@@ -212,8 +212,3 @@ OPTION(
         ON
 )
 SET(DEBUG_NETWORK_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the network (0 to 5)")
-
-
-
-
-
