@@ -17,7 +17,7 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Action.cpp Action.h
+SET (YOUR_SRCS  Job.cpp Job.h
 		Behaviour.cpp Behaviour.h
 )
 ####################################################################################

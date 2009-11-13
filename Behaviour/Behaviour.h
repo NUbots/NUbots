@@ -22,7 +22,7 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include "Behaviour/Action.h"
+#include "Behaviour/Job.h"
 
 class Behaviour
 {
@@ -30,7 +30,7 @@ public:
     Behaviour();
     ~Behaviour();
     
-    Action* process();
+    Job* process();
 };
 
 

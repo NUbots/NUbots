@@ -34,7 +34,7 @@ Behaviour::~Behaviour()
     
 }
 
-Action* Behaviour::process()
+Job* Behaviour::process()
 {
     return 0;
 }

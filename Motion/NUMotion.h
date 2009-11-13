@@ -4,43 +4,62 @@
     @class NUMotion
     @brief A module to provide motion
  
-    This module should be able to do 3 things
-        - Walk (Speed, Position)
-        - Head (Look at Point, Nod, Pan, etc)
-        - Special (Kicks, Saves, Getups etc)
+    If I rename actions to jobs. Each job can have several tasks.
  
-    So my arguement for motion, is that; every motion involves a movement to a point, and then an execution of a 'motion action' at that point.
-    The motion action itself would have a target and a speed.
-    So
-    actionName                                      <= action name
-    vector<float> speed, vector<position>           <= relative position where the action is to be performed
-    vector<actionspeed>, vector<actionposition>     <= action target
- 
-    So, a MotionAction needs to have
-        - A Type (Walk, Head, Special)
-        - Data
-            - WALK: vector<speed>, vector<position>: x, y, theta
-            - HEAD: vector<speed>, vector<position>: angleYaw, anglePitch
-            - SPECIAL: 
-                - Kick: (distance, bearing) to ball, (distance, bearing) to target (if distance, bearing to ball not in range walk to closest point instead)
-                - Save: (distance, bearing) to ball, ?
-                - Getup: None
+    I will have a JobType, and a JobID
 
-    If I use inheritance:
+    BODYJOB:
+        Job: Stand, Kick, Save
+        time and position
+            KICK: distance and bearing to kick the object
+            SAVE: nothing extra, a dive should emerge if a distance needs to be covered in a small amount of time.
+ 
+    HEADJOB:
+        Job: Track, Nod, Pan
+        time and position
+ 
+    LIGHTJOB:
+        Job: Chest, LFoot, RFoot, LEar etc
+        time and value
+ 
+    CAMERAJOB:
+        Job: Exposure, Gain etc
+        time and value
+ 
+    SOUNDJOB:
+        Job: Playing, Set, Initial etc
+        time
+ 
     Action
-        -- MotionAction
-            -- WalkAction
-            -- HeadAction
-            -- SpecialAction
+        -- BodyAction
+        -- HeadAction
         -- LightAction
         -- CameraAction
         -- SoundAction
-    Then I either need to make all functions required by each virtual in Action, or use casting. Casting should be avoided.
-    Alternativly just have a single action class that encapsulates everything; Well this is almost.
+        Every action has a
+            - Type
+            - Job
+            - Time
+        Some actions have more data
+            - a Value or position
+            - kick distance and kick bearing
  
-    if (ActionType == Action::Motion)
-        position = action.getMovePosition()         // get the position where the action is to be performed
-        speed = action.getMoveSpeed()               // get the speed
+    if (action.Type == Action::Body)
+        position = action.getPosition()         // get the position where the action is to be performed
+        time = action.getTime()               // get the time at which to perform the action
+        job = action.getJob()
+        
+ 
+TODO: I need to rethink this a little. Each class can not have a different enum to represent JobType!.
+ Option 1. Put all job types in Action.
+ Option 2. Avoid needing enum types by providing alot of construtors/static functions.
+        Action* action = BodyAction::newKickJob(time, position, kicktarget);        // I don't have a problem with this
+        action->jobType;    // how do I know if it is a stand, kick or save ??? I need a get method anyway.
+ Option 3. I could have a crap load of inheritance.
+        Action* action = new KickJob(position, kicktarget);
+        still how do I know what type it is!!!!!!!!!
+ Option 4. I could use dynamic_cast or typeid. However, this seem to be a bad idea
+ Option 5. Just directly access the JobType variable (This doesn't work because I can only compare enums of the same type.
  
  
     @author Jason Kulk
@@ -64,7 +83,7 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "Behaviour/Action.h"
+#include "Behaviour/Job.h"
 
 class ActuatorCommands
 {
@@ -87,7 +106,7 @@ public:
     ~NUMotion();
     
     ActuatorCommands* process(BodyData* data);
-    void process(Action* actions);
+    void process(vector<Job*> actions);
 protected:
 private:
 public:

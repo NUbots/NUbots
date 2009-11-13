@@ -327,6 +327,12 @@ void* runThreadMotion(void* arg)
     debug << "NUbot::runThreadMotion: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;
+    vector<Job*> jobs;
+    vector<float> position (3,0);
+    jobs.push_back(BodyJob::newStandJob(0, position));
+    jobs.push_back(HeadJob::newNodJob(0));
+    
+    nubot->motion->process(jobs);
     
 #ifdef THREAD_MOTION_MONITOR_TIME
     struct timespec pretime, starttime, endtime;
@@ -413,7 +419,7 @@ void* runThreadVision(void* arg)
             debug << "NUbot::runThreadVision. Waittime " << waittime << " ms."<< endl;
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        
+        //nubot->motion->process(actions);
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
         clock_gettime(CLOCK_REALTIME, &endtime);

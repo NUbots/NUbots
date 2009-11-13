@@ -28,6 +28,8 @@
 
 #include "config.h"
 #include "NUPlatform/NUPlatform.h"
+#include "Behaviour/Job.h"
+//#include "NUMotion/MotionActions.h"
 
 // Selectively include modules depending on config.h
 #ifdef USE_VISION
@@ -71,8 +73,6 @@ private:
     void createThreads();
     
 public:
-    
-private:
     NUPlatform* platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* vision;                 //!< vision module
@@ -89,7 +89,7 @@ private:
     #ifdef USE_NETWORK
         Network* network;               //!< network module
     #endif
-    
+private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)
     pthread_t threadVision;             //!< thread containing vision and higher-level though processes (cerebrum)
 };

@@ -48,7 +48,17 @@ ActuatorCommands* NUMotion::process(BodyData* data)
 
 /*! @brief Process new body sensor data, and action commands
  */
-void NUMotion::process(Action* action)
+void NUMotion::process(vector<Job*> jobs)
 {
+    cout << "NUMotion::process():" << endl;
+    job_type_t jobtype;
+    for (int i=0; i<jobs.size(); i++)
+    {
+        jobtype = jobs[i]->getJobType();
+        if (jobtype == BODY)
+            cout << "This job is body" << endl;
+        else if (jobtype == HEAD)
+            cout << "This job is head" << endl;
+    }
 }
 
