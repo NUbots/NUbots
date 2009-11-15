@@ -21,6 +21,7 @@
 
 #include <time.h>
 #include <errno.h>
+#include <iostream>
 using namespace std;
 
 #include "NUbot.h"

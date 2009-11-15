@@ -1,5 +1,5 @@
-/*! @file NUPlatform.cpp
-    @brief Partial implementation of base NUPlatform (Robot) class
+/*! @file NUSensorsData.cpp
+    @brief Implementation of sensor class
 
     @author Jason Kulk
  
@@ -19,31 +19,20 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "NUSensorsData.h"
 #include <iostream>
 using namespace std;
 
-#include "NUPlatform.h"
-
-NUPlatform* nuplatform = NULL;
-
-NUPlatform::NUPlatform()
+/*!
+ */
+NUSensorsData::NUSensorsData()
 {
-    cout << "NUPlatform::NUPlatform" << endl;
-    sensors = new NUSensors();
-    cout << "NUPlatform::NUPlatform. this: " << this << endl;
+    cout << "NUSensorsData::NUSensorsData" << endl;
+    data.push_back(&m_joint_positions);
 }
 
-NUPlatform::~NUPlatform()
+NUSensorsData::~NUSensorsData()
 {
 }
 
-void NUPlatform::getName(string& name)
-{
-    name = m_name;
-}
-
-void NUPlatform::getNumber(int& number)
-{
-    number = m_number;
-}
 

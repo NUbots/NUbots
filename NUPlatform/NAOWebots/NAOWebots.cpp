@@ -20,6 +20,8 @@
  */
 
 #include "NAOWebots.h"
+#include <iostream>
+using namespace std;
 
 /*! @brief Constructor for NAO in Webots robotic platform
  

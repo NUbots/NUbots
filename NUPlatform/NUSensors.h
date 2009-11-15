@@ -1,6 +1,16 @@
 /*! @file NUSensors.h
     @brief Declaration of a base sensor class to store sensor data in a platform independent way
-
+    @author Jason Kulk
+ 
+    @class NUSensors
+    @brief The base Sensors class
+ 
+    How to organise all of this data has been the topic of much thought. At the moment
+    I think my best idea is to group similar sensors into a sensor_t, and then have a
+    vector of sensor_t's. This is OK, except I would like to be able to access the data
+    based on well defined names.
+ 
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -23,44 +33,26 @@
 #define NUSENSORS_H
 
 #include <vector>
-#include <pthread.h>
-#include <iostream>
-
 using namespace std;
 
-/*! @brief Container for a single sensor
- */
-struct sensor_type 
-{
-    string name;                //!< the sensor's name
-    int sensorID;               //!< the sensor's id
-    vector<float> data;         //!< the sensor values
-    vector<float> sd;           //!< standard deviation for each sensor value sensor
-    bool isValid;               //!< true, if data is valid, false if not
-    bool isCalculated;          //!< true, if data has been calculated, false if the data is direct from a sensor
-    long double timestamp;      //!< the unix timestamp of the data
-};
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+
 
 /*! @brief Base sensor storage class
  */
 class NUSensors
 {
 public:
-    NUSensors();
+    NUSensors();                // TODO: this should be removed when I have an implementation
     virtual ~NUSensors();
     
-    virtual void update();
-    
-    //virtual void getData();     // actually copy the data
+    virtual NUSensorsData* update();
+    NUSensorsData* getData();
     
 protected:
 private:
-    
-public:
-    vector<sensor_type*> devices;
-    sensor_type* Sensor1;
-    sensor_type* Sensor2;
 protected:
+    NUSensorsData data;
 private:
 };
 
