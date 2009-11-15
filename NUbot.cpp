@@ -326,13 +326,7 @@ void* runThreadMotion(void* arg)
 {
     debug << "NUbot::runThreadMotion: Starting." << endl;
     
-    NUbot* nubot = (NUbot*) arg;
-    vector<Job*> jobs;
-    vector<float> position (3,0);
-    jobs.push_back(BodyJob::newStandJob(0, position));
-    jobs.push_back(HeadJob::newNodJob(0));
-    
-    nubot->motion->process(jobs);
+    NUbot* nubot = (NUbot*) arg;                // the nubot
     
 #ifdef THREAD_MOTION_MONITOR_TIME
     struct timespec pretime, starttime, endtime;
@@ -392,7 +386,9 @@ void* runThreadVision(void* arg)
 {
     debug << "NUbot::runThreadVision: Starting." << endl;
     
-    NUbot* nubot = (NUbot*) arg;
+    NUbot* nubot = (NUbot*) arg;                // the nubot
+    vector<Job*> jobs;                          // the list of jobs for motion and lcs modules
+    vector<Job*>* p_jobs = &jobs;
     
 #ifdef THREAD_VISION_MONITOR_TIME
     struct timespec pretime, starttime, endtime;
@@ -419,7 +415,17 @@ void* runThreadVision(void* arg)
             debug << "NUbot::runThreadVision. Waittime " << waittime << " ms."<< endl;
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //nubot->motion->process(actions);
+        //          image = nubot->platform->camera->getData()
+        //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
+        //                 odometry = nubot->motion->getData()                       // There is no deep copy here either
+        //      gamectrl, teaminfo = nubot->network->getData()
+        //          fieldobj = nubot->vision->process(image, data, gamectrl)
+        //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
+        nubot->behaviour->process(p_jobs);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+        nubot->motion->process(p_jobs);
+        //          cmds = nubot->lcs->process(lcsactions)
+        //          nubot->platform->actionators->process(cmds)
+        jobs.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
         clock_gettime(CLOCK_REALTIME, &endtime);
@@ -438,34 +444,3 @@ void* runThreadVision(void* arg)
     pthread_exit(NULL);
 }
 
-
-
-// NUbot threads:
-// You can't assume that these threads are syncronised, or running at any particular relative rate 
-// I need a thread which links BodySensors->NUMotion in a real-time thread.
-//      while (true):
-//          wait for new data
-//          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
-//                cmds = nubot->motion->process(data)                       // it is up to motion to decide whether it should deep copy
-//        nubot->platform->actionators->process(cmds)
-//
-// I need a thread which links Image->Vision->Localisation->Behaviour->Motion in a non-real-time thread.
-//      while (true):
-//          actions.clear()
-//          wait for new image
-//          image = nubot->platform->camera->getData()
-//          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
-//                 odometry = nubot->motion->getData()                       // There is no deep copy here either
-//      gamectrl, teaminfo = nubot->network->getData()
-//      
-//          fieldobj = nubot->vision->process(image, data, gamectrl)
-//          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
-//                  nubot->behaviour->process(wm, gamectrl, actions)
-//          
-//          nubot->actionFilter(actions, motionactions, lcsactions)     // I think this is messy, perhaps no actionfilter.
-//
-//          nubot->motion->process(motionactions)                // I don't think anything needs to be returned here
-//          cmds = nubot->lcs->process(lcsactions)
-//          nubot->platform->actionators->process(cmds)
-
-// so each thread is passed the nubot, and does it that way

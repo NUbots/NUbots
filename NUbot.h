@@ -28,8 +28,6 @@
 
 #include "config.h"
 #include "NUPlatform/NUPlatform.h"
-#include "Behaviour/Job.h"
-//#include "NUMotion/MotionActions.h"
 
 // Selectively include modules depending on config.h
 #ifdef USE_VISION
@@ -42,6 +40,7 @@
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
+    #include "Behaviour/Job.h"
 #endif
 
 #ifdef USE_MOTION
