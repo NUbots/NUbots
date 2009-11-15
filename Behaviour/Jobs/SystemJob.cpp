@@ -1,5 +1,5 @@
-/*! @file Job.cpp
-    @brief Partial implementation of base job class
+/*! @file SystemJob.cpp
+    @brief Implementation of system job class
 
     @author Jason Kulk
  
@@ -19,91 +19,32 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Job.h"
+#include "SystemJob.h"
 
-/*! @brief Job destructor
+/*! @brief Put the robot to sleep
+    @return the job
  */
-Job::~Job()
+SystemJob* SystemJob::newSleepJob()
 {
-    // I think everything will cleaning delete itself.
+    SystemJob* job = new SystemJob(SLEEP);
+    return job;
 }
 
-/*! @brief Get the job's type
-    @returns the job's type
+/*! @brief Turn the robot off
+    @return the job
  */
-job_type_t Job::getJobType()
+SystemJob* SystemJob::newShutdownJob()
 {
-    return m_job_type;
+    SystemJob* job = new SystemJob(SHUTDOWN);
+    return job;
 }
 
-/*! @brief Get the job's id
-    @returns the job's id
+/*! A private constructor
  */
-job_id_t Job::getJobID()
+SystemJob::SystemJob(job_id_t jobid)
 {
-    return m_job_id;
-}
-
-/*! @brief Get the time at which the job is to be completed
-    @returns the job time
- */
-float Job::getJobTime()
-{
-    return m_job_time;
-}
-
-/*! @brief Get the position at which the final task in the job will be executed
-    @returns the position the job will be executed at
- */
-vector<float>* Job::getPosition()
-{
-    return &m_position;
-}
-
-/*! @brief Get the values used by the job
-    @returns the values used by the job
- */
-vector<float>* Job::getValues()
-{
-    return &m_values;
-}
-
-/*! @brief Get the target of the job
-    @return the target of the job
- */
-vector<float>* Job::getTarget()
-{
-    return &m_target;
-}
-
-BodyJob* BodyJob::newStandJob(float time, vector<float> position)
-{
-    static vector<float> empty_vector;
-    BodyJob* temp = new BodyJob::BodyJob(STAND, time, position, empty_vector);
-    return temp;
-}
-
-BodyJob::BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget)
-{
-    m_job_type = BODY;
+    m_job_type = SYSTEM;
     m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
-    m_target = jobtarget;
 }
 
-HeadJob* HeadJob::newNodJob(float period)
-{
-    static vector<float> empty_vector;
-    HeadJob* temp = new HeadJob::HeadJob(NOD, period, empty_vector);
-    return temp;
-}
-
-HeadJob::HeadJob(job_id_t jobid, float time, vector<float> position)
-{
-    m_job_type = HEAD;
-    m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
-}
 
