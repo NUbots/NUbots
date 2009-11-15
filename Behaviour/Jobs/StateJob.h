@@ -31,6 +31,7 @@
 class StateJob : public Job
 {
 public:
+    static StateJob* newSubstituteJob();
     static StateJob* newInitialJob();
     static StateJob* newReadyJob();
     static StateJob* newSetJob();

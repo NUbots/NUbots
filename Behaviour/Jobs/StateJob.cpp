@@ -22,6 +22,15 @@
 #include "StateJob.h"
 
 /*! @brief Create a new initial state job
+ @returns the StateJob
+ */
+StateJob* StateJob::newSubstituteJob()
+{
+    StateJob* job = new StateJob(SUBSTITUTE);
+    return job;
+}
+
+/*! @brief Create a new initial state job
     @returns the StateJob
  */
 StateJob* StateJob::newInitialJob()
