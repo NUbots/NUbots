@@ -5,6 +5,7 @@
     @brief A base class to encapsulate jobs issued by behaviour.
  
     All jobs need to inherit from this base class. You need only implement a constructor.
+    Unfortunately, you need to add the job_id to the job_id_t enum here!
 
     @author Jason Kulk
  
@@ -37,7 +38,7 @@ enum job_type_t {
     HEAD,
     LIGHT,
     CAMERA,
-    SOUND,
+    STATE,
     SYSTEM
 };
 
@@ -46,7 +47,9 @@ enum job_type_t {
 enum job_id_t {
     // Body job ids
     STAND,
+    WALK,
     KICK,
+    BLOCK,
     SAVE,
     // Head job ids
     TRACK,
@@ -61,19 +64,37 @@ enum job_id_t {
     L_FOOT,
     R_FOOT,
     // Camera job ids
-    EXPOSURE,
+    RESOLUTION,
+    FPS,
+    SETTINGS,
+    AUTO_EXPOSURE,
+    AUTO_WHITE_BALANCE,
+    AUTO_GAIN,
+    BRIGHTNESS,
+    CONTRAST,
+    SATURATION,
+    RED_CHROMA,
+    BLUE_CHROMA,
     GAIN,
+    EXPOSURE,
     SELECT_CAMERA,
     // Sound job ids
+    SUBSTITUTE,
     INITIAL,
     READY,
     SET,
     PLAYING,
     PENALTY,
     FINISH,
+    HURT,
+    DEAD,
+    CRASH,
+    LOW_BATTERY,
+    HIGH_CURRENT,
+    HIGH_TEMPERATURE,
     // System jobs
     SLEEP,
-    OFF
+    SHUTDOWN
 };
 
 class Job
@@ -85,27 +106,22 @@ public:
     job_id_t getJobID();
     float getJobTime();
     vector<float>* getPosition();
+    vector<float>* getSpeed();
+    vector<float>* getCentre();
+    vector<float>* getLimits();
     vector<float>* getValues();
     vector<float>* getTarget();
 
 protected:
     job_type_t m_job_type;              //!< The type of job
     job_id_t m_job_id;                  //!< The job's id
-    float m_job_time;                   //!< The time the job is to be completed by
-    vector<float> m_position;           //!< The relative position at which the job will be completed at
+    float m_job_time;                   //!< The time the job is to be completed by (seconds)
+    vector<float> m_position;           //!< The relative cartesian position at which the job will be completed at 
+    vector<float> m_speed;              //!< The speed at which the job will be performed (ie the walk speed)
+    vector<float> m_centre;             //!< The job's centre value
+    vector<float> m_limits;             //!< The job's min and maximum limits
     vector<float> m_values;             //!< The values used by the job
     vector<float> m_target;             //!< The target of the job (eg. for a kick it is the kick target)
-};
-
-class HeadJob : public Job
-{
-public:
-    static HeadJob* newTrackJob(float time, vector<float> position);
-    static HeadJob* newNodJob(float period);
-    static HeadJob* newPanJob(float period);
-    
-private:
-    HeadJob(job_id_t jobid, float time, vector<float> position);
 };
 
 #endif

@@ -60,6 +60,30 @@ vector<float>* Job::getPosition()
     return &m_position;
 }
 
+/*! @brief Get the speed at which the (first) task in the job will be executed
+ @returns the speed the job will be executed at
+ */
+vector<float>* Job::getSpeed()
+{
+    return &m_speed;
+}
+
+/*! @brief Get the centre of the job to be executed
+ @returns the centre the job will be executed at
+ */
+vector<float>* Job::getCentre()
+{
+    return &m_centre;
+}
+
+/*! @brief Get the limits of the job
+ @returns the limits of the job
+ */
+vector<float>* Job::getLimits()
+{
+    return &m_limits;
+}
+
 /*! @brief Get the values used by the job
     @returns the values used by the job
  */
@@ -74,20 +98,5 @@ vector<float>* Job::getValues()
 vector<float>* Job::getTarget()
 {
     return &m_target;
-}
-
-HeadJob* HeadJob::newNodJob(float period)
-{
-    static vector<float> empty_vector;
-    HeadJob* temp = new HeadJob::HeadJob(NOD, period, empty_vector);
-    return temp;
-}
-
-HeadJob::HeadJob(job_id_t jobid, float time, vector<float> position)
-{
-    m_job_type = HEAD;
-    m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
 }
 

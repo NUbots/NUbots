@@ -22,7 +22,7 @@ SET (YOUR_SRCS  Jobs.h
 		CameraJob.cpp CameraJob.h
 		HeadJob.cpp HeadJob.h
 		LightJob.cpp LightJob.h
-		SoundJob.cpp SoundJob.h
+		StateJob.cpp StateJob.h
 		SystemJob.cpp SystemJob.h
 )
 ####################################################################################
