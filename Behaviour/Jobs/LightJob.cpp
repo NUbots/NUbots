@@ -1,109 +1,95 @@
-/*! @file Job.cpp
-    @brief Partial implementation of base job class
+/*! @file LightJob.cpp
+    @brief Implementation of light job class
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
- 
- This file is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This file is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (c) 2009 Jason Kulk
+
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Job.h"
+#include "LightJob.h"
 
-/*! @brief Job destructor
+/*! @brief Set the left eye's colour
+    @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+    @param colour the (red, green, blue) tuple for the light
  */
-Job::~Job()
+LightJob* LightJob::newLEyeJob(float time, vector<float> colour)
 {
-    // I think everything will cleaning delete itself.
+    LightJob* job = new LightJob(L_EYE, time, colour);
 }
 
-/*! @brief Get the job's type
-    @returns the job's type
+/*! @brief Set the right eye's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-job_type_t Job::getJobType()
+LightJob* LightJob::newREyeJob(float time, vector<float> colour)
 {
-    return m_job_type;
+    LightJob* job = new LightJob(R_EYE, time, colour);
 }
 
-/*! @brief Get the job's id
-    @returns the job's id
+/*! @brief Set the left ear's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-job_id_t Job::getJobID()
+LightJob* LightJob::newLEarJob(float time, vector<float> colour)
 {
-    return m_job_id;
+    LightJob* job = new LightJob(L_EAR, time, colour);
 }
 
-/*! @brief Get the time at which the job is to be completed
-    @returns the job time
+/*! @brief Set the right ear's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-float Job::getJobTime()
+LightJob* LightJob::newREarJob(float time, vector<float> colour)
 {
-    return m_job_time;
+    LightJob* job = new LightJob(R_EAR, time, colour);
 }
 
-/*! @brief Get the position at which the final task in the job will be executed
-    @returns the position the job will be executed at
+/*! @brief Set the chest's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-vector<float>* Job::getPosition()
+LightJob* LightJob::newChestJob(float time, vector<float> colour)
 {
-    return &m_position;
+    LightJob* job = new LightJob(CHEST, time, colour);
 }
 
-/*! @brief Get the values used by the job
-    @returns the values used by the job
+/*! @brief Set the left foot's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-vector<float>* Job::getValues()
+LightJob* LightJob::newLFootJob(float time, vector<float> colour)
 {
-    return &m_values;
+    LightJob* job = new LightJob(L_FOOT, time, colour);
 }
 
-/*! @brief Get the target of the job
-    @return the target of the job
+/*! @brief Set the right foot's colour
+ @param time the time at which the colour will take place (this will be interpolated by the underlying driver)
+ @param colour the (red, green, blue) tuple for the light
  */
-vector<float>* Job::getTarget()
+LightJob* LightJob::newRFootJob(float time, vector<float> colour)
 {
-    return &m_target;
+    LightJob* job = new LightJob(R_FOOT, time, colour);
 }
 
-BodyJob* BodyJob::newStandJob(float time, vector<float> position)
+/*! A private constructor
+ */
+LightJob::LightJob(job_id_t jobid, float time, vector<float> colour)
 {
-    static vector<float> empty_vector;
-    BodyJob* temp = new BodyJob::BodyJob(STAND, time, position, empty_vector);
-    return temp;
-}
-
-BodyJob::BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget)
-{
-    m_job_type = BODY;
+    m_job_type = LIGHT;
     m_job_id = jobid;
     m_job_time = time;
-    m_position = position;
-    m_target = jobtarget;
+    m_values = colour;
 }
-
-HeadJob* HeadJob::newNodJob(float period)
-{
-    static vector<float> empty_vector;
-    HeadJob* temp = new HeadJob::HeadJob(NOD, period, empty_vector);
-    return temp;
-}
-
-HeadJob::HeadJob(job_id_t jobid, float time, vector<float> position)
-{
-    m_job_type = HEAD;
-    m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
-}
-
