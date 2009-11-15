@@ -17,8 +17,13 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Job.cpp Job.h
-		Behaviour.cpp Behaviour.h
+SET (YOUR_SRCS  Jobs.h
+		BodyJob.cpp BodyJob.h
+		CameraJob.cpp CameraJob.h
+		HeadJob.cpp HeadJob.h
+		LightJob.cpp LightJob.h
+		SoundJob.cpp SoundJob.h
+		SystemJob.cpp SystemJob.h
 )
 ####################################################################################
 
