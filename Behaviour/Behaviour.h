@@ -30,7 +30,7 @@ public:
     Behaviour();
     ~Behaviour();
     
-    Job* process();
+    vector<Job*>* process(vector<Job*>* jobs);
 };
 
 

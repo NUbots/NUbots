@@ -106,7 +106,7 @@ public:
     ~NUMotion();
     
     ActuatorCommands* process(BodyData* data);
-    void process(vector<Job*> actions);
+    void process(vector<Job*>* p_jobs);
 protected:
 private:
 public:
