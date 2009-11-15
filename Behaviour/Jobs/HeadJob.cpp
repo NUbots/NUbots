@@ -1,5 +1,5 @@
-/*! @file Job.cpp
-    @brief Partial implementation of base job class
+/*! @file HeadJob.cpp
+    @brief Implementation of head job class
 
     @author Jason Kulk
  
@@ -19,86 +19,65 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Job.h"
+#include "HeadJob.h"
 
-/*! @brief Job destructor
+
+/*! @brief Create a new point tracking job
+ 
+    Directly, control the position of the head using this command. For example, track the ball using this function
+    by calculating the head angles required to put the ball at the right place in the image.
+ 
+    @param time the time in seconds at which to reach the given point (use this to control the speed; set to 0 for as fast as possible)
+    @param point the point (head_yaw, head_pitch, [head_roll]) in radians to track
  */
-Job::~Job()
+HeadJob* HeadJob::newTrackJob(float time, vector<float> point)
 {
-    // I think everything will cleaning delete itself.
+    HeadJob* job = new HeadJob::HeadJob(PAN, time, point);
+    return job;
 }
 
-/*! @brief Get the job's type
-    @returns the job's type
+/*! @brief Create a new nod job
+ 
+    A job to move the head up and down periodically.
+ 
+    @param period the period of the nod in seconds
+    @param centre the nod's centre (yaw, pitch, roll) in radians
+    @param limits the nod's (pitch) limits in radians
  */
-job_type_t Job::getJobType()
+HeadJob* HeadJob::newNodJob(float period, vector<float> centre, vector<float> limits)
 {
-    return m_job_type;
+    HeadJob* job = new HeadJob::HeadJob(NOD, period, centre, limits);
+    return job;
 }
 
-/*! @brief Get the job's id
-    @returns the job's id
+/*! @brief Create a new pan job
+ 
+    A job to pan the head from side to side periodically.
+ 
+    @param period the period of the pan in seconds
+    @param centre the pan's centre (yaw, pitch, roll) in radians
+    @param limits the nod's (yaw) limits in radians
  */
-job_id_t Job::getJobID()
+HeadJob* HeadJob::newPanJob(float period, vector<float> centre, vector<float> limits)
 {
-    return m_job_id;
+    HeadJob* job = new HeadJob::HeadJob(PAN, period, centre, limits);
+    return job;
 }
 
-/*! @brief Get the time at which the job is to be completed
-    @returns the job time
+
+/*! A private constructor for HeadJobs.
  */
-float Job::getJobTime()
+HeadJob::HeadJob(job_id_t jobid, float time, vector<float> centre, vector<float> limits)
 {
-    return m_job_time;
-}
-
-/*! @brief Get the position at which the final task in the job will be executed
-    @returns the position the job will be executed at
- */
-vector<float>* Job::getPosition()
-{
-    return &m_position;
-}
-
-/*! @brief Get the values used by the job
-    @returns the values used by the job
- */
-vector<float>* Job::getValues()
-{
-    return &m_values;
-}
-
-/*! @brief Get the target of the job
-    @return the target of the job
- */
-vector<float>* Job::getTarget()
-{
-    return &m_target;
-}
-
-BodyJob* BodyJob::newStandJob(float time, vector<float> position)
-{
-    static vector<float> empty_vector;
-    BodyJob* temp = new BodyJob::BodyJob(STAND, time, position, empty_vector);
-    return temp;
-}
-
-BodyJob::BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget)
-{
-    m_job_type = BODY;
+    m_job_type = HEAD;
     m_job_id = jobid;
     m_job_time = time;
-    m_position = position;
-    m_target = jobtarget;
+    m_centre = centre;
+    m_limits = limits;
 }
 
-HeadJob* HeadJob::newNodJob(float period)
-{
-    static vector<float> empty_vector;
-    HeadJob* temp = new HeadJob::HeadJob(NOD, period, empty_vector);
-    return temp;
-}
-
+/*! A private contructor for HeadJobs with a position
+ */
 HeadJob::HeadJob(job_id_t jobid, float time, vector<float> position)
 {
     m_job_type = HEAD;

@@ -1,10 +1,13 @@
-/*! @file Job.h
-    @brief Declaration of base Job class.
+/*! @file HeadJob.h
+    @brief Declaration of HeadJob class.
  
-    @class Job
-    @brief A base class to encapsulate jobs issued by behaviour.
+    @class HeadJob
+    @brief A class to encapsulate jobs issued by behaviour for the head.
  
-    All jobs need to inherit from this base class. You need only implement a constructor.
+    There are three types of head jobs
+        - Track; use this to effectively move the head into a desired position
+        - Nod; use this to move the head up and down while spinning
+        - Pan; use this to move the head side to side while searching.
 
     @author Jason Kulk
  
@@ -24,99 +27,21 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef HEADJOB_H
+#define HEADJOB_H
 
-#include <vector>
-using namespace std;
-
-/*! An enum for job types (ie. Body, Head, etc)
- */
-enum job_type_t {
-    BODY,
-    HEAD,
-    LIGHT,
-    CAMERA,
-    SOUND,
-    SYSTEM
-};
-
-/*! An enum for specific job ids (ie. Stand, Kick etc)
- */
-enum job_id_t {
-    // Body job ids
-    STAND,
-    KICK,
-    SAVE,
-    // Head job ids
-    TRACK,
-    NOD,
-    PAN,
-    // Light job ids
-    L_EYE,
-    R_EYE,
-    L_EAR,
-    R_EAR,
-    CHEST,
-    L_FOOT,
-    R_FOOT,
-    // Camera job ids
-    EXPOSURE,
-    GAIN,
-    SELECT_CAMERA,
-    // Sound job ids
-    INITIAL,
-    READY,
-    SET,
-    PLAYING,
-    PENALTY,
-    FINISH,
-    // System jobs
-    SLEEP,
-    OFF
-};
-
-class Job
-{
-public:
-    ~Job();
-    
-    job_type_t getJobType();
-    job_id_t getJobID();
-    float getJobTime();
-    vector<float>* getPosition();
-    vector<float>* getValues();
-    vector<float>* getTarget();
-
-protected:
-    job_type_t m_job_type;              //!< The type of job
-    job_id_t m_job_id;                  //!< The job's id
-    float m_job_time;                   //!< The time the job is to be completed by
-    vector<float> m_position;           //!< The relative position at which the job will be completed at
-    vector<float> m_values;             //!< The values used by the job
-    vector<float> m_target;             //!< The target of the job (eg. for a kick it is the kick target)
-};
-
-
-class BodyJob : public Job
-{
-public:
-    static BodyJob* newStandJob(float time, vector<float> position);
-    static BodyJob* newKickJob(float time, vector<float> position, vector<float> kicktarget);
-    static BodyJob* newSaveJob(float time, vector<float> position);
-private:
-    BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget);
-};
+#include "Behaviour/Job.h"
 
 class HeadJob : public Job
 {
 public:
-    static HeadJob* newTrackJob(float time, vector<float> position);
-    static HeadJob* newNodJob(float period);
-    static HeadJob* newPanJob(float period);
+    static HeadJob* newTrackJob(float time, vector<float> point);
+    static HeadJob* newNodJob(float period, vector<float> centre, vector<float> limits);
+    static HeadJob* newPanJob(float period, vector<float> centre, vector<float> limits);
     
 private:
-    HeadJob(job_id_t jobid, float time, vector<float> position);
+    HeadJob(job_id_t jobid, float time, vector<float> centre, vector<float> limits);
+    HeadJob(job_id_t jobid, float time, vector<float> point);
 };
 
 #endif
