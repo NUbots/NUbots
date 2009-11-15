@@ -1,11 +1,9 @@
-/*! @file Job.h
-    @brief Declaration of base Job class.
+/*! @file CameraJob.h
+    @brief Declaration of camera job class.
  
-    @class Job
-    @brief A base class to encapsulate jobs issued by behaviour.
- 
-    All jobs need to inherit from this base class. You need only implement a constructor.
-
+    @class CameraJob
+    @brief A class to encapsulate jobs issued by behaviour for the camera.
+    
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -24,99 +22,30 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef CAMERAJOB_H
+#define CAMERAJOB_H
 
-#include <vector>
-using namespace std;
+#include "Behaviour/Job.h"
 
-/*! An enum for job types (ie. Body, Head, etc)
- */
-enum job_type_t {
-    BODY,
-    HEAD,
-    LIGHT,
-    CAMERA,
-    SOUND,
-    SYSTEM
-};
-
-/*! An enum for specific job ids (ie. Stand, Kick etc)
- */
-enum job_id_t {
-    // Body job ids
-    STAND,
-    KICK,
-    SAVE,
-    // Head job ids
-    TRACK,
-    NOD,
-    PAN,
-    // Light job ids
-    L_EYE,
-    R_EYE,
-    L_EAR,
-    R_EAR,
-    CHEST,
-    L_FOOT,
-    R_FOOT,
-    // Camera job ids
-    EXPOSURE,
-    GAIN,
-    SELECT_CAMERA,
-    // Sound job ids
-    INITIAL,
-    READY,
-    SET,
-    PLAYING,
-    PENALTY,
-    FINISH,
-    // System jobs
-    SLEEP,
-    OFF
-};
-
-class Job
+class CameraJob : public Job
 {
 public:
-    ~Job();
-    
-    job_type_t getJobType();
-    job_id_t getJobID();
-    float getJobTime();
-    vector<float>* getPosition();
-    vector<float>* getValues();
-    vector<float>* getTarget();
-
-protected:
-    job_type_t m_job_type;              //!< The type of job
-    job_id_t m_job_id;                  //!< The job's id
-    float m_job_time;                   //!< The time the job is to be completed by
-    vector<float> m_position;           //!< The relative position at which the job will be completed at
-    vector<float> m_values;             //!< The values used by the job
-    vector<float> m_target;             //!< The target of the job (eg. for a kick it is the kick target)
-};
-
-
-class BodyJob : public Job
-{
-public:
-    static BodyJob* newStandJob(float time, vector<float> position);
-    static BodyJob* newKickJob(float time, vector<float> position, vector<float> kicktarget);
-    static BodyJob* newSaveJob(float time, vector<float> position);
+    static CameraJob* newResolutionJob(vector<float> values);
+    static CameraJob* newFPSJob(vector<float> values);
+    static CameraJob* newSettingsJob(vector<float> values);
+    static CameraJob* newAutoExposureJob(vector<float> values);
+    static CameraJob* newAutoWhiteBalanceJob(vector<float> values);
+    static CameraJob* newAutoGainJob(vector<float> values);
+    static CameraJob* newBrightnessJob(vector<float> values); 
+    static CameraJob* newContrastJob(vector<float> values);
+    static CameraJob* newSaturationJob(vector<float> values);
+    static CameraJob* newRedChromaJob(vector<float> values);
+    static CameraJob* newBlueChromaJob(vector<float> values);
+    static CameraJob* newGainJob(vector<float> values);
+    static CameraJob* newExposureJob(vector<float> values);
+    static CameraJob* newSelectCameraJob(vector<float> values);
 private:
-    BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget);
-};
-
-class HeadJob : public Job
-{
-public:
-    static HeadJob* newTrackJob(float time, vector<float> position);
-    static HeadJob* newNodJob(float period);
-    static HeadJob* newPanJob(float period);
-    
-private:
-    HeadJob(job_id_t jobid, float time, vector<float> position);
+    CameraJob(job_id_t jobid, vector<float> values);
 };
 
 #endif

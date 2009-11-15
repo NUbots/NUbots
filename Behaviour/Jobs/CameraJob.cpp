@@ -1,5 +1,5 @@
-/*! @file Job.cpp
-    @brief Partial implementation of base job class
+/*! @file CameraJob.cpp
+    @brief Implementation of camera job class
 
     @author Jason Kulk
  
@@ -19,91 +19,130 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Job.h"
+#include "CameraJob.h"
 
-/*! @brief Job destructor
+
+/*! @brief Change the camera's resolution
+    @param values the desired resolution (width, height)
  */
-Job::~Job()
+CameraJob* CameraJob::newResolutionJob(vector<float> values)
 {
-    // I think everything will cleaning delete itself.
+    CameraJob* job = new CameraJob(RESOLUTION, values);
 }
 
-/*! @brief Get the job's type
-    @returns the job's type
+/*! @brief Change the camera's frame rate
+ @param values the new frame rate
  */
-job_type_t Job::getJobType()
+CameraJob* CameraJob::newFPSJob(vector<float> values)
 {
-    return m_job_type;
+    CameraJob* job = new CameraJob(FPS, values);
 }
 
-/*! @brief Get the job's id
-    @returns the job's id
+/*! @brief Apply new camera settings to the currently selected camera
+ 
+    Use this function to change all of the camera settings at once. Because the settings are in a vector, you will
+    need to be careful with the order. Alternatively, use any of the more specific functions.
+ 
+    @param values the camera settings (auto_exposure, auto_wb, auto_gain, brightness, contrast, saturation, red_chr, blue_chr, gain, exposure)
  */
-job_id_t Job::getJobID()
+CameraJob* CameraJob::newSettingsJob(vector<float> values)
 {
-    return m_job_id;
+    CameraJob* job = new CameraJob(SETTINGS, values);
 }
 
-/*! @brief Get the time at which the job is to be completed
-    @returns the job time
+/*! @brief Turn the camera's auto exposure on and off
+ @param values the values associated with the camera setting
  */
-float Job::getJobTime()
+CameraJob* CameraJob::newAutoExposureJob(vector<float> values)
 {
-    return m_job_time;
+    CameraJob* job = new CameraJob(AUTO_EXPOSURE, values);
 }
 
-/*! @brief Get the position at which the final task in the job will be executed
-    @returns the position the job will be executed at
+/*! @brief Turn the camera's auto white balance on and off
+ @param values the values associated with the camera setting
  */
-vector<float>* Job::getPosition()
+CameraJob* CameraJob::newAutoWhiteBalanceJob(vector<float> values)
 {
-    return &m_position;
+    CameraJob* job = new CameraJob(AUTO_WHITE_BALANCE, values);
 }
 
-/*! @brief Get the values used by the job
-    @returns the values used by the job
+/*! @brief Turn the camera's auto gain on and off
+ @param values the values associated with the camera setting
  */
-vector<float>* Job::getValues()
+CameraJob* CameraJob::newAutoGainJob(vector<float> values)
 {
-    return &m_values;
+    CameraJob* job = new CameraJob(AUTO_GAIN, values);
 }
 
-/*! @brief Get the target of the job
-    @return the target of the job
+/*! @brief Change the camera's brightness
+ @param values the values associated with the camera setting
  */
-vector<float>* Job::getTarget()
+CameraJob* CameraJob::newBrightnessJob(vector<float> values)
 {
-    return &m_target;
+    CameraJob* job = new CameraJob(BRIGHTNESS, values);
 }
 
-BodyJob* BodyJob::newStandJob(float time, vector<float> position)
+/*! @brief Change the camera's contrast
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newContrastJob(vector<float> values)
 {
-    static vector<float> empty_vector;
-    BodyJob* temp = new BodyJob::BodyJob(STAND, time, position, empty_vector);
-    return temp;
+    CameraJob* job = new CameraJob(CONTRAST, values);
 }
 
-BodyJob::BodyJob(job_id_t jobid, float time, vector<float> position, vector<float> jobtarget)
+/*! @brief Change the camera's saturation
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newSaturationJob(vector<float> values)
 {
-    m_job_type = BODY;
+    CameraJob* job = new CameraJob(SATURATION, values);
+}
+
+/*! @brief Change the camera's red chroma
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newRedChromaJob(vector<float> values)
+{
+    CameraJob* job = new CameraJob(RED_CHROMA, values);
+}
+
+/*! @brief Change the camera's blue chroma
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newBlueChromaJob(vector<float> values)
+{
+    CameraJob* job = new CameraJob(BLUE_CHROMA, values);
+}
+
+/*! @brief Change the camera's gain
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newGainJob(vector<float> values)
+{
+    CameraJob* job = new CameraJob(GAIN, values);
+}
+
+/*! @brief Change the camera's exposure
+ @param values the values associated with the camera setting
+ */
+CameraJob* CameraJob::newExposureJob(vector<float> values)
+{
+    CameraJob* job = new CameraJob(EXPOSURE, values);
+}
+
+/*! @brief Select which camera(s) should be active
+ @param values the ids of the cameras to be selected
+ */
+CameraJob* CameraJob::newSelectCameraJob(vector<float> values)
+{
+    CameraJob* job = new CameraJob(SELECT_CAMERA, values);
+}
+
+/*! A private constructor so that behaviour does not need to know about the job ids
+ */
+CameraJob::CameraJob(job_id_t jobid, vector<float> values)
+{
+    m_job_type = CAMERA;
     m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
-    m_target = jobtarget;
+    m_values = values;
 }
-
-HeadJob* HeadJob::newNodJob(float period)
-{
-    static vector<float> empty_vector;
-    HeadJob* temp = new HeadJob::HeadJob(NOD, period, empty_vector);
-    return temp;
-}
-
-HeadJob::HeadJob(job_id_t jobid, float time, vector<float> position)
-{
-    m_job_type = HEAD;
-    m_job_id = jobid;
-    m_job_time = time;
-    m_position = position;
-}
-
