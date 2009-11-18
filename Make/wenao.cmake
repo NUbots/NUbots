@@ -11,7 +11,7 @@
 #   - ADD_DEFINITIONS
 #   - INCLUDE_DIRECTORIES
 #   - Append required libraries to NUBOT_LINK_LIBRARIES
-#   - On Darwin we need to make sure that we target i386 and not x86_64, because at this time reboots does not support x86_64
+#   - On Darwin we need to make sure that we target i386 and not x86_64, because at this time weboots does not support x86_64
 #   - print debug information if desired
 
 SET(TARGET_ROBOT_DIR ${TARGET_ROBOT_DIR}/NAOWebots)

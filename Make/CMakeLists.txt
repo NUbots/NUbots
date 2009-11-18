@@ -33,7 +33,7 @@ ENDIF (DEBUG)
 
 ########## The location of target specific files 
 # this is used by target specific cmake files to locate appropriate sources
-SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform)
+SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms)
 
 ########## Selectively include target specific CMake files
 IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)

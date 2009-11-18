@@ -17,8 +17,12 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NAO.cpp NAO.h
-)
+SET (YOUR_SRCS  ALNAO.cpp ALNAO.h
+		NAOPlatform.cpp NAOPlatform.h
+                NAOCamera.cpp NAOCamera.h
+                NAOSensors.cpp NAOSensors.h
+                NAOActionators.cpp NAOActionators.h
+                NAOSystem.cpp NAOSystem.h )
 ####################################################################################
 
 # I need to prefix each file with the correct path

@@ -17,13 +17,12 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  nao_soccer_player_blue.cpp
-		NAOWebots.cpp NAOWebots.h
-                FieldPlayer.cpp FieldPlayer.hpp
-                GoalKeeper.cpp GoalKeeper.hpp   
-                InfoMessage.hpp 
-                NaoCam.cpp NaoCam.hpp
-                Player.cpp Player.hpp )
+SET (YOUR_SRCS  main.cpp
+		CycloidPlatform.cpp CycloidPlatform.h
+                CycloidCamera.cpp CycloidCamera.h
+                CycloidSensors.cpp CycloidSensors.h
+                CycloidActionators.cpp CycloidActionators.h
+                CycloidSystem.cpp CycloidSystem.h )
 ####################################################################################
 
 # I need to prefix each file with the correct path

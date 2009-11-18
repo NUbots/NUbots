@@ -17,8 +17,12 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
-)
+SET (YOUR_SRCS  main.cpp
+		CycloidPlatform.cpp CycloidPlatform.h
+                CycloidCamera.cpp CycloidCamera.h
+                CycloidSensors.cpp CycloidSensors.h
+                CycloidActionators.cpp CycloidActionators.h
+                CycloidSystem.cpp CycloidSystem.h )
 ####################################################################################
 
 # I need to prefix each file with the correct path
