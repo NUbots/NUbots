@@ -4,7 +4,8 @@
     @class Job
     @brief A base class to encapsulate jobs issued by behaviour.
  
-    All jobs need to inherit from this base class. You need only implement a constructor.
+    All jobs need to inherit from this base class. You need only implement a constructor,
+    or have a private constructor and provide static functions to create the instances.
     Unfortunately, you need to add the job_id to the job_id_t enum here!
 
     @author Jason Kulk
