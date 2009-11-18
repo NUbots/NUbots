@@ -20,6 +20,9 @@
  */
 
 #include <time.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+#include <boost/timer.hpp>
 #include <errno.h>
 #include <iostream>
 using namespace std;
@@ -329,6 +332,8 @@ void* runThreadMotion(void* arg)
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
     
+/*! @todo
+ */
 #ifdef THREAD_MOTION_MONITOR_TIME
     struct timespec pretime, starttime, endtime;
     struct timespec relstarttime, relendtime;
@@ -365,10 +370,8 @@ void* runThreadMotion(void* arg)
         runtime = (endtime.tv_nsec - starttime.tv_nsec)/1e6 + (endtime.tv_sec - starttime.tv_sec)*1e3;
         relruntime = (relendtime.tv_nsec - relstarttime.tv_nsec)/1e6 + (relendtime.tv_sec - relstarttime.tv_sec)*1e3;
         proruntime = (proendtime.tv_nsec - prostarttime.tv_nsec)/1e6 + (proendtime.tv_sec - prostarttime.tv_sec)*1e3;
-        if (runtime > 8)
-        {
+        if (runtime > 7)
             debug << "NUbot::runThreadMotion. Motion cycle time error: " << runtime << " ms. Time spent in this thread: " << relruntime << "ms, in this process: " << proruntime << endl;
-        }
 #endif
     } 
     while (err == 0 | errno != EINTR);
@@ -398,14 +401,28 @@ void* runThreadVision(void* arg)
     float runtime, waittime, relruntime, proruntime;       // the run time in ms
 #endif
     
+/* Using boot for the timing temporarliy here.
+ */
+    ptime now, earlier;
+    boost::timer t1;
+    float waittime = 0;
+    
     int err;
     do 
     {
 #ifdef THREAD_VISION_MONITOR_TIME
         clock_gettime(CLOCK_REALTIME, &pretime);
 #endif
+        now = microsec_clock::local_time();
+        t1.restart();
         err = nubot->waitForNewVisionData();
+        earlier = now;
+        now = microsec_clock::local_time();
+        waittime = t1.elapsed();
         debug << "NUbot::runThreadVision. Running" << endl;
+        
+        debug << "Waittime using ptime " << now - earlier << endl;
+        debug << "Waittime using timer " << waittime << endl;
         
 #ifdef THREAD_VISION_MONITOR_TIME
         clock_gettime(CLOCK_REALTIME, &starttime);
@@ -418,6 +435,10 @@ void* runThreadVision(void* arg)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //          image = nubot->platform->camera->getData()
         //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
+        //      NUCamera::imageWidth
+        //      #idef NAOWebots:
+        //          NUCamera::imageWidth = WebotsCamera::imageWidth
+        //
         //                 odometry = nubot->motion->getData()                       // There is no deep copy here either
         //      gamectrl, teaminfo = nubot->network->getData()
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
@@ -435,10 +456,8 @@ void* runThreadVision(void* arg)
         runtime = (endtime.tv_nsec - starttime.tv_nsec)/1e6 + (endtime.tv_sec - starttime.tv_sec)*1e3;
         relruntime = (relendtime.tv_nsec - relstarttime.tv_nsec)/1e6 + (relendtime.tv_sec - relstarttime.tv_sec)*1e3;
         proruntime = (proendtime.tv_nsec - prostarttime.tv_nsec)/1e6 + (proendtime.tv_sec - prostarttime.tv_sec)*1e3;
-        if (runtime > 8)
-        {
+        if (runtime > 25)
             debug << "NUbot::runThreadVision. Vision cycle time error: " << runtime << " ms. Time spent in this thread: " << relruntime << "ms, in this process: " << proruntime << endl;
-        }
 #endif
     } 
     while (err == 0 | errno != EINTR);
