@@ -23,7 +23,6 @@
 #define NUPLATFORM_H
 
 #include <string>
-
 using namespace std;
 
 #include "config.h"
@@ -31,12 +30,12 @@ using namespace std;
 #include "NUCamera.h"
 #include "NUSensors.h"
 #include "NUActionators.h"
+#include "NUSystem.h"
 
 class NUPlatform
 {
 // Functions:
 public:
-    NUPlatform();
     virtual ~NUPlatform();
     
     virtual void getName(string& name);
@@ -49,7 +48,8 @@ private:
 public:
     NUCamera* camera;
     NUSensors* sensors;
-    NUActionators* actuators;
+    NUActionators* actionators;
+    NUSystem* system;
 protected:
     string m_name;
     int m_number;

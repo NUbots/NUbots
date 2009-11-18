@@ -26,13 +26,6 @@ using namespace std;
 
 NUPlatform* nuplatform = NULL;
 
-NUPlatform::NUPlatform()
-{
-    cout << "NUPlatform::NUPlatform" << endl;
-    sensors = new NUSensors();
-    cout << "NUPlatform::NUPlatform. this: " << this << endl;
-}
-
 NUPlatform::~NUPlatform()
 {
 }
