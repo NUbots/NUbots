@@ -29,13 +29,13 @@ using namespace std;
 
 #include "NUbot.h"
 #ifdef TARGET_IS_NAOWEBOTS
-    #include "NUPlatform/NAOWebots/NAOWebots.h"
+    #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
 #endif
 #ifdef TARGET_IS_NAO
-    #include "NUPlatform/NAO/NAO.h"
+    #include "NUPlatform/Platforms/NAO/NAOPlatform.h"
 #endif
 #ifdef TARGET_IS_CYCLOID
-    #include "NUPlatform/Cycloid/Cycloid.h"
+    #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
 #endif
 
 static pthread_mutex_t mutexMotionData;    //!< lock for new motion data signal @relates NUbot
@@ -61,13 +61,13 @@ NUbot::NUbot(int argc, const char *argv[])
 #endif
     // Construct the right Platform
     #ifdef TARGET_IS_NAOWEBOTS
-        platform = new NAOWebots(argc, argv);
+        platform = new NAOWebotsPlatform(argc, argv);
     #endif
     #ifdef TARGET_IS_NAO
-        platform = new NAO();
+        platform = new NAOPlatform();
     #endif
     #ifdef TARGET_IS_CYCLOID
-        platform = new Cycloid();
+        platform = new CycloidPlatform();
     #endif
 
 #if DEBUG_NUBOT_VERBOSITY > 4
@@ -402,6 +402,13 @@ void* runThreadVision(void* arg)
 #endif
     
 /* Using boot for the timing temporarliy here.
+ This is going to turn into the first NUSystem use; I need OS/TARGET independant timing.
+ - Get current wall time (since start) double secondssincestart
+ - Get current wall time (fast)
+ - Get current process time in seconds (since start)
+ - Get current thread time in seconds (since start)
+ 
+ My plan is to use clock_gettime if it is there. Otherwise boost::posix_time and the std::clock. Will need to be careful if clock wraps!
  */
     ptime now, earlier;
     boost::timer t1;
