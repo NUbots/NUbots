@@ -79,10 +79,17 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 FIND_PACKAGE( PTHREAD REQUIRED )
 FIND_PACKAGE( BOOST REQUIRED )
 
-############################ CONFIG.H GENERATION
+############################ targetconfig.h GENERATION
 CONFIGURE_FILE(
-	"${CMAKE_CURRENT_SOURCE_DIR}/config.in"
-  	"${CMAKE_CURRENT_SOURCE_DIR}/../config.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../targetconfig.h"
+    ESCAPE_QUOTES
+)
+
+############################ DEBUG.H GENERATION
+CONFIGURE_FILE(
+	"${CMAKE_CURRENT_SOURCE_DIR}/debug.in"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../Tools/debug.h"
     ESCAPE_QUOTES
 )
 
@@ -157,49 +164,24 @@ ENDIF (WIN32)
 
 ############################ OPTIONS
 SET(DEBUG_NUBOT_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
-
-OPTION(
-        USE_VISION
-        "Set to ON to run vision, set to OFF to run blind"
-        ON
-)
-
+SET(DEBUG_NUPLATFORM_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
+SET(DEBUG_NUCAMERA_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
+SET(DEBUG_NUSENSORS_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
+SET(DEBUG_NUACTIONATORS_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
+SET(DEBUG_NUSYSTEM_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
 SET(DEBUG_VISION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the vision (0 to 5)")
+SET(DEBUG_LOCALISATION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the localisation (0 to 5)")
+SET(DEBUG_BEHAVIOUR_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the behaviour (0 to 5)")
+SET(DEBUG_MOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
 
 SET(THREAD_VISION_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
+SET(THREAD_MOTION_PRIORITY 40 CACHE STRING "Set the priority of the motion thread (0 to 100)")
 
 OPTION(
         THREAD_VISION_MONITOR_TIME
         "Set to ON to monitor the computation time of the vision thread"
         ON
 )
-
-OPTION(
-        USE_LOCALISATION
-        "Set to ON to run localisation, set to OFF be be lost"
-        ON
-)
-
-SET(DEBUG_LOCALISATION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the localisation (0 to 5)")
-
-OPTION(
-        USE_BEHAVIOUR
-        "Set to ON to run behaviour, set to OFF to have a lobotomy"
-        ON
-)
-
-SET(DEBUG_BEHAVIOUR_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the behaviour (0 to 5)")
-
-OPTION(
-        USE_MOTION
-        "Set to ON to run motion, set to OFF to be paralysed"
-        ON
-)
-
-SET(THREAD_MOTION_PRIORITY 40 CACHE STRING "Set the priority of the motion thread (0 to 100)")
-
-SET(DEBUG_MOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
-
 OPTION(
         THREAD_MOTION_MONITOR_TIME
         "Set to ON to monitor the computation time of the motion thread"
@@ -207,8 +189,22 @@ OPTION(
 )
 
 OPTION(
-        USE_NETWORK
-        "Set to ON to run network, set to OFF to be deaf"
+        USE_VISION
+        "Set to ON to run vision, set to OFF to run blind"
         ON
 )
-SET(DEBUG_NETWORK_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the network (0 to 5)")
+OPTION(
+        USE_LOCALISATION
+        "Set to ON to run localisation, set to OFF be be lost"
+        ON
+)
+OPTION(
+        USE_BEHAVIOUR
+        "Set to ON to run behaviour, set to OFF to have a lobotomy"
+        ON
+)
+OPTION(
+        USE_MOTION
+        "Set to ON to run motion, set to OFF to be paralysed"
+        ON
+)
