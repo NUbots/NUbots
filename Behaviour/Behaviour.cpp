@@ -34,8 +34,8 @@ Behaviour::~Behaviour()
     
 }
 
-vector<Job*>* Behaviour::process(vector<Job*>* jobs)
+void Behaviour::process(JobList jobs)
 {
-    return jobs;
+
 }
 

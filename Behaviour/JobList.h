@@ -1,5 +1,8 @@
-/*! @file Behaviour.h
-    @brief Declaration of behaviour class
+/*! @file JobList.h
+    @brief Declaration of JobList class.
+ 
+    @class JobList
+    @brief A class containing the list of jobs to be done by modules
 
     @author Jason Kulk
  
@@ -19,21 +22,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BEHAVIOUR_H
-#define BEHAVIOUR_H
+#ifndef JOBLIST_H
+#define JOBLIST_H
 
-#include "Behaviour/JobList.h"
-#include "Behaviour/Jobs/Jobs.h"
+#include "Job.h"
 
-class Behaviour
+#include <vector>
+using namespace std;
+
+class JobList
 {
 public:
-    Behaviour();
-    ~Behaviour();
+    JobList();
+    ~JobList();
     
-    void process(JobList jobs);
-};
+    void append(Job* newjob);
+    void clear();
 
+private:
+    vector<Job*> jobs;                          //!< the list of jobs for subsequent modules
+};
 
 #endif
 

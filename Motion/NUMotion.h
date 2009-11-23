@@ -83,7 +83,7 @@ TODO: I need to rethink this a little. Each class can not have a different enum 
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "Behaviour/Job.h"
+#include "Behaviour/JobList.h"
 
 class ActuatorCommands
 {
@@ -106,7 +106,7 @@ public:
     ~NUMotion();
     
     ActuatorCommands* process(BodyData* data);
-    void process(vector<Job*>* p_jobs);
+    void process(JobList jobs);
 protected:
 private:
 public:

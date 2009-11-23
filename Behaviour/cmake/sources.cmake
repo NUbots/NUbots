@@ -21,7 +21,8 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  Job.cpp Job.h
-		Behaviour.cpp Behaviour.h
+                JobList.cpp JobList.h
+                Behaviour.cpp Behaviour.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

@@ -1,5 +1,5 @@
-/*! @file NUMotion.cpp
-    @brief Implementation of motion class
+/*! @file JobList.cpp
+    @brief Implementation of JobList class
 
     @author Jason Kulk
  
@@ -19,37 +19,35 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using namespace std;
+#include "JobList.h"
 
-#include "NUPlatform/NUPlatform.h"
-#include "NUMotion.h"
-
-/*! @brief Constructor for motion module
+/*! @brief JobList constructor
  */
-NUMotion::NUMotion()
+JobList::JobList()
 {
-    cout << "NUMotion::NUMotion" << endl;
+    jobs.reserve(100);           // reserve space for 100 jobs
 }
 
-/*! @brief Destructor for motion module
+/*! @brief Job destructor
  */
-NUMotion::~NUMotion()
+JobList::~JobList()
 {
 }
 
-/*! @brief Process new body sensor data, and action commands
+/*! @brief Append a job to the job list
+    
+    @param newjob the new job to be added to the list
  */
-ActuatorCommands* NUMotion::process(BodyData* data)
+void JobList::append(Job* newjob)
 {
-    ActuatorCommands* temp = new ActuatorCommands();
-    return temp;
+    jobs.push_back(newjob);
 }
 
-/*! @brief Process new body sensor data, and action commands
+/*! @brief Clear the job list
  */
-void NUMotion::process(JobList jobs)
+void JobList::clear()
 {
-    cout << "NUMotion::process():" << endl;
+    jobs.clear();
 }
+
 
