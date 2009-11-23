@@ -28,12 +28,16 @@
 #define NAOWEBOTSSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "NAOWebotsPlatform.h"
 
 class NAOWebotsSensors : public NUSensors
 {
 public:
-    NAOWebotsSensors();
+    NAOWebotsSensors(NAOWebotsPlatform* platform);
     ~NAOWebotsSensors();
+    
+private:
+    void copyFromHardwareCommunications();
 };
 
 #endif

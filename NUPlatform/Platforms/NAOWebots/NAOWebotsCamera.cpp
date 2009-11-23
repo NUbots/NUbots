@@ -24,7 +24,7 @@
 #include <iostream>
 using namespace std;
 
-NAOWebotsCamera::NAOWebotsCamera()
+NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {
     cout << "NAOWebotsCamera::NAOWebotsCamera()" << endl;
 }

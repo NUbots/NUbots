@@ -20,18 +20,38 @@
  */
 
 #include "NAOWebotsSensors.h"
+#include "Tools/debug.h"
 
-#include <iostream>
-using namespace std;
+#include "webots/Servo.hpp"
+using namespace webots;
 
-NAOWebotsSensors::NAOWebotsSensors()
+/*! @brief Constructs a nubot sensor class with Webots backend
+ */
+NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
-    cout << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
+#endif
+    Servo* hy = platform->getServo("HeadFail");
+    debug << Servo::exists("HeadFail") << endl;
 }
 
+/*! @brief Destructor for NAOWebotsSensors
+ */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
 }
+
+/*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.
+ */
+void NAOWebotsSensors::copyFromHardwareCommunications()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
+#endif
+    data.JointPositions;
+}
+
 
 
 

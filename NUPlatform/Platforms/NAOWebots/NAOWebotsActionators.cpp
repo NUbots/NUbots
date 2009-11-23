@@ -24,7 +24,7 @@
 #include <iostream>
 using namespace std;
 
-NAOWebotsActionators::NAOWebotsActionators()
+NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
 {
     cout << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
 }

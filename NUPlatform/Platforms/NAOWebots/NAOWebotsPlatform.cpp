@@ -56,10 +56,10 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     int m_number = (port % 10) + 1;
     setNameFromNumber();
     
-    camera = new NAOWebotsCamera();
-    sensors = new NAOWebotsSensors();
-    actionators = new NAOWebotsActionators();
-    system = new NAOWebotsSystem();
+    camera = new NAOWebotsCamera(this);
+    sensors = new NAOWebotsSensors(this);
+    actionators = new NAOWebotsActionators(this);
+    system = new NAOWebotsSystem(this);
 }
 
 NAOWebotsPlatform::~NAOWebotsPlatform()
@@ -67,9 +67,9 @@ NAOWebotsPlatform::~NAOWebotsPlatform()
 }
 
 
-/* A function which generates a Robot's name based on a number
- @param number the robot's number
- @param name the string to be updated with the robot's name
+/*! @brief A function which generates a Robot's name based on a number
+    @param number the robot's number
+    @param name the string to be updated with the robot's name
  */
 void NAOWebotsPlatform::setNameFromNumber()
 {
@@ -91,4 +91,6 @@ void NAOWebotsPlatform::setNameFromNumber()
             break;
     }
 }
+
+
 

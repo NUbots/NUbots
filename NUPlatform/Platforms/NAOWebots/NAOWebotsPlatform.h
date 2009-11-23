@@ -23,15 +23,14 @@
 #define NAOWEBOTSPLATFORM_H
 
 #include "NUPlatform/NUPlatform.h"
+#include "webots/Robot.hpp"
 
-class NAOWebotsPlatform : public NUPlatform
+class NAOWebotsPlatform : public NUPlatform, public webots::Robot
 {
 // Functions:
 public:
     NAOWebotsPlatform(int argc, const char *argv[]);
     ~NAOWebotsPlatform();
-    
-    void test();
     
 protected:
 private:

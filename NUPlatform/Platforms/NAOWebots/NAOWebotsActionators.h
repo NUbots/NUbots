@@ -28,11 +28,12 @@
 #define NAOWEBOTSACTIONATORS_H
 
 #include "NUPlatform/NUActionators.h"
+#include "NAOWebotsPlatform.h"
 
 class NAOWebotsActionators : public NUActionators
 {
 public:
-    NAOWebotsActionators();
+    NAOWebotsActionators(NAOWebotsPlatform* platform);
     ~NAOWebotsActionators();
 };
 

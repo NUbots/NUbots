@@ -24,7 +24,7 @@
 #include <iostream>
 using namespace std;
 
-NAOWebotsSystem::NAOWebotsSystem()
+NAOWebotsSystem::NAOWebotsSystem(NAOWebotsPlatform* platform)
 {
     cout << "NAOWebotsSystem::NAOWebotsSystem()" << endl;
 }

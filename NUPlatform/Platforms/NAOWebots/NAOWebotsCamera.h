@@ -28,11 +28,12 @@
 #define NAOWEBOTSCAMERA_H
 
 #include "NUPlatform/NUCamera.h"
+#include "NAOWebotsPlatform.h"
 
 class NAOWebotsCamera : public NUCamera
 {
 public:
-    NAOWebotsCamera();
+    NAOWebotsCamera(NAOWebotsPlatform* platform);
     ~NAOWebotsCamera();
 };
 

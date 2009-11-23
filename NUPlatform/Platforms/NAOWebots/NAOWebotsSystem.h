@@ -28,11 +28,12 @@
 #define NAOWEBOTSSYSTEM_H
 
 #include "NUPlatform/NUSystem.h"
+#include "NAOWebotsPlatform.h"
 
 class NAOWebotsSystem : public NUSystem
 {
 public:
-    NAOWebotsSystem();
+    NAOWebotsSystem(NAOWebotsPlatform* platform);
     ~NAOWebotsSystem();
 };
 
