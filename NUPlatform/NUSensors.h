@@ -32,9 +32,6 @@
 #ifndef NUSENSORS_H
 #define NUSENSORS_H
 
-#include <vector>
-using namespace std;
-
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 
 

@@ -242,10 +242,10 @@ void NUbot::run()
     while (true)
     {
         signalMotion();
-        if (count%10 == 0)
+        if (count%2 == 0)
             signalVision();
         count++;
-        usleep(0.1*1e6);
+        usleep(1.0/50*1e6);
     };
     return;
 }
@@ -328,6 +328,8 @@ void* runThreadMotion(void* arg)
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
     
+    NUSensorsData* data;
+    
 #ifdef THREAD_MOTION_MONITOR_TIME
     double entrytime;
     double realstarttime, processstarttime, threadstarttime; 
@@ -341,18 +343,16 @@ void* runThreadMotion(void* arg)
         entrytime = NUSystem::getTime();
 #endif
         err = nubot->waitForNewMotionData();
-        debug << "NUbot::runThreadMotion. Running" << endl;
 
 #ifdef THREAD_MOTION_MONITOR_TIME
         realstarttime = NUSystem::getTime();
         if (realstarttime - entrytime > 25)
             debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
-        
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //     data = nubot->platform->sensors->getData()                // I should not deep copy the data here
+        data = nubot->platform->sensors->update();
         //                cmds = nubot->motion->process(data)                       // it is up to motion to decide whether it should deep copy
         //        nubot->platform->actionators->process(cmds)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -381,8 +381,7 @@ void* runThreadVision(void* arg)
     debug << "NUbot::runThreadVision: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
-    vector<Job*> jobs;                          // the list of jobs for motion and lcs modules
-    vector<Job*>* p_jobs = &jobs;
+    JobList joblist = JobList();
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -399,13 +398,11 @@ void* runThreadVision(void* arg)
         entrytime = NUSystem::getTime();
 #endif
         err = nubot->waitForNewVisionData();
-
-        debug << "NUbot::runThreadVision. Running" << endl;
         
 #ifdef THREAD_VISION_MONITOR_TIME
         realstarttime = NUSystem::getTime();
-        if (realstarttime - entrytime > 25)
-            debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
+        if (realstarttime - entrytime > 1000/15.0 + 5)
+            debug << "NUbot::runThreadVision. Waittime " << realstarttime - entrytime << " ms."<< endl;
         
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
@@ -421,11 +418,11 @@ void* runThreadVision(void* arg)
         //      gamectrl, teaminfo = nubot->network->getData()
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
-        nubot->behaviour->process(p_jobs);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
-        nubot->motion->process(p_jobs);
+        nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+        nubot->motion->process(joblist);
         //          cmds = nubot->lcs->process(lcsactions)
         //          nubot->platform->actionators->process(cmds)
-        jobs.clear();                           // assume that all of the jobs have been completed
+        joblist.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
         realendtime = NUSystem::getTime();

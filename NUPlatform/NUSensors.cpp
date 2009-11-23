@@ -20,26 +20,38 @@
  */
 
 #include "NUSensors.h"
-#include <iostream>
-using namespace std;
+#include "Tools/debug.h"
 
 NUSensors::NUSensors()
 {
-    cout << "NUSensors::NUSensors" << endl;
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::NUSensors" << endl;
+#endif
 }
 
 NUSensors::~NUSensors()
 {
-    cout << "NUSensors::~NUSensors" << endl;
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::~NUSensors" << endl;
+#endif
 }
 
 NUSensorsData* NUSensors::update()
 {
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::update()" << endl;
+#endif
+    // Actually update the sensor values stored in this class here. This function should only be called when there is new sensor data.
+    
+    // Then just return the new data
     return getData();
 }
 
 NUSensorsData* NUSensors::getData()
 {
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::getData()" << endl;
+#endif
     return &data;
 }
 

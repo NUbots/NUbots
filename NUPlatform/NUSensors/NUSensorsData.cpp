@@ -20,19 +20,25 @@
  */
 
 #include "NUSensorsData.h"
-#include <iostream>
-using namespace std;
+#include "Tools/debug.h"
 
 /*!
  */
 NUSensorsData::NUSensorsData()
 {
-    cout << "NUSensorsData::NUSensorsData" << endl;
-    data.push_back(&m_joint_positions);
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensorsData::NUSensorsData" << endl;
+#endif
+    
+    // lets try and fill in the joints first
+    
 }
 
 NUSensorsData::~NUSensorsData()
 {
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensorsData::~NUSensorsData" << endl;
+#endif
 }
 
 

@@ -41,7 +41,7 @@
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
-    #include "Behaviour/Job.h"
+    #include "Behaviour/JobList.h"
 #endif
 
 #ifdef USE_MOTION
