@@ -20,9 +20,6 @@
  */
 
 #include <time.h>
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-#include <boost/timer.hpp>
 #include <errno.h>
 #include <iostream>
 using namespace std;
@@ -228,7 +225,7 @@ NUbot::~NUbot()
 
 /*! @brief The nubot's main loop
     
-    The nubot's main loop. This function will probably never return. TODO.
+    The nubot's main loop. This function will probably never return.
  
     The idea is to simply have 
     @verbatim
@@ -244,7 +241,6 @@ void NUbot::run()
     int count = 0;
     while (true)
     {
-        debug << "NUbot::run()" << endl;
         signalMotion();
         if (count%10 == 0)
             signalVision();
@@ -332,31 +328,28 @@ void* runThreadMotion(void* arg)
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
     
-/*! @todo
- */
 #ifdef THREAD_MOTION_MONITOR_TIME
-    struct timespec pretime, starttime, endtime;
-    struct timespec relstarttime, relendtime;
-    struct timespec prostarttime, proendtime;
-    float runtime, waittime, relruntime, proruntime;       // the run time in ms
+    double entrytime;
+    double realstarttime, processstarttime, threadstarttime; 
+    double realendtime, processendtime, threadendtime;
 #endif
     
     int err;
     do 
     {
 #ifdef THREAD_MOTION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &pretime);
+        entrytime = NUSystem::getTime();
 #endif
         err = nubot->waitForNewMotionData();
         debug << "NUbot::runThreadMotion. Running" << endl;
 
 #ifdef THREAD_MOTION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &starttime);
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &relstarttime);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &prostarttime);
-        waittime = (starttime.tv_nsec - pretime.tv_nsec)/1e6 + (starttime.tv_sec - pretime.tv_sec)*1e3;
-        if (waittime > 25)
-            debug << "NUbot::runThreadMotion. Waittime " << waittime << " ms."<< endl;
+        realstarttime = NUSystem::getTime();
+        if (realstarttime - entrytime > 25)
+            debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
+        
+        processstarttime = NUSystem::getProcessTime();
+        threadstarttime = NUSystem::getThreadTime();
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //     data = nubot->platform->sensors->getData()                // I should not deep copy the data here
@@ -364,14 +357,11 @@ void* runThreadMotion(void* arg)
         //        nubot->platform->actionators->process(cmds)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_MOTION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &endtime);
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &relendtime);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proendtime);
-        runtime = (endtime.tv_nsec - starttime.tv_nsec)/1e6 + (endtime.tv_sec - starttime.tv_sec)*1e3;
-        relruntime = (relendtime.tv_nsec - relstarttime.tv_nsec)/1e6 + (relendtime.tv_sec - relstarttime.tv_sec)*1e3;
-        proruntime = (proendtime.tv_nsec - prostarttime.tv_nsec)/1e6 + (proendtime.tv_sec - prostarttime.tv_sec)*1e3;
-        if (runtime > 7)
-            debug << "NUbot::runThreadMotion. Motion cycle time error: " << runtime << " ms. Time spent in this thread: " << relruntime << "ms, in this process: " << proruntime << endl;
+        realendtime = NUSystem::getTime();
+        processendtime = NUSystem::getProcessTime();
+        threadendtime = NUSystem::getThreadTime();
+        if (threadendtime - threadstarttime > 3)
+            debug << "NUbot::runThreadMotion. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
 #endif
     } 
     while (err == 0 | errno != EINTR);
@@ -395,49 +385,30 @@ void* runThreadVision(void* arg)
     vector<Job*>* p_jobs = &jobs;
     
 #ifdef THREAD_VISION_MONITOR_TIME
-    struct timespec pretime, starttime, endtime;
-    struct timespec relstarttime, relendtime;
-    struct timespec prostarttime, proendtime;
-    float runtime, waittime, relruntime, proruntime;       // the run time in ms
+    double entrytime;
+    double realstarttime, processstarttime, threadstarttime; 
+    double realendtime, processendtime, threadendtime;
 #endif
     
-/* Using boot for the timing temporarliy here.
- This is going to turn into the first NUSystem use; I need OS/TARGET independant timing.
- - Get current wall time (since start) double secondssincestart
- - Get current wall time (fast)
- - Get current process time in seconds (since start)
- - Get current thread time in seconds (since start)
- 
- My plan is to use clock_gettime if it is there. Otherwise boost::posix_time and the std::clock. Will need to be careful if clock wraps!
- */
-    ptime now, earlier;
-    boost::timer t1;
-    float waittime = 0;
+    double timenow;
     
     int err;
     do 
     {
 #ifdef THREAD_VISION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &pretime);
+        entrytime = NUSystem::getTime();
 #endif
-        now = microsec_clock::local_time();
-        t1.restart();
         err = nubot->waitForNewVisionData();
-        earlier = now;
-        now = microsec_clock::local_time();
-        waittime = t1.elapsed();
+
         debug << "NUbot::runThreadVision. Running" << endl;
         
-        debug << "Waittime using ptime " << now - earlier << endl;
-        debug << "Waittime using timer " << waittime << endl;
-        
 #ifdef THREAD_VISION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &starttime);
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &relstarttime);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &prostarttime);
-        waittime = (starttime.tv_nsec - pretime.tv_nsec)/1e6 + (starttime.tv_sec - pretime.tv_sec)*1e3;
-        if (waittime > 25)
-            debug << "NUbot::runThreadVision. Waittime " << waittime << " ms."<< endl;
+        realstarttime = NUSystem::getTime();
+        if (realstarttime - entrytime > 25)
+            debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
+        
+        processstarttime = NUSystem::getProcessTime();
+        threadstarttime = NUSystem::getThreadTime();
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //          image = nubot->platform->camera->getData()
@@ -457,14 +428,11 @@ void* runThreadVision(void* arg)
         jobs.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
-        clock_gettime(CLOCK_REALTIME, &endtime);
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &relendtime);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proendtime);
-        runtime = (endtime.tv_nsec - starttime.tv_nsec)/1e6 + (endtime.tv_sec - starttime.tv_sec)*1e3;
-        relruntime = (relendtime.tv_nsec - relstarttime.tv_nsec)/1e6 + (relendtime.tv_sec - relstarttime.tv_sec)*1e3;
-        proruntime = (proendtime.tv_nsec - prostarttime.tv_nsec)/1e6 + (proendtime.tv_sec - prostarttime.tv_sec)*1e3;
-        if (runtime > 25)
-            debug << "NUbot::runThreadVision. Vision cycle time error: " << runtime << " ms. Time spent in this thread: " << relruntime << "ms, in this process: " << proruntime << endl;
+        realendtime = NUSystem::getTime();
+        processendtime = NUSystem::getProcessTime();
+        threadendtime = NUSystem::getThreadTime();
+        if (threadendtime - threadstarttime > 10)
+            debug << "NUbot::runThreadVision. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
 #endif
     } 
     while (err == 0 | errno != EINTR);

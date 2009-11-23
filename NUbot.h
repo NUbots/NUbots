@@ -26,10 +26,11 @@
 #ifndef NUBOT_H
 #define NUBOT_H
 
-#include "config.h"
-#include "NUPlatform/NUPlatform.h"
+#include "targetconfig.h"
+#include "Tools/debug.h"
 
-// Selectively include modules depending on config.h
+#include "NUPlatform/NUPlatform.h"
+// Selectively include modules depending on targetconfig.h
 #ifdef USE_VISION
     #include "Vision/Vision.h"
 #endif
@@ -45,10 +46,6 @@
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
-#endif
-
-#ifdef USE_NETWORK
-    #include "Network/Network.h"
 #endif
 
 #include <pthread.h>
@@ -85,12 +82,10 @@ public:
     #ifdef USE_MOTION
         NUMotion* motion;               //!< motion module
     #endif
-    #ifdef USE_NETWORK
-        Network* network;               //!< network module
-    #endif
 private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)
     pthread_t threadVision;             //!< thread containing vision and higher-level though processes (cerebrum)
 };
 
 #endif
+
