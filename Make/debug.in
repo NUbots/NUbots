@@ -13,6 +13,8 @@
 
 // depending on the target platform the location for debug information is different
 #ifdef TARGET_IS_NAOWEBOTS
+    #include <iostream>
+    using namespace std;
     #define debug cout                          //!< the debug stream
 #else
     #ifdef TARGET_IS_NAO
