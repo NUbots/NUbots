@@ -20,4 +20,5 @@
 # Linux Ignore
 *.*~
 
-config.h
+targetconfig.h
+/Tools/debug.h
