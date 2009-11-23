@@ -20,7 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUSensorsData.cpp NUSensorsData.h
+SET (YOUR_SRCS  sensor_t.h
+                NUSensorsData.cpp NUSensorsData.h
 )
 ####################################################################################
 

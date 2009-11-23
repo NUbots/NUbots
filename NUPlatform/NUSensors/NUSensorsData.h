@@ -26,22 +26,11 @@
 #ifndef NUSENSORSDATA_H
 #define NUSENSORSDATA_H
 
+#include "sensor_t.h"
+
 #include <vector>
 #include <string>
 using namespace std;
-
-/*! @brief Container for a single group of sensors
- */
-struct sensor_t 
-{
-    string name;                //!< the sensor's name
-    int sensorID;               //!< the sensor's id
-    vector<float> data;         //!< the sensor values
-    vector<float> sd;           //!< standard deviation for each sensor value sensor
-    bool isValid;               //!< true, if data is valid, false if not
-    bool isCalculated;          //!< true, if data has been calculated, false if the data is direct from a sensor
-    long double timestamp;      //!< the unix timestamp of the data
-};
 
 /*! @brief Base sensor storage class
  */
@@ -55,7 +44,7 @@ private:
 public:
     // Proprioception Sensors:
     sensor_t* JointPositions;
-    sensor_t* JointVelocities;
+    /*sensor_t* JointVelocities;
     sensor_t* JointAccelerations;
     sensor_t* JointTargets;
     sensor_t* JointStiffnesses;
@@ -75,7 +64,7 @@ public:
     sensor_t* BatteryValues;
     
     // Distance Sensors:
-    sensor_t* DistanceValues;
+    sensor_t* DistanceValues;*/
 private:
     vector<sensor_t*> data;
 };
