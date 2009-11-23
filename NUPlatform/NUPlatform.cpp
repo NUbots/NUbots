@@ -23,6 +23,7 @@
 using namespace std;
 
 #include "NUPlatform.h"
+#include "Tools/debug.h"
 
 NUPlatform* nuplatform = NULL;
 

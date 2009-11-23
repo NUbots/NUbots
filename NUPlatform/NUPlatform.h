@@ -25,8 +25,6 @@
 #include <string>
 using namespace std;
 
-#include "config.h"
-
 #include "NUCamera.h"
 #include "NUSensors.h"
 #include "NUActionators.h"
@@ -58,3 +56,4 @@ private:
 };
 
 #endif
+
