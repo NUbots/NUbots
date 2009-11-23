@@ -14,15 +14,17 @@
 
 # list the project's subdirectories here:
 SET(NUBOT_DIRS  NUPlatform
-		Behaviour
+                Behaviour
                 Localisation
                 Motion
-                Network
                 Vision
+                Tools
 )
 
 # list the top-level files here
-LIST(APPEND NUBOT_SRCS ../NUbot.cpp ../NUbot.h)
+LIST(APPEND NUBOT_SRCS  ../NUbot.cpp ../NUbot.h
+                        ../targetconfig.h
+)
 
 # I will add the cmake/sources.cmake to the specified directories in NUBOT_DIRS
 # NOT: I also put each directory on the search path INCLUDE_DIRECTORIES(../${loop_var})
