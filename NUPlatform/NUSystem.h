@@ -22,10 +22,33 @@
 #ifndef NUSYSTEM_H
 #define NUSYSTEM_H
 
+#include <time.h>
+#ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
+    #define __NU_SYSTEM_CLOCK_GETTIME 
+#else                                   // otherwise use boost.
+    #include <boost/date_time/posix_time/posix_time.hpp>
+    using namespace boost::posix_time;
+#endif
+
 class NUSystem
 {
 public:
+    NUSystem();
     virtual ~NUSystem();
+    // System time functions
+    static double getPosixTimeStamp();
+    static double getTime();
+    static double getTimeFast();
+    static double getProcessTime();
+    static double getThreadTime();
+private:
+    // System time members
+    #ifdef __NU_SYSTEM_CLOCK_GETTIME
+        static struct timespec m_gettime_starttime;            //!< the program's start time according to gettime()
+        static struct timespec m_gettimefast_starttime;        //!< the program's start time according to the fast verion of gettime()
+    #else
+        static ptime m_microsec_starttime;                     //!< the program's start time according to boost::posix_time
+    #endif
 };
 
 #endif
