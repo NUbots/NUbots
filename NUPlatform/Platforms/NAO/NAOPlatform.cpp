@@ -44,3 +44,4 @@ NAOPlatform::NAOPlatform()
 NAOPlatform::~NAOPlatform()
 {
 }
+

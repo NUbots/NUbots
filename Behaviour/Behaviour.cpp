@@ -38,3 +38,4 @@ vector<Job*>* Behaviour::process(vector<Job*>* jobs)
 {
     return jobs;
 }
+
