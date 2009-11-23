@@ -1,5 +1,5 @@
-/*! @file NAOPlatform.h
- @brief Implementation of NAOPlatform class.
+/*! @file ALNAO.h
+ @brief Implementation of ALNAO class.
  
  @author Jason Kulk
  
@@ -19,44 +19,52 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "NUbot.h"
+
 #include <albroker.h>
 #include <alproxy.h>
 #include <almemoryproxy.h>
 #include <almemoryfastaccess.h>
+using namespace AL;
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <time.h>
+using namespace std;
 
-#include "NAOPlatform.h"
+ofstream debug;
 
-class NAOPlatform : public AL::ALModule
+class NUNAO : public ALModule
 {
 public:
-    NAOPlatform(AL::ALPtr<AL::ALBroker> pBroker, const std::string& pName): ALModule(pBroker, pName)
+    NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
     {
-        setModuleDescription("A module that provides basic access to the NAOs sensors and actuators.");
-        std::ofstream thelog;
-        thelog.open("/var/log/jason.log");
-        thelog << "NAOPlatform.cpp: NAOPlatform::NAOPlatform" << endl;
+        debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
+        NUbot* nubot = new NUbot(0, NULL);
+        nubot->run();
+        delete nubot;
     }
 
-    virtual ~NAOPlatform()
+    virtual ~NUNAO()
     {
     }
     
-    void dataChanged(const std::string& pDataName, const ALValue& pValue, const std::string& pMessage)
+    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage)
     {
     }
+    
     bool innerTest() 
     {
         return true;
     }
 }; 
 
-extern "C" int _createModule(AL::ALPtr<AL::ALBroker> pBroker)
+extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
-    AL::ALModule::createModule<NAO>(pBroker, "NAOPlatform");
-    cout << "NAO.cpp: _createModule" << endl;
+    debug.open("/var/log/debug.log");
+    debug << "NUNAO.cpp: _createModule" << endl;
+    ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
 }
 
