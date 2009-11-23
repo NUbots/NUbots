@@ -40,13 +40,13 @@
 class NUSensors
 {
 public:
-    NUSensors();                // TODO: this should be removed when I have an implementation
     virtual ~NUSensors();
     
-    virtual NUSensorsData* update();
+    NUSensorsData* update();
     NUSensorsData* getData();
     
 protected:
+    virtual void copyFromHardwareCommunications();
 private:
 protected:
     NUSensorsData data;

@@ -22,13 +22,6 @@
 #include "NUSensors.h"
 #include "Tools/debug.h"
 
-NUSensors::NUSensors()
-{
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::NUSensors" << endl;
-#endif
-}
-
 NUSensors::~NUSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -41,9 +34,7 @@ NUSensorsData* NUSensors::update()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::update()" << endl;
 #endif
-    // Actually update the sensor values stored in this class here. This function should only be called when there is new sensor data.
-    
-    // Then just return the new data
+    copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     return getData();
 }
 
@@ -54,4 +45,13 @@ NUSensorsData* NUSensors::getData()
 #endif
     return &data;
 }
+
+void NUSensors::copyFromHardwareCommunications()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::copyFromHardwareCommunications()" << endl;
+#endif
+}
+
+
 
