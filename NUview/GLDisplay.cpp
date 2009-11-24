@@ -1,8 +1,9 @@
 #include "gl/GLee.h"
 #include "GLDisplay.h"
+#include "openglmanager.h"
 
-GLDisplay::GLDisplay(QWidget *parent, const QGLWidget * shareWidget):
-        QGLWidget(parent,shareWidget), imageWidth(80), imageHeight(60)
+GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
+        QGLWidget(parent,(QGLWidget*)shareWidget), imageWidth(80), imageHeight(60)
 {
     for(int id = 0; id < numDisplays; id++)
     {
@@ -14,6 +15,12 @@ GLDisplay::GLDisplay(QWidget *parent, const QGLWidget * shareWidget):
     }
     setPrimaryDisplay(unknown);
     setMouseTracking(true);
+
+    // Setup connections.
+    connect(shareWidget,SIGNAL(updatedDisplay(int,GLuint,int,int)),this, SLOT(updatedDisplay(int, GLuint, int, int)));
+    connect(this, SIGNAL(selectPixel(int,int)), parent ,SLOT(SelectColourAtPixel(int,int)));
+    connect(this, SIGNAL(rightSelectPixel(int,int)), parent,SLOT(ClassifySelectedColour()));
+    connect(this, SIGNAL(ctrlSelectPixel(int,int)), parent,SLOT(SelectAndClassifySelectedPixel(int,int)));
     return;
 }
 

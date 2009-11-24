@@ -38,35 +38,18 @@ MainWindow::MainWindow(QWidget *parent)
     imageDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(imageDisplay);
 
-    // COnnect the virtual robot to the opengl manager.
+    // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(yuvImageChanged(NUimage*)),&glManager, SLOT(newRawImage(NUimage*)));
     connect(&virtualRobot,SIGNAL(classifiedImageChanged(ClassifiedImage*)),&glManager,SLOT(newClassifiedImage(ClassifiedImage*)));
     connect(&virtualRobot,SIGNAL(horizonChanged(Horizon*)),&glManager,SLOT(newHorizon(Horizon*)));
     connect(&virtualRobot,SIGNAL(classificationSelectionChanged(ClassifiedImage*)),&glManager,SLOT(newClassificationSelection(ClassifiedImage*)));
 
-
-    // Connections from manager to opengl displays.
-    connect(&glManager,SIGNAL(updatedDisplay(int,GLuint,int,int)),miscDisplay, SLOT(updatedDisplay(int, GLuint, int, int)));
-    connect(&glManager,SIGNAL(updatedDisplay(int,GLuint,int,int)),horizonDisplay, SLOT(updatedDisplay(int,GLuint, int, int)));
-    connect(&glManager,SIGNAL(updatedDisplay(int,GLuint,int,int)),classDisplay, SLOT(updatedDisplay(int, GLuint, int, int)));
-    connect(&glManager,SIGNAL(updatedDisplay(int,GLuint,int,int)),imageDisplay, SLOT(updatedDisplay(int, GLuint, int, int)));
-
-    connect(imageDisplay, SIGNAL(selectPixel(int,int)), this ,SLOT(SelectColourAtPixel(int,int)));
-    connect(imageDisplay, SIGNAL(rightSelectPixel(int,int)), this,SLOT(ClassifySelectedColour()));
-    connect(imageDisplay, SIGNAL(ctrlSelectPixel(int,int)), this,SLOT(SelectAndClassifySelectedPixel(int,int)));
-
-    connect(classDisplay, SIGNAL(selectPixel(int,int)), this ,SLOT(SelectColourAtPixel(int,int)));
-    connect(classDisplay, SIGNAL(rightSelectPixel(int,int)), this,SLOT(ClassifySelectedColour()));
-    connect(classDisplay, SIGNAL(ctrlSelectPixel(int,int)), this,SLOT(SelectAndClassifySelectedPixel(int,int)));
-
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
-
     connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
     connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
-
 
     mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
@@ -90,11 +73,27 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete imageDisplay;
+
+// Delete widgets and displays
+    delete statusBar;
+    delete miscDisplay;
+    delete horizonDisplay;
     delete classDisplay;
+    delete imageDisplay;
     delete classification;
     delete connection;
     delete mdiArea;
+
+// Delete Actions
+    delete openAction;
+    delete exitAction;
+    delete firstFrameAction;
+    delete previousFrameAction;
+    delete selectFrameAction;
+    delete nextFrameAction;
+    delete lastFrameAction;
+    delete cascadeAction;
+    delete tileAction;
     return;
 }
 
