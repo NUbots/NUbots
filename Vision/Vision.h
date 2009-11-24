@@ -1,0 +1,46 @@
+/*!
+  @file Vision.h
+  @brief Declaration of NUbots Vision class.
+*/
+
+#ifndef VISION_H
+#define VISION_H
+
+#include <vector>
+#include "Tools/Math/Vector2.h"
+#include "Kinematics/Horizon.h"
+#include "Tools/Image/ClassifiedImage.h"
+
+class NUimage;
+
+//! Contains vision processing tools and functions.
+class Vision
+{
+    public:
+    //! Default constructor.
+    Vision();
+    //! Destructor.
+    ~Vision();
+    /*!
+      @brief Produce a classified.
+
+      Primarily used for display when debugging and constructing a lookup table.
+      @param targetImage The target classification image that will be written to.
+      @param sourceImage The raw image to be classified.
+      @param lookUpTable The colour classification lookup table. This table maps colours
+      from the raw source image into the classified colour space.
+      */
+    void classifyImage(ClassifiedImage &targetImage, const NUimage* sourceImage, const unsigned char *lookUpTable);
+    /*!
+      @brief Classifies an individual pixel.
+      @param x The x coordinate of the pixel to be classified.
+      @param y The y coordinate of the pixel to be classified.
+      @return Returns the classfied colour index for the given pixel.
+      */
+    inline unsigned char classifyPixel(int x, int y);
+    private:    
+    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
+
+};
+#endif // VISION_H
