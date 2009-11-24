@@ -49,58 +49,88 @@ NUSystem::~NUSystem()
 {
 }
 
-/*! @brief Returns the time in seconds since the epoch (ie. The UNIX timestamp)
+/*! @brief Returns a timestamp in milliseconds since the epoch (ie. The UNIX timestamp)
  
     This function can be slow on some platforms. Only use this if you need the best precision time
-    the platform supports. Typically, the precision will be better than 1ms.
+    the platform supports. Typically, the precision will be in the nanosecond range.
+ 
+    In simulators, the timestamp will be fudged so that the timestamp returned will be the unix
+    timestamp at the start of the simulation + the *simulated* time
  */
-double NUSystem::getPosixTimeStamp()
+long double NUSystem::getPosixTimeStamp()
 {
-    static double timeinseconds;
+    static long double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
-    static struct timespec timenow;
+    static struct timespec timenow, timeafter;
     clock_gettime(CLOCK_REALTIME_FAST, &timenow);
-    timeinseconds = timenow.tv_nsec/1e9 + timenow.tv_sec;
+    timeinmilliseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
 #else
-    static ptime ptimenow;
-    timeinseconds = (microsec_clock::universal_time() - from_time_t(0)).total_nanoseconds()/1e9;
+    static ptime ptimenow, ptimeafter;
+    timeinmilliseconds = (microsec_clock::universal_time() - from_time_t(0)).total_nanoseconds()/1e6;
 #endif
-    return timeinseconds;
+    return timeinmilliseconds;
 }
 
-/*! @brief Returns the real time in milliseconds since the start of the program.
+/*! @brief Returns the time in milliseconds since the start of the program
+ 
+    This function is simulator safe, in that if you pause the simulator the time returned by this
+    function will not increase.
  */
 double NUSystem::getTime()
 {
-    static double timeinseconds;
+    return getRealTime();       // the default implementation is to just return the actual time
+}
+
+/*! @brief Returns the time in milliseconds since the start of the program
+ 
+ This function is simulator safe, in that if you pause the simulator the time returned by this
+ function will not increase.
+ 
+ This function will be faster than getTime() on some platforms. Use this function if you don't need
+ accuracy better than +/- 10ms.
+ */
+double NUSystem::getTimeFast()
+{
+    return getRealTimeFast();       // the default implementation is to just return the actual time
+}
+
+/*! @brief Returns the real time in milliseconds since the start of the program.
+ 
+    This always returns the real time. If you pause time (in a simulator) this clock keeps running
+ */
+double NUSystem::getRealTime()
+{
+    static double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     static struct timespec timenow;
     clock_gettime(CLOCK_REALTIME, &timenow);
-    timeinseconds = (timenow.tv_nsec - m_gettime_starttime.tv_nsec)/1e6 + (timenow.tv_sec - m_gettime_starttime.tv_sec)*1e3;
+    timeinmilliseconds = (timenow.tv_nsec - m_gettime_starttime.tv_nsec)/1e6 + (timenow.tv_sec - m_gettime_starttime.tv_sec)*1e3;
 #else
     static ptime timenow;
     timenow = microsec_clock::local_time();
-    timeinseconds = (timenow - m_microsec_starttime).total_nanoseconds()/1e6;
+    timeinmilliseconds = (timenow - m_microsec_starttime).total_nanoseconds()/1e6;
 #endif
-    return timeinseconds;
+    return timeinmilliseconds;
 }
 
 /*! @brief Returns the real time in milliseconds since the start of the program.
  
     This function will be faster than getTime() on some platforms. Use this function if you don't need
     accuracy better than +/- 10ms.
+ 
+    This always returns the real time. If you pause time (in a simulator) this clock keeps running
  */
-double NUSystem::getTimeFast()
+double NUSystem::getRealTimeFast()
 {
-    static double timeinseconds;
+    static double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     static struct timespec timenow;
     clock_gettime(CLOCK_REALTIME_FAST, &timenow);
-    timeinseconds = (timenow.tv_nsec - m_gettimefast_starttime.tv_nsec)/1e6 + (timenow.tv_sec - m_gettimefast_starttime.tv_sec)*1e3;
+    timeinmilliseconds = (timenow.tv_nsec - m_gettimefast_starttime.tv_nsec)/1e6 + (timenow.tv_sec - m_gettimefast_starttime.tv_sec)*1e3;
 #else
-    timeinseconds = getTime();
+    timeinmilliseconds = getRealTime();
 #endif
-    return timeinseconds;
+    return timeinmilliseconds;
 }
 
 /*! @brief Returns the the time in milliseconds spent in this process since some arbitary point in the past. 
@@ -113,15 +143,15 @@ double NUSystem::getTimeFast()
  */
 double NUSystem::getProcessTime()
 {
-    static double timeinseconds;
+    static double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     static struct timespec timenow;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &timenow);
-    timeinseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
+    timeinmilliseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
 #else
-    timeinseconds = 1e3*clock()/float(CLOCKS_PER_SEC);
+    timeinmilliseconds = 1e3*clock()/float(CLOCKS_PER_SEC);
 #endif
-    return timeinseconds;
+    return timeinmilliseconds;
 }
 
 /*! @brief Returns the the time in milliseconds spent in this thread since the program started.  
@@ -134,15 +164,15 @@ double NUSystem::getProcessTime()
  */
 double NUSystem::getThreadTime()
 {
-    static double timeinseconds;
+    static double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     static struct timespec timenow;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &timenow);
-    timeinseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
+    timeinmilliseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
 #else
-    timeinseconds = 1e3*clock()/float(CLOCKS_PER_SEC);
+    timeinmilliseconds = 1e3*clock()/float(CLOCKS_PER_SEC);
 #endif
-    return timeinseconds;
+    return timeinmilliseconds;
 }
 
 

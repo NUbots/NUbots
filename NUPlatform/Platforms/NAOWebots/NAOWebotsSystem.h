@@ -35,6 +35,13 @@ class NAOWebotsSystem : public NUSystem
 public:
     NAOWebotsSystem(NAOWebotsPlatform* platform);
     ~NAOWebotsSystem();
+    
+    virtual long double getPosixTimeStamp();
+    virtual double getTime();
+    virtual double getTimeFast(); 
+private:
+    NAOWebotsPlatform* m_platform;                      //!< In webots we need a pointer to the Robot so we can access the API
+    long double m_simulator_start_timestamp;            //!< The unix timestamp in milliseconds when the simulation was started
 };
 
 #endif

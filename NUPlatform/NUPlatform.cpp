@@ -40,4 +40,3 @@ void NUPlatform::getNumber(int& number)
 {
     number = m_number;
 }
-

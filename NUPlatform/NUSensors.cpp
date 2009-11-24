@@ -22,11 +22,21 @@
 #include "NUSensors.h"
 #include "Tools/debug.h"
 
+
+NUSensors::NUSensors()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::NUSensors" << endl;
+#endif
+    m_data = new NUSensorsData();
+}
+
 NUSensors::~NUSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::~NUSensors" << endl;
 #endif
+    delete m_data;
 }
 
 NUSensorsData* NUSensors::update()
@@ -43,7 +53,7 @@ NUSensorsData* NUSensors::getData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::getData()" << endl;
 #endif
-    return &data;
+    return m_data;
 }
 
 void NUSensors::copyFromHardwareCommunications()

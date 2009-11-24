@@ -24,12 +24,15 @@ using namespace std;
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
+#include "Tools/debug.h"
 
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
 {
-    cout << "NUMotion::NUMotion" << endl;
+#if DEBUG_NUMOTION_VERBOSITY > 4
+    debug << "NUMotion::NUMotion" << endl;
+#endif
 }
 
 /*! @brief Destructor for motion module
@@ -50,6 +53,8 @@ ActuatorCommands* NUMotion::process(BodyData* data)
  */
 void NUMotion::process(JobList jobs)
 {
-    cout << "NUMotion::process():" << endl;
+#if DEBUG_NUMOTION_VERBOSITY > 4
+    debug << "NUMotion::process():" << endl;
+#endif
 }
 

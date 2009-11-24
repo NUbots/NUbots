@@ -20,17 +20,43 @@
  */
 
 #include "NAOWebotsSystem.h"
-
-#include <iostream>
-using namespace std;
+#include "Tools/debug.h"
 
 NAOWebotsSystem::NAOWebotsSystem(NAOWebotsPlatform* platform)
 {
-    cout << "NAOWebotsSystem::NAOWebotsSystem()" << endl;
+    debug << "NAOWebotsSystem::NAOWebotsSystem()" << endl;
+    m_platform = platform;
+    m_simulator_start_timestamp = getRealTime();
 }
 
 NAOWebotsSystem::~NAOWebotsSystem()
 {
+}
+
+/*! @brief  Returns a timestamp in milliseconds since the epoch (ie. The UNIX timestamp)
+            adjusted so that the clock pauses when the simulator does.
+ */
+long double NAOWebotsSystem::getPosixTimeStamp()
+{
+    return m_simulator_start_timestamp + m_platform->getTime();
+}
+
+/*! @brief Returns the time in milliseconds since the start of the program adjusted so
+           that when the simulator is paused or sped up the clock is also paused or sped up.
+ */
+double NAOWebotsSystem::getTime()
+{
+    return m_platform->getTime();
+}
+
+/*! @brief  Returns the time in milliseconds since the start of the program adjusted so
+            that when the simulator is paused or sped up the clock is also paused or sped up.
+ 
+    This function compromises a little accuracy for a faster system call if the platform supports it
+ */
+double NAOWebotsSystem::getTimeFast()
+{
+    return getTime();
 }
 
 

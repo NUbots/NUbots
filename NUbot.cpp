@@ -239,8 +239,14 @@ void NUbot::run()
 {
     // do something smart here!??!
     int count = 0;
+#ifdef TARGET_IS_NAOWEBOTS
+    NAOWebotsPlatform* webots = (NAOWebotsPlatform*) platform;
+#endif
     while (true)
     {
+#ifdef TARGET_IS_NAOWEBOTS
+        webots->step(40);
+#endif
         signalMotion();
         if (count%2 == 0)
             signalVision();
@@ -326,7 +332,7 @@ void* runThreadMotion(void* arg)
 {
     debug << "NUbot::runThreadMotion: Starting." << endl;
     
-    NUbot* nubot = (NUbot*) arg;                // the nubot
+    NUbot* nubot = (NUbot*) arg;                
     
     NUSensorsData* data;
     
@@ -339,15 +345,17 @@ void* runThreadMotion(void* arg)
     int err;
     do 
     {
-#ifdef THREAD_MOTION_MONITOR_TIME
-        entrytime = NUSystem::getTime();
+#if defined THREAD_MOTION_MONITOR_TIME and !defined TARGET_IS_NAOWEBOTS
+        entrytime = NUSystem::getRealTime();
 #endif
         err = nubot->waitForNewMotionData();
 
 #ifdef THREAD_MOTION_MONITOR_TIME
-        realstarttime = NUSystem::getTime();
+    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
+        realstarttime = NUSystem::getRealTime();
         if (realstarttime - entrytime > 25)
             debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
+    #endif
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
 #endif
@@ -357,7 +365,7 @@ void* runThreadMotion(void* arg)
         //        nubot->platform->actionators->process(cmds)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_MOTION_MONITOR_TIME
-        realendtime = NUSystem::getTime();
+        realendtime = NUSystem::getRealTime();
         processendtime = NUSystem::getProcessTime();
         threadendtime = NUSystem::getThreadTime();
         if (threadendtime - threadstarttime > 3)
@@ -394,16 +402,17 @@ void* runThreadVision(void* arg)
     int err;
     do 
     {
-#ifdef THREAD_VISION_MONITOR_TIME
-        entrytime = NUSystem::getTime();
+#if defined THREAD_VISION_MONITOR_TIME && !defined TARGET_IS_NAOWEBOTS
+        entrytime = NUSystem::getRealTimeFast();
 #endif
         err = nubot->waitForNewVisionData();
         
 #ifdef THREAD_VISION_MONITOR_TIME
-        realstarttime = NUSystem::getTime();
+    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
+        realstarttime = NUSystem::getRealTimeFast();
         if (realstarttime - entrytime > 1000/15.0 + 5)
             debug << "NUbot::runThreadVision. Waittime " << realstarttime - entrytime << " ms."<< endl;
-        
+    #endif
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
 #endif
@@ -425,7 +434,7 @@ void* runThreadVision(void* arg)
         joblist.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
-        realendtime = NUSystem::getTime();
+        realendtime = NUSystem::getRealTimeFast();
         processendtime = NUSystem::getProcessTime();
         threadendtime = NUSystem::getThreadTime();
         if (threadendtime - threadstarttime > 10)
