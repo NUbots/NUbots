@@ -35,11 +35,13 @@ class NUSystem
 public:
     NUSystem();
     virtual ~NUSystem();
-    // System time functions
-    static double getPosixTimeStamp();
-    static double getTime();
-    static double getTimeFast();
-    static double getProcessTime();
+    virtual long double getPosixTimeStamp();
+    virtual double getTime();
+    virtual double getTimeFast();           
+    
+    static double getRealTime();       
+    static double getRealTimeFast();
+    static double getProcessTime();    
     static double getThreadTime();
 private:
     // System time members
