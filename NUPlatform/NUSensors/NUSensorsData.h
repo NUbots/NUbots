@@ -44,27 +44,30 @@ private:
 public:
     // Proprioception Sensors:
     sensor_t* JointPositions;
-    /*sensor_t* JointVelocities;
+    sensor_t* JointVelocities;
     sensor_t* JointAccelerations;
     sensor_t* JointTargets;
     sensor_t* JointStiffnesses;
     sensor_t* JointCurrents;
+    sensor_t* JointTorques;
     sensor_t* JointTemperatures;
     
     // Balance Sensors:
     sensor_t* BalanceValues;
     
-    // Touch Sensors:
-    sensor_t* TouchValues;
+    // Distance Sensors:
+    sensor_t* DistanceValues;
     
     // Foot Pressure Sensors:
-    sensor_t* FootValues;
+    sensor_t* FootSoleValues;
+    sensor_t* FootBumperValues;
+    
+    // Buttons Sensors:
+    sensor_t* ButtonValues;
     
     // Battery Sensors:
     sensor_t* BatteryValues;
     
-    // Distance Sensors:
-    sensor_t* DistanceValues;*/
 private:
     vector<sensor_t*> data;
 };

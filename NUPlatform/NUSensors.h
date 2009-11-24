@@ -40,6 +40,7 @@
 class NUSensors
 {
 public:
+    NUSensors();
     virtual ~NUSensors();
     
     NUSensorsData* update();
@@ -49,7 +50,7 @@ protected:
     virtual void copyFromHardwareCommunications();
 private:
 protected:
-    NUSensorsData data;
+    NUSensorsData* m_data;
 private:
 };
 

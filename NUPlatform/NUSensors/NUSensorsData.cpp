@@ -30,7 +30,31 @@ NUSensorsData::NUSensorsData()
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
     
-    // lets try and fill in the joints first
+    // create the sensor_t's
+    JointPositions = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointVelocities = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointAccelerations = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointTargets = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointStiffnesses = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointCurrents = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointTorques = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointTemperatures = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    
+    // Balance Sensors:
+    BalanceValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    
+    // Distance Sensors:
+    DistanceValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    
+    // Foot Pressure Sensors:
+    FootSoleValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    FootBumperValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    
+    // Buttons Sensors:
+    ButtonValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    
+    // Battery Sensors:
+    BatteryValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
     
 }
 

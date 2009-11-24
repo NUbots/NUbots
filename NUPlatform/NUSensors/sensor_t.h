@@ -33,6 +33,19 @@ using namespace std;
 enum sensor_id_t 
 {
     JOINT_POSITIONS,
+    JOINT_VELOCITIES,
+    JOINT_ACCELERATIONS,
+    JOINT_TARGETS,
+    JOINT_STIFFNESSES,
+    JOINT_CURRENTS,
+    JOINT_TORQUES,
+    JOINT_TEMPERATURES,
+    BALANCE_VALUES,
+    DISTANCE_VALUES,
+    FOOT_SOLE_VALUES,
+    FOOT_BUMPER_VALUES,
+    BUTTON_VALUES,
+    BATTERY_VALUES,
     UNDEFINED
 };
 
@@ -56,6 +69,17 @@ public:
         IsCalculated = false;
         TimeStamp = 0;
     };
+    void setData(long double time, vector<float> newdata, bool iscalculated = false)
+    {
+        TimeStamp = time;
+        Data = newdata;
+        IsValid = true;
+        IsCalculated = iscalculated;
+    };
+    void setStdDev(vector<float> newstddev)
+    {
+        StdDev = newstddev;
+    }
 public:
     string Name;                //!< the sensor's name
     sensor_id_t SensorID;       //!< the sensor's id
