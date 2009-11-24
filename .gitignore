@@ -23,6 +23,11 @@
 targetconfig.h
 /Tools/debug.h
 
+# External files from archives
+/NUview/gl/*
+/NUview/diagona/*
+/Tools/zlib/*
+
 # ignore Qt builds
 /NUview/debug/*
 /NUview/release/*
