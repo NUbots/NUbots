@@ -22,3 +22,11 @@
 
 targetconfig.h
 /Tools/debug.h
+
+# ignore Qt builds
+/NUview/debug/*
+/NUview/release/*
+*.Debug
+*.Release
+/NUview/Makefile
+/NUview/NUview.pro.user

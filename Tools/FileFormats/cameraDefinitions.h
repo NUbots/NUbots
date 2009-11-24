@@ -1,0 +1,24 @@
+#ifndef CAMERA_DEFINITIONS_H_DEFINED
+#define CAMERA_DEFINITIONS_H_DEFINED
+
+enum NaoCamera{
+  CAMERA_TOP = 0,
+  CAMERA_BOTTOM = 1,
+  NUM_CAMERAS = 2
+};
+
+enum CameraRecordingMode {
+    RECORDING_MODE_OFF,
+    RECORDING_MODE_INITIAL_POSITION,
+    RECORDING_MODE_LOCALISATION_PAN,
+    RECORDING_MODE_SEARCH_PAN,
+    RECORDING_MODE_PLAYING
+};
+
+inline NaoCamera getCameraFromID(int ID)
+{
+  if(ID == CAMERA_BOTTOM) return CAMERA_BOTTOM;
+  else return CAMERA_TOP;
+}
+
+#endif
