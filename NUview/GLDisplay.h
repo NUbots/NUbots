@@ -12,6 +12,8 @@
 #include <QMouseEvent>
 #include <QColor>
 
+class OpenglManager;
+
 /*!
   @brief Widget used to display images related to images captured by the robots camera,
   as well as subsequent vision processing done on this image.
@@ -26,7 +28,7 @@ public:
       @param shareWidget Another 'QGLWidget' with which this one will share textures and
       drawing lists.
       */
-    GLDisplay(QWidget *parent = 0,const QGLWidget * shareWidget = 0);
+    GLDisplay(QWidget *parent = 0,const OpenglManager * shareWidget = 0);
     /*!
       @brief Destructor.
       */
