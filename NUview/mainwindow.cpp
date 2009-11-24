@@ -73,11 +73,27 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete imageDisplay;
+
+// Delete widgets and displays
+    delete statusBar;
+    delete miscDisplay;
+    delete horizonDisplay;
     delete classDisplay;
+    delete imageDisplay;
     delete classification;
     delete connection;
     delete mdiArea;
+
+// Delete Actions
+    delete openAction;
+    delete exitAction;
+    delete firstFrameAction;
+    delete previousFrameAction;
+    delete selectFrameAction;
+    delete nextFrameAction;
+    delete lastFrameAction;
+    delete cascadeAction;
+    delete tileAction;
     return;
 }
 
