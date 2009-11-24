@@ -16,3 +16,4 @@ del zlib-1.2.3.tar
 RMDIR /s /Q zlib-1.2.3
 
 ECHO All file extracted. Enjoy!
+PAUSE
