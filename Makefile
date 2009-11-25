@@ -208,14 +208,14 @@ NUView:
 	@echo "Building NUView"
 # the first thing we need to do is check whether we have unzipped the external libraries
 # I am not entirely sure this is a good idea. Especially for zlib, because OS-X and Linux will have this installed already!
-	@if [ -d $(CUR_DIR)/NUView/gl ]; then \
+	@if [ -d $(CUR_DIR)/NUview/gl ]; then \
 		set -e; \
 	else \
 		echo "Cute, this must be your first time."; \
-		mkdir -p $(CUR_DIR)/NUView/gl; \
-		cd $(CUR_DIR)/NUView/gl; \
+		mkdir -p $(CUR_DIR)/NUview/gl; \
+		cd $(CUR_DIR)/NUview/gl; \
 		tar -xf $(EXT_SOURCE_DIR)/GLee-5.4.0-src.tar.gz; \
-		mkdir -p $(CUR_DIR)/NUView/diagona; \
+		mkdir -p $(CUR_DIR)/NUview/diagona; \
 		cd $(CUR_DIR)/NUView/diagona; \
 		tar -xf $(EXT_SOURCE_DIR)/diagona.zip; \
 		mkdir -p $(CUR_DIR)/Tools; \
@@ -223,9 +223,11 @@ NUView:
 		tar -xf $(EXT_SOURCE_DIR)/zlib-1.2.3.tar.gz; \
 		mv zlib-1.2.3 zlib; \
 	fi
-	cd $(CUR_DIR)/NUView;
-	@qmake
-	@make 
+# now qmake and then make the NUview project
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		qmake -spec macx-g++; \
+		make all; \
 	
 NUViewConfig:
 	@echo "Configuring NUView Build"
