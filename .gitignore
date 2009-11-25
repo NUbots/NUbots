@@ -36,5 +36,6 @@ targetconfig.h
 *.Release
 /NUview/Makefile
 /NUview/NUview.pro.user
-/NUview/NUview.app
+/NUview/NU*.app
 /NUview/moc_*
+/NUview/autosave.lut
