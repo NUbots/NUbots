@@ -234,12 +234,18 @@ NUViewConfig:
 	
 NUViewClean:
 	@echo "Cleaning NUView Build"
-	@cd NUView
-	@make clean
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		make clean; \
+		rm -rf NUview.app; \
 	
 NUViewVeryClean:
 	@echo "Hosing NUView Build"
-	@make clean
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		make clean; \
+		rm -rf NUview.app; \
+		rm -f Makefile; \
 
 ########################################
 
