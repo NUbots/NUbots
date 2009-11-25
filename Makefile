@@ -216,7 +216,7 @@ NUView:
 		cd $(CUR_DIR)/NUview/gl; \
 		tar -xf $(EXT_SOURCE_DIR)/GLee-5.4.0-src.tar.gz; \
 		mkdir -p $(CUR_DIR)/NUview/diagona; \
-		cd $(CUR_DIR)/NUView/diagona; \
+		cd $(CUR_DIR)/NUview/diagona; \
 		tar -xf $(EXT_SOURCE_DIR)/diagona.zip; \
 		mkdir -p $(CUR_DIR)/Tools; \
 		cd $(CUR_DIR)/Tools; \
