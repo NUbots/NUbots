@@ -22,6 +22,8 @@
 #include "NUSensorsData.h"
 #include "Tools/debug.h"
 
+#include <fstream>
+
 /*!
  */
 NUSensorsData::NUSensorsData()
@@ -32,30 +34,29 @@ NUSensorsData::NUSensorsData()
     
     // create the sensor_t's
     JointPositions = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointVelocities = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointAccelerations = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointTargets = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointStiffnesses = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointCurrents = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointTorques = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointTemperatures = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    JointVelocities = new sensor_t(string("JointVelocities"), JOINT_VELOCITIES);
+    JointAccelerations = new sensor_t(string("JointAccelerations"), JOINT_ACCELERATIONS);
+    JointTargets = new sensor_t(string("JointTargets"), JOINT_TARGETS);
+    JointStiffnesses = new sensor_t(string("JointStiffnesses"), JOINT_STIFFNESSES);
+    JointCurrents = new sensor_t(string("JointCurrents"), JOINT_CURRENTS);
+    JointTorques = new sensor_t(string("JointTorques"), JOINT_TORQUES);
+    JointTemperatures = new sensor_t(string("JointTemperatures"), JOINT_TEMPERATURES);
     
     // Balance Sensors:
-    BalanceValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    BalanceValues = new sensor_t(string("BalanceValues"), BALANCE_VALUES);
     
     // Distance Sensors:
-    DistanceValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    DistanceValues = new sensor_t(string("DistanceValues"), DISTANCE_VALUES);
     
     // Foot Pressure Sensors:
-    FootSoleValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    FootBumperValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    FootSoleValues = new sensor_t(string("FootSoleValues"), FOOT_SOLE_VALUES);
+    FootBumperValues = new sensor_t(string("FootBumperValues"), FOOT_BUMPER_VALUES);
     
     // Buttons Sensors:
-    ButtonValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
+    ButtonValues = new sensor_t(string("ButtonValues"), BUTTON_VALUES);
     
     // Battery Sensors:
-    BatteryValues = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    
+    BatteryValues = new sensor_t(string("BatteryValues"), BATTERY_VALUES);
 }
 
 NUSensorsData::~NUSensorsData()
