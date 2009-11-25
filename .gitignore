@@ -17,8 +17,9 @@
 #we don't want to include .pyc files
 *.pyc
 
-# Linux Ignore
+# Common Ignores
 *.*~
+*.o
 
 targetconfig.h
 /Tools/debug.h
@@ -35,3 +36,5 @@ targetconfig.h
 *.Release
 /NUview/Makefile
 /NUview/NUview.pro.user
+/NUview/NUview.app
+/NUview/moc_*
