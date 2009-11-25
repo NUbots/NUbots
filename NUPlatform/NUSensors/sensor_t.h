@@ -5,6 +5,9 @@
     @class sensor_t
     @brief A single set of sensors class to store sensor data in a platform independent way
  
+    A sensor_t is a container for a set of similar sensors that share a common timestamp.
+    For example, all of the JoinPositions are encapsulated in a single sensor_t.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -30,6 +33,10 @@
 #include <string>
 using namespace std;
 
+/*! @brief A enum type to perform run time sensor type checking without using string
+           string compares. Unfortunately, to add a new sensor you need to add an
+           id to this list.
+ */
 enum sensor_id_t 
 {
     JOINT_POSITIONS,
@@ -53,33 +60,15 @@ enum sensor_id_t
 class sensor_t 
 {
 public:
-    sensor_t()
-    {
-        Name = string("Undefined");
-        SensorID = UNDEFINED;
-        IsValid = false;
-        IsCalculated = false;
-        TimeStamp = 0;
-    };
-    sensor_t(string sensorname, sensor_id_t sensorid)
-    {
-        Name = sensorname; 
-        SensorID = sensorid;
-        IsValid = false;
-        IsCalculated = false;
-        TimeStamp = 0;
-    };
-    void setData(long double time, vector<float> newdata, bool iscalculated = false)
-    {
-        TimeStamp = time;
-        Data = newdata;
-        IsValid = true;
-        IsCalculated = iscalculated;
-    };
-    void setStdDev(vector<float> newstddev)
-    {
-        StdDev = newstddev;
-    }
+    sensor_t();
+    sensor_t(string sensorname, sensor_id_t sensorid);
+    void setData(long double time, vector<float> newdata, bool iscalculated = false);
+    void setStdDev(vector<float> newstddev);
+    
+    void view(ostream& output);
+    
+    friend ostream& operator<< (ostream& output, const sensor_t& p_sensor);
+    friend istream& operator>> (istream& input, sensor_t& p_sensor);
 public:
     string Name;                //!< the sensor's name
     sensor_id_t SensorID;       //!< the sensor's id
