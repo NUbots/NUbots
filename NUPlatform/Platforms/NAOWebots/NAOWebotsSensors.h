@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 using namespace std;
 
 #include "webots/Robot.hpp"
@@ -66,6 +67,9 @@ private:
     static vector<string> m_foot_bumper_names;          //!< a vector of the foot bumper names
     vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
     GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
+    
+    ifstream templog;
+    NUSensorsData* m_temp_data;
 };
 
 #endif

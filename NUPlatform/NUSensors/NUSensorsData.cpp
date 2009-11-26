@@ -33,30 +33,37 @@ NUSensorsData::NUSensorsData()
 #endif
     
     // create the sensor_t's
-    JointPositions = new sensor_t(string("JointPositions"), JOINT_POSITIONS);
-    JointVelocities = new sensor_t(string("JointVelocities"), JOINT_VELOCITIES);
-    JointAccelerations = new sensor_t(string("JointAccelerations"), JOINT_ACCELERATIONS);
-    JointTargets = new sensor_t(string("JointTargets"), JOINT_TARGETS);
-    JointStiffnesses = new sensor_t(string("JointStiffnesses"), JOINT_STIFFNESSES);
-    JointCurrents = new sensor_t(string("JointCurrents"), JOINT_CURRENTS);
-    JointTorques = new sensor_t(string("JointTorques"), JOINT_TORQUES);
-    JointTemperatures = new sensor_t(string("JointTemperatures"), JOINT_TEMPERATURES);
+    addSensor(&JointPositions, string("JointPositions"), JOINT_POSITIONS);
+    addSensor(&JointVelocities, string("JointVelocities"), JOINT_VELOCITIES);
+    addSensor(&JointAccelerations, string("JointAccelerations"), JOINT_ACCELERATIONS);
+    addSensor(&JointTargets, string("JointTargets"), JOINT_TARGETS);
+    addSensor(&JointStiffnesses, string("JointStiffnesses"), JOINT_STIFFNESSES);
+    addSensor(&JointCurrents, string("JointCurrents"), JOINT_CURRENTS);
+    addSensor(&JointTorques, string("JointTorques"), JOINT_TORQUES);
+    addSensor(&JointTemperatures, string("JointTemperatures"), JOINT_TEMPERATURES);
     
     // Balance Sensors:
-    BalanceValues = new sensor_t(string("BalanceValues"), BALANCE_VALUES);
+    addSensor(&BalanceAccelerometer, string("BalanceAccelerometer"), BALANCE_ACCELEROMETER);
+    addSensor(&BalanceGyro, string("BalanceGyro"), BALANCE_GYRO);
     
     // Distance Sensors:
-    DistanceValues = new sensor_t(string("DistanceValues"), DISTANCE_VALUES);
+    addSensor(&DistanceValues, string("DistanceValues"), DISTANCE_VALUES);
     
     // Foot Pressure Sensors:
-    FootSoleValues = new sensor_t(string("FootSoleValues"), FOOT_SOLE_VALUES);
-    FootBumperValues = new sensor_t(string("FootBumperValues"), FOOT_BUMPER_VALUES);
+    addSensor(&FootSoleValues, string("FootSoleValues"), FOOT_SOLE_VALUES);
+    addSensor(&FootBumperValues, string("FootBumperValues"), FOOT_BUMPER_VALUES);
     
     // Buttons Sensors:
-    ButtonValues = new sensor_t(string("ButtonValues"), BUTTON_VALUES);
+    addSensor(&ButtonValues, string("ButtonValues"), BUTTON_VALUES);
     
     // Battery Sensors:
-    BatteryValues = new sensor_t(string("BatteryValues"), BATTERY_VALUES);
+    addSensor(&BatteryValues, string("BatteryValues"), BATTERY_VALUES);
+}
+
+void NUSensorsData::addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid)
+{
+    *p_sensor = new sensor_t(sensorname, sensorid);
+    m_sensors.push_back(*p_sensor);
 }
 
 NUSensorsData::~NUSensorsData()
@@ -64,6 +71,51 @@ NUSensorsData::~NUSensorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensorsData::~NUSensorsData" << endl;
 #endif
+}
+
+void NUSensorsData::summaryTo(ostream& output)
+{
+    debug << "NUSensorsData::summaryTo" << endl;
+    for (int i=0; i<m_sensors.size(); i++)
+        m_sensors[i]->summaryTo(output);
+}
+
+void NUSensorsData::csvTo(ostream& output)
+{
+    // TODO: implement this somewhere!
+}
+
+/*! Returns the number of sensors in the NUSensorsData
+ */
+int NUSensorsData::size() const
+{
+    return m_sensors.size();
+}
+
+ostream& operator<< (ostream& output, const NUSensorsData& p_data)
+{
+    output << string("NUSensorsData: ");
+    output << p_data.size() << " ";
+    for (int i=0; i<p_data.size(); i++)
+        output << *p_data.m_sensors[i];
+    return output;
+}
+
+istream& operator>> (istream& input, NUSensorsData& p_data)
+{
+    //string tempname;
+    int numsensors;
+    sensor_t sensor;
+    sensor_t* hmm;
+    //input >> tempname;
+    input >> numsensors;
+    for (int i=0; i<numsensors; i++)
+    {
+        input >> sensor;
+        hmm = new sensor_t(sensor);
+        p_data.m_sensors.push_back(hmm);
+    }
+    return input;
 }
 
 

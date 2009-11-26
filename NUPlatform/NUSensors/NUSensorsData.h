@@ -40,7 +40,15 @@ public:
     NUSensorsData();
     ~NUSensorsData();
     
+    void summaryTo(ostream& output);
+    void csvTo(ostream& output);
+    
+    friend ostream& operator<< (ostream& output, const NUSensorsData& p_sensor);
+    friend istream& operator>> (istream& input, NUSensorsData& p_sensor);
+    
+    int size() const;
 private:
+    void addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid);
 public:
     // Proprioception Sensors:
     sensor_t* JointPositions;
@@ -53,7 +61,8 @@ public:
     sensor_t* JointTemperatures;
     
     // Balance Sensors:
-    sensor_t* BalanceValues;
+    sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
+    sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
     
     // Distance Sensors:
     sensor_t* DistanceValues;
@@ -69,7 +78,7 @@ public:
     sensor_t* BatteryValues;
     
 private:
-    vector<sensor_t*> data;
+    vector<sensor_t*> m_sensors;
 };
 
 #endif

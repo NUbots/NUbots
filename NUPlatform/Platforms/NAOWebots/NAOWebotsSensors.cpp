@@ -49,6 +49,8 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  */
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
+    m_temp_data = new NUSensorsData();
+    templog.open("./temp.log");
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
 #endif
@@ -118,6 +120,9 @@ void NAOWebotsSensors::enableSensorsInWebots()
  */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
+    delete m_accelerometer;
+    delete m_gyro;
+    delete m_gps;
 }
 
 /*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.
@@ -127,10 +132,66 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
+    static double currenttime;
     static vector<float> positiondata(m_servos.size(), 0);
+    static vector<float> velocitydata(m_servos.size(), 0);
+    static vector<float> accelerationdata(m_servos.size(), 0);
+    static vector<float> targetdata(m_servos.size(), 0);
+    static vector<float> stiffnessdata(m_servos.size(), 0);
+    static vector<float> torquedata(m_servos.size(), 0);
+    
+    const unsigned char numdimensions = 3;
+    static vector<float> accelerometerdata(numdimensions, 0);
+    static vector<float> gyrodata(numdimensions, 0);
+    
+    static vector<float> distancedata(m_distance_sensors.size(), 0);
+    static vector<float> footsoledata(m_foot_sole_sensors.size(), 0);
+    static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
+    
+    currenttime = m_platform->system->getTime();
+    
+    // Copy joint positions
     for (int i=0; i<m_servos.size(); i++)
         positiondata[i] = m_servos[i]->getPosition();
-    m_data->JointPositions->setData(m_platform->system->getPosixTimeStamp(), positiondata);
+    m_data->JointPositions->setData(currenttime, positiondata);
+    
+    // Velocity and acceleration will need to be calculated
+    
+    // We will need to keep track of the controls ourselves for Target and stiffness.
+    
+    // Copy joint torques
+    for (int i=0; i<m_servos.size(); i++)
+        torquedata[i] = m_servos[i]->getMotorForceFeedback();
+    m_data->JointTorques->setData(currenttime, torquedata);
+    
+    // Copy accelerometer [x, y, z, gx, gy, gz]
+    static const double *buffer;
+    buffer = m_accelerometer->getValues();
+    for (int i=0; i<numdimensions; i++)
+        accelerometerdata[i] = buffer[i];
+    m_data->BalanceAccelerometer->setData(currenttime, accelerometerdata);
+    buffer = m_gyro->getValues();
+    for (int i=0; i<numdimensions; i++)
+        gyrodata[i] = buffer[i];
+    m_data->BalanceGyro->setData(currenttime, gyrodata);
+    
+    // Copy distance readings
+    for (int i=0; i<m_distance_sensors.size(); i++)
+        distancedata[i] = m_distance_sensors[i]->getValue();
+    m_data->DistanceValues->setData(currenttime, distancedata);
+    
+    // Copy foot sole readings
+    for (int i=0; i<m_foot_sole_sensors.size(); i++)
+        footsoledata[i] = m_foot_sole_sensors[i]->getValue();
+    m_data->FootSoleValues->setData(currenttime, footsoledata);
+    
+    // Copy foot bumper readings
+    for (int i=0; i<m_foot_bumper_sensors.size(); i++)
+        footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
+    m_data->FootBumperValues->setData(currenttime, footbumperdata);
+    
+    //templog >> *m_temp_data;
+    m_temp_data->summaryTo(debug);
 }
 
 
