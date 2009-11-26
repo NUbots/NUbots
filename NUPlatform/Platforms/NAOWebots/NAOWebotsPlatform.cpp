@@ -56,10 +56,10 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     int m_number = (port % 10) + 1;
     setNameFromNumber();
     
+    system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
     camera = new NAOWebotsCamera(this);
     sensors = new NAOWebotsSensors(this);
     actionators = new NAOWebotsActionators(this);
-    system = new NAOWebotsSystem(this);
 }
 
 NAOWebotsPlatform::~NAOWebotsPlatform()
