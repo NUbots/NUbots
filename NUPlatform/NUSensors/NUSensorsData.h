@@ -47,16 +47,6 @@ class NUSensorsData
 {
 public:
     static const int SENSOR_MISSING = -1;
-    enum bodypart_id_t
-    {
-        Head,
-        LeftArm,
-        RightArm,
-        Torso,
-        LeftLeg,
-        RightLeg,
-        All
-    };
     static joint_id_t HeadYaw;
     static joint_id_t HeadPitch;
     static joint_id_t LShoulderPitch;
@@ -79,6 +69,16 @@ public:
     static joint_id_t RKneePitch;
     static joint_id_t RAnklePitch;
     static joint_id_t RAnkleRoll;
+    enum bodypart_id_t
+    {
+        Head,
+        LeftArm,
+        RightArm,
+        Torso,
+        LeftLeg,
+        RightLeg,
+        All
+    };
 public:
     NUSensorsData();
     ~NUSensorsData();
@@ -100,6 +100,8 @@ public:
     bool getJointCurrents(bodypart_id_t bodypart, vector<float>& currents);
     bool getJointTorques(bodypart_id_t bodypart, vector<float>& torques);
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
+    
+    void setAvaliableJoints(const vector<string> joints);
     
     void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
     void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
@@ -165,6 +167,12 @@ public:
     
 private:
     vector<sensor_t*> m_sensors;
+    vector<joint_id_t> m_head_ids;
+    vector<joint_id_t> m_larm_ids;
+    vector<joint_id_t> m_rarm_ids;
+    vector<joint_id_t> m_torso_ids;
+    vector<joint_id_t> m_lleg_ids;
+    vector<joint_id_t> m_rleg_ids;
 };
 
 #endif

@@ -55,6 +55,7 @@ NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
     m_platform = platform;
     getSensorsFromWebots(platform);
     enableSensorsInWebots();
+    m_data->setAvaliableJoints(m_servo_names);
 }
 
 /* Gets pointers to each of the sensors in the simulated NAO

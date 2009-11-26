@@ -23,6 +23,7 @@
 #include "Tools/debug.h"
 
 #include <fstream>
+#include <cctype>       // for tolower()
 
 joint_id_t NUSensorsData::HeadYaw = NUSensorsData::SENSOR_MISSING;
 joint_id_t NUSensorsData::HeadPitch = NUSensorsData::SENSOR_MISSING;
@@ -297,6 +298,141 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, 
 /******************************************************************************************************************************************
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
+
+/*! @brief Sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
+    @param joints a vector of strings where each string is a name of a joint
+ */
+void NUSensorsData::setAvaliableJoints(const vector<string> joints)
+{
+    // first convert everything to lower case and remove whitespace and underscores
+    vector<string> simplejointnames;
+    string namebuffer, currentname, currentletter;
+    for (int i=0; i<joints.size(); i++)
+    {
+        currentname = joints[i];
+        // compare each letter to a space and an underscore
+        for (int j=0; j<currentname.size(); j++)
+        {
+            currentletter = currentname.substr(j, 1);
+            if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
+                namebuffer += tolower(currentletter[0]);            
+        }
+    }
+    
+    for (int i=0; i<joints.size(); i++) 
+    {
+        if (joints[i].compare("headyaw"))
+        {
+            HeadYaw = i;
+            m_head_ids.push_back(i);
+        }
+        else if (joints[i].compare("headpitch"))
+        {
+            HeadPitch = i;
+            m_head_ids.push_back(i);
+        }
+        else if (joints[i].compare("lshoulderpitch"))
+        {
+            LShoulderPitch = i;
+            m_larm_ids.push_back(i);
+        }
+        else if (joints[i].compare("lshoulderroll"))
+        {
+            LShoulderRoll = i;
+            m_larm_ids.push_back(i);
+        }
+        else if (joints[i].compare("lelbowyaw"))
+        {
+            LElbowYaw = i;
+            m_larm_ids.push_back(i);
+        }
+        else if (joints[i].compare("lelbowroll"))
+        {
+            LElbowRoll = i;
+            m_larm_ids.push_back(i);
+        }
+        else if (joints[i].compare("rshoulderpitch"))
+        {
+            RShoulderPitch = i;
+            m_rarm_ids.push_back(i);
+        }
+        else if (joints[i].compare("rshoulderroll"))
+        {
+            RShoulderRoll = i;
+            m_rarm_ids.push_back(i);
+        }
+        else if (joints[i].compare("relbowyaw"))
+        {
+            RElbowYaw = i;
+            m_rarm_ids.push_back(i);
+        }
+        else if (joints[i].compare("relbowroll"))
+        {
+            RElbowRoll = i;
+            m_rarm_ids.push_back(i);
+        }
+        else if (joints[i].compare("lhipyawpitch"))
+        {
+            LHipYawPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("lhippitch"))
+        {
+            LHipPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("lhiproll"))
+        {
+            LHipRoll = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("lkneepitch"))
+        {
+            LKneePitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("lanklepitch"))
+        {
+            LAnklePitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("lankleroll"))
+        {
+            LAnkleRoll = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("rhipyawpitch"))
+        {
+            RHipYawPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("rhippitch"))
+        {
+            RHipPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("rhiproll"))
+        {
+            RHipRoll = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("rkneepitch"))
+        {
+            RKneePitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("ranklepitch"))
+        {
+            RAnklePitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (joints[i].compare("rankleroll"))
+        {
+            RAnkleRoll = i;
+            m_lleg_ids.push_back(i);
+        }
+    }
+}
 
 /*! @brief Sets the joint positions to the given values
     @param time the time the data was collected in milliseconds
