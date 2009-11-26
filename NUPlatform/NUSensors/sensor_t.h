@@ -81,7 +81,7 @@ public:
     double Time;                //!< the sensor's time
     long double TimeStamp;      //!< the unix timestamp of the data
 private:
-    long double m_time_offset;       //!< a time offset so that unixtimestamp = timesincestart + offset
+    long double m_time_offset;  //!< a time offset so that unixtimestamp = timesincestart + offset
 };
 
 #endif

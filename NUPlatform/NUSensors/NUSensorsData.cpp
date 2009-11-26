@@ -73,15 +73,189 @@ NUSensorsData::~NUSensorsData()
 #endif
 }
 
+/******************************************************************************************************************************************
+                                                                                                                                Set Methods
+ ******************************************************************************************************************************************/
+
+/*! @brief Sets the joint positions to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint position values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointPositions(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointPositions, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint velocities to the given values
+     @param time the time the data was collected in milliseconds
+     @param data the new joint velocities values
+     @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointVelocities(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointVelocities, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint accelerations to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint accelerations values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointAccelerations(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointAccelerations, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint targets to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint targets values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointTargets(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointTargets, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint stiffnesses to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint stiffnesses values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointStiffnesses(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointStiffnesses, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint currents to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint currents values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointCurrents(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointCurrents, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint torques to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint torques values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointTorques(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointTorques, time, data, iscalculated);
+}
+
+/*! @brief Sets the joint temperature to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new joint temperature values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setJointTemperatures(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(JointTemperatures, time, data, iscalculated);
+}
+
+/*! @brief Sets the accelerometer to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new accelerometer values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(BalanceAccelerometer, time, data, iscalculated);
+}
+
+/*! @brief Sets the gyro to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the gyro values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(BalanceGyro, time, data, iscalculated);
+}
+
+/*! @brief Sets the distance values to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new distance values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setDistanceValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(DistanceValues, time, data, iscalculated);
+}
+
+/*! @brief Sets the foot sole values to the given values
+ @param time the time the data was collected in milliseconds
+ @param data the new foot sole values values
+ @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setFootSoleValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(FootSoleValues, time, data, iscalculated);
+}
+
+/*! @brief Sets the foot bumper to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new foot bumper values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setFootBumperValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(FootBumperValues, time, data, iscalculated);
+}
+
+/*! @brief Sets the button values to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new button values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setButtonValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(ButtonValues, time, data, iscalculated);
+}
+
+/*! @brief Sets the battery to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the battery values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setBatteryValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(BatteryValues, time, data, iscalculated);
+}
+
+/* @brief Sets the data of the given sensor to the given data
+   @param p_sensor a pointer to the sensor to be updated
+   @param time the time the data was collected
+   @param data the new data to be stored in p_sensor
+   @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated)
+{
+    p_sensor->setData(time, data, iscalculated);
+}
+
+/******************************************************************************************************************************************
+                                                                                                      Displaying Contents and Serialisation
+ ******************************************************************************************************************************************/
+
+/*! @brief Puts a user readable summary of the contents of the NUSensorsData class
+    @param output the stream in which to put the summary
+ */
 void NUSensorsData::summaryTo(ostream& output)
 {
     for (int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
 }
 
+/*! @todo Implement this function
+ */
 void NUSensorsData::csvTo(ostream& output)
 {
-    // TODO: implement this somewhere!
+    // TODO: implement this somewhere somehow!
 }
 
 /*! Returns the number of sensors in the NUSensorsData

@@ -5,6 +5,20 @@
     @class NUSensorsData
     @brief A sensor class to store sensor data in a platform independent way
  
+    I see a problem coming that I have known about for ages. How am I going to access the data? 
+    I need to know the order of the data. I also need to be able to handle requests for joints 
+    which aren't there, or are broken!
+    
+        
+        if (NUSensorsData::HeadYaw != NUSensorsData::Unavaliable && m_data->JointPositions->IsValid)
+            angle = m_data->JointPositions->Data[NUSensorsData::HeadYaw];
+        else
+            angle = NaN;
+ 
+        angle = getJointPosition(NUSensorsData::HeadYaw)
+        angles = getJointPositions(NUSensorsData::All)          // effectively this is an Aldebaran type approach except instead of strings i'll have an enum
+        
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -32,13 +46,27 @@
 #include <string>
 using namespace std;
 
-/*! @brief Base sensor storage class
- */
 class NUSensorsData
 {
 public:
     NUSensorsData();
     ~NUSensorsData();
+    
+    void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointAccelerations(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointTargets(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointStiffnesses(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointCurrents(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointTorques(double time, const vector<float>& data, bool iscalculated = false);
+    void setJointTemperatures(double time, const vector<float>& data, bool iscalculated = false);
+    void setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated = false);
+    void setBalanceGyro(double time, const vector<float>& data, bool iscalculated = false);
+    void setDistanceValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setFootSoleValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setFootBumperValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setButtonValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -49,6 +77,9 @@ public:
     int size() const;
 private:
     void addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid);
+    
+    void setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated = false);
+    
     void updateNamedSensorPointer(sensor_t* p_sensor);
 public:
     // NAMED SENSORS

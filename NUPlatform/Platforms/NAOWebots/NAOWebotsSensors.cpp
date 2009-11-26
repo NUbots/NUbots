@@ -49,7 +49,6 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  */
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
-    m_temp_data = new NUSensorsData();          // TODO: delete this
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
 #endif
@@ -119,8 +118,16 @@ void NAOWebotsSensors::enableSensorsInWebots()
  */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
+    m_servo_names.clear();
+    m_servos.clear();
     delete m_accelerometer;
     delete m_gyro;
+    m_distance_names.clear();
+    m_distance_sensors.clear();
+    m_foot_sole_names.clear();
+    m_foot_sole_sensors.clear();
+    m_foot_bumper_names.clear();
+    m_foot_bumper_sensors.clear();
     delete m_gps;
 }
 
@@ -131,31 +138,6 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
-    
-    // BEGIN: for testing purposes only
-    static int count = 0;
-    if (count == 0)
-        tempoutlog.open("./temp.log");                 // TODO: delete this too
-    if (count < 10)
-        tempoutlog << *m_data;      //*m_data because I want to stream the actual data and not the pointer
-    else if (count == 10)
-    {
-        tempoutlog.close();
-        tempinlog.open("./temp.log");
-    }
-    else if (count < 20)
-        tempinlog >> *m_temp_data;
-    if (count < 22)
-    {
-        debug << "m_data: " << endl;
-        m_data->summaryTo(debug);
-        debug << "m_temp_data: " << endl;
-        m_temp_data->summaryTo(debug);
-        m_temp_data->BalanceAccelerometer->summaryTo(debug);
-    }
-    debug << count << endl;
-    count++;
-    // END: for testing purposes only
     
     static double currenttime;
     static vector<float> positiondata(m_servos.size(), 0);
@@ -178,7 +160,7 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     // Copy joint positions
     for (int i=0; i<m_servos.size(); i++)
         positiondata[i] = m_servos[i]->getPosition();
-    m_data->JointPositions->setData(currenttime, positiondata);
+    m_data->setJointPositions(currenttime, positiondata);
     
     // Velocity and acceleration will need to be calculated
     
@@ -187,35 +169,39 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     // Copy joint torques
     for (int i=0; i<m_servos.size(); i++)
         torquedata[i] = m_servos[i]->getMotorForceFeedback();
-    m_data->JointTorques->setData(currenttime, torquedata);
+    m_data->setJointTorques(currenttime, torquedata);
     
     // Copy accelerometer [x, y, z, gx, gy, gz]
     static const double *buffer;
     buffer = m_accelerometer->getValues();
     for (int i=0; i<numdimensions; i++)
         accelerometerdata[i] = buffer[i];
-    m_data->BalanceAccelerometer->setData(currenttime, accelerometerdata);
+    m_data->setBalanceAccelerometer(currenttime, accelerometerdata);
     buffer = m_gyro->getValues();
     for (int i=0; i<numdimensions; i++)
         gyrodata[i] = buffer[i];
-    m_data->BalanceGyro->setData(currenttime, gyrodata);
+    m_data->setBalanceGyro(currenttime, gyrodata);
     
     // Copy distance readings
     for (int i=0; i<m_distance_sensors.size(); i++)
         distancedata[i] = m_distance_sensors[i]->getValue();
-    m_data->DistanceValues->setData(currenttime, distancedata);
+    m_data->setDistanceValues(currenttime, distancedata);
     
     // Copy foot sole readings
     for (int i=0; i<m_foot_sole_sensors.size(); i++)
         footsoledata[i] = m_foot_sole_sensors[i]->getValue();
-    m_data->FootSoleValues->setData(currenttime, footsoledata);
+    m_data->setFootSoleValues(currenttime, footsoledata);
     
     // Copy foot bumper readings
     for (int i=0; i<m_foot_bumper_sensors.size(); i++)
         footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
-    m_data->FootBumperValues->setData(currenttime, footbumperdata);
+    m_data->setFootBumperValues(currenttime, footbumperdata);
+    
+    m_data->summaryTo(debug);
 }
 
+
+// ok who keeps track of each joint is which! It has to be saved in NUSensorsData, but only this class can set it!
 
 
 

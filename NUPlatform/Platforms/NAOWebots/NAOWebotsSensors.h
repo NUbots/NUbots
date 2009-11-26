@@ -67,10 +67,6 @@ private:
     static vector<string> m_foot_bumper_names;          //!< a vector of the foot bumper names
     vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
     GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
-    
-    ifstream tempinlog;             // temp log for testing serialisation
-    ofstream tempoutlog;            // temp log for testing serialisation
-    NUSensorsData* m_temp_data;     // a version of NUSensorsData that has been loaded from a log
 };
 
 #endif
