@@ -49,8 +49,7 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  */
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
-    m_temp_data = new NUSensorsData();
-    templog.open("./temp.log");
+    m_temp_data = new NUSensorsData();          // TODO: delete this
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
 #endif
@@ -132,6 +131,32 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
+    
+    // BEGIN: for testing purposes only
+    static int count = 0;
+    if (count == 0)
+        tempoutlog.open("./temp.log");                 // TODO: delete this too
+    if (count < 10)
+        tempoutlog << *m_data;      //*m_data because I want to stream the actual data and not the pointer
+    else if (count == 10)
+    {
+        tempoutlog.close();
+        tempinlog.open("./temp.log");
+    }
+    else if (count < 20)
+        tempinlog >> *m_temp_data;
+    if (count < 22)
+    {
+        debug << "m_data: " << endl;
+        m_data->summaryTo(debug);
+        debug << "m_temp_data: " << endl;
+        m_temp_data->summaryTo(debug);
+        m_temp_data->BalanceAccelerometer->summaryTo(debug);
+    }
+    debug << count << endl;
+    count++;
+    // END: for testing purposes only
+    
     static double currenttime;
     static vector<float> positiondata(m_servos.size(), 0);
     static vector<float> velocitydata(m_servos.size(), 0);
@@ -189,9 +214,6 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     for (int i=0; i<m_foot_bumper_sensors.size(); i++)
         footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
     m_data->FootBumperValues->setData(currenttime, footbumperdata);
-    
-    //templog >> *m_temp_data;
-    m_temp_data->summaryTo(debug);
 }
 
 
