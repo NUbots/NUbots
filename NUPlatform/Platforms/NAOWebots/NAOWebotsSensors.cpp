@@ -198,6 +198,13 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     m_data->setFootBumperValues(currenttime, footbumperdata);
     
     m_data->summaryTo(debug);
+    float temp;
+    vector<float> temps;
+    debug << "HeadYaw: " << m_data->getJointPosition(NUSensorsData::HeadYaw, temp) << endl;
+    debug << m_data->getJointPositions(NUSensorsData::All, temps) << endl;
+    for (int i=0; i<temps.size(); i++)
+        debug << temps[i] << ", ";
+    debug << endl;
 }
 
 

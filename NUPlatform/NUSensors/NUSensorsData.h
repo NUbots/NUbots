@@ -9,11 +9,6 @@
     I need to know the order of the data. I also need to be able to handle requests for joints 
     which aren't there, or are broken!
     
-        
-        if (NUSensorsData::HeadYaw != NUSensorsData::Unavaliable && m_data->JointPositions->IsValid)
-            angle = m_data->JointPositions->Data[NUSensorsData::HeadYaw];
-        else
-            angle = NaN;
  
         angle = getJointPosition(NUSensorsData::HeadYaw)
         angles = getJointPositions(NUSensorsData::All)          // effectively this is an Aldebaran type approach except instead of strings i'll have an enum
@@ -46,11 +41,65 @@
 #include <string>
 using namespace std;
 
+typedef int joint_id_t;
+
 class NUSensorsData
 {
 public:
+    static const int SENSOR_MISSING = -1;
+    enum bodypart_id_t
+    {
+        Head,
+        LeftArm,
+        RightArm,
+        Torso,
+        LeftLeg,
+        RightLeg,
+        All
+    };
+    static joint_id_t HeadYaw;
+    static joint_id_t HeadPitch;
+    static joint_id_t LShoulderPitch;
+    static joint_id_t LShoulderRoll;
+    static joint_id_t LElbowYaw;
+    static joint_id_t LElbowRoll;
+    static joint_id_t RShoulderPitch;
+    static joint_id_t RShoulderRoll;
+    static joint_id_t RElbowYaw;
+    static joint_id_t RElbowRoll;
+    static joint_id_t LHipYawPitch;
+    static joint_id_t LHipPitch;
+    static joint_id_t LHipRoll;
+    static joint_id_t LKneePitch;
+    static joint_id_t LAnklePitch;
+    static joint_id_t LAnkleRoll;
+    static joint_id_t RHipYawPitch;
+    static joint_id_t RHipPitch;
+    static joint_id_t RHipRoll;
+    static joint_id_t RKneePitch;
+    static joint_id_t RAnklePitch;
+    static joint_id_t RAnkleRoll;
+public:
     NUSensorsData();
     ~NUSensorsData();
+    
+    bool getJointPosition(joint_id_t jointid, float& position);
+    bool getJointVelocity(joint_id_t jointid, float& velocity);
+    bool getJointAcceleration(joint_id_t jointid, float& acceleration);
+    bool getJointTarget(joint_id_t jointid, float& target);
+    bool getJointStiffness(joint_id_t jointid, float& stiffness);
+    bool getJointCurrent(joint_id_t jointid, float& current);
+    bool getJointTorque(joint_id_t jointid, float& torque);
+    bool getJointTemperature(joint_id_t jointid, float& temperature);
+    
+    bool getJointPositions(bodypart_id_t bodypart, vector<float>& positions);
+    bool getJointVelocities(bodypart_id_t bodypart, vector<float>& velocities);
+    bool getJointAccelerations(bodypart_id_t bodypart, vector<float>& accelerations);
+    bool getJointTargets(bodypart_id_t bodypart, vector<float>& targets);
+    bool getJointStiffnesses(bodypart_id_t bodypart, vector<float>& stiffnesses);
+    bool getJointCurrents(bodypart_id_t bodypart, vector<float>& currents);
+    bool getJointTorques(bodypart_id_t bodypart, vector<float>& torques);
+    bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
     
     void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
     void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
@@ -60,6 +109,7 @@ public:
     void setJointCurrents(double time, const vector<float>& data, bool iscalculated = false);
     void setJointTorques(double time, const vector<float>& data, bool iscalculated = false);
     void setJointTemperatures(double time, const vector<float>& data, bool iscalculated = false);
+    
     void setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated = false);
     void setBalanceGyro(double time, const vector<float>& data, bool iscalculated = false);
     void setDistanceValues(double time, const vector<float>& data, bool iscalculated = false);
@@ -77,6 +127,9 @@ public:
     int size() const;
 private:
     void addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid);
+    
+    bool getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data);
+    bool getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data);
     
     void setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated = false);
     
