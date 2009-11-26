@@ -35,6 +35,7 @@ using namespace std;
 #else
     ptime NUSystem::m_microsec_starttime = microsec_clock::local_time();
 #endif
+long double NUSystem::m_time_offset = 0;
 
 NUSystem::NUSystem()
 {
@@ -43,6 +44,9 @@ NUSystem::NUSystem()
     clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
     clock_gettime(CLOCK_REALTIME_FAST, &m_gettimefast_starttime); 
 #endif
+    
+    // I need to get the offset between the unix timestamp and the time since start
+    m_time_offset = getPosixTimeStamp();
 }
 
 NUSystem::~NUSystem()
@@ -93,6 +97,14 @@ double NUSystem::getTimeFast()
 {
     return getRealTimeFast();       // the default implementation is to just return the actual time
 }
+
+/*! @brief Returns the time offset such that timesincestart = timestamp - offset and timestamp = timesincestart + offset
+ */
+long double NUSystem::getTimeOffset()
+{
+    return m_time_offset;
+}
+
 
 /*! @brief Returns the real time in milliseconds since the start of the program.
  
