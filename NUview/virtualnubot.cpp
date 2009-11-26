@@ -17,6 +17,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     classImage.useInternalBuffer();
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
+    hasImage = false;
 }
 
 virtualNUbot::~virtualNUbot()
@@ -43,7 +44,7 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage.width() && y < rawImage.height())
+    if(x < rawImage.width() && y < rawImage.height() && hasImage)
     {
         return rawImage.image[y][x];
     }
@@ -76,6 +77,7 @@ void virtualNUbot::loadFrame(int frameNumber)
     int robotFrameNumber;
 
     file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
+    hasImage = true;
     horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
     emit yuvImageChanged(&rawImage);
     emit horizonChanged(&horizonLine);

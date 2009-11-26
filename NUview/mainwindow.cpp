@@ -314,8 +314,11 @@ void MainWindow::updateSelection()
 
 void MainWindow::SelectColourAtPixel(int x, int y)
 {
-    pixels::Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
-    classification->setColour(tempPixel,ClassificationWidget::YCbCr);
+    if(virtualRobot.imageAvailable())
+    {
+        pixels::Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
+        classification->setColour(tempPixel,ClassificationWidget::YCbCr);
+    }
 }
 
 void MainWindow::ClassifySelectedColour()
@@ -325,8 +328,11 @@ void MainWindow::ClassifySelectedColour()
 
 void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
 {
-    SelectColourAtPixel(x,y);
-    ClassifySelectedColour();
+    if(virtualRobot.imageAvailable())
+    {
+        SelectColourAtPixel(x,y);
+        ClassifySelectedColour();
+    }
 }
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )

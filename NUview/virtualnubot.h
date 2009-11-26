@@ -35,6 +35,10 @@ public:
     void loadFrame(int FrameNumber);
     int loadFile(const char* fileName);
     pixels::Pixel selectRawPixel(int x, int y);
+    bool imageAvailable()
+    {
+        return hasImage;
+    }
 
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
@@ -46,7 +50,7 @@ public slots:
     void UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
-    void loadLookupTableFile(QString fileName);
+    void loadLookupTableFile(QString fileName);    
 
 signals:
     void yuvImageChanged(NUimage* updatedImage);
@@ -90,6 +94,7 @@ private:
     float touchSensors[100];
     static const int maxUndoLength = 10;
     int nextUndoIndex;
+    bool hasImage;
     std::vector<classEntry> undoHistory[maxUndoLength];
 };
 
