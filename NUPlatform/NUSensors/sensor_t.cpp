@@ -19,8 +19,9 @@
 */
 
 #include "sensor_t.h"
+#include "NUPlatform/NUSystem.h"
 #include "Tools/debug.h"
-#include <cctype>
+
 
 /*! @brief Default constructor for a sensor_t. Initialises the sensor to be undefined and invalid
  */
@@ -33,7 +34,9 @@ sensor_t::sensor_t()
     TimeStamp = 0;
 }
     
-/* @brief Constructor for a named sensor_t
+/*! @brief Constructor for a named sensor_t
+    @param sensorname the name of the sensor
+    @param sensorid the id of the sensor
  */
 sensor_t::sensor_t(string sensorname, sensor_id_t sensorid)
 {
@@ -41,17 +44,20 @@ sensor_t::sensor_t(string sensorname, sensor_id_t sensorid)
     SensorID = sensorid;
     IsValid = false;
     IsCalculated = false;
-    TimeStamp = 0;
+    m_time_offset = NUSystem::getTimeOffset();
+    Time = 0;
+    TimeStamp = Time + m_time_offset;
 }
 
 /*! @brief Updates the sensors data
-    @param time the unix time stamp the sensor data was collected
+    @param time the time in milliseconds since the program started
     @param newdata the vector of new sensor data
     @param iscalculated set this to true if the new sensor data was calculated from other sensor data
  */
-void sensor_t::setData(long double time, vector<float> newdata, bool iscalculated)
+void sensor_t::setData(double time, vector<float> newdata, bool iscalculated)
 {
-    TimeStamp = time;
+    Time = time;
+    TimeStamp = Time + m_time_offset;
     Data = newdata;
     IsValid = true;
     IsCalculated = iscalculated;
@@ -65,16 +71,16 @@ void sensor_t::setStdDev(vector<float> newstddev)
     StdDev = newstddev;
 }
 
-/*! @brief Provides a light overview of the contents of the sensor_t
+/*! @brief Provides a text summary of the contents of the sensor_t
  
     The idea is to use this function when writing to a debug log. I guarentee that the 
     output will be human readable.
  
     @param output the ostream in which to put the string
  */
-void sensor_t::view(ostream& output)
+void sensor_t::summaryTo(ostream& output)
 {
-    output << Name << ": " << TimeStamp << " ";
+    output << Name << ": " << Time << " ";
     if (IsValid)
     {
         for (int i=0; i<Data.size(); i++)
@@ -84,6 +90,22 @@ void sensor_t::view(ostream& output)
         output << "Invalid";
     output << endl;
 }
+
+/*! @brief Provides a comma separated string of data for writing to a .csv
+    @param output the ostream in which to put the string
+ */
+void sensor_t::csvTo(ostream& output)
+{
+    output << Time << ", ";
+    if (IsValid)
+    {
+        for (int i=0; i<Data.size(); i++)
+            output << Data[i] << ", ";
+    }
+    output << endl;
+}
+
+
 
 /*! @brief Saves the entire contents of the sensor_t into the stream
  
@@ -110,6 +132,8 @@ ostream& operator<< (ostream& output, const sensor_t& p_sensor)
     output << p_sensor.IsValid << " ";
     output << p_sensor.IsCalculated << " ";
     
+    // we save the time as binary data
+    output.write((char*) &p_sensor.Time, sizeof(double));
     // we also save the timestamp as binary data
     output.write((char*) &p_sensor.TimeStamp, sizeof(long double));
     return output;
@@ -147,11 +171,17 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
         p_sensor.StdDev[i] = *((float*) inbuffer);
     }
     
+    // Read in flags
     input >> p_sensor.IsValid;
     input >> p_sensor.IsCalculated;
+    // Read in Time
     input.read(inbuffer, sizeof(char));         // skip over the single space after the iscalculated flag
+    input.read(inbuffer, sizeof(double));
+    p_sensor.Time = *((double*) inbuffer);
+    // Read in TimeStamp
     input.read(inbuffer, sizeof(long double));
     p_sensor.TimeStamp = *((long double*) inbuffer);
+    p_sensor.m_time_offset = p_sensor.TimeStamp - p_sensor.Time;
     return input;
 }
 

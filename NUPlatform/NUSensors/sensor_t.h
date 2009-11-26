@@ -62,10 +62,11 @@ class sensor_t
 public:
     sensor_t();
     sensor_t(string sensorname, sensor_id_t sensorid);
-    void setData(long double time, vector<float> newdata, bool iscalculated = false);
+    void setData(double time, vector<float> newdata, bool iscalculated = false);
     void setStdDev(vector<float> newstddev);
     
-    void view(ostream& output);
+    void summaryTo(ostream& output);
+    void csvTo(ostream& output);
     
     friend ostream& operator<< (ostream& output, const sensor_t& p_sensor);
     friend istream& operator>> (istream& input, sensor_t& p_sensor);
@@ -76,7 +77,10 @@ public:
     vector<float> StdDev;       //!< standard deviation for each sensor value sensor
     bool IsValid;               //!< true, if data is valid, false if not
     bool IsCalculated;          //!< true, if data has been calculated, false if the data is direct from a sensor
+    double Time;                //!< the sensor's time
     long double TimeStamp;      //!< the unix timestamp of the data
+private:
+    long double m_time_offset;       //!< a time offset so that unixtimestamp = timesincestart + offset
 };
 
 #endif
