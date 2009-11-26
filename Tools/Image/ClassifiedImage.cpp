@@ -67,11 +67,7 @@ unsigned char* ClassifiedImage::allocateBuffer(int width, int height)
 void ClassifiedImage::MapBufferToImage(unsigned char* buffer, int width, int height)
 {
     int arrayWidth = width;
-    if(height != this->height())
-    {
-        delete [] image;
-        image = 0;
-    }
+    setImageDimensions(width, height);
     if(image == 0)
     {
         //Allocate memory for array of elements of column

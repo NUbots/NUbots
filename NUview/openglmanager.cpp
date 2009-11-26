@@ -1,5 +1,5 @@
 #include "ColorModelConversions.h"
-#include "ClassificationColours.h"
+#include "Vision/ClassificationColours.h"
 #include "openglmanager.h"
 #include "Tools/Image/NUimage.h"
 #include "Tools/Image/ClassifiedImage.h"
@@ -156,4 +156,50 @@ void OpenglManager::newClassificationSelection(ClassifiedImage* newImage)
     createDrawTextureImage(image, GLDisplay::classificationSelection);
     emit updatedDisplay(GLDisplay::classificationSelection, displays[GLDisplay::classificationSelection], width, height);
     return;
+}
+
+void OpenglManager::newGreenpoints(std::vector< Vector2<int> > newpoints)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[GLDisplay::greenHorizonScanPoints])
+    {
+        glDeleteLists(displays[GLDisplay::greenHorizonScanPoints],1);
+    }
+
+    displays[GLDisplay::greenHorizonScanPoints] = glGenLists(1);
+    glNewList(displays[GLDisplay::greenHorizonScanPoints],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+    for (int pointNum = 0; pointNum < (int)newpoints.size(); pointNum++)
+    {
+        drawHollowCircle(newpoints[pointNum].x+0.5, newpoints[pointNum].y+0.5, 0.5, 50);
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[GLDisplay::greenHorizonScanPoints] = true;
+
+    emit updatedDisplay(GLDisplay::greenHorizonScanPoints, displays[GLDisplay::greenHorizonScanPoints], width, height);
+    return;
+}
+
+void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
+{
+    int stepSize = 360 / num_segments;
+    glBegin(GL_LINE_LOOP);
+    for(int angle = 0; angle < 360; angle += stepSize)
+    {
+        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
+    }
+    glEnd();
+}
+
+void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
+{
+    int stepSize = 360 / num_segments;
+    glBegin(GL_TRIANGLE_FAN);
+    for(int angle = 0; angle < 360; angle += stepSize)
+    {
+        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
+    }
+    glEnd();
 }

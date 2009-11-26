@@ -44,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(horizonChanged(Horizon*)),&glManager,SLOT(newHorizon(Horizon*)));
     connect(&virtualRobot,SIGNAL(classificationSelectionChanged(ClassifiedImage*)),&glManager,SLOT(newClassificationSelection(ClassifiedImage*)));
 
+    connect(&virtualRobot,SIGNAL(greenHorizonScanPointsChanged(std::vector< Vector2<int> >)),&glManager,SLOT(newGreenpoints(std::vector< Vector2<int> >)));
+
+
+
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
@@ -59,10 +63,13 @@ MainWindow::MainWindow(QWidget *parent)
     imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
     imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(0,255,127));
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
     classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
+
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
 

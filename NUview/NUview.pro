@@ -14,7 +14,7 @@ HEADERS += ui_mainwindow.h \
     connectionwidget.h \
     ColorModelConversions.h \
     classificationwidget.h \
-    ClassificationColours.h \
+    ../Vision/ClassificationColours.h \
     ../Tools/FileFormats/NUbotImage.h \
     ../Vision/Vision.h \
     ../Tools/FileFormats/LUTTools.h \

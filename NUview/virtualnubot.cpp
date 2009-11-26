@@ -100,9 +100,14 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
         return;
     }
 
-    /*
-    ClassifiedPacketData* currentPacket = (ClassifiedPacketData*) uncompressed;
 
+    ClassifiedPacketData* currentPacket = (ClassifiedPacketData*) uncompressed;
+    classImage.useInternalBuffer(false);
+    classImage.setImageDimensions(currentPacket->frameWidth, currentPacket->frameHeight);
+    classImage.MapBufferToImage(currentPacket->classImage,currentPacket->frameWidth, currentPacket->frameHeight);
+    emit classifiedImageChanged(&classImage);
+    processVisionFrame(classImage);
+/*
     //Update Image:
     classifiedImage.height = currentPacket->frameHeight;
     classifiedImage.width = currentPacket->frameWidth;
@@ -127,10 +132,17 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(NUimage& image)
 {
+    std::vector< Vector2<int> > points;
+
     switch (image.imageFormat)
     {
         case pixels::YUYV:
             generateClassifiedImage(image);
+            points = vision.findGreenBorderPoints(&image,classificationTable,5,&horizonLine);
+            //emit greenHorizonScanPointsChanged(greenPoints);
+            points = vision.getConvexFieldBorders(points);
+            points = vision.interpolateBorders(points,5);
+            emit greenHorizonScanPointsChanged(points);
             break;
         default:
             break;
@@ -138,6 +150,12 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     }
     return;
 }
+
+void virtualNUbot::processVisionFrame(ClassifiedImage& image)
+{
+    return;
+}
+
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
 {

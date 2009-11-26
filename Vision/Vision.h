@@ -38,6 +38,11 @@ class Vision
       @return Returns the classfied colour index for the given pixel.
       */
     inline unsigned char classifyPixel(int x, int y);
+
+    std::vector< Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
+    std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
+    std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
+
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
     const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.

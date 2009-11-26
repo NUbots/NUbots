@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <QMainWindow>
 #include "ColorModelConversions.h"
-#include "ClassificationColours.h"
+#include "Vision/ClassificationColours.h"
 #include "Tools/Math/General.h"
 
 ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent)

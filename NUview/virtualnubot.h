@@ -4,7 +4,7 @@
 #include <QObject>
 #include "Tools/FileFormats/NUbotImage.h"
 #include "Tools/Image/NUimage.h"
-#include "ClassificationColours.h"
+#include "Vision/ClassificationColours.h"
 #include "classificationwidget.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
@@ -53,6 +53,7 @@ signals:
     void classifiedImageChanged(ClassifiedImage* updatedImage);
     void horizonChanged(Horizon* horizonLine);
     void classificationSelectionChanged(ClassifiedImage* updatedImage);
+    void greenHorizonScanPointsChanged(std::vector< Vector2<int> > updatedPoints);
 
 private:
     class classEntry
@@ -66,6 +67,8 @@ private:
 
 
     void processVisionFrame(NUimage& image);
+    void processVisionFrame(ClassifiedImage& image);
+
     void processVisionFrame();
     void generateClassifiedImage(const NUimage& yuvImage);
 

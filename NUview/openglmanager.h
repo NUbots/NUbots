@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QGLWidget>
 #include "gldisplay.h"
+#include "Tools/Math/Vector2.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -48,6 +49,11 @@ public:
           @param newImage The new classified selection image.
           */
         void newClassificationSelection(ClassifiedImage* newImage);
+        /*!
+          @brief Accepts new point objects and maps it to display instructions.
+          @param newpoints The new points.
+          */
+        void newGreenpoints(std::vector< Vector2<int> > newpoints);
 
     private:
         int width;                                  //!< Width of the current image.
@@ -62,6 +68,9 @@ public:
           @param displayId The .display Id to associatie this texture with.
           */
         void createDrawTextureImage(QImage& image, int displayId);
+        void drawHollowCircle(float cx, float cy, float r, int num_segments);
+        void drawSolidCircle(float cx, float cy, float r, int num_segments);
+
 };
 
 #endif // OPENGLMANAGER_H

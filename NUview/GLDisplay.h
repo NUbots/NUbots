@@ -64,7 +64,7 @@ public:
         classifiedImage,
         classificationSelection,
         horizonLine,
-        greenHorizonScan,
+        greenHorizonScanPoints,
         numDisplays
     };
 
@@ -179,7 +179,7 @@ private:
                 return QString("Horizon");
             case classificationSelection:
                 return QString("Classification Selection");
-            case greenHorizonScan:
+            case greenHorizonScanPoints:
                 return QString("Green Horizon Scan");
             default:
                 return QString("Unknown Image");
@@ -203,7 +203,7 @@ private:
                 return QColor(255,0,255);
             case classificationSelection:
                 return QColor(255,255,255);
-            case greenHorizonScan:
+            case greenHorizonScanPoints:
                 return QColor(0,255,0);
             default:
                 return QColor(255,255,255);;
