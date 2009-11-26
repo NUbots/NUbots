@@ -44,10 +44,10 @@ private:
     
 // Members:
 public:
+    NUSystem* system;
     NUCamera* camera;
     NUSensors* sensors;
     NUActionators* actionators;
-    NUSystem* system;
 protected:
     string m_name;
     int m_number;

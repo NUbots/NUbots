@@ -7,7 +7,7 @@
 #ifndef NUIMAGE_H
 #define NUIMAGE_H
 
-#include "NUPlatform\NUCamera\NUCameraData.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 #include "pixels.h"
 
 /*!

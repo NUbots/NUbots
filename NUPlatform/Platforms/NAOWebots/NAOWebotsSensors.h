@@ -64,7 +64,7 @@ private:
     static vector<string> m_foot_sole_names;            //!< a vector of the names of each of the foot touch sensors in Webot NAO
     vector<TouchSensor*> m_foot_sole_sensors;           //!< a vector of pointers to each of the foot force sensors in the Webot NAO
     static vector<string> m_foot_bumper_names;          //!< a vector of the foot bumper names
-    vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons; 0 is off, 1 is on
+    vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
     GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
 };
 

@@ -26,7 +26,7 @@ NAOWebotsSystem::NAOWebotsSystem(NAOWebotsPlatform* platform)
 {
     debug << "NAOWebotsSystem::NAOWebotsSystem()" << endl;
     m_platform = platform;
-    m_simulator_start_timestamp = getRealTime();
+    m_simulator_start_timestamp = getTimeOffset();
 }
 
 NAOWebotsSystem::~NAOWebotsSystem()

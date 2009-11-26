@@ -11,7 +11,7 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
-# Targets: NAO, NAOWebots, Cycloid
+# Targets: NAO, NAOWebots, Cycloid, NUView
 
 CUR_DIR = $(shell pwd)
 
@@ -28,11 +28,15 @@ CYCLOID_BUILD_DIR = Build/Cycloid
 ALD_CC_SCRIPT = $(AL_DIR)/tools/crosscompile.sh
 ALD_CTC = $(AL_DIR)/crosstoolchain
 
+# External source directory
+EXT_SOURCE_DIR = $(CUR_DIR)/Install
+
 .PHONY: default_target all 
 .PHONY: NAO NAOConfig NAOClean NAOVeryClean
 .PHONY: NAOExternal
 .PHONY: NAOWebots NAOWebotsConfig NAOWebotsClean NAOWebotsVeryClean
 .PHONY: Cycloid CycloidConfig CycloidClean CycloidVeryClean
+.PHONY: NUView NUViewConfig NUViewClean NUViewVeryClean
 .PHONY: clean veryclean
 
 # We export an environment variable TARGET_ROBOT which tells everything
@@ -44,6 +48,8 @@ NAO: TARGET_ROBOT=NAO
 NAOConfig: TARGET_ROBOT=NAO
 Cycloid: TARGET_ROBOT=CYCLOID
 CycloidConfig: TARGET_ROBOT=CYCLOID
+NUView: TARGET_ROBOT=VIRTUAL
+NUViewConfig: TARGET_ROBOT=VIRTUAL
 export TARGET_ROBOT
 
 # I need to determine which platform this makefile is run on
@@ -57,8 +63,9 @@ VM = $(strip $(vm))
 ROBOT = $(strip $(robot))
 default_target: NAOWebots
 
-all: NAO NAOWebots Cycloid
+all: NAO NAOWebots Cycloid NUView
 
+################ NAO ################
 NAO:
 	@echo "Targetting NAO";
 ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
@@ -138,7 +145,7 @@ endif
 NAOVeryClean:
 	@echo "Hosing NAO Build";
 ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
-	@echo "TODO configure on a windows machine"
+	@echo "TODO very clean on a windows machine"
 endif
 ifeq ($(SYSTEM),Darwin)
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAOVeryClean;"
@@ -148,6 +155,8 @@ ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
 		cd $(NAO_BUILD_DIR); \
 		rm -rf ./*;
 endif
+
+################ NAOWebots ################
 
 NAOWebots:
 	@echo "Targetting NAOWebots";
@@ -181,6 +190,8 @@ NAOWebotsVeryClean:
 		cd $(NAOWEBOTS_BUILD_DIR); \
 		rm -rf ./*;
 
+################ Cycloid ################
+
 Cycloid:
 	@echo "Targetting Cycloid";
 	@cmake $(MAKE_DIR);
@@ -191,10 +202,56 @@ CycloidClean:
 CycloidVeryClean:
 	@echo "Hosing Cycloid Build";
 	@set -e;
+	
+################ NUView ################
+NUView:
+	@echo "Building NUView"
+# the first thing we need to do is check whether we have unzipped the external libraries
+# I am not entirely sure this is a good idea. Especially for zlib, because OS-X and Linux will have this installed already!
+	@if [ -d $(CUR_DIR)/NUview/gl ]; then \
+		set -e; \
+	else \
+		echo "Cute, this must be your first time."; \
+		mkdir -p $(CUR_DIR)/NUview/gl; \
+		cd $(CUR_DIR)/NUview/gl; \
+		tar -xf $(EXT_SOURCE_DIR)/GLee-5.4.0-src.tar.gz; \
+		mkdir -p $(CUR_DIR)/NUview/diagona; \
+		cd $(CUR_DIR)/NUview/diagona; \
+		tar -xf $(EXT_SOURCE_DIR)/diagona.zip; \
+		mkdir -p $(CUR_DIR)/Tools; \
+		cd $(CUR_DIR)/Tools; \
+		tar -xf $(EXT_SOURCE_DIR)/zlib-1.2.3.tar.gz; \
+		mv zlib-1.2.3 zlib; \
+	fi
+# now qmake and then make the NUview project
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		qmake -spec macx-g++; \
+		make all; \
+	
+NUViewConfig:
+	@echo "Configuring NUView Build"
+	
+NUViewClean:
+	@echo "Cleaning NUView Build"
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		make clean; \
+		rm -rf NUview.app; \
+	
+NUViewVeryClean:
+	@echo "Hosing NUView Build"
+	@set -e; \
+		cd $(CUR_DIR)/NUview; \
+		make clean; \
+		rm -rf NUview.app; \
+		rm -f Makefile; \
 
-clean: NAOClean NAOWebotsClean CycloidClean
+########################################
 
-veryclean: NAOVeryClean NAOWebotsVeryClean CycloidVeryClean
+clean: NAOClean NAOWebotsClean CycloidClean NUViewClean
+
+veryclean: NAOVeryClean NAOWebotsVeryClean CycloidVeryClean NUViewVeryClean
 
 
 # Helpful tips:

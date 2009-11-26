@@ -37,7 +37,8 @@ public:
     virtual ~NUSystem();
     virtual long double getPosixTimeStamp();
     virtual double getTime();
-    virtual double getTimeFast();           
+    virtual double getTimeFast(); 
+    static long double getTimeOffset();
     
     static double getRealTime();       
     static double getRealTimeFast();
@@ -51,6 +52,7 @@ private:
     #else
         static ptime m_microsec_starttime;                     //!< the program's start time according to boost::posix_time
     #endif
+    static long double m_time_offset;                          //!< an offset so that timesincestart = unixstamp - offset and unixstamp = timesincestart + offset
 };
 
 #endif
