@@ -75,7 +75,6 @@ NUSensorsData::~NUSensorsData()
 
 void NUSensorsData::summaryTo(ostream& output)
 {
-    debug << "NUSensorsData::summaryTo" << endl;
     for (int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
 }
@@ -94,7 +93,6 @@ int NUSensorsData::size() const
 
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {
-    output << string("NUSensorsData: ");
     output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
         output << *p_data.m_sensors[i];
@@ -103,19 +101,74 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
-    //string tempname;
+    p_data.m_sensors.clear();
     int numsensors;
-    sensor_t sensor;
-    sensor_t* hmm;
-    //input >> tempname;
+    sensor_t insensor;
+    sensor_t* sensor;
     input >> numsensors;
     for (int i=0; i<numsensors; i++)
     {
-        input >> sensor;
-        hmm = new sensor_t(sensor);
-        p_data.m_sensors.push_back(hmm);
+        input >> insensor;
+        sensor = new sensor_t(insensor);
+        p_data.m_sensors.push_back(sensor);
+        p_data.updateNamedSensorPointer(sensor);
     }
     return input;
+}
+
+void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
+{
+    switch (p_sensor->SensorID) 
+    {
+        case JOINT_POSITIONS:
+            JointPositions = p_sensor;
+            break;
+        case JOINT_VELOCITIES:
+            JointVelocities = p_sensor;
+            break;
+        case JOINT_ACCELERATIONS:
+            JointAccelerations = p_sensor;
+            break;
+        case JOINT_TARGETS:
+            JointTargets = p_sensor;
+            break;
+        case JOINT_STIFFNESSES:
+            JointStiffnesses = p_sensor;
+            break;
+        case JOINT_CURRENTS:
+            JointCurrents = p_sensor;
+            break;
+        case JOINT_TORQUES:
+            JointTorques = p_sensor;
+            break;
+        case JOINT_TEMPERATURES:
+            JointTemperatures = p_sensor;
+            break;
+        case BALANCE_ACCELEROMETER:
+            BalanceAccelerometer = p_sensor;
+            break;
+        case BALANCE_GYRO:
+            BalanceGyro = p_sensor;
+            break;
+        case DISTANCE_VALUES:
+            DistanceValues = p_sensor;
+            break;
+        case FOOT_SOLE_VALUES:
+            FootSoleValues = p_sensor;
+            break;
+        case FOOT_BUMPER_VALUES:
+            FootBumperValues = p_sensor;
+            break;
+        case BUTTON_VALUES:
+            ButtonValues = p_sensor;
+            break;
+        case BATTERY_VALUES:
+            BatteryValues = p_sensor;
+            break;
+        default:
+            break;
+    }
+
 }
 
 

@@ -49,7 +49,9 @@ public:
     int size() const;
 private:
     void addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid);
+    void updateNamedSensorPointer(sensor_t* p_sensor);
 public:
+    // NAMED SENSORS
     // Proprioception Sensors:
     sensor_t* JointPositions;
     sensor_t* JointVelocities;
