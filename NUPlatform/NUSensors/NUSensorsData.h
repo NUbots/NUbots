@@ -1,18 +1,9 @@
 /*! @file NUSensorsData.h
-    @brief Declaration of a sensor class to store sensor data in a platform independent way
+    @brief Declaration of a sensor data storage class to store sensor data in a platform independent way
     @author Jason Kulk
  
     @class NUSensorsData
     @brief A sensor class to store sensor data in a platform independent way
- 
-    I see a problem coming that I have known about for ages. How am I going to access the data? 
-    I need to know the order of the data. I also need to be able to handle requests for joints 
-    which aren't there, or are broken!
-    
- 
-        angle = getJointPosition(NUSensorsData::HeadYaw)
-        angles = getJointPositions(NUSensorsData::All)          // effectively this is an Aldebaran type approach except instead of strings i'll have an enum
-        
  
     @author Jason Kulk
  

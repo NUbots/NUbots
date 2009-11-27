@@ -157,15 +157,15 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
     
     currenttime = m_platform->system->getTime();
-    
+    // @todo TODO: implement unit conversions here, and apply any calibrated offsets
     // Copy joint positions
     for (int i=0; i<m_servos.size(); i++)
         positiondata[i] = m_servos[i]->getPosition();
     m_data->setJointPositions(currenttime, positiondata);
     
-    // Velocity and acceleration will need to be calculated
+    // @todo TODO: Velocity and acceleration will need to be calculated
     
-    // We will need to keep track of the controls ourselves for Target and stiffness.
+    // @todo TODO: We will need to keep track of the controls ourselves for Target and stiffness.
     
     // Copy joint torques
     for (int i=0; i<m_servos.size(); i++)
@@ -198,18 +198,8 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
         footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
     m_data->setFootBumperValues(currenttime, footbumperdata);
     
-    m_data->summaryTo(debug);
-    float temp;
-    vector<float> temps;
-    debug << "HeadYaw: " << m_data->getJointPosition(NUSensorsData::HeadYaw, temp) << endl;
-    debug << m_data->getJointPositions(NUSensorsData::All, temps) << endl;
-    for (int i=0; i<temps.size(); i++)
-        debug << temps[i] << ", ";
-    debug << endl;
+    //m_data->summaryTo(debug);
 }
-
-
-// ok who keeps track of each joint is which! It has to be saved in NUSensorsData, but only this class can set it!
 
 
 
