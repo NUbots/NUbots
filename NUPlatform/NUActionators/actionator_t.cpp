@@ -24,8 +24,47 @@
 #include "Tools/debug.h"
 
 
-/*! @brief Default constructor for a sensor_t. Initialises the sensor to be undefined and invalid
+/*! @brief Default constructor for a actionator_t. Initialises the actionator to be undefined and invalid
  */
 actionator_t::actionator_t()
 {
+    Name = string("Undefined");
+    ActionatorID = UNDEFINED;
 }
+
+/*! @brief Constructor for an actionator_t with known name and id
+    @param actionatorname the name of the actionator
+    @param actionatorid the id of the actionator to be used for RTTI
+ */
+actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
+{
+    Name = actionatorname;
+    ActionatorID = actionatorid;
+}
+
+/*! @brief Adds an action to this actionator with the specified times and values
+    @param time the time the action will be applied
+    @param isvalid a vector of bools, if an entry is false the corresponding element
+                   in values will be ignored, and the current value will be reused
+    @param values the actionator values to be applied 
+    @param gains the strength/stiffness/brightness etc of the values
+ */
+void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& values, vector<float>& gains)
+{
+    actionator_point_t* point = new actionator_point_t();
+    point->Time = time;
+    point->IsValid = isvalid;
+    point->Values = values;
+    point->Gains = gains;
+    m_points.push_back(point);
+}
+
+void actionator_t::summaryTo(ostream& output)
+{
+    output << Name << " " << endl;
+}
+
+void actionator_t::csvTo(ostream& output)
+{
+}
+

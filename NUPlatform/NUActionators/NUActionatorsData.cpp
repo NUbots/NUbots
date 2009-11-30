@@ -25,12 +25,29 @@
 
 NUActionatorsData::NUActionatorsData()
 {
+    addActionator(&JointPositions, string("JointPositions"), JOINT_POSITIONS);
+    addActionator(&JointVelocities, string("JointVelocities"), JOINT_VELOCITIES);
+    addActionator(&CameraControl, string("CameraControl"), CAMERA_CONTROL);
+    addActionator(&LedLEar, string("LedLEar"), LED_L_EAR);
+    addActionator(&LedREar, string("LedREar"), LED_R_EAR);
+    addActionator(&LedLEye, string("LedLEar"), LED_L_EYE);
+    addActionator(&LedREye, string("LedLEar"), LED_R_EYE);
+    addActionator(&LedLEar, string("LedLEar"), LED_L_EAR);
+}
+
+void addActionator(actionator_t** p_actionator, string actionatorname, actionator_id_t actionatorid)
+{
+    *p_actionator = new actionator_t(actionatorname, actionatorid);
+    m_actionators.push_back(*p_actionator);
 }
 
 NUActionatorsData::~NUActionatorsData()
 {
 }
 
-
+void NUActionatorsData::setAvaliableActionators(const vector<string>& actionators)
+{
+    
+}
 
 

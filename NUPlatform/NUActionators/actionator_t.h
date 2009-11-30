@@ -5,16 +5,6 @@
     @class actionator_t
     @brief A single set of actionators class to store actuator data in a platform independent way
  
-    A single actionator for all joint positions
- 
- First decision: should an each joint be a separate actionator? Well, honestly, I think it should.
- However, that is not how sensors are organised and I would, more than anything, rather keep it
- consistent. So that will pose a few limitations:
- 
- vector<actionator_point_t> points; 
- 
- vector<float> time, vector<float> value, vector<float> gain.
- 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -46,7 +36,7 @@ struct actionator_point_t
     vector<bool> IsValid;   //!< use this flag to effect only selected subactionators in this group    
     vector<float> Values;   //!< the actual values to be given to the group of actionators
     vector<float> Gains;    //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
-}
+};
 
 /*! @brief A enum type to perform run time actionator type checking without using
            string compares. Unfortunately, to add a new actionator you need to add an
@@ -55,6 +45,17 @@ struct actionator_point_t
 enum actionator_id_t 
 {
     JOINT_POSITIONS,
+    JOINT_VELOCITIES,
+    JOINT_CURRENTS,
+    JOINT_TORQUES,
+    CAMERA_CONTROL,
+    LED_L_EAR,
+    LED_R_EAR,
+    LED_L_EYE,
+    LED_R_EYE,
+    LED_L_FOOT,
+    LED_R_FOOT,
+    SOUND,
     UNDEFINED
 };
 
@@ -63,12 +64,19 @@ class actionator_t
 {
 public:
     actionator_t();
+    actionator_t(string actionatorname, actionator_id_t actionatorid);
     
-    /*void summaryTo(ostream& output);
+    void addAction(double time, vector<bool>& isvalid, vector<float>& values, vector<float>& gains);
+    
+    void summaryTo(ostream& output);
     void csvTo(ostream& output);
     
-    friend ostream& operator<< (ostream& output, const actionator_t& p_actionator);
+    /*friend ostream& operator<< (ostream& output, const actionator_t& p_actionator);
     friend istream& operator>> (istream& input, actionator_t& p_actionator);*/
+public:
+    string Name;
+    actionator_id_t ActionatorID;
+    vector<actionator_point_t*> m_points;
 };
 
 #endif

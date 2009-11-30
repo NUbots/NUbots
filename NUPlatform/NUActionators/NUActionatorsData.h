@@ -32,15 +32,31 @@
 #include <string>
 using namespace std;
 
-typedef int joint_id_t;
-
 class NUActionatorsData
 {
 public:
     NUActionatorsData();
     ~NUActionatorsData();
 
+    void setAvaliableActionators(const vector<string>& actionators);
 private:
+    void addActionator(actionator_t** p_actionator, string actionatorname, actionator_id_t actionatorid);
+    
+public:
+    // NAMED ACTIONATORS
+    actionator_t* JointPositions;
+    actionator_t* JointVelocities;
+    actionator_t* CameraControl;
+    actionator_t* LedLEar;
+    actionator_t* LedREar;
+    actionator_t* LedLEye;
+    actionator_t* LedREye;
+    actionator_t* LedLFoot;
+    actionator_t* LedRFoot;
+    actionator_t* Sound;
+    
+private:
+    vector<actionator_t*> m_actionators;
     
 };
 
