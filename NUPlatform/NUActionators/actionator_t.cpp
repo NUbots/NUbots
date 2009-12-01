@@ -50,8 +50,16 @@ actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
 
 /*! @brief Adds an action to this actionator with the specified times and values
  
-    This function will keep m_points sorted based on the time they need to be executed,
-    and it will clear all points after the new one.
+    This function will keep m_points sorted based on the time they need to be executed.
+    Additionally, the new action will overwrite existing points in m_points
+    if the new action has valid data that needs to be executed before the existing data.
+    
+    The IsValid flags is carefully used so that only VALID data overwrites later points,
+    for example, a head movement is added with a time of 10s, a leg movement is added with a
+    time of 5s, the leg movement will not overwrite the head movement because the values specified
+    in the leg movement for the head are NOT valid, and are indicated using the isvalid input.
+ 
+    I hope that makes sense.
  
     @param time the time the action will be applied
     @param isvalid a vector of bools, if an entry is false the corresponding element
@@ -73,11 +81,31 @@ void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& 
     {   // so instead of just pushing it to the back, I need to put it in the right place :(
         static vector<actionator_point_t*>::iterator insertposition;
         insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
-        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
-        m_points.push_back(point);  
         
-        // m_points.insert(insertposition, point); // Merge-type actionator points
+        for (int i=0; i<point->IsValid.size(); i++)
+        {
+            if (point->IsValid[i] == true)
+            {
+                static vector<actionator_point_t*>::iterator it;
+                for (it = insertposition; it < m_points.end(); it++)
+                {
+                    (*it)->IsValid[i] = false;
+                }
+            }
+        }
+        
+        m_points.insert(insertposition, point); // Merge-type actionator points
     }
+        
+        // Option 1: Merge all actionator points; this can produce very 'surprising' results and it is not possible to change your mind after sending off the commands
+        // m_points.insert(insertposition, point); // Merge-type actionator points
+        
+        // Option 2: Clear all actionator points after the current one; this would be ideal but it is hard to implement correctly; I need
+        //           to go through and look at all points after and see if they have valid data that is not overwritten because the new point has invalid data
+        // m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+        // m_points.push_back(point);  
+        
+        // Option 3: Set all points after the current one to be invalid on the subactionators that the current one is valid one!!!
     
 }
 
@@ -116,7 +144,16 @@ void actionator_t::summaryTo(ostream& output)
     {
         output << "Available: ";
         for (int i=0; i<m_points.size(); i++)
-            output << m_points[i]->Time << " ";
+        {
+            output << m_points[i]->Time << ": ";
+            for (int j=0; j<m_points[i]->Values.size(); j++)
+            {
+                if (m_points[i]->IsValid[j] == false)
+                    output << "- ";
+                else
+                    output << m_points[i]->Values[j] << " ";
+            }
+        }
         output << endl;
     }
 
