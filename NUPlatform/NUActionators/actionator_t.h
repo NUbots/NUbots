@@ -51,6 +51,7 @@ public:
     {
         JOINT_POSITIONS,
         JOINT_VELOCITIES,
+        JOINT_STIFFNESSES,
         JOINT_CURRENTS,
         JOINT_TORQUES,
         CAMERA_CONTROL,
