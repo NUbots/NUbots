@@ -46,6 +46,8 @@ static string temp_foot_bumper_names[] = {string("LFoot/Bumper/Left"), string("L
 vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
 
 /*! @brief Constructs a nubot sensor class with Webots backend
+ 
+    @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
@@ -55,7 +57,7 @@ NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
     m_platform = platform;
     getSensorsFromWebots(platform);
     enableSensorsInWebots();
-    m_data->setAvaliableJoints(m_servo_names);
+    m_data->setAvailableJoints(m_servo_names);
 }
 
 /* Gets pointers to each of the sensors in the simulated NAO
@@ -198,7 +200,15 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
         footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
     m_data->setFootBumperValues(currenttime, footbumperdata);
     
-    //m_data->summaryTo(debug);
+#if DEBUG_NUSENSORS_VERBOSITY > 3
+    static bool firstrun = true;
+    if (firstrun)
+    {
+        debug << "NAOWebotsSensors::NAOWebotsSensors(). Available Sensors:" << endl;
+        m_data->summaryTo(debug);
+        firstrun = false;
+    }
+#endif
 }
 
 
