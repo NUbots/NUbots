@@ -333,8 +333,8 @@ void* runThreadMotion(void* arg)
     debug << "NUbot::runThreadMotion: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;                
-    
-    NUSensorsData* data;
+    NUSensorsData* data = NULL;
+    NUActionatorsData* actions = NULL;
     
 #ifdef THREAD_MOTION_MONITOR_TIME
     double entrytime;
@@ -359,11 +359,13 @@ void* runThreadMotion(void* arg)
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
 #endif
+        
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         data = nubot->platform->sensors->update();
-        //                cmds = nubot->motion->process(data)                       // it is up to motion to decide whether it should deep copy
-        //        nubot->platform->actionators->process(cmds)
+        nubot->motion->process(data, actions);
+        nubot->platform->actionators->process(actions);
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 #ifdef THREAD_MOTION_MONITOR_TIME
         realendtime = NUSystem::getRealTime();
         processendtime = NUSystem::getProcessTime();
@@ -389,6 +391,8 @@ void* runThreadVision(void* arg)
     debug << "NUbot::runThreadVision: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
+    NUSensorsData* data = NULL;
+    NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
 #ifdef THREAD_VISION_MONITOR_TIME
@@ -419,18 +423,14 @@ void* runThreadVision(void* arg)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //          image = nubot->platform->camera->getData()
         //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
-        //      NUCamera::imageWidth
-        //      #idef NAOWebots:
-        //          NUCamera::imageWidth = WebotsCamera::imageWidth
-        //
-        //                 odometry = nubot->motion->getData()                       // There is no deep copy here either
+        //                 odometry = nubot->motion->getData()                // There is no deep copy here either
         //      gamectrl, teaminfo = nubot->network->getData()
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
         nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
         nubot->motion->process(joblist);
         //          cmds = nubot->lcs->process(lcsactions)
-        //          nubot->platform->actionators->process(cmds)
+        nubot->platform->actionators->process(actions);
         joblist.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
