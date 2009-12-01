@@ -87,6 +87,14 @@ NAOWebotsActionators::~NAOWebotsActionators()
 
 void NAOWebotsActionators::copyToHardwareCommunications()
 {
+    // In webots we have
+    for (int i=0; i<m_servos.size(); i++)
+    {
+        m_servos[i]->setPosition(0);
+        m_servos[i]->setVelocity(0);
+        m_servos[i]->setControlP(0.01);
+        m_servos[i]->setForce(0);           // we might have to use this to emulate the stiffness on the NAO
+    }
 }
 
 
