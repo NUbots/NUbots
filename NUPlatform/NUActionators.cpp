@@ -20,15 +20,40 @@
  */
 
 #include "NUActionators.h"
+#include "Tools/debug.h"
 
 NUActionators::NUActionators()
 {
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NUActionators::NUActionators" << endl;
+#endif
+    m_data = new NUActionatorsData();
 }
 
 NUActionators::~NUActionators()
 {
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NUActionators::NUActionators" << endl;
+#endif
 }
 
+/*! @brief Processes the NUActionatorsData and sends the actions to the hardware
+ 
+    @param data a pointer to the NUActionatorsData to be sent to the hardware
+ */
+void NUActionators::process(NUActionatorsData*& data)
+{
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NUActionators::process" << endl;
+#endif
+    if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
+        data = m_data;
+    copyToHardwareCommunications();
+}
 
-
-
+/* @brief A function to copy NUActionatorsData to the hardware communications system.
+          This function must be implemented for each platform.
+ */
+void NUActionators::copyToHardwareCommunications()
+{
+}
