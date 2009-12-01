@@ -25,28 +25,30 @@
 #include <fstream>
 #include <cctype>       // for tolower()
 
-joint_id_t NUSensorsData::HeadYaw = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::HeadPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LShoulderPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LShoulderRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LElbowYaw = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LElbowRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RShoulderPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RShoulderRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RElbowYaw = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RElbowRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LHipYawPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LHipPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LHipRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LKneePitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LAnklePitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::LAnkleRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RHipYawPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RHipPitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RHipRoll = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RKneePitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
-joint_id_t NUSensorsData::RAnkleRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::HeadYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::HeadPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LShoulderPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LShoulderRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LElbowYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LElbowRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RShoulderPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RShoulderRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RElbowYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RElbowRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipYawPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LKneePitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LAnklePitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LAnkleRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipYawPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RKneePitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RAnkleRoll = NUSensorsData::SENSOR_MISSING;
 
 /*!
  */
@@ -57,34 +59,34 @@ NUSensorsData::NUSensorsData()
 #endif
     
     // create the sensor_t's
-    addSensor(&JointPositions, string("JointPositions"), JOINT_POSITIONS);
-    addSensor(&JointVelocities, string("JointVelocities"), JOINT_VELOCITIES);
-    addSensor(&JointAccelerations, string("JointAccelerations"), JOINT_ACCELERATIONS);
-    addSensor(&JointTargets, string("JointTargets"), JOINT_TARGETS);
-    addSensor(&JointStiffnesses, string("JointStiffnesses"), JOINT_STIFFNESSES);
-    addSensor(&JointCurrents, string("JointCurrents"), JOINT_CURRENTS);
-    addSensor(&JointTorques, string("JointTorques"), JOINT_TORQUES);
-    addSensor(&JointTemperatures, string("JointTemperatures"), JOINT_TEMPERATURES);
+    addSensor(&JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
+    addSensor(&JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
+    addSensor(&JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
+    addSensor(&JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
+    addSensor(&JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
+    addSensor(&JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
+    addSensor(&JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
+    addSensor(&JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
     
     // Balance Sensors:
-    addSensor(&BalanceAccelerometer, string("BalanceAccelerometer"), BALANCE_ACCELEROMETER);
-    addSensor(&BalanceGyro, string("BalanceGyro"), BALANCE_GYRO);
+    addSensor(&BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
+    addSensor(&BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
     
     // Distance Sensors:
-    addSensor(&DistanceValues, string("DistanceValues"), DISTANCE_VALUES);
+    addSensor(&DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
     
     // Foot Pressure Sensors:
-    addSensor(&FootSoleValues, string("FootSoleValues"), FOOT_SOLE_VALUES);
-    addSensor(&FootBumperValues, string("FootBumperValues"), FOOT_BUMPER_VALUES);
+    addSensor(&FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
+    addSensor(&FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     
     // Buttons Sensors:
-    addSensor(&ButtonValues, string("ButtonValues"), BUTTON_VALUES);
+    addSensor(&ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
     
     // Battery Sensors:
-    addSensor(&BatteryValues, string("BatteryValues"), BATTERY_VALUES);
+    addSensor(&BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
 }
 
-void NUSensorsData::addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid)
+void NUSensorsData::addSensor(sensor_t** p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
 {
     *p_sensor = new sensor_t(sensorname, sensorid);
     m_sensors.push_back(*p_sensor);
@@ -95,6 +97,13 @@ NUSensorsData::~NUSensorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensorsData::~NUSensorsData" << endl;
 #endif
+    m_sensors.clear();
+    m_head_ids.clear();
+    m_larm_ids.clear();
+    m_rarm_ids.clear();
+    m_torso_ids.clear();
+    m_lleg_ids.clear();
+    m_rleg_ids.clear();
 }
 
 /******************************************************************************************************************************************
@@ -302,8 +311,9 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, 
 /*! @brief Sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
     @param joints a vector of strings where each string is a name of a joint
  */
-void NUSensorsData::setAvaliableJoints(const vector<string> joints)
+void NUSensorsData::setAvailableJoints(const vector<string>& joints)
 {
+    // NOTE: This function is the same as setAvailableJoints in NUActionatorsData; so if you change this you probably want to change that too
     // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplejointnames;
     string namebuffer, currentname, currentletter;
@@ -317,116 +327,128 @@ void NUSensorsData::setAvaliableJoints(const vector<string> joints)
             if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
                 namebuffer += tolower(currentletter[0]);            
         }
+        simplejointnames.push_back(namebuffer);
+        namebuffer.clear();
     }
     
-    for (int i=0; i<joints.size(); i++) 
+    for (int i=0; i<simplejointnames.size(); i++) 
     {
-        if (joints[i].compare("headyaw"))
+        if (simplejointnames[i].compare("headyaw") == 0)
         {
             HeadYaw = i;
             m_head_ids.push_back(i);
         }
-        else if (joints[i].compare("headpitch"))
+        else if (simplejointnames[i].compare("headpitch") == 0)
         {
             HeadPitch = i;
             m_head_ids.push_back(i);
         }
-        else if (joints[i].compare("lshoulderpitch"))
+        else if (simplejointnames[i].compare("lshoulderpitch") == 0)
         {
             LShoulderPitch = i;
             m_larm_ids.push_back(i);
         }
-        else if (joints[i].compare("lshoulderroll"))
+        else if (simplejointnames[i].compare("lshoulderroll") == 0)
         {
             LShoulderRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (joints[i].compare("lelbowyaw"))
+        else if (simplejointnames[i].compare("lelbowyaw") == 0)
         {
             LElbowYaw = i;
             m_larm_ids.push_back(i);
         }
-        else if (joints[i].compare("lelbowroll"))
+        else if (simplejointnames[i].compare("lelbowroll") == 0)
         {
             LElbowRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (joints[i].compare("rshoulderpitch"))
+        else if (simplejointnames[i].compare("rshoulderpitch") == 0)
         {
             RShoulderPitch = i;
             m_rarm_ids.push_back(i);
         }
-        else if (joints[i].compare("rshoulderroll"))
+        else if (simplejointnames[i].compare("rshoulderroll") == 0)
         {
             RShoulderRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (joints[i].compare("relbowyaw"))
+        else if (simplejointnames[i].compare("relbowyaw") == 0)
         {
             RElbowYaw = i;
             m_rarm_ids.push_back(i);
         }
-        else if (joints[i].compare("relbowroll"))
+        else if (simplejointnames[i].compare("relbowroll") == 0)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (joints[i].compare("lhipyawpitch"))
+        else if (simplejointnames[i].compare("lhipyaw") == 0)
+        {
+            LHipYaw = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].compare("lhipyawpitch") == 0)
         {
             LHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("lhippitch"))
+        else if (simplejointnames[i].compare("lhippitch") == 0)
         {
             LHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("lhiproll"))
+        else if (simplejointnames[i].compare("lhiproll") == 0)
         {
             LHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("lkneepitch"))
+        else if (simplejointnames[i].compare("lkneepitch") == 0)
         {
             LKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("lanklepitch"))
+        else if (simplejointnames[i].compare("lanklepitch") == 0)
         {
             LAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("lankleroll"))
+        else if (simplejointnames[i].compare("lankleroll") == 0)
         {
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("rhipyawpitch"))
+        else if (simplejointnames[i].compare("rhipyaw") == 0)
+        {
+            RHipYaw = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].compare("rhipyawpitch") == 0)
         {
             RHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("rhippitch"))
+        else if (simplejointnames[i].compare("rhippitch") == 0)
         {
             RHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("rhiproll"))
+        else if (simplejointnames[i].compare("rhiproll") == 0)
         {
             RHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("rkneepitch"))
+        else if (simplejointnames[i].compare("rkneepitch") == 0)
         {
             RKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("ranklepitch"))
+        else if (simplejointnames[i].compare("ranklepitch") == 0)
         {
             RAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (joints[i].compare("rankleroll"))
+        else if (simplejointnames[i].compare("rankleroll") == 0)
         {
             RAnkleRoll = i;
             m_lleg_ids.push_back(i);
@@ -651,49 +673,49 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
 {
     switch (p_sensor->SensorID) 
     {
-        case JOINT_POSITIONS:
+        case sensor_t::JOINT_POSITIONS:
             JointPositions = p_sensor;
             break;
-        case JOINT_VELOCITIES:
+        case sensor_t::JOINT_VELOCITIES:
             JointVelocities = p_sensor;
             break;
-        case JOINT_ACCELERATIONS:
+        case sensor_t::JOINT_ACCELERATIONS:
             JointAccelerations = p_sensor;
             break;
-        case JOINT_TARGETS:
+        case sensor_t::JOINT_TARGETS:
             JointTargets = p_sensor;
             break;
-        case JOINT_STIFFNESSES:
+        case sensor_t::JOINT_STIFFNESSES:
             JointStiffnesses = p_sensor;
             break;
-        case JOINT_CURRENTS:
+        case sensor_t::JOINT_CURRENTS:
             JointCurrents = p_sensor;
             break;
-        case JOINT_TORQUES:
+        case sensor_t::JOINT_TORQUES:
             JointTorques = p_sensor;
             break;
-        case JOINT_TEMPERATURES:
+        case sensor_t::JOINT_TEMPERATURES:
             JointTemperatures = p_sensor;
             break;
-        case BALANCE_ACCELEROMETER:
+        case sensor_t::BALANCE_ACCELEROMETER:
             BalanceAccelerometer = p_sensor;
             break;
-        case BALANCE_GYRO:
+        case sensor_t::BALANCE_GYRO:
             BalanceGyro = p_sensor;
             break;
-        case DISTANCE_VALUES:
+        case sensor_t::DISTANCE_VALUES:
             DistanceValues = p_sensor;
             break;
-        case FOOT_SOLE_VALUES:
+        case sensor_t::FOOT_SOLE_VALUES:
             FootSoleValues = p_sensor;
             break;
-        case FOOT_BUMPER_VALUES:
+        case sensor_t::FOOT_BUMPER_VALUES:
             FootBumperValues = p_sensor;
             break;
-        case BUTTON_VALUES:
+        case sensor_t::BUTTON_VALUES:
             ButtonValues = p_sensor;
             break;
-        case BATTERY_VALUES:
+        case sensor_t::BATTERY_VALUES:
             BatteryValues = p_sensor;
             break;
         default:

@@ -32,11 +32,11 @@
 #include <string>
 using namespace std;
 
-typedef int joint_id_t;
-
 class NUSensorsData
 {
 public:
+    typedef int joint_id_t;
+    
     static const int SENSOR_MISSING = -1;
     static joint_id_t HeadYaw;
     static joint_id_t HeadPitch;
@@ -48,12 +48,14 @@ public:
     static joint_id_t RShoulderRoll;
     static joint_id_t RElbowYaw;
     static joint_id_t RElbowRoll;
+    static joint_id_t LHipYaw;
     static joint_id_t LHipYawPitch;
     static joint_id_t LHipPitch;
     static joint_id_t LHipRoll;
     static joint_id_t LKneePitch;
     static joint_id_t LAnklePitch;
     static joint_id_t LAnkleRoll;
+    static joint_id_t RHipYaw;
     static joint_id_t RHipYawPitch;
     static joint_id_t RHipPitch;
     static joint_id_t RHipRoll;
@@ -92,7 +94,7 @@ public:
     bool getJointTorques(bodypart_id_t bodypart, vector<float>& torques);
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
     
-    void setAvaliableJoints(const vector<string> joints);
+    void setAvailableJoints(const vector<string>& joints);
     
     void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
     void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
@@ -119,7 +121,7 @@ public:
     
     int size() const;
 private:
-    void addSensor(sensor_t** p_sensor, string sensorname, sensor_id_t sensorid);
+    void addSensor(sensor_t** p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     
     bool getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data);
     bool getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data);
