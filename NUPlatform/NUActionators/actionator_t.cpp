@@ -48,6 +48,49 @@ actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
     IsAvailable = false;
 }
 
+/*! @brief A wrapper for addAction where no values are valid
+ 
+    @param time the time the action will be applied
+    @param isvalid a vector of bools, if an entry is false the corresponding element
+                   in gains will be ignored, and the current value will be reused
+    @param gains the actionator values to be applied 
+ */
+void actionator_t::addActionGains(double time, const vector<bool>& isvalid, const vector<float>& gains)
+{
+    static vector<float> values;
+    vector<bool> isvaluevalid (values.size(), false);
+    
+    addAction(time, isvaluevalid, values, isvalid, gains);
+}
+
+/*! @brief A wrapper for addAction where no gains are valid
+ 
+    @param time the time the action will be applied
+    @param isvalid a vector of bools, if an entry is false the corresponding element
+           in values will be ignored, and the current value will be reused
+    @param values the actionator values to be applied 
+ */
+void actionator_t::addActionValues(double time, const vector<bool>& isvalid, const vector<float>& values)
+{
+    static vector<float> gains;
+    vector<bool> isgainvalid (values.size(), false);
+    
+    addAction(time, isvalid, values, isgainvalid, gains);
+}
+
+/*! @brief A wrapper for addAction where isvalid is used for both values and gains
+ 
+    @param time the time the action will be applied
+    @param isvalid a vector of bools, if an entry is false the corresponding element
+                   in values AND gains will be ignored, and the current value will be reused
+    @param values the actionator values to be applied 
+    @param gains the strength/stiffness/brightness etc of the values
+ */
+void actionator_t::addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<float>& gains)
+{
+    addAction(time, isvalid, values, isvalid, gains);
+}
+
 /*! @brief Adds an action to this actionator with the specified times and values
  
     This function will keep m_points sorted based on the time they need to be executed.
@@ -65,14 +108,16 @@ actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
     @param isvalid a vector of bools, if an entry is false the corresponding element
                    in values will be ignored, and the current value will be reused
     @param values the actionator values to be applied 
+    @param isgainvalid a vector of bools, if an entry is false the corresponding gain is ignored
     @param gains the strength/stiffness/brightness etc of the values
  */
-void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& values, vector<float>& gains)
+void actionator_t::addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<bool>& isgainvalid, const vector<float>& gains)
 {
     actionator_point_t* point = new actionator_point_t();
     point->Time = time;
     point->IsValid = isvalid;
     point->Values = values;
+    point->IsGainValid = isgainvalid;
     point->Gains = gains;
     // I need to keep the actionator points sorted based on their time
     if (m_points.size() == 0)           // the common (walk engine) case will be fast
@@ -90,6 +135,14 @@ void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& 
                 for (it = insertposition; it < m_points.end(); it++)
                 {
                     (*it)->IsValid[i] = false;
+                }
+            }
+            if (point->IsGainValid[i] == true)
+            {
+                static vector<actionator_point_t*>::iterator it;
+                for (it = insertposition; it < m_points.end(); it++)
+                {
+                    (*it)->IsGainValid[i] = false;
                 }
             }
         }

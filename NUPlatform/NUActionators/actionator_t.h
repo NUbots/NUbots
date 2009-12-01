@@ -37,10 +37,11 @@ public:
      */
     struct actionator_point_t 
     {
-        double Time;            //!< a single time for each actuator point
-        vector<bool> IsValid;   //!< use this flag to effect only selected subactionators in this group    
-        vector<float> Values;   //!< the actual values to be given to the group of actionators
-        vector<float> Gains;    //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
+        double Time;                //!< a single time for each actuator point
+        vector<bool> IsValid;       //!< use this flag to effect only selected subactionators in this group    
+        vector<float> Values;       //!< the actual values to be given to the group of actionators
+        vector<bool> IsGainValid;   //!< use this flag to only change the gain on selected subactionators in this group
+        vector<float> Gains;        //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
     };
     
     /*! @brief A enum type to perform run time actionator type checking without using
@@ -61,8 +62,11 @@ public:
 public:
     actionator_t();
     actionator_t(string actionatorname, actionator_id_t actionatorid);
-    
-    void addAction(double time, vector<bool>& isvalid, vector<float>& values, vector<float>& gains);
+
+    void addActionGains(double time, const vector<bool>& isvalid, const vector<float>& gains);
+    void addActionValues(double time, const vector<bool>& isvalid, const vector<float>& values);
+    void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<float>& gains);
+    void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<bool>& isgainvalid, const vector<float>& gains);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
