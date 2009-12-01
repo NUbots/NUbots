@@ -30,6 +30,7 @@ actionator_t::actionator_t()
 {
     Name = string("Undefined");
     ActionatorID = UNDEFINED;
+    IsAvailable = false;
 }
 
 /*! @brief Constructor for an actionator_t with known name and id
@@ -40,6 +41,7 @@ actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
 {
     Name = actionatorname;
     ActionatorID = actionatorid;
+    IsAvailable = false;
 }
 
 /*! @brief Adds an action to this actionator with the specified times and values
@@ -59,12 +61,42 @@ void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& 
     m_points.push_back(point);
 }
 
+/*! @brief Provides a text summary of the contents of the actionator_t
+ 
+ The idea is to use this function when writing to a debug log. I guarentee that the 
+ output will be human readable.
+ 
+ @param output the ostream in which to put the string
+ */
 void actionator_t::summaryTo(ostream& output)
 {
-    output << Name << " " << endl;
+    output << Name << " ";
+    if (!IsAvailable)
+    {
+        output << "Unavailable" << endl;
+        return;
+    }
+    else
+    {
+        output << "Available: ";
+        for (int i=0; i<m_points.size(); i++)
+            output << m_points[i]->Time << " ";
+        output << endl;
+    }
+
 }
 
 void actionator_t::csvTo(ostream& output)
 {
+}
+
+ostream& operator<< (ostream& output, const actionator_t& p_actionator)
+{
+    //! @todo TODO: implement this function
+}
+
+istream& operator>> (istream& input, actionator_t& p_actionator)
+{
+    //! @todo TODO: implement this function
 }
 

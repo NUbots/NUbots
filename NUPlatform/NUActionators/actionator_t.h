@@ -30,38 +30,34 @@
 #include <string>
 using namespace std;
 
-struct actionator_point_t 
-{
-    double Time;            //!< a single time for each actuator point
-    vector<bool> IsValid;   //!< use this flag to effect only selected subactionators in this group    
-    vector<float> Values;   //!< the actual values to be given to the group of actionators
-    vector<float> Gains;    //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
-};
-
-/*! @brief A enum type to perform run time actionator type checking without using
-           string compares. Unfortunately, to add a new actionator you need to add an
-           id to this list.
- */
-enum actionator_id_t 
-{
-    JOINT_POSITIONS,
-    JOINT_VELOCITIES,
-    JOINT_CURRENTS,
-    JOINT_TORQUES,
-    CAMERA_CONTROL,
-    LED_L_EAR,
-    LED_R_EAR,
-    LED_L_EYE,
-    LED_R_EYE,
-    LED_L_FOOT,
-    LED_R_FOOT,
-    SOUND,
-    UNDEFINED
-};
-
-
 class actionator_t 
 {
+public:
+    /*! @brief A simple struct for storing an actionator control point
+     */
+    struct actionator_point_t 
+    {
+        double Time;            //!< a single time for each actuator point
+        vector<bool> IsValid;   //!< use this flag to effect only selected subactionators in this group    
+        vector<float> Values;   //!< the actual values to be given to the group of actionators
+        vector<float> Gains;    //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
+    };
+    
+    /*! @brief A enum type to perform run time actionator type checking without using
+     string compares. Unfortunately, to add a new actionator you need to add an
+     id to this list.
+     */
+    enum actionator_id_t 
+    {
+        JOINT_POSITIONS,
+        JOINT_VELOCITIES,
+        JOINT_CURRENTS,
+        JOINT_TORQUES,
+        CAMERA_CONTROL,
+        LEDS,
+        SOUND,
+        UNDEFINED
+    };
 public:
     actionator_t();
     actionator_t(string actionatorname, actionator_id_t actionatorid);
@@ -71,12 +67,13 @@ public:
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
     
-    /*friend ostream& operator<< (ostream& output, const actionator_t& p_actionator);
-    friend istream& operator>> (istream& input, actionator_t& p_actionator);*/
+    friend ostream& operator<< (ostream& output, const actionator_t& p_actionator);
+    friend istream& operator>> (istream& input, actionator_t& p_actionator);
 public:
-    string Name;
-    actionator_id_t ActionatorID;
-    vector<actionator_point_t*> m_points;
+    string Name;                                //!< the name of the actionator group
+    actionator_id_t ActionatorID;               //!< the actionator id
+    vector<actionator_point_t*> m_points;       //!< the actionator points
+    bool IsAvailable;                           //!< true if the actionator is avaliable, false if it is absent
 };
 
 #endif
