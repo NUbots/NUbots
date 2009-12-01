@@ -32,6 +32,8 @@ NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsD
 NUActionatorsData::joint_id_t NUActionatorsData::RShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
@@ -75,6 +77,14 @@ NUActionatorsData::NUActionatorsData()
     
     // add a Sound actionator
     addActionator(&Sound, string("Sound"), actionator_t::SOUND);
+    
+    vector<bool> isvalid (3, true);
+    vector<float> values (3, 0);
+    vector<float> gains (3, 0);
+    
+    JointPositions->addAction(10, isvalid, values, gains);
+    isvalid[1] = false;
+    JointPositions->addAction(5, isvalid, values, gains);
 }
 
 /* Add an actionator to the NUActionatorsData.
@@ -96,6 +106,14 @@ NUActionatorsData::~NUActionatorsData()
     m_lleg_ids.clear();
     m_rleg_ids.clear();
 }
+
+/******************************************************************************************************************************************
+ Get Methods
+ ******************************************************************************************************************************************/
+
+/******************************************************************************************************************************************
+ Set Methods
+ ******************************************************************************************************************************************/
 
 /*! @brief Sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
  @param joints a vector of strings where each string is a name of a joint
@@ -244,6 +262,11 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& joints)
             m_lleg_ids.push_back(i);
         }
     }
+    m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_rarm_ids.begin(), m_rarm_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_torso_ids.begin(), m_torso_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_lleg_ids.begin(), m_lleg_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_rleg_ids.begin(), m_rleg_ids.end());
 }
 
 /*! @brief Sets each of the static led_id_t if the led is in the list.
@@ -326,6 +349,10 @@ void NUActionatorsData::setAvailableActionators(const vector<string>& actionator
             Sound->IsAvailable = true;
     }
 }
+
+/******************************************************************************************************************************************
+ Displaying Contents and Serialisation
+ ******************************************************************************************************************************************/
 
 void NUActionatorsData::summaryTo(ostream& output)
 {

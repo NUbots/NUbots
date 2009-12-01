@@ -50,6 +50,8 @@ public:
     static joint_id_t RShoulderRoll;
     static joint_id_t RElbowYaw;
     static joint_id_t RElbowRoll;
+    static joint_id_t TorsoYaw;
+    static joint_id_t TorsoPitch;
     static joint_id_t LHipYaw;
     static joint_id_t LHipYawPitch;
     static joint_id_t LHipPitch;
@@ -80,11 +82,38 @@ public:
         Torso,
         LeftLeg,
         RightLeg,
+        Body,
         All
     };
 public:
     NUActionatorsData();
     ~NUActionatorsData();
+    
+    bool getJointPositions(vector<float>& positions, vector<float>& gains);
+    bool getJointVelocities(vector<float>& velocities, vector<float>& gains);
+    bool getJointStiffnesses(vector<float>& stiffnesses);
+    bool getJointTorques(vector<float>& torques, vector<float>& gains);
+    
+    // Set methods for a joint without specifying a gain
+    bool setJointPosition(joint_id_t jointid, double time, float position);
+    bool setJointVelocity(joint_id_t jointid, double time, float velocity);
+    bool setJointStiffness(joint_id_t jointid, double time, float stiffness);
+    bool setJointTorque(joint_id_t jointid, double time, float torque);
+    
+    // Set methods for a joint
+    bool setJointPosition(joint_id_t jointid, double time, float position, float gain);
+    bool setJointVelocity(joint_id_t jointid, double time, float velocity, float gain);
+    bool setJointTorque(joint_id_t jointid, double time, float torque, float gain);
+    
+    // Set methods for the joints without specifying a gain
+    bool setJointPositions(bodypart_id_t jointid, double time, const vector<float>& positions);
+    bool setJointVelocities(bodypart_id_t jointid, double time, const vector<float>& velocities);
+    bool setJointStiffnesses(bodypart_id_t jointid, double time, const vector<float>& stiffnesses);
+    bool setJointTorques(bodypart_id_t jointid, double time, const vector<float>& torques);
+    
+    bool setJointPositions(bodypart_id_t jointid, double time, const vector<float>& positions, const vector<float>& gain);
+    bool setJointVelocities(bodypart_id_t jointid, double time, const vector<float>& velocities, const vector<float>& gain);
+    bool setJointTorques(bodypart_id_t jointid, double time, const vector<float>& torques, const vector<float>& gain);
 
     void setAvailableJoints(const vector<string>& joints);
     void setAvailableLeds(const vector<string>& leds);
@@ -98,6 +127,14 @@ public:
     
 private:
     void addActionator(actionator_t** p_actionator, string actionatorname, actionator_t::actionator_id_t actionatorid);
+    
+    bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data);
+    bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data, float gain);
+    
+    bool setJointsValueData(actionator_t* p_actionator, joint_id_t jointid, double time, const vector<bool>& isvalid, const vector<float>& values);
+    bool setJointsGainData(actionator_t* p_actionator, joint_id_t jointid, double time, const vector<bool>& isvalid, const vector<float>& gains);
+    bool setJointsData(actionator_t* p_actionator, joint_id_t jointid, double time, const vector<bool>& isvalid, const vector<float>& values, const vector<float>& gain);
+    bool setJointsData(actionator_t* p_actionator, joint_id_t jointid, double time, const vector<bool>& isvalid, const vector<float>& values, const vector<bool>& isgainvalid, const vector<float>& gain);
     
 public:
     // NAMED ACTIONATORS
@@ -116,6 +153,7 @@ private:
     vector<joint_id_t> m_torso_ids;
     vector<joint_id_t> m_lleg_ids;
     vector<joint_id_t> m_rleg_ids;
+    vector<joint_id_t> m_body_ids;
 };
 
 #endif
