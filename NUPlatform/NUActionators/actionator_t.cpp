@@ -23,6 +23,10 @@
 #include "NUPlatform/NUSystem.h"
 #include "Tools/debug.h"
 
+#include <algorithm>
+
+static bool comparePointTimes(const void* a, const void* b);     //! @todo TODO: make this a member of the class!
+
 
 /*! @brief Default constructor for a actionator_t. Initialises the actionator to be undefined and invalid
  */
@@ -45,6 +49,10 @@ actionator_t::actionator_t(string actionatorname, actionator_id_t actionatorid)
 }
 
 /*! @brief Adds an action to this actionator with the specified times and values
+ 
+    This function will keep m_points sorted based on the time they need to be executed,
+    and it will clear all points after the new one.
+ 
     @param time the time the action will be applied
     @param isvalid a vector of bools, if an entry is false the corresponding element
                    in values will be ignored, and the current value will be reused
@@ -58,7 +66,35 @@ void actionator_t::addAction(double time, vector<bool>& isvalid, vector<float>& 
     point->IsValid = isvalid;
     point->Values = values;
     point->Gains = gains;
-    m_points.push_back(point);
+    // I need to keep the actionator points sorted based on their time
+    if (m_points.size() == 0)           // the common (walk engine) case will be fast
+        m_points.push_back(point);
+    else
+    {   // so instead of just pushing it to the back, I need to put it in the right place :(
+        static vector<actionator_point_t*>::iterator insertposition;
+        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+        m_points.push_back(point);  
+        
+        // m_points.insert(insertposition, point); // Merge-type actionator points
+    }
+    
+}
+
+/*! Returns true if a should go before b, false otherwise.
+ */
+bool comparePointTimes(const void* a, const void* b)
+{
+    static double timea = 0;
+    static double timeb = 0;
+    
+    timea = ((actionator_t::actionator_point_t*)a)->Time;
+    timeb = ((actionator_t::actionator_point_t*)b)->Time;
+    
+    if (timea < timeb)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Provides a text summary of the contents of the actionator_t
