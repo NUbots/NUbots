@@ -20,16 +20,72 @@
  */
 
 #include "NAOWebotsActionators.h"
+#include "Tools/debug.h"
 
-#include <iostream>
-using namespace std;
+// init m_actionator_names:
+static string temp_actionator_names[] = {string("JointPositions"), string("JointVelocities"), string("JointTorques"), string("Camera"), string("Leds")};
+vector<string> NAOWebotsActionators::m_actionator_names(temp_actionator_names, temp_actionator_names + sizeof(temp_actionator_names)/sizeof(*temp_actionator_names));
 
+// init m_servo_names:
+static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
+                                    string("LShoulderPitch"), string("LShoulderRoll"), string("LElbowYaw"), string("LElbowRoll"), \
+                                    string("RShoulderPitch"), string("RShoulderRoll"), string("RElbowYaw"), string("RElbowRoll"), \
+                                    string("LHipYawPitch"), string("LHipPitch"), string("LHipRoll"), string("LKneePitch"), string("LAnklePitch"), string("LAnkleRoll"), \
+                                    string("RHipYawPitch"), string("RHipPitch"), string("RHipRoll"), string("RKneePitch"), string("RAnklePitch"), string("RAnkleRoll")};
+vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+
+// init m_led_names:
+static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
+                                  string("ChestBoard/Led"), \
+                                  string("LFoot/Led"), string("RFoot/Led")};
+vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+
+/*! @brief Constructs a nubot actionator class with a Webots backend
+ 
+    @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
+ */ 
 NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
 {
-    cout << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
+#endif
+    getActionatorsFromWebots(platform);
+    enableActionatorsInWebots();
+    
+    m_data->setAvailableJoints(m_servo_names);
+    m_data->setAvailableLeds(m_led_names);
+    m_data->setAvailableActionators(m_actionator_names);
+#if DEBUG_NUACTIONATORS_VERBOSITY > 3
+    debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
+    m_data->summaryTo(debug);
+#endif
+}
+
+/*! @brief Get pointers to each of the actionators in the simulated NAO
+ */
+void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
+{
+    // Get the servos
+    for (int i=0; i<m_servo_names.size(); i++)
+        m_servos.push_back(platform->getServo(m_servo_names[i]));
+    // Get the camera
+    m_camera_control = platform->getServo("CameraSelect");
+    // Get the leds
+    for (int i=0; i<m_led_names.size(); i++)
+        m_leds.push_back(platform->getLED(m_led_names[i]));
+    //! @todo TODO: get the sound from webots
+}
+
+void NAOWebotsActionators::enableActionatorsInWebots()
+{
+    // Nothing needs to be done here!
 }
 
 NAOWebotsActionators::~NAOWebotsActionators()
+{
+}
+
+void NAOWebotsActionators::copyToHardwareCommunications()
 {
 }
 
