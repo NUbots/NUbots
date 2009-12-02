@@ -39,14 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
     mdiArea->addSubWindow(imageDisplay);
 
     // Connect the virtual robot to the opengl manager.
-    connect(&virtualRobot,SIGNAL(yuvImageChanged(NUimage*)),&glManager, SLOT(newRawImage(NUimage*)));
-    connect(&virtualRobot,SIGNAL(classifiedImageChanged(ClassifiedImage*)),&glManager,SLOT(newClassifiedImage(ClassifiedImage*)));
-    connect(&virtualRobot,SIGNAL(horizonChanged(Horizon*)),&glManager,SLOT(newHorizon(Horizon*)));
-    connect(&virtualRobot,SIGNAL(classificationSelectionChanged(ClassifiedImage*)),&glManager,SLOT(newClassificationSelection(ClassifiedImage*)));
-
-    connect(&virtualRobot,SIGNAL(greenHorizonScanPointsChanged(std::vector< Vector2<int> >)),&glManager,SLOT(newGreenpoints(std::vector< Vector2<int> >)));
-
-
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
 
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
@@ -60,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     currentFrameNumber = -1;
 
     imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
-    imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
+    //imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
     imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
     imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(0,255,127));

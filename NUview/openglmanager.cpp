@@ -59,7 +59,7 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
     displayStored[displayId] = true;
 }
 
-void OpenglManager::newRawImage(NUimage* newImage)
+void OpenglManager::writeNUimageToDisplay(NUimage* newImage, GLDisplay::display displayId)
 {
     width = newImage->width();
     height = newImage->height();
@@ -75,12 +75,12 @@ void OpenglManager::newRawImage(NUimage* newImage)
             imageLine[x] = qRgb(r,g,b);
         }
     }
-    createDrawTextureImage(image, GLDisplay::rawImage);
-    emit updatedDisplay(GLDisplay::rawImage, displays[GLDisplay::rawImage], width, height);
+    createDrawTextureImage(image, displayId);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
 
-void OpenglManager::newClassifiedImage(ClassifiedImage* newImage)
+void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDisplay::display displayId)
 {
     width = newImage->width();
     height = newImage->height();
@@ -101,73 +101,47 @@ void OpenglManager::newClassifiedImage(ClassifiedImage* newImage)
             imageLine[x] = qRgba(r,g,b,alpha);
         }
     }
-    createDrawTextureImage(image, GLDisplay::classifiedImage);
-    emit updatedDisplay(GLDisplay::classifiedImage, displays[GLDisplay::classifiedImage], width, height);
+    createDrawTextureImage(image, displayId);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
 
-void OpenglManager::newHorizon(Horizon* newHorizon)
+void OpenglManager::writeLineToDisplay(Line* newLine, GLDisplay::display displayId)
 {
     // If there is an old list stored, delete it first.
-    if(displayStored[GLDisplay::horizonLine])
+    if(displayStored[displayId])
     {
-        glDeleteLists(displays[GLDisplay::horizonLine],1);
+        glDeleteLists(displays[displayId],1);
     }
 
-    displays[GLDisplay::horizonLine] = glGenLists(1);
-    glNewList(displays[GLDisplay::horizonLine],GL_COMPILE);    // START OF LIST
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
 
     glLineWidth(2.0);       // Line width
     glBegin(GL_LINES);                              // Start Lines
-    glVertex2i( 0, (int)newHorizon->findYFromX(0));                 // Starting point
-    glVertex2i( (int)width, (int)newHorizon->findYFromX(width));    // End point
+    glVertex2i( 0, (int)newLine->findYFromX(0));                 // Starting point
+    glVertex2i( (int)width, (int)newLine->findYFromX(width));    // End point
     glEnd();                                        // End Lines
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
 
-    displayStored[GLDisplay::horizonLine] = true;
+    displayStored[displayId] = true;
 
-    emit updatedDisplay(GLDisplay::horizonLine, displays[GLDisplay::horizonLine], width, height);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
 
-void OpenglManager::newClassificationSelection(ClassifiedImage* newImage)
-{
-    width = newImage->width();
-    height = newImage->height();
-    QImage image(width,height,QImage::Format_ARGB32);
-
-    unsigned char r, g, b, alpha;
-    QRgb* imageLine;
-    int tempIndex;
-    for (int y=0; y < height; y++)
-    {
-        imageLine = (QRgb*)image.scanLine(y);
-        for (int x=0; x < width; x++)
-        {
-            alpha = 255;
-            tempIndex = newImage->image[y][x];
-            if(tempIndex == ClassIndex::unclassified) alpha = 0;
-            ClassIndex::getColourIndexAsRGB(tempIndex, r, g, b);
-            imageLine[x] = qRgba(r,g,b,alpha);
-        }
-    }
-    createDrawTextureImage(image, GLDisplay::classificationSelection);
-    emit updatedDisplay(GLDisplay::classificationSelection, displays[GLDisplay::classificationSelection], width, height);
-    return;
-}
-
-void OpenglManager::newGreenpoints(std::vector< Vector2<int> > newpoints)
+void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId)
 {
     // If there is an old list stored, delete it first.
-    if(displayStored[GLDisplay::greenHorizonScanPoints])
+    if(displayStored[displayId])
     {
-        glDeleteLists(displays[GLDisplay::greenHorizonScanPoints],1);
+        glDeleteLists(displays[displayId],1);
     }
 
-    displays[GLDisplay::greenHorizonScanPoints] = glGenLists(1);
-    glNewList(displays[GLDisplay::greenHorizonScanPoints],GL_COMPILE);    // START OF LIST
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
     for (int pointNum = 0; pointNum < (int)newpoints.size(); pointNum++)
     {
@@ -176,9 +150,9 @@ void OpenglManager::newGreenpoints(std::vector< Vector2<int> > newpoints)
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
 
-    displayStored[GLDisplay::greenHorizonScanPoints] = true;
+    displayStored[displayId] = true;
 
-    emit updatedDisplay(GLDisplay::greenHorizonScanPoints, displays[GLDisplay::greenHorizonScanPoints], width, height);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
 

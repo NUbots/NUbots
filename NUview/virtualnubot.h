@@ -8,6 +8,7 @@
 #include "classificationwidget.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
+#include "GLDisplay.h"
 #include "Vision/Vision.h"
 #include <vector>
 
@@ -53,11 +54,10 @@ public slots:
     void loadLookupTableFile(QString fileName);    
 
 signals:
-    void yuvImageChanged(NUimage* updatedImage);
-    void classifiedImageChanged(ClassifiedImage* updatedImage);
-    void horizonChanged(Horizon* horizonLine);
-    void classificationSelectionChanged(ClassifiedImage* updatedImage);
-    void greenHorizonScanPointsChanged(std::vector< Vector2<int> > updatedPoints);
+    void imageDisplayChanged(NUimage* updatedImage, GLDisplay::display displayId);
+    void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
+    void lineDisplayChanged(Line* line, GLDisplay::display displayId);
+    void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
 
 private:
     class classEntry
