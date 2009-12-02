@@ -167,16 +167,10 @@ void actionator_t::addAction(double time, const vector<bool>& isvalid, const vec
  */
 void actionator_t::removeCompleted(double currenttime)
 {
-    if (m_points.size() == 0)
-        return;
-    else if (m_points[0]->Time < currenttime)
+    while (m_points.size() > 0 && m_points[0]->Time < currenttime)
     {
-        if (m_points.size() == 1)
-            m_points.clear();
-        else
-            m_points.erase(m_points.begin());
+        m_points.erase(m_points.begin());
     }
-
 }
 
 /*! Returns true if a should go before b, false otherwise.
