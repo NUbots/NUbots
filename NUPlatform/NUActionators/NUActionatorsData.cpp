@@ -122,9 +122,9 @@ void NUActionatorsData::removeCompletedActions(double currenttime)
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointPositions(vector<double>& time, vector<bool>& isvalid, vector<float>& positions, vector<float>& gains)
+bool NUActionatorsData::getJointPositions(vector<double>& time, vector<bool>& isvalid, vector<float>& positions, vector<bool>& isgainvalid, vector<float>& gains)
 {
-    getJointData(JointPositions, time, isvalid, positions, gains);
+    getJointData(JointPositions, time, isvalid, positions, isgainvalid, gains);
 }
 
 /*! @brief Gets the next actionator point (ie the isvalid the velocities and the gains) data
@@ -136,9 +136,9 @@ bool NUActionatorsData::getJointPositions(vector<double>& time, vector<bool>& is
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointVelocities(vector<double>& time, vector<bool>& isvalid, vector<float>& velocities, vector<float>& gains)
+bool NUActionatorsData::getJointVelocities(vector<double>& time, vector<bool>& isvalid, vector<float>& velocities, vector<bool>& isgainvalid, vector<float>& gains)
 {
-    getJointData(JointVelocities, time, isvalid, velocities, gains);
+    getJointData(JointVelocities, time, isvalid, velocities, isgainvalid, gains);
 }
 
 /*! @brief Gets the next actionator point (ie the isvalid the torques and the gains) data
@@ -150,9 +150,9 @@ bool NUActionatorsData::getJointVelocities(vector<double>& time, vector<bool>& i
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointTorques(vector<double>& time, vector<bool>& isvalid, vector<float>& torques, vector<float>& gains)
+bool NUActionatorsData::getJointTorques(vector<double>& time, vector<bool>& isvalid, vector<float>& torques, vector<bool>& isgainvalid, vector<float>& gains)
 {
-    getJointData(JointTorques, time, isvalid, torques, gains);
+    getJointData(JointTorques, time, isvalid, torques, isgainvalid, gains);
 }
 
 /*! @brief This function does the grunt work for getting data and gains to be sent to hardware communications
@@ -165,7 +165,7 @@ bool NUActionatorsData::getJointTorques(vector<double>& time, vector<bool>& isva
  
     @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isvalid, vector<float>& data, vector<float>& gains)
+bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isvalid, vector<float>& data, vector<bool>& isgainvalid, vector<float>& gains)
 {
     if (p_actionator->IsAvailable == false)
         return false;
@@ -177,6 +177,7 @@ bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>&
     time = vector<double> (numdims, 0);
     isvalid = vector<bool> (numdims, false);
     data = vector<float> (numdims, 0);
+    isgainvalid = vector<bool> (numdims, false);
     gains = vector<float> (numdims, 0);
     
     // for each dimension we need to find the next point that has valid data for this dimension
@@ -189,6 +190,14 @@ bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>&
                 time[i] = p_actionator->m_points[j]->Time;
                 isvalid[i] = true;
                 data[i] = p_actionator->m_points[j]->Values[i];
+                isgainvalid[i] = p_actionator->m_points[j]->IsGainValid[i];
+                gains[i] = p_actionator->m_points[j]->Gains[i];
+                break;
+            }
+            else if (p_actionator->m_points[j]->IsGainValid[i] == true)
+            {
+                time[i] = p_actionator->m_points[j]->Time;
+                isgainvalid[i] = true;
                 gains[i] = p_actionator->m_points[j]->Gains[i];
                 break;
             }

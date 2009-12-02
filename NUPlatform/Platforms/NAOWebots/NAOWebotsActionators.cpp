@@ -108,12 +108,13 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     static vector<float> positions;
     static vector<float> velocities;
     static vector<float> torques;
+    static vector<bool> isgainvalid;
     static vector<float> gains;
     
     currenttime = m_platform->system->getTime();
     m_data->removeCompletedActions(currenttime);
     
-    if (m_data->getJointPositions(actiontime, isvalid, positions, gains))
+    if (m_data->getJointPositions(actiontime, isvalid, positions, isgainvalid, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
@@ -122,11 +123,14 @@ void NAOWebotsActionators::copyToHardwareCommunications()
                 float currentpos = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                 m_servos[i]->setPosition(positions[i]);
                 m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(actiontime[i] - currenttime)));     // note time is in milliseconds
+            }
+            if (isgainvalid[i] == true)
+            {
                 m_servos[i]->setControlP(gains[i]);
             }
         }
     }
-    if (m_data->getJointVelocities(actiontime, isvalid, velocities, gains))
+    if (m_data->getJointVelocities(actiontime, isvalid, velocities, isgainvalid, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
@@ -137,7 +141,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
             }
         }
     }
-    if (m_data->getJointTorques(actiontime, isvalid, torques, gains))
+    if (m_data->getJointTorques(actiontime, isvalid, torques, isgainvalid, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
