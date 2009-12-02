@@ -202,30 +202,37 @@ bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>&
 
 bool NUActionatorsData::setJointPosition(joint_id_t jointid, double time, float position)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointVelocity(joint_id_t jointid, double time, float velocity)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointStiffness(joint_id_t jointid, double time, float stiffness)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointTorque(joint_id_t jointid, double time, float torque)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointPosition(joint_id_t jointid, double time, float position, float gain)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointVelocity(joint_id_t jointid, double time, float velocity, float gain)
 {
+    return false;
 }
 
 bool NUActionatorsData::setJointTorque(joint_id_t jointid, double time, float torque, float gain)
 {
+    return false;
 }
 
 /*! @brief Set the joint positions for the selected body part
