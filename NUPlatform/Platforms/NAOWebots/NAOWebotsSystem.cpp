@@ -38,7 +38,7 @@ NAOWebotsSystem::~NAOWebotsSystem()
  */
 long double NAOWebotsSystem::getPosixTimeStamp()
 {
-    return m_simulator_start_timestamp + m_platform->getTime();
+    return m_simulator_start_timestamp + m_platform->getTime()*1000;
 }
 
 /*! @brief Returns the time in milliseconds since the start of the program adjusted so
@@ -46,7 +46,7 @@ long double NAOWebotsSystem::getPosixTimeStamp()
  */
 double NAOWebotsSystem::getTime()
 {
-    return m_platform->getTime();
+    return m_platform->getTime()*1000;
 }
 
 /*! @brief  Returns the time in milliseconds since the start of the program adjusted so
