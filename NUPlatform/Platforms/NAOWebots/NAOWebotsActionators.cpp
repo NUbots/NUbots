@@ -102,11 +102,12 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
-    // In webots we have
     static double currenttime;
     static vector<double> actiontime;
     static vector<bool> isvalid;
     static vector<float> positions;
+    static vector<float> velocities;
+    static vector<float> torques;
     static vector<float> gains;
     
     currenttime = m_platform->system->getTime();
@@ -118,20 +119,34 @@ void NAOWebotsActionators::copyToHardwareCommunications()
         {
             if (isvalid[i] == true)
             {
-                float currentpos = m_servos[i]->getPosition();
+                float currentpos = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                 m_servos[i]->setPosition(positions[i]);
                 m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(actiontime[i] - currenttime)));     // note time is in milliseconds
                 m_servos[i]->setControlP(gains[i]);
             }
         }
     }
-    /*for (int i=0; i<m_servos.size(); i++)
+    if (m_data->getJointVelocities(actiontime, isvalid, velocities, gains))
     {
-        m_servos[i]->setPosition(0);
-        m_servos[i]->setVelocity(0);
-        m_servos[i]->setControlP(0.01);
-        m_servos[i]->setForce(0);           // we might have to use this to emulate the stiffness on the NAO
-    }*/
+        for (int i=0; i<m_servos.size(); i++)
+        {
+            if (isvalid[i] == true)
+            {
+                m_servos[i]->setPosition(positions[i]);
+                m_servos[i]->setVelocity(fabs(velocities[i]));     // note time is in milliseconds
+            }
+        }
+    }
+    if (m_data->getJointTorques(actiontime, isvalid, torques, gains))
+    {
+        for (int i=0; i<m_servos.size(); i++)
+        {
+            if (isvalid[i] == true)
+            {
+                m_servos[i]->setVelocity(torques[i]);     // note time is in milliseconds
+            }
+        }
+    }
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
