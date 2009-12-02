@@ -68,6 +68,8 @@ public:
     void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<float>& gains);
     void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<bool>& isgainvalid, const vector<float>& gains);
     
+    void removeCompleted(double currenttime);
+    
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
     

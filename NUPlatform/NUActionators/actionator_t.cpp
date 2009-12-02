@@ -162,6 +162,23 @@ void actionator_t::addAction(double time, const vector<bool>& isvalid, const vec
     
 }
 
+/*! @brief Remove all of the completed points
+    @param currenttime the current time in milliseconds
+ */
+void actionator_t::removeCompleted(double currenttime)
+{
+    if (m_points.size() == 0)
+        return;
+    else if (m_points[0]->Time < currenttime)
+    {
+        if (m_points.size() == 1)
+            m_points.clear();
+        else
+            m_points.erase(m_points.begin());
+    }
+
+}
+
 /*! Returns true if a should go before b, false otherwise.
  */
 bool comparePointTimes(const void* a, const void* b)
@@ -196,18 +213,24 @@ void actionator_t::summaryTo(ostream& output)
     else
     {
         output << "Available: ";
-        for (int i=0; i<m_points.size(); i++)
+        if (m_points.size() == 0)
+            output << "empty" << endl;
+        else
         {
-            output << m_points[i]->Time << ": ";
-            for (int j=0; j<m_points[i]->Values.size(); j++)
+            output << endl;
+            for (int i=0; i<m_points.size(); i++)
             {
-                if (m_points[i]->IsValid[j] == false)
-                    output << "- ";
-                else
-                    output << m_points[i]->Values[j] << " ";
+                output << m_points[i]->Time << ": \t";
+                for (int j=0; j<m_points[i]->Values.size(); j++)
+                {
+                    if (m_points[i]->IsValid[j] == false)
+                        output << "- ";
+                    else
+                        output << m_points[i]->Values[j] << " ";
+                }
+                output << endl;
             }
         }
-        output << endl;
     }
 
 }

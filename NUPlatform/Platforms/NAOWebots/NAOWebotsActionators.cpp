@@ -49,12 +49,24 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
 #endif
+    m_platform = platform;
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
     m_data->setAvailableJoints(m_servo_names);
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableActionators(m_actionator_names);
+    
+    vector<float> values (2, 0);
+    vector<float> gains (2, 100);
+    
+    
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 350, values, gains);
+    values[0] = -1.57;
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 700, values, gains);
+    values[0] = 1.57;
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 1400, values, gains);
+    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
@@ -87,14 +99,40 @@ NAOWebotsActionators::~NAOWebotsActionators()
 
 void NAOWebotsActionators::copyToHardwareCommunications()
 {
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
+#endif
     // In webots we have
-    for (int i=0; i<m_servos.size(); i++)
+    static double currenttime;
+    static double actiontime;
+    static vector<bool> isvalid;
+    static vector<float> positions;
+    static vector<float> gains;
+    
+    currenttime = m_platform->system->getTime();
+    m_data->removeCompletedActions(currenttime);
+    
+    if (m_data->getJointPositions(actiontime, isvalid, positions, gains))
+    {
+        for (int i=0; i<m_servos.size(); i++)
+        {
+            if (isvalid[i] == true)
+            {
+                m_servos[i]->setPosition(positions[i]);
+                m_servos[i]->setControlP(gains[i]);
+            }
+        }
+    }
+    /*for (int i=0; i<m_servos.size(); i++)
     {
         m_servos[i]->setPosition(0);
         m_servos[i]->setVelocity(0);
         m_servos[i]->setControlP(0.01);
         m_servos[i]->setForce(0);           // we might have to use this to emulate the stiffness on the NAO
-    }
+    }*/
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    m_data->summaryTo(debug);
+#endif
 }
 
 
