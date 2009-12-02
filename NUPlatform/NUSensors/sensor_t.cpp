@@ -151,7 +151,7 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
     char* inbuffer = new char[1000];                // temporary buffer for binary read
     input >> p_sensor.Name;
     input >> id;
-    p_sensor.SensorID = (sensor_id_t) id;
+    p_sensor.SensorID = (sensor_t::sensor_id_t) id;
     
     input >> size;
     p_sensor.Data.resize(size, 0);

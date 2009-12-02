@@ -30,11 +30,33 @@
 #include "NUPlatform/NUActionators.h"
 #include "NAOWebotsPlatform.h"
 
+#include "webots/Robot.hpp"
+using namespace webots;
+
 class NAOWebotsActionators : public NUActionators
 {
 public:
     NAOWebotsActionators(NAOWebotsPlatform* platform);
     ~NAOWebotsActionators();
+    
+private:
+    void copyToHardwareCommunications();
+    
+    void getActionatorsFromWebots(NAOWebotsPlatform* platform);
+    void enableActionatorsInWebots();
+private:
+    static const int m_simulation_step = 40;
+    
+    NAOWebotsPlatform* m_platform;
+    
+    // Actionators
+    static vector<string> m_actionator_names;   //<! a list of names of the available actionators
+    static vector<string> m_servo_names;
+    vector<Servo*> m_servos;
+    Servo* m_camera_control;                    //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
+    static vector<string> m_led_names;
+    vector<LED*> m_leds;
+    //! @todo TODO: add the sound actionator
 };
 
 #endif

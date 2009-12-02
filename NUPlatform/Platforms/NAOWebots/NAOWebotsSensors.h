@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 using namespace std;
 
 #include "webots/Robot.hpp"

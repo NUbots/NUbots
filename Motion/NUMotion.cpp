@@ -41,12 +41,18 @@ NUMotion::~NUMotion()
 {
 }
 
-/*! @brief Process new body sensor data, and action commands
+/*! @brief Process new body sensor data, and produce actionator commands
+ 
+    @param data a pointer to the most recent sensor data storage class
+    @param actions a pointer to the actionators data storage class. This variable will be filled
+                   with the desired actions by NUMotion provided the NUActionatorsData instance
+                   has been initialised by NUActionators.
  */
-ActuatorCommands* NUMotion::process(BodyData* data)
+void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    ActuatorCommands* temp = new ActuatorCommands();
-    return temp;
+    if (actions == NULL)
+        return;
+    
 }
 
 /*! @brief Process new body sensor data, and action commands

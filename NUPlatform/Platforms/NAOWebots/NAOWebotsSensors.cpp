@@ -46,6 +46,8 @@ static string temp_foot_bumper_names[] = {string("LFoot/Bumper/Left"), string("L
 vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
 
 /*! @brief Constructs a nubot sensor class with Webots backend
+ 
+    @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
 {
@@ -55,6 +57,7 @@ NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
     m_platform = platform;
     getSensorsFromWebots(platform);
     enableSensorsInWebots();
+    m_data->setAvailableJoints(m_servo_names);
 }
 
 /* Gets pointers to each of the sensors in the simulated NAO
@@ -118,6 +121,17 @@ void NAOWebotsSensors::enableSensorsInWebots()
  */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
+    m_servo_names.clear();
+    m_servos.clear();
+    delete m_accelerometer;
+    delete m_gyro;
+    m_distance_names.clear();
+    m_distance_sensors.clear();
+    m_foot_sole_names.clear();
+    m_foot_sole_sensors.clear();
+    m_foot_bumper_names.clear();
+    m_foot_bumper_sensors.clear();
+    delete m_gps;
 }
 
 /*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.
@@ -127,12 +141,75 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
+    
+    static double currenttime;
     static vector<float> positiondata(m_servos.size(), 0);
+    static vector<float> velocitydata(m_servos.size(), 0);
+    static vector<float> accelerationdata(m_servos.size(), 0);
+    static vector<float> targetdata(m_servos.size(), 0);
+    static vector<float> stiffnessdata(m_servos.size(), 0);
+    static vector<float> torquedata(m_servos.size(), 0);
+    
+    const unsigned char numdimensions = 3;
+    static vector<float> accelerometerdata(numdimensions, 0);
+    static vector<float> gyrodata(numdimensions, 0);
+    
+    static vector<float> distancedata(m_distance_sensors.size(), 0);
+    static vector<float> footsoledata(m_foot_sole_sensors.size(), 0);
+    static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
+    
+    currenttime = m_platform->system->getTime();
+    // @todo TODO: implement unit conversions here, and apply any calibrated offsets
+    // Copy joint positions
     for (int i=0; i<m_servos.size(); i++)
         positiondata[i] = m_servos[i]->getPosition();
-    m_data->JointPositions->setData(m_platform->system->getPosixTimeStamp(), positiondata);
+    m_data->setJointPositions(currenttime, positiondata);
+    
+    // @todo TODO: Velocity and acceleration will need to be calculated
+    
+    // @todo TODO: We will need to keep track of the controls ourselves for Target and stiffness.
+    
+    // Copy joint torques
+    for (int i=0; i<m_servos.size(); i++)
+        torquedata[i] = m_servos[i]->getMotorForceFeedback();
+    m_data->setJointTorques(currenttime, torquedata);
+    
+    // Copy accelerometer [x, y, z, gx, gy, gz]
+    static const double *buffer;
+    buffer = m_accelerometer->getValues();
+    for (int i=0; i<numdimensions; i++)
+        accelerometerdata[i] = buffer[i];
+    m_data->setBalanceAccelerometer(currenttime, accelerometerdata);
+    buffer = m_gyro->getValues();
+    for (int i=0; i<numdimensions; i++)
+        gyrodata[i] = buffer[i];
+    m_data->setBalanceGyro(currenttime, gyrodata);
+    
+    // Copy distance readings
+    for (int i=0; i<m_distance_sensors.size(); i++)
+        distancedata[i] = m_distance_sensors[i]->getValue();
+    m_data->setDistanceValues(currenttime, distancedata);
+    
+    // Copy foot sole readings
+    for (int i=0; i<m_foot_sole_sensors.size(); i++)
+        footsoledata[i] = m_foot_sole_sensors[i]->getValue();
+    m_data->setFootSoleValues(currenttime, footsoledata);
+    
+    // Copy foot bumper readings
+    for (int i=0; i<m_foot_bumper_sensors.size(); i++)
+        footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
+    m_data->setFootBumperValues(currenttime, footbumperdata);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 3
+    static bool firstrun = true;
+    if (firstrun)
+    {
+        debug << "NAOWebotsSensors::NAOWebotsSensors(). Available Sensors:" << endl;
+        m_data->summaryTo(debug);
+        firstrun = false;
+    }
+#endif
 }
-
 
 
 
