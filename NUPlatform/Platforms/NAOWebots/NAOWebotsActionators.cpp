@@ -63,9 +63,9 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     
     m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 350, values, gains);
     values[0] = -1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 700, values, gains);
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 4000, values, gains);
     values[0] = 1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 1400, values, gains);
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 8000, values, gains);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -104,7 +104,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #endif
     // In webots we have
     static double currenttime;
-    static double actiontime;
+    static vector<double> actiontime;
     static vector<bool> isvalid;
     static vector<float> positions;
     static vector<float> gains;
@@ -118,7 +118,9 @@ void NAOWebotsActionators::copyToHardwareCommunications()
         {
             if (isvalid[i] == true)
             {
+                float currentpos = m_servos[i]->getPosition();
                 m_servos[i]->setPosition(positions[i]);
+                m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(actiontime[i] - currenttime)));     // note time is in milliseconds
                 m_servos[i]->setControlP(gains[i]);
             }
         }

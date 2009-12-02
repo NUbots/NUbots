@@ -92,9 +92,9 @@ public:
     void removeCompletedActions(double currenttime);
     
     // Get methods for joints
-    bool getJointPositions(double& time, vector<bool>& isvalid, vector<float>& positions, vector<float>& gains);
-    bool getJointVelocities(double& time, vector<bool>& isvalid, vector<float>& velocities, vector<float>& gains);
-    bool getJointTorques(double& time, vector<bool>& isvalid, vector<float>& torques, vector<float>& gains);
+    bool getJointPositions(vector<double>& time, vector<bool>& isvalid, vector<float>& positions, vector<float>& gains);
+    bool getJointVelocities(vector<double>& time, vector<bool>& isvalid, vector<float>& velocities, vector<float>& gains);
+    bool getJointTorques(vector<double>& time, vector<bool>& isvalid, vector<float>& torques, vector<float>& gains);
     
     // Set methods for a joint without specifying a gain
     bool setJointPosition(joint_id_t jointid, double time, float position);
@@ -130,7 +130,7 @@ public:
 private:
     void addActionator(actionator_t** p_actionator, string actionatorname, actionator_t::actionator_id_t actionatorid);
     
-    bool getJointData(actionator_t* p_actionator, double& time, vector<bool>& isvalid, vector<float>& data, vector<float>& gains);
+    bool getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isvalid, vector<float>& data, vector<float>& gains);
     
     bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data);
     bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data, float gain);

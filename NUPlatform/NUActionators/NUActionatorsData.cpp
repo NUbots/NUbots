@@ -122,7 +122,7 @@ void NUActionatorsData::removeCompletedActions(double currenttime)
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointPositions(double& time, vector<bool>& isvalid, vector<float>& positions, vector<float>& gains)
+bool NUActionatorsData::getJointPositions(vector<double>& time, vector<bool>& isvalid, vector<float>& positions, vector<float>& gains)
 {
     getJointData(JointPositions, time, isvalid, positions, gains);
 }
@@ -136,7 +136,7 @@ bool NUActionatorsData::getJointPositions(double& time, vector<bool>& isvalid, v
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointVelocities(double& time, vector<bool>& isvalid, vector<float>& velocities, vector<float>& gains)
+bool NUActionatorsData::getJointVelocities(vector<double>& time, vector<bool>& isvalid, vector<float>& velocities, vector<float>& gains)
 {
     getJointData(JointVelocities, time, isvalid, velocities, gains);
 }
@@ -150,7 +150,7 @@ bool NUActionatorsData::getJointVelocities(double& time, vector<bool>& isvalid, 
  
  @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointTorques(double& time, vector<bool>& isvalid, vector<float>& torques, vector<float>& gains)
+bool NUActionatorsData::getJointTorques(vector<double>& time, vector<bool>& isvalid, vector<float>& torques, vector<float>& gains)
 {
     getJointData(JointTorques, time, isvalid, torques, gains);
 }
@@ -165,18 +165,35 @@ bool NUActionatorsData::getJointTorques(double& time, vector<bool>& isvalid, vec
  
     @return returns true if the actionator is available and has at least one valid data point, false otherwise
  */
-bool NUActionatorsData::getJointData(actionator_t* p_actionator, double& time, vector<bool>& isvalid, vector<float>& data, vector<float>& gains)
+bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isvalid, vector<float>& data, vector<float>& gains)
 {
     if (p_actionator->IsAvailable == false)
         return false;
     else if (p_actionator->m_points.size() == 0)
         return false;
-        
-    actionator_t::actionator_point_t* point = p_actionator->m_points.front();
-    time = point->Time;
-    isvalid = point->IsValid;
-    data = point->Values;
-    gains = point->Gains;
+    
+    actionator_t::actionator_point_t* point = p_actionator->m_points[0];
+    int numdims = point->Values.size();
+    time = vector<double> (numdims, 0);
+    isvalid = vector<bool> (numdims, false);
+    data = vector<float> (numdims, 0);
+    gains = vector<float> (numdims, 0);
+    
+    // for each dimension we need to find the next point that has valid data for this dimension
+    for (int i=0; i<numdims; i++)
+    {
+        for (int j=0; j<p_actionator->m_points.size(); j++)
+        {
+            if (p_actionator->m_points[j]->IsValid[i] == true)
+            {
+                time[i] = p_actionator->m_points[j]->Time;
+                isvalid[i] = true;
+                data[i] = p_actionator->m_points[j]->Values[i];
+                gains[i] = p_actionator->m_points[j]->Gains[i];
+                break;
+            }
+        }
+    }
 }
 
 /******************************************************************************************************************************************
