@@ -105,19 +105,21 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
     static double currenttime;
-    static vector<double> actiontime;
     static vector<bool> isvalid;
+    static vector<double> times;
     static vector<float> positions;
     static vector<float> velocities;
     static vector<float> torques;
-    static vector<bool> isgainvalid;
     static vector<float> gains;
+    
+    static vector<float> redvalues;
+    static vector<float> greenvalues;
+    static vector<float> bluevalues;
     
     currenttime = m_platform->system->getTime();
     m_data->removeCompletedPoints(currenttime);
     
-    /*
-    if (m_data->getJointPositions(actiontime, isvalid, positions, isgainvalid, gains))
+    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
@@ -125,35 +127,30 @@ void NAOWebotsActionators::copyToHardwareCommunications()
             {
                 float currentpos = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                 m_servos[i]->setPosition(positions[i]);
-                m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(actiontime[i] - currenttime)));     // note time is in milliseconds
-            }
-            if (isgainvalid[i] == true)
-            {
+                m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(times[i] - currenttime)));     //! note time is in milliseconds @todo TODO: think of a better way of doing this
                 m_servos[i]->setControlP(gains[i]);
             }
         }
     }
-    if (m_data->getJointVelocities(actiontime, isvalid, velocities, isgainvalid, gains))
+    if (m_data->getNextJointTorques(isvalid, times, torques, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
             if (isvalid[i] == true)
+                m_servos[i]->setForce(torques[i]);
+        }
+    }
+    if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
+    {
+        for (int i=0; i<m_leds.size(); i++)
+        {
+            if (isvalid[i] == true)
             {
-                m_servos[i]->setPosition(positions[i]);
-                m_servos[i]->setVelocity(fabs(velocities[i]));     // note time is in milliseconds
+                int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
+                m_leds[i]->set(ledvalue);
             }
         }
     }
-    if (m_data->getJointTorques(actiontime, isvalid, torques, isgainvalid, gains))
-    {
-        for (int i=0; i<m_servos.size(); i++)
-        {
-            if (isvalid[i] == true)
-            {
-                m_servos[i]->setVelocity(torques[i]);     // note time is in milliseconds
-            }
-        }
-    }*/
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
