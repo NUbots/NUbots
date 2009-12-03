@@ -1,4 +1,3 @@
-#include "gl/GLee.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
 
@@ -9,7 +8,6 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
     {
         overlays[id].displayID = id;
         overlays[id].enabled = false;
-        //overlays[id].alpha = 1.0;
         overlays[id].colour = getDefaultColour(id);
         overlays[id].hasDisplayCommand = false;
     }
@@ -69,7 +67,6 @@ void GLDisplay::setPrimaryDisplay(int displayID)
     return setPrimaryDisplay(displayID, getDefaultColour(displayID));
     primaryLayer = overlays[displayID];
     primaryLayer.enabled = true;
-    //primaryLayer.alpha = 1.0;
     primaryLayer.colour = getDefaultColour(displayID);
     setWindowTitle(getWindowTitle(displayID));
 }
@@ -184,26 +181,14 @@ void GLDisplay::paintGL()
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    //float layerAlpha;
     for (int id = 0; id < numDisplays; id++)
     {
         if(overlays[id].enabled && overlays[id].hasDisplayCommand)
         {
-            //layerAlpha = overlays[id].alpha;
             glColor4ub(overlays[id].colour.red(),
                        overlays[id].colour.green(),
                        overlays[id].colour.blue(),
                        overlays[id].colour.alpha());
-           // if(layerAlpha < 1.0)
-           // {
-           //     glBlendFunc(GL_CONSTANT_ALPHA,GL_ONE_MINUS_CONSTANT_ALPHA);
-           // }
-           // else
-           // {
-           //     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-           // }
-
-            //glBlendColor(layerAlpha,layerAlpha,layerAlpha,layerAlpha);
             glCallList(overlays[id].displayCommand);
             glColor4ub( 255, 255, 255, 255);
         }

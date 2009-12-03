@@ -1,7 +1,7 @@
 #include "virtualnubot.h"
 #include "Tools/FileFormats/LUTTools.h"
-#include <zlib.h>
 #include <QDebug>
+#include <zlib.h>
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -125,48 +125,28 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< Vector2<int> > horizontalPoints;
-    Vector2<int> temp;
     int spacings = 8;
-    std::vector<Vector2<int> >::const_iterator nextPoint;
-    std::vector<Vector2<int> >::const_iterator prevPoint;
     switch (image.imageFormat)
     {
         case pixels::YUYV:
             generateClassifiedImage(image);
+
+            // Find the green edges
             points = vision.findGreenBorderPoints(&image,classificationTable,spacings,&horizonLine);
-            //emit greenHorizonScanPointsChanged(greenPoints);
+            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+
+            // Find the Field border
             points = vision.getConvexFieldBorders(points);
             points = vision.interpolateBorders(points,spacings);
+            emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
+
+            // Scan Image
             verticalPoints = vision.verticalScan(points,spacings);
             horizontalPoints = vision.horizontalScan(points,spacings);
-            //combining points:
-            points.clear();
-            if(verticalPoints.size())
-            {
-                nextPoint = verticalPoints.begin();
-                prevPoint = nextPoint++;
-                for(; nextPoint != verticalPoints.end(); nextPoint++)
-                {
-                    temp.x = nextPoint->x;
-                    temp.y = nextPoint->y;
-                    points.push_back(temp);
-                }
 
-            }
-            if(horizontalPoints.size())
-            {
-                nextPoint = horizontalPoints.begin();
-                prevPoint = nextPoint++;
-                for(; nextPoint != horizontalPoints.end(); nextPoint++)
-                {
-                    temp.x = nextPoint->x;
-                    temp.y = nextPoint->y;
-                    points.push_back(temp);
-                }
-            }
-            //if(!points.size()) break;
-            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
-            qDebug()<< points.size()*100/(image.height()*image.width()) << " percent of image";
+            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image";
+            emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
+            emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
             break;
         default:
             break;
