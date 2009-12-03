@@ -66,6 +66,8 @@ public:
         horizonLine,
         greenHorizonScanPoints,
         greenHorizonPoints,
+        horizontalScanPath,
+        verticalScanPath,
         numDisplays
     };
 
