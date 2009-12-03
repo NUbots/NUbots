@@ -526,20 +526,94 @@ bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<doub
     gains = l_gains;
 }
 
+/*! @brief Gets the next torque control point
+ 
+ @param isvalid a vector of bools that indicates whether there is a new target for each joint.
+ @param time the time each torque control should be completed will be put in this vector
+ @param torques the target torques for each joint will be put in this vector
+ @param gains the target gains for each joint will be put in this vector
+ */
 bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains)
 {
+    static vector<bool> l_isvalid(m_num_joints, false);
+    static vector<double> l_time(m_num_joints, 0);
+    static vector<float> l_torques(m_num_joints, 0);
+    static vector<float> l_gains(m_num_joints, 0);
+    
+    // loop through each actionator in TorqueActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<m_num_joints; i++)
+    {
+        if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0]->Data.size() != 2)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = TorqueActionators[i]->m_points[0]->Time;
+            l_torques[i] = TorqueActionators[i]->m_points[0]->Data[0];
+            l_gains[i] = TorqueActionators[i]->m_points[0]->Data[1];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    torques = l_torques;
+    gains = l_gains;
 }
 
 bool NUActionatorsData::getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data)
 {
+    //!< @todo TODO: implement this function. Or decide whether it needs to be implemented
+    return false;
 }
 
+/*! @brief Gets the next led point
+ 
+ @param isvalid a vector of bools that indicates whether there is a new target for each led.
+ @param time the time each led should be completed will be put in this vector
+ @param redvalues the target red value for each led will be put in this vector
+ @param greenvalues the target green value for each led will be put in this vector
+ @param bluevalues the target blue value for each led will be put in this vector
+ */
 bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
 {
+    static vector<bool> l_isvalid(LedActionators.size(), false);
+    static vector<double> l_time(LedActionators.size(), 0);
+    static vector<float> l_redvalues(LedActionators.size(), 0);
+    static vector<float> l_greenvalues(LedActionators.size(), 0);
+    static vector<float> l_bluevalues(LedActionators.size(), 0);
+    
+    // loop through each actionator in LedActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<m_num_joints; i++)
+    {
+        if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0]->Data.size() != 3)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = LedActionators[i]->m_points[0]->Time;
+            l_redvalues[i] = LedActionators[i]->m_points[0]->Data[0];
+            l_greenvalues[i] = LedActionators[i]->m_points[0]->Data[1];
+            l_bluevalues[i] = LedActionators[i]->m_points[0]->Data[2];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    l_redvalues = redvalues;
+    l_greenvalues = greenvalues;
+    l_bluevalues = bluevalues;
 }
 
 bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
 {
+    //!< @todo TODO: implement this function
+    return false;
 }
 
 
