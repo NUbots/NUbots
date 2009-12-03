@@ -8,6 +8,7 @@
 
 class NUimage;
 class ClassifiedImage;
+class Line;
 class Horizon;
 
 class OpenglManager : public QGLWidget
@@ -30,30 +31,29 @@ public:
 
     public slots:
         /*!
-          @brief Accepts a new raw robot image and maps it to display instructions.
+          @brief Accepts a new raw image and maps it to display instructions.
           @param newImage The new raw image.
+          @param displayId The id of the display layer to write to.
           */
-        void newRawImage(NUimage* newImage);
+        void writeNUimageToDisplay(NUimage* newImage, GLDisplay::display displayId);
         /*!
-          @brief Accepts a new classified robot image and maps it to display instructions.
+          @brief Accepts a new classified image and maps it to display instructions.
           @param newImage The new classified image.
+          @param displayId The id of the display layer to write to.
           */
-        void newClassifiedImage(ClassifiedImage* newImage);
+        void writeClassImageToDisplay(ClassifiedImage* newImage, GLDisplay::display displayId);
         /*!
-          @brief Accepts a new horizon line object and maps it to display instructions.
+          @brief Accepts a new line object and maps it to display instructions.
           @param newHorizon The new horizon line.
+          @param displayId The id of the display layer to write to.
           */
-        void newHorizon(Horizon* newHorizon);
+        void writeLineToDisplay(Line* newLine, GLDisplay::display displayId);
         /*!
-          @brief Accepts a new classified colour selection image and maps it to display instructions.
-          @param newImage The new classified selection image.
-          */
-        void newClassificationSelection(ClassifiedImage* newImage);
-        /*!
-          @brief Accepts new point objects and maps it to display instructions.
+          @brief Accepts new point vector and maps it to display instructions.
           @param newpoints The new points.
+          @param displayId The id of the display layer to write to.
           */
-        void newGreenpoints(std::vector< Vector2<int> > newpoints);
+        void writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.

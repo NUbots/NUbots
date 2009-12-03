@@ -25,8 +25,9 @@
 #include "NAOWebotsActionators.h"
 #include "NAOWebotsSystem.h"
 
-#include <string>
+#include <string.h>
 #include <iostream>
+#include <stdlib.h>
 using namespace std;
 
 /*! @brief Constructor for NAO in Webots robotic platform

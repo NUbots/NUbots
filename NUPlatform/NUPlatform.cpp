@@ -25,10 +25,16 @@ using namespace std;
 #include "NUPlatform.h"
 #include "Tools/debug.h"
 
-NUPlatform* nuplatform = NULL;
-
 NUPlatform::~NUPlatform()
 {
+    if (system != NULL)
+        delete system;
+    if (camera != NULL)
+        delete camera;
+    if (sensors != NULL)
+        delete sensors;
+    if (actionators != NULL)
+        delete actionators;
 }
 
 void NUPlatform::getName(string& name)

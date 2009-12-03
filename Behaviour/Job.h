@@ -123,6 +123,8 @@ protected:
     vector<float> m_limits;             //!< The job's min and maximum limits
     vector<float> m_values;             //!< The values used by the job
     vector<float> m_target;             //!< The target of the job (eg. for a kick it is the kick target)
+    char* m_data;
+    int m_data_length;
 };
 
 #endif

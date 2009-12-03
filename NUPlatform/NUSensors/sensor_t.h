@@ -33,32 +33,32 @@
 #include <string>
 using namespace std;
 
-/*! @brief A enum type to perform run time sensor type checking without using string
-           string compares. Unfortunately, to add a new sensor you need to add an
-           id to this list.
- */
-enum sensor_id_t 
-{
-    JOINT_POSITIONS,
-    JOINT_VELOCITIES,
-    JOINT_ACCELERATIONS,
-    JOINT_TARGETS,
-    JOINT_STIFFNESSES,
-    JOINT_CURRENTS,
-    JOINT_TORQUES,
-    JOINT_TEMPERATURES,
-    BALANCE_VALUES,
-    DISTANCE_VALUES,
-    FOOT_SOLE_VALUES,
-    FOOT_BUMPER_VALUES,
-    BUTTON_VALUES,
-    BATTERY_VALUES,
-    UNDEFINED
-};
-
-
 class sensor_t 
 {
+public:
+    /*! @brief A enum type to perform run time sensor type checking without using string
+     string compares. Unfortunately, to add a new sensor you need to add an
+     id to this list.
+     */
+    enum sensor_id_t 
+    {
+        JOINT_POSITIONS,
+        JOINT_VELOCITIES,
+        JOINT_ACCELERATIONS,
+        JOINT_TARGETS,
+        JOINT_STIFFNESSES,
+        JOINT_CURRENTS,
+        JOINT_TORQUES,
+        JOINT_TEMPERATURES,
+        BALANCE_ACCELEROMETER,
+        BALANCE_GYRO,
+        DISTANCE_VALUES,
+        FOOT_SOLE_VALUES,
+        FOOT_BUMPER_VALUES,
+        BUTTON_VALUES,
+        BATTERY_VALUES,
+        UNDEFINED
+    };
 public:
     sensor_t();
     sensor_t(string sensorname, sensor_id_t sensorid);
@@ -80,7 +80,7 @@ public:
     double Time;                //!< the sensor's time
     long double TimeStamp;      //!< the unix timestamp of the data
 private:
-    long double m_time_offset;       //!< a time offset so that unixtimestamp = timesincestart + offset
+    long double m_time_offset;  //!< a time offset so that unixtimestamp = timesincestart + offset
 };
 
 #endif

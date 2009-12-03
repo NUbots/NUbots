@@ -17,6 +17,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     classImage.useInternalBuffer();
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
+    hasImage = false;
 }
 
 virtualNUbot::~virtualNUbot()
@@ -43,7 +44,7 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage.width() && y < rawImage.height())
+    if(x < rawImage.width() && y < rawImage.height() && hasImage)
     {
         return rawImage.image[y][x];
     }
@@ -55,18 +56,6 @@ pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 
 void virtualNUbot::loadFrame(int frameNumber)
 {
-    //yuvImage.height = 240;
-    //yuvImage.width = 320;
-    //yuvImage.colourDepth = 2;
-    //int requiredImageBufferLength = yuvImage.height * yuvImage.width * yuvImage.colourDepth;
-    /*if(currentYuvBufferLength < requiredImageBufferLength)
-    {
-        delete yuvBuffer;
-        yuvBuffer = new unsigned char[requiredImageBufferLength];
-        currentYuvBufferLength = requiredImageBufferLength;
-    }
-    */
-    //yuvImage.imageBuffer = yuvBuffer;
     rawImage.setImageDimensions(160,120);
     rawImage.useInternalBuffer();
     rawImage.imageFormat = pixels::YUYV;
@@ -76,9 +65,10 @@ void virtualNUbot::loadFrame(int frameNumber)
     int robotFrameNumber;
 
     file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
+    hasImage = true;
     horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-    emit yuvImageChanged(&rawImage);
-    emit horizonChanged(&horizonLine);
+    emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
     processVisionFrame(rawImage);
     return;
 }
@@ -105,7 +95,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     classImage.useInternalBuffer(false);
     classImage.setImageDimensions(currentPacket->frameWidth, currentPacket->frameHeight);
     classImage.MapBufferToImage(currentPacket->classImage,currentPacket->frameWidth, currentPacket->frameHeight);
-    emit classifiedImageChanged(&classImage);
+    emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     processVisionFrame(classImage);
 /*
     //Update Image:
@@ -121,7 +111,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
 void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
 {
     vision.classifyImage(classImage,&rawImage,classificationTable);
-    emit classifiedImageChanged(&classImage);
+    emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     return;
 }
 
@@ -175,7 +165,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
             //if(!points.size()) break;
-            emit greenHorizonScanPointsChanged(points);
+            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
             qDebug()<< points.size()*100/(image.height()*image.width()) << " percent of image";
             break;
         default:
@@ -212,7 +202,8 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels
         unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
         tempLut[index] = ClassIndex::unclassified;
     }
-    emit classificationSelectionChanged(&previewClassImage);
+    emit classifiedDisplayChanged(&previewClassImage, GLDisplay::classificationSelection);
+
 }
 
 void virtualNUbot::UndoLUT()

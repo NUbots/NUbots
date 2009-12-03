@@ -22,32 +22,24 @@
 #ifndef NUACTIONATORS_H
 #define NUACTIONATORS_H
 
+#include "Behaviour/JobList.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 #include <vector>
 #include <string>
 using namespace std;
-
-/*! @brief Container for a single actuator
- 
- This structure holds the desired actuator targets. The targets for position, speed, and stiffness 
- are specified for each time in times.
- 
- The target positions, speeds, and stiffnesses may be interpolated between each of the specified times.
- */
-struct actuator_type 
-{
-    string name;                        //!< the actuator's name
-    int actuatorID;                     //!< the actuator's id
-    vector<float> times;                //!< times for each target point
-    vector<float> targetPositions;      //!< positions to reach at each time 
-    vector<float> targetSpeeds;         //!< speed to travel at each time
-    vector<float> targetStiffnesses;    //!< stiffness for each time
-};
 
 class NUActionators
 {
 public:
     NUActionators();
-    ~NUActionators();
+    virtual ~NUActionators();
+    
+    void process(NUActionatorsData*& data);
+protected:
+    virtual void copyToHardwareCommunications();
+protected:
+    NUActionatorsData* m_data;
 };
 
 #endif

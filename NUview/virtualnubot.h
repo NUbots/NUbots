@@ -8,6 +8,7 @@
 #include "classificationwidget.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
+#include "GLDisplay.h"
 #include "Vision/Vision.h"
 #include <vector>
 
@@ -35,6 +36,10 @@ public:
     void loadFrame(int FrameNumber);
     int loadFile(const char* fileName);
     pixels::Pixel selectRawPixel(int x, int y);
+    bool imageAvailable()
+    {
+        return hasImage;
+    }
 
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
@@ -46,14 +51,13 @@ public slots:
     void UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
-    void loadLookupTableFile(QString fileName);
+    void loadLookupTableFile(QString fileName);    
 
 signals:
-    void yuvImageChanged(NUimage* updatedImage);
-    void classifiedImageChanged(ClassifiedImage* updatedImage);
-    void horizonChanged(Horizon* horizonLine);
-    void classificationSelectionChanged(ClassifiedImage* updatedImage);
-    void greenHorizonScanPointsChanged(std::vector< Vector2<int> > updatedPoints);
+    void imageDisplayChanged(NUimage* updatedImage, GLDisplay::display displayId);
+    void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
+    void lineDisplayChanged(Line* line, GLDisplay::display displayId);
+    void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
 
 private:
     class classEntry
@@ -90,6 +94,7 @@ private:
     float touchSensors[100];
     static const int maxUndoLength = 10;
     int nextUndoIndex;
+    bool hasImage;
     std::vector<classEntry> undoHistory[maxUndoLength];
 };
 

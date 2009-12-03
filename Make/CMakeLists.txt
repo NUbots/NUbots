@@ -78,6 +78,7 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 
 FIND_PACKAGE( PTHREAD REQUIRED )
 FIND_PACKAGE( BOOST REQUIRED )
+FIND_PACKAGE( LIBRT )
 
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE(
@@ -98,6 +99,7 @@ CONFIGURE_FILE(
 # Add definitions needed here
 ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
                  ${BOOST_DEFINITIONS}
+				 ${LIBRT_DEFINITIONS}
 )
 
 
@@ -105,6 +107,7 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 # Define include directories here
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
                      ${BOOST_INCLUDE_DIR}
+					 ${LIBRT_INCLUDE_DIR}
 )
 
 IF (DEBUG)
@@ -127,6 +130,7 @@ TARGET_LINK_LIBRARIES( nubot
                        ${NUBOT_LINK_LIBRARIES} 
                        ${PTHREAD_LIBRARIES}
                        ${BOOST_LIBRARIES}
+					   ${LIBRT_LIBRARIES}
 )
 
 ############################ BINARY COPY
