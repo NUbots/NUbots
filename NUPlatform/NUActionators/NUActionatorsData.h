@@ -125,6 +125,7 @@ public:
     // Methods for adding new position or torque values for a single joint
     bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
     bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
+    bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
     
     // Methods for adding new position or torque values for a body part
     bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);

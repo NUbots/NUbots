@@ -636,10 +636,52 @@ bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, 
 
 bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain)
 {
+    static vector<float> data (3, 0);
+    if (jointid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
+        return false;
+    else 
+    {
+        data[0] = position;
+        data[1] = velocity;
+        data[2] = gain;
+        PositionActionators[jointid]->addPoint(time, data);
+        return true;
+    }
 }
 
 bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float torque, float gain)
 {
+    static vector<float> data (3, 0);
+    if (jointid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
+        return false;
+    else 
+    {
+        data[0] = torque;
+        data[1] = gain;
+        TorqueActionators[jointid]->addPoint(time, data);
+        return true;
+    }
+}
+
+bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue)
+{
+    static vector<float> data (3, 0);
+    if (ledid == ACTIONATOR_MISSING || LedActionators.size() == 0)
+        return false;
+    else 
+    {
+        if (redvalue > 1.1)
+        {
+            redvalue /= 255;
+            greenvalue /= 255;
+            bluevalue /= 255;
+        }
+        data[0] = redvalue;
+        data[1] = greenvalue;
+        data[2] = bluevalue;
+        LedActionators[ledid]->addPoint(time, data);
+        return true;
+    }
 }
 
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
