@@ -78,8 +78,8 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
-    positionactionation = false;
-    torqueactionation = false;
+    m_positionactionation = false;
+    m_torqueactionation = false;
     
     m_num_head_joints = 0;
     m_num_arm_joints = 0;
@@ -91,7 +91,7 @@ NUActionatorsData::NUActionatorsData()
 
 NUActionatorsData::~NUActionatorsData()
 {
-    m_actionators.clear();
+    m_all_actionators.clear();
     m_head_ids.clear();
     m_larm_ids.clear();
     m_rarm_ids.clear();
@@ -132,6 +132,11 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     // NOTE: This has been copied directly from NUSensorsData; so if your changing this you probably need to change that as well!
     vector<string> simplejointnames;
     simplifyNames(jointnames, simplejointnames);
+    
+    debug << "NUActionatorsData::setAvailableJoints: ";
+    for (int i=0; i<simplejointnames.size(); i++)
+        debug << simplejointnames[i] << " ";
+    debug << endl;
     
     for (int i=0; i<simplejointnames.size(); i++) 
     {
@@ -398,7 +403,7 @@ void NUActionatorsData::addJointActionator(string actionatorname)
  
  @param actionatorname the name of the actionator to be added
  */
-void NUActionatorsData::addCameraActionator(string actionatorname)
+void NUActionatorsData::addCameraSettingActionator(string actionatorname)
 {
     addActionator(CameraActionators, actionatorname, actionator_t::CAMERA_SETTING);
 }
@@ -448,7 +453,7 @@ string NUActionatorsData::simplifyName(const string& input)
     for (int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
-        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0)
+        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
             namebuffer += tolower(currentletter[0]);            
     }
     return namebuffer;
@@ -464,6 +469,7 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
     vector<string> simplifiednames;
     for (int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
+    output = simplifiednames;
 }
 
 /******************************************************************************************************************************************
@@ -475,8 +481,65 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
  */
 void NUActionatorsData::removeCompletedPoints(double currenttime)
 {
-    for (int i=0; i<m_actionators.size(); i++)
-        m_actionators[i]->removeCompleted(currenttime);
+    for (int i=0; i<m_all_actionators.size(); i++)
+        m_all_actionators[i]->removeCompletedPoints(currenttime);
+}
+
+/*! @brief Gets the next position control point
+    
+    @param isvalid a vector of bools that indicates whether there is a new target for each joint.
+    @param time the time each position control should be completed will be put in this vector
+    @param positions the target position for each joint will be put in this vector
+    @param velocities the target velocities for each joint will be put in this vector
+    @param gains the target gains for each joint will be put in this vector
+ */
+bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains)
+{
+    static vector<bool> l_isvalid(m_num_joints, false);
+    static vector<double> l_time(m_num_joints, 0);
+    static vector<float> l_positions(m_num_joints, 0);
+    static vector<float> l_velocities(m_num_joints, 0);
+    static vector<float> l_gains(m_num_joints, 0);
+    
+    // loop through each actionator in PostionActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<m_num_joints; i++)
+    {
+        if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0]->Data.size() != 3)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = PositionActionators[i]->m_points[0]->Time;
+            l_positions[i] = PositionActionators[i]->m_points[0]->Data[0];
+            l_velocities[i] = PositionActionators[i]->m_points[0]->Data[1];
+            l_gains[i] = PositionActionators[i]->m_points[0]->Data[2];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    positions = l_positions;
+    velocities = l_velocities;
+    gains = l_gains;
+}
+
+bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains)
+{
+}
+
+bool NUActionatorsData::getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data)
+{
+}
+
+bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
+{
+}
+
+bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
+{
 }
 
 
@@ -484,14 +547,32 @@ void NUActionatorsData::removeCompletedPoints(double currenttime)
  Set Methods
  ******************************************************************************************************************************************/
 
+bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain)
+{
+}
+
+bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float torque, float gain)
+{
+}
+
+bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
+{
+}
+
+bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
+{
+}
+
 /******************************************************************************************************************************************
  Displaying Contents and Serialisation
  ******************************************************************************************************************************************/
 
 void NUActionatorsData::summaryTo(ostream& output)
 {
-    for (int i=0; i<m_actionators.size(); i++)
-        m_actionators[i]->summaryTo(output);
+    if (m_all_actionators.size() == 0)
+        output << "NONE!" << endl;
+    for (int i=0; i<m_all_actionators.size(); i++)
+        m_all_actionators[i]->summaryTo(output);
 }
 
 void NUActionatorsData::csvTo(ostream& output)

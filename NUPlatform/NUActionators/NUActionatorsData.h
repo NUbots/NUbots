@@ -105,15 +105,22 @@ public:
     NUActionatorsData();
     ~NUActionatorsData();
     
+    // Methods for setting which actionators are available on init
+    void setAvailableJointControlMethods(const vector<string>& methodnames);
+    void setAvailableJoints(const vector<string>& jointnamess);
+    void setAvailableLeds(const vector<string>& lednames);
+    void setAvailableCameraSettings(const vector<string>& camerasettingnames);
+    void setAvailableOtherActionators(const vector<string>& actionatornames);
+    
     void removeCompletedPoints(double currenttime);
     
     // Get methods for joints
-    bool getNextJointPositions(vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
-    bool getNextJointTorques(vector<double>& time, vector<float>& torques, vector<float>& gains);
+    bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
+    bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
     
-    bool getNextCameraControl(vector<double>& time, vector<float>& data);
-    bool getNextLeds(vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
-    bool getNextSound(double& time, int soundid, string text);
+    bool getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data);
+    bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
+    bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
     
     // Methods for adding new position or torque values for a single joint
     bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
@@ -122,12 +129,6 @@ public:
     // Methods for adding new position or torque values for a body part
     bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
     bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
-
-    void setAvailableJointControlMethods(const vector<string>& methodnames);
-    void setAvailableJoints(const vector<string>& jointnamess);
-    void setAvailableLeds(const vector<string>& lednames);
-    void setAvailableCameraSettings(const vector<string>& camerasettingnames);
-    void setAvailableOtherActionators(const vector<string>& actionatornames);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -136,19 +137,18 @@ public:
     friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
     
 private:
+    void addJointActionator(string actionatorname);
+    void addCameraSettingActionator(string actionatorname);
+    void addLedActionator(string actionatorname);
+    void addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype); 
+    void addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype);
     string simplifyName(const string& input);
     void simplifyNames(const vector<string>& input, vector<string>& output);
     
-    void addJointActionator(string actionatorname);
-    void addCameraActionator(string actionatorname);
-    void addLedActionator(string actionatorname);
-    void addActionator(vector<actionator_t*> actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype); 
-    void addActionator(actionator_t* p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype);
-    
 private:
     // Limb position and torque actionators
-    bool positionactionation;
-    bool torqueactionation;
+    bool m_positionactionation;
+    bool m_torqueactionation;
     vector<actionator_t*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
     vector<actionator_t*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
 
