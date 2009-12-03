@@ -634,6 +634,13 @@ bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, 
  Set Methods
  ******************************************************************************************************************************************/
 
+/*! @brief Adds a single joint position control point
+    @param jointid the id of the joint you want to control
+    @param time the time at which you want the joint to reach its target (in milliseconds)
+    @param position the target position (in radians)
+    @param velocity the target velocity (in rad/s)
+    @param gain the target gain (in Percent)
+ */
 bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain)
 {
     static vector<float> data (3, 0);
@@ -649,6 +656,12 @@ bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float 
     }
 }
 
+/*! @brief Adds a single joint torque control point
+    @param jointid the id of the joint you want to control
+    @param time the time at which you want the joint to reach its target  (in milliseconds)
+    @param torque the target torque (in Nm)
+    @param gain the target gain (in Percent)
+ */
 bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float torque, float gain)
 {
     static vector<float> data (3, 0);
@@ -663,6 +676,13 @@ bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float to
     }
 }
 
+/*! @brief Adds a single led control point
+    @param ledid the id of the led you want to control
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param redvalue the target red value (0 to 1, or 0 to 255)
+    @param greenvalue the target red value (0 to 1, or 0 to 255)
+    @param bluevalue the target red value (0 to 1, or 0 to 255)
+ */
 bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue)
 {
     static vector<float> data (3, 0);
@@ -684,12 +704,104 @@ bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, floa
     }
 }
 
+/*! @brief Adds joint position control points for a body part (the body part could be 'All' to set all joints at once)
+    @param partid the id of the body part you want to control
+    @param time the time at which you want the part will reach its target (in milliseconds)
+    @param positions the target position (in radians)
+    @param velocities the target velocities (in rad/s)
+    @param gains the target gains (in Percent)
+ */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
 {
+    static vector<joint_id_t> selectedjoints;
+    if (partid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
+        return false;
+    
+    if (partid == All)
+        selectedjoints = m_all_joint_ids;
+    else if (partid == Body)
+        selectedjoints = m_body_ids;
+    else if (partid == Head)
+        selectedjoints = m_head_ids;
+    else if (partid == LArm)
+        selectedjoints = m_larm_ids;
+    else if (partid == RArm)
+        selectedjoints = m_rarm_ids;
+    else if (partid == Torso)
+        selectedjoints = m_torso_ids;
+    else if (partid == LLeg)
+        selectedjoints = m_lleg_ids;
+    else if (partid == RLeg)
+        selectedjoints = m_rleg_ids;
+    else
+        debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        
+    if (selectedjoints.size() != positions.size())
+    {
+        debug << "NUActionatorsData::addJointPositions. Specified positions are not the correct length. They are " << positions.size() << " and they should be " << selectedjoints.size() << endl;
+        return false;
+    }
+    else 
+    {
+        static vector<float> data (3, 0);
+        for (int i=0; i<selectedjoints.size(); i++)
+        {
+            data[0] = positions[i];
+            data[1] = velocities[i];
+            data[2] = gains[i];
+            PositionActionators[selectedjoints[i]]->addPoint(time, data);
+        }
+    }
+    return true;
 }
 
+/*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
+    @param partid the id of the body part you want to control
+    @param time the time at which you want the joint to reach its target  (in milliseconds)
+    @param torques the target torque (in Nm)
+    @param gains the target gain (in Percent)
+ */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
 {
+    static vector<joint_id_t> selectedjoints;
+    if (partid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
+        return false;
+    
+    if (partid == All)
+        selectedjoints = m_all_joint_ids;
+    else if (partid == Body)
+        selectedjoints = m_body_ids;
+    else if (partid == Head)
+        selectedjoints = m_head_ids;
+    else if (partid == LArm)
+        selectedjoints = m_larm_ids;
+    else if (partid == RArm)
+        selectedjoints = m_rarm_ids;
+    else if (partid == Torso)
+        selectedjoints = m_torso_ids;
+    else if (partid == LLeg)
+        selectedjoints = m_lleg_ids;
+    else if (partid == RLeg)
+        selectedjoints = m_rleg_ids;
+    else
+        debug << "NUActionatorsData::addJointTorques. UNDEFINED Body part.";
+    
+    if (selectedjoints.size() != torques.size())
+    {
+        debug << "NUActionatorsData::addJointTorques. Specified torques are not the correct length. They are " << torques.size() << " and they should be " << selectedjoints.size() << endl;
+        return false;
+    }
+    else 
+    {
+        static vector<float> data (2, 0);
+        for (int i=0; i<selectedjoints.size(); i++)
+        {
+            data[0] = torques[i];
+            data[1] = gains[i];
+            TorqueActionators[selectedjoints[i]]->addPoint(time, data);
+        }
+    }
+    return true;
 }
 
 /******************************************************************************************************************************************
