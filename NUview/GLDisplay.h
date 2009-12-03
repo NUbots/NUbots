@@ -65,6 +65,7 @@ public:
         classificationSelection,
         horizonLine,
         greenHorizonScanPoints,
+        greenHorizonPoints,
         numDisplays
     };
 

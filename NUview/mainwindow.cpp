@@ -59,12 +59,14 @@ MainWindow::MainWindow(QWidget *parent)
     //imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
     imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
-    imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(0,255,127));
+    imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
+    imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
+
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
     classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
-    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
+    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(255,0,0));
 
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);

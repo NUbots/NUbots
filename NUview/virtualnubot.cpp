@@ -1,7 +1,7 @@
 #include "virtualnubot.h"
 #include "Tools/FileFormats/LUTTools.h"
 #include <QDebug>
-#include "Tools/zlib/zlib.h"
+#include "Extras/Include/zlib.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -129,9 +129,10 @@ void virtualNUbot::processVisionFrame(NUimage& image)
         case pixels::YUYV:
             generateClassifiedImage(image);
             points = vision.findGreenBorderPoints(&image,classificationTable,5,&horizonLine);
+            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
             points = vision.getConvexFieldBorders(points);
             points = vision.interpolateBorders(points,5);
-            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+            emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
             break;
         default:
             break;
