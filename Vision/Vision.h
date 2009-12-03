@@ -39,9 +39,12 @@ class Vision
       */
     inline unsigned char classifyPixel(int x, int y);
 
-    std::vector< Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
+    std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
+
+    std::vector<Vector2<int> > horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    std::vector<Vector2<int> > verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
