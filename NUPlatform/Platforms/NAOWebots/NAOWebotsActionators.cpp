@@ -59,15 +59,10 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     //m_data->setAvailableCameraSettings();        // I am not sure if this should be *here* at all
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
-    /*vector<float> values (2, 0);
-    vector<float> gains (2, 100);
     
-    
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 350, values, gains);
-    values[0] = -1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 4000, values, gains);
-    values[0] = 1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 8000, values, gains);*/
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 0, 100);
+    m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 4000, -1.57, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 8000, 1.57, 1, 100);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
