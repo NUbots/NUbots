@@ -61,6 +61,9 @@ public:
     actionator_t();
     actionator_t(string actionatorname, actionator_type_t actionatortype);
     
+    void removeCompletedPoints(double currenttime);
+    bool isEmpty();
+    
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
     

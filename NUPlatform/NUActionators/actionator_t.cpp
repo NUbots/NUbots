@@ -50,6 +50,30 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
     m_previous_point = NULL;
 }
 
+/*! @brief Remove all of the completed points
+ @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
+ */
+void actionator_t::removeCompletedPoints(double currenttime)
+{
+    if (m_points.size() > 0 && m_points[0]->Time < currenttime)
+        m_previous_point = m_points.front();            // I make the first point that is removed to previous point
+    
+    while (m_points.size() > 0 && m_points[0]->Time < currenttime)
+    {
+        m_points.pop_front();
+    }
+}
+
+/*! @brief Returns true if there are no points in the queue, false if there are point to be applied
+ */
+bool actionator_t::isEmpty()
+{
+    if (m_points.size() == 0)
+        return true;
+    else
+        return false;
+}
+
 /*! @brief Provides a text summary of the contents of the actionator_t
  
  The idea is to use this function when writing to a debug log. I guarentee that the 
@@ -59,6 +83,20 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
  */
 void actionator_t::summaryTo(ostream& output)
 {
+    output << Name << " ";
+    if (isEmpty())
+        output << "EMPTY" << endl;
+    else {
+        output << endl;
+        for (int i=0; i<m_points.size(); i++)
+        {
+            output << m_points[i]->Time << ": ";
+            for (int j=0; j<m_points[i]->Data.size(); j++)
+                output << m_points[i]->Data[j] << " ";
+            output << endl;
+        }
+    }
+
 }
 
 void actionator_t::csvTo(ostream& output)
