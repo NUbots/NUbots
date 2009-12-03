@@ -1,7 +1,7 @@
 #include "virtualnubot.h"
 #include "Tools/FileFormats/LUTTools.h"
+#include <zlib.h>
 #include <QDebug>
-#include "Tools/zlib/zlib.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
