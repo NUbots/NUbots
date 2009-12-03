@@ -133,11 +133,6 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     vector<string> simplejointnames;
     simplifyNames(jointnames, simplejointnames);
     
-    debug << "NUActionatorsData::setAvailableJoints: ";
-    for (int i=0; i<simplejointnames.size(); i++)
-        debug << simplejointnames[i] << " ";
-    debug << endl;
-    
     for (int i=0; i<simplejointnames.size(); i++) 
     {
         addJointActionator(jointnames[i]);
@@ -495,14 +490,15 @@ void NUActionatorsData::removeCompletedPoints(double currenttime)
  */
 bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains)
 {
-    static vector<bool> l_isvalid(m_num_joints, false);
-    static vector<double> l_time(m_num_joints, 0);
-    static vector<float> l_positions(m_num_joints, 0);
-    static vector<float> l_velocities(m_num_joints, 0);
-    static vector<float> l_gains(m_num_joints, 0);
+    static int l_num_joints = PositionActionators.size();
+    static vector<bool> l_isvalid(l_num_joints, false);
+    static vector<double> l_time(l_num_joints, 0);
+    static vector<float> l_positions(l_num_joints, 0);
+    static vector<float> l_velocities(l_num_joints, 0);
+    static vector<float> l_gains(l_num_joints, 0);
     
     // loop through each actionator in PostionActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<m_num_joints; i++)
+    for (int i=0; i<l_num_joints; i++)
     {
         if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0]->Data.size() != 3)
         {
@@ -524,6 +520,11 @@ bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<doub
     positions = l_positions;
     velocities = l_velocities;
     gains = l_gains;
+    
+    if (l_num_joints > 0)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Gets the next torque control point
@@ -535,13 +536,14 @@ bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<doub
  */
 bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains)
 {
-    static vector<bool> l_isvalid(m_num_joints, false);
-    static vector<double> l_time(m_num_joints, 0);
-    static vector<float> l_torques(m_num_joints, 0);
-    static vector<float> l_gains(m_num_joints, 0);
+    static int l_num_joints = TorqueActionators.size();
+    static vector<bool> l_isvalid(l_num_joints, false);
+    static vector<double> l_time(l_num_joints, 0);
+    static vector<float> l_torques(l_num_joints, 0);
+    static vector<float> l_gains(l_num_joints, 0);
     
     // loop through each actionator in TorqueActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<m_num_joints; i++)
+    for (int i=0; i<l_num_joints; i++)
     {
         if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0]->Data.size() != 2)
         {
@@ -561,6 +563,11 @@ bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double
     time = l_time;
     torques = l_torques;
     gains = l_gains;
+    
+    if (l_num_joints > 0)
+        return true;
+    else
+        return false;
 }
 
 bool NUActionatorsData::getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data)
@@ -579,14 +586,15 @@ bool NUActionatorsData::getNextCameraControl(vector<bool>& isvalid, vector<doubl
  */
 bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
 {
-    static vector<bool> l_isvalid(LedActionators.size(), false);
-    static vector<double> l_time(LedActionators.size(), 0);
-    static vector<float> l_redvalues(LedActionators.size(), 0);
-    static vector<float> l_greenvalues(LedActionators.size(), 0);
-    static vector<float> l_bluevalues(LedActionators.size(), 0);
+    static int l_num_leds = LedActionators.size();
+    static vector<bool> l_isvalid(l_num_leds, false);
+    static vector<double> l_time(l_num_leds, 0);
+    static vector<float> l_redvalues(l_num_leds, 0);
+    static vector<float> l_greenvalues(l_num_leds, 0);
+    static vector<float> l_bluevalues(l_num_leds, 0);
     
     // loop through each actionator in LedActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<m_num_joints; i++)
+    for (int i=0; i<l_num_leds; i++)
     {
         if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0]->Data.size() != 3)
         {
@@ -608,6 +616,11 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
     l_redvalues = redvalues;
     l_greenvalues = greenvalues;
     l_bluevalues = bluevalues;
+    
+    if (l_num_leds > 0)
+        return true;
+    else
+        return false;
 }
 
 bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
