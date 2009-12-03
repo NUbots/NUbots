@@ -6,6 +6,7 @@
 #include "Vision.h"
 #include "Tools/Image/NUImage.h"
 #include "ClassificationColours.h"
+#include <QDebug>
 
 Vision::Vision()
 {
@@ -122,4 +123,145 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
         prevPoint = nextPoint;
     }
     return interpolatedBorders;
+}
+
+
+
+std::vector<Vector2<int> > Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+{
+    std::vector<Vector2<int> > scanPoints;
+    if(!fieldBorders.size()) return scanPoints;
+    std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
+    std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
+    int x = 0;
+    int y = 0;
+    int halfLineEnd = 0;
+    int quarterLineEnd = 0;
+    int midX = 0;
+    int skip = int(scanSpacing/2);
+
+    Vector2<int> temp;
+    for (; nextPoint != fieldBorders.end(); nextPoint++)
+    {
+        x = nextPoint->x;
+        y = nextPoint->y;
+        halfLineEnd = y + int((currentImage->height() - y)/2);
+        quarterLineEnd = y+ int((currentImage->height() - y)/8);
+        //qDebug() << y << ','<< halfLineEnd;
+        midX = x-skip;
+        //qDebug() << midX << ", "<<x;
+        //unsigned char colour;
+        while(y < currentImage->height())
+        {
+            //colour = classifyPixel(x,y);
+            //qDebug() << x << ',' << y << ':' << (int)colour;
+            temp.x = x;
+            temp.y = y;
+            scanPoints.push_back(temp);
+            if(y < halfLineEnd)
+            {
+                temp.x = midX;
+
+                temp.y = y;
+                scanPoints.push_back(temp);
+
+                if(y < quarterLineEnd)
+                {
+                    temp.x = midX-skip/2;
+                    temp.y = y;
+                    scanPoints.push_back(temp);
+                    temp.x = midX+skip/2;
+                    temp.y = y;
+                    scanPoints.push_back(temp);
+                }
+            }
+            y++;
+        }
+    }
+    //LAST LINE
+
+    midX = fieldBorders.back().x+skip;
+    y = fieldBorders.back().y;
+    while(y < currentImage->height())
+    {
+        if(y < halfLineEnd)
+        {
+            temp.x = midX;
+            temp.y = y;
+            scanPoints.push_back(temp);
+            if(y < quarterLineEnd)
+            {
+                temp.x = midX-skip/2;
+                temp.y = y;
+                scanPoints.push_back(temp);
+                temp.x = midX+skip/2;
+                temp.y = y;
+                scanPoints.push_back(temp);
+            }
+        }
+        y++;
+
+    }
+
+    return scanPoints;
+}
+
+std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+{
+    std::vector<Vector2<int> > horizontalScanPoints;
+    Vector2<int> temp;
+    if(!currentImage) return horizontalScanPoints;
+    if(!fieldBorders.size())
+    {
+        for(int y = 0; y < currentImage->height(); y = y + scanSpacing*2)
+        {
+            for(int x = 0; x < currentImage->width(); x++)
+            {
+                temp.x = x;
+                temp.y = y;
+                //qDebug()<< "adding";
+                horizontalScanPoints.push_back(temp);
+            }
+        }
+        //qDebug()<< "returning";
+        return horizontalScanPoints;
+    }
+
+    //Find the minimum Y, and scan above the field boarders
+    std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
+    std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
+    int minY = currentImage->height();
+    int maxY = 0;
+    for (; nextPoint != fieldBorders.end(); nextPoint++)
+    {
+        if(nextPoint->y < minY)
+        {
+            minY = nextPoint->y;
+        }
+        if(nextPoint->y >maxY)
+        {
+            maxY = nextPoint->y;
+        }
+    }
+    //Then calculate horizontal scanlines above the field boarder
+
+    for(int y = minY; y > 0; y = y - scanSpacing)
+    {
+        for(int x = 0; x < currentImage->width(); x++)
+        {
+            temp.x = x;
+            temp.y = y;
+            horizontalScanPoints.push_back(temp);
+        }
+    }
+    for(int y = minY; y < maxY; y = y + scanSpacing*2)
+    {
+        for(int x = 0; x < currentImage->width(); x++)
+        {
+            temp.x = x;
+            temp.y = y;
+            horizontalScanPoints.push_back(temp);
+        }
+    }
+    return horizontalScanPoints;
 }
