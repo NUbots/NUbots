@@ -1,7 +1,7 @@
-/*! @file NAOWebotsPlatform.h
-    @brief Declaration of NAO in Webots class.
-
+/*! @file JRobot.cpp
+    @brief Implementation of JRobot class
     @author Jason Kulk
+ 
  
   Copyright (c) 2009 Jason Kulk
  
@@ -19,28 +19,22 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NAOWEBOTSPLATFORM_H
-#define NAOWEBOTSPLATFORM_H
+#include "JRobot.h"
+#include "Tools/debug.h"
 
-#include "NUPlatform/NUPlatform.h"
-#include "JWebots/JRobot.h"
-
-class NAOWebotsPlatform : public NUPlatform, public JRobot
+JRobot::JRobot() : Robot()
 {
-// Functions:
-public:
-    NAOWebotsPlatform(int argc, const char *argv[]);
-    ~NAOWebotsPlatform();
-    
-protected:
-private:
-    void setNameFromNumber();
-    
-// Members:
-public:
-protected:
-private:
-    
-};
+    debug << "JRobot::JRobot()" << endl;
+}
 
-#endif
+JRobot::~JRobot()
+{
+    
+}
+
+Servo* JRobot::createServo(const std::string &name) const
+{
+    debug << "JRobot::createServo" << endl;
+    Servo* servo = new Servo(name);
+    return servo;
+}
