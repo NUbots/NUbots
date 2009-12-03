@@ -53,9 +53,11 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
-    m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableLeds(m_led_names);
-    m_data->setAvailableActionators(m_actionator_names);
+    m_data->setAvailableJointControlMethods();
+    void setAvailableJoints(m_servo_names);
+    void setAvailableLeds(m_led_names);
+    //void setAvailableCameraSettings();        // I am not sure if this should be *here* at all
+    //void setAvailableOtherActionators();      there are no other actionators at the moment 
     
     vector<float> values (2, 0);
     vector<float> gains (2, 100);
