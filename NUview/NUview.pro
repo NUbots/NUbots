@@ -40,6 +40,5 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/Horizon.cpp \
     openglmanager.cpp \
     GLDisplay.cpp \
-    gl/GLee.c \
     ../Tools/Image/NUimage.cpp \
     ../Tools/Image/ClassifiedImage.cpp
