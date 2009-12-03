@@ -64,6 +64,13 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 4000, -1.57, 1, 100);
     m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 8000, 1.57, 1, 100);
     
+    vector<float> pos (2, 0);
+    vector<float> vel (2, 0);
+    vector<float> gain (2, 100);
+    pos[1] = -0.7;
+    m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
+    
+    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
@@ -146,7 +153,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
             }
         }
     }
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+#if DEBUG_NUACTIONATORS_VERBOSITY > 6
     m_data->summaryTo(debug);
 #endif
 }
