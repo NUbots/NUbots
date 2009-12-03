@@ -100,27 +100,12 @@ NUActionatorsData::~NUActionatorsData()
     m_rleg_ids.clear();
 }
 
-/*! @brief Remove all of the completed actionator points
-    @param currenttime all actionator points that have times before this one are assumed to have been completed, and they will be removed
- */
-void NUActionatorsData::removeCompletedPoints(double currenttime)
-{
-    for (int i=0; i<m_actionators.size(); i++)
-        m_actionators[i]->removeCompleted(currenttime);
-}
-
-
 /******************************************************************************************************************************************
- Get Methods
- ******************************************************************************************************************************************/
-
-
-/******************************************************************************************************************************************
- Set Methods
+ Initialisation and Availability Setting Methods
  ******************************************************************************************************************************************/
 
 /*! @brief Sets the available joint control methods, that is whether the joints can be position, torque or both controlled.
-    @param methodnames a vector of strings where each string names a method
+ @param methodnames a vector of strings where each string names a method
  */
 void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& methodnames)
 {
@@ -140,7 +125,7 @@ void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& me
 
 
 /*! @brief Adds the joint actionators and sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
-    @param jointnames a vector of strings where each string is a name of a joint
+ @param jointnames a vector of strings where each string is a name of a joint
  */
 void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
 {
@@ -290,7 +275,7 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
         {
             debug << "NUActionatorsData::setAvailableJoints. This platform has an unrecognised joint: " << jointnames[i] << endl;
         }
-
+        
     }
     // add the arms, torso and legs to the body_ids
     m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
@@ -312,7 +297,7 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
 }
 
 /*! @brief Adds the led actionators and sets each of the static led_id_t if the led is in the list.
-    @param leds a vector of strings where each string is a name of a led
+ @param leds a vector of strings where each string is a name of a led
  */
 void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
 {
@@ -340,7 +325,7 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
 }
 
 /*! @brief Adds the camera setting actionator and sets each of the static camera_setting_id_t if the setting is in the list.
-    @param camerasettingnames a vector of strings where each string is a name of a setting
+ @param camerasettingnames a vector of strings where each string is a name of a setting
  */
 void NUActionatorsData::setAvailableCameraSettings(const vector<string>& camerasettingnames)
 {
@@ -380,8 +365,8 @@ void NUActionatorsData::setAvailableCameraSettings(const vector<string>& cameras
 }
 
 /*! @brief Sets the available actionators based on the names found in the passed in strings
-    
-    @param actionators a vector of names for each of the available actionators.
+ 
+ @param actionators a vector of names for each of the available actionators.
  */
 void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actionatornames)
 {
@@ -398,8 +383,8 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
 }
 
 /*! @brief Adds a joint actionator with the specified name
-
-    @param actionatorname the name of the actionator to be added
+ 
+ @param actionatorname the name of the actionator to be added
  */
 void NUActionatorsData::addJointActionator(string actionatorname)
 {
@@ -411,7 +396,7 @@ void NUActionatorsData::addJointActionator(string actionatorname)
 
 /*! @brief Adds a camera setting actionator with the specified name
  
-    @param actionatorname the name of the actionator to be added
+ @param actionatorname the name of the actionator to be added
  */
 void NUActionatorsData::addCameraActionator(string actionatorname)
 {
@@ -420,7 +405,7 @@ void NUActionatorsData::addCameraActionator(string actionatorname)
 
 /*! @brief Adds a led actionator with the specified name
  
-    @param actionatorname the name of the actionator to be added
+ @param actionatorname the name of the actionator to be added
  */
 void NUActionatorsData::addLedActionator(string actionatorname)
 {
@@ -429,30 +414,32 @@ void NUActionatorsData::addLedActionator(string actionatorname)
 
 /*! @brief Adds an actionator to the actionator group with the specified name and type
  
-    @param actionatorgroup the vector of similar actionator to which this one will be added
-    @param actionatorname the name of the actionator to be added
-    @param actionatortype the type of the actionator to be added
+ @param actionatorgroup the vector of similar actionator to which this one will be added
+ @param actionatorname the name of the actionator to be added
+ @param actionatortype the type of the actionator to be added
  */
 void NUActionatorsData::addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype)
 {
     actionator_t* newactionator = new actionator_t(actionatorname, actionatortype);
     actionatorgroup.push_back(newactionator);
+    m_all_actionators.push_back(newactionator);
 }
 
 /*! @brief Adds an actionator with the specified name and type
  
-    @param p_actionator the actionator pointer for the new actionator
-    @param actionatorname the name of the actionator to be added
-    @param actionatortype the type of the actionator to be added
+ @param p_actionator the actionator pointer for the new actionator
+ @param actionatorname the name of the actionator to be added
+ @param actionatortype the type of the actionator to be added
  */
 void NUActionatorsData::addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype)
 {
     p_actionator = new actionator_t(actionatorname, actionatortype);
+    m_all_actionators.push_back(p_actionator);
 }
 
 /*! @brief Simplifies a name
-    @param input the name to be simplified
-    @return the simplified string
+ @param input the name to be simplified
+ @return the simplified string
  */
 string NUActionatorsData::simplifyName(const string& input)
 {
@@ -469,8 +456,8 @@ string NUActionatorsData::simplifyName(const string& input)
 
 /*! @brief Simplifies a vector of strings
  
-    @param input the vector of strings to be simplified
-    @param ouput the vector that will be updated to contain the simplified names
+ @param input the vector of strings to be simplified
+ @param ouput the vector that will be updated to contain the simplified names
  */
 void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
 {
@@ -478,6 +465,24 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
     for (int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
 }
+
+/******************************************************************************************************************************************
+ Get Methods
+ ******************************************************************************************************************************************/
+
+/*! @brief Remove all of the completed actionator points
+ @param currenttime all actionator points that have times before this one are assumed to have been completed, and they will be removed
+ */
+void NUActionatorsData::removeCompletedPoints(double currenttime)
+{
+    for (int i=0; i<m_actionators.size(); i++)
+        m_actionators[i]->removeCompleted(currenttime);
+}
+
+
+/******************************************************************************************************************************************
+ Set Methods
+ ******************************************************************************************************************************************/
 
 /******************************************************************************************************************************************
  Displaying Contents and Serialisation
