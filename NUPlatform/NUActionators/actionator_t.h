@@ -61,6 +61,7 @@ public:
     actionator_t();
     actionator_t(string actionatorname, actionator_type_t actionatortype);
     
+    void addPoint(double time, const vector<float>& data);
     void removeCompletedPoints(double currenttime);
     bool isEmpty();
     

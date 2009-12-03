@@ -50,6 +50,38 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
     m_previous_point = NULL;
 }
 
+/*! @brief Adds a point to the actionator
+    @param time the time the point will be completed
+    @param data the data for the point (careful the data size is hardcoded in many places, if you get it wrong your data will be ignored!)
+ */
+void actionator_t::addPoint(double time, const vector<float>& data)
+{
+    if (time == 0 || data.size() == 0)
+        return;
+    actionator_point_t* point = new actionator_point_t();
+    point->Time = time;
+    point->Data = data;
+
+    // I need to keep the actionator points sorted based on their time
+    if (m_points.size() == 0)           // the common (walk engine) case will be fast
+        m_points.push_back(point);
+    else
+    {   // so instead of just pushing it to the back, I need to put it in the right place :D
+        static deque<actionator_point_t*>::iterator insertposition;
+        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+        m_points.push_back(point);  
+    }
+    
+    // Option 1: Merge all actionator points; this can produce very 'surprising' results and it is not possible to change your mind after sending off the commands
+    // m_points.insert(insertposition, point); // Merge-type actionator points
+    
+    // Option 2: Clear all actionator points after the current one; this would be ideal but it is hard to implement correctly; I need
+    //           to go through and look at all points after and see if they have valid data that is not overwritten because the new point has invalid data
+    // m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+    // m_points.push_back(point);  
+}
+
 /*! @brief Remove all of the completed points
  @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
  */
@@ -69,6 +101,22 @@ void actionator_t::removeCompletedPoints(double currenttime)
 bool actionator_t::isEmpty()
 {
     if (m_points.size() == 0)
+        return true;
+    else
+        return false;
+}
+
+/*! Returns true if a should go before b, false otherwise.
+ */
+bool comparePointTimes(const void* a, const void* b)
+{
+    static double timea = 0;
+    static double timeb = 0;
+    
+    timea = ((actionator_t::actionator_point_t*)a)->Time;
+    timeb = ((actionator_t::actionator_point_t*)b)->Time;
+    
+    if (timea < timeb)
         return true;
     else
         return false;
