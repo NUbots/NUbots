@@ -93,11 +93,11 @@ public:
     enum bodypart_id_t
     {
         Head,
-        LeftArm,
-        RightArm,
+        LArm,
+        RArm,
         Torso,
-        LeftLeg,
-        RightLeg,
+        LLeg,
+        RLeg,
         Body,
         All
     };
