@@ -23,8 +23,8 @@
 #include "Tools/debug.h"
 
 // init m_actionator_names:
-static string temp_actionator_names[] = {string("JointPositions"), string("JointVelocities"), string("JointTorques"), string("Camera"), string("Leds")};
-vector<string> NAOWebotsActionators::m_actionator_names(temp_actionator_names, temp_actionator_names + sizeof(temp_actionator_names)/sizeof(*temp_actionator_names));
+static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};
+vector<string> NAOWebotsActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
 
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
@@ -53,13 +53,13 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
-    m_data->setAvailableJointControlMethods();
-    void setAvailableJoints(m_servo_names);
-    void setAvailableLeds(m_led_names);
-    //void setAvailableCameraSettings();        // I am not sure if this should be *here* at all
-    //void setAvailableOtherActionators();      there are no other actionators at the moment 
+    m_data->setAvailableJointControlMethods(m_servo_control_names);
+    m_data->setAvailableJoints(m_servo_names);
+    m_data->setAvailableLeds(m_led_names);
+    //m_data->setAvailableCameraSettings();        // I am not sure if this should be *here* at all
+    //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
-    vector<float> values (2, 0);
+    /*vector<float> values (2, 0);
     vector<float> gains (2, 100);
     
     
@@ -67,7 +67,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     values[0] = -1.57;
     m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 4000, values, gains);
     values[0] = 1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 8000, values, gains);
+    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 8000, values, gains);*/
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -114,8 +114,9 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     static vector<float> gains;
     
     currenttime = m_platform->system->getTime();
-    m_data->removeCompletedActions(currenttime);
+    m_data->removeCompletedPoints(currenttime);
     
+    /*
     if (m_data->getJointPositions(actiontime, isvalid, positions, isgainvalid, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
@@ -152,7 +153,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
                 m_servos[i]->setVelocity(torques[i]);     // note time is in milliseconds
             }
         }
-    }
+    }*/
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif

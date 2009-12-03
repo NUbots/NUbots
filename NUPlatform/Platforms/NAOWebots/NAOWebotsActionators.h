@@ -50,10 +50,10 @@ private:
     NAOWebotsPlatform* m_platform;
     
     // Actionators
-    static vector<string> m_actionator_names;   //<! a list of names of the available actionators
+    static vector<string> m_servo_control_names;    //<! the names of the available joint control methods (usually position and/or torque)
     static vector<string> m_servo_names;
     vector<Servo*> m_servos;
-    Servo* m_camera_control;                    //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
+    Servo* m_camera_control;                        //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
     static vector<string> m_led_names;
     vector<LED*> m_leds;
     //! @todo TODO: add the sound actionator
