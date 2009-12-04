@@ -45,7 +45,7 @@ private:
     void getActionatorsFromWebots(NAOWebotsPlatform* platform);
     void enableActionatorsInWebots();
 private:
-    static const int m_simulation_step = 40;
+    const int m_simulation_step;
     
     NAOWebotsPlatform* m_platform;
     

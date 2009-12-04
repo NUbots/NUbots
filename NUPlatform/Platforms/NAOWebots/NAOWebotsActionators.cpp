@@ -44,7 +44,7 @@ vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names 
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */ 
-NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
+NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
@@ -60,12 +60,12 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 0, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 100);
     m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 100);
     m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 100);
     
     vector<float> pos (2, 0);
-    vector<float> vel (2, 0);
+    vector<float> vel (2, 1);
     vector<float> gain (2, 100);
     pos[1] = -0.7;
     m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
@@ -127,10 +127,14 @@ void NAOWebotsActionators::copyToHardwareCommunications()
         {
             if (isvalid[i] == true)
             {
-                float currentpos = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                m_servos[i]->setPosition(positions[i]);
-                m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(times[i] - currenttime)));     //! note time is in milliseconds @todo TODO: think of a better way of doing this
-                m_servos[i]->setControlP(gains[i]);
+                if ((times[i] - currenttime) > m_simulation_step)
+                {
+                    float c = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
+                    float v = (positions[i] - c)/(times[i] - currenttime);
+                    m_servos[i]->setPosition(positions[i]);
+                    m_servos[i]->setVelocity(fabs(v*1000));
+                    m_servos[i]->setControlP(gains[i]);
+                }
             }
         }
     }
