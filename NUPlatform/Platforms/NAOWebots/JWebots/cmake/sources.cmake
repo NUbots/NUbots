@@ -17,7 +17,9 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  JRobot.cpp JRobot.h )
+SET (YOUR_SRCS  JRobot.cpp JRobot.h 
+		JServo.cpp JServo.h
+)
 ####################################################################################
 
 # I need to prefix each file with the correct path

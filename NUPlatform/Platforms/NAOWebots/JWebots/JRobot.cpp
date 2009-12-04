@@ -20,21 +20,20 @@
 */
 
 #include "JRobot.h"
+#include "JServo.h"
 #include "Tools/debug.h"
 
 JRobot::JRobot() : Robot()
 {
-    debug << "JRobot::JRobot()" << endl;
 }
 
 JRobot::~JRobot()
 {
-    
 }
 
 Servo* JRobot::createServo(const std::string &name) const
 {
     debug << "JRobot::createServo" << endl;
-    Servo* servo = new Servo(name);
+    Servo* servo = new JServo(name);
     return servo;
 }

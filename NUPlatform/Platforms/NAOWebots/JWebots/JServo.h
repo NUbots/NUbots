@@ -1,0 +1,60 @@
+/*! @file JServo.h
+    @brief Declaration of a JServo (A slightly extended version of Webots' Servo) class
+    @author Jason Kulk
+ 
+    @class actionator_t
+    @brief A JServo (A slightly extended version of Webots' Servo) class
+ 
+    In particular, the JServo provides get methods for the servo targets.
+ 
+    @author Jason Kulk
+ 
+  Copyright (c) 2009 Jason Kulk
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef JSERVO_H
+#define JSERVO_H
+
+#include <webots/Servo.hpp>
+using namespace webots;
+
+class JServo : public Servo 
+{
+public:
+    JServo(const std::string &name);
+    virtual ~JServo();
+    
+    virtual void setAcceleration(double accel);
+    virtual void setVelocity(double vel);
+    virtual void setPosition(double position);
+    virtual void setForce(double force);
+    virtual void setControlP(double p);
+    
+    double getTargetAcceleration() const;
+    double getTargetVelocity() const;
+    double getTargetPosition() const;
+    double getTargetForce() const;
+    double getTargetGain() const;
+private:
+    double m_target_acceleration;
+    double m_target_velocity;
+    double m_target_position;
+    double m_target_force;
+    double m_target_gain;
+};
+
+#endif
+
