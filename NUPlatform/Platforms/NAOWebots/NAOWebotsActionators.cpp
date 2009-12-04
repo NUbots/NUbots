@@ -61,8 +61,8 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     
     
     m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 0, 100);
-    m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 4000, -1.57, 1, 100);
-    m_data->addJointPosition(NUActionatorsData::Head, platform->system->getTime() + 8000, 1.57, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 100);
     
     vector<float> pos (2, 0);
     vector<float> vel (2, 0);

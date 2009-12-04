@@ -26,13 +26,14 @@
 #ifndef JROBOT_H
 #define JROBOT_H
 
+#include "JServo.h"
 #include <webots/Robot.hpp>
 using namespace webots;
 
 class JRobot : public Robot 
 {
 public:
-    JRobot()
+    JRobot();
     virtual ~JRobot();
 protected:
     virtual Servo *createServo(const std::string &name) const;
