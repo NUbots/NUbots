@@ -118,7 +118,7 @@ public:
     bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
     
-    bool getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data);
+    bool getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data);
     bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
     bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
     
@@ -126,6 +126,7 @@ public:
     bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
     bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
     bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
+    bool addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data);
     
     // Methods for adding new position or torque values for a body part
     bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);

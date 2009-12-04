@@ -570,19 +570,55 @@ bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double
         return false;
 }
 
-bool NUActionatorsData::getNextCameraControl(vector<bool>& isvalid, vector<double>& time, vector<float>& data)
+/*! @brief Gets the next set of camera settings
+ 
+    @param isvalid a vector of bools that indicates whether there is a new setting for each setting.
+    @param time the time each setting should be completed will be put in this vector
+    @param settingids the id of each setting for which there could be a new setting
+    @param data the vector of data for each camera setting
+ */
+bool NUActionatorsData::getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data)
 {
-    //!< @todo TODO: implement this function. Or decide whether it needs to be implemented
-    return false;
+    static int l_num_settings = CameraActionators.size();
+    static vector<bool> l_isvalid(l_num_settings, false);
+    static vector<double> l_time(l_num_settings, 0);
+    static vector<camera_setting_id_t> l_settingids(l_num_settings, 0);
+    static vector<vector<float> > l_data(l_num_settings, vector<float>());
+
+    
+    // loop through each actionator in CameraActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<l_num_settings; i++)
+    {
+        if(CameraActionators[i]->isEmpty())
+            l_isvalid[i] = false;
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = CameraActionators[i]->m_points[0]->Time;
+            l_data[i] = CameraActionators[i]->m_points[0]->Data;
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    data = l_data;
+    
+    if (l_num_settings > 0)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Gets the next led point
  
- @param isvalid a vector of bools that indicates whether there is a new target for each led.
- @param time the time each led should be completed will be put in this vector
- @param redvalues the target red value for each led will be put in this vector
- @param greenvalues the target green value for each led will be put in this vector
- @param bluevalues the target blue value for each led will be put in this vector
+    @param isvalid a vector of bools that indicates whether there is a new target for each led.
+    @param time the time each led should be completed will be put in this vector
+    @param redvalues the target red value for each led will be put in this vector
+    @param greenvalues the target green value for each led will be put in this vector
+    @param bluevalues the target blue value for each led will be put in this vector
+ 
+    @return return false if there are no leds on this platform
  */
 bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
 {
@@ -672,6 +708,22 @@ bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float to
         data[0] = torque;
         data[1] = gain;
         TorqueActionators[jointid]->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds a new camera setting
+    @param settingid the id of the camera setting to be changed
+    @param time the time the setting will be applied
+    @param data the new setting(s)
+ */
+bool NUActionatorsData::addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data)
+{
+    if (settingid == ACTIONATOR_MISSING || CameraActionators.size() == 0)
+        return false;
+    else 
+    {
+        CameraActionators[settingid]->addPoint(time, data);
         return true;
     }
 }

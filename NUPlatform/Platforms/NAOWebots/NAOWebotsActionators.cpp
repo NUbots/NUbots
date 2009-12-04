@@ -34,6 +34,10 @@ static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
                                     string("RHipYawPitch"), string("RHipPitch"), string("RHipRoll"), string("RKneePitch"), string("RAnklePitch"), string("RAnkleRoll")};
 vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
+// init m_camera_setting_names:
+static string temp_setting_names[] = {string("SelectCamera")};
+vector<string> NAOWebotsActionators::m_camera_setting_names(temp_setting_names, temp_setting_names + sizeof(temp_setting_names)/sizeof(*temp_setting_names));
+
 // init m_led_names:
 static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
                                   string("ChestBoard/Led"), \
@@ -56,7 +60,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
     m_data->setAvailableLeds(m_led_names);
-    //m_data->setAvailableCameraSettings();        // I am not sure if this should be *here* at all
+    m_data->setAvailableCameraSettings(m_camera_setting_names);
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
@@ -69,6 +73,16 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     vector<float> gain (2, 100);
     pos[1] = -0.7;
     m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
+    
+    // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
+    Camera* camera = m_platform->getCamera("camera");
+    camera->enable(160);
+    
+    vector<float> data (1,0);
+    data[0] = 0;
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 5000, data);
+    data[0] = 1;
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 10000, data);
     
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
@@ -85,7 +99,7 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     for (int i=0; i<m_servo_names.size(); i++)
         m_servos.push_back(platform->getServo(m_servo_names[i]));
     // Get the camera
-    m_camera_control = platform->getServo("CameraSelect");
+    m_camera_select = platform->getServo("CameraSelect");
     // Get the leds
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
@@ -113,6 +127,8 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     static vector<float> velocities;
     static vector<float> torques;
     static vector<float> gains;
+
+    static vector<vector<float> > data;
     
     static vector<float> redvalues;
     static vector<float> greenvalues;
@@ -144,6 +160,19 @@ void NAOWebotsActionators::copyToHardwareCommunications()
         {
             if (isvalid[i] == true)
                 m_servos[i]->setForce(torques[i]);
+        }
+    }
+    if (m_data->getNextCameraSettings(isvalid, times, data))
+    {
+        if (isvalid[0] == true)
+        {
+            if (data[0].size() > 0)
+            {
+                if (data[0][0] == 0)
+                    m_camera_select->setPosition(0);
+                else
+                    m_camera_select->setPosition(0.6981);
+            }
         }
     }
     if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))

@@ -22,10 +22,18 @@
 #ifndef NUCAMERA_H
 #define NUCAMERA_H
 
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 class NUCamera
 {
 public:
     virtual ~NUCamera();
+    
+    void process(NUActionatorsData* data);
+protected:
+    virtual void copyToHardwareCommunications();
+protected:
+    NUActionatorsData* m_data;
 };
 
 #endif
