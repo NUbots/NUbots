@@ -167,7 +167,15 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     
     // @todo TODO: Velocity and acceleration will need to be calculated
     
-    // @todo TODO: We will need to keep track of the controls ourselves for Target and stiffness.
+    // Copy joint targets
+    for (int i=0; i<m_servos.size(); i++)
+        targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
+    m_data->setJointTargets(currenttime, targetdata);
+
+    // Copy joint stiffnesses
+    for (int i=0; i<m_servos.size(); i++)
+        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
+    m_data->setJointStiffnesses(currenttime, stiffnessdata);
     
     // Copy joint torques
     for (int i=0; i<m_servos.size(); i++)

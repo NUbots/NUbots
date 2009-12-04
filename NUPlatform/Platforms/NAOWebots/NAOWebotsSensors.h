@@ -36,6 +36,7 @@
 using namespace std;
 
 #include "webots/Robot.hpp"
+#include "JWebots/JRobot.h"
 using namespace webots;
 
 

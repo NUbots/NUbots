@@ -20,7 +20,6 @@
 */
 
 #include "JRobot.h"
-#include "JServo.h"
 #include "Tools/debug.h"
 
 JRobot::JRobot() : Robot()

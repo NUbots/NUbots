@@ -26,6 +26,8 @@
 #ifndef JROBOT_H
 #define JROBOT_H
 
+#include "JServo.h"
+
 #include <webots/Robot.hpp>
 using namespace webots;
 
