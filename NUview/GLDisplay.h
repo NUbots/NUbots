@@ -44,7 +44,9 @@ public:
     class Layer
     {
     public:
-        //! Determines if this particualar layer has been enabled for drawing.
+        //! Determines if this layer is the primary layer for the display.
+        bool primary;
+        //! Determines if this particular layer has been enabled for drawing.
         bool enabled;
         //! The drawing colour of this layer (Includes alpha for transparency).
         QColor colour;
@@ -75,6 +77,41 @@ public:
     QSize minimumSizeHint() const;
     //! Returns the most desired size for the window
     QSize sizeHint() const;
+
+    /*!
+      @brief Returns the window title for the gien display type.
+      @param displayID Id of the display whose title is required.
+      @return The title of the display type.
+      */
+    static const QString getLayerName(int displayID)
+    {
+        switch(displayID)
+        {
+            case rawImage:
+                return QString("Raw");
+            case classifiedImage:
+                return QString("Classified");
+            case horizonLine:
+                return QString("Horizon");
+            case classificationSelection:
+                return QString("Classification Selection");
+            case greenHorizonScanPoints:
+                return QString("Green Horizon Scan");
+            case greenHorizonPoints:
+                return QString("Green Horizon");
+            case horizontalScanPath:
+                return QString("Horizontal Scan Path");
+            case verticalScanPath:
+                return QString("Vertical Scan Path");
+            default:
+                return QString("Unknown");
+        }
+    }
+
+    const Layer* getLayerSettings(int layerId)
+    {
+        return &overlays[layerId];
+    }
 
 public slots:
     /*!
@@ -118,6 +155,7 @@ public slots:
     void setOverlayDrawing(int displayID, bool enabled, QColor drawingColour);
 
 
+
 signals:
     /*!
       @brief Returns the selected pixel in image coordinates when selected with a left mouse button click.
@@ -153,7 +191,7 @@ protected:
 private:
     int imageWidth; //!< The width of the windows current primary display
     int imageHeight; //!< The height of the windows current primary display
-    Layer primaryLayer; //!< The current primary layer.
+    Layer* primaryLayer; //!< The current primary layer.
     Layer overlays[numDisplays]; //!< Array of all of the layers.
     //! Overriden function for the mouse press event.
     void mousePressEvent(QMouseEvent * mouseEvent);
@@ -164,30 +202,6 @@ private:
       @param mouseEvent The mouse event from the selection.
       */
     QPoint calculateSelectedPixel(QMouseEvent * mouseEvent);
-
-    /*!
-      @brief Returns the window title for the gien display type.
-      @param displayID Id of the display whose title is required.
-      @return The title of the display type.
-      */
-    static const QString getWindowTitle(int displayID)
-    {
-        switch(displayID)
-        {
-            case rawImage:
-                return QString("Raw Image");
-            case classifiedImage:
-                return QString("Classified Image");
-            case horizonLine:
-                return QString("Horizon");
-            case classificationSelection:
-                return QString("Classification Selection");
-            case greenHorizonScanPoints:
-                return QString("Green Horizon Scan");
-            default:
-                return QString("Unknown Image");
-        }
-    }
 
     /*!
       @brief gets the default colour for the given display.
@@ -207,9 +221,15 @@ private:
             case classificationSelection:
                 return QColor(255,255,255);
             case greenHorizonScanPoints:
-                return QColor(0,255,0);
+                return QColor(255,0,0);
+            case greenHorizonPoints:
+                return QColor(0,255,127);
+            case horizontalScanPath:
+                return QColor(255,0,0);
+            case verticalScanPath:
+                return QColor(0,255,127);
             default:
-                return QColor(255,255,255);;
+                return QColor(255,255,255);
         }
     }
 };
