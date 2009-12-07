@@ -238,22 +238,17 @@ NUbot::~NUbot()
 void NUbot::run()
 {
     // do something smart here!??!
-    int count = 0;
 #ifdef TARGET_IS_NAOWEBOTS
+    int count = 0;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) platform;
-#endif
     while (true)
     {
-#ifdef TARGET_IS_NAOWEBOTS
-        webots->step(40);
-#endif
+        webots->step(40);           // stepping the simulator generates new data to run motion, and sometimes the vision data
         signalMotion();
-        if (count%2 == 0)
-            signalVision();
+        signalVision();             // depending on the selected frame rate vision might not need to be updated every simulation step
         count++;
-        usleep(1.0/50*1e6);
     };
-    return;
+#endif
 }
 
 /*! @brief Signal the motion thread to run
