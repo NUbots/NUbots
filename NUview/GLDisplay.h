@@ -108,9 +108,26 @@ public:
         }
     }
 
+    /*!
+      @brief Get the settings for a layer.
+      @param layerId The ID of the layer.
+      @return The settings for this layer.
+      */
     const Layer* getLayerSettings(int layerId)
     {
         return &overlays[layerId];
+    }
+
+    /*!
+      @brief Get the ID of the primary layer.
+      @return The ID of the primary layer. display::unknown if none is set.
+      */
+    int getPrimaryLayerId()
+    {
+        if(primaryLayer)
+            return primaryLayer->displayID;
+        else
+            return unknown;
     }
 
 public slots:
