@@ -50,7 +50,7 @@ NUSensorsData::joint_id_t NUSensorsData::RKneePitch = NUSensorsData::SENSOR_MISS
 NUSensorsData::joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RAnkleRoll = NUSensorsData::SENSOR_MISSING;
 
-/*!
+/*! @brief Default constructor for NUSensorsData
  */
 NUSensorsData::NUSensorsData()
 {
@@ -59,37 +59,42 @@ NUSensorsData::NUSensorsData()
 #endif
     
     // create the sensor_t's
-    addSensor(&JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
-    addSensor(&JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
-    addSensor(&JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
-    addSensor(&JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
-    addSensor(&JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
-    addSensor(&JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
-    addSensor(&JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
-    addSensor(&JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+    addSensor(JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
+    addSensor(JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
+    addSensor(JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
+    addSensor(JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
+    addSensor(JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
+    addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
+    addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
+    addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
     
     // Balance Sensors:
-    addSensor(&BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
-    addSensor(&BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
+    addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
     
     // Distance Sensors:
-    addSensor(&DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
+    addSensor(DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
     
     // Foot Pressure Sensors:
-    addSensor(&FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
-    addSensor(&FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
+    addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     
     // Buttons Sensors:
-    addSensor(&ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
+    addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
     
     // Battery Sensors:
-    addSensor(&BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
+    addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
 }
 
-void NUSensorsData::addSensor(sensor_t** p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
+/*! @brief Adds a sensor to the class
+    @param p_sensor a pointer that will be updated to point to the new sensor
+    @param sensorname the name of the sensor
+    @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
+ */
+void NUSensorsData::addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
 {
-    *p_sensor = new sensor_t(sensorname, sensorid);
-    m_sensors.push_back(*p_sensor);
+    p_sensor = new sensor_t(sensorname, sensorid);
+    m_sensors.push_back(p_sensor);
 }
 
 NUSensorsData::~NUSensorsData()
@@ -637,13 +642,15 @@ void NUSensorsData::csvTo(ostream& output)
     //! @todo TODO: implement this somewhere somehow!
 }
 
-/*! Returns the number of sensors in the NUSensorsData
+/*! @brief Returns the number of sensors in the NUSensorsData
  */
 int NUSensorsData::size() const
 {
     return m_sensors.size();
 }
 
+/*! @brief Put the entire contents of the NUSensorsData class into a stream
+ */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {
     output << p_data.size() << " ";
@@ -652,6 +659,8 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
     return output;
 }
 
+/*! @brief Get the entire contents of the NUSensorsData class from a stream
+ */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
     p_data.m_sensors.clear();
@@ -669,6 +678,9 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     return input;
 }
 
+/*! @brief A helper function to update a named sensor pointer based on the id of p_sensor
+    @param p_sensor the p_sensor->SensorID will be used to update one of the named pointers to point to p_sensor
+ */
 void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
 {
     switch (p_sensor->SensorID) 
@@ -721,7 +733,6 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         default:
             break;
     }
-
 }
 
 

@@ -121,7 +121,7 @@ public:
     
     int size() const;
 private:
-    void addSensor(sensor_t** p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
+    void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     
     bool getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data);
     bool getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data);
@@ -132,13 +132,13 @@ private:
 public:
     // NAMED SENSORS
     // Proprioception Sensors:
-    sensor_t* JointPositions;
-    sensor_t* JointVelocities;
-    sensor_t* JointAccelerations;
-    sensor_t* JointTargets;
-    sensor_t* JointStiffnesses;
-    sensor_t* JointCurrents;
-    sensor_t* JointTorques;
+    sensor_t* JointPositions;                   //!< stores the joint position sensors (in radians)
+    sensor_t* JointVelocities;                  //!< stores the joint velocity sensors (in rad/s)
+    sensor_t* JointAccelerations;               //!< stores the joint acceleration sensors (in rad/s/s)
+    sensor_t* JointTargets;                     //!< stores the joint position targets (in radians)
+    sensor_t* JointStiffnesses;                 //!< stores the joint stiffness values (as a percent)
+    sensor_t* JointCurrents;                    //!< stores the joint motor current sensors (in A)
+    sensor_t* JointTorques;                     //!< stores the joint temperatures (in degrees C)
     sensor_t* JointTemperatures;
     
     // Balance Sensors:
@@ -146,27 +146,27 @@ public:
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
     
     // Distance Sensors:
-    sensor_t* DistanceValues;
+    sensor_t* DistanceValues;                   //!< stores the distance to obstacle measurements in cm
     
     // Foot Pressure Sensors:
-    sensor_t* FootSoleValues;
-    sensor_t* FootBumperValues;
+    sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
+    sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
     
     // Buttons Sensors:
-    sensor_t* ButtonValues;
+    sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed
     
     // Battery Sensors:
-    sensor_t* BatteryValues;
+    sensor_t* BatteryValues;                    //!< stores the battery values in Volts, Amperes and Watts
     
 private:
-    vector<sensor_t*> m_sensors;
-    vector<joint_id_t> m_head_ids;
-    vector<joint_id_t> m_larm_ids;
-    vector<joint_id_t> m_rarm_ids;
-    vector<joint_id_t> m_torso_ids;
-    vector<joint_id_t> m_lleg_ids;
-    vector<joint_id_t> m_rleg_ids;
-};
+    vector<sensor_t*> m_sensors;                //!< a vector of all of the sensors
+    vector<joint_id_t> m_head_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each head joint
+    vector<joint_id_t> m_larm_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each left arm joint
+    vector<joint_id_t> m_rarm_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each right arm joint
+    vector<joint_id_t> m_torso_ids;             //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each torso joint
+    vector<joint_id_t> m_lleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each left leg joint
+    vector<joint_id_t> m_rleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each right leg joint
+};  
 
 #endif
 
