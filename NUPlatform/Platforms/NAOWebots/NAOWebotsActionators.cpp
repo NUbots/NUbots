@@ -77,7 +77,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
     Camera* camera = m_platform->getCamera("camera");
-    camera->enable(160);
+    camera->enable(40);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
     
     vector<float> data (1,0);
     data[0] = 0;
