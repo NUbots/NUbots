@@ -63,5 +63,13 @@ void NUSensors::copyFromHardwareCommunications()
 #endif
 }
 
+void NUSensors::calculateJointVelocityFromPosition()
+{
+}
+
+void NUSensors::calculateJointAccelerationFromVelocity()
+{
+}
+
 
 
