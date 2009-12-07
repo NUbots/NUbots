@@ -2,6 +2,7 @@
 #define LAYERSELECTIONWIDGET_H
 
 #include <QWidget>
+#include <QStringList>
 
 class QMdiArea;
 class QComboBox;
@@ -13,6 +14,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QGridLayout;
 class QMdiSubWindow;
+class QPicture;
 class GLDisplay;
 
 class LayerSelectionWidget : public QWidget
@@ -21,9 +23,12 @@ class LayerSelectionWidget : public QWidget
 public:
     LayerSelectionWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
     ~LayerSelectionWidget();
+    
+    QStringList coloursList;
 
     QMdiArea* mdiWidget;
     QHBoxLayout* layerSelectionlayout;
+    QHBoxLayout* alphaSelectionlayout;
     QGridLayout* colourSelectionLayout;
     QVBoxLayout* overallLayout;
 
@@ -32,21 +37,18 @@ public:
     QCheckBox* layerPrimaryCheckBox;
 
     // Labels
-    QLabel* redLabel;
-    QLabel* greenLabel;
-    QLabel* blueLabel;
+    QLabel* colourLabel;
+    QLabel* drawingColourLabel;
     QLabel* alphaLabel;
 
     // Sliders
-    QSlider* redSlider;
-    QSlider* greenSlider;
-    QSlider* blueSlider;
+    QSlider* colourSlider;
     QSlider* alphaSlider;
 
-    QSpinBox* redSpinBox;
-    QSpinBox* greenSpinBox;
-    QSpinBox* blueSpinBox;
+    QSpinBox* colourSpinBox;
     QSpinBox* alphaSpinBox;
+
+    QColor getSelectedColour();
 
 private slots:
     void isPrimaryChanged(bool isPrimary);
@@ -62,6 +64,7 @@ private:
     void createLayout();
     void createConnections();
     bool disableWriting;
+    QString getClosestColourName(QColor colour);
 
 };
 

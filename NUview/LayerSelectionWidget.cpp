@@ -10,19 +10,25 @@
 #include <QMdiSubWindow>
 #include <typeinfo>
 #include <QDebug>
+#include <QStringlist>
+#include <QPixmap>
 #include "GLDisplay.h"
 
 LayerSelectionWidget::LayerSelectionWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent), mdiWidget(parentMdiWidget)
 {
     setObjectName(tr("Layer Selection"));
     setWindowTitle(tr("Layer Selection"));
+
+    coloursList << "red" << "green" << "blue" << "yellow" << "orange" << "black" << "white" << "royalblue" << "purple" << "pink" << "limegreen" << "peru" << "hotpink";
+
+
     createWidgets();
     createLayout();
     createConnections();
-    layerEnabledCheckBox->setChecked(true);
-    layerEnabledCheckBox->toggle();
+    this->setEnabled(false); // Dafault to disabled, until a valid window is selected.
     currentDisplay = 0;
     disableWriting = false;
+
 }
 
 LayerSelectionWidget::~LayerSelectionWidget()
@@ -36,19 +42,14 @@ LayerSelectionWidget::~LayerSelectionWidget()
     delete layerPrimaryCheckBox;
     delete layerEnabledCheckBox;
 
-    delete redLabel;
-    delete greenLabel;
-    delete blueLabel;
+    delete drawingColourLabel;
+    delete colourLabel;
     delete alphaLabel;
 
-    delete redSlider;
-    delete greenSlider;
-    delete blueSlider;
+    delete colourSlider;
     delete alphaSlider;
 
-    delete redSpinBox;
-    delete greenSpinBox;
-    delete blueSpinBox;
+    delete colourSpinBox;
     delete alphaSpinBox;
 }
 
@@ -63,38 +64,24 @@ void LayerSelectionWidget::createWidgets()
     layerPrimaryCheckBox = new QCheckBox("Primary");
     layerEnabledCheckBox = new QCheckBox("Enabled");
 
-    redLabel = new QLabel("Red");
-    greenLabel = new QLabel("Green");
-    blueLabel = new QLabel("Blue");
+    QPixmap tempPixmap(22,22);
+    tempPixmap.fill(QColor(Qt::white));
+    drawingColourLabel = new QLabel();
+    drawingColourLabel->setPixmap(tempPixmap);
+    colourLabel = new QLabel("Colour");
     alphaLabel = new QLabel("Alpha");
 
-    redSlider = new QSlider(Qt::Horizontal);
-    redSlider->setMinimum(0);
-    redSlider->setMaximum(255);
-
-    greenSlider = new QSlider(Qt::Horizontal);
-    greenSlider->setMinimum(0);
-    greenSlider->setMaximum(255);
-
-    blueSlider = new QSlider(Qt::Horizontal);
-    blueSlider->setMinimum(0);
-    blueSlider->setMaximum(255);
+    colourSlider = new QSlider(Qt::Horizontal);
+    colourSlider->setMinimum(0);
+    colourSlider->setMaximum(coloursList.length()-1);
 
     alphaSlider = new QSlider(Qt::Horizontal);
     alphaSlider->setMinimum(0);
     alphaSlider->setMaximum(255);
 
-    redSpinBox = new QSpinBox();
-    redSpinBox->setMinimum(redSlider->minimum());
-    redSpinBox->setMaximum(redSlider->maximum());
-
-    greenSpinBox = new QSpinBox();
-    greenSpinBox->setMinimum(greenSlider->minimum());
-    greenSpinBox->setMaximum(greenSlider->maximum());
-
-    blueSpinBox = new QSpinBox();
-    blueSpinBox->setMinimum(blueSlider->minimum());
-    blueSpinBox->setMaximum(blueSlider->maximum());
+    colourSpinBox = new QSpinBox();
+    colourSpinBox->setMinimum(colourSlider->minimum());
+    colourSpinBox->setMaximum(colourSlider->maximum());
 
     alphaSpinBox = new QSpinBox();
     alphaSpinBox->setMinimum(alphaSlider->minimum());
@@ -105,28 +92,20 @@ void LayerSelectionWidget::createLayout()
 {
 
     layerSelectionlayout = new QHBoxLayout();
-    //layerSelectionlayout->addWidget(layerComboBox,1);
     layerSelectionlayout->addWidget(layerPrimaryCheckBox,0,Qt::AlignHCenter);
     layerSelectionlayout->addWidget(layerEnabledCheckBox,0,Qt::AlignHCenter);
 
     colourSelectionLayout = new QGridLayout();
-    colourSelectionLayout->addWidget(redLabel,0,0);
-    colourSelectionLayout->addWidget(redSlider,0,1);
-    colourSelectionLayout->addWidget(redSpinBox,0,2);
+    colourSelectionLayout->addWidget(drawingColourLabel,0,0);
+    colourSelectionLayout->addWidget(colourLabel,0,1);
+    colourSelectionLayout->addWidget(colourSlider,0,2);
+    colourSelectionLayout->addWidget(colourSpinBox,0,3);
 
-    colourSelectionLayout->addWidget(greenLabel,1,0);
-    colourSelectionLayout->addWidget(greenSlider,1,1);
-    colourSelectionLayout->addWidget(greenSpinBox,1,2);
+    colourSelectionLayout->addWidget(alphaLabel,1,1);
+    colourSelectionLayout->addWidget(alphaSlider,1,2);
+    colourSelectionLayout->addWidget(alphaSpinBox,1,3);
 
-    colourSelectionLayout->addWidget(blueLabel,2,0);
-    colourSelectionLayout->addWidget(blueSlider,2,1);
-    colourSelectionLayout->addWidget(blueSpinBox,2,2);
-
-    colourSelectionLayout->addWidget(alphaLabel,3,0);
-    colourSelectionLayout->addWidget(alphaSlider,3,1);
-    colourSelectionLayout->addWidget(alphaSpinBox,3,2);
-
-    colourSelectionLayout->setColumnStretch(1,1);
+    colourSelectionLayout->setColumnStretch(2,1);
 
     overallLayout = new QVBoxLayout();
     overallLayout->addWidget(layerComboBox);
@@ -137,6 +116,7 @@ void LayerSelectionWidget::createLayout()
 
 void LayerSelectionWidget::createConnections()
 {
+
     connect(layerComboBox,SIGNAL(activated(int)),this,SLOT(updateSelectedLayerSettings()));
     connect(mdiWidget,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(focusWindowChanged(QMdiSubWindow*)));
 
@@ -146,42 +126,32 @@ void LayerSelectionWidget::createConnections()
     connect(layerPrimaryCheckBox,SIGNAL(toggled(bool)),this,SLOT(primarySettingChanged(bool)));
     connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),this,SLOT(enabledSettingChanged(bool)));
 
-
     connect(layerPrimaryCheckBox,SIGNAL(toggled(bool)),this,SLOT(isPrimaryChanged(bool)));
 
-
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),redSlider,SLOT(setEnabled(bool)));
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),redSpinBox,SLOT(setEnabled(bool)));
-
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),blueSlider,SLOT(setEnabled(bool)));
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),blueSpinBox,SLOT(setEnabled(bool)));
-
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),greenSlider,SLOT(setEnabled(bool)));
-    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),greenSpinBox,SLOT(setEnabled(bool)));
+    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),colourSlider,SLOT(setEnabled(bool)));
+    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),colourSpinBox,SLOT(setEnabled(bool)));
+    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),colourLabel,SLOT(setEnabled(bool)));
 
     connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),alphaSlider,SLOT(setEnabled(bool)));
     connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),alphaSpinBox,SLOT(setEnabled(bool)));
+    connect(layerEnabledCheckBox,SIGNAL(toggled(bool)),alphaLabel,SLOT(setEnabled(bool)));
 
     // Red
-    connect(redSlider,SIGNAL(valueChanged(int)),redSpinBox,SLOT(setValue(int)));
-    connect(redSpinBox,SIGNAL(valueChanged(int)),redSlider,SLOT(setValue(int)));
-    // Green
-    connect(greenSlider,SIGNAL(valueChanged(int)),greenSpinBox,SLOT(setValue(int)));
-    connect(greenSpinBox,SIGNAL(valueChanged(int)),greenSlider,SLOT(setValue(int)));
-    // Blue
-    connect(blueSlider,SIGNAL(valueChanged(int)),blueSpinBox,SLOT(setValue(int)));
-    connect(blueSpinBox,SIGNAL(valueChanged(int)),blueSlider,SLOT(setValue(int)));
+    connect(colourSlider,SIGNAL(valueChanged(int)),colourSpinBox,SLOT(setValue(int)));
+    connect(colourSpinBox,SIGNAL(valueChanged(int)),colourSlider,SLOT(setValue(int)));
+
     // Alpha
     connect(alphaSlider,SIGNAL(valueChanged(int)),alphaSpinBox,SLOT(setValue(int)));
     connect(alphaSpinBox,SIGNAL(valueChanged(int)),alphaSlider,SLOT(setValue(int)));
 
-    connect(redSlider,SIGNAL(valueChanged(int)),this,SLOT(colourSettingsChanged()));
-    connect(greenSlider,SIGNAL(valueChanged(int)),this,SLOT(colourSettingsChanged()));
-    connect(blueSlider,SIGNAL(valueChanged(int)),this,SLOT(colourSettingsChanged()));
+    connect(colourSlider,SIGNAL(valueChanged(int)),this,SLOT(colourSettingsChanged()));
     connect(alphaSlider,SIGNAL(valueChanged(int)),this,SLOT(colourSettingsChanged()));
-
 }
 
+QColor LayerSelectionWidget::getSelectedColour()
+{
+    return QColor(coloursList[colourSlider->value()]);
+}
 
 void LayerSelectionWidget::focusWindowChanged(QMdiSubWindow* focusWindow)
 {
@@ -225,9 +195,11 @@ void LayerSelectionWidget::updateSelectedLayerSettings()
     // Update controls with stored values.
     layerPrimaryCheckBox->setChecked(selectedLayer->primary);
     layerEnabledCheckBox->setChecked(selectedLayer->enabled);
-    redSlider->setValue(selectedLayer->colour.red());
-    greenSlider->setValue(selectedLayer->colour.green());
-    blueSlider->setValue(selectedLayer->colour.blue());
+
+    QString closestColourName = getClosestColourName(selectedLayer->colour);
+    int index = coloursList.indexOf(closestColourName);
+    colourSlider->setValue(index);
+    //redSlider->setValue(selectedLayer->colour.red());
     alphaSlider->setValue(selectedLayer->colour.alpha());
     disableWriting = false;
 }
@@ -238,7 +210,13 @@ void LayerSelectionWidget::colourSettingsChanged()
     int selectedIndex = layerComboBox->currentIndex();
     int selectedLayerID = layerComboBox->itemData(selectedIndex).toInt();
 
-    QColor colour(redSlider->value(), greenSlider->value(), blueSlider->value(), alphaSlider->value());
+    QColor colour = getSelectedColour();
+    colour.setAlpha(alphaSlider->value());
+
+    QPixmap tempPixmap(22,22);
+    tempPixmap.fill(colour);
+    drawingColourLabel->setPixmap(tempPixmap);
+
     if(layerPrimaryCheckBox->isChecked())
     {
         currentDisplay->setPrimaryDisplay(selectedLayerID,colour);
@@ -257,7 +235,9 @@ void LayerSelectionWidget::enabledSettingChanged(bool enabled)
     int selectedIndex = layerComboBox->currentIndex();
     int selectedLayerID = layerComboBox->itemData(selectedIndex).toInt();
 
-    QColor colour(redSlider->value(), greenSlider->value(), blueSlider->value(), alphaSlider->value());
+    QColor colour = getSelectedColour();
+    colour.setAlpha(alphaSlider->value());
+
     if(layerPrimaryCheckBox->isChecked())
     {
         return;
@@ -267,6 +247,7 @@ void LayerSelectionWidget::enabledSettingChanged(bool enabled)
         currentDisplay->setOverlayDrawing(selectedLayerID, layerEnabledCheckBox->isChecked());
         currentDisplay->update();
     }
+
 }
 
 void LayerSelectionWidget::primarySettingChanged(bool primary)
@@ -276,10 +257,32 @@ void LayerSelectionWidget::primarySettingChanged(bool primary)
     int selectedIndex = layerComboBox->currentIndex();
     int selectedLayerID = layerComboBox->itemData(selectedIndex).toInt();
 
-    QColor colour(redSlider->value(), greenSlider->value(), blueSlider->value(), alphaSlider->value());
+    QColor colour = getSelectedColour();
+    colour.setAlpha(alphaSlider->value());
     if(layerPrimaryCheckBox->isChecked())
     {
         currentDisplay->setPrimaryDisplay(selectedLayerID);
         currentDisplay->update();
     }
+}
+
+QString LayerSelectionWidget::getClosestColourName(QColor colour)
+{
+    QColor tempCol;
+    QString closestColourName;
+    int closestDistance = 255*255*255;
+    int tempDistance;
+    for (int i = 0; i < coloursList.length(); i++)
+    {
+        tempCol.setNamedColor(coloursList[i]);
+        tempDistance = abs(tempCol.red() - colour.red());
+        tempDistance += abs(tempCol.green() - colour.green());
+        tempDistance += abs(tempCol.blue() - colour.blue());
+        if(tempDistance < closestDistance)
+        {
+            closestDistance = tempDistance;
+            closestColourName = coloursList[i];
+        }
+    }
+    return closestColourName;
 }
