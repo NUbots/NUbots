@@ -161,6 +161,10 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
         firstrun = false;
     }
 #endif
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
+    m_data->summaryTo(debug);
+#endif
 }
 
 /*! @brief Copies the joint data into m_data
@@ -193,7 +197,7 @@ void NAOWebotsSensors::copyFromJoints()
     
     // Copy joint stiffnesses
     for (int i=0; i<m_servos.size(); i++)
-        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();            //! @todo TODO: investigate what scaling should be done with stiffnesses in webots
+        stiffnessdata[i] = 0.1*((JServo*) m_servos[i])->getTargetGain();
     m_data->setJointStiffnesses(m_current_time, stiffnessdata);
     
     // Copy joint torques

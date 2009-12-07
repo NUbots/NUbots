@@ -65,9 +65,9 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 100);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 100);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 30);
     
     vector<float> pos (2, 0);
     vector<float> vel (2, 1);
@@ -165,9 +165,9 @@ void NAOWebotsActionators::copyToServos()
                     {
                         float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float v = (positions[i] - c)/(times[i] - m_current_time);
-                        m_servos[i]->setPosition(positions[i]);
+                        m_servos[i]->setControlP(gains[i]/10.0);
                         m_servos[i]->setVelocity(fabs(v*1000));
-                        m_servos[i]->setControlP(gains[i]);             //! @todo TODO: investigate how to scale the gain for webots!
+                        m_servos[i]->setPosition(positions[i]);
                     }
                 }
             }
@@ -184,7 +184,7 @@ void NAOWebotsActionators::copyToServos()
             for (int i=0; i<m_servos.size(); i++)
             {
                 if (isvalid[i] == true)
-                    m_servos[i]->setForce(torques[i]);
+                    m_servos[i]->setForce(torques[i]);          // I think this is broken in webots!
             }
         }
         else

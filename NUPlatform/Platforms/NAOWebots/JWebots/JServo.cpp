@@ -22,6 +22,8 @@
 #include "JServo.h"
 #include "Tools/debug.h"
 
+#include <math.h>
+
 JServo::JServo(const std::string &name) : Servo(name)
 {
     m_target_acceleration = -1;         // according to webots documentation -1 is default
@@ -98,7 +100,11 @@ double JServo::getTargetVelocity() const
  */
 double JServo::getTargetPosition() const
 {
-    return m_target_position;
+    float currentposition = getPosition();
+    if (fabs(currentposition - m_target_position) < 0.001)
+        return m_target_position;
+    else
+        return currentposition + m_target_velocity*0.04;
 }
 
 /*! Returns the servo's current target force
