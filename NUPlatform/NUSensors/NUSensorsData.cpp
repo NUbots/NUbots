@@ -84,6 +84,9 @@ NUSensorsData::NUSensorsData()
     
     // Battery Sensors:
     addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
+    
+    // GPS Sensor
+    addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
 }
 
 /*! @brief Adds a sensor to the class
@@ -300,13 +303,185 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, 
 {
     switch (bodypartid)
     {
-        case All:
+        case AllJoints:
             data = p_sensor->Data;
             break;
         default:
             return false;                   //!@todo TODO: implement other body parts!
     }
     return true;
+}
+
+/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
+    @param values will be updated with the current accelerometer readings
+ */
+bool NUSensorsData::getAccelerometerValues(vector<float>& values)
+{
+    if (BalanceAccelerometer == NULL || BalanceAccelerometer->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceAccelerometer->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the gyro values [gx, gy, gz] in rad/s
+    @param values will be updated with the current gyro readings
+ */
+bool NUSensorsData::getGyroValues(vector<float>& values)
+{
+    if (BalanceGyro == NULL || BalanceGyro->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceGyro->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
+    @param values will be updated with the current distance readings
+ */
+bool NUSensorsData::getDistanceValues(vector<float>& values)
+{
+    if (DistanceValues == NULL || DistanceValues->IsValid == false)
+        return false;
+    else
+    {
+        values = DistanceValues->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the battery readings [voltage (V), current (A), charge (%)]
+    @param values will be updated with the current battery sensor values
+ */
+bool NUSensorsData::getBatteryValues(vector<float>& values)
+{
+    if (BatteryValues == NULL || BatteryValues->IsValid == false)
+        return false;
+    else
+    {
+        values = BatteryValues->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the GPS readings [x (cm), y(cm), theta (rad)]
+    @param values will be updated with the gps coordinates of the robot
+ */
+bool NUSensorsData::getGPSValues(vector<float>& values)
+{
+    if (GPS == NULL || GPS->IsValid == false)
+        return false;
+    else
+    {
+        values = GPS->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the foot sole pressure sensor values (order: left to right front to back) in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param values will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
+{
+    if (FootSoleValues == NULL || FootSoleValues->IsValid == false)
+        return false;
+    else
+    {
+        static int numfootsolesensors = FootSoleValues->Data.size();
+        if (footid == AllFeet)
+            values = FootSoleValues->Data;
+        else if (footid == LeftFoot)
+        {
+            static vector<float> leftfootvalues(numfootsolesensors/2, 0);
+            for (int i=0; i<leftfootvalues.size(); i++)
+                leftfootvalues[i] = FootSoleValues->Data[i];
+            values = leftfootvalues;
+        }
+        else if (footid == RightFoot)
+        {
+            static vector<float> rightfootvalues(numfootsolesensors/2, 0);
+            for (int i=0; i<rightfootvalues.size(); i++)
+                rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
+            values = rightfootvalues;
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootSoleValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the foot bumper sensor values (order: left to right) in binary (0=off 1=on)
+    @param footid the id of the part of the foot you want the readings for
+    @param values will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
+{
+    if (FootBumperValues == NULL || FootBumperValues->IsValid == false)
+        return false;
+    else
+    {
+        static int numfootbumpersensors = FootBumperValues->Data.size();
+        if (footid == AllFeet)
+            values = FootBumperValues->Data;
+        else if (footid == LeftFoot)
+        {
+            static vector<float> leftfootvalues(numfootbumpersensors/2, 0);
+            for (int i=0; i<leftfootvalues.size(); i++)
+                leftfootvalues[i] = FootBumperValues->Data[i];
+            values = leftfootvalues;
+        }
+        else if (footid == RightFoot)
+        {
+            static vector<float> rightfootvalues(numfootbumpersensors/2, 0);
+            for (int i=0; i<rightfootvalues.size(); i++)
+                rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
+            values = rightfootvalues;
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootBumperValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the button values (order: importance) in binary (0=off 1=on)
+    @param buttonid the id of the button(s) you want the readings for
+    @param values will be updated with the current readings for the selected button(s)
+ */
+bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
+{
+    if (ButtonValues == NULL || ButtonValues->IsValid == false)
+        return false;
+    else
+    {
+        if (buttonid == AllButtons)
+            values = ButtonValues->Data;
+        else if (buttonid == MainButton)
+            values = vector<float> (1, ButtonValues->Data[0]);
+        else if (buttonid == SecondaryButton)
+        {
+            if (ButtonValues->Data.size() > 1)
+                values = vector<float> (1, ButtonValues->Data[1]);
+            else
+                return false;
+        }
+        else
+        {
+            debug << "NUSensorsData::getButtonValues(). Unknown button id." << endl;
+            return false;
+        }
+        return true;
+    }
 }
 
 /******************************************************************************************************************************************
@@ -609,6 +784,16 @@ void NUSensorsData::setButtonValues(double time, const vector<float>& data, bool
 void NUSensorsData::setBatteryValues(double time, const vector<float>& data, bool iscalculated)
 {
     setData(BatteryValues, time, data, iscalculated);
+}
+
+/*! @brief Sets the GPS coordinates to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the GPS values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(GPS, time, data, iscalculated);
 }
 
 /* @brief Sets the data of the given sensor to the given data
