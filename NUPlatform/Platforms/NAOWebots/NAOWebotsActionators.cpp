@@ -54,6 +54,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
 #endif
     m_platform = platform;
+    m_current_time = 0;
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
@@ -106,6 +107,8 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     //! @todo TODO: get the sound from webots
 }
 
+/*! @brief enable the actionators in the simulated NAO
+ */
 void NAOWebotsActionators::enableActionatorsInWebots()
 {
     // Nothing needs to be done here!
@@ -120,48 +123,87 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
-    static double currenttime;
-    static vector<bool> isvalid;
+    
+    m_current_time = m_platform->system->getTime();
+    m_data->removeCompletedPoints(m_current_time);
+    
+    copyToServos();
+    copyToCamera();
+    copyToLeds();
+    copyToSound();
+    
+#if DEBUG_NUACTIONATORS_VERBOSITY > 6
+    m_data->summaryTo(debug);
+#endif
+}
+
+/*! @brief Copies the joint positions and torques to the servos
+ */
+void NAOWebotsActionators::copyToServos()
+{
+    static vector<bool> isvalid;            
     static vector<double> times;
     static vector<float> positions;
     static vector<float> velocities;
     static vector<float> torques;
     static vector<float> gains;
-
-    static vector<vector<float> > data;
     
-    static vector<float> redvalues;
-    static vector<float> greenvalues;
-    static vector<float> bluevalues;
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToServos()" << endl;
+#endif
     
-    currenttime = m_platform->system->getTime();
-    m_data->removeCompletedPoints(currenttime);
-    
+    // Positions
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
-        for (int i=0; i<m_servos.size(); i++)
+        if (m_servos.size() == isvalid.size())                          // only process the input if it has the right length
         {
-            if (isvalid[i] == true)
+            for (int i=0; i<m_servos.size(); i++)
             {
-                if ((times[i] - currenttime) > m_simulation_step)
+                if (isvalid[i] == true)
                 {
-                    float c = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                    float v = (positions[i] - c)/(times[i] - currenttime);
-                    m_servos[i]->setPosition(positions[i]);
-                    m_servos[i]->setVelocity(fabs(v*1000));
-                    m_servos[i]->setControlP(gains[i]);
+                    if ((times[i] - m_current_time) > m_simulation_step)
+                    {
+                        float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
+                        float v = (positions[i] - c)/(times[i] - m_current_time);
+                        m_servos[i]->setPosition(positions[i]);
+                        m_servos[i]->setVelocity(fabs(v*1000));
+                        m_servos[i]->setControlP(gains[i]);             //! @todo TODO: investigate how to scale the gain for webots!
+                    }
                 }
             }
         }
+        else
+            debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
+
     }
+    // Torques
     if (m_data->getNextJointTorques(isvalid, times, torques, gains))
     {
-        for (int i=0; i<m_servos.size(); i++)
+        if (m_servos.size() == isvalid.size())
         {
-            if (isvalid[i] == true)
-                m_servos[i]->setForce(torques[i]);
+            for (int i=0; i<m_servos.size(); i++)
+            {
+                if (isvalid[i] == true)
+                    m_servos[i]->setForce(torques[i]);
+            }
         }
+        else
+            debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
     }
+}
+
+/*! @brief Copies the camera settings to the camera
+ */
+void NAOWebotsActionators::copyToCamera()
+{
+    static vector<bool> isvalid;
+    static vector<double> times;
+    static vector<vector<float> > data;
+    
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToCamera()" << endl;
+#endif
+    
     if (m_data->getNextCameraSettings(isvalid, times, data))
     {
         if (isvalid[0] == true)
@@ -171,26 +213,52 @@ void NAOWebotsActionators::copyToHardwareCommunications()
                 if (data[0][0] == 0)
                     m_camera_select->setPosition(0);
                 else
-                    m_camera_select->setPosition(0.6981);
+                    m_camera_select->setPosition(0.6981);       // offset between top and bottom camera is 40 degrees = 0.6981
             }
         }
     }
-    if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
-    {
-        for (int i=0; i<m_leds.size(); i++)
-        {
-            if (isvalid[i] == true)
-            {
-                int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
-                m_leds[i]->set(ledvalue);
-            }
-        }
-    }
-#if DEBUG_NUACTIONATORS_VERBOSITY > 6
-    m_data->summaryTo(debug);
-#endif
 }
 
+/*! @brief Copies the led values to the leds
+ */
+void NAOWebotsActionators::copyToLeds()
+{
+    static vector<bool> isvalid;
+    static vector<double> times;
+    static vector<float> redvalues;
+    static vector<float> greenvalues;
+    static vector<float> bluevalues;
+    
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToLeds()" << endl;
+#endif
+    
+    if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
+    {
+        if (m_leds.size() == isvalid.size())
+        {
+            for (int i=0; i<m_leds.size(); i++)
+            {
+                if (isvalid[i] == true)
+                {
+                    int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
+                    m_leds[i]->set(ledvalue);
+                }
+            }
+        }
+        else
+            debug << "NAOWebotsActionators::copyToLeds(). The input does not have the correct length, all data will be ignored!" << endl;
+    }
+}
+
+/*! @brief Copies the sound to the sound driver
+ */
+void NAOWebotsActionators::copyToSound()
+{
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToSound()" << endl;
+#endif
+}
 
 
 

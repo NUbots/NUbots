@@ -44,19 +44,26 @@ private:
     
     void getActionatorsFromWebots(NAOWebotsPlatform* platform);
     void enableActionatorsInWebots();
-private:
-    const int m_simulation_step;
     
-    NAOWebotsPlatform* m_platform;
+    void copyToServos();
+    void copyToCamera();
+    void copyToLeds();
+    void copyToSound();
+    
+private:
+    const int m_simulation_step;                    //!< the webots simulation timestep in milliseconds
+    double m_current_time;                          //!< the current time in milliseconds
+    
+    NAOWebotsPlatform* m_platform;                  //!< a pointer to the platform, in particular platform inherits webots::Robot so use it to access the devices
     
     // Actionators
-    static vector<string> m_servo_control_names;    //<! the names of the available joint control methods (usually position and/or torque)
-    static vector<string> m_servo_names;
-    vector<Servo*> m_servos;
-    static vector<string> m_camera_setting_names;
+    static vector<string> m_servo_control_names;    //!< the names of the available joint control methods (usually position and/or torque)
+    static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
+    vector<Servo*> m_servos;                        //!< the actual webots::Servo pointers.
+    static vector<string> m_camera_setting_names;   //!< the names of the camera settings available in webots (just SelectCamera) 
     Servo* m_camera_select;                         //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
-    static vector<string> m_led_names;
-    vector<LED*> m_leds;
+    static vector<string> m_led_names;              //!< the names of the leds available in webots
+    vector<LED*> m_leds;                            //!< the actual webots::LED pointers
     //! @todo TODO: add the sound actionator
 };
 
