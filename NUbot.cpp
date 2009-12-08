@@ -245,7 +245,14 @@ void NUbot::run()
     {
         webots->step(40);           // stepping the simulator generates new data to run motion, and sometimes the vision data
         signalMotion();
-        signalVision();             // depending on the selected frame rate vision might not need to be updated every simulation step
+        if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
+            signalVision();         
+        
+        usleep(35e3);               // I haven't been able to do anything smart here. 
+                                    // I need to sleep otherwise the motion and vision threads are never going to run
+                                    // Sleep too long and the simulator skips a frame. 
+                                    // I don't know how long to sleep because step takes 60 to 80ms to return!
+                                    // Sleeping for 35ms seems to work as well as any value --- Jason.
         count++;
     };
 #endif

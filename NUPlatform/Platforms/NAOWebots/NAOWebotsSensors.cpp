@@ -161,7 +161,7 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
         firstrun = false;
     }
 #endif
-#if DEBUG_NUSENSORS_VERBOSITY > 4
+#if DEBUG_NUSENSORS_VERBOSITY > 5
     debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
     m_data->summaryTo(debug);
 #endif
