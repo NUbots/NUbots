@@ -3,6 +3,12 @@
 
     @author Jason Kulk
  
+ So what can Motion do?
+    - play scripts
+    - do kicks, blocks and saves
+    - walk
+    - do something separate with the head
+ 
  Copyright (c) 2009 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
@@ -41,7 +47,7 @@ NUMotion::~NUMotion()
 {
 }
 
-/*! @brief Process new body sensor data, and produce actionator commands
+/*! @brief Process new sensor data, and produce actionator commands
  
     @param data a pointer to the most recent sensor data storage class
     @param actions a pointer to the actionators data storage class. This variable will be filled
@@ -55,12 +61,14 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
 }
 
-/*! @brief Process new body sensor data, and action commands
+/*! @brief Process jobs
  */
 void NUMotion::process(JobList jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process():" << endl;
 #endif
+    
+    // I need to easily iterate over the job list
 }
 
