@@ -36,9 +36,10 @@ class NUActionatorsData
 {
 public:
     typedef int joint_id_t;
+    typedef int camera_setting_id_t;
     typedef int led_id_t;
-    
     static const int ACTIONATOR_MISSING = -1;
+    
     // joints
     static joint_id_t HeadYaw;
     static joint_id_t HeadPitch;
@@ -52,6 +53,7 @@ public:
     static joint_id_t RElbowRoll;
     static joint_id_t TorsoYaw;
     static joint_id_t TorsoPitch;
+    static joint_id_t TorsoRoll;
     static joint_id_t LHipYaw;
     static joint_id_t LHipYawPitch;
     static joint_id_t LHipPitch;
@@ -66,6 +68,19 @@ public:
     static joint_id_t RKneePitch;
     static joint_id_t RAnklePitch;
     static joint_id_t RAnkleRoll;
+    // camera settings
+    static camera_setting_id_t Resolution;
+    static camera_setting_id_t FramesPerSecond;
+    static camera_setting_id_t AutoExposure;
+    static camera_setting_id_t AutoWhiteBalance;
+    static camera_setting_id_t AutoGain;
+    static camera_setting_id_t Brightness;
+    static camera_setting_id_t Saturation;
+    static camera_setting_id_t RedChroma;
+    static camera_setting_id_t BlueChroma;
+    static camera_setting_id_t Gain;
+    static camera_setting_id_t Exposure;
+    static camera_setting_id_t SelectCamera;
     // leds
     static led_id_t LEar;
     static led_id_t REar;
@@ -74,14 +89,15 @@ public:
     static led_id_t Chest;
     static led_id_t LFoot;
     static led_id_t RFoot;
+    
     enum bodypart_id_t
     {
         Head,
-        LeftArm,
-        RightArm,
+        LArm,
+        RArm,
         Torso,
-        LeftLeg,
-        RightLeg,
+        LLeg,
+        RLeg,
         Body,
         All
     };
@@ -89,37 +105,32 @@ public:
     NUActionatorsData();
     ~NUActionatorsData();
     
-    void removeCompletedActions(double currenttime);
+    // Methods for setting which actionators are available on init
+    void setAvailableJointControlMethods(const vector<string>& methodnames);
+    void setAvailableJoints(const vector<string>& jointnamess);
+    void setAvailableLeds(const vector<string>& lednames);
+    void setAvailableCameraSettings(const vector<string>& camerasettingnames);
+    void setAvailableOtherActionators(const vector<string>& actionatornames);
+    
+    void removeCompletedPoints(double currenttime);
     
     // Get methods for joints
-    bool getJointPositions(vector<double>& time, vector<bool>& ispositionvalid, vector<float>& positions, vector<bool>& isgainvalid, vector<float>& gains);
-    bool getJointVelocities(vector<double>& time, vector<bool>& isvelocityvalid, vector<float>& velocities, vector<bool>& isgainvalid, vector<float>& gains);
-    bool getJointTorques(vector<double>& time, vector<bool>& istorquevalid, vector<float>& torques, vector<bool>& isgainvalid, vector<float>& gains);
+    bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
+    bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
     
-    // Set methods for a joint without specifying a gain
-    bool setJointPosition(joint_id_t jointid, double time, float position);
-    bool setJointVelocity(joint_id_t jointid, double time, float velocity);
-    bool setJointStiffness(joint_id_t jointid, double time, float stiffness);
-    bool setJointTorque(joint_id_t jointid, double time, float torque);
+    bool getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data);
+    bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
+    bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
     
-    // Set methods for a joint
-    bool setJointPosition(joint_id_t jointid, double time, float position, float gain);
-    bool setJointVelocity(joint_id_t jointid, double time, float velocity, float gain);
-    bool setJointTorque(joint_id_t jointid, double time, float torque, float gain);
+    // Methods for adding new position or torque values for a single joint
+    bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
+    bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
+    bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
+    bool addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data);
     
-    // Set methods for the joints without specifying a gain
-    bool setJointPositions(bodypart_id_t partid, double time, const vector<float>& positions);
-    bool setJointVelocities(bodypart_id_t partid, double time, const vector<float>& velocities);
-    bool setJointStiffnesses(bodypart_id_t partid, double time, const vector<float>& stiffnesses);
-    bool setJointTorques(bodypart_id_t partid, double time, const vector<float>& torques);
-    
-    bool setJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& gain);
-    bool setJointVelocities(bodypart_id_t partid, double time, const vector<float>& velocities, const vector<float>& gain);
-    bool setJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gain);
-
-    void setAvailableJoints(const vector<string>& joints);
-    void setAvailableLeds(const vector<string>& leds);
-    void setAvailableActionators(const vector<string>& actionators);
+    // Methods for adding new position or torque values for a body part
+    bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
+    bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -128,35 +139,27 @@ public:
     friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
     
 private:
-    void addActionator(actionator_t** p_actionator, string actionatorname, actionator_t::actionator_id_t actionatorid);
-    
-    bool getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isdatavalid, vector<float>& data, vector<bool>& isgainvalid, vector<float>& gains);
-    
-    bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data);
-    bool setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data, float gain);
-
-    void expandGain(const vector<joint_id_t>& ids, const vector<float>& gains, vector<bool>& isgainvalid, vector<float>& allgains);
-    void expandData(const vector<joint_id_t>& ids, const vector<float>& data, vector<bool>& isdatavalid, vector<float>& alldata);
-    void expandAction(const vector<joint_id_t>& ids, const vector<float>& data, const vector<float>& gains, vector<bool>& isvalid, vector<float>& data, vector<float>& gains);
-
-    void addAction(actionator_t* p_actionator, double time, const vector<bool>& isvalid, const vector<float>& alldata, const vector<float>& allgains);
-    void addAction(actionator_t* p_actionator, double time, const vector<bool>& isdatavalid, const vector<float>& alldata, const vector<bool>& isgainvalid, const vector<float>& allgains);
-    
-    bool setJointsGain(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& gains);
-    bool setJointsData(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& data);
-    bool setJointsData(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& data, const vector<float>& gains);
-    
-public:
-    // NAMED ACTIONATORS
-    actionator_t* JointPositions;           //!< The joint position actuators; available on all robotic platforms
-    actionator_t* JointVelocities;          //!< The joint velocity actuators; available on all robotic platforms
-    actionator_t* JointTorques;             //!< The joint torque actuators; avaliable only in Webots 
-    actionator_t* CameraControl;            //!< The camera control actionator, use this actionator to swap cameras and change settings
-    actionator_t* Leds;                     //!< The leds
-    actionator_t* Sound;                    //!< The sound actionator
+    void addJointActionator(string actionatorname);
+    void addCameraSettingActionator(string actionatorname);
+    void addLedActionator(string actionatorname);
+    void addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype); 
+    void addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype);
+    string simplifyName(const string& input);
+    void simplifyNames(const vector<string>& input, vector<string>& output);
     
 private:
-    vector<actionator_t*> m_actionators;
+    // Limb position and torque actionators
+    bool m_positionactionation;
+    bool m_torqueactionation;
+    vector<actionator_t*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
+    vector<actionator_t*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
+
+    // Peripheral actionators 
+    vector<actionator_t*> CameraActionators;        //!< The camera control actionators, a single actionator for each setting Steve.
+    vector<actionator_t*> LedActionators;           //!< The led actionators
+    actionator_t* Sound;                      //!< The sound actionator
+    
+    vector<actionator_t*> m_all_actionators;
     vector<joint_id_t> m_head_ids;
     vector<joint_id_t> m_larm_ids;
     vector<joint_id_t> m_rarm_ids;

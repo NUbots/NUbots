@@ -1,6 +1,10 @@
-/*! @file NAOWebotsPlatform.h
-    @brief Declaration of NAO in Webots class.
-
+/*! @file JRobot.h
+    @brief Declaration of a JRobot (A slightly extended version of Webots' Robot) class
+    @author Jason Kulk
+ 
+    @class actionator_t
+    @brief A JRobot (A slightly extended version of Webots' Robot) class
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -19,28 +23,22 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NAOWEBOTSPLATFORM_H
-#define NAOWEBOTSPLATFORM_H
+#ifndef JROBOT_H
+#define JROBOT_H
 
-#include "NUPlatform/NUPlatform.h"
-#include "JWebots/JRobot.h"
+#include "JServo.h"
+#include <webots/Robot.hpp>
+using namespace webots;
 
-class NAOWebotsPlatform : public NUPlatform, public JRobot
+class JRobot : public Robot 
 {
-// Functions:
 public:
-    NAOWebotsPlatform(int argc, const char *argv[]);
-    ~NAOWebotsPlatform();
-    
+    JRobot();
+    virtual ~JRobot();
 protected:
-private:
-    void setNameFromNumber();
-    
-// Members:
-public:
-protected:
-private:
+    virtual Servo *createServo(const std::string &name) const;
     
 };
 
 #endif
+

@@ -8,6 +8,7 @@
 /Build/jwalk2.build
 /Build/robocup.build
 *.xcodeproj
+*.build
 
 # We don't oxygen files in the repp
 /Documentation

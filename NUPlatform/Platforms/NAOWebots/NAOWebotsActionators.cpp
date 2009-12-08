@@ -23,8 +23,8 @@
 #include "Tools/debug.h"
 
 // init m_actionator_names:
-static string temp_actionator_names[] = {string("JointPositions"), string("JointVelocities"), string("JointTorques"), string("Camera"), string("Leds")};
-vector<string> NAOWebotsActionators::m_actionator_names(temp_actionator_names, temp_actionator_names + sizeof(temp_actionator_names)/sizeof(*temp_actionator_names));
+static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};
+vector<string> NAOWebotsActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
 
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
@@ -33,6 +33,10 @@ static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
                                     string("LHipYawPitch"), string("LHipPitch"), string("LHipRoll"), string("LKneePitch"), string("LAnklePitch"), string("LAnkleRoll"), \
                                     string("RHipYawPitch"), string("RHipPitch"), string("RHipRoll"), string("RKneePitch"), string("RAnklePitch"), string("RAnkleRoll")};
 vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+
+// init m_camera_setting_names:
+static string temp_setting_names[] = {string("SelectCamera")};
+vector<string> NAOWebotsActionators::m_camera_setting_names(temp_setting_names, temp_setting_names + sizeof(temp_setting_names)/sizeof(*temp_setting_names));
 
 // init m_led_names:
 static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
@@ -44,7 +48,7 @@ vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names 
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */ 
-NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
+NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
@@ -53,19 +57,33 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform)
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
+    m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
     m_data->setAvailableLeds(m_led_names);
-    m_data->setAvailableActionators(m_actionator_names);
-    
-    vector<float> values (2, 0);
-    vector<float> gains (2, 100);
+    m_data->setAvailableCameraSettings(m_camera_setting_names);
+    //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 350, values, gains);
-    values[0] = -1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 4000, values, gains);
-    values[0] = 1.57;
-    m_data->setJointPositions(NUActionatorsData::Head, platform->system->getTime() + 8000, values, gains);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 100);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 100);
+    
+    vector<float> pos (2, 0);
+    vector<float> vel (2, 1);
+    vector<float> gain (2, 100);
+    pos[1] = -0.7;
+    m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
+    
+    // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
+    Camera* camera = m_platform->getCamera("camera");
+    camera->enable(160);
+    
+    vector<float> data (1,0);
+    data[0] = 0;
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 5000, data);
+    data[0] = 1;
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 10000, data);
+    
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -81,7 +99,7 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     for (int i=0; i<m_servo_names.size(); i++)
         m_servos.push_back(platform->getServo(m_servo_names[i]));
     // Get the camera
-    m_camera_control = platform->getServo("CameraSelect");
+    m_camera_select = platform->getServo("CameraSelect");
     // Get the leds
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
@@ -103,55 +121,72 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
     static double currenttime;
-    static vector<double> actiontime;
     static vector<bool> isvalid;
+    static vector<double> times;
     static vector<float> positions;
     static vector<float> velocities;
     static vector<float> torques;
-    static vector<bool> isgainvalid;
     static vector<float> gains;
+
+    static vector<vector<float> > data;
+    
+    static vector<float> redvalues;
+    static vector<float> greenvalues;
+    static vector<float> bluevalues;
     
     currenttime = m_platform->system->getTime();
-    m_data->removeCompletedActions(currenttime);
+    m_data->removeCompletedPoints(currenttime);
     
-    if (m_data->getJointPositions(actiontime, isvalid, positions, isgainvalid, gains))
+    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
             if (isvalid[i] == true)
             {
-                float currentpos = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                m_servos[i]->setPosition(positions[i]);
-                m_servos[i]->setVelocity(fabs(1000*(currentpos - positions[i])/(actiontime[i] - currenttime)));     // note time is in milliseconds
-            }
-            if (isgainvalid[i] == true)
-            {
-                m_servos[i]->setControlP(gains[i]);
+                if ((times[i] - currenttime) > m_simulation_step)
+                {
+                    float c = m_servos[i]->getPosition();          // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
+                    float v = (positions[i] - c)/(times[i] - currenttime);
+                    m_servos[i]->setPosition(positions[i]);
+                    m_servos[i]->setVelocity(fabs(v*1000));
+                    m_servos[i]->setControlP(gains[i]);
+                }
             }
         }
     }
-    if (m_data->getJointVelocities(actiontime, isvalid, velocities, isgainvalid, gains))
+    if (m_data->getNextJointTorques(isvalid, times, torques, gains))
     {
         for (int i=0; i<m_servos.size(); i++)
         {
             if (isvalid[i] == true)
+                m_servos[i]->setForce(torques[i]);
+        }
+    }
+    if (m_data->getNextCameraSettings(isvalid, times, data))
+    {
+        if (isvalid[0] == true)
+        {
+            if (data[0].size() > 0)
             {
-                m_servos[i]->setPosition(positions[i]);
-                m_servos[i]->setVelocity(fabs(velocities[i]));     // note time is in milliseconds
+                if (data[0][0] == 0)
+                    m_camera_select->setPosition(0);
+                else
+                    m_camera_select->setPosition(0.6981);
             }
         }
     }
-    if (m_data->getJointTorques(actiontime, isvalid, torques, isgainvalid, gains))
+    if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
     {
-        for (int i=0; i<m_servos.size(); i++)
+        for (int i=0; i<m_leds.size(); i++)
         {
             if (isvalid[i] == true)
             {
-                m_servos[i]->setVelocity(torques[i]);     // note time is in milliseconds
+                int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
+                m_leds[i]->set(ledvalue);
             }
         }
     }
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+#if DEBUG_NUACTIONATORS_VERBOSITY > 6
     m_data->summaryTo(debug);
 #endif
 }

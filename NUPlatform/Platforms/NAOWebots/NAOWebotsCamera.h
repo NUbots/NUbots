@@ -35,6 +35,8 @@ class NAOWebotsCamera : public NUCamera
 public:
     NAOWebotsCamera(NAOWebotsPlatform* platform);
     ~NAOWebotsCamera();
+private:
+    void copyToHardwareCommunications();
 };
 
 #endif

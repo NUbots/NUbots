@@ -49,7 +49,7 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
-NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform)
+NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
@@ -167,7 +167,15 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     
     // @todo TODO: Velocity and acceleration will need to be calculated
     
-    // @todo TODO: We will need to keep track of the controls ourselves for Target and stiffness.
+    // Copy joint targets
+    for (int i=0; i<m_servos.size(); i++)
+        targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
+    m_data->setJointTargets(currenttime, targetdata);
+
+    // Copy joint stiffnesses
+    for (int i=0; i<m_servos.size(); i++)
+        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
+    m_data->setJointStiffnesses(currenttime, stiffnessdata);
     
     // Copy joint torques
     for (int i=0; i<m_servos.size(); i++)

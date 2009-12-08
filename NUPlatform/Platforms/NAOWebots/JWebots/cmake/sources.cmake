@@ -17,33 +17,15 @@
 
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  nao_soccer_player_blue.cpp
-		NAOWebotsPlatform.cpp NAOWebotsPlatform.h
-                NAOWebotsCamera.cpp NAOWebotsCamera.h
-                NAOWebotsSensors.cpp NAOWebotsSensors.h
-                NAOWebotsActionators.cpp NAOWebotsActionators.h
-                NAOWebotsSystem.cpp NAOWebotsSystem.h )
-####################################################################################
-########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  JWebots
+SET (YOUR_SRCS  JRobot.cpp JRobot.h 
+		JServo.cpp JServo.h
 )
 ####################################################################################
 
-# I need to prefix each file and directory with the correct path
+# I need to prefix each file with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 
     LIST(APPEND NUBOT_SRCS "${THIS_SRC_DIR}/${loop_var}" )
 ENDFOREACH(loop_var ${YOUR_SRCS})
-
-# Do the same thing for each subdirectory in TWO steps
-SET(YOUR_CMAKE_FILES )				
-FOREACH(loop_var ${YOUR_DIRS}) 
-    LIST(APPEND YOUR_CMAKE_FILES "${THIS_SRC_DIR}/${loop_var}/cmake/sources.cmake")
-ENDFOREACH(loop_var ${YOUR_DIRS})
-
-# We need to be careful here and this extra loop because including files will effect THIS_SRC_DIR!!!!
-FOREACH(loop_var ${YOUR_CMAKE_FILES}) 
-    INCLUDE(${loop_var})
-ENDFOREACH(loop_var ${YOUR_CMAKE_FILES})

@@ -36,6 +36,7 @@
 using namespace std;
 
 #include "webots/Robot.hpp"
+#include "JWebots/JRobot.h"
 using namespace webots;
 
 
@@ -52,7 +53,7 @@ private:
     void enableSensorsInWebots();
     
 private:
-    static const int m_simulation_step = 40;            //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
+    const int m_simulation_step;                        //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
     
     NAOWebotsPlatform* m_platform;
     // Sensors

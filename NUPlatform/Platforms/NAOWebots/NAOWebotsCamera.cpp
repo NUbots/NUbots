@@ -33,6 +33,10 @@ NAOWebotsCamera::~NAOWebotsCamera()
 {
 }
 
+void NAOWebotsCamera::copyToHardwareCommunications()
+{
+}
+
 
 
 
