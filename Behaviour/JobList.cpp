@@ -50,4 +50,10 @@ void JobList::clear()
     jobs.clear();
 }
 
+/*! @brief Returns the number of jobs in the queue
+ */
+int JobList::size()
+{
+    return jobs.size();
+}
 

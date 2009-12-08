@@ -3,6 +3,10 @@
  
     @class JobList
     @brief A class containing the list of jobs to be done by modules
+ 
+    At the moment this is a VERY thin wrapper for a vector of jobs. But this WILL need to
+    change in the future because I think we will want to insert/delete to/from any position
+    and we might might to implement some form of priorities.
 
     @author Jason Kulk
  
@@ -38,6 +42,7 @@ public:
     
     void append(Job* newjob);
     void clear();
+    int size();
 
 private:
     vector<Job*> jobs;                          //!< the list of jobs for subsequent modules
