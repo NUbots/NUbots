@@ -40,6 +40,9 @@ static pthread_cond_t condMotionData;      //!< signal for new motion data      
 static pthread_mutex_t mutexVisionData;    //!< lock for new vision data signal @relates NUbot
 static pthread_cond_t condVisionData;      //!< signal for new vision data      @relates NUbot
 
+static pthread_mutex_t mutexMotionRunning;           //!< in webots I need to use a mutex to prevent starting a motion iteration before the current one has completed @relates NUbot
+static pthread_mutex_t mutexVisionRunning;           //!< in webots I need to use a mutex to prevent starting a vision iteration before the current one has completed @relates NUbot
+
 static void* runThreadMotion(void* arg);
 static void* runThreadVision(void* arg);
 
@@ -116,8 +119,9 @@ void NUbot::createThreads()
 #if DEBUG_NUBOT_VERBOSITY > 4
     debug << "NUbot::createThreads(). Constructing threads." << endl;
 #endif
-    // create threadMotion and its trigger condMotionData
+    // create threadMotion, its trigger condMotionData and the running mutex mutexMotionRunning
     int err;
+    
     err = pthread_mutex_init(&mutexMotionData, NULL);
     if (err != 0)
         debug << "NUbot::createThreads(). Failed to initialise mutexMotionData errno: " << errno << endl;
@@ -125,7 +129,11 @@ void NUbot::createThreads()
     err = pthread_cond_init(&condMotionData, NULL);
     if (err != 0)
         debug << "NUbot::createThreads(). Failed to initialise condMotionData errno: " << errno << endl;
-
+    
+    err = pthread_mutex_init(&mutexMotionRunning, NULL);
+    if (err != 0)
+        debug << "NUbot::createThreads(). Failed to initialise mutexMotionRunning errno: " << errno << endl;
+    
 #if THREAD_MOTION_PRIORITY > 0
     err = pthread_create(&threadMotion, NULL, runThreadMotion, (void*) this);         // The last parameter is the arguement to the thread
     if (err != 0)
@@ -149,7 +157,7 @@ void NUbot::createThreads()
         debug << "NUbot::createThreads(). Failed to create threadMotion! The error code was: " << err << endl;
 #endif
 
-    // create threadVision and its trigger condVisionData
+    // create threadVision, its trigger condVisionData and the running mutex mutexVisionRunning
     err = pthread_mutex_init(&mutexVisionData, NULL);
     if (err != 0)
         debug << "NUbot::createThreads(). Failed to initialise mutexVisionData errno: " << errno << endl;
@@ -157,6 +165,10 @@ void NUbot::createThreads()
     err = pthread_cond_init(&condVisionData, NULL);
     if (err != 0)
         debug << "NUbot::createThreads(). Failed to initialise condVisionData errno: " << errno << endl;
+    
+    err = pthread_mutex_init(&mutexVisionRunning, NULL);
+    if (err != 0)
+        debug << "NUbot::createThreads(). Failed to initialise mutexVisionRunning errno: " << errno << endl;
     
 #if THREAD_VISION_PRIORITY > 0
     debug << "NUbot::createThreads(). Warning. Creating threadVision as realtime" << endl;
@@ -198,8 +210,10 @@ NUbot::~NUbot()
     
     pthread_mutex_destroy(&mutexVisionData);
     pthread_cond_destroy(&condVisionData);
+    pthread_mutex_destroy(&mutexVisionRunning);
     pthread_mutex_destroy(&mutexMotionData);
     pthread_cond_destroy(&condMotionData);
+    pthread_mutex_destroy(&mutexMotionRunning);
     
     // delete modules
     delete platform;
@@ -237,22 +251,20 @@ NUbot::~NUbot()
  */
 void NUbot::run()
 {
-    // do something smart here!??!
 #ifdef TARGET_IS_NAOWEBOTS
     int count = 0;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) platform;
     while (true)
     {
         webots->step(40);           // stepping the simulator generates new data to run motion, and sometimes the vision data
+        debug << "NUbot::run()" << endl;
         signalMotion();
         if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
+        {
             signalVision();         
-        
-        usleep(35e3);               // I haven't been able to do anything smart here. 
-                                    // I need to sleep otherwise the motion and vision threads are never going to run
-                                    // Sleep too long and the simulator skips a frame. 
-                                    // I don't know how long to sleep because step takes 60 to 80ms to return!
-                                    // Sleeping for 35ms seems to work as well as any value --- Jason.
+            waitForVisionCompletion();
+        }
+        waitForMotionCompletion();     
         count++;
     };
 #endif
@@ -290,6 +302,40 @@ int NUbot::waitForNewMotionData()
     return err;
 }
 
+/*! @brief Signal that the motion thread has completed
+ 
+ @return returns the error return by the underlying pthread_cond_signal
+ */
+int NUbot::signalMotionStart()
+{
+    int err = 0;
+    err = pthread_mutex_lock(&mutexMotionRunning);
+    return err;
+}
+
+/*! @brief Signal that the motion thread has completed
+ 
+ @return returns the error return by the underlying pthread_cond_signal
+ */
+int NUbot::signalMotionCompletion()
+{
+    int err = 0;
+    err = pthread_mutex_unlock(&mutexMotionRunning);
+    return err;
+}
+
+/*! @brief Blocks the calling thread until motion thread completes its iteration
+ 
+ @return returns the error return by the underlying pthread_cond_wait
+ */
+int NUbot::waitForMotionCompletion()
+{
+    int err = 0;
+    err = pthread_mutex_lock(&mutexMotionRunning);            // block if motion thread is STILL running
+    pthread_mutex_unlock(&mutexMotionRunning);
+    return err;
+}
+
 /*! @brief Signal the vision thread to run
  
  This should be called by the underlying platform when new vision data is avaliable.
@@ -322,6 +368,40 @@ int NUbot::waitForNewVisionData()
     return err;
 }
 
+/*! @brief Signal that the vision thread has started an iteration
+ 
+ @return returns the error return by the underlying pthread_mutex
+ */
+int NUbot::signalVisionStart()
+{
+    int err = 0;
+    err = pthread_mutex_lock(&mutexVisionRunning);
+    return err;
+}
+
+/*! @brief Signal that the vision thread has completed
+ 
+ @return returns the error return by the underlying pthread_mutex
+ */
+int NUbot::signalVisionCompletion()
+{
+    int err = 0;
+    err = pthread_mutex_unlock(&mutexVisionRunning);
+    return err;
+}
+
+/*! @brief Blocks the calling thread until vision thread completes its iteration
+ 
+ @return returns the error return by the underlying pthread_cond_wait
+ */
+int NUbot::waitForVisionCompletion()
+{
+    int err = 0;
+    err = pthread_mutex_lock(&mutexVisionRunning);
+    pthread_mutex_unlock(&mutexVisionRunning);
+    return err;
+}
+
 /*! @brief The motion control loop
     @relates NUbot
  
@@ -351,6 +431,7 @@ void* runThreadMotion(void* arg)
         entrytime = NUSystem::getRealTime();
 #endif
         err = nubot->waitForNewMotionData();
+        nubot->signalMotionStart();
 
 #ifdef THREAD_MOTION_MONITOR_TIME
     #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
@@ -363,6 +444,7 @@ void* runThreadMotion(void* arg)
 #endif
         
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        debug << "NUbot::runThreadMotion " << nubot->platform->system->getTime() << endl;
         data = nubot->platform->sensors->update();
         nubot->motion->process(data, actions);
         nubot->platform->actionators->process(actions);
@@ -375,6 +457,7 @@ void* runThreadMotion(void* arg)
         if (threadendtime - threadstarttime > 3)
             debug << "NUbot::runThreadMotion. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
 #endif
+        nubot->signalMotionCompletion();
     } 
     while (err == 0 | errno != EINTR);
     pthread_exit(NULL);
@@ -412,6 +495,7 @@ void* runThreadVision(void* arg)
         entrytime = NUSystem::getRealTimeFast();
 #endif
         err = nubot->waitForNewVisionData();
+        nubot->signalVisionStart();
         
 #ifdef THREAD_VISION_MONITOR_TIME
     #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
@@ -423,6 +507,7 @@ void* runThreadVision(void* arg)
         threadstarttime = NUSystem::getThreadTime();
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        debug << "NUbot::runThreadVision " << nubot->platform->system->getTime() << endl;
         //          image = nubot->platform->camera->getData()
         //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
         //                 odometry = nubot->motion->getData()                // There is no deep copy here either
@@ -442,6 +527,7 @@ void* runThreadVision(void* arg)
         if (threadendtime - threadstarttime > 10)
             debug << "NUbot::runThreadVision. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
 #endif
+        nubot->signalVisionCompletion();
     } 
     while (err == 0 | errno != EINTR);
     pthread_exit(NULL);

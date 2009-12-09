@@ -61,10 +61,16 @@ public:
     void run();
     
     static int signalMotion();
+    int signalMotionStart();
+    int signalMotionCompletion();
     static int signalVision();
+    int signalVisionStart();
+    int signalVisionCompletion();
     
     int waitForNewMotionData();
+    int waitForMotionCompletion();
     int waitForNewVisionData();
+    int waitForVisionCompletion();
 private:
     void createThreads();
     
