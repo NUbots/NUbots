@@ -4,9 +4,6 @@
     @class JobList
     @brief A class containing the list of jobs to be done by modules
  
-    At the moment this is a VERY thin wrapper for a vector of jobs. But this WILL need to
-    change in the future because I think we will want to insert/delete to/from any position
-    and we might might to implement some form of priorities.
 
     @author Jason Kulk
  
@@ -31,7 +28,8 @@
 
 #include "Job.h"
 
-#include <vector>
+#include <list>
+#include <iterator>
 using namespace std;
 
 class JobList
@@ -40,12 +38,51 @@ public:
     JobList();
     ~JobList();
     
-    void append(Job* newjob);
+    void addJob(Job* job);
+    void addVisionJob(Job* job);
+    void addLocalisationJob(Job* job);
+    void addBehaviourJob(Job* job);
+    void addMotionJob(Job* job);
+    void addLightJob(Job* job);
+    void addCameraJob(Job* job);
+    void addSoundJob(Job* job);
+    void addSystemJob(Job* job);
+    void addOtherJob(Job* job);
+    
+    void removeJob(Job* job);
+    void removeVisionJob(Job* job);
+    void removeLocalisationJob(Job* job);
+    void removeBehaviourJob(Job* job);
+    void removeMotionJob(Job* job);
+    void removeLightJob(Job* job);
+    void removeCameraJob(Job* job);
+    void removeSoundJob(Job* job);
+    void removeSystemJob(Job* job);
+    void removeOtherJob(Job* job);
+    
     void clear();
-    int size();
+    
+private:
+    void addJob(Job* job, list<Job*>& joblist);
+    void removeJob(Job* job, list<Job*>& joblist);
 
 private:
-    vector<Job*> jobs;                          //!< the list of jobs for subsequent modules
+    list<Job*> m_vision_jobs;               //!< a list of all the current vision jobs
+    list<Job*> m_localisation_jobs;         //!< a list of all the current localisation jobs
+    list<Job*> m_behaviour_jobs;            //!< a list of all the behaviour jobs
+    list<Job*> m_motion_jobs;               //!< a list of all the current motion jobs
+    list<Job*> m_light_jobs;                //!< a list of all the current light jobs
+    list<Job*> m_camera_jobs;               //!< a list of all the current camera jobs
+    list<Job*> m_sound_jobs;                //!< a list of all the current jobs for the sound system
+    list<Job*> m_system_jobs;               //!< a list of all the current system/os jobs
+    list<Job*> m_other_jobs;                //!< a list of all other jobs
+    list<list<Job*>* > m_job_lists;         //!< a list of all the lists of jobs
+};
+
+
+// I think I need to implement an iterator!
+class JobListIterator : public iterator<forward_iterator_tag, Job*>
+{
 };
 
 #endif
