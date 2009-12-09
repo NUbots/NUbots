@@ -24,6 +24,7 @@
 
 targetconfig.h
 /Tools/debug.h
+*.old*
 
 # External files from archives
 /NUview/gl/*
