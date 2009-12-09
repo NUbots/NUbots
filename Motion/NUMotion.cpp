@@ -11,6 +11,9 @@
  
  So that looks like four sub modules.
  
+ NUMotion gets some jobs; BODY and HEAD. Now I need to convert those jobs into
+ other jobs, or put the actions in the NUActionatorsData
+ 
  WALK.
     Input:
         NUSensorsData
