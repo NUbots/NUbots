@@ -39,13 +39,13 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     // Colour selection group
 
     colourSelectLayout = new QHBoxLayout;
-    colourSelectLayout->addWidget(colourLabel);
+    //colourSelectLayout->addWidget(colourLabel);
     colourSelectLayout->addWidget(coloursComboBox,1);
 
     // Selected Colour
     selectedColourLabel = new QLabel("Selected Colour: ");
     selectedColourLayout = new QHBoxLayout;
-    selectedColourLayout->addWidget(selectedColourLabel,0);
+    //selectedColourLayout->addWidget(selectedColourLabel,0);
 
     colourPreviewLabel = new QLabel("");
     temp_pixmap.fill(Qt::black);
