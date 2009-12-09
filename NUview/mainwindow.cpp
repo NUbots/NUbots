@@ -1,9 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "LayerSelectionWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
 #include <stdio.h>
+#include <QDebug>
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -55,6 +59,12 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
 
+    // Add layer selection dock widget
+    layerSelection = new LayerSelectionWidget(mdiArea,this);
+    layerSelectionDock = new QDockWidget(layerSelection->windowTitle());
+    layerSelectionDock->setWidget(layerSelection);
+    addDockWidget(Qt::RightDockWidgetArea, layerSelectionDock);
+
     imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
     //imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
@@ -80,7 +90,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
 // Delete widgets and displays
     delete statusBar;
     delete miscDisplay;
@@ -89,6 +98,8 @@ MainWindow::~MainWindow()
     delete imageDisplay;
     delete classification;
     delete connection;
+    delete layerSelection;
+    delete layerSelectionDock;
     delete mdiArea;
 
 // Delete Actions
@@ -102,6 +113,7 @@ MainWindow::~MainWindow()
     delete cascadeAction;
     delete tileAction;
     return;
+
 }
 
 void MainWindow::createActions()
@@ -188,6 +200,8 @@ void MainWindow::createMenus()
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
+    visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
+    networkWindowMenu = windowMenu->addMenu(tr("&Network"));
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
 }
