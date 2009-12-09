@@ -295,7 +295,12 @@ void NAOWebotsSensors::copyFromGPS()
         
         buffer = m_gps->getValues();
         for (int i=0; i<numdimensions; i++)
-            gpsdata[i] = buffer[i];
+        {
+            if (i == 0 || i == 1)
+                gpsdata[i] = 100*buffer[i];         // convert to cm for gps coordinates
+            else
+                gpsdata[i] = buffer[i];
+        }
         m_data->setGPSValues(m_current_time, gpsdata);      //! @todo TODO: add gps data to NUsensorsData
     }
 }
