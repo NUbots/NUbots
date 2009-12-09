@@ -4,10 +4,39 @@
     @author Jason Kulk
  
  So what can Motion do?
-    - play scripts
-    - do kicks, blocks and saves
     - walk
-    - do something separate with the head
+    - track points, pan, nod with the head
+    - do kicks
+    - play scripts (get-ups, and probably blocks)
+ 
+ So that looks like four sub modules.
+ 
+ WALK.
+    Input:
+        NUSensorsData
+        Current walk-related job
+    Output:
+        NUActionatorsData
+ 
+ HEAD.
+    Input: 
+        NUSensorsData (I think that you should proably try to stablise the head, and maybe use some smarter control)
+        Current head-related job
+    Output:
+        NUActionatorsData
+ 
+ KICK.
+    Input:
+        NUSensorsData (The kick should be closed loop)
+        Current kick-related job
+    Output:
+        NUActionatorsData
+ 
+ BLOCK.
+ 
+ SAVE.
+ 
+ GETUP.
  
  Copyright (c) 2009 Jason Kulk
  
@@ -69,6 +98,32 @@ void NUMotion::process(JobList jobs)
     debug << "NUMotion::process():" << endl;
 #endif
     
+    // 
+    
     // I need to easily iterate over the job list
+    // for each job in joblist:
+    //      if job.type == BODY:
+    //          if job.id == STAND:
+    //              m_walk->walkToPoint(job.x, job.y, job.theta);
+    //          elif job.id == WALK:
+    //              m_walk->walkOnVector(job.x, job.y, job.theta);
+    
+    // Option 1. NUMotion does the organisation.
+    //           if iCanKickFromHere(job.x, job.y, job.theta, job.targetx, job.targety)
+    //              m_kick->kickPoint(job.x, job.y, job.theta, job.targetx, job.targety)         // This means kick might have to call walk's stop
+    //           else:
+    //              m_walk->walkToPoint(m_kick->getNearestPoint(job.x, job.y, job.theta, job.targetx, job.targety));
+    
+    // Option 2. KICK etc does the organisation
+    //          elif job.id == KICK:
+    //              m_kick->kick(job.x, job.y, job.targetx, job.targety)                        // This means kick gets to call as many walk functions as it likes
+    //              so kick could return a walkjob and nuactionatordata
+    //              so the walkjob could be a stand(0,0) for a stop
+
+    
+    //          elif (job.id == BLOCK || job.id == SAVE):
+    //              m_walk->walkToPoint(job.x, job.y, job.theta);
+    //              m_walk->blockPoint(job.targetx, job.targety, usehands == false || true)
+    //
 }
 
