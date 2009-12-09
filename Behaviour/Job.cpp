@@ -31,7 +31,7 @@ Job::~Job()
 /*! @brief Get the job's type
     @returns the job's type
  */
-job_type_t Job::getJobType()
+Job::job_type_t Job::getJobType()
 {
     return m_job_type;
 }
@@ -39,7 +39,7 @@ job_type_t Job::getJobType()
 /*! @brief Get the job's id
     @returns the job's id
  */
-job_id_t Job::getJobID()
+Job::job_id_t Job::getJobID()
 {
     return m_job_id;
 }

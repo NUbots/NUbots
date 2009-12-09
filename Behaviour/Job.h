@@ -32,74 +32,82 @@
 #include <vector>
 using namespace std;
 
-/*! An enum for job types (ie. Body, Head, etc)
- */
-enum job_type_t {
-    BODY,
-    HEAD,
-    LIGHT,
-    CAMERA,
-    STATE,
-    SYSTEM
-};
-
-/*! An enum for specific job ids (ie. Stand, Kick etc)
- */
-enum job_id_t {
-    // Body job ids
-    STAND,
-    WALK,
-    KICK,
-    BLOCK,
-    SAVE,
-    // Head job ids
-    TRACK,
-    NOD,
-    PAN,
-    // Light job ids
-    L_EYE,
-    R_EYE,
-    L_EAR,
-    R_EAR,
-    CHEST,
-    L_FOOT,
-    R_FOOT,
-    // Camera job ids
-    RESOLUTION,
-    FPS,
-    SETTINGS,
-    AUTO_EXPOSURE,
-    AUTO_WHITE_BALANCE,
-    AUTO_GAIN,
-    BRIGHTNESS,
-    CONTRAST,
-    SATURATION,
-    RED_CHROMA,
-    BLUE_CHROMA,
-    GAIN,
-    EXPOSURE,
-    SELECT_CAMERA,
-    // Sound job ids
-    SUBSTITUTE,
-    INITIAL,
-    READY,
-    SET,
-    PLAYING,
-    PENALTY,
-    FINISH,
-    HURT,
-    DEAD,
-    CRASH,
-    LOW_BATTERY,
-    HIGH_CURRENT,
-    HIGH_TEMPERATURE,
-    // System jobs
-    SLEEP,
-    SHUTDOWN
-};
-
 class Job
 {
+public:
+    /*! An enum for job types (ie. Body, Head, etc)
+     */
+    enum job_type_t {
+        VISION,
+        LOCALISATION,
+        BEHAVIOUR,
+        MOTION,
+        LIGHT,
+        CAMERA,
+        SOUND,
+        SYSTEM,
+        OTHER
+    };
+    /*! An enum for specific job ids (ie. Stand, Kick etc)
+     */
+    enum job_id_t {
+        // Vision job ids
+        VISION_LOAD_LUT,
+        // Localisation job ids
+        LOCALISATION_RESET,
+        // Behaviour job ids
+        BEHAVIOUR_CHANGE_STRATEGY,
+        // Motion job ids
+        MOTION_STAND,
+        MOTION_WALK,
+        MOTION_KICK,
+        MOTION_BLOCK,
+        MOTION_SAVE,
+        MOTION_TRACK,
+        MOTION_NOD,
+        MOTION_PAN,
+        // Light job ids
+        LIGHT_L_EYE,
+        LIGHT_R_EYE,
+        LIGHT_L_EAR,
+        LIGHT_R_EAR,
+        LIGHT_CHEST,
+        LIGHT_L_FOOT,
+        LIGHT_R_FOOT,
+        // Camera job ids
+        CAMERA_RESOLUTION,
+        CAMERA_FPS,
+        CAMERA_SETTINGS,
+        CAMERA_AUTO_EXPOSURE,
+        CAMERA_AUTO_WHITE_BALANCE,
+        CAMERA_AUTO_GAIN,
+        CAMERA_BRIGHTNESS,
+        CAMERA_CONTRAST,
+        CAMERA_SATURATION,
+        CAMERA_RED_CHROMA,
+        CAMERA_BLUE_CHROMA,
+        CAMERA_GAIN,
+        CAMERA_EXPOSURE,
+        CAMERA_SELECT_CAMERA,
+        // Sound job ids
+        SOUND_SUBSTITUTE,
+        SOUND_INITIAL,
+        SOUND_READY,
+        SOUND_SET,
+        SOUND_PLAYING,
+        SOUND_PENALTY,
+        SOUND_FINISH,
+        SOUND_HURT,
+        SOUND_DEAD,
+        SOUND_CRASH,
+        SOUND_LOW_BATTERY,
+        SOUND_HIGH_CURRENT,
+        SOUND_HIGH_TEMPERATURE,
+        // System jobs
+        SYSTEM_SLEEP,
+        SYSTEM_SHUTDOWN
+    };
+    
 public:
     ~Job();
     
@@ -123,8 +131,8 @@ protected:
     vector<float> m_limits;             //!< The job's min and maximum limits
     vector<float> m_values;             //!< The values used by the job
     vector<float> m_target;             //!< The target of the job (eg. for a kick it is the kick target)
-    char* m_data;
-    int m_data_length;
+    char* m_data;                       //!< The binary data associated with the job
+    int m_data_length;                  //!< The number of bytes in m_data
 };
 
 #endif
