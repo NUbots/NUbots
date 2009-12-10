@@ -21,7 +21,7 @@
 
 #include "SaveJob.h"
 
-SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK)
+SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_SAVE)
 {
     m_job_time = time;     
     m_save_position = position;

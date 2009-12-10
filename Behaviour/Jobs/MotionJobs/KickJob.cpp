@@ -21,7 +21,7 @@
 
 #include "KickJob.h"
 
-KickJob::KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget) : MotionJob(Job::MOTION_WALK)
+KickJob::KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget) : MotionJob(Job::MOTION_KICK)
 {
     m_job_time = time;
     m_kick_position = kickposition;

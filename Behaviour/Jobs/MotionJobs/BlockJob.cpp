@@ -21,7 +21,7 @@
 
 #include "BlockJob.h"
 
-BlockJob::BlockJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK)
+BlockJob::BlockJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_BLOCK)
 {
     m_job_time = time;     
     m_block_position = position;

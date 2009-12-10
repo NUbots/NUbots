@@ -5,25 +5,6 @@
     @brief A base class to encapsulate jobs issued by behaviour.
  
     All jobs need to inherit from this base class. 
-
-    So I need to add jobs to the job list. All of the jobs have different data members
-    I would like to keep it as simple as possible, but also avoid each end having to know
-    any sort of order. I could have a structure for each type.
- 
-    I have tried to have many Job inherit from a base job class. This did not work too well,
-    because the data for each job is so different.
- 
- Option 1. I could redo it with inheritance but assume that I am allowed to cast the job pointer
-           to be of the right type. I am not sure that doing inheritance based on the job type is so greate
-           because even within the same job type the data is pretty different. So if I was going to use inheritance
-           I would need to have a class for each of the 50 odd jobs. That is a LOT of classes. 
- 
-           Some of them are pretty similar: All of the camera jobs are the same. All of the light jobs are the same. All of the sound jobs are the same.
-           All of the system jobs are the same. So only VISION, LOCALISATION, BEHAVIOUR and MOTION have jobs with vastly different input data.
- 
-           Alright just cast the motherfuckers so that you can get the right data!
- 
-           MotionJob()
  
     @author Jason Kulk
  
@@ -80,6 +61,7 @@ public:
         MOTION_KICK,
         MOTION_BLOCK,
         MOTION_SAVE,
+        MOTION_HEAD,
         MOTION_TRACK,
         MOTION_NOD,
         MOTION_PAN,

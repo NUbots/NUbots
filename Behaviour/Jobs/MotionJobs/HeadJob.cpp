@@ -21,7 +21,7 @@
 
 #include "HeadJob.h"
 
-HeadJob::HeadJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK)
+HeadJob::HeadJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_HEAD)
 {
     m_job_time = time;     
     m_head_position = position;

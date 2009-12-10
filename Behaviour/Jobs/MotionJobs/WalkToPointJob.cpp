@@ -21,7 +21,7 @@
 
 #include "WalkToPointJob.h"
 
-WalkToPointJob::WalkToPointJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK)
+WalkToPointJob::WalkToPointJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK_TO_POINT)
 {
     m_job_time = time;     
     m_walk_position = position;
