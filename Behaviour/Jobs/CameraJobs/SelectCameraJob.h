@@ -1,8 +1,8 @@
-/*! @file CameraJob.h
-    @brief Declaration of base CameraJob class.
+/*! @file SelectCameraJob.h
+    @brief Declaration of base SelectCameraJob class.
  
-    @class CameraJob
-    @brief A base class to encapsulate jobs issued for the camera module.
+    @class SelectCameraJob
+    @brief A class to encapsulate jobs issued for the camera switching module.
  
     All camera jobs should inherit from this base class.
  
@@ -29,17 +29,22 @@
 
 #include "Job.h"
 
-class CameraJob : public Job
+class SelectCameraJob : public CameraJob
 {
 public:
-    CameraJob(job_id_t jobid, double time) : Job(Job::CAMERA, jobid){m_job_time = time;};
-    virtual ~CameraJob() {};
+    SelectCameraJob(double time, int camnumber) : CameraJob(CAMERA_SELECT_CAMERA, time), m_camera_number(camnumber){};
+    ~SelectCameraJob() {};
+    
+    void setCameraNumber(double time, int camnumber) {m_job_time = time; m_camera_number = camnumber;};
+    void getCameraNumber(double& time, int& camnumber) {time = m_job_time; camnumber = m_camera_number;};
     
     /*virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
     virtual istream& operator>> (istream& input);*/
+private:
+    int m_camera_number;
 };
 
 #endif

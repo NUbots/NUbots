@@ -29,11 +29,14 @@
 #include "Jobs/LocalisationJob.h"
 #include "Jobs/BehaviourJob.h"
 #include "Jobs/MotionJob.h"
-#include "Jobs/MotionJobs/WalkToPointJob.h"
+#include "Jobs/MotionJobs/BlockJob.h"
+#include "Jobs/MotionJobs/HeadJob.h"
+#include "Jobs/MotionJobs/KickJob.h"
+#include "Jobs/MotionJobs/SaveJob.h"
 #include "Jobs/MotionJobs/WalkJob.h"
+#include "Jobs/MotionJobs/WalkToPointJob.h"
 
 #include "Jobs/LightJob.h"
-
 #include "Jobs/LightJobs/ChestLedJob.h"
 #include "Jobs/LightJobs/LEarLedJob.h"
 #include "Jobs/LightJobs/LEyeLedJob.h"
@@ -41,7 +44,9 @@
 #include "Jobs/LightJobs/REarLedJob.h"
 #include "Jobs/LightJobs/REyeLedJob.h"
 #include "Jobs/LightJobs/RFootLedJob.h"
+
 #include "Jobs/CameraJob.h"
+#include "Jobs/CameraJobs/SelectCameraJob.h"
 #include "Jobs/SoundJob.h"
 #include "Jobs/SystemJob.h"
 #include "Jobs/OtherJob.h"
