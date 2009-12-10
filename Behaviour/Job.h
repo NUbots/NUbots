@@ -109,6 +109,7 @@ public:
     };
     
 public:
+    Job();
     ~Job();
     
     job_type_t getJobType();
@@ -120,6 +121,12 @@ public:
     vector<float>* getLimits();
     vector<float>* getValues();
     vector<float>* getTarget();
+    
+    void summaryTo(ostream& output);
+    void csvTo(ostream& output);
+    
+    ostream& operator<< (ostream& output);
+    istream& operator>> (istream& input);
 
 protected:
     job_type_t m_job_type;              //!< The type of job

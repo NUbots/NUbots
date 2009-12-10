@@ -21,6 +21,12 @@
 
 #include "Job.h"
 
+/*! @brief Default Job constructor
+ */
+Job::Job()
+{
+}
+
 /*! @brief Job destructor
  */
 Job::~Job()
