@@ -95,11 +95,36 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process jobs
  */
-void NUMotion::process(JobList jobs)
+void NUMotion::process(JobList& jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process():" << endl;
 #endif
+    
+    JobList::iterator it, itend;
+    ++it;
+    it = jobs.begin();
+    itend = jobs.end();
+    debug << "begin: " << (*it) << " end: " << (*itend) << endl;
+    
+    for (it = jobs.begin(); it != jobs.end(); ++it)
+    {}
+    
+    list<Job*>::iterator vit;
+    for (vit = jobs.vision_begin(); vit != jobs.vision_end(); ++vit)
+    {
+        debug << *vit << " ";
+    }
+    /*for (int i=0; i<5; i++)
+    {
+        ++it;
+        if (it == itend)
+            debug << "its the end " << endl;
+        if (it != itend)
+            debug << "its not the end" << endl;
+    }*/
+    
+    
     
     // 
     

@@ -36,7 +36,7 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList jobs);
+    void process(JobList& jobs);
 protected:
 private:
 public:

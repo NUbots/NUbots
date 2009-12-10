@@ -480,6 +480,12 @@ void* runThreadVision(void* arg)
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
+    joblist.addVisionJob(new Job());
+    joblist.addVisionJob(new Job());
+    joblist.addMotionJob(new Job());
+    joblist.addMotionJob(new Job());
+    joblist.addMotionJob(new Job());
+    
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
     double realstarttime, processstarttime, threadstarttime; 
@@ -518,7 +524,7 @@ void* runThreadVision(void* arg)
         nubot->motion->process(joblist);
         //          cmds = nubot->lcs->process(lcsactions)
         nubot->platform->actionators->process(actions);
-        joblist.clear();                           // assume that all of the jobs have been completed
+        //joblist.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
         realendtime = NUSystem::getRealTimeFast();
