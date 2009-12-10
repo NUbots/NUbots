@@ -101,30 +101,11 @@ void NUMotion::process(JobList& jobs)
     debug << "NUMotion::process():" << endl;
 #endif
     
-    JobList::iterator it, itend;
-    ++it;
-    it = jobs.begin();
-    itend = jobs.end();
-    debug << "begin: " << (*it) << " end: " << (*itend) << endl;
-    
-    for (it = jobs.begin(); it != jobs.end(); ++it)
-    {}
-    
-    list<Job*>::iterator vit;
-    for (vit = jobs.vision_begin(); vit != jobs.vision_end(); ++vit)
+    list<Job*>::iterator it;
+    for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
     {
-        debug << *vit << " ";
+        debug << *it << " ";
     }
-    /*for (int i=0; i<5; i++)
-    {
-        ++it;
-        if (it == itend)
-            debug << "its the end " << endl;
-        if (it != itend)
-            debug << "its not the end" << endl;
-    }*/
-    
-    
     
     // 
     

@@ -50,7 +50,7 @@ void JobList::addJob(Job* job)
 {
     if (job == NULL)
         return;
-    Job::job_type_t jobtype = job->getJobType();
+    Job::job_type_t jobtype = job->getType();
     if (jobtype == Job::MOTION)
         addMotionJob(job);
     else if (jobtype == Job::VISION)
@@ -161,7 +161,7 @@ void JobList::removeJob(Job* job)
 {
     if (job == NULL)
         return;
-    Job::job_type_t jobtype = job->getJobType();
+    Job::job_type_t jobtype = job->getType();
     if (jobtype == Job::MOTION)
         removeMotionJob(job);
     else if (jobtype == Job::VISION)
