@@ -26,7 +26,7 @@ SET (YOUR_SRCS  Job.cpp Job.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS Jobs)
+SET (YOUR_DIRS)
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
