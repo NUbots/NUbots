@@ -22,8 +22,7 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include "Behaviour/JobList.h"
-#include "Behaviour/Job.h"
+#include "Behaviour/Jobs.h"
 
 class Behaviour
 {

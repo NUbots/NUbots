@@ -1,6 +1,6 @@
-/*! @file NUActionators.h
-    @brief Declaration of a base actuator class for robot manipulation
-
+/*! @file Jobs.h
+    @brief A convience header that will include the Job interface.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -19,27 +19,25 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUACTIONATORS_H
-#define NUACTIONATORS_H
+#ifndef JOBS_H
+#define JOBS_H
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Jobs/JobList.h"
+#include "Jobs/Job.h"
 
-#include <vector>
-#include <string>
-using namespace std;
+#include "Jobs/VisionJob.h"
+#include "Jobs/LocalisationJob.h"
+#include "Jobs/BehaviourJob.h"
+#include "Jobs/MotionJob.h"
+#include "Jobs/MotionJobs/WalkToPointJob.h"
+#include "Jobs/MotionJobs/WalkJob.h"
 
-class NUActionators
-{
-public:
-    NUActionators();
-    virtual ~NUActionators();
-    
-    void process(NUActionatorsData*& data);
-protected:
-    virtual void copyToHardwareCommunications();
-protected:
-    NUActionatorsData* m_data;
-};
+#include "Jobs/LightJob.h"
+#include "Jobs/CameraJob.h"
+#include "Jobs/SoundJob.h"
+#include "Jobs/SystemJob.h"
+#include "Jobs/OtherJob.h"
+
 
 #endif
 

@@ -20,13 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Job.cpp Job.h
-                JobList.cpp JobList.h
-                Behaviour.cpp Behaviour.h
+SET (YOUR_SRCS  Behaviour.cpp Behaviour.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS)
+SET (YOUR_DIRS Jobs
+)
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path

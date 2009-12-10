@@ -480,11 +480,13 @@ void* runThreadVision(void* arg)
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
-    joblist.addVisionJob(new Job());
-    joblist.addVisionJob(new Job());
-    joblist.addMotionJob(new Job());
-    joblist.addMotionJob(new Job());
-    joblist.addMotionJob(new Job());
+    vector<float> temp(3, 0);
+    
+    joblist.addVisionJob(new WalkJob(temp));
+    joblist.addVisionJob(new WalkJob(temp));
+    joblist.addMotionJob(new WalkJob(temp));
+    joblist.addMotionJob(new WalkJob(temp));
+    joblist.addMotionJob(new WalkJob(temp));
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;

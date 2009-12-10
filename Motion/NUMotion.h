@@ -25,7 +25,7 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "Behaviour/JobList.h"
+#include "Behaviour/Jobs.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
