@@ -32,6 +32,8 @@
 #include "Jobs/MotionJobs/BlockJob.h"
 #include "Jobs/MotionJobs/HeadJob.h"
 #include "Jobs/MotionJobs/KickJob.h"
+#include "Jobs/MotionJobs/NodHeadJob.h"
+#include "Jobs/MotionJobs/PanHeadJob.h"
 #include "Jobs/MotionJobs/SaveJob.h"
 #include "Jobs/MotionJobs/WalkJob.h"
 #include "Jobs/MotionJobs/WalkToPointJob.h"
