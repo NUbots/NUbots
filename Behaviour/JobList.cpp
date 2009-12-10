@@ -265,7 +265,158 @@ void JobList::removeJob(Job* job, list<Job*>& joblist)
     joblist.remove(job);
 }
 
+/*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
+           entire contents of the list.
+ 
+    This iterator is fairly expensive, and should be avoided. Its expensive because finding non-empty
+    lists and consequently valid jobs is expensive, and every call to .begin() or .end() *searches* for the
+    appropriate element!
+ */
+JobList::iterator JobList::begin()
+{
+    return JobList::iterator(this);
+}
 
+/*! @brief Returns an iterator at the end of the job list. This iterator goes over the
+           entire contents of the list.
+ 
+    This iterator is fairly expensive, and should be avoided. Its expensive because finding non-empty
+    lists and consequently valid jobs is expensive, and every call to .begin() or .end() *searches* for the
+    appropriate element!
+ */
+JobList::iterator JobList::end()
+{
+    return JobList::iterator(this, true);
+}
+
+/*! @brief Returns an iterator at the beginning of the vision jobs.
+ */
+list<Job*>::iterator JobList::vision_begin()
+{
+    return m_vision_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the vision jobs.
+ */
+list<Job*>::iterator JobList::vision_end()
+{
+    return m_vision_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the localisation jobs.
+ */
+list<Job*>::iterator JobList::localisation_begin()
+{
+    return m_localisation_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the localisation jobs.
+ */
+list<Job*>::iterator JobList::localisation_end()
+{
+    return m_localisation_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the behaviour jobs.
+ */
+list<Job*>::iterator JobList::behaviour_begin()
+{
+    return m_behaviour_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the behaviour jobs.
+ */
+list<Job*>::iterator JobList::behaviour_end()
+{
+    return m_behaviour_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the motion jobs.
+ */
+list<Job*>::iterator JobList::motion_begin()
+{
+    return m_motion_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the motion jobs.
+ */
+list<Job*>::iterator JobList::motion_end()
+{
+    return m_motion_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the light jobs.
+ */
+list<Job*>::iterator JobList::light_begin()
+{
+    return m_light_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the light jobs.
+ */
+list<Job*>::iterator JobList::light_end()
+{
+    return m_light_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the camera jobs.
+ */
+list<Job*>::iterator JobList::camera_begin()
+{
+    return m_camera_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the camera jobs.
+ */
+list<Job*>::iterator JobList::camera_end()
+{
+    return m_camera_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the sound jobs.
+ */
+list<Job*>::iterator JobList::sound_begin()
+{
+    return m_sound_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the sound jobs.
+ */
+list<Job*>::iterator JobList::sound_end()
+{
+    return m_sound_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the system jobs.
+ */
+list<Job*>::iterator JobList::system_begin()
+{
+    return m_system_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the system jobs.
+ */
+list<Job*>::iterator JobList::system_end()
+{
+    return m_system_jobs.end();
+}
+
+/*! @brief Returns an iterator at the beginning of the other jobs.
+ */
+list<Job*>::iterator JobList::other_begin()
+{
+    return m_other_jobs.begin();
+}
+
+/*! @brief Returns an iterator at the end of the other jobs.
+ */
+list<Job*>::iterator JobList::other_end()
+{
+    return m_other_jobs.end();
+}
+
+/*! @brief Clears the contents of the job list
+ */
 void JobList::clear()
 {
     list<list<Job*>*>::iterator it;
@@ -273,5 +424,126 @@ void JobList::clear()
         (*it)->clear();
 }
 
+/******************************************************************************************************************************************
+ JobListIterator Implementation
+ ******************************************************************************************************************************************/
+/*! @brief Default constructor
+ */
+JobListIterator::JobListIterator()
+{
+    m_job = NULL;
+}
 
+/*! @brief Constructor for a JobListIterator over joblist
+    @param joblist the JobList to iterate over
+    @param end set this to false if you want the iterator at the beginning, set it to true if you want the iterator at the end
+ */
+JobListIterator::JobListIterator(JobList* joblist, bool end)
+{
+    m_joblist = joblist;
+#if DEBUG_BEHAVIOUR_VERBOSITY > 5
+    debug << "JobListIterator::JobListIterator. Contents of JobList:" << endl;
+    list<list<Job*>*>::iterator it;
+    list<Job*>::iterator sit;
+    for (it = m_joblist->m_job_lists.begin(); it != m_joblist->m_job_lists.end(); ++it)
+    {
+        for (sit = (*it)->begin(); sit!=(*it)->end(); ++sit)
+            debug << (*sit) << " ";
+    }
+    debug << endl;
+#endif
+    
+    if (end == false)
+    {   // make the iterator point to the beginning of the JobList
+        // find the first non-empty list, but iterating over joblist->m_job_lists
+        for (m_job_lists_iterator = m_joblist->m_job_lists.begin(); m_job_lists_iterator!=m_joblist->m_job_lists.end(); ++m_job_lists_iterator)
+        {
+            if (!(*m_job_lists_iterator)->empty())
+            {
+                m_list_iterator = (*m_job_lists_iterator)->begin();
+                m_job = *m_list_iterator;
+                break;
+            }
+        }
+    }
+    else
+    {   // make the iterator point to the end of the JobList
+        // find the last non-empty list, by iterating over joblist->m_job_lists backwards
+        list<list<Job*>*>::reverse_iterator reverseit;
+        for (reverseit = joblist->m_job_lists.rbegin(); reverseit != joblist->m_job_lists.rend(); ++reverseit)
+        {
+            if (!(*reverseit)->empty())
+            {
+                m_list_iterator = (*reverseit)->end();
+                m_job = *m_list_iterator;
+                break;
+            }
+        }
+    }
+    
+    // this should leave m_job_lists_iterator at the current m_*_jobs and m_list_iterator at the current m_job
+}
+
+/*! @brief Increments the iterator to reference the next job. If there are no more jobs the iterator will be in the .end() state
+ */
+JobListIterator& JobListIterator::operator++() 
+{
+    if (m_job == NULL)
+        return *this;
+    
+    ++m_list_iterator;      // Note. end() refers to past the end, so we increment and then check if we are past the end
+    if (m_list_iterator == (*m_job_lists_iterator)->end())
+        moveToNextList();
+    m_job = *(m_list_iterator);
+    return *this;
+}
+
+/*! @brief Increments the iterator to reference the next job. If there are no more jobs the iterator will be in the .end() state
+ */
+JobListIterator& JobListIterator::operator++(int) 
+{
+    if (m_job == NULL)
+        return *this;
+    
+    ++m_list_iterator;      // Note. end() refers to past the end, so we increment and then check if we are past the end
+    if (m_list_iterator == (*m_job_lists_iterator)->end())
+        moveToNextList();
+    m_job = *(m_list_iterator);
+    return *this;
+}
+
+/*! @brief Returns true if the two iterators reference the same job
+ */
+bool JobListIterator::operator==(const JobListIterator& rhs) 
+{
+    return m_job==rhs.m_job;
+}
+
+/*! @brief Returns true when the two iterators reference different jobs
+ */
+bool JobListIterator::operator!=(const JobListIterator& rhs) 
+{
+    return m_job!=rhs.m_job;
+}
+
+/*! @brief Get the job to which the iterator refers
+ */
+Job* JobListIterator::operator*()
+{
+    return m_job;
+};
+
+/*! @brief Move to the next non-empty job list in JobList
+ */
+void JobListIterator::moveToNextList()
+{
+    for(m_job_lists_iterator++; m_job_lists_iterator!=m_joblist->m_job_lists.end(); ++m_job_lists_iterator)
+    {
+        if (!(*m_job_lists_iterator)->empty())
+        {
+            m_list_iterator = (*m_job_lists_iterator)->begin();
+            break;
+        }
+    }
+}
 
