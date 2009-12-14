@@ -15,7 +15,9 @@
 #ifdef TARGET_IS_NAOWEBOTS
     #include <iostream>
     using namespace std;
-    #define debug cout                          //!< the debug stream
+    #define console cout                          //!< the debug stream
+    #include <fstream>
+    extern ofstream debug;
 #else
     #ifdef TARGET_IS_NAO
         #include <fstream>

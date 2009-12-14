@@ -48,9 +48,14 @@ public:
     
 protected:
     virtual void copyFromHardwareCommunications();
+    
+    void calculateJointVelocityFromPosition();
+    void calculateJointAccelerationFromVelocity();
+    
 private:
 protected:
     NUSensorsData* m_data;
+    
 private:
 };
 

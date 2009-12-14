@@ -1,4 +1,4 @@
-The purpose of this software is to provide an omni-directional walk for a humanoid robot.
+The purpose of this software is to provide a software architecture and tools to enable a humanoid robot to play soccer against other robots. In particular, play soccer in the Standard Platform League.
 
 Copyright (c) NUbots, University of Newcastle
 

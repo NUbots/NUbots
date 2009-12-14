@@ -1,11 +1,11 @@
-/*! @file Jobs.h
-    @brief Includes all of the Job classes.
+/*! @file VisionJob.h
+    @brief Declaration of base VisionJob class.
  
-    @class Job
-    @brief Includes all of the Job classes.
+    @class VisionJob
+    @brief A base class to encapsulate jobs issued for the vision module.
  
-    Thus, to include all of the job classes #include "Behaviour/Jobs/Jobs.h"
-
+    All vision jobs should inherit from this base class.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -24,16 +24,23 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JOBS_H
-#define JOBS_H
+#ifndef VISIONJOB_H
+#define VISIONJOB_H
 
-#include "BodyJob.h"
-#include "CameraJob.h"
-#include "HeadJob.h"
-#include "LightJob.h"
-#include "StateJob.h"
-#include "SystemJob.h"
+#include "Job.h"
 
+class VisionJob : public Job
+{
+public:
+    VisionJob(job_id_t jobid) : Job(Job::VISION, jobid){};
+    virtual ~VisionJob() {};
+    
+    /*virtual void summaryTo(ostream& output);
+    virtual void csvTo(ostream& output);
+    
+    virtual ostream& operator<< (ostream& output);
+    virtual istream& operator>> (istream& input);*/
+};
 
 #endif
 

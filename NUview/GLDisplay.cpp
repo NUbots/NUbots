@@ -7,10 +7,12 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
     for(int id = 0; id < numDisplays; id++)
     {
         overlays[id].displayID = id;
+        overlays[id].primary = false;
         overlays[id].enabled = false;
         overlays[id].colour = getDefaultColour(id);
         overlays[id].hasDisplayCommand = false;
     }
+    primaryLayer = &overlays[0];
     setPrimaryDisplay(unknown);
     setMouseTracking(true);
 
@@ -47,10 +49,8 @@ void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int 
 {
 
     bool newSize = ((imageWidth != width) || (imageHeight != height));
-    if(primaryLayer.displayID == displayID)
+    if(primaryLayer->displayID == displayID)
     {
-        primaryLayer.displayCommand = newDisplay;
-        primaryLayer.hasDisplayCommand = true;
         if(newSize)
         {
             imageWidth = width;
@@ -65,18 +65,17 @@ void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int 
 void GLDisplay::setPrimaryDisplay(int displayID)
 {
     return setPrimaryDisplay(displayID, getDefaultColour(displayID));
-    primaryLayer = overlays[displayID];
-    primaryLayer.enabled = true;
-    primaryLayer.colour = getDefaultColour(displayID);
-    setWindowTitle(getWindowTitle(displayID));
 }
 
 void GLDisplay::setPrimaryDisplay(int displayID, QColor drawingColour)
 {
-    primaryLayer = overlays[displayID];
-    primaryLayer.enabled = true;
-    primaryLayer.colour = drawingColour;
-    setWindowTitle(getWindowTitle(displayID));
+    primaryLayer->primary = false;
+    primaryLayer->enabled = false;
+    primaryLayer = &overlays[displayID];
+    primaryLayer->primary = true;
+    primaryLayer->enabled = true;
+    primaryLayer->colour = drawingColour;
+    setWindowTitle(getLayerName(displayID) + " Image");
 }
 
 void GLDisplay::setOverlayDrawing(int displayID, bool enabled)
@@ -165,13 +164,13 @@ void GLDisplay::paintGL()
     glOrtho(0.0, imageWidth, imageHeight, 0.0, -1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);       // Clear The Screen
 
-    if(primaryLayer.enabled && primaryLayer.hasDisplayCommand)
+    if(primaryLayer->enabled && primaryLayer->hasDisplayCommand)
     {
-        glColor4ub(primaryLayer.colour.red(),
-                   primaryLayer.colour.green(),
-                   primaryLayer.colour.blue(),
-                   primaryLayer.colour.alpha());
-        glCallList(primaryLayer.displayCommand);
+        glColor4ub(primaryLayer->colour.red(),
+                   primaryLayer->colour.green(),
+                   primaryLayer->colour.blue(),
+                   primaryLayer->colour.alpha());
+        glCallList(primaryLayer->displayCommand);
     }
     else
     {
@@ -183,7 +182,7 @@ void GLDisplay::paintGL()
 
     for (int id = 0; id < numDisplays; id++)
     {
-        if(overlays[id].enabled && overlays[id].hasDisplayCommand)
+        if(overlays[id].enabled && overlays[id].hasDisplayCommand && (overlays[id].primary == false))
         {
             glColor4ub(overlays[id].colour.red(),
                        overlays[id].colour.green(),

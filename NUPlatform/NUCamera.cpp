@@ -22,10 +22,24 @@
 #include "NUCamera.h"
 
 
+/*NUCamera::NUCamera()
+{
+}*/
+
 NUCamera::~NUCamera()
 {
 }
 
+void NUCamera::process(NUActionatorsData* data)
+{
+    m_data = data;
+    copyToHardwareCommunications();
+}
+
+void NUCamera::copyToHardwareCommunications()
+{
+    // implementation in PlatformCamera!
+}
 
 
 

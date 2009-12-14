@@ -34,6 +34,7 @@ NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::
 NUActionatorsData::joint_id_t NUActionatorsData::RElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoRoll = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
@@ -57,6 +58,19 @@ NUActionatorsData::led_id_t NUActionatorsData::Chest = NUActionatorsData::ACTION
 NUActionatorsData::led_id_t NUActionatorsData::LFoot = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::led_id_t NUActionatorsData::RFoot = NUActionatorsData::ACTIONATOR_MISSING;
 
+NUActionatorsData::camera_setting_id_t NUActionatorsData::Resolution = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::FramesPerSecond = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoExposure = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoWhiteBalance = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoGain = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::Brightness = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::Saturation = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::RedChroma = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::BlueChroma = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::Gain = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::Exposure = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::camera_setting_id_t NUActionatorsData::SelectCamera = NUActionatorsData::ACTIONATOR_MISSING;
+
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
 NUActionatorsData::NUActionatorsData()
@@ -64,33 +78,20 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
-    // add Joint actionators
-    addActionator(&JointPositions, string("JointPositions"), actionator_t::JOINT_POSITIONS);
-    addActionator(&JointVelocities, string("JointVelocities"), actionator_t::JOINT_VELOCITIES);
-    addActionator(&JointTorques, string("JointTorques"), actionator_t::JOINT_TORQUES);
+    m_positionactionation = false;
+    m_torqueactionation = false;
     
-    // add Camera actionator
-    addActionator(&CameraControl, string("CameraControl"), actionator_t::CAMERA_CONTROL);
-    
-    // add LED actionator
-    addActionator(&Leds, string("Leds"), actionator_t::LEDS);
-    
-    // add a Sound actionator
-    addActionator(&Sound, string("Sound"), actionator_t::SOUND);
-}
-
-/* Add an actionator to the NUActionatorsData.
-   We construct the actionator itself and assign it to the appropriate named actionator, then append it to the list m_actionators
- */
-void NUActionatorsData::addActionator(actionator_t** p_actionator, string actionatorname, actionator_t::actionator_id_t actionatorid)
-{
-    *p_actionator = new actionator_t(actionatorname, actionatorid);
-    m_actionators.push_back(*p_actionator);
+    m_num_head_joints = 0;
+    m_num_arm_joints = 0;
+    m_num_torso_joints = 0;
+    m_num_leg_joints = 0;
+    m_num_body_joints = 0;
+    m_num_joints = 0;
 }
 
 NUActionatorsData::~NUActionatorsData()
 {
-    m_actionators.clear();
+    m_all_actionators.clear();
     m_head_ids.clear();
     m_larm_ids.clear();
     m_rarm_ids.clear();
@@ -99,600 +100,42 @@ NUActionatorsData::~NUActionatorsData()
     m_rleg_ids.clear();
 }
 
-/*! @brief Remove all of the completed actionator points
-    @param currenttime all actionator points that have times before this one are assumed to have been completed, and they will be removed
- */
-void NUActionatorsData::removeCompletedActions(double currenttime)
-{
-    for (int i=0; i<m_actionators.size(); i++)
-        m_actionators[i]->removeCompleted(currenttime);
-}
-
-
 /******************************************************************************************************************************************
- Get Methods
+ Initialisation and Availability Setting Methods
  ******************************************************************************************************************************************/
 
-/*! @brief Gets the next actionator point (ie the isvalid the positions and the gains) data
- 
- @param time the variable that will be updated with the time the actionator point should be completed on in milliseconds
- @param isvalid the isvalid flags for the data and gain
- @param positions the vector of data for the actionator
- @param gains the vector of gaings for the actionator
- 
- @return returns true if the actionator is available and has at least one valid data point, false otherwise
+/*! @brief Sets the available joint control methods, that is whether the joints can be position, torque or both controlled.
+ @param methodnames a vector of strings where each string names a method
  */
-bool NUActionatorsData::getJointPositions(vector<double>& time, vector<bool>& isvalid, vector<float>& positions, vector<bool>& isgainvalid, vector<float>& gains)
+void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& methodnames)
 {
-    getJointData(JointPositions, time, isvalid, positions, isgainvalid, gains);
-}
-
-/*! @brief Gets the next actionator point (ie the isvalid the velocities and the gains) data
- 
- @param time the variable that will be updated with the time the actionator point should be completed on in milliseconds
- @param isvalid the isvalid flags for the data and gain
- @param data the vector of data for the actionator
- @param gains the vector of gaings for the actionator
- 
- @return returns true if the actionator is available and has at least one valid data point, false otherwise
- */
-bool NUActionatorsData::getJointVelocities(vector<double>& time, vector<bool>& isvalid, vector<float>& velocities, vector<bool>& isgainvalid, vector<float>& gains)
-{
-    getJointData(JointVelocities, time, isvalid, velocities, isgainvalid, gains);
-}
-
-/*! @brief Gets the next actionator point (ie the isvalid the torques and the gains) data
- 
- @param time the variable that will be updated with the time the actionator point should be completed on in milliseconds
- @param isvalid the isvalid flags for the data and gain
- @param data the vector of data for the actionator
- @param gains the vector of gaings for the actionator
- 
- @return returns true if the actionator is available and has at least one valid data point, false otherwise
- */
-bool NUActionatorsData::getJointTorques(vector<double>& time, vector<bool>& isvalid, vector<float>& torques, vector<bool>& isgainvalid, vector<float>& gains)
-{
-    getJointData(JointTorques, time, isvalid, torques, isgainvalid, gains);
-}
-
-/*! @brief This function does the grunt work for getting data and gains to be sent to hardware communications
- 
-    @param p_actionator a pointer to the actionator we put the data and gain from
-    @param time the variable that will be updated with the time the actionator point should be completed on in milliseconds
-    @param isvalid the isvalid flags for the data and gain
-    @param data the vector of data for the actionator
-    @param gains the vector of gaings for the actionator
- 
-    @return returns true if the actionator is available and has at least one valid data point, false otherwise
- */
-bool NUActionatorsData::getJointData(actionator_t* p_actionator, vector<double>& time, vector<bool>& isvalid, vector<float>& data, vector<bool>& isgainvalid, vector<float>& gains)
-{
-    if (p_actionator->IsAvailable == false)
-        return false;
-    else if (p_actionator->m_points.size() == 0)
-        return false;
+    vector<string> simplemethodnames;
+    simplifyNames(methodnames, simplemethodnames);
     
-    actionator_t::actionator_point_t* point = p_actionator->m_points[0];
-    int numdims = point->Values.size();
-    time = vector<double> (numdims, 0);
-    isvalid = vector<bool> (numdims, false);
-    data = vector<float> (numdims, 0);
-    isgainvalid = vector<bool> (numdims, false);
-    gains = vector<float> (numdims, 0);
-    
-    // for each dimension we need to find the next point that has valid data for this dimension
-    for (int i=0; i<numdims; i++)
+    for (int i=0; i<simplemethodnames.size(); i++)
     {
-        for (int j=0; j<p_actionator->m_points.size(); j++)
-        {
-            if (p_actionator->m_points[j]->IsValid[i] == true)
-            {
-                time[i] = p_actionator->m_points[j]->Time;
-                isvalid[i] = true;
-                data[i] = p_actionator->m_points[j]->Values[i];
-                isgainvalid[i] = p_actionator->m_points[j]->IsGainValid[i];
-                gains[i] = p_actionator->m_points[j]->Gains[i];
-                break;
-            }
-            else if (p_actionator->m_points[j]->IsGainValid[i] == true)
-            {
-                time[i] = p_actionator->m_points[j]->Time;
-                isgainvalid[i] = true;
-                gains[i] = p_actionator->m_points[j]->Gains[i];
-                break;
-            }
-        }
-    }
-}
-
-/******************************************************************************************************************************************
- Set Methods
- ******************************************************************************************************************************************/
-
-bool NUActionatorsData::setJointPosition(joint_id_t jointid, double time, float position)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointVelocity(joint_id_t jointid, double time, float velocity)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointStiffness(joint_id_t jointid, double time, float stiffness)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointTorque(joint_id_t jointid, double time, float torque)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointPosition(joint_id_t jointid, double time, float position, float gain)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointVelocity(joint_id_t jointid, double time, float velocity, float gain)
-{
-    return false;
-}
-
-bool NUActionatorsData::setJointTorque(joint_id_t jointid, double time, float torque, float gain)
-{
-    return false;
-}
-
-/*! @brief Set the joint positions for the selected body part
-
-    @param partid the body_part_id_t being targeted
-    @param time the time the position will be reached in milliseconds
-    @param positions the vector of new positions
- 
-    @return Returns true if their are position actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointPositions(bodypart_id_t partid, double time, const vector<float>& positions)
-{
-    return setJointsData(JointPositions, partid, time, positions);
-}
-
-/*! @brief Set the joint velocities for the selected body part
- 
-    @param partid the body_part_id_t being targeted
-    @param time the time the velocity will be reached in milliseconds
-    @param velocities the vector of new velocities
-
-    @return Returns true if their are velocities actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointVelocities(bodypart_id_t partid, double time, const vector<float>& velocities)
-{
-    return setJointsData(JointVelocities, partid, time, velocities);
-}
-
-/*! @brief Set the joint stiffnesses for the selected body part
- 
-    @param partid the body_part_id_t being targeted
-    @param time the time the stiffness will be reached in milliseconds
-    @param stiffnesses the vector of new stiffnesses
-
-    @return Returns true if their are stiffness actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointStiffnesses(bodypart_id_t partid, double time, const vector<float>& stiffnesses)
-{
-    return setJointsGain(JointPositions, partid, time, stiffnesses);
-}
-
-/*! @brief Set the joint torques for the selected body part
- 
- @param partid the body_part_id_t being targeted
- @param time the time the torques will be applied in milliseconds
- @param torques the vector of new torques
- 
- @return Returns true if their are stiffness actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointTorques(bodypart_id_t partid, double time, const vector<float>& torques)
-{
-    return setJointsData(JointTorques, partid, time, torques);
-}
-
-/*! @brief Set the joint positions and gains for the selected body part
- 
- @param partid the body_part_id_t being targeted
- @param time the time the position and gain will be reached in milliseconds
- @param positions the vector of new positions
- @param gains the vector of new gains
- 
- @return Returns true if their are position actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& gains)
-{
-    return setJointsData(JointPositions, partid, time, positions, gains);
-}
-
-/*! @brief Set the joint velocities and gains for the selected body part
- 
- @param partid the body_part_id_t being targeted
- @param time the time the velocities and gain will be reached in milliseconds
- @param velocities the vector of new velocities
- @param gains the vector of new gains
- 
- @return Returns true if their are velocities actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointVelocities(bodypart_id_t partid, double time, const vector<float>& velocities, const vector<float>& gains)
-{
-    return setJointsData(JointVelocities, partid, time, velocities, gains);
-}
-
-/*! @brief Set the joint torques and gains for the selected body part
- 
- @param partid the body_part_id_t being targeted
- @param time the time the torques and gain will be reached in milliseconds
- @param torques the vector of new torques
- @param gains the vector of new gains
- 
- @return Returns true if their are torques actionators available, returns false otherwise
- */
-bool NUActionatorsData::setJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
-{
-    return setJointsData(JointTorques, partid, time, torques, gains);
-}
-
-
-bool NUActionatorsData::setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data)
-{
-    //! @todo TODO: implement this function
-}
-
-bool NUActionatorsData::setJointData(actionator_t* p_actionator, joint_id_t jointid, double time, float data, float gain)
-{
-    //! @todo TODO: implement this function
-}
-
-
-
-/*! @brief This function does the grunt work for setting joint gains, while leaving the data alone
- 
- The selected body part of the selected actionator is set with new gains. This function
- exists because it is a very similar problem to set JointPositions and JointVelocities, for example.
- 
-    @param p_actionator a pointer to the actionator that will have its gain updated
-    @param partid the body_part_id_t being targeted
-    @param time the time the action will be completed on in milliseconds
-    @param gains the vector of new gains
- 
-    @return Returns true if the actionator is available, returns false otherwise
- */
-bool NUActionatorsData::setJointsGain(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& gains)
-{
-    if (p_actionator->IsAvailable == false)
-        return false;
-    if (partid == All && m_num_joints == 0)
-        return false;
-    else if (partid == Body && m_num_body_joints == 0)
-        return false;
-    else if (partid == Head && m_num_head_joints == 0)
-        return false;
-    else if ((partid == LeftArm || partid == RightArm) && m_num_arm_joints == 0)
-        return false;
-    else if (partid == Torso && m_num_torso_joints == 0)
-        return false;
-    else if ((partid == LeftLeg || partid == RightLeg) && m_num_leg_joints == 0)
-        return false;
-    
-    const vector<bool> isdatavalid (m_num_joints, false);         // for this function the data is always unused
-    const vector<float> alldata (m_num_joints, 0);                // so make them invalid and set to zero
-    
-    if (partid == All)
-    {   // if the data and gains are full, then we can do this very quickly
-        vector<bool> isgainvalid (m_num_joints, true);
-        addAction(p_actionator, time, isdatavalid, alldata, isgainvalid, gains);
-    }
-    else
-    {
-        if (partid == Body)
-        {   // if we have all the body data and gains, it is faster to just set invalid values for the head
-            vector<bool> isgainvalid (m_num_joints, true);          // set the head isvalid flags to false
-            for (int i=0; i<m_head_ids.size(); i++)
-                isgainvalid[m_head_ids[i]] = false;         
-            
-            vector<float> allgains (gains);                           // now I make alldata and allgains by inserting zeros at the begining of each for the head joints
-            allgains.insert(allgains.begin(), m_head_ids.size(), 0); 
-            
-            addAction(p_actionator, time, isdatavalid, alldata, isgainvalid, allgains);
-        }
+        if (simplemethodnames[i].compare("position") || simplemethodnames[i].compare("positions") || simplemethodnames[i].compare("jointposition") || simplemethodnames[i].compare("jointpositions"))
+            m_positionactionation = true;
+        else if (simplemethodnames[i].compare("torque") || simplemethodnames[i].compare("torques") || simplemethodnames[i].compare("jointtorque") || simplemethodnames[i].compare("jointtorques"))
+            m_torqueactionation = true;
         else
-        {
-            vector<bool> isgainvalid (m_num_joints, false);
-            vector<float> allgains (m_num_joints, 0);
-            
-            if (partid == Head)
-                expandGain(m_head_ids, gains, isgainvalid, allgains);
-            else if (partid == LeftArm)
-                expandGain(m_larm_ids, gains, isgainvalid, allgains);
-            else if (partid == RightArm)
-                expandGain(m_rarm_ids, gains, isgainvalid, allgains);
-            else if (partid == Torso)
-                expandGain(m_torso_ids, gains, isgainvalid, allgains);
-            else if (partid == LeftLeg)
-                expandGain(m_lleg_ids, gains, isgainvalid, allgains);
-            else if (partid == RightLeg)
-                expandGain(m_rleg_ids, gains, isgainvalid, allgains);
-            
-            addAction(p_actionator, time, isdatavalid, alldata, isgainvalid, allgains);
-        }
-    }
-    return true;
-}
-
-/*! @brief This function does the grunt work for setting joint data, while leaving the gains alone
- 
- The selected body part of the selected actionator is set with new data. This function
- exists because it is a very similar problem to set JointPositions and JointVelocities, for example.
- 
-    @param p_actionator a pointer to the actionator that will have its data updated
-    @param partid the body_part_id_t being targeted
-    @param time the time the action will be completed on in milliseconds
-    @param data the vector of new data
- 
-    @return Returns true if the actionator is available, returns false otherwise
- */
-bool NUActionatorsData::setJointsData(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& data)
-{
-    if (p_actionator->IsAvailable == false)
-        return false;
-    if (partid == All && m_num_joints == 0)
-        return false;
-    else if (partid == Body && m_num_body_joints == 0)
-        return false;
-    else if (partid == Head && m_num_head_joints == 0)
-        return false;
-    else if ((partid == LeftArm || partid == RightArm) && m_num_arm_joints == 0)
-        return false;
-    else if (partid == Torso && m_num_torso_joints == 0)
-        return false;
-    else if ((partid == LeftLeg || partid == RightLeg) && m_num_leg_joints == 0)
-        return false;
-    
-    const vector<bool> isgainvalid (m_num_joints, false);         // for this function the gains are always unused
-    const vector<float> allgains (m_num_joints, 0);               // so make them invalid and set to zero
-    
-    if (partid == All)
-    {   // if the data and gains are full, then we can do this very quickly
-        const vector<bool> isdatavalid (m_num_joints, true);
-        addAction(p_actionator, time, isdatavalid, data, isgainvalid, allgains);
-    }
-    else
-    {
-        if (partid == Body)
-        {   // if we have all the body data and gains, it is faster to just set invalid values for the head
-            vector<bool> isdatavalid (m_num_joints, true);          // set the head isvalid flags to false
-            for (int i=0; i<m_head_ids.size(); i++)
-                isdatavalid[m_head_ids[i]] = false;         
-            
-            vector<float> alldata (data);                           // now I make alldata and allgains by inserting zeros at the begining of each for the head joints
-            alldata.insert(alldata.begin(), m_head_ids.size(), 0); 
-            
-            addAction(p_actionator, time, isdatavalid, alldata, isgainvalid, allgains);
-        }
-        else
-        {
-            vector<bool> isdatavalid (m_num_joints, false);
-            vector<float> alldata (m_num_joints, 0);
-            
-            if (partid == Head)
-                expandData(m_head_ids, data, isdatavalid, alldata);
-            else if (partid == LeftArm)
-                expandData(m_larm_ids, data, isdatavalid, alldata);
-            else if (partid == RightArm)
-                expandData(m_rarm_ids, data, isdatavalid, alldata);
-            else if (partid == Torso)
-                expandData(m_torso_ids, data, isdatavalid, alldata);
-            else if (partid == LeftLeg)
-                expandData(m_lleg_ids, data, isdatavalid, alldata);
-            else if (partid == RightLeg)
-                expandData(m_rleg_ids, data, isdatavalid, alldata);
-            
-            addAction(p_actionator, time, isdatavalid, alldata, isgainvalid, allgains);
-        }
-    }
-    return true;
-}
-
-/*! @brief This function does the grunt work for setting joint data and gains simultaneously
- 
-    The selected body part of the selected actionator is set with new data and gains. This function
-    exists because it is a very similar problem to set JointPositions and JointVelocities, for example.
- 
-    @param p_actionator a pointer to the actionator that will have its data and gain updated
-    @param partid the body_part_id_t being targeted
-    @param time the time the action will be completed on in milliseconds
-    @param data the vector of new data
-    @param gains the vector of new gains
- 
-    @return Returns true if the actionator is available, returns false otherwise
- */
-bool NUActionatorsData::setJointsData(actionator_t* p_actionator, bodypart_id_t partid, double time, const vector<float>& data, const vector<float>& gains)
-{
-    if (p_actionator->IsAvailable == false)
-        return false;
-    if (partid == All && m_num_joints == 0)
-        return false;
-    else if (partid == Body && m_num_body_joints == 0)
-        return false;
-    else if (partid == Head && m_num_head_joints == 0)
-        return false;
-    else if ((partid == LeftArm || partid == RightArm) && m_num_arm_joints == 0)
-        return false;
-    else if (partid == Torso && m_num_torso_joints == 0)
-        return false;
-    else if ((partid == LeftLeg || partid == RightLeg) && m_num_leg_joints == 0)
-        return false;
-    
-    if (partid == All)
-    {   // if the positions and gains are full, then we can do this very quickly
-        vector<bool> isvalid (m_num_joints, true);
-        addAction(p_actionator, time, isvalid, data, gains);
-    }
-    else
-    {
-        if (partid == Body)
-        {   // if we have all the body data and gains, it is faster to just set invalid values for the head
-            vector<bool> isvalid (m_num_joints, true);          // set the head isvalid flags to false
-            for (int i=0; i<m_head_ids.size(); i++)
-                isvalid[m_head_ids[i]] = false;         
-            
-            vector<float> alldata (data);                       // now I make alldata and allgains by inserting zeros at the begining of each for the head joints
-            vector<float> allgains (gains);
-            alldata.insert(alldata.begin(), m_head_ids.size(), 0);
-            allgains.insert(allgains.begin(), m_head_ids.size(), 0);     
-            
-            addAction(p_actionator, time, isvalid, alldata, allgains);
-        }
-        else
-        {
-            vector<bool> isvalid (m_num_joints, false);
-            vector<float> alldata (m_num_joints, 0);
-            vector<float> allgains (m_num_joints, 0);
-            
-            if (partid == Head)
-                expandAction(m_head_ids, data, gains, isvalid, alldata, allgains);
-            else if (partid == LeftArm)
-                expandAction(m_larm_ids, data, gains, isvalid, alldata, allgains);
-            else if (partid == RightArm)
-                expandAction(m_rarm_ids, data, gains, isvalid, alldata, allgains);
-            else if (partid == Torso)
-                expandAction(m_torso_ids, data, gains, isvalid, alldata, allgains);
-            else if (partid == LeftLeg)
-                expandAction(m_lleg_ids, data, gains, isvalid, alldata, allgains);
-            else if (partid == RightLeg)
-                expandAction(m_rleg_ids, data, gains, isvalid, alldata, allgains);
-            
-            addAction(p_actionator, time, isvalid, alldata, allgains);
-        }
-    }
-    return true;
-}
-
-/*! @brief Expands the vector gains into isgainvalid and allgains vectors where isgainvalid and allgains have sizes
-           equal to m_all_joint_ids.
-    @param ids a vector of the ids of the section being targeted by gains
-    @param gains a vector of data that will be sent to a subactionator group
-    @param isgainvalid will be updated to contain true values in places specified by ids
-    @param allgains will be update to contain actual values in places specified by ids
- */
-void NUActionatorsData::expandGain(const vector<joint_id_t>& ids, const vector<float>& gains, vector<bool>& isgainvalid, vector<float>& allgains)
-{
-    if (ids.size() != gains.size())
-    {
-        debug << "NUActionatorsData::expandGain: Your ids and gains have different lengths. All of your gains will be ignored!" << endl;
-        return;
-    }
-    
-    int id = 0;
-    for (int i=0; i<ids.size(); i++)
-    {
-        id = ids[i];        // id is the index into the all arrays, and i is the index into the data and gains arrays
-        
-        isgainvalid[id] = true;
-        allgains[id] = gains[i];
+            debug << "NUActionatorsData::setAvailableJointControlMethods. You have specified an unrecognised joint control method: " << methodnames[i] << endl;
     }
 }
 
-/*! @brief Expands the vector data into isdatavalid and alldata vectors where isdatavalid and alldata have sizes
-           equal to m_all_joint_ids.
-    @param ids a vector of the ids of the section being targeted by data
-    @param data a vector of data that will be sent to a subactionator group
-    @param isdatavalid will be updated to contain true values in places specified by ids
-    @param alldata will be update to contain actual values in places specified by ids
- */
-void NUActionatorsData::expandData(const vector<joint_id_t>& ids, const vector<float>& data, vector<bool>& isdatavalid, vector<float>& alldata)
-{
-    if (ids.size() != data.size())
-    {
-        debug << "NUActionatorsData::expandData: Your ids and data have different lengths. All of your data will be ignored!" << endl;
-        return;
-    }
-    
-    int id = 0;
-    for (int i=0; i<ids.size(); i++)
-    {
-        id = ids[i];        // id is the index into the all arrays, and i is the index into the data and gains arrays
-        
-        isdatavalid[id] = true;
-        alldata[id] = data[i];
-    }
-}
 
-/*! @brief Expand the vectors data and gains into isvalid, alldata and allgains such that
-           isvalid, alldata and allgains have length equal to m_num_joints.
-    @param ids a vector of the ids of the section being targeted by data and gains
-    @param data a vector of data that will be sent to a subactionator group
-    @param gains a vector of gain that will be sent to a subactionator group
-    @param isvalid will be updated to contain true values in places specified by ids
-    @param alldata will be update to contain actual values in places specified by ids
-    @param allgains will be update to contain actual values in places specified by ids
+/*! @brief Adds the joint actionators and sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
+ @param jointnames a vector of strings where each string is a name of a joint
  */
-void NUActionatorsData::expandAction(const vector<joint_id_t>& ids, const vector<float>& data, const vector<float>& gains, vector<bool>& isvalid, vector<float>& alldata, vector<float>& allgains)
-{
-    if (ids.size() != data.size() || ids.size() != gains.size())
-    {
-        debug << "NUActionatorsData::expandAction: Your ids, data and gains have different lengths. All of your data and gains will be ignored!" << endl;
-        return;
-    }
-    
-    int id = 0;
-    for (int i=0; i<ids.size(); i++)
-    {
-        id = ids[i];        // id is the index into the all arrays, and i is the index into the data and gains arrays
-        
-        isvalid[id] = true;
-        alldata[id] = data[i];
-        allgains[id] = gains[i];
-    }
-}
-
-/*! @brief Adds an action to the specified actionator where isvalid applies to both the data and the gains
- */
-void NUActionatorsData::addAction(actionator_t* p_actionator, double time, const vector<bool>& isvalid, const vector<float>& alldata, const vector<float>& allgains)
-{
-    addAction(p_actionator, time, isvalid, alldata, isvalid, allgains);
-}
-
-/*! @brief Adds an action to the specified actionator where separate isvalid flags are used for the data and the gains
- */
-void NUActionatorsData::addAction(actionator_t* p_actionator, double time, const vector<bool>& isdatavalid, const vector<float>& alldata, const vector<bool>& isgainvalid, const vector<float>& allgains)
-{
-    p_actionator->addAction(time, isdatavalid, alldata, isgainvalid, allgains);
-}
-
-
-/*! @brief Sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
- @param joints a vector of strings where each string is a name of a joint
- */
-void NUActionatorsData::setAvailableJoints(const vector<string>& joints)
+void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
 {
     // NOTE: This has been copied directly from NUSensorsData; so if your changing this you probably need to change that as well!
-    
-    // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplejointnames;
-    string namebuffer, currentname, currentletter;
-    for (int i=0; i<joints.size(); i++)
-    {
-        currentname = joints[i];
-        // compare each letter to a space and an underscore
-        for (int j=0; j<currentname.size(); j++)
-        {
-            currentletter = currentname.substr(j, 1);
-            if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
-                namebuffer += tolower(currentletter[0]);            
-        }
-        simplejointnames.push_back(namebuffer);
-        namebuffer.clear();
-    }
+    simplifyNames(jointnames, simplejointnames);
     
     for (int i=0; i<simplejointnames.size(); i++) 
     {
+        addJointActionator(jointnames[i]);
         if (simplejointnames[i].compare("headyaw") == 0)
         {
             HeadYaw = i;
@@ -742,6 +185,21 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& joints)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
+        }
+        else if (simplejointnames[i].compare("torsoyaw") == 0)
+        {
+            TorsoYaw = i;
+            m_torso_ids.push_back(i);
+        }
+        else if (simplejointnames[i].compare("torsopitch") == 0)
+        {
+            TorsoPitch = i;
+            m_torso_ids.push_back(i);
+        }
+        else if (simplejointnames[i].compare("torsoroll") == 0)
+        {
+            TorsoRoll = i;
+            m_torso_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("lhipyaw") == 0)
         {
@@ -813,6 +271,11 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& joints)
             RAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
+        else 
+        {
+            debug << "NUActionatorsData::setAvailableJoints. This platform has an unrecognised joint: " << jointnames[i] << endl;
+        }
+        
     }
     // add the arms, torso and legs to the body_ids
     m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
@@ -833,85 +296,564 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& joints)
     m_num_joints = m_all_joint_ids.size();
 }
 
-/*! @brief Sets each of the static led_id_t if the led is in the list.
-    @param leds a vector of strings where each string is a name of a led
+/*! @brief Adds the led actionators and sets each of the static led_id_t if the led is in the list.
+ @param leds a vector of strings where each string is a name of a led
  */
-void NUActionatorsData::setAvailableLeds(const vector<string>& leds)
+void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
 {
-    // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplelednames;
-    string namebuffer, currentname, currentletter;
-    for (int i=0; i<leds.size(); i++)
-    {
-        currentname = leds[i];
-        // compare each letter to a space and an underscore
-        for (int j=0; j<currentname.size(); j++)
-        {
-            currentletter = currentname.substr(j, 1);
-            if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
-                namebuffer += tolower(currentletter[0]);            
-        }
-        simplelednames.push_back(namebuffer);
-        namebuffer.clear();
-    }
+    simplifyNames(lednames, simplelednames);
     
     for (int i=0; i<simplelednames.size(); i++) 
     {
-        if (simplelednames[i].compare("lear") == 0)
+        addLedActionator(lednames[i]);
+        if (simplelednames[i].compare("lear") == 0 || simplelednames[i].compare("earsledleft") == 0)
             LEar = i;
-        else if (simplelednames[i].compare("rear") == 0)
+        else if (simplelednames[i].compare("rear") == 0 || simplelednames[i].compare("earsledright") == 0)
             REar = i;
-        else if (simplelednames[i].compare("leye") == 0)
+        else if (simplelednames[i].compare("leye") == 0 || simplelednames[i].compare("faceledleft") == 0)
             LEye = i;
-        else if (simplelednames[i].compare("reye") == 0)
+        else if (simplelednames[i].compare("reye") == 0 || simplelednames[i].compare("faceledright") == 0)
             REye = i;
-        else if (simplelednames[i].compare("chest") == 0)
+        else if (simplelednames[i].compare("chest") == 0 || simplelednames[i].compare("chestboardled") == 0)
             Chest = i;
-        else if (simplelednames[i].compare("lfoot") == 0)
+        else if (simplelednames[i].compare("lfoot") == 0 || simplelednames[i].compare("lfootled") == 0)
             LFoot = i;
-        else if (simplelednames[i].compare("rfoot") == 0)
+        else if (simplelednames[i].compare("rfoot") == 0 || simplelednames[i].compare("rfootled") == 0)
             RFoot = i;
     }
 }
 
-/*! @brief Sets the available actionators based on the names found in the passed in strings
-    
-    @param actionators a vector of names for each of the available actionators.
+/*! @brief Adds the camera setting actionator and sets each of the static camera_setting_id_t if the setting is in the list.
+ @param camerasettingnames a vector of strings where each string is a name of a setting
  */
-void NUActionatorsData::setAvailableActionators(const vector<string>& actionators)
+void NUActionatorsData::setAvailableCameraSettings(const vector<string>& camerasettingnames)
 {
-    // first convert everything to lower case and remove whitespace and underscores
-    vector<string> simpleactionatornames;
-    string namebuffer, currentname, currentletter;
-    for (int i=0; i<actionators.size(); i++)
+    vector<string> simplecamerasettingnames;
+    simplifyNames(camerasettingnames, simplecamerasettingnames);
+    
+    for (int i=0; i<simplecamerasettingnames.size(); i++) 
     {
-        currentname = actionators[i];
-        // compare each letter to a space and an underscore
-        for (int j=0; j<currentname.size(); j++)
-        {
-            currentletter = currentname.substr(j, 1);
-            if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
-                namebuffer += tolower(currentletter[0]);            
-        }
-        simpleactionatornames.push_back(namebuffer);
-        namebuffer.clear();
+        addCameraSettingActionator(camerasettingnames[i]);
+        if (simplecamerasettingnames[i].compare("resolution") == 0)
+            Resolution = i;
+        else if (simplecamerasettingnames[i].compare("framespersecond") == 0 || simplecamerasettingnames[i].compare("fps") == 0 )
+            FramesPerSecond = i;
+        else if (simplecamerasettingnames[i].compare("autoexposure") == 0)
+            AutoExposure = i;
+        else if (simplecamerasettingnames[i].compare("autowhitebalance") == 0)
+            AutoWhiteBalance = i;
+        else if (simplecamerasettingnames[i].compare("autogain") == 0)
+            AutoGain = i;
+        else if (simplecamerasettingnames[i].compare("brightness") == 0)
+            Brightness = i;
+        else if (simplecamerasettingnames[i].compare("saturation") == 0)
+            Saturation = i;
+        else if (simplecamerasettingnames[i].compare("redchroma") == 0)
+            RedChroma = i;
+        else if (simplecamerasettingnames[i].compare("bluechroma") == 0)
+            BlueChroma = i;
+        else if (simplecamerasettingnames[i].compare("gain") == 0)
+            Gain = i;
+        else if (simplecamerasettingnames[i].compare("exposure") == 0)
+            Exposure = i;
+        else if (simplecamerasettingnames[i].compare("selectcamera") == 0)
+            SelectCamera = i;
+        else
+            debug << "NUActionatorsData::setAvailableCameraSettings. You have added an unrecognised camera setting: " << camerasettingnames[i] << endl;
     }
+}
+
+/*! @brief Sets the available actionators based on the names found in the passed in strings
+ 
+ @param actionators a vector of names for each of the available actionators.
+ */
+void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actionatornames)
+{
+    vector<string> simpleactionatornames;
+    simplifyNames(actionatornames, simpleactionatornames);
     
     for (int i=0; i<simpleactionatornames.size(); i++) 
     {
-        if (simpleactionatornames[i].compare("jointpositions") == 0)
-            JointPositions->IsAvailable = true;
-        else if (simpleactionatornames[i].compare("jointvelocities") == 0)
-            JointVelocities->IsAvailable = true;
-        else if (simpleactionatornames[i].compare("jointtorques") == 0)
-            JointTorques->IsAvailable = true;
-        else if (simpleactionatornames[i].compare("cameracontrol") == 0 || simpleactionatornames[i].compare("camera") == 0 || simpleactionatornames[i].compare("cameraselect") == 0)
-            CameraControl->IsAvailable = true;
-        else if (simpleactionatornames[i].compare("leds") == 0)
-            Leds->IsAvailable = true;
-        else if (simpleactionatornames[i].compare("sound") == 0)
-            Sound->IsAvailable = true;
+        if (simpleactionatornames[i].compare("sound") == 0)
+            addActionator(Sound, actionatornames[i], actionator_t::SOUND);
+        else
+            debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
     }
+}
+
+/*! @brief Adds a joint actionator with the specified name
+ 
+ @param actionatorname the name of the actionator to be added
+ */
+void NUActionatorsData::addJointActionator(string actionatorname)
+{
+    if (m_positionactionation == true)
+        addActionator(PositionActionators, actionatorname, actionator_t::JOINT_POSITION);
+    if (m_torqueactionation == true)
+        addActionator(TorqueActionators, actionatorname, actionator_t::JOINT_TORQUE);
+}
+
+/*! @brief Adds a camera setting actionator with the specified name
+ 
+ @param actionatorname the name of the actionator to be added
+ */
+void NUActionatorsData::addCameraSettingActionator(string actionatorname)
+{
+    addActionator(CameraActionators, actionatorname, actionator_t::CAMERA_SETTING);
+}
+
+/*! @brief Adds a led actionator with the specified name
+ 
+ @param actionatorname the name of the actionator to be added
+ */
+void NUActionatorsData::addLedActionator(string actionatorname)
+{
+    addActionator(LedActionators, actionatorname, actionator_t::LEDS);
+}
+
+/*! @brief Adds an actionator to the actionator group with the specified name and type
+ 
+ @param actionatorgroup the vector of similar actionator to which this one will be added
+ @param actionatorname the name of the actionator to be added
+ @param actionatortype the type of the actionator to be added
+ */
+void NUActionatorsData::addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype)
+{
+    actionator_t* newactionator = new actionator_t(actionatorname, actionatortype);
+    actionatorgroup.push_back(newactionator);
+    m_all_actionators.push_back(newactionator);
+}
+
+/*! @brief Adds an actionator with the specified name and type
+ 
+ @param p_actionator the actionator pointer for the new actionator
+ @param actionatorname the name of the actionator to be added
+ @param actionatortype the type of the actionator to be added
+ */
+void NUActionatorsData::addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype)
+{
+    p_actionator = new actionator_t(actionatorname, actionatortype);
+    m_all_actionators.push_back(p_actionator);
+}
+
+/*! @brief Simplifies a name
+ @param input the name to be simplified
+ @return the simplified string
+ */
+string NUActionatorsData::simplifyName(const string& input)
+{
+    string namebuffer, currentletter;
+    // compare each letter to a space and an underscore and a forward slash
+    for (int j=0; j<input.size(); j++)
+    {
+        currentletter = input.substr(j, 1);
+        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+            namebuffer += tolower(currentletter[0]);            
+    }
+    return namebuffer;
+}
+
+/*! @brief Simplifies a vector of strings
+ 
+ @param input the vector of strings to be simplified
+ @param ouput the vector that will be updated to contain the simplified names
+ */
+void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
+{
+    vector<string> simplifiednames;
+    for (int i=0; i<input.size(); i++)
+        simplifiednames.push_back(simplifyName(input[i]));
+    output = simplifiednames;
+}
+
+/******************************************************************************************************************************************
+ Get Methods
+ ******************************************************************************************************************************************/
+
+/*! @brief Remove all of the completed actionator points
+ @param currenttime all actionator points that have times before this one are assumed to have been completed, and they will be removed
+ */
+void NUActionatorsData::removeCompletedPoints(double currenttime)
+{
+    for (int i=0; i<m_all_actionators.size(); i++)
+        m_all_actionators[i]->removeCompletedPoints(currenttime);
+}
+
+/*! @brief Gets the next position control point
+    
+    @param isvalid a vector of bools that indicates whether there is a new target for each joint.
+    @param time the time each position control should be completed will be put in this vector
+    @param positions the target position for each joint will be put in this vector
+    @param velocities the target velocities for each joint will be put in this vector
+    @param gains the target gains for each joint will be put in this vector
+ */
+bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains)
+{
+    static int l_num_joints = PositionActionators.size();
+    static vector<bool> l_isvalid(l_num_joints, false);
+    static vector<double> l_time(l_num_joints, 0);
+    static vector<float> l_positions(l_num_joints, 0);
+    static vector<float> l_velocities(l_num_joints, 0);
+    static vector<float> l_gains(l_num_joints, 0);
+    
+    // loop through each actionator in PostionActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<l_num_joints; i++)
+    {
+        if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0]->Data.size() != 3)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = PositionActionators[i]->m_points[0]->Time;
+            l_positions[i] = PositionActionators[i]->m_points[0]->Data[0];
+            l_velocities[i] = PositionActionators[i]->m_points[0]->Data[1];
+            l_gains[i] = PositionActionators[i]->m_points[0]->Data[2];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    positions = l_positions;
+    velocities = l_velocities;
+    gains = l_gains;
+    
+    if (l_num_joints > 0)
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Gets the next torque control point
+ 
+ @param isvalid a vector of bools that indicates whether there is a new target for each joint.
+ @param time the time each torque control should be completed will be put in this vector
+ @param torques the target torques for each joint will be put in this vector
+ @param gains the target gains for each joint will be put in this vector
+ */
+bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains)
+{
+    static int l_num_joints = TorqueActionators.size();
+    static vector<bool> l_isvalid(l_num_joints, false);
+    static vector<double> l_time(l_num_joints, 0);
+    static vector<float> l_torques(l_num_joints, 0);
+    static vector<float> l_gains(l_num_joints, 0);
+    
+    // loop through each actionator in TorqueActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<l_num_joints; i++)
+    {
+        if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0]->Data.size() != 2)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = TorqueActionators[i]->m_points[0]->Time;
+            l_torques[i] = TorqueActionators[i]->m_points[0]->Data[0];
+            l_gains[i] = TorqueActionators[i]->m_points[0]->Data[1];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    torques = l_torques;
+    gains = l_gains;
+    
+    if (l_num_joints > 0)
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Gets the next set of camera settings
+ 
+    @param isvalid a vector of bools that indicates whether there is a new setting for each setting.
+    @param time the time each setting should be completed will be put in this vector
+    @param settingids the id of each setting for which there could be a new setting
+    @param data the vector of data for each camera setting
+ */
+bool NUActionatorsData::getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data)
+{
+    static int l_num_settings = CameraActionators.size();
+    static vector<bool> l_isvalid(l_num_settings, false);
+    static vector<double> l_time(l_num_settings, 0);
+    static vector<camera_setting_id_t> l_settingids(l_num_settings, 0);
+    static vector<vector<float> > l_data(l_num_settings, vector<float>());
+
+    
+    // loop through each actionator in CameraActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<l_num_settings; i++)
+    {
+        if(CameraActionators[i]->isEmpty())
+            l_isvalid[i] = false;
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = CameraActionators[i]->m_points[0]->Time;
+            l_data[i] = CameraActionators[i]->m_points[0]->Data;
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    data = l_data;
+    
+    if (l_num_settings > 0)
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Gets the next led point
+ 
+    @param isvalid a vector of bools that indicates whether there is a new target for each led.
+    @param time the time each led should be completed will be put in this vector
+    @param redvalues the target red value for each led will be put in this vector
+    @param greenvalues the target green value for each led will be put in this vector
+    @param bluevalues the target blue value for each led will be put in this vector
+ 
+    @return return false if there are no leds on this platform
+ */
+bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
+{
+    static int l_num_leds = LedActionators.size();
+    static vector<bool> l_isvalid(l_num_leds, false);
+    static vector<double> l_time(l_num_leds, 0);
+    static vector<float> l_redvalues(l_num_leds, 0);
+    static vector<float> l_greenvalues(l_num_leds, 0);
+    static vector<float> l_bluevalues(l_num_leds, 0);
+    
+    // loop through each actionator in LedActionators looking for non-empty actionators with the right datalength
+    for (int i=0; i<l_num_leds; i++)
+    {
+        if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0]->Data.size() != 3)
+        {
+            l_isvalid[i] = false;
+        }
+        else
+        {
+            l_isvalid[i] = true;
+            l_time[i] = LedActionators[i]->m_points[0]->Time;
+            l_redvalues[i] = LedActionators[i]->m_points[0]->Data[0];
+            l_greenvalues[i] = LedActionators[i]->m_points[0]->Data[1];
+            l_bluevalues[i] = LedActionators[i]->m_points[0]->Data[2];
+        }
+    }
+    
+    // now copy the results to the output vectors
+    isvalid = l_isvalid;
+    time = l_time;
+    l_redvalues = redvalues;
+    l_greenvalues = greenvalues;
+    l_bluevalues = bluevalues;
+    
+    if (l_num_leds > 0)
+        return true;
+    else
+        return false;
+}
+
+bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
+{
+    //!< @todo TODO: implement this function
+    return false;
+}
+
+
+/******************************************************************************************************************************************
+ Set Methods
+ ******************************************************************************************************************************************/
+
+/*! @brief Adds a single joint position control point
+    @param jointid the id of the joint you want to control
+    @param time the time at which you want the joint to reach its target (in milliseconds)
+    @param position the target position (in radians)
+    @param velocity the target velocity (in rad/s)
+    @param gain the target gain (in Percent)
+ */
+bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain)
+{
+    static vector<float> data (3, 0);
+    if (jointid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
+        return false;
+    else 
+    {
+        data[0] = position;
+        data[1] = velocity;
+        data[2] = gain;
+        PositionActionators[jointid]->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds a single joint torque control point
+    @param jointid the id of the joint you want to control
+    @param time the time at which you want the joint to reach its target  (in milliseconds)
+    @param torque the target torque (in Nm)
+    @param gain the target gain (in Percent)
+ */
+bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float torque, float gain)
+{
+    static vector<float> data (3, 0);
+    if (jointid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
+        return false;
+    else 
+    {
+        data[0] = torque;
+        data[1] = gain;
+        TorqueActionators[jointid]->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds a new camera setting
+    @param settingid the id of the camera setting to be changed
+    @param time the time the setting will be applied
+    @param data the new setting(s)
+ */
+bool NUActionatorsData::addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data)
+{
+    if (settingid == ACTIONATOR_MISSING || CameraActionators.size() == 0)
+        return false;
+    else 
+    {
+        CameraActionators[settingid]->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds a single led control point
+    @param ledid the id of the led you want to control
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param redvalue the target red value (0 to 1, or 0 to 255)
+    @param greenvalue the target red value (0 to 1, or 0 to 255)
+    @param bluevalue the target red value (0 to 1, or 0 to 255)
+ */
+bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue)
+{
+    static vector<float> data (3, 0);
+    if (ledid == ACTIONATOR_MISSING || LedActionators.size() == 0)
+        return false;
+    else 
+    {
+        if (redvalue > 1.1)
+        {
+            redvalue /= 255;
+            greenvalue /= 255;
+            bluevalue /= 255;
+        }
+        data[0] = redvalue;
+        data[1] = greenvalue;
+        data[2] = bluevalue;
+        LedActionators[ledid]->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds joint position control points for a body part (the body part could be 'All' to set all joints at once)
+    @param partid the id of the body part you want to control
+    @param time the time at which you want the part will reach its target (in milliseconds)
+    @param positions the target position (in radians)
+    @param velocities the target velocities (in rad/s)
+    @param gains the target gains (in Percent)
+ */
+bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
+{
+    static vector<joint_id_t> selectedjoints;
+    if (partid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
+        return false;
+    
+    if (partid == All)
+        selectedjoints = m_all_joint_ids;
+    else if (partid == Body)
+        selectedjoints = m_body_ids;
+    else if (partid == Head)
+        selectedjoints = m_head_ids;
+    else if (partid == LArm)
+        selectedjoints = m_larm_ids;
+    else if (partid == RArm)
+        selectedjoints = m_rarm_ids;
+    else if (partid == Torso)
+        selectedjoints = m_torso_ids;
+    else if (partid == LLeg)
+        selectedjoints = m_lleg_ids;
+    else if (partid == RLeg)
+        selectedjoints = m_rleg_ids;
+    else
+        debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        
+    if (selectedjoints.size() != positions.size())
+    {
+        debug << "NUActionatorsData::addJointPositions. Specified positions are not the correct length. They are " << positions.size() << " and they should be " << selectedjoints.size() << endl;
+        return false;
+    }
+    else 
+    {
+        static vector<float> data (3, 0);
+        for (int i=0; i<selectedjoints.size(); i++)
+        {
+            data[0] = positions[i];
+            data[1] = velocities[i];
+            data[2] = gains[i];
+            PositionActionators[selectedjoints[i]]->addPoint(time, data);
+        }
+    }
+    return true;
+}
+
+/*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
+    @param partid the id of the body part you want to control
+    @param time the time at which you want the joint to reach its target  (in milliseconds)
+    @param torques the target torque (in Nm)
+    @param gains the target gain (in Percent)
+ */
+bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
+{
+    static vector<joint_id_t> selectedjoints;
+    if (partid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
+        return false;
+    
+    if (partid == All)
+        selectedjoints = m_all_joint_ids;
+    else if (partid == Body)
+        selectedjoints = m_body_ids;
+    else if (partid == Head)
+        selectedjoints = m_head_ids;
+    else if (partid == LArm)
+        selectedjoints = m_larm_ids;
+    else if (partid == RArm)
+        selectedjoints = m_rarm_ids;
+    else if (partid == Torso)
+        selectedjoints = m_torso_ids;
+    else if (partid == LLeg)
+        selectedjoints = m_lleg_ids;
+    else if (partid == RLeg)
+        selectedjoints = m_rleg_ids;
+    else
+        debug << "NUActionatorsData::addJointTorques. UNDEFINED Body part.";
+    
+    if (selectedjoints.size() != torques.size())
+    {
+        debug << "NUActionatorsData::addJointTorques. Specified torques are not the correct length. They are " << torques.size() << " and they should be " << selectedjoints.size() << endl;
+        return false;
+    }
+    else 
+    {
+        static vector<float> data (2, 0);
+        for (int i=0; i<selectedjoints.size(); i++)
+        {
+            data[0] = torques[i];
+            data[1] = gains[i];
+            TorqueActionators[selectedjoints[i]]->addPoint(time, data);
+        }
+    }
+    return true;
 }
 
 /******************************************************************************************************************************************
@@ -920,8 +862,10 @@ void NUActionatorsData::setAvailableActionators(const vector<string>& actionator
 
 void NUActionatorsData::summaryTo(ostream& output)
 {
-    for (int i=0; i<m_actionators.size(); i++)
-        m_actionators[i]->summaryTo(output);
+    if (m_all_actionators.size() == 0)
+        output << "NONE!" << endl;
+    for (int i=0; i<m_all_actionators.size(); i++)
+        m_all_actionators[i]->summaryTo(output);
 }
 
 void NUActionatorsData::csvTo(ostream& output)

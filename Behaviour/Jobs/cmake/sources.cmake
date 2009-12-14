@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -20,17 +20,32 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Jobs.h
-		BodyJob.cpp BodyJob.h
-		CameraJob.cpp CameraJob.h
-		HeadJob.cpp HeadJob.h
-		LightJob.cpp LightJob.h
-		StateJob.cpp StateJob.h
-		SystemJob.cpp SystemJob.h
+SET (YOUR_SRCS  JobList.cpp JobList.h
+		Job.cpp Job.h
+		VisionJob.h
+		LocalisationJob.h
+		BehaviourJob.h
+		MotionJob.h
+		LightJob.h
+		CameraJob.h
+		SoundJob.h
+		SystemJob.h
+		OtherJob.h
+		MotionJobs/WalkToPointJob.cpp MotionJobs/WalkToPointJob.h
+		MotionJobs/WalkJob.cpp MotionJobs/WalkJob.h
+		MotionJobs/KickJob.cpp MotionJobs/KickJob.h
+		MotionJobs/BlockJob.cpp MotionJobs/BlockJob.h
+		MotionJobs/SaveJob.cpp MotionJobs/SaveJob.h
+		MotionJobs/HeadJob.cpp MotionJobs/HeadJob.h
+		MotionJobs/NodHeadJob.cpp MotionJobs/NodHeadJob.h
+		MotionJobs/PanHeadJob.cpp MotionJobs/PanHeadJob.h
+		LightJobs/ChestLedJob.h		LightJobs/LEarLedJob.h		LightJobs/LEyeLedJob.h		LightJobs/LFootLedJob.h		LightJobs/REarLedJob.h		LightJobs/REyeLedJob.h		LightJobs/RFootLedJob.h
+		CameraJobs/SelectCameraJob.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS)
+SET (YOUR_DIRS 	
+)
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path

@@ -163,6 +163,7 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
 {
+    if(hasImage == false) return;
     pixels::Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)

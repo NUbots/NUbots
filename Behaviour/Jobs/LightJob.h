@@ -1,14 +1,11 @@
 /*! @file LightJob.h
-    @brief Declaration of light job class.
- 
-    @author Jason Kulk
+    @brief Declaration of base LightJob class.
  
     @class LightJob
-    @brief A class to encapsulate jobs issued by behaviour for the robot's lights.
+    @brief A base class to encapsulate jobs issued for the lights module.
  
-    Specify colours using vector<float> (red, green, blue) where red/green/blue range from 0 to 1.0.
-    If a non-zero time is specified the colour will be smoothly changed from the current colour.
-
+    All light jobs should inherit from this base class.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -30,21 +27,25 @@
 #ifndef LIGHTJOB_H
 #define LIGHTJOB_H
 
-#include "Behaviour/Job.h"
+#include "Job.h"
 
 class LightJob : public Job
 {
 public:
-    static LightJob* newLEyeJob(float time, vector<float> colour);
-    static LightJob* newREyeJob(float time, vector<float> colour);
-    static LightJob* newLEarJob(float time, vector<float> colour);
-    static LightJob* newREarJob(float time, vector<float> colour);
-    static LightJob* newChestJob(float time, vector<float> colour);
-    static LightJob* newLFootJob(float time, vector<float> colour);
-    static LightJob* newRFootJob(float time, vector<float> colour);
+    LightJob(job_id_t jobid, double time, const vector<float>& colour) : Job(Job::LIGHT, jobid){m_job_time = time; m_colour = colour;};
+    virtual ~LightJob() {m_colour.clear();};
     
-private:
-    LightJob(job_id_t jobid, float time, vector<float> colour);
+    void setColour(double time, const vector<float>& colour) {m_job_time = time; m_colour = colour;};
+    void getColour(double& time, vector<float>& colour) {time = m_job_time; colour = m_colour;};
+    
+    /*virtual void summaryTo(ostream& output);
+    virtual void csvTo(ostream& output);
+    
+    virtual ostream& operator<< (ostream& output);
+    virtual istream& operator>> (istream& input);*/
+protected:
+    vector<float> m_colour;
+    
 };
 
 #endif

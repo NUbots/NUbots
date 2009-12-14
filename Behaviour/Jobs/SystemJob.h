@@ -1,10 +1,11 @@
 /*! @file SystemJob.h
-    @brief Declaration of system job class.
-    @author Jason Kulk
+    @brief Declaration of base SystemJob class.
  
     @class SystemJob
-    @brief A class to encapsulate jobs issued by behaviour for the robot's OS.
-
+    @brief A base class to encapsulate jobs issued for the system module.
+ 
+    All system jobs should inherit from this base class.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -26,16 +27,19 @@
 #ifndef SYSTEMJOB_H
 #define SYSTEMJOB_H
 
-#include "Behaviour/Jobs/Jobs.h"
+#include "Job.h"
 
 class SystemJob : public Job
 {
 public:
-    static SystemJob* newSleepJob();
-    static SystemJob* newShutdownJob();
+    SystemJob(job_id_t jobid) : Job(Job::SYSTEM, jobid){};
+    virtual ~SystemJob() {};
     
-private:
-    SystemJob(job_id_t jobid);
+    /*virtual void summaryTo(ostream& output);
+    virtual void csvTo(ostream& output);
+    
+    virtual ostream& operator<< (ostream& output);
+    virtual istream& operator>> (istream& input);*/
 };
 
 #endif

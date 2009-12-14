@@ -1,9 +1,9 @@
 /*! @file actionator_t.h
-    @brief Declaration of a single set of actionators class
+    @brief Declaration of a single actionator class
     @author Jason Kulk
  
     @class actionator_t
-    @brief A single set of actionators class to store actuator data in a platform independent way
+    @brief A single actionator class
  
     @author Jason Kulk
  
@@ -27,6 +27,7 @@
 #define ACTIONATOR_T_H
 
 #include <vector>
+#include <deque>
 #include <string>
 using namespace std;
 
@@ -34,41 +35,35 @@ class actionator_t
 {
 public:
     /*! @brief A simple struct for storing an actionator control point
+     
+     At this level you need to specify the entire control data, for example, if this is a joint position actionator then you need to
+     specify (pos, vel, gain), or if it is an LED you need to specify (R, G, B). This behaviour is NOT negotiable. 
      */
     struct actionator_point_t 
     {
-        double Time;                //!< a single time for each actuator point
-        vector<bool> IsValid;       //!< use this flag to effect only selected subactionators in this group    
-        vector<float> Values;       //!< the actual values to be given to the group of actionators
-        vector<bool> IsGainValid;   //!< use this flag to only change the gain on selected subactionators in this group
-        vector<float> Gains;        //!< the gains/strength/stiffness/brightness etc for the actionator if applicable
+        double Time;                //!< the time the actionator point will be completed in milliseconds since epoch or program start
+        vector<float> Data;         //!< the actual data to be given to the actionator, the contents depend on the actionator's type
     };
     
     /*! @brief A enum type to perform run time actionator type checking without using
-     string compares. Unfortunately, to add a new actionator you need to add an
-     id to this list.
+     string compares.
      */
-    enum actionator_id_t 
+    enum actionator_type_t 
     {
-        JOINT_POSITIONS,
-        JOINT_VELOCITIES,
-        JOINT_CURRENTS,
-        JOINT_TORQUES,
-        CAMERA_CONTROL,
+        JOINT_POSITION,
+        JOINT_TORQUE,
+        CAMERA_SETTING,
         LEDS,
         SOUND,
         UNDEFINED
     };
 public:
     actionator_t();
-    actionator_t(string actionatorname, actionator_id_t actionatorid);
-
-    void addActionGains(double time, const vector<bool>& isvalid, const vector<float>& gains);
-    void addActionValues(double time, const vector<bool>& isvalid, const vector<float>& values);
-    void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<float>& gains);
-    void addAction(double time, const vector<bool>& isvalid, const vector<float>& values, const vector<bool>& isgainvalid, const vector<float>& gains);
+    actionator_t(string actionatorname, actionator_type_t actionatortype);
     
-    void removeCompleted(double currenttime);
+    void addPoint(double time, const vector<float>& data);
+    void removeCompletedPoints(double currenttime);
+    bool isEmpty();
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -76,9 +71,10 @@ public:
     friend ostream& operator<< (ostream& output, const actionator_t& p_actionator);
     friend istream& operator>> (istream& input, actionator_t& p_actionator);
 public:
-    string Name;                                //!< the name of the actionator group
-    actionator_id_t ActionatorID;               //!< the actionator id
-    vector<actionator_point_t*> m_points;       //!< the actionator points
+    string Name;                                //!< the name of the actionator
+    actionator_type_t ActionatorType;           //!< the actionator type
+    deque<actionator_point_t*> m_points;        //!< the double-ended queue of actionator points
+    actionator_point_t* m_previous_point;       //!< the last actionator point that was applied
     bool IsAvailable;                           //!< true if the actionator is avaliable, false if it is absent
 };
 

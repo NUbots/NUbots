@@ -10,6 +10,7 @@
 #include "openglmanager.h"
 
 class QMdiArea;
+class LayerSelectionWidget;
 
 namespace Ui
 {
@@ -96,13 +97,19 @@ private:
     GLDisplay* horizonDisplay;                  //!< Horizon Line display
     GLDisplay* miscDisplay;                     //!< Misc display
 
+    LayerSelectionWidget* layerSelection;
+    QDockWidget* layerSelectionDock;
+
     QStatusBar* statusBar;          //!< Instance of the status bar.
     QMdiArea* mdiArea;              //!< Instance of QMdiArea: the main are in the middle of the app (focal point)
 
     QMenu *fileMenu;                //!< Instance of the file menu
     QMenu *editMenu;                //!< Instance of the edit menu
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
-    QMenu *windowMenu;              //!< Instance of the windows menu
+    QMenu *windowMenu;              //!< Instance of the window menu
+    QMenu *visionWindowMenu;        //!< Instance of the vision window menu
+    QMenu *networkWindowMenu;        //!< Instance of the network window menu
+
 
     QToolBar *fileToolBar;          //!< Instance of the file toolbar
     QToolBar *editToolBar;          //!< Instance of the edit toolbar

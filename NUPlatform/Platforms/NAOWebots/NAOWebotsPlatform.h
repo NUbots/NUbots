@@ -23,9 +23,9 @@
 #define NAOWEBOTSPLATFORM_H
 
 #include "NUPlatform/NUPlatform.h"
-#include "webots/Robot.hpp"
+#include "JWebots/JRobot.h"
 
-class NAOWebotsPlatform : public NUPlatform, public webots::Robot
+class NAOWebotsPlatform : public NUPlatform, public JRobot
 {
 // Functions:
 public:

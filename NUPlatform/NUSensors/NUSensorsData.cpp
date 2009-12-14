@@ -50,7 +50,7 @@ NUSensorsData::joint_id_t NUSensorsData::RKneePitch = NUSensorsData::SENSOR_MISS
 NUSensorsData::joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RAnkleRoll = NUSensorsData::SENSOR_MISSING;
 
-/*!
+/*! @brief Default constructor for NUSensorsData
  */
 NUSensorsData::NUSensorsData()
 {
@@ -59,37 +59,45 @@ NUSensorsData::NUSensorsData()
 #endif
     
     // create the sensor_t's
-    addSensor(&JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
-    addSensor(&JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
-    addSensor(&JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
-    addSensor(&JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
-    addSensor(&JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
-    addSensor(&JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
-    addSensor(&JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
-    addSensor(&JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+    addSensor(JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
+    addSensor(JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
+    addSensor(JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
+    addSensor(JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
+    addSensor(JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
+    addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
+    addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
+    addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
     
     // Balance Sensors:
-    addSensor(&BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
-    addSensor(&BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
+    addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
     
     // Distance Sensors:
-    addSensor(&DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
+    addSensor(DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
     
     // Foot Pressure Sensors:
-    addSensor(&FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
-    addSensor(&FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
+    addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     
     // Buttons Sensors:
-    addSensor(&ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
+    addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
     
     // Battery Sensors:
-    addSensor(&BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
+    addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
+    
+    // GPS Sensor
+    addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
 }
 
-void NUSensorsData::addSensor(sensor_t** p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
+/*! @brief Adds a sensor to the class
+    @param p_sensor a pointer that will be updated to point to the new sensor
+    @param sensorname the name of the sensor
+    @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
+ */
+void NUSensorsData::addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
 {
-    *p_sensor = new sensor_t(sensorname, sensorid);
-    m_sensors.push_back(*p_sensor);
+    p_sensor = new sensor_t(sensorname, sensorid);
+    m_sensors.push_back(p_sensor);
 }
 
 NUSensorsData::~NUSensorsData()
@@ -295,13 +303,185 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, 
 {
     switch (bodypartid)
     {
-        case All:
+        case AllJoints:
             data = p_sensor->Data;
             break;
         default:
             return false;                   //!@todo TODO: implement other body parts!
     }
     return true;
+}
+
+/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
+    @param values will be updated with the current accelerometer readings
+ */
+bool NUSensorsData::getAccelerometerValues(vector<float>& values)
+{
+    if (BalanceAccelerometer == NULL || BalanceAccelerometer->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceAccelerometer->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the gyro values [gx, gy, gz] in rad/s
+    @param values will be updated with the current gyro readings
+ */
+bool NUSensorsData::getGyroValues(vector<float>& values)
+{
+    if (BalanceGyro == NULL || BalanceGyro->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceGyro->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
+    @param values will be updated with the current distance readings
+ */
+bool NUSensorsData::getDistanceValues(vector<float>& values)
+{
+    if (DistanceValues == NULL || DistanceValues->IsValid == false)
+        return false;
+    else
+    {
+        values = DistanceValues->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the battery readings [voltage (V), current (A), charge (%)]
+    @param values will be updated with the current battery sensor values
+ */
+bool NUSensorsData::getBatteryValues(vector<float>& values)
+{
+    if (BatteryValues == NULL || BatteryValues->IsValid == false)
+        return false;
+    else
+    {
+        values = BatteryValues->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the GPS readings [x (cm), y(cm), theta (rad)]
+    @param values will be updated with the gps coordinates of the robot
+ */
+bool NUSensorsData::getGPSValues(vector<float>& values)
+{
+    if (GPS == NULL || GPS->IsValid == false)
+        return false;
+    else
+    {
+        values = GPS->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the foot sole pressure sensor values (order: left to right front to back) in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param values will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
+{
+    if (FootSoleValues == NULL || FootSoleValues->IsValid == false)
+        return false;
+    else
+    {
+        static int numfootsolesensors = FootSoleValues->Data.size();
+        if (footid == AllFeet)
+            values = FootSoleValues->Data;
+        else if (footid == LeftFoot)
+        {
+            static vector<float> leftfootvalues(numfootsolesensors/2, 0);
+            for (int i=0; i<leftfootvalues.size(); i++)
+                leftfootvalues[i] = FootSoleValues->Data[i];
+            values = leftfootvalues;
+        }
+        else if (footid == RightFoot)
+        {
+            static vector<float> rightfootvalues(numfootsolesensors/2, 0);
+            for (int i=0; i<rightfootvalues.size(); i++)
+                rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
+            values = rightfootvalues;
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootSoleValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the foot bumper sensor values (order: left to right) in binary (0=off 1=on)
+    @param footid the id of the part of the foot you want the readings for
+    @param values will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
+{
+    if (FootBumperValues == NULL || FootBumperValues->IsValid == false)
+        return false;
+    else
+    {
+        static int numfootbumpersensors = FootBumperValues->Data.size();
+        if (footid == AllFeet)
+            values = FootBumperValues->Data;
+        else if (footid == LeftFoot)
+        {
+            static vector<float> leftfootvalues(numfootbumpersensors/2, 0);
+            for (int i=0; i<leftfootvalues.size(); i++)
+                leftfootvalues[i] = FootBumperValues->Data[i];
+            values = leftfootvalues;
+        }
+        else if (footid == RightFoot)
+        {
+            static vector<float> rightfootvalues(numfootbumpersensors/2, 0);
+            for (int i=0; i<rightfootvalues.size(); i++)
+                rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
+            values = rightfootvalues;
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootBumperValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the button values (order: importance) in binary (0=off 1=on)
+    @param buttonid the id of the button(s) you want the readings for
+    @param values will be updated with the current readings for the selected button(s)
+ */
+bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
+{
+    if (ButtonValues == NULL || ButtonValues->IsValid == false)
+        return false;
+    else
+    {
+        if (buttonid == AllButtons)
+            values = ButtonValues->Data;
+        else if (buttonid == MainButton)
+            values = vector<float> (1, ButtonValues->Data[0]);
+        else if (buttonid == SecondaryButton)
+        {
+            if (ButtonValues->Data.size() > 1)
+                values = vector<float> (1, ButtonValues->Data[1]);
+            else
+                return false;
+        }
+        else
+        {
+            debug << "NUSensorsData::getButtonValues(). Unknown button id." << endl;
+            return false;
+        }
+        return true;
+    }
 }
 
 /******************************************************************************************************************************************
@@ -606,6 +786,16 @@ void NUSensorsData::setBatteryValues(double time, const vector<float>& data, boo
     setData(BatteryValues, time, data, iscalculated);
 }
 
+/*! @brief Sets the GPS coordinates to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the GPS values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(GPS, time, data, iscalculated);
+}
+
 /* @brief Sets the data of the given sensor to the given data
    @param p_sensor a pointer to the sensor to be updated
    @param time the time the data was collected
@@ -637,13 +827,15 @@ void NUSensorsData::csvTo(ostream& output)
     //! @todo TODO: implement this somewhere somehow!
 }
 
-/*! Returns the number of sensors in the NUSensorsData
+/*! @brief Returns the number of sensors in the NUSensorsData
  */
 int NUSensorsData::size() const
 {
     return m_sensors.size();
 }
 
+/*! @brief Put the entire contents of the NUSensorsData class into a stream
+ */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {
     output << p_data.size() << " ";
@@ -652,6 +844,8 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
     return output;
 }
 
+/*! @brief Get the entire contents of the NUSensorsData class from a stream
+ */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
     p_data.m_sensors.clear();
@@ -669,6 +863,9 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     return input;
 }
 
+/*! @brief A helper function to update a named sensor pointer based on the id of p_sensor
+    @param p_sensor the p_sensor->SensorID will be used to update one of the named pointers to point to p_sensor
+ */
 void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
 {
     switch (p_sensor->SensorID) 
@@ -721,7 +918,6 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         default:
             break;
     }
-
 }
 
 

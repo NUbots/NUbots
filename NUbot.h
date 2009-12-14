@@ -41,7 +41,7 @@
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
-    #include "Behaviour/JobList.h"
+    #include "Behaviour/Jobs.h"
 #endif
 
 #ifdef USE_MOTION
@@ -61,10 +61,16 @@ public:
     void run();
     
     static int signalMotion();
+    int signalMotionStart();
+    int signalMotionCompletion();
     static int signalVision();
+    int signalVisionStart();
+    int signalVisionCompletion();
     
     int waitForNewMotionData();
+    int waitForMotionCompletion();
     int waitForNewVisionData();
+    int waitForVisionCompletion();
 private:
     void createThreads();
     

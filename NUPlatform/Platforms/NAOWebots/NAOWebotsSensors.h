@@ -36,6 +36,7 @@
 using namespace std;
 
 #include "webots/Robot.hpp"
+#include "JWebots/JRobot.h"
 using namespace webots;
 
 
@@ -46,15 +47,22 @@ public:
     ~NAOWebotsSensors();
     
 private:
-    void copyFromHardwareCommunications();
-    
-    void getSensorsFromWebots(NAOWebotsPlatform* platform);
+    void getSensorsFromWebots();
     void enableSensorsInWebots();
     
-private:
-    static const int m_simulation_step = 40;            //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
+    void copyFromHardwareCommunications();
+    void copyFromJoints();
+    void copyFromAccelerometerAndGyro();
+    void copyFromDistance();
+    void copyFromFootSole();
+    void copyFromFootBumper();
+    void copyFromGPS();
     
-    NAOWebotsPlatform* m_platform;
+private:
+    const int m_simulation_step;                        //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
+    double m_current_time;                              //!< the current time in milliseconds since program start
+    
+    NAOWebotsPlatform* m_platform;                      //!< a pointer to the platform, in particular in webots this inherits from webots::Robot so use it to access devices
     // Sensors
     static vector<string> m_servo_names;                //!< a vector of the names of each servo in the Webot NAO
     vector<Servo*> m_servos;                            //!< a vector containing pointers to each of the servos in the Webot NAO.
