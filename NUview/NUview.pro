@@ -26,7 +26,11 @@ HEADERS += ui_mainwindow.h \
     openglmanager.h \
     GLDisplay.h \
     ../Tools/Image/NUimage.h \
-    ../Tools/Image/ClassifiedImage.h
+    ../Tools/Image/ClassifiedImage.h \
+    ../Vision/ClassifiedSection.h \
+    ../Vision/ScanLine.h \
+    ../Vision/TransistionSegment.h \
+    ../Vision/TransitionSegment.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -41,4 +45,7 @@ SOURCES += mainwindow.cpp \
     openglmanager.cpp \
     GLDisplay.cpp \
     ../Tools/Image/NUimage.cpp \
-    ../Tools/Image/ClassifiedImage.cpp
+    ../Tools/Image/ClassifiedImage.cpp \
+    ../Vision/ClassifiedSection.cpp \
+    ../Vision/ScanLine.cpp \
+    ../Vision/TransitionSegment.cpp

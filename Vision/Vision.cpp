@@ -263,5 +263,9 @@ std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fie
             horizontalScanPoints.push_back(temp);
         }
     }
+    //ClassifiedSection* horizontalClassification = new ClassifiedSection(ClassifiedSection::RIGHT);
+    //ScanLine* aLine = new ScanLine();
+    //horizontalClassification->addScanLine(aLine);
+
     return horizontalScanPoints;
 }
