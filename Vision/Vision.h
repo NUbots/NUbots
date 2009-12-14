@@ -10,6 +10,10 @@
 #include "Tools/Math/Vector2.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
+#include "ClassifiedSection.h"
+#include "ScanLine.h"
+#include "TransitionSegment.h"
+
 
 class NUimage;
 
