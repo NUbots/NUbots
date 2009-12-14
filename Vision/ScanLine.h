@@ -14,6 +14,7 @@ class ScanLine
         int getNumberOfSegments();
         void addSegement(TransitionSegment* segment);
         TransitionSegment* getSegment(int position);
+        Vector2<int> getStart();
     private:
         std::vector<TransitionSegment> segments;
         Vector2<int> start;

@@ -28,6 +28,7 @@ public:
     int getDirection();
     void addScanLine(ScanLine* line);
     ScanLine* getScanLine(int posistion);
+    int getNumberOfScanLines();
 
 private:
     int direction;

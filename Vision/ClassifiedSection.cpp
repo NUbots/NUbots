@@ -36,3 +36,7 @@ ScanLine* ClassifiedSection::getScanLine(int position)
 {
     return &(scanLines[position]);
 }
+int ClassifiedSection::getNumberOfScanLines()
+{
+    return scanLines.size();
+}

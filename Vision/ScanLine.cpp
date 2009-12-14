@@ -15,6 +15,7 @@ ScanLine::~ScanLine()
 ScanLine::ScanLine(Vector2<int> newStartPoint, int newLength)
 {
     //std::vector<TransitionSegment>;
+    start = newStartPoint;
     length = newLength;
 }
 
@@ -37,5 +38,9 @@ void ScanLine::addSegement(TransitionSegment* segment)
 TransitionSegment* ScanLine::getSegment(int position)
 {
     return &(segments[position]);
+}
+Vector2<int> ScanLine::getStart()
+{
+    return start;
 }
 
