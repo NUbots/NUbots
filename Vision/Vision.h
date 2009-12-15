@@ -39,6 +39,13 @@ class Vision
       */
     inline unsigned char classifyPixel(int x, int y);
 
+    /*!
+      @brief Identifies number of robots in Field of View (FoV)
+      @param fieldBorders list of (x,y) cartesian points representing points along the field border
+      @return Returns the integer number of robots identified and negative when an error occurred
+      */
+    int countRobots(std::vector<Vector2<int> > &fieldBorders);
+
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);

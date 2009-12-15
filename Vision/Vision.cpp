@@ -132,7 +132,7 @@ std::vector<Vector2<int> > Vision::verticalScan(std::vector<Vector2<int> >&field
     std::vector<Vector2<int> > scanPoints;
     if(!fieldBorders.size()) return scanPoints;
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
-    std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
+    //std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++; //This iterator is unused
     int x = 0;
     int y = 0;
     int halfLineEnd = 0;
@@ -227,7 +227,7 @@ std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fie
         return horizontalScanPoints;
     }
 
-    //Find the minimum Y, and scan above the field boarders
+    //Find the minimum Y, and scan above the field borders
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
     int minY = currentImage->height();
@@ -243,7 +243,7 @@ std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fie
             maxY = nextPoint->y;
         }
     }
-    //Then calculate horizontal scanlines above the field boarder
+    //Then calculate horizontal scanlines above the field border
 
     for(int y = minY; y > 0; y = y - scanSpacing)
     {
@@ -264,4 +264,96 @@ std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fie
         }
     }
     return horizontalScanPoints;
+}
+
+int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
+{
+    int robotCount = 0;
+    int scanSpacing = 8;
+    if(!fieldBorders.size()) return robotCount;
+    if (!currentImage || !currentLookupTable)
+    {
+        qDebug() << "currentImage not set or currentLookUpTable not set";
+        return -2;
+    }
+    //   list of pairs of coordinates to denote the end points for a candidate region
+    std::vector<Vector2<int> > candidateRegions;
+    std::vector<Vector2<int> >::const_iterator currentPoint = fieldBorders.begin();
+
+    std::vector<Vector2<int> > tempRegion;
+    Vector2<int> regionStart, regionStop;
+
+    int x = 0;
+    int y = 0;
+    int p_x = currentPoint->y; //previous x
+    int p_y = currentPoint->y; //previous y
+    int c_x = 0; //current x
+    int c_y = 0; //current y
+
+
+
+
+
+    //
+    //Trace along the field border looking for Green-White-Green transitions
+    //and marking these regions as candidate robots
+    //
+    for(;currentPoint != fieldBorders.end(); currentPoint++)
+    {
+        c_x = currentPoint->x;
+        c_y = currentPoint->y;
+
+
+        if (p_x != c_x && p_y != c_y)
+        {
+            //
+            //Scan the points in between previous point
+            //and current point using scanSpacing
+            //
+            int m = (c_y-p_y)/(c_x-p_x);
+            int b = p_y - m*p_x;
+            for (x = p_x, y = p_y; x < c_x; x += scanSpacing)
+            {
+               y = m*x + b;
+               //qDebug() << "(" << x << "," << y << ")";
+
+               //
+               //A circular buffer must initially fill up to a starting colour.
+               //When the buffer fully becomes the new colour a new region has started
+               //If this new region is white store the start point and continue
+               //until it triggers a different colour. Mark this as the end and store
+               //both points as endpoints for a candidate region.
+               //
+
+               //if ( candidate region found )
+               //{
+               //   robotCount++;
+               //}
+            }
+        }
+
+
+
+        p_x = c_x;
+        p_y = c_y;
+    }
+
+
+
+    //
+    //Candidate White regions have to be above a threshold width
+    //which will be based upon distance/orientation
+    //
+
+    //
+    //Candidate white region also has to be less than a threshold
+    //width which will be based upondistance/orientation
+    //
+
+    //
+    //Determine if candidate region is a line marking and reject region
+    //
+
+
+    return robotCount;
 }

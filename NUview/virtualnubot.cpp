@@ -147,6 +147,9 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
+
+            // Count Robots
+            qDebug() << "Vision::countRobots() = " << vision.countRobots(points);
             break;
         default:
             break;

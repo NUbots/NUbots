@@ -14,6 +14,7 @@ HEADERS += ui_mainwindow.h \
     connectionwidget.h \
     ColorModelConversions.h \
     classificationwidget.h \
+    ../Vision/CircularBuffer.h \
     ../Vision/ClassificationColours.h \
     ../Tools/FileFormats/NUbotImage.h \
     ../Vision/Vision.h \
@@ -32,6 +33,7 @@ SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
     classificationwidget.cpp \
+    ../Vision/CircularBuffer.cpp \
     ../Tools/FileFormats/NUbotImage.cpp \
     ../Vision/Vision.cpp \
     ../Tools/FileFormats/LUTTools.cpp \
