@@ -250,13 +250,13 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
 }
 
 
-void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
+void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 {
     int direction = scanArea->getDirection();
     int numOfLines = scanArea->getNumberOfScanLines();
     int lineLength = 0;
     ScanLine* tempLine;
-    TransitionSegment* tempTransistion ;
+    TransitionSegment* tempTransition ;
     Vector2<int> currentPoint;
     unsigned char beforeColour = 0;
     unsigned char afterColour = 0;
@@ -273,7 +273,7 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y + j;
-                tempTransition = new TransitionSegment(currentPoint);
+                //tempTransition = new TransitionSegment(currentPoint);
             }
         }
 
@@ -285,7 +285,6 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
 int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
 {
     int robotCount = 0;
-    int scanSpacing = 8;
     if(!fieldBorders.size()) return robotCount;
     if (!currentImage || !currentLookupTable)
     {
@@ -299,8 +298,8 @@ int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
     std::vector<Vector2<int> > tempRegion;
     Vector2<int> regionStart, regionStop;
 
-    int x = 0;
-    int y = 0;
+    //int x = 0;
+    //int y = 0;
     int p_x = currentPoint->y; //previous x
     int p_y = currentPoint->y; //previous y
     int c_x = 0; //current x
@@ -326,12 +325,12 @@ int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
             //Scan the points in between previous point
             //and current point using scanSpacing
             //
-            int m = (c_y-p_y)/(c_x-p_x);
-            int b = p_y - m*p_x;
-            for (x = p_x, y = p_y; x < c_x; x += scanSpacing)
-            {
-               y = m*x + b;
-               //qDebug() << "(" << x << "," << y << ")";
+            //int m = (c_y-p_y)/(c_x-p_x);
+            //int b = p_y - m*p_x;
+            //for (x = p_x, y = p_y; x < c_x; x += scanSpacing)
+            //{
+               //y = m*x + b;
+               qDebug() << "(" << c_x << "," << c_y << ")";
 
                //
                //A circular buffer must initially fill up to a starting colour.
@@ -345,7 +344,7 @@ int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
                //{
                //   robotCount++;
                //}
-            }
+            //}
         }
 
 

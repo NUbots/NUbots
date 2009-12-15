@@ -56,7 +56,7 @@ class Vision
 
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    void ClassifiyScanArea(ClassifiedSection* scanArea);
+    void ClassifyScanArea(ClassifiedSection* scanArea);
 
 
     private:    
