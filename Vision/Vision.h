@@ -49,6 +49,8 @@ class Vision
 
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    void ClassifiyScanArea(ClassifiedSection* scanArea);
+
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.

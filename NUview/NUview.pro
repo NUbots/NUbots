@@ -29,10 +29,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Image/ClassifiedImage.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
-    ../Vision/TransistionSegment.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h
-
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

@@ -247,3 +247,36 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     }
     return scanArea;
 }
+
+
+void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
+{
+    int direction = scanArea->getDirection();
+    int numOfLines = scanArea->getNumberOfScanLines();
+    int lineLength = 0;
+    ScanLine* tempLine;
+    TransitionSegment* tempTransistion ;
+    Vector2<int> currentPoint;
+    unsigned char beforeColour = 0;
+    unsigned char afterColour = 0;
+    unsigned char currentColour = 0;
+    for (int i = 0; i < numOfLines; i++)
+    {
+        tempLine = scanArea->getScanLine(i);
+        Vector2<int> startPoint = tempLine->getStart();
+        lineLength = tempLine->getLength();
+        if(lineLength < 3) continue;
+        for(int j = 0; j < lineLength; j++)
+        {
+            if(direction == ClassifiedSection::DOWN)
+            {
+                currentPoint.x = startPoint.x;
+                currentPoint.y = startPoint.y + j;
+                tempTransition = new TransitionSegment(currentPoint);
+            }
+        }
+
+
+    }
+    return;
+}

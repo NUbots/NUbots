@@ -145,6 +145,12 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
             //! Scan Below Horizon Image
             vertScanArea = vision.verticalScan(points,spacings);
+            //! Scan Above the Horizon
+            horiScanArea = vision.horizontalScan(points,spacings);
+
+            //! Classify Line Segments
+            vision.classifyArea(vertScanArea);
+            vision.classifyArea(horiScanArea);
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -165,8 +171,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
 
-            //! Scan Above the Horizon
-            horiScanArea = vision.horizontalScan(points,spacings);
+
 
             //! Extract and Display Horizontal Scan Points:
             tempNumScanLines = horiScanArea->getNumberOfScanLines();
@@ -186,7 +191,10 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                     }
                 }
             }
-            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image";
+
+
+
+            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
             break;
