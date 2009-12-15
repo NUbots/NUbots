@@ -22,7 +22,6 @@
 #ifndef NUACTIONATORS_H
 #define NUACTIONATORS_H
 
-#include "Behaviour/JobList.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
 #include <vector>

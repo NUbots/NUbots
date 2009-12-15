@@ -10,6 +10,10 @@
 #include "Tools/Math/Vector2.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
+#include "ClassifiedSection.h"
+#include "ScanLine.h"
+#include "TransitionSegment.h"
+
 
 class NUimage;
 
@@ -50,8 +54,10 @@ class Vision
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
-    std::vector<Vector2<int> > horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    std::vector<Vector2<int> > verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    void ClassifiyScanArea(ClassifiedSection* scanArea);
+
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.

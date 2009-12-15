@@ -28,6 +28,9 @@ HEADERS += ui_mainwindow.h \
     GLDisplay.h \
     ../Tools/Image/NUimage.h \
     ../Tools/Image/ClassifiedImage.h \
+    ../Vision/ClassifiedSection.h \
+    ../Vision/ScanLine.h \
+    ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -45,4 +48,7 @@ SOURCES += mainwindow.cpp \
     GLDisplay.cpp \
     ../Tools/Image/NUimage.cpp \
     ../Tools/Image/ClassifiedImage.cpp \
+    ../Vision/ClassifiedSection.cpp \
+    ../Vision/ScanLine.cpp \
+    ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp

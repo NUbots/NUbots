@@ -57,6 +57,7 @@ public:
         FOOT_BUMPER_VALUES,
         BUTTON_VALUES,
         BATTERY_VALUES,
+        GPS_VALUES,
         UNDEFINED
     };
 public:

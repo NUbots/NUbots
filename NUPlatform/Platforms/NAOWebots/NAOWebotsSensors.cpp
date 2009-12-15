@@ -55,40 +55,40 @@ NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_s
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
 #endif
     m_platform = platform;
-    getSensorsFromWebots(platform);
+    getSensorsFromWebots();
     enableSensorsInWebots();
     m_data->setAvailableJoints(m_servo_names);
 }
 
-/* Gets pointers to each of the sensors in the simulated NAO
+/*! @brief Gets pointers to each of the sensors in the simulated NAO
  */
-void NAOWebotsSensors::getSensorsFromWebots(NAOWebotsPlatform* platform)
+void NAOWebotsSensors::getSensorsFromWebots()
 {
     // Get the servos
     for (int i=0; i<m_servo_names.size(); i++)
-        m_servos.push_back(platform->getServo(m_servo_names[i]));
+        m_servos.push_back(m_platform->getServo(m_servo_names[i]));
     // Get the accelerometer
-    m_accelerometer = platform->getAccelerometer("accelerometer");
+    m_accelerometer = m_platform->getAccelerometer("accelerometer");
     // Get gyro
-    m_gyro = platform->getGyro("gyro");
+    m_gyro = m_platform->getGyro("gyro");
     // Get distance sensors
     for (int i=0; i<m_distance_names.size(); i++)
-        m_distance_sensors.push_back(platform->getDistanceSensor(m_distance_names[i]));
+        m_distance_sensors.push_back(m_platform->getDistanceSensor(m_distance_names[i]));
     // Get foot sole sensors
     for (int i=0; i<m_foot_sole_names.size(); i++)
-        m_foot_sole_sensors.push_back(platform->getTouchSensor(m_foot_sole_names[i]));
+        m_foot_sole_sensors.push_back(m_platform->getTouchSensor(m_foot_sole_names[i]));
     // Get foor bumper sensors
     for (int i=0; i<m_foot_bumper_names.size(); i++)
-        m_foot_bumper_sensors.push_back(platform->getTouchSensor(m_foot_bumper_names[i]));
+        m_foot_bumper_sensors.push_back(m_platform->getTouchSensor(m_foot_bumper_names[i]));
     
     // Get the gps if avaliable
     if (GPS::exists("gps"))
-        m_gps = platform->getGPS("gps");
+        m_gps = m_platform->getGPS("gps");
     else
         m_gps = NULL;
 }
 
-/* Enables the sensor feedback in the simulated NAO
+/* @brief Enables the sensor feedback in the simulated NAO (in webots this must be done, otherwise the readings are never updated)
  */
 void NAOWebotsSensors::enableSensorsInWebots()
 {
@@ -131,7 +131,8 @@ NAOWebotsSensors::~NAOWebotsSensors()
     m_foot_sole_sensors.clear();
     m_foot_bumper_names.clear();
     m_foot_bumper_sensors.clear();
-    delete m_gps;
+    if (m_gps != NULL)
+        delete m_gps;
 }
 
 /*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.
@@ -141,72 +142,15 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
-    
-    static double currenttime;
-    static vector<float> positiondata(m_servos.size(), 0);
-    static vector<float> velocitydata(m_servos.size(), 0);
-    static vector<float> accelerationdata(m_servos.size(), 0);
-    static vector<float> targetdata(m_servos.size(), 0);
-    static vector<float> stiffnessdata(m_servos.size(), 0);
-    static vector<float> torquedata(m_servos.size(), 0);
-    
-    const unsigned char numdimensions = 3;
-    static vector<float> accelerometerdata(numdimensions, 0);
-    static vector<float> gyrodata(numdimensions, 0);
-    
-    static vector<float> distancedata(m_distance_sensors.size(), 0);
-    static vector<float> footsoledata(m_foot_sole_sensors.size(), 0);
-    static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
-    
-    currenttime = m_platform->system->getTime();
-    // @todo TODO: implement unit conversions here, and apply any calibrated offsets
-    // Copy joint positions
-    for (int i=0; i<m_servos.size(); i++)
-        positiondata[i] = m_servos[i]->getPosition();
-    m_data->setJointPositions(currenttime, positiondata);
-    
-    // @todo TODO: Velocity and acceleration will need to be calculated
-    
-    // Copy joint targets
-    for (int i=0; i<m_servos.size(); i++)
-        targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
-    m_data->setJointTargets(currenttime, targetdata);
 
-    // Copy joint stiffnesses
-    for (int i=0; i<m_servos.size(); i++)
-        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
-    m_data->setJointStiffnesses(currenttime, stiffnessdata);
+    m_current_time = m_platform->system->getTime();
     
-    // Copy joint torques
-    for (int i=0; i<m_servos.size(); i++)
-        torquedata[i] = m_servos[i]->getMotorForceFeedback();
-    m_data->setJointTorques(currenttime, torquedata);
-    
-    // Copy accelerometer [x, y, z, gx, gy, gz]
-    static const double *buffer;
-    buffer = m_accelerometer->getValues();
-    for (int i=0; i<numdimensions; i++)
-        accelerometerdata[i] = buffer[i];
-    m_data->setBalanceAccelerometer(currenttime, accelerometerdata);
-    buffer = m_gyro->getValues();
-    for (int i=0; i<numdimensions; i++)
-        gyrodata[i] = buffer[i];
-    m_data->setBalanceGyro(currenttime, gyrodata);
-    
-    // Copy distance readings
-    for (int i=0; i<m_distance_sensors.size(); i++)
-        distancedata[i] = m_distance_sensors[i]->getValue();
-    m_data->setDistanceValues(currenttime, distancedata);
-    
-    // Copy foot sole readings
-    for (int i=0; i<m_foot_sole_sensors.size(); i++)
-        footsoledata[i] = m_foot_sole_sensors[i]->getValue();
-    m_data->setFootSoleValues(currenttime, footsoledata);
-    
-    // Copy foot bumper readings
-    for (int i=0; i<m_foot_bumper_sensors.size(); i++)
-        footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
-    m_data->setFootBumperValues(currenttime, footbumperdata);
+    copyFromJoints();
+    copyFromAccelerometerAndGyro();
+    copyFromDistance();
+    copyFromFootSole();
+    copyFromFootBumper();
+    copyFromGPS();
     
 #if DEBUG_NUSENSORS_VERBOSITY > 3
     static bool firstrun = true;
@@ -217,6 +161,148 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
         firstrun = false;
     }
 #endif
+#if DEBUG_NUSENSORS_VERBOSITY > 5
+    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
+    m_data->summaryTo(debug);
+#endif
+}
+
+/*! @brief Copies the joint data into m_data
+ */
+void NAOWebotsSensors::copyFromJoints()
+{
+    static vector<float> positiondata(m_servos.size(), 0);
+    static vector<float> velocitydata(m_servos.size(), 0);
+    static vector<float> accelerationdata(m_servos.size(), 0);
+    static vector<float> targetdata(m_servos.size(), 0);
+    static vector<float> stiffnessdata(m_servos.size(), 0);
+    static vector<float> torquedata(m_servos.size(), 0);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromJoints()" << endl;
+#endif
+
+    // Copy joint positions
+    for (int i=0; i<m_servos.size(); i++)
+        positiondata[i] = m_servos[i]->getPosition();
+    m_data->setJointPositions(m_current_time, positiondata);
+    
+    calculateJointVelocityFromPosition();
+    calculateJointAccelerationFromVelocity();
+    
+    // Copy joint targets
+    for (int i=0; i<m_servos.size(); i++)
+        targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
+    m_data->setJointTargets(m_current_time, targetdata);
+    
+    // Copy joint stiffnesses
+    for (int i=0; i<m_servos.size(); i++)
+        stiffnessdata[i] = 0.1*((JServo*) m_servos[i])->getTargetGain();
+    m_data->setJointStiffnesses(m_current_time, stiffnessdata);
+    
+    // Copy joint torques
+    for (int i=0; i<m_servos.size(); i++)
+        torquedata[i] = m_servos[i]->getMotorForceFeedback();
+    m_data->setJointTorques(m_current_time, torquedata);
+}
+
+/*! @brief Copies the accelerometer and gyro data into m_data
+ */
+void NAOWebotsSensors::copyFromAccelerometerAndGyro()
+{
+    const unsigned char numdimensions = 3;
+    static vector<float> accelerometerdata(numdimensions, 0);
+    static vector<float> gyrodata(numdimensions, 0);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromAccelerometerAndGyro()" << endl;
+#endif
+    
+    // Copy accelerometer [ax, ay, az]
+    static const double *buffer;
+    buffer = m_accelerometer->getValues();
+    for (int i=0; i<numdimensions; i++)
+        accelerometerdata[i] = 100*buffer[i];       // convert from m/s/s to cm/s/s
+    m_data->setBalanceAccelerometer(m_current_time, accelerometerdata);
+    // Copy gyro [gx, gy, gz]
+    buffer = m_gyro->getValues();
+    for (int i=0; i<numdimensions; i++)
+        gyrodata[i] = buffer[i];
+    m_data->setBalanceGyro(m_current_time, gyrodata);
+}
+
+/*! @brief Copies the distance data into m_data
+ */
+void NAOWebotsSensors::copyFromDistance()
+{
+    static vector<float> distancedata(m_distance_sensors.size(), 0);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromDistance()" << endl;
+#endif
+    
+    // Copy distance readings
+    for (int i=0; i<m_distance_sensors.size(); i++)
+        distancedata[i] = 100*m_distance_sensors[i]->getValue();        // convert from metres to centimetres
+    m_data->setDistanceValues(m_current_time, distancedata);
+}
+
+/*! @brief Copies the foot sole pressure data into m_data
+ */
+void NAOWebotsSensors::copyFromFootSole()
+{
+    static vector<float> footsoledata(m_foot_sole_sensors.size(), 0);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromFootSole()" << endl;
+#endif
+    
+    // Copy foot sole readings
+    for (int i=0; i<m_foot_sole_sensors.size(); i++)
+        footsoledata[i] = m_foot_sole_sensors[i]->getValue();
+    m_data->setFootSoleValues(m_current_time, footsoledata);
+}
+
+/*! @brief Copies the foot bumper data into m_data
+ */
+void NAOWebotsSensors::copyFromFootBumper()
+{
+    static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOWebotsSensors::copyFromFootBumper()" << endl;
+#endif
+    
+    // Copy foot bumper readings
+    for (int i=0; i<m_foot_bumper_sensors.size(); i++)
+        footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
+    m_data->setFootBumperValues(m_current_time, footbumperdata);
+}
+
+/*! @brief Copies the gps data into m_data
+ */
+void NAOWebotsSensors::copyFromGPS()
+{
+    const unsigned char numdimensions = 3;
+    if (m_gps != NULL)
+    {
+        static vector<float> gpsdata(numdimensions, 0);
+        static const double *buffer;
+        
+        #if DEBUG_NUSENSORS_VERBOSITY > 4
+            debug << "NAOWebotsSensors::copyFromGPS()" << endl;
+        #endif
+        
+        buffer = m_gps->getValues();
+        for (int i=0; i<numdimensions; i++)
+        {
+            if (i == 0 || i == 1)
+                gpsdata[i] = 100*buffer[i];         // convert to cm for gps coordinates
+            else
+                gpsdata[i] = buffer[i];
+        }
+        m_data->setGPSValues(m_current_time, gpsdata);      //! @todo TODO: add gps data to NUsensorsData
+    }
 }
 
 

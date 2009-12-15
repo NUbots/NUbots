@@ -12,8 +12,11 @@
 
 using namespace std;
 
+ofstream debug;
+
 int main(int argc, const char *argv[]) 
 {
+    debug.open("debug.log");
     NUbot* nubot = new NUbot(argc, argv);
     nubot->run();
     delete nubot;

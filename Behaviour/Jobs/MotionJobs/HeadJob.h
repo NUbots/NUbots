@@ -2,13 +2,9 @@
     @brief Declaration of HeadJob class.
  
     @class HeadJob
-    @brief A class to encapsulate jobs issued by behaviour for the head.
+    @brief A class to encapsulate jobs issued for the head module. This particular job just moves the 
+           head to the given angles.
  
-    There are three types of head jobs
-        - Track; use this to effectively move the head into a desired position
-        - Nod; use this to move the head up and down while spinning
-        - Pan; use this to move the head side to side while searching.
-
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -30,18 +26,26 @@
 #ifndef HEADJOB_H
 #define HEADJOB_H
 
-#include "Behaviour/Job.h"
+#include "../MotionJob.h"
+#include <vector>
+using namespace std;
 
-class HeadJob : public Job
+class HeadJob : public MotionJob
 {
 public:
-    static HeadJob* newTrackJob(float time, vector<float> point);
-    static HeadJob* newNodJob(float period, vector<float> centre, vector<float> limits);
-    static HeadJob* newPanJob(float period, vector<float> centre, vector<float> limits);
+    HeadJob(double time, const vector<float>& position);
+    ~HeadJob();
     
+    void setPosition(double time, const vector<float>& newposition);
+    void getPosition(double& time, vector<float>& position);
+    
+    /*virtual void summaryTo(ostream& output);
+    virtual void csvTo(ostream& output);
+    
+    virtual ostream& operator<< (ostream& output);
+    virtual istream& operator>> (istream& input);*/
 private:
-    HeadJob(job_id_t jobid, float time, vector<float> centre, vector<float> limits);
-    HeadJob(job_id_t jobid, float time, vector<float> point);
+    vector<float> m_head_position;                 //!< the head position [yaw (rad), pitch (rad), roll (rad)]
 };
 
 #endif

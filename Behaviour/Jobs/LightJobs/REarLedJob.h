@@ -1,9 +1,9 @@
-/*! @file JobList.h
-    @brief Declaration of JobList class.
+/*! @file REarLedJob.h
+    @brief Declaration of base REarLedJob class.
  
-    @class JobList
-    @brief A class containing the list of jobs to be done by modules
-
+    @class REarLedJob
+    @brief A class to encapsulate jobs issued to the left eye module.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -22,25 +22,16 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JOBLIST_H
-#define JOBLIST_H
+#ifndef REARLEDJOB_H
+#define REARLEDJOB_H
 
-#include "Job.h"
+#include "../LightJob.h"
 
-#include <vector>
-using namespace std;
-
-class JobList
+class REarLedJob : public LightJob
 {
 public:
-    JobList();
-    ~JobList();
-    
-    void append(Job* newjob);
-    void clear();
-
-private:
-    vector<Job*> jobs;                          //!< the list of jobs for subsequent modules
+    REarLedJob(double time, const vector<float>& colour) : LightJob(Job::LIGHT_R_EAR, time, colour) {};
+    ~REarLedJob() {};
 };
 
 #endif

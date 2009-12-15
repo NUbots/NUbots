@@ -1,9 +1,11 @@
 /*! @file CameraJob.h
-    @brief Declaration of camera job class.
+    @brief Declaration of base CameraJob class.
  
     @class CameraJob
-    @brief A class to encapsulate jobs issued by behaviour for the camera.
-    
+    @brief A base class to encapsulate jobs issued for the camera module.
+ 
+    All camera jobs should inherit from this base class.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -25,27 +27,19 @@
 #ifndef CAMERAJOB_H
 #define CAMERAJOB_H
 
-#include "Behaviour/Job.h"
+#include "Job.h"
 
 class CameraJob : public Job
 {
 public:
-    static CameraJob* newResolutionJob(vector<float> values);
-    static CameraJob* newFPSJob(vector<float> values);
-    static CameraJob* newSettingsJob(vector<float> values);
-    static CameraJob* newAutoExposureJob(vector<float> values);
-    static CameraJob* newAutoWhiteBalanceJob(vector<float> values);
-    static CameraJob* newAutoGainJob(vector<float> values);
-    static CameraJob* newBrightnessJob(vector<float> values); 
-    static CameraJob* newContrastJob(vector<float> values);
-    static CameraJob* newSaturationJob(vector<float> values);
-    static CameraJob* newRedChromaJob(vector<float> values);
-    static CameraJob* newBlueChromaJob(vector<float> values);
-    static CameraJob* newGainJob(vector<float> values);
-    static CameraJob* newExposureJob(vector<float> values);
-    static CameraJob* newSelectCameraJob(vector<float> values);
-private:
-    CameraJob(job_id_t jobid, vector<float> values);
+    CameraJob(job_id_t jobid, double time) : Job(Job::CAMERA, jobid){m_job_time = time;};
+    virtual ~CameraJob() {};
+    
+    /*virtual void summaryTo(ostream& output);
+    virtual void csvTo(ostream& output);
+    
+    virtual ostream& operator<< (ostream& output);
+    virtual istream& operator>> (istream& input);*/
 };
 
 #endif

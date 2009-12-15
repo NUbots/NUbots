@@ -124,27 +124,77 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 {
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
+    ClassifiedSection* vertScanArea = new ClassifiedSection();
+    ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
     int spacings = 8;
+    int tempNumScanLines = 0;
     switch (image.imageFormat)
     {
         case pixels::YUYV:
             generateClassifiedImage(image);
 
-            // Find the green edges
+            //! Find the green edges
             points = vision.findGreenBorderPoints(&image,classificationTable,spacings,&horizonLine);
             emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
 
-            // Find the Field border
+            //! Find the Field border
             points = vision.getConvexFieldBorders(points);
             points = vision.interpolateBorders(points,spacings);
             emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
 
-            // Scan Image
-            verticalPoints = vision.verticalScan(points,spacings);
-            horizontalPoints = vision.horizontalScan(points,spacings);
+            //! Scan Below Horizon Image
+            vertScanArea = vision.verticalScan(points,spacings);
+            //! Scan Above the Horizon
+            horiScanArea = vision.horizontalScan(points,spacings);
 
-            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image";
+            //! Classify Line Segments
+            vision.classifyArea(vertScanArea);
+            vision.classifyArea(horiScanArea);
+
+            //! Extract and Display Vertical Scan Points:
+            tempNumScanLines = vertScanArea->getNumberOfScanLines();
+            for (int i = 0; i < tempNumScanLines; i++)
+            {
+                ScanLine* tempScanLine = vertScanArea->getScanLine(i);
+                int lengthOfLine = tempScanLine->getLength();
+                Vector2<int> startPoint = tempScanLine->getStart();
+                if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
+                {
+                    for(int j = 0;  j < lengthOfLine; j++)
+                    {
+                        Vector2<int> temp;
+                        temp.x = startPoint.x;
+                        temp.y = startPoint.y + j;
+                        verticalPoints.push_back(temp);
+                    }
+                }
+            }
+
+
+
+            //! Extract and Display Horizontal Scan Points:
+            tempNumScanLines = horiScanArea->getNumberOfScanLines();
+            for (int i = 0; i < tempNumScanLines; i++)
+            {
+                ScanLine* tempScanLine = horiScanArea->getScanLine(i);
+                int lengthOfLine = tempScanLine->getLength();
+                Vector2<int> startPoint = tempScanLine->getStart();
+                if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
+                {
+                    for(int j = 0;  j < lengthOfLine; j++)
+                    {
+                        Vector2<int> temp;
+                        temp.x = startPoint.x + j;
+                        temp.y = startPoint.y;
+                        horizontalPoints.push_back(temp);
+                    }
+                }
+            }
+
+
+
+            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
@@ -166,7 +216,6 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
 {
-    if(hasImage == false) return;
     pixels::Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)

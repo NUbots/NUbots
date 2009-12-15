@@ -25,7 +25,7 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "Behaviour/JobList.h"
+#include "Behaviour/Jobs.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
@@ -36,7 +36,7 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList jobs);
+    void process(JobList& jobs);
 protected:
 private:
 public:

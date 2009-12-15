@@ -127,16 +127,18 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
 
 
 
-std::vector<Vector2<int> > Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection* Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
-    std::vector<Vector2<int> > scanPoints;
-    if(!fieldBorders.size()) return scanPoints;
+    //std::vector<Vector2<int> > scanPoints;
+    ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::DOWN);
+    if(!fieldBorders.size()) return scanArea;
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     //std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++; //This iterator is unused
     int x = 0;
     int y = 0;
-    int halfLineEnd = 0;
-    int quarterLineEnd = 0;
+    int fullLineLength = 0;
+    int halfLineLength = 0;
+    int quarterLineLength = 0;
     int midX = 0;
     int skip = int(scanSpacing/2);
 
@@ -145,89 +147,72 @@ std::vector<Vector2<int> > Vision::verticalScan(std::vector<Vector2<int> >&field
     {
         x = nextPoint->x;
         y = nextPoint->y;
-        halfLineEnd = y + int((currentImage->height() - y)/2);
-        quarterLineEnd = y+ int((currentImage->height() - y)/8);
-        //qDebug() << y << ','<< halfLineEnd;
+
+        //!Create Full ScanLine
+        temp.x = x;
+        temp.y = y;
+
+        fullLineLength = int(currentImage->height() - y);
+        ScanLine* tempScanLine = new ScanLine(temp, fullLineLength);
+        scanArea->addScanLine(tempScanLine);
+
+        //!Create half ScanLine
         midX = x-skip;
-        //qDebug() << midX << ", "<<x;
-        //unsigned char colour;
-        while(y < currentImage->height())
-        {
-            //colour = classifyPixel(x,y);
-            //qDebug() << x << ',' << y << ':' << (int)colour;
-            temp.x = x;
-            temp.y = y;
-            scanPoints.push_back(temp);
-            if(y < halfLineEnd)
-            {
-                temp.x = midX;
+        temp.x = midX;
+        halfLineLength = int((currentImage->height() - y)/2);
+        ScanLine* tempMidScanLine = new ScanLine(temp,halfLineLength);
+        scanArea->addScanLine(tempMidScanLine);
 
-                temp.y = y;
-                scanPoints.push_back(temp);
-
-                if(y < quarterLineEnd)
-                {
-                    temp.x = midX-skip/2;
-                    temp.y = y;
-                    scanPoints.push_back(temp);
-                    temp.x = midX+skip/2;
-                    temp.y = y;
-                    scanPoints.push_back(temp);
-                }
-            }
-            y++;
-        }
+        //!Create Quarter ScanLines
+        temp.x = int(midX - skip/2);
+        quarterLineLength = int((currentImage->height() - y)/4);
+        ScanLine* tempLeftQuarterLine = new ScanLine(temp,quarterLineLength);
+        scanArea->addScanLine(tempLeftQuarterLine);
+        temp.x = int(midX + skip/2);
+        ScanLine* tempRightQuarterLine = new ScanLine(temp,quarterLineLength);
+        scanArea->addScanLine(tempRightQuarterLine);
     }
-    //LAST LINE
 
+    //!Generate the last Lines:
     midX = fieldBorders.back().x+skip;
     y = fieldBorders.back().y;
-    while(y < currentImage->height())
-    {
-        if(y < halfLineEnd)
-        {
-            temp.x = midX;
-            temp.y = y;
-            scanPoints.push_back(temp);
-            if(y < quarterLineEnd)
-            {
-                temp.x = midX-skip/2;
-                temp.y = y;
-                scanPoints.push_back(temp);
-                temp.x = midX+skip/2;
-                temp.y = y;
-                scanPoints.push_back(temp);
-            }
-        }
-        y++;
+    temp.x = midX;
+    temp.y = y;
+    ScanLine* tempMidScanLine = new ScanLine(temp,halfLineLength);
+    scanArea->addScanLine(tempMidScanLine);
+    temp.x = midX-skip/2;
+    temp.y = y;
+    ScanLine* tempLeftQuarterLine = new ScanLine(temp,quarterLineLength);
+    scanArea->addScanLine(tempLeftQuarterLine);
+    temp.x = midX+skip/2;
+    temp.y = y;
+    ScanLine* tempRightQuarterLine = new ScanLine(temp,quarterLineLength);
+    scanArea->addScanLine(tempRightQuarterLine);
 
-    }
-
-    return scanPoints;
+    return scanArea;
 }
 
-std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
-    std::vector<Vector2<int> > horizontalScanPoints;
+    ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::RIGHT);
+    if(!currentImage) return scanArea;
     Vector2<int> temp;
-    if(!currentImage) return horizontalScanPoints;
+    //! Case for No FieldBoarders
     if(!fieldBorders.size())
     {
+
         for(int y = 0; y < currentImage->height(); y = y + scanSpacing*2)
         {
-            for(int x = 0; x < currentImage->width(); x++)
-            {
-                temp.x = x;
-                temp.y = y;
-                //qDebug()<< "adding";
-                horizontalScanPoints.push_back(temp);
-            }
+            temp.x = 0;
+            temp.y = y;
+            ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
+            scanArea->addScanLine(tempScanLine);
         }
-        //qDebug()<< "returning";
-        return horizontalScanPoints;
+        return scanArea;
     }
 
-    //Find the minimum Y, and scan above the field borders
+    //! Find the minimum Y, and scan above the field boarders
+
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
     int minY = currentImage->height();
@@ -243,27 +228,58 @@ std::vector<Vector2<int> > Vision::horizontalScan(std::vector<Vector2<int> >&fie
             maxY = nextPoint->y;
         }
     }
-    //Then calculate horizontal scanlines above the field border
 
+    //! Then calculate horizontal scanlines above the field boarder
+    //! Generate Scan pattern for above the max of green boarder.
     for(int y = minY; y > 0; y = y - scanSpacing)
     {
-        for(int x = 0; x < currentImage->width(); x++)
-        {
-            temp.x = x;
-            temp.y = y;
-            horizontalScanPoints.push_back(temp);
-        }
+        temp.x =0;
+        temp.y = y;
+        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
+        scanArea->addScanLine(tempScanLine);
     }
+    //! Generate Scan Pattern for in between the max and min of green horizon.
     for(int y = minY; y < maxY; y = y + scanSpacing*2)
     {
-        for(int x = 0; x < currentImage->width(); x++)
-        {
-            temp.x = x;
-            temp.y = y;
-            horizontalScanPoints.push_back(temp);
-        }
+        temp.x =0;
+        temp.y = y;
+        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
+        scanArea->addScanLine(tempScanLine);
     }
-    return horizontalScanPoints;
+    return scanArea;
+}
+
+
+void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
+{
+    int direction = scanArea->getDirection();
+    int numOfLines = scanArea->getNumberOfScanLines();
+    int lineLength = 0;
+    ScanLine* tempLine;
+    TransitionSegment* tempTransistion ;
+    Vector2<int> currentPoint;
+    unsigned char beforeColour = 0;
+    unsigned char afterColour = 0;
+    unsigned char currentColour = 0;
+    for (int i = 0; i < numOfLines; i++)
+    {
+        tempLine = scanArea->getScanLine(i);
+        Vector2<int> startPoint = tempLine->getStart();
+        lineLength = tempLine->getLength();
+        if(lineLength < 3) continue;
+        for(int j = 0; j < lineLength; j++)
+        {
+            if(direction == ClassifiedSection::DOWN)
+            {
+                currentPoint.x = startPoint.x;
+                currentPoint.y = startPoint.y + j;
+                tempTransition = new TransitionSegment(currentPoint);
+            }
+        }
+
+
+    }
+    return;
 }
 
 int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)

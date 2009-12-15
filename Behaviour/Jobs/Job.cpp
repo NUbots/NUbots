@@ -21,6 +21,12 @@
 
 #include "Job.h"
 
+/*! @brief Job constructor
+ */
+Job::Job(job_type_t jobtype, job_id_t jobid) : m_job_type(jobtype), m_job_id(jobid)
+{
+}
+
 /*! @brief Job destructor
  */
 Job::~Job()
@@ -31,7 +37,7 @@ Job::~Job()
 /*! @brief Get the job's type
     @returns the job's type
  */
-job_type_t Job::getJobType()
+Job::job_type_t Job::getType()
 {
     return m_job_type;
 }
@@ -39,7 +45,7 @@ job_type_t Job::getJobType()
 /*! @brief Get the job's id
     @returns the job's id
  */
-job_id_t Job::getJobID()
+Job::job_id_t Job::getID()
 {
     return m_job_id;
 }
@@ -47,56 +53,15 @@ job_id_t Job::getJobID()
 /*! @brief Get the time at which the job is to be completed
     @returns the job time
  */
-float Job::getJobTime()
+double Job::getTime()
 {
     return m_job_time;
 }
 
-/*! @brief Get the position at which the final task in the job will be executed
-    @returns the position the job will be executed at
+/*! @brief Returns the unix timestamp of when the job was created
  */
-vector<float>* Job::getPosition()
+long double Job::getTimeStamp()
 {
-    return &m_position;
-}
-
-/*! @brief Get the speed at which the (first) task in the job will be executed
- @returns the speed the job will be executed at
- */
-vector<float>* Job::getSpeed()
-{
-    return &m_speed;
-}
-
-/*! @brief Get the centre of the job to be executed
- @returns the centre the job will be executed at
- */
-vector<float>* Job::getCentre()
-{
-    return &m_centre;
-}
-
-/*! @brief Get the limits of the job
- @returns the limits of the job
- */
-vector<float>* Job::getLimits()
-{
-    return &m_limits;
-}
-
-/*! @brief Get the values used by the job
-    @returns the values used by the job
- */
-vector<float>* Job::getValues()
-{
-    return &m_values;
-}
-
-/*! @brief Get the target of the job
-    @return the target of the job
- */
-vector<float>* Job::getTarget()
-{
-    return &m_target;
+    return m_timestamp;
 }
 
