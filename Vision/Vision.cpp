@@ -419,6 +419,7 @@ int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
 
 
     return robotCount;
+}
 
 bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 {
