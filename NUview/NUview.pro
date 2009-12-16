@@ -9,7 +9,7 @@ macx {
         /usr/lib/libz.dylib
 }
 INCLUDEPATH += ../ \
-                'C:/Program Files/boost/boost_1_40/'
+                'C:/Program Files/boost'
 
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
