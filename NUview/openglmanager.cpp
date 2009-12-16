@@ -156,6 +156,41 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
     return;
 }
 
+void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(2.0);       // Line width
+    std::vector<TransitionSegment>::const_iterator i;
+    unsigned char r,g,b;
+    for(i = newsegments.begin(); i != newsegments.end(); i++)
+    {
+        Vector2<int> start = i->getStartPoint();
+        Vector2<int> end =i->getEndPoint();
+        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
+        glColor3ub(r,g,b);
+
+        glBegin(GL_LINES);                              // Start Lines
+        glVertex2i( start.x, start.y);                 // Starting point
+        glVertex2i( end.x, end.y);                 // Starting point
+        glEnd();                                        // End Lines
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+}
+
+
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
     int stepSize = 360 / num_segments;
