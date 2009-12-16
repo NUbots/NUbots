@@ -13,7 +13,7 @@
 #include "ClassifiedSection.h"
 #include "ScanLine.h"
 #include "TransitionSegment.h"
-
+#include "boost/circular_buffer.hpp"
 
 class NUimage;
 
@@ -49,10 +49,13 @@ class Vision
 
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    void ClassifiyScanArea(ClassifiedSection* scanArea);
+
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
     const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
 
+    bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
 };
 #endif // VISION_H

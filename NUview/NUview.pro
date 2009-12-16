@@ -8,7 +8,9 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-INCLUDEPATH += ../
+INCLUDEPATH += ../ \
+                'C:/Program Files/boost/boost_1_40/'
+
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -29,10 +31,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Image/ClassifiedImage.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
-    ../Vision/TransistionSegment.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h
-
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

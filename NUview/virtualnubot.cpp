@@ -145,6 +145,12 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
             //! Scan Below Horizon Image
             vertScanArea = vision.verticalScan(points,spacings);
+            //! Scan Above the Horizon
+            horiScanArea = vision.horizontalScan(points,spacings);
+
+            //! Classify Line Segments
+            vision.ClassifiyScanArea(vertScanArea);
+            vision.ClassifiyScanArea(horiScanArea);
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -155,7 +161,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 Vector2<int> startPoint = tempScanLine->getStart();
                 if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
                 {
-                    for(int j = 0;  j++ < lengthOfLine; j++)
+                    for(int j = 0;  j < lengthOfLine; j++)
                     {
                         Vector2<int> temp;
                         temp.x = startPoint.x;
@@ -165,8 +171,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
 
-            //! Scan Above the Horizon
-            horiScanArea = vision.horizontalScan(points,spacings);
+
 
             //! Extract and Display Horizontal Scan Points:
             tempNumScanLines = horiScanArea->getNumberOfScanLines();
@@ -177,16 +182,19 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 Vector2<int> startPoint = tempScanLine->getStart();
                 if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
                 {
-                    for(int j = 0;  j++ < lengthOfLine; j++)
+                    for(int j = 0;  j < lengthOfLine; j++)
                     {
                         Vector2<int> temp;
                         temp.x = startPoint.x + j;
                         temp.y = startPoint.y;
-                        verticalPoints.push_back(temp);
+                        horizontalPoints.push_back(temp);
                     }
                 }
             }
-            //qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image";
+
+
+
+            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
             break;
