@@ -149,8 +149,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             horiScanArea = vision.horizontalScan(points,spacings);
 
             //! Classify Line Segments
-            vision.classifyArea(vertScanArea);
-            vision.classifyArea(horiScanArea);
+            vision.ClassifiyScanArea(vertScanArea);
+            vision.ClassifiyScanArea(horiScanArea);
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
