@@ -7,13 +7,13 @@
 #define VISION_H
 
 #include <vector>
+#include <boost/circular_buffer.hpp>
 #include "Tools/Math/Vector2.h"
 #include "Kinematics/Horizon.h"
 #include "Tools/Image/ClassifiedImage.h"
 #include "ClassifiedSection.h"
 #include "ScanLine.h"
 #include "TransitionSegment.h"
-#include "boost/circular_buffer.hpp"
 
 class NUimage;
 
