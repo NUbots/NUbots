@@ -10,12 +10,12 @@ class TransitionSegment
         TransitionSegment();
         ~TransitionSegment();
         TransitionSegment(Vector2<int> newStart, Vector2<int> newEnd, unsigned char newBeforeColour, unsigned char newColour, unsigned char newAfterColour);
-        Vector2<int> getEndPoint();
-        Vector2<int> getStartPoint();
-        int getSize();
-        unsigned char getBeforeColour();
-        unsigned char getColour();
-        unsigned char getAfterColour();
+        Vector2<int> getEndPoint() const;
+        Vector2<int> getStartPoint() const;
+        int getSize() const;
+        unsigned char getBeforeColour() const;
+        unsigned char getColour() const;
+        unsigned char getAfterColour() const;
 
     private:
         Vector2<int> start;

@@ -342,7 +342,7 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 {
 
     unsigned char currentClass = cb[0];
-    for (int i = 1; i < cb.size(); i++)
+    for (unsigned int i = 1; i < cb.size(); i++)
     {
         if(cb[i] != currentClass)
         {

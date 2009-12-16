@@ -58,6 +58,7 @@ signals:
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
+    void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
 
 private:
     class classEntry

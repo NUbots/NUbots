@@ -23,17 +23,32 @@
 #define NUCAMERA_H
 
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Tools/Image/NUimage.h"
 
-class NUCamera
+class NUCamera: public NUActionators
 {
 public:
+	enum setting
+	{
+		Brightness,
+		Contrast,
+		Saturation,
+		Hue,
+		RedChroma,
+		BlueChroma,
+		Gain,
+		AutoExposition,
+		AutoWhiteBalance,
+		AutoGain,
+		Exposure,
+		FramesPerSecond,
+		CameraSelect
+	};
+
     virtual ~NUCamera();
-    
-    void process(NUActionatorsData* data);
-protected:
-    virtual void copyToHardwareCommunications();
-protected:
-    NUActionatorsData* m_data;
+    virtual NUimage grabNewImage();
+    virtual void setControlSetting(unsigned int settingID, int value);
+    virtual int getControlSetting(unsigned int id);
 };
 
 #endif
