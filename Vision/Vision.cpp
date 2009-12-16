@@ -305,7 +305,7 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
             }
 
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
-            colourBuff.push_back(currentColour);
+            colourBuff.push_back(afterColour);
             if(checkIfBufferSame(colourBuff))
             {
                 if(currentColour != afterColour)
