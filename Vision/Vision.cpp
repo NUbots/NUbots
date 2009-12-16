@@ -7,6 +7,7 @@
 #include "Tools/Image/NUImage.h"
 #include "ClassificationColours.h"
 #include <QDebug>
+#include <boost/circular_buffer.hpp>
 
 Vision::Vision()
 {
@@ -285,6 +286,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
 {
     int robotCount = 0;
+    boost::circular_buffer<int> cb(3);
     if(!fieldBorders.size()) return robotCount;
     if (!currentImage || !currentLookupTable)
     {
