@@ -3,6 +3,7 @@
   @brief Declaration of NUbots Vision class.
   @author Steven Nicklin
 */
+
 #include "Vision.h"
 #include "Tools/Image/NUImage.h"
 #include "ClassificationColours.h"
@@ -259,26 +260,71 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     ScanLine* tempLine;
     TransitionSegment* tempTransition ;
     Vector2<int> currentPoint;
-    unsigned char beforeColour = 0;
-    unsigned char afterColour = 0;
-    unsigned char currentColour = 0;
+    Vector2<int> tempStartPoint;
+    Vector2<int> tempEndPoint;
+    unsigned char beforeColour = 0; //!< Colour Before the segment
+    unsigned char afterColour = 0;  //!< Colour in the next Segment
+    unsigned char currentColour = 0; //!< colour in the current segment
+    //! initialising circular buffer
+    int bufferSize = 3;
+    boost::circular_buffer<unsigned char> colourBuff(bufferSize);
+
+    for (int i = 0; i < bufferSize; i++)
+    {
+        colourBuff.push_back(0);
+    }
+
     for (int i = 0; i < numOfLines; i++)
     {
         tempLine = scanArea->getScanLine(i);
         Vector2<int> startPoint = tempLine->getStart();
         lineLength = tempLine->getLength();
-        if(lineLength < 3) continue;
+        tempStartPoint = startPoint;
+        //! No point in scanning lines less then the buffer size
+        if(lineLength < bufferSize) continue;
+
         for(int j = 0; j < lineLength; j++)
         {
             if(direction == ClassifiedSection::DOWN)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y + j;
-                //tempTransition = new TransitionSegment(currentPoint);
             }
+            else if (direction == ClassifiedSection::RIGHT)
+            {
+                currentPoint.x = startPoint.x + j;
+                currentPoint.y = startPoint.y;
+            }
+            else if(direction == ClassifiedSection::UP)
+            {
+                currentPoint.x = startPoint.x;
+                currentPoint.y = startPoint.y - j;
+            }
+            else if(direction == ClassifiedSection::LEFT)
+            {
+                currentPoint.x = startPoint.x - j;
+                currentPoint.y = startPoint.y;
+            }
+
+            afterColour = classifyPixel(currentPoint.x,currentPoint.y);
+            colourBuff.push_back(currentColour);
+            if(checkIfBufferSame(colourBuff))
+            {
+                if(currentColour != afterColour)
+                {
+                    //! Transition detected: Generate new segment and add to the line
+                    tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                    tempLine->addSegement(tempTransition);
+                    tempStartPoint = currentPoint;
+                    beforeColour = currentColour;
+                    currentColour = afterColour;
+                    qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+                }
+            }
+
+
         }
-
-
+        qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
     }
     return;
 }
@@ -373,4 +419,19 @@ int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
 
 
     return robotCount;
+
+bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
+{
+
+    unsigned char currentClass = cb[0];
+    for (int i = 1; i < cb.size(); i++)
+    {
+        if(cb[i] != currentClass)
+        {
+            return false;
+        }
+    }
+
+    return true;
+
 }

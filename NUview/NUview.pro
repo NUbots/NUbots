@@ -9,7 +9,8 @@ macx {
         /usr/lib/libz.dylib
 }
 INCLUDEPATH += ../ \
-               'C:/Program Files/boost/'
+               'C:/Program Files/boost'
+
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \

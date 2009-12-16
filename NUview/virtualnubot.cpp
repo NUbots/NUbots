@@ -149,6 +149,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             horiScanArea = vision.horizontalScan(points,spacings);
 
             //! Classify Line Segments
+
             vision.ClassifyScanArea(vertScanArea);
             vision.ClassifyScanArea(horiScanArea);
 
