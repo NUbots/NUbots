@@ -1,5 +1,6 @@
 QT += network \
     opengl
+
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -8,8 +9,9 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
+
 INCLUDEPATH += ../ \
-                'C:/Program Files/boost/boost_1_40/'
+                'C:/Program Files/boost/'
 
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
