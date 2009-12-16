@@ -10,8 +10,11 @@ macx {
         /usr/lib/libz.dylib
 }
 
-INCLUDEPATH += ../ \
-                'C:/Program Files/boost/'
+win32 {
+    INCLUDEPATH += 'C:/Program Files/boost/'
+}
+
+INCLUDEPATH += ../
 
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
