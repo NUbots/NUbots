@@ -264,7 +264,7 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 3;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
     for (int i = 0; i < bufferSize; i++)
@@ -311,16 +311,55 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
                 if(currentColour != afterColour)
                 {
                     //! Transition detected: Generate new segment and add to the line
-                    tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
-                    tempLine->addSegement(tempTransition);
+                    //Adjust the position:
+
+
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
+                    {
+                            //SHIFTING THE POINTS TO THE START OF BUFFER:
+                        if(direction == ClassifiedSection::DOWN)
+                        {
+                            currentPoint.x = startPoint.x;
+                            currentPoint.y = startPoint.y + j - bufferSize;
+                        }
+                        else if (direction == ClassifiedSection::RIGHT)
+                        {
+                            currentPoint.x = startPoint.x + j - bufferSize;
+                            currentPoint.y = startPoint.y;
+                        }
+                        else if(direction == ClassifiedSection::UP)
+                        {
+                            currentPoint.x = startPoint.x;
+                            currentPoint.y = startPoint.y - j - bufferSize;
+                        }
+                        else if(direction == ClassifiedSection::LEFT)
+                        {
+                            currentPoint.x = startPoint.x - j - bufferSize;
+                            currentPoint.y = startPoint.y;
+                        }
+                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        tempLine->addSegement(tempTransition);
+                        qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+                    }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
-                    qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+
+                }
+                if(j == lineLength-1)
+                {
+                    //! End Of Screen detected: Generate new segment and add to the line
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                    {
+                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        tempLine->addSegement(tempTransition);
+                        qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+                    }
+                    tempStartPoint = currentPoint;
+                    beforeColour = currentColour;
+                    currentColour = afterColour;
                 }
             }
-
-
         }
         qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
     }
