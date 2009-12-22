@@ -5,6 +5,7 @@
 #include <QGLWidget>
 #include "gldisplay.h"
 #include "Tools/Math/Vector2.h"
+#include "Vision/TransitionSegment.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -54,6 +55,13 @@ public:
           @param displayId The id of the display layer to write to.
           */
         void writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts new tansition segment vector and maps it to display instructions.
+          @param newsegments The new tansition segments.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.

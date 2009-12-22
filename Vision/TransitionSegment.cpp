@@ -20,27 +20,27 @@ TransitionSegment::TransitionSegment(Vector2<int> newStart, Vector2<int> newEnd,
     colour = newColour;
     afterColour = newAfterColour;
 }
-Vector2<int> TransitionSegment::getEndPoint()
+Vector2<int> TransitionSegment::getEndPoint() const
 {
     return end;
 }
-Vector2<int> TransitionSegment::getStartPoint()
+Vector2<int> TransitionSegment::getStartPoint() const
 {
     return start;
 }
-int TransitionSegment::getSize()
+int TransitionSegment::getSize() const
 {
     return (int)sqrt((end.x-start.x)^2 + (end.y-start.y)^2);
 }
-unsigned char TransitionSegment::getBeforeColour()
+unsigned char TransitionSegment::getBeforeColour() const
 {
     return beforeColour;
 }
-unsigned char TransitionSegment::getColour()
+unsigned char TransitionSegment::getColour() const
 {
     return colour;
 }
-unsigned char TransitionSegment::getAfterColour()
+unsigned char TransitionSegment::getAfterColour() const
 {
     return afterColour;
 }

@@ -1,5 +1,6 @@
 QT += network \
     opengl
+
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -8,7 +9,13 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
+
+win32 {
+    INCLUDEPATH += 'C:/Program Files/boost/'
+}
+
 INCLUDEPATH += ../
+
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \

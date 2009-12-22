@@ -124,6 +124,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 {
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
+    std::vector< TransitionSegment > segments;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
@@ -149,8 +150,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             horiScanArea = vision.horizontalScan(points,spacings);
 
             //! Classify Line Segments
-            vision.classifyArea(vertScanArea);
-            vision.classifyArea(horiScanArea);
+            vision.ClassifiyScanArea(vertScanArea);
+            vision.ClassifiyScanArea(horiScanArea);
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -159,6 +160,10 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 ScanLine* tempScanLine = vertScanArea->getScanLine(i);
                 int lengthOfLine = tempScanLine->getLength();
                 Vector2<int> startPoint = tempScanLine->getStart();
+                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+                {
+                    segments.push_back((*tempScanLine->getSegment(seg)));
+                }
                 if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
                 {
                     for(int j = 0;  j < lengthOfLine; j++)
@@ -197,6 +202,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
+            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
             break;
         default:
             break;

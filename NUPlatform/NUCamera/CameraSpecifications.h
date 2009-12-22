@@ -1,6 +1,6 @@
 /*!
   @file CameraSpecifications.h
-  @brief Decleration of CameraSpecifications class
+  @brief Declaration of CameraSpecifications class
   @author Steven Nicklin
   */
 
@@ -29,6 +29,7 @@ public:
 
     int resolutionWidth;
     int resolutionHeight;
+    int fps;
     double horizontalFov;
     double verticalFov;
     double focalLength;

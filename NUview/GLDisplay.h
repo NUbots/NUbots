@@ -70,6 +70,7 @@ public:
         greenHorizonPoints,
         horizontalScanPath,
         verticalScanPath,
+        TransitionSegments,
         numDisplays
     };
 
@@ -103,6 +104,8 @@ public:
                 return QString("Horizontal Scan Path");
             case verticalScanPath:
                 return QString("Vertical Scan Path");
+            case TransitionSegments:
+                return QString("Transition Segment");
             default:
                 return QString("Unknown");
         }
@@ -245,6 +248,8 @@ private:
                 return QColor(255,0,0);
             case verticalScanPath:
                 return QColor(0,255,127);
+            case TransitionSegments:
+                return QColor(255,255,255);
             default:
                 return QColor(255,255,255);
         }
