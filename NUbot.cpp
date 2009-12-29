@@ -446,7 +446,9 @@ void* runThreadMotion(void* arg)
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         debug << "NUbot::runThreadMotion " << nubot->platform->system->getTime() << endl;
         data = nubot->platform->sensors->update();
-        nubot->motion->process(data, actions);
+        #ifdef USE_MOTION
+            nubot->motion->process(data, actions);
+        #endif
         nubot->platform->actionators->process(actions);
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -523,7 +525,9 @@ void* runThreadVision(void* arg)
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
         nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
-        nubot->motion->process(joblist);
+        #ifdef USE_MOTION
+            nubot->motion->process(joblist);
+        #endif
         //          cmds = nubot->lcs->process(lcsactions)
         nubot->platform->actionators->process(actions);
         //joblist.clear();                           // assume that all of the jobs have been completed
