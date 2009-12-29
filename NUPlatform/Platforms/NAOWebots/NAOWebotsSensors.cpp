@@ -143,7 +143,7 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
 
-    m_current_time = m_platform->system->getTime();
+    m_current_time = nusystem->getTime();             // hmmmm. I am not sure whether I am allowed to do this. Its a backdoor so I don't like it!
     
     copyFromJoints();
     copyFromAccelerometerAndGyro();

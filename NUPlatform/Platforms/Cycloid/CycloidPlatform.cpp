@@ -35,10 +35,11 @@ CycloidPlatform::CycloidPlatform()
 {
     cout << "CycloidPlatform::CycloidPlatform" << endl;
     
+    system = new CycloidSystem();                       // the system needs to be created first because it provides times for the other modules!
+    nusystem = system;                                  // we access the system in other modules using this pointer.
     camera = new CycloidCamera();
     sensors = new CycloidSensors();
     actionators = new CycloidActionators();
-    system = new CycloidSystem();
 }
 
 CycloidPlatform::~CycloidPlatform()

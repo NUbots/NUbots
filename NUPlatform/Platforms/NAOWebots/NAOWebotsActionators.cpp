@@ -65,15 +65,15 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 350, 0, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 4000, -1.57, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 8000, 1.57, 1, 30);
     
     vector<float> pos (2, 0);
     vector<float> vel (2, 1);
     vector<float> gain (2, 100);
     pos[1] = -0.7;
-    m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
+    m_data->addJointPositions(NUActionatorsData::Head, nusystem->getTime() + 10000, pos, vel, gain);
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
     Camera* camera = m_platform->getCamera("camera");
@@ -81,9 +81,9 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     vector<float> data (1,0);
     data[0] = 0;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 5000, data);
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 5000, data);
     data[0] = 1;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 10000, data);
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
     
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
@@ -124,7 +124,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
     
-    m_current_time = m_platform->system->getTime();
+    m_current_time = nusystem->getTime();
     m_data->removeCompletedPoints(m_current_time);
     
     copyToServos();
