@@ -20,13 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
-		NUWalk.cpp NUWalk.h
+SET (YOUR_SRCS  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Kicks
-		Walks
+SET (YOUR_DIRS  
 )
 ####################################################################################
 
