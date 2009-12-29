@@ -176,7 +176,7 @@ SET(DEBUG_NUSYSTEM_VERBOSITY 5 CACHE STRING "Set the verbosity of debug informat
 SET(DEBUG_VISION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the vision (0 to 5)")
 SET(DEBUG_LOCALISATION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the localisation (0 to 5)")
 SET(DEBUG_BEHAVIOUR_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the behaviour (0 to 5)")
-SET(DEBUG_MOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
+SET(DEBUG_NUMOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
 
 SET(THREAD_VISION_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
 SET(THREAD_MOTION_PRIORITY 40 CACHE STRING "Set the priority of the motion thread (0 to 100)")
