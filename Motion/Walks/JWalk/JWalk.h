@@ -1,8 +1,8 @@
-/*! @file NUMotion.h
-    @brief Declaration of motion class
+/*! @file JWalk.h
+    @brief Declaration of jason's walk class
  
-    @class NUMotion
-    @brief A module to provide motion
+    @class JWalk
+    @brief A module to provide locomotion
  
     @author Jason Kulk
  
@@ -22,37 +22,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUMOTION_H
-#define NUMOTION_H
+#ifndef JWALK_H
+#define JWALK_H
 
-#include "motionconfig.h"
-#include "Behaviour/Jobs.h"
+#include "Motion/NUWalk.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUWalk.h"
 
-class NUMotion
+class JWalk : public NUWalk
 {
 public:
-    NUMotion();
-    ~NUMotion();
-    
-    void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
+    JWalk();
+    ~JWalk();
 protected:
+    void doWalk();
 private:
 public:
 protected:
 private:
-#ifdef USE_HEAD
-    NUHead* m_head;
-#endif
-#ifdef USE_WALK
-    NUWalk* m_walk;
-#endif
-#ifdef USE_KICK
-    NUKick* m_kick;
-#endif
 };
 
 #endif

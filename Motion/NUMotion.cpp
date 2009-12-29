@@ -57,9 +57,6 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using namespace std;
-
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
 #include "Tools/debug.h"
@@ -70,6 +67,15 @@ NUMotion::NUMotion()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::NUMotion" << endl;
+#endif
+#ifdef USE_HEAD
+    m_head = ?;
+#endif
+#ifdef USE_WALK
+    m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
+#endif
+#ifdef USE_KICK
+    m_kick = new NUKick();
 #endif
 }
 
@@ -90,10 +96,14 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (actions == NULL)
         return;
-    
+#ifdef USE_WALK
+    m_walk->process(data, actions);
+#endif
 }
 
-/*! @brief Process jobs
+/*! @brief Process the jobs
+    
+    @param jobs the current list of jobs
  */
 void NUMotion::process(JobList& jobs)
 {
@@ -101,13 +111,64 @@ void NUMotion::process(JobList& jobs)
     debug << "NUMotion::process():" << endl;
 #endif
     
-    list<Job*>::iterator it;
+    static list<Job*>::iterator it;     // the iterator over the motion jobs
     for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
     {
-        debug << *it << " ";
+#ifdef USE_WALK
+        if ((*it)->getID() == Job::MOTION_WALK)
+        {   // process a walk speed job
+            static vector<float> speed;
+            static WalkJob* job;
+            
+            job = (WalkJob*) (*it);
+            job->getSpeed(speed);         // why does it not know what type of job it is here?
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
+            #endif
+            
+            m_walk->walkSpeed(speed);
+        }
+        else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
+        {   // process a walk to point job
+            static double time;
+            static vector<float> position;
+            static WalkToPointJob* job;
+            
+            job = (WalkToPointJob*) (*it);
+            job->getPosition(time, position);
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkToPoint job." << endl;
+            #endif
+            
+            m_walk->walkToPoint(time, position);
+        }
+#endif  // USE_WALK
+        
+#ifdef USE_KICK
+        if ((*it)->getID() == Job::MOTION_KICK)
+        {   // process a kick job
+            static double time;
+            static vector<float> kickposition;
+            static vector<float> kicktarget;
+            static KickJob* job;
+            
+            job = (KickJob*) (*it);
+            job->getKick(time, kickposition, kicktarget);         // why does it not know what type of job it is here?
+#if DEBUG_NUMOTION_VERBOSITY > 4
+            debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
+#endif
+            
+            m_kick->kick(time, kickposition, kicktarget);
+        }
+#endif  // USE_KICK 
     }
     
-    // 
+    // so every walk engine needs to support two function calls. A walkToPoint and a walkOnVector.
+    // walkToPoint:
+    //      This requires some path planning to be done, potentially very simple for distant points.
+    //      However, for close points the walk engine might need to calculate short steps.
+    //      So I can't really just map walkToPoint to a speed vector for all walks.
+    //      So each walk engine will need to do its own path planning :(
     
     // I need to easily iterate over the job list
     // for each job in joblist:
