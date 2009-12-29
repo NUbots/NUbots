@@ -20,16 +20,26 @@
  */
 
 #include "NAOWebotsCamera.h"
-
-#include <iostream>
-using namespace std;
+#include "Tools/debug.h"
 
 NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {
-    cout << "NAOWebotsCamera::NAOWebotsCamera()" << endl;
+    debug << "NAOWebotsCamera::NAOWebotsCamera()" << endl;
 }
 
 NAOWebotsCamera::~NAOWebotsCamera()
+{
+}
+
+NUimage NAOWebotsCamera::grabNewImage()
+{
+}
+
+void NAOWebotsCamera::setControlSetting(unsigned int settingID, int value)
+{
+}
+
+int NAOWebotsCamera::getControlSetting(unsigned int id)
 {
 }
 
