@@ -16,24 +16,28 @@ IF(DEBUG)
 ENDIF()
 
 # I need to prefix each file and directory with the correct path
-STRING(REPLACE "/cmake/walkconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
+STRING(REPLACE "/cmake/motionconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
 ############################ walk engine options
 OPTION(
-        USE_WALK
+        USE_MOTION_HEAD
+        "Set to ON to use head, set to OFF to not move the head"
+        ON
+)
+OPTION(
+        USE_MOTION_WALK
         "Set to ON to use walk, set to OFF to have no walk"
         ON
 )
-
 OPTION(
-        USE_WALK_JWALK
-        "Set to ON to use jwalk, set to OFF use something else"
+        USE_MOTION_KICK
+        "Set to ON to use kick, set to OFF to not have kick"
         ON
 )
 
-############################ walkconfig.h generation
+############################ motionconfig.h generation
 CONFIGURE_FILE(
-	"${THIS_SRC_DIR}/cmake/walkconfig.in"
-  	"${THIS_SRC_DIR}/walkconfig.h"
+	"${THIS_SRC_DIR}/cmake/motionconfig.in"
+  	"${THIS_SRC_DIR}/motionconfig.h"
     ESCAPE_QUOTES
 )
