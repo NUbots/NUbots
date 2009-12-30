@@ -239,37 +239,37 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
         else if (simplejointnames[i].compare("rhipyaw") == 0)
         {
             RHipYaw = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhipyawpitch") == 0)
         {
             RHipYawPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhippitch") == 0)
         {
             RHipPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhiproll") == 0)
         {
             RHipRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rkneepitch") == 0)
         {
             RKneePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("ranklepitch") == 0)
         {
             RAnklePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rankleroll") == 0)
         {
             RAnkleRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else 
         {
@@ -786,7 +786,10 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     else if (partid == RLeg)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        return false;
+    }
         
     if (selectedjoints.size() != positions.size())
     {
@@ -803,8 +806,8 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
             data[2] = gains[i];
             PositionActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
@@ -836,7 +839,10 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     else if (partid == RLeg)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointTorques. UNDEFINED Body part.";
+        return false;
+    }
     
     if (selectedjoints.size() != torques.size())
     {
@@ -852,8 +858,8 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
             data[1] = gains[i];
             TorqueActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /******************************************************************************************************************************************
