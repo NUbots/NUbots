@@ -57,7 +57,10 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
 void actionator_t::addPoint(double time, const vector<float>& data)
 {
     if (time == 0 || data.size() == 0)
+    {
+        debug << "actionator_t::addPoint. Your data is invalid. It will be ignored!." << endl;
         return;
+    }
     actionator_point_t* point = new actionator_point_t();
     point->Time = time;
     point->Data = data;
