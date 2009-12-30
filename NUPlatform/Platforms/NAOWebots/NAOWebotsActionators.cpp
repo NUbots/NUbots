@@ -132,7 +132,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     copyToLeds();
     copyToSound();
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 6
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
 }
@@ -161,12 +161,19 @@ void NAOWebotsActionators::copyToServos()
             {
                 if (isvalid[i] == true)
                 {
-                    if ((times[i] - m_current_time) > m_simulation_step)
+                    if ((times[i] - m_current_time) >= 0)
                     {
                         float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                        float v = (positions[i] - c)/(times[i] - m_current_time);
+                        float dt = times[i] - m_current_time;
+                        float v = 1000*(positions[i] - c)/dt;
+                        // we need to clip to velocity to the max
+                        float maxv = ((JServo*) m_servos[i])->getMaxVelocity();
+                        if (v < -maxv)
+                            v = -maxv;
+                        else if (v > maxv)
+                            v = maxv;
                         m_servos[i]->setControlP(gains[i]/10.0);
-                        m_servos[i]->setVelocity(fabs(v*1000));
+                        m_servos[i]->setVelocity(fabs(v));
                         m_servos[i]->setPosition(positions[i]);
                     }
                 }
