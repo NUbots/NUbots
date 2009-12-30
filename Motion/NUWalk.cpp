@@ -24,6 +24,9 @@
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
 #endif
+#ifdef USE_JUPPWALK
+    #include "Walks/Jupp/JuppWalk.h"
+#endif
 
 #include "NUPlatform/NUSystem.h"
 #include "Tools/debug.h"
@@ -32,6 +35,10 @@ NUWalk* NUWalk::getWalkEngine()
 {
 #ifdef USE_JWALK
     return new JWalk();
+#else
+    #ifdef USE_JUPPWALK
+        return new JuppWalk();
+    #endif
 #endif
 }
 
@@ -71,25 +78,25 @@ void NUWalk::walkSpeed(const vector<float>& speed)
     {
         m_speed_x = speed[0];
         m_speed_y = speed[1];
-        m_speed_rotation = speed[2];
+        m_speed_yaw = speed[2];
     }
     else if (speed.size() == 2)
     {
         m_speed_x = speed[0];
         m_speed_y = speed[1];
-        m_speed_rotation = 0;
+        m_speed_yaw = 0;
     }
     else if (speed.size() == 1)
     {
         m_speed_x = speed[0];
         m_speed_y = 0;
-        m_speed_rotation = 0;
+        m_speed_yaw = 0;
     }
     else if (speed.size() == 0)
     {
         m_speed_x = 0;
         m_speed_y = 0;
-        m_speed_rotation = 0;
+        m_speed_yaw = 0;
     }
     m_speed_timestamp = nusystem->getTime();
 }

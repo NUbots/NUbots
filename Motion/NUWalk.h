@@ -47,7 +47,7 @@ protected:
     
     float m_speed_x;                    //!< the current x speed in cm/s
     float m_speed_y;                    //!< the current y speed in cm/s
-    float m_speed_rotation;             //!< the current rotation speed in rad/s
+    float m_speed_yaw;                  //!< the current rotation speed in rad/s
     double m_speed_timestamp;           //!< the timestamp of the last speed command
     
     double m_point_time;                //!< the desired time to reach the current target point in milliseconds from now
