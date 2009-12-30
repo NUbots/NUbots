@@ -18,6 +18,12 @@
     #else
         #undef USE_JWALK
     #endif
+    #define USE_WALK_JUPPWALK_${USE_WALK_JUPPWALK}
+    #ifdef USE_WALK_JUPPWALK_ON
+        #define USE_JUPPWALK
+    #else
+        #undef USE_JUPPWALK
+    #endif
 #else
     #undef USE_JWALK
 #endif

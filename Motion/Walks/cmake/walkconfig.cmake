@@ -31,6 +31,12 @@ OPTION(
         ON
 )
 
+OPTION(
+        USE_WALK_JUPPWALK
+        "Set to ON to use juppwalk, set to OFF use something else"
+        ON
+)
+
 ############################ walkconfig.h generation
 CONFIGURE_FILE(
 	"${THIS_SRC_DIR}/cmake/walkconfig.in"
