@@ -64,9 +64,11 @@ void JuppWalk::doWalk()
 {
     debug << "JuppWalk::doWalk()" << endl;
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
-    m_swing_amplitude_roll = asin(m_speed_x/(m_step_frequency*m_leg_length));
-    m_swing_amplitude_pitch = asin(m_speed_y/(m_step_frequency*m_leg_length));
+    m_swing_amplitude_roll = asin(-m_speed_y/(m_step_frequency*m_leg_length));
+    m_swing_amplitude_pitch = asin(m_speed_x/(m_step_frequency*m_leg_length));
     m_swing_amplitude_yaw = m_speed_yaw/m_step_frequency;
+    
+    //cout << "swings: " << m_swing_amplitude_pitch << endl;
     
     // I need to tick the central clock, and then calculate the leg phases
     // now t needs to start from zero.
@@ -91,14 +93,14 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
         legsign = 1;
     
     // Shifting (this isn't effectively shift the weight to the other foot)
-    // amp = 0.18 is the largest before the robot tips!
-    float shift_amp = 0.17 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 0.7*fabs(m_swing_amplitude_roll);
+    // amp = 0.12 -> 0.22 with foot at 12.5% and feet close together
+    float shift_amp = 0.20 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.4*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
-    float shift_leg_roll = legsign*shift;
-    float shift_foot_roll = -legsign*0.5*shift;
+    float shift_leg_roll = -legsign*1.0*shift;
+    float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
     
     // Shortening
-    float short_phase = 3.0*(legphase + M_PI/2 - 0.05);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
+    float short_phase = 1.0*(legphase + M_PI/2.0 - 0.05);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
     float short_amp = 0.2 + 2*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
     float short_leg_length = 0;
     float short_foot_pitch = 0;
@@ -109,33 +111,33 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     }
     
     // Loading
-    float load_phase = 3.0*NORMALISE(legphase + M_PI/2 - M_PI/3.0 - 0.05) - M_PI;
+    float load_phase = 1.0*NORMALISE(legphase + M_PI/2.0 - M_PI/3.0 - 0.05) - M_PI;
     float load_amp = 0.025 + 0.5*(1 - cos(fabs(m_swing_amplitude_pitch)));
     float load_leg_length = 0;
     if (fabs(load_phase) < M_PI)
         load_leg_length = -load_amp*0.5*(cos(load_phase) + 1);
     
     // Swinging
-    float swing_phase = 2.0*(legphase + M_PI/2 - 0.15);          // 2.0 is the swing speed, and -0.15 is the phase shift
+    float swing_phase = 1.0*(legphase + M_PI/2.0 - 0.05);          // 2.0 is the swing speed, and -0.15 is the phase shift
     float swing = 0;
     float b = -(2/(2*M_PI*2.0 - M_PI));                 // makes the reverse of the swing linear
-    if (fabs(swing_phase) < M_PI/2)
+    if (fabs(swing_phase) < M_PI/2.0)
         swing = sin(swing_phase);
-    else if (swing_phase < M_PI/2)
+    else if (swing_phase >= M_PI/2.0)
         swing = b*(swing_phase - M_PI/2 - 1);
     else
         swing = b*(swing_phase + M_PI/2 + 1);
     
-    float swing_leg_roll = legsign*m_swing_amplitude_roll*swing;
+    float swing_leg_roll = m_swing_amplitude_roll*swing;      // you always want the swing leg to go outwards
     float swing_leg_pitch = m_swing_amplitude_pitch*swing;
     float swing_leg_yaw = legsign*m_swing_amplitude_yaw*swing;
-    float swing_foot_roll = 0.25*m_swing_amplitude_roll*swing;
-    float swing_foot_pitch = legsign*0.25*m_swing_amplitude_pitch*swing;
+    float swing_foot_roll = -0.125*legsign*m_swing_amplitude_roll*swing;
+    float swing_foot_pitch = 0.25*m_swing_amplitude_pitch*swing;
     
     // Balance
-    float balance_foot_roll = 0.5*legsign*m_swing_amplitude_roll*cos(legphase + 0.35);
-    float balance_foot_pitch = 0.02 + 0.08*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
-    float balance_leg_roll = legsign*(0.01 + m_swing_amplitude_roll + fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw);
+    float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
+    float balance_foot_pitch = 0.04 + 0.08*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
+    float balance_leg_roll = legsign*-0.03 + m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
     
     // Output
@@ -148,7 +150,7 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     float leg_length = short_leg_length + load_leg_length;
     
     // Now convert their leg interface to the joint angles!
-    float knee_pitch = -2*acos(1 + 0.125*leg_length);
+    float knee_pitch = -2*acos(1 + 0.15*leg_length);
     float hip_yaw = leg_yaw;
     float hip_roll = leg_roll - 0.5*knee_pitch*sin(hip_yaw);
     float hip_pitch = leg_pitch - 0.5*knee_pitch*cos(hip_yaw);
@@ -159,7 +161,7 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     // Now copy the angles to NUActionatorsData!
     static vector<float> positions (6, 0);
     static vector<float> velocities (6, 0);
-    static vector<float> gains (6, 100);
+    static vector<float> gains (6, 65);
     positions[0] = hip_yaw;
     positions[1] = -hip_pitch;      // Jupp's pitch and roll are reversed compared to our standard
     positions[2] = -hip_roll;
