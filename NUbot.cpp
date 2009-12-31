@@ -482,13 +482,12 @@ void* runThreadVision(void* arg)
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
-    vector<float> temp(3, 0);
+    vector<float> walkspeed(3, 0);
+    walkspeed[0] = 5;
+    walkspeed[1] = -1.5;
     
-    joblist.addVisionJob(new WalkJob(temp));
-    joblist.addVisionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
+    joblist.addVisionJob(new WalkJob(walkspeed));
+    
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -525,6 +524,9 @@ void* runThreadVision(void* arg)
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
         nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+        
+        if (nusystem->getTime() > 0)
+            joblist.addMotionJob(new WalkJob(walkspeed));
         #ifdef USE_MOTION
             nubot->motion->process(joblist);
         #endif
