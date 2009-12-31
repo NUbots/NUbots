@@ -74,6 +74,8 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     vector<float> gain (2, 100);
     pos[1] = -0.7;
     m_data->addJointPositions(NUActionatorsData::Head, nusystem->getTime() + 10000, pos, vel, gain);
+    pos[1] = 0;
+    m_data->addJointPositions(NUActionatorsData::Head, nusystem->getTime() + 15000, pos, vel, gain);
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
     Camera* camera = m_platform->getCamera("camera");
