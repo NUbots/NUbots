@@ -478,13 +478,14 @@ void* runThreadVision(void* arg)
     debug << "NUbot::runThreadVision: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
-    NUSensorsData* data = NULL;
-    NUActionatorsData* actions = NULL;
+    //NUSensorsData* data = NULL;
+    //NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
     vector<float> walkspeed(3, 0);
-    walkspeed[0] = 5;
-    walkspeed[1] = -1.5;
+    walkspeed[0] = 6;       // max 7cm/s
+    walkspeed[1] = -0;
+    walkspeed[2] = 0;
     
     joblist.addVisionJob(new WalkJob(walkspeed));
     
@@ -531,7 +532,7 @@ void* runThreadVision(void* arg)
             nubot->motion->process(joblist);
         #endif
         //          cmds = nubot->lcs->process(lcsactions)
-        nubot->platform->actionators->process(actions);
+        //nubot->platform->actionators->process(m_actions);
         //joblist.clear();                           // assume that all of the jobs have been completed
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef THREAD_VISION_MONITOR_TIME
