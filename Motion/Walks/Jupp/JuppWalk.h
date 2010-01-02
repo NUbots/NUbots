@@ -41,6 +41,7 @@ protected:
     void doWalk();
 private:
     void calculateLegAngles(float legphase, bool leftleg);
+    void calculateArmAngles(float legphase, bool leftarm);
 public:
 protected:
 private:

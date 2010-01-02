@@ -81,6 +81,9 @@ void JuppWalk::doWalk()
     
     calculateLegAngles(m_left_leg_phase, true);
     calculateLegAngles(m_right_leg_phase, false);
+    
+    calculateArmAngles(m_left_leg_phase, true);
+    calculateArmAngles(m_right_leg_phase, false);
 }
 
 void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
@@ -93,15 +96,15 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
         legsign = 1;
     
     // Shifting (this isn't effectively shift the weight to the other foot)
-    // amp = 0.12 -> 0.22 with foot at 12.5% and feet close together
-    float shift_amp = 0.20 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.4*fabs(m_swing_amplitude_roll);
+    // amp = 0.12 -> 0.24 with foot at 12.5% and feet close together
+    float shift_amp = 0.23 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.2*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
     float shift_leg_roll = -legsign*1.0*shift;
     float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
     
     // Shortening
     float short_phase = 1.0*(legphase + M_PI/2.0 - 0.05);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
-    float short_amp = 0.2 + 2*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
+    float short_amp = 0.3 + 1*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
     float short_leg_length = 0;
     float short_foot_pitch = 0;
     if (fabs(short_phase) < M_PI)
@@ -162,8 +165,12 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     static vector<float> positions (6, 0);
     static vector<float> velocities (6, 0);
     static vector<float> gains (6, 65);
-    positions[0] = hip_yaw;
-    positions[1] = -hip_pitch;      // Jupp's pitch and roll are reversed compared to our standard
+    if (leftleg == true)
+        positions[0] = hip_yaw;
+    else
+        positions[0] = hip_yaw;
+    // Jupp's pitch and roll are reversed compared to our standard
+    positions[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
     positions[2] = -hip_roll;
     positions[3] = -knee_pitch;
     positions[4] = -ankle_pitch;
@@ -175,7 +182,28 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
         m_actions->addJointPositions(NUActionatorsData::LLeg, nusystem->getTime(), positions, velocities, gains);
     else
         m_actions->addJointPositions(NUActionatorsData::RLeg, nusystem->getTime(), positions, velocities, gains);
+}
+
+void JuppWalk::calculateArmAngles(float legphase, bool leftarm)
+{
+    // Arm sign 
+    float armsign;
+    if (leftarm == true)
+        armsign = -1;      // -1 for the left leg, 1 for the right leg
+    else
+        armsign = 1;
     
+    float pitch = 0.5*sin(legphase + M_PI) + M_PI/2.0;
+    static vector<float> positions (4, 0);
+    static vector<float> velocities (4, 0);
+    static vector<float> gains (4, 65);
+    positions[0] = pitch;
+    positions[1] = -0.1*armsign;
+    positions[2] = M_PI/2;
+    if (leftarm == true)
+        m_actions->addJointPositions(NUActionatorsData::LArm, nusystem->getTime(), positions, velocities, gains);
+    else
+        m_actions->addJointPositions(NUActionatorsData::RArm, nusystem->getTime(), positions, velocities, gains);
 }
 
 
