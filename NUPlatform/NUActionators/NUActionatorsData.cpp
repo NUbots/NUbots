@@ -480,6 +480,35 @@ void NUActionatorsData::removeCompletedPoints(double currenttime)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
 }
 
+/*! @brief Returns the number of joints in the specified body part
+    @param partid the id of the body part
+    @return the number of joints
+ */
+int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
+{
+    if (partid == All)
+        return m_num_joints;
+    else if (partid == Body)
+        return m_num_body_joints;
+    else if (partid == Head)
+        return m_num_head_joints;
+    else if (partid == LArm)
+        return m_num_arm_joints;
+    else if (partid == RArm)
+        return m_num_arm_joints;
+    else if (partid == Torso)
+        return m_num_torso_joints;
+    else if (partid == LLeg)
+        return m_num_leg_joints;
+    else if (partid == RLeg)
+        return m_num_leg_joints;
+    else
+    {
+        debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        return 0;
+    }
+}
+
 /*! @brief Gets the next position control point
     
     @param isvalid a vector of bools that indicates whether there is a new target for each joint.

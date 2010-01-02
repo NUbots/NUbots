@@ -114,6 +114,9 @@ public:
     
     void removeCompletedPoints(double currenttime);
     
+    // Misc. get methods
+    int getNumberOfJoints(bodypart_id_t partid);
+    
     // Get methods for joints
     bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
