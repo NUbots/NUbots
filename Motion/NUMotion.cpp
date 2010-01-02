@@ -127,6 +127,7 @@ void NUMotion::process(JobList& jobs)
             #endif
             
             m_walk->walkSpeed(speed);
+            jobs.removeMotionJob(job);
         }
         else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
         {   // process a walk to point job
@@ -141,6 +142,7 @@ void NUMotion::process(JobList& jobs)
             #endif
             
             m_walk->walkToPoint(time, position);
+            jobs.removeMotionJob(job);
         }
 #endif  // USE_WALK
         
@@ -159,6 +161,7 @@ void NUMotion::process(JobList& jobs)
 #endif
             
             m_kick->kick(time, kickposition, kicktarget);
+            jobs.removeMotionJob(job);
         }
 #endif  // USE_KICK 
     }
