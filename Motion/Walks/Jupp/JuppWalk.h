@@ -32,6 +32,9 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
+#include <fstream>
+using namespace std;
+
 class JuppWalk : public NUWalk
 {
 public:
@@ -40,8 +43,21 @@ public:
 protected:
     void doWalk();
 private:
-    void calculateLegAngles(float legphase, bool leftleg);
-    void calculateArmAngles(float legphase, bool leftarm);
+    
+    void calculateGaitPhase();
+    void calculateGyroFeedback();
+    
+    void calculateLeftLeg();
+    void calculateRightLeg();
+    void calculateLegAngles(float legphase, float legsign, vector<float>& angles);
+    void calculateLegGains(float legphase, vector<float>& gains);
+    
+    void calculateLeftArm();
+    void calculateRightArm();
+    void calculateArmAngles(float armphase, float armsign, vector<float>& angles);
+    void calculateArmGains(float armphase, vector<float>& gains);
+    
+    void updateActionatorsData();
 public:
 protected:
 private:
@@ -58,6 +74,25 @@ private:
     float m_swing_amplitude_roll;
     float m_swing_amplitude_pitch;
     float m_swing_amplitude_yaw;
+    
+    // Gyro feedback
+    float m_gyro_foot_pitch;
+    float m_gyro_foot_roll;
+    
+    // Leg angles
+    vector<float> m_left_leg_angles;
+    vector<float> m_left_leg_gains;
+    vector<float> m_right_leg_angles;
+    vector<float> m_right_leg_gains;
+    
+    // Arm angles
+    vector<float> m_left_arm_angles;
+    vector<float> m_left_arm_gains;
+    vector<float> m_right_arm_angles;
+    vector<float> m_right_arm_gains;
+    
+    // Pattern generation debugging
+    ofstream m_pattern_debug;
 };
 
 #endif

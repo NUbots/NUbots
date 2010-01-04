@@ -51,59 +51,121 @@ JuppWalk::JuppWalk()
     m_swing_amplitude_roll = 0;
     m_swing_amplitude_pitch = 0;
     m_swing_amplitude_yaw = 0;
+    
+    // Initialise the leg values
+    // @todo Get the lengths of these angles and gains from m_actions
+    m_left_leg_angles = vector<float> (6, 0);
+    m_left_leg_gains = vector<float> (6, 0);
+    m_right_leg_angles = vector<float> (6, 0);
+    m_right_leg_gains = vector<float> (6, 0);
+    
+    // Initialise the arm values
+    m_left_arm_angles = vector<float> (4, 0);
+    m_left_arm_gains = vector<float> (4, 0);
+    m_right_arm_angles = vector<float> (4, 0);
+    m_right_arm_gains = vector<float> (4, 0);
+    
+    m_pattern_debug.open("patternDebug.log");
+    m_pattern_debug << "Phase (rad), LegYaw, LegPitch, LegRoll, LegLength, FootPitch, FootRoll" << endl;
 }
 
 /*! @brief Destructor for motion module
  */
 JuppWalk::~JuppWalk()
 {
-    // nothing needs to be deleted at this level
+    m_left_leg_angles.clear();
+    m_left_leg_gains.clear();
+    m_right_leg_angles.clear();
+    m_right_leg_gains.clear();
+    
+    m_left_arm_angles.clear();
+    m_left_arm_gains.clear();
+    m_right_arm_angles.clear();
+    m_right_arm_gains.clear();
 }
 
 void JuppWalk::doWalk()
 {
     debug << "JuppWalk::doWalk()" << endl;
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
-    m_swing_amplitude_roll = asin(-m_speed_y/(m_step_frequency*m_leg_length));
-    m_swing_amplitude_pitch = asin(m_speed_x/(m_step_frequency*m_leg_length));
-    m_swing_amplitude_yaw = m_speed_yaw/m_step_frequency;
+    m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
+    m_swing_amplitude_pitch = asin(m_speed_x/(2*m_step_frequency*m_leg_length));
+    m_swing_amplitude_yaw = m_speed_yaw/(2*m_step_frequency);
     
-    //cout << "swings: " << m_swing_amplitude_pitch << endl;
-    
-    // I need to tick the central clock, and then calculate the leg phases
-    // now t needs to start from zero.
-    m_current_time = nusystem->getTime();
-    m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
-    m_previous_time = m_current_time;
-    
+    calculateGaitPhase();
     m_left_leg_phase = NORMALISE(m_gait_phase + M_PI/2);
     m_right_leg_phase = NORMALISE(m_gait_phase - M_PI/2);
     
-    calculateLegAngles(m_left_leg_phase, true);
-    calculateLegAngles(m_right_leg_phase, false);
+    calculateGyroFeedback();
+    calculateLeftLeg();
+    calculateRightLeg();
     
-    calculateArmAngles(m_left_leg_phase, true);
-    calculateArmAngles(m_right_leg_phase, false);
+    calculateLeftArm();
+    calculateRightArm();
+    
+    updateActionatorsData();
 }
 
-void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
+void JuppWalk::calculateGaitPhase()
 {
-    // Leg sign 
-    float legsign;
-    if (leftleg == true)
-        legsign = -1;      // -1 for the left leg, 1 for the right leg
-    else
-        legsign = 1;
+    // do the phase feedback here!
+    static vector<float> leftvalues;
+    static vector<float> rightvalues;
     
+    float leftsum = 0;
+    float rightsum = 0;
+    m_data->getFootSoleValues(NUSensorsData::LeftFoot, leftvalues);
+    for (int i=0; i<leftvalues.size(); i++)
+        leftsum += leftvalues[i];
+    m_data->getFootSoleValues(NUSensorsData::RightFoot, rightvalues);
+    for (int i=0; i<rightvalues.size(); i++)
+        rightsum += rightvalues[i];
+    
+    //cout << "phase: " << m_gait_phase << " left: " << leftsum << " right: " << rightsum << endl;
+    
+    // there might need to be some stupid logic here because the sensors in the simulator aren't very good!
+    
+    m_current_time = nusystem->getTime();
+    m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
+    m_previous_time = m_current_time;
+}
+
+/*! @brief Calculates the angles and gains for the left leg
+ */
+void JuppWalk::calculateLeftLeg()
+{
+    calculateLegAngles(m_left_leg_phase, -1, m_left_leg_angles);
+    calculateLegGains(m_left_leg_phase, m_left_leg_gains);
+}
+
+/*! @brief Calculates the angles and gains for the right leg
+ */
+void JuppWalk::calculateRightLeg()
+{
+    calculateLegAngles(m_right_leg_phase, 1, m_right_leg_angles);
+    calculateLegGains(m_right_leg_phase, m_right_leg_gains);
+}
+
+/*! @brief Calculates leg angles based on the given legphase, and legsign
+    @param legphase the phase of the leg you want angles for (+/- M_PI)
+    @param legsign 1 for the right leg, -1 for the left leg
+ */
+void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& angles)
+{
+    /* Jason's guide to this to walk:
+     Step 1. Tune shift_amp such that it looks like the weight is being shifted between the feet
+     Step 2. Tune the shortening phase shift. Too late and the robot will fall, too late and the feet wont come off the ground!
+     Step 3. Tune the swinging phase shift. You only want to swing when the foot is in the air (this will probably be the same as the shortening phase)
+     */
     // Shifting (this isn't effectively shift the weight to the other foot)
-    // amp = 0.12 -> 0.24 with foot at 12.5% and feet close together
-    float shift_amp = 0.23 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.2*fabs(m_swing_amplitude_roll);
+    float shift_amp = 0.21 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 0.7*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
     float shift_leg_roll = -legsign*1.0*shift;
     float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
     
     // Shortening
-    float short_phase = 1.0*(legphase + M_PI/2.0 - 0.05);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
+    float short_v = 2.0;    // tune this! It controls the duration of the shortening
+    float short_phase = short_v*(legphase + M_PI/2.0 - 0.5);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
     float short_amp = 0.3 + 1*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
     float short_leg_length = 0;
     float short_foot_pitch = 0;
@@ -114,22 +176,23 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     }
     
     // Loading
-    float load_phase = 1.0*NORMALISE(legphase + M_PI/2.0 - M_PI/3.0 - 0.05) - M_PI;
+    float load_v = 2.0;     // tune this! It controls the duration of the loading
+    float load_phase = load_v*NORMALISE(legphase + M_PI/2.0 - M_PI/3.0 - 0.5) - M_PI;
     float load_amp = 0.025 + 0.5*(1 - cos(fabs(m_swing_amplitude_pitch)));
     float load_leg_length = 0;
     if (fabs(load_phase) < M_PI)
         load_leg_length = -load_amp*0.5*(cos(load_phase) + 1);
     
     // Swinging
-    float swing_phase = 1.0*(legphase + M_PI/2.0 - 0.05);          // 2.0 is the swing speed, and -0.15 is the phase shift
+    float swing_phase = 2.0*(legphase + M_PI/2.0 - 0.5);          // 2.0 is the swing speed, and -0.15 is the phase shift
     float swing = 0;
     float b = -(2/(2*M_PI*2.0 - M_PI));                 // makes the reverse of the swing linear
     if (fabs(swing_phase) < M_PI/2.0)
         swing = sin(swing_phase);
     else if (swing_phase >= M_PI/2.0)
-        swing = b*(swing_phase - M_PI/2 - 1);
+        swing = b*(swing_phase - M_PI/2) + 1;
     else
-        swing = b*(swing_phase + M_PI/2 + 1);
+        swing = b*(swing_phase + M_PI/2) - 1;
     
     float swing_leg_roll = m_swing_amplitude_roll*swing;      // you always want the swing leg to go outwards
     float swing_leg_pitch = m_swing_amplitude_pitch*swing;
@@ -142,68 +205,123 @@ void JuppWalk::calculateLegAngles(float legphase, bool leftleg)
     float balance_foot_pitch = 0.04 + 0.08*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
     float balance_leg_roll = legsign*-0.03 + m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
-    
-    // Output
-    float leg_roll = swing_leg_roll + shift_leg_roll + balance_leg_roll;
-    float leg_pitch = swing_leg_pitch;
+    // Now we can calculate the leg's state
     float leg_yaw = swing_leg_yaw;
-    
-    float foot_roll = swing_foot_roll + shift_foot_roll + balance_foot_roll;
-    float foot_pitch = swing_foot_pitch + short_foot_pitch + balance_foot_pitch;
+    float leg_pitch = swing_leg_pitch;
+    float leg_roll = swing_leg_roll + shift_leg_roll + balance_leg_roll;
     float leg_length = short_leg_length + load_leg_length;
     
-    // Now convert their leg interface to the joint angles!
+    float foot_pitch = swing_foot_pitch + short_foot_pitch + balance_foot_pitch + m_gyro_foot_pitch;
+    float foot_roll = swing_foot_roll + shift_foot_roll + balance_foot_roll + legsign*m_gyro_foot_roll;
+    
+    if (legsign > 0)
+        m_pattern_debug << m_right_leg_phase << ", " << leg_yaw << ", " << leg_pitch << ", " << leg_roll << ", " << leg_length << ", " << foot_pitch << ", " << foot_roll << endl;
+    
+    // do the kinematics, and calculate the joint angles
     float knee_pitch = -2*acos(1 + 0.15*leg_length);
     float hip_yaw = leg_yaw;
-    float hip_roll = leg_roll - 0.5*knee_pitch*sin(hip_yaw);
     float hip_pitch = leg_pitch - 0.5*knee_pitch*cos(hip_yaw);
+    float hip_roll = leg_roll - 0.5*knee_pitch*sin(hip_yaw);
     
-    float ankle_roll = (foot_roll - leg_roll)*cos(hip_yaw) - (foot_pitch - leg_pitch)*sin(hip_yaw);
     float ankle_pitch = -0.5*knee_pitch + (foot_roll - leg_roll)*sin(hip_yaw) + (foot_pitch - leg_pitch)*cos(hip_yaw);
+    float ankle_roll = (foot_roll - leg_roll)*cos(hip_yaw) - (foot_pitch - leg_pitch)*sin(hip_yaw);
     
-    // Now copy the angles to NUActionatorsData!
-    static vector<float> positions (6, 0);
-    static vector<float> velocities (6, 0);
-    static vector<float> gains (6, 65);
-    if (leftleg == true)
-        positions[0] = hip_yaw;
-    else
-        positions[0] = hip_yaw;
-    // Jupp's pitch and roll are reversed compared to our standard
-    positions[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
-    positions[2] = -hip_roll;
-    positions[3] = -knee_pitch;
-    positions[4] = -ankle_pitch;
-    positions[5] = -ankle_roll;
-    
-    debug << "positions: " << positions[0] << " " << positions[1] << " " << positions[2] << " " << positions[3] << " " << positions[4] << " " << positions[5] << endl;
-    
-    if (leftleg == true)
-        m_actions->addJointPositions(NUActionatorsData::LLeg, nusystem->getTime(), positions, velocities, gains);
-    else
-        m_actions->addJointPositions(NUActionatorsData::RLeg, nusystem->getTime(), positions, velocities, gains);
+    // now translate to my coordinate system
+    angles[0] = hip_yaw;
+    angles[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
+    angles[2] = -hip_roll;
+    angles[3] = -knee_pitch;
+    angles[4] = -ankle_pitch;
+    angles[5] = -ankle_roll;
 }
 
-void JuppWalk::calculateArmAngles(float legphase, bool leftarm)
+/*! @brief Calculates the leg gains based on the given phase
+    @param legphase the phase of the leg
+    @param gains the parameter to be updated with the new gains
+ */
+void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    // Arm sign 
-    float armsign;
-    if (leftarm == true)
-        armsign = -1;      // -1 for the left leg, 1 for the right leg
-    else
-        armsign = 1;
-    
-    float pitch = 0.5*sin(legphase + M_PI) + M_PI/2.0;
-    static vector<float> positions (4, 0);
-    static vector<float> velocities (4, 0);
-    static vector<float> gains (4, 65);
-    positions[0] = pitch;
-    positions[1] = -0.1*armsign;
-    positions[2] = M_PI/2;
-    if (leftarm == true)
-        m_actions->addJointPositions(NUActionatorsData::LArm, nusystem->getTime(), positions, velocities, gains);
-    else
-        m_actions->addJointPositions(NUActionatorsData::RArm, nusystem->getTime(), positions, velocities, gains);
+    gains[0] = 100;
+    gains[1] = 65;
+    gains[2] = 65;
+    gains[3] = 65;
+    gains[4] = 65;
+    gains[5] = 65;
 }
+
+/*! @brief Calculates the left arm angles and gains
+ */
+void JuppWalk::calculateLeftArm()
+{
+    calculateArmAngles(m_left_leg_phase, -1, m_left_arm_angles);
+    calculateArmGains(m_left_leg_phase, m_left_arm_gains);
+}
+
+/*! @brief Calculates the right arm angles and gains
+ */
+void JuppWalk::calculateRightArm()
+{
+    calculateArmAngles(m_right_leg_phase, 1, m_right_arm_angles);
+    calculateArmGains(m_right_leg_phase, m_right_arm_gains);
+}
+
+/*! @brief Calculates arm angles based on the given legphase, and armsign
+    @param legphase the phase for the arm
+    @param armsign as with the leg; -1 for left and 1 for right
+ */
+void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& angles)
+{
+    angles[0] = 0.4*sin(legphase + M_PI) + M_PI/2.0;
+    angles[1] = -0.15*armsign;
+    angles[2] = armsign*M_PI/2;
+    angles[3] = 0;
+}
+
+/*! @brief Calculates the arm gains based on the given phase
+    @param legphase the phase for the arm
+    @param angles the parameter to get the new gains
+ */
+void JuppWalk::calculateArmGains(float legphase, vector<float>& angles)
+{
+    angles[0] = 50;
+    angles[1] = 50;
+    angles[2] = 25;
+    angles[3] = 25;
+}
+
+/*! @brief Calculates the gyro-based feedback terms m_gyro_foot_roll and m_gyro_foot_pitch
+    
+    The formula for this function comes from Faber, 2007. "Stochastic Optimization of Bipedal Walking using Gyro Feedback and Phase Resetting"
+ */
+void JuppWalk::calculateGyroFeedback()
+{
+    static vector<float> values;        // [vx, vy, vz]
+    return;     // I have never been able to get anything like this to work in practice; this is no exception!
+    m_data->getGyroValues(values);
+    /*cout << "Gyro values:";
+    for (int i=0; i<values.size(); i++)
+        cout << values[i] << " ";
+    cout << endl;
+    if (fabs(values[0]) > 0.4)
+        m_gyro_foot_roll = 0.2*values[0];
+    else
+        m_gyro_foot_roll = 0;*/
+
+    if (fabs(values[1]) > 0.4)
+        m_gyro_foot_pitch = -0.2*values[1];
+    else
+        m_gyro_foot_pitch = 0;
+}
+
+void JuppWalk::updateActionatorsData()
+{
+    static vector<float> zerovelleg (m_actions->getNumberOfJoints(NUActionatorsData::LLeg), 0);
+    static vector<float> zerovelarm (m_actions->getNumberOfJoints(NUActionatorsData::LArm), 0);
+    m_actions->addJointPositions(NUActionatorsData::LLeg, m_current_time + 40, m_left_leg_angles, zerovelleg, m_left_leg_gains);
+    m_actions->addJointPositions(NUActionatorsData::RLeg, m_current_time + 40, m_right_leg_angles, zerovelleg, m_right_leg_gains);
+    m_actions->addJointPositions(NUActionatorsData::LArm, m_current_time + 40, m_left_arm_angles, zerovelarm, m_left_arm_gains);
+    m_actions->addJointPositions(NUActionatorsData::RArm, m_current_time + 40, m_right_arm_angles, zerovelarm, m_right_arm_gains);
+}
+
 
 
