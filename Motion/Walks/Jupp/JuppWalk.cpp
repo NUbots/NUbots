@@ -158,33 +158,38 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
      Step 3. Tune the swinging phase shift. You only want to swing when the foot is in the air (this will probably be the same as the shortening phase)
      */
     // Shifting (this isn't effectively shift the weight to the other foot)
-    float shift_amp = 0.21 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 0.7*fabs(m_swing_amplitude_roll);
+    float shift_amp = 0.21 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.5*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
     float shift_leg_roll = -legsign*1.0*shift;
     float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
     
     // Shortening
     float short_v = 2.0;    // tune this! It controls the duration of the shortening
-    float short_phase = short_v*(legphase + M_PI/2.0 - 0.5);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
-    float short_amp = 0.3 + 1*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
+    float short_phase = short_v*(legphase + M_PI/2.0 - 0.6);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
+    float short_amp = 0.3 + 1.5*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
+    // if legsign and m_swing_amplitude_roll have the same sign shorten more!
+    if (legsign > 0 && m_swing_amplitude_roll > 0)
+        short_amp += 0.15;
+    else if (legsign < 0 && m_swing_amplitude_roll < 0)
+        short_amp += 0.15;
     float short_leg_length = 0;
     float short_foot_pitch = 0;
     if (fabs(short_phase) < M_PI)
     {
         short_leg_length = -short_amp*0.5*(cos(short_phase) + 1);
-        short_foot_pitch = -m_swing_amplitude_pitch*0.125*(cos(short_phase) + 1);
+        short_foot_pitch = fabs(m_swing_amplitude_pitch)*0.125*(cos(short_phase) + 1);       // this works really well when walking backwards!
     }
     
     // Loading
     float load_v = 2.0;     // tune this! It controls the duration of the loading
-    float load_phase = load_v*NORMALISE(legphase + M_PI/2.0 - M_PI/3.0 - 0.5) - M_PI;
+    float load_phase = load_v*NORMALISE(legphase + M_PI/2.0 - M_PI/short_v - 0.6) - M_PI;
     float load_amp = 0.025 + 0.5*(1 - cos(fabs(m_swing_amplitude_pitch)));
     float load_leg_length = 0;
     if (fabs(load_phase) < M_PI)
         load_leg_length = -load_amp*0.5*(cos(load_phase) + 1);
     
     // Swinging
-    float swing_phase = 2.0*(legphase + M_PI/2.0 - 0.5);          // 2.0 is the swing speed, and -0.15 is the phase shift
+    float swing_phase = 2.0*(legphase + M_PI/2.0 - 0.6);          // 2.0 is the swing speed, and -0.15 is the phase shift
     float swing = 0;
     float b = -(2/(2*M_PI*2.0 - M_PI));                 // makes the reverse of the swing linear
     if (fabs(swing_phase) < M_PI/2.0)
@@ -202,12 +207,13 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // Balance
     float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
-    float balance_foot_pitch = 0.04 + 0.08*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
-    float balance_leg_roll = legsign*-0.03 + m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
+    float balance_foot_pitch = 0.0 + 0.15*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
+    float balance_leg_pitch = -0.00;
+    float balance_leg_roll = legsign*-0.03 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
     // Now we can calculate the leg's state
     float leg_yaw = swing_leg_yaw;
-    float leg_pitch = swing_leg_pitch;
+    float leg_pitch = swing_leg_pitch + balance_leg_pitch;
     float leg_roll = swing_leg_roll + shift_leg_roll + balance_leg_roll;
     float leg_length = short_leg_length + load_leg_length;
     
