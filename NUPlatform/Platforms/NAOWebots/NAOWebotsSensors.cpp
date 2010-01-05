@@ -222,7 +222,7 @@ void NAOWebotsSensors::copyFromAccelerometerAndGyro()
     static const double *buffer;
     buffer = m_accelerometer->getValues();
     for (int i=0; i<numdimensions; i++)
-        accelerometerdata[i] = 100*buffer[i];       // convert from m/s/s to cm/s/s
+        accelerometerdata[i] = -100*buffer[i];       // convert from m/s/s to cm/s/s, and swap sign as it is incorrect in webots
     m_data->setBalanceAccelerometer(m_current_time, accelerometerdata);
     // Copy gyro [gx, gy, gz]
     buffer = m_gyro->getValues();
