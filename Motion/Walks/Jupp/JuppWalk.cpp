@@ -112,6 +112,12 @@ void JuppWalk::calculateGaitPhase()
     static vector<float> leftvalues;
     static vector<float> rightvalues;
     
+    //! @todo TODO: Do these calculations in sensors. Ie determine the weight on the foot
+    static float previousleftsum = 0;
+    static float previouspreviousleftsum = 0;
+    static float previousrightsum = 0;
+    static float previouspreviousrightsum = 0;
+    
     float leftsum = 0;
     float rightsum = 0;
     m_data->getFootSoleValues(NUSensorsData::LeftFoot, leftvalues);
@@ -121,13 +127,20 @@ void JuppWalk::calculateGaitPhase()
     for (int i=0; i<rightvalues.size(); i++)
         rightsum += rightvalues[i];
     
-    //cout << "phase: " << m_gait_phase << " left: " << leftsum << " right: " << rightsum << endl;
-    
-    // there might need to be some stupid logic here because the sensors in the simulator aren't very good!
-    
     m_current_time = nusystem->getTime();
-    m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
+    if (previousleftsum == 0 && previouspreviousleftsum == 0 && leftsum > 20)
+        m_gait_phase = -0.73;
+    else if (previousrightsum == 0 && previouspreviousrightsum == 0 && rightsum > 20)
+        m_gait_phase = 2.38;
+    else
+        m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
+
     m_previous_time = m_current_time;
+    previouspreviousleftsum = previousleftsum;
+    previouspreviousrightsum = previousrightsum;
+    previousleftsum = leftsum;
+    previousrightsum = rightsum;
+    //cout << "phase: " << m_gait_phase << " left: " << leftsum << " right: " << rightsum << endl;
 }
 
 /*! @brief Calculates the angles and gains for the left leg
