@@ -158,7 +158,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
      Step 3. Tune the swinging phase shift. You only want to swing when the foot is in the air (this will probably be the same as the shortening phase)
      */
     // Shifting (this isn't effectively shift the weight to the other foot)
-    float shift_amp = 0.21 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.5*fabs(m_swing_amplitude_roll);
+    float shift_amp = 0.24 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.3*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
     float shift_leg_roll = -legsign*1.0*shift;
     float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
@@ -166,7 +166,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     // Shortening
     float short_v = 2.0;    // tune this! It controls the duration of the shortening
     float short_phase = short_v*(legphase + M_PI/2.0 - 0.6);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
-    float short_amp = 0.3 + 1.5*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
+    float short_amp = 0.3 + 2*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
     // if legsign and m_swing_amplitude_roll have the same sign shorten more!
     if (legsign > 0 && m_swing_amplitude_roll > 0)
         short_amp += 0.15;
@@ -207,18 +207,26 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // Balance
     float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
-    float balance_foot_pitch = 0.0 + 0.15*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
+    float balance_foot_pitch = 0.04 + 0.15*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
     float balance_leg_pitch = -0.00;
     float balance_leg_roll = legsign*-0.03 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
+    // Apply gyro feedback
+    if (fabs(swing_phase) < M_PI/2.0)      // if we are in the swing phase don't apply the foot_gyro_* offsets
+    {
+        m_gyro_foot_pitch = 0;
+        m_gyro_foot_roll = 0;
+        m_gyro_leg_pitch = 0;
+    }
+    
     // Now we can calculate the leg's state
     float leg_yaw = swing_leg_yaw;
-    float leg_pitch = swing_leg_pitch + balance_leg_pitch;
+    float leg_pitch = swing_leg_pitch + balance_leg_pitch + m_gyro_leg_pitch;
     float leg_roll = swing_leg_roll + shift_leg_roll + balance_leg_roll;
     float leg_length = short_leg_length + load_leg_length;
     
     float foot_pitch = swing_foot_pitch + short_foot_pitch + balance_foot_pitch + m_gyro_foot_pitch;
-    float foot_roll = swing_foot_roll + shift_foot_roll + balance_foot_roll + legsign*m_gyro_foot_roll;
+    float foot_roll = swing_foot_roll + shift_foot_roll + balance_foot_roll + m_gyro_foot_roll;
     
     if (legsign > 0)
         m_pattern_debug << m_right_leg_phase << ", " << leg_yaw << ", " << leg_pitch << ", " << leg_roll << ", " << leg_length << ", " << foot_pitch << ", " << foot_roll << endl;
@@ -249,7 +257,7 @@ void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
     gains[0] = 65;
     gains[1] = 65;
-    gains[2] = 65;
+    gains[2] = 100;
     gains[3] = 65;
     gains[4] = 65;
     gains[5] = 65;
@@ -302,21 +310,35 @@ void JuppWalk::calculateArmGains(float legphase, vector<float>& angles)
 void JuppWalk::calculateGyroFeedback()
 {
     static vector<float> values;        // [vx, vy, vz]
-    return;     // I have never been able to get anything like this to work in practice; this is no exception!
     m_data->getGyroValues(values);
-    /*cout << "Gyro values:";
-    for (int i=0; i<values.size(); i++)
-        cout << values[i] << " ";
-    cout << endl;
-    if (fabs(values[0]) > 0.4)
-        m_gyro_foot_roll = 0.2*values[0];
-    else
-        m_gyro_foot_roll = 0;*/
 
-    if (fabs(values[1]) > 0.4)
-        m_gyro_foot_pitch = -0.2*values[1];
+    static const float roll_threshold = 0.50;
+    static const float roll_gain = 0.5;
+    static const float pitch_threshold = 0.10;
+    static const float pitch_gain = 0.2;           
+    if (values[0] > roll_threshold)
+        m_gyro_foot_roll = -roll_gain*(values[0] - roll_threshold);
+    else if (values[0] < -roll_threshold)
+        m_gyro_foot_roll = -roll_gain*(values[0] + roll_threshold);
     else
+        m_gyro_foot_roll = 0;
+
+    
+    if (values[1] > pitch_threshold)
+    {
+        m_gyro_foot_pitch = -pitch_gain*(values[1] - pitch_threshold);
+        m_gyro_leg_pitch = -0.5*pitch_gain*(values[1] - pitch_threshold);
+    }
+    else if (values[1] < -pitch_threshold)
+    {
+        m_gyro_foot_pitch = -pitch_gain*(values[1] + pitch_threshold);
+        m_gyro_leg_pitch = -0.5*pitch_gain*(values[1] + pitch_threshold);
+    }
+    else
+    {
         m_gyro_foot_pitch = 0;
+        m_gyro_leg_pitch = 0;
+    }
 }
 
 void JuppWalk::updateActionatorsData()

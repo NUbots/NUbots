@@ -78,6 +78,7 @@ private:
     // Gyro feedback
     float m_gyro_foot_pitch;
     float m_gyro_foot_roll;
+    float m_gyro_leg_pitch;
     
     // Leg angles
     vector<float> m_left_leg_angles;
