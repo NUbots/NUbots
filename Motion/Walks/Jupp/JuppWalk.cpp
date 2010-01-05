@@ -226,19 +226,19 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     // do the kinematics, and calculate the joint angles
     float knee_pitch = -2*acos(1 + 0.15*leg_length);
     float hip_yaw = leg_yaw;
-    float hip_pitch = leg_pitch - 0.5*knee_pitch*cos(hip_yaw);
     float hip_roll = leg_roll - 0.5*knee_pitch*sin(hip_yaw);
+    float hip_pitch = leg_pitch - 0.5*knee_pitch*cos(hip_yaw);
     
-    float ankle_pitch = -0.5*knee_pitch + (foot_roll - leg_roll)*sin(hip_yaw) + (foot_pitch - leg_pitch)*cos(hip_yaw);
     float ankle_roll = (foot_roll - leg_roll)*cos(hip_yaw) - (foot_pitch - leg_pitch)*sin(hip_yaw);
+    float ankle_pitch = -0.5*knee_pitch + (foot_roll - leg_roll)*sin(hip_yaw) + (foot_pitch - leg_pitch)*cos(hip_yaw);
     
     // now translate to my coordinate system
-    angles[0] = hip_yaw;
+    angles[0] = -hip_roll;
     angles[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
-    angles[2] = -hip_roll;
+    angles[2] = hip_yaw;
     angles[3] = -knee_pitch;
-    angles[4] = -ankle_pitch;
-    angles[5] = -ankle_roll;
+    angles[4] = -ankle_roll;
+    angles[5] = -ankle_pitch;
 }
 
 /*! @brief Calculates the leg gains based on the given phase
@@ -247,7 +247,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    gains[0] = 100;
+    gains[0] = 65;
     gains[1] = 65;
     gains[2] = 65;
     gains[3] = 65;
@@ -277,10 +277,10 @@ void JuppWalk::calculateRightArm()
  */
 void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& angles)
 {
-    angles[0] = 0.4*sin(legphase + M_PI) + M_PI/2.0;
-    angles[1] = -0.15*armsign;
-    angles[2] = armsign*M_PI/2;
-    angles[3] = 0;
+    angles[0] = -0.15*armsign;                          // ShoulderRoll
+    angles[1] = 0.4*sin(legphase + M_PI) + M_PI/2.0;    // ShoulderPitch
+    angles[2] = 0;                                      // ElbowRoll
+    angles[3] = armsign*M_PI/2;                         // ElbowYaw
 }
 
 /*! @brief Calculates the arm gains based on the given phase

@@ -25,30 +25,30 @@
 #include <fstream>
 #include <cctype>       // for tolower()
 
-NUSensorsData::joint_id_t NUSensorsData::HeadYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::HeadPitch = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LShoulderPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::HeadYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::LShoulderRoll = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LElbowYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LShoulderPitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::LElbowRoll = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RShoulderPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LElbowYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RShoulderRoll = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RElbowYaw = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RShoulderPitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RElbowRoll = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LHipYaw = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LHipYawPitch = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RElbowYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::LHipRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipYawPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LHipYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::LKneePitch = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::LAnklePitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::LAnkleRoll = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RHipYaw = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RHipYawPitch = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::LAnklePitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RHipRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipYawPitch = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RHipYaw = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RKneePitch = NUSensorsData::SENSOR_MISSING;
-NUSensorsData::joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
 NUSensorsData::joint_id_t NUSensorsData::RAnkleRoll = NUSensorsData::SENSOR_MISSING;
+NUSensorsData::joint_id_t NUSensorsData::RAnklePitch = NUSensorsData::SENSOR_MISSING;
 
 /*! @brief Default constructor for NUSensorsData
  */

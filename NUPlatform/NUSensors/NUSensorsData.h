@@ -39,30 +39,30 @@ public:
     
     static const int SENSOR_MISSING = -1;
     // joint ids (these are used to index into named sensor_t data)
-    static joint_id_t HeadYaw;
     static joint_id_t HeadPitch;
-    static joint_id_t LShoulderPitch;
+    static joint_id_t HeadYaw;
     static joint_id_t LShoulderRoll;
-    static joint_id_t LElbowYaw;
+    static joint_id_t LShoulderPitch;
     static joint_id_t LElbowRoll;
-    static joint_id_t RShoulderPitch;
+    static joint_id_t LElbowYaw;
     static joint_id_t RShoulderRoll;
-    static joint_id_t RElbowYaw;
+    static joint_id_t RShoulderPitch;
     static joint_id_t RElbowRoll;
-    static joint_id_t LHipYaw;
-    static joint_id_t LHipYawPitch;
-    static joint_id_t LHipPitch;
+    static joint_id_t RElbowYaw;
     static joint_id_t LHipRoll;
+    static joint_id_t LHipPitch;
+    static joint_id_t LHipYawPitch;
+    static joint_id_t LHipYaw;
     static joint_id_t LKneePitch;
-    static joint_id_t LAnklePitch;
     static joint_id_t LAnkleRoll;
-    static joint_id_t RHipYaw;
-    static joint_id_t RHipYawPitch;
-    static joint_id_t RHipPitch;
+    static joint_id_t LAnklePitch;
     static joint_id_t RHipRoll;
+    static joint_id_t RHipPitch;
+    static joint_id_t RHipYawPitch;
+    static joint_id_t RHipYaw;
     static joint_id_t RKneePitch;
-    static joint_id_t RAnklePitch;
     static joint_id_t RAnkleRoll;
+    static joint_id_t RAnklePitch;
     // limb ids
     enum bodypart_id_t
     {
