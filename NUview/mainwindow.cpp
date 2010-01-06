@@ -135,7 +135,7 @@ void MainWindow::createActions()
 
     // First Frame
     firstFrameAction = new QAction(tr("&First Frame"), this);
-    //firstFrameAction->setShortcut(tr("Ctrl+O"));
+    firstFrameAction->setShortcut(tr("Home"));
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString("../diagona/icon/16/138.png")));
 
@@ -150,7 +150,7 @@ void MainWindow::createActions()
 
     // Select Frame
     selectFrameAction = new QAction(tr("&Select Frame..."), this);
-    //selectFrameAction->setShortcut(tr("Ctrl+O"));
+    selectFrameAction->setShortcut(tr("Ctrl+G"));
     selectFrameAction->setStatusTip(tr("Select frame number to go to"));
     selectFrameAction->setIcon(QIcon(QString("../diagona/icon/16/134.png")));
     connect(selectFrameAction, SIGNAL(triggered()), this, SLOT(selectFrame()));
@@ -164,7 +164,7 @@ void MainWindow::createActions()
 
     // Last Frame
     lastFrameAction = new QAction(tr("&Last Frame"), this);
-    //lastFrameAction->setShortcut(tr("Ctrl+O"));
+    lastFrameAction->setShortcut(tr("End"));
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString("../diagona/icon/16/137.png")));
     connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
@@ -278,6 +278,16 @@ void MainWindow::previousFrame()
 
 void MainWindow::selectFrame()
 {
+    //qDebug() << "Select frame... not implemented";
+    int selectedFrameNumber;
+    bool ok;
+    //get frame number to select.
+    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
+    qDebug() << selectedFrameNumber;
+    if (ok && !fileName.isEmpty() && selectedFrameNumber < totalFrameNumber && selectedFrameNumber > 0){
+        currentFrameNumber = selectedFrameNumber;
+        LoadFrame(currentFrameNumber);
+    }
     return;
 }
 
@@ -305,6 +315,8 @@ void MainWindow::LoadFrame(int frameNumber)
     updateSelection();
     QString message = "Frame Loaded:  Number ";
     message.append(QString::number(frameNumber));
+    message.append("/");
+    message.append(QString::number(totalFrameNumber));
     this->statusBar->showMessage(message, 10000);
     return;
 }
@@ -352,11 +364,39 @@ void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
+    //! Undo key event
     if(event->key() == Qt::Key_Z && (event->modifiers() & Qt::ControlModifier))
     {
         if(event->isAutoRepeat() == false)
         {
             virtualRobot.UndoLUT();
+        }
+    }
+
+    //! Last frame key event
+    if(event->key() == Qt::Key_End)
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            lastFrame();
+        }
+    }
+
+    //! First Frame key event
+    if(event->key() == Qt::Key_Home)
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            firstFrame();
+        }
+    }
+
+    //! Select frame key event
+    if(event->key() == Qt::Key_G && (event->modifiers() & Qt::ControlModifier))
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            selectFrame();
         }
     }
 }
