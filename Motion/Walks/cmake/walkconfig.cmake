@@ -37,6 +37,12 @@ OPTION(
         ON
 )
 
+OPTION(
+        USE_WALK_NBWALK
+        "Set to ON to use nbwalk, set to OFF use something else"
+        ON
+)
+
 ############################ walkconfig.h generation
 CONFIGURE_FILE(
 	"${THIS_SRC_DIR}/cmake/walkconfig.in"

@@ -20,20 +20,16 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS  NBWalk.cpp NBWalk.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  JWalk
-           	Jupp
-     		NBWalk
+SET (YOUR_DIRS 
 )
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 

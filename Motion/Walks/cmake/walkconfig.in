@@ -24,8 +24,16 @@
     #else
         #undef USE_JUPPWALK
     #endif
+    #define USE_WALK_NBWALK_${USE_WALK_NBWALK}
+    #ifdef USE_WALK_NBWALK_ON
+        #define USE_NBWALK
+    #else
+        #undef USE_NBWALK
+    #endif
 #else
     #undef USE_JWALK
+    #undef USE_JUPPWALK
+    #undef USE_NBWALK
 #endif
 
 #endif // !WALKCONFIG_H
