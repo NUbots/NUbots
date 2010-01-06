@@ -278,13 +278,13 @@ void MainWindow::previousFrame()
 
 void MainWindow::selectFrame()
 {
-    //qDebug() << "Select frame... not implemented";
+
     int selectedFrameNumber;
     bool ok;
-    //get frame number to select.
+
     selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
     qDebug() << selectedFrameNumber;
-    if (ok && !fileName.isEmpty() && selectedFrameNumber < totalFrameNumber && selectedFrameNumber > 0){
+    if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
         currentFrameNumber = selectedFrameNumber;
         LoadFrame(currentFrameNumber);
     }
