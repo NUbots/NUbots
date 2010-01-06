@@ -1,6 +1,9 @@
-/*! @file NUCamera.h
-    @brief Declaration of a base camera class
-
+/*! @file JWalk.h
+    @brief Declaration of jason's walk class
+ 
+    @class JWalk
+    @brief A module to provide locomotion
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -19,40 +22,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUCAMERA_H
-#define NUCAMERA_H
+#ifndef JWALK_H
+#define JWALK_H
 
-#include "NUPlatform/NUActionators.h"
+#include "Motion/NUWalk.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Tools/Image/NUimage.h"
 
-class NUCamera : public NUActionators
+class JWalk : public NUWalk
 {
 public:
-	enum setting
-	{
-		Brightness,
-		Contrast,
-		Saturation,
-		Hue,
-		RedChroma,
-		BlueChroma,
-		Gain,
-		AutoExposition,
-		AutoWhiteBalance,
-		AutoGain,
-		Exposure,
-		FramesPerSecond,
-		CameraSelect
-	};
-
-    virtual ~NUCamera();
-    virtual NUimage grabNewImage();
-    virtual void setControlSetting(unsigned int settingID, int value);
-    virtual int getControlSetting(unsigned int id);
-    
+    JWalk();
+    ~JWalk();
+protected:
+    void doWalk();
 private:
-    virtual void copyToHardwareCommunications();
+public:
+protected:
+private:
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "Tools/debug.h"
 
 #include <math.h>
+#include <string>
 
 JServo::JServo(const std::string &name) : Servo(name)
 {
@@ -30,7 +31,17 @@ JServo::JServo(const std::string &name) : Servo(name)
     m_target_velocity = 10;
     m_target_position = 0;
     m_target_force = 0;
-    m_target_gain = 10;          // according to webots documentation 10 is default
+    m_target_gain = 10;                 // according to webots documentation 10 is default
+    
+    // There is nothing in the Webots API to make this easy, so Ill have to do it the hard way
+    if (name.compare("HeadYaw") == 0 || name.compare("LShoulderPitch") == 0 || name.compare("RShoulderPitch") == 0 || name.compare("LElbowYaw") == 0 || name.compare("LElbowYaw") == 0)
+        m_max_velocity = 8.25;
+    else if (name.compare("HeadPitch") == 0 || name.compare("LShoulderRoll") == 0 || name.compare("RShoulderRoll") == 0 || name.compare("LElbowRoll") == 0 || name.compare("LElbowRoll") == 0)
+        m_max_velocity = 7.18;
+    else if (name.compare("LHipPitch") == 0 || name.compare("RHipPitch") == 0 || name.compare("LKneePitch") == 0 || name.compare("RKneePitch") == 0 || name.compare("LAnklePitch") == 0 || name.compare("RAnklePitch") == 0)
+        m_max_velocity = 6.39;
+    else
+        m_max_velocity = 4.15;
 }
 
 JServo::~JServo()
@@ -119,4 +130,12 @@ double JServo::getTargetForce() const
 double JServo::getTargetGain() const
 {
     return m_target_gain;
+}
+
+/*! Returns the servo's maximum velocity. 
+ This is important because webots chooses to do nothing instead of getting the motor to move as fast as possible
+ */
+double JServo::getMaxVelocity() const
+{
+    return m_max_velocity;
 }

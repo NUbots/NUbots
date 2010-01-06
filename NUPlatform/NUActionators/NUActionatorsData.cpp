@@ -22,33 +22,33 @@
 #include "NUActionatorsData.h"
 #include "Tools/debug.h"
 
-NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::TorsoRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 
 NUActionatorsData::led_id_t NUActionatorsData::LEar = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::led_id_t NUActionatorsData::REar = NUActionatorsData::ACTIONATOR_MISSING;
@@ -239,37 +239,37 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
         else if (simplejointnames[i].compare("rhipyaw") == 0)
         {
             RHipYaw = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhipyawpitch") == 0)
         {
             RHipYawPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhippitch") == 0)
         {
             RHipPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rhiproll") == 0)
         {
             RHipRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rkneepitch") == 0)
         {
             RKneePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("ranklepitch") == 0)
         {
             RAnklePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].compare("rankleroll") == 0)
         {
             RAnkleRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else 
         {
@@ -478,6 +478,35 @@ void NUActionatorsData::removeCompletedPoints(double currenttime)
 {
     for (int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
+}
+
+/*! @brief Returns the number of joints in the specified body part
+    @param partid the id of the body part
+    @return the number of joints
+ */
+int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
+{
+    if (partid == All)
+        return m_num_joints;
+    else if (partid == Body)
+        return m_num_body_joints;
+    else if (partid == Head)
+        return m_num_head_joints;
+    else if (partid == LArm)
+        return m_num_arm_joints;
+    else if (partid == RArm)
+        return m_num_arm_joints;
+    else if (partid == Torso)
+        return m_num_torso_joints;
+    else if (partid == LLeg)
+        return m_num_leg_joints;
+    else if (partid == RLeg)
+        return m_num_leg_joints;
+    else
+    {
+        debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        return 0;
+    }
 }
 
 /*! @brief Gets the next position control point
@@ -786,7 +815,10 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     else if (partid == RLeg)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        return false;
+    }
         
     if (selectedjoints.size() != positions.size())
     {
@@ -803,8 +835,8 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
             data[2] = gains[i];
             PositionActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
@@ -836,7 +868,10 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     else if (partid == RLeg)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointTorques. UNDEFINED Body part.";
+        return false;
+    }
     
     if (selectedjoints.size() != torques.size())
     {
@@ -852,8 +887,8 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
             data[1] = gains[i];
             TorqueActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /******************************************************************************************************************************************

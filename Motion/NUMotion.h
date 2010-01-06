@@ -25,9 +25,11 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
+#include "motionconfig.h"
 #include "Behaviour/Jobs.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUWalk.h"
 
 class NUMotion
 {
@@ -42,6 +44,15 @@ private:
 public:
 protected:
 private:
+#ifdef USE_HEAD
+    NUHead* m_head;
+#endif
+#ifdef USE_WALK
+    NUWalk* m_walk;
+#endif
+#ifdef USE_KICK
+    NUKick* m_kick;
+#endif
 };
 
 #endif

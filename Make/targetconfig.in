@@ -6,8 +6,8 @@
 
     @author Jason Kulk
  */
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef TARGETCONFIG_H
+#define TARGETCONFIG_H
 
 // define the target robotic platform
 #define TARGET_IS_$ENV{TARGET_ROBOT}            //!< Preprocessor define for determine the target platform. Will be TARGET_IS_NAO, TARGET_IS_NAOWEBOTS, TARGET_IS_CYCLOID, etc

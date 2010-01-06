@@ -22,6 +22,8 @@
 *.*~
 *.o
 
+*motionconfig.h
+*walkconfig.h
 targetconfig.h
 /Tools/debug.h
 *.old*

@@ -41,33 +41,33 @@ public:
     static const int ACTIONATOR_MISSING = -1;
     
     // joints
-    static joint_id_t HeadYaw;
     static joint_id_t HeadPitch;
-    static joint_id_t LShoulderPitch;
+    static joint_id_t HeadYaw;
     static joint_id_t LShoulderRoll;
-    static joint_id_t LElbowYaw;
+    static joint_id_t LShoulderPitch;
     static joint_id_t LElbowRoll;
-    static joint_id_t RShoulderPitch;
+    static joint_id_t LElbowYaw;
     static joint_id_t RShoulderRoll;
-    static joint_id_t RElbowYaw;
+    static joint_id_t RShoulderPitch;
     static joint_id_t RElbowRoll;
-    static joint_id_t TorsoYaw;
-    static joint_id_t TorsoPitch;
+    static joint_id_t RElbowYaw;
     static joint_id_t TorsoRoll;
-    static joint_id_t LHipYaw;
-    static joint_id_t LHipYawPitch;
-    static joint_id_t LHipPitch;
+    static joint_id_t TorsoPitch;
+    static joint_id_t TorsoYaw;
     static joint_id_t LHipRoll;
+    static joint_id_t LHipPitch;
+    static joint_id_t LHipYawPitch;
+    static joint_id_t LHipYaw;
     static joint_id_t LKneePitch;
-    static joint_id_t LAnklePitch;
     static joint_id_t LAnkleRoll;
-    static joint_id_t RHipYaw;
-    static joint_id_t RHipYawPitch;
-    static joint_id_t RHipPitch;
+    static joint_id_t LAnklePitch;
     static joint_id_t RHipRoll;
+    static joint_id_t RHipPitch;
+    static joint_id_t RHipYawPitch;
+    static joint_id_t RHipYaw;
     static joint_id_t RKneePitch;
-    static joint_id_t RAnklePitch;
     static joint_id_t RAnkleRoll;
+    static joint_id_t RAnklePitch;
     // camera settings
     static camera_setting_id_t Resolution;
     static camera_setting_id_t FramesPerSecond;
@@ -113,6 +113,9 @@ public:
     void setAvailableOtherActionators(const vector<string>& actionatornames);
     
     void removeCompletedPoints(double currenttime);
+    
+    // Misc. get methods
+    int getNumberOfJoints(bodypart_id_t partid);
     
     // Get methods for joints
     bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);

@@ -1,9 +1,9 @@
-/*! @file NUCamera.cpp
-    @brief Partial implementation of base camera class
+/*! @file JWalk.cpp
+    @brief Implementation of jwalk class
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,33 +19,24 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUCamera.h"
+#include "JWalk.h"
 
+#include "NUPlatform/NUSystem.h"
+#include "Tools/debug.h"
 
-/*NUCamera::NUCamera()
-{
-}*/
-
-NUCamera::~NUCamera()
+JWalk::JWalk()
 {
 }
 
-NUimage NUCamera::grabNewImage()
+/*! @brief Destructor for motion module
+ */
+JWalk::~JWalk()
 {
+    // nothing needs to be deleted at this level
 }
 
-void NUCamera::setControlSetting(unsigned int settingID, int value)
+void JWalk::doWalk()
 {
 }
-
-int NUCamera::getControlSetting(unsigned int id)
-{
-}
-
-void NUCamera::copyToHardwareCommunications()
-{
-    // implementation in PlatformCamera!
-}
-
 
 

@@ -124,6 +124,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 {
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
+    std::vector< TransitionSegment > segments;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
@@ -160,6 +161,10 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 ScanLine* tempScanLine = vertScanArea->getScanLine(i);
                 int lengthOfLine = tempScanLine->getLength();
                 Vector2<int> startPoint = tempScanLine->getStart();
+                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+                {
+                    segments.push_back((*tempScanLine->getSegment(seg)));
+                }
                 if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
                 {
                     for(int j = 0;  j < lengthOfLine; j++)
@@ -199,8 +204,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
-            // Count Robots
-            //qDebug() << "Vision::countRobots() = " << vision.countRobots(points);
+            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
+
             break;
         default:
             break;

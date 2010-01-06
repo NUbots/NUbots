@@ -266,7 +266,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 3;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
     for (int i = 0; i < bufferSize; i++)
@@ -313,123 +313,72 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 if(currentColour != afterColour)
                 {
                     //! Transition detected: Generate new segment and add to the line
-                    tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
-                    tempLine->addSegement(tempTransition);
 
-                    if (tempLine->getNumberOfSegments() >= 2 &&
-                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getColour()       == ClassIndex::getColourFromIndex(1) && //middle white
-                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getBeforeColour() == ClassIndex::getColourFromIndex(2) && //before green
-                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getAfterColour()  == ClassIndex::getColourFromIndex(2))   //after  green
+                    //Adjust the position:
+
+
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
                     {
-                        TransitionSegment *tempSegment = tempLine->getSegment(tempLine->getNumberOfSegments() - 1);
-                        qDebug() << "@(" << tempSegment->getStartPoint().x << ","<< tempSegment->getStartPoint().y << ")-(" << tempSegment->getEndPoint().x << "," << tempSegment->getEndPoint().y << "): Green-White-Green. |" << tempSegment->getSize() <<"|";
+                            //SHIFTING THE POINTS TO THE START OF BUFFER:
+                        if(direction == ClassifiedSection::DOWN)
+                        {
+                            currentPoint.x = startPoint.x;
+                            currentPoint.y = startPoint.y + j - bufferSize;
+                        }
+                        else if (direction == ClassifiedSection::RIGHT)
+                        {
+                            currentPoint.x = startPoint.x + j - bufferSize;
+                            currentPoint.y = startPoint.y;
+                        }
+                        else if(direction == ClassifiedSection::UP)
+                        {
+                            currentPoint.x = startPoint.x;
+                            currentPoint.y = startPoint.y - j - bufferSize;
+                        }
+                        else if(direction == ClassifiedSection::LEFT)
+                        {
+                            currentPoint.x = startPoint.x - j - bufferSize;
+                            currentPoint.y = startPoint.y;
+                        }
+                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        tempLine->addSegement(tempTransition);
+                        qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
 
                 }
+                if(j == lineLength-1)
+                {
+                    //! End Of Screen detected: Generate new segment and add to the line
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                    {
+                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        tempLine->addSegement(tempTransition);
+
+                        if (tempLine->getNumberOfSegments() >= 2 &&
+                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getColour()       == ClassIndex::getColourFromIndex(1) && //middle white
+                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getBeforeColour() == ClassIndex::getColourFromIndex(2) && //before green
+                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getAfterColour()  == ClassIndex::getColourFromIndex(2))   //after  green
+                        {
+                            TransitionSegment *tempSegment = tempLine->getSegment(tempLine->getNumberOfSegments() - 1);
+                            qDebug() << "@(" << tempSegment->getStartPoint().x << ","<< tempSegment->getStartPoint().y << ")-(" << tempSegment->getEndPoint().x << "," << tempSegment->getEndPoint().y << "): Green-White-Green. |" << tempSegment->getSize() <<"|";
+
+                        //qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+
+                    }
+                    tempStartPoint = currentPoint;
+                    beforeColour = currentColour;
+                    currentColour = afterColour;
+                }
             }
-
-
         }
         //if (tempLine->getNumberOfSegments() > 2)
             //qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
 
     }
     return;
-}
-
-int Vision::countRobots(std::vector<Vector2<int> > &fieldBorders)
-{
-    int robotCount = 0;
-    boost::circular_buffer<int> cb(3);
-    if(!fieldBorders.size()) return robotCount;
-    if (!currentImage || !currentLookupTable)
-    {
-        qDebug() << "currentImage not set or currentLookUpTable not set";
-        return -2;
-    }
-    //   list of pairs of coordinates to denote the end points for a candidate region
-    std::vector<Vector2<int> > candidateRegions;
-    std::vector<Vector2<int> >::const_iterator currentPoint = fieldBorders.begin();
-
-    std::vector<Vector2<int> > tempRegion;
-    Vector2<int> regionStart, regionStop;
-
-    //int x = 0;
-    //int y = 0;
-    int p_x = currentPoint->y; //previous x
-    int p_y = currentPoint->y; //previous y
-    int c_x = 0; //current x
-    int c_y = 0; //current y
-
-
-
-
-
-    //
-    //Trace along the field border looking for Green-White-Green transitions
-    //and marking these regions as candidate robots
-    //
-    for(;currentPoint != fieldBorders.end(); currentPoint++)
-    {
-        c_x = currentPoint->x;
-        c_y = currentPoint->y;
-
-
-        if (p_x != c_x && p_y != c_y)
-        {
-            //
-            //Scan the points in between previous point
-            //and current point using scanSpacing
-            //
-            //int m = (c_y-p_y)/(c_x-p_x);
-            //int b = p_y - m*p_x;
-            //for (x = p_x, y = p_y; x < c_x; x += scanSpacing)
-            //{
-               //y = m*x + b;
-               qDebug() << "(" << c_x << "," << c_y << ")";
-
-               //
-               //A circular buffer must initially fill up to a starting colour.
-               //When the buffer fully becomes the new colour a new region has started
-               //If this new region is white store the start point and continue
-               //until it triggers a different colour. Mark this as the end and store
-               //both points as endpoints for a candidate region.
-               //
-
-               //if ( candidate region found )
-               //{
-               //   robotCount++;
-               //}
-            //}
-        }
-
-
-
-        p_x = c_x;
-        p_y = c_y;
-    }
-
-
-
-    //
-    //Candidate White regions have to be above a threshold width
-    //which will be based upon distance/orientation
-    //
-
-    //
-    //Candidate white region also has to be less than a threshold
-    //width which will be based upondistance/orientation
-    //
-
-    //
-    //Determine if candidate region is a line marking and reject region
-    //
-
-
-    return robotCount;
 }
 
 bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)

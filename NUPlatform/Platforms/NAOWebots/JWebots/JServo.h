@@ -48,12 +48,16 @@ public:
     double getTargetPosition() const;
     double getTargetForce() const;
     double getTargetGain() const;
+    
+    double getMaxVelocity() const;
 private:
     double m_target_acceleration;
     double m_target_velocity;
     double m_target_position;
     double m_target_force;
     double m_target_gain;
+    
+    double m_max_velocity;
 };
 
 #endif
