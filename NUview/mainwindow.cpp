@@ -283,7 +283,7 @@ void MainWindow::selectFrame()
     bool ok;
 
     selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
-    qDebug() << selectedFrameNumber;
+
     if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
         currentFrameNumber = selectedFrameNumber;
         LoadFrame(currentFrameNumber);
@@ -344,6 +344,13 @@ void MainWindow::SelectColourAtPixel(int x, int y)
     if(virtualRobot.imageAvailable())
     {
         pixels::Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
+
+        QString message = "(";
+        message.append(QString::number(x));
+        message.append(",");
+        message.append(QString::number(y));
+        message.append(")");
+        this->statusBar->showMessage(message, 10000);
         classification->setColour(tempPixel,ClassificationWidget::YCbCr);
     }
 }

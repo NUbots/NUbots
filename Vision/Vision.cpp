@@ -342,17 +342,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         }
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
-
-                        /*if (tempLine->getNumberOfSegments() >= 2 &&
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getColour()       == ClassIndex::getColourFromIndex(1) && //middle white
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getBeforeColour() == ClassIndex::getColourFromIndex(2) && //before green
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getAfterColour()  == ClassIndex::getColourFromIndex(2))   //after  green
-                        {
-                            TransitionSegment *tempSegment = tempLine->getSegment(tempLine->getNumberOfSegments() - 1);
-                            qDebug() << "@(" << tempSegment->getStartPoint().x << ","<< tempSegment->getStartPoint().y << ")-(" << tempSegment->getEndPoint().x << "," << tempSegment->getEndPoint().y << "): Green-White-Green. |" << tempSegment->getSize() <<"|";
-                        }*/
-
-                        //qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
@@ -366,17 +355,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     {
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
-
-                        /*if (tempLine->getNumberOfSegments() >= 2 &&
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getColour()       == ClassIndex::getColourFromIndex(1) && //middle white
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getBeforeColour() == ClassIndex::getColourFromIndex(2) && //before green
-                            tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getAfterColour()  == ClassIndex::getColourFromIndex(2))   //after  green
-                        {
-                            TransitionSegment *tempSegment = tempLine->getSegment(tempLine->getNumberOfSegments() - 1);
-                            qDebug() << "@(" << tempSegment->getStartPoint().x << ","<< tempSegment->getStartPoint().y << ")-(" << tempSegment->getEndPoint().x << "," << tempSegment->getEndPoint().y << "): Green-White-Green. |" << tempSegment->getSize() <<"|";
-                        }*/
-                        //qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
-
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
@@ -384,8 +362,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 }
             }
         }
-        //if (tempLine->getNumberOfSegments() > 2)
-            //qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
 
     }
     return;
