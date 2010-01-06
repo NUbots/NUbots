@@ -200,7 +200,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
             // Count Robots
-            qDebug() << "Vision::countRobots() = " << vision.countRobots(points);
+            //qDebug() << "Vision::countRobots() = " << vision.countRobots(points);
             break;
         default:
             break;

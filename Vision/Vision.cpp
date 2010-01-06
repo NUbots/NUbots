@@ -264,7 +264,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     Vector2<int> tempEndPoint;
     unsigned char beforeColour = 0; //!< Colour Before the segment
     unsigned char afterColour = 0;  //!< Colour in the next Segment
-    unsigned char currentColour = 0; //!< colour in the current segment
+    unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
     int bufferSize = 3;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
@@ -307,7 +307,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
             }
 
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
-            colourBuff.push_back(currentColour);
+            colourBuff.push_back(afterColour);
             if(checkIfBufferSame(colourBuff))
             {
                 if(currentColour != afterColour)
@@ -315,16 +315,27 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     //! Transition detected: Generate new segment and add to the line
                     tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                     tempLine->addSegement(tempTransition);
+
+                    if (tempLine->getNumberOfSegments() >= 2 &&
+                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getColour()       == ClassIndex::getColourFromIndex(1) && //middle white
+                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getBeforeColour() == ClassIndex::getColourFromIndex(2) && //before green
+                        tempLine->getSegment(tempLine->getNumberOfSegments() - 1)->getAfterColour()  == ClassIndex::getColourFromIndex(2))   //after  green
+                    {
+                        TransitionSegment *tempSegment = tempLine->getSegment(tempLine->getNumberOfSegments() - 1);
+                        qDebug() << "@(" << tempSegment->getStartPoint().x << ","<< tempSegment->getStartPoint().y << ")-(" << tempSegment->getEndPoint().x << "," << tempSegment->getEndPoint().y << "): Green-White-Green. |" << tempSegment->getSize() <<"|";
+                    }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
-                    qDebug() << "Found "<<ClassIndex::getColourNameFromIndex(currentColour) << " segment.";
+
                 }
             }
 
 
         }
-        qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
+        //if (tempLine->getNumberOfSegments() > 2)
+            //qDebug() << tempLine->getNumberOfSegments() <<" number of segments on line "<< i;
+
     }
     return;
 }
