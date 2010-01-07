@@ -356,12 +356,12 @@ void JuppWalk::calculateGyroFeedback()
 
 void JuppWalk::updateActionatorsData()
 {
-    static vector<float> zerovelleg (m_actions->getNumberOfJoints(NUActionatorsData::LLeg), 0);
-    static vector<float> zerovelarm (m_actions->getNumberOfJoints(NUActionatorsData::LArm), 0);
-    m_actions->addJointPositions(NUActionatorsData::LLeg, m_current_time + 40, m_left_leg_angles, zerovelleg, m_left_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::RLeg, m_current_time + 40, m_right_leg_angles, zerovelleg, m_right_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::LArm, m_current_time + 40, m_left_arm_angles, zerovelarm, m_left_arm_gains);
-    m_actions->addJointPositions(NUActionatorsData::RArm, m_current_time + 40, m_right_arm_angles, zerovelarm, m_right_arm_gains);
+    static vector<float> zerovelleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+    static vector<float> zerovelarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + 40, m_left_leg_angles, zerovelleg, m_left_leg_gains);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + 40, m_right_leg_angles, zerovelleg, m_right_leg_gains);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + 40, m_left_arm_angles, zerovelarm, m_left_arm_gains);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + 40, m_right_arm_angles, zerovelarm, m_right_arm_gains);
 }
 
 

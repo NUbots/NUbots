@@ -89,17 +89,17 @@ public:
     static led_id_t Chest;
     static led_id_t LFoot;
     static led_id_t RFoot;
-    
+    // limb ids
     enum bodypart_id_t
     {
-        Head,
-        LArm,
-        RArm,
-        Torso,
-        LLeg,
-        RLeg,
-        Body,
-        All
+        HeadJoints,
+        LeftArmJoints,
+        RightArmJoints,
+        TorsoJoints,
+        LeftLegJoints,
+        RightLegJoints,
+        BodyJoints,
+        AllJoints
     };
 public:
     NUActionatorsData();

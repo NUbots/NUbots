@@ -72,6 +72,7 @@ public:
         TorsoJoints,
         LeftLegJoints,
         RightLegJoints,
+        BodyJoints,
         AllJoints
     };
     // foot ids
@@ -103,6 +104,7 @@ public:
     bool getJointTemperature(joint_id_t jointid, float& temperature);
     
     // Get methods for a limb of joints (the limb can also be body and all)
+    int getNumberOfJoints(bodypart_id_t partid);
     bool getJointPositions(bodypart_id_t bodypart, vector<float>& positions);
     bool getJointVelocities(bodypart_id_t bodypart, vector<float>& velocities);
     bool getJointAccelerations(bodypart_id_t bodypart, vector<float>& accelerations);
@@ -202,6 +204,14 @@ private:
     vector<joint_id_t> m_torso_ids;             //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each torso joint
     vector<joint_id_t> m_lleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each left leg joint
     vector<joint_id_t> m_rleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each right leg joint
+    vector<joint_id_t> m_body_ids;
+    vector<joint_id_t> m_all_joint_ids;
+    int m_num_head_joints;
+    int m_num_arm_joints;
+    int m_num_torso_joints;
+    int m_num_leg_joints;
+    int m_num_body_joints;
+    int m_num_joints;
 };  
 
 #endif
