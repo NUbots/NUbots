@@ -304,13 +304,13 @@ namespace WP {
      NON_WALKING_GAIT};
     
     static const float WEBOTS_STEP_CONFIG[LEN_STEP_CONFIG] = 
-    {0.3f, // step duration
+    {0.4f, // step duration
     0.2f,  // fraction in double support
-    15.0f,  // stepHeight
+    25.0f,  // stepHeight
     0.0f,  // step lift
-    150.0f,  // max x speed
+    400.0f,  // max x speed
     -60.0f,  // max x speed
-    100.0f,  // max y speed
+    200.0f,  // max y speed
     0.5f,  // max theta speed()
     50.0f,  // max x acc
     50.0f,  // max y acc
@@ -320,8 +320,8 @@ namespace WP {
     static const float WEBOTS_ZMP_CONFIG[LEN_ZMP_CONFIG] = 
     {0.0f,  // footCenterLocX
     0.4f,  // zmp static percentage
-    60.0f,  // left zmp offset
-    60.0f,  // right zmp offset
+    120.0f,  // left zmp offset
+    120.0f,  // right zmp offset
     0.01f,  // strafe zmp offset (no units)
     6.6f};  // turn zmp off    ""
     static const float WEBOTS_HACK_CONFIG[LEN_HACK_CONFIG] = 

@@ -290,9 +290,9 @@ void NBWalk::updateNBSensors()
     m_data->getGyroValues(gyrovalues);
     
     // it is clear that the walk engine is very sensitive to a good measurement for orientation
-    anglex_buffer.push_front(atan2(-accelvalues[1],-accelvalues[2]));        // angleX is roll for NB.
-    angley_buffer.push_front(atan2(accelvalues[0],-accelvalues[2]));       // angleY is the pitch for NB. I think positive is forwards      
-    if (anglex_buffer.size() > 5)
+    /*anglex_buffer.push_front(atan2(-accelvalues[1],-accelvalues[2]));        // angleX is roll for NB. Right is positive
+    angley_buffer.push_front(atan2(accelvalues[0],-accelvalues[2]));         // angleY is the pitch for NB. Forwards is positive
+    if (anglex_buffer.size() > 2)
     {
         anglex_buffer.pop_back();
         angley_buffer.pop_back();
@@ -302,20 +302,20 @@ void NBWalk::updateNBSensors()
     for ( it=anglex_buffer.begin() ; it != anglex_buffer.end(); it++ )
         xsum += *it;
     for ( it=angley_buffer.begin() ; it != angley_buffer.end(); it++ )
-        ysum += *it;
-    float angleX = xsum/anglex_buffer.size();
-    float angleY = ysum/angley_buffer.size();
-
+        ysum += *it;*/
+    float angleX = atan2(-accelvalues[1],-accelvalues[2]);//xsum/anglex_buffer.size();
+    float angleY = atan2(accelvalues[0],-accelvalues[2]);//ysum/angley_buffer.size();
+    
     m_data->getFootSoleValues(NUSensorsData::AllFeet, footvalues);
     m_data->getButtonValues(NUSensorsData::MainButton, buttonvalues);
     
     nb_sensors->setMotionSensors(FSR(footvalues[0], footvalues[1], footvalues[2], footvalues[3]),
                                  FSR(footvalues[4], footvalues[5], footvalues[6], footvalues[7]),
                                  0,                                                             // no button in webots
-                                 Inertial(accelvalues[0], accelvalues[1], accelvalues[2],
-                                          gyrovalues[0], gyrovalues[1], angleX, angleY),                  // no angleX and angleY in webots. These measurements are important to NB's walk.
-                                 Inertial(accelvalues[0], accelvalues[1], accelvalues[2],
-                                          gyrovalues[0], gyrovalues[1], angleX, angleY));
+                                 Inertial(-accelvalues[0]/100.0, -accelvalues[1]/100.0, -accelvalues[2]/100.0,
+                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY),
+                                 Inertial(-accelvalues[0]/100.0, -accelvalues[1]/100.0, -accelvalues[2]/100.0,
+                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY));
     
     nb_sensors->setMotionBodyAngles(nb_sensors->getBodyAngles());
 }
@@ -339,7 +339,7 @@ void NBWalk::nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjo
     nbjoints[9] = nujoints[13];     // LKneePitch
     nbjoints[10] = nujoints[15];    // LAnklePitch
     nbjoints[11] = nujoints[14];    // LAnkleRoll
-    nbjoints[12] = nujoints[18];    // LHipYawPitch
+    nbjoints[12] = nujoints[18];    // RHipYawPitch
     nbjoints[13] = nujoints[16];    // RHipRoll
     nbjoints[14] = nujoints[17];    // RHipPitch
     nbjoints[15] = nujoints[19];    // RKneePitch
@@ -353,9 +353,11 @@ void NBWalk::nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjo
 
 void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints)
 {
-    // NB order: 0.HeadYaw, 1.HeadPitch, 2.LShoulderPitch, 3.LShoulderRoll, 4.LElbowYaw, 5.LElbowRoll, 6.LHipYawPitch, 7.LHipRoll, 8.LHipPitch, 9.LKneePitch, 10.LAnklePitch, 11.LAnkleRoll, 12.LHipYawPitch, 13.RHipRoll, 14.RHipPitch, 15.RKneePitch, 16.RAnklePitch, 17.RAnkleRoll, 18.RShoulderPitch, 19.RShoulderRoll, 20.RElbowYaw, 21.RElbowRoll 
+    // NB order: 0.HeadYaw, 1.HeadPitch, 2.LShoulderPitch, 3.LShoulderRoll, 4.LElbowYaw, 5.LElbowRoll, 6.LHipYawPitch, 7.LHipRoll, 8.LHipPitch, 9.LKneePitch, 10.LAnklePitch, 11.LAnkleRoll, 12.RHipYawPitch, 13.RHipRoll, 14.RHipPitch, 15.RKneePitch, 16.RAnklePitch, 17.RAnkleRoll, 18.RShoulderPitch, 19.RShoulderRoll, 20.RElbowYaw, 21.RElbowRoll 
     // NU order: 0.HeadPitch, 1.HeadYaw, 2.LShoulderRoll, 3.LShoulderPitch, 4.LElbowRoll, 5.LElbowYaw, 6.RShoulderRoll, 7.RShoulderPitch, 8.RElbowRoll, 9.RElbowYaw, 10.LHipRoll, 11.LHipPitch, 12.LHipYawPitch, 13.LKneePitch, 14.LAnkleRoll, 15.LAnklePitch, 16.RHipRoll, 17.RHipPitch, 18.RHipYawPitch, 19.RKneePitch, 20.RAnkleRoll, 21.RAnklePitch
     // Clearly the order is mostly different, so there is only one way to do this!
+    if (nbjoints.size() < 22 || nujoints.size() < 22)
+        return;
     nujoints[0] = nbjoints[1];      // HeadPitch
     nujoints[1] = nbjoints[0];      // HeadYaw
     nujoints[2] = nbjoints[3];      // LShoulderRoll
@@ -374,7 +376,7 @@ void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujo
     nujoints[15] = nbjoints[10];    // LAnklePitch
     nujoints[16] = nbjoints[13];    // RHipRoll
     nujoints[17] = nbjoints[14];    // RHipPitch
-    nujoints[18] = nbjoints[7];     // RHipYawPitch
+    nujoints[18] = nbjoints[12];     // RHipYawPitch
     nujoints[19] = nbjoints[15];    // RKneePitch
     nujoints[20] = nbjoints[17];    // RAnkleRoll
     nujoints[21] = nbjoints[16];    // RAnklePitch
