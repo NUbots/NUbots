@@ -20,29 +20,17 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NBWalk.cpp NBWalk.h
-		BaseFreezeCommand.cpp BaseFreezeCommand.h
-		BodyJointCommand.cpp BodyJointCommand.h
-		NullProvider.cpp NullProvider.h
-		NullBodyProvider.h
-		WalkProvider.cpp WalkProvider.h
-		Step.cpp Step.h
-		StepGenerator.cpp StepGenerator.h
-		Gait.cpp Gait.h
-		AbstractGait.cpp AbstractGait.h
-		MetaGait.cpp MetaGait.h
-	        WalkingLeg.cpp WalkingLeg.h
-	    	WalkingArm.cpp WalkingArm.h
-		PreviewController.cpp PreviewController.h
-		Observer.cpp Observer.h
-		SensorAngles.cpp SensorAngles.h
-		SpringSensor.cpp SpringSensor.h
-		ZmpEKF.cpp ZmpEKF.h
-		ZmpAccEKF.cpp ZmpAccEKF.h
+SET (YOUR_SRCS  COMKinematics.cpp
+		CoordFrame3D.cpp
+		CoordFrame4D
+		InverseKinematics.cpp
+		NBMath.cpp
+		NBMatrixMath.cpp
+		Sensors.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS NBInclude
+SET (YOUR_DIRS
 )
 ####################################################################################
 

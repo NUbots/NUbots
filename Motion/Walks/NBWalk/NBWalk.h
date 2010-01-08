@@ -11,6 +11,9 @@
     of this walk engine was written by them. The header of each file will indicate the author of that
     file, I will mark files I needed to modify.
  
+    I am integrating the engine at the level of NB's MotionSwitchboard, that is this class will share
+    much of its code with the MotionSwitchboard. However, there will be no mention of head or script providers.
+ 
     @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
@@ -36,6 +39,11 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
+#include "MotionProvider.h"
+#include "WalkProvider.h"
+#include "NullBodyProvider.h"
+
+#include <vector>
 #include <fstream>
 using namespace std;
 
@@ -47,6 +55,17 @@ public:
 protected:
     void doWalk();
 private:
+    void sendWalkCommand();
+    void preProcess();
+    void processJoints();
+    void processStiffness();
+    bool postProcess();
+    void swapBodyProvider();    
+    
+    void updateNBSensors();
+    void nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints);
+    void nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints);
+    void updateActionatorsData();
     
 public:
 protected:
@@ -54,6 +73,30 @@ private:
     
     // Pattern generation debugging
     ofstream m_pattern_debug;
+    
+    // The following variables are taken straight from NB's MotionSwitchboard.
+    boost::shared_ptr<Sensors> nb_sensors;
+    WalkProvider walkProvider;
+    NullBodyProvider nullBodyProvider;
+    
+	MotionProvider * curProvider;
+	MotionProvider * nextProvider;
+    
+	MotionProvider * curHeadProvider;
+	MotionProvider * nextHeadProvider;
+    
+    std::vector <float> nextJoints;
+    std::vector <float> nextStiffnesses;
+    
+	mutable bool newJoints; // Way to track if we ever use the same joints twice
+    
+    bool readyToSend;
+    
+    mutable pthread_mutex_t next_provider_mutex;
+    mutable pthread_mutex_t next_joints_mutex;
+    mutable pthread_mutex_t stiffness_mutex;
+    
+    bool noWalkTransitionCommand;
 };
 
 #endif
