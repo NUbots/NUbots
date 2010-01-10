@@ -30,10 +30,17 @@
     #else
         #undef USE_NBWALK
     #endif
+    #define USE_WALK_VSCWALK_${USE_WALK_VSCWALK}
+    #ifdef USE_WALK_VSCWALK_ON
+        #define USE_VSCWALK
+    #else
+        #undef USE_VSCWALK
+    #endif
 #else
     #undef USE_JWALK
     #undef USE_JUPPWALK
     #undef USE_NBWALK
+    #undef USE_VSCWALK
 #endif
 
 #endif // !WALKCONFIG_H

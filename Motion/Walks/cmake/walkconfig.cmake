@@ -28,7 +28,7 @@ OPTION(
 OPTION(
         USE_WALK_JWALK
         "Set to ON to use jwalk, set to OFF use something else"
-        ON
+        OFF
 )
 
 OPTION(
@@ -40,7 +40,13 @@ OPTION(
 OPTION(
         USE_WALK_NBWALK
         "Set to ON to use nbwalk, set to OFF use something else"
-        ON
+        OFF
+)
+
+OPTION(
+        USE_WALK_VSCWALK
+        "Set to ON to use vscwalk, set to OFF use something else"
+        OFF
 )
 
 ############################ walkconfig.h generation
