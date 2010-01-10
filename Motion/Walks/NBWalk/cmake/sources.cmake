@@ -20,20 +20,34 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS  NBWalk.cpp NBWalk.h
+		BaseFreezeCommand.cpp BaseFreezeCommand.h
+		BodyJointCommand.cpp BodyJointCommand.h
+		NullProvider.cpp NullProvider.h
+		NullBodyProvider.h
+		WalkProvider.cpp WalkProvider.h
+		Step.cpp Step.h
+		StepGenerator.cpp StepGenerator.h
+		Gait.cpp Gait.h
+		AbstractGait.cpp AbstractGait.h
+		MetaGait.cpp MetaGait.h
+	        WalkingLeg.cpp WalkingLeg.h
+	    	WalkingArm.cpp WalkingArm.h
+		PreviewController.cpp PreviewController.h
+		Observer.cpp Observer.h
+		SensorAngles.cpp SensorAngles.h
+		SpringSensor.cpp SpringSensor.h
+		ZmpEKF.cpp ZmpEKF.h
+		ZmpAccEKF.cpp ZmpAccEKF.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  JWalk
-           	Jupp
-     		NBWalk
+SET (YOUR_DIRS NBInclude
 )
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 

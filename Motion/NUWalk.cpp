@@ -27,6 +27,9 @@
 #ifdef USE_JUPPWALK
     #include "Walks/Jupp/JuppWalk.h"
 #endif
+#ifdef USE_NBWALK
+    #include "Walks/NBWalk/NBWalk.h"
+#endif
 
 #include "NUPlatform/NUSystem.h"
 #include "Tools/debug.h"
@@ -38,8 +41,13 @@ NUWalk* NUWalk::getWalkEngine()
 #else
     #ifdef USE_JUPPWALK
         return new JuppWalk();
+    #else
+        #ifdef USE_NBWALK
+            return new NBWalk();
+        #endif
     #endif
 #endif
+    return NULL;
 }
 
 /*! @brief Destructor for motion module

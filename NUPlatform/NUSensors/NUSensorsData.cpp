@@ -198,6 +198,35 @@ bool NUSensorsData::getJointTemperature(joint_id_t jointid, float& temperature)
     return getJointData(JointTemperatures, jointid, temperature);
 }
 
+/*! @brief Returns the number of joints in the specified body part
+ @param partid the id of the body part
+ @return the number of joints
+ */
+int NUSensorsData::getNumberOfJoints(bodypart_id_t partid)
+{
+    if (partid == AllJoints)
+        return m_num_joints;
+    else if (partid == BodyJoints)
+        return m_num_body_joints;
+    else if (partid == HeadJoints)
+        return m_num_head_joints;
+    else if (partid == LeftArmJoints)
+        return m_num_arm_joints;
+    else if (partid == RightArmJoints)
+        return m_num_arm_joints;
+    else if (partid == TorsoJoints)
+        return m_num_torso_joints;
+    else if (partid == LeftLegJoints)
+        return m_num_leg_joints;
+    else if (partid == RightLegJoints)
+        return m_num_leg_joints;
+    else
+    {
+        debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
+        return 0;
+    }
+}
+
 /*! @brief Gets the requested joint positions in a given body part. If the get is successful true is returned
  otherwise false is returned, and the input variable is left unchanged.
  @param bodypart the id of the body part to want the data for
@@ -296,18 +325,43 @@ bool NUSensorsData::getJointData(sensor_t* p_sensor, joint_id_t jointid, float& 
 
 /* The grunt work for getting joint vector data.
     @param p_sensor a pointer to the sensor from which we are going to get the vector of data from
-    @param bodypartid the id of the body part to get the vector of data
+    @param partid the id of the body part to get the vector of data
     @param data the variable that will be updated to have the vector of data
  */
-bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data)
+bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vector<float>& data)
 {
-    switch (bodypartid)
-    {
-        case AllJoints:
-            data = p_sensor->Data;
-            break;
-        default:
-            return false;                   //!@todo TODO: implement other body parts!
+    if (partid == AllJoints)
+    {   // if we want all joints then it is easy
+        data = p_sensor->Data;
+        return true;
+    }
+    else 
+    {   // if we want a subset, then its harder; use the ids lists to make a subarray
+        static vector<joint_id_t> selectedjoints;
+        if (partid == BodyJoints)
+            selectedjoints = m_body_ids;
+        else if (partid == HeadJoints)
+            selectedjoints = m_head_ids;
+        else if (partid == LeftArmJoints)
+            selectedjoints = m_larm_ids;
+        else if (partid == RightArmJoints)
+            selectedjoints = m_rarm_ids;
+        else if (partid == TorsoJoints)
+            selectedjoints = m_torso_ids;
+        else if (partid == LeftLegJoints)
+            selectedjoints = m_lleg_ids;
+        else if (partid == RightLegJoints)
+            selectedjoints = m_rleg_ids;
+        else
+        {
+            debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
+            return false;
+        }
+        
+        data.clear();
+        for (int i=0; i<selectedjoints.size(); i++)
+            data.push_back(p_sensor->Data[i]);
+        return true;
     }
     return true;
 }
@@ -634,6 +688,23 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
             m_lleg_ids.push_back(i);
         }
     }
+    // add the arms, torso and legs to the body_ids
+    m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_rarm_ids.begin(), m_rarm_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_torso_ids.begin(), m_torso_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_lleg_ids.begin(), m_lleg_ids.end());
+    m_body_ids.insert(m_body_ids.end(), m_rleg_ids.begin(), m_rleg_ids.end());
+    // add the head and the body_ids to the all_joint_ids
+    m_all_joint_ids.insert(m_all_joint_ids.end(), m_head_ids.begin(), m_head_ids.end());
+    m_all_joint_ids.insert(m_all_joint_ids.end(), m_body_ids.begin(), m_body_ids.end());
+    
+    // set total numbers in each limb
+    m_num_head_joints = m_head_ids.size();
+    m_num_arm_joints = m_larm_ids.size();
+    m_num_torso_joints = m_torso_ids.size();
+    m_num_leg_joints = m_lleg_ids.size();
+    m_num_body_joints = m_body_ids.size();
+    m_num_joints = m_all_joint_ids.size();
 }
 
 /*! @brief Sets the joint positions to the given values

@@ -486,25 +486,25 @@ void NUActionatorsData::removeCompletedPoints(double currenttime)
  */
 int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
 {
-    if (partid == All)
+    if (partid == AllJoints)
         return m_num_joints;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         return m_num_body_joints;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         return m_num_head_joints;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         return m_num_arm_joints;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         return m_num_arm_joints;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         return m_num_torso_joints;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         return m_num_leg_joints;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         return m_num_leg_joints;
     else
     {
-        debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        debug << "NUActionatorsData::getNumberOfJoints. UNDEFINED Body part.";
         return 0;
     }
 }
@@ -798,21 +798,21 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     if (partid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
         return false;
     
-    if (partid == All)
+    if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         selectedjoints = m_body_ids;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         selectedjoints = m_head_ids;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         selectedjoints = m_larm_ids;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         selectedjoints = m_rleg_ids;
     else
     {
@@ -851,21 +851,21 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     if (partid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
         return false;
     
-    if (partid == All)
+    if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         selectedjoints = m_body_ids;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         selectedjoints = m_head_ids;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         selectedjoints = m_larm_ids;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         selectedjoints = m_rleg_ids;
     else
     {
