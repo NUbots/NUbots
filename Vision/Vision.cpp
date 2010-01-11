@@ -9,6 +9,7 @@
 #include "ClassificationColours.h"
 #include <QDebug>
 #include <boost/circular_buffer.hpp>
+#include <queue>
 
 Vision::Vision()
 {
@@ -126,8 +127,6 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
     }
     return interpolatedBorders;
 }
-
-
 
 ClassifiedSection* Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
@@ -251,7 +250,6 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     return scanArea;
 }
 
-
 void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 {
     int direction = scanArea->getDirection();
@@ -365,6 +363,97 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
     }
     return;
+}
+
+void Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
+{
+
+    if (!segments.empty())
+    {
+
+        std::queue<int> qUnprocessed;
+        unsigned int rawSegsLeft = segments.size();
+        int nextRawSeg = 0;
+        bool isSegUsed [segments.size()];
+        for (unsigned int i = 0; i < segments.size(); i++)
+        {
+            //may have non-robot colour segments, so pre-mark them as used
+            qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
+
+            /*{
+                rawSegsLeft++;*/
+                isSegUsed[i] = false;
+            /*}
+            else
+            {
+                isSegUsed[i] = true;
+            }*/
+
+        }
+        qDebug() << "rawSegsLeft: " << rawSegsLeft;
+        while(rawSegsLeft)
+        {
+
+            //Roll through and find first unused segment
+            nextRawSeg = 0;
+
+            while(isSegUsed[nextRawSeg] && nextRawSeg < segments.size()) nextRawSeg++;
+            //Prime unprocessed segment queue to build next candidate
+            qUnprocessed.push(nextRawSeg);
+            //take away from pool of raw segs
+            isSegUsed[nextRawSeg] = true;
+            rawSegsLeft--;
+
+            //Build candidate
+            while (!qUnprocessed.empty())
+            {
+                unsigned int thisSeg;
+                thisSeg = qUnprocessed.front();
+                qUnprocessed.pop();
+
+                //if there is a seg above AND 'close enough', then qUnprocessed->push()
+                if ( thisSeg > 0 &&
+                     segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg-1).getStartPoint().x &&
+                     segments.at(thisSeg-1).getEndPoint().y - segments.at(thisSeg).getStartPoint().y < VERT_JOIN_LIMIT &&
+                     !isSegUsed[thisSeg-1])
+                {
+                    //qUnprocessed.push(thisSeg-1);
+                    //take away from pool of raw segs
+                    //isSegUsed[thisSeg-1] = true;
+                    //rawSegsLeft--;
+                }
+                //if there is a seg below AND 'close enough', then qUnprocessed->push()
+                if ( thisSeg+1 < segments.size() &&
+                     segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg+1).getStartPoint().x &&
+                     segments.at(thisSeg).getEndPoint().y - segments.at(thisSeg+1).getStartPoint().y < VERT_JOIN_LIMIT &&
+                     !isSegUsed[thisSeg+1])
+                {
+                    //qUnprocessed.push(thisSeg+1);
+                    //take away from pool of raw segs
+                    //isSegUsed[thisSeg+1] = true;
+                    //rawSegsLeft--;
+                }
+                //if there is a seg overlapping on the right AND 'close enough', then qUnprocessed->push()
+                //if there is a seg overlapping on the left AND 'close enough', then qUnprocessed->push()
+
+                //add thisSeg to CandidateVector
+            }//while (!qUnprocessed->empty())
+
+            qDebug() << "Candidate finished";
+            //get new RobotCandidate( std::vector< TransitionSegment > segments)
+            //std::vector< RobotCandidate >* candidateRobots->push_back(newCandidate)
+
+        }//while(rawSegsLeft)
+
+    }//if (!segments.empty())
+
+}
+
+bool Vision::isRobotColour(unsigned char colour)
+{
+    return ( colour == ClassIndex::white ||
+             colour == ClassIndex::red   ||
+             colour == ClassIndex::shadow_blue);
 }
 
 bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)

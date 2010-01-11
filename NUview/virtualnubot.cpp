@@ -206,6 +206,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
             emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
 
+            vision.classifyRobotCandidates(segments);
+
             break;
         default:
             break;

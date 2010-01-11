@@ -21,6 +21,10 @@ class NUimage;
 class Vision
 {
     public:
+
+    const static unsigned int VERT_JOIN_LIMIT = 3;
+    const static unsigned int HORZ_JOIN_LIMIT = 2;
+
     //! Default constructor.
     Vision();
     //! Destructor.
@@ -44,11 +48,17 @@ class Vision
     inline unsigned char classifyPixel(int x, int y);
 
     /*!
-      @brief Identifies number of robots in Field of View (FoV)
-      @param fieldBorders list of (x,y) cartesian points representing points along the field border
-      @return Returns the integer number of robots identified and negative when an error occurred
-      */
-    int countRobots(std::vector<Vector2<int> > &fieldBorders);
+      @brief Joins segments to create a joined segment clusters that represent candidate robots
+      @param segList The segList is a vector of TransitionSegments after field lines have been rejected
+    */
+    void classifyRobotCandidates(std::vector< TransitionSegment > segments);
+
+    /*!
+      @brief Returns true when the colour passed in is a valid robot colour
+      @param colour The colour value that needs to be checked if it is a robot colour
+      @return bool True when the colour passed in is an assigned robot colour
+    */
+    bool Vision::isRobotColour(unsigned char colour);
 
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
