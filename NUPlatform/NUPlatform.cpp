@@ -46,3 +46,15 @@ void NUPlatform::getNumber(int& number)
 {
     number = m_number;
 }
+
+void NUPlatform::getTeamColour(string& name)
+{
+    name = m_team_colour;
+}
+
+void NUPlatform::getTeamNumber(int& number)
+{
+    number = m_team_number;
+}
+
+
