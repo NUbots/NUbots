@@ -90,7 +90,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     data[0] = 1;
     m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
     
-    m_data->addTeleportation(nusystem->getTime() + 16000, 45, 45, 0);
+    m_data->addTeleportation(nusystem->getTime() + 16000, 100, 100, 1.57);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -289,22 +289,28 @@ void NAOWebotsActionators::copyToTeleporter()
 #endif 
     if (m_data->getNextTeleportation(l_isvalid, l_time, l_position))
     {
-        if (l_isvalid == true && (l_time - m_current_time) < m_simulation_step)
+        if (l_isvalid == true)// && (l_time - m_current_time) < m_simulation_step)
         {
             static char buf[256];
             static char teamred[] = "RED";
             static char teamblue[] = "BLUE";
             static int id;             // webots id = id - 1
             static string colour;
+            // get the player id
             m_platform->getNumber(id);
-            m_platform->getTeamColour(colour);
+            id--;
             
+            // get the player's colour
+            m_platform->getTeamColour(colour);
             char* team;
             if (colour.compare("red") == 0)
                 team = teamred;
             else
                 team = teamblue;
-            sprintf(buf, "move robot %s %d %f %f %f %f", team, id - 1, l_position[0]/100.0, l_position[1]/100.0, 30.0/100.0, l_position[2]);
+            
+            // convert from our standard coordinates to webots teleporter coords
+            // x is toward yellow goal, y is up and z is right
+            sprintf(buf, "move robot %s %d %f %f %f %f", team, id - 1, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
             m_teleporter->send(buf, strlen(buf) + 1);
         }
     }
