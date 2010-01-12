@@ -43,6 +43,9 @@ static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Righ
                                   string("ChestBoard/Led"), \
                                   string("LFoot/Led"), string("RFoot/Led")};
 vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+// init m_other_names:
+static string temp_other_names[] = {string("Teleporter")};
+vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
 
 /*! @brief Constructs a nubot actionator class with a Webots backend
  
@@ -60,9 +63,9 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableCameraSettings(m_camera_setting_names);
-    //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
+    m_data->setAvailableLeds(m_led_names);
+    m_data->setAvailableOtherActionators(m_other_names);
     
     
     m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 350, 0, 1, 30);
@@ -87,6 +90,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     data[0] = 1;
     m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
     
+    m_data->addTeleportation(nusystem->getTime() + 16000, 45, 45, 0);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -107,6 +111,8 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
     //! @todo TODO: get the sound from webots
+    // Get the teleporter
+    m_teleporter = platform->getEmitter("super_emitter");
 }
 
 /*! @brief enable the actionators in the simulated NAO
@@ -127,12 +133,14 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #endif
     
     m_current_time = nusystem->getTime();
-    m_data->removeCompletedPoints(m_current_time);
     
     copyToServos();
     copyToCamera();
     copyToLeds();
     copyToSound();
+    copyToTeleporter();
+    
+    m_data->removeCompletedPoints(m_current_time);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
@@ -267,6 +275,39 @@ void NAOWebotsActionators::copyToSound()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToSound()" << endl;
 #endif
+}
+
+/*! @brief Copies the teleportation data to the teleporter (super_emitter)
+ */
+void NAOWebotsActionators::copyToTeleporter()
+{
+    static bool l_isvalid;
+    static double l_time;
+    static vector<float> l_position(3, 0);
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToTeleporter()" << endl;
+#endif 
+    if (m_data->getNextTeleportation(l_isvalid, l_time, l_position))
+    {
+        if (l_isvalid == true && (l_time - m_current_time) < m_simulation_step)
+        {
+            static char buf[256];
+            static char teamred[] = "RED";
+            static char teamblue[] = "BLUE";
+            static int id;             // webots id = id - 1
+            static string colour;
+            m_platform->getNumber(id);
+            m_platform->getTeamColour(colour);
+            
+            char* team;
+            if (colour.compare("red") == 0)
+                team = teamred;
+            else
+                team = teamblue;
+            sprintf(buf, "move robot %s %d %f %f %f %f", team, id - 1, l_position[0]/100.0, l_position[1]/100.0, 30.0/100.0, l_position[2]);
+            m_teleporter->send(buf, strlen(buf) + 1);
+        }
+    }
 }
 
 

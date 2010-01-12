@@ -49,6 +49,7 @@ private:
     void copyToCamera();
     void copyToLeds();
     void copyToSound();
+    void copyToTeleporter();
     
 private:
     const int m_simulation_step;                    //!< the webots simulation timestep in milliseconds
@@ -64,6 +65,8 @@ private:
     Servo* m_camera_select;                         //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
     static vector<string> m_led_names;              //!< the names of the leds available in webots
     vector<LED*> m_leds;                            //!< the actual webots::LED pointers
+    static vector<string> m_other_names;            //!< the names of other available actionators in webots
+    Emitter* m_teleporter;
     //! @todo TODO: add the sound actionator
 };
 

@@ -127,7 +127,7 @@ public:
     bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
     bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
         // magical data for the NUActionators
-    bool getNextTeleporation(bool& isvalid, double& time, vector<float>& data);
+    bool getNextTeleportation(bool& isvalid, double& time, vector<float>& data);
     
     // Add methods to be used by modules (ie by Vision, Motion etc)
         // add new joint commands
@@ -140,7 +140,7 @@ public:
     bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
     bool addSound(sound_id_t soundid, double time);
         // add magic commands
-    bool addTeleporation(double time, float x, float y, float bearing);
+    bool addTeleportation(double time, float x, float y, float bearing);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);

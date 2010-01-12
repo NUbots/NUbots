@@ -722,7 +722,7 @@ bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, 
     @param data the target teleportation position [x (cm), y(cm), bearing (rad)] :D
     
  */
-bool NUActionatorsData::getNextTeleporation(bool& isvalid, double& time, vector<float>& data)
+bool NUActionatorsData::getNextTeleportation(bool& isvalid, double& time, vector<float>& data)
 {
     if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0]->Data.size() != 3)
         return false;
@@ -855,7 +855,7 @@ bool NUActionatorsData::addSound(sound_id_t soundid, double time)
  
     @return true if the command is successfully added, false otherwise
  */
-bool NUActionatorsData::addTeleporation(double time, float x, float y, float bearing)
+bool NUActionatorsData::addTeleportation(double time, float x, float y, float bearing)
 {
     static vector<float> data (3, 0);
     if (Teleporter == NULL)
