@@ -78,6 +78,8 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
+    Sound = NULL;
+    Teleporter = NULL;
     m_positionactionation = false;
     m_torqueactionation = false;
     
@@ -377,6 +379,8 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     {
         if (simpleactionatornames[i].compare("sound") == 0)
             addActionator(Sound, actionatornames[i], actionator_t::SOUND);
+        if (simpleactionatornames[i].compare("teleporter") == 0 || simpleactionatornames[i].compare("teleportation") == 0 || simpleactionatornames[i].compare("magichand") == 0 || simpleactionatornames[i].compare("handofgod") == 0)
+            addActionator(Teleporter, actionatornames[i], actionator_t::TELEPORTER);
         else
             debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
     }
@@ -688,10 +692,47 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
         return false;
 }
 
+/*! @brief Gets the next sound
+ 
+    @param isvalid true if the data is valid, false otherwise
+    @param time the time in milliseconds the sound should be completed
+    @param soundid the id of the sound to be played
+    @param text ideally this would be some text to be used in a text to speech engine. However, I don't have the capacity to store strings in the actionator_t, so this will not work
+    
+    @return false if there is no next sound, true if there is a next sound
+ */
 bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
 {
-    //!< @todo TODO: implement this function
-    return false;
+    if (Sound == NULL || Sound->isEmpty() || Sound->m_points[0]->Data.size() != 1)
+        return false;
+    else 
+    {
+        isvalid = true;
+        time = Sound->m_points[0]->Time;
+        soundid = (int) Sound->m_points[0]->Data[0];
+        return true;
+    }
+
+}
+
+/*! @brief Gets the next teleporation command
+ 
+    @param isvalid true if the data is valid, false otherwise
+    @param time the time in milliseconds the teleportation will take place :D
+    @param data the target teleportation position [x (cm), y(cm), bearing (rad)] :D
+    
+ */
+bool NUActionatorsData::getNextTeleporation(bool& isvalid, double& time, vector<float>& data)
+{
+    if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0]->Data.size() != 3)
+        return false;
+    else 
+    {
+        isvalid = true;
+        time = Teleporter->m_points[0]->Time;
+        data = Teleporter->m_points[0]->Data;
+        return true;
+    }
 }
 
 
@@ -782,6 +823,49 @@ bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, floa
         data[2] = bluevalue;
         LedActionators[ledid]->addPoint(time, data);
         return true;
+    }
+}
+
+/*! @brief Adds a single sound
+ 
+    @param soundid the id of the sound you want to play
+    @param time the time in milliseconds to play the sound
+ 
+    @return true if the sound is successfully added, false otherwise
+ */
+bool NUActionatorsData::addSound(sound_id_t soundid, double time)
+{
+    static vector<float> data (1, 0);
+    if (Sound == NULL)
+        return false;
+    else 
+    {
+        data[0] = soundid;
+        Sound->addPoint(time, data);
+    }
+
+}
+
+/*! @brief Adds a single teleportation command
+ 
+    @param time the time in milliseconds to teleport
+    @param x the x position (cm)
+    @param y the y position (cm)
+    @param bearing the bearing (rad)
+ 
+    @return true if the command is successfully added, false otherwise
+ */
+bool NUActionatorsData::addTeleporation(double time, float x, float y, float bearing)
+{
+    static vector<float> data (3, 0);
+    if (Teleporter == NULL)
+        return false;
+    else
+    {
+        data[0] = x;
+        data[1] = y;
+        data[2] = bearing;
+        Teleporter->addPoint(time, data);
     }
 }
 

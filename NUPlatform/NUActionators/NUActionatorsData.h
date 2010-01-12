@@ -38,6 +38,7 @@ public:
     typedef int joint_id_t;
     typedef int camera_setting_id_t;
     typedef int led_id_t;
+    typedef int sound_id_t;
     static const int ACTIONATOR_MISSING = -1;
     
     // joints
@@ -108,8 +109,8 @@ public:
     // Methods for setting which actionators are available on init
     void setAvailableJointControlMethods(const vector<string>& methodnames);
     void setAvailableJoints(const vector<string>& jointnamess);
-    void setAvailableLeds(const vector<string>& lednames);
     void setAvailableCameraSettings(const vector<string>& camerasettingnames);
+    void setAvailableLeds(const vector<string>& lednames);
     void setAvailableOtherActionators(const vector<string>& actionatornames);
     
     void removeCompletedPoints(double currenttime);
@@ -117,23 +118,29 @@ public:
     // Misc. get methods
     int getNumberOfJoints(bodypart_id_t partid);
     
-    // Get methods for joints
+    // Get methods for NUActionators
+        // joint data for the NUActionators
     bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
-    
+        // other data for the NUActionators
     bool getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data);
     bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
     bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
+        // magical data for the NUActionators
+    bool getNextTeleporation(bool& isvalid, double& time, vector<float>& data);
     
-    // Methods for adding new position or torque values for a single joint
+    // Add methods to be used by modules (ie by Vision, Motion etc)
+        // add new joint commands
     bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
     bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
-    bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
-    bool addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data);
-    
-    // Methods for adding new position or torque values for a body part
     bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
     bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
+        // add other commands
+    bool addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data);
+    bool addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue); 
+    bool addSound(sound_id_t soundid, double time);
+        // add magic commands
+    bool addTeleporation(double time, float x, float y, float bearing);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -160,23 +167,27 @@ private:
     // Peripheral actionators 
     vector<actionator_t*> CameraActionators;        //!< The camera control actionators, a single actionator for each setting Steve.
     vector<actionator_t*> LedActionators;           //!< The led actionators
-    actionator_t* Sound;                      //!< The sound actionator
+    actionator_t* Sound;                            //!< The sound actionator
     
-    vector<actionator_t*> m_all_actionators;
-    vector<joint_id_t> m_head_ids;
-    vector<joint_id_t> m_larm_ids;
-    vector<joint_id_t> m_rarm_ids;
-    vector<joint_id_t> m_torso_ids;
-    vector<joint_id_t> m_lleg_ids;
-    vector<joint_id_t> m_rleg_ids;
-    vector<joint_id_t> m_body_ids;
-    vector<joint_id_t> m_all_joint_ids;
-    int m_num_head_joints;
-    int m_num_arm_joints;
-    int m_num_torso_joints;
-    int m_num_leg_joints;
-    int m_num_body_joints;
-    int m_num_joints;
+    // Magic actionators
+    actionator_t* Teleporter;                       //!< A magical actionator that teleports the robot from one location to another
+    
+    // Variables to provide fast access to body part actionator groups
+    vector<actionator_t*> m_all_actionators;        //!< a vector with every actionator
+    vector<joint_id_t> m_head_ids;                  //!< a vector of joint_id_t's for each joint in the head
+    vector<joint_id_t> m_larm_ids;                  //!< a vector of joint_id_t's for each joint in the left arm
+    vector<joint_id_t> m_rarm_ids;                  //!< a vector of joint_id_t's for each joint in the right arm
+    vector<joint_id_t> m_torso_ids;                 //!< a vector of joint_id_t's for each joint in the torso
+    vector<joint_id_t> m_lleg_ids;                  //!< a vector of joint_id_t's for each joint in the left leg
+    vector<joint_id_t> m_rleg_ids;                  //!< a vector of joint_id_t's for each joint in the right leg
+    vector<joint_id_t> m_body_ids;                  //!< a vector of joint_id_t's for each joint in the body (ie all except the head)
+    vector<joint_id_t> m_all_joint_ids;             //!< a vector of joint_id_t's for every joint
+    int m_num_head_joints;                          //!< the number of joints in the head
+    int m_num_arm_joints;                           //!< the number of joints in a single arm. Note it assumes both arms are the same 
+    int m_num_torso_joints;                         //!< the number of joints in the torso
+    int m_num_leg_joints;                           //!< the number of joints in a single leg. Note it assumes both legs are the same
+    int m_num_body_joints;                          //!< the number of joints in the body
+    int m_num_joints;                               //!< the total number of joints int the robot
 };
 
 #endif
