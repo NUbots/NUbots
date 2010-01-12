@@ -310,7 +310,7 @@ void NAOWebotsActionators::copyToTeleporter()
             
             // convert from our standard coordinates to webots teleporter coords
             // x is toward yellow goal, y is up and z is right
-            sprintf(buf, "move robot %s %d %f %f %f %f", team, id - 1, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
+            sprintf(buf, "move robot %s %d %f %f %f %f", team, id, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
             m_teleporter->send(buf, strlen(buf) + 1);
         }
     }
