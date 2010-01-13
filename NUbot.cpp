@@ -253,11 +253,14 @@ void NUbot::run()
 {
 #ifdef TARGET_IS_NAOWEBOTS
     int count = 0;
+    double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) platform;
     while (true)
     {
+        previoussimtime = nusystem->getTime();
         webots->step(40);           // stepping the simulator generates new data to run motion, and sometimes the vision data
-        debug << "NUbot::run()" << endl;
+        if (nusystem->getTime() - previoussimtime > 81)
+            debug << "NUbot::run(): simulationskip: " << (nusystem->getTime() - previoussimtime) << endl;
         signalMotion();
         if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
         {
@@ -434,8 +437,8 @@ void* runThreadMotion(void* arg)
         nubot->signalMotionStart();
 
 #ifdef THREAD_MOTION_MONITOR_TIME
-    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         realstarttime = NUSystem::getRealTime();
+    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         if (realstarttime - entrytime > 25)
             debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
     #endif
@@ -444,7 +447,6 @@ void* runThreadMotion(void* arg)
 #endif
         
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUbot::runThreadMotion " << nubot->platform->system->getTime() << endl;
         data = nubot->platform->sensors->update();
         #ifdef USE_MOTION
             nubot->motion->process(data, actions);
@@ -483,9 +485,9 @@ void* runThreadVision(void* arg)
     JobList joblist = JobList();
     
     vector<float> walkspeed(3, 0);
-    walkspeed[0] = 6;       // max 7cm/s
-    walkspeed[1] = -0;
-    walkspeed[2] = 0;
+    walkspeed[0] = 4;       // max 10cm/s min -20cm/s
+    walkspeed[1] = 7;      // max 5cm/s
+    walkspeed[2] = 0.0;
     
     joblist.addVisionJob(new WalkJob(walkspeed));
     
@@ -496,7 +498,7 @@ void* runThreadVision(void* arg)
     double realendtime, processendtime, threadendtime;
 #endif
     
-    double timenow;
+    double lastupdatetime = nusystem->getTime();
     
     int err;
     do 
@@ -508,8 +510,8 @@ void* runThreadVision(void* arg)
         nubot->signalVisionStart();
         
 #ifdef THREAD_VISION_MONITOR_TIME
-    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         realstarttime = NUSystem::getRealTimeFast();
+    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         if (realstarttime - entrytime > 1000/15.0 + 5)
             debug << "NUbot::runThreadVision. Waittime " << realstarttime - entrytime << " ms."<< endl;
     #endif
@@ -517,17 +519,27 @@ void* runThreadVision(void* arg)
         threadstarttime = NUSystem::getThreadTime();
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUbot::runThreadVision " << nubot->platform->system->getTime() << endl;
         //          image = nubot->platform->camera->getData()
         //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
         //                 odometry = nubot->motion->getData()                // There is no deep copy here either
         //      gamectrl, teaminfo = nubot->network->getData()
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
-        nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+        #ifdef USE_BEHAVIOUR
+            nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+        #endif
         
-        if (nusystem->getTime() > 0)
+        if (nusystem->getTime() > 0000)
             joblist.addMotionJob(new WalkJob(walkspeed));
+         
+        
+        /*if (nusystem->getTime() > 16000 && nusystem->getTime() - lastupdatetime > 10000)
+        {
+            lastupdatetime = nusystem->getTime();
+            walkspeed[0] += 1;
+            joblist.addMotionJob(new WalkJob(walkspeed));
+            cout << "walkspeed:" << walkspeed[0] << endl;
+        }*/
         #ifdef USE_MOTION
             nubot->motion->process(joblist);
         #endif
