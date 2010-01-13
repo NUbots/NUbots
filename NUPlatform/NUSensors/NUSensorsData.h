@@ -117,6 +117,10 @@ public:
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
+    bool getOrientation(vector<float>& values);
+    bool getZMP(vector<float>& values);
+    bool getFalling(vector<float>& values);
+    bool getFallen(vector<float>& values);
     bool getDistanceValues(vector<float>& values);
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
@@ -157,6 +161,7 @@ public:
     int size() const;
 private:
     void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
+    void addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     
     bool getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data);
     bool getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data);
@@ -179,6 +184,10 @@ public:
     // Balance Sensors:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
+    sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
+    sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
+    sensor_t* BalanceFalling;                   //!< stores whether the robot is falling (sum, left, right, forward, backward)
+    sensor_t* BalanceFallen;                    //!< stores whether the robot has fallen (sum, left, right, forward, backward)
     
     // Distance Sensors:
     sensor_t* DistanceValues;                   //!< stores the distance to obstacle measurements in cm

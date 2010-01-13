@@ -142,8 +142,6 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
-
-    m_current_time = nusystem->getTime();             // hmmmm. I am not sure whether I am allowed to do this. Its a backdoor so I don't like it!
     
     copyFromJoints();
     copyFromAccelerometerAndGyro();
@@ -151,6 +149,8 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     copyFromFootSole();
     copyFromFootBumper();
     copyFromGPS();
+    
+    calculateSoftSensors();
     
 #if DEBUG_NUSENSORS_VERBOSITY > 3
     static bool firstrun = true;
@@ -186,9 +186,6 @@ void NAOWebotsSensors::copyFromJoints()
     for (int i=0; i<m_servos.size(); i++)
         positiondata[i] = m_servos[i]->getPosition();
     m_data->setJointPositions(m_current_time, positiondata);
-    
-    calculateJointVelocityFromPosition();
-    calculateJointAccelerationFromVelocity();
     
     // Copy joint targets
     for (int i=0; i<m_servos.size(); i++)

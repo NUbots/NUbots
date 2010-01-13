@@ -71,6 +71,10 @@ NUSensorsData::NUSensorsData()
     // Balance Sensors:
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
+    addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
+    addSoftSensor(BalanceFalling, string("BalanceFalling"), sensor_t::BALANCE_FALLING);
+    addSoftSensor(BalanceFallen, string("BalanceFallen"), sensor_t::BALANCE_FALLEN);
     
     // Distance Sensors:
     addSensor(DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
@@ -97,6 +101,17 @@ NUSensorsData::NUSensorsData()
 void NUSensorsData::addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
 {
     p_sensor = new sensor_t(sensorname, sensorid);
+    m_sensors.push_back(p_sensor);
+}
+
+/*! @brief Adds a soft sensor to the class
+ @param p_sensor a pointer that will be updated to point to the new sensor
+ @param sensorname the name of the sensor
+ @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
+ */
+void NUSensorsData::addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
+{
+    p_sensor = new sensor_t(sensorname, sensorid, true);
     m_sensors.push_back(p_sensor);
 }
 
@@ -390,6 +405,62 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
     else
     {
         values = BalanceGyro->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
+    @param values will be updated with the current orientation estimate
+ */
+bool NUSensorsData::getOrientation(vector<float>& values)
+{
+    if (BalanceOrientation == NULL || BalanceOrientation->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceOrientation->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the zero moment point [x,y] in cm from somewhere?
+    @param values will be updated with the current ZMP estimate
+ */
+bool NUSensorsData::getZMP(vector<float>& values)
+{
+    if (BalanceZMP == NULL || BalanceZMP->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceZMP->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the falling sense [sum, left, right, forward, backward] 
+    @param values will be updated with the current falling measurements [sum, left, right, forward, backward]
+ */
+bool NUSensorsData::getFalling(vector<float>& values)
+{
+    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceFalling->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the fallen sense [sum, left, right, forward, backward] 
+    @param values will be updated with the current fallen measurements [sum, left, right, forward, backward]
+ */
+bool NUSensorsData::getFallen(vector<float>& values)
+{
+    if (BalanceFallen == NULL || BalanceFallen->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceFallen->Data;
         return true;
     }
 }

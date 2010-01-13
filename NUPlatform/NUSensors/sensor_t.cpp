@@ -38,12 +38,12 @@ sensor_t::sensor_t()
     @param sensorname the name of the sensor
     @param sensorid the id of the sensor
  */
-sensor_t::sensor_t(string sensorname, sensor_id_t sensorid)
+sensor_t::sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated)
 {
     Name = sensorname; 
     SensorID = sensorid;
     IsValid = false;
-    IsCalculated = false;
+    IsCalculated = iscalculated;
     m_time_offset = NUSystem::getTimeOffset();
     Time = 0;
     TimeStamp = Time + m_time_offset;

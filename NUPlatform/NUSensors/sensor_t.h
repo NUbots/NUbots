@@ -52,6 +52,10 @@ public:
         JOINT_TEMPERATURES,
         BALANCE_ACCELEROMETER,
         BALANCE_GYRO,
+        BALANCE_ORIENTATION,
+        BALANCE_ZMP,
+        BALANCE_FALLING,
+        BALANCE_FALLEN,
         DISTANCE_VALUES,
         FOOT_SOLE_VALUES,
         FOOT_BUMPER_VALUES,
@@ -62,7 +66,7 @@ public:
     };
 public:
     sensor_t();
-    sensor_t(string sensorname, sensor_id_t sensorid);
+    sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated = false);
     void setData(double time, vector<float> newdata, bool iscalculated = false);
     void setStdDev(vector<float> newstddev);
     
