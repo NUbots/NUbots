@@ -38,6 +38,7 @@ public:
 
 public slots:
     void open();                    //!< To open a file
+    void openLUT();                  //!< To open a LUT file
     void firstFrame();              //!< Takes you back to first frame
     void previousFrame();           //!< Takes you back to previous frame
     void selectFrame();             //!< Takes you to a selected frame
@@ -118,6 +119,7 @@ private:
 
 
     QAction *openAction;            //!< Instance of the open action
+    QAction *LUT_Action;            //!< Instance of the open action
     QAction *exitAction;            //!< Instance of the exit action
     QAction *firstFrameAction;      //!< Instance of the first frame action; brings you back to first frame
     QAction *previousFrameAction;   //!< Instance of the previous frame action

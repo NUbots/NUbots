@@ -14,6 +14,7 @@
 #include "ClassifiedSection.h"
 #include "ScanLine.h"
 #include "TransitionSegment.h"
+#include "RobotCandidate.h"
 
 class NUimage;
 
@@ -21,9 +22,6 @@ class NUimage;
 class Vision
 {
     public:
-
-    const static unsigned int VERT_JOIN_LIMIT = 3;
-    const static unsigned int HORZ_JOIN_LIMIT = 2;
 
     //! Default constructor.
     Vision();
@@ -50,8 +48,9 @@ class Vision
     /*!
       @brief Joins segments to create a joined segment clusters that represent candidate robots
       @param segList The segList is a vector of TransitionSegments after field lines have been rejected
+      @returns A list of RobotCanidates
     */
-    void classifyRobotCandidates(std::vector< TransitionSegment > segments);
+    std::vector<RobotCandidate> classifyRobotCandidates(std::vector< TransitionSegment > segments);
 
     /*!
       @brief Returns true when the colour passed in is a valid robot colour

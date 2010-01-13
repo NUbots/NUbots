@@ -264,7 +264,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 1;
+    int bufferSize = 2;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
     for (int i = 0; i < bufferSize; i++)
@@ -321,21 +321,21 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         if(direction == ClassifiedSection::DOWN)
                         {
                             currentPoint.x = startPoint.x;
-                            currentPoint.y = startPoint.y + j - bufferSize;
+                            currentPoint.y = startPoint.y + j;// - bufferSize;
                         }
                         else if (direction == ClassifiedSection::RIGHT)
                         {
-                            currentPoint.x = startPoint.x + j - bufferSize;
+                            currentPoint.x = startPoint.x + j;// - bufferSize;
                             currentPoint.y = startPoint.y;
                         }
                         else if(direction == ClassifiedSection::UP)
                         {
                             currentPoint.x = startPoint.x;
-                            currentPoint.y = startPoint.y - j - bufferSize;
+                            currentPoint.y = startPoint.y - j;// - bufferSize;
                         }
                         else if(direction == ClassifiedSection::LEFT)
                         {
-                            currentPoint.x = startPoint.x - j - bufferSize;
+                            currentPoint.x = startPoint.x - j;// - bufferSize;
                             currentPoint.y = startPoint.y;
                         }
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
@@ -365,12 +365,19 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     return;
 }
 
-void Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
+std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
 {
+    std::vector<RobotCandidate> candidateList;
+
+    const float MAX_ASPECT = 2.0;
+    const float MIN_ASPECT = 0.1;
+    const int VERT_JOIN_LIMIT = 3;
+    const int HORZ_JOIN_LIMIT = 2;
+    const int HORZ_JOIN_SCALING = 4;
+    const int SEG_COUNT_THRESHOLD = 12;
 
     if (!segments.empty())
     {
-
         std::queue<int> qUnprocessed;
         unsigned int rawSegsLeft = segments.size();
         int nextRawSeg = 0;
@@ -378,19 +385,19 @@ void Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
         for (unsigned int i = 0; i < segments.size(); i++)
         {
             //may have non-robot colour segments, so pre-mark them as used
-            qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
-
-            /*{
-                rawSegsLeft++;*/
+            if (isRobotColour(segments.at(i).getColour()))
+            {
+                //qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
                 isSegUsed[i] = false;
-            /*}
+            }
             else
             {
+                rawSegsLeft--;
                 isSegUsed[i] = true;
-            }*/
+            }
 
         }
-        qDebug() << "rawSegsLeft: " << rawSegsLeft;
+        //qDebug() << "rawSegsLeft: " << rawSegsLeft << "/" << (segments.size()-1);
         while(rawSegsLeft)
         {
 
@@ -404,49 +411,121 @@ void Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
             isSegUsed[nextRawSeg] = true;
             rawSegsLeft--;
 
+            int min_x, max_x, min_y, max_y, segCount;
+            min_x = segments.at(nextRawSeg).getStartPoint().x;
+            max_x = segments.at(nextRawSeg).getStartPoint().x;
+            min_y = segments.at(nextRawSeg).getStartPoint().y;
+            max_y = segments.at(nextRawSeg).getEndPoint().y;
+            segCount = 0;
             //Build candidate
             while (!qUnprocessed.empty())
             {
                 unsigned int thisSeg;
                 thisSeg = qUnprocessed.front();
                 qUnprocessed.pop();
+                segCount++;
+
+                if ( min_x > segments.at(thisSeg).getStartPoint().x)
+                    min_x = segments.at(thisSeg).getStartPoint().x;
+                if ( max_x < segments.at(thisSeg).getStartPoint().x)
+                    max_x = segments.at(thisSeg).getStartPoint().x;
+                if ( min_y > segments.at(thisSeg).getStartPoint().y)
+                    min_y = segments.at(thisSeg).getStartPoint().y;
+                if ( max_y < segments.at(thisSeg).getEndPoint().y)
+                    max_y = segments.at(thisSeg).getEndPoint().y;
 
                 //if there is a seg above AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg > 0 &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg-1).getStartPoint().x &&
-                     segments.at(thisSeg-1).getEndPoint().y - segments.at(thisSeg).getStartPoint().y < VERT_JOIN_LIMIT &&
+                     -(segments.at(thisSeg-1).getEndPoint().y - segments.at(thisSeg).getStartPoint().y) < VERT_JOIN_LIMIT &&
                      !isSegUsed[thisSeg-1])
                 {
-                    //qUnprocessed.push(thisSeg-1);
+                    //qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
+                    qUnprocessed.push(thisSeg-1);
                     //take away from pool of raw segs
-                    //isSegUsed[thisSeg-1] = true;
-                    //rawSegsLeft--;
+                    isSegUsed[thisSeg-1] = true;
+                    rawSegsLeft--;
                 }
                 //if there is a seg below AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg+1 < segments.size() &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg+1).getStartPoint().x &&
-                     segments.at(thisSeg).getEndPoint().y - segments.at(thisSeg+1).getStartPoint().y < VERT_JOIN_LIMIT &&
+                     -(segments.at(thisSeg).getEndPoint().y - segments.at(thisSeg+1).getStartPoint().y) < VERT_JOIN_LIMIT &&
                      !isSegUsed[thisSeg+1])
                 {
-                    //qUnprocessed.push(thisSeg+1);
+                    //qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
+                    qUnprocessed.push(thisSeg+1);
                     //take away from pool of raw segs
-                    //isSegUsed[thisSeg+1] = true;
-                    //rawSegsLeft--;
+                    isSegUsed[thisSeg+1] = true;
+                    rawSegsLeft--;
                 }
                 //if there is a seg overlapping on the right AND 'close enough', then qUnprocessed->push()
+                for (int thatSeg = thisSeg + 1; thatSeg < segments.size(); thatSeg++)
+                {
+                    if ( segments.at(thatSeg).getStartPoint().x > segments.at(thisSeg).getStartPoint().x &&
+                         !isSegUsed[thatSeg])
+                    {
+                        //NOT in same column as thisSeg and is to the right
+                        if ( segments.at(thatSeg).getStartPoint().y < segments.at(thisSeg).getEndPoint().y &&
+                             segments.at(thisSeg).getStartPoint().y < segments.at(thatSeg).getEndPoint().y)
+                        {
+                            //thisSeg overlaps with thatSeg
+                            if ( segments.at(thatSeg).getStartPoint().x - segments.at(thisSeg).getStartPoint().x < HORZ_JOIN_LIMIT * HORZ_JOIN_SCALING )
+                            {
+                                //within HORZ_JOIN_LIMIT
+                                //qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                qUnprocessed.push(thatSeg);
+                                //take away from pool of raw segs
+                                isSegUsed[thatSeg] = true;
+                                rawSegsLeft--;
+                                thatSeg = segments.size();
+                            }
+                        }
+                    }
+                }
                 //if there is a seg overlapping on the left AND 'close enough', then qUnprocessed->push()
+                for (int thatSeg = thisSeg - 1; thatSeg >= 0; thatSeg--)
+                {
+                    if ( !isSegUsed[thatSeg] &&
+                         segments.at(thatSeg).getStartPoint().x < segments.at(thisSeg).getStartPoint().x)
+                    {
+                        //NOT in same column as thisSeg and is to the right
+                        if ( segments.at(thatSeg).getStartPoint().y < segments.at(thisSeg).getEndPoint().y &&
+                             segments.at(thisSeg).getStartPoint().y < segments.at(thatSeg).getEndPoint().y)
+                        {
+                            //thisSeg overlaps with thatSeg
+                            if ( segments.at(thisSeg).getStartPoint().x - segments.at(thatSeg).getStartPoint().x < HORZ_JOIN_LIMIT * HORZ_JOIN_SCALING )
+                            {
+                                //within HORZ_JOIN_LIMIT
+                                //qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                qUnprocessed.push(thatSeg);
+                                //take away from pool of raw segs
+                                isSegUsed[thatSeg] = true;
+                                rawSegsLeft--;
+                                thatSeg = -1;
+                            }
+                        }
+                    }
+                }
 
                 //add thisSeg to CandidateVector
             }//while (!qUnprocessed->empty())
+            if ( max_x - min_x > 0 &&
+                 max_y - min_y > 0 &&
+                 (float)(max_x - min_x) / (float)(max_y - min_y) < MAX_ASPECT &&
+                 (float)(max_x - min_x) / (float)(max_y - min_y) > MIN_ASPECT &&
+                 segCount > SEG_COUNT_THRESHOLD)
+            {
+                //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y) << ", dist from bottom: " << (120 - max_y) ;
+                RobotCandidate temp(min_x, min_y, max_x, max_y);
+                candidateList.push_back(temp);
+            }
 
-            qDebug() << "Candidate finished";
-            //get new RobotCandidate( std::vector< TransitionSegment > segments)
-            //std::vector< RobotCandidate >* candidateRobots->push_back(newCandidate)
+
 
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
-
+    return candidateList;
 }
 
 bool Vision::isRobotColour(unsigned char colour)

@@ -125,6 +125,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > segments;
+    std::vector< RobotCandidate > robotCandidates;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
@@ -206,7 +207,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
             emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
 
-            vision.classifyRobotCandidates(segments);
+            robotCandidates = vision.classifyRobotCandidates(segments);
+            emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
 
             break;
         default:

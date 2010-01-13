@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
 
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
@@ -72,8 +73,9 @@ MainWindow::MainWindow(QWidget *parent)
     imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
-    imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
-    imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
+    //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
+    //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
+    imageDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
 
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
@@ -83,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
+    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
+    horizonDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
 
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
@@ -125,6 +129,13 @@ void MainWindow::createActions()
     openAction->setStatusTip(tr("Open a new file"));
     openAction->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
+
+    // LUT Action
+    LUT_Action = new QAction(tr("&Open LUT..."), this);
+    LUT_Action->setShortcut(tr("Ctrl+L"));
+    LUT_Action->setStatusTip(tr("Open a LUT file"));
+    LUT_Action->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
+    connect(LUT_Action, SIGNAL(triggered()), this, SLOT(openLUT()));
 
     // Exit Action
     exitAction = new QAction(tr("E&xit"), this);
@@ -188,6 +199,7 @@ void MainWindow::createMenus()
     // File Menu
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAction);
+    fileMenu->addAction(LUT_Action);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
@@ -255,6 +267,11 @@ void MainWindow::open()
         firstFrame();
     }
 }
+void MainWindow::openLUT()
+{
+    classification->doOpen();
+}
+
 
 void MainWindow::firstFrame()
 {
