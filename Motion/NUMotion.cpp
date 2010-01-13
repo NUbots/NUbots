@@ -99,6 +99,10 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 #ifdef USE_WALK
     m_walk->process(data, actions);
 #endif
+    vector<float> values;
+    data->getFallen(values);
+    if (values[0] > 0)
+        actions->addTeleportation(nusystem->getTime(), -250, 0, 0);
 }
 
 /*! @brief Process the jobs
