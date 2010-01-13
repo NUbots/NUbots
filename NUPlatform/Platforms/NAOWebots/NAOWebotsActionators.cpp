@@ -90,7 +90,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     data[0] = 1;
     m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
     
-    m_data->addTeleportation(nusystem->getTime() + 16000, 100, 100, 1.57);
+    //m_data->addTeleportation(nusystem->getTime() + 16000, 100, 100, 1.57);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -171,7 +171,7 @@ void NAOWebotsActionators::copyToServos()
             {
                 if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
-                    if ((times[i] - m_current_time) >= 0)
+                    if (times[i] > m_current_time)
                     {
                         float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
@@ -184,6 +184,12 @@ void NAOWebotsActionators::copyToServos()
                             v = maxv;
                         m_servos[i]->setControlP(gains[i]/10.0);
                         m_servos[i]->setVelocity(fabs(v));
+                        m_servos[i]->setPosition(positions[i]);
+                    }
+                    else
+                    {   // the command has already past, we should get there as fast as possible
+                        m_servos[i]->setControlP(gains[i]/10.0);
+                        m_servos[i]->setVelocity(((JServo*) m_servos[i])->getMaxVelocity());
                         m_servos[i]->setPosition(positions[i]);
                     }
                 }
@@ -308,7 +314,7 @@ void NAOWebotsActionators::copyToTeleporter()
             else
                 team = teamblue;
             
-            // convert from our standard coordinates to webots teleporter coords
+            // convert from our standard coordinates to webots teleporter coords (I can do the conversion in-line cause it is simple)
             // x is toward yellow goal, y is up and z is right
             sprintf(buf, "move robot %s %d %f %f %f %f", team, id, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
             m_teleporter->send(buf, strlen(buf) + 1);
