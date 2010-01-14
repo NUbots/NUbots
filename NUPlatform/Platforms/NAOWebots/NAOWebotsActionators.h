@@ -53,7 +53,6 @@ private:
     
 private:
     const int m_simulation_step;                    //!< the webots simulation timestep in milliseconds
-    double m_current_time;                          //!< the current time in milliseconds
     
     NAOWebotsPlatform* m_platform;                  //!< a pointer to the platform, in particular platform inherits webots::Robot so use it to access the devices
     

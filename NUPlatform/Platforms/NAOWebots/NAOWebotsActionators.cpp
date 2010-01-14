@@ -132,8 +132,6 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
     
-    m_current_time = nusystem->getTime();
-    
     copyToServos();
     copyToCamera();
     copyToLeds();

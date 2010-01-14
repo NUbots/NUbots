@@ -170,6 +170,7 @@ private:
     
     void updateNamedSensorPointer(sensor_t* p_sensor);
 public:
+    double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
     // NAMED SENSORS
     // Proprioception Sensors:
     sensor_t* JointPositions;                   //!< stores the joint position sensors (in radians)

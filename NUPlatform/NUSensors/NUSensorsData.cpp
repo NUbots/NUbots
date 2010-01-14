@@ -946,6 +946,7 @@ void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool is
  */
 void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated)
 {
+    CurrentTime = time;
     p_sensor->setData(time, data, iscalculated);
 }
 

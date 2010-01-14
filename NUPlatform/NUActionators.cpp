@@ -20,6 +20,7 @@
  */
 
 #include "NUActionators.h"
+#include "NUSystem.h"
 #include "Tools/debug.h"
 
 NUActionators::NUActionators()
@@ -48,6 +49,7 @@ void NUActionators::process(NUActionatorsData*& data)
 #endif
     if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
         data = m_data;
+    m_current_time = nusystem->getTime();
     copyToHardwareCommunications();
 }
 

@@ -142,7 +142,6 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
-    
     copyFromJoints();
     copyFromAccelerometerAndGyro();
     copyFromDistance();
