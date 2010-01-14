@@ -30,6 +30,8 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUWalk.h"
+#include "FallProtection.h"
+#include "Getup.h"
 
 class NUMotion
 {
@@ -44,6 +46,9 @@ private:
 public:
 protected:
 private:
+    // essential motion components
+    FallProtection* m_fall_protection;
+    Getup* m_getup;
 #ifdef USE_HEAD
     NUHead* m_head;
 #endif
