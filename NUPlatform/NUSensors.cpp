@@ -130,9 +130,13 @@ void NUSensors::calculateOrientation()
     static vector<float> acceleration(3, 0);
     if (m_data->getAccelerometerValues(acceleration))
     {
-        orientation[0] = atan2(-acceleration[1],-acceleration[2]);
-        orientation[1] = atan2(acceleration[0],-acceleration[2]);
-        orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
+        float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
+        if (fabs(accelsum - 981) < 0.1*981)
+        {   // only update the orientation estimate if not under other accelerations!
+            orientation[0] = atan2(-acceleration[1],-acceleration[2]);
+            orientation[1] = atan2(acceleration[0],-acceleration[2]);
+            orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
+        }
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
     }
 }
@@ -150,7 +154,14 @@ void NUSensors::calculateZMP()
 /*! @brief Updates the fall sense (ie BalanceFalling and BalanceFallen) using the current sensor data.
  
     Both BalanceFalling and BalanceFallen are [sum, left, right, forward, backward] where 0=not fall(ing) 1=fall(ing).
-    This function should be called after calculateOrientation and calculateZMP so that those results are available to it
+    This function should be called after calculateOrientation and calculateZMP so that those results are available.
+ 
+    Except in special circumstances, a fall is always preceded by a falling. We transition into the falling state
+    when no control action can prevent a fall. The falling is completed after the robot has impacted with the ground, 
+    the impact is detected using the accelerometers, and once the robot has settled it is fallen and can start getting up.
+ 
+    To handle the special cases where the robot is fallen without ever having fell, ie. on Initial, on Ready and on Playing
+    ......................................
  */
 void NUSensors::calculateFallSense()
 {
@@ -161,6 +172,15 @@ void NUSensors::calculateFallSense()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
+    // Can I ever be fallen, without falling?
+    // On initial. On ready. On playing. These are special cases where the fall happened outside the game.
+    // I could use the game state to trigger a special check, or I could just check if I have fallen over
+    // in every frame.
+    // Alas, in init we are not going to have any motors on. When we go to ready, I need to stand up.
+    // So I could check whether I am standing in each frame, to do this I would need to know the stance
+    // position, if the feet are on the ground, and if the orientation is upright. That is a probably because, 
+    // I don't have the stance position in the sensors.
+    //! @todo TODO: Finish this discussion on how to do the fall detection...
     // check if the robot has fallen over
     static vector<float> orientation(3,0);
     static vector<float> angularvelocity(3,0);
