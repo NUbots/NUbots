@@ -497,7 +497,7 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
  
     Note orientation is not measured by the GPS :(.
  
-    @param values will be updated with the gps coordinates of the robot
+    @param values will be updated with the gps coordinates of the robot [x (cm), y (cm), z (cm)]
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
 {
