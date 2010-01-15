@@ -290,14 +290,10 @@ void NAOWebotsSensors::copyFromGPS()
         #endif
         
         buffer = m_gps->getValues();
-        for (int i=0; i<numdimensions; i++)
-        {
-            if (i == 0 || i == 1)
-                gpsdata[i] = 100*buffer[i];         // convert to cm for gps coordinates
-            else
-                gpsdata[i] = buffer[i];
-        }
-        m_data->setGPSValues(m_current_time, gpsdata);      //! @todo TODO: add gps data to NUsensorsData
+        gpsdata[0] = 100*buffer[0];                // the data from webots is: [x, z, -y]
+        gpsdata[1] = -100*buffer[2];
+        gpsdata[2] = 100*buffer[1];
+        m_data->setGPSValues(m_current_time, gpsdata);
     }
 }
 
