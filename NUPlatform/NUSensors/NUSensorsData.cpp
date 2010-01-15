@@ -493,7 +493,10 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
     }
 }
 
-/*! @brief Gets the GPS readings [x (cm), y(cm), theta (rad)]
+/*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
+ 
+    Note orientation is not measured by the GPS :(.
+ 
     @param values will be updated with the gps coordinates of the robot
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
