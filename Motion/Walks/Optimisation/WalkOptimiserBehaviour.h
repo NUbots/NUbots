@@ -26,29 +26,33 @@
 #define WALKOPTIMISERBEHAVIOUR_H
 
 #include "Behaviour/Jobs.h"
+#include "Motion/NUWalk.h"
+#include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "WalkParameters.h"
-
-#include <fstream>
-using namespace std;
+#include "../WalkParameters.h"
+#include "WalkOptimiser.h"
 
 class WalkOptimiserBehaviour
 {
 public:
-    WalkOptimiserBehaviour();
+    WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p_walk);
     ~WalkOptimiserBehaviour();
     
-    void process(NUSensorsData* data, NUActionatorsData* actions, JobList& joblist);
+    void process(NUSensorsData* data, NUActionatorsData* actions);
 protected:
 private:
-    bool isFallen();
 public:
 protected:
 private:
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
-    WalkParameters* m_walk_parameters;
+    
+    NUWalk* m_walk;
+    WalkParameters m_walk_parameters;
+    WalkOptimiser* m_optimiser;
+    
+    float m_respawn_x, m_respawn_y, m_respawn_bearing;
 };
 
 #endif

@@ -25,36 +25,33 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../WalkParameters.h"
+
 class WalkOptimiser
 {
     public:
-        WalkOptimiser();
+        WalkOptimiser(const WalkParameters& walkparameters);
         ~WalkOptimiser();
     
+        void getNewParameters(WalkParameters& walkparameters);
         void doOptimisation();
     private:
         void tickOptimiser(float speed, float power);
-        void mutateBestParameters();
+        void mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters);
     
         void initBestParameters();
         void copyToBestParameters();
     
         float normalDistribution(float mean, float sigma);
-    
-        void assessParameters(Step* currentstep, float currentspeed);
-    
-        void initOptimiserLog();
-        void writeOptimiserLog();
+
     public:
-        float BestSpeed;            // the speed in cm/s of the best set of parameters
-        float BestCost;             // the cost of transport in J/(Ncm)
-        float BestParameters[SM_NUM_MODES][SH_NUM_JOINTS];              // the best set of parameters
-        float BestDeltaParameters[SM_NUM_MODES][SH_NUM_JOINTS];         // the difference BestParameters - PreviousBestParameters
+        float BestSpeed;                               // the speed in cm/s of the best set of parameters
+        float BestCost;                                // the cost of transport in J/(Ncm)
+        WalkParameters m_best_parameters;              // the best set of parameters
+        WalkParameters m_best_delta_parameters;
     
-        float CurrentParameters[SM_NUM_MODES][SH_NUM_JOINTS];
+        WalkParameters m_current_parameters;
     private:
-        Step* LeftStep;
-        Step* RightStep;
     
         int SpeedCount;             // the number of speeds received with the current settings
         float SpeedSum;             // the cumulative sum of the received speeds 
@@ -68,15 +65,14 @@ class WalkOptimiser
         float PowerSum;             // the cumulative sums of the power
     
         float Alpha;
-        int ResetLimit;
-        int CountSinceLastImprovement;
+        int m_reset_limit;
+        int m_count_since_last_improvement;
     
         int AssessSpeedCount;       // the number of speeds received with the current settings that will be used to assess the speed accurately
         float AssessSpeedSum;       // the sum
         float AssessPowerSum;
         int AssessSpeedCountLimit;  // the number of speeds required before an assessment is reported.
     
-        ofstream optimiserlog;
         int Iteration;
         float CurrentSpeed;
         float CurrentCost;

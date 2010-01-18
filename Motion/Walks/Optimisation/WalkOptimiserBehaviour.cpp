@@ -36,18 +36,45 @@ inline T NORMALISE(T theta){
     return atan2(sin(theta), cos(theta));
 }
 
-WalkOptimiserBehaviour::WalkOptimiserBehaviour()
+/*! @brief Constructs a walk optimiser
+    @param p_platform I need this to access the player number and team number. I think that should be moved into sensorsdata at some stage
+ */
+WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p_walk)
 {
+    m_walk = p_walk;
+    m_walk->getWalkParameters(m_walk_parameters);
+    m_optimiser = new WalkOptimiser(m_walk_parameters);
     
+    // specify respawn location based on the player and team number
+    m_respawn_x = -290;
+    m_respawn_bearing = 0;
+    int playernum, teamnum;
+    p_platform->getNumber(playernum);
+    p_platform->getTeamNumber(teamnum);
+    if (teamnum == 0)
+    {
+        if (playernum == 1)
+            m_respawn_y = 150;
+        else
+            m_respawn_y = 50;
+    }
+    else 
+    {
+        if (playernum == 1)
+            m_respawn_y = -50;
+        else
+            m_respawn_y = -150;
+    }
 }
 
 WalkOptimiserBehaviour::~WalkOptimiserBehaviour()
 {
-    
+    if (m_optimiser != NULL)
+        delete m_optimiser;
 }
 
 
-void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* actions, JobList& joblist)
+void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* actions)
 {   
     if (data == NULL || actions == NULL)
         return;
@@ -57,29 +84,13 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
         m_actions = actions;
     }
     
-    static vector<float> fallen;
-    m_data->
-    
-    if isFallen()
-        optimiser->getNewParameters(m_walk_parameters);
-    
-        tick optimiser?. Not really because there is no new metric.
-        it should just be a getNewParameters
-    // so i need to add jobs to the job list to get what I want done.
-    // I need to add a 'respawn job', I am not going to bother with a nice interface with this one because I need to have it written today!
-    // if we have been using this parameter set for 10 seconds
-    // I also need to make sure I get data from the same point in each gait
-    //      then tick the optimiser
-    //      start from the respawn location.
-    // else add no jobs
-}
-
-bool WalkOptimiserBehaviour::isFallen()
-{
-    static vector<float> fallen;
-    if (m_data->getFallen(fallen) && fallen[0] > 0)
-        return true;
-    else
-        return false;
+    if (m_data->isFallen())
+    {
+        actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
+        m_optimiser->getNewParameters(m_walk_parameters);
+    }
+    else 
+    {
+    }
 }
 

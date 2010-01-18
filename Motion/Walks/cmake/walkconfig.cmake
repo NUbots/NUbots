@@ -26,6 +26,12 @@ OPTION(
 )
 
 OPTION(
+	USE_WALKOPTIMISER
+	"Set to ON to use the walk optimiser, set to OFF for game"
+	OFF
+)
+
+OPTION(
         USE_WALK_JWALK
         "Set to ON to use jwalk, set to OFF use something else"
         OFF

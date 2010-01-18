@@ -7,17 +7,21 @@
  *
  */
 
-#include "optimiser.h"
+#include "WalkOptimiser.h"
 #include "boost/random.hpp"
 #include <math.h>
 
 #define OPTIMISER_VERBOSITY         4
 #define OPTIMISER_ASSESS            0
 
-#define NAO_WEIGHT                  4.8*9.81
-
-Optimiser::Optimiser()
+WalkOptimiser::WalkOptimiser(const WalkParameters& walkparameters)
 {
+    m_best_parameters = walkparameters;
+    m_best_delta_parameters = walkparameters;
+    for (int i=0; i<m_best_delta_parameters.size(); i++)
+        m_best_delta_parameters[i] = 0;
+    m_current_parameters = walkparameters;
+    
     BestSpeed = 0;
     BestCost = 0;
     
@@ -29,12 +33,9 @@ Optimiser::Optimiser()
     
     PowerSum = 0;
     
-    LeftStep = NULL;           // I don't know which step I am going to be optimising, so I need to collect them as I go
-    RightStep = NULL;
-    
     Alpha = 0.0;
-    CountSinceLastImprovement = 0;
-    ResetLimit = 10;
+    m_count_since_last_improvement = 0;
+    m_reset_limit = 10;
     
     AssessSpeedCount = 0;           // the number of speeds received with the current settings that will be used to assess the speed accurately
     AssessSpeedSum = 0;             // the sum
@@ -44,17 +45,14 @@ Optimiser::Optimiser()
     Iteration = 0;
     CurrentSpeed = 0;
     CurrentCost = 0;
-    initOptimiserLog();
 }
 
-Optimiser::~Optimiser()
+WalkOptimiser::~WalkOptimiser()
 {
 }
 
-void Optimiser::doOptimisation(Step* currentstep, float currentspeed)
+/*void WalkOptimiser::doOptimisation()
 {
-    if (balanceFallenCount > 0)
-        SpeedSum = 0.01;
         
     if (currentstep == NULL)                            // Don't do optimisation on NULL steps
         return;
@@ -92,8 +90,51 @@ void Optimiser::doOptimisation(Step* currentstep, float currentspeed)
         PowerSum = 0;
     }
 #endif
+}*/
+
+/*! @brief Gets a new set of parameters to test
+    @param walkparameters will be updated to contain the new parameters that we want to test
+ */
+void WalkOptimiser::getNewParameters(WalkParameters& walkparameters)
+{
+    mutateParameters(m_best_parameters, m_best_delta_parameters, walkparameters);
 }
 
+/*! Generates a new set of parameters to be tested based on base_parameters and basedelta_parameters
+ */
+void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters)
+{
+    // generate phi to mutate the BestParameters
+    float sigma = 0.15*exp(m_count_since_last_improvement/m_reset_limit - 1);
+    vector<float> phi(base_parameters.size(), 0);
+    for (int i=0; i<base_parameters.size(); i++)
+        phi[i] = normalDistribution(1, sigma);
+    
+    // mutate the BestParameters
+    vector<float> mutant(base_parameters.size(), 0);
+    for (int i=0; i<base_parameters.size(); i++)
+        mutant[i] = base_parameters[i] * phi[i];        // TODO: Add in C
+
+    // calculate the difference between the mutated state and the best one
+    vector<float> deltamutant(base_parameters.size(), 0);
+    for (int i=0; i<base_parameters.size(); i++)
+        deltamutant[i] = base_parameters[i] - mutant[i];
+    
+    // calculate the desired change in parameters
+    vector<float> deltaparameters(base_parameters.size(), 0);
+    for (int i=0; i<base_parameters.size(); i++)
+        deltaparameters[i] = Alpha*basedelta_parameters[i] + (1-Alpha)*deltamutant[i];
+    
+    // now calculate the new parameters themselves
+    vector<float> newparameters(base_parameters.size(), 0);
+    for (int i=0; i<base_parameters.size(); i++)
+        newparameters[i] = base_parameters[i] + deltaparameters[i];
+    
+    // now copy the new parameters into the storage variable
+    for (int i=0; i<base_parameters.size(); i++)
+        walkparameters[i] = newparameters[i];
+}
+/*
 void Optimiser::tickOptimiser(float speed, float power)
 {
     static bool initialised = false;            // we need to initialise the optimisation on the first tick
@@ -139,7 +180,7 @@ void Optimiser::tickOptimiser(float speed, float power)
         BestCost = cost;
         CountSinceLastImprovement = 0;
         #if OPTIMISER_VERBOSITY > 2
-    thelog << "OPTIMISER: tickOptimiser BestSpeed:" << BestSpeed << " BestCost: " << BestCost << "SpeedImprovement:" << SpeedImprovement << " PreviousSpeedImprovement:" << SpeedPreviousImprovement << "CostImprovement:" << CostImprovement << "PreviousCostImprovement:" << CostPreviousImprovement << " Alpha:" << Alpha << endl;
+            thelog << "OPTIMISER: tickOptimiser BestSpeed:" << BestSpeed << " BestCost: " << BestCost << "SpeedImprovement:" << SpeedImprovement << " PreviousSpeedImprovement:" << SpeedPreviousImprovement << "CostImprovement:" << CostImprovement << "PreviousCostImprovement:" << CostPreviousImprovement << " Alpha:" << Alpha << endl;
         #endif
         SpeedPreviousImprovement = SpeedImprovement;
         CostPreviousImprovement = CostImprovement;
@@ -159,154 +200,13 @@ void Optimiser::tickOptimiser(float speed, float power)
     }
     
     mutateBestParameters();
-    writeOptimiserLog();
     Iteration++;
     return;
-}
-
-/* Generates a new set of parameters to be tested based on BestParameters and BestDeltaParameters
- */
-void Optimiser::mutateBestParameters()
-{
-    
-    // generate phi to mutate the BestParameters
-    float sigma = 0.15*exp(CountSinceLastImprovement/ResetLimit - 1);
-    static float phi[SM_NUM_MODES][SH_NUM_JOINTS];
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            phi[i][j] = normalDistribution(1, sigma);
-    
-    #if OPTIMISER_VERBOSITY > 4
-        thelog << "OPTIMISER: mutateBestParameters. Phi:" << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << phi[i][j] << ",";
-        thelog << endl;
-    #endif
-    
-    // mutate the BestParameters
-    static float mutant[SM_NUM_MODES][SH_NUM_JOINTS];
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            mutant[i][j] = BestParameters[i][j] * phi[i][j];        // TODO: Add in C
-    
-    #if OPTIMISER_VERBOSITY > 4
-        thelog << "OPTIMISER: mutateBestParameters. Mutant:" << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << mutant[i][j] << ",";
-        thelog << endl;
-    #endif
-    
-    // calculate the difference between the mutated state and the best one
-    static float deltamutant[SM_NUM_MODES][SH_NUM_JOINTS];
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            deltamutant[i][j] = BestParameters[i][j] - mutant[i][j];
-    
-    #if OPTIMISER_VERBOSITY > 4
-        thelog << "OPTIMISER: mutateBestParameters. Deltamutant:" << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << deltamutant[i][j] << ",";
-        thelog << endl;
-    #endif
-    
-    // calculate the desired change in parameters
-    static float deltaparameters[SM_NUM_MODES][SH_NUM_JOINTS];
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            deltaparameters[i][j] = Alpha*BestDeltaParameters[i][j] + (1-Alpha)*deltamutant[i][j];
-    
-    #if OPTIMISER_VERBOSITY > 4
-        thelog << "OPTIMISER: mutateBestParameters. Deltaparameters:" << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << deltaparameters[i][j] << ",";
-        thelog << endl;
-    #endif
-    
-    // now calculate the new parameters themselves
-    static float newparameters[SM_NUM_MODES][SH_NUM_JOINTS];
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            newparameters[i][j] = BestParameters[i][j] + deltaparameters[i][j];
-    
-    #if OPTIMISER_VERBOSITY > 2
-        thelog << "OPTIMISER: mutateBestParameters. New parameters:" << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << newparameters[i][j] << ",";
-        thelog << endl;
-    #endif
-    
-    // now put the new parameters in the steps so that they will be used
-    for (int i=0; i<SM_NUM_MODES; i++)
-    {
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-        {
-            LeftStep->StepSupportHardnesses[i][j] = newparameters[i][j];
-            RightStep->StepSupportHardnesses[i][j] = newparameters[i][j];
-        }
-    }
-    return;
-}
- 
-/* Copies the parameters in the LeftStep to the BestParameters, and updates BestDeltaParameters
-
- The Left and Right Step are also compared to see if there are any differences --- which is an error.
- */
-void Optimiser::copyToBestParameters()
-{
-    #if OPTIMISER_VERBOSITY > 4
-        thelog << "OPTIMISER: copyToBestParameters." << endl;
-        thelog << "OPTIMISER: Best Parameters before update." << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << BestParameters[i][j] << ",";
-        thelog << endl;
-    #endif
-    for (int i=0; i<SM_NUM_MODES; i++)
-    {
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-        {
-            BestDeltaParameters[i][j] = LeftStep->StepSupportHardnesses[i][j] - BestParameters[i][j];
-            BestParameters[i][j] = LeftStep->StepSupportHardnesses[i][j];
-            if (RightStep != NULL && fabs(LeftStep->StepSupportHardnesses[i][j] - RightStep->StepSupportHardnesses[i][j]) > 0.001)
-                thelog << "OPTIMISER: tickOptimiser. WARNING. The left and right steps have different parameters." << endl;
-        }
-    }
-    #if OPTIMISER_VERBOSITY > 3
-        thelog << "OPTIMISER: Best Parameters after update." << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << BestParameters[i][j] << ",";
-        thelog << endl;
-        thelog << "OPTIMISER: Difference between best and previous best parameters." << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << BestDeltaParameters[i][j] << ",";
-        thelog << endl;
-    #endif
-}
-
-/* Initialises the BestParameters to be equal to those stored in the LeftStep, and sets the BestDeltaParameters to all zeros
- */
-void Optimiser::initBestParameters()
-{
-    for (int i=0; i<SM_NUM_MODES; i++)
-    {
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-        {
-            BestDeltaParameters[i][j] = 0;
-            BestParameters[i][j] = LeftStep->StepSupportHardnesses[i][j];
-        }
-    }
-}
+}*/
 
 /* Returns a normal random variable from the normal distribution with mean and sigma
  */
-float Optimiser::normalDistribution(float mean, float sigma)
+float WalkOptimiser::normalDistribution(float mean, float sigma)
 {
     static boost::mt19937 generator(1);
     static boost::normal_distribution<float> distribution(0,1);
@@ -335,61 +235,3 @@ float Optimiser::normalDistribution(float mean, float sigma)
     
     thelog << "Mean" << mean << "SD" << sd << endl;*/
 }
-
-void Optimiser::assessParameters(Step* currentstep, float currentspeed)
-{
-    // Decide when it is time to tick the optimisation (based on the SpeedCount exceeding the required number of measurements)
-    AssessSpeedCount++;
-    AssessSpeedSum += currentspeed;
-    AssessPowerSum += (3/1000.0)*(batteryValues[E_VOLTAGE_MAX] + batteryValues[E_VOLTAGE_MAX])*fabs(batteryValues[E_CURRENT]) - 21.0;          // 21.0W is the idle power consumption of the robot
-    if (AssessSpeedCount >= AssessSpeedCountLimit)
-    {
-        float speed = AssessSpeedSum/AssessSpeedCount;
-        float power = AssessPowerSum/AssessSpeedCount;
-        float cost = power/(NAO_WEIGHT*speed);
-        
-        CurrentSpeed = speed;
-        CurrentCost = cost;
-        
-        thelog << "OPTIMISER: Assessment: Avg. Speed: " << speed << "Cost: " << power/(NAO_WEIGHT*speed) << " Falls: " << balanceFallenCount << endl;
-        thelog << "OPTIMISER: Parameters: " << endl;
-        for (int i=0; i<SM_NUM_MODES; i++)
-            for (int j=0; j<SH_NUM_JOINTS; j++)
-                thelog << currentstep->StepSupportHardnesses[i][j] << ",";
-        thelog << endl;
-        balanceFallenCount = 0;
-        AssessSpeedCount = 0;
-        AssessSpeedSum = 0;
-        AssessPowerSum = 0;
-        writeOptimiserLog();
-        Iteration++;
-    }
-}
-
-void Optimiser::initOptimiserLog()
-{
-    optimiserlog.open("/var/log/optimiser.log");
-    optimiserlog << "Time (s), Iteration, Speed, Cost, ParamNorm, BestSpeed, BestCost, BestParamNorm" << endl;
-}
-
-void Optimiser::writeOptimiserLog()
-{
-    optimiserlog << dcmTimeSinceStart << ", " << Iteration << ", " << CurrentSpeed << ", " << CurrentCost << ", ";
-    // calculate the parameter norm
-    float sqrdsum = 0;
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            sqrdsum += pow(LeftStep->StepSupportHardnesses[i][j], 2);
-    float norm = sqrt(sqrdsum);
-    optimiserlog << norm << ", ";
-    optimiserlog << BestSpeed << ", " << BestCost << ", ";
-    // calculate the parameter norm
-    sqrdsum = 0;
-    for (int i=0; i<SM_NUM_MODES; i++)
-        for (int j=0; j<SH_NUM_JOINTS; j++)
-            sqrdsum += pow(BestParameters[i][j], 2);
-    norm = sqrt(sqrdsum);
-    optimiserlog << norm << ", " << endl;
-    
-}
-
