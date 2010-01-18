@@ -61,7 +61,10 @@ NUWalk* NUWalk::getWalkEngine()
  */
 NUWalk::~NUWalk()
 {
-    // nothing needs to be deleted at this level
+    m_gait_walk_parameters.clear();
+    m_gait_arm_gains.clear();      
+    m_gait_torso_gains.clear();    
+    m_gait_leg_gains.clear();      
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -155,6 +158,30 @@ void NUWalk::walkToPoint(double time, const vector<float>& position)
 void NUWalk::doWalk()
 {
     // implementation is walk engine dependent
+}
+
+/*! @brief Sets the walk parameters to those specified in the variable
+    @param walkparameters the new walk parameters for the walk and gain engines
+ */
+void NUWalk::setWalkParameters(WalkParameters& walkparameters)
+{
+    walkparameters.getArmGains(m_gait_arm_gains);
+    walkparameters.getTorsoGains(m_gait_torso_gains);
+    walkparameters.getLegGains(m_gait_leg_gains);
+    
+    walkparameters.getParameters(m_gait_walk_parameters);
+}
+
+/*! @brief Gets the walk parameters and stores them in the passed variable
+    @param walkparameters the storage variable for the current parameters
+ */
+void NUWalk::getWalkParameters(WalkParameters& walkparameters)
+{
+    walkparameters.setArmGains(m_gait_arm_gains);
+    walkparameters.setTorsoGains(m_gait_torso_gains);
+    walkparameters.setLegGains(m_gait_leg_gains);
+    
+    walkparameters.setParameters(m_gait_walk_parameters);
 }
 
 

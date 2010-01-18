@@ -27,6 +27,7 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Walks/WalkParameters.h"
 
 class NUWalk
 {
@@ -37,24 +38,34 @@ public:
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void walkSpeed(const vector<float>& speed);
     void walkToPoint(double time, const vector<float>& position);
+    
+    virtual void setWalkParameters(WalkParameters& walkparameters);
+    virtual void getWalkParameters(WalkParameters& walkparameters);
 protected:
     virtual void doWalk();
 private:
 public:
 protected:
-    NUSensorsData* m_data;              //!< local pointer to the latest sensor data
-    NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
+    NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
+    NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
     
-    float m_speed_x;                    //!< the current x speed in cm/s
-    float m_speed_y;                    //!< the current y speed in cm/s
-    float m_speed_yaw;                  //!< the current rotation speed in rad/s
-    double m_speed_timestamp;           //!< the timestamp of the last speed command
+    float m_speed_x;                                //!< the current x speed in cm/s
+    float m_speed_y;                                //!< the current y speed in cm/s
+    float m_speed_yaw;                              //!< the current rotation speed in rad/s
+    double m_speed_timestamp;                       //!< the timestamp of the last speed command
     
-    double m_point_time;                //!< the desired time to reach the current target point in milliseconds from now
-    float m_point_x;                    //!< the current target point's x position in cm
-    float m_point_y;                    //!< the current target point's y position in cm
-    float m_point_theta;                //!< the current target point's final orientation relative to the current in radians
-    double m_point_timestamp;           //!< the timestamp of the last point command
+    double m_point_time;                            //!< the desired time to reach the current target point in milliseconds from now
+    float m_point_x;                                //!< the current target point's x position in cm
+    float m_point_y;                                //!< the current target point's y position in cm
+    float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
+    double m_point_timestamp;                       //!< the timestamp of the last point command
+    
+    // A semi-standard way of storing gait parameters for every walk engine
+    vector<vector<float> > m_gait_arm_gains;        //!< the arm gains over a gait cycle
+    vector<vector<float> > m_gait_torso_gains;      //!< the torso gains over a gait cycle
+    vector<vector<float> > m_gait_leg_gains;        //!< the leg gains over a gait cycle
+    
+    vector<vector<WalkParameters::Parameter> > m_gait_walk_parameters;  //!< the walk engine parameters over a gait cycle
 
 private:
 };
