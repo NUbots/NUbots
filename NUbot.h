@@ -46,6 +46,9 @@
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
+    #ifdef USE_WALKOPTIMISER
+        #include "Motion/Walks/Optimisation/WalkOptimiserBehaviour.h"
+    #endif
 #endif
 
 #include <pthread.h>
@@ -87,6 +90,9 @@ public:
     #endif
     #ifdef USE_MOTION
         NUMotion* motion;               //!< motion module
+        #ifdef USE_WALKOPTIMISER
+            WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
+        #endif
     #endif
 private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)
