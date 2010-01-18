@@ -38,9 +38,11 @@ inline T NORMALISE(T theta){
 
 JuppWalk::JuppWalk()
 {
-    m_step_frequency = 0.8;
-    m_leg_length = 20;          // The NAO has legs 20cm long
+    initWalkParameters();
     
+    
+    
+    m_leg_length = 20;          // The NAO has legs 20cm long
     m_current_time = nusystem->getTime();
     m_previous_time = m_current_time;
     
@@ -69,6 +71,71 @@ JuppWalk::JuppWalk()
     m_pattern_debug << "Phase (rad), LegYaw, LegPitch, LegRoll, LegLength, FootPitch, FootRoll" << endl;
 }
 
+void JuppWalk::initWalkParameters()
+{
+    m_step_frequency = 0.8;
+    m_param_phase_offset = 0.6;                 // the phase offset for the shortening, loading and swing phases
+    // weight shift parameters
+    m_param_shift_c = 0.24;                     // controls the shift amplitude
+    m_param_ankle_shift = 0.125;                // controls the fraction of the shift done by the ankles
+    // leg shortening parameters
+    m_param_short_c = 0.3;                      // controls the leg shortening amplitude
+    m_param_short_v = 2.0;                      // controls the duration of the leg shortening phase
+    // leg loading parameters
+    m_param_load_c = 0.025;                     // controls the loading amplitude
+    m_param_load_v = 2.0;                       // controls the loading duration
+    // leg swing parameters
+    m_param_swing_v = 2.0;                      // controls the swing duration
+    // balance parameters
+    m_param_balance_orientation = 0.04;         // controls the body orientation
+    m_param_balance_sagittal_sway = 0.02;       // controls the sagittal sway amplitude
+    
+    // At the moment this walk engine uses the same walk parameters for an entire walking cycle
+    m_gait_walk_parameters.push_back(vector<WalkParameters::Parameter>());
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_step_frequency, 0.1, 3.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_phase_offset, -M_PI/2.0, M_PI/2.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_shift_c, 0.0, 0.4));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_ankle_shift, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_short_c, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_short_v, 1.0, 4.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_load_c, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_load_v, 1.0, 4.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_swing_v, 1.0, 4.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_balance_orientation, -0.2, 0.2));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_balance_sagittal_sway, 0.0, 1.0));
+    
+    m_gait_arm_gains.push_back(vector<float>());
+    m_gait_arm_gains[0].push_back(50);
+    m_gait_arm_gains[0].push_back(50);
+    m_gait_arm_gains[0].push_back(25);
+    m_gait_arm_gains[0].push_back(25);
+    
+    m_gait_leg_gains.push_back(vector<float>());
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(100);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+}
+
+/*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
+ */
+void JuppWalk::getParameters()
+{
+    m_step_frequency = m_gait_walk_parameters[0][0].Value; 
+    m_param_phase_offset = m_gait_walk_parameters[0][1].Value;
+    m_param_shift_c = m_gait_walk_parameters[0][2].Value;
+    m_param_ankle_shift = m_gait_walk_parameters[0][3].Value;
+    m_param_short_c = m_gait_walk_parameters[0][4].Value;
+    m_param_short_v = m_gait_walk_parameters[0][5].Value;
+    m_param_load_c = m_gait_walk_parameters[0][6].Value;
+    m_param_load_v = m_gait_walk_parameters[0][7].Value;
+    m_param_swing_v = m_gait_walk_parameters[0][8].Value;
+    m_param_balance_orientation = m_gait_walk_parameters[0][9].Value;
+    m_param_balance_sagittal_sway = m_gait_walk_parameters[0][10].Value;
+}
+
 /*! @brief Destructor for motion module
  */
 JuppWalk::~JuppWalk()
@@ -87,6 +154,7 @@ JuppWalk::~JuppWalk()
 void JuppWalk::doWalk()
 {
     debug << "JuppWalk::doWalk()" << endl;
+    getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
     m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
     m_swing_amplitude_pitch = asin(m_speed_x/(2*m_step_frequency*m_leg_length));
@@ -170,16 +238,17 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
      Step 2. Tune the shortening phase shift. Too late and the robot will fall, too late and the feet wont come off the ground!
      Step 3. Tune the swinging phase shift. You only want to swing when the foot is in the air (this will probably be the same as the shortening phase)
      */
-    // Shifting (this isn't effectively shift the weight to the other foot)
-    float shift_amp = 0.24 + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.3*fabs(m_swing_amplitude_roll);
+    
+    
+    // Shifting
+    float shift_amp = m_param_shift_c + 0.08*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2)) + 1.3*fabs(m_swing_amplitude_roll);
     float shift = shift_amp*sin(legphase);   
-    float shift_leg_roll = -legsign*1.0*shift;
-    float shift_foot_roll = legsign*0.125*shift; // this needs to be tuned
+    float shift_leg_roll = -legsign*shift;
+    float shift_foot_roll = legsign*m_param_ankle_shift*shift;
     
     // Shortening
-    float short_v = 2.0;    // tune this! It controls the duration of the shortening
-    float short_phase = short_v*(legphase + M_PI/2.0 - 0.6);    // 3.0 controls the duration of the shortening, 0.05 determines the phase shift
-    float short_amp = 0.3 + 2*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
+    float short_phase = m_param_short_v*(legphase + M_PI/2.0 - m_param_phase_offset);
+    float short_amp = m_param_short_c + 2*sqrt(pow(m_swing_amplitude_roll, 2) + pow(m_swing_amplitude_pitch, 2));
     // if legsign and m_swing_amplitude_roll have the same sign shorten more!
     if (legsign > 0 && m_swing_amplitude_roll > 0)
         short_amp += 0.15;
@@ -194,15 +263,14 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     }
     
     // Loading
-    float load_v = 2.0;     // tune this! It controls the duration of the loading
-    float load_phase = load_v*NORMALISE(legphase + M_PI/2.0 - M_PI/short_v - 0.6) - M_PI;
-    float load_amp = 0.025 + 0.5*(1 - cos(fabs(m_swing_amplitude_pitch)));
+    float load_phase = m_param_load_v*NORMALISE(legphase + M_PI/2.0 - M_PI/m_param_short_v - m_param_phase_offset) - M_PI;
+    float load_amp = m_param_load_c + 0.5*(1 - cos(fabs(m_swing_amplitude_pitch)));
     float load_leg_length = 0;
     if (fabs(load_phase) < M_PI)
         load_leg_length = -load_amp*0.5*(cos(load_phase) + 1);
     
     // Swinging
-    float swing_phase = 2.0*(legphase + M_PI/2.0 - 0.6);          // 2.0 is the swing speed, and -0.15 is the phase shift
+    float swing_phase = m_param_swing_v*(legphase + M_PI/2.0 - m_param_phase_offset);
     float swing = 0;
     float b = -(2/(2*M_PI*2.0 - M_PI));                 // makes the reverse of the swing linear
     if (fabs(swing_phase) < M_PI/2.0)
@@ -220,7 +288,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // Balance
     float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
-    float balance_foot_pitch = 0.04 + 0.15*m_swing_amplitude_pitch - 0.04*m_swing_amplitude_pitch*cos(2*legphase + 0.7);
+    float balance_foot_pitch = m_param_balance_orientation + 0.15*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
     float balance_leg_pitch = -0.00;
     float balance_leg_roll = legsign*-0.03 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
@@ -268,12 +336,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    gains[0] = 65;
-    gains[1] = 65;
-    gains[2] = 100;
-    gains[3] = 65;
-    gains[4] = 65;
-    gains[5] = 65;
+    gains = m_gait_leg_gains[0];
 }
 
 /*! @brief Calculates the left arm angles and gains
@@ -308,17 +371,15 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
     @param legphase the phase for the arm
     @param angles the parameter to get the new gains
  */
-void JuppWalk::calculateArmGains(float legphase, vector<float>& angles)
+void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 {
-    angles[0] = 50;
-    angles[1] = 50;
-    angles[2] = 25;
-    angles[3] = 25;
+    gains = m_gait_arm_gains[0];
 }
 
 /*! @brief Calculates the gyro-based feedback terms m_gyro_foot_roll and m_gyro_foot_pitch
     
-    The formula for this function comes from Faber, 2007. "Stochastic Optimization of Bipedal Walking using Gyro Feedback and Phase Resetting"
+    The formula for this function comes from 
+    Faber, 2007. "Stochastic Optimization of Bipedal Walking using Gyro Feedback and Phase Resetting"
  */
 void JuppWalk::calculateGyroFeedback()
 {

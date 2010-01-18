@@ -43,6 +43,8 @@ public:
 protected:
     void doWalk();
 private:
+    void initWalkParameters();
+    void getParameters();
     
     void calculateGaitPhase();
     void calculateGyroFeedback();
@@ -61,9 +63,7 @@ private:
 public:
 protected:
 private:
-    float m_step_frequency;
     float m_leg_length;
-    
     float m_current_time;
     float m_previous_time;
     
@@ -75,18 +75,32 @@ private:
     float m_swing_amplitude_pitch;
     float m_swing_amplitude_yaw;
     
+    // Walk Engine Parameters that require tuning
+    float m_step_frequency;
+    float m_param_phase_offset;     // the phase offset for the shortening, loading and swing phases
+    float m_param_shift_c;         // controls the shift amplitude
+    float m_param_ankle_shift;    // controls the fraction of the shift done by the ankles
+    float m_param_short_c;          // controls the leg shortening amplitude
+    float m_param_short_v;          // controls the duration of the leg shortening phase
+    float m_param_load_c;
+    float m_param_load_v;
+    float m_param_swing_v;
+    float m_param_balance_orientation;
+    float m_param_balance_sagittal_sway;
+    
+    
     // Gyro feedback
     float m_gyro_foot_pitch;
     float m_gyro_foot_roll;
     float m_gyro_leg_pitch;
     
-    // Leg angles
+    // Legs
     vector<float> m_left_leg_angles;
     vector<float> m_left_leg_gains;
     vector<float> m_right_leg_angles;
     vector<float> m_right_leg_gains;
     
-    // Arm angles
+    // Arms
     vector<float> m_left_arm_angles;
     vector<float> m_left_arm_gains;
     vector<float> m_right_arm_angles;
