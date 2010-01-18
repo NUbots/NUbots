@@ -47,14 +47,11 @@ Getup::~Getup()
  */
 void Getup::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    if (actions == NULL)
+    if (data == NULL || actions == NULL)
         return;
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Getup::process()" << endl;
 #endif
-    static vector<float> gps(3,0);
-    if (data->getGPSValues(gps))        // This is a hack! I know the GPS is only avaliable in Webots in practice mode.
-        actions->addTeleportation(data->CurrentTime, -275, 0 , 0);
 }
 
 /*! @brief Returns true when the head is ready to be used for vision/localisation purposes.
