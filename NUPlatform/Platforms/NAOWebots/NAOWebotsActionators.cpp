@@ -169,26 +169,28 @@ void NAOWebotsActionators::copyToServos()
             {
                 if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
+                    JServo* jservo = (JServo*) m_servos[i];
                     if (times[i] > m_current_time)
                     {
-                        float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
+                        float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
                         float v = 1000*(positions[i] - c)/dt;
                         // we need to clip to velocity to the max
-                        float maxv = ((JServo*) m_servos[i])->getMaxVelocity();
+                        float maxv = jservo->getMaxVelocity();
                         if (v < -maxv)
                             v = -maxv;
                         else if (v > maxv)
                             v = maxv;
-                        m_servos[i]->setControlP(gains[i]/10.0);
-                        m_servos[i]->setVelocity(fabs(v));
-                        m_servos[i]->setPosition(positions[i]);
+                        jservo->setControlP(gains[i]/10.0);
+                        jservo->setMaxForce(gains[i]*jservo->getMaxForce()/100.0);
+                        jservo->setVelocity(fabs(v));
+                        jservo->setPosition(positions[i]);
                     }
                     else
                     {   // the command has already past, we should get there as fast as possible
-                        m_servos[i]->setControlP(gains[i]/10.0);
-                        m_servos[i]->setVelocity(((JServo*) m_servos[i])->getMaxVelocity());
-                        m_servos[i]->setPosition(positions[i]);
+                        jservo->setControlP(gains[i]/10.0);
+                        jservo->setVelocity(jservo->getMaxVelocity());
+                        jservo->setPosition(positions[i]);
                     }
                 }
             }

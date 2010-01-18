@@ -41,6 +41,7 @@ public:
     virtual void setVelocity(double vel);
     virtual void setPosition(double position);
     virtual void setForce(double force);
+    virtual void setMaxForce(double maxforce);
     virtual void setControlP(double p);
     
     double getTargetAcceleration() const;
@@ -50,14 +51,17 @@ public:
     double getTargetGain() const;
     
     double getMaxVelocity() const;
+    double getMaxForce() const;
 private:
     double m_target_acceleration;
     double m_target_velocity;
     double m_target_position;
     double m_target_force;
     double m_target_gain;
+    double m_target_max_force;
     
     double m_max_velocity;
+    double m_max_force;
 };
 
 #endif
