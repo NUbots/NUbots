@@ -306,6 +306,22 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
+
+            if(j == lineLength-1)
+            {
+                //! End Of Screen detected: Generate new segment and add to the line
+                if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                {
+                    tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                    tempLine->addSegement(tempTransition);
+                    qDebug() << "End Of Line Detected: " << currentPoint.x << ","<< currentPoint.y;
+                }
+                tempStartPoint = currentPoint;
+                beforeColour = currentColour;
+                currentColour = afterColour;
+                continue;
+            }
+
             if(checkIfBufferSame(colourBuff))
             {
                 if(currentColour != afterColour)
@@ -346,18 +362,9 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     currentColour = afterColour;
 
                 }
-                if(j == lineLength-1)
-                {
-                    //! End Of Screen detected: Generate new segment and add to the line
-                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
-                    {
-                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
-                        tempLine->addSegement(tempTransition);
-                    }
-                    tempStartPoint = currentPoint;
-                    beforeColour = currentColour;
-                    currentColour = afterColour;
-                }
+
+
+
             }
         }
 
@@ -375,6 +382,7 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
     const int HORZ_JOIN_LIMIT = 2;
     const int HORZ_JOIN_SCALING = 4;
     const int SEG_COUNT_THRESHOLD = 12;
+    const int COLOUR_SEG_THRESHOLD = 5;
 
     if (!segments.empty())
     {
@@ -411,12 +419,14 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
             isSegUsed[nextRawSeg] = true;
             rawSegsLeft--;
 
+            int teamColour = 0;
             int min_x, max_x, min_y, max_y, segCount;
             min_x = segments.at(nextRawSeg).getStartPoint().x;
             max_x = segments.at(nextRawSeg).getStartPoint().x;
             min_y = segments.at(nextRawSeg).getStartPoint().y;
             max_y = segments.at(nextRawSeg).getEndPoint().y;
             segCount = 0;
+
             //Build candidate
             while (!qUnprocessed.empty())
             {
@@ -424,6 +434,16 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                 thisSeg = qUnprocessed.front();
                 qUnprocessed.pop();
                 segCount++;
+
+                if ( segments.at(thisSeg).getColour() == ClassIndex::shadow_blue)
+                {
+                    teamColour++;
+                }
+
+                if ( segments.at(thisSeg).getColour() == ClassIndex::red)
+                {
+                    teamColour--;
+                }
 
                 if ( min_x > segments.at(thisSeg).getStartPoint().x)
                     min_x = segments.at(thisSeg).getStartPoint().x;
@@ -516,8 +536,23 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                  segCount > SEG_COUNT_THRESHOLD)
             {
                 //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y) << ", dist from bottom: " << (120 - max_y) ;
-                RobotCandidate temp(min_x, min_y, max_x, max_y);
-                candidateList.push_back(temp);
+                if (teamColour >= COLOUR_SEG_THRESHOLD)
+                {
+                    RobotCandidate temp(min_x, min_y, max_x, max_y, ClassIndex::shadow_blue);
+                    candidateList.push_back(temp);
+                }
+                else if (teamColour <= -COLOUR_SEG_THRESHOLD)
+                {
+                    RobotCandidate temp(min_x, min_y, max_x, max_y, ClassIndex::red);
+                    candidateList.push_back(temp);
+                }
+                else
+                {
+                    RobotCandidate temp(min_x, min_y, max_x, max_y);
+                    candidateList.push_back(temp);
+                }
+
+
             }
 
 
