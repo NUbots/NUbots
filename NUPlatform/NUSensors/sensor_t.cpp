@@ -185,6 +185,14 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
     return input;
 }
 
-
+/*! @brief Overloaded subscript operator has been written for easy access to sensor data.
+ */
+float& sensor_t::operator[] (const int index)
+{
+    if (index < Data.size())
+        return Data[index];
+    else
+        return Data[Data.size() - 1];
+}
 
 

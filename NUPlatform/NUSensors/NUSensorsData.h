@@ -125,6 +125,9 @@ public:
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
     
+    // Common sub-get methods
+    bool isFallen();
+    
     // Get methods for other sensors that have logical groups
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
