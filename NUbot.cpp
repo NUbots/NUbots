@@ -87,7 +87,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #ifdef USE_MOTION
         motion = new NUMotion();
         #ifdef USE_WALKOPTIMISER
-            walkoptimiser = new WalkOptimiserBehaviour();
+            walkoptimiser = new WalkOptimiserBehaviour(platform, motion->m_walk);
         #endif
     #endif
     #ifdef USE_NETWORK
@@ -453,6 +453,9 @@ void* runThreadMotion(void* arg)
         data = nubot->platform->sensors->update();
         #ifdef USE_MOTION
             nubot->motion->process(data, actions);
+            #ifdef USE_WALKOPTIMISER
+                nubot->walkoptimiser->process(data, actions);
+            #endif
         #endif
         nubot->platform->actionators->process(actions);
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -486,8 +489,8 @@ void* runThreadVision(void* arg)
     JobList joblist = JobList();
     
     vector<float> walkspeed(3, 0);
-    walkspeed[0] = 7;       // max 10cm/s min -20cm/s
-    walkspeed[1] = 0;      // max 5cm/s
+    walkspeed[0] = 4;       // max 10cm/s min -20cm/s
+    walkspeed[1] = 3;      // max 5cm/s
     walkspeed[2] = 0.0;
     
 #ifdef THREAD_VISION_MONITOR_TIME
@@ -525,9 +528,6 @@ void* runThreadVision(void* arg)
         //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
         #ifdef USE_BEHAVIOUR
             nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
-        #endif
-        #ifdef USE_WALKOPTIMISER
-            nubot->walkoptimiser->process(joblist);
         #endif
         
         if (nusystem->getTime() > 0000)

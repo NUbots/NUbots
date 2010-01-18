@@ -45,7 +45,7 @@ protected:
 private:
 public:
 protected:
-private:
+public:         //! @todo TODO: Fix this. Jason needs a backdoor to the walk engine NOW!
     // essential motion components
     FallProtection* m_fall_protection;
     Getup* m_getup;
