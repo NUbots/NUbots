@@ -89,6 +89,9 @@ void JuppWalk::initWalkParameters()
     // balance parameters
     m_param_balance_orientation = 0.04;         // controls the body orientation
     m_param_balance_sagittal_sway = 0.02;       // controls the sagittal sway amplitude
+    // gyro parameters
+    m_param_gyro_roll = 0.1;
+    m_param_gyro_pitch = 0.1;
     
     // At the moment this walk engine uses the same walk parameters for an entire walking cycle
     m_gait_walk_parameters.push_back(vector<WalkParameters::Parameter>());
@@ -103,6 +106,12 @@ void JuppWalk::initWalkParameters()
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_swing_v, 1.0, 4.0));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_balance_orientation, -0.2, 0.2));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_balance_sagittal_sway, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_roll, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_pitch, 0.0, 1.0));
+    
+    m_gait_max_speeds.push_back(7.0);
+    m_gait_max_speeds.push_back(3.0);
+    m_gait_max_speeds.push_back(0.5);
     
     m_gait_arm_gains.push_back(vector<float>());
     m_gait_arm_gains[0].push_back(50);
@@ -134,6 +143,8 @@ void JuppWalk::getParameters()
     m_param_swing_v = m_gait_walk_parameters[0][8].Value;
     m_param_balance_orientation = m_gait_walk_parameters[0][9].Value;
     m_param_balance_sagittal_sway = m_gait_walk_parameters[0][10].Value;
+    m_param_gyro_roll = m_gait_walk_parameters[0][11].Value;
+    m_param_gyro_pitch = m_gait_walk_parameters[0][12].Value;
 }
 
 /*! @brief Destructor for motion module
@@ -386,27 +397,25 @@ void JuppWalk::calculateGyroFeedback()
     static vector<float> values;        // [vx, vy, vz]
     m_data->getGyroValues(values);
 
-    static const float roll_threshold = 0.50;
-    static const float roll_gain = 0.5;
-    static const float pitch_threshold = 0.10;
-    static const float pitch_gain = 0.2;           
+    static const float roll_threshold = 0.10;
+    static const float pitch_threshold = 0.10;          
     if (values[0] > roll_threshold)
-        m_gyro_foot_roll = -roll_gain*(values[0] - roll_threshold);
+        m_gyro_foot_roll = -m_param_gyro_roll*(values[0] - roll_threshold);
     else if (values[0] < -roll_threshold)
-        m_gyro_foot_roll = -roll_gain*(values[0] + roll_threshold);
+        m_gyro_foot_roll = -m_param_gyro_roll*(values[0] + roll_threshold);
     else
         m_gyro_foot_roll = 0;
 
     
     if (values[1] > pitch_threshold)
     {
-        m_gyro_foot_pitch = -pitch_gain*(values[1] - pitch_threshold);
-        m_gyro_leg_pitch = -0.5*pitch_gain*(values[1] - pitch_threshold);
+        m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] - pitch_threshold);
+        m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] - pitch_threshold);
     }
     else if (values[1] < -pitch_threshold)
     {
-        m_gyro_foot_pitch = -pitch_gain*(values[1] + pitch_threshold);
-        m_gyro_leg_pitch = -0.5*pitch_gain*(values[1] + pitch_threshold);
+        m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] + pitch_threshold);
+        m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] + pitch_threshold);
     }
     else
     {

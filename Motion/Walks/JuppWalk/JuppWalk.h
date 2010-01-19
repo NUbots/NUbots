@@ -87,6 +87,8 @@ private:
     float m_param_swing_v;
     float m_param_balance_orientation;
     float m_param_balance_sagittal_sway;
+    float m_param_gyro_roll;
+    float m_param_gyro_pitch;
     
     
     // Gyro feedback
