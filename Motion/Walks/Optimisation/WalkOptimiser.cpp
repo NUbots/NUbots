@@ -23,13 +23,16 @@ WalkOptimiser::WalkOptimiser(const WalkParameters& walkparameters, bool minimise
     m_current_parameters = walkparameters;
     
     m_minimise = minimise;
-    m_best_performance = 0;
+    if (m_minimise)
+        m_best_performance = 100;
+    else
+        m_best_performance = 0;
     m_alpha = 0.0;
     m_count_since_last_improvement = 0;
     m_reset_limit = 10;
     
     m_improvement = 0;
-    m_previous_improvement = 10000;
+    m_previous_improvement = 1e100;
 }
 
 WalkOptimiser::~WalkOptimiser()
@@ -40,6 +43,7 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
 {
     if (m_minimise == true && performance < m_best_performance || m_minimise == false && performance > m_best_performance)
     {
+        cout << "Improvement!" << endl;
         m_improvement = m_best_performance - performance;
         m_alpha = 0.9*fabs(tanh(fabs(m_improvement/m_previous_improvement)));
         m_best_parameters = m_current_parameters;
