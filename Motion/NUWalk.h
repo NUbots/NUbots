@@ -66,6 +66,7 @@ protected:
     vector<vector<float> > m_gait_leg_gains;        //!< the leg gains over a gait cycle
     
     vector<vector<WalkParameters::Parameter> > m_gait_walk_parameters;  //!< the walk engine parameters over a gait cycle
+    vector<float> m_gait_max_speeds;                //!< the maximum allowed speeds in the x,y,theta directions
 
 private:
 };

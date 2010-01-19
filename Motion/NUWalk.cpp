@@ -62,6 +62,7 @@ NUWalk* NUWalk::getWalkEngine()
 NUWalk::~NUWalk()
 {
     m_gait_walk_parameters.clear();
+    m_gait_max_speeds.clear();
     m_gait_arm_gains.clear();      
     m_gait_torso_gains.clear();    
     m_gait_leg_gains.clear();      
@@ -92,30 +93,34 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUWalk::walkSpeed(const vector<float>& speed)
 {
-    if (speed.size() == 3)
+    static float temp_x, temp_y, temp_yaw;
+    temp_x = 0;
+    temp_y = 0;
+    temp_yaw = 0;
+    if (speed.size() > 0)
     {
-        m_speed_x = speed[0];
-        m_speed_y = speed[1];
-        m_speed_yaw = speed[2];
+        if (m_gait_max_speeds.size() > 0 && fabs(temp_x) > fabs(m_gait_max_speeds[0]))      // if clipping is available, and the input is greater than the limit, then clip it
+            temp_x = (fabs(temp_x)/temp_x)*m_gait_max_speeds[0];
+        else
+            temp_x = speed[0];
     }
-    else if (speed.size() == 2)
+    if (speed.size() > 1)
     {
-        m_speed_x = speed[0];
-        m_speed_y = speed[1];
-        m_speed_yaw = 0;
+        if (m_gait_max_speeds.size() > 1 && fabs(temp_y) > fabs(m_gait_max_speeds[1]))      // if clipping is available, and the input is greater than the limit, then clip it
+            temp_y = (fabs(temp_y)/temp_y)*m_gait_max_speeds[1];
+        else
+            temp_y = speed[1];
     }
-    else if (speed.size() == 1)
+    if (speed.size() > 2)
     {
-        m_speed_x = speed[0];
-        m_speed_y = 0;
-        m_speed_yaw = 0;
+        if (m_gait_max_speeds.size() > 2 && fabs(temp_yaw) > fabs(m_gait_max_speeds[2]))      // if clipping is available, and the input is greater than the limit, then clip it
+            temp_yaw = (fabs(temp_yaw)/temp_yaw)*m_gait_max_speeds[2];
+        else
+            temp_yaw = speed[2];
     }
-    else if (speed.size() == 0)
-    {
-        m_speed_x = 0;
-        m_speed_y = 0;
-        m_speed_yaw = 0;
-    }
+    m_speed_x = temp_x;
+    m_speed_y = temp_y;
+    m_speed_yaw = temp_yaw;
     m_speed_timestamp = nusystem->getTime();
 }
 
@@ -170,6 +175,7 @@ void NUWalk::setWalkParameters(WalkParameters& walkparameters)
     walkparameters.getLegGains(m_gait_leg_gains);
     
     walkparameters.getParameters(m_gait_walk_parameters);
+    walkparameters.getMaxSpeeds(m_gait_max_speeds);
 }
 
 /*! @brief Gets the walk parameters and stores them in the passed variable
@@ -182,6 +188,7 @@ void NUWalk::getWalkParameters(WalkParameters& walkparameters)
     walkparameters.setLegGains(m_gait_leg_gains);
     
     walkparameters.setParameters(m_gait_walk_parameters);
+    walkparameters.setMaxSpeeds(m_gait_max_speeds);
 }
 
 
