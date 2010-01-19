@@ -135,6 +135,10 @@ void WalkParameters::setParameters(const vector<vector<Parameter> >& parameters)
 
 void WalkParameters::summaryTo(ostream& output)
 {
+    output << "WalkParameters: ";
+    for (int i=0; i<size(); i++)
+        output << (*this)[i] << " ";
+    output << endl;
 }
 
 void WalkParameters::csvTo(ostream& output)

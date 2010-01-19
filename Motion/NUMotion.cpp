@@ -176,7 +176,7 @@ void NUMotion::process(JobList& jobs)
 #endif  // USE_WALK
         
 #ifdef USE_KICK
-        if ((*it)->getID() == Job::MOTION_KICK)
+        else if ((*it)->getID() == Job::MOTION_KICK)
         {   // process a kick job
             static double time;
             static vector<float> kickposition;

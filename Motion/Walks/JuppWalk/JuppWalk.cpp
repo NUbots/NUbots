@@ -55,7 +55,7 @@ JuppWalk::JuppWalk()
     m_swing_amplitude_yaw = 0;
     
     // Initialise the leg values
-    // @todo Get the lengths of these angles and gains from m_actions
+    //! @todo Get the lengths of these angles and gains from m_actions
     m_left_leg_angles = vector<float> (6, 0);
     m_left_leg_gains = vector<float> (6, 0);
     m_right_leg_angles = vector<float> (6, 0);

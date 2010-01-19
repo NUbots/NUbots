@@ -40,19 +40,38 @@ public:
     ~WalkOptimiserBehaviour();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(JobList& joblist);
 protected:
+    void startTrial();
+    void runTrial();
+    void finishTrial();
+    void respawn();
 private:
 public:
 protected:
 private:
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
+    JobList* m_joblist;
     
     NUWalk* m_walk;
     WalkParameters m_walk_parameters;
     WalkOptimiser* m_optimiser;
     
+    enum State 
+    {
+        Initial,
+        Start,
+        Trial
+    };
+    State m_state, m_previous_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
+    float m_target_speed;
+    float m_max_target_speed;
+    
+    double m_trial_start_time;
+    float m_trial_start_x, m_trial_start_y;
+    float m_trial_energy_used;
 };
 
 #endif

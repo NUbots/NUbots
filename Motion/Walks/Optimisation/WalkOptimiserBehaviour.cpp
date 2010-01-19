@@ -41,12 +41,13 @@ inline T NORMALISE(T theta){
  */
 WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p_walk)
 {
+    // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_optimiser = new WalkOptimiser(m_walk_parameters);
+    m_optimiser = new WalkOptimiser(m_walk_parameters, false);
     
     // specify respawn location based on the player and team number
-    m_respawn_x = -290;
+    m_respawn_x = -270;
     m_respawn_bearing = 0;
     int playernum, teamnum;
     p_platform->getNumber(playernum);
@@ -54,17 +55,33 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     if (teamnum == 0)
     {
         if (playernum == 1)
+        {
             m_respawn_y = 150;
+            m_max_target_speed = 3;
+        }
         else
+        {
             m_respawn_y = 50;
+            m_max_target_speed = 6;
+        }
     }
     else 
     {
         if (playernum == 1)
+        {
             m_respawn_y = -50;
+            m_max_target_speed = 9;
+        }
         else
+        {
             m_respawn_y = -150;
+            m_max_target_speed = 12;
+        }
     }
+    
+    // start the behaviour in the initial state
+    m_state = Initial;
+    m_previous_state = m_state;
 }
 
 WalkOptimiserBehaviour::~WalkOptimiserBehaviour()
@@ -78,19 +95,100 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
 {   
     if (data == NULL || actions == NULL)
         return;
-    else
-    {
-        m_data = data;
-        m_actions = actions;
-    }
+    m_data = data;
+    m_actions = actions;
     
+    if (m_state == Trial)
+        runTrial();
+}
+
+void WalkOptimiserBehaviour::process(JobList& joblist)
+{
+    if (m_data == NULL || m_actions == NULL)
+        return;
+    
+    m_previous_state = m_state;
     if (m_data->isFallen())
-    {
-        actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
-        m_optimiser->getNewParameters(m_walk_parameters);
-    }
+        respawn();
     else 
     {
+        if (m_state == Initial)         // wait until 'playing'
+        {
+            if (m_data->CurrentTime > 15000)
+                respawn();
+        }
+        else if (m_state == Start)      // accelerate up to 'target' speed
+        {
+            static float previoustime = m_data->CurrentTime;
+            static vector<float> speed(3,0);
+            static WalkJob* walkjob = new WalkJob(speed);
+            joblist.addMotionJob(walkjob);
+            if (m_target_speed < m_max_target_speed)
+                m_target_speed += 0.01*((m_data->CurrentTime - previoustime)/1000);
+            else
+                startTrial();
+
+            speed[0] = m_target_speed;
+            walkjob->setSpeed(speed);
+        }
+        else if (m_state == Trial)        // wait until we have enough data then tick the optimiser
+        {
+            if ((m_data->CurrentTime - m_trial_start_time) > 20000)
+                finishTrial();
+        }
     }
 }
 
+void WalkOptimiserBehaviour::respawn()
+{
+    m_target_speed = 0;
+    m_state = Start;
+    m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
+    m_optimiser->getNewParameters(m_walk_parameters);
+    m_walk->setWalkParameters(m_walk_parameters);
+}
+
+void WalkOptimiserBehaviour::startTrial()
+{
+    m_state = Trial;
+    m_trial_start_time = m_data->CurrentTime;
+    static vector<float> gps(3,0);
+    m_data->getGPSValues(gps);
+    m_trial_start_x = gps[0];
+    m_trial_start_y = gps[1];
+    m_trial_energy_used = 0;
+    cout << "Starting Trial at [" << gps[0] << "," << gps[1] << "] " << m_trial_start_time << endl;
+}
+
+void WalkOptimiserBehaviour::runTrial()
+{
+    static vector<float> previouspositions;
+    static vector<float> positions;
+    static vector<float> torques;
+    m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
+    m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
+    
+    if (previouspositions.size() != 0)
+    {
+        for (int i=0; i<positions.size(); i++)
+            m_trial_energy_used += fabs(torques[i]*(positions[i] - previouspositions[i]));
+    }
+    
+    previouspositions = positions;
+}
+
+void WalkOptimiserBehaviour::finishTrial()
+{
+    m_state = Start;
+    static vector<float> gps(3,0);
+    m_data->getGPSValues(gps);
+    float distance = sqrt(pow(gps[0] - m_trial_start_x,2) + pow(gps[1] - m_trial_start_y,2));
+    float time = (m_data->CurrentTime - m_trial_start_time)/1000.0;
+    if (time < 15)
+        time = 15;
+    float speed = distance/time;
+    float cost = (m_trial_energy_used+20*time)*9.81*4.8/(distance*100);
+    m_optimiser->tick(cost, m_walk_parameters);
+    respawn();
+    cout << "Finished Trial with speed: " << speed << " cost " << cost << endl;
+}

@@ -81,16 +81,8 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 15000, pos, vel, gain);
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
-    Camera* camera = m_platform->getCamera("camera");
-    camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
-    
-    vector<float> data (1,0);
-    data[0] = 0;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 5000, data);
-    data[0] = 1;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
-    
-    //m_data->addTeleportation(nusystem->getTime() + 16000, 100, 100, 1.57);
+    //Camera* camera = m_platform->getCamera("camera");
+    //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -175,14 +167,19 @@ void NAOWebotsActionators::copyToServos()
                         float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
                         float v = 1000*(positions[i] - c)/dt;
-                        // we need to clip to velocity to the max
+                        // we need to clip the velocity, and the gain to the max
                         float maxv = jservo->getMaxVelocity();
                         if (v < -maxv)
                             v = -maxv;
                         else if (v > maxv)
                             v = maxv;
-                        jservo->setControlP(gains[i]/10.0);
-                        jservo->setMaxForce(gains[i]*jservo->getMaxForce()/100.0);
+                        float g = gains[i];
+                        if (g > 100)
+                            g = 100;
+                        else if (g < 0)
+                            g = 0;
+                        jservo->setControlP(g/10.0);
+                        jservo->setMaxForce(g*jservo->getMaxForce()/100.0);
                         jservo->setVelocity(fabs(v));
                         jservo->setPosition(positions[i]);
                     }

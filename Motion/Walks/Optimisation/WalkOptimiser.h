@@ -30,52 +30,28 @@
 class WalkOptimiser
 {
     public:
-        WalkOptimiser(const WalkParameters& walkparameters);
+        WalkOptimiser(const WalkParameters& walkparameters, bool minimise = true);
         ~WalkOptimiser();
     
         void getNewParameters(WalkParameters& walkparameters);
-        void doOptimisation();
+        void tick(float performance, WalkParameters& nextparameters);
     private:
-        void tickOptimiser(float speed, float power);
+        void mutateBestParameters(WalkParameters& walkparameters);
         void mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters);
-    
-        void initBestParameters();
-        void copyToBestParameters();
     
         float normalDistribution(float mean, float sigma);
 
-    public:
-        float BestSpeed;                               // the speed in cm/s of the best set of parameters
-        float BestCost;                                // the cost of transport in J/(Ncm)
+    private:
         WalkParameters m_best_parameters;              // the best set of parameters
         WalkParameters m_best_delta_parameters;
-    
         WalkParameters m_current_parameters;
-    private:
-    
-        int SpeedCount;             // the number of speeds received with the current settings
-        float SpeedSum;             // the cumulative sum of the received speeds 
-        int SpeedCountLimit;        // the number of speeds required before progressing the optimisation
-       
-        float SpeedImprovement;     // the last speed improvement
-        float SpeedPreviousImprovement;     // the previous speed improvement
-        float CostImprovement;
-        float CostPreviousImprovement;
-    
-        float PowerSum;             // the cumulative sums of the power
-    
-        float Alpha;
+        
+        bool m_minimise;
+        float m_best_performance;
+        float m_alpha;
         int m_reset_limit;
         int m_count_since_last_improvement;
-    
-        int AssessSpeedCount;       // the number of speeds received with the current settings that will be used to assess the speed accurately
-        float AssessSpeedSum;       // the sum
-        float AssessPowerSum;
-        int AssessSpeedCountLimit;  // the number of speeds required before an assessment is reported.
-    
-        int Iteration;
-        float CurrentSpeed;
-        float CurrentCost;
+        float m_improvement, m_previous_improvement;
 };
 
 

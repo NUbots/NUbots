@@ -414,6 +414,10 @@ int NUbot::waitForVisionCompletion()
     The thread is set up to run when signalled by signalMotion(). It will quickly grab the
     new sensor data, compute a response, and then send the commands to the actionators.
  
+    Note that you can not safely use the job interface in this thread, if you need to add
+    jobs provide a process function for this thread, and another process for the behaviour 
+    thread.
+ 
     @param arg a pointer to the nubot
  */
 void* runThreadMotion(void* arg)
@@ -486,12 +490,9 @@ void* runThreadVision(void* arg)
     debug << "NUbot::runThreadVision: Starting." << endl;
     
     NUbot* nubot = (NUbot*) arg;                // the nubot
+    NUSensorsData* data = NULL;
+    NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
-    
-    vector<float> walkspeed(3, 0);
-    walkspeed[0] = 4;       // max 10cm/s min -20cm/s
-    walkspeed[1] = 3;      // max 5cm/s
-    walkspeed[2] = 0.0;
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -521,7 +522,7 @@ void* runThreadVision(void* arg)
 #endif
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //          image = nubot->platform->camera->getData()
-        //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
+        data = nubot->platform->sensors->getData();
         //                 odometry = nubot->motion->getData()                // There is no deep copy here either
         //      gamectrl, teaminfo = nubot->network->getData()
         //          fieldobj = nubot->vision->process(image, data, gamectrl)
@@ -529,19 +530,10 @@ void* runThreadVision(void* arg)
         #ifdef USE_BEHAVIOUR
             nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
         #endif
-        
-        if (nusystem->getTime() > 0000)
-            joblist.addMotionJob(new WalkJob(walkspeed));
-         
-        
-        /*if (nusystem->getTime() > 16000 && nusystem->getTime() - lastupdatetime > 10000)
-        {
-            lastupdatetime = nusystem->getTime();
-            walkspeed[0] += 1;
-            joblist.addMotionJob(new WalkJob(walkspeed));
-            cout << "walkspeed:" << walkspeed[0] << endl;
-        }*/
         #ifdef USE_MOTION
+            #ifdef USE_WALKOPTIMISER
+                nubot->walkoptimiser->process(joblist);
+            #endif
             nubot->motion->process(joblist);
         #endif
         //          cmds = nubot->lcs->process(lcsactions)
