@@ -109,7 +109,12 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
     
     m_previous_state = m_state;
     if (m_data->isFallen())
-        respawn();
+    {
+        if (m_state == Trial)
+            finishTrial();
+        else
+            respawn();
+    }
     else 
     {
         if (m_state == Initial)         // wait until 'playing'
@@ -119,12 +124,11 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         }
         else if (m_state == Start)      // accelerate up to 'target' speed
         {
-            static float previoustime = m_data->CurrentTime;
             static vector<float> speed(3,0);
             static WalkJob* walkjob = new WalkJob(speed);
             joblist.addMotionJob(walkjob);
             if (m_target_speed < m_max_target_speed)
-                m_target_speed += 0.01*((m_data->CurrentTime - previoustime)/1000);
+                m_target_speed += 0.03;
             else
                 startTrial();
 
@@ -187,7 +191,7 @@ void WalkOptimiserBehaviour::finishTrial()
     if (time < 15)
         time = 15;
     float speed = distance/time;
-    float cost = (m_trial_energy_used+20*time)*9.81*4.8/(distance*100);
+    float cost = (2*m_trial_energy_used+20*time)*9.81*4.8/(distance*100);       // assume CPU draws 20W and the motor gears are 50% efficient
     m_optimiser->tick(cost, m_walk_parameters);
     respawn();
     cout << "Finished Trial with speed: " << speed << " cost " << cost << endl;
