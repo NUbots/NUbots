@@ -67,7 +67,6 @@ private:
     State m_state, m_previous_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
     float m_target_speed;
-    float m_max_target_speed;
     
     double m_trial_start_time;
     float m_trial_start_x, m_trial_start_y;

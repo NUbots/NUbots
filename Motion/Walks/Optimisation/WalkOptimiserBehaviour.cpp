@@ -44,7 +44,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_optimiser = new WalkOptimiser(m_walk_parameters, false);
+    m_optimiser = new WalkOptimiser(m_walk_parameters);
     
     // specify respawn location based on the player and team number
     m_respawn_x = -270;
@@ -55,28 +55,16 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     if (teamnum == 0)
     {
         if (playernum == 1)
-        {
             m_respawn_y = 150;
-            m_max_target_speed = 3;
-        }
         else
-        {
             m_respawn_y = 50;
-            m_max_target_speed = 6;
-        }
     }
     else 
     {
         if (playernum == 1)
-        {
             m_respawn_y = -50;
-            m_max_target_speed = 9;
-        }
         else
-        {
             m_respawn_y = -150;
-            m_max_target_speed = 12;
-        }
     }
     
     // start the behaviour in the initial state
@@ -127,7 +115,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
             static vector<float> speed(3,0);
             static WalkJob* walkjob = new WalkJob(speed);
             joblist.addMotionJob(walkjob);
-            if (m_target_speed < m_max_target_speed)
+            if (m_target_speed < m_walk_parameters[0])
                 m_target_speed += 0.03;
             else
                 startTrial();
@@ -193,6 +181,7 @@ void WalkOptimiserBehaviour::finishTrial()
     float speed = distance/time;
     float cost = (2*m_trial_energy_used+20*time)*9.81*4.8/(distance*100);       // assume CPU draws 20W and the motor gears are 50% efficient
     m_optimiser->tick(cost, m_walk_parameters);
+    m_walk_parameters.summaryTo(cout);
     respawn();
     cout << "Finished Trial with speed: " << speed << " cost " << cost << endl;
 }
