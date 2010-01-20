@@ -218,17 +218,9 @@ void JuppWalk::calculateGaitPhase()
     
     m_current_time = nusystem->getTime();
     if (totalpreviousleftsums == 0 && leftsum > 20)
-    {
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset - M_PI + m_param_phase_reset_offset;
-        cout << M_PI/m_param_short_v + m_param_phase_offset - M_PI << endl;
-        cout << "Phase: " << m_gait_phase << endl;
-    }
     else if (totalpreviousrightsums == 0 && rightsum > 20)
-    {
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
-        cout << M_PI/m_param_short_v + m_param_phase_offset << endl;
-        cout << "Phase: " << m_gait_phase << endl;
-    }
     else
         m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
 
