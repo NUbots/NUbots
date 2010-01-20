@@ -67,19 +67,6 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableOtherActionators(m_other_names);
     
-    
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 350, 0, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 4000, -1.57, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 8000, 1.57, 1, 30);
-    
-    vector<float> pos (2, 0);
-    vector<float> vel (2, 1);
-    vector<float> gain (2, 100);
-    pos[1] = -0.7;
-    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 10000, pos, vel, gain);
-    pos[1] = 0;
-    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 15000, pos, vel, gain);
-    
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
     //Camera* camera = m_platform->getCamera("camera");
     //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
@@ -162,7 +149,12 @@ void NAOWebotsActionators::copyToServos()
                 if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
                     JServo* jservo = (JServo*) m_servos[i];
-                    if (times[i] > m_current_time)
+                    float g = gains[i];
+                    if (g > 100)
+                        g = 100;
+                    else if (g <= 0)
+                        g = 0.01;
+                    if (times[i] >= m_current_time)
                     {
                         float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
@@ -173,11 +165,6 @@ void NAOWebotsActionators::copyToServos()
                             v = -maxv;
                         else if (v > maxv)
                             v = maxv;
-                        float g = gains[i];
-                        if (g > 100)
-                            g = 100;
-                        else if (g < 0)
-                            g = 0;
                         jservo->setControlP(g/10.0);
                         jservo->setMaxForce(g*jservo->getMaxForce()/100.0);
                         jservo->setVelocity(fabs(v));
@@ -185,7 +172,7 @@ void NAOWebotsActionators::copyToServos()
                     }
                     else
                     {   // the command has already past, we should get there as fast as possible
-                        jservo->setControlP(gains[i]/10.0);
+                        jservo->setControlP(g/10.0);
                         jservo->setVelocity(jservo->getMaxVelocity());
                         jservo->setPosition(positions[i]);
                     }
