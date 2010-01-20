@@ -33,6 +33,9 @@
 #include "../WalkParameters.h"
 #include "WalkOptimiser.h"
 
+#include <string>
+using namespace std;
+
 class WalkOptimiserBehaviour
 {
 public:
@@ -44,15 +47,18 @@ public:
 protected:
     void startTrial();
     void runTrial();
+    void perturbRobot();
     void finishTrial();
     void respawn();
+    
+    void loadOptimiser();
+    void saveOptimiser();
 private:
 public:
 protected:
 private:
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
-    JobList* m_joblist;
     
     NUWalk* m_walk;
     WalkParameters m_walk_parameters;
@@ -67,10 +73,14 @@ private:
     State m_state, m_previous_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
     float m_target_speed;
+    float m_target_trial_duration;
     
     double m_trial_start_time;
     float m_trial_start_x, m_trial_start_y;
     float m_trial_energy_used;
+    
+    // Serialisation
+    string m_saved_optimiser_filename;
 };
 
 #endif

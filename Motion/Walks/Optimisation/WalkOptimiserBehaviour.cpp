@@ -25,6 +25,10 @@
 #include "Tools/debug.h"
 
 #include <math.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+using namespace std;
 
 //! @todo TODO: put M_PI and NORMALISE somewhere else
 #ifndef M_PI
@@ -45,13 +49,20 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
     m_optimiser = new WalkOptimiser(m_walk_parameters);
+
+    int playernum, teamnum;
+    p_platform->getNumber(playernum);
+    p_platform->getTeamNumber(teamnum);
+    m_optimiser = new WalkOptimiser(m_walk_parameters);
+    // check to see if there is an existing saved optimiser. I do this by trying to open it
+    stringstream filenamestream;
+    filenamestream << "optimiser" << teamnum << playernum << ".log";
+    m_saved_optimiser_filename = filenamestream.str();
+    loadOptimiser();
     
     // specify respawn location based on the player and team number
     m_respawn_x = -270;
     m_respawn_bearing = 0;
-    int playernum, teamnum;
-    p_platform->getNumber(playernum);
-    p_platform->getTeamNumber(teamnum);
     if (teamnum == 0)
     {
         if (playernum == 1)
@@ -70,6 +81,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // start the behaviour in the initial state
     m_state = Initial;
     m_previous_state = m_state;
+    m_target_trial_duration = 20000;
 }
 
 WalkOptimiserBehaviour::~WalkOptimiserBehaviour()
@@ -78,7 +90,10 @@ WalkOptimiserBehaviour::~WalkOptimiserBehaviour()
         delete m_optimiser;
 }
 
-
+/*! @brief Processes the sensor data, and produces actions (if necessary)
+    @param data the sensorsdata
+    @param actions the actionatorsdata
+ */
 void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* actions)
 {   
     if (data == NULL || actions == NULL)
@@ -90,11 +105,14 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
         runTrial();
 }
 
+/*! @brief Jobs created by the WalkOptimiserBehaviour are added here.
+    @param joblist the list of jobs to which job(s) will be added
+ */
 void WalkOptimiserBehaviour::process(JobList& joblist)
 {
     if (m_data == NULL || m_actions == NULL)
         return;
-    
+
     m_previous_state = m_state;
     if (m_data->isFallen())
     {
@@ -125,12 +143,14 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         }
         else if (m_state == Trial)        // wait until we have enough data then tick the optimiser
         {
-            if ((m_data->CurrentTime - m_trial_start_time) > 20000)
+            if ((m_data->CurrentTime - m_trial_start_time) > m_target_trial_duration)
                 finishTrial();
         }
     }
 }
 
+/*! @brief Teleports the robot back to its starting position. The robot is always placed upright
+ */
 void WalkOptimiserBehaviour::respawn()
 {
     m_target_speed = 0;
@@ -140,6 +160,8 @@ void WalkOptimiserBehaviour::respawn()
     m_walk->setWalkParameters(m_walk_parameters);
 }
 
+/*! @brief Start the trial
+ */
 void WalkOptimiserBehaviour::startTrial()
 {
     m_state = Trial;
@@ -149,9 +171,10 @@ void WalkOptimiserBehaviour::startTrial()
     m_trial_start_x = gps[0];
     m_trial_start_y = gps[1];
     m_trial_energy_used = 0;
-    cout << "Starting Trial at [" << gps[0] << "," << gps[1] << "] " << m_trial_start_time << endl;
 }
 
+/*! @brief Run the trial.
+ */
 void WalkOptimiserBehaviour::runTrial()
 {
     static vector<float> previouspositions;
@@ -169,6 +192,61 @@ void WalkOptimiserBehaviour::runTrial()
     previouspositions = positions;
 }
 
+/*! @brief Perturbs the robot while it is walking
+ */
+void WalkOptimiserBehaviour::perturbRobot()
+{
+    static double lastmovetime = 0;
+    static vector<float> pos(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+    static vector<float> vel(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+    static vector<float> gains(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 100);
+    static int state = 0;
+    
+    if (m_data->CurrentTime - lastmovetime > m_target_trial_duration/24)
+    {
+        state = (state + 1)%6;
+        cout << "Moving the head. State:" << state << endl;
+        switch (state) 
+        {
+            case 0:
+                pos[0] = -1.57;
+                pos[1] = 0;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            case 1:
+                pos[0] = 1.57;
+                pos[1] = 0;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            case 2:
+                pos[0] = -1.57;
+                pos[1] = -1.57;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            case 3:
+                pos[0] = 1.57;
+                pos[1] = -1.57;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            case 4:
+                pos[0] = 1.57;
+                pos[1] = 1.57;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            case 5:
+                pos[0] = -1.57;
+                pos[1] = 1.57;
+                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
+                break;
+            default:
+                break;
+        }
+        lastmovetime = m_data->CurrentTime;
+    }
+}
+
+/*! @brief Finish the trial, that is calculate the performance, tick the optimiser, save the optimiser and respawn the robot
+ */
 void WalkOptimiserBehaviour::finishTrial()
 {
     m_state = Start;
@@ -181,7 +259,31 @@ void WalkOptimiserBehaviour::finishTrial()
     float speed = distance/time;
     float cost = (2*m_trial_energy_used+20*time)*9.81*4.8/(distance*100);       // assume CPU draws 20W and the motor gears are 50% efficient
     m_optimiser->tick(cost, m_walk_parameters);
-    m_walk_parameters.summaryTo(cout);
+    saveOptimiser();
     respawn();
-    cout << "Finished Trial with speed: " << speed << " cost " << cost << endl;
+}
+
+/*! @brief Loads a saved WalkOptimiser from a file. If there is no file then we start from scratch
+ */
+void WalkOptimiserBehaviour::loadOptimiser()
+{
+    ifstream savedoptimiser(m_saved_optimiser_filename.c_str(), ios_base::in);
+    if (savedoptimiser.is_open())
+    {   // if it exists start from where we left off
+        cout << "WalkOptimiserBehaviour::WalkOptimiserBehaviour. Loading previous WalkOptimiser from file." << endl;
+        savedoptimiser >> (*m_optimiser);
+        m_optimiser->getNewParameters(m_walk_parameters);
+        m_walk->setWalkParameters(m_walk_parameters);
+        m_optimiser->summaryTo(cout);
+    }
+}
+
+/*! @brief Saves the WalkOptimiser to a file so that we can continue later
+ */
+void WalkOptimiserBehaviour::saveOptimiser()
+{
+    ofstream savedoptimiser(m_saved_optimiser_filename.c_str(), ios_base::trunc);
+    if (savedoptimiser.is_open())
+        savedoptimiser << (*m_optimiser);
+    m_optimiser->summaryTo(cout);
 }
