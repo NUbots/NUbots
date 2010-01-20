@@ -146,10 +146,52 @@ void WalkOptimiser::csvTo(ostream& output)
 {
 }
 
+/*! @brief Stores the entire contents of the WalkOptimiser in the stream
+ */
 ostream& operator<< (ostream& output, const WalkOptimiser& p)
 {
+    output << p.m_best_parameters;
+    output << p.m_best_delta_parameters;   
+    output << p.m_current_parameters;      
+    output.write((char*) &p.m_minimise, sizeof(bool));
+    output.write((char*) &p.m_best_performance, sizeof(float));
+    output.write((char*) &p.m_alpha, sizeof(float));
+    output.write((char*) &p.m_reset_limit, sizeof(int));
+    output.write((char*) &p.m_count_since_last_improvement, sizeof(int));
+    output.write((char*) &p.m_improvement, sizeof(float));
+    output.write((char*) &p.m_previous_improvement, sizeof(float));
+    
+    return output;
 }
 
+/*! @brief Retrieves a stored WalkOptimiser from a stream
+ */
 istream& operator>> (istream& input, WalkOptimiser& p)
 {
+    input >> p.m_best_parameters;
+    input >> p.m_best_delta_parameters;
+    input >> p.m_current_parameters;
+    char inbuffer[10];
+    input.read(inbuffer, sizeof(bool));
+    p.m_minimise = *((bool*) inbuffer);
+    
+    input.read(inbuffer, sizeof(float));
+    p.m_best_performance = *((float*) inbuffer);
+    
+    input.read(inbuffer, sizeof(float));
+    p.m_alpha = *((float*) inbuffer);
+    
+    input.read(inbuffer, sizeof(int));
+    p.m_reset_limit = *((int*) inbuffer);
+    
+    input.read(inbuffer, sizeof(int));
+    p.m_count_since_last_improvement = *((int*) inbuffer);
+    
+    input.read(inbuffer, sizeof(float));
+    p.m_improvement = *((float*) inbuffer);
+    
+    input.read(inbuffer, sizeof(float));
+    p.m_previous_improvement = *((float*) inbuffer);
+    
+    return input;
 }
