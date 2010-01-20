@@ -33,6 +33,7 @@
 #define WALKPARAMETERS_H
 
 #include <vector>
+#include <iostream>
 using namespace std;
 
 class WalkParameters
@@ -41,11 +42,34 @@ public:
     class Parameter 
     {
     public:
+        Parameter() {Value = 0; Min = 0; Max = 0;};
         Parameter(float value, float min, float max) {Value = value; Min = min; Max = max;};
         ~Parameter() {};
         float Value;
         float Min;
         float Max;
+        
+        void summaryTo(ostream& output) {output << Value;};
+        void csvTo(ostream& output) {};
+        
+        friend ostream& operator<< (ostream& output, const Parameter& p) 
+        {   
+            output.write((char*) &p.Value, sizeof(float)); 
+            output.write((char*) &p.Min, sizeof(float)); 
+            output.write((char*) &p.Max, sizeof(float));
+            return output;
+        };
+        friend istream& operator>> (istream& input, Parameter& p)
+        {
+            char inbuffer[10];
+            input.read(inbuffer, sizeof(float));
+            p.Value = *((float*) inbuffer);
+            input.read(inbuffer, sizeof(float));
+            p.Min = *((float*) inbuffer);
+            input.read(inbuffer, sizeof(float));
+            p.Max = *((float*) inbuffer);
+            return input;
+        };
     };
 public:
     WalkParameters();

@@ -27,6 +27,11 @@
  */
 WalkParameters::WalkParameters()
 {
+    m_num_max_speeds = 0;                      
+    m_num_parameters = 0;                      
+    m_num_arm_gains = 0;                       
+    m_num_torso_gains = 0;                     
+    m_num_leg_gains = 0;
 }
 
 /*! @brief Construct a walk parameter set with the given parameters
@@ -152,6 +157,9 @@ void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
     m_num_max_speeds = m_max_speeds.size();
 }
 
+/*! @brief Prints a human readable summary of the walk parameters
+    Only those relevant to optimisation are shown.
+ */
 void WalkParameters::summaryTo(ostream& output)
 {
     output << "WalkParameters: ";
@@ -162,14 +170,169 @@ void WalkParameters::summaryTo(ostream& output)
 
 void WalkParameters::csvTo(ostream& output)
 {
+    
 }
 
+/*! @brief Saves the entire contents of the WalkParameters class in the stream
+ */
 ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
 {
+    // m_num_max_speeds
+    output.write((char*) &p_walkparameters.m_num_max_speeds, sizeof(int));
+    // m_max_speeds
+    for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
+        output.write((char*) &p_walkparameters.m_max_speeds[i], sizeof(float));
+    // m_num_parameters, numperphase
+    output.write((char*) &p_walkparameters.m_num_parameters, sizeof(int));
+    if (p_walkparameters.m_num_parameters > 0)
+    {
+        int numperphase = p_walkparameters.m_parameters[0].size();
+        output.write((char*) &numperphase, sizeof(int));
+        // m_parameters
+        for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
+            for (int j=0; j<numperphase; j++)
+                output.write((char*) &p_walkparameters.m_parameters[i][j], sizeof(WalkParameters::Parameter));
+    }
+    // m_num_arm_gains, numperphase
+    output.write((char*) &p_walkparameters.m_num_arm_gains, sizeof(int));
+    if (p_walkparameters.m_num_arm_gains > 0)
+    {
+        int numperphase = p_walkparameters.m_arm_gains[0].size();
+        output.write((char*) &numperphase, sizeof(int));
+        // m_arm_gains
+        for (int i=0; i<p_walkparameters.m_num_arm_gains/numperphase; i++)
+            for (int j=0; j<numperphase; j++)
+                output.write((char*) &p_walkparameters.m_arm_gains[i][j], sizeof(float));
+    }
+    // m_num_torso_gains, numperphase
+    output.write((char*) &p_walkparameters.m_num_torso_gains, sizeof(int));
+    if (p_walkparameters.m_num_torso_gains > 0)
+    {
+        int numperphase = p_walkparameters.m_torso_gains[0].size();
+        output.write((char*) &numperphase, sizeof(int));
+        // m_torso_gains
+        for (int i=0; i<p_walkparameters.m_num_torso_gains/numperphase; i++)
+            for (int j=0; j<numperphase; j++)
+                output.write((char*) &p_walkparameters.m_torso_gains[i][j], sizeof(float));
+    }
+    // m_num_leg_gains, numperphase
+    output.write((char*) &p_walkparameters.m_num_leg_gains, sizeof(int));
+    if (p_walkparameters.m_num_leg_gains > 0)
+    {
+        int numperphase = p_walkparameters.m_leg_gains[0].size();
+        output.write((char*) &numperphase, sizeof(int));
+        // m_leg_gains
+        for (int i=0; i<p_walkparameters.m_num_leg_gains/numperphase; i++)
+            for (int j=0; j<numperphase; j++)
+                output.write((char*) &p_walkparameters.m_leg_gains[i][j], sizeof(float));
+    }
+    return output;
 }
 
+/*! @brief Loads the entire contents of the WalkParameters class from the stream
+ */
 istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 {
+    char inbuffer[100];
+    // m_num_max_speeds
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_max_speeds = *((int*) inbuffer);
+    // m_max_speeds
+    p_walkparameters.m_max_speeds.resize(p_walkparameters.m_num_max_speeds, 0);
+    for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
+    {
+        input.read(inbuffer, sizeof(float));
+        p_walkparameters.m_max_speeds[i] = *((float*) inbuffer);
+    }
+    // m_num_parameters, numperphase
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_parameters = *((int*) inbuffer);
+    if (p_walkparameters.m_num_parameters > 0)
+    {
+        input.read(inbuffer, sizeof(int));
+        int numperphase = *((int*) inbuffer);
+        p_walkparameters.m_parameters.resize(p_walkparameters.m_num_parameters/numperphase);
+        // m_parameters
+        for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
+        {
+            p_walkparameters.m_parameters[i].resize(numperphase);
+            for (int j=0; j<numperphase; j++)
+            {
+                input.read(inbuffer, sizeof(WalkParameters::Parameter));
+                p_walkparameters.m_parameters[i][j] = *((WalkParameters::Parameter*) inbuffer);
+            }
+        }
+    }
+    else
+        p_walkparameters.m_parameters.clear();
+    
+    // m_num_arm_gains, numperphase
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_arm_gains = *((int*) inbuffer);
+    if (p_walkparameters.m_num_arm_gains > 0)
+    {
+        input.read(inbuffer, sizeof(int));
+        int numperphase = *((int*) inbuffer);
+        p_walkparameters.m_arm_gains.resize(p_walkparameters.m_num_arm_gains/numperphase);
+        // m_arm_gains
+        for (int i=0; i<p_walkparameters.m_num_arm_gains/numperphase; i++)
+        {
+            p_walkparameters.m_arm_gains[i].resize(numperphase);
+            for (int j=0; j<numperphase; j++)
+            {
+                input.read(inbuffer, sizeof(float));
+                p_walkparameters.m_arm_gains[i][j] = *((float*) inbuffer);
+            }
+        }
+    }
+    else
+        p_walkparameters.m_arm_gains.clear();
+    
+    // m_num_torso_gains, numperphase
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_torso_gains = *((int*) inbuffer);
+    if (p_walkparameters.m_num_torso_gains > 0)
+    {
+        input.read(inbuffer, sizeof(int));
+        int numperphase = *((int*) inbuffer);
+        p_walkparameters.m_torso_gains.resize(p_walkparameters.m_num_torso_gains/numperphase);
+        // m_torso_gains
+        for (int i=0; i<p_walkparameters.m_num_torso_gains/numperphase; i++)
+        {
+            p_walkparameters.m_torso_gains[i].resize(numperphase);
+            for (int j=0; j<numperphase; j++)
+            {
+                input.read(inbuffer, sizeof(float));
+                p_walkparameters.m_torso_gains[i][j] = *((float*) inbuffer);
+            }
+        }
+    }
+    else
+        p_walkparameters.m_torso_gains.clear();
+    
+    // m_num_leg_gains, numperphase
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_leg_gains = *((int*) inbuffer);
+    if (p_walkparameters.m_num_leg_gains > 0)
+    {
+        input.read(inbuffer, sizeof(int));
+        int numperphase = *((int*) inbuffer);
+        p_walkparameters.m_leg_gains.resize(p_walkparameters.m_num_leg_gains/numperphase);
+        // m_leg_gains
+        for (int i=0; i<p_walkparameters.m_num_leg_gains/numperphase; i++)
+        {
+            p_walkparameters.m_leg_gains[i].resize(numperphase);
+            for (int j=0; j<numperphase; j++)
+            {
+                input.read(inbuffer, sizeof(float));
+                p_walkparameters.m_leg_gains[i][j] = *((float*) inbuffer);
+            }
+        }
+    }
+    else
+        p_walkparameters.m_leg_gains.clear();
+    
+    return input;
 }
 
 /*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
@@ -179,7 +342,12 @@ float& WalkParameters::operator[] (const int index)
 {
     // I have written this function with the assumption that I don't want to optimise the arm or torso gains
     // Furthermore, that I only want to optimise the speed in the forward direction
-    static const int nummaxspeedsused = 1;
+    static int nummaxspeedsused = 1;
+    if (m_num_max_speeds == 0)
+        nummaxspeedsused = 0;
+    else
+        nummaxspeedsused = 1;
+    
     if (index < nummaxspeedsused)
         return m_max_speeds[0];
     else if (index < m_num_parameters + nummaxspeedsused)
@@ -192,5 +360,11 @@ float& WalkParameters::operator[] (const int index)
  */
 int WalkParameters::size() const
 {
-    return m_num_parameters + m_num_leg_gains + 1;
+    static int nummaxspeedsused = 1;
+    if (m_num_max_speeds == 0)
+        nummaxspeedsused = 0;
+    else
+        nummaxspeedsused = 1;
+
+    return m_num_parameters + m_num_leg_gains + nummaxspeedsused;
 }
