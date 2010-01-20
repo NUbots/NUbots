@@ -31,7 +31,7 @@ WalkOptimiser::WalkOptimiser(const WalkParameters& walkparameters, bool minimise
     m_count_since_last_improvement = 0;
     m_reset_limit = 10;
     
-    m_improvement = 0;
+    m_improvement = 1e100;
     m_previous_improvement = 1e100;
 }
 
@@ -44,8 +44,11 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
     if (m_minimise == true && performance < m_best_performance || m_minimise == false && performance > m_best_performance)
     {
         cout << "Improvement!" << endl;
+        m_previous_improvement = m_improvement;
         m_improvement = m_best_performance - performance;
         m_alpha = 0.9*fabs(tanh(fabs(m_improvement/m_previous_improvement)));
+        for (int i=0; i<m_best_parameters.size(); i++)
+            m_best_delta_parameters[i] = m_current_parameters[i] - m_best_parameters[i];
         m_best_parameters = m_current_parameters;
         m_best_performance = performance;
         m_count_since_last_improvement = 0;
@@ -80,7 +83,7 @@ void WalkOptimiser::mutateBestParameters(WalkParameters& walkparameters)
     mutateParameters(m_best_parameters, m_best_delta_parameters, walkparameters);
 }
 
-/*! Generates a new set of parameters to be tested based on base_parameters and basedelta_parameters
+/*! @brief Generates a new set of parameters to be tested based on base_parameters and basedelta_parameters
  */
 void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters)
 {
@@ -116,7 +119,7 @@ void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParame
 }
 
 
-/* Returns a normal random variable from the normal distribution with mean and sigma
+/*! @brief Returns a normal random variable from the normal distribution with mean and sigma
  */
 float WalkOptimiser::normalDistribution(float mean, float sigma)
 {
@@ -128,4 +131,25 @@ float WalkOptimiser::normalDistribution(float mean, float sigma)
     float x = mean + z*sigma;       // then scale it to belong to the specified normal distribution
 
     return x;
+}
+
+/*! @brief Prints a human readable summary of the optimiser's state.
+    The summary includes the current best performance, and the best set of walk parameters
+ */
+void WalkOptimiser::summaryTo(ostream& output)
+{
+    output << "WalkOptimiser Performance: " << m_best_performance << " with ";
+    m_best_parameters.summaryTo(output);
+}
+
+void WalkOptimiser::csvTo(ostream& output)
+{
+}
+
+ostream& operator<< (ostream& output, const WalkOptimiser& p)
+{
+}
+
+istream& operator>> (istream& input, WalkOptimiser& p)
+{
 }
