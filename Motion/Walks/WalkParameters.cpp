@@ -191,7 +191,7 @@ ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
         // m_parameters
         for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
             for (int j=0; j<numperphase; j++)
-                output.write((char*) &p_walkparameters.m_parameters[i][j], sizeof(WalkParameters::Parameter));
+                output << p_walkparameters.m_parameters[i][j];
     }
     // m_num_arm_gains, numperphase
     output.write((char*) &p_walkparameters.m_num_arm_gains, sizeof(int));
@@ -257,10 +257,7 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         {
             p_walkparameters.m_parameters[i].resize(numperphase);
             for (int j=0; j<numperphase; j++)
-            {
-                input.read(inbuffer, sizeof(WalkParameters::Parameter));
-                p_walkparameters.m_parameters[i][j] = *((WalkParameters::Parameter*) inbuffer);
-            }
+                input >> p_walkparameters.m_parameters[i][j];
         }
     }
     else
