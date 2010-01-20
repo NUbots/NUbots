@@ -89,6 +89,7 @@ private:
     float m_param_balance_sagittal_sway;
     float m_param_gyro_roll;
     float m_param_gyro_pitch;
+    float m_param_phase_reset_offset;
     
     
     // Gyro feedback

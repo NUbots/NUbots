@@ -25,6 +25,8 @@
 #include "Tools/debug.h"
 
 #include <math.h>
+#include <boost/circular_buffer.hpp>
+using namespace std;
 
 //! @todo TODO: put M_PI and NORMALISE somewhere else
 #ifndef M_PI
@@ -39,8 +41,6 @@ inline T NORMALISE(T theta){
 JuppWalk::JuppWalk()
 {
     initWalkParameters();
-    
-    
     
     m_leg_length = 20;          // The NAO has legs 20cm long
     m_current_time = nusystem->getTime();
@@ -92,6 +92,8 @@ void JuppWalk::initWalkParameters()
     // gyro parameters
     m_param_gyro_roll = 0.1;
     m_param_gyro_pitch = 0.1;
+    // gait phase resetting
+    m_param_phase_reset_offset = 0.24;
     
     // At the moment this walk engine uses the same walk parameters for an entire walking cycle
     m_gait_walk_parameters.push_back(vector<WalkParameters::Parameter>());
@@ -108,6 +110,7 @@ void JuppWalk::initWalkParameters()
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_balance_sagittal_sway, 0.0, 1.0));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_roll, 0.0, 1.0));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_pitch, 0.0, 1.0));
+    m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_phase_reset_offset, -1.0, 1.0));
     
     m_gait_max_speeds.push_back(7.0);
     m_gait_max_speeds.push_back(3.0);
@@ -145,6 +148,7 @@ void JuppWalk::getParameters()
     m_param_balance_sagittal_sway = m_gait_walk_parameters[0][10].Value;
     m_param_gyro_roll = m_gait_walk_parameters[0][11].Value;
     m_param_gyro_pitch = m_gait_walk_parameters[0][12].Value;
+    m_param_phase_reset_offset = m_gait_walk_parameters[0][13].Value;
 }
 
 /*! @brief Destructor for motion module
@@ -192,10 +196,9 @@ void JuppWalk::calculateGaitPhase()
     static vector<float> rightvalues;
     
     //! @todo TODO: Do these calculations in sensors. Ie determine the weight on the foot
-    static float previousleftsum = 0;
-    static float previouspreviousleftsum = 0;
-    static float previousrightsum = 0;
-    static float previouspreviousrightsum = 0;
+    const int numpastvalues = 4;
+    static boost::circular_buffer<float> previousleftsums(numpastvalues, 0);
+    static boost::circular_buffer<float> previousrightsums(numpastvalues, 0);
     
     float leftsum = 0;
     float rightsum = 0;
@@ -206,19 +209,32 @@ void JuppWalk::calculateGaitPhase()
     for (int i=0; i<rightvalues.size(); i++)
         rightsum += rightvalues[i];
     
+    float totalpreviousleftsums = 0;
+    for (int i=0; i<previousleftsums.size(); i++)
+        totalpreviousleftsums += previousleftsums[i];
+    float totalpreviousrightsums = 0;
+    for (int i=0; i<previousrightsums.size(); i++)
+        totalpreviousrightsums += previousrightsums[i];
+    
     m_current_time = nusystem->getTime();
-    if (previousleftsum == 0 && previouspreviousleftsum == 0 && leftsum > 20)
-        m_gait_phase = -0.73;
-    else if (previousrightsum == 0 && previouspreviousrightsum == 0 && rightsum > 20)
-        m_gait_phase = 2.38;
+    if (totalpreviousleftsums == 0 && leftsum > 20)
+    {
+        m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset - M_PI + m_param_phase_reset_offset;
+        cout << M_PI/m_param_short_v + m_param_phase_offset - M_PI << endl;
+        cout << "Phase: " << m_gait_phase << endl;
+    }
+    else if (totalpreviousrightsums == 0 && rightsum > 20)
+    {
+        m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
+        cout << M_PI/m_param_short_v + m_param_phase_offset << endl;
+        cout << "Phase: " << m_gait_phase << endl;
+    }
     else
         m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
 
     m_previous_time = m_current_time;
-    previouspreviousleftsum = previousleftsum;
-    previouspreviousrightsum = previousrightsum;
-    previousleftsum = leftsum;
-    previousrightsum = rightsum;
+    previousleftsums.push_back(leftsum);
+    previousrightsums.push_back(rightsum);
     //cout << "phase: " << m_gait_phase << " left: " << leftsum << " right: " << rightsum << endl;
 }
 
