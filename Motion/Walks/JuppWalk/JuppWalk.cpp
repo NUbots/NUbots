@@ -192,41 +192,17 @@ void JuppWalk::doWalk()
 void JuppWalk::calculateGaitPhase()
 {
     // do the phase feedback here!
-    static vector<float> leftvalues;
-    static vector<float> rightvalues;
-    
-    //! @todo TODO: Do these calculations in sensors. Ie determine the weight on the foot
-    const int numpastvalues = 4;
-    static boost::circular_buffer<float> previousleftsums(numpastvalues, 0);
-    static boost::circular_buffer<float> previousrightsums(numpastvalues, 0);
-    
-    float leftsum = 0;
-    float rightsum = 0;
-    m_data->getFootSoleValues(NUSensorsData::LeftFoot, leftvalues);
-    for (int i=0; i<leftvalues.size(); i++)
-        leftsum += leftvalues[i];
-    m_data->getFootSoleValues(NUSensorsData::RightFoot, rightvalues);
-    for (int i=0; i<rightvalues.size(); i++)
-        rightsum += rightvalues[i];
-    
-    float totalpreviousleftsums = 0;
-    for (int i=0; i<previousleftsums.size(); i++)
-        totalpreviousleftsums += previousleftsums[i];
-    float totalpreviousrightsums = 0;
-    for (int i=0; i<previousrightsums.size(); i++)
-        totalpreviousrightsums += previousrightsums[i];
-    
+    float impacttime = 0;
+
     m_current_time = nusystem->getTime();
-    if (totalpreviousleftsums == 0 && leftsum > 20)
+    if (m_data->footImpact(NUSensorsData::LeftFoot, impacttime))
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset - M_PI + m_param_phase_reset_offset;
-    else if (totalpreviousrightsums == 0 && rightsum > 20)
+    else if (m_data->footImpact(NUSensorsData::RightFoot, impacttime))
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
     else
         m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
 
     m_previous_time = m_current_time;
-    previousleftsums.push_back(leftsum);
-    previousrightsums.push_back(rightsum);
     //cout << "phase: " << m_gait_phase << " left: " << leftsum << " right: " << rightsum << endl;
 }
 
