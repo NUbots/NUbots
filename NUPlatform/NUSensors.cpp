@@ -24,6 +24,7 @@
 #include "Tools/debug.h"
 
 #include <math.h>
+#include <boost/circular_buffer.hpp>
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -100,6 +101,9 @@ void NUSensors::calculateSoftSensors()
         calculateJointAcceleration();
     
     calculateOrientation();
+    calculateFootForce();
+    calculateFootImpact();
+    calculateCoP();
     calculateZMP();
     calculateFallSense();
 }
@@ -217,5 +221,74 @@ void NUSensors::calculateFallSense()
     m_data->BalanceFalling->setData(m_current_time, falling, true);
 }
 
+/*! @brief Calculates the total force in Newtons on each foot
+ */
+void NUSensors::calculateFootForce()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateFootForce()" << endl;
+#endif
+    static vector<float> forces(3,0);
+    forces[0] = 0;
+    // now I assume that the left foot values are stored first (because they are ;)) and that the left and right feet have the same number of sensors
+    for (int i=0; i<m_data->FootSoleValues->size()/2; i++)
+        forces[0] += (*m_data->FootSoleValues)[i];
+    forces[1] = 0;
+    for (int i=m_data->FootSoleValues->size()/2; i<m_data->FootSoleValues->size(); i++)
+        forces[1] += (*m_data->FootSoleValues)[i];
+    forces[2] = forces[0] + forces[1];
+    m_data->FootForce->setData(m_current_time, forces, true);
+}
 
+/*! @brief Determines the time at which each foot last impacted with the ground
+ */
+void NUSensors::calculateFootImpact()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateFootImpact()" << endl;
+#endif   
+    const int numpastvalues = 4;
+    static boost::circular_buffer<float> previousleftforces(numpastvalues, 0);      // forces on the left foot
+    static boost::circular_buffer<float> previousrightforces(numpastvalues, 0);     // forces on the right foot
+    static boost::circular_buffer<float> previousforces(numpastvalues, 0);          // forces on the feet
+    
+    const float minimumtotalforce = 3;          //!< @todo This should be defined based on the robot weight, or in someother platform specific way
+    static vector<float> impacttimes(2,0);
+    float leftforce = (*(m_data->FootForce))[0];
+    float rightforce = (*(m_data->FootForce))[1];
+    float totalforce = (*(m_data->FootForce))[2];
+    
+    // detect impacts on the left
+    bool previousleftoff = true;
+    for (int i=0; i<numpastvalues; i++)
+    {
+        if (previousleftforces[i] > 0.5*previousforces[i] || previousforces[i] < minimumtotalforce)
+            previousleftoff = false;
+    }
+    if (previousleftoff == true && leftforce > 0.5*totalforce && totalforce > minimumtotalforce)
+        impacttimes[0] = m_data->CurrentTime;
+    
+    // detect impacts on the right
+    bool previousrightoff = true;
+    for (int i=0; i<numpastvalues; i++)
+    {
+        if (previousrightforces[i] > 0.5*previousforces[i] || previousforces[i] < minimumtotalforce)
+            previousrightoff = false;
+    }
+    if (previousrightoff == true && rightforce > 0.5*totalforce && totalforce > minimumtotalforce)
+        impacttimes[1] = m_data->CurrentTime;
+    
+    m_data->FootImpact->setData(m_data->CurrentTime, impacttimes, true);
+    
+    previousleftforces.push_back(leftforce);
+    previousrightforces.push_back(rightforce);
+    previousforces.push_back(totalforce);
+}
+
+void NUSensors::calculateCoP()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateCoP()" << endl;
+#endif
+}
 

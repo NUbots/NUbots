@@ -58,6 +58,10 @@ protected:
     void calculateZMP();
     void calculateFallSense();
     
+    void calculateFootForce();
+    void calculateFootImpact();
+    void calculateCoP();
+    
 private:
 protected:
     NUSensorsData* m_data;

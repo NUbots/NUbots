@@ -125,13 +125,15 @@ public:
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
     
-    // Common sub-get methods
-    bool isFallen();
-    
     // Get methods for other sensors that have logical groups
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
+    bool getFootForce(foot_id_t footid, float& force);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
+    
+    // Common sub-get methods
+    bool isFallen();
+    bool footImpact(foot_id_t footid, float& time);
     
     void setAvailableJoints(const vector<string>& joints);
     
@@ -199,6 +201,8 @@ public:
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
+    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons
+    sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     
     // Buttons Sensors:
     sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed

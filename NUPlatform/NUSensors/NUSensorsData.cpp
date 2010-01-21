@@ -82,6 +82,8 @@ NUSensorsData::NUSensorsData()
     // Foot Pressure Sensors:
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
     addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
@@ -520,19 +522,19 @@ bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
         return false;
     else
     {
-        static int numfootsolesensors = FootSoleValues->Data.size();
+        int numfootsolesensors = FootSoleValues->Data.size();
         if (footid == AllFeet)
             values = FootSoleValues->Data;
         else if (footid == LeftFoot)
         {
-            static vector<float> leftfootvalues(numfootsolesensors/2, 0);
+            vector<float> leftfootvalues(numfootsolesensors/2, 0);
             for (int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootSoleValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
-            static vector<float> rightfootvalues(numfootsolesensors/2, 0);
+            vector<float> rightfootvalues(numfootsolesensors/2, 0);
             for (int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
             values = rightfootvalues;
@@ -556,19 +558,19 @@ bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
         return false;
     else
     {
-        static int numfootbumpersensors = FootBumperValues->Data.size();
+        int numfootbumpersensors = FootBumperValues->Data.size();
         if (footid == AllFeet)
             values = FootBumperValues->Data;
         else if (footid == LeftFoot)
         {
-            static vector<float> leftfootvalues(numfootbumpersensors/2, 0);
+            vector<float> leftfootvalues(numfootbumpersensors/2, 0);
             for (int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootBumperValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
-            static vector<float> rightfootvalues(numfootbumpersensors/2, 0);
+            vector<float> rightfootvalues(numfootbumpersensors/2, 0);
             for (int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
             values = rightfootvalues;
@@ -576,6 +578,39 @@ bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
         else
         {
             debug << "NUSensorsData::getFootBumperValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the total force on the foot in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param force will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
+{
+    force = 0;
+    if (FootForce == NULL || FootForce->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+        {
+            force = (*FootForce)[0];
+        }
+        else if (footid == RightFoot)
+        {
+            force = (*FootForce)[1];
+        }
+        else if (footid == AllFeet)
+        {
+            force = (*FootForce)[2];
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
+            force = 0;
             return false;
         }
         return true;
@@ -626,6 +661,40 @@ bool NUSensorsData::isFallen()
         return false;
     else
         return true;
+}
+
+/*! @brief Returns true has impacted in the ground in this cycle
+    @param footid the foot you want to know about
+    @param time time will be updated with the time at which the last impact on that foot occured.
+    @return true if the foot hit the ground in *this* cycle, it will be false otherwise (ie it will be false the cycle after the impact; that is what the time is for ;))
+ */
+bool NUSensorsData::footImpact(foot_id_t footid, float& time)
+{
+    if (FootImpact == NULL || FootImpact->IsValid == false)
+    {
+        time = 0;
+        return false;
+    }
+    else if (footid == LeftFoot)
+        time = FootImpact->Data[0];
+    else if (footid == RightFoot)
+        time = FootImpact->Data[1];
+    else if (footid == AllFeet)
+    {
+        if (FootImpact->Data[0] > FootImpact->Data[1])              // left impact was most recent, so return it
+            time = FootImpact->Data[0];
+        else
+            time = FootImpact->Data[1];
+    }
+    else
+        return false;
+        
+    
+    if (CurrentTime - time <= 0.1) 
+        return true;
+    else
+        return false;
+
 }
 
 /******************************************************************************************************************************************
