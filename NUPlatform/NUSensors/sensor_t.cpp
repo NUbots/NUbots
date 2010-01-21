@@ -195,4 +195,11 @@ float& sensor_t::operator[] (const int index)
         return Data[Data.size() - 1];
 }
 
+/*! @brief Returns the size of the sensor_t, where the size is the size of Data
+ */
+int sensor_t::size()
+{
+    return Data.size();
+}
+
 

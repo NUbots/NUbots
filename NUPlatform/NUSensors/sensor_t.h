@@ -59,6 +59,8 @@ public:
         DISTANCE_VALUES,
         FOOT_SOLE_VALUES,
         FOOT_BUMPER_VALUES,
+        FOOT_FORCE,
+        FOOT_IMPACT,
         BUTTON_VALUES,
         BATTERY_VALUES,
         GPS_VALUES,
@@ -76,6 +78,7 @@ public:
     friend ostream& operator<< (ostream& output, const sensor_t& p_sensor);
     friend istream& operator>> (istream& input, sensor_t& p_sensor);
     float& operator[] (const int index);
+    int size();
 public:
     string Name;                //!< the sensor's name
     sensor_id_t SensorID;       //!< the sensor's id
