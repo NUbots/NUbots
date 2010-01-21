@@ -56,7 +56,7 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
  */
 void actionator_t::addPoint(double time, const vector<float>& data)
 {
-    if (time == 0 || data.size() == 0)
+    if (time < 0 || data.size() == 0)
     {
         debug << "actionator_t::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
         return;
