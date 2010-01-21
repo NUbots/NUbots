@@ -180,6 +180,7 @@ void WalkOptimiserBehaviour::runTrial()
     static vector<float> previouspositions;
     static vector<float> positions;
     static vector<float> torques;
+    perturbRobot();
     m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
     m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
     
@@ -193,55 +194,74 @@ void WalkOptimiserBehaviour::runTrial()
 }
 
 /*! @brief Perturbs the robot while it is walking
+ 
+    It seems that the head does not exert any force when it is accelerating on the torso,
+    so the only effect of moving the head is a shift in the centre of mass.
+ 
+    I might be able to perturb the robot by adding small signals into the ankle or hips.
+    I probably only want to perturb the feet that are on the ground.
+ 
+    So, what sort of signals should I add to determine robustness?
+        - short strong ones to simulate pushes.
+        - longer ones to simulate running into something.
+ 
+    Do I want to try and increase the size of the pushes until it falls over! This is fine in the simulator,
+    but not fine in hardware! Well I could make it fine in hardware, by changing the definition of a fall!
  */
 void WalkOptimiserBehaviour::perturbRobot()
 {
-    static double lastmovetime = 0;
-    static vector<float> pos(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-    static vector<float> vel(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-    static vector<float> gains(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 100);
-    static int state = 0;
+    // so lets start with something easy:
+    //      a simple impulse to the ankle roll
+
+    const double duration = 200;
+    const float magnitude = 1.0;
+    static int stepcount = 0;
+    static float target = 0;
+    static float stiffness = 0;
+    static float leftforce, rightforce;
+    static float leftimpacttime, rightimpacttime;
+    m_data->getFootForce(NUSensorsData::LeftFoot, leftforce);
+    m_data->getFootForce(NUSensorsData::RightFoot, rightforce);
     
-    if (m_data->CurrentTime - lastmovetime > m_target_trial_duration/24)
-    {
-        state = (state + 1)%6;
-        cout << "Moving the head. State:" << state << endl;
-        switch (state) 
+    if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime) || m_data->footImpact(NUSensorsData::RightFoot, rightimpacttime))
+        stepcount++;
+    
+    if (stepcount%3 == 0)           // perturb the robot on every third step
+    {   
+        cout << "Robot will be perturbed on this step" << endl;
+        float steptime = fabs(leftimpacttime - rightimpacttime);
+        // estimate the time to perturb the robot
+        float perturbationtime = 0;
+        if (leftimpacttime > rightimpacttime)       // if the we are on the left foot
+            perturbationtime = leftimpacttime + 0.5*steptime;
+        else
+            perturbationtime = rightimpacttime + 0.5*steptime;
+        
+        if (m_data->CurrentTime - perturbationtime > 0 && m_data->CurrentTime - perturbationtime < duration)
         {
-            case 0:
-                pos[0] = -1.57;
-                pos[1] = 0;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            case 1:
-                pos[0] = 1.57;
-                pos[1] = 0;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            case 2:
-                pos[0] = -1.57;
-                pos[1] = -1.57;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            case 3:
-                pos[0] = 1.57;
-                pos[1] = -1.57;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            case 4:
-                pos[0] = 1.57;
-                pos[1] = 1.57;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            case 5:
-                pos[0] = -1.57;
-                pos[1] = 1.57;
-                m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gains);
-                break;
-            default:
-                break;
+            cout << "The robot is being perturbed NOW" << endl;
+            if (leftimpacttime > rightimpacttime) 
+            {
+                cout << "Perturbing the left leg" << endl;
+                m_data->getJointTarget(NUSensorsData::LAnkleRoll, target);
+                m_data->getJointStiffness(NUSensorsData::LAnkleRoll, stiffness);
+                m_actions->addJointPosition(NUSensorsData::LAnkleRoll, 0, target - (100*magnitude/stiffness), 0, stiffness);
+                m_data->getJointTarget(NUSensorsData::LHipRoll, target);
+                m_data->getJointStiffness(NUSensorsData::LHipRoll, stiffness);
+                //m_actions->addJointPosition(NUSensorsData::LHipRoll, 0, target + (100*magnitude/stiffness), 0, stiffness);
+            }
+            else
+            {
+                cout << "Perturbing the right leg" << endl;
+                m_data->getJointTarget(NUSensorsData::RAnkleRoll, target);
+                m_data->getJointStiffness(NUSensorsData::RAnkleRoll, stiffness);
+                m_actions->addJointPosition(NUSensorsData::RAnkleRoll, 0, target - (100*magnitude/stiffness), 0, stiffness);
+                m_data->getJointTarget(NUSensorsData::RHipRoll, target);
+                m_data->getJointStiffness(NUSensorsData::RHipRoll, stiffness);
+                //m_actions->addJointPosition(NUSensorsData::RHipRoll, 0, target + (100*magnitude/stiffness), 0, stiffness);
+            }
+                
         }
-        lastmovetime = m_data->CurrentTime;
     }
 }
 
