@@ -46,11 +46,20 @@ public:
     void process(JobList& joblist);
 protected:
     void startTrial();
-    void runTrial();
+    void measureCost();
+    void finishMeasureCost();
+    void measureRobust();
+    void finishMeasureRobust();
+    
     void perturbRobot();
-    void finishTrial();
+    void pushInward();
+    void pushOutward();
+    void pushForward();
+    void pushBackward();
+
     void respawn();
     
+    void tickOptimiser(float metric);
     void loadOptimiser();
     void saveOptimiser();
 private:
@@ -67,8 +76,10 @@ private:
     enum State 
     {
         Initial,
-        Start,
-        Trial
+        StartCost,
+        MeasureCost,
+        StartRobust,
+        MeasureRobust
     };
     State m_state, m_previous_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
@@ -77,7 +88,19 @@ private:
     
     double m_trial_start_time;
     float m_trial_start_x, m_trial_start_y;
-    float m_trial_energy_used;
+    float m_trial_energy_used, m_trial_perturbation_mag;
+    int m_perturbation_direction;
+    float m_left_impact_time, m_right_impact_time;
+    
+    enum metric_type_t
+    {
+        Speed,
+        Cost,
+        SpeedAndPushes,
+        CostAndPushes
+    };
+    metric_type_t m_metric_type;
+    float m_measured_speed, m_measured_cost, m_measured_robustness;
     
     // Serialisation
     string m_saved_optimiser_filename;
