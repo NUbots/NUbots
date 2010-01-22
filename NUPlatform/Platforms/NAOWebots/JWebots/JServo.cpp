@@ -76,6 +76,9 @@ void JServo::setAcceleration(double accel)
 void JServo::setVelocity(double vel)
 {
     m_target_velocity = vel;
+    vel = fabs(vel);
+    if (vel > m_max_velocity)
+        vel = m_max_velocity;
     Servo::setVelocity(vel);
 }
 
@@ -97,13 +100,18 @@ void JServo::setForce(double force)
     Servo::setForce(force);
 }
 
-/*! @brief Sets the proportional gain of servo's position control
-    @param p the the proportional gain
+/*! @brief Sets the servo's gain and saturation
+    @param gain the % (0 to 100) of the maximum gain
  */
-void JServo::setControlP(double p)
+void JServo::setGain(double gain)
 {
-    m_target_gain = p;
-    Servo::setControlP(p);
+    if (gain <= 0)
+        gain = 0.01;
+    else if (gain > 100)
+        gain = 100;
+    m_target_gain = gain;
+    Servo::setControlP(gain*0.1);
+    setMaxForce((gain/100.0)*m_max_force);
 }
 
 /*! @brief Sets the maximum motor force in Nm

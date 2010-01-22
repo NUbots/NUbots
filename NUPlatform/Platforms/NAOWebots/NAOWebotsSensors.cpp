@@ -193,7 +193,7 @@ void NAOWebotsSensors::copyFromJoints()
     
     // Copy joint stiffnesses
     for (int i=0; i<m_servos.size(); i++)
-        stiffnessdata[i] = 0.1*((JServo*) m_servos[i])->getTargetGain();
+        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
     m_data->setJointStiffnesses(m_current_time, stiffnessdata);
     
     // Copy joint torques

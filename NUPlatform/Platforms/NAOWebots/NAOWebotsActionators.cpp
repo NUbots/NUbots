@@ -149,30 +149,18 @@ void NAOWebotsActionators::copyToServos()
                 if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
                     JServo* jservo = (JServo*) m_servos[i];
-                    float g = gains[i];
-                    if (g > 100)
-                        g = 100;
-                    else if (g <= 0)
-                        g = 0.01;
                     if (times[i] >= m_current_time)
                     {
                         float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
                         float v = 1000*(positions[i] - c)/dt;
-                        // we need to clip the velocity, and the gain to the max
-                        float maxv = jservo->getMaxVelocity();
-                        if (v < -maxv)
-                            v = -maxv;
-                        else if (v > maxv)
-                            v = maxv;
-                        jservo->setControlP(g/10.0);
-                        jservo->setMaxForce(g*jservo->getMaxForce()/100.0);
-                        jservo->setVelocity(fabs(v));
+                        jservo->setGain(gains[i]);
+                        jservo->setVelocity(v);
                         jservo->setPosition(positions[i]);
                     }
                     else
                     {   // the command has already past, we should get there as fast as possible
-                        jservo->setControlP(g/10.0);
+                        jservo->setGain(gains[i]);
                         jservo->setVelocity(jservo->getMaxVelocity());
                         jservo->setPosition(positions[i]);
                     }

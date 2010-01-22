@@ -41,8 +41,8 @@ public:
     virtual void setVelocity(double vel);
     virtual void setPosition(double position);
     virtual void setForce(double force);
+    virtual void setGain(double gain);
     virtual void setMaxForce(double maxforce);
-    virtual void setControlP(double p);
     
     double getTargetAcceleration() const;
     double getTargetVelocity() const;
