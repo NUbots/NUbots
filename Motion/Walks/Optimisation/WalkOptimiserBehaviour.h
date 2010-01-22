@@ -84,6 +84,7 @@ private:
     };
     State m_state, m_previous_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
+    double m_last_respawn_time;
     float m_target_speed;
     float m_target_trial_duration;
     

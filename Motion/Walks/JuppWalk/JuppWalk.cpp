@@ -168,7 +168,7 @@ JuppWalk::~JuppWalk()
 
 void JuppWalk::doWalk()
 {
-    debug << "JuppWalk::doWalk()" << endl;
+    //debug << "JuppWalk::doWalk()" << endl;
     getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
     m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));

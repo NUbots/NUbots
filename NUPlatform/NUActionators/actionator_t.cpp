@@ -90,10 +90,10 @@ void actionator_t::addPoint(double time, const vector<float>& data)
  */
 void actionator_t::removeCompletedPoints(double currenttime)
 {
-    if (m_points.size() > 0 && m_points[0]->Time < currenttime)
+    if (m_points.size() > 0 && m_points[0]->Time <= currenttime)
         m_previous_point = m_points.front();            // I make the first point that is removed to previous point
     
-    while (m_points.size() > 0 && m_points[0]->Time < currenttime)
+    while (m_points.size() > 0 && m_points[0]->Time <= currenttime)
     {
         m_points.pop_front();
     }

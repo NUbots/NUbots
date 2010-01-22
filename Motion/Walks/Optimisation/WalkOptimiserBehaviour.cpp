@@ -80,6 +80,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
         else
             m_respawn_y = -150;
     }
+    m_last_respawn_time = 0;
     
     // start the behaviour in the initial state
     m_state = Initial;
@@ -127,8 +128,13 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
  */
 void WalkOptimiserBehaviour::process(JobList& joblist)
 {
+    static int fallencount = 0;         // this is a midnight hack as well, I need to get a proper orientation measurement!
     if (m_data == NULL || m_actions == NULL)
         return;
+    
+    // This is a hack. Hold the robot up in the air for a little so it doesn't fall over after a fall
+    if (m_data->CurrentTime - m_last_respawn_time < 500)
+        m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
 
     m_previous_state = m_state;
     if (m_state == Initial)
@@ -142,15 +148,21 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
     }
     else if (m_data->isFallen())
     {
-        if (m_state == MeasureRobust)
-            finishMeasureRobust();
-        else
-            respawn();
-        m_target_speed = 0.1;
-        m_state = StartCost;
+        fallencount++;
+        if (fallencount > 10)
+        {
+            if (m_state == MeasureRobust)
+                finishMeasureRobust();
+            else
+                respawn();
+            m_target_speed = 0.1;
+            m_state = StartCost;
+            cout << "Fallen" << endl;
+        }
     }
     else 
     {
+        fallencount = 0;
         if (m_state == StartCost || m_state == StartRobust)
         {   // accelerate up to 'target' speed
             const float acceleration = 0.75/25.0;       // the acceleration in cm/s/s
@@ -204,6 +216,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
  */
 void WalkOptimiserBehaviour::respawn()
 {
+    m_last_respawn_time = m_data->CurrentTime;
     m_target_speed = 0;
     m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
     m_optimiser->getNewParameters(m_walk_parameters);
@@ -244,7 +257,6 @@ void WalkOptimiserBehaviour::measureCost()
     }
     
     previouspositions = positions;
-    perturbRobot();
 }
 
 /*! @brief Finish the cost measurement
@@ -300,6 +312,7 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
  */
 void WalkOptimiserBehaviour::perturbRobot()
 {
+    const float duration = 400;
     static int stepcount = 1;
     
     // increment the step count every time there is a foot impact
@@ -308,8 +321,9 @@ void WalkOptimiserBehaviour::perturbRobot()
         stepcount++;
         if (stepcount%3 == 0)
         {
-            m_trial_perturbation_mag += 0.05;
             m_perturbation_direction = (m_perturbation_direction + 1) % 4;
+            if (m_perturbation_direction == 0)
+                m_trial_perturbation_mag += 0.02;
             cout << "Robot will be perturbed on this step by " << m_trial_perturbation_mag << endl;
         }
     }
@@ -321,14 +335,12 @@ void WalkOptimiserBehaviour::perturbRobot()
         float steptime = fabs(m_left_impact_time - m_right_impact_time);
         float perturbationtime = 0;
         if (m_left_impact_time > m_right_impact_time)       // if the we are on the left foot
-            perturbationtime = m_left_impact_time + 0.10*steptime;
+            perturbationtime = m_left_impact_time + 0.25*steptime;
         else
-            perturbationtime = m_right_impact_time + 0.10*steptime;
+            perturbationtime = m_right_impact_time + 0.25*steptime;
         
-        if (m_data->CurrentTime - perturbationtime > 0)
+        if (m_data->CurrentTime - perturbationtime > 0 && m_data->CurrentTime - perturbationtime < duration)
         {
-            pushOutward();
-            /*
             if (m_perturbation_direction == 0)
                 pushInward();
             else if (m_perturbation_direction == 1)
@@ -337,62 +349,36 @@ void WalkOptimiserBehaviour::perturbRobot()
                 pushForward();
             else
                 pushBackward();
-             */
         }
     }
 }
 
+/*! @brief Simulates an imaginary push inwards, that is a push toward the foot thats off the ground
+ */
 void WalkOptimiserBehaviour::pushInward()
 {
-    // negative movements on hips are left
-    // positive movements on ankle are left
-    static float target = 0;
-    static float stiffness = 0;
-    cout << "pushInward()" << endl;
     if (m_left_impact_time > m_right_impact_time) 
     {
-        m_data->getJointTarget(NUSensorsData::LAnkleRoll, target);
-        m_data->getJointStiffness(NUSensorsData::LAnkleRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LAnkleRoll, 0, target - (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        /*m_data->getJointTarget(NUSensorsData::LHipRoll, target);
-        m_data->getJointStiffness(NUSensorsData::LHipRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LHipRoll, 0, target + (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::RAnkleRoll, target);
-        m_data->getJointStiffness(NUSensorsData::RAnkleRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RAnkleRoll, 0, target - (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::RHipRoll, target);
-        m_data->getJointStiffness(NUSensorsData::RHipRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RHipRoll, 0, target + (100*m_trial_perturbation_mag/stiffness), 0, stiffness);*/
+        pushJoint(NUSensorsData::LAnkleRoll, -m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::LHipRoll, +m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::RAnkleRoll, -m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::RHipRoll, +m_trial_perturbation_mag);
     }
     else
     {
-        m_data->getJointTarget(NUSensorsData::RAnkleRoll, target);
-        m_data->getJointStiffness(NUSensorsData::RAnkleRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RAnkleRoll, 0, target + (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        /*m_data->getJointTarget(NUSensorsData::LHipRoll, target);
-        m_data->getJointStiffness(NUSensorsData::LHipRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LHipRoll, 0, target - (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::RAnkleRoll, target);
-        m_data->getJointStiffness(NUSensorsData::RAnkleRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RAnkleRoll, 0, target + (100*m_trial_perturbation_mag/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::RHipRoll, target);
-        m_data->getJointStiffness(NUSensorsData::RHipRoll, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RHipRoll, 0, target - (100*m_trial_perturbation_mag/stiffness), 0, stiffness);*/
+        pushJoint(NUSensorsData::LAnkleRoll, +m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::LHipRoll, -m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::RAnkleRoll, +m_trial_perturbation_mag);
+        pushJoint(NUSensorsData::RHipRoll, -m_trial_perturbation_mag);
     }
 }
 
+/*! @brief Simulates an imaginary push outwards, that is a push toward the foot thats on the ground
+ */
 void WalkOptimiserBehaviour::pushOutward()
 {
-    /* Fuck me I am having a hard time to get this to work!
-     
-        Right Foot:
-     */
-    static float target = 0;
-    static float stiffness = 0;
     if (m_left_impact_time > m_right_impact_time) 
-    {   // suspect
-        // both +ve results in a nice push inward!
-        cout << "pushOutward() on left foot" << endl;
+    {
         pushJoint(NUSensorsData::LAnkleRoll, +m_trial_perturbation_mag);
         pushJoint(NUSensorsData::LHipRoll, -m_trial_perturbation_mag);
         pushJoint(NUSensorsData::RAnkleRoll, +m_trial_perturbation_mag);
@@ -400,7 +386,6 @@ void WalkOptimiserBehaviour::pushOutward()
     }
     else
     {
-        cout << "pushOutward() on right foot" << endl;
         pushJoint(NUSensorsData::LAnkleRoll, -m_trial_perturbation_mag);
         pushJoint(NUSensorsData::LHipRoll, +m_trial_perturbation_mag);
         pushJoint(NUSensorsData::RAnkleRoll, -m_trial_perturbation_mag);
@@ -408,6 +393,28 @@ void WalkOptimiserBehaviour::pushOutward()
     }
 }
 
+void WalkOptimiserBehaviour::pushForward()
+{
+    float magnitude = 0.5*m_trial_perturbation_mag;
+    if (m_left_impact_time > m_right_impact_time) 
+        pushJoint(NUSensorsData::LAnklePitch, -m_trial_perturbation_mag);
+    else
+        pushJoint(NUSensorsData::RAnklePitch, -m_trial_perturbation_mag);
+}
+
+void WalkOptimiserBehaviour::pushBackward()
+{
+    float magnitude = 0.5*m_trial_perturbation_mag;
+    if (m_left_impact_time > m_right_impact_time) 
+        pushJoint(NUSensorsData::LAnklePitch, +m_trial_perturbation_mag);
+    else
+        pushJoint(NUSensorsData::RAnklePitch, +m_trial_perturbation_mag);
+}
+
+/*! @brief Adds an imaginary push to the specified joint of the specified offset
+ @param id the id of the joint to attack
+ @param offset the offset in radians applied to the joint (low stiffnesses will automatically be compensated for)
+ */
 void WalkOptimiserBehaviour::pushJoint(NUSensorsData::joint_id_t id, float offset)
 {
     static double time = 0;
@@ -415,60 +422,7 @@ void WalkOptimiserBehaviour::pushJoint(NUSensorsData::joint_id_t id, float offse
     static float velocity = 0;
     static float stiffness = 0;
     m_actions->getLastJointPosition(id, time, target, velocity, stiffness);
-    cout << "Target: " << target << " output: " << target + (100*offset/stiffness) << endl;
     m_actions->addJointPosition(id, time, target + (100*offset/stiffness), velocity, stiffness);
-}
-
-void WalkOptimiserBehaviour::pushForward()
-{
-    cout << "pushForward()" << endl;
-    static float target = 0;
-    static float stiffness = 0;
-    float magnitude = 0.5*m_trial_perturbation_mag;
-    if (m_left_impact_time > m_right_impact_time) 
-    {
-        m_data->getJointTarget(NUSensorsData::LAnklePitch, target);
-        m_data->getJointStiffness(NUSensorsData::LAnklePitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LAnklePitch, 0, target - (100*magnitude/stiffness), 0, stiffness);
-        /*m_data->getJointTarget(NUSensorsData::LHipPitch, target);
-        m_data->getJointStiffness(NUSensorsData::LHipPitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LHipPitch, 0, target - (100*magnitude/stiffness), 0, stiffness);*/
-    }
-    else
-    {
-        m_data->getJointTarget(NUSensorsData::RAnklePitch, target);
-        m_data->getJointStiffness(NUSensorsData::RAnklePitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RAnklePitch, 0, target - (100*magnitude/stiffness), 0, stiffness);
-        /*m_data->getJointTarget(NUSensorsData::RHipPitch, target);
-        m_data->getJointStiffness(NUSensorsData::RHipPitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RHipPitch, 0, target - (100*magnitude/stiffness), 0, stiffness);*/
-    }
-}
-
-void WalkOptimiserBehaviour::pushBackward()
-{
-    cout << "pushBackward()" << endl;
-    static float target = 0;
-    static float stiffness = 0;
-    float magnitude = 0.5*m_trial_perturbation_mag;
-    if (m_left_impact_time > m_right_impact_time) 
-    {
-        m_data->getJointTarget(NUSensorsData::LAnklePitch, target);
-        m_data->getJointStiffness(NUSensorsData::LAnklePitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LAnklePitch, 0, target + (100*magnitude/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::LHipPitch, target);
-        m_data->getJointStiffness(NUSensorsData::LHipPitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::LHipPitch, 0, target + (100*magnitude/stiffness), 0, stiffness);
-    }
-    else
-    {
-        m_data->getJointTarget(NUSensorsData::RAnklePitch, target);
-        m_data->getJointStiffness(NUSensorsData::RAnklePitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RAnklePitch, 0, target + (100*magnitude/stiffness), 0, stiffness);
-        m_data->getJointTarget(NUSensorsData::RHipPitch, target);
-        m_data->getJointStiffness(NUSensorsData::RHipPitch, stiffness);
-        m_actions->addJointPosition(NUSensorsData::RHipPitch, 0, target + (100*magnitude/stiffness), 0, stiffness);
-    }
 }
 
 /*! @brief Ticks the optimiser
