@@ -107,8 +107,11 @@ NAOWebotsActionators::~NAOWebotsActionators()
 
 void NAOWebotsActionators::copyToHardwareCommunications()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+#if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
+#endif
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    m_data->summaryTo(debug);
 #endif
     
     copyToServos();
@@ -118,10 +121,6 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     copyToTeleporter();
     
     m_data->removeCompletedPoints(m_current_time);
-    
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    m_data->summaryTo(debug);
-#endif
 }
 
 /*! @brief Copies the joint positions and torques to the servos

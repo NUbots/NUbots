@@ -120,6 +120,8 @@ public:
     
     // Get methods for NUActionators
         // joint data for the NUActionators
+    bool getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain);
+    bool getLastJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain);
     bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
         // other data for the NUActionators

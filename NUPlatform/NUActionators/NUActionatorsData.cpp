@@ -513,6 +513,50 @@ int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
     }
 }
 
+/*! @brief Gets the next joint position for the specified joint
+    @param id the id of the joint you want the next command
+    @param time will be updated with the next command's time
+    @param position will be updated with the next command's position
+    @param velocity will be updated with the next command's gain
+ */
+bool NUActionatorsData::getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
+{
+    if (id == NUActionatorsData::ACTIONATOR_MISSING || PositionActionators[id]->isEmpty() || PositionActionators[id]->m_points[0]->Data.size() != 3)
+        return false;
+    else 
+    {
+        time = PositionActionators[id]->m_points[0]->Time;
+        position = PositionActionators[id]->m_points[0]->Data[0];
+        velocity = PositionActionators[id]->m_points[0]->Data[1];
+        gain = PositionActionators[id]->m_points[0]->Data[2]; 
+        return true;
+    }
+}
+
+/*! @brief Gets the *last* joint position for the specified joint
+    @param id the id of the joint you want the *last* command
+    @param time will be updated with the *last* command's time
+    @param position will be updated with the *last* command's position
+    @param velocity will be updated with the *last* command's gain
+ */
+bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
+{
+    if (id == NUActionatorsData::ACTIONATOR_MISSING)
+        return false;
+    else
+    {
+        int lastindex = PositionActionators[id]->m_points.size() - 1;
+        if (lastindex > 0 && PositionActionators[id]->m_points[lastindex]->Data.size() == 3)
+        {
+            time = PositionActionators[id]->m_points[lastindex]->Time;
+            position = PositionActionators[id]->m_points[lastindex]->Data[0];
+            velocity = PositionActionators[id]->m_points[lastindex]->Data[1];
+            gain = PositionActionators[id]->m_points[lastindex]->Data[2]; 
+            return true;
+        }
+    }
+}
+
 /*! @brief Gets the next position control point
     
     @param isvalid a vector of bools that indicates whether there is a new target for each joint.
