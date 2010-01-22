@@ -141,6 +141,7 @@ double JServo::getTargetVelocity() const
  */
 double JServo::getTargetPosition() const
 {
+    return m_target_position;
     float currentposition = getPosition();
     if (fabs(currentposition - m_target_position) < 0.001)
         return m_target_position;
