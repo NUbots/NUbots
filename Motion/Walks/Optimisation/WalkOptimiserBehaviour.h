@@ -34,6 +34,7 @@
 #include "WalkOptimiser.h"
 
 #include <string>
+#include <fstream>
 using namespace std;
 
 class WalkOptimiserBehaviour
@@ -44,6 +45,9 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList& joblist);
+    
+    void summaryTo(ostream& output);
+    void csvTo(ostream& output);
 protected:
     void startTrial();
     void measureCost();
@@ -102,10 +106,12 @@ private:
         CostAndPushes
     };
     metric_type_t m_metric_type;
-    float m_measured_speed, m_measured_cost, m_measured_robustness;
+    float m_measured_metric, m_measured_speed, m_measured_cost, m_measured_robustness;
     
     // Serialisation
     string m_saved_optimiser_filename;
+    ofstream m_best_parameter_log;
+    ofstream m_performance_log;
 };
 
 #endif

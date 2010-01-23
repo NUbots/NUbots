@@ -58,10 +58,18 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     p_platform->getNumber(playernum);
     p_platform->getTeamNumber(teamnum);
     // check to see if there is an existing saved optimiser. I do this by trying to open it
-    stringstream filenamestream;
-    filenamestream << "optimiser" << teamnum << playernum << ".log";
-    m_saved_optimiser_filename = filenamestream.str();
+    stringstream savedoptimiser_filenamestream;
+    savedoptimiser_filenamestream << "previous_optimiser" << teamnum << playernum << ".log";
+    m_saved_optimiser_filename = savedoptimiser_filenamestream.str();
     loadOptimiser();
+    // init log files. I always want to write, and I always want to append to the files
+    stringstream parameter_filenamestream;
+    parameter_filenamestream << "best_parameters" << teamnum << playernum << ".log";
+    m_best_parameter_log.open(parameter_filenamestream.str().c_str(), ios_base::out | ios_base::app);
+    stringstream performance_filenamestream;
+    performance_filenamestream << "performance" << teamnum << playernum << ".log";
+    m_performance_log.open(performance_filenamestream.str().c_str(), ios_base::out | ios_base::app);
+    
     
     // specify respawn location based on the player and team number
     m_respawn_x = -270;
@@ -294,13 +302,15 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
     m_measured_robustness = sqrt(pow(gps[0] - m_trial_start_x,2) + pow(gps[1] - m_trial_start_y,2));
     
     if (m_metric_type == Speed)
-        tickOptimiser(m_measured_speed);
+        m_measured_metric = m_measured_speed;
     else if (m_metric_type == Cost)
-        tickOptimiser(m_measured_cost);
+        m_measured_metric = m_measured_cost;
     else if (m_metric_type == SpeedAndPushes)
-        tickOptimiser(m_measured_speed);
+        m_measured_metric = m_measured_speed;
     else
-        tickOptimiser(m_measured_cost);
+        m_measured_metric = m_measured_cost;
+    
+    tickOptimiser(m_measured_metric);
     
     respawn();
 }
@@ -430,6 +440,8 @@ void WalkOptimiserBehaviour::tickOptimiser(float metric)
     cout << "Ticking Optimiser" << endl;
     m_optimiser->tick(metric, m_walk_parameters);
     saveOptimiser();
+    m_optimiser->csvTo(m_best_parameter_log);
+    csvTo(m_performance_log);
 }
 
 /*! @brief Loads a saved WalkOptimiser from a file. If there is no file then we start from scratch
@@ -456,3 +468,26 @@ void WalkOptimiserBehaviour::saveOptimiser()
         savedoptimiser << (*m_optimiser);
     m_optimiser->summaryTo(cout);
 }
+
+/*! @brief Prints a human readable summary of the walk behaviour's state
+ */
+void WalkOptimiserBehaviour::summaryTo(ostream& output)
+{
+    output << "WalkOptimiserBehaviour: Optimising: ";
+    if (m_metric_type == Speed)
+        output << "Speed" << endl;
+    else if (m_metric_type == Cost)
+        output << "Cost" << endl;
+    else if (m_metric_type == SpeedAndPushes)
+        output << "SpeedAndPushes" << endl;
+    else if (m_metric_type == CostAndPushes)
+        output << "CostAndPushes" << endl;
+    output << "Measured Speed: " << m_measured_speed << " Cost: " << m_measured_cost << "Robustness: " << m_measured_robustness << endl;
+}
+
+void WalkOptimiserBehaviour::csvTo(ostream& output)
+{
+    output << m_optimiser->getIterationCount() << ", " << m_optimiser->getBestPerformance() << ", " << m_measured_metric << ", " << m_measured_speed << ", " << m_measured_cost << ", " << m_measured_robustness << endl;
+}
+
+

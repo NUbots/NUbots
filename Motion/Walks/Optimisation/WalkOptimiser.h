@@ -38,6 +38,9 @@ class WalkOptimiser
         void getNewParameters(WalkParameters& walkparameters);
         void tick(float performance, WalkParameters& nextparameters);
     
+        int getIterationCount();
+        float getBestPerformance();
+    
         void summaryTo(ostream& output);
         void csvTo(ostream& output);
         
@@ -53,9 +56,12 @@ class WalkOptimiser
         WalkParameters m_best_parameters;              //!< the best set of parameters
         WalkParameters m_best_delta_parameters;        //!< the difference between the current best and the previous best (this 'gradient' is used by the line search part of the EHCLS)
         WalkParameters m_current_parameters;           //!< the current parameters under test
+        WalkParameters m_real_best_parameters;         //!< the actual best set of parameters ever seen
         
+        int m_iteration_count;
         bool m_minimise;
         float m_best_performance;
+        float m_real_best_performance;
         float m_alpha;
         int m_reset_limit;
         int m_count_since_last_improvement;

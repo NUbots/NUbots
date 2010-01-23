@@ -21,12 +21,15 @@ WalkOptimiser::WalkOptimiser(const WalkParameters& walkparameters, bool minimise
     for (int i=0; i<m_best_delta_parameters.size(); i++)
         m_best_delta_parameters[i] = 0;
     m_current_parameters = walkparameters;
+    m_real_best_parameters = walkparameters;
     
+    m_iteration_count = 0;
     m_minimise = minimise;
     if (m_minimise)
         m_best_performance = 100;
     else
         m_best_performance = 0;
+    m_real_best_performance = m_best_performance;
     m_alpha = 0.0;
     m_count_since_last_improvement = 0;
     m_reset_limit = 10;
@@ -39,8 +42,13 @@ WalkOptimiser::~WalkOptimiser()
 {
 }
 
+/*! @brief Ticks the optimisation process
+    @param performance the performance of the current set of parameters
+    @param nextparameters will be updated with the next set of parameters to test
+ */
 void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
 {
+    m_iteration_count++;
     if (m_minimise == true && performance < m_best_performance || m_minimise == false && performance > m_best_performance)
     {
         cout << "Improvement!" << endl;
@@ -52,6 +60,11 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
         m_best_parameters = m_current_parameters;
         m_best_performance = performance;
         m_count_since_last_improvement = 0;
+    }
+    if (m_minimise == true && performance < m_real_best_performance || m_minimise == false && performance > m_real_best_performance)
+    {   // check if it is the best set of parameters I have ever seen!
+        m_real_best_parameters = m_current_parameters;
+        m_real_best_performance = performance;
     }
     getNewParameters(nextparameters);
 }
@@ -118,6 +131,20 @@ void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParame
         walkparameters[i] = newparameters[i];
 }
 
+/*! @brief Returns the optimiser's iteration count
+ */
+int WalkOptimiser::getIterationCount()
+{
+    return m_iteration_count;
+}
+
+/*! @brief Returns the optimiser's current best performance
+ */
+float WalkOptimiser::getBestPerformance()
+{
+    return m_real_best_performance;
+}
+
 
 /*! @brief Returns a normal random variable from the normal distribution with mean and sigma
  */
@@ -138,12 +165,17 @@ float WalkOptimiser::normalDistribution(float mean, float sigma)
  */
 void WalkOptimiser::summaryTo(ostream& output)
 {
-    output << "WalkOptimiser Performance: " << m_best_performance << " with ";
-    m_best_parameters.summaryTo(output);
+    output << "WalkOptimiser Performance: " << m_real_best_performance << " with ";
+    m_real_best_parameters.summaryTo(output);
 }
 
+/*! @brief Prints a csv of iteration count and best performance
+ */
 void WalkOptimiser::csvTo(ostream& output)
 {
+    output << m_iteration_count << ", " << m_real_best_performance << ", ";
+    m_real_best_parameters.csvTo(output);
+    output << endl;
 }
 
 /*! @brief Stores the entire contents of the WalkOptimiser in the stream
@@ -152,9 +184,12 @@ ostream& operator<< (ostream& output, const WalkOptimiser& p)
 {
     output << p.m_best_parameters;
     output << p.m_best_delta_parameters;   
-    output << p.m_current_parameters;      
+    output << p.m_current_parameters;     
+    output << p.m_real_best_parameters;
+    output.write((char*) &p.m_iteration_count, sizeof(int));
     output.write((char*) &p.m_minimise, sizeof(bool));
     output.write((char*) &p.m_best_performance, sizeof(float));
+    output.write((char*) &p.m_real_best_performance, sizeof(float));
     output.write((char*) &p.m_alpha, sizeof(float));
     output.write((char*) &p.m_reset_limit, sizeof(int));
     output.write((char*) &p.m_count_since_last_improvement, sizeof(int));
@@ -171,12 +206,19 @@ istream& operator>> (istream& input, WalkOptimiser& p)
     input >> p.m_best_parameters;
     input >> p.m_best_delta_parameters;
     input >> p.m_current_parameters;
+    input >> p.m_real_best_parameters;
     char inbuffer[10];
+    input.read(inbuffer, sizeof(int));
+    p.m_iteration_count = *((int*) inbuffer);
+    
     input.read(inbuffer, sizeof(bool));
     p.m_minimise = *((bool*) inbuffer);
     
     input.read(inbuffer, sizeof(float));
     p.m_best_performance = *((float*) inbuffer);
+    
+    input.read(inbuffer, sizeof(float));
+    p.m_real_best_performance = *((float*) inbuffer);
     
     input.read(inbuffer, sizeof(float));
     p.m_alpha = *((float*) inbuffer);

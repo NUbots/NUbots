@@ -168,9 +168,12 @@ void WalkParameters::summaryTo(ostream& output)
     output << endl;
 }
 
+/*! @brief Prints a comma separated string of the parameters
+ */
 void WalkParameters::csvTo(ostream& output)
 {
-    
+    for (int i=0; i<size(); i++)
+        output << (*this)[i] << ", ";
 }
 
 /*! @brief Saves the entire contents of the WalkParameters class in the stream

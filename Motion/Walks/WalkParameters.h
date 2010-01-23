@@ -50,7 +50,7 @@ public:
         float Max;
         
         void summaryTo(ostream& output) {output << Value;};
-        void csvTo(ostream& output) {};
+        void csvTo(ostream& output) {output << Value << ", ";};
         
         friend ostream& operator<< (ostream& output, const Parameter& p) 
         {   
