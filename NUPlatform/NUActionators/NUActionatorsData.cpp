@@ -546,7 +546,7 @@ bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float&
     else
     {
         int lastindex = PositionActionators[id]->m_points.size() - 1;
-        if (lastindex > 0 && PositionActionators[id]->m_points[lastindex]->Data.size() == 3)
+        if (lastindex >= 0 && PositionActionators[id]->m_points[lastindex]->Data.size() == 3)
         {
             time = PositionActionators[id]->m_points[lastindex]->Time;
             position = PositionActionators[id]->m_points[lastindex]->Data[0];
