@@ -312,7 +312,6 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
  */
 void WalkOptimiserBehaviour::perturbRobot()
 {
-    const float duration = 400;
     static int stepcount = 1;
     
     // increment the step count every time there is a foot impact
@@ -324,7 +323,6 @@ void WalkOptimiserBehaviour::perturbRobot()
             m_perturbation_direction = (m_perturbation_direction + 1) % 4;
             if (m_perturbation_direction == 0)
                 m_trial_perturbation_mag += 0.02;
-            cout << "Robot will be perturbed on this step by " << m_trial_perturbation_mag << endl;
         }
     }
     
@@ -335,11 +333,11 @@ void WalkOptimiserBehaviour::perturbRobot()
         float steptime = fabs(m_left_impact_time - m_right_impact_time);
         float perturbationtime = 0;
         if (m_left_impact_time > m_right_impact_time)       // if the we are on the left foot
-            perturbationtime = m_left_impact_time + 0.25*steptime;
+            perturbationtime = m_left_impact_time + 0.20*steptime;
         else
-            perturbationtime = m_right_impact_time + 0.25*steptime;
+            perturbationtime = m_right_impact_time + 0.20*steptime;
         
-        if (m_data->CurrentTime - perturbationtime > 0 && m_data->CurrentTime - perturbationtime < duration)
+        if (m_data->CurrentTime - perturbationtime > 0 && m_data->CurrentTime - perturbationtime < 0.80*steptime)
         {
             if (m_perturbation_direction == 0)
                 pushInward();
