@@ -162,7 +162,11 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
             if (m_state == MeasureRobust)
                 finishMeasureRobust();
             else
+            {
                 respawn();
+                if (fallencount == 11)
+                    m_optimiser->getNewParameters(m_walk_parameters);
+            }
             m_target_speed = 0.1;
             m_state = StartCost;
             cout << "Fallen" << endl;
@@ -173,7 +177,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         fallencount = 0;
         if (m_state == StartCost || m_state == StartRobust)
         {   // accelerate up to 'target' speed
-            const float acceleration = 0.75/25.0;       // the acceleration in cm/s/s
+            const float acceleration = 1.0/25.0;       // the acceleration in cm/s/s
             static vector<float> speed(3,0);
             static WalkJob* walkjob = new WalkJob(speed);
             if (m_state == StartCost)
@@ -227,7 +231,6 @@ void WalkOptimiserBehaviour::respawn()
     m_last_respawn_time = m_data->CurrentTime;
     m_target_speed = 0;
     m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
-    m_optimiser->getNewParameters(m_walk_parameters);
     m_walk->setWalkParameters(m_walk_parameters);
 }
 
@@ -439,9 +442,14 @@ void WalkOptimiserBehaviour::tickOptimiser(float metric)
 {
     cout << "Ticking Optimiser" << endl;
     m_optimiser->tick(metric, m_walk_parameters);
+    m_walk->setWalkParameters(m_walk_parameters);
+    
     saveOptimiser();
     m_optimiser->csvTo(m_best_parameter_log);
     csvTo(m_performance_log);
+    
+    cout << "Parameters:";
+    m_walk_parameters.summaryTo(cout);
 }
 
 /*! @brief Loads a saved WalkOptimiser from a file. If there is no file then we start from scratch
@@ -466,7 +474,6 @@ void WalkOptimiserBehaviour::saveOptimiser()
     ofstream savedoptimiser(m_saved_optimiser_filename.c_str(), ios_base::trunc);
     if (savedoptimiser.is_open())
         savedoptimiser << (*m_optimiser);
-    m_optimiser->summaryTo(cout);
 }
 
 /*! @brief Prints a human readable summary of the walk behaviour's state

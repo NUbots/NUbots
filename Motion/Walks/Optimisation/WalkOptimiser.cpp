@@ -51,15 +51,18 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
     m_iteration_count++;
     if (m_minimise == true && performance < m_best_performance || m_minimise == false && performance > m_best_performance)
     {
-        cout << "Improvement!" << endl;
         m_previous_improvement = m_improvement;
         m_improvement = m_best_performance - performance;
-        m_alpha = 0.9*fabs(tanh(fabs(m_improvement/m_previous_improvement)));
+        m_alpha = fabs(tanh(fabs(m_improvement/m_previous_improvement)));
         for (int i=0; i<m_best_parameters.size(); i++)
             m_best_delta_parameters[i] = m_current_parameters[i] - m_best_parameters[i];
         m_best_parameters = m_current_parameters;
         m_best_performance = performance;
         m_count_since_last_improvement = 0;
+        cout << "Improvement. m_alpha: " << m_alpha << " with: "; 
+        m_best_parameters.summaryTo(cout);
+        cout << "Delta:";
+        m_best_delta_parameters.summaryTo(cout);
     }
     if (m_minimise == true && performance < m_real_best_performance || m_minimise == false && performance > m_real_best_performance)
     {   // check if it is the best set of parameters I have ever seen!
@@ -101,7 +104,7 @@ void WalkOptimiser::mutateBestParameters(WalkParameters& walkparameters)
 void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters)
 {
     // generate phi to mutate the BestParameters
-    float sigma = 0.06*exp(m_count_since_last_improvement/m_reset_limit - 1);
+    float sigma = 0.1*exp(m_count_since_last_improvement/m_reset_limit - 1);
     vector<float> phi(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(1, sigma);
