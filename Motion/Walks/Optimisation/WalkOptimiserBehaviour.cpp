@@ -48,7 +48,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_metric_type = Cost;
+    m_metric_type = Speed;
     if (m_metric_type == Speed || m_metric_type == SpeedAndPushes)
         m_optimiser = new WalkOptimiser(m_walk_parameters, false);
     else
@@ -94,7 +94,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     m_state = Initial;
     m_previous_state = m_state;
     m_target_speed = 0.1;
-    m_target_trial_duration = 20000;
+    m_target_trial_duration = 15000;
     
     m_trial_energy_used = 0;
     m_trial_perturbation_mag = 0;
@@ -177,7 +177,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         fallencount = 0;
         if (m_state == StartCost || m_state == StartRobust)
         {   // accelerate up to 'target' speed
-            const float acceleration = 1.0/25.0;       // the acceleration in cm/s/s
+            float acceleration = m_walk_parameters[0]/200.0;       // the acceleration in cm/s/s
             static vector<float> speed(3,0);
             static WalkJob* walkjob = new WalkJob(speed);
             if (m_state == StartCost)
@@ -281,8 +281,8 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     m_data->getGPSValues(gps);
     float distance = sqrt(pow(gps[0] - m_trial_start_x,2) + pow(gps[1] - m_trial_start_y,2));
     float time = (m_data->CurrentTime - m_trial_start_time)/1000.0;
-    if (time < 15)
-        time = 15;
+    if (time < 10)
+        time = 10;
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used+20*time)*9.81*4.8/(distance*100);       // assume CPU draws 20W and the motor gears are 50% efficient
     respawn();

@@ -71,9 +71,16 @@ void actionator_t::addPoint(double time, const vector<float>& data)
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
         static deque<actionator_point_t*>::iterator insertposition;
-        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
-        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
-        m_points.push_back(point);  
+        try 
+        {
+            insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+            m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+            m_points.push_back(point);
+        }
+        catch (exception& e) {
+            debug << "actionator_t::addPoint has thrown an exception: " << e.what() << endl;
+            debug << "Attempted to resize with " << (int) (insertposition - m_points.begin()) << endl;
+        }
     }
     
     // Option 1: Merge all actionator points; this can produce very 'surprising' results and it is not possible to change your mind after sending off the commands
