@@ -49,9 +49,10 @@ public:
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
 protected:
-    void startTrial();
+    void startCostTrial();
     void measureCost();
     void finishMeasureCost();
+    void startRobustTrial();
     void measureRobust();
     void finishMeasureRobust();
     
@@ -62,6 +63,7 @@ protected:
     void pushBackward();
     void pushJoint(NUSensorsData::joint_id_t id, float offset);
 
+    void teleport();
     void respawn();
     
     void tickOptimiser(float metric);
@@ -73,6 +75,7 @@ protected:
 private:
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
+    JobList* m_jobs;
     
     NUWalk* m_walk;
     WalkParameters m_walk_parameters;
@@ -81,14 +84,13 @@ private:
     enum State 
     {
         Initial,
-        StartCost,
         MeasureCost,
-        StartRobust,
-        MeasureRobust
+        MeasureRobust,
+        Teleport
     };
-    State m_state, m_previous_state;
+    State m_state, m_previous_state, m_next_state;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
-    double m_last_respawn_time;
+    double m_teleport_time;
     float m_target_speed;
     float m_target_trial_duration;
     

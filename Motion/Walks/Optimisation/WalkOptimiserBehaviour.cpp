@@ -88,7 +88,6 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
         else
             m_respawn_y = -150;
     }
-    m_last_respawn_time = 0;
     
     // start the behaviour in the initial state
     m_state = Initial;
@@ -125,128 +124,128 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
 
 /*! @brief Jobs created by the WalkOptimiserBehaviour are added here.
  
-    The behaviour has 5 states:
+    The behaviour has 4 states:
         1. Initial where we are just waiting for the simulator to go into 'playing'
-        2. StartCost where we accelerate the robot up to the maximum speed in preparation for the measuring the cost
         3. MeasureCost where we actually perform the measurement of the cost
-        4. StartRobust where we accelerate the robot up to maximim speed in preparation for measuring the robustness
         5. MeasureRobust where we actually perform the measurement of the robustness
+        6. Teleport where the robot is teleported back to its initial position
  
     @param joblist the list of jobs to which job(s) will be added
  */
 void WalkOptimiserBehaviour::process(JobList& joblist)
 {
-    static int fallencount = 0;         // this is a midnight hack as well, I need to get a proper orientation measurement!
+    static int fallencount = 0;
+    static vector<float> speed(3,0);
+    static WalkJob* job = new WalkJob(speed);
+    
     if (m_data == NULL || m_actions == NULL)
         return;
-    
-    // This is a hack. Hold the robot up in the air for a little so it doesn't fall over after a fall
-    if (m_data->CurrentTime - m_last_respawn_time < 500)
-        m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
 
     m_previous_state = m_state;
     if (m_state == Initial)
     {   // In the initial state we wait until the simulator puts the game in 'playing'
         if (m_data->CurrentTime > 15000)
         {
-            cout << "Starting Optimisation" << endl;
-            m_state = StartCost;
+            respawn();
+            startCostTrial();
+        }
+    }
+    else if (m_state == Teleport)
+    {   // In the teleport state we gradually slow down to a stop over 2s
+        float acceleration = m_target_speed/(2000 - (m_data->CurrentTime - m_teleport_time));
+        static double previoustime = m_data->CurrentTime;
+        m_target_speed -= acceleration*(m_data->CurrentTime - previoustime);
+        if (m_target_speed < 0)
+            m_target_speed = 0;
+        if (m_data->CurrentTime - m_teleport_time > 2000)
+        {
+            m_state = m_next_state;
+            m_target_speed = 0;
+            fallencount = 0;
             respawn();
         }
     }
     else if (m_data->isFallen())
-    {
+    {   // In the fallen state, we wait to make sure we are actually fallen, and then finish the current trial
         fallencount++;
-        if (fallencount > 10)
+        if (fallencount > 9)
         {
-            if (m_state == MeasureRobust)
+            if (m_state == MeasureCost)
+                finishMeasureCost();
+            else if (m_state == MeasureRobust)
                 finishMeasureRobust();
-            else
-            {
-                respawn();
-                if (fallencount == 11)
-                    m_optimiser->getNewParameters(m_walk_parameters);
-            }
-            m_target_speed = 0.1;
-            m_state = StartCost;
-            cout << "Fallen" << endl;
         }
     }
     else 
     {
-        fallencount = 0;
-        if (m_state == StartCost || m_state == StartRobust)
-        {   // accelerate up to 'target' speed
-            float acceleration = m_walk_parameters[0]/200.0;       // the acceleration in cm/s/s
-            static vector<float> speed(3,0);
-            static WalkJob* walkjob = new WalkJob(speed);
-            if (m_state == StartCost)
-                m_target_speed += acceleration;
-            else
-                m_target_speed += 3.0*acceleration;
-            
-            if (m_target_speed > m_walk_parameters[0])
-            {
-                m_target_speed = m_walk_parameters[0];
-                if (m_state == StartCost) 
-                {
-                    cout << "Starting MeasureCost" << endl;
-                    m_state = MeasureCost;
-                }
-                else 
-                {
-                    cout << "Starting MeasureRobust" << endl;
-                    m_state = MeasureRobust;
-                }
-                startTrial();
-            }
-
-            speed[0] = m_target_speed;
-            walkjob->setSpeed(speed);
-            joblist.addMotionJob(walkjob);
-        }
-        else if (m_state == MeasureCost)
+        fallencount = 0;                // reset the fallen count when we are not falling
+        
+        // handle accelerating walks up to maximum speed
+        const float acceleration = 10;  // The fairest way to accelerate walks is to use a fixed constant for all! (cm/s/s)
+        static double previoustime = m_data->CurrentTime;
+        m_target_speed += acceleration*(m_data->CurrentTime - previoustime);
+        if (m_target_speed > m_walk_parameters[0])
+            m_target_speed = m_walk_parameters[0];
+        
+        // look for terminating distances while measuring walk performance
+        static vector<float> gps(3,0);
+        m_data->getGPSValues(gps);
+        float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
+        if (m_state == MeasureCost)
         {
-            if ((m_data->CurrentTime - m_trial_start_time) > m_target_trial_duration)
-            {
-                m_state = StartRobust;
+            if (totaldistance > 300.0)
                 finishMeasureCost();
-            }
         }
         else if (m_state == MeasureRobust)
         {
-            if ((m_data->CurrentTime - m_trial_start_time) > 2*m_target_trial_duration)
-            {
-                m_state = StartCost;
-                finishMeasureRobust();
-            }
+            if (totaldistance > 450.0)
+                teleport();
         }
     }
+    speed[0] = m_target_speed;
+    job->setSpeed(speed);
+    joblist.addMotionJob(job);
 }
 
-/*! @brief Teleports the robot back to its starting position. The robot is always placed upright
+// I need to figure out where to put the startTrial(). Needs to go before MeasureCost and MeasureRobust. Really only before
+// MeasureRobust because MeasureRobust doesn't compare about the time.
+
+/*! @brief Teleports the robot back to its starting position cleanly.
+ 
+    This function makes sure that the robot is walking at a speed of 0 before placing the robot on the ground.
+ */
+void WalkOptimiserBehaviour::teleport()
+{
+    m_next_state = m_state;                 // I copy the desired state to next state, so when teleport finishes I know which state to go into
+    m_state = Teleport;
+    m_teleport_time = m_data->CurrentTime;  
+}
+
+/*! @brief Moves the robot back to its starting position. The robot is always placed upright
  */
 void WalkOptimiserBehaviour::respawn()
 {
-    m_last_respawn_time = m_data->CurrentTime;
-    m_target_speed = 0;
     m_actions->addTeleportation(m_data->CurrentTime, m_respawn_x, m_respawn_y, m_respawn_bearing);
-    m_walk->setWalkParameters(m_walk_parameters);
 }
 
-/*! @brief Start the trial
+/*! @brief Start the cost trial
  */
-void WalkOptimiserBehaviour::startTrial()
+void WalkOptimiserBehaviour::startCostTrial()
 {
+    cout << "Starting Cost Measurement" << endl;
     m_trial_start_time = m_data->CurrentTime;
-    static vector<float> gps(3,0);
-    m_data->getGPSValues(gps);
-    m_trial_start_x = gps[0];
-    m_trial_start_y = gps[1];
-    
     m_trial_energy_used = 0;
-    m_trial_perturbation_mag = 0;
+    m_state = MeasureCost;
+}
+
+/*! @brief Start the robust trial
+ */
+void WalkOptimiserBehaviour::startRobustTrial()
+{
+    cout << "Starting Robust Measurement" << endl;
+    m_trial_perturbation_mag = 0.02;
     m_perturbation_direction = -1;
+    m_state = MeasureRobust;
 }
 
 /*! @brief Measures the cost of transport of the robot while it is walking
@@ -266,7 +265,6 @@ void WalkOptimiserBehaviour::measureCost()
         for (int i=0; i<positions.size(); i++)
             m_trial_energy_used += fabs(torques[i]*(positions[i] - previouspositions[i]));
     }
-    
     previouspositions = positions;
 }
 
@@ -276,16 +274,16 @@ void WalkOptimiserBehaviour::measureCost()
  */
 void WalkOptimiserBehaviour::finishMeasureCost()
 {
-    cout << "Finishing Cost Measurement" << endl;
     static vector<float> gps(3,0);
     m_data->getGPSValues(gps);
-    float distance = sqrt(pow(gps[0] - m_trial_start_x,2) + pow(gps[1] - m_trial_start_y,2));
+    float distance = fabs(gps[0] - m_respawn_x);                                // only count the forward distance travelled
     float time = (m_data->CurrentTime - m_trial_start_time)/1000.0;
-    if (time < 10)
-        time = 10;
     m_measured_speed = distance/time;
-    m_measured_cost = (2*m_trial_energy_used+20*time)*9.81*4.8/(distance*100);       // assume CPU draws 20W and the motor gears are 50% efficient
-    respawn();
+    m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
+    
+    cout << "Finishing Cost Measurement. Speed:" << m_measured_speed << " Cost:" << m_measured_cost << endl;
+    startRobustTrial();
+    teleport();
 }
 
 /*! @brief Measure the robustness of the walk
@@ -299,10 +297,7 @@ void WalkOptimiserBehaviour::measureRobust()
  */
 void WalkOptimiserBehaviour::finishMeasureRobust()
 {
-    cout << "Finishing Robust Measurement" << endl;
-    static vector<float> gps(3,0);
-    m_data->getGPSValues(gps);
-    m_measured_robustness = sqrt(pow(gps[0] - m_trial_start_x,2) + pow(gps[1] - m_trial_start_y,2));
+    m_measured_robustness = m_trial_perturbation_mag;
     
     if (m_metric_type == Speed)
         m_measured_metric = m_measured_speed;
@@ -312,20 +307,27 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
         m_measured_metric = m_measured_speed;
     else
         m_measured_metric = m_measured_cost;
-    
+ 
+    cout << "Finishing Robust Measurement. Mag:" << m_trial_perturbation_mag << endl;
     tickOptimiser(m_measured_metric);
     
-    respawn();
+    m_state = MeasureCost;
+    teleport();
 }
 
 /*! @brief Perturbs the robot while it is walking
  
     We are going to be 'perturbing' the robot by applying an additional torque to the ankles and/or hips.
- 
  */
 void WalkOptimiserBehaviour::perturbRobot()
 {
     static int stepcount = 1;
+    
+    if (m_target_speed < m_walk_parameters[0])
+    {   // be careful not to perturb the robot will it is accelerating
+        stepcount = 1;
+        return;
+    }
     
     // increment the step count every time there is a foot impact
     if (m_data->footImpact(NUSensorsData::LeftFoot, m_left_impact_time) || m_data->footImpact(NUSensorsData::RightFoot, m_right_impact_time))
@@ -333,9 +335,10 @@ void WalkOptimiserBehaviour::perturbRobot()
         stepcount++;
         if (stepcount%3 == 0)
         {
+            cout << "Perturbing robot" << endl;
             m_perturbation_direction = (m_perturbation_direction + 1) % 4;
             if (m_perturbation_direction == 0)
-                m_trial_perturbation_mag += 0.02;
+                m_trial_perturbation_mag += 0.00;
         }
     }
     
@@ -404,6 +407,8 @@ void WalkOptimiserBehaviour::pushOutward()
     }
 }
 
+/*! @brief Simulates an imaginary push forwards, that is a push from behind
+ */
 void WalkOptimiserBehaviour::pushForward()
 {
     float magnitude = 0.5*m_trial_perturbation_mag;
@@ -413,6 +418,8 @@ void WalkOptimiserBehaviour::pushForward()
         pushJoint(NUSensorsData::RAnklePitch, -m_trial_perturbation_mag);
 }
 
+/*! @brief Simulates a push from the front
+ */
 void WalkOptimiserBehaviour::pushBackward()
 {
     float magnitude = 0.5*m_trial_perturbation_mag;
