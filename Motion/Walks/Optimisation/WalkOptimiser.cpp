@@ -49,6 +49,7 @@ WalkOptimiser::~WalkOptimiser()
 void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
 {
     m_iteration_count++;
+    m_current_performance = performance;
     if (m_minimise == true && performance < m_best_performance || m_minimise == false && performance > m_best_performance)
     {
         m_previous_improvement = m_improvement;
@@ -176,8 +177,8 @@ void WalkOptimiser::summaryTo(ostream& output)
  */
 void WalkOptimiser::csvTo(ostream& output)
 {
-    output << m_iteration_count << ", " << m_real_best_performance << ", ";
-    m_real_best_parameters.csvTo(output);
+    output << m_iteration_count << ", " << m_current_performance << ", ";
+    m_current_parameters.csvTo(output);
     output << endl;
 }
 

@@ -60,6 +60,7 @@ class WalkOptimiser
         
         int m_iteration_count;
         bool m_minimise;
+        float m_current_performance;
         float m_best_performance;
         float m_real_best_performance;
         float m_alpha;
