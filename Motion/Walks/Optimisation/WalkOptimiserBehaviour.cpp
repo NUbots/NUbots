@@ -310,7 +310,6 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     }
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
-    if (totaldistance < 300)        // if the total distance is less than 300cm then we have fallen over --- make sure you penalised it
         
     m_state = MeasureRobust;
     teleport();
