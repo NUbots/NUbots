@@ -103,10 +103,10 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     static vector<float> fallingvalues;
     static vector<float> fallenvalues;
     data->getFalling(fallingvalues);
-    data->getFallen(fallenvalues);
-    if (fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
+    data->getFallen(fallenvalues);              //! @todo Put in a compile flag here or something because I need to walk while fallen atm
+    if (false && fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
         m_fall_protection->process(data, actions);
-    else if (fallenvalues[0] > 0)                       // If fallen you can only getup
+    else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
     {
         m_getup->process(data, actions);
         if (m_getup->headReady())                       // And you can only use the head if the getup lets you
