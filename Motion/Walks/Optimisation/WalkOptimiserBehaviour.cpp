@@ -48,7 +48,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_metric_type = Speed;
+    m_metric_type = Cost;                                                              //<<<<<<<<<-------------------- Don't forget to set this line to the right metric!!
     if (m_metric_type == Speed || m_metric_type == SpeedAndPushes)
         m_optimiser = new WalkOptimiser(m_walk_parameters, false);
     else
@@ -59,18 +59,20 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     p_platform->getTeamNumber(teamnum);
     // check to see if there is an existing saved optimiser. I do this by trying to open it
     stringstream savedoptimiser_filenamestream;
-    savedoptimiser_filenamestream << "previous_optimiser" << teamnum << playernum << ".log";
+    savedoptimiser_filenamestream << "../previous_optimiser" << teamnum << playernum << ".log";
     m_saved_optimiser_filename = savedoptimiser_filenamestream.str();
     loadOptimiser();
     // init log files. I always want to write, and I always want to append to the files
     stringstream parameter_filenamestream;
-    parameter_filenamestream << "best_parameters" << teamnum << playernum << ".log";
-    m_best_parameter_log.open(parameter_filenamestream.str().c_str(), ios_base::out | ios_base::app);
+    parameter_filenamestream << "../parameters" << teamnum << playernum << ".log";
+    m_parameter_log.open(parameter_filenamestream.str().c_str(), ios_base::out | ios_base::app);
     stringstream performance_filenamestream;
-    performance_filenamestream << "performance" << teamnum << playernum << ".log";
+    performance_filenamestream << "../performance" << teamnum << playernum << ".log";
     m_performance_log.open(performance_filenamestream.str().c_str(), ios_base::out | ios_base::app);
     
     
+    m_current_time = 0;
+    m_previous_time = 0;
     // specify respawn location based on the player and team number
     m_respawn_x = -270;
     m_respawn_bearing = 0;
@@ -95,6 +97,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     m_target_speed = 0.1;
     m_target_trial_duration = 15000;
     
+    m_trial_out_of_field = false;
     m_trial_energy_used = 0;
     m_trial_perturbation_mag = 0;
 }
@@ -142,27 +145,51 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         return;
 
     m_previous_state = m_state;
+    m_previous_time = m_current_time;
+    m_current_time = m_data->CurrentTime;
+    
     if (m_state == Initial)
-    {   // In the initial state we wait until the simulator puts the game in 'playing'
+    {   // In the initial state we wait until the simulator puts the game in 'playing' and I have time to score a goal!
         if (m_data->CurrentTime > 15000)
         {
-            respawn();
-            startCostTrial();
+            m_state = MeasureCost;
+            teleport();
         }
     }
     else if (m_state == Teleport)
-    {   // In the teleport state we gradually slow down to a stop over 2s
-        float acceleration = m_target_speed/(2000 - (m_data->CurrentTime - m_teleport_time));
-        static double previoustime = m_data->CurrentTime;
-        m_target_speed -= acceleration*(m_data->CurrentTime - previoustime);
+    {   // In the teleport state we gradually slow down to a stop over 2.0s
+        // We then respawn, and then wait another 0.5s before proceeding to the next state
+        
+        // handle the deacceleration
+        float acceleration = m_target_speed*1000/(1500 - (m_current_time - m_teleport_time));
+        m_target_speed -= acceleration*(m_current_time - m_previous_time)/1000.0;
         if (m_target_speed < 0)
             m_target_speed = 0;
-        if (m_data->CurrentTime - m_teleport_time > 2000)
+        
+        // handle the respawn call (being careful to only call it once because it really slows webots down)
+        static bool respawn_called = false;
+        if (respawn_called == false && m_current_time - m_teleport_time > 2000)
+        {
+            respawn();
+            respawn_called = true;
+        }
+        
+        // handle the timely progress to the next state
+        if (m_current_time - m_teleport_time > 2500)
         {
             m_state = m_next_state;
             m_target_speed = 0;
             fallencount = 0;
-            respawn();
+            respawn_called = false;
+            if (m_trial_out_of_field == false)
+            {
+                if (m_state == MeasureCost)
+                    startCostTrial();
+                else if (m_state == MeasureRobust)
+                    startRobustTrial();
+            }
+            else
+                m_trial_out_of_field = false;
         }
     }
     else if (m_data->isFallen())
@@ -182,8 +209,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         
         // handle accelerating walks up to maximum speed
         const float acceleration = 10;  // The fairest way to accelerate walks is to use a fixed constant for all! (cm/s/s)
-        static double previoustime = m_data->CurrentTime;
-        m_target_speed += acceleration*(m_data->CurrentTime - previoustime);
+        m_target_speed += acceleration*(m_current_time - m_previous_time)/1000.0;
         if (m_target_speed > m_walk_parameters[0])
             m_target_speed = m_walk_parameters[0];
         
@@ -199,16 +225,16 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         else if (m_state == MeasureRobust)
         {
             if (totaldistance > 450.0)
+            {
+                m_trial_out_of_field = true;
                 teleport();
+            }
         }
     }
     speed[0] = m_target_speed;
     job->setSpeed(speed);
     joblist.addMotionJob(job);
 }
-
-// I need to figure out where to put the startTrial(). Needs to go before MeasureCost and MeasureRobust. Really only before
-// MeasureRobust because MeasureRobust doesn't compare about the time.
 
 /*! @brief Teleports the robot back to its starting position cleanly.
  
@@ -232,7 +258,6 @@ void WalkOptimiserBehaviour::respawn()
  */
 void WalkOptimiserBehaviour::startCostTrial()
 {
-    cout << "Starting Cost Measurement" << endl;
     m_trial_start_time = m_data->CurrentTime;
     m_trial_energy_used = 0;
     m_state = MeasureCost;
@@ -242,7 +267,6 @@ void WalkOptimiserBehaviour::startCostTrial()
  */
 void WalkOptimiserBehaviour::startRobustTrial()
 {
-    cout << "Starting Robust Measurement" << endl;
     m_trial_perturbation_mag = 0.02;
     m_perturbation_direction = -1;
     m_state = MeasureRobust;
@@ -277,12 +301,18 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     static vector<float> gps(3,0);
     m_data->getGPSValues(gps);
     float distance = fabs(gps[0] - m_respawn_x);                                // only count the forward distance travelled
+    float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
     float time = (m_data->CurrentTime - m_trial_start_time)/1000.0;
+    if (totaldistance < 300)
+    {   // if we fall then add the time and energy it takes to get up
+        time += 10;                                     // approx 10s to getup
+        m_trial_energy_used += (9.81*4.8*0.3)*3;         // approx 42J to getup
+    }
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
-    
-    cout << "Finishing Cost Measurement. Speed:" << m_measured_speed << " Cost:" << m_measured_cost << endl;
-    startRobustTrial();
+    if (totaldistance < 300)        // if the total distance is less than 300cm then we have fallen over --- make sure you penalised it
+        
+    m_state = MeasureRobust;
     teleport();
 }
 
@@ -308,7 +338,6 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
     else
         m_measured_metric = m_measured_cost;
  
-    cout << "Finishing Robust Measurement. Mag:" << m_trial_perturbation_mag << endl;
     tickOptimiser(m_measured_metric);
     
     m_state = MeasureCost;
@@ -335,10 +364,9 @@ void WalkOptimiserBehaviour::perturbRobot()
         stepcount++;
         if (stepcount%3 == 0)
         {
-            cout << "Perturbing robot" << endl;
             m_perturbation_direction = (m_perturbation_direction + 1) % 4;
             if (m_perturbation_direction == 0)
-                m_trial_perturbation_mag += 0.00;
+                m_trial_perturbation_mag += 0.02;
         }
     }
     
@@ -447,16 +475,13 @@ void WalkOptimiserBehaviour::pushJoint(NUSensorsData::joint_id_t id, float offse
  */
 void WalkOptimiserBehaviour::tickOptimiser(float metric)
 {
-    cout << "Ticking Optimiser" << endl;
+    //cout << "Ticking Optimiser" << endl;
     m_optimiser->tick(metric, m_walk_parameters);
     m_walk->setWalkParameters(m_walk_parameters);
     
     saveOptimiser();
-    m_optimiser->csvTo(m_best_parameter_log);
+    m_optimiser->csvTo(m_parameter_log);
     csvTo(m_performance_log);
-    
-    cout << "Parameters:";
-    m_walk_parameters.summaryTo(cout);
 }
 
 /*! @brief Loads a saved WalkOptimiser from a file. If there is no file then we start from scratch

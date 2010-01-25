@@ -89,11 +89,13 @@ private:
         Teleport
     };
     State m_state, m_previous_state, m_next_state;
+    double m_current_time, m_previous_time;
     float m_respawn_x, m_respawn_y, m_respawn_bearing;
     double m_teleport_time;
     float m_target_speed;
     float m_target_trial_duration;
     
+    bool m_trial_out_of_field;
     double m_trial_start_time;
     float m_trial_start_x, m_trial_start_y;
     float m_trial_energy_used, m_trial_perturbation_mag;
@@ -112,7 +114,7 @@ private:
     
     // Serialisation
     string m_saved_optimiser_filename;
-    ofstream m_best_parameter_log;
+    ofstream m_parameter_log;
     ofstream m_performance_log;
 };
 
