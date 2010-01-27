@@ -105,7 +105,7 @@ void WalkOptimiser::mutateBestParameters(WalkParameters& walkparameters)
 void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters)
 {
     // generate phi to mutate the BestParameters
-    float sigma = 0.05*exp(m_count_since_last_improvement/m_reset_limit - 1);
+    float sigma = 0.1*exp(m_count_since_last_improvement/m_reset_limit - 1);
     vector<float> phi(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(1, sigma);
