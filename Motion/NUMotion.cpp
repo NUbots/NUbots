@@ -131,6 +131,9 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
+ 
+    @attention There is a very rare segmentation fault in this function. This will need to be looked at eventually.
+               I think I might need to change things around so I don't remove jobs mid loop!
     
     @param jobs the current list of jobs
  */
