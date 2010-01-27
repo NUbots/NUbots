@@ -132,24 +132,21 @@ void NUWalk::setTargetSpeeds(const vector<float>& speed)
     temp_yaw = 0;
     if (speed.size() > 0)
     {
+        temp_x = speed[0];
         if (m_gait_max_speeds.size() > 0 && fabs(temp_x) > fabs(m_gait_max_speeds[0]))      // if clipping is available, and the input is greater than the limit, then clip it
             temp_x = (fabs(temp_x)/temp_x)*m_gait_max_speeds[0];
-        else
-            temp_x = speed[0];
     }
     if (speed.size() > 1)
     {
+        temp_y = speed[1];
         if (m_gait_max_speeds.size() > 1 && fabs(temp_y) > fabs(m_gait_max_speeds[1]))      // if clipping is available, and the input is greater than the limit, then clip it
             temp_y = (fabs(temp_y)/temp_y)*m_gait_max_speeds[1];
-        else
-            temp_y = speed[1];
     }
     if (speed.size() > 2)
     {
+        temp_yaw = speed[2];
         if (m_gait_max_speeds.size() > 2 && fabs(temp_yaw) > fabs(m_gait_max_speeds[2]))      // if clipping is available, and the input is greater than the limit, then clip it
             temp_yaw = (fabs(temp_yaw)/temp_yaw)*m_gait_max_speeds[2];
-        else
-            temp_yaw = speed[2];
     }
     m_target_speed_x = temp_x;
     m_target_speed_y = temp_y;
