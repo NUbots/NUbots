@@ -48,7 +48,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_metric_type = Speed;                                                              //<<<<<<<<<-------------------- Don't forget to set this line to the right metric!!
+    m_metric_type = Cost;                                                              //<<<<<<<<<-------------------- Don't forget to set this line to the right metric!!
     if (m_metric_type == Speed || m_metric_type == SpeedAndPushes)
         m_optimiser = new WalkOptimiser(m_walk_parameters, false);
     else
@@ -94,7 +94,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // start the behaviour in the initial state
     m_state = Initial;
     m_previous_state = m_state;
-    m_target_speed = 0.1;
+    m_target_speed = 0.0;
     
     m_trial_out_of_field = false;
     m_trial_energy_used = 0;
@@ -291,15 +291,17 @@ void WalkOptimiserBehaviour::measureCost()
     static vector<float> previouspositions;
     static vector<float> positions;
     static vector<float> torques;
+    static double previoustime = 0;
     m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
     m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
     
-    if (previouspositions.size() != 0)
+    if (previouspositions.size() != 0 && (m_data->CurrentTime - previoustime) < 1000)
     {
         for (int i=0; i<positions.size(); i++)
             m_trial_energy_used += fabs(torques[i]*(positions[i] - previouspositions[i]));
     }
     previouspositions = positions;
+    previoustime = m_data->CurrentTime;
 }
 
 /*! @brief Finish the cost measurement
@@ -316,10 +318,12 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     if (totaldistance < 300)
     {   // if we fall then add the time and energy it takes to get up
         time += 10;                                     // approx 10s to getup
-        m_trial_energy_used += (9.81*4.8*0.3)*3;         // approx 42J to getup
+        m_trial_energy_used += (9.81*4.8*0.3)*3;        // approx 42J to getup
     }
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
+    
+    //cout << "finishMeasureCost(). m_trial_energy_used: " << m_trial_energy_used << " time: " << time << " totaldistance:" << totaldistance << endl;
     
     m_state = MeasureRobust;
     teleport();
