@@ -95,7 +95,6 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     m_state = Initial;
     m_previous_state = m_state;
     m_target_speed = 0.1;
-    m_target_trial_duration = 15000;
     
     m_trial_out_of_field = false;
     m_trial_energy_used = 0;
@@ -157,30 +156,41 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         }
     }
     else if (m_state == Teleport)
-    {   // In the teleport state we gradually slow down to a stop over 2.0s
+    {   // In the teleport state we wait until the robot has stopped
         // We then respawn, and then wait another 0.5s before proceeding to the next state
         
-        // handle the deacceleration
-        float acceleration = m_target_speed*1000/(1500 - (m_current_time - m_teleport_time));
-        m_target_speed -= acceleration*(m_current_time - m_previous_time)/1000.0;
-        if (m_target_speed < 0)
-            m_target_speed = 0;
+        // handle the deacceleration (now done in the walk engine itself)
+        m_target_speed = 0;
         
+        // wait until the robot comes to rest
+        static vector<float> speed(3,0);
+        static double stoppedtime = 0;
+        static bool stopped = false;
+        m_walk->getCurrentSpeed(speed);
+        if (stopped == false && speed[0] == 0)
+        {
+            stoppedtime = m_current_time;
+            stopped = true;
+            cout << "Teleport. Stop detected." << endl;
+        }
+            
         // handle the respawn call (being careful to only call it once because it really slows webots down)
         static bool respawn_called = false;
-        if (respawn_called == false && m_current_time - m_teleport_time > 2000)
+        if (respawn_called == false && stopped == true && (m_current_time - stoppedtime) > 500)
         {
             respawn();
             respawn_called = true;
+            cout << "Teleport. Respawn called." << endl;
         }
         
         // handle the timely progress to the next state
-        if (m_current_time - m_teleport_time > 2500)
+        if (respawn_called == true && stopped == true && (m_current_time - stoppedtime) > 1000)
         {
             m_state = m_next_state;
             m_target_speed = 0;
             fallencount = 0;
             respawn_called = false;
+            stopped = false;
             if (m_trial_out_of_field == false)
             {
                 if (m_state == MeasureCost)
@@ -190,6 +200,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
             }
             else
                 m_trial_out_of_field = false;
+            cout << "Teleport. Move on to next state." << endl;
         }
     }
     else if (m_data->isFallen())
@@ -207,11 +218,8 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
     {
         fallencount = 0;                // reset the fallen count when we are not falling
         
-        // handle accelerating walks up to maximum speed
-        const float acceleration = 10;  // The fairest way to accelerate walks is to use a fixed constant for all! (cm/s/s)
-        m_target_speed += acceleration*(m_current_time - m_previous_time)/1000.0;
-        if (m_target_speed > m_walk_parameters[0])
-            m_target_speed = m_walk_parameters[0];
+        // handle accelerating walks up to maximum speed (now done in the walk engine itself)
+        m_target_speed = m_walk_parameters[0];
         
         // look for terminating distances while measuring walk performance
         static vector<float> gps(3,0);
@@ -219,8 +227,14 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
         if (m_state == MeasureCost)
         {
-            if (totaldistance > 300.0)
-                finishMeasureCost();
+            if (totaldistance > 300.0)      // if walked more than 300cm begin to stop the robot
+            {
+                m_target_speed = 0;
+                static vector<float> speeds(3,0);
+                m_walk->getCurrentSpeed(speeds);
+                if (speeds[0] == 0)         // once the robot has stopped finish the cost measurement
+                    finishMeasureCost();
+            }
         }
         else if (m_state == MeasureRobust)
         {
@@ -244,7 +258,6 @@ void WalkOptimiserBehaviour::teleport()
 {
     m_next_state = m_state;                 // I copy the desired state to next state, so when teleport finishes I know which state to go into
     m_state = Teleport;
-    m_teleport_time = m_data->CurrentTime;  
 }
 
 /*! @brief Moves the robot back to its starting position. The robot is always placed upright
