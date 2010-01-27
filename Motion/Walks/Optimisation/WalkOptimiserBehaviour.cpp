@@ -556,6 +556,7 @@ void WalkOptimiserBehaviour::loadAssessor()
     if (assess_parameters_log.is_open())
     {
         m_walk_parameters.csvFrom(assess_parameters_log);
+        m_walk->setWalkParameters(m_walk_parameters);
         m_assessor_running = true;
         cout << "Loading walk parameters for assessment: " << endl;
         m_walk_parameters.summaryTo(cout);
