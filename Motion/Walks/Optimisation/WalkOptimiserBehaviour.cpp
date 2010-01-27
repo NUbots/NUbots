@@ -48,7 +48,7 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     // get initial walk parameters from the walk engine itself.
     m_walk = p_walk;
     m_walk->getWalkParameters(m_walk_parameters);
-    m_metric_type = Cost;                                                              //<<<<<<<<<-------------------- Don't forget to set this line to the right metric!!
+    m_metric_type = Speed;                                                              //<<<<<<<<<-------------------- Don't forget to set this line to the right metric!!
     if (m_metric_type == Speed || m_metric_type == SpeedAndPushes)
         m_optimiser = new WalkOptimiser(m_walk_parameters, false);
     else
@@ -311,6 +311,8 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
         
+    cout << "finishMeasureCost. distance:" << distance << " speed:" << m_measured_speed << " cost: " << m_measured_cost << endl;
+    
     m_state = MeasureRobust;
     teleport();
 }
