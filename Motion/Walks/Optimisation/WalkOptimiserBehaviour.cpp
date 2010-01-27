@@ -28,6 +28,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 using namespace std;
 
 //! @todo TODO: put M_PI and NORMALISE somewhere else
@@ -57,6 +59,11 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     int playernum, teamnum;
     p_platform->getNumber(playernum);
     p_platform->getTeamNumber(teamnum);
+    // firstly we look to see if there are any sets of parameters that need assessing!
+    stringstream assessparameters_filenamestream;
+    assessparameters_filenamestream << "../assess_this" << teamnum << playernum << ".log";
+    m_assessparameters_filename = assessparameters_filenamestream.str();
+    loadAssessor();
     // check to see if there is an existing saved optimiser. I do this by trying to open it
     stringstream savedoptimiser_filenamestream;
     savedoptimiser_filenamestream << "../previous_optimiser" << teamnum << playernum << ".log";
@@ -351,7 +358,10 @@ void WalkOptimiserBehaviour::finishMeasureRobust()
     else
         m_measured_metric = m_measured_cost;
  
-    tickOptimiser(m_measured_metric);
+    if (m_assessor_running == true)
+        tickAssessor();
+    else
+        tickOptimiser(m_measured_metric);
     
     m_state = MeasureCost;
     teleport();
@@ -519,6 +529,39 @@ void WalkOptimiserBehaviour::saveOptimiser()
     ofstream savedoptimiser(m_saved_optimiser_filename.c_str(), ios_base::trunc);
     if (savedoptimiser.is_open())
         savedoptimiser << (*m_optimiser);
+}
+
+/*! @brief Ticks the internal walk parameter assessor
+ */
+void WalkOptimiserBehaviour::tickAssessor()
+{
+    using namespace boost::accumulators;
+    static accumulator_set<float, stats<tag::mean, tag::variance> > speed_accumulator;
+    static accumulator_set<float, stats<tag::mean, tag::variance> > cost_accumulator;
+    static accumulator_set<float, stats<tag::mean, tag::variance> > robust_accumulator;
+    
+    speed_accumulator(m_measured_speed);
+    cost_accumulator(m_measured_cost);
+    robust_accumulator(m_measured_robustness);
+    
+    cout << "Speed: " << mean(speed_accumulator) << " sd:" << sqrt(variance(speed_accumulator)) << endl;
+    cout << "Cost: " << mean(cost_accumulator) << " sd:" << sqrt(variance(cost_accumulator)) << endl;
+    cout << "Robustness: " << mean(robust_accumulator) << " sd:" << sqrt(variance(robust_accumulator)) << endl;
+}
+
+void WalkOptimiserBehaviour::loadAssessor()
+{
+    ifstream assess_parameters_log;
+    assess_parameters_log.open(m_assessparameters_filename.c_str());
+    if (assess_parameters_log.is_open())
+    {
+        m_walk_parameters.csvFrom(assess_parameters_log);
+        m_assessor_running = true;
+        cout << "Loading walk parameters for assessment: " << endl;
+        m_walk_parameters.summaryTo(cout);
+    }
+    else
+        m_assessor_running = false;
 }
 
 /*! @brief Prints a human readable summary of the walk behaviour's state

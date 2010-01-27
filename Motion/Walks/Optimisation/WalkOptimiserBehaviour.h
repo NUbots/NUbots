@@ -69,6 +69,9 @@ protected:
     void tickOptimiser(float metric);
     void loadOptimiser();
     void saveOptimiser();
+    
+    void tickAssessor();
+    void loadAssessor();
 private:
 public:
 protected:
@@ -109,7 +112,10 @@ private:
     metric_type_t m_metric_type;
     float m_measured_metric, m_measured_speed, m_measured_cost, m_measured_robustness;
     
+    
+    bool m_assessor_running;
     // Serialisation
+    string m_assessparameters_filename;
     string m_saved_optimiser_filename;
     ofstream m_parameter_log;
     ofstream m_performance_log;
