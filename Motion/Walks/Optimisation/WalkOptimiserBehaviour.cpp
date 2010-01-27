@@ -171,7 +171,6 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         {
             stoppedtime = m_current_time;
             stopped = true;
-            cout << "Teleport. Stop detected." << endl;
         }
             
         // handle the respawn call (being careful to only call it once because it really slows webots down)
@@ -180,7 +179,6 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         {
             respawn();
             respawn_called = true;
-            cout << "Teleport. Respawn called." << endl;
         }
         
         // handle the timely progress to the next state
@@ -200,7 +198,6 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
             }
             else
                 m_trial_out_of_field = false;
-            cout << "Teleport. Move on to next state." << endl;
         }
     }
     else if (m_data->isFallen())
@@ -323,8 +320,6 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     }
     m_measured_speed = distance/time;
     m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
-        
-    cout << "finishMeasureCost. distance:" << distance << " speed:" << m_measured_speed << " cost: " << m_measured_cost << endl;
     
     m_state = MeasureRobust;
     teleport();

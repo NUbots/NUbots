@@ -154,8 +154,6 @@ void NUWalk::setTargetSpeeds(const vector<float>& speed)
     m_target_speed_x = temp_x;
     m_target_speed_y = temp_y;
     m_target_speed_yaw = temp_yaw;
-    
-    cout << "TargetSpeeds: " << m_target_speed_x << " " << m_target_speed_y << " " << m_target_speed_yaw << endl;
 }
 
 /*! @brief Sets the current walk engine speed. The current speeds are smoothed to satisify acceleration constraints
@@ -180,7 +178,6 @@ void NUWalk::setCurrentSpeeds()
         acceleration_y = 0;
         acceleration_yaw = 0;
     }
-    cout << "Accelerations(Before): " << acceleration_x << " " << acceleration_y << " " << acceleration_yaw << endl;
     // clip the accelerations to the max values (if the max values exist)
     if (m_gait_max_accelerations.size() > 0 && fabs(acceleration_x) > fabs(m_gait_max_accelerations[0]))      // if clipping is available, and the input is greater than the limit, then clip it
         acceleration_x = sign(acceleration_x)*m_gait_max_accelerations[0];
@@ -197,9 +194,6 @@ void NUWalk::setCurrentSpeeds()
     m_speed_yaw = m_speed_yaw + acceleration_yaw*timestep;
     
     previoustime = m_data->CurrentTime;
-    
-    cout << "Accelerations(After): " << acceleration_x << " " << acceleration_y << " " << acceleration_yaw << endl;
-    cout << "CurrentSpeeds: " << m_speed_x << " " << m_speed_y << " " << m_speed_yaw << endl;
 }
 
 /*! @brief Updates currentspeed with the current speed of the walk engine
