@@ -33,22 +33,36 @@ class NUWalk
 {
 public:
     static NUWalk* getWalkEngine();
+    NUWalk();
     virtual ~NUWalk();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void walkSpeed(const vector<float>& speed);
     void walkToPoint(double time, const vector<float>& position);
     
+    void getCurrentSpeed(vector<float>& currentspeed);
+    
     virtual void setWalkParameters(WalkParameters& walkparameters);
     virtual void getWalkParameters(WalkParameters& walkparameters);
 protected:
     virtual void doWalk();
+    
+    void setTargetSpeeds(const vector<float>& speed);
+    void setCurrentSpeeds();
+    
+    inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};
 private:
 public:
 protected:
     NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
     
+    // the target speeds before acceleration clipping
+    float m_target_speed_x;                         //!< the current target x speed cm/s
+    float m_target_speed_y;                         //!< the current target y speed cm/s
+    float m_target_speed_yaw;                       //!< the current target yaw speed rad/s
+    
+    // the current speeds
     float m_speed_x;                                //!< the current x speed in cm/s
     float m_speed_y;                                //!< the current y speed in cm/s
     float m_speed_yaw;                              //!< the current rotation speed in rad/s
@@ -67,6 +81,7 @@ protected:
     
     vector<vector<WalkParameters::Parameter> > m_gait_walk_parameters;  //!< the walk engine parameters over a gait cycle
     vector<float> m_gait_max_speeds;                //!< the maximum allowed speeds in the x,y,theta directions
+    vector<float> m_gait_max_accelerations;         //!< the maximum allowed accelerations in the x,y, theta directions
 
 private:
 };

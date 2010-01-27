@@ -57,12 +57,31 @@ NUWalk* NUWalk::getWalkEngine()
     return NULL;
 }
 
+NUWalk::NUWalk()
+{
+    m_target_speed_x = 0;                         //!< the current target x speed cm/s
+    m_target_speed_y = 0;                         //!< the current target y speed cm/s
+    m_target_speed_yaw = 0;                       //!< the current target yaw speed rad/s
+    
+    m_speed_x = 0;                                //!< the current x speed in cm/s
+    m_speed_y = 0;                                //!< the current y speed in cm/s
+    m_speed_yaw = 0;                              //!< the current rotation speed in rad/s
+    m_speed_timestamp = 0;                        //!< the timestamp of the last speed command
+    
+    m_point_time = 0;                             //!< the desired time to reach the current target point in milliseconds from now
+    m_point_x = 0;                                //!< the current target point's x position in cm
+    m_point_y = 0;                                //!< the current target point's y position in cm
+    m_point_theta = 0;                            //!< the current target point's final orientation relative to the current in radians
+    m_point_timestamp = 0;                        //!< the timestamp of the last point command
+}
+
 /*! @brief Destructor for motion module
  */
 NUWalk::~NUWalk()
 {
     m_gait_walk_parameters.clear();
     m_gait_max_speeds.clear();
+    m_gait_max_accelerations.clear();
     m_gait_arm_gains.clear();      
     m_gait_torso_gains.clear();    
     m_gait_leg_gains.clear();      
@@ -93,6 +112,20 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUWalk::walkSpeed(const vector<float>& speed)
 {
+    setTargetSpeeds(speed);
+    setCurrentSpeeds();
+    m_speed_timestamp = nusystem->getTime();
+}
+
+/*! @brief Sets the target speeds. The given speeds will be clipped if they are faster than the maximum possible speeds
+ 
+    m_target_speed_x, m_target_speed_y and m_target_speed_yaw are set with valid speeds. This is may not be the current speed
+    if the new targets require the robot to accelerate too quickly.
+ 
+    @param speed the desired speeds (x,y,theta)
+ */
+void NUWalk::setTargetSpeeds(const vector<float>& speed)
+{
     static float temp_x, temp_y, temp_yaw;
     temp_x = 0;
     temp_y = 0;
@@ -118,10 +151,66 @@ void NUWalk::walkSpeed(const vector<float>& speed)
         else
             temp_yaw = speed[2];
     }
-    m_speed_x = temp_x;
-    m_speed_y = temp_y;
-    m_speed_yaw = temp_yaw;
-    m_speed_timestamp = nusystem->getTime();
+    m_target_speed_x = temp_x;
+    m_target_speed_y = temp_y;
+    m_target_speed_yaw = temp_yaw;
+    
+    cout << "TargetSpeeds: " << m_target_speed_x << " " << m_target_speed_y << " " << m_target_speed_yaw << endl;
+}
+
+/*! @brief Sets the current walk engine speed. The current speeds are smoothed to satisify acceleration constraints
+ 
+    m_speed_x, m_speed_y and m_speed_yaw are set with smoothed speeds
+ */
+void NUWalk::setCurrentSpeeds()
+{
+    static double previoustime = m_data->CurrentTime;
+    float timestep = (m_data->CurrentTime - previoustime)/1000.0;
+    float acceleration_x, acceleration_y, acceleration_yaw;
+    // calculate the accelerations required to go move to the target speed in the next timestep
+    if (timestep != 0)
+    {
+        acceleration_x = (m_target_speed_x - m_speed_x)/timestep;
+        acceleration_y = (m_target_speed_y - m_speed_y)/timestep;
+        acceleration_yaw = (m_target_speed_yaw - m_speed_yaw)/timestep;
+    }
+    else 
+    {
+        acceleration_x = 0;
+        acceleration_y = 0;
+        acceleration_yaw = 0;
+    }
+    cout << "Accelerations(Before): " << acceleration_x << " " << acceleration_y << " " << acceleration_yaw << endl;
+    // clip the accelerations to the max values (if the max values exist)
+    if (m_gait_max_accelerations.size() > 0 && fabs(acceleration_x) > fabs(m_gait_max_accelerations[0]))      // if clipping is available, and the input is greater than the limit, then clip it
+        acceleration_x = sign(acceleration_x)*m_gait_max_accelerations[0];
+    
+    if (m_gait_max_accelerations.size() > 1 && fabs(acceleration_y) > fabs(m_gait_max_accelerations[1]))      // if clipping is available, and the input is greater than the limit, then clip it
+        acceleration_y = sign(acceleration_y)*m_gait_max_accelerations[1];
+    
+    if (m_gait_max_accelerations.size() > 2 && fabs(acceleration_yaw) > fabs(m_gait_max_accelerations[2]))      // if clipping is available, and the input is greater than the limit, then clip it
+        acceleration_yaw = sign(acceleration_yaw)*m_gait_max_accelerations[2];
+
+    // set the current speeds 
+    m_speed_x = m_speed_x + acceleration_x*timestep;
+    m_speed_y = m_speed_y + acceleration_y*timestep;
+    m_speed_yaw = m_speed_yaw + acceleration_yaw*timestep;
+    
+    previoustime = m_data->CurrentTime;
+    
+    cout << "Accelerations(After): " << acceleration_x << " " << acceleration_y << " " << acceleration_yaw << endl;
+    cout << "CurrentSpeeds: " << m_speed_x << " " << m_speed_y << " " << m_speed_yaw << endl;
+}
+
+/*! @brief Updates currentspeed with the current speed of the walk engine
+ */
+void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
+{
+    static vector<float> speeds(3,0);
+    speeds[0] = m_speed_x;
+    speeds[1] = m_speed_y;
+    speeds[2] = m_speed_yaw;
+    currentspeed = speeds;
 }
 
 /*! @brief Walk to the given point by the given time
@@ -170,12 +259,14 @@ void NUWalk::doWalk()
  */
 void NUWalk::setWalkParameters(WalkParameters& walkparameters)
 {
+    // walkparameters >> m_gait_*
     walkparameters.getArmGains(m_gait_arm_gains);
     walkparameters.getTorsoGains(m_gait_torso_gains);
     walkparameters.getLegGains(m_gait_leg_gains);
     
     walkparameters.getParameters(m_gait_walk_parameters);
     walkparameters.getMaxSpeeds(m_gait_max_speeds);
+    walkparameters.getMaxAccelerations(m_gait_max_accelerations);
 }
 
 /*! @brief Gets the walk parameters and stores them in the passed variable
@@ -183,12 +274,14 @@ void NUWalk::setWalkParameters(WalkParameters& walkparameters)
  */
 void NUWalk::getWalkParameters(WalkParameters& walkparameters)
 {
+    // m_gait_* >> walkparameters
     walkparameters.setArmGains(m_gait_arm_gains);
     walkparameters.setTorsoGains(m_gait_torso_gains);
     walkparameters.setLegGains(m_gait_leg_gains);
     
     walkparameters.setParameters(m_gait_walk_parameters);
     walkparameters.setMaxSpeeds(m_gait_max_speeds);
+    walkparameters.setMaxAccelerations(m_gait_max_accelerations);
 }
 
 

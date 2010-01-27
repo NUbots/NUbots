@@ -40,9 +40,10 @@ WalkParameters::WalkParameters()
     @param leggains the gains: [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
     @param parameters the walk engine parameters are stored as [first phase, second phase, etc] where each phase is a list of WalkParameter structs. However, only the walk engine knows the order they are saved in.
  */
-WalkParameters::WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds)
+WalkParameters::WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds, const vector<float>& maxaccels)
 {
     setMaxSpeeds(maxspeeds);
+    setMaxAccelerations(maxaccels);
     setParameters(parameters);
     setArmGains(armgains);
     setTorsoGains(torsogains);
@@ -54,6 +55,7 @@ WalkParameters::WalkParameters(const vector<vector<float> >& armgains, const vec
 WalkParameters::~WalkParameters()
 {
     m_max_speeds.clear();
+    m_max_accelerations.clear();
     m_parameters.clear();
     m_arm_gains.clear();
     m_torso_gains.clear();
@@ -98,6 +100,14 @@ void WalkParameters::getParameters(vector<vector<Parameter> >& parameters)
 void WalkParameters::getMaxSpeeds(vector<float>& maxspeeds)
 {
     maxspeeds = m_max_speeds;
+}
+
+/*! @brief Gets the walk engine max acceleration values stored here
+    @param maxaccels the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
+ */
+void WalkParameters::getMaxAccelerations(vector<float>& maxaccels)
+{
+    maxaccels = m_max_accelerations;
 }
 
 /*! @brief Sets the arm gains
@@ -157,6 +167,15 @@ void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
     m_num_max_speeds = m_max_speeds.size();
 }
 
+/*! @brief Sets the walk engine max accelerations stored here
+    @param maxspeeds the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
+ */
+void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
+{
+    m_max_accelerations = maxaccels;
+    m_num_max_accelerations = m_max_accelerations.size();
+}
+
 /*! @brief Prints a human readable summary of the walk parameters
     Only those relevant to optimisation are shown.
  */
@@ -185,6 +204,11 @@ ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
     // m_max_speeds
     for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
         output.write((char*) &p_walkparameters.m_max_speeds[i], sizeof(float));
+    // m_num_max_accelerations
+    output.write((char*) &p_walkparameters.m_num_max_accelerations, sizeof(int));
+    // m_max_accelerations
+    for (int i=0; i<p_walkparameters.m_num_max_accelerations; i++)
+        output.write((char*) &p_walkparameters.m_max_accelerations[i], sizeof(float));
     // m_num_parameters, numperphase
     output.write((char*) &p_walkparameters.m_num_parameters, sizeof(int));
     if (p_walkparameters.m_num_parameters > 0)
@@ -247,6 +271,17 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         input.read(inbuffer, sizeof(float));
         p_walkparameters.m_max_speeds[i] = *((float*) inbuffer);
     }
+    // m_num_max_accelerations
+    input.read(inbuffer, sizeof(int));
+    p_walkparameters.m_num_max_accelerations = *((int*) inbuffer);
+    // m_max_accelerations
+    p_walkparameters.m_max_accelerations.resize(p_walkparameters.m_num_max_accelerations, 0);
+    for (int i=0; i<p_walkparameters.m_num_max_accelerations; i++)
+    {
+        input.read(inbuffer, sizeof(float));
+        p_walkparameters.m_max_accelerations[i] = *((float*) inbuffer);
+    }
+    
     // m_num_parameters, numperphase
     input.read(inbuffer, sizeof(int));
     p_walkparameters.m_num_parameters = *((int*) inbuffer);
@@ -341,19 +376,26 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 float& WalkParameters::operator[] (const int index)
 {
     // I have written this function with the assumption that I don't want to optimise the arm or torso gains
-    // Furthermore, that I only want to optimise the speed in the forward direction
+    // Furthermore, that I only want to optimise the speed in the forward direction (for now)
     static int nummaxspeedsused = 1;
+    static int nummaxaccelsused = 1;
     if (m_num_max_speeds == 0)
         nummaxspeedsused = 0;
     else
         nummaxspeedsused = 1;
+    if (m_num_max_accelerations == 0)
+        nummaxaccelsused = 0;
+    else
+        nummaxaccelsused = 1;
     
     if (index < nummaxspeedsused)
-        return m_max_speeds[0];
-    else if (index < m_num_parameters + nummaxspeedsused)
-        return m_parameters[(index - nummaxspeedsused)/m_parameters[0].size()][(index - nummaxspeedsused)%m_parameters[0].size()].Value;
-    else if (index < m_num_parameters + nummaxspeedsused + m_num_leg_gains)
-        return m_leg_gains[(index - m_num_parameters - nummaxspeedsused)/m_leg_gains[0].size()][(index - m_num_parameters - nummaxspeedsused)%m_leg_gains[0].size()];
+        return m_max_speeds[index];
+    else if (index < nummaxspeedsused + nummaxaccelsused)
+        return m_max_accelerations[index - nummaxspeedsused];
+    else if (index < m_num_parameters + nummaxspeedsused + nummaxaccelsused)
+        return m_parameters[(index - nummaxspeedsused - nummaxaccelsused)/m_parameters[0].size()][(index - nummaxspeedsused - nummaxaccelsused)%m_parameters[0].size()].Value;
+    else if (index < m_num_parameters + nummaxspeedsused + nummaxaccelsused + m_num_leg_gains)
+        return m_leg_gains[(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
 }
 
 /*! @brief Returns the size of the WalkParameters, that is the number of elements stored here that are relevant to an optimiser
@@ -361,10 +403,15 @@ float& WalkParameters::operator[] (const int index)
 int WalkParameters::size() const
 {
     static int nummaxspeedsused = 1;
+    static int nummaxaccelsused = 1;
     if (m_num_max_speeds == 0)
         nummaxspeedsused = 0;
     else
         nummaxspeedsused = 1;
+    if (m_num_max_accelerations == 0)
+        nummaxaccelsused = 0;
+    else
+        nummaxaccelsused = 1;
 
-    return m_num_parameters + m_num_leg_gains + nummaxspeedsused;
+    return m_num_parameters + m_num_leg_gains + nummaxspeedsused + nummaxaccelsused;
 }
