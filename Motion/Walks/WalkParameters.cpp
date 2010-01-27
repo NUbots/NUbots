@@ -195,6 +195,21 @@ void WalkParameters::csvTo(ostream& output)
         output << (*this)[i] << ", ";
 }
 
+/*! @brief Attempts to load a set of parameters from a file created using csvTo
+ */
+void WalkParameters::csvFrom(istream& input)
+{
+    // this isn't the most robust get from csv in the world but it will do for tonight.
+    // (it assumes that the walk_parameters has already been initialised, and will
+    // only overwrite the usual parameters, the rest are left alone.
+    for (int i=0; i<size(); i++)
+    {
+        input >> (*this)[i];
+        input.ignore(2, ',');
+    }
+    
+}
+
 /*! @brief Saves the entire contents of the WalkParameters class in the stream
  */
 ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)

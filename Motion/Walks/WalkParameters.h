@@ -94,6 +94,7 @@ public:
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
+    void csvFrom(istream& input);
     
     friend ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters);
     friend istream& operator>> (istream& input, WalkParameters& p_walkparameters);
