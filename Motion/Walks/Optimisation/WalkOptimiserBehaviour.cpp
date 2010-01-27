@@ -322,7 +322,7 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     float distance = fabs(gps[0] - m_respawn_x);                                // only count the forward distance travelled
     float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
     float time = (m_data->CurrentTime - m_trial_start_time)/1000.0;
-    if (totaldistance < 300)
+    if (m_data->isFallen() || totaldistance < 300)
     {   // if we fall then add the time and energy it takes to get up
         time += 10;                                     // approx 10s to getup
         m_trial_energy_used += (9.81*4.8*0.3)*3;        // approx 42J to getup
