@@ -56,6 +56,7 @@ class WalkOptimiser
         WalkParameters m_best_parameters;              //!< the best set of parameters
         WalkParameters m_best_delta_parameters;        //!< the difference between the current best and the previous best (this 'gradient' is used by the line search part of the EHCLS)
         WalkParameters m_current_parameters;           //!< the current parameters under test
+        WalkParameters m_previous_parameters;          //!< the previous parameters under test
         WalkParameters m_real_best_parameters;         //!< the actual best set of parameters ever seen
         
         int m_iteration_count;

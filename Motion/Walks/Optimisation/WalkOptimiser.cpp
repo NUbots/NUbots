@@ -9,6 +9,7 @@
 
 #include "WalkOptimiser.h"
 #include "boost/random.hpp"
+#include <time.h>
 #include <math.h>
 
 #define OPTIMISER_VERBOSITY         4
@@ -21,6 +22,7 @@ WalkOptimiser::WalkOptimiser(const WalkParameters& walkparameters, bool minimise
     for (int i=0; i<m_best_delta_parameters.size(); i++)
         m_best_delta_parameters[i] = 0;
     m_current_parameters = walkparameters;
+    m_previous_parameters = m_current_parameters;
     m_real_best_parameters = walkparameters;
     
     m_iteration_count = 0;
@@ -79,6 +81,7 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
 void WalkOptimiser::getNewParameters(WalkParameters& walkparameters)
 {
     m_count_since_last_improvement++;
+    m_previous_parameters = m_current_parameters;
     if (m_count_since_last_improvement > m_reset_limit)
     {
         m_alpha *= 0.9;
@@ -154,7 +157,8 @@ float WalkOptimiser::getBestPerformance()
  */
 float WalkOptimiser::normalDistribution(float mean, float sigma)
 {
-    static boost::mt19937 generator(1);
+    static unsigned int seed = clock()*clock()*clock();          // I am hoping that at least one of the three calls is different for each process
+    static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
     static boost::normal_distribution<float> distribution(0,1);
     static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);
     
@@ -178,7 +182,9 @@ void WalkOptimiser::summaryTo(ostream& output)
 void WalkOptimiser::csvTo(ostream& output)
 {
     output << m_iteration_count << ", " << m_current_performance << ", ";
-    m_current_parameters.csvTo(output);
+    m_previous_parameters.csvTo(output);        // there is a bit of a miss match depending on when this function is called.
+                                                // In general, we print after we tick the optimiser, so we really want to print the
+                                                // previous parameters because the current ones are still under test!
     output << endl;
 }
 
