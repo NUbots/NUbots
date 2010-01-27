@@ -73,7 +73,7 @@ public:
     };
 public:
     WalkParameters();
-    WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds);
+    WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds, const vector<float>& maxaccels);
     ~WalkParameters();
     
     // get methods
@@ -82,6 +82,7 @@ public:
     void getLegGains(vector<vector<float> >& leggains);
     void getParameters(vector<vector<Parameter> >& parameters);
     void getMaxSpeeds(vector<float>& maxspeeds);
+    void getMaxAccelerations(vector<float>& maxaccels);
     
     // set methods
     void setArmGains(const vector<vector<float> >& armgains);
@@ -89,6 +90,7 @@ public:
     void setLegGains(const vector<vector<float> >& leggains);
     void setParameters(const vector<vector<Parameter> >& parameters);
     void setMaxSpeeds(const vector<float>& maxspeeds);
+    void setMaxAccelerations(const vector<float>& maxaccels);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -104,6 +106,8 @@ public:
 private:
     vector<float> m_max_speeds;                //!< stores the maximum speeds (x,y,theta) allowed by the walk engine
     int m_num_max_speeds;                      //!< stores the number of speed directions in m_max_speeds
+    vector<float> m_max_accelerations;         //!< stores the maximum accelerations (x,y,theta) allowed by the walk engine
+    int m_num_max_accelerations;               //!< stores the number of acceleration directions in m_max_accelerations
     vector<vector<Parameter> > m_parameters;   //!< stores the parameters for the walk engine
     int m_num_parameters;                      //!< stores the total number of parameters for the walk engine
     vector<vector<float> > m_arm_gains;        //!< stores the arm gains for a walk

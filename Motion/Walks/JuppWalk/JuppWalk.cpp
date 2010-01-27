@@ -116,6 +116,10 @@ void JuppWalk::initWalkParameters()
     m_gait_max_speeds.push_back(3.0);
     m_gait_max_speeds.push_back(0.5);
     
+    m_gait_max_accelerations.push_back(5.0);
+    m_gait_max_accelerations.push_back(2.0);
+    m_gait_max_accelerations.push_back(10.0);
+    
     m_gait_arm_gains.push_back(vector<float>());
     m_gait_arm_gains[0].push_back(50);
     m_gait_arm_gains[0].push_back(50);
