@@ -59,7 +59,7 @@ signals:
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
     void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
-    void robotCandidatesDisplayChanged(std::vector< RobotCandidate > updatedRobotCandidates, GLDisplay::display displayId);
+    void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
 
 private:
     class classEntry

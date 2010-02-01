@@ -6,6 +6,7 @@
 
 #include "Vision.h"
 #include "Tools/Image/NUImage.h"
+#include "Tools/Math/Line.h"
 #include "ClassificationColours.h"
 #include <QDebug>
 #include <boost/circular_buffer.hpp>
@@ -198,7 +199,7 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::RIGHT);
     if(!currentImage) return scanArea;
     Vector2<int> temp;
-    //! Case for No FieldBoarders
+    //! Case for No FieldBorders
     if(!fieldBorders.size())
     {
 
@@ -249,7 +250,64 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     }
     return scanArea;
 }
+/* removed temporarliy
+std::vector< ClassifiedSection > Vision::robotScanAreas(std::vector<RobotCandidate> robotCandidates, std::vector<Vector2<int> >&fieldBorders, Horizon horizonLine)
+{
+    int scanSpacing = 4;
+    std::vector< ClassifiedSection > robotScanAreas;
+    if(!robotCandidates.size()) return robotScanAreas;
+    std::vector< RobotCandidate >::const_iterator nextRobot = robotCandidates.begin();
+    int min_x = 0;
+    int max_x = 0;
+    int max_y = 0;
+    for (;nextRobot != robotCandidates.end(); nextRobot++)
+    {
+        ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::DOWN);
 
+        min_x = nextRobot->getTopLeft().x;
+        max_x = nextRobot->getBottomRight().x;
+        max_y = nextRobot->getBottomRight().y;
+        Vector2<int> temp;
+
+        if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/4 )
+        {
+            scanSpacing = 4;
+        }
+        else if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/8 )
+        {
+            scanSpacing = 3;
+        }
+        else if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/16 )
+        {
+            scanSpacing = 2;
+        }
+        else
+        {
+            scanSpacing = 1;
+        }
+        //scanSpacing = 2;
+        for ( int x = min_x; x <= max_x; x += scanSpacing)
+        {
+            temp.x = x;
+            temp.y = (int)horizonLine.findYFromX((double)x);
+            if (temp.y < 0) temp.y = 0;
+            //TODO
+            //Have option of only scanning from green border to horizon
+            //also compare the horizontal scan from feet to horizon
+            //qDebug() << findYFromX(fieldBorders,x) << " - " << temp.y << " = " << (findYFromX(fieldBorders,x)- temp.y);
+            //ScanLine* tempScanLine = new ScanLine(temp, (findYFromX(fieldBorders,x) - temp.y));
+            //qDebug() << "ScanLine Created...";
+            ScanLine* tempScanLine = new ScanLine(temp, max_y - temp.y);
+            scanArea->addScanLine(tempScanLine);
+            //qDebug() << "ScanLine added...";
+        }
+        ClassifyScanArea(scanArea);
+        //qDebug() << "ScanArea Classified...";
+        robotScanAreas.push_back(*scanArea);
+    }
+    return robotScanAreas;
+}
+*/
 void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 {
     int direction = scanArea->getDirection();
@@ -314,7 +372,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                     tempLine->addSegement(tempTransition);
-                    qDebug() << "End Of Line Detected: " << currentPoint.x << ","<< currentPoint.y;
                 }
                 tempStartPoint = currentPoint;
                 beforeColour = currentColour;
@@ -372,17 +429,21 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     return;
 }
 
-std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
+std::vector<ObjectCandidate> Vision::classifyCandidates(
+                                        std::vector< TransitionSegment > segments,
+                                        std::vector<Vector2<int> >&fieldBorders,
+                                        std::vector<unsigned char> validColours)
 {
-    std::vector<RobotCandidate> candidateList;
-
+    std::vector<ObjectCandidate> candidateList;
+    //TODO
+    //put this entire method into a standardised class to also be able
+    //to detect goal posts and the ball as a standard (configurable) method
     const float MAX_ASPECT = 2.0;
     const float MIN_ASPECT = 0.1;
     const int VERT_JOIN_LIMIT = 3;
     const int HORZ_JOIN_LIMIT = 2;
-    const int HORZ_JOIN_SCALING = 4;
-    const int SEG_COUNT_THRESHOLD = 12;
-    const int COLOUR_SEG_THRESHOLD = 5;
+    int HORZ_JOIN_SCALING = 4;
+    const int SEG_COUNT_THRESHOLD = 3;
 
     if (!segments.empty())
     {
@@ -393,7 +454,7 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
         for (unsigned int i = 0; i < segments.size(); i++)
         {
             //may have non-robot colour segments, so pre-mark them as used
-            if (isRobotColour(segments.at(i).getColour()))
+            if (isValidColour(segments.at(i).getColour(), validColours))
             {
                 //qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
                 isSegUsed[i] = false;
@@ -419,13 +480,20 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
             isSegUsed[nextRawSeg] = true;
             rawSegsLeft--;
 
-            int teamColour = 0;
             int min_x, max_x, min_y, max_y, segCount;
             min_x = segments.at(nextRawSeg).getStartPoint().x;
             max_x = segments.at(nextRawSeg).getStartPoint().x;
             min_y = segments.at(nextRawSeg).getStartPoint().y;
             max_y = segments.at(nextRawSeg).getEndPoint().y;
             segCount = 0;
+
+            //TODO
+            //work on planar graph to build skeleton.
+            std::vector<Vector2<int> > points;
+
+            //TODO
+            //look at euclidean distance
+            //also weighted euclidean distance based on perspective/depth
 
             //Build candidate
             while (!qUnprocessed.empty())
@@ -434,16 +502,6 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                 thisSeg = qUnprocessed.front();
                 qUnprocessed.pop();
                 segCount++;
-
-                if ( segments.at(thisSeg).getColour() == ClassIndex::shadow_blue)
-                {
-                    teamColour++;
-                }
-
-                if ( segments.at(thisSeg).getColour() == ClassIndex::red)
-                {
-                    teamColour--;
-                }
 
                 if ( min_x > segments.at(thisSeg).getStartPoint().x)
                     min_x = segments.at(thisSeg).getStartPoint().x;
@@ -456,11 +514,11 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
 
                 //if there is a seg above AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg > 0 &&
+                     !isSegUsed[thisSeg-1] &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg-1).getStartPoint().x &&
-                     -(segments.at(thisSeg-1).getEndPoint().y - segments.at(thisSeg).getStartPoint().y) < VERT_JOIN_LIMIT &&
-                     !isSegUsed[thisSeg-1])
+                     -(segments.at(thisSeg-1).getEndPoint().y - segments.at(thisSeg).getStartPoint().y) < VERT_JOIN_LIMIT)
                 {
-                    //qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
+                    qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
                     qUnprocessed.push(thisSeg-1);
                     //take away from pool of raw segs
                     isSegUsed[thisSeg-1] = true;
@@ -468,11 +526,11 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                 }
                 //if there is a seg below AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg+1 < segments.size() &&
+                     !isSegUsed[thisSeg+1] &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg+1).getStartPoint().x &&
-                     -(segments.at(thisSeg).getEndPoint().y - segments.at(thisSeg+1).getStartPoint().y) < VERT_JOIN_LIMIT &&
-                     !isSegUsed[thisSeg+1])
+                     -(segments.at(thisSeg).getEndPoint().y - segments.at(thisSeg+1).getStartPoint().y) < VERT_JOIN_LIMIT)
                 {
-                    //qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
+                    qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
                     qUnprocessed.push(thisSeg+1);
                     //take away from pool of raw segs
                     isSegUsed[thisSeg+1] = true;
@@ -485,14 +543,14 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                          !isSegUsed[thatSeg])
                     {
                         //NOT in same column as thisSeg and is to the right
-                        if ( segments.at(thatSeg).getStartPoint().y < segments.at(thisSeg).getEndPoint().y &&
-                             segments.at(thisSeg).getStartPoint().y < segments.at(thatSeg).getEndPoint().y)
+                        if ( segments.at(thatSeg).getStartPoint().y <= segments.at(thisSeg).getEndPoint().y &&
+                             segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
                         {
                             //thisSeg overlaps with thatSeg
                             if ( segments.at(thatSeg).getStartPoint().x - segments.at(thisSeg).getStartPoint().x < HORZ_JOIN_LIMIT * HORZ_JOIN_SCALING )
                             {
                                 //within HORZ_JOIN_LIMIT
-                                //qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
                                 qUnprocessed.push(thatSeg);
                                 //take away from pool of raw segs
                                 isSegUsed[thatSeg] = true;
@@ -502,6 +560,7 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                         }
                     }
                 }
+
                 //if there is a seg overlapping on the left AND 'close enough', then qUnprocessed->push()
                 for (int thatSeg = thisSeg - 1; thatSeg >= 0; thatSeg--)
                 {
@@ -509,14 +568,17 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
                          segments.at(thatSeg).getStartPoint().x < segments.at(thisSeg).getStartPoint().x)
                     {
                         //NOT in same column as thisSeg and is to the right
-                        if ( segments.at(thatSeg).getStartPoint().y < segments.at(thisSeg).getEndPoint().y &&
-                             segments.at(thisSeg).getStartPoint().y < segments.at(thatSeg).getEndPoint().y)
+                        if ( segments.at(thatSeg).getStartPoint().y <= segments.at(thisSeg).getEndPoint().y &&
+                             segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
                         {
+                            //TODO
+                            //define HORZ_JOIN_SCALING method
+                            
                             //thisSeg overlaps with thatSeg
                             if ( segments.at(thisSeg).getStartPoint().x - segments.at(thatSeg).getStartPoint().x < HORZ_JOIN_LIMIT * HORZ_JOIN_SCALING )
                             {
                                 //within HORZ_JOIN_LIMIT
-                                //qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
                                 qUnprocessed.push(thatSeg);
                                 //take away from pool of raw segs
                                 isSegUsed[thatSeg] = true;
@@ -529,33 +591,19 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
 
                 //add thisSeg to CandidateVector
             }//while (!qUnprocessed->empty())
-            if ( max_x - min_x > 0 &&
-                 max_y - min_y > 0 &&
-                 (float)(max_x - min_x) / (float)(max_y - min_y) < MAX_ASPECT &&
-                 (float)(max_x - min_x) / (float)(max_y - min_y) > MIN_ASPECT &&
-                 segCount > SEG_COUNT_THRESHOLD)
+            qDebug() << "Candidate ready...";
+            //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
+            if ( max_x - min_x > 0 &&                                               // width  is non-zero
+                 max_y - min_y > 0 &&                                               // height is non-zero
+                 //(float)(max_x - min_x) / (float)(max_y - min_y) < MAX_ASPECT &&    // Less    than specified landscape aspect
+                 //(float)(max_x - min_x) / (float)(max_y - min_y) > MIN_ASPECT &&    // greater than specified portrait aspect
+                 segCount > SEG_COUNT_THRESHOLD                                    // greater than minimum amount of segments to remove noise
+                 )
             {
-                //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y) << ", dist from bottom: " << (120 - max_y) ;
-                if (teamColour >= COLOUR_SEG_THRESHOLD)
-                {
-                    RobotCandidate temp(min_x, min_y, max_x, max_y, ClassIndex::shadow_blue);
-                    candidateList.push_back(temp);
-                }
-                else if (teamColour <= -COLOUR_SEG_THRESHOLD)
-                {
-                    RobotCandidate temp(min_x, min_y, max_x, max_y, ClassIndex::red);
-                    candidateList.push_back(temp);
-                }
-                else
-                {
-                    RobotCandidate temp(min_x, min_y, max_x, max_y);
-                    candidateList.push_back(temp);
-                }
-
-
+                qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y);
+                ObjectCandidate temp(min_x, min_y, max_x, max_y);
+                candidateList.push_back(temp);
             }
-
-
 
         }//while(rawSegsLeft)
 
@@ -563,11 +611,59 @@ std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< Transit
     return candidateList;
 }
 
-bool Vision::isRobotColour(unsigned char colour)
+bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colourList)
 {
-    return ( colour == ClassIndex::white ||
-             colour == ClassIndex::red   ||
-             colour == ClassIndex::shadow_blue);
+    bool result = false;
+    if (colourList.size())
+    {
+        std::vector<unsigned char>::const_iterator nextCol = colourList.begin();
+        for (;nextCol != colourList.end(); nextCol++)
+        {
+            if (colour == *(nextCol.base()))
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
+{
+
+    int y = 0;
+    int left_x = -1;
+    int left_y = 0;
+    int right_x = -1;
+    int right_y = 0;
+    std::vector< Vector2<int> >::const_iterator nextPoint = points.begin();
+
+    for(; nextPoint != points.end(); nextPoint++)
+    {
+        if (nextPoint->x == x)
+        {
+            return nextPoint->y;
+        }
+
+        if (left_x < nextPoint->x && nextPoint->x < x)
+        {
+            left_x = nextPoint->x;
+            left_y = nextPoint->y;
+        }
+
+        if ( (right_x > nextPoint->x || right_x < 0) && nextPoint->x > x)
+        {
+            right_x = nextPoint->x;
+            right_y = nextPoint->y;
+        }
+
+    }
+    qDebug() << "findYFromX" << y;
+    if (right_x - left_x > 0)
+        y = left_y + (right_y-left_y) * x / (right_x-left_x);
+    qDebug() << "findYFromX" << y;
+    return y;
 }
 
 bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)

@@ -15,6 +15,7 @@
 #include "ScanLine.h"
 #include "TransitionSegment.h"
 #include "RobotCandidate.h"
+#include "ObjectCandidate.h"
 
 class NUimage;
 
@@ -50,21 +51,31 @@ class Vision
       @param segList The segList is a vector of TransitionSegments after field lines have been rejected
       @returns A list of RobotCanidates
     */
-    std::vector<RobotCandidate> classifyRobotCandidates(std::vector< TransitionSegment > segments);
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments, std::vector<Vector2<int> >&fieldBorders, std::vector<unsigned char> validColours);
 
     /*!
-      @brief Returns true when the colour passed in is a valid robot colour
+      @brief Defines a finer scan area of where a candidate robot exists
+      @param robotCandidates The vector of RobotCandidates that contain the location of where the robot feet should be
+      @param horizonLine The HorizonLine is where the robotScanArea will scan upto and just a little bit beyond since this is theoretically the maximum height of a robot.
+      @param scanSpacing This value defines how fine the scan resolution should be when creating scan lines.
+      @returns
+    */
+    //std::vector< ClassifiedSection > robotScanAreas(std::vector<RobotCandidate> robotCandidates, std::vector<Vector2<int> >&fieldBorders, Horizon horizonLine);
+
+    /*!
+      @brief Returns true when the colour passed in is a valid colour from the list passed in
       @param colour The colour value that needs to be checked if it is a robot colour
+      @param colourList The vector of valid colours to match against
       @return bool True when the colour passed in is an assigned robot colour
     */
-    bool Vision::isRobotColour(unsigned char colour);
+    bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colourList);
 
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
-    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBorders, int scanSpacing);
+    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBorders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
 
 
@@ -72,6 +83,7 @@ class Vision
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
     const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
 
+    int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
 };
 #endif // VISION_H

@@ -126,11 +126,22 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > segments;
     std::vector< RobotCandidate > robotCandidates;
+    std::vector< ObjectCandidate > candidates;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
+
     std::vector< Vector2<int> > horizontalPoints;
+
     int spacings = 8;
     int tempNumScanLines = 0;
+    int robotClassifiedPoints = 0;
+
+    std::vector<unsigned char> validColours;
+    const int ROBOTS = 0;
+    const int BALL   = 1;
+    const int GOALS  = 2;
+    int mode  = ROBOTS;
+
     switch (image.imageFormat)
     {
         case pixels::YUYV:
@@ -199,16 +210,64 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
 
-
-
-            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
-            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
 
-            robotCandidates = vision.classifyRobotCandidates(segments);
-            emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
+            //! Identify Field Objects
+            qDebug() << "PREclassifyRobotCandidates";
+
+            mode = ROBOTS;
+            switch (mode)
+            {
+                case ROBOTS:
+                    validColours.push_back(ClassIndex::white);
+                    validColours.push_back(ClassIndex::red);
+                    validColours.push_back(ClassIndex::shadow_blue);
+
+                    robotClassifiedPoints = 0;
+/*                    //! Only if there are any robot candidates should further processing continue
+                    if (robotCandidates.size() && false)
+                    {
+                        //segments.clear();
+                        std::vector< ClassifiedSection > robotScanAreas = vision.robotScanAreas(robotCandidates, points, horizonLine);
+                        std::vector< ClassifiedSection >::iterator nextScanArea = robotScanAreas.begin();
+                        for (; nextScanArea != robotScanAreas.end(); nextScanArea++)
+                        {
+                            tempNumScanLines = nextScanArea->getNumberOfScanLines();
+                            for (int i = 0; i < tempNumScanLines; i++)
+                            {
+                                ScanLine* tempScanLine = nextScanArea->getScanLine(i);
+                                robotClassifiedPoints += tempScanLine->getLength();
+                                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+                                {
+                                    segments.push_back((*tempScanLine->getSegment(seg)));
+                                }
+
+                            }
+                        }
+                    }
+//*/
+                break;
+                case BALL:
+                    validColours.push_back(ClassIndex::orange);
+                    validColours.push_back(ClassIndex::red_orange);
+                    validColours.push_back(ClassIndex::yellow_orange);
+                    //validColours.push_back(ClassIndex::red);
+                break;
+                case GOALS:
+                    validColours.push_back(ClassIndex::yellow);
+                    validColours.push_back(ClassIndex::blue);
+                break;
+            }
+            candidates = vision.classifyCandidates(segments, points, validColours);
+
+            emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+            qDebug() << "POSTclassifyRobotCandidates";
+
+
+            qDebug()<< (verticalPoints.size() + horizontalPoints.size() + robotClassifiedPoints) * 100/(image.height()*image.width()) << " percent of image classified";
+            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
 
             break;
         default:

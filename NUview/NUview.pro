@@ -33,7 +33,8 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
-    ../Vision/RobotCandidate.h
+    ../Vision/RobotCandidate.h \
+    ../Vision/ObjectCandidate.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -53,4 +54,5 @@ SOURCES += mainwindow.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
-    ../Vision/RobotCandidate.cpp
+    ../Vision/RobotCandidate.cpp \
+    ../Vision/ObjectCandidate.cpp

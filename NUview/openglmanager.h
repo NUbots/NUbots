@@ -65,11 +65,11 @@ public:
         void writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId);
 
         /*!
-          @brief Accepts new robot candidate vector and maps it to display instructions.
-          @param robotCandidates The new Robot Candidates to display.
+          @brief Accepts new object candidate vector and maps it to display.
+          @param candidates The new Object Candidates to display.
           @param displayId The id of the display layer to write to.
           */
-        void writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId);
+        void writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.

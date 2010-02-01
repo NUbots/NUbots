@@ -5,6 +5,7 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
+#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -190,7 +191,7 @@ void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegm
     emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
-void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId)
+void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
 {
 
     // If there is an old list stored, delete it first.
@@ -203,21 +204,61 @@ void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > 
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
     glLineWidth(2.0);       // Line width
-    std::vector<RobotCandidate>::const_iterator i;
+    std::vector<ObjectCandidate>::const_iterator i = candidates.begin();
     unsigned char r,g,b;
-    for(i = robotCandidates.begin(); i != robotCandidates.end(); i++)
+    r = 128;
+    g = 128;
+    b = 128;
+    for(; i != candidates.end(); i++)
     {
         Vector2<int> topLeft = i->getTopLeft();
         Vector2<int> bottomRight = i->getBottomRight();
-        ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
         glColor3ub(r,g,b);
 
-        glBegin(GL_LINE_LOOP);                              // Start Lines
+        glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( topLeft.x, topLeft.y);
             glVertex2i( topLeft.x, bottomRight.y);
             glVertex2i( bottomRight.x, bottomRight.y);
             glVertex2i( bottomRight.x, topLeft.y);
         glEnd();                                        // End Lines
+/*
+        std::vector<Vector2<int> >::iterator nextPoint  = i->getSkeleton().begin();
+        for (; nextPoint != i->getSkeleton().end(); nextPoint++)
+        {
+            Vector2<int> A;
+            Vector2<int> B;
+
+            A.x = nextPoint->x;
+            A.y = nextPoint->y;
+
+            nextPoint++;
+            if (nextPoint != i->getSkeleton().end())
+            {
+                B.x = nextPoint->x;
+                B.y = nextPoint->y;
+            }
+            else
+            {
+                break;
+            }
+
+            //TODO
+            //The fact that I NEED to put in the below
+            //if statement means there is a fundamental
+            //problem with the data I am passing through
+
+            qDebug() << "A(" << A.x << "," << A.y << ")-B("<< B.x << "," << B.y << ")";
+            //TODO
+            //extend skeleton graph to be a planar
+            //triangular mesh
+            glColor3ub(255,255,0);
+            /*glBegin(GL_LINES);                              // Start Lines
+                glVertex2i( A.x, A.y);
+                glVertex2i( B.x, B.y);
+            glEnd();                                        // End Lines
+
+        }
+        //*/
     }
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST

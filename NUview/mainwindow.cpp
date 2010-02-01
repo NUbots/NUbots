@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
 
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
     //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
-    imageDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
     horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
-    horizonDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
+    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
