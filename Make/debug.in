@@ -21,10 +21,12 @@
 #else
     #ifdef TARGET_IS_NAO
         #include <fstream>
+        using namespace std;
         extern std::ofstream debug;
     #else
         #ifdef TARGET_IS_CYCLOID
             #include <fstream>
+            using namespace std;
             extern std::ofstream debug;
         #endif
     #endif

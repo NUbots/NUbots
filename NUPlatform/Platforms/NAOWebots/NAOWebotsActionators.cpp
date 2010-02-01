@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsActionators.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 // init m_actionator_names:
 static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};

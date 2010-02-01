@@ -21,7 +21,7 @@
 
 #include "actionator_t.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <algorithm>
 

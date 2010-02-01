@@ -20,7 +20,7 @@
  */
 
 #include "NUActionatorsData.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;

@@ -23,7 +23,7 @@
 using namespace std;
 
 #include "NUPlatform.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUPlatform::~NUPlatform()
 {

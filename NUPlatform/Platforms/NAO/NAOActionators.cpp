@@ -26,7 +26,9 @@ using namespace std;
 
 NAOActionators::NAOActionators()
 {
-    cout << "NAOActionators::NAOActionators()" << endl;
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOActionators::NAOActionators()" << endl;
+#endif
 }
 
 NAOActionators::~NAOActionators()

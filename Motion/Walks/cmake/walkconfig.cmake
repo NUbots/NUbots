@@ -58,6 +58,6 @@ OPTION(
 ############################ walkconfig.h generation
 CONFIGURE_FILE(
 	"${THIS_SRC_DIR}/cmake/walkconfig.in"
-  	"${THIS_SRC_DIR}/walkconfig.h"
+  	"${THIS_SRC_DIR}/../../Autoconfig/walkconfig.h"
     ESCAPE_QUOTES
 )

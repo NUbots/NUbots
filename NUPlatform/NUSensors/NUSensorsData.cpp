@@ -20,7 +20,7 @@
  */
 
 #include "NUSensorsData.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <fstream>
 #include <cctype>       // for tolower()

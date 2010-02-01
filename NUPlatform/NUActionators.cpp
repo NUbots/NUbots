@@ -21,7 +21,7 @@
 
 #include "NUActionators.h"
 #include "NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUActionators::NUActionators()
 {

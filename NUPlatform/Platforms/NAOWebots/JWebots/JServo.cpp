@@ -20,7 +20,7 @@
 */
 
 #include "JServo.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <math.h>
 #include <string>

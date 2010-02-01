@@ -20,7 +20,7 @@
 
 #include "sensor_t.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 
 /*! @brief Default constructor for a sensor_t. Initialises the sensor to be undefined and invalid

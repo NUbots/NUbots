@@ -21,12 +21,13 @@
 
 #include "NAOSensors.h"
 
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 NAOSensors::NAOSensors()
 {
-    cout << "NAOSensors::NAOSensors()" << endl;
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NAOSensors::NAOSensors()" << endl;
+#endif
 }
 
 NAOSensors::~NAOSensors()

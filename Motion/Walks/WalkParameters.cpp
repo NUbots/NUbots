@@ -21,7 +21,7 @@
 
 #include "WalkParameters.h"
 
-#include "Tools/debug.h"
+#include "debug.h"
 
 /*! @brief Construct a walk parameter set with no parameters
  */

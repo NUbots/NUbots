@@ -24,7 +24,7 @@
 #include "NAOWebotsSensors.h"
 #include "NAOWebotsActionators.h"
 #include "NAOWebotsSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <string.h>
 #include <iostream>

@@ -21,7 +21,7 @@
 
 #include "NUSensors.h"
 #include "NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
