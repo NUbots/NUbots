@@ -114,7 +114,7 @@ void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& me
     vector<string> simplemethodnames;
     simplifyNames(methodnames, simplemethodnames);
     
-    for (int i=0; i<simplemethodnames.size(); i++)
+    for (unsigned int i=0; i<simplemethodnames.size(); i++)
     {
         if (simplemethodnames[i].compare("position") || simplemethodnames[i].compare("positions") || simplemethodnames[i].compare("jointposition") || simplemethodnames[i].compare("jointpositions"))
             m_positionactionation = true;
@@ -135,7 +135,7 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     vector<string> simplejointnames;
     simplifyNames(jointnames, simplejointnames);
     
-    for (int i=0; i<simplejointnames.size(); i++) 
+    for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
         addJointActionator(jointnames[i]);
         if (simplejointnames[i].compare("headyaw") == 0)
@@ -306,7 +306,7 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
     vector<string> simplelednames;
     simplifyNames(lednames, simplelednames);
     
-    for (int i=0; i<simplelednames.size(); i++) 
+    for (unsigned int i=0; i<simplelednames.size(); i++) 
     {
         addLedActionator(lednames[i]);
         if (simplelednames[i].compare("lear") == 0 || simplelednames[i].compare("earsledleft") == 0)
@@ -334,7 +334,7 @@ void NUActionatorsData::setAvailableCameraSettings(const vector<string>& cameras
     vector<string> simplecamerasettingnames;
     simplifyNames(camerasettingnames, simplecamerasettingnames);
     
-    for (int i=0; i<simplecamerasettingnames.size(); i++) 
+    for (unsigned int i=0; i<simplecamerasettingnames.size(); i++) 
     {
         addCameraSettingActionator(camerasettingnames[i]);
         if (simplecamerasettingnames[i].compare("resolution") == 0)
@@ -375,7 +375,7 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     vector<string> simpleactionatornames;
     simplifyNames(actionatornames, simpleactionatornames);
     
-    for (int i=0; i<simpleactionatornames.size(); i++) 
+    for (unsigned int i=0; i<simpleactionatornames.size(); i++) 
     {
         if (simpleactionatornames[i].compare("sound") == 0)
             addActionator(Sound, actionatornames[i], actionator_t::SOUND);
@@ -449,7 +449,7 @@ string NUActionatorsData::simplifyName(const string& input)
 {
     string namebuffer, currentletter;
     // compare each letter to a space and an underscore and a forward slash
-    for (int j=0; j<input.size(); j++)
+    for (unsigned int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
@@ -466,7 +466,7 @@ string NUActionatorsData::simplifyName(const string& input)
 void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
 {
     vector<string> simplifiednames;
-    for (int i=0; i<input.size(); i++)
+    for (unsigned int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
     output = simplifiednames;
 }
@@ -480,7 +480,7 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
  */
 void NUActionatorsData::removeCompletedPoints(double currenttime)
 {
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
 }
 
@@ -554,6 +554,8 @@ bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float&
             gain = PositionActionators[id]->m_points[lastindex]->Data[2]; 
             return true;
         }
+        else
+            return false;
     }
 }
 
@@ -886,8 +888,8 @@ bool NUActionatorsData::addSound(sound_id_t soundid, double time)
     {
         data[0] = soundid;
         Sound->addPoint(time, data);
+        return true;
     }
-
 }
 
 /*! @brief Adds a single teleportation command
@@ -910,6 +912,7 @@ bool NUActionatorsData::addTeleportation(double time, float x, float y, float be
         data[1] = y;
         data[2] = bearing;
         Teleporter->addPoint(time, data);
+        return true;
     }
 }
 
@@ -956,7 +959,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     else 
     {
         static vector<float> data (3, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = positions[i];
             data[1] = velocities[i];
@@ -1009,7 +1012,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     else 
     {
         static vector<float> data (2, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = torques[i];
             data[1] = gains[i];
@@ -1027,7 +1030,7 @@ void NUActionatorsData::summaryTo(ostream& output)
 {
     if (m_all_actionators.size() == 0)
         output << "NONE!" << endl;
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->summaryTo(output);
 }
 
@@ -1039,11 +1042,13 @@ void NUActionatorsData::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return output;
 }
 
 istream& operator>> (istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return input;
 }
 
 

@@ -34,7 +34,6 @@ NAOPlatform::NAOPlatform()
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "NAOPlatform::NAOPlatform()" << endl;
 #endif
-    
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules!
     nusystem = system;                        // we access the system in other modules using this pointer.    
     camera = new NAOCamera();

@@ -34,7 +34,7 @@ NUActionators::NUActionators()
 NUActionators::~NUActionators()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::NUActionators" << endl;
+    debug << "NUActionators::~NUActionators" << endl;
 #endif
 }
 

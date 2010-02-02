@@ -411,6 +411,8 @@ float& WalkParameters::operator[] (const int index)
         return m_parameters[(index - nummaxspeedsused - nummaxaccelsused)/m_parameters[0].size()][(index - nummaxspeedsused - nummaxaccelsused)%m_parameters[0].size()].Value;
     else if (index < m_num_parameters + nummaxspeedsused + nummaxaccelsused + m_num_leg_gains)
         return m_leg_gains[(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
+    else
+        return m_max_speeds[0];
 }
 
 /*! @brief Returns the size of the WalkParameters, that is the number of elements stored here that are relevant to an optimiser

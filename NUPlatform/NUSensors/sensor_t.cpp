@@ -83,7 +83,7 @@ void sensor_t::summaryTo(ostream& output)
     output << Name << ": " << Time << " ";
     if (IsValid)
     {
-        for (int i=0; i<Data.size(); i++)
+        for (unsigned int i=0; i<Data.size(); i++)
             output << Data[i] << " ";
     }
     else
@@ -99,7 +99,7 @@ void sensor_t::csvTo(ostream& output)
     output << Time << ", ";
     if (IsValid)
     {
-        for (int i=0; i<Data.size(); i++)
+        for (unsigned int i=0; i<Data.size(); i++)
             output << Data[i] << ", ";
     }
     output << endl;
@@ -119,13 +119,13 @@ ostream& operator<< (ostream& output, const sensor_t& p_sensor)
     
     output << p_sensor.Data.size() << " ";
     // we save the sensor data as binary data
-    for (int i=0; i<p_sensor.Data.size(); i++)
+    for (unsigned int i=0; i<p_sensor.Data.size(); i++)
         output.write((char*) &p_sensor.Data[i], sizeof(float));
     output << " ";
     
     output << p_sensor.StdDev.size() << " ";
     // we save the standard deviation data as binary data
-    for (int i=0; i<p_sensor.StdDev.size(); i++)
+    for (unsigned int i=0; i<p_sensor.StdDev.size(); i++)
         output.write((char*) &p_sensor.StdDev[i], sizeof(float));
     output << " ";
     
@@ -187,7 +187,7 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
 
 /*! @brief Overloaded subscript operator has been written for easy access to sensor data.
  */
-float& sensor_t::operator[] (const int index)
+float& sensor_t::operator[] (const unsigned int index)
 {
     if (index < Data.size())
         return Data[index];

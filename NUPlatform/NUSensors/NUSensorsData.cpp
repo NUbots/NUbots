@@ -376,7 +376,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
         }
         
         data.clear();
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
             data.push_back(p_sensor->Data[i]);
         return true;
     }
@@ -528,14 +528,14 @@ bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
         else if (footid == LeftFoot)
         {
             vector<float> leftfootvalues(numfootsolesensors/2, 0);
-            for (int i=0; i<leftfootvalues.size(); i++)
+            for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootSoleValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
             vector<float> rightfootvalues(numfootsolesensors/2, 0);
-            for (int i=0; i<rightfootvalues.size(); i++)
+            for (unsigned int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
             values = rightfootvalues;
         }
@@ -564,14 +564,14 @@ bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
         else if (footid == LeftFoot)
         {
             vector<float> leftfootvalues(numfootbumpersensors/2, 0);
-            for (int i=0; i<leftfootvalues.size(); i++)
+            for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootBumperValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
             vector<float> rightfootvalues(numfootbumpersensors/2, 0);
-            for (int i=0; i<rightfootvalues.size(); i++)
+            for (unsigned int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
             values = rightfootvalues;
         }
@@ -710,11 +710,11 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
     // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplejointnames;
     string namebuffer, currentname, currentletter;
-    for (int i=0; i<joints.size(); i++)
+    for (unsigned int i=0; i<joints.size(); i++)
     {
         currentname = joints[i];
         // compare each letter to a space and an underscore
-        for (int j=0; j<currentname.size(); j++)
+        for (unsigned int j=0; j<currentname.size(); j++)
         {
             currentletter = currentname.substr(j, 1);
             if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
@@ -724,7 +724,7 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
         namebuffer.clear();
     }
     
-    for (int i=0; i<simplejointnames.size(); i++) 
+    for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
         if (simplejointnames[i].compare("headyaw") == 0)
         {
@@ -1047,7 +1047,7 @@ void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>
  */
 void NUSensorsData::summaryTo(ostream& output)
 {
-    for (int i=0; i<m_sensors.size(); i++)
+    for (unsigned int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
 }
 

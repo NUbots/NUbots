@@ -304,7 +304,7 @@ void WalkOptimiserBehaviour::measureCost()
     
     if (previouspositions.size() != 0 && (m_data->CurrentTime - previoustime) < 1000)
     {
-        for (int i=0; i<positions.size(); i++)
+        for (unsigned int i=0; i<positions.size(); i++)
             m_trial_energy_used += fabs(torques[i]*(positions[i] - previouspositions[i]));
     }
     previouspositions = positions;
