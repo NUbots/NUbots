@@ -46,5 +46,8 @@ NAOPlatform::NAOPlatform()
 
 NAOPlatform::~NAOPlatform()
 {
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NAOPlatform::~NAOPlatform()" << endl;
+#endif
 }
 

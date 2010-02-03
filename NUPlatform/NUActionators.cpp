@@ -36,6 +36,8 @@ NUActionators::~NUActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::~NUActionators" << endl;
 #endif
+    if (m_data != NULL)
+        delete m_data;
 }
 
 /*! @brief Processes the NUActionatorsData and sends the actions to the hardware
@@ -44,11 +46,11 @@ NUActionators::~NUActionators()
  */
 void NUActionators::process(NUActionatorsData*& data)
 {
+    if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
+        data = m_data;
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::process" << endl;
 #endif
-    if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
-        data = m_data;
     m_current_time = nusystem->getTime();
     copyToHardwareCommunications();
 }

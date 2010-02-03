@@ -49,7 +49,8 @@ NUSensors::~NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::~NUSensors" << endl;
 #endif
-    delete m_data;
+    if (m_data != NULL)
+        delete m_data;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
