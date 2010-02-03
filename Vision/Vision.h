@@ -46,12 +46,36 @@ class Vision
       */
     inline unsigned char classifyPixel(int x, int y);
 
+    enum tCLASSIFY_METHOD
+    {
+        PRIMS,
+        DBSCAN
+    };
+
     /*!
       @brief Joins segments to create a joined segment clusters that represent candidate robots
       @param segList The segList is a vector of TransitionSegments after field lines have been rejected
-      @returns A list of RobotCanidates
+      @returns A list of ObjectCanidates
     */
-    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments, std::vector<Vector2<int> >&fieldBorders, std::vector<unsigned char> validColours);
+
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
+                                                    std::vector<Vector2<int> >&fieldBorders,
+                                                    std::vector<unsigned char> validColours,
+                                                    int spacing,
+                                                    float min_aspect, float max_aspect, int min_segments,
+                                                    tCLASSIFY_METHOD method);
+
+    std::vector<ObjectCandidate> classifyCandidatesPrims(std::vector< TransitionSegment > segments,
+                                                         std::vector<Vector2<int> >&fieldBorders,
+                                                         std::vector<unsigned char> validColours,
+                                                         int spacing,
+                                                         float min_aspect, float max_aspect, int min_segments);
+
+    std::vector<ObjectCandidate> classifyCandidatesDBSCAN(std::vector< TransitionSegment > segments,
+                                                          std::vector<Vector2<int> >&fieldBorders,
+                                                          std::vector<unsigned char> validColours,
+                                                          int spacing,
+                                                          float min_aspect, float max_aspect, int min_segments);
 
     /*!
       @brief Defines a finer scan area of where a candidate robot exists
@@ -68,7 +92,10 @@ class Vision
       @param colourList The vector of valid colours to match against
       @return bool True when the colour passed in is an assigned robot colour
     */
-    bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colourList);
+    bool isValidColour(unsigned char colour, std::vector<unsigned char> colourList);
+
+    float findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
+    static bool sortTransitionSegments(TransitionSegment a, TransitionSegment b);
 
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);

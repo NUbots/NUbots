@@ -132,11 +132,12 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
     std::vector< Vector2<int> > horizontalPoints;
 
-    int spacings = 8;
+    const int spacings = 8;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
 
     std::vector<unsigned char> validColours;
+    Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
     const int BALL   = 1;
     const int GOALS  = 2;
@@ -189,8 +190,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
 
-
-
             //! Extract and Display Horizontal Scan Points:
             tempNumScanLines = horiScanArea->getNumberOfScanLines();
             for (int i = 0; i < tempNumScanLines; i++)
@@ -215,15 +214,18 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
 
             //! Identify Field Objects
-            qDebug() << "PREclassifyRobotCandidates";
+            qDebug() << "PREclassifyCandidates";
 
             mode = ROBOTS;
+            method = Vision::PRIMS;
             switch (mode)
             {
                 case ROBOTS:
                     validColours.push_back(ClassIndex::white);
                     validColours.push_back(ClassIndex::red);
                     validColours.push_back(ClassIndex::shadow_blue);
+
+                    candidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 2.0, 12, method);
 
                     robotClassifiedPoints = 0;
 /*                    //! Only if there are any robot candidates should further processing continue
@@ -254,16 +256,19 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                     validColours.push_back(ClassIndex::red_orange);
                     validColours.push_back(ClassIndex::yellow_orange);
                     //validColours.push_back(ClassIndex::red);
+                    candidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.3, 3.0, 2, method);
                 break;
                 case GOALS:
                     validColours.push_back(ClassIndex::yellow);
                     validColours.push_back(ClassIndex::blue);
+
+                    candidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 break;
             }
-            candidates = vision.classifyCandidates(segments, points, validColours);
+
 
             emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-            qDebug() << "POSTclassifyRobotCandidates";
+            qDebug() << "POSTclassifyCandidates";
 
 
             qDebug()<< (verticalPoints.size() + horizontalPoints.size() + robotClassifiedPoints) * 100/(image.height()*image.width()) << " percent of image classified";
