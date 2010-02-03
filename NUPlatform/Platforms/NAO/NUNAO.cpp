@@ -38,26 +38,23 @@ ofstream debug;
 class NUNAO : public ALModule
 {
 public:
+    NUbot* m_nubot;
+public:
     NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
     {
         debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
-        NUbot* nubot = new NUbot(0, NULL);
-        nubot->run();
-        delete nubot;
-    }
+        m_nubot = new NUbot(0, NULL);
+        getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(NUbot::signalMotion);
+        m_nubot->run();
+    };
 
-    virtual ~NUNAO()
-    {
-    }
+    virtual ~NUNAO() {delete m_nubot;};
     
-    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage)
-    {
-    }
+    void onDCMPostProcess() {};
     
-    bool innerTest() 
-    {
-        return true;
-    }
+    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage) {};
+    
+    bool innerTest() {return true;};
 }; 
 
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)

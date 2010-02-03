@@ -35,6 +35,13 @@ NAOActionators::~NAOActionators()
 {
 }
 
+void NAOActionators::copyToHardwareCommunications()
+{
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOActionators::copyToHardwareCommunications()" << endl;
+#endif
+}
+
 
 
 

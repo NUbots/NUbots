@@ -34,6 +34,8 @@ class NAOActionators : public NUActionators
 public:
     NAOActionators();
     ~NAOActionators();
+private:
+    void copyToHardwareCommunications();
 };
 
 #endif
