@@ -28,12 +28,42 @@
 #define NAOSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "NUNAO.h"
 
 class NAOSensors : public NUSensors
 {
 public:
     NAOSensors();
     ~NAOSensors();
+private:
+    void getSensorsFromALMemory();
+    void copyFromHardwareCommunications();
+    
+private:
+    static vector<string> m_jointposition_names;
+    static vector<string> m_jointtarget_names;
+    static vector<string> m_jointstiffness_names;
+    static vector<string> m_jointcurrent_names;
+    static vector<string> m_jointtemperature_names;
+    static vector<string> m_accel_names;
+    static vector<string> m_gyro_names;
+    static vector<string> m_foot_sole_names;
+    static vector<string> m_foot_bumper_names;
+    static vector<string> m_button_names;
+    static vector<string> m_battery_names;
+    static vector<string> m_sensor_names;
+    ALMemoryFastAccess* m_al_positions_access;
+    ALMemoryFastAccess* m_al_targets_access;
+    ALMemoryFastAccess* m_al_stiffness_access;
+    ALMemoryFastAccess* m_al_current_access;
+    ALMemoryFastAccess* m_al_temperature_access;
+    ALMemoryFastAccess* m_al_accel_access;
+    ALMemoryFastAccess* m_al_gyro_access;
+    ALMemoryFastAccess* m_al_footsole_access;
+    ALMemoryFastAccess* m_al_footbumper_access;
+    ALMemoryFastAccess* m_al_button_access;
+    ALMemoryFastAccess* m_al_battery_access;
+    
 };
 
 #endif

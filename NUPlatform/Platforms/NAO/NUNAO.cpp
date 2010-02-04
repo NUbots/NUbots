@@ -19,46 +19,25 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUbot.h"
-
-#include <albroker.h>
-#include <alproxy.h>
-#include <almemoryproxy.h>
-#include <almemoryfastaccess.h>
-using namespace AL;
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <time.h>
-using namespace std;
+#include "NUNAO.h"
 
 ofstream debug;
 ofstream errorlog;
+ALPtr<ALBroker> NUNAO::m_broker;
 
-
-
-class NUNAO : public ALModule
+NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
 {
-public:
-    NUbot* m_nubot;
-public:
-    NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
-    {
-        debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
-        m_nubot = new NUbot(0, NULL);
-        getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(NUbot::signalMotion);
-        m_nubot->run();
-    };
+    debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
+    m_broker = pBroker;
+    m_nubot = new NUbot(0, NULL);
+    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(NUbot::signalMotion);
+    m_nubot->run();
+}
 
-    virtual ~NUNAO() {delete m_nubot;};
-    
-    void onDCMPostProcess() {};
-    
-    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage) {};
-    
-    bool innerTest() {return true;};
-}; 
+NUNAO::~NUNAO()
+{
+    delete m_nubot;
+}
 
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {

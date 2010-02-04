@@ -60,4 +60,7 @@ void NUActionators::process(NUActionatorsData*& data)
  */
 void NUActionators::copyToHardwareCommunications()
 {
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NUActionators::copyToHardwareCommunications" << endl;
+#endif
 }

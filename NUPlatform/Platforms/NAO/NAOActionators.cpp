@@ -21,8 +21,7 @@
 
 #include "NAOActionators.h"
 
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 NAOActionators::NAOActionators()
 {
