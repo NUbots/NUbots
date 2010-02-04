@@ -34,6 +34,9 @@ using namespace AL;
 using namespace std;
 
 ofstream debug;
+ofstream errorlog;
+
+
 
 class NUNAO : public ALModule
 {
@@ -60,7 +63,10 @@ public:
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
     debug.open("/var/log/debug.log");
+    debug << "NUbot Debug Log" << endl;
     debug << "NUNAO.cpp: _createModule" << endl;
+    errorlog.open("/var/log/error.log");
+    errorlog << "NUbot Error Log" << endl;
     ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
 }

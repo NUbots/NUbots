@@ -18,16 +18,19 @@
     #define console cout                          //!< the debug stream
     #include <fstream>
     extern ofstream debug;
+    extern ofstream errorlog;
 #else
     #ifdef TARGET_IS_NAO
         #include <fstream>
         using namespace std;
-        extern std::ofstream debug;
+        extern ofstream debug;
+        extern ofstream errorlog;
     #else
         #ifdef TARGET_IS_CYCLOID
             #include <fstream>
             using namespace std;
-            extern std::ofstream debug;
+            extern ofstream debug;
+            extern ofstream errorlog;
         #endif
     #endif
 #endif

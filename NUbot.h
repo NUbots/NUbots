@@ -76,6 +76,7 @@ public:
     int waitForVisionCompletion();
 private:
     void createThreads();
+    void createErrorHandling();
     
 public:
     NUPlatform* platform;               //!< interface to robot platform
