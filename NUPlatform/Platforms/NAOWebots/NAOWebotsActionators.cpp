@@ -27,11 +27,11 @@ static string temp_servo_control_names[] = {string("JointPositions"), string("Jo
 vector<string> NAOWebotsActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
-                                    string("LShoulderPitch"), string("LShoulderRoll"), string("LElbowYaw"), string("LElbowRoll"), \
-                                    string("RShoulderPitch"), string("RShoulderRoll"), string("RElbowYaw"), string("RElbowRoll"), \
-                                    string("LHipYawPitch"), string("LHipPitch"), string("LHipRoll"), string("LKneePitch"), string("LAnklePitch"), string("LAnkleRoll"), \
-                                    string("RHipYawPitch"), string("RHipPitch"), string("RHipRoll"), string("RKneePitch"), string("RAnklePitch"), string("RAnkleRoll")};
+static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
+                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
+                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), string("RElbowYaw"), \
+                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYawPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
+                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
 vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 // init m_camera_setting_names:
@@ -65,15 +65,17 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
     
     
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 350, 0, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 4000, -1.57, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, platform->system->getTime() + 8000, 1.57, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 350, 0, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 4000, -1.57, 1, 30);
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 8000, 1.57, 1, 30);
     
     vector<float> pos (2, 0);
     vector<float> vel (2, 1);
     vector<float> gain (2, 100);
     pos[1] = -0.7;
-    m_data->addJointPositions(NUActionatorsData::Head, platform->system->getTime() + 10000, pos, vel, gain);
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 10000, pos, vel, gain);
+    pos[1] = 0;
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 15000, pos, vel, gain);
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
     Camera* camera = m_platform->getCamera("camera");
@@ -81,9 +83,9 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     vector<float> data (1,0);
     data[0] = 0;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 5000, data);
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 5000, data);
     data[0] = 1;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, platform->system->getTime() + 10000, data);
+    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
     
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
@@ -124,7 +126,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
     
-    m_current_time = m_platform->system->getTime();
+    m_current_time = nusystem->getTime();
     m_data->removeCompletedPoints(m_current_time);
     
     copyToServos();
@@ -132,7 +134,7 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     copyToLeds();
     copyToSound();
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 6
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
 }
@@ -159,14 +161,21 @@ void NAOWebotsActionators::copyToServos()
         {
             for (int i=0; i<m_servos.size(); i++)
             {
-                if (isvalid[i] == true)
+                if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
-                    if ((times[i] - m_current_time) > m_simulation_step)
+                    if ((times[i] - m_current_time) >= 0)
                     {
                         float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                        float v = (positions[i] - c)/(times[i] - m_current_time);
+                        float dt = times[i] - m_current_time;
+                        float v = 1000*(positions[i] - c)/dt;
+                        // we need to clip to velocity to the max
+                        float maxv = ((JServo*) m_servos[i])->getMaxVelocity();
+                        if (v < -maxv)
+                            v = -maxv;
+                        else if (v > maxv)
+                            v = maxv;
                         m_servos[i]->setControlP(gains[i]/10.0);
-                        m_servos[i]->setVelocity(fabs(v*1000));
+                        m_servos[i]->setVelocity(fabs(v));
                         m_servos[i]->setPosition(positions[i]);
                     }
                 }

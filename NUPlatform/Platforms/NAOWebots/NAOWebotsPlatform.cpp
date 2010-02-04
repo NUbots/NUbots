@@ -58,6 +58,7 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     setNameFromNumber();
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
+    nusystem = system;                                  // we access the system in other modules using this pointer.
     camera = new NAOWebotsCamera(this);
     sensors = new NAOWebotsSensors(this);
     actionators = new NAOWebotsActionators(this);

@@ -125,6 +125,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > segments;
+    std::vector< RobotCandidate > robotCandidates;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
@@ -150,8 +151,9 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             horiScanArea = vision.horizontalScan(points,spacings);
 
             //! Classify Line Segments
-            vision.ClassifiyScanArea(vertScanArea);
-            vision.ClassifiyScanArea(horiScanArea);
+
+            vision.ClassifyScanArea(vertScanArea);
+            vision.ClassifyScanArea(horiScanArea);
 
             //! Form Lines
             vision.DetectLines(vertScanArea);
@@ -205,7 +207,12 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
+
             emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
+
+            robotCandidates = vision.classifyRobotCandidates(segments);
+            emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
+
             break;
         default:
             break;

@@ -99,11 +99,12 @@ NAODarwinExternal:
 #run make inside the vm
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
 #copy the binary back
-	@scp -pC $(LOGNAME)@$(VM):naoqi/projects/robocup/Build/NAO/libnubot.so ./Build/NAO/libnubot.so
+	@mkdir -p ./$(NAO_BUILD_DIR)
+	@scp -prC $(LOGNAME)@$(VM):naoqi/projects/robocup/$(NAO_BUILD_DIR)/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
 #forward the binary to the robot, if a robot was specified
 ifneq ($(robot),)
 	@ssh root@$(ROBOT) /etc/init.d/naoqi stop
-	@scp -C ./Build/NAO/libnubot.so root@$(ROBOT):/opt/naoqi/modules/lib/
+	@scp -C ./$(NAO_BUILD_DIR)/libnubot.so root@$(ROBOT):/opt/naoqi/modules/lib/
 	@ssh -f root@$(ROBOT) /etc/init.d/naoqi start
 endif
 	

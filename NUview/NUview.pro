@@ -34,7 +34,9 @@ HEADERS += ui_mainwindow.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
     ../Vision/LineDetection.h \
-    ../Tools/Math/LSFittedLine.h
+    ../Tools/Math/LSFittedLine.h \
+    ../Vision/RobotCandidate.h
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -55,4 +57,5 @@ SOURCES += mainwindow.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
     ../Vision/LineDetection.cpp \
-    ../Tools/Math/LSFittedLine.cpp
+    ../Tools/Math/LSFittedLine.cpp \
+    ../Vision/RobotCandidate.cpp

@@ -14,6 +14,7 @@
 #include "ClassifiedSection.h"
 #include "ScanLine.h"
 #include "TransitionSegment.h"
+#include "RobotCandidate.h"
 
 
 class NUimage;
@@ -22,6 +23,7 @@ class NUimage;
 class Vision
 {
     public:
+
     //! Default constructor.
     Vision();
     //! Destructor.
@@ -44,6 +46,20 @@ class Vision
       */
     inline unsigned char classifyPixel(int x, int y);
 
+    /*!
+      @brief Joins segments to create a joined segment clusters that represent candidate robots
+      @param segList The segList is a vector of TransitionSegments after field lines have been rejected
+      @returns A list of RobotCanidates
+    */
+    std::vector<RobotCandidate> classifyRobotCandidates(std::vector< TransitionSegment > segments);
+
+    /*!
+      @brief Returns true when the colour passed in is a valid robot colour
+      @param colour The colour value that needs to be checked if it is a robot colour
+      @return bool True when the colour passed in is an assigned robot colour
+    */
+    bool Vision::isRobotColour(unsigned char colour);
+
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
@@ -52,6 +68,8 @@ class Vision
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifiyScanArea(ClassifiedSection* scanArea);
     void DetectLines(ClassifiedSection* scanArea);
+    void ClassifyScanArea(ClassifiedSection* scanArea);
+
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.

@@ -21,15 +21,19 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
+		NUWalk.cpp NUWalk.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS  Kicks
+		Walks
 )
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
+
+INCLUDE("${THIS_SRC_DIR}/cmake/motionconfig.cmake")
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 

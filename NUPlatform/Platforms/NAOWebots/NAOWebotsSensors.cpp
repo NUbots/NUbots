@@ -25,11 +25,11 @@
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadYaw"), string("HeadPitch"), \
-                                    string("LShoulderPitch"), string("LShoulderRoll"), string("LElbowYaw"), string("LElbowRoll"), \
-                                    string("RShoulderPitch"), string("RShoulderRoll"), string("RElbowYaw"), string("RElbowRoll"), \
-                                    string("LHipYawPitch"), string("LHipPitch"), string("LHipRoll"), string("LKneePitch"), string("LAnklePitch"), string("LAnkleRoll"), \
-                                    string("RHipYawPitch"), string("RHipPitch"), string("RHipRoll"), string("RKneePitch"), string("RAnklePitch"), string("RAnkleRoll")};
+static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
+                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
+                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), string("RElbowYaw"), \
+                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYawPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
+                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
 vector<string> NAOWebotsSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 // init m_distance_names:
@@ -143,7 +143,7 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
 
-    m_current_time = m_platform->system->getTime();
+    m_current_time = nusystem->getTime();             // hmmmm. I am not sure whether I am allowed to do this. Its a backdoor so I don't like it!
     
     copyFromJoints();
     copyFromAccelerometerAndGyro();
@@ -222,7 +222,7 @@ void NAOWebotsSensors::copyFromAccelerometerAndGyro()
     static const double *buffer;
     buffer = m_accelerometer->getValues();
     for (int i=0; i<numdimensions; i++)
-        accelerometerdata[i] = 100*buffer[i];       // convert from m/s/s to cm/s/s
+        accelerometerdata[i] = -100*buffer[i];       // convert from m/s/s to cm/s/s, and swap sign as it is incorrect in webots
     m_data->setBalanceAccelerometer(m_current_time, accelerometerdata);
     // Copy gyro [gx, gy, gz]
     buffer = m_gyro->getValues();

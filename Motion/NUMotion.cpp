@@ -57,9 +57,6 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using namespace std;
-
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
 #include "Tools/debug.h"
@@ -70,6 +67,15 @@ NUMotion::NUMotion()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::NUMotion" << endl;
+#endif
+#ifdef USE_HEAD
+    m_head = ?;
+#endif
+#ifdef USE_WALK
+    m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
+#endif
+#ifdef USE_KICK
+    m_kick = new NUKick();
 #endif
 }
 
@@ -90,10 +96,14 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (actions == NULL)
         return;
-    
+#ifdef USE_WALK
+    m_walk->process(data, actions);
+#endif
 }
 
-/*! @brief Process jobs
+/*! @brief Process the jobs
+    
+    @param jobs the current list of jobs
  */
 void NUMotion::process(JobList& jobs)
 {
@@ -101,38 +111,59 @@ void NUMotion::process(JobList& jobs)
     debug << "NUMotion::process():" << endl;
 #endif
     
-    list<Job*>::iterator it;
+    static list<Job*>::iterator it;     // the iterator over the motion jobs
     for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
     {
-        debug << *it << " ";
+#ifdef USE_WALK
+        if ((*it)->getID() == Job::MOTION_WALK)
+        {   // process a walk speed job
+            static vector<float> speed;
+            static WalkJob* job;
+            
+            job = (WalkJob*) (*it);
+            job->getSpeed(speed);         // why does it not know what type of job it is here?
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
+            #endif
+            
+            m_walk->walkSpeed(speed);
+            jobs.removeMotionJob(job);
+        }
+        else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
+        {   // process a walk to point job
+            static double time;
+            static vector<float> position;
+            static WalkToPointJob* job;
+            
+            job = (WalkToPointJob*) (*it);
+            job->getPosition(time, position);
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkToPoint job." << endl;
+            #endif
+            
+            m_walk->walkToPoint(time, position);
+            jobs.removeMotionJob(job);
+        }
+#endif  // USE_WALK
+        
+#ifdef USE_KICK
+        if ((*it)->getID() == Job::MOTION_KICK)
+        {   // process a kick job
+            static double time;
+            static vector<float> kickposition;
+            static vector<float> kicktarget;
+            static KickJob* job;
+            
+            job = (KickJob*) (*it);
+            job->getKick(time, kickposition, kicktarget);         // why does it not know what type of job it is here?
+#if DEBUG_NUMOTION_VERBOSITY > 4
+            debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
+#endif
+            
+            m_kick->kick(time, kickposition, kicktarget);
+            jobs.removeMotionJob(job);
+        }
+#endif  // USE_KICK 
     }
-    
-    // 
-    
-    // I need to easily iterate over the job list
-    // for each job in joblist:
-    //      if job.type == BODY:
-    //          if job.id == STAND:
-    //              m_walk->walkToPoint(job.x, job.y, job.theta);
-    //          elif job.id == WALK:
-    //              m_walk->walkOnVector(job.x, job.y, job.theta);
-    
-    // Option 1. NUMotion does the organisation.
-    //           if iCanKickFromHere(job.x, job.y, job.theta, job.targetx, job.targety)
-    //              m_kick->kickPoint(job.x, job.y, job.theta, job.targetx, job.targety)         // This means kick might have to call walk's stop
-    //           else:
-    //              m_walk->walkToPoint(m_kick->getNearestPoint(job.x, job.y, job.theta, job.targetx, job.targety));
-    
-    // Option 2. KICK etc does the organisation
-    //          elif job.id == KICK:
-    //              m_kick->kick(job.x, job.y, job.targetx, job.targety)                        // This means kick gets to call as many walk functions as it likes
-    //              so kick could return a walkjob and nuactionatordata
-    //              so the walkjob could be a stand(0,0) for a stop
-
-    
-    //          elif (job.id == BLOCK || job.id == SAVE):
-    //              m_walk->walkToPoint(job.x, job.y, job.theta);
-    //              m_walk->blockPoint(job.targetx, job.targety, usehands == false || true)
-    //
 }
 

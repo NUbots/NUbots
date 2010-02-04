@@ -40,7 +40,7 @@
 #define DEBUG_VISION_VERBOSITY ${DEBUG_VISION_VERBOSITY}                //!< Controls debug verbosity of the vision module
 #define DEBUG_LOCALISATION_VERBOSITY ${DEBUG_LOCALISATION_VERBOSITY}    //!< Controls debug verbosity of the localisation module
 #define DEBUG_BEHAVIOUR_VERBOSITY ${DEBUG_BEHAVIOUR_VERBOSITY}          //!< Controls debug verbosity of the behaviour module
-#define DEBUG_MOTION_VERBOSITY ${DEBUG_MOTION_VERBOSITY}                //!< Controls debug verbosity of the motion module
+#define DEBUG_NUMOTION_VERBOSITY ${DEBUG_NUMOTION_VERBOSITY}            //!< Controls debug verbosity of the numotion module
 
 // Time profiling and monitoring options
 #define THREAD_VISION_MONITOR_TIME_${THREAD_VISION_MONITOR_TIME}
