@@ -7,6 +7,7 @@
 #include "Vision.h"
 #include "Tools/Image/NUImage.h"
 #include "ClassificationColours.h"
+#include "LineDetection.h"
 #include <QDebug>
 
 Vision::Vision()
@@ -320,21 +321,21 @@ void Vision::ClassifiyScanArea(ClassifiedSection* scanArea)
                         if(direction == ClassifiedSection::DOWN)
                         {
                             currentPoint.x = startPoint.x;
-                            currentPoint.y = startPoint.y + j - bufferSize;
+                            currentPoint.y = startPoint.y + j;// - bufferSize;
                         }
                         else if (direction == ClassifiedSection::RIGHT)
                         {
-                            currentPoint.x = startPoint.x + j - bufferSize;
+                            currentPoint.x = startPoint.x + j;// - bufferSize;
                             currentPoint.y = startPoint.y;
                         }
                         else if(direction == ClassifiedSection::UP)
                         {
                             currentPoint.x = startPoint.x;
-                            currentPoint.y = startPoint.y - j - bufferSize;
+                            currentPoint.y = startPoint.y - j;// - bufferSize;
                         }
                         else if(direction == ClassifiedSection::LEFT)
                         {
-                            currentPoint.x = startPoint.x - j - bufferSize;
+                            currentPoint.x = startPoint.x - j;// - bufferSize;
                             currentPoint.y = startPoint.y;
                         }
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
@@ -376,6 +377,14 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
             return false;
         }
     }
-
     return true;
+}
+
+void Vision::DetectLines(ClassifiedSection* scanArea)
+{
+    LineDetection* LineDetector = new LineDetection();
+    int image_width = currentImage->width();
+    LineDetector->FormLines(scanArea,image_width);
+
+    return;
 }

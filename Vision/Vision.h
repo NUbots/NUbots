@@ -15,6 +15,7 @@
 #include "ScanLine.h"
 #include "TransitionSegment.h"
 
+
 class NUimage;
 
 //! Contains vision processing tools and functions.
@@ -50,7 +51,7 @@ class Vision
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifiyScanArea(ClassifiedSection* scanArea);
-
+    void DetectLines(ClassifiedSection* scanArea);
 
     private:    
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.

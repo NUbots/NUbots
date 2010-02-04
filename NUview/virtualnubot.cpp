@@ -153,6 +153,9 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             vision.ClassifiyScanArea(vertScanArea);
             vision.ClassifiyScanArea(horiScanArea);
 
+            //! Form Lines
+            vision.DetectLines(vertScanArea);
+
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
             for (int i = 0; i < tempNumScanLines; i++)
