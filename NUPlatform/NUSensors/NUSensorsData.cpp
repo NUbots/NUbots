@@ -726,122 +726,122 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
     
     for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
-        if (simplejointnames[i].compare("headyaw") == 0)
+        if (simplejointnames[i].find("headyaw") != string::npos)
         {
             HeadYaw = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("headpitch") == 0)
+        else if (simplejointnames[i].find("headpitch") != string::npos)
         {
             HeadPitch = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderpitch") == 0)
+        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
         {
             LShoulderPitch = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderroll") == 0)
+        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
         {
             LShoulderRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowyaw") == 0)
+        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
         {
             LElbowYaw = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowroll") == 0)
+        else if (simplejointnames[i].find("lelbowroll") != string::npos)
         {
             LElbowRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderpitch") == 0)
+        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
         {
             RShoulderPitch = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderroll") == 0)
+        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
         {
             RShoulderRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowyaw") == 0)
+        else if (simplejointnames[i].find("relbowyaw") != string::npos)
         {
             RElbowYaw = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowroll") == 0)
+        else if (simplejointnames[i].find("relbowroll") != string::npos)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyaw") == 0)
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
         {
             LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyawpitch") == 0)
+        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhippitch") == 0)
+        else if (simplejointnames[i].find("lhippitch") != string::npos)
         {
             LHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhiproll") == 0)
+        else if (simplejointnames[i].find("lhiproll") != string::npos)
         {
             LHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lkneepitch") == 0)
+        else if (simplejointnames[i].find("lkneepitch") != string::npos)
         {
             LKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lanklepitch") == 0)
+        else if (simplejointnames[i].find("lanklepitch") != string::npos)
         {
             LAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lankleroll") == 0)
+        else if (simplejointnames[i].find("lankleroll") != string::npos)
         {
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyaw") == 0)
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
         {
             RHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyawpitch") == 0)
+        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhippitch") == 0)
+        else if (simplejointnames[i].find("rhippitch") != string::npos)
         {
             RHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhiproll") == 0)
+        else if (simplejointnames[i].find("rhiproll") != string::npos)
         {
             RHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rkneepitch") == 0)
+        else if (simplejointnames[i].find("rkneepitch") != string::npos)
         {
             RKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("ranklepitch") == 0)
+        else if (simplejointnames[i].find("ranklepitch") != string::npos)
         {
             RAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rankleroll") == 0)
+        else if (simplejointnames[i].find("rankleroll") != string::npos)
         {
             RAnkleRoll = i;
             m_lleg_ids.push_back(i);
