@@ -63,6 +63,21 @@ NUSensorsData* NUSensors::update()
 #endif
     m_current_time = nusystem->getTime();
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
+    calculateSoftSensors();
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 3
+    static bool firstrun = true;
+    if (firstrun)
+    {
+        debug << "NUSensors::update(). Available Sensors:" << endl;
+        m_data->summaryTo(debug);
+        firstrun = false;
+    }
+#endif
+#if DEBUG_NUSENSORS_VERBOSITY > 5
+    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
+    m_data->summaryTo(debug);
+#endif
     return getData();
 }
 
