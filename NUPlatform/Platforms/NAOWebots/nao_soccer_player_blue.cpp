@@ -13,6 +13,7 @@
 #include <sstream>
 using namespace std;
 ofstream debug;
+ofstream errorlog;
 
 int getPlayerNumber(int argc, const char *argv[])
 {
@@ -35,6 +36,9 @@ int main(int argc, const char *argv[])
     stringstream filename;
     filename << getPlayerNumber(argc, argv) << "debug.log";
     debug.open(filename.str().c_str());    // I need to use a different name for each robot!
+    stringstream errorlogname;
+    errorlogname << getPlayerNumber(argc, argv) << "debug.log";
+    errorlog.open(errorlogname.str().c_str());
     NUbot* nubot = new NUbot(argc, argv);
     nubot->run();
     delete nubot;
