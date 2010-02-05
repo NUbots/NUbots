@@ -28,14 +28,29 @@
 #define NAOACTIONATORS_H
 
 #include "NUPlatform/NUActionators.h"
+#include "NUNAO.h"
 
 class NAOActionators : public NUActionators
 {
+#define ALIAS_POSITION "PositionActionators"
+#define ALIAS_STIFFNESS "StiffnessActionators"
+#define ALIAS_LED "LedActionators"
 public:
     NAOActionators();
     ~NAOActionators();
 private:
+    void getActionatorsFromALDCM();
     void copyToHardwareCommunications();
+    
+private:
+    static vector<string> m_servo_control_names;
+    static vector<string> m_servo_position_names;
+    static vector<string> m_servo_stiffness_names;
+    static vector<string> m_led_names;
+    static vector<string> m_actionator_names;
+    
+    DCMProxy* m_al_dcm;
+    double m_al_time_offset;
 };
 
 #endif

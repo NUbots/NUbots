@@ -24,7 +24,7 @@
 #include "NUbot.h"
 
 #include <albroker.h>
-#include <alproxy.h>
+#include <dcmproxy.h>
 #include <almemoryfastaccess.h>
 using namespace AL;
 
