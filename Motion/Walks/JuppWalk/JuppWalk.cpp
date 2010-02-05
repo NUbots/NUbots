@@ -322,7 +322,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // now translate to my coordinate system
     angles[0] = -hip_roll;
-    angles[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
+    angles[1] = -hip_pitch - hip_yaw;      // I need to compensate for the NAO's yawpitch joint
     angles[2] = hip_yaw;
     angles[3] = -knee_pitch;
     angles[4] = -ankle_roll;
