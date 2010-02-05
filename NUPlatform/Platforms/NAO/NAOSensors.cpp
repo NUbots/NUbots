@@ -57,9 +57,8 @@ vector<string> NAOSensors::m_button_names(temp_button_names, temp_button_names +
 static string temp_battery_names[] = {DN_CHARGE, DN_CURRENT, DN_VOLTAGE_MIN, DN_VOLTAGE_MAX, DN_TEMPERATURE};
 vector<string> NAOSensors::m_battery_names(temp_battery_names, temp_battery_names + sizeof(temp_battery_names)/sizeof(*temp_battery_names));
 
-vector<string> NAOSensors::m_sensor_names;
-
-
+/*! @brief Constructs a NUSensors for NAO class
+ */
 NAOSensors::NAOSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -69,6 +68,8 @@ NAOSensors::NAOSensors()
     m_data->setAvailableJoints(m_jointposition_names);
 }
 
+/*! @brief Destructor
+ */
 NAOSensors::~NAOSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -76,6 +77,10 @@ NAOSensors::~NAOSensors()
 #endif
 }
 
+/*! @brief Gets the access to the sensors from Aldebaran
+ 
+    That is I set up ALMemoryFastAccess connection with sensor values I require
+ */
 void NAOSensors::getSensorsFromALMemory()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -103,10 +108,10 @@ void NAOSensors::getSensorsFromALMemory()
     m_al_button_access->ConnectToVariables(NUNAO::m_broker, m_button_names);
     m_al_battery_access = new ALMemoryFastAccess();
     m_al_battery_access->ConnectToVariables(NUNAO::m_broker, m_battery_names);
-    
-    
 }
 
+/*! @brief Copies the sensor data from almemory to NUSensorsData
+ */
 void NAOSensors::copyFromHardwareCommunications()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
