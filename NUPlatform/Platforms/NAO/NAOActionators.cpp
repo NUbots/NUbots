@@ -30,16 +30,20 @@ vector<string> NAOActionators::m_servo_control_names(temp_servo_control_names, t
 // init m_servo_position_names:
 static string temp_servo_position_names[] = {DN_HEAD_PITCH_POSITION, DN_HEAD_YAW_POSITION, DN_L_SHOULDER_ROLL_POSITION, DN_L_SHOULDER_PITCH_POSITION, DN_L_ELBOW_ROLL_POSITION, DN_L_ELBOW_YAW_POSITION, DN_R_SHOULDER_ROLL_POSITION, DN_R_SHOULDER_PITCH_POSITION, DN_R_ELBOW_ROLL_POSITION, DN_R_ELBOW_YAW_POSITION, DN_L_HIP_ROLL_POSITION, DN_L_HIP_PITCH_POSITION, DN_L_HIP_YAWPITCH_POSITION, DN_L_KNEE_PITCH_POSITION, DN_L_ANKLE_ROLL_POSITION, DN_L_ANKLE_PITCH_POSITION, DN_R_HIP_ROLL_POSITION, DN_R_HIP_PITCH_POSITION, DN_R_HIP_YAWPITCH_POSITION, DN_R_KNEE_PITCH_POSITION, DN_R_ANKLE_ROLL_POSITION, DN_R_ANKLE_PITCH_POSITION};
 vector<string> NAOActionators::m_servo_position_names(temp_servo_position_names, temp_servo_position_names + sizeof(temp_servo_position_names)/sizeof(*temp_servo_position_names));
+unsigned int NAOActionators::m_num_servo_positions = NAOActionators::m_servo_position_names.size();
 
-// init m_servo_position_names:
+// init m_servo_stiffness_names:
 static string temp_servo_stiffness_names[] = {DN_HEAD_PITCH_HARDNESS, DN_HEAD_YAW_HARDNESS, DN_L_SHOULDER_ROLL_HARDNESS, DN_L_SHOULDER_PITCH_HARDNESS, DN_L_ELBOW_ROLL_HARDNESS, DN_L_ELBOW_YAW_HARDNESS, DN_R_SHOULDER_ROLL_HARDNESS, DN_R_SHOULDER_PITCH_HARDNESS, DN_R_ELBOW_ROLL_HARDNESS, DN_R_ELBOW_YAW_HARDNESS, DN_L_HIP_ROLL_HARDNESS, DN_L_HIP_PITCH_HARDNESS, DN_L_HIP_YAWPITCH_HARDNESS, DN_L_KNEE_PITCH_HARDNESS, DN_L_ANKLE_ROLL_HARDNESS, DN_L_ANKLE_PITCH_HARDNESS, DN_R_HIP_ROLL_HARDNESS, DN_R_HIP_PITCH_HARDNESS, DN_R_HIP_YAWPITCH_HARDNESS, DN_R_KNEE_PITCH_HARDNESS, DN_R_ANKLE_ROLL_HARDNESS, DN_R_ANKLE_PITCH_HARDNESS};
 vector<string> NAOActionators::m_servo_stiffness_names(temp_servo_stiffness_names, temp_servo_stiffness_names + sizeof(temp_servo_stiffness_names)/sizeof(*temp_servo_stiffness_names));
+unsigned int NAOActionators::m_num_servo_stiffnesses = NAOActionators::m_servo_stiffness_names.size();
 
 // init m_led_names:
 static string temp_led_names[] = {};
 vector<string> NAOActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+unsigned int NAOActionators::m_num_leds = NAOActionators::m_led_names.size();
 
 vector<string> NAOActionators::m_actionator_names;
+unsigned int NAOActionators::m_num_actionators;
 
 NAOActionators::NAOActionators()
 {
@@ -54,6 +58,20 @@ NAOActionators::NAOActionators()
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
 #endif
+    
+    vector<float> pos(2,0);
+    vector<float> gain(2, 50);
+    vector<float> vel(2,0);
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 1000, pos, vel, gain);
+    pos[0] = -1.57;
+    pos[1] = -1.57;
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 2000, pos, vel, gain);
+    pos[0] = 1.57;
+    pos[1] = 1.57;
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 4000, pos, vel, gain);
+    pos[0] = 0;
+    pos[1] = 0;
+    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 5000, pos, vel, gain);
 }
 
 NAOActionators::~NAOActionators()
@@ -66,7 +84,7 @@ void NAOActionators::getActionatorsFromALDCM()
     debug << "NAOActionators::getActionatorsFromALDCM()" << endl;
 #endif
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
-    m_al_time_offset = nusystem->getTime() - m_al_dcm->getTime(0);       // so when talking to motors use time + m_al_time_offset
+    m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
     ALValue param;
     
     param.arraySetSize(2);
@@ -84,6 +102,44 @@ void NAOActionators::getActionatorsFromALDCM()
     param[1] = m_led_names;
     param = m_al_dcm->createAlias(param);
     debug << param.toString(VerbosityMini) << endl;
+    
+    createALDCMCommands();
+}
+
+void NAOActionators::createALDCMCommands()
+{
+    createALDCMCommand(ALIAS_POSITION, m_position_command, m_num_servo_positions);
+    createALDCMCommand(ALIAS_STIFFNESS, m_stiffness_command, m_num_servo_stiffnesses);
+    createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);
+}
+
+void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators)
+{
+    ALValue l_command;
+    
+    // time-mixed mode always has a command length of 4
+    // [AliasName, ClearAfter, time-mixed,[...]]
+    l_command.arraySetSize(4);
+    l_command[0] = p_name;
+    l_command[1] = "ClearAfter";
+    l_command[2] = "time-mixed";
+    
+    ALValue actionators;
+    actionators.arraySetSize(numactionators);
+    ALValue points;
+    points.arraySetSize(1);
+    ALValue point;
+    point.arraySetSize(3);
+    for (unsigned int i=0; i<numactionators; i++)
+    {
+        point[0] = 0;
+        point[1] = (int) 0;
+        point[2] = 0;
+        points[0] = point;
+        actionators[i] = points;
+    }
+    l_command[3] = actionators;
+    p_command = l_command;
 }
 
 void NAOActionators::copyToHardwareCommunications()
@@ -94,18 +150,18 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<float> velocities;
     static vector<float> gains;
     
-    static vector<float> dcmtimes(m_servo_position_names.size(), m_al_dcm->getTime(0));
-    static vector<float> dcmpositions(m_servo_position_names.size(), 0);
-    static vector<float> dcmstiffnesses(m_servo_stiffness_names.size(), 0);
+    static vector<float> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
+    static vector<float> dcmpositions(m_num_servo_positions, 0);
+    static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, 0);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOActionators::copyToHardwareCommunications()" << endl;
 #endif
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
-        if (m_servo_position_names.size() == isvalid.size())                          // only process the input if it has the right length
+        if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
         {
-            for (unsigned int i=0; i<m_servo_position_names.size(); i++)
+            for (unsigned int i=0; i<m_num_servo_positions; i++)
             {
                 if (isvalid[i] == true)
                 {
@@ -116,35 +172,24 @@ void NAOActionators::copyToHardwareCommunications()
             }
         }
         else
-            debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
+            errorlog << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
     }
     
-    // This time round I am going to go with time-mixed. This uses a HUGE amount of CPU: consider revising!
-    ALValue command;
-    command.arraySetSize(4);
-    command[0] = ALIAS_STIFFNESS;
-    command[1] = "ClearAfter";
-    command[2] = "time-mixed";
-    
-    ALValue actionators;
-    actionators.arraySetSize(m_servo_stiffness_names.size());
-    
-    ALValue points;
-    points.arraySetSize(1);
-    ALValue point;
-    point.arraySetSize(3);
-    for (unsigned int i=0; i<m_servo_stiffness_names.size(); i++)
+    for (unsigned int i=0; i<m_num_servo_positions; i++)
     {
-        point[0] = dcmstiffnesses[i];
-        point[1] = dcmtimes[i];
-        point[2] = 0;
-        points[0] = point;
-        actionators[i] = points;
+        m_stiffness_command[3][i][0][0] = dcmstiffnesses[i];
+        m_stiffness_command[3][i][0][1] = (int) dcmtimes[i];
+        m_position_command[3][i][0][0] = dcmpositions[i];
+        m_position_command[3][i][0][1] = (int) dcmtimes[i];
     }
-    command[3] = actionators;
-    debug << m_al_time_offset << " " << nusystem->getTime() << " " << m_al_dcm->getTime(0) << endl;
-    debug << command.toString(VerbosityMini) << endl;
-    m_al_dcm->setAlias(command);
+    m_al_dcm->setAlias(m_stiffness_command);
+    m_al_dcm->setAlias(m_position_command);
+    m_al_dcm->setAlias(m_led_command);
+    
+    //debug << m_position_command.toString(VerbosityMini) << endl;
+    //debug << m_stiffness_command.toString(VerbosityMini) << endl;
+    
+    m_data->removeCompletedPoints(m_current_time);
 }
 
 

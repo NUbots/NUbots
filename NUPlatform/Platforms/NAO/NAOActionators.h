@@ -40,17 +40,24 @@ public:
     ~NAOActionators();
 private:
     void getActionatorsFromALDCM();
+    void createALDCMCommands();
+    void createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators);
     void copyToHardwareCommunications();
     
 private:
     static vector<string> m_servo_control_names;
     static vector<string> m_servo_position_names;
+    static unsigned int m_num_servo_positions;
     static vector<string> m_servo_stiffness_names;
+    static unsigned int m_num_servo_stiffnesses;
     static vector<string> m_led_names;
+    static unsigned int m_num_leds;
     static vector<string> m_actionator_names;
+    static unsigned int m_num_actionators;
     
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
+    ALValue m_position_command, m_stiffness_command, m_led_command;
 };
 
 #endif
