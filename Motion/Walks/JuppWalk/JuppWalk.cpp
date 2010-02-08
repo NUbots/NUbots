@@ -67,8 +67,8 @@ JuppWalk::JuppWalk()
     m_right_arm_angles = vector<float> (4, 0);
     m_right_arm_gains = vector<float> (4, 0);
     
-    m_pattern_debug.open("patternDebug.log");
-    m_pattern_debug << "Phase (rad), LegYaw, LegPitch, LegRoll, LegLength, FootPitch, FootRoll" << endl;
+    //m_pattern_debug.open("patternDebug.log");
+    //m_pattern_debug << "Phase (rad), LegYaw, LegPitch, LegRoll, LegLength, FootPitch, FootRoll" << endl;
 }
 
 void JuppWalk::initWalkParameters()
@@ -120,7 +120,7 @@ void JuppWalk::initWalkParameters()
     m_gait_max_accelerations.push_back(2.0);
     m_gait_max_accelerations.push_back(10.0);
     
-    m_gait_arm_gains.push_back(vector<float>());
+    /*m_gait_arm_gains.push_back(vector<float>());
     m_gait_arm_gains[0].push_back(50);
     m_gait_arm_gains[0].push_back(50);
     m_gait_arm_gains[0].push_back(25);
@@ -132,7 +132,21 @@ void JuppWalk::initWalkParameters()
     m_gait_leg_gains[0].push_back(100);
     m_gait_leg_gains[0].push_back(65);
     m_gait_leg_gains[0].push_back(65);
-    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);*/
+    
+    m_gait_arm_gains.push_back(vector<float>());
+    m_gait_arm_gains[0].push_back(35);
+    m_gait_arm_gains[0].push_back(35);
+    m_gait_arm_gains[0].push_back(35);
+    m_gait_arm_gains[0].push_back(35);
+    
+    m_gait_leg_gains.push_back(vector<float>());
+    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(30);
 }
 
 /*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
@@ -199,11 +213,11 @@ void JuppWalk::calculateGaitPhase()
     float impacttime = 0;
 
     m_current_time = nusystem->getTime();
-    if (m_data->footImpact(NUSensorsData::LeftFoot, impacttime))
+    /*if (m_data->footImpact(NUSensorsData::LeftFoot, impacttime))
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset - M_PI + m_param_phase_reset_offset;
     else if (m_data->footImpact(NUSensorsData::RightFoot, impacttime))
         m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
-    else
+    else*/
         m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
 
     m_previous_time = m_current_time;
@@ -384,6 +398,8 @@ void JuppWalk::calculateGyroFeedback()
 {
     static vector<float> values;        // [vx, vy, vz]
     m_data->getGyroValues(values);
+    
+    return;
 
     static const float roll_threshold = 0.10;
     static const float pitch_threshold = 0.10;          
@@ -414,12 +430,25 @@ void JuppWalk::calculateGyroFeedback()
 
 void JuppWalk::updateActionatorsData()
 {
-    static vector<float> zerovelleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-    static vector<float> zerovelarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zerovelleg, m_left_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zerovelleg, m_right_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zerovelarm, m_left_arm_gains);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zerovelarm, m_right_arm_gains);
+    static bool firstrun = true;
+    static double firstruntime = m_current_time;
+    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+    static vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
+    if (firstrun == true)
+    {
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, firstruntime + 3000, zeroleg, zeroleg, m_left_leg_gains);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, firstruntime + 3000, zeroleg, zeroleg, m_right_leg_gains);
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, firstruntime + 3000, zeroarm, zeroarm, m_left_arm_gains);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, firstruntime + 3000, zeroarm, zeroarm, m_right_arm_gains);
+        firstrun = false;
+    }
+    else if (m_current_time - firstrun > 3500)
+    {
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
+    }
 }
 
 
