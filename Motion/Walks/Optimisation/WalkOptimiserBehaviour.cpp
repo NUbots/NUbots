@@ -327,8 +327,11 @@ void WalkOptimiserBehaviour::finishMeasureCost()
         time += 10;                                     // approx 10s to getup
         m_trial_energy_used += (9.81*4.8*0.3)*3;        // approx 42J to getup
     }
+    
+    m_trial_energy_used = 2*m_trial_energy_used;                                // the factor of two is placed here to model the motor's gearbox efficiency
+    m_trial_energy_used = 21*time;                                              // we assume the CPU etc draws 21W
     m_measured_speed = distance/time;
-    m_measured_cost = (2*m_trial_energy_used)*100/(9.81*4.8*distance);          // the factor of two is placed here to model the motor's gearbox efficiency
+    m_measured_cost = m_trial_energy_used*100/(9.81*4.8*distance);          
     
     //cout << "finishMeasureCost(). m_trial_energy_used: " << m_trial_energy_used << " time: " << time << " totaldistance:" << totaldistance << endl;
     
