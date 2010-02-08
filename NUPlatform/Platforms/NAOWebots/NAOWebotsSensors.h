@@ -60,7 +60,6 @@ private:
     
 private:
     const int m_simulation_step;                        //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
-    double m_current_time;                              //!< the current time in milliseconds since program start
     
     NAOWebotsPlatform* m_platform;                      //!< a pointer to the platform, in particular in webots this inherits from webots::Robot so use it to access devices
     // Sensors

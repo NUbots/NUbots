@@ -20,7 +20,7 @@
  */
 
 #include "NUSensorsData.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <fstream>
 #include <cctype>       // for tolower()
@@ -71,6 +71,10 @@ NUSensorsData::NUSensorsData()
     // Balance Sensors:
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
+    addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
+    addSoftSensor(BalanceFalling, string("BalanceFalling"), sensor_t::BALANCE_FALLING);
+    addSoftSensor(BalanceFallen, string("BalanceFallen"), sensor_t::BALANCE_FALLEN);
     
     // Distance Sensors:
     addSensor(DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
@@ -78,6 +82,8 @@ NUSensorsData::NUSensorsData()
     // Foot Pressure Sensors:
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
     addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
@@ -97,6 +103,17 @@ NUSensorsData::NUSensorsData()
 void NUSensorsData::addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
 {
     p_sensor = new sensor_t(sensorname, sensorid);
+    m_sensors.push_back(p_sensor);
+}
+
+/*! @brief Adds a soft sensor to the class
+ @param p_sensor a pointer that will be updated to point to the new sensor
+ @param sensorname the name of the sensor
+ @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
+ */
+void NUSensorsData::addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
+{
+    p_sensor = new sensor_t(sensorname, sensorid, true);
     m_sensors.push_back(p_sensor);
 }
 
@@ -359,7 +376,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
         }
         
         data.clear();
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
             data.push_back(p_sensor->Data[i]);
         return true;
     }
@@ -394,6 +411,62 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
+    @param values will be updated with the current orientation estimate
+ */
+bool NUSensorsData::getOrientation(vector<float>& values)
+{
+    if (BalanceOrientation == NULL || BalanceOrientation->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceOrientation->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the zero moment point [x,y] in cm from somewhere?
+    @param values will be updated with the current ZMP estimate
+ */
+bool NUSensorsData::getZMP(vector<float>& values)
+{
+    if (BalanceZMP == NULL || BalanceZMP->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceZMP->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the falling sense [sum, left, right, forward, backward] 
+    @param values will be updated with the current falling measurements [sum, left, right, forward, backward]
+ */
+bool NUSensorsData::getFalling(vector<float>& values)
+{
+    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceFalling->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the fallen sense [sum, left, right, forward, backward] 
+    @param values will be updated with the current fallen measurements [sum, left, right, forward, backward]
+ */
+bool NUSensorsData::getFallen(vector<float>& values)
+{
+    if (BalanceFallen == NULL || BalanceFallen->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceFallen->Data;
+        return true;
+    }
+}
+
 /*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
     @param values will be updated with the current distance readings
  */
@@ -422,8 +495,11 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
     }
 }
 
-/*! @brief Gets the GPS readings [x (cm), y(cm), theta (rad)]
-    @param values will be updated with the gps coordinates of the robot
+/*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
+ 
+    Note orientation is not measured by the GPS :(.
+ 
+    @param values will be updated with the gps coordinates of the robot [x (cm), y (cm), z (cm)]
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
 {
@@ -446,20 +522,20 @@ bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
         return false;
     else
     {
-        static int numfootsolesensors = FootSoleValues->Data.size();
+        int numfootsolesensors = FootSoleValues->Data.size();
         if (footid == AllFeet)
             values = FootSoleValues->Data;
         else if (footid == LeftFoot)
         {
-            static vector<float> leftfootvalues(numfootsolesensors/2, 0);
-            for (int i=0; i<leftfootvalues.size(); i++)
+            vector<float> leftfootvalues(numfootsolesensors/2, 0);
+            for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootSoleValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
-            static vector<float> rightfootvalues(numfootsolesensors/2, 0);
-            for (int i=0; i<rightfootvalues.size(); i++)
+            vector<float> rightfootvalues(numfootsolesensors/2, 0);
+            for (unsigned int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
             values = rightfootvalues;
         }
@@ -482,26 +558,59 @@ bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
         return false;
     else
     {
-        static int numfootbumpersensors = FootBumperValues->Data.size();
+        int numfootbumpersensors = FootBumperValues->Data.size();
         if (footid == AllFeet)
             values = FootBumperValues->Data;
         else if (footid == LeftFoot)
         {
-            static vector<float> leftfootvalues(numfootbumpersensors/2, 0);
-            for (int i=0; i<leftfootvalues.size(); i++)
+            vector<float> leftfootvalues(numfootbumpersensors/2, 0);
+            for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootBumperValues->Data[i];
             values = leftfootvalues;
         }
         else if (footid == RightFoot)
         {
-            static vector<float> rightfootvalues(numfootbumpersensors/2, 0);
-            for (int i=0; i<rightfootvalues.size(); i++)
+            vector<float> rightfootvalues(numfootbumpersensors/2, 0);
+            for (unsigned int i=0; i<rightfootvalues.size(); i++)
                 rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
             values = rightfootvalues;
         }
         else
         {
             debug << "NUSensorsData::getFootBumperValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the total force on the foot in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param force will be updated with the current readings for the selected foot
+ */
+bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
+{
+    force = 0;
+    if (FootForce == NULL || FootForce->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+        {
+            force = (*FootForce)[0];
+        }
+        else if (footid == RightFoot)
+        {
+            force = (*FootForce)[1];
+        }
+        else if (footid == AllFeet)
+        {
+            force = (*FootForce)[2];
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
+            force = 0;
             return false;
         }
         return true;
@@ -539,6 +648,56 @@ bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
 }
 
 /******************************************************************************************************************************************
+                                                                                                                 Convienent sub-get Methods
+ ******************************************************************************************************************************************/
+
+/*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
+ */
+bool NUSensorsData::isFallen()
+{
+    if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
+        return false;       
+    else if (BalanceFallen->Data[0] <= 0)
+        return false;
+    else
+        return true;
+}
+
+/*! @brief Returns true has impacted in the ground in this cycle
+    @param footid the foot you want to know about
+    @param time time will be updated with the time at which the last impact on that foot occured.
+    @return true if the foot hit the ground in *this* cycle, it will be false otherwise (ie it will be false the cycle after the impact; that is what the time is for ;))
+ */
+bool NUSensorsData::footImpact(foot_id_t footid, float& time)
+{
+    if (FootImpact == NULL || FootImpact->IsValid == false)
+    {
+        time = 0;
+        return false;
+    }
+    else if (footid == LeftFoot)
+        time = FootImpact->Data[0];
+    else if (footid == RightFoot)
+        time = FootImpact->Data[1];
+    else if (footid == AllFeet)
+    {
+        if (FootImpact->Data[0] > FootImpact->Data[1])              // left impact was most recent, so return it
+            time = FootImpact->Data[0];
+        else
+            time = FootImpact->Data[1];
+    }
+    else
+        return false;
+        
+    
+    if (CurrentTime - time <= 0.1) 
+        return true;
+    else
+        return false;
+
+}
+
+/******************************************************************************************************************************************
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
 
@@ -551,11 +710,11 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
     // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplejointnames;
     string namebuffer, currentname, currentletter;
-    for (int i=0; i<joints.size(); i++)
+    for (unsigned int i=0; i<joints.size(); i++)
     {
         currentname = joints[i];
         // compare each letter to a space and an underscore
-        for (int j=0; j<currentname.size(); j++)
+        for (unsigned int j=0; j<currentname.size(); j++)
         {
             currentletter = currentname.substr(j, 1);
             if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
@@ -565,124 +724,124 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
         namebuffer.clear();
     }
     
-    for (int i=0; i<simplejointnames.size(); i++) 
+    for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
-        if (simplejointnames[i].compare("headyaw") == 0)
+        if (simplejointnames[i].find("headyaw") != string::npos)
         {
             HeadYaw = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("headpitch") == 0)
+        else if (simplejointnames[i].find("headpitch") != string::npos)
         {
             HeadPitch = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderpitch") == 0)
+        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
         {
             LShoulderPitch = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderroll") == 0)
+        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
         {
             LShoulderRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowyaw") == 0)
+        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
         {
             LElbowYaw = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowroll") == 0)
+        else if (simplejointnames[i].find("lelbowroll") != string::npos)
         {
             LElbowRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderpitch") == 0)
+        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
         {
             RShoulderPitch = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderroll") == 0)
+        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
         {
             RShoulderRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowyaw") == 0)
+        else if (simplejointnames[i].find("relbowyaw") != string::npos)
         {
             RElbowYaw = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowroll") == 0)
+        else if (simplejointnames[i].find("relbowroll") != string::npos)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyaw") == 0)
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
         {
             LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyawpitch") == 0)
+        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhippitch") == 0)
+        else if (simplejointnames[i].find("lhippitch") != string::npos)
         {
             LHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhiproll") == 0)
+        else if (simplejointnames[i].find("lhiproll") != string::npos)
         {
             LHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lkneepitch") == 0)
+        else if (simplejointnames[i].find("lkneepitch") != string::npos)
         {
             LKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lanklepitch") == 0)
+        else if (simplejointnames[i].find("lanklepitch") != string::npos)
         {
             LAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lankleroll") == 0)
+        else if (simplejointnames[i].find("lankleroll") != string::npos)
         {
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyaw") == 0)
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
         {
             RHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyawpitch") == 0)
+        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhippitch") == 0)
+        else if (simplejointnames[i].find("rhippitch") != string::npos)
         {
             RHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhiproll") == 0)
+        else if (simplejointnames[i].find("rhiproll") != string::npos)
         {
             RHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rkneepitch") == 0)
+        else if (simplejointnames[i].find("rkneepitch") != string::npos)
         {
             RKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("ranklepitch") == 0)
+        else if (simplejointnames[i].find("ranklepitch") != string::npos)
         {
             RAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rankleroll") == 0)
+        else if (simplejointnames[i].find("rankleroll") != string::npos)
         {
             RAnkleRoll = i;
             m_lleg_ids.push_back(i);
@@ -875,6 +1034,7 @@ void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool is
  */
 void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated)
 {
+    CurrentTime = time;
     p_sensor->setData(time, data, iscalculated);
 }
 
@@ -887,7 +1047,7 @@ void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>
  */
 void NUSensorsData::summaryTo(ostream& output)
 {
-    for (int i=0; i<m_sensors.size(); i++)
+    for (unsigned int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
 }
 

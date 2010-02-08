@@ -52,9 +52,15 @@ public:
         JOINT_TEMPERATURES,
         BALANCE_ACCELEROMETER,
         BALANCE_GYRO,
+        BALANCE_ORIENTATION,
+        BALANCE_ZMP,
+        BALANCE_FALLING,
+        BALANCE_FALLEN,
         DISTANCE_VALUES,
         FOOT_SOLE_VALUES,
         FOOT_BUMPER_VALUES,
+        FOOT_FORCE,
+        FOOT_IMPACT,
         BUTTON_VALUES,
         BATTERY_VALUES,
         GPS_VALUES,
@@ -62,7 +68,7 @@ public:
     };
 public:
     sensor_t();
-    sensor_t(string sensorname, sensor_id_t sensorid);
+    sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated = false);
     void setData(double time, vector<float> newdata, bool iscalculated = false);
     void setStdDev(vector<float> newstddev);
     
@@ -71,6 +77,8 @@ public:
     
     friend ostream& operator<< (ostream& output, const sensor_t& p_sensor);
     friend istream& operator>> (istream& input, sensor_t& p_sensor);
+    float& operator[] (const unsigned int index);
+    int size();
 public:
     string Name;                //!< the sensor's name
     sensor_id_t SensorID;       //!< the sensor's id

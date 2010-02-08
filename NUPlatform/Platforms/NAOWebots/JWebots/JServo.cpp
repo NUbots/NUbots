@@ -20,7 +20,7 @@
 */
 
 #include "JServo.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <math.h>
 #include <string>
@@ -34,14 +34,27 @@ JServo::JServo(const std::string &name) : Servo(name)
     m_target_gain = 10;                 // according to webots documentation 10 is default
     
     // There is nothing in the Webots API to make this easy, so Ill have to do it the hard way
-    if (name.compare("HeadYaw") == 0 || name.compare("LShoulderPitch") == 0 || name.compare("RShoulderPitch") == 0 || name.compare("LElbowYaw") == 0 || name.compare("LElbowYaw") == 0)
+    if (name.compare("HeadYaw") == 0 || name.compare("LShoulderPitch") == 0 || name.compare("RShoulderPitch") == 0 || name.compare("LElbowYaw") == 0 || name.compare("RElbowYaw") == 0)
+    {
         m_max_velocity = 8.25;
-    else if (name.compare("HeadPitch") == 0 || name.compare("LShoulderRoll") == 0 || name.compare("RShoulderRoll") == 0 || name.compare("LElbowRoll") == 0 || name.compare("LElbowRoll") == 0)
+        m_max_force = 2.26;
+    }
+    else if (name.compare("HeadPitch") == 0 || name.compare("LShoulderRoll") == 0 || name.compare("RShoulderRoll") == 0 || name.compare("LElbowRoll") == 0 || name.compare("RElbowRoll") == 0)
+    {
         m_max_velocity = 7.18;
+        m_max_force = 2.60;
+    }
     else if (name.compare("LHipPitch") == 0 || name.compare("RHipPitch") == 0 || name.compare("LKneePitch") == 0 || name.compare("RKneePitch") == 0 || name.compare("LAnklePitch") == 0 || name.compare("RAnklePitch") == 0)
+    {
         m_max_velocity = 6.39;
+        m_max_force = 7.77;
+    }
     else
+    {
         m_max_velocity = 4.15;
+        m_max_force = 11.96;
+    }
+    m_target_max_force = m_max_force;
 }
 
 JServo::~JServo()
@@ -63,6 +76,9 @@ void JServo::setAcceleration(double accel)
 void JServo::setVelocity(double vel)
 {
     m_target_velocity = vel;
+    vel = fabs(vel);
+    if (vel > m_max_velocity)
+        vel = m_max_velocity;
     Servo::setVelocity(vel);
 }
 
@@ -76,7 +92,7 @@ void JServo::setPosition(double position)
 }
 
 /*! @brief Sets the servo force
-    @param force the serov force in Nm
+    @param force the servo force in Nm
  */
 void JServo::setForce(double force)
 {
@@ -84,13 +100,27 @@ void JServo::setForce(double force)
     Servo::setForce(force);
 }
 
-/*! @brief Sets the proportional gain of servo's position control
+/*! @brief Sets the servo's gain and saturation
+    @param gain the % (0 to 100) of the maximum gain
+ */
+void JServo::setGain(double gain)
+{
+    if (gain <= 0)
+        gain = 0.01;
+    else if (gain > 100)
+        gain = 100;
+    m_target_gain = gain;
+    Servo::setControlP(gain*0.1);
+    setMaxForce((gain/100.0)*m_max_force);
+}
+
+/*! @brief Sets the maximum motor force in Nm
     @param p the the proportional gain
  */
-void JServo::setControlP(double p)
+void JServo::setMaxForce(double maxforce)
 {
-    m_target_gain = p;
-    Servo::setControlP(p);
+    m_target_max_force = maxforce;
+    Servo::setMotorForce(maxforce);
 }
 
 /*! Returns the current target acceleration
@@ -111,6 +141,7 @@ double JServo::getTargetVelocity() const
  */
 double JServo::getTargetPosition() const
 {
+    return m_target_position;
     float currentposition = getPosition();
     if (fabs(currentposition - m_target_position) < 0.001)
         return m_target_position;
@@ -138,4 +169,12 @@ double JServo::getTargetGain() const
 double JServo::getMaxVelocity() const
 {
     return m_max_velocity;
+}
+
+/*! Returns the servo's maximum force (torque in Nm). 
+ This is important because webots chooses to do nothing instead of getting the motor to move with as much force as possible
+ */
+double JServo::getMaxForce() const
+{
+    return m_max_force;
 }

@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NAOWebotsSystem::NAOWebotsSystem(NAOWebotsPlatform* platform)
 {

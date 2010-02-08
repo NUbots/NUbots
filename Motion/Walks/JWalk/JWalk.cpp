@@ -22,7 +22,7 @@
 #include "JWalk.h"
 
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 JWalk::JWalk()
 {

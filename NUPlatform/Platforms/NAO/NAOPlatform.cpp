@@ -25,24 +25,29 @@
 #include "NAOActionators.h"
 #include "NAOSystem.h"
 
-#include <string>
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 /*! @brief Constructor for NAO robotic platform
  */
 NAOPlatform::NAOPlatform()
 {
-    cout << "NAOPlatform::NAOPlatform" << endl;
-    
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NAOPlatform::NAOPlatform()" << endl;
+#endif
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules!
     nusystem = system;                        // we access the system in other modules using this pointer.    
     camera = new NAOCamera();
     sensors = new NAOSensors();
     actionators = new NAOActionators();
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NAOPlatform::NAOPlatform(). Completed." << endl;
+#endif
 }
 
 NAOPlatform::~NAOPlatform()
 {
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NAOPlatform::~NAOPlatform()" << endl;
+#endif
 }
 

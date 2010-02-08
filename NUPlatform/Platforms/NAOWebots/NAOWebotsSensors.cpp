@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsSensors.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 
@@ -37,8 +37,8 @@ static string temp_distance_names[] = {string("US/TopLeft"), string("US/BottomLe
 vector<string> NAOWebotsSensors::m_distance_names(temp_distance_names, temp_distance_names + sizeof(temp_distance_names)/sizeof(*temp_distance_names));
 
 // init m_foot_names:
-static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBR"), string("LFsrBL"), \
-                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBR"), string("RFsrBL")};
+static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBL"), string("LFsrBR"), \
+                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBL"), string("RFsrBR")};
 vector<string> NAOWebotsSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
 
 // init m_button_names:
@@ -142,29 +142,12 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
 #endif
-
-    m_current_time = nusystem->getTime();             // hmmmm. I am not sure whether I am allowed to do this. Its a backdoor so I don't like it!
-    
     copyFromJoints();
     copyFromAccelerometerAndGyro();
     copyFromDistance();
     copyFromFootSole();
     copyFromFootBumper();
     copyFromGPS();
-    
-#if DEBUG_NUSENSORS_VERBOSITY > 3
-    static bool firstrun = true;
-    if (firstrun)
-    {
-        debug << "NAOWebotsSensors::NAOWebotsSensors(). Available Sensors:" << endl;
-        m_data->summaryTo(debug);
-        firstrun = false;
-    }
-#endif
-#if DEBUG_NUSENSORS_VERBOSITY > 5
-    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
-    m_data->summaryTo(debug);
-#endif
 }
 
 /*! @brief Copies the joint data into m_data
@@ -187,9 +170,6 @@ void NAOWebotsSensors::copyFromJoints()
         positiondata[i] = m_servos[i]->getPosition();
     m_data->setJointPositions(m_current_time, positiondata);
     
-    calculateJointVelocityFromPosition();
-    calculateJointAccelerationFromVelocity();
-    
     // Copy joint targets
     for (int i=0; i<m_servos.size(); i++)
         targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
@@ -197,7 +177,7 @@ void NAOWebotsSensors::copyFromJoints()
     
     // Copy joint stiffnesses
     for (int i=0; i<m_servos.size(); i++)
-        stiffnessdata[i] = 0.1*((JServo*) m_servos[i])->getTargetGain();
+        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
     m_data->setJointStiffnesses(m_current_time, stiffnessdata);
     
     // Copy joint torques
@@ -294,14 +274,10 @@ void NAOWebotsSensors::copyFromGPS()
         #endif
         
         buffer = m_gps->getValues();
-        for (int i=0; i<numdimensions; i++)
-        {
-            if (i == 0 || i == 1)
-                gpsdata[i] = 100*buffer[i];         // convert to cm for gps coordinates
-            else
-                gpsdata[i] = buffer[i];
-        }
-        m_data->setGPSValues(m_current_time, gpsdata);      //! @todo TODO: add gps data to NUsensorsData
+        gpsdata[0] = 100*buffer[0];                // the data from webots is: [x, z, -y]
+        gpsdata[1] = -100*buffer[2];
+        gpsdata[2] = 100*buffer[1];
+        m_data->setGPSValues(m_current_time, gpsdata);
     }
 }
 

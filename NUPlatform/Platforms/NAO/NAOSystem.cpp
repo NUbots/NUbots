@@ -21,12 +21,13 @@
 
 #include "NAOSystem.h"
 
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 NAOSystem::NAOSystem()
 {
-    cout << "NAOSystem::NAOSystem()" << endl;
+#if DEBUG_NUSYSTEM_VERBOSITY > 4
+    debug << "NAOSystem::NAOSystem()" << endl;
+#endif
 }
 
 NAOSystem::~NAOSystem()
