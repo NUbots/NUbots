@@ -136,12 +136,16 @@ void NAOSensors::copyFromHardwareCommunications()
     m_data->setJointTemperatures(m_current_time, temp);
     
     m_al_accel_access->GetValues(temp);
+    for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to cm/s/s
+        temp[i] = temp[i]*100;
     m_data->setBalanceAccelerometer(m_current_time, temp);
     
     m_al_gyro_access->GetValues(temp);
     m_data->setBalanceGyro(m_current_time, temp);
     
     m_al_footsole_access->GetValues(temp);
+    for (unsigned int i=0; i<temp.size(); i++)
+        temp[i] = temp[i]*9.81;
     m_data->setFootSoleValues(m_current_time, temp);
     
     m_al_footbumper_access->GetValues(temp);
