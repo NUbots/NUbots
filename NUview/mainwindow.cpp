@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
 
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
@@ -72,8 +73,9 @@ MainWindow::MainWindow(QWidget *parent)
     imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
-    imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
-    imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
+    //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
+    //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
+    imageDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
 
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
@@ -83,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
+    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
+    horizonDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
 
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
@@ -126,6 +130,13 @@ void MainWindow::createActions()
     openAction->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
+    // LUT Action
+    LUT_Action = new QAction(tr("&Open LUT..."), this);
+    LUT_Action->setShortcut(tr("Ctrl+L"));
+    LUT_Action->setStatusTip(tr("Open a LUT file"));
+    LUT_Action->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
+    connect(LUT_Action, SIGNAL(triggered()), this, SLOT(openLUT()));
+
     // Exit Action
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcut(tr("Ctrl+Q"));
@@ -135,7 +146,7 @@ void MainWindow::createActions()
 
     // First Frame
     firstFrameAction = new QAction(tr("&First Frame"), this);
-    //firstFrameAction->setShortcut(tr("Ctrl+O"));
+    firstFrameAction->setShortcut(tr("Home"));
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString("../diagona/icon/16/138.png")));
 
@@ -150,7 +161,7 @@ void MainWindow::createActions()
 
     // Select Frame
     selectFrameAction = new QAction(tr("&Select Frame..."), this);
-    //selectFrameAction->setShortcut(tr("Ctrl+O"));
+    selectFrameAction->setShortcut(tr("Ctrl+G"));
     selectFrameAction->setStatusTip(tr("Select frame number to go to"));
     selectFrameAction->setIcon(QIcon(QString("../diagona/icon/16/134.png")));
     connect(selectFrameAction, SIGNAL(triggered()), this, SLOT(selectFrame()));
@@ -164,7 +175,7 @@ void MainWindow::createActions()
 
     // Last Frame
     lastFrameAction = new QAction(tr("&Last Frame"), this);
-    //lastFrameAction->setShortcut(tr("Ctrl+O"));
+    lastFrameAction->setShortcut(tr("End"));
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString("../diagona/icon/16/137.png")));
     connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
@@ -188,6 +199,7 @@ void MainWindow::createMenus()
     // File Menu
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAction);
+    fileMenu->addAction(LUT_Action);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
@@ -255,6 +267,11 @@ void MainWindow::open()
         firstFrame();
     }
 }
+void MainWindow::openLUT()
+{
+    classification->doOpen();
+}
+
 
 void MainWindow::firstFrame()
 {
@@ -278,6 +295,16 @@ void MainWindow::previousFrame()
 
 void MainWindow::selectFrame()
 {
+
+    int selectedFrameNumber;
+    bool ok;
+
+    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
+
+    if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
+        currentFrameNumber = selectedFrameNumber;
+        LoadFrame(currentFrameNumber);
+    }
     return;
 }
 
@@ -305,6 +332,8 @@ void MainWindow::LoadFrame(int frameNumber)
     updateSelection();
     QString message = "Frame Loaded:  Number ";
     message.append(QString::number(frameNumber));
+    message.append("/");
+    message.append(QString::number(totalFrameNumber));
     this->statusBar->showMessage(message, 10000);
     return;
 }
@@ -332,6 +361,13 @@ void MainWindow::SelectColourAtPixel(int x, int y)
     if(virtualRobot.imageAvailable())
     {
         pixels::Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
+
+        QString message = "(";
+        message.append(QString::number(x));
+        message.append(",");
+        message.append(QString::number(y));
+        message.append(")");
+        this->statusBar->showMessage(message, 10000);
         classification->setColour(tempPixel,ClassificationWidget::YCbCr);
     }
 }
@@ -352,11 +388,39 @@ void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
+    //! Undo key event
     if(event->key() == Qt::Key_Z && (event->modifiers() & Qt::ControlModifier))
     {
         if(event->isAutoRepeat() == false)
         {
             virtualRobot.UndoLUT();
+        }
+    }
+
+    //! Last frame key event
+    if(event->key() == Qt::Key_End)
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            lastFrame();
+        }
+    }
+
+    //! First Frame key event
+    if(event->key() == Qt::Key_Home)
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            firstFrame();
+        }
+    }
+
+    //! Select frame key event
+    if(event->key() == Qt::Key_G && (event->modifiers() & Qt::ControlModifier))
+    {
+        if(event->isAutoRepeat() == false)
+        {
+            selectFrame();
         }
     }
 }

@@ -77,9 +77,10 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
         channelLabels[channel] = new QLabel(tr(""));
         channelMinSelectors[channel] = new QSpinBox;
         channelMinSelectors[channel]->setRange(-255, 0);
+        channelMinSelectors[channel]->setValue(-10);
         channelMaxSelectors[channel] = new QSpinBox;
         channelMaxSelectors[channel]->setRange(0, 255);
-
+        channelMaxSelectors[channel]->setValue(10);
         boundaryLayout->addWidget(channelLabels[channel],channel+1,0);
         boundaryLayout->addWidget(channelMinSelectors[channel],channel+1,1);
         boundaryLayout->addWidget(channelMaxSelectors[channel],channel+1,2);

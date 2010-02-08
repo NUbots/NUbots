@@ -190,6 +190,43 @@ void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegm
     emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
+void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId)
+{
+
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(2.0);       // Line width
+    std::vector<RobotCandidate>::const_iterator i;
+    unsigned char r,g,b;
+    for(i = robotCandidates.begin(); i != robotCandidates.end(); i++)
+    {
+        Vector2<int> topLeft = i->getTopLeft();
+        Vector2<int> bottomRight = i->getBottomRight();
+        ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
+        glColor3ub(r,g,b);
+
+        glBegin(GL_LINE_LOOP);                              // Start Lines
+            glVertex2i( topLeft.x, topLeft.y);
+            glVertex2i( topLeft.x, bottomRight.y);
+            glVertex2i( bottomRight.x, bottomRight.y);
+            glVertex2i( bottomRight.x, topLeft.y);
+        glEnd();                                        // End Lines
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+
+}
 
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
