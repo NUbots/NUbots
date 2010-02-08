@@ -13,13 +13,18 @@ public:
     int width();
     int height();
     float aspect();
+    unsigned char getColour()  const;
+    void setColour(unsigned char c);
 
     ObjectCandidate();
     ObjectCandidate(int left, int top, int right, int bottom);
+    ObjectCandidate(int left, int top, int right, int bottom, unsigned char colour);
     ~ObjectCandidate();
 protected:
     Vector2<int> topLeft;
     Vector2<int> bottomRight;
+    unsigned char colour;
+
 
 };
 

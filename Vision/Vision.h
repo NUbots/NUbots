@@ -94,7 +94,7 @@ class Vision
     */
     bool isValidColour(unsigned char colour, std::vector<unsigned char> colourList);
 
-    float findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
+    int findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
     static bool sortTransitionSegments(TransitionSegment a, TransitionSegment b);
 
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);

@@ -459,21 +459,25 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
+    //! Overall runtime O( (K*(2*M^3 + M^2) + N*(LogN + 1) )
     std::vector<ObjectCandidate> candidateList;
 
     const int VERT_JOIN_LIMIT = 3;
     const int HORZ_JOIN_LIMIT = 1;
-    int HORZ_JOIN_SCALING = 32;
+
 
     if (!segments.empty())
     {
+        //! Sorting O(N*logN)
         sort(segments.begin(), segments.end(), Vision::sortTransitionSegments);
 
         std::queue<int> qUnprocessed;
         unsigned int rawSegsLeft = segments.size();
         int nextRawSeg = 0;
+
         bool isSegUsed [segments.size()];
 
+        //! Removing invalid colours O(N)
         for (unsigned int i = 0; i < segments.size(); i++)
         {
             //may have non-robot colour segments, so pre-mark them as used
@@ -481,7 +485,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             {
                 //qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
                 isSegUsed[i] = false;
-                qDebug() <<  "(" << segments.at(i).getStartPoint().x << "," << segments.at(i).getStartPoint().y << ")-("<< segments.at(i).getEndPoint().x << "," << segments.at(i).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << "]";
+                //qDebug() <<  "(" << segments.at(i).getStartPoint().x << "," << segments.at(i).getStartPoint().y << ")-("<< segments.at(i).getEndPoint().x << "," << segments.at(i).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << "]";
             }
             else
             {
@@ -490,13 +494,15 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             }
 
         }
-        //qDebug() << "rawSegsLeft: " << rawSegsLeft << "/" << (segments.size()-1);
+
+        //! For all valid segments O(M)
         while(rawSegsLeft)
         {
 
             //Roll through and find first unused segment
             nextRawSeg = 0;
 
+            //! Find next unused segment O(M)
             while(isSegUsed[nextRawSeg] && nextRawSeg < segments.size()) nextRawSeg++;
             //Prime unprocessed segment queue to build next candidate
             qUnprocessed.push(nextRawSeg);
@@ -505,16 +511,15 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             rawSegsLeft--;
 
             int min_x, max_x, min_y, max_y, segCount;
+            int * colourHistogram = new int[validColours.size()];
             min_x = segments.at(nextRawSeg).getStartPoint().x;
             max_x = segments.at(nextRawSeg).getStartPoint().x;
             min_y = segments.at(nextRawSeg).getStartPoint().y;
             max_y = segments.at(nextRawSeg).getEndPoint().y;
             segCount = 0;
+            for (int i = 0; i < validColours.size(); i++)  colourHistogram[i] = 0;
 
-            //TODO
-            //work on planar graph to build skeleton.
-            std::vector<Vector2<int> > points;
-
+            //! For all unprocessed joined segment in a candidate O(M)
             //Build candidate
             while (!qUnprocessed.empty())
             {
@@ -522,6 +527,14 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 thisSeg = qUnprocessed.front();
                 qUnprocessed.pop();
                 segCount++;
+                for (int i = 0; i < validColours.size(); i++)
+                {
+                    if ( segments.at(thisSeg).getColour() == validColours.at(i) && validColours.at(i) != ClassIndex::white)
+                    {
+                        colourHistogram[i] += 1;
+                        i = validColours.size();
+                    }
+                }
 
                 if ( min_x > segments.at(thisSeg).getStartPoint().x)
                     min_x = segments.at(thisSeg).getStartPoint().x;
@@ -532,30 +545,35 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 if ( max_y < segments.at(thisSeg).getEndPoint().y)
                     max_y = segments.at(thisSeg).getEndPoint().y;
 
+
+
                 //if there is a seg above AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg > 0 &&
                      !isSegUsed[thisSeg-1] &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg-1).getStartPoint().x &&
                      segments.at(thisSeg).getStartPoint().y - segments.at(thisSeg-1).getEndPoint().y < VERT_JOIN_LIMIT)
                 {
-                    qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
+                    //qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
                     qUnprocessed.push(thisSeg-1);
                     //take away from pool of raw segs
                     isSegUsed[thisSeg-1] = true;
                     rawSegsLeft--;
                 }
+
                 //if there is a seg below AND 'close enough', then qUnprocessed->push()
                 if ( thisSeg+1 < segments.size() &&
                      !isSegUsed[thisSeg+1] &&
                      segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg+1).getStartPoint().x &&
                      segments.at(thisSeg+1).getStartPoint().y - segments.at(thisSeg).getEndPoint().y < VERT_JOIN_LIMIT)
                 {
-                    qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
+                    //qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
                     qUnprocessed.push(thisSeg+1);
                     //take away from pool of raw segs
                     isSegUsed[thisSeg+1] = true;
                     rawSegsLeft--;
                 }
+
+                //! For each segment being processed in a candidate to the RIGHT attempt to join segments within range O(M)
                 //if there is a seg overlapping on the right AND 'close enough', then qUnprocessed->push()
                 for (int thatSeg = thisSeg + 1; thatSeg < segments.size(); thatSeg++)
                 {
@@ -569,17 +587,18 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                  segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
                             {
                                 //thisSeg overlaps with thatSeg
-                                qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
-                                float intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
-                                                                                      segments.at(thisSeg).getStartPoint().x,
-                                                                                      segments.at(thatSeg).getStartPoint().x,
-                                                                                      spacing*HORZ_JOIN_LIMIT);
-                                if ( intercept >= 0.0 &&
-                                     float(segments.at(thatSeg).getEndPoint().y) >= intercept &&
-                                     int(intercept) <= segments.at(thisSeg).getEndPoint().y)
+                                //qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
+                                //! Find intercept O(K), K is number of field border points
+                                int intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
+                                                                                    segments.at(thisSeg).getStartPoint().x,
+                                                                                    segments.at(thatSeg).getStartPoint().x,
+                                                                                    spacing*HORZ_JOIN_LIMIT);
+                                if ( intercept >= 0 &&
+                                     segments.at(thatSeg).getEndPoint().y >= intercept &&
+                                     intercept <= segments.at(thisSeg).getEndPoint().y)
                                 {
                                     //within HORZ_JOIN_LIMIT
-                                    qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                    //qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
                                     qUnprocessed.push(thatSeg);
                                     //take away from pool of raw segs
                                     isSegUsed[thatSeg] = true;
@@ -588,8 +607,8 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                 }
                                 else
                                 {
-                                    qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
-                                    qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
+                                    //qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
+                                    //qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
                                 }
                             }
                         }
@@ -599,6 +618,8 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                         thatSeg = segments.size();
                     }
                 }
+
+                //! For each segment being processed in a candidate to the LEFT attempt to join segments within range O(M)
                 //if there is a seg overlapping on the left AND 'close enough', then qUnprocessed->push()
                 for (int thatSeg = thisSeg - 1; thatSeg >= 0; thatSeg--)
                 {
@@ -613,18 +634,19 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                  segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
                             {
                                 //thisSeg overlaps with thatSeg
-                                qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
-                                float intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
-                                                                                      segments.at(thisSeg).getStartPoint().x,
-                                                                                      segments.at(thatSeg).getStartPoint().x,
-                                                                                      spacing*HORZ_JOIN_LIMIT);
+                                //qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
+                                //! Find intercept O(K), K is number of field border points
+                                int intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
+                                                                                    segments.at(thisSeg).getStartPoint().x,
+                                                                                    segments.at(thatSeg).getStartPoint().x,
+                                                                                    spacing*HORZ_JOIN_LIMIT);
 
-                                if ( intercept >= 0.0 &&
-                                     float(segments.at(thatSeg).getEndPoint().y) >= intercept &&
-                                     int(intercept) <= segments.at(thisSeg).getEndPoint().y)
+                                if ( intercept >= 0 &&
+                                     segments.at(thatSeg).getEndPoint().y >= intercept &&
+                                     intercept <= segments.at(thisSeg).getEndPoint().y)
                                 {
                                     //within HORZ_JOIN_LIMIT
-                                    qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                    //qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
                                     qUnprocessed.push(thatSeg);
                                     //take away from pool of raw segs
                                     isSegUsed[thatSeg] = true;
@@ -632,8 +654,8 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                 }
                                 else
                                 {
-                                    qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
-                                    qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
+                                    //qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
+                                    //qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
                                 }
                             }
                         }
@@ -646,7 +668,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
                 //add thisSeg to CandidateVector
             }//while (!qUnprocessed->empty())
-            qDebug() << "Candidate ready...";
+            //qDebug() << "Candidate ready...";
             //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
             if ( max_x - min_x > 0 &&                                               // width  is non-zero
                  max_y - min_y > 0 &&                                               // height is non-zero
@@ -655,8 +677,14 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                  segCount >= min_segments                                    // greater than minimum amount of segments to remove noise
                  )
             {
-                qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y);
-                ObjectCandidate temp(min_x, min_y, max_x, max_y);
+                //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y);
+                int max_col = 0;
+                for (int i = 0; i < validColours.size(); i++)
+                {
+                    if (i != max_col && colourHistogram[i] > colourHistogram[max_col])
+                        max_col = i;
+                }
+                ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col));
                 candidateList.push_back(temp);
             }
 
@@ -673,6 +701,9 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< Trans
                                         float min_aspect, float max_aspect, int min_segments)
 {
     std::vector<ObjectCandidate> candidateList;
+
+
+
     return candidateList;
 }
 
@@ -731,13 +762,13 @@ int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
     return y;
 }
 
-float Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
+int Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
 {
-    float intercept = 0.0;
+    int intercept = 0;
     if (current_x == target_x)
     {
-        qDebug() << "Intercept -1 =";
-        return -1.0;
+        //qDebug() << "Intercept -1 =";
+        return -1;
     }
 
     int y = findYFromX(points, current_x);
@@ -756,7 +787,7 @@ float Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&poi
 
     if (diff_x > spacing)
     {
-        intercept = float(currentImage->height());
+        intercept = currentImage->height();
     }
     else if ( diff_x > spacing/2)
     {
@@ -771,9 +802,9 @@ float Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&poi
         intercept = y;
     }
 
-    qDebug() << "findInterceptFromPerspectiveFrustum intercept:"<<intercept<<" {y:"<< y << ", height:" << currentImage->height() << ", spacing:" << spacing << ", target_x:" << target_x << ", current_x:" << current_x << "}";
+    //qDebug() << "findInterceptFromPerspectiveFrustum intercept:"<<intercept<<" {y:"<< y << ", height:" << currentImage->height() << ", spacing:" << spacing << ", target_x:" << target_x << ", current_x:" << current_x << "}";
     if (intercept > currentImage->height())
-        intercept = -2.0;
+        intercept = -2;
     return intercept;
 }
 

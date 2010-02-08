@@ -26,7 +26,6 @@ public:
     ~RobotCandidate();
 private:
     std::vector<Vector2<int> > skeleton;
-    unsigned char teamColour;
 };
 
 #endif // ROBOTCANDIDATE_H
