@@ -23,7 +23,7 @@
 using namespace Kinematics;
 
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <math.h>
 #include <list>
@@ -392,7 +392,7 @@ void NBWalk::updateActionatorsData()
     nbToNUJointOrder(nextJoints, nu_nextJoints);
     //nbToNUJointOrder(nextStiffnesses, nu_nextStiffnesses);
     debug << "nu_nextStiffnesses: ";
-    for (int i=0; i<nu_nextStiffnesses.size(); i++)
+    for (unsigned int i=0; i<nu_nextStiffnesses.size(); i++)
         debug << nu_nextStiffnesses[i] << ", ";
     debug << endl;
     m_actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 40, nu_nextJoints, zerovel, nu_nextStiffnesses);

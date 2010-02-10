@@ -27,7 +27,7 @@ using namespace std;
 
 using namespace Kinematics;
 
-#include "Tools/debug.h"
+#include "debug.h"
 
 WalkProvider::WalkProvider(shared_ptr<Sensors> s)
     : MotionProvider(WALK_PROVIDER),

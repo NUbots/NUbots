@@ -24,6 +24,7 @@
 #include "NAOWebotsSensors.h"
 #include "NAOWebotsActionators.h"
 #include "NAOWebotsSystem.h"
+#include "debug.h"
 
 #include <string.h>
 #include <iostream>
@@ -40,7 +41,9 @@ using namespace std;
  */
 NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
 {
-    cout << "NAOWebotsPlatform::NAOWebotsPlatform" << endl;
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NAOWebotsPlatform::NAOWebotsPlatform" << endl;
+#endif
     // find URBI port number (e.g. -p 54001) in controllerArgs
     int port = -1;
     for (int i = 1; i < argc; i++) {
@@ -51,11 +54,11 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     }
     
     if (port == -1) {
-        cout << "Error: could not find port number in controllerArgs" << endl;
+        debug << "Error: could not find port number in controllerArgs" << endl;
     }
-    
-    int m_number = (port % 10) + 1;
+    m_number = (port % 10) + 1;
     setNameFromNumber();
+    setTeam(Robot::getName());
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
     nusystem = system;                                  // we access the system in other modules using this pointer.
@@ -91,6 +94,23 @@ void NAOWebotsPlatform::setNameFromNumber()
         default:
             m_name = string("Valerie");
             break;
+    }
+}
+
+/*! @brief A function which sets m_team_colour and m_team_number
+    @param name the name webots gives the robot
+ */
+void NAOWebotsPlatform::setTeam(const string& name)
+{
+    if (name.find("red") != string::npos)
+    {
+        m_team_colour = string("red");
+        m_team_number = 1;
+    }
+    else 
+    {
+        m_team_colour = string("blue");
+        m_team_number = 0;
     }
 }
 

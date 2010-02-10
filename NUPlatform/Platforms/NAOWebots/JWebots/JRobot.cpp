@@ -20,7 +20,7 @@
 */
 
 #include "JRobot.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 JRobot::JRobot() : Robot()
 {

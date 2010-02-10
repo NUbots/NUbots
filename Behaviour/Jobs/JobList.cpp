@@ -20,7 +20,7 @@
  */
 
 #include "JobList.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 /*! @brief JobList constructor
  */
