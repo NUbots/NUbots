@@ -78,19 +78,19 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 
 FIND_PACKAGE( PTHREAD REQUIRED )
 FIND_PACKAGE( BOOST REQUIRED )
-FIND_PACKAGE( LIBRT )
+FIND_PACKAGE( RT )
 
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
-  	"${CMAKE_CURRENT_SOURCE_DIR}/../targetconfig.h"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/targetconfig.h"
     ESCAPE_QUOTES
 )
 
 ############################ DEBUG.H GENERATION
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/debug.in"
-  	"${CMAKE_CURRENT_SOURCE_DIR}/../Tools/debug.h"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debug.h"
     ESCAPE_QUOTES
 )
 
@@ -176,7 +176,7 @@ SET(DEBUG_NUSYSTEM_VERBOSITY 5 CACHE STRING "Set the verbosity of debug informat
 SET(DEBUG_VISION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the vision (0 to 5)")
 SET(DEBUG_LOCALISATION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the localisation (0 to 5)")
 SET(DEBUG_BEHAVIOUR_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the behaviour (0 to 5)")
-SET(DEBUG_MOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
+SET(DEBUG_NUMOTION_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
 
 SET(THREAD_VISION_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
 SET(THREAD_MOTION_PRIORITY 40 CACHE STRING "Set the priority of the motion thread (0 to 100)")

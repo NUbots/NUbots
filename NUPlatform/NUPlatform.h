@@ -38,6 +38,8 @@ public:
     
     virtual void getName(string& name);
     virtual void getNumber(int& number);
+    virtual void getTeamColour(string& colour);
+    virtual void getTeamNumber(int& number);
     
 protected:
 private:
@@ -51,6 +53,8 @@ public:
 protected:
     string m_name;
     int m_number;
+    string m_team_colour;
+    int m_team_number;
 private:
     
 };

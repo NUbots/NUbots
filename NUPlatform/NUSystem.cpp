@@ -20,10 +20,9 @@
  */
 
 #include "NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
-#include <iostream>
-using namespace std;
+NUSystem* nusystem;
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     struct timespec NUSystem::m_gettime_starttime;            //!< the program's start time according to gettime()

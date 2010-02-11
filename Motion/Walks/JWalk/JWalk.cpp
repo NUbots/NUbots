@@ -1,5 +1,5 @@
-/*! @file debug.cpp
-    @brief Implementation of debug tools
+/*! @file JWalk.cpp
+    @brief Implementation of jwalk class
 
     @author Jason Kulk
  
@@ -19,18 +19,24 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "JWalk.h"
+
+#include "NUPlatform/NUSystem.h"
 #include "debug.h"
 
-/*#ifdef TARGET_IS_NAOWEBOTS
-    #define debug cout                          //!< the debug stream
-#else
-    #ifdef TARGET_IS_NAO
-        ofstream debug;
-    #else
-        #ifdef TARGET_IS_CYCLOID
-            ofstream debug;
-        #endif
-    #endif
-#endif*/
+JWalk::JWalk()
+{
+}
+
+/*! @brief Destructor for motion module
+ */
+JWalk::~JWalk()
+{
+    // nothing needs to be deleted at this level
+}
+
+void JWalk::doWalk()
+{
+}
 
 

@@ -21,8 +21,8 @@
 
 #include <time.h>
 #include <errno.h>
-#include <iostream>
-using namespace std;
+#include <signal.h>
+#include <execinfo.h>
 
 #include "NUbot.h"
 #ifdef TARGET_IS_NAOWEBOTS
@@ -46,6 +46,9 @@ static pthread_mutex_t mutexVisionRunning;           //!< in webots I need to us
 static void* runThreadMotion(void* arg);
 static void* runThreadVision(void* arg);
 
+static void segFaultHandler(int value);
+static void unhandledExceptionHandler(exception& e);
+
 /*! @brief Constructor for the nubot
     
     The parameters are for command line arguements. Webots gives the binary arguements which tell us the 
@@ -56,6 +59,7 @@ static void* runThreadVision(void* arg);
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+    createErrorHandling();
 #if DEBUG_NUBOT_VERBOSITY > 4
     debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
 #endif
@@ -86,6 +90,9 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     #ifdef USE_MOTION
         motion = new NUMotion();
+        #ifdef USE_WALKOPTIMISER
+            walkoptimiser = new WalkOptimiserBehaviour(platform, motion->m_walk);
+        #endif
     #endif
     #ifdef USE_NETWORK
         network = new Network();
@@ -196,6 +203,16 @@ void NUbot::createThreads()
 #endif
 }
 
+/*! @brief Connects error and signal handlers with the appropriate functions
+ */
+void NUbot::createErrorHandling()
+{
+    struct sigaction newaction, oldaction;
+    newaction.sa_handler = segFaultHandler;
+    
+    sigaction(SIGSEGV, &newaction, &oldaction);
+}
+
 /*! @brief Destructor for the nubot
  */
 NUbot::~NUbot()
@@ -253,11 +270,14 @@ void NUbot::run()
 {
 #ifdef TARGET_IS_NAOWEBOTS
     int count = 0;
+    double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) platform;
     while (true)
     {
+        previoussimtime = nusystem->getTime();
         webots->step(40);           // stepping the simulator generates new data to run motion, and sometimes the vision data
-        debug << "NUbot::run()" << endl;
+        if (nusystem->getTime() - previoussimtime > 81)
+            debug << "NUbot::run(): simulationskip: " << (nusystem->getTime() - previoussimtime) << endl;
         signalMotion();
         if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
         {
@@ -408,6 +428,10 @@ int NUbot::waitForVisionCompletion()
     The thread is set up to run when signalled by signalMotion(). It will quickly grab the
     new sensor data, compute a response, and then send the commands to the actionators.
  
+    Note that you can not safely use the job interface in this thread, if you need to add
+    jobs provide a process function for this thread, and another process for the behaviour 
+    thread.
+ 
     @param arg a pointer to the nubot
  */
 void* runThreadMotion(void* arg)
@@ -424,42 +448,53 @@ void* runThreadMotion(void* arg)
     double realendtime, processendtime, threadendtime;
 #endif
     
-    int err;
+    int err = 0;
     do 
     {
-#if defined THREAD_MOTION_MONITOR_TIME and !defined TARGET_IS_NAOWEBOTS
+    #if defined THREAD_MOTION_MONITOR_TIME and !defined TARGET_IS_NAOWEBOTS
         entrytime = NUSystem::getRealTime();
-#endif
+    #endif
         err = nubot->waitForNewMotionData();
         nubot->signalMotionStart();
 
-#ifdef THREAD_MOTION_MONITOR_TIME
-    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
+    #ifdef THREAD_MOTION_MONITOR_TIME
         realstarttime = NUSystem::getRealTime();
+        #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         if (realstarttime - entrytime > 25)
             debug << "NUbot::runThreadMotion. Waittime " << realstarttime - entrytime << " ms."<< endl;
-    #endif
+        #endif
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
-#endif
-        
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUbot::runThreadMotion " << nubot->platform->system->getTime() << endl;
-        data = nubot->platform->sensors->update();
-        nubot->motion->process(data, actions);
-        nubot->platform->actionators->process(actions);
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-#ifdef THREAD_MOTION_MONITOR_TIME
+    #endif
+            
+        try
+        {
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            data = nubot->platform->sensors->update();
+            #ifdef USE_MOTION
+                nubot->motion->process(data, actions);
+                #ifdef USE_WALKOPTIMISER
+                    nubot->walkoptimiser->process(data, actions);
+                #endif
+            #endif
+            nubot->platform->actionators->process(actions);
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        }
+        catch (exception& e)
+        {
+            unhandledExceptionHandler(e);
+        }
+    #ifdef THREAD_MOTION_MONITOR_TIME
         realendtime = NUSystem::getRealTime();
         processendtime = NUSystem::getProcessTime();
         threadendtime = NUSystem::getThreadTime();
         if (threadendtime - threadstarttime > 3)
             debug << "NUbot::runThreadMotion. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
-#endif
+    #endif
         nubot->signalMotionCompletion();
     } 
-    while (err == 0 | errno != EINTR);
+    while (err == 0 && errno != EINTR);
+    errorlog << "runMotionThread is exiting. err: " << err << " errno: " << errno << endl;
     pthread_exit(NULL);
 }
 
@@ -480,21 +515,13 @@ void* runThreadVision(void* arg)
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
-    vector<float> temp(3, 0);
-    
-    joblist.addVisionJob(new WalkJob(temp));
-    joblist.addVisionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
-    joblist.addMotionJob(new WalkJob(temp));
-    
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
     double realstarttime, processstarttime, threadstarttime; 
     double realendtime, processendtime, threadendtime;
 #endif
     
-    double timenow;
+    double lastupdatetime = nusystem->getTime();
     
     int err;
     do 
@@ -506,28 +533,41 @@ void* runThreadVision(void* arg)
         nubot->signalVisionStart();
         
 #ifdef THREAD_VISION_MONITOR_TIME
-    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         realstarttime = NUSystem::getRealTimeFast();
+    #ifndef TARGET_IS_NAOWEBOTS         // there is not point monitoring wait times in webots
         if (realstarttime - entrytime > 1000/15.0 + 5)
             debug << "NUbot::runThreadVision. Waittime " << realstarttime - entrytime << " ms."<< endl;
     #endif
         processstarttime = NUSystem::getProcessTime();
         threadstarttime = NUSystem::getThreadTime();
 #endif
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUbot::runThreadVision " << nubot->platform->system->getTime() << endl;
-        //          image = nubot->platform->camera->getData()
-        //          data = nubot->platform->sensors->getData()                // I should not deep copy the data here
-        //                 odometry = nubot->motion->getData()                // There is no deep copy here either
-        //      gamectrl, teaminfo = nubot->network->getData()
-        //          fieldobj = nubot->vision->process(image, data, gamectrl)
-        //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
-        nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
-        nubot->motion->process(joblist);
-        //          cmds = nubot->lcs->process(lcsactions)
-        nubot->platform->actionators->process(actions);
-        //joblist.clear();                           // assume that all of the jobs have been completed
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        try
+        {
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //          image = nubot->platform->camera->getData()
+            data = nubot->platform->sensors->getData();
+            //                 odometry = nubot->motion->getData()                // There is no deep copy here either
+            //      gamectrl, teaminfo = nubot->network->getData()
+            //          fieldobj = nubot->vision->process(image, data, gamectrl)
+            //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
+            #ifdef USE_BEHAVIOUR
+                nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+            #endif
+            #ifdef USE_MOTION
+                #ifdef USE_WALKOPTIMISER
+                    nubot->walkoptimiser->process(joblist);
+                #endif
+                nubot->motion->process(joblist);
+            #endif
+            //          cmds = nubot->lcs->process(lcsactions)
+            //nubot->platform->actionators->process(m_actions);
+            //joblist.clear();                           // assume that all of the jobs have been completed
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        }
+        catch (exception& e) 
+        {
+            unhandledExceptionHandler(e);
+        }
 #ifdef THREAD_VISION_MONITOR_TIME
         realendtime = NUSystem::getRealTimeFast();
         processendtime = NUSystem::getProcessTime();
@@ -537,7 +577,41 @@ void* runThreadVision(void* arg)
 #endif
         nubot->signalVisionCompletion();
     } 
-    while (err == 0 | errno != EINTR);
+    while (err == 0 && errno != EINTR);
     pthread_exit(NULL);
 }
+
+
+/*! @brief 'Handles' a segmentation fault; logs the backtrace to errorlog
+ */
+void segFaultHandler (int value)
+{
+    errorlog << "SEGMENTATION FAULT. " << endl;
+    void *array[10];
+    size_t size;
+    char **strings;
+    size = backtrace(array, 10);
+    strings = backtrace_symbols(array, size);
+    for (size_t i=0; i<size; i++)
+        errorlog << strings[i] << endl;
+    //!< @todo TODO: after a seg fault I should fail safely!
+}
+
+/*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
+    @param e the exception
+ */
+void unhandledExceptionHandler(exception& e)
+{
+    //!< @todo TODO: check whether the exception is serious, if it is fail safely
+    errorlog << "UNHANDLED EXCEPTION. " << endl;
+    void *array[10];
+    size_t size;
+    char **strings;
+    size = backtrace(array, 10);
+    strings = backtrace_symbols(array, size);
+    for (size_t i=0; i<size; i++)
+        errorlog << strings[i] << endl;
+    errorlog << e.what() << endl;
+}
+
 

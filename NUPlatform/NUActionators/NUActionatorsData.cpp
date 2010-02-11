@@ -20,35 +20,35 @@
  */
 
 #include "NUActionatorsData.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
-NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::TorsoRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::LAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::LAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
+NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 
 NUActionatorsData::led_id_t NUActionatorsData::LEar = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::led_id_t NUActionatorsData::REar = NUActionatorsData::ACTIONATOR_MISSING;
@@ -78,6 +78,8 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
+    Sound = NULL;
+    Teleporter = NULL;
     m_positionactionation = false;
     m_torqueactionation = false;
     
@@ -112,11 +114,11 @@ void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& me
     vector<string> simplemethodnames;
     simplifyNames(methodnames, simplemethodnames);
     
-    for (int i=0; i<simplemethodnames.size(); i++)
+    for (unsigned int i=0; i<simplemethodnames.size(); i++)
     {
-        if (simplemethodnames[i].compare("position") || simplemethodnames[i].compare("positions") || simplemethodnames[i].compare("jointposition") || simplemethodnames[i].compare("jointpositions"))
+        if (simplemethodnames[i].find("position") != string::npos)
             m_positionactionation = true;
-        else if (simplemethodnames[i].compare("torque") || simplemethodnames[i].compare("torques") || simplemethodnames[i].compare("jointtorque") || simplemethodnames[i].compare("jointtorques"))
+        else if (simplemethodnames[i].find("torque") != string::npos)
             m_torqueactionation = true;
         else
             debug << "NUActionatorsData::setAvailableJointControlMethods. You have specified an unrecognised joint control method: " << methodnames[i] << endl;
@@ -133,143 +135,143 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     vector<string> simplejointnames;
     simplifyNames(jointnames, simplejointnames);
     
-    for (int i=0; i<simplejointnames.size(); i++) 
+    for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
         addJointActionator(jointnames[i]);
-        if (simplejointnames[i].compare("headyaw") == 0)
+        if (simplejointnames[i].find("headyaw") != string::npos)
         {
             HeadYaw = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("headpitch") == 0)
+        else if (simplejointnames[i].find("headpitch") != string::npos)
         {
             HeadPitch = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderpitch") == 0)
+        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
         {
             LShoulderPitch = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderroll") == 0)
+        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
         {
             LShoulderRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowyaw") == 0)
+        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
         {
             LElbowYaw = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowroll") == 0)
+        else if (simplejointnames[i].find("lelbowroll") != string::npos)
         {
             LElbowRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderpitch") == 0)
+        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
         {
             RShoulderPitch = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderroll") == 0)
+        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
         {
             RShoulderRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowyaw") == 0)
+        else if (simplejointnames[i].find("relbowyaw") != string::npos)
         {
             RElbowYaw = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowroll") == 0)
+        else if (simplejointnames[i].find("relbowroll") != string::npos)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsoyaw") == 0)
+        else if (simplejointnames[i].find("torsoyaw")!= string::npos)
         {
             TorsoYaw = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsopitch") == 0)
+        else if (simplejointnames[i].find("torsopitch") != string::npos)
         {
             TorsoPitch = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsoroll") == 0)
+        else if (simplejointnames[i].find("torsoroll") != string::npos)
         {
             TorsoRoll = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyaw") == 0)
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
         {
             LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyawpitch") == 0)
+        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhippitch") == 0)
+        else if (simplejointnames[i].find("lhippitch") != string::npos)
         {
             LHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhiproll") == 0)
+        else if (simplejointnames[i].find("lhiproll") != string::npos)
         {
             LHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lkneepitch") == 0)
+        else if (simplejointnames[i].find("lkneepitch") != string::npos)
         {
             LKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lanklepitch") == 0)
+        else if (simplejointnames[i].find("lanklepitch") != string::npos)
         {
             LAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lankleroll") == 0)
+        else if (simplejointnames[i].find("lankleroll") != string::npos)
         {
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyaw") == 0)
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
         {
             RHipYaw = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyawpitch") == 0)
+        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhippitch") == 0)
+        else if (simplejointnames[i].find("rhippitch") != string::npos)
         {
             RHipPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhiproll") == 0)
+        else if (simplejointnames[i].find("rhiproll") != string::npos)
         {
             RHipRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rkneepitch") == 0)
+        else if (simplejointnames[i].find("rkneepitch") != string::npos)
         {
             RKneePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("ranklepitch") == 0)
+        else if (simplejointnames[i].find("ranklepitch") != string::npos)
         {
             RAnklePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rankleroll") == 0)
+        else if (simplejointnames[i].find("rankleroll") != string::npos)
         {
             RAnkleRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else 
         {
@@ -304,22 +306,22 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
     vector<string> simplelednames;
     simplifyNames(lednames, simplelednames);
     
-    for (int i=0; i<simplelednames.size(); i++) 
+    for (unsigned int i=0; i<simplelednames.size(); i++) 
     {
         addLedActionator(lednames[i]);
-        if (simplelednames[i].compare("lear") == 0 || simplelednames[i].compare("earsledleft") == 0)
+        if (simplelednames[i].find("lear") != string::npos || simplelednames[i].find("earsledleft") != string::npos)
             LEar = i;
-        else if (simplelednames[i].compare("rear") == 0 || simplelednames[i].compare("earsledright") == 0)
+        else if (simplelednames[i].find("rear") != string::npos || simplelednames[i].find("earsledright") != string::npos)
             REar = i;
-        else if (simplelednames[i].compare("leye") == 0 || simplelednames[i].compare("faceledleft") == 0)
+        else if (simplelednames[i].find("leye") != string::npos || simplelednames[i].find("faceledleft") != string::npos)
             LEye = i;
-        else if (simplelednames[i].compare("reye") == 0 || simplelednames[i].compare("faceledright") == 0)
+        else if (simplelednames[i].find("reye") != string::npos || simplelednames[i].find("faceledright") != string::npos)
             REye = i;
-        else if (simplelednames[i].compare("chest") == 0 || simplelednames[i].compare("chestboardled") == 0)
+        else if (simplelednames[i].find("chest") != string::npos || simplelednames[i].find("chestboardled") != string::npos)
             Chest = i;
-        else if (simplelednames[i].compare("lfoot") == 0 || simplelednames[i].compare("lfootled") == 0)
+        else if (simplelednames[i].find("lfoot") != string::npos || simplelednames[i].find("lfootled") != string::npos)
             LFoot = i;
-        else if (simplelednames[i].compare("rfoot") == 0 || simplelednames[i].compare("rfootled") == 0)
+        else if (simplelednames[i].find("rfoot") != string::npos || simplelednames[i].find("rfootled") != string::npos)
             RFoot = i;
     }
 }
@@ -332,7 +334,7 @@ void NUActionatorsData::setAvailableCameraSettings(const vector<string>& cameras
     vector<string> simplecamerasettingnames;
     simplifyNames(camerasettingnames, simplecamerasettingnames);
     
-    for (int i=0; i<simplecamerasettingnames.size(); i++) 
+    for (unsigned int i=0; i<simplecamerasettingnames.size(); i++) 
     {
         addCameraSettingActionator(camerasettingnames[i]);
         if (simplecamerasettingnames[i].compare("resolution") == 0)
@@ -373,10 +375,12 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     vector<string> simpleactionatornames;
     simplifyNames(actionatornames, simpleactionatornames);
     
-    for (int i=0; i<simpleactionatornames.size(); i++) 
+    for (unsigned int i=0; i<simpleactionatornames.size(); i++) 
     {
         if (simpleactionatornames[i].compare("sound") == 0)
             addActionator(Sound, actionatornames[i], actionator_t::SOUND);
+        if (simpleactionatornames[i].compare("teleporter") == 0 || simpleactionatornames[i].compare("teleportation") == 0 || simpleactionatornames[i].compare("magichand") == 0 || simpleactionatornames[i].compare("handofgod") == 0)
+            addActionator(Teleporter, actionatornames[i], actionator_t::TELEPORTER);
         else
             debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
     }
@@ -445,7 +449,7 @@ string NUActionatorsData::simplifyName(const string& input)
 {
     string namebuffer, currentletter;
     // compare each letter to a space and an underscore and a forward slash
-    for (int j=0; j<input.size(); j++)
+    for (unsigned int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
@@ -462,7 +466,7 @@ string NUActionatorsData::simplifyName(const string& input)
 void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
 {
     vector<string> simplifiednames;
-    for (int i=0; i<input.size(); i++)
+    for (unsigned int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
     output = simplifiednames;
 }
@@ -476,8 +480,83 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
  */
 void NUActionatorsData::removeCompletedPoints(double currenttime)
 {
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
+}
+
+/*! @brief Returns the number of joints in the specified body part
+    @param partid the id of the body part
+    @return the number of joints
+ */
+int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
+{
+    if (partid == AllJoints)
+        return m_num_joints;
+    else if (partid == BodyJoints)
+        return m_num_body_joints;
+    else if (partid == HeadJoints)
+        return m_num_head_joints;
+    else if (partid == LeftArmJoints)
+        return m_num_arm_joints;
+    else if (partid == RightArmJoints)
+        return m_num_arm_joints;
+    else if (partid == TorsoJoints)
+        return m_num_torso_joints;
+    else if (partid == LeftLegJoints)
+        return m_num_leg_joints;
+    else if (partid == RightLegJoints)
+        return m_num_leg_joints;
+    else
+    {
+        debug << "NUActionatorsData::getNumberOfJoints. UNDEFINED Body part.";
+        return 0;
+    }
+}
+
+/*! @brief Gets the next joint position for the specified joint
+    @param id the id of the joint you want the next command
+    @param time will be updated with the next command's time
+    @param position will be updated with the next command's position
+    @param velocity will be updated with the next command's gain
+ */
+bool NUActionatorsData::getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
+{
+    if (id == NUActionatorsData::ACTIONATOR_MISSING || PositionActionators[id]->isEmpty() || PositionActionators[id]->m_points[0]->Data.size() != 3)
+        return false;
+    else 
+    {
+        time = PositionActionators[id]->m_points[0]->Time;
+        position = PositionActionators[id]->m_points[0]->Data[0];
+        velocity = PositionActionators[id]->m_points[0]->Data[1];
+        gain = PositionActionators[id]->m_points[0]->Data[2]; 
+        return true;
+    }
+}
+
+/*! @brief Gets the *last* joint position for the specified joint
+    @param id the id of the joint you want the *last* command
+    @param time will be updated with the *last* command's time
+    @param position will be updated with the *last* command's position
+    @param velocity will be updated with the *last* command's gain
+ */
+bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
+{
+    if (id == NUActionatorsData::ACTIONATOR_MISSING)
+        return false;
+    else
+    {
+        int lastindex = PositionActionators[id]->m_points.size() - 1;
+        if (lastindex >= 0 && PositionActionators[id]->m_points[lastindex]->Data.size() == 3)
+        {
+            time = PositionActionators[id]->m_points[lastindex]->Time;
+            position = PositionActionators[id]->m_points[lastindex]->Data[0];
+            velocity = PositionActionators[id]->m_points[lastindex]->Data[1];
+            gain = PositionActionators[id]->m_points[lastindex]->Data[2]; 
+            return true;
+        }
+        else
+            return false;
+    }
 }
 
 /*! @brief Gets the next position control point
@@ -659,10 +738,47 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
         return false;
 }
 
+/*! @brief Gets the next sound
+ 
+    @param isvalid true if the data is valid, false otherwise
+    @param time the time in milliseconds the sound should be completed
+    @param soundid the id of the sound to be played
+    @param text ideally this would be some text to be used in a text to speech engine. However, I don't have the capacity to store strings in the actionator_t, so this will not work
+    
+    @return false if there is no next sound, true if there is a next sound
+ */
 bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, string& text)
 {
-    //!< @todo TODO: implement this function
-    return false;
+    if (Sound == NULL || Sound->isEmpty() || Sound->m_points[0]->Data.size() != 1)
+        return false;
+    else 
+    {
+        isvalid = true;
+        time = Sound->m_points[0]->Time;
+        soundid = (int) Sound->m_points[0]->Data[0];
+        return true;
+    }
+
+}
+
+/*! @brief Gets the next teleporation command
+ 
+    @param isvalid true if the data is valid, false otherwise
+    @param time the time in milliseconds the teleportation will take place :D
+    @param data the target teleportation position [x (cm), y(cm), bearing (rad)] :D
+    
+ */
+bool NUActionatorsData::getNextTeleportation(bool& isvalid, double& time, vector<float>& data)
+{
+    if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0]->Data.size() != 3)
+        return false;
+    else 
+    {
+        isvalid = true;
+        time = Teleporter->m_points[0]->Time;
+        data = Teleporter->m_points[0]->Data;
+        return true;
+    }
 }
 
 
@@ -756,6 +872,50 @@ bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, floa
     }
 }
 
+/*! @brief Adds a single sound
+ 
+    @param soundid the id of the sound you want to play
+    @param time the time in milliseconds to play the sound
+ 
+    @return true if the sound is successfully added, false otherwise
+ */
+bool NUActionatorsData::addSound(sound_id_t soundid, double time)
+{
+    static vector<float> data (1, 0);
+    if (Sound == NULL)
+        return false;
+    else 
+    {
+        data[0] = soundid;
+        Sound->addPoint(time, data);
+        return true;
+    }
+}
+
+/*! @brief Adds a single teleportation command
+ 
+    @param time the time in milliseconds to teleport
+    @param x the x position (cm)
+    @param y the y position (cm)
+    @param bearing the bearing (rad)
+ 
+    @return true if the command is successfully added, false otherwise
+ */
+bool NUActionatorsData::addTeleportation(double time, float x, float y, float bearing)
+{
+    static vector<float> data (3, 0);
+    if (Teleporter == NULL)
+        return false;
+    else
+    {
+        data[0] = x;
+        data[1] = y;
+        data[2] = bearing;
+        Teleporter->addPoint(time, data);
+        return true;
+    }
+}
+
 /*! @brief Adds joint position control points for a body part (the body part could be 'All' to set all joints at once)
     @param partid the id of the body part you want to control
     @param time the time at which you want the part will reach its target (in milliseconds)
@@ -769,24 +929,27 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     if (partid == ACTIONATOR_MISSING || PositionActionators.size() == 0)
         return false;
     
-    if (partid == All)
+    if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         selectedjoints = m_body_ids;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         selectedjoints = m_head_ids;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         selectedjoints = m_larm_ids;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointPositions. UNDEFINED Body part.";
+        return false;
+    }
         
     if (selectedjoints.size() != positions.size())
     {
@@ -796,15 +959,15 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     else 
     {
         static vector<float> data (3, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = positions[i];
             data[1] = velocities[i];
             data[2] = gains[i];
             PositionActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
@@ -819,24 +982,27 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     if (partid == ACTIONATOR_MISSING || TorqueActionators.size() == 0)
         return false;
     
-    if (partid == All)
+    if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         selectedjoints = m_body_ids;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         selectedjoints = m_head_ids;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         selectedjoints = m_larm_ids;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         selectedjoints = m_rleg_ids;
     else
+    {
         debug << "NUActionatorsData::addJointTorques. UNDEFINED Body part.";
+        return false;
+    }
     
     if (selectedjoints.size() != torques.size())
     {
@@ -846,14 +1012,14 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     else 
     {
         static vector<float> data (2, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = torques[i];
             data[1] = gains[i];
             TorqueActionators[selectedjoints[i]]->addPoint(time, data);
         }
+        return true;
     }
-    return true;
 }
 
 /******************************************************************************************************************************************
@@ -864,7 +1030,7 @@ void NUActionatorsData::summaryTo(ostream& output)
 {
     if (m_all_actionators.size() == 0)
         output << "NONE!" << endl;
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->summaryTo(output);
 }
 
@@ -876,11 +1042,13 @@ void NUActionatorsData::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return output;
 }
 
 istream& operator>> (istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return input;
 }
 
 

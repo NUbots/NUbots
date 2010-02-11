@@ -95,15 +95,16 @@ NAODarwinExternal:
 #log into vm.local and make the project dir
 	@ssh $(LOGNAME)@$(VM) mkdir -p naoqi/projects/robocup;
 #copy everything in this directory except the existing .*, Build, Documentation directories
-	@scp -prC $(filter-out Build Documentation targetconfig.h, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
+	@scp -prC $(filter-out Build Documentation Autoconfig, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
 #run make inside the vm
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
 #copy the binary back
-	@scp -pC $(LOGNAME)@$(VM):naoqi/projects/robocup/Build/NAO/libnubot.so ./Build/NAO/libnubot.so
+	@mkdir -p ./$(NAO_BUILD_DIR)
+	@scp -prC $(LOGNAME)@$(VM):naoqi/projects/robocup/$(NAO_BUILD_DIR)/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
 #forward the binary to the robot, if a robot was specified
 ifneq ($(robot),)
 	@ssh root@$(ROBOT) /etc/init.d/naoqi stop
-	@scp -C ./Build/NAO/libnubot.so root@$(ROBOT):/opt/naoqi/modules/lib/
+	@scp -C ./$(NAO_BUILD_DIR)/libnubot.so root@$(ROBOT):/opt/naoqi/modules/lib/
 	@ssh -f root@$(ROBOT) /etc/init.d/naoqi start
 endif
 	
@@ -123,7 +124,6 @@ endif
 ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
 	@set -e; \
 		cd $(NAO_BUILD_DIR); \
-		sh $(ALD_CC_SCRIPT) $(ALD_CTC) $(MAKE_DIR); \
 		ccmake .; \
 		make $(MAKE_OPTIONS);
 endif

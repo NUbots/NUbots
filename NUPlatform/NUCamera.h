@@ -22,10 +22,10 @@
 #ifndef NUCAMERA_H
 #define NUCAMERA_H
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators.h"
 #include "Tools/Image/NUimage.h"
 
-class NUCamera: public NUActionators
+class NUCamera
 {
 public:
 	enum setting
@@ -50,6 +50,9 @@ public:
     virtual void setControlSetting(unsigned int settingID, int value);
     virtual int getControlSetting(unsigned int id);
 	CameraData cameraInfo;
+    
+private:
+    virtual void copyToHardwareCommunications();
 };
 
 #endif

@@ -35,6 +35,10 @@ class NAOWebotsCamera : public NUCamera
 public:
     NAOWebotsCamera(NAOWebotsPlatform* platform);
     ~NAOWebotsCamera();
+    
+    NUimage grabNewImage();
+    void setControlSetting(unsigned int settingID, int value);
+    int getControlSetting(unsigned int id);
 private:
     void copyToHardwareCommunications();
 };

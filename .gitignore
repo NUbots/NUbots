@@ -22,8 +22,7 @@
 *.*~
 *.o
 
-targetconfig.h
-/Tools/debug.h
+Autoconfig/*
 *.old*
 
 # External files from archives

@@ -38,6 +38,7 @@ public:
 protected:
     virtual void copyToHardwareCommunications();
 protected:
+    double m_current_time;
     NUActionatorsData* m_data;
 };
 

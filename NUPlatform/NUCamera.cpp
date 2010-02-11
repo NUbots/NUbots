@@ -1,5 +1,5 @@
-/*! @file Actuators.cpp
-    @brief Partial implementation of base actuator class
+/*! @file NUCamera.cpp
+    @brief Partial implementation of base camera class
 
     @author Jason Kulk
  
@@ -30,10 +30,16 @@ NUCamera::~NUCamera()
 {
 }
 
-void NUCamera::process(NUActionatorsData* data)
+NUimage NUCamera::grabNewImage()
 {
-    m_data = data;
-    copyToHardwareCommunications();
+}
+
+void NUCamera::setControlSetting(unsigned int settingID, int value)
+{
+}
+
+int NUCamera::getControlSetting(unsigned int id)
+{
 }
 
 void NUCamera::copyToHardwareCommunications()
