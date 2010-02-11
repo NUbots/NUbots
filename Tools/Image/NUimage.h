@@ -51,7 +51,7 @@ public:
     pixels::Pixel **image;
     pixels::Pixel *localBuffer;
     pixels::ColourSpace imageFormat;	//!< The colour format of the image
-    CameraInfo cameraInfo;		//!< Properties and settings of the camera used to capture the image.
+    //CameraData cameraInfo;		//!< Properties and settings of the camera used to capture the image.
     long int timestamp;			//!< Time point at which the image was captured. (Unix Time)
 private:
     int imageWidth;
