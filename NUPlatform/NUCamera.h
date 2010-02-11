@@ -49,6 +49,7 @@ public:
     virtual NUimage grabNewImage();
     virtual void setControlSetting(unsigned int settingID, int value);
     virtual int getControlSetting(unsigned int id);
+	CameraData cameraInfo;
 };
 
 #endif
