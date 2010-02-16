@@ -27,7 +27,7 @@
 #define NUBOT_H
 
 #include "targetconfig.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
@@ -46,6 +46,9 @@
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
+    #ifdef USE_WALKOPTIMISER
+        #include "Motion/Walks/Optimisation/WalkOptimiserBehaviour.h"
+    #endif
 #endif
 
 #include <pthread.h>
@@ -73,6 +76,7 @@ public:
     int waitForVisionCompletion();
 private:
     void createThreads();
+    void createErrorHandling();
     
 public:
     NUPlatform* platform;               //!< interface to robot platform
@@ -87,6 +91,9 @@ public:
     #endif
     #ifdef USE_MOTION
         NUMotion* motion;               //!< motion module
+        #ifdef USE_WALKOPTIMISER
+            WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
+        #endif
     #endif
 private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)

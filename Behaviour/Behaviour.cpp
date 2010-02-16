@@ -34,7 +34,7 @@ Behaviour::~Behaviour()
     
 }
 
-void Behaviour::process(JobList jobs)
+void Behaviour::process(JobList& jobs)
 {
 
 }

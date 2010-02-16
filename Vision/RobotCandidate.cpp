@@ -1,31 +1,31 @@
 #include "RobotCandidate.h"
 
-RobotCandidate::RobotCandidate()
+RobotCandidate::RobotCandidate():ObjectCandidate()
 {
-    topLeft.x = 0;
-    topLeft.y = 0;
-    bottomRight.x = 0;
-    bottomRight.y = 0;
+
 }
 
-RobotCandidate::RobotCandidate(int left, int top, int right, int bottom)
+RobotCandidate::RobotCandidate(int left, int top, int right, int bottom): ObjectCandidate(left, top, right, bottom)
 {
-    topLeft.x = left;
-    topLeft.y = top;
-    bottomRight.x = right;
-    bottomRight.y = bottom;
     //red = 4
     //blue = 9
     //unknown = 3
-    teamColour = 3;
+    colour = 3;
 }
 
-RobotCandidate::RobotCandidate(int left, int top, int right, int bottom, unsigned char teamColour):teamColour(teamColour)
+RobotCandidate::RobotCandidate(int left, int top, int right, int bottom, std::vector<Vector2<int> > points): ObjectCandidate(left, top, right, bottom), skeleton(points)
 {
-    topLeft.x = left;
-    topLeft.y = top;
-    bottomRight.x = right;
-    bottomRight.y = bottom;
+    colour = 3;
+}
+
+RobotCandidate::RobotCandidate(int left, int top, int right, int bottom, unsigned char teamColour): ObjectCandidate(left, top, right, bottom, teamColour)
+{
+
+}
+
+RobotCandidate::RobotCandidate(int left, int top, int right, int bottom, unsigned char teamColour, std::vector<Vector2<int> > points): ObjectCandidate(left, top, right, bottom, teamColour), skeleton(points)
+{
+
 }
 
 RobotCandidate::~RobotCandidate()
@@ -33,31 +33,14 @@ RobotCandidate::~RobotCandidate()
     return;
 }
 
-Vector2<int> RobotCandidate::getTopLeft() const
+std::vector<Vector2<int> > RobotCandidate::getSkeleton() const
 {
-    return topLeft;
-}
-Vector2<int> RobotCandidate::getBottomRight() const
-{
-    return bottomRight;
-}
-
-int RobotCandidate::width()
-{
-    return (bottomRight.x - topLeft.x);
-}
-int RobotCandidate::height()
-{
-    return (bottomRight.y - topLeft.y);
-}
-float RobotCandidate::aspect()
-{
-    return (float)(bottomRight.x - topLeft.x) / (float)(bottomRight.y - topLeft.y);
+       return skeleton;
 }
 
 unsigned char RobotCandidate::getTeamColour() const
 {
-    return teamColour;
+    return colour;
 }
 
 

@@ -83,14 +83,14 @@ FIND_PACKAGE( RT )
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
-  	"${CMAKE_CURRENT_SOURCE_DIR}/../targetconfig.h"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/targetconfig.h"
     ESCAPE_QUOTES
 )
 
 ############################ DEBUG.H GENERATION
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/debug.in"
-  	"${CMAKE_CURRENT_SOURCE_DIR}/../Tools/debug.h"
+  	"${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debug.h"
     ESCAPE_QUOTES
 )
 

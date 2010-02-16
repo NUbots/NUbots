@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsCamera.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {

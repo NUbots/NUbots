@@ -20,7 +20,7 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  debug.cpp debug.h
+SET (YOUR_SRCS  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

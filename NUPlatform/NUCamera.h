@@ -23,10 +23,9 @@
 #define NUCAMERA_H
 
 #include "NUPlatform/NUActionators.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Tools/Image/NUimage.h"
 
-class NUCamera : public NUActionators
+class NUCamera
 {
 public:
 	enum setting

@@ -1,11 +1,11 @@
-/*! @file JuppWalk.h
-    @brief Declaration of Jupp's walk class
+/*! @file VSCWalk.h
+    @brief Declaration of Virtual Slope Control walk class
  
-    @class JuppWalk
+    @class VSCWalk
     @brief A module to provide locomotion
  
-    This module is based on Sven Behnke's omni-directional walk engine detailed in the paper:
-    Online Trajectory Generation for Omnidirectional Biped Walking, ICRA 2006.
+    This module is based on the omnidirectional walk described in the following paper:
+    Mingguo Zhao, "Humanoid Robot Gait Generation Based on Limit Cycle Stability", 2009.
  
     @author Jason Kulk
  
@@ -25,8 +25,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JUPPWALK_H
-#define JUPPWALK_H
+#ifndef VSCWALK_H
+#define VSCWALK_H
 
 #include "Motion/NUWalk.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -35,65 +35,51 @@
 #include <fstream>
 using namespace std;
 
-class JuppWalk : public NUWalk
+class VSCWalk : public NUWalk
 {
 public:
-    JuppWalk();
-    ~JuppWalk();
+    VSCWalk();
+    ~VSCWalk();
 protected:
     void doWalk();
 private:
-    
-    void calculateGaitPhase();
-    void calculateGyroFeedback();
-    
-    void calculateLeftLeg();
-    void calculateRightLeg();
-    void calculateLegAngles(float legphase, float legsign, vector<float>& angles);
-    void calculateLegGains(float legphase, vector<float>& gains);
-    
     void calculateLeftArm();
     void calculateRightArm();
-    void calculateArmAngles(float armphase, float armsign, vector<float>& angles);
-    void calculateArmGains(float armphase, vector<float>& gains);
+    void calculateArmAngles(float legphase, float armsign, vector<float>& angles);
+    void calculateArmGains(float legphase, vector<float>& gains);
     
     void updateActionatorsData();
+
 public:
 protected:
 private:
-    float m_step_frequency;
-    float m_leg_length;
+    float m_theta;              //!< toe-off angle (rad)
+    float m_alpha;              //!< heel strik thigh angle (rad)
+    float m_beta;               //!< swing leg thigh angle (rad)
+    float m_period;             //!< the step period in seconds
     
-    float m_current_time;
-    float m_previous_time;
+    float m_psi;
+    float m_gamma;
+    float m_phi;
     
-    float m_gait_phase;
-    float m_left_leg_phase;
-    float m_right_leg_phase;
+    float m_lambda;
     
-    float m_swing_amplitude_roll;
-    float m_swing_amplitude_pitch;
-    float m_swing_amplitude_yaw;
+    float m_t;                  //!< the step time in milliseconds
+    float m_previous_t;         //!< the previous step time in milliseconds
+    int m_step_leg;             //!< the side (left or right) of the current step. 0 if its a left, and 1 if its a right step
     
-    // Gyro feedback
-    float m_gyro_foot_pitch;
-    float m_gyro_foot_roll;
-    float m_gyro_leg_pitch;
-    
-    // Leg angles
     vector<float> m_left_leg_angles;
-    vector<float> m_left_leg_gains;
     vector<float> m_right_leg_angles;
+    vector<float> m_left_leg_gains;
     vector<float> m_right_leg_gains;
     
-    // Arm angles
     vector<float> m_left_arm_angles;
-    vector<float> m_left_arm_gains;
     vector<float> m_right_arm_angles;
+    vector<float> m_left_arm_gains;
     vector<float> m_right_arm_gains;
     
-    // Pattern generation debugging
     ofstream m_pattern_debug;
+
 };
 
 #endif

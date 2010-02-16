@@ -35,6 +35,7 @@ public:
 protected:
 private:
     void setNameFromNumber();
+    void setTeam(const string& name);
     
 // Members:
 public:

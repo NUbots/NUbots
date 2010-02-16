@@ -5,6 +5,7 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
+#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -190,7 +191,7 @@ void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegm
     emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
-void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId)
+void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
 {
 
     // If there is an old list stored, delete it first.
@@ -203,21 +204,22 @@ void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > 
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
     glLineWidth(2.0);       // Line width
-    std::vector<RobotCandidate>::const_iterator i;
+    std::vector<ObjectCandidate>::const_iterator i = candidates.begin();
     unsigned char r,g,b;
-    for(i = robotCandidates.begin(); i != robotCandidates.end(); i++)
+    for(; i != candidates.end(); i++)
     {
+        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
         Vector2<int> topLeft = i->getTopLeft();
         Vector2<int> bottomRight = i->getBottomRight();
-        ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
         glColor3ub(r,g,b);
 
-        glBegin(GL_LINE_LOOP);                              // Start Lines
+        glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( topLeft.x, topLeft.y);
             glVertex2i( topLeft.x, bottomRight.y);
             glVertex2i( bottomRight.x, bottomRight.y);
             glVertex2i( bottomRight.x, topLeft.y);
         glEnd();                                        // End Lines
+
     }
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
@@ -227,8 +229,36 @@ void OpenglManager::writeRobotCandidatesToDisplay(std::vector< RobotCandidate > 
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }
+void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
 
-void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+    glLineWidth(1.0);       // Line width
+    glBegin(GL_LINES);                              // Start Lines
+    for(int i = 0;i<numLines;i++)
+    {
+        glVertex2i(newWMLine[i].getStart().getx(),newWMLine[i].getStart().gety());                 // Starting point
+        glVertex2i(newWMLine[i].getEnd().getx(),newWMLine[i].getEnd().gety());    // End point
+    }
+    glEnd();                                        // End Lines
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+
+    displayStored[displayId] = true;
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDisplay::display displayId)
 {
 
     // If there is an old list stored, delete it first.
@@ -240,6 +270,58 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
     displays[displayId] = glGenLists(1);
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
+
+
+
+
+
+    drawHollowCircle(x, y, radius, 50);
+
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
+void OpenglManager::clearDisplay(GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+    displays[displayId] = glGenLists(1);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
+void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
+{
+    int stepSize = 360 / num_segments;
+    glBegin(GL_LINE_LOOP);
+    for(int angle = 0; angle < 360; angle += stepSize)
+    {
+        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
+    }
+    glEnd();
+}
+
+void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
+{
+    int stepSize = 360 / num_segments;
+    glBegin(GL_TRIANGLE_FAN);
+    for(int angle = 0; angle < 360; angle += stepSize)
+    {
+        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
+    }
+    glEnd();
+}
+
+void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
+{
     glLineWidth(2.0);       // Line width
     //std::vector<RobotCandidate>::const_iterator i;
     unsigned char r,g,b;
@@ -273,26 +355,4 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
 
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
-}
-
-void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
-{
-    int stepSize = 360 / num_segments;
-    glBegin(GL_LINE_LOOP);
-    for(int angle = 0; angle < 360; angle += stepSize)
-    {
-        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
-    }
-    glEnd();
-}
-
-void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
-{
-    int stepSize = 360 / num_segments;
-    glBegin(GL_TRIANGLE_FAN);
-    for(int angle = 0; angle < 360; angle += stepSize)
-    {
-        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
-    }
-    glEnd();
 }

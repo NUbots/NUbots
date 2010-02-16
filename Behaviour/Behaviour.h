@@ -30,7 +30,7 @@ public:
     Behaviour();
     ~Behaviour();
     
-    void process(JobList jobs);
+    void process(JobList& jobs);
 };
 
 

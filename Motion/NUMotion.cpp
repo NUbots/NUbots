@@ -59,7 +59,7 @@
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 /*! @brief Constructor for motion module
  */
@@ -85,7 +85,10 @@ NUMotion::~NUMotion()
 {
 }
 
-/*! @brief Process new sensor data, and produce actionator commands
+/*! @brief Process new sensor data, and produce actionator commands.
+ 
+    This function basically calls all of the process functions of the submodules of motion. I have it setup
+    so that the process functions are only called when they are allowed to be executed.
  
     @param data a pointer to the most recent sensor data storage class
     @param actions a pointer to the actionators data storage class. This variable will be filled
@@ -96,12 +99,41 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (actions == NULL)
         return;
-#ifdef USE_WALK
-    m_walk->process(data, actions);
-#endif
+    
+    static vector<float> fallingvalues;
+    static vector<float> fallenvalues;
+    data->getFalling(fallingvalues);
+    data->getFallen(fallenvalues);              //! @todo Put in a compile flag here or something because I need to walk while fallen atm
+    if (false && fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
+        m_fall_protection->process(data, actions);
+    else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
+    {
+        m_getup->process(data, actions);
+        if (m_getup->headReady())                       // And you can only use the head if the getup lets you
+        {
+            #ifdef USE_HEAD
+                m_head->process(data, actions);
+            #endif
+        }
+    }
+    else                                                // If not falling and not fallen I can do kicks, walks, saves and blocks
+    {
+        #ifdef USE_HEAD
+            m_head->process(data, actions);
+        #endif
+        #ifdef USE_WALK
+            m_walk->process(data, actions);
+        #endif
+        #ifdef USE_KICK
+            m_kick->process(data, actions);
+        #endif
+    }
 }
 
-/*! @brief Process the jobs
+/*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
+ 
+    @attention There is a very rare segmentation fault in this function. This will need to be looked at eventually.
+               I think I might need to change things around so I don't remove jobs mid loop!
     
     @param jobs the current list of jobs
  */
@@ -121,7 +153,7 @@ void NUMotion::process(JobList& jobs)
             static WalkJob* job;
             
             job = (WalkJob*) (*it);
-            job->getSpeed(speed);         // why does it not know what type of job it is here?
+            job->getSpeed(speed);
             #if DEBUG_NUMOTION_VERBOSITY > 4
                 debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
             #endif
@@ -147,7 +179,7 @@ void NUMotion::process(JobList& jobs)
 #endif  // USE_WALK
         
 #ifdef USE_KICK
-        if ((*it)->getID() == Job::MOTION_KICK)
+        else if ((*it)->getID() == Job::MOTION_KICK)
         {   // process a kick job
             static double time;
             static vector<float> kickposition;
@@ -155,9 +187,9 @@ void NUMotion::process(JobList& jobs)
             static KickJob* job;
             
             job = (KickJob*) (*it);
-            job->getKick(time, kickposition, kicktarget);         // why does it not know what type of job it is here?
+            job->getKick(time, kickposition, kicktarget);
 #if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
+            debug << "NUMotion::process(): Processing a kick job." << endl;
 #endif
             
             m_kick->kick(time, kickposition, kicktarget);

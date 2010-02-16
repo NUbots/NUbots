@@ -23,12 +23,12 @@ SET(NUBOT_DIRS  NUPlatform
 
 # list the top-level files here
 LIST(APPEND NUBOT_SRCS  ../NUbot.cpp ../NUbot.h
-                        ../targetconfig.h
 )
 
 # I will add the cmake/sources.cmake to the specified directories in NUBOT_DIRS
-# NOT: I also put each directory on the search path INCLUDE_DIRECTORIES(../${loop_var})
+# NOTE: I can also put each directory on the search path INCLUDE_DIRECTORIES(../${loop_var})
 INCLUDE_DIRECTORIES(../)
+INCLUDE_DIRECTORIES(../Autoconfig)
 FOREACH (loop_var ${NUBOT_DIRS})
     INCLUDE(../${loop_var}/cmake/sources.cmake)
 ENDFOREACH (loop_var ${NUBOT_DIRS})
