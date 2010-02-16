@@ -8,9 +8,9 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-win32:INCLUDEPATH += 'C:/Program \
-    Files/boost/'
+win32:INCLUDEPATH += 'C:/Program Files/boost/'
 INCLUDEPATH += ../
+INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -34,7 +34,14 @@ HEADERS += ui_mainwindow.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
     ../Vision/RobotCandidate.h \
-    ../Vision/ObjectCandidate.h
+    ../Vision/ObjectCandidate.h \
+    ../Localisation/WMPoint.h \
+    ../Localisation/WMLine.h \
+    ../Localisation/sphere.h \
+    ../Localisation/cylinder.h \
+    ../Localisation/cameramatrix.h \
+    ../Tools/Math/matrix.h \
+    localisationwidget.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -55,4 +62,11 @@ SOURCES += mainwindow.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
     ../Vision/RobotCandidate.cpp \
-    ../Vision/ObjectCandidate.cpp
+    ../Vision/ObjectCandidate.cpp \
+    ../Localisation/WMPoint.cpp \
+    ../Localisation/WMLine.cpp \
+    ../Localisation/sphere.cpp \
+    ../Localisation/cylinder.cpp \
+    ../Localisation/cameramatrix.cpp \
+    ../Tools/Math/matrix.cpp \
+    localisationwidget.cpp

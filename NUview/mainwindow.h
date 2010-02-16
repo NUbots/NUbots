@@ -8,6 +8,7 @@
 #include "virtualNubot.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
+#include "localisationwidget.h"
 
 class QMdiArea;
 class LayerSelectionWidget;
@@ -97,6 +98,7 @@ private:
     GLDisplay* classDisplay;                    //!< Classified Image display
     GLDisplay* horizonDisplay;                  //!< Horizon Line display
     GLDisplay* miscDisplay;                     //!< Misc display
+    LocalisationWidget* localisation;           //!< Instance of the localisation widget.
 
     LayerSelectionWidget* layerSelection;
     QDockWidget* layerSelectionDock;

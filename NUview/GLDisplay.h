@@ -72,6 +72,9 @@ public:
         verticalScanPath,
         TransitionSegments,
         ObjectCandidates,
+        wmRightLeg,
+        wmLeftLeg,
+        wmBall,
         numDisplays
     };
 
@@ -109,6 +112,12 @@ public:
                 return QString("Transition Segment");
             case ObjectCandidates:
                 return QString("Field Object Candidates");
+            case wmLeftLeg:
+                return QString("World Model: Left Leg");
+            case wmRightLeg:
+                return QString("World Model: Right Leg");
+            case wmBall:
+                return QString("World Model: Ball");
             default:
                 return QString("Unknown");
         }
@@ -255,6 +264,12 @@ private:
                 return QColor(255,255,255);
             case ObjectCandidates:
                 return QColor(255,128,64);
+            case wmLeftLeg:
+                return QColor(0,0,200);
+            case wmRightLeg:
+                return QColor(200,0,0);
+            case wmBall:
+                return QColor(255,102,0);
             default:
                 return QColor(255,255,255);
         }

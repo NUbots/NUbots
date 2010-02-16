@@ -7,6 +7,7 @@
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
 #include "Vision/RobotCandidate.h"
+#include "localisationwidget.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -70,6 +71,29 @@ public:
           @param displayId The id of the display layer to write to.
           */
         void writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts array of new world model lines and maps them to display instructions.
+          @param newWMLine The array of new world model lines.
+          @param numLines The size of the array of world model lines
+          @param displayId The id of the display layer to write to.
+          */
+        void writeWMLineToDisplay(WMLine* newWMLine, int numLines, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts centre and radius of new world model ball and maps it to display instructions.
+          @param x The x ordinate of the centre of the ball.
+          @param y The y ordinate of the centre of the ball.
+          @param radius The radius of the ball.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeWMBallToDisplay(float x, float y, float radius,GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts a display and clears it's previously stored lists.
+          @param displayId The display to be cleared.
+          */
+        void clearDisplay(GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.
