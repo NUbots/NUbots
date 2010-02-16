@@ -9,7 +9,6 @@ LocalisationWidget::LocalisationWidget(QWidget *parent): QDockWidget(parent)
     for(int j=0;j<22;j++)
         joints[j] = 0;
 
-    scale = 2;
     setObjectName(tr("Localisation"));
     setWindowTitle(tr("Localisation"));
     createWidgets();
@@ -436,20 +435,20 @@ void LocalisationWidget::calculateLines()
 
 }
 
-void LocalisationWidget::displayLines(WMLine in)
+void LocalisationWidget::displayLines(WMLine newLine)
 {
-        if (Clip3D(in,30,1500))
+        if (Clip3D(newLine,30,1500))
         {
             //Normalise
-            in.normalise();
+            newLine.normalise();
 
             //Normal to screen coords
-            if (Clip2D(in))
+            if (Clip2D(newLine))
             {
-                in.screenCoords();
+                newLine.screenCoords();
               
-                WMPoint tp1(roundDouble(in.getStart().getx() / 2),roundDouble(in.getStart().gety() / 2));
-                WMPoint tp2(roundDouble(in.getEnd().getx() / 2),roundDouble(in.getEnd().gety() / 2));
+                WMPoint tp1(roundDouble(newLine.getStart().getx() / 2),roundDouble(newLine.getStart().gety() / 2));
+                WMPoint tp2(roundDouble(newLine.getEnd().getx() / 2),roundDouble(newLine.getEnd().gety() / 2));
 
                 visibleLines[countVisibleLines] = WMLine(tp1,tp2);
                 countVisibleLines++;
@@ -457,11 +456,11 @@ void LocalisationWidget::displayLines(WMLine in)
          }
 }
 
-void LocalisationWidget::displayGoals(Cylinder in)
+void LocalisationWidget::displayGoals(Cylinder newCylinder)
 {
-    in.createSides();
-    WMLine left = in.getLeft();
-    WMLine right = in.getRight();
+    newCylinder.createSides();
+    WMLine left = newCylinder.getLeft();
+    WMLine right = newCylinder.getRight();
 
     if (Clip3D(left,30,1500))
     {
@@ -494,16 +493,16 @@ void LocalisationWidget::displayGoals(Cylinder in)
     }
 
 }
-void LocalisationWidget::displayBall(Sphere in)
+void LocalisationWidget::displayBall(Sphere newSphere)
 {
-    in.createSides();
+    newSphere.createSides();
 
-    WMLine top = in.getTop();
-    WMLine bottom = in.getBottom();
-    WMLine mid = in.getMid();
+    WMLine top = newSphere.getTop();
+    WMLine bottom = newSphere.getBottom();
+    WMLine mid = newSphere.getMid();
 
 
-    if (Clip3D(in,30,1500))
+    if (Clip3D(newSphere,30,1500))
     {
         top.normalise();
         bottom.normalise();
@@ -519,13 +518,13 @@ void LocalisationWidget::displayBall(Sphere in)
         emit updateLocalisationBall(cx,cy,r, GLDisplay::wmBall);
     }
 }
-int LocalisationWidget::roundDouble(double in)
+int LocalisationWidget::roundDouble(double newInt)
 {
     // If number is positive, add 0.5 then truncate with 'int()' to produce rounded
     // whole number.  If negative number, subtract 0.5 for the same result.
-    return int(in > 0.0 ? in + 0.5 : in - 0.5);
+    return int(newInt > 0.0 ? newInt + 0.5 : newInt - 0.5);
 }
-void LocalisationWidget::angleToPoint(WMPoint p)
+void LocalisationWidget::angleToPoint(WMPoint point)
 {
     Matrix robotAxisTransform = Matrix(4,4);
     robotAxisTransform[0][2] = 1;
@@ -533,26 +532,20 @@ void LocalisationWidget::angleToPoint(WMPoint p)
     robotAxisTransform[2][1] = 1;
     robotAxisTransform[3][3] = 1;
     Matrix robotAxisCam = robotAxisTransform * camera.getLeft();
-    p = WMPoint(robotAxisCam * p.get());
-    //qDebug() << "Point: (" << p.getx() << "," << p.gety() << "," << p.getz() << ")";
-    double pNormXYZ = sqrt(pow(p.getx(),2) + pow(p.gety(),2) + pow(p.getz(),2));
-    double pNormYaw = sqrt(pow(p.getx(),2) + pow(p.gety(),2));
-    double pNormPitch = sqrt(pow(p.getx(),2) + pow(p.getz(),2));
-    //double pNormRot = sqrt(pow(p.gety(),2) + pow(p.getz(),2));
-    // Vector b is anything along the x axis, i.e. the unit vector <1,0,0> (norm of 1)
-    double angleXYZ = 57.2957795 * acos(p.getx() / pNormXYZ);
-    double angleYaw = 57.2957795 * acos(p.getx() / pNormYaw);
-    double anglePitch = 57.2957795 * acos(p.getx() / pNormPitch);
-    //double angleRot = 57.2957795 * acos(p.getx() / pNormRot);
-    //qDebug() << "3D angle: " << angleXYZ;
-    //qDebug() << "Yaw angle: " << angleYaw << ". Pitch angle: " << anglePitch << /*". Rot angle: " << angleRot << */".";
+    point = WMPoint(robotAxisCam * point.get());
+    double pNormXYZ = sqrt(pow(point.getx(),2) + pow(point.gety(),2) + pow(point.getz(),2));
+    double pNormYaw = sqrt(pow(point.getx(),2) + pow(point.gety(),2));
+    double pNormPitch = sqrt(pow(point.getx(),2) + pow(point.getz(),2));
+    double angleXYZ = 57.2957795 * acos(point.getx() / pNormXYZ);
+    double angleYaw = 57.2957795 * acos(point.getx() / pNormYaw);
+    double anglePitch = 57.2957795 * acos(point.getx() / pNormPitch);
 
-    if(p.gety()<0)
+    if(point.gety()<0)
         angleYaw = -angleYaw;
 
-    if(p.getx() < 0)
+    if(point.getx() < 0)
         anglePitch = 180 - anglePitch;
-    if(p.getz()<0)
+    if(point.getz()<0)
         anglePitch *= -1;
 
     totalAngle->setText(doubleToString(angleXYZ));
@@ -580,17 +573,14 @@ void LocalisationWidget::frameChange(double* jointSensors, bool camera,double* t
 void LocalisationWidget::angleXChanged(double newAngleX)
 {
     anglePoint.setx(newAngleX);
-    //commonPointsComboBox->setCurrentIndex(0);
 }
 void LocalisationWidget::angleYChanged(double newAngleY)
 {
     anglePoint.sety(newAngleY);
-    //commonPointsComboBox->setCurrentIndex(0);
 }
 void LocalisationWidget::angleZChanged(double newAngleZ)
 {
     anglePoint.setz(newAngleZ);
-    //commonPointsComboBox->setCurrentIndex(0);
 }
 void LocalisationWidget::calculateAngleClicked()
 {
@@ -625,12 +615,11 @@ void LocalisationWidget::commonPointsChanged(int newIndex)
         anglePointZSpinBox->setValue(3.25);
         break;
     }
-    //commonPointsComboBox->setCurrentIndex(newIndex);
 }
-QString LocalisationWidget::doubleToString(double in)
+QString LocalisationWidget::doubleToString(double newString)
 {
     QString string;
-    string.sprintf("%.2f",in);
+    string.sprintf("%.2f",newString);
     return string;
 }
 void LocalisationWidget::updateJoints()
