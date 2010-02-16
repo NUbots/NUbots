@@ -2,6 +2,7 @@
 #include "Tools/FileFormats/LUTTools.h"
 #include <QDebug>
 #include <zlib.h>
+#include "../Vision/LineDetection.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -124,11 +125,14 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 {
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
-    std::vector< TransitionSegment > segments;
+    std::vector< TransitionSegment > verticalsegments;
+    std::vector< TransitionSegment > horzontalsegments;
+    std::vector< TransitionSegment > allsegments;
     std::vector< RobotCandidate > robotCandidates;
     ClassifiedSection* vertScanArea = new ClassifiedSection();
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
+    std::vector<LSFittedLine> fieldLines;
     int spacings = 8;
     int tempNumScanLines = 0;
     switch (image.imageFormat)
@@ -156,7 +160,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             vision.ClassifyScanArea(horiScanArea);
 
             //! Form Lines
-            vision.DetectLines(vertScanArea);
+            //fieldLines = vision.DetectLines(vertScanArea,spacings);
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -167,7 +171,8 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 Vector2<int> startPoint = tempScanLine->getStart();
                 for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
                 {
-                    segments.push_back((*tempScanLine->getSegment(seg)));
+                    verticalsegments.push_back((*tempScanLine->getSegment(seg)));
+                    allsegments.push_back((*tempScanLine->getSegment(seg)));
                 }
                 if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
                 {
@@ -182,7 +187,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             }
 
 
-
             //! Extract and Display Horizontal Scan Points:
             tempNumScanLines = horiScanArea->getNumberOfScanLines();
             for (int i = 0; i < tempNumScanLines; i++)
@@ -190,6 +194,11 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 ScanLine* tempScanLine = horiScanArea->getScanLine(i);
                 int lengthOfLine = tempScanLine->getLength();
                 Vector2<int> startPoint = tempScanLine->getStart();
+                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+                {
+                    horzontalsegments.push_back((*tempScanLine->getSegment(seg)));
+                    allsegments.push_back((*tempScanLine->getSegment(seg)));
+                }
                 if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
                 {
                     for(int j = 0;  j < lengthOfLine; j++)
@@ -202,15 +211,16 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
 
+            //! Extract Detected Line & Corners
+            emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
-
-            qDebug()<< (verticalPoints.size() + horizontalPoints.size()) * 100/(image.height()*image.width()) << " percent of image classified";
+            qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
-            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
+            emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
-            robotCandidates = vision.classifyRobotCandidates(segments);
+            robotCandidates = vision.classifyRobotCandidates(verticalsegments);
             emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
 
             break;

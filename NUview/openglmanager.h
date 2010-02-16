@@ -7,6 +7,7 @@
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
 #include "Vision/RobotCandidate.h"
+#include "Tools/Math/LSFittedLine.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -70,6 +71,13 @@ public:
           @param displayId The id of the display layer to write to.
           */
         void writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId);
+
+                /*!
+          @brief Accepts new robot candidate vector and maps it to display instructions.
+          @param robotCandidates The new Robot Candidates to display.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.

@@ -7,29 +7,34 @@
 #include "Vision.h"
 #include "Tools/Image/NUImage.h"
 #include "ClassificationColours.h"
-#include "LineDetection.h"
+
 #include <QDebug>
 #include <boost/circular_buffer.hpp>
 #include <queue>
 
 Vision::Vision()
 {
+    AllFieldObjects = new FieldObjects();
+    classifiedCounter = 0;
     return;
 }
 
 Vision::~Vision()
 {
+
     return;
 }
 
 unsigned char Vision::classifyPixel(int x, int y)
 {
+    classifiedCounter++;
     pixels::Pixel* temp = &currentImage->image[y][x];
     return currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
 }
 
 void Vision::classifyImage(ClassifiedImage &target, const NUimage* sourceImage, const unsigned char *lookUpTable)
 {   
+    int tempClassCounter = classifiedCounter;
     target.setImageDimensions(sourceImage->width(),sourceImage->height());
     currentImage = sourceImage;
     currentLookupTable = lookUpTable;
@@ -40,11 +45,13 @@ void Vision::classifyImage(ClassifiedImage &target, const NUimage* sourceImage, 
             target.image[y][x] = classifyPixel(x,y);
         }
     }
+    classifiedCounter = tempClassCounter;
     return;
 }
 
 std::vector< Vector2<int> > Vision::findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine)
 {
+    classifiedCounter = 0;
     std::vector< Vector2<int> > results;
     currentImage = sourceImage;
     currentLookupTable = lookUpTable;
@@ -248,6 +255,14 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
         ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
         scanArea->addScanLine(tempScanLine);
     }
+    /*//! Generate Scan Pattern under green horizon
+    for(int y = minY; y < currentImage->height(); y = y + scanSpacing/2)
+    {
+        temp.x =0;
+        temp.y = y;
+        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
+        scanArea->addScanLine(tempScanLine);
+    }*/
     return scanArea;
 }
 
@@ -265,7 +280,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 2;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
     for (int i = 0; i < bufferSize; i++)
@@ -315,10 +330,15 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                     tempLine->addSegement(tempTransition);
-                    qDebug() << "End Of Line Detected: " << currentPoint.x << ","<< currentPoint.y;
+                    int spacing = 16;
+                    int segmentlength = currentPoint.y-tempStartPoint.y;
+                    if(abs(segmentlength)>spacing)
+                    {
+                        CloselyClassifyScanline(tempLine, tempStartPoint,currentColour,segmentlength, spacing, direction);
+                    }
                 }
                 tempStartPoint = currentPoint;
-                beforeColour = currentColour;
+                beforeColour = ClassIndex::unclassified;
                 currentColour = afterColour;
                 continue;
             }
@@ -328,13 +348,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 if(currentColour != afterColour)
                 {
                     //! Transition detected: Generate new segment and add to the line
-
                     //Adjust the position:
-
-
                     if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
                     {
-                            //SHIFTING THE POINTS TO THE START OF BUFFER:
+                        //SHIFTING THE POINTS TO THE START OF BUFFER:
                         if(direction == ClassifiedSection::DOWN)
                         {
                             currentPoint.x = startPoint.x;
@@ -348,29 +365,129 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         else if(direction == ClassifiedSection::UP)
                         {
                             currentPoint.x = startPoint.x;
-                            currentPoint.y = startPoint.y - j;// - bufferSize;
+                            currentPoint.y = startPoint.y - j;// + bufferSize;
                         }
                         else if(direction == ClassifiedSection::LEFT)
                         {
-                            currentPoint.x = startPoint.x - j;// - bufferSize;
+                            currentPoint.x = startPoint.x - j;// + bufferSize;
                             currentPoint.y = startPoint.y;
                         }
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
+                        //SCAN FOR OTHER SEGMENTS:
+                        int spacing = 16;
+                        if(abs(currentPoint.y-tempStartPoint.y)>spacing)
+                        {
+                            int length = currentPoint.y-tempStartPoint.y;
+                            CloselyClassifyScanline(tempLine, tempStartPoint,currentColour,length, spacing, direction);
+                        }
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
 
                 }
-
-
-
             }
         }
 
     }
     return;
+}
+
+void Vision::CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
+{
+    if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
+    {
+        Vector2<int> tempSubEndPoint;
+        Vector2<int> tempSubStartPoint;
+        unsigned char subAfterColour;
+        unsigned char subBeforeColour;
+        unsigned char tempColour = currentColour;
+        for(int k =0; k < abs(length); k = k+spacings)
+        {
+            tempSubEndPoint.y = tempStartPoint.y+k;
+            tempSubStartPoint.y = tempStartPoint.y+k;
+            int tempsubPoint = tempStartPoint.x;
+            unsigned char  tempColour = currentColour;;
+
+            while(tempColour == currentColour)
+            {
+                if(tempsubPoint+1 > currentImage->width()) break;
+
+                tempsubPoint++;
+
+                if(tempStartPoint.y+k < currentImage->height() && tempStartPoint.y+k > 0 &&
+                   tempsubPoint < currentImage->width() && tempsubPoint > 0)
+                {
+                    tempColour= classifyPixel(tempsubPoint,tempStartPoint.y+k);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            tempSubEndPoint.x = tempsubPoint;
+            subAfterColour = tempColour;
+            tempsubPoint = tempStartPoint.x;
+            tempColour = currentColour;
+
+            while(tempColour == currentColour)
+            {
+                if(tempsubPoint-1 < 0) break;
+                tempsubPoint--;
+                if(tempStartPoint.y+k < currentImage->height() && tempStartPoint.y+k > 0
+                   && tempsubPoint < currentImage->width() && tempsubPoint > 0)
+                {
+                    tempColour = classifyPixel(tempsubPoint,tempStartPoint.y+k);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            tempSubStartPoint.x = tempsubPoint;
+            subBeforeColour = tempColour;
+            //THEN ADD TO LINE
+
+            TransitionSegment* tempTransition = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , currentColour, subAfterColour);
+            tempLine->addSegement(tempTransition);
+
+
+
+    /*
+    else if (direction == ClassifiedSection::RIGHT || direction == ClassifiedSection::LEFT)
+    {
+    //SCAN UNTIL TRANSITION IN BOTH UP AND DOWN
+    //THEN ADD TO LINE
+    int tempPoint = currentPoint.y;
+    unsigned char nextsubColour;
+    while(checkIfBufferSame(colourBuff2))
+    {
+        tempPoint++;
+        nextsubColour = classifyPixel(currentPoint.x,tempPoint);
+        colourBuff.push_back(nextsubColour);
+    }
+    tempSubEndPoint.x = currentPoint.x;
+    tempSubEndPoint.y = tempPoint;
+    subAfterColour = nextsubColour;
+    tempPoint = currentPoint.y;
+    colourBuff2.push_back(currentColour);
+    while(checkIfBufferSame(colourBuff2))
+    {
+        tempPoint--;
+        unsigned char nextColour = classifyPixel(currentPoint.x,tempPoint);
+        colourBuff.push_back(nextColour);
+    }
+    tempSubStartPoint.x = currentPoint.x;
+    tempSubStartPoint.y = tempPoint;
+    subBeforeColour = nextsubColour;
+    //THEN ADD TO LINE
+    tempTransition = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , currentColour, subAfterColour);
+    tempLine->addSegement(tempTransition);
+    }
+    */
+    }
+    }
 }
 
 std::vector<RobotCandidate> Vision::classifyRobotCandidates(std::vector< TransitionSegment > segments)
@@ -586,11 +703,15 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 
 }
 
-void Vision::DetectLines(ClassifiedSection* scanArea)
+std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
     LineDetection* LineDetector = new LineDetection();
     int image_width = currentImage->width();
-    LineDetector->FormLines(scanArea,image_width);
+    int image_height = currentImage->height();
+    LineDetector->FormLines(scanArea,image_width,image_height,spacing);
+    qDebug() << "Lines Detection completed";
+    std::vector<CornerPoint> cornerPoints= LineDetector->cornerPoints;
+    std::vector<LSFittedLine> fieldLines= LineDetector->fieldLines;
 
-    return;
+    return fieldLines;
 }

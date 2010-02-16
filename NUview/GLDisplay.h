@@ -72,6 +72,7 @@ public:
         verticalScanPath,
         TransitionSegments,
         RobotCandidates,
+        FieldLines,
         numDisplays
     };
 
@@ -109,6 +110,8 @@ public:
                 return QString("Transition Segment");
             case RobotCandidates:
                 return QString("Robot Candidates");
+            case FieldLines:
+                return QString("Field Lines");
             default:
                 return QString("Unknown");
         }
@@ -255,6 +258,8 @@ private:
                 return QColor(255,255,255);
             case RobotCandidates:
                 return QColor(255,128,64);
+            case FieldLines:
+                return QColor(100,100,100);
             default:
                 return QColor(255,255,255);
         }

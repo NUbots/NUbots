@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
-
+    connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
@@ -88,8 +88,9 @@ MainWindow::MainWindow(QWidget *parent)
     horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
     horizonDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
 
-    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
+    miscDisplay->setOverlayDrawing(GLDisplay::FieldLines,true, QColor(255,0,0));
+    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
     setWindowTitle(QString("NUview"));
 }
 

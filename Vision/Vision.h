@@ -15,7 +15,8 @@
 #include "ScanLine.h"
 #include "TransitionSegment.h"
 #include "RobotCandidate.h"
-
+#include "LineDetection.h"
+#include "FieldObjects/FieldObjects.h"
 
 class NUimage;
 
@@ -23,11 +24,15 @@ class NUimage;
 class Vision
 {
     public:
-
+    //! FieldObjects Container
+    FieldObjects* AllFieldObjects;
+    int classifiedCounter;
     //! Default constructor.
     Vision();
     //! Destructor.
     ~Vision();
+
+
     /*!
       @brief Produce a classified.
 
@@ -53,6 +58,9 @@ class Vision
     */
     std::vector<RobotCandidate> classifyRobotCandidates(std::vector< TransitionSegment > segments);
 
+
+
+
     /*!
       @brief Returns true when the colour passed in is a valid robot colour
       @param colour The colour value that needs to be checked if it is a robot colour
@@ -67,7 +75,7 @@ class Vision
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifiyScanArea(ClassifiedSection* scanArea);
-    void DetectLines(ClassifiedSection* scanArea);
+    std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
 
 
@@ -76,5 +84,8 @@ class Vision
     const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
 
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+    void CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> startPoint, unsigned char currentColour, int length, int spacing, int direction);
+
+
 };
 #endif // VISION_H

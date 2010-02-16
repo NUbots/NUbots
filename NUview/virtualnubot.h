@@ -10,6 +10,7 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "GLDisplay.h"
 #include "Vision/Vision.h"
+#include "Tools/Math/LSFittedLine.h"
 #include <vector>
 
 
@@ -60,6 +61,7 @@ signals:
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
     void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
     void robotCandidatesDisplayChanged(std::vector< RobotCandidate > updatedRobotCandidates, GLDisplay::display displayId);
+    void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
 
 private:
     class classEntry

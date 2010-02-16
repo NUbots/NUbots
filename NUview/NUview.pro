@@ -35,8 +35,15 @@ HEADERS += ui_mainwindow.h \
     LayerSelectionWidget.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
-    ../Vision/RobotCandidate.h
-
+    ../Vision/RobotCandidate.h \
+    ../Tools/Math/Vector3.h \
+    ../Vision/Object.h \
+    ../Vision/FieldObjects/StationaryObject.h \
+    ../Vision/FieldObjects/Self.h \
+    ../Vision/FieldObjects/Object.h \
+    ../Vision/FieldObjects/MobileObject.h \
+    ../Vision/FieldObjects/AmbiguousObject.h \
+    ../Vision/FieldObjects/FieldObjects.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -58,4 +65,10 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     ../Vision/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
-    ../Vision/RobotCandidate.cpp
+    ../Vision/RobotCandidate.cpp \
+    ../Vision/FieldObjects/StationaryObject.cpp \
+    ../Vision/FieldObjects/Self.cpp \
+    ../Vision/FieldObjects/Object.cpp \
+    ../Vision/FieldObjects/MobileObject.cpp \
+    ../Vision/FieldObjects/AmbiguousObject.cpp \
+    ../Vision/FieldObjects/FieldObjects.cpp
