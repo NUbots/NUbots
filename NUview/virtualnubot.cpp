@@ -186,8 +186,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             vision.ClassifyScanArea(vertScanArea);
             vision.ClassifyScanArea(horiScanArea);
 
-            //! Form Lines
-            //fieldLines = vision.DetectLines(vertScanArea,spacings);
+
 
             //! Extract and Display Vertical Scan Points:
             tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -200,6 +199,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 {
                     verticalsegments.push_back((*tempScanLine->getSegment(seg)));
                     allsegments.push_back((*tempScanLine->getSegment(seg)));
+                    segments.push_back((*tempScanLine->getSegment(seg)));
                 }
                 if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
                 {
@@ -236,15 +236,18 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                     }
                 }
             }
-
+            //! Form Lines
+            //fieldLines = vision.DetectLines(vertScanArea,spacings);
             //! Extract Detected Line & Corners
-            emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+            //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
             qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
 
-            emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
+
+            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
             //robotCandidates = vision.classifyCandidates(verticalsegments);
             //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
@@ -299,7 +302,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
 
             qDebug()<< (verticalPoints.size() + horizontalPoints.size() + robotClassifiedPoints) * 100/(image.height()*image.width()) << " percent of image classified";
-            emit transitionSegmentsDisplayChanged(segments,GLDisplay::TransitionSegments);
+            emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
             break;
         default:
