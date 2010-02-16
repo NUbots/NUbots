@@ -229,7 +229,68 @@ void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > cand
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }
+void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
 
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+    glLineWidth(1.0);       // Line width
+    glBegin(GL_LINES);                              // Start Lines
+    for(int i = 0;i<numLines;i++)
+    {
+        glVertex2i(newWMLine[i].getStart().getx(),newWMLine[i].getStart().gety());                 // Starting point
+        glVertex2i(newWMLine[i].getEnd().getx(),newWMLine[i].getEnd().gety());    // End point
+    }
+    glEnd();                                        // End Lines
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+    drawHollowCircle(x, y, radius, 50);
+
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
+void OpenglManager::clearDisplay(GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+    displays[displayId] = glGenLists(1);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
     int stepSize = 360 / num_segments;

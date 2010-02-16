@@ -27,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
     connection = new ConnectionWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, connection);
 
+    localisation = new LocalisationWidget(this);
+    addDockWidget(Qt::BottomDockWidgetArea,localisation);
+
     classification = new ClassificationWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, classification);
 
@@ -57,6 +60,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
 
+    // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
+    connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
+    connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
+    connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
+
     mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
@@ -76,7 +85,9 @@ MainWindow::MainWindow(QWidget *parent)
     //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
     imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
-
+    imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
     classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
@@ -103,6 +114,7 @@ MainWindow::~MainWindow()
     delete imageDisplay;
     delete classification;
     delete connection;
+    delete localisation;
     delete layerSelection;
     delete layerSelectionDock;
     delete mdiArea;

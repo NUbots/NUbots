@@ -66,6 +66,20 @@ void virtualNUbot::loadFrame(int frameNumber)
 
     file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
     hasImage = true;
+
+    // Create double values of each joint and send to localisation widget
+    double jS[22];
+    double tS[10];
+    for (int i = 0; i <22;i++)
+    {
+        jS[i] = jointSensors[i] * 57.2957795;
+    }
+    for (int j = 0; j<10;j++)
+    {
+        tS[j] = touchSensors[j];
+    }
+    emit imageDisplayChanged(jS,camera,tS);
+
     horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
     emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
