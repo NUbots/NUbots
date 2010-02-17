@@ -38,11 +38,11 @@ public:
     void setSpeed(const vector<float>& newspeed);
     void getSpeed(vector<float>& speed);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 private:
     vector<float> m_walk_speed;                 //!< the walk speed x (cm/s), y (cm/s) and theta (rad/s)
 };

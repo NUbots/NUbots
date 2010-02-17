@@ -28,6 +28,7 @@
 #define JOB_H
 
 #include <vector>
+#include <iostream>
 using namespace std;
 
 class Job
@@ -115,11 +116,11 @@ public:
     double getTime();
     long double getTimeStamp();
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 
 protected:
     // Properties that *every* job has

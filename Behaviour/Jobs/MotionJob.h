@@ -35,11 +35,11 @@ public:
     MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){};
     virtual ~MotionJob() {};
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 };
 
 #endif

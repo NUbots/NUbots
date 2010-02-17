@@ -39,11 +39,11 @@ public:
     void setPosition(double time, const vector<float>& newposition);
     void getPosition(double& time, vector<float>& position);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 private:
     vector<float> m_head_position;                 //!< the head position [yaw (rad), pitch (rad), roll (rad)]
 };

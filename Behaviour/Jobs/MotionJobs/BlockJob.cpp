@@ -55,3 +55,35 @@ void BlockJob::getPosition(double& time, vector<float>& position)
     time = m_job_time;
     position = m_block_position;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+    @param output the stream to be written to
+ */
+void BlockJob::summaryTo(ostream& output)
+{
+    output << "BlockJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_block_position.size(); i++)
+        output << m_block_position[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+    @param output the stream to be written to
+ */
+void BlockJob::csvTo(ostream& output)
+{
+    output << "BlockJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_block_position.size(); i++)
+        output << m_block_position[i] << ", ";
+    output << endl;
+}
+
+ostream& BlockJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& BlockJob::operator>> (istream& input)
+{
+    return input;
+}

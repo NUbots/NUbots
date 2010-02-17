@@ -55,3 +55,35 @@ void HeadJob::getPosition(double& time, vector<float>& position)
     time = m_job_time;
     position = m_head_position;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void HeadJob::summaryTo(ostream& output)
+{
+    output << "HeadJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_head_position.size(); i++)
+        output << m_head_position[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void HeadJob::csvTo(ostream& output)
+{
+    output << "HeadJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_head_position.size(); i++)
+        output << m_head_position[i] << ", ";
+    output << endl;
+}
+
+ostream& HeadJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& HeadJob::operator>> (istream& input)
+{
+    return input;
+}

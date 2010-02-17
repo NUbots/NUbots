@@ -53,3 +53,35 @@ void WalkJob::getSpeed(vector<float>& speed)
 {
     speed = m_walk_speed;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void WalkJob::summaryTo(ostream& output)
+{
+    output << "WalkJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_walk_speed.size(); i++)
+        output << m_walk_speed[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void WalkJob::csvTo(ostream& output)
+{
+    output << "WalkJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_walk_speed.size(); i++)
+        output << m_walk_speed[i] << ", ";
+    output << endl;
+}
+
+ostream& WalkJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& WalkJob::operator>> (istream& input)
+{
+    return input;
+}
