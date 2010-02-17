@@ -15,6 +15,8 @@
 #include "ScanLine.h"
 #include "TransitionSegment.h"
 #include "RobotCandidate.h"
+#include "LineDetection.h"
+#include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 
 class NUimage;
@@ -23,11 +25,15 @@ class NUimage;
 class Vision
 {
     public:
-
+    //! FieldObjects Container
+    FieldObjects* AllFieldObjects;
+    int classifiedCounter;
     //! Default constructor.
     Vision();
     //! Destructor.
     ~Vision();
+
+
     /*!
       @brief Produce a classified.
 
@@ -86,6 +92,9 @@ class Vision
     */
     //std::vector< ClassifiedSection > robotScanAreas(std::vector<RobotCandidate> robotCandidates, std::vector<Vector2<int> >&fieldBorders, Horizon horizonLine);
 
+
+
+
     /*!
       @brief Returns true when the colour passed in is a valid colour from the list passed in
       @param colour The colour value that needs to be checked if it is a robot colour
@@ -101,9 +110,12 @@ class Vision
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
-    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBorders, int scanSpacing);
-    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBorders, int scanSpacing);
+
+    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
+    std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
+
 
 
     private:    
@@ -112,5 +124,8 @@ class Vision
 
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+    void CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> startPoint, unsigned char currentColour, int length, int spacing, int direction);
+
+
 };
 #endif // VISION_H

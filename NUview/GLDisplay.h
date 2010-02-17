@@ -71,6 +71,8 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
+        RobotCandidates,
+        FieldLines,
         ObjectCandidates,
         wmRightLeg,
         wmLeftLeg,
@@ -110,6 +112,10 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
+            case RobotCandidates:
+                return QString("Robot Candidates");
+            case FieldLines:
+                return QString("Field Lines");
             case ObjectCandidates:
                 return QString("Field Object Candidates");
             case wmLeftLeg:
@@ -264,6 +270,8 @@ private:
                 return QColor(255,255,255);
             case ObjectCandidates:
                 return QColor(255,128,64);
+            case FieldLines:
+                return QColor(100,100,100);
             case wmLeftLeg:
                 return QColor(0,0,200);
             case wmRightLeg:

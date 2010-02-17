@@ -253,12 +253,14 @@ void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDispl
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
 
+
     displayStored[displayId] = true;
     emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
 void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDisplay::display displayId)
 {
+
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -268,6 +270,10 @@ void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDispl
     displays[displayId] = glGenLists(1);
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
+
+
+
+
 
     drawHollowCircle(x, y, radius, 50);
 
@@ -291,6 +297,7 @@ void OpenglManager::clearDisplay(GLDisplay::display displayId)
     emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
+
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
     int stepSize = 360 / num_segments;
@@ -311,4 +318,41 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
         glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
     }
     glEnd();
+}
+
+void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
+{
+    glLineWidth(2.0);       // Line width
+    //std::vector<RobotCandidate>::const_iterator i;
+    unsigned char r,g,b;
+    for(int i = 0 ; i < fieldLines.size(); i++)
+    {
+        //Vector2<int> topLeft = i->getTopLeft();
+        //Vector2<int> bottomRight = i->getBottomRight();
+        //ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
+        //glColor3ub(255,255,255);
+        if(fieldLines[i].valid == true){
+            glBegin(GL_LINES);                              // Start Lines
+            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));                 // Starting point
+            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
+            glEnd();  // End Lines
+            glBegin(GL_TRIANGLES);
+             for (int j =0; j < linePoints.size(); j++)
+            {
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
+                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y+0.5),0.0);
+            }
+            glEnd();
+        }
+    }
+        glEnable(GL_TEXTURE_2D);
+        glEndList();                                    // END OF LIST
+
+        displayStored[displayId] = true;
+
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+
 }
