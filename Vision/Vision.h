@@ -57,7 +57,7 @@ class Vision
       @param colour The colour value that needs to be checked if it is a robot colour
       @return bool True when the colour passed in is an assigned robot colour
     */
-    bool Vision::isRobotColour(unsigned char colour);
+    bool isRobotColour(unsigned char colour);
 
     std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
