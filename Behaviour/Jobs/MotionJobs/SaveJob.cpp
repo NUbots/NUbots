@@ -20,6 +20,7 @@
  */
 
 #include "SaveJob.h"
+#include "debug.h"
 
 SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_SAVE)
 {
@@ -78,12 +79,27 @@ void SaveJob::csvTo(ostream& output)
     output << endl;
 }
 
-ostream& SaveJob::operator<< (ostream& output)
+ostream& operator<<(ostream& output, const SaveJob& job)
 {
+    debug << "SaveJob<<" << endl;
+    output << static_cast<Job>(job) << static_cast<MotionJob>(job);
+    unsigned int m_save_position_size = job.m_save_position.size();
+    output.write((char*) &m_save_position_size, sizeof(m_save_position_size));
+    for (unsigned int i=0; i<m_save_position_size; i++)
+        output.write((char*) &job.m_save_position[i], sizeof(job.m_save_position[i]));
     return output;
 }
 
-istream& SaveJob::operator>> (istream& input)
+istream& operator>>(istream& input, SaveJob& job)
 {
+    debug << "SaveJob>>" << endl;
+    Job tempjob = static_cast<Job>(job);
+    MotionJob motionjob = static_cast<MotionJob>(job);
+    input >> tempjob >> motionjob;
+    //input >> static_cast<Job>(job);// >> static_cast<MotionJob>(job);
+    
+    /*static char inbuffer[1024];
+    input.read(inbuffer, sizeof(job.m_save_position.size()));
+    reinterpret_cast<job.m_save_position.size()> inbuffer;*/
     return input;
 }

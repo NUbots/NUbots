@@ -22,6 +22,8 @@
 #include "JobList.h"
 #include "debug.h"
 
+#include "../Jobs.h"            //!< @todo remove this after finished testing!
+
 /*! @brief JobList constructor
  */
 JobList::JobList()
@@ -35,6 +37,48 @@ JobList::JobList()
     m_job_lists.push_back(&m_sound_jobs);
     m_job_lists.push_back(&m_system_jobs);
     m_job_lists.push_back(&m_other_jobs);
+    
+    
+    // Test Save Job
+    vector<float> saveposition(3, 0);
+    saveposition[0] = 10;
+    saveposition[1] = -25;
+    saveposition[2] = 1.57;
+    SaveJob* savejob = new SaveJob(300.1, saveposition);
+    // Test Kick Job
+    vector<float> kickposition(2, 0);
+    vector<float> kicktarget(2, 0);
+    kickposition[0] = 0;
+    kickposition[1] = -5.7;
+    kicktarget[0] = 330.33;
+    kicktarget[1] = 55.5;
+    KickJob* kickjob = new KickJob(1010.19, kickposition, kicktarget);
+    // Test Walk Job
+    vector<float> walkspeed(3, 0);
+    walkspeed[0] = 10;
+    walkspeed[1] = -25;
+    walkspeed[2] = 0.0;
+    WalkJob* walkjob = new WalkJob(walkspeed);
+    
+    /*// Test Light Job
+    vector<float> colour(3,0);
+    colour[0] = 1;
+    colour[1] = 0;
+    colour[2] = 0;
+    ChestLedJob ledjob = ChestLedJob(0, colour);*/
+    
+    addMotionJob(savejob);
+    addMotionJob(kickjob);
+    addMotionJob(walkjob);
+    
+    ofstream temp;
+    temp.open("tempjobs.txt");
+    temp << *savejob;
+    temp.close();
+    
+    ifstream intemp;
+    intemp.open("tempjobs.txt");
+    intemp >> (*savejob);
 }
 
 /*! @brief Job destructor

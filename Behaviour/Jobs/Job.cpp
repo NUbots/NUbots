@@ -20,6 +20,8 @@
  */
 
 #include "Job.h"
+#include "../Jobs.h"
+#include "debug.h"
 
 /*! @brief Job constructor
  */
@@ -73,13 +75,45 @@ void Job::csvTo(ostream& output)
 {
 }
 
-ostream& Job::operator<< (ostream& output)
+ostream& operator<<(ostream& output, const Job& job)
 {
+    debug << "Job<<" << endl;
+    
+    output << static_cast<unsigned int>(job.m_job_type) << " " << static_cast<unsigned int>(job.m_job_id) << " ";
+    output.write((char*) &job.m_job_time, sizeof(job.m_job_time));
+    output.write((char*) &job.m_timestamp, sizeof(job.m_timestamp));
+    
     return output;
 }
 
-istream& Job::operator>> (istream& input)
+istream& operator>>(istream& input, Job& job)
 {
+    // This is a very very very hard function to write!
+    debug << "Job>>" << endl;
+    
+    Job::job_type_t jobtype;    // we need to create a job of the correct type!
+    Job::job_id_t jobid;        // we need to create a job of the correct id!
+    
+    unsigned int tempint = 0;
+    
+    // Read in the job's type and id
+    input >> tempint;
+    jobtype = static_cast<Job::job_type_t>(tempint);
+    input >> tempint;
+    jobid = static_cast<Job::job_id_t>(tempint);
+    
+    debug << jobtype << " " << jobid << endl;
+    // Now create a new job of that type
+    switch (jobid) 
+    {
+        case Job::MOTION_SAVE:
+            /*job = SaveJob(0, vector<float>(3,0));
+            input >> static_cast<SaveJob> (job);*/
+            break;
+        default:
+            break;
+    }
+    
     return input;
 }
 

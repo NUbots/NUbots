@@ -38,8 +38,8 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<< (ostream& output, const MotionJob& job);
+    friend istream& operator>> (istream& input, MotionJob& job);
 };
 
 #endif

@@ -41,8 +41,8 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const SaveJob& job);
+    friend istream& operator>>(istream& input, SaveJob& job);
 private:
     vector<float> m_save_position;                 //!< the save position [x (cm), y (cm), theta (rad)]
 };

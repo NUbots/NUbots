@@ -26,6 +26,7 @@
 
 
 #include "MotionJob.h"
+#include "debug.h"
 
 void MotionJob::summaryTo(ostream& output)
 {
@@ -37,13 +38,17 @@ void MotionJob::csvTo(ostream& output)
     
 }
 
-ostream& MotionJob::operator<< (ostream& output)
+ostream& operator<< (ostream& output, const MotionJob& job)
 {
+    // There are no members introduced at this level
+    debug << "MotionJob<<" << endl;
     return output;
 }
 
-istream& MotionJob::operator>> (istream& input)
+istream& operator>> (istream& input, MotionJob& job)
 {
+    // There are no members introduced at this level
+    debug << "MotionJob>>" << endl;
     return input;
 }
 

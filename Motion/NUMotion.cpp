@@ -97,7 +97,7 @@ NUMotion::~NUMotion()
  */
 void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    if (actions == NULL)
+    if (data == NULL || actions == NULL)
         return;
     
     static vector<float> fallingvalues;

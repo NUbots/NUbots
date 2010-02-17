@@ -210,7 +210,7 @@ void NUbot::createErrorHandling()
     struct sigaction newaction, oldaction;
     newaction.sa_handler = segFaultHandler;
     
-    sigaction(SIGSEGV, &newaction, &oldaction);
+    sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
 }
 
 /*! @brief Destructor for the nubot
