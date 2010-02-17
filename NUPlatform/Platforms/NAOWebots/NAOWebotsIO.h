@@ -1,14 +1,12 @@
-/*! @file BehaviourJob.h
-    @brief Declaration of base BehaviourJob class.
+/*! @file NAOWebotsIO.h
+    @brief Declaration of naoio class.
  
-    @class BehaviourJob
-    @brief A base class to encapsulate jobs issued for the behaviour module.
- 
-    All behaviour jobs should inherit from this base class.
- 
+    @class NAOWebotsIO
+    @brief NAOWebotsIO class for input and output to streams, files and networks on the NAO in Webots platform
+
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,22 +22,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BEHAVIOURJOB_H
-#define BEHAVIOURJOB_H
+#ifndef NAOWebotsIO_H
+#define NAOWebotsIO_H
 
-#include "Job.h"
+#include "NUPlatform/NUIO.h"
 
-class BehaviourJob : public Job
+class NAOWebotsIO: public NUIO
 {
+// Functions:
 public:
-    BehaviourJob(job_id_t jobid) : Job(Job::BEHAVIOUR, jobid){};
-    virtual ~BehaviourJob() {};
+    NAOWebotsIO(int probotnumber);
+    ~NAOWebotsIO();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+protected:
+private:
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+// Members:
+public:
+protected:
+private:
+    
 };
 
 #endif

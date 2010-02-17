@@ -70,3 +70,40 @@ void NodHeadJob::getNod(double& period, vector<float>& centre, vector<float>& li
     centre = m_centre_position;
     limits = m_limit_positions;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void NodHeadJob::summaryTo(ostream& output)
+{
+    output << "NodHeadJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_centre_position.size(); i++)
+        output << m_centre_position[i] << ",";
+    output << " ";
+    for (unsigned int i=0; i<m_limit_positions.size(); i++)
+        output << m_limit_positions[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void NodHeadJob::csvTo(ostream& output)
+{
+    output << "NodHeadJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_centre_position.size(); i++)
+        output << m_centre_position[i] << ", ";
+    for (unsigned int i=0; i<m_limit_positions.size(); i++)
+        output << m_limit_positions[i] << ", ";
+    output << endl;
+}
+
+ostream& NodHeadJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& NodHeadJob::operator>> (istream& input)
+{
+    return input;
+}

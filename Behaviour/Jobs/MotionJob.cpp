@@ -1,10 +1,10 @@
-/*! @file BehaviourJob.h
-    @brief Declaration of base BehaviourJob class.
+/*! @file MotionJob.cpp
+    @brief Implementation of base MotionJob class.
  
-    @class BehaviourJob
-    @brief A base class to encapsulate jobs issued for the behaviour module.
+    @class MotionJob
+    @brief A base class to encapsulate jobs issued for the motion module.
  
-    All behaviour jobs should inherit from this base class.
+    All motion jobs should inherit from this base class.
  
     @author Jason Kulk
  
@@ -24,23 +24,27 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BEHAVIOURJOB_H
-#define BEHAVIOURJOB_H
 
-#include "Job.h"
+#include "MotionJob.h"
 
-class BehaviourJob : public Job
+void MotionJob::summaryTo(ostream& output)
 {
-public:
-    BehaviourJob(job_id_t jobid) : Job(Job::BEHAVIOUR, jobid){};
-    virtual ~BehaviourJob() {};
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
-    
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
-};
+}
 
-#endif
+void MotionJob::csvTo(ostream& output)
+{
+    
+}
+
+ostream& MotionJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& MotionJob::operator>> (istream& input)
+{
+    return input;
+}
+
 

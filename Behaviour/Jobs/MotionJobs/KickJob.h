@@ -42,11 +42,11 @@ public:
     void getKickPosition(double& time, vector<float>& kickposition);
     void getKickTarget(vector<float>& kicktarget);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 private:
     vector<float> m_kick_position;                 //!< the kick position [x(cm), y(cm)]
     vector<float> m_kick_target;                   //!< the kick target relative from the *current* position [x(cm) y(cm)]

@@ -6,6 +6,7 @@
 #include "gldisplay.h"
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
+#include "Vision/RobotCandidate.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -57,11 +58,18 @@ public:
         void writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId);
 
         /*!
-          @brief Accepts new tansition segment vector and maps it to display instructions.
+          @brief Accepts new transition segment vector and maps it to display instructions.
           @param newsegments The new tansition segments.
           @param displayId The id of the display layer to write to.
           */
         void writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts new robot candidate vector and maps it to display instructions.
+          @param robotCandidates The new Robot Candidates to display.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeRobotCandidatesToDisplay(std::vector< RobotCandidate > robotCandidates, GLDisplay::display displayId);
 
     private:
         int width;                                  //!< Width of the current image.

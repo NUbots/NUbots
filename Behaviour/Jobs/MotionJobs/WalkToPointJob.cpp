@@ -55,3 +55,35 @@ void WalkToPointJob::getPosition(double& time, vector<float>& position)
     time = m_job_time;
     position = m_walk_position;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void WalkToPointJob::summaryTo(ostream& output)
+{
+    output << "WalkToPointJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_walk_position.size(); i++)
+        output << m_walk_position[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void WalkToPointJob::csvTo(ostream& output)
+{
+    output << "WalkToPointJob, " << m_job_time << ", "; 
+    for (unsigned int i=0; i<m_walk_position.size(); i++)
+        output << m_walk_position[i] << ", ";
+    output << endl;
+}
+
+ostream& WalkToPointJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& WalkToPointJob::operator>> (istream& input)
+{
+    return input;
+}

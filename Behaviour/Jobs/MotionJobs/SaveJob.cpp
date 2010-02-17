@@ -55,3 +55,35 @@ void SaveJob::getPosition(double& time, vector<float>& position)
     time = m_job_time;
     position = m_save_position;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void SaveJob::summaryTo(ostream& output)
+{
+    output << "SaveJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_save_position.size(); i++)
+        output << m_save_position[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void SaveJob::csvTo(ostream& output)
+{
+    output << "SaveJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_save_position.size(); i++)
+        output << m_save_position[i] << ", ";
+    output << endl;
+}
+
+ostream& SaveJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& SaveJob::operator>> (istream& input)
+{
+    return input;
+}

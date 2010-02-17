@@ -1,9 +1,12 @@
-/*! @file NUPlatform.h
-    @brief Declaration of a base nuplatform class.
+/*! @file NUIO.h
+    @brief Declaration of nuio class.
+ 
+    @class NUIO
+    @brief NUIO class for input and output to streams, files and networks
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,46 +22,42 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUPLATFORM_H
-#define NUPLATFORM_H
+#ifndef NUIO_H
+#define NUIO_H
 
-#include <string>
-using namespace std;
+#include "NUIO/UdpPort.h"
 
-#include "NUCamera.h"
-#include "NUSensors.h"
-#include "NUActionators.h"
-#include "NUSystem.h"
-#include "NUIO.h"
+class NUSensorsData;
+class NUActionatorsData;
+class NUCamera;
 
-class NUPlatform
+class NUIO
 {
 // Functions:
 public:
-    virtual ~NUPlatform();
+    NUIO(int robotnumber);
+    virtual ~NUIO();
     
-    virtual void getName(string& name);
-    virtual void getNumber(int& number);
-    virtual void getTeamColour(string& colour);
-    virtual void getTeamNumber(int& number);
+    friend NUIO& operator<<(NUIO& io, const NUSensorsData& sensors);
+    friend NUIO& operator<<(NUIO& io, const NUSensorsData* sensors);
     
 protected:
 private:
     
 // Members:
 public:
-    NUSystem* system;
-    NUIO* io;
-    NUCamera* camera;
-    NUSensors* sensors;
-    NUActionators* actionators;
 protected:
-    string m_name;
-    int m_number;
-    string m_team_colour;
-    int m_team_number;
 private:
-    
+    UdpPort* m_gamecontroller_port;
+    UdpPort* m_team_port;
+    UdpPort* m_camera_port;
+    UdpPort* m_sensors_port;
+    UdpPort* m_actionators_port;
+    UdpPort* m_vision_port;
+    UdpPort* m_wm_port;
+    UdpPort* m_behaviour_port;
+    UdpPort* m_motion_port;
+    UdpPort* m_jobs_port;
 };
 
 #endif

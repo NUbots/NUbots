@@ -25,7 +25,7 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		VisionJob.h
 		LocalisationJob.h
 		BehaviourJob.h
-		MotionJob.h
+		MotionJob.cpp MotionJob.h
 		LightJob.h
 		CameraJob.h
 		SoundJob.h

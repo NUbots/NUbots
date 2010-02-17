@@ -65,3 +65,21 @@ long double Job::getTimeStamp()
     return m_timestamp;
 }
 
+void Job::summaryTo(ostream& output)
+{
+}
+
+void Job::csvTo(ostream& output)
+{
+}
+
+ostream& Job::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& Job::operator>> (istream& input)
+{
+    return input;
+}
+

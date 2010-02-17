@@ -95,3 +95,40 @@ void KickJob::getKickTarget(vector<float>& kicktarget)
 {
     kicktarget = m_kick_target;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void KickJob::summaryTo(ostream& output)
+{
+    output << "KickJob: " << m_job_time << "(";
+    for (unsigned int i=0; i<m_kick_position.size(); i++)
+        output << m_kick_position[i] << ",";
+    output << ")-->(";
+    for (unsigned int i=0; i<m_kick_target.size(); i++)
+        output << m_kick_target[i] << ",";
+    output << ")" << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void KickJob::csvTo(ostream& output)
+{
+    output << "KickJob: " << m_job_time << "(";
+    for (unsigned int i=0; i<m_kick_position.size(); i++)
+        output << m_kick_position[i] << ", ";
+    for (unsigned int i=0; i<m_kick_target.size(); i++)
+        output << m_kick_target[i] << ", ";
+    output << endl;
+}
+
+ostream& KickJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& KickJob::operator>> (istream& input)
+{
+    return input;
+}

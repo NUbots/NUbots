@@ -70,3 +70,41 @@ void PanHeadJob::getPan(double& period, vector<float>& centre, vector<float>& li
     centre = m_centre_position;
     limits = m_limit_positions;
 }
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void PanHeadJob::summaryTo(ostream& output)
+{
+    output << "PanHeadJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_centre_position.size(); i++)
+        output << m_centre_position[i] << ",";
+    output << " ";
+    for (unsigned int i=0; i<m_limit_positions.size(); i++)
+        output << m_limit_positions[i] << ",";
+    output << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void PanHeadJob::csvTo(ostream& output)
+{
+    output << "PanHeadJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_centre_position.size(); i++)
+        output << m_centre_position[i] << ", ";
+    for (unsigned int i=0; i<m_limit_positions.size(); i++)
+        output << m_limit_positions[i] << ", ";
+    output << endl;
+}
+
+ostream& PanHeadJob::operator<< (ostream& output)
+{
+    return output;
+}
+
+istream& PanHeadJob::operator>> (istream& input)
+{
+    return input;
+}
+

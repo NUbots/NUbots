@@ -35,11 +35,11 @@ public:
     CameraJob(job_id_t jobid, double time) : Job(Job::CAMERA, jobid){m_job_time = time;};
     virtual ~CameraJob() {};
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 };
 
 #endif

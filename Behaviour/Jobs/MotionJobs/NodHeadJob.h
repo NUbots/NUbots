@@ -39,11 +39,11 @@ public:
     void setNod(double period, const vector<float>& centre, const vector<float>& limits);
     void getNod(double& period, vector<float>& centre, vector<float>& limits);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 private:
     vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
     vector<float> m_limit_positions;                 //!< the limit positions for the nod [lower (rad), upper(rad)]

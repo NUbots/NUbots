@@ -1,6 +1,5 @@
 QT += network \
     opengl
-
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -9,13 +8,9 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-
-win32 {
-    INCLUDEPATH += 'C:/Program Files/boost/'
-}
-
+win32:INCLUDEPATH += 'C:/Program \
+    Files/boost/'
 INCLUDEPATH += ../
-
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -37,7 +32,8 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
-    LayerSelectionWidget.h
+    LayerSelectionWidget.h \
+    ../Vision/RobotCandidate.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -56,4 +52,5 @@ SOURCES += mainwindow.cpp \
     ../Vision/ClassifiedSection.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
-    LayerSelectionWidget.cpp
+    LayerSelectionWidget.cpp \
+    ../Vision/RobotCandidate.cpp

@@ -249,9 +249,7 @@ NUbot::~NUbot()
     #ifdef USE_NETWORK
         delete network;
     #endif
-    #if DEBUG_NUBOT_VERBOSITY > 4
-        debug << "NUbot::~NUbot(). Finished." << endl;
-    #endif
+    debug << "NUbot::~NUbot(). Finished." << endl;
 }
 
 /*! @brief The nubot's main loop
@@ -429,8 +427,8 @@ int NUbot::waitForVisionCompletion()
     new sensor data, compute a response, and then send the commands to the actionators.
  
     Note that you can not safely use the job interface in this thread, if you need to add
-    jobs provide a process function for this thread, and another process for the behaviour 
-    thread.
+    jobs provide a process function for this thread, and *another* process for the behaviour 
+    thread which creates the jobs.
  
     @param arg a pointer to the nubot
  */
@@ -478,6 +476,7 @@ void* runThreadMotion(void* arg)
                 #endif
             #endif
             nubot->platform->actionators->process(actions);
+            *(nubot->platform->io) << data;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e)
