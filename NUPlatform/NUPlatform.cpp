@@ -23,10 +23,13 @@
 using namespace std;
 
 #include "NUPlatform.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUPlatform::~NUPlatform()
 {
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NUPlatform::~NUPlatform()" << endl;
+#endif
     if (system != NULL)
         delete system;
     if (camera != NULL)

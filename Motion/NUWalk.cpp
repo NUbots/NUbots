@@ -19,7 +19,7 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Walks/walkconfig.h"
+#include "walkconfig.h"
 #include "NUWalk.h"
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
@@ -35,7 +35,10 @@
 #endif
 
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
+
+#include <math.h>
+using namespace std;
 
 NUWalk* NUWalk::getWalkEngine()
 {

@@ -33,6 +33,20 @@ IF ( "x${AL_DIR}x" STREQUAL "xx"  )
   MESSAGE( STATUS "Naoqi folder is now set to ${AL_DIR}")
 ENDIF("x${AL_DIR}x" STREQUAL "xx" )
 
+############################ SET CMAKE_CXX_FLAGS (DEFAULT, RELEASE, DEBUG)
+# This is IMPORTANT because the default "RELEASE" flags FAIL when targetting the NAO
+# These settings have been stolen from the Northern Bites circa 2009
+SET( CMAKE_CXX_FLAGS
+  "${CMAKE_CXX_FLAGS} -O2 -Wall -Wconversion -Wno-unused -Wno-strict-aliasing" )
+# Release build flags
+SET( CMAKE_CXX_FLAGS_RELEASE
+  "-O3 -DNDEBUG -Wall -Wconversion -Wno-unused -Wno-strict-aliasing -march=k6-2 -mtune=k6-2 -mmmx -m3dnow" )
+SET( CMAKE_C_FLAGS_RELEASE
+  "${CMAKE_CXX_FLAGS_RELEASE}" )
+# Debug build flags
+SET( CMAKE_CXX_FLAGS_DEBUG
+  " -g3 -Wall -Wconversion -Wno-unused -Wno-strict-aliasing -march=k6-2 -mtune=k6-2 -mmmx -m3dnow" )
+
 ############################ CMAKE PACKAGE DIRECTORY
 SET( CMAKE_MODULE_PATH ${AL_DIR}/cmakemodules )
 

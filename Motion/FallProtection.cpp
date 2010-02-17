@@ -20,7 +20,7 @@
  */
 
 #include "FallProtection.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 /*! @brief Constructor for FallProtection module
  */

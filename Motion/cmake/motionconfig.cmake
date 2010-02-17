@@ -38,6 +38,6 @@ OPTION(
 ############################ motionconfig.h generation
 CONFIGURE_FILE(
 	"${THIS_SRC_DIR}/cmake/motionconfig.in"
-  	"${THIS_SRC_DIR}/motionconfig.h"
+  	"${THIS_SRC_DIR}/../Autoconfig/motionconfig.h"
     ESCAPE_QUOTES
 )

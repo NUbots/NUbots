@@ -59,7 +59,7 @@
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 /*! @brief Constructor for motion module
  */

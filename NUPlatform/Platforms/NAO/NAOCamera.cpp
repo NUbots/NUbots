@@ -20,13 +20,13 @@
  */
 
 #include "NAOCamera.h"
-
-#include <iostream>
-using namespace std;
+#include "debug.h"
 
 NAOCamera::NAOCamera()
 {
-    cout << "NAOCamera::NAOCamera()" << endl;
+#if DEBUG_NUCAMERA_VERBOSITY > 4
+    debug << "NAOCamera::NAOCamera()" << endl;
+#endif
 }
 
 NAOCamera::~NAOCamera()

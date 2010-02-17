@@ -20,7 +20,7 @@
  */
 
 #include "NUActionatorsData.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
@@ -114,11 +114,11 @@ void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& me
     vector<string> simplemethodnames;
     simplifyNames(methodnames, simplemethodnames);
     
-    for (int i=0; i<simplemethodnames.size(); i++)
+    for (unsigned int i=0; i<simplemethodnames.size(); i++)
     {
-        if (simplemethodnames[i].compare("position") || simplemethodnames[i].compare("positions") || simplemethodnames[i].compare("jointposition") || simplemethodnames[i].compare("jointpositions"))
+        if (simplemethodnames[i].find("position") != string::npos)
             m_positionactionation = true;
-        else if (simplemethodnames[i].compare("torque") || simplemethodnames[i].compare("torques") || simplemethodnames[i].compare("jointtorque") || simplemethodnames[i].compare("jointtorques"))
+        else if (simplemethodnames[i].find("torque") != string::npos)
             m_torqueactionation = true;
         else
             debug << "NUActionatorsData::setAvailableJointControlMethods. You have specified an unrecognised joint control method: " << methodnames[i] << endl;
@@ -135,140 +135,140 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     vector<string> simplejointnames;
     simplifyNames(jointnames, simplejointnames);
     
-    for (int i=0; i<simplejointnames.size(); i++) 
+    for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
         addJointActionator(jointnames[i]);
-        if (simplejointnames[i].compare("headyaw") == 0)
+        if (simplejointnames[i].find("headyaw") != string::npos)
         {
             HeadYaw = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("headpitch") == 0)
+        else if (simplejointnames[i].find("headpitch") != string::npos)
         {
             HeadPitch = i;
             m_head_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderpitch") == 0)
+        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
         {
             LShoulderPitch = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lshoulderroll") == 0)
+        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
         {
             LShoulderRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowyaw") == 0)
+        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
         {
             LElbowYaw = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lelbowroll") == 0)
+        else if (simplejointnames[i].find("lelbowroll") != string::npos)
         {
             LElbowRoll = i;
             m_larm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderpitch") == 0)
+        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
         {
             RShoulderPitch = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rshoulderroll") == 0)
+        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
         {
             RShoulderRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowyaw") == 0)
+        else if (simplejointnames[i].find("relbowyaw") != string::npos)
         {
             RElbowYaw = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("relbowroll") == 0)
+        else if (simplejointnames[i].find("relbowroll") != string::npos)
         {
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsoyaw") == 0)
+        else if (simplejointnames[i].find("torsoyaw")!= string::npos)
         {
             TorsoYaw = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsopitch") == 0)
+        else if (simplejointnames[i].find("torsopitch") != string::npos)
         {
             TorsoPitch = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("torsoroll") == 0)
+        else if (simplejointnames[i].find("torsoroll") != string::npos)
         {
             TorsoRoll = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyaw") == 0)
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
         {
             LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhipyawpitch") == 0)
+        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhippitch") == 0)
+        else if (simplejointnames[i].find("lhippitch") != string::npos)
         {
             LHipPitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lhiproll") == 0)
+        else if (simplejointnames[i].find("lhiproll") != string::npos)
         {
             LHipRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lkneepitch") == 0)
+        else if (simplejointnames[i].find("lkneepitch") != string::npos)
         {
             LKneePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lanklepitch") == 0)
+        else if (simplejointnames[i].find("lanklepitch") != string::npos)
         {
             LAnklePitch = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("lankleroll") == 0)
+        else if (simplejointnames[i].find("lankleroll") != string::npos)
         {
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyaw") == 0)
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
         {
             RHipYaw = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhipyawpitch") == 0)
+        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhippitch") == 0)
+        else if (simplejointnames[i].find("rhippitch") != string::npos)
         {
             RHipPitch = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rhiproll") == 0)
+        else if (simplejointnames[i].find("rhiproll") != string::npos)
         {
             RHipRoll = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rkneepitch") == 0)
+        else if (simplejointnames[i].find("rkneepitch") != string::npos)
         {
             RKneePitch = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("ranklepitch") == 0)
+        else if (simplejointnames[i].find("ranklepitch") != string::npos)
         {
             RAnklePitch = i;
             m_rleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].compare("rankleroll") == 0)
+        else if (simplejointnames[i].find("rankleroll") != string::npos)
         {
             RAnkleRoll = i;
             m_rleg_ids.push_back(i);
@@ -306,22 +306,22 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
     vector<string> simplelednames;
     simplifyNames(lednames, simplelednames);
     
-    for (int i=0; i<simplelednames.size(); i++) 
+    for (unsigned int i=0; i<simplelednames.size(); i++) 
     {
         addLedActionator(lednames[i]);
-        if (simplelednames[i].compare("lear") == 0 || simplelednames[i].compare("earsledleft") == 0)
+        if (simplelednames[i].find("lear") != string::npos || simplelednames[i].find("earsledleft") != string::npos)
             LEar = i;
-        else if (simplelednames[i].compare("rear") == 0 || simplelednames[i].compare("earsledright") == 0)
+        else if (simplelednames[i].find("rear") != string::npos || simplelednames[i].find("earsledright") != string::npos)
             REar = i;
-        else if (simplelednames[i].compare("leye") == 0 || simplelednames[i].compare("faceledleft") == 0)
+        else if (simplelednames[i].find("leye") != string::npos || simplelednames[i].find("faceledleft") != string::npos)
             LEye = i;
-        else if (simplelednames[i].compare("reye") == 0 || simplelednames[i].compare("faceledright") == 0)
+        else if (simplelednames[i].find("reye") != string::npos || simplelednames[i].find("faceledright") != string::npos)
             REye = i;
-        else if (simplelednames[i].compare("chest") == 0 || simplelednames[i].compare("chestboardled") == 0)
+        else if (simplelednames[i].find("chest") != string::npos || simplelednames[i].find("chestboardled") != string::npos)
             Chest = i;
-        else if (simplelednames[i].compare("lfoot") == 0 || simplelednames[i].compare("lfootled") == 0)
+        else if (simplelednames[i].find("lfoot") != string::npos || simplelednames[i].find("lfootled") != string::npos)
             LFoot = i;
-        else if (simplelednames[i].compare("rfoot") == 0 || simplelednames[i].compare("rfootled") == 0)
+        else if (simplelednames[i].find("rfoot") != string::npos || simplelednames[i].find("rfootled") != string::npos)
             RFoot = i;
     }
 }
@@ -334,7 +334,7 @@ void NUActionatorsData::setAvailableCameraSettings(const vector<string>& cameras
     vector<string> simplecamerasettingnames;
     simplifyNames(camerasettingnames, simplecamerasettingnames);
     
-    for (int i=0; i<simplecamerasettingnames.size(); i++) 
+    for (unsigned int i=0; i<simplecamerasettingnames.size(); i++) 
     {
         addCameraSettingActionator(camerasettingnames[i]);
         if (simplecamerasettingnames[i].compare("resolution") == 0)
@@ -375,7 +375,7 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     vector<string> simpleactionatornames;
     simplifyNames(actionatornames, simpleactionatornames);
     
-    for (int i=0; i<simpleactionatornames.size(); i++) 
+    for (unsigned int i=0; i<simpleactionatornames.size(); i++) 
     {
         if (simpleactionatornames[i].compare("sound") == 0)
             addActionator(Sound, actionatornames[i], actionator_t::SOUND);
@@ -449,7 +449,7 @@ string NUActionatorsData::simplifyName(const string& input)
 {
     string namebuffer, currentletter;
     // compare each letter to a space and an underscore and a forward slash
-    for (int j=0; j<input.size(); j++)
+    for (unsigned int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
@@ -466,7 +466,7 @@ string NUActionatorsData::simplifyName(const string& input)
 void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
 {
     vector<string> simplifiednames;
-    for (int i=0; i<input.size(); i++)
+    for (unsigned int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
     output = simplifiednames;
 }
@@ -480,7 +480,7 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
  */
 void NUActionatorsData::removeCompletedPoints(double currenttime)
 {
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
 }
 
@@ -554,6 +554,8 @@ bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float&
             gain = PositionActionators[id]->m_points[lastindex]->Data[2]; 
             return true;
         }
+        else
+            return false;
     }
 }
 
@@ -886,8 +888,8 @@ bool NUActionatorsData::addSound(sound_id_t soundid, double time)
     {
         data[0] = soundid;
         Sound->addPoint(time, data);
+        return true;
     }
-
 }
 
 /*! @brief Adds a single teleportation command
@@ -910,6 +912,7 @@ bool NUActionatorsData::addTeleportation(double time, float x, float y, float be
         data[1] = y;
         data[2] = bearing;
         Teleporter->addPoint(time, data);
+        return true;
     }
 }
 
@@ -956,7 +959,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
     else 
     {
         static vector<float> data (3, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = positions[i];
             data[1] = velocities[i];
@@ -1009,7 +1012,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
     else 
     {
         static vector<float> data (2, 0);
-        for (int i=0; i<selectedjoints.size(); i++)
+        for (unsigned int i=0; i<selectedjoints.size(); i++)
         {
             data[0] = torques[i];
             data[1] = gains[i];
@@ -1027,7 +1030,7 @@ void NUActionatorsData::summaryTo(ostream& output)
 {
     if (m_all_actionators.size() == 0)
         output << "NONE!" << endl;
-    for (int i=0; i<m_all_actionators.size(); i++)
+    for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->summaryTo(output);
 }
 
@@ -1039,11 +1042,13 @@ void NUActionatorsData::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return output;
 }
 
 istream& operator>> (istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    return input;
 }
 
 

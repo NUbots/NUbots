@@ -21,7 +21,7 @@
 
 #include "NUSensors.h"
 #include "NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
@@ -49,7 +49,8 @@ NUSensors::~NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::~NUSensors" << endl;
 #endif
-    delete m_data;
+    if (m_data != NULL)
+        delete m_data;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -62,6 +63,21 @@ NUSensorsData* NUSensors::update()
 #endif
     m_current_time = nusystem->getTime();
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
+    calculateSoftSensors();
+    
+#if DEBUG_NUSENSORS_VERBOSITY > 3
+    static bool firstrun = true;
+    if (firstrun)
+    {
+        debug << "NUSensors::update(). Available Sensors:" << endl;
+        m_data->summaryTo(debug);
+        firstrun = false;
+    }
+#endif
+#if DEBUG_NUSENSORS_VERBOSITY > 5
+    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
+    m_data->summaryTo(debug);
+#endif
     return getData();
 }
 

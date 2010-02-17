@@ -9,7 +9,7 @@
 #ifndef WALKCONFIG_H
 #define WALKCONFIG_H
 
-#include "../motionconfig.h"
+#include "motionconfig.h"
 
 #ifdef USE_WALK
     #define USE_WALKOPTIMISER_${USE_WALKOPTIMISER}

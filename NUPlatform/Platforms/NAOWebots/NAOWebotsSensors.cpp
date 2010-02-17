@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsSensors.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 
@@ -37,8 +37,8 @@ static string temp_distance_names[] = {string("US/TopLeft"), string("US/BottomLe
 vector<string> NAOWebotsSensors::m_distance_names(temp_distance_names, temp_distance_names + sizeof(temp_distance_names)/sizeof(*temp_distance_names));
 
 // init m_foot_names:
-static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBR"), string("LFsrBL"), \
-                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBR"), string("RFsrBL")};
+static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBL"), string("LFsrBR"), \
+                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBL"), string("RFsrBR")};
 vector<string> NAOWebotsSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
 
 // init m_button_names:
@@ -148,22 +148,6 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     copyFromFootSole();
     copyFromFootBumper();
     copyFromGPS();
-    
-    calculateSoftSensors();
-    
-#if DEBUG_NUSENSORS_VERBOSITY > 3
-    static bool firstrun = true;
-    if (firstrun)
-    {
-        debug << "NAOWebotsSensors::NAOWebotsSensors(). Available Sensors:" << endl;
-        m_data->summaryTo(debug);
-        firstrun = false;
-    }
-#endif
-#if DEBUG_NUSENSORS_VERBOSITY > 5
-    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
-    m_data->summaryTo(debug);
-#endif
 }
 
 /*! @brief Copies the joint data into m_data

@@ -77,7 +77,7 @@ public:
     
     friend ostream& operator<< (ostream& output, const sensor_t& p_sensor);
     friend istream& operator>> (istream& input, sensor_t& p_sensor);
-    float& operator[] (const int index);
+    float& operator[] (const unsigned int index);
     int size();
 public:
     string Name;                //!< the sensor's name

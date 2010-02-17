@@ -1,9 +1,9 @@
-/*! @file NUCamera.h
-    @brief Declaration of a base camera class
-
+/*! @file NUNAO.h
+    @brief Declaration of NUNAO class.
+ 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,42 +17,39 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#ifndef NUNAO_H
+#define NUNAO_H
 
-#ifndef NUCAMERA_H
-#define NUCAMERA_H
+#include "NUbot.h"
 
-#include "NUPlatform/NUActionators.h"
-#include "Tools/Image/NUimage.h"
+#include <albroker.h>
+#include <dcmproxy.h>
+#include <almemoryfastaccess.h>
+using namespace AL;
 
-class NUCamera
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <time.h>
+using namespace std;
+
+class NUNAO : public ALModule
 {
 public:
-	enum setting
-	{
-		Brightness,
-		Contrast,
-		Saturation,
-		Hue,
-		RedChroma,
-		BlueChroma,
-		Gain,
-		AutoExposition,
-		AutoWhiteBalance,
-		AutoGain,
-		Exposure,
-		FramesPerSecond,
-		CameraSelect
-	};
-
-    virtual ~NUCamera();
-    virtual NUimage grabNewImage();
-    virtual void setControlSetting(unsigned int settingID, int value);
-    virtual int getControlSetting(unsigned int id);
+    static ALPtr<ALBroker> m_broker;
+    NUbot* m_nubot;
     
-private:
-    virtual void copyToHardwareCommunications();
-};
+public:
+    NUNAO(ALPtr<ALBroker> pBroker, const string& pName);
+    virtual ~NUNAO();
+    
+    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage) {};
+    
+    bool innerTest() {return true;};
+}; 
 
 #endif
+
+
 

@@ -21,7 +21,7 @@
 
 #include "actionator_t.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <algorithm>
 
@@ -146,10 +146,10 @@ void actionator_t::summaryTo(ostream& output)
         output << "EMPTY" << endl;
     else {
         output << endl;
-        for (int i=0; i<m_points.size(); i++)
+        for (unsigned int i=0; i<m_points.size(); i++)
         {
             output << m_points[i]->Time << ": ";
-            for (int j=0; j<m_points[i]->Data.size(); j++)
+            for (unsigned int j=0; j<m_points[i]->Data.size(); j++)
                 output << m_points[i]->Data[j] << " ";
             output << endl;
         }
@@ -164,10 +164,12 @@ void actionator_t::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const actionator_t& p_actionator)
 {
     //! @todo TODO: implement this function
+    return output;
 }
 
 istream& operator>> (istream& input, actionator_t& p_actionator)
 {
     //! @todo TODO: implement this function
+    return input;
 }
 

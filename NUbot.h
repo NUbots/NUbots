@@ -27,8 +27,7 @@
 #define NUBOT_H
 
 #include "targetconfig.h"
-#include "Motion/Walks/walkconfig.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
@@ -77,6 +76,7 @@ public:
     int waitForVisionCompletion();
 private:
     void createThreads();
+    void createErrorHandling();
     
 public:
     NUPlatform* platform;               //!< interface to robot platform
