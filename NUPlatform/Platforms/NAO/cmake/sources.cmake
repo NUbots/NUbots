@@ -22,7 +22,8 @@ SET (YOUR_SRCS  NUNAO.cpp
                 NAOCamera.cpp NAOCamera.h
                 NAOSensors.cpp NAOSensors.h
                 NAOActionators.cpp NAOActionators.h
-                NAOSystem.cpp NAOSystem.h )
+                NAOSystem.cpp NAOSystem.h 
+		NAOIO.cpp )
 ####################################################################################
 
 # I need to prefix each file with the correct path

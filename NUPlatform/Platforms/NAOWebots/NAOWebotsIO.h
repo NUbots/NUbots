@@ -1,9 +1,12 @@
-/*! @file NUPlatform.h
-    @brief Declaration of a base nuplatform class.
+/*! @file NAOWebotsIO.h
+    @brief Declaration of naoio class.
+ 
+    @class NAOWebotsIO
+    @brief NAOWebotsIO class for input and output to streams, files and networks on the NAO in Webots platform
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,44 +22,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUPLATFORM_H
-#define NUPLATFORM_H
+#ifndef NAOWebotsIO_H
+#define NAOWebotsIO_H
 
-#include <string>
-using namespace std;
+#include "NUPlatform/NUIO.h"
 
-#include "NUCamera.h"
-#include "NUSensors.h"
-#include "NUActionators.h"
-#include "NUSystem.h"
-#include "NUIO.h"
-
-class NUPlatform
+class NAOWebotsIO: public NUIO
 {
 // Functions:
 public:
-    virtual ~NUPlatform();
-    
-    virtual void getName(string& name);
-    virtual void getNumber(int& number);
-    virtual void getTeamColour(string& colour);
-    virtual void getTeamNumber(int& number);
+    NAOWebotsIO(int probotnumber);
+    ~NAOWebotsIO();
     
 protected:
 private:
     
 // Members:
 public:
-    NUSystem* system;
-    NUIO* io;
-    NUCamera* camera;
-    NUSensors* sensors;
-    NUActionators* actionators;
 protected:
-    string m_name;
-    int m_number;
-    string m_team_colour;
-    int m_team_number;
 private:
     
 };

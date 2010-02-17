@@ -15,18 +15,17 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 
+IF(DEBUG)
+    MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
+ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  nao_soccer_player_blue.cpp
-		NAOWebotsPlatform.cpp NAOWebotsPlatform.h
-                NAOWebotsCamera.cpp NAOWebotsCamera.h
-                NAOWebotsSensors.cpp NAOWebotsSensors.h
-                NAOWebotsActionators.cpp NAOWebotsActionators.h
-                NAOWebotsSystem.cpp NAOWebotsSystem.h
-		NAOWebotsIO.cpp )
+SET (YOUR_SRCS  Thread
+		UdpPort
+)
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  JWebots
+SET (YOUR_DIRS  	
 )
 ####################################################################################
 

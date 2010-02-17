@@ -24,6 +24,7 @@
 #include "NAOSensors.h"
 #include "NAOActionators.h"
 #include "NAOSystem.h"
+#include "NAOIO.h"
 
 #include "debug.h"
 
@@ -34,8 +35,15 @@ NAOPlatform::NAOPlatform()
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "NAOPlatform::NAOPlatform()" << endl;
 #endif
+    /*! @todo TODO: I need to set
+     string m_name;
+     int m_number;
+     string m_team_colour;
+     int m_team_number;
+     */
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules!
-    nusystem = system;                        // we access the system in other modules using this pointer.    
+    nusystem = system;                        // we access the system in other modules using this pointer.  
+    io = new NAOIO(m_number);
     camera = new NAOCamera();
     sensors = new NAOSensors();
     actionators = new NAOActionators();
