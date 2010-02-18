@@ -513,6 +513,8 @@ void* runThreadVision(void* arg)
     NUSensorsData* data = NULL;
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
+    cout << "Initial JobList ----------------------------------------" << endl;
+    joblist.summaryTo(debug);
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -542,6 +544,7 @@ void* runThreadVision(void* arg)
 #endif
         try
         {
+            *nubot->platform->io >> joblist;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             //          image = nubot->platform->camera->getData()
             data = nubot->platform->sensors->getData();
@@ -561,6 +564,8 @@ void* runThreadVision(void* arg)
             //          cmds = nubot->lcs->process(lcsactions)
             //nubot->platform->actionators->process(m_actions);
             //joblist.clear();                           // assume that all of the jobs have been completed
+            joblist.summaryTo(debug);
+            //*nubot->platform->io << joblist;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e) 

@@ -30,6 +30,7 @@
 class NUSensorsData;
 class NUActionatorsData;
 class NUCamera;
+class JobList;
 
 class NUIO
 {
@@ -38,8 +39,15 @@ public:
     NUIO(int robotnumber);
     virtual ~NUIO();
     
+    // Sensor data streaming
     friend NUIO& operator<<(NUIO& io, const NUSensorsData& sensors);
     friend NUIO& operator<<(NUIO& io, const NUSensorsData* sensors);
+    
+    // JobList streaming
+    friend NUIO& operator<<(NUIO& io, JobList& jobs);
+    friend NUIO& operator<<(NUIO& io, JobList* jobs);
+    friend NUIO& operator>>(NUIO& io, JobList& jobs);
+    friend NUIO& operator>>(NUIO& io, JobList* jobs);
     
 protected:
 private:

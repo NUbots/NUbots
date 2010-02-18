@@ -21,6 +21,7 @@
 
 #include "NUIO.h"
 #include "NUPlatform/NUPlatform.h"
+#include "Behaviour/Jobs.h"
 #include "NUIO/RoboCupGameControlData.h"
 #include "NUIO/NetworkPorts.h"
 
@@ -77,7 +78,9 @@ NUIO::~NUIO()
         delete m_jobs_port;
 }
 
-/*! @brief Sends the sensors data to the network and file
+/*! @brief Stream insertion operator for NUSensorsData
+    @param io the nuio stream object
+    @param sensors the sensor data to stream
  */
 NUIO& operator<<(NUIO& io, const NUSensorsData& sensors)
 {
@@ -88,11 +91,62 @@ NUIO& operator<<(NUIO& io, const NUSensorsData& sensors)
     return io;
 }
 
-/*! @brief Sends the sensors data to the network and file
+/*! @brief Stream insertion operator for a pointer to NUSensorsData
+    @param io the nuio stream object
+    @param sensors the pointer to the sensor data to put in the stream
  */
 NUIO& operator<<(NUIO& io, const NUSensorsData* sensors)
 {
     io << *sensors;
+    return io;
+}
+
+/*! @brief Stream insertion operator for a JobList
+    @param io the nuio stream object
+    @param jobs the job list to put in the stream
+ */
+NUIO& operator<<(NUIO& io, JobList& jobs)
+{
+    stringstream buffer;
+    buffer << jobs;
+    
+    io.m_jobs_port->sendData(buffer);
+    return io;
+}
+
+/*! @brief Stream insertion operator for a pointer to a JobList
+    @param io the nuio stream object
+    @param jobs the pointer to the job list to put in the stream
+ */
+NUIO& operator<<(NUIO& io, JobList* jobs)
+{
+    io << *jobs;
+    return io;
+}
+
+/*! @brief Stream extraction operator for a JobList
+    @param io the nuio stream object to extract the new jobs from
+    @param jobs the job list to add the extracted jobs
+ */
+NUIO& operator>>(NUIO& io, JobList& jobs)
+{
+    network_data_t netdata = io.m_jobs_port->receiveData();
+    if (netdata.size > 0)
+    {
+        stringstream buffer;
+        buffer.write(reinterpret_cast<char*>(netdata.data), netdata.size);
+        buffer >> jobs;
+    }
+    return io;
+}
+
+/*! @brief Stream extraction operator for a JobList
+    @param io the nuio stream object to extract the new jobs from
+    @param jobts the pointer to the job list to add the extracted jobs
+ */
+NUIO& operator>>(NUIO& io, JobList* jobs)
+{
+    io >> *jobs;
     return io;
 }
 
