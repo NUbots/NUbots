@@ -111,7 +111,7 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */
-ostream& operator<< (ostream& output, const NUimage& p_image)
+std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
 {
     output << p_image.imageWidth << " ";
     output << p_image.imageHeight << " ";
@@ -129,7 +129,7 @@ ostream& operator<< (ostream& output, const NUimage& p_image)
 /*! @brief Get the entire contents of the NUSensorsData class from a stream
  */
 
-istream& operator>> (istream& input, NUimage& p_image)
+std::istream& operator>> (std::istream& input, NUimage& p_image)
 {
     int width, height;
     char temp;
@@ -143,7 +143,7 @@ istream& operator>> (istream& input, NUimage& p_image)
     {
        for(int x = 0; x < width; x++)
         {
-            output.read((char*) &p_image.image[y][x], sizeof(p_image.image[y][x]));
+            input.read((char*) &p_image.image[y][x], sizeof(p_image.image[y][x]));
         }
     }
     return input;

@@ -36,7 +36,7 @@ public:
     void setImageDimensions(int newWidth, int newHeight);
 
     friend std::ostream& operator<< (std::ostream& output, const NUimage& p_nuimage);
-    //friend std::istream& operator>> (std::istream& input, NUimage& p_nuimage);
+    friend std::istream& operator>> (std::istream& input, NUimage& p_nuimage);
 
     int width() const
     {
