@@ -19,11 +19,26 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 
+#define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
+
+
+class Circle;
 class NUimage;
 
 //! Contains vision processing tools and functions.
 class Vision
 {
+    private:
+    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
+
+    int findYFromX(std::vector<Vector2<int> >&points, int x);
+    bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+    
+    double CalculateBearing(double cx);
+    double CalculateElevation(double cy);
+    double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
+
     public:
     //! FieldObjects Container
     FieldObjects* AllFieldObjects;
@@ -33,7 +48,16 @@ class Vision
     //! Destructor.
     ~Vision();
 
+    void ProcessFrame(NUimage& image, Horizon horizonLine);
 
+
+    void setLUT(unsigned char* newLUT);
+
+
+    void setImage(const NUimage* sourceImage);
+
+
+    void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);
     /*!
       @brief Produce a classified.
 
@@ -43,7 +67,7 @@ class Vision
       @param lookUpTable The colour classification lookup table. This table maps colours
       from the raw source image into the classified colour space.
       */
-    void classifyImage(ClassifiedImage &targetImage, const NUimage* sourceImage, const unsigned char *lookUpTable);
+    void classifyImage(ClassifiedImage &targetImage);
     /*!
       @brief Classifies an individual pixel.
       @param x The x coordinate of the pixel to be classified.
@@ -106,7 +130,7 @@ class Vision
     int findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
     static bool sortTransitionSegments(TransitionSegment a, TransitionSegment b);
 
-    std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
+    std::vector<Vector2<int> > findGreenBorderPoints(int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
@@ -114,17 +138,16 @@ class Vision
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
+    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
 
 
 
-    private:    
-    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
+    Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
 
-    int findYFromX(std::vector<Vector2<int> >&points, int x);
-    bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
-    void CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> startPoint, unsigned char currentColour, int length, int spacing, int direction);
+
+
+
 
 
 };

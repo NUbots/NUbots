@@ -1,8 +1,10 @@
 #include "virtualnubot.h"
 #include "Tools/FileFormats/LUTTools.h"
-#include <QDebug>
+//#include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
+
+
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -19,6 +21,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
     hasImage = false;
+    //debug<<"VirtualNUBot started";
 }
 
 virtualNUbot::~virtualNUbot()
@@ -101,7 +104,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     {
         QString text = QString("ZLIB Error: ");
         text.append(QString::number(err));
-        qDebug() << "Error occured in Extraction: " << text;
+        //qDebug() << "Error occured in Extraction: " << text;
         return;
     }
 
@@ -125,8 +128,11 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
 
 void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
 {
-    vision.classifyImage(classImage,&rawImage,classificationTable);
+    //qDebug() << "Generating CLASS Image";
+    vision.classifyImage(classImage);
+    //qDebug() << "Displaying CLASS Image";
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
+    //qDebug() << "Returning ";
     return;
 }
 
@@ -137,6 +143,7 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(NUimage& image)
 {
+    //qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -161,31 +168,35 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
-
+    //qDebug() << "Start switch";
     switch (image.imageFormat)
     {
         case pixels::YUYV:
+            //qDebug() << "CASE YUYVGenerate Classified Image: START";
+            vision.setImage(&image);
+            vision.setLUT(classificationTable);
             generateClassifiedImage(image);
+            //qDebug() << "Generate Classified Image: finnished";
 
             //! Find the green edges
-            points = vision.findGreenBorderPoints(&image,classificationTable,spacings,&horizonLine);
+            points = vision.findGreenBorderPoints(spacings,&horizonLine);
             emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
-
+            //qDebug() << "Find Edges: finnished";
             //! Find the Field border
             points = vision.getConvexFieldBorders(points);
             points = vision.interpolateBorders(points,spacings);
             emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
-
+            //qDebug() << "Find Field border: finnished";
             //! Scan Below Horizon Image
             vertScanArea = vision.verticalScan(points,spacings);
             //! Scan Above the Horizon
             horiScanArea = vision.horizontalScan(points,spacings);
-
+            //qDebug() << "Generate Scanlines: finnished";
             //! Classify Line Segments
 
             vision.ClassifyScanArea(vertScanArea);
             vision.ClassifyScanArea(horiScanArea);
-
+            //qDebug() << "Classify Scanlines: finnished";
 
 
             //! Extract and Display Vertical Scan Points:
@@ -241,23 +252,20 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             //! Extract Detected Line & Corners
             //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
-            qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+
 
             emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
             emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-
+            //qDebug() << "disaplay scanPaths: finnished";
 
             //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
             //robotCandidates = vision.classifyCandidates(verticalsegments);
             //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
 
-            emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
-            emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-
 
             //! Identify Field Objects
-            qDebug() << "PREclassifyCandidates";
+            //qDebug() << "PREclassifyCandidates";
 
             mode = ROBOTS;
             method = Vision::PRIMS;
@@ -270,25 +278,25 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                         validColours.push_back(ClassIndex::white);
                         validColours.push_back(ClassIndex::red);
                         validColours.push_back(ClassIndex::shadow_blue);
-                        qDebug() << "PRE-ROBOT";
+                        //qDebug() << "PRE-ROBOT";
                         tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
-                        qDebug() << "POST-ROBOT";
+                        //qDebug() << "POST-ROBOT";
                         robotClassifiedPoints = 0;
                     break;
                     case BALL:
                         validColours.push_back(ClassIndex::orange);
                         validColours.push_back(ClassIndex::red_orange);
                         validColours.push_back(ClassIndex::yellow_orange);
-                        qDebug() << "PRE-BALL";
-                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.3, 3.0, 2, method);
-                        qDebug() << "POST-BALL";
+                        //qDebug() << "PRE-BALL";
+                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
+                        //qDebug() << "POST-BALL";
                     break;
                     case GOALS:
                         validColours.push_back(ClassIndex::yellow);
                         validColours.push_back(ClassIndex::blue);
-                        qDebug() << "PRE-GOALS";
-                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                        qDebug() << "POST-GOALS";
+                        //qDebug() << "PRE-GOALS";
+                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                        //qDebug() << "POST-GOALS";
                     break;
                 }
                 while (tempCandidates.size())
@@ -298,11 +306,22 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 }
             }
             emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-            qDebug() << "POSTclassifyCandidates";
+            //qDebug() << "POSTclassifyCandidates";
 
+            Circle circ = vision.DetectBall(candidates);
+            //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
+            if(circ.isDefined)
+            {
+                //! Draw Ball:
+                emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+            }
+            else
+            {
+                emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+            }
+            //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
-            qDebug()<< (verticalPoints.size() + horizontalPoints.size() + robotClassifiedPoints) * 100/(image.height()*image.width()) << " percent of image classified";
-            emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
             break;
         default:
@@ -330,7 +349,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels
     }
 
     // Create Classifed Image based on lookup table.
-    vision.classifyImage(previewClassImage,&rawImage,tempLut);
+    vision.classifyPreviewImage(previewClassImage,tempLut);
 
     // Remove selection from temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
