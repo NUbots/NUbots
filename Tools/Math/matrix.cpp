@@ -1,5 +1,5 @@
 //#include "stdafx.h"
-#include "Matrix.h"
+#include "matrix.h"
 #include <string.h>
 #include <iostream>
 #include <iomanip>
