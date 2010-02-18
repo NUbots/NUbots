@@ -144,12 +144,9 @@ ostream& operator<<(ostream& output, const Job* job)
  */
 istream& operator>>(istream& input, Job** job)
 {
-    debug << ">>Job*" << endl;
-    if (*job != NULL)
-    {   // If the passed in job is not NULL, delete it
-        delete *job;
-        *job = NULL;
-    }
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    debug << ">>Job**" << endl;
+#endif
     
     unsigned int tempuint = 0;
     static char buffer[1024];
@@ -202,6 +199,10 @@ istream& operator>>(istream& input, Job** job)
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
             break;
     }    
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    if (*job != NULL)
+        (*job)->summaryTo(debug);
+#endif
     return input;
 }
 
