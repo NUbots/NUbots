@@ -147,6 +147,12 @@ void JuppWalk::initWalkParameters()
     m_gait_leg_gains[0].push_back(65);
     m_gait_leg_gains[0].push_back(65);
     m_gait_leg_gains[0].push_back(65);
+    
+    // this is a hack so that I can save a set of walk parameters
+    /*WalkParameters p;
+    getWalkParameters(p);
+    ofstream t("jupptestparameters.wp");
+    t << p;*/
 }
 
 /*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
