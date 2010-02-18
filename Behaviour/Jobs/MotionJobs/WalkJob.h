@@ -6,7 +6,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ class WalkJob : public MotionJob
 {
 public:
     WalkJob(const vector<float>& speed);
+    WalkJob(istream& input);
     ~WalkJob();
     
     void setSpeed(const vector<float>& newspeed);
@@ -41,8 +42,10 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const WalkJob& job);
+    friend ostream& operator<<(ostream& output, const WalkJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_walk_speed;                 //!< the walk speed x (cm/s), y (cm/s) and theta (rad/s)
 };

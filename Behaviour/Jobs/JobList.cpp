@@ -77,7 +77,7 @@ JobList::JobList()
     
     ofstream tempjoblog;
     tempjoblog.open("tempjobs.txt");
-    tempjoblog << panjob;
+    tempjoblog << walkjob;
     tempjoblog.close();
     
     // I can't possibly know the type of job in the log, so
