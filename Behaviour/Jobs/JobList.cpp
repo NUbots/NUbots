@@ -47,6 +47,7 @@ JobList::JobList()
     SaveJob* savejob = new SaveJob(300.1, saveposition);
     BlockJob* blockjob = new BlockJob(69, saveposition);
     HeadJob* headjob = new HeadJob(9000, saveposition);
+    WalkToPointJob* pointjob = new WalkToPointJob(33, saveposition);
     // Test Kick Job
     vector<float> kickposition(2, 0);
     vector<float> kicktarget(2, 0);
@@ -72,12 +73,17 @@ JobList::JobList()
     ChestLedJob ledjob = ChestLedJob(0, colour);*/
     
     addMotionJob(savejob);
+    addMotionJob(blockjob);
+    addMotionJob(headjob);
     addMotionJob(kickjob);
+    addMotionJob(nodjob);
+    addMotionJob(panjob);
     addMotionJob(walkjob);
+    addMotionJob(pointjob);
     
     ofstream tempjoblog;
     tempjoblog.open("tempjobs.txt");
-    tempjoblog << walkjob;
+    tempjoblog << pointjob;
     tempjoblog.close();
     
     // I can't possibly know the type of job in the log, so

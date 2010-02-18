@@ -171,9 +171,9 @@ istream& operator>>(istream& input, Job** job)
     // Now that we have the id (and the type) create a new Job of the correct concrete type
     switch (jobid) 
     {
-        /*case Job::MOTION_WALK_TO_POINT:
+        case Job::MOTION_WALK_TO_POINT:
             *job = new WalkToPointJob(jobtime, input);
-            break;*/
+            break;
         case Job::MOTION_WALK:
             *job = new WalkJob(input);
             break;
