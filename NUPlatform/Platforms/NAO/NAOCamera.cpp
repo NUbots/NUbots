@@ -28,7 +28,7 @@
 #undef __STRICT_ANSI__
 #include <linux/videodev.h>
 #include <linux/version.h>
-#include <linux/i2c-dev.h>
+#include <bn/i2c/i2c-dev.h>
 #define __STRICT_ANSI__
 
 #ifndef V4L2_CID_AUTOEXPOSURE
