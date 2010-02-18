@@ -30,18 +30,6 @@ NUCamera::~NUCamera()
 {
 }
 
-NUimage NUCamera::grabNewImage()
-{
-}
-
-void NUCamera::setControlSetting(unsigned int settingID, int value)
-{
-}
-
-int NUCamera::getControlSetting(unsigned int id)
-{
-}
-
 void NUCamera::copyToHardwareCommunications()
 {
     // implementation in PlatformCamera!
