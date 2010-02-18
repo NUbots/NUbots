@@ -20,12 +20,14 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
-CameraSettings.cpp
+SET (YOUR_SRCS
+Line.cpp
+LSFittedLine.cpp
+matrix.cpp  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS
 )
 ####################################################################################
 

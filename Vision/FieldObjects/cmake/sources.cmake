@@ -20,12 +20,17 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
-CameraSettings.cpp
+SET (YOUR_SRCS
+AmbiguousObject.cpp
+FieldObjects.cpp
+MobileObject.cpp
+Object.cpp
+Self.cpp
+StationaryObject.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS
 )
 ####################################################################################
 
