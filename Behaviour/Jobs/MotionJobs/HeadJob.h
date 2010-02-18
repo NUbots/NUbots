@@ -7,7 +7,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class HeadJob : public MotionJob
 {
 public:
     HeadJob(double time, const vector<float>& position);
+    HeadJob(double time, istream& input);
     ~HeadJob();
     
     void setPosition(double time, const vector<float>& newposition);
@@ -42,8 +43,10 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const HeadJob& job);
+    friend ostream& operator<<(ostream& output, const HeadJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_head_position;                 //!< the head position [yaw (rad), pitch (rad), roll (rad)]
 };

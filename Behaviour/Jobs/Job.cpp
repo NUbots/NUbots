@@ -186,17 +186,19 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_SAVE:
             *job = new SaveJob(jobtime, input);
             break;
-        /*case Job::MOTION_HEAD:
+        case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
             break;
-        case Job::MOTION_NOD:
+        /*case Job::MOTION_NOD:
             *job = new NodJob(jobtime, input);
             break;
         case Job::MOTION_PAN:
             *job = new PanJob(jobtime, input);
             break;
+         */
         default:
-            break;*/
+            errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
+            break;
     }    
     return input;
 }
