@@ -32,6 +32,7 @@
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
 #ifdef USE_VISION
+    #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
 #endif
 
@@ -82,6 +83,7 @@ public:
     NUPlatform* platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* vision;                 //!< vision module
+        NUimage* image;
     #endif
     #ifdef USE_LOCALISATION
         Localisation* localisation;     //!< localisation module
