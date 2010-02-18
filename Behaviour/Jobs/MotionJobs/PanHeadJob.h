@@ -7,7 +7,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NODHEADJOB_H
-#define NODHEADJOB_H
+#ifndef PANHEADJOB_H
+#define PANHEADJOB_H
 
 #include "../MotionJob.h"
 #include <vector>
@@ -34,6 +34,7 @@ class PanHeadJob : public MotionJob
 {
 public:
     PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits);
+    PanHeadJob(double time, istream& input);
     ~PanHeadJob();
     
     void setPan(double period, const vector<float>& centre, const vector<float>& limits);
@@ -42,8 +43,10 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const PanHeadJob& job);
+    friend ostream& operator<<(ostream& output, const PanHeadJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
     vector<float> m_limit_positions;                 //!< the limit positions for the pan [lower (rad), upper(rad)]

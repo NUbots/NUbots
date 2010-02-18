@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include "PanHeadJob.h"
+#include "debug.h"
 
 /*! @brief Constructs a PanHeadJob
  
@@ -27,11 +28,44 @@
     @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
     @param limits the lower and upper angle limits for the pan (rad)
  */
-PanHeadJob::PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_NOD)
+PanHeadJob::PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = period;     
     m_centre_position = centre;
     m_limit_positions = limits;
+}
+
+/*! @brief Constructs a PanHeadJob from stream data
+    @param time the time in ms to perform the kick
+    @param input the stream from which to read the job specific data
+ */
+PanHeadJob::PanHeadJob(double time, istream& input) : MotionJob(Job::MOTION_PAN)
+{
+    m_job_time = time;
+    char buffer[1024];
+    // read in the centre position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_centre_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the centre position vector
+    m_centre_position = vector<float>(m_centre_position_size, 0);
+    for (unsigned int i=0; i<m_centre_position_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_centre_position[i] = *reinterpret_cast<float*>(buffer);
+    }
+    
+    // read in the limit position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_limit_positions_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the limit position vector
+    m_limit_positions = vector<float>(m_limit_positions_size, 0);
+    for (unsigned int i=0; i<m_limit_positions_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_limit_positions[i] = *reinterpret_cast<float*>(buffer);
+    }
 }
 
 /*! @brief WalkJob destructor
@@ -98,13 +132,55 @@ void PanHeadJob::csvTo(ostream& output)
     output << endl;
 }
 
-ostream& PanHeadJob::operator<< (ostream& output)
+/*! @brief A helper function to ease writing Job objects to classes
+ 
+ This function calls its parents versions of the toStream, each parent
+ writes the members introduced at that level
+ 
+ @param output the stream to write the job to
+ */
+void PanHeadJob::toStream(ostream& output) const
 {
+    debug << "PanHeadJob::toStream" << endl;
+    Job::toStream(output);                  // This writes data introduced at the base level
+    MotionJob::toStream(output);            // This writes data introduced at the motion level
+                                            // Then we write PanHeadJob specific data
+    unsigned int m_centre_position_size = m_centre_position.size();
+    output.write((char*) &m_centre_position_size, sizeof(m_centre_position_size));
+    for (unsigned int i=0; i<m_centre_position_size; i++)
+        output.write((char*) &m_centre_position[i], sizeof(m_centre_position[i]));
+    unsigned int m_limit_positions_size = m_limit_positions.size();
+    output.write((char*) &m_limit_positions_size, sizeof(m_limit_positions_size));
+    for (unsigned int i=0; i<m_limit_positions_size; i++)
+        output.write((char*) &m_limit_positions[i], sizeof(m_limit_positions[i]));
+}
+
+/*! @relates PanHeadJob
+ @brief Stream insertion operator for a PanHeadJob
+ 
+ @param output the stream to write to
+ @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const PanHeadJob& job)
+{
+    debug << "<<PanHeadJob" << endl;
+    job.toStream(output);
     return output;
 }
 
-istream& PanHeadJob::operator>> (istream& input)
+/*! @relates PanHeadJob
+ @brief Stream insertion operator for a pointer to PanHeadJob
+ 
+ @param output the stream to write to
+ @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const PanHeadJob* job)
 {
-    return input;
+    debug << "<<PanHeadJob" << endl;
+    if (job != NULL)
+        job->toStream(output);
+    else
+        output << "NULL";
+    return output;
 }
 
