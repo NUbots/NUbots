@@ -16,8 +16,10 @@ public:
     QSize sizeHint() const;
 
 protected:
+        void keyPressEvent ( QKeyEvent * e );
         void mousePressEvent ( QMouseEvent * event );
         void mouseMoveEvent ( QMouseEvent * event );
+        void wheelEvent ( QWheelEvent * event );
         void initializeGL();
         void paintGL();
         void resizeGL(int width, int height);
@@ -32,6 +34,9 @@ protected:
         float viewOrientation[3];
         QPoint dragStartPosition;
         QPoint prevDragPos;
+
+        bool light;
+
 };
 
 #endif // LOCWMGLDISPLAY_H

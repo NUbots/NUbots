@@ -12,6 +12,8 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent)
     viewOrientation[0] = 0.0f;
     viewOrientation[1] = 0.0f;
     viewOrientation[2] = 0.0f;
+    setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
+    light = true;
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -19,13 +21,40 @@ locWmGlDisplay::~locWmGlDisplay()
     return;
 }
 
+void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
+{
+    switch (e->key())
+    {
+        case Qt::Key_L:
+            light = !light;
+            if (!light)				// If Not Light
+            {
+                glDisable(GL_LIGHTING);		// Disable Lighting
+            }
+            else					// Otherwise
+            {
+                glEnable(GL_LIGHTING);		// Enable Lighting
+            }
+            update();
+            break;
+        default:
+            e->ignore();
+            QGLWidget::keyPressEvent(e);
+            break;
+    }
+    return;
+}
+
 void locWmGlDisplay::mousePressEvent ( QMouseEvent * event )
 {
-    if(event->button()==Qt::RightButton)
+    switch(event->button())
     {
-        dragStartPosition = event->pos();
-        prevDragPos = dragStartPosition;
-        qDebug() << "Drag Started!";
+        case Qt::RightButton:
+            dragStartPosition = event->pos();
+            prevDragPos = dragStartPosition;
+            break;
+        default:
+            QGLWidget::mousePressEvent(event);
     }
 }
 
@@ -44,71 +73,84 @@ void locWmGlDisplay::mouseMoveEvent ( QMouseEvent * event )
         prevDragPos = currPos;
         update();
     }
+    else
+    {
+        QGLWidget::mouseMoveEvent(event);
+    }
+}
+
+void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
+{
+    int magnitude = event->delta();
+    float zoomDistance = (float)magnitude / 10.0f;
+    viewTranslation[2] += zoomDistance;
+    update();
 }
 
 void locWmGlDisplay::initializeGL()
 {
-    glShadeModel(GL_SMOOTH);						// Enables Smooth Shading
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);					// Black Background
+    GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };         // Ambient Light Values
+    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };		// Diffuse Light Values
+    GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };        // Diffuse Light Values
+    GLfloat LightPosition[]= { 0.0f, 0.0f, 200.0f, 1.0f };	// Light Position
 
-    glClearDepth(1.0f);						// Depth Buffer Setup
-    glEnable(GL_DEPTH_TEST);						// Enables Depth Testing
-    glDepthFunc(GL_LEQUAL);						// The Type Of Depth Test To Do
+    quadratic = gluNewQuadric();
+    gluQuadricNormals(quadratic, GLU_SMOOTH);	// Create Smooth Normals
 
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Really Nice Perspective Calculations
-    glEnable (GL_LINE_SMOOTH);
+    glEnable(GL_TEXTURE_2D);                    // Enable Texture Mapping
+    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
 
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glClearDepth(1.0f);                         		// Depth Buffer Setup
+    glEnable(GL_DEPTH_TEST);					// Enables Depth Testing
+    glDepthFunc(GL_LEQUAL);					// The Type Of Depth Test To Do
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);		// Really Nice Perspective Calculations
+
+    // Load Textures
     glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
-
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);                   // Setup Alpha Blending
     QPixmap textureImage(QString(":/textures/FieldLines.png"));
     QPixmap grassTextureImage(QString(":/textures/grass_texture.jpg"));
     texture = bindTexture(textureImage);
     grassTexture = bindTexture(grassTextureImage);
 
-    quadratic = gluNewQuadric();
-    gluQuadricNormals(quadratic, GLU_SMOOTH);	// Create Smooth Normals ( NEW )
-    gluQuadricTexture(quadratic, GL_TRUE);		// Create Texture Coords ( NEW )
-
-
     // Lighting
-
-
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 0.0f, 1.0f };				 // Light Position ( NEW )
-    GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f }; // Ambient Light Values ( NEW )
-    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };				 // Diffuse Light Values ( NEW )
-    GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };				 // Diffuse Light Values ( NEW )
-    GLfloat MatSpecular[]= { 0.0f, 0.0f, 0.0f, 1.0f };				 // Diffuse Light Values ( NEW )
-    GLfloat MatEmission[]= { 0.0f, 0.0f, 0.0f, 1.0f };				 // Diffuse Light Values ( NEW )
-
+    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);			// Setup The Ambient Light
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);			// Setup The Diffuse Light
+    glLightfv(GL_LIGHT1, GL_SPECULAR,LightSpecular);			// Setup Specular Light
     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);			// Position The Light
-    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);				// Setup The Ambient Light
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);				// Setup The Diffuse Light
-    glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);				// Setup The Diffuse Light
-    glEnable(GL_LIGHT1);							// Enable Light One
 
+    glEnable(GL_LIGHT1);						// Enable Light One
 
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_DIFFUSE);
-    glMaterialfv(GL_FRONT,GL_SPECULAR,MatSpecular);
-    glMaterialfv(GL_FRONT,GL_EMISSION,MatEmission);
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,128.0f);
-    return;
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
 }
 
 void locWmGlDisplay::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);			// Clear The Screen And The Depth Buffer
-    glLoadIdentity();							// Reset The Current Modelview Matrix
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);         // Clear The Screen And The Depth Buffer
+    glLoadIdentity();						// Reset The Current Modelview Matrix
 
-    glTranslatef(viewTranslation[0],viewTranslation[1],viewTranslation[2]);					// Move Left 1.5 Units And Into The Screen 6.0
+    glEnable(GL_COLOR_MATERIAL);                                // Enable Material Colour Tracking
+    GLfloat MatSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };          // Diffuse Material Values
+    GLfloat MatEmission[]= { 0.0f, 0.0f, 0.0f, 1.0f };  	// Diffuse Material Values
+
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE); // Set Ambient and Diffuse Material Values to Track
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,MatSpecular);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,MatEmission);
+    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,100.0f);
+
+    glTranslatef(viewTranslation[0],viewTranslation[1],viewTranslation[2]); // Move to centre of field position.
     glRotatef(viewOrientation[0],1.0f,0.0f,0.0f); // Rotate about X-Axis
     glRotatef(viewOrientation[1],0.0f,1.0f,0.0f); // Rotate about Y-Axis
     glRotatef(viewOrientation[2],0.0f,0.0f,1.0f); // Rotate about Z-Axis
-    drawField();
-    drawBall(QColor(255,165,0,255), 0.0f, 0.0f);
 
+    // Position Lighting
+    GLfloat LightPosition[]= { 0.0f, 0.0f, 300.0f, 1.0f };      // Light Position
+    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);		// Set Light Position
+
+    drawField();        // Draw the Standard Field Layout.
+    drawBall(QColor(255,165,0,255), 0.0f, 0.0f);    // Draw the ball.
+    glFlush ();         // Run Queued Commands
     return;
 }
 
@@ -122,8 +164,8 @@ void locWmGlDisplay::drawField()
 
     glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
     glBindTexture(GL_TEXTURE_2D, grassTexture);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);    // Turn off filtering of textures
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);    // Turn off filtering of textures
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glBegin(GL_QUADS);
         glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
         glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
@@ -142,10 +184,9 @@ void locWmGlDisplay::drawField()
         glTexCoord2f(1.0f, 1.0f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
         glTexCoord2f(0.0f, 1.0f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
     glEnd();
+    glDisable(GL_BLEND);            // Turn Blending Off
+    glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
 
-    glDisable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
-    glEnable(GL_BLEND);		// Turn Blending On
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     drawGoal(QColor(0,0,255,255),-300,0.0,0.0);
     drawGoal(QColor(255,255,0,255),300,0.0,180.0);
     
@@ -157,37 +198,38 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
     float postRadius = 5;
     float crossBarRadius = 2.5;
     glPushMatrix();
-    glColor4f(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
+
     glTranslatef(x,y,0.0f);    // Move to centre of goal.
     glRotatef(facing,0.0f,0.0f,1.0f);				// Rotate The Pyramid On It's Y Axis
     glTranslatef(0.0f,70.0f,0.0f);    // Move to right post.
-    gluCylinder(quadratic,postRadius,postRadius,80.0f,32,32);	// Draw right post
+    gluCylinder(quadratic,postRadius,postRadius,80.0f,128,128);	// Draw right post
 
     glColor4f(1.0f,1.0f,1.0f,colour.alpha());
 
-        glBegin(GL_TRIANGLES);						// Drawing Using Triangles
-                glVertex3f( -postRadius, 0.0f, 40.0f);				// Top
-                glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);				// Bottom Left
-                glVertex3f( -postRadius,0.0f, 0.0f);				// Bottom Right
-        glEnd();							// Finished Drawing The Triangle
+    glBegin(GL_TRIANGLES);				// Drawing Using Triangles
+        glVertex3f( -postRadius, 0.0f, 40.0f);		// Top
+        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
+        glVertex3f( -postRadius,0.0f, 0.0f);		// Bottom Right
+    glEnd();						// Finished Drawing The Triangle
 
 
     glTranslatef(0.0f,-2*70.0f,0.0f);    // Move to left post.
-    glColor4f(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    gluCylinder(quadratic,postRadius,postRadius,80.0f,32,32);	// Draw left post
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
+    gluCylinder(quadratic,postRadius,postRadius,80.0f,128,128);	// Draw left post
     glColor4f(1.0f,1.0f,1.0f,colour.alpha());
 
-        glBegin(GL_TRIANGLES);						// Drawing Using Triangles
-                glVertex3f( -postRadius, 0.0f, 40.0f);				// Top
-                glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);				// Bottom Left
-                glVertex3f( -postRadius,0.0f, 0.0f);				// Bottom Right
-        glEnd();							// Finished Drawing The Triangle
+    glBegin(GL_TRIANGLES);				// Drawing Using Triangles
+        glVertex3f( -postRadius, 0.0f, 40.0f);		// Top
+        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
+        glVertex3f( -postRadius,0.0f, 0.0f);		// Bottom Right
+    glEnd();						// Finished Drawing The Triangle
 
     glTranslatef(0.0f,-postRadius,80.0f - crossBarRadius);    // Move to top of left post.
     glRotatef(-90.0,1.0f,0.0f,0.0f);
-    glColor4f(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    gluCylinder(quadratic,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,32,32);	// Draw cross bar
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
+    gluCylinder(quadratic,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,128,128);	// Draw cross bar
+    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
     glPopMatrix();
 
 }
@@ -197,9 +239,10 @@ void locWmGlDisplay::drawBall(QColor colour, float x, float y)
     float ballRadius = 6.5/2.0;
 
     glPushMatrix();
-    glColor4f(colour.red(),colour.green(),colour.blue(),colour.alpha());
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
     glTranslatef(x,y,ballRadius);    // Move to centre of goal.
-    gluSphere(quadratic,ballRadius,32,32);		// Draw A Sphere
+    gluSphere(quadratic,ballRadius,128,128);		// Draw A Sphere
+    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
     glPopMatrix();
 }
 
