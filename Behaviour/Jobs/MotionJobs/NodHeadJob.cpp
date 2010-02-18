@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include "NodHeadJob.h"
+#include "debug.h"
 
 /*! @brief Constructs a NodHeadJob
  
@@ -32,6 +33,39 @@ NodHeadJob::NodHeadJob(double period, const vector<float>& centre, const vector<
     m_job_time = period;     
     m_centre_position = centre;
     m_limit_positions = limits;
+}
+
+/*! @brief Constructs a NodHeadJob from stream data
+    @param time the time in ms to perform the kick
+    @param input the stream from which to read the job specific data
+ */
+NodHeadJob::NodHeadJob(double time, istream& input) : MotionJob(Job::MOTION_NOD)
+{
+    m_job_time = time;
+    char buffer[1024];
+    // read in the centre position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_centre_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the centre position vector
+    m_centre_position = vector<float>(m_centre_position_size, 0);
+    for (unsigned int i=0; i<m_centre_position_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_centre_position[i] = *reinterpret_cast<float*>(buffer);
+    }
+    
+    // read in the limit position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_limit_positions_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the limit position vector
+    m_limit_positions = vector<float>(m_limit_positions_size, 0);
+    for (unsigned int i=0; i<m_limit_positions_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_limit_positions[i] = *reinterpret_cast<float*>(buffer);
+    }
 }
 
 /*! @brief WalkJob destructor
@@ -98,12 +132,54 @@ void NodHeadJob::csvTo(ostream& output)
     output << endl;
 }
 
-ostream& NodHeadJob::operator<< (ostream& output)
+/*! @brief A helper function to ease writing Job objects to classes
+ 
+    This function calls its parents versions of the toStream, each parent
+    writes the members introduced at that level
+
+    @param output the stream to write the job to
+ */
+void NodHeadJob::toStream(ostream& output) const
 {
+    debug << "NodHeadJob::toStream" << endl;
+    Job::toStream(output);                  // This writes data introduced at the base level
+    MotionJob::toStream(output);            // This writes data introduced at the motion level
+    // Then we write NodHeadJob specific data
+    unsigned int m_centre_position_size = m_centre_position.size();
+    output.write((char*) &m_centre_position_size, sizeof(m_centre_position_size));
+    for (unsigned int i=0; i<m_centre_position_size; i++)
+        output.write((char*) &m_centre_position[i], sizeof(m_centre_position[i]));
+    unsigned int m_limit_positions_size = m_limit_positions.size();
+    output.write((char*) &m_limit_positions_size, sizeof(m_limit_positions_size));
+    for (unsigned int i=0; i<m_limit_positions_size; i++)
+        output.write((char*) &m_limit_positions[i], sizeof(m_limit_positions[i]));
+}
+
+/*! @relates NodHeadJob
+    @brief Stream insertion operator for a NodHeadJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const NodHeadJob& job)
+{
+    debug << "<<NodHeadJob" << endl;
+    job.toStream(output);
     return output;
 }
 
-istream& NodHeadJob::operator>> (istream& input)
+/*! @relates NodHeadJob
+    @brief Stream insertion operator for a pointer to NodHeadJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const NodHeadJob* job)
 {
-    return input;
+    debug << "<<NodHeadJob" << endl;
+    if (job != NULL)
+        job->toStream(output);
+    else
+        output << "NULL";
+    return output;
 }

@@ -55,6 +55,7 @@ JobList::JobList()
     kicktarget[0] = 330.33;
     kicktarget[1] = 55.5;
     KickJob* kickjob = new KickJob(1010.19, kickposition, kicktarget);
+    NodHeadJob* nodjob = new NodHeadJob(123, kicktarget, kickposition);
     // Test Walk Job
     vector<float> walkspeed(3, 0);
     walkspeed[0] = 10;
@@ -75,7 +76,7 @@ JobList::JobList()
     
     ofstream tempjoblog;
     tempjoblog.open("tempjobs.txt");
-    tempjoblog << kickjob;
+    tempjoblog << nodjob;
     tempjoblog.close();
     
     // I can't possibly know the type of job in the log, so

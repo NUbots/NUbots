@@ -7,7 +7,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class NodHeadJob : public MotionJob
 {
 public:
     NodHeadJob(double period, const vector<float>& centre, const vector<float>& limits);
+    NodHeadJob(double time, istream& input);
     ~NodHeadJob();
     
     void setNod(double period, const vector<float>& centre, const vector<float>& limits);
@@ -42,8 +43,10 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const NodHeadJob& job);
+    friend ostream& operator<<(ostream& output, const NodHeadJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
     vector<float> m_limit_positions;                 //!< the limit positions for the nod [lower (rad), upper(rad)]

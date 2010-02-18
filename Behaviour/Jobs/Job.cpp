@@ -189,10 +189,10 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
             break;
-        /*case Job::MOTION_NOD:
-            *job = new NodJob(jobtime, input);
+        case Job::MOTION_NOD:
+            *job = new NodHeadJob(jobtime, input);
             break;
-        case Job::MOTION_PAN:
+        /*case Job::MOTION_PAN:
             *job = new PanJob(jobtime, input);
             break;
          */
