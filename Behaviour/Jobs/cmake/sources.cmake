@@ -33,6 +33,7 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		OtherJob.h
 		MotionJobs/WalkToPointJob.cpp MotionJobs/WalkToPointJob.h
 		MotionJobs/WalkJob.cpp MotionJobs/WalkJob.h
+		MotionJobs/WalkParametersJob.cpp
 		MotionJobs/KickJob.cpp MotionJobs/KickJob.h
 		MotionJobs/BlockJob.cpp MotionJobs/BlockJob.h
 		MotionJobs/SaveJob.cpp MotionJobs/SaveJob.h

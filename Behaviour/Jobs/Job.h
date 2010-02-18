@@ -60,6 +60,7 @@ public:
         // Motion job ids
         MOTION_WALK_TO_POINT,
         MOTION_WALK,
+        MOTION_WALK_PARAMETERS,
         MOTION_KICK,
         MOTION_BLOCK,
         MOTION_SAVE,

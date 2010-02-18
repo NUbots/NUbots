@@ -177,6 +177,9 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_WALK:
             *job = new WalkJob(input);
             break;
+        case Job::MOTION_WALK_PARAMETERS:
+            *job = new WalkParametersJob(input);
+            break;
         case Job::MOTION_KICK:
             *job = new KickJob(jobtime, input);
             break;

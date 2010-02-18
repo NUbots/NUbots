@@ -176,6 +176,21 @@ void NUMotion::process(JobList& jobs)
             m_walk->walkToPoint(time, position);
             jobs.removeMotionJob(job);
         }
+        else if ((*it)->getID() == Job::MOTION_WALK_PARAMETERS)
+        {   // process a walk to point job
+            static double time;
+            static WalkParameters parameters;
+            static WalkParametersJob* job;
+            
+            job = (WalkParametersJob*) (*it);
+            job->getWalkParameters(parameters);
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkparameter job." << endl;
+            #endif
+            
+            m_walk->setWalkParameters(parameters);
+            jobs.removeMotionJob(job);
+        }
 #endif  // USE_WALK
         
 #ifdef USE_KICK

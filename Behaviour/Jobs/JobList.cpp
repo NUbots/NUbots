@@ -64,6 +64,10 @@ JobList::JobList()
     walkspeed[1] = -25;
     walkspeed[2] = 0.0;
     WalkJob* walkjob = new WalkJob(walkspeed);
+    WalkParameters parameters = WalkParameters();
+    ifstream testparafile("jupptestparameters.wp");
+    testparafile >> parameters;
+    WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
     
     /*// Test Light Job
     vector<float> colour(3,0);
@@ -80,10 +84,11 @@ JobList::JobList()
     addMotionJob(panjob);
     addMotionJob(walkjob);
     addMotionJob(pointjob);
+    addMotionJob(parametersjob);
     
     ofstream tempjoblog;
     tempjoblog.open("tempjobs.txt");
-    tempjoblog << pointjob;
+    tempjoblog << parametersjob;
     tempjoblog.close();
     
     // I can't possibly know the type of job in the log, so
