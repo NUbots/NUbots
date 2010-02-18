@@ -8,7 +8,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,11 +35,12 @@ public:
     MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){};
     virtual ~MotionJob() {};
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(ostream& output) = 0;
+    virtual void csvTo(ostream& output) = 0;
     
     friend ostream& operator<< (ostream& output, const MotionJob& job);
-    friend istream& operator>> (istream& input, MotionJob& job);
+protected:
+    virtual void toStream(ostream& output) const {};
 };
 
 #endif

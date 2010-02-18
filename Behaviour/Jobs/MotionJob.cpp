@@ -8,7 +8,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,28 +28,20 @@
 #include "MotionJob.h"
 #include "debug.h"
 
-void MotionJob::summaryTo(ostream& output)
-{
-    
-}
 
-void MotionJob::csvTo(ostream& output)
-{
-    
-}
+/*! @relates MotionJob
+    @brief Stream insertion operator for MotionJob.
+ 
+    This operator calls the protected virtual member toStream(output). As toStream is virtual
+    the correct toStream function will be called for all types of jobs.
 
+    @param output the stream to put the job in
+    @param job the job to put in the stream
+ */
 ostream& operator<< (ostream& output, const MotionJob& job)
 {
-    // There are no members introduced at this level
-    debug << "MotionJob<<" << endl;
+    job.toStream(output);
     return output;
-}
-
-istream& operator>> (istream& input, MotionJob& job)
-{
-    // There are no members introduced at this level
-    debug << "MotionJob>>" << endl;
-    return input;
 }
 
 

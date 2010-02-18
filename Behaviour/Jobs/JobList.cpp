@@ -71,14 +71,28 @@ JobList::JobList()
     addMotionJob(kickjob);
     addMotionJob(walkjob);
     
-    ofstream temp;
-    temp.open("tempjobs.txt");
-    temp << *savejob;
-    temp.close();
+    ofstream tempjoblog;
+    tempjoblog.open("tempjobs.txt");
+    tempjoblog << *savejob;
+    tempjoblog.close();
     
-    ifstream intemp;
-    intemp.open("tempjobs.txt");
-    intemp >> (*savejob);
+    // I can't possibly know the type of job in the log, so
+    // I can't create a new object to store the data in yet
+    // So the stream operator should create a *new* job of the correct type
+    // So I need to make a placeholder job
+    Job* placeholderjob = NULL;         // basically I want to set this pointer to point to the streamed in job
+                                        // but I need to create the object inside the stream operator
+                                        // So the problem; I have a reference to a job, how do I change the placeholder?
+    ifstream intemplogjob;
+    intemplogjob.open("tempjobs.txt");
+    intemplogjob >> &placeholderjob;
+    intemplogjob.close();
+    
+    cout << "Compare these jobs" << endl;
+    //debug << placeholderjob << endl;
+    placeholderjob->summaryTo(cout);
+    //debug << savejob << endl;
+    savejob->summaryTo(cout);
 }
 
 /*! @brief Job destructor
@@ -468,8 +482,48 @@ void JobList::clear()
         (*it)->clear();
 }
 
+/*! @brief Returns the size of the job list
+    @return Returns the size of the job list 
+ */
+unsigned int JobList::size()
+{
+    unsigned int size = 0;
+    list<list<Job*>*>::iterator it;
+    for (it = m_job_lists.begin(); it != m_job_lists.end(); it++)
+        size += (*it)->size();
+    return size;
+}
+
+ostream& operator<<(ostream& output, JobList& joblist)
+{
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    debug << "JobList<<" << endl;
+#endif
+    output << joblist.size() << " ";
+    static JobList::iterator it;     // the iterator over all of the jobs
+    for (it = joblist.begin(); it != joblist.end(); ++it)
+        output << **it;
+}
+
+istream& operator>>(istream& input, JobList& joblist)
+{
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    debug << "JobList>>" << endl;
+#endif
+    unsigned int numnewjobs = 0;
+    input >> numnewjobs;
+    for (unsigned int i=0; i<numnewjobs; i++)
+    {
+        //input >> ???;
+    }
+    // Good luck implementing this!
+    // I want the stream operator to add jobs to the list
+}
+
+
+
 /******************************************************************************************************************************************
- JobListIterator Implementation
+                                                                                                            JobListIterator Implementation
  ******************************************************************************************************************************************/
 /*! @brief Default constructor
  */
