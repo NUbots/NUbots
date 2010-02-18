@@ -1,13 +1,16 @@
 #ifndef ROBOTCANDIDATE_H
 #define ROBOTCANDIDATE_H
 
+#include "ObjectCandidate.h"
 #include "Tools/Math/Vector2.h"
+#include "Tools/Math/Line.h"
 
-class RobotCandidate
+#include <vector>
+
+class RobotCandidate: public ObjectCandidate
 {
 public:
-    Vector2<int> getTopLeft() const;
-    Vector2<int> getBottomRight() const;
+    std::vector<Vector2<int> > getSkeleton() const;
 
     int width();
     int height();
@@ -17,12 +20,12 @@ public:
 
     RobotCandidate();
     RobotCandidate(int left, int top, int right, int bottom);
+    RobotCandidate(int left, int top, int right, int bottom, std::vector<Vector2<int> > points);
     RobotCandidate(int left, int top, int right, int bottom, unsigned char teamColour);
+    RobotCandidate(int left, int top, int right, int bottom, unsigned char teamColour, std::vector<Vector2<int> > points);
     ~RobotCandidate();
 private:
-    Vector2<int> topLeft;
-    Vector2<int> bottomRight;
-    unsigned char teamColour;
+    std::vector<Vector2<int> > skeleton;
 };
 
 #endif // ROBOTCANDIDATE_H

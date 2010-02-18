@@ -11,6 +11,7 @@ macx {
 win32:INCLUDEPATH += 'C:/Program \
     Files/boost/'
 INCLUDEPATH += ../
+INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -33,7 +34,27 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
-    ../Vision/RobotCandidate.h
+    ../Vision/LineDetection.h \
+    ../Tools/Math/LSFittedLine.h \
+    ../Vision/RobotCandidate.h \
+    ../Tools/Math/Vector3.h \
+    ../Vision/Object.h \
+    ../Vision/FieldObjects/StationaryObject.h \
+    ../Vision/FieldObjects/Self.h \
+    ../Vision/FieldObjects/Object.h \
+    ../Vision/FieldObjects/MobileObject.h \
+    ../Vision/FieldObjects/AmbiguousObject.h \
+    ../Vision/FieldObjects/FieldObjects.h \
+    ../Vision/ObjectCandidate.h \
+    ../Localisation/WMPoint.h \
+    ../Localisation/WMLine.h \
+    ../Localisation/sphere.h \
+    ../Localisation/cylinder.h \
+    ../Localisation/cameramatrix.h \
+    ../Tools/Math/matrix.h \
+    localisationwidget.h \
+    ../Vision/Ball.h \
+    ../Vision/CircleFitting.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -53,4 +74,22 @@ SOURCES += mainwindow.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
-    ../Vision/RobotCandidate.cpp
+    ../Vision/LineDetection.cpp \
+    ../Tools/Math/LSFittedLine.cpp \
+    ../Vision/RobotCandidate.cpp \
+    ../Vision/FieldObjects/StationaryObject.cpp \
+    ../Vision/FieldObjects/Self.cpp \
+    ../Vision/FieldObjects/Object.cpp \
+    ../Vision/FieldObjects/MobileObject.cpp \
+    ../Vision/FieldObjects/AmbiguousObject.cpp \
+    ../Vision/FieldObjects/FieldObjects.cpp \
+    ../Vision/ObjectCandidate.cpp \
+    ../Localisation/WMPoint.cpp \
+    ../Localisation/WMLine.cpp \
+    ../Localisation/sphere.cpp \
+    ../Localisation/cylinder.cpp \
+    ../Localisation/cameramatrix.cpp \
+    ../Tools/Math/matrix.cpp \
+    localisationwidget.cpp \
+    ../Vision/Ball.cpp \
+    ../Vision/CircleFitting.cpp

@@ -5,7 +5,6 @@
 #include <QMdiArea>
 #include <QStatusBar>
 #include <stdio.h>
-#include <QDebug>
 
 
 
@@ -26,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connection = new ConnectionWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, connection);
+
+    localisation = new LocalisationWidget(this);
+    addDockWidget(Qt::BottomDockWidgetArea,localisation);
 
     classification = new ClassificationWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, classification);
@@ -48,14 +50,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
-
+    //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
     connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
+
+    // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
+    connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
+    connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
+    connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
 
     mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
@@ -75,8 +85,10 @@ MainWindow::MainWindow(QWidget *parent)
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
     //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
-    imageDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
-
+    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
+    imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
 
     classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
     classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
@@ -86,11 +98,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
     horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
-    horizonDisplay->setOverlayDrawing(GLDisplay::RobotCandidates,true);
+    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
+
+    miscDisplay->setOverlayDrawing(GLDisplay::FieldLines,true, QColor(255,0,0));
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
-
     setWindowTitle(QString("NUview"));
+    qDebug() << "Main Window Started";
 }
 
 MainWindow::~MainWindow()
@@ -103,6 +117,7 @@ MainWindow::~MainWindow()
     delete imageDisplay;
     delete classification;
     delete connection;
+    delete localisation;
     delete layerSelection;
     delete layerSelectionDock;
     delete mdiArea;

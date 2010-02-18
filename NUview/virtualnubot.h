@@ -10,6 +10,8 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "GLDisplay.h"
 #include "Vision/Vision.h"
+#include "Tools/Math/LSFittedLine.h"
+#include "Vision/Circle.h"
 #include <vector>
 
 
@@ -55,11 +57,24 @@ public slots:
 
 signals:
     void imageDisplayChanged(NUimage* updatedImage, GLDisplay::display displayId);
+
+    /*!
+      @brief Sends the robot data to the localisation widget
+      @param joints The angles of the robot's joints.
+      @param bottomCamera The camera being used.
+      @param touch The values of the robot's touch sensors.
+      */
+    void imageDisplayChanged(double* joints,bool bottomCamera,double * touch);
+
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
     void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
     void robotCandidatesDisplayChanged(std::vector< RobotCandidate > updatedRobotCandidates, GLDisplay::display displayId);
+    void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
+    void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
+    void drawFO_Ball(float cx, float cy, float radius, GLDisplay::display displayId);
+
 
 private:
     class classEntry
