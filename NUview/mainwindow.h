@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
 #include <QtGui/QMainWindow>
 #include "classificationwidget.h"
 #include "connectionwidget.h"
@@ -9,6 +10,7 @@
 #include "GLDisplay.h"
 #include "openglmanager.h"
 #include "localisationwidget.h"
+
 
 class QMdiArea;
 class LayerSelectionWidget;

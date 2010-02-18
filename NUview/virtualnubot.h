@@ -11,6 +11,7 @@
 #include "GLDisplay.h"
 #include "Vision/Vision.h"
 #include "Tools/Math/LSFittedLine.h"
+#include "Vision/Circle.h"
 #include <vector>
 
 
@@ -72,6 +73,8 @@ signals:
     void robotCandidatesDisplayChanged(std::vector< RobotCandidate > updatedRobotCandidates, GLDisplay::display displayId);
     void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
     void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
+    void drawFO_Ball(float cx, float cy, float radius, GLDisplay::display displayId);
+
 
 private:
     class classEntry

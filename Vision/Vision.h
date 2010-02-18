@@ -19,11 +19,26 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 
+#define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
+
+
+class Circle;
 class NUimage;
 
 //! Contains vision processing tools and functions.
 class Vision
 {
+    private:
+    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
+
+    int findYFromX(std::vector<Vector2<int> >&points, int x);
+    bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+    
+    double CalculateBearing(double cx);
+    double CalculateElevation(double cy);
+    double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
+
     public:
     //! FieldObjects Container
     FieldObjects* AllFieldObjects;
@@ -114,17 +129,16 @@ class Vision
     ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
+    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
 
 
 
-    private:    
-    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
+    Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
 
-    int findYFromX(std::vector<Vector2<int> >&points, int x);
-    bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
-    void CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> startPoint, unsigned char currentColour, int length, int spacing, int direction);
+
+
+
 
 
 };

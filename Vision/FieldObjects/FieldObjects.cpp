@@ -94,11 +94,13 @@ void FieldObjects::InitStationaryFieldObjects()
 		stationaryFieldObjects.push_back(statObject);
 	}
 }
+
 void FieldObjects::InitMobileFieldObjects()
 {
-	for(int ID; ID < NUM_MOBILE_FIELD_OBJECTS; ID++)
+        for(int ID =0; ID < NUM_MOBILE_FIELD_OBJECTS; ID++)
 	{
-                MobileObject mobileObject;
+                MobileObject mobileObject = MobileObject();
                 mobileFieldObjects.push_back(mobileObject);
 	}
 }
+

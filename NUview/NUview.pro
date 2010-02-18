@@ -8,7 +8,8 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-win32:INCLUDEPATH += 'C:/Program Files/boost/'
+win32:INCLUDEPATH += 'C:/Program \
+    Files/boost/'
 INCLUDEPATH += ../
 INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
 HEADERS += ui_mainwindow.h \
@@ -51,8 +52,9 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/cylinder.h \
     ../Localisation/cameramatrix.h \
     ../Tools/Math/matrix.h \
-    localisationwidget.h
-
+    localisationwidget.h \
+    ../Vision/Ball.h \
+    ../Vision/CircleFitting.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -88,4 +90,6 @@ SOURCES += mainwindow.cpp \
     ../Localisation/cylinder.cpp \
     ../Localisation/cameramatrix.cpp \
     ../Tools/Math/matrix.cpp \
-    localisationwidget.cpp
+    localisationwidget.cpp \
+    ../Vision/Ball.cpp \
+    ../Vision/CircleFitting.cpp

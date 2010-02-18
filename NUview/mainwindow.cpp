@@ -5,7 +5,6 @@
 #include <QMdiArea>
 #include <QStatusBar>
 #include <stdio.h>
-#include <QDebug>
 
 
 
@@ -54,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
@@ -104,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
     miscDisplay->setOverlayDrawing(GLDisplay::FieldLines,true, QColor(255,0,0));
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
     setWindowTitle(QString("NUview"));
+    qDebug() << "Main Window Started";
 }
 
 MainWindow::~MainWindow()

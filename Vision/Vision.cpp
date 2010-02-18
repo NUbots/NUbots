@@ -8,16 +8,19 @@
 #include "Tools/Image/NUImage.h"
 #include "Tools/Math/Line.h"
 #include "ClassificationColours.h"
-
-#include <QDebug>
+#include "Ball.h"
+#include "Tools/Math/General.h"
 #include <boost/circular_buffer.hpp>
 #include <queue>
 #include <algorithm>
 
+using namespace mathGeneral;
 Vision::Vision()
 {
+
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
+    //qDebug() << "Vision Started..";
     return;
 }
 
@@ -36,10 +39,15 @@ unsigned char Vision::classifyPixel(int x, int y)
 
 void Vision::classifyImage(ClassifiedImage &target, const NUimage* sourceImage, const unsigned char *lookUpTable)
 {   
+    //qDebug() << "InVision CLASS Generation:";
     int tempClassCounter = classifiedCounter;
+    //qDebug() << sourceImage->width() << ","<< sourceImage->height();
+
     target.setImageDimensions(sourceImage->width(),sourceImage->height());
+    //qDebug() << "Set Dimensions:";
     currentImage = sourceImage;
     currentLookupTable = lookUpTable;
+    //qDebug() << "Begin Loop:";
     for (int y = 0; y < sourceImage->height(); y++)
     {
         for (int x = 0; x < sourceImage->width(); x++)
@@ -389,12 +397,11 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                     tempLine->addSegement(tempTransition);
-                    int spacing = 16;
-                    int segmentlength = currentPoint.y-tempStartPoint.y;
-                    if(abs(segmentlength)>spacing)
+                    /*int spacing = 16;
+                    if(abs(tempTransition->getSize())>spacing)
                     {
-                        CloselyClassifyScanline(tempLine, tempStartPoint,currentColour,segmentlength, spacing, direction);
-                    }
+                        CloselyClassifyScanline(tempLine, tempTransition,spacing, direction);//tempStartPoint,currentColour,segmentlength, spacing, direction);
+                    }*/
                 }
                 tempStartPoint = currentPoint;
                 beforeColour = ClassIndex::unclassified;
@@ -434,12 +441,11 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
                         //SCAN FOR OTHER SEGMENTS:
-                        int spacing = 16;
-                        if(abs(currentPoint.y-tempStartPoint.y)>spacing)
+                        /*int spacing = 16;
+                        if(abs(tempTransition->getSize())>spacing)
                         {
-                            int length = currentPoint.y-tempStartPoint.y;
-                            CloselyClassifyScanline(tempLine, tempStartPoint,currentColour,length, spacing, direction);
-                        }
+                            CloselyClassifyScanline(tempLine, tempTransition,spacing, direction);
+                        }*/
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
@@ -453,23 +459,26 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     return;
 }
 
-void Vision::CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
+void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
 {
     if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
     {
+        Vector2<int> tempStartPoint = tempTransition->getStartPoint();
+
+        int length = abs(tempTransition->getEndPoint().y - tempTransition->getStartPoint().y);
         Vector2<int> tempSubEndPoint;
         Vector2<int> tempSubStartPoint;
         unsigned char subAfterColour;
         unsigned char subBeforeColour;
-        unsigned char tempColour = currentColour;
-        for(int k =0; k < abs(length); k = k+spacings)
+        unsigned char tempColour = tempTransition->getColour();
+        for(int k =0; k < length; k = k+spacings)
         {
             tempSubEndPoint.y = tempStartPoint.y+k;
             tempSubStartPoint.y = tempStartPoint.y+k;
             int tempsubPoint = tempStartPoint.x;
-            unsigned char  tempColour = currentColour;;
+            tempColour = tempTransition->getColour();
 
-            while(tempColour == currentColour)
+            while(tempColour == tempTransition->getColour())
             {
                 if(tempsubPoint+1 > currentImage->width()) break;
 
@@ -488,9 +497,9 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> tempStartP
             tempSubEndPoint.x = tempsubPoint;
             subAfterColour = tempColour;
             tempsubPoint = tempStartPoint.x;
-            tempColour = currentColour;
+            tempColour = tempTransition->getColour();
 
-            while(tempColour == currentColour)
+            while(tempColour == tempTransition->getColour())
             {
                 if(tempsubPoint-1 < 0) break;
                 tempsubPoint--;
@@ -505,11 +514,14 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, Vector2<int> tempStartP
                 }
             }
             tempSubStartPoint.x = tempsubPoint;
-            subBeforeColour = tempColour;
+            subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
-            TransitionSegment* tempTransition = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , currentColour, subAfterColour);
-            tempLine->addSegement(tempTransition);
+            TransitionSegment* tempTransitionA = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
+            if(tempTransitionA->getSize() >1)
+            {
+            tempLine->addSegement(tempTransitionA);
+            }
 
 
 
@@ -789,8 +801,8 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             }//while (!qUnprocessed->empty())
             //qDebug() << "Candidate ready...";
             //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
-            if ( max_x - min_x > 0 &&                                               // width  is non-zero
-                 max_y - min_y > 0 &&                                               // height is non-zero
+            if ( max_x - min_x >= 0 &&                                               // width  is non-zero
+                 max_y - min_y >= 0 &&                                               // height is non-zero
                  (float)(max_x - min_x) / (float)(max_y - min_y) <= max_aspect &&    // Less    than specified landscape aspect
                  (float)(max_x - min_x) / (float)(max_y - min_y) >= min_aspect &&    // greater than specified portrait aspect
                  segCount >= min_segments                                    // greater than minimum amount of segments to remove noise
@@ -953,9 +965,63 @@ std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int sp
     int image_width = currentImage->width();
     int image_height = currentImage->height();
     LineDetector->FormLines(scanArea,image_width,image_height,spacing);
-    qDebug() << "Lines Detection completed";
     std::vector<CornerPoint> cornerPoints= LineDetector->cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector->fieldLines;
 
     return fieldLines;
+}
+
+Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
+{
+    Ball* BallFinding = new Ball();
+    int width = currentImage->width();
+    int height = currentImage->height();
+    Circle ball;
+    ball.isDefined = false;
+    if (FO_Candidates.size() <= 0) return ball;
+    ball = BallFinding->FindBall(FO_Candidates, AllFieldObjects, this,height,width);
+    if(ball.isDefined)
+    {
+        Vector2<int> viewPosition;
+        Vector3<float> sphericalError;
+        Vector3<float> sphericalPosition;
+        viewPosition.x = (int)round(ball.centreX);
+        viewPosition.y = (int)round(ball.centreY);
+        double ballDistanceFactor=EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()*ORANGE_BALL_DIAMETER;
+        float BALL_OFFSET = 0;
+        float distance = (float)(ballDistanceFactor/(2*ball.radius)+BALL_OFFSET);
+        float bearing = (float)CalculateBearing(viewPosition.x);
+        float elevation = (float)CalculateElevation(viewPosition.y);
+        sphericalPosition[0] = distance;
+        sphericalPosition[1] = bearing;
+        sphericalPosition[2] = elevation;
+        //AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
+        //qDebug() << "Setting FieldObject:";
+        //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
+        //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
+        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
+        //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
+        //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
+        /*qDebug()    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance()
+                    << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing()
+                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Elevation();*/
+
+    }
+    return ball;
+}
+double Vision::CalculateBearing(double cx){
+    double FOVx = deg2rad(45.0f); //Taken from Old Globals
+    return atan( (currentImage->height()/2-cx) / ( (currentImage->width()/2) / (tan(FOVx/2.0)) ) );
+}
+
+
+double Vision::CalculateElevation(double cy){
+    double FOVy = deg2rad(34.45f); //Taken from Old Globals
+    return atan( (currentImage->height()/2-cy) / ( (currentImage->height()/2) / (tan(FOVy/2.0)) ) );
+}
+
+double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
+{
+    double FOVx = deg2rad(45.0f); //Taken from Old Globals
+    return (0.5*currentImage->width())/(tan(0.5*FOVx));
 }
