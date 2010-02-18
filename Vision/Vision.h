@@ -48,7 +48,16 @@ class Vision
     //! Destructor.
     ~Vision();
 
+    void ProcessFrame(NUimage& image, Horizon horizonLine);
 
+
+    void setLUT(unsigned char* newLUT);
+
+
+    void setImage(const NUimage* sourceImage);
+
+
+    void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);
     /*!
       @brief Produce a classified.
 
@@ -58,7 +67,7 @@ class Vision
       @param lookUpTable The colour classification lookup table. This table maps colours
       from the raw source image into the classified colour space.
       */
-    void classifyImage(ClassifiedImage &targetImage, const NUimage* sourceImage, const unsigned char *lookUpTable);
+    void classifyImage(ClassifiedImage &targetImage);
     /*!
       @brief Classifies an individual pixel.
       @param x The x coordinate of the pixel to be classified.
@@ -121,7 +130,7 @@ class Vision
     int findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
     static bool sortTransitionSegments(TransitionSegment a, TransitionSegment b);
 
-    std::vector<Vector2<int> > findGreenBorderPoints(const NUimage* sourceImage, const unsigned char *lookUpTable, int scanSpacing, Horizon* horizonLine);
+    std::vector<Vector2<int> > findGreenBorderPoints(int scanSpacing, Horizon* horizonLine);
     std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 

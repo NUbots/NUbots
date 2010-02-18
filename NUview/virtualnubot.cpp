@@ -129,7 +129,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
 void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
 {
     //qDebug() << "Generating CLASS Image";
-    vision.classifyImage(classImage,&rawImage,classificationTable);
+    vision.classifyImage(classImage);
     //qDebug() << "Displaying CLASS Image";
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     //qDebug() << "Returning ";
@@ -173,11 +173,13 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     {
         case pixels::YUYV:
             //qDebug() << "CASE YUYVGenerate Classified Image: START";
+            vision.setImage(&image);
+            vision.setLUT(classificationTable);
             generateClassifiedImage(image);
             //qDebug() << "Generate Classified Image: finnished";
 
             //! Find the green edges
-            points = vision.findGreenBorderPoints(&image,classificationTable,spacings,&horizonLine);
+            points = vision.findGreenBorderPoints(spacings,&horizonLine);
             emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
             //qDebug() << "Find Edges: finnished";
             //! Find the Field border
@@ -347,7 +349,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels
     }
 
     // Create Classifed Image based on lookup table.
-    vision.classifyImage(previewClassImage,&rawImage,tempLut);
+    vision.classifyPreviewImage(previewClassImage,tempLut);
 
     // Remove selection from temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
