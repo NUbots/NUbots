@@ -33,6 +33,7 @@ class KickJob : public MotionJob
 {
 public:
     KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget);
+    KickJob(double time, istream& input);
     ~KickJob();
     
     void setKick(double time, const vector<float>& kickposition, const vector<float>& kicktarget);
@@ -45,8 +46,10 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const KickJob& job);
+    friend ostream& operator<<(ostream& output, const KickJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_kick_position;                 //!< the kick position [x(cm), y(cm)]
     vector<float> m_kick_target;                   //!< the kick target relative from the *current* position [x(cm) y(cm)]

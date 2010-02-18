@@ -176,10 +176,10 @@ istream& operator>>(istream& input, Job** job)
             break;
         case Job::MOTION_WALK:
             *job = new WalkJob(jobtime, input);
-            break;
+            break;*/
         case Job::MOTION_KICK:
             *job = new KickJob(jobtime, input);
-            break;*/
+            break;
         case Job::MOTION_BLOCK:
             *job = new BlockJob(jobtime, input);
             break;

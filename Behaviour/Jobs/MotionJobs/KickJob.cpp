@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,12 +20,51 @@
  */
 
 #include "KickJob.h"
+#include "debug.h"
 
+/*! @brief Constructs a KickJob
+    @param time the time you want to kick
+    @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
+    @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
+ */
 KickJob::KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget) : MotionJob(Job::MOTION_KICK)
 {
     m_job_time = time;
     m_kick_position = kickposition;
     m_kick_target = kicktarget;         
+}
+
+/*! @brief Constructs a KickJob from stream data
+    @param time the time in ms to perform the kick
+    @param input the stream from which to read the job specific data
+ */
+KickJob::KickJob(double time, istream& input) : MotionJob(Job::MOTION_KICK)
+{
+    m_job_time = time;
+    char buffer[1024];
+    // read in the kick position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_kick_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the kick position vector
+    m_kick_position = vector<float>(m_kick_position_size, 0);
+    for (unsigned int i=0; i<m_kick_position_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_kick_position[i] = *reinterpret_cast<float*>(buffer);
+    }
+    
+    // read in the kick target size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_kick_target_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the kick position vector
+    m_kick_target = vector<float>(m_kick_target_size, 0);
+    for (unsigned int i=0; i<m_kick_target_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_kick_target[i] = *reinterpret_cast<float*>(buffer);
+    }
 }
 
 /*! @brief KickJob destructor
@@ -101,7 +140,7 @@ void KickJob::getKickTarget(vector<float>& kicktarget)
  */
 void KickJob::summaryTo(ostream& output)
 {
-    output << "KickJob: " << m_job_time << "(";
+    output << "KickJob: " << m_job_time << " (";
     for (unsigned int i=0; i<m_kick_position.size(); i++)
         output << m_kick_position[i] << ",";
     output << ")-->(";
@@ -123,12 +162,54 @@ void KickJob::csvTo(ostream& output)
     output << endl;
 }
 
-ostream& KickJob::operator<< (ostream& output)
+/*! @brief A helper function to ease writing Job objects to classes
+ 
+ This function calls its parents versions of the toStream, each parent
+ writes the members introduced at that level
+ 
+ @param output the stream to write the job to
+ */
+void KickJob::toStream(ostream& output) const
 {
+    debug << "KickJob::toStream" << endl;
+    Job::toStream(output);                  // This writes data introduced at the base level
+    MotionJob::toStream(output);            // This writes data introduced at the motion level
+    // Then we write KickJob specific data
+    unsigned int m_kick_position_size = m_kick_position.size();
+    output.write((char*) &m_kick_position_size, sizeof(m_kick_position_size));
+    for (unsigned int i=0; i<m_kick_position_size; i++)
+        output.write((char*) &m_kick_position[i], sizeof(m_kick_position[i]));
+    unsigned int m_kick_target_size = m_kick_target.size();
+    output.write((char*) &m_kick_target_size, sizeof(m_kick_target_size));
+    for (unsigned int i=0; i<m_kick_target_size; i++)
+        output.write((char*) &m_kick_target[i], sizeof(m_kick_target[i]));
+}
+
+/*! @relates KickJob
+    @brief Stream insertion operator for a KickJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const KickJob& job)
+{
+    debug << "<<KickJob" << endl;
+    job.toStream(output);
     return output;
 }
 
-istream& KickJob::operator>> (istream& input)
+/*! @relates KickJob
+    @brief Stream insertion operator for a pointer to KickJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const KickJob* job)
 {
-    return input;
+    debug << "<<KickJob" << endl;
+    if (job != NULL)
+        job->toStream(output);
+    else
+        output << "NULL";
+    return output;
 }

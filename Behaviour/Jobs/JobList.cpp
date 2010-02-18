@@ -45,6 +45,8 @@ JobList::JobList()
     saveposition[1] = -25;
     saveposition[2] = 1.57;
     SaveJob* savejob = new SaveJob(300.1, saveposition);
+    BlockJob* blockjob = new BlockJob(69, saveposition);
+    HeadJob* headjob = new HeadJob(9000, saveposition);
     // Test Kick Job
     vector<float> kickposition(2, 0);
     vector<float> kicktarget(2, 0);
@@ -73,7 +75,7 @@ JobList::JobList()
     
     ofstream tempjoblog;
     tempjoblog.open("tempjobs.txt");
-    tempjoblog << *savejob;
+    tempjoblog << kickjob;
     tempjoblog.close();
     
     // I can't possibly know the type of job in the log, so
