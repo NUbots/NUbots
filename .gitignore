@@ -21,6 +21,7 @@
 # Common Ignores
 *.*~
 *.o
+*.orig
 
 Autoconfig/*
 *.old*
