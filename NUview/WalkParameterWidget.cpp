@@ -156,6 +156,7 @@ void WalkParameterWidget::walkParameterChanged()
     shiftFrequencySlider->value();
     stepSizeSlider->value();
     
+    m_job_list->summaryTo(debug);
     (*m_io) << m_job_list;
 }
 
