@@ -40,7 +40,7 @@ JobList::JobList()
     
     
     // Test Save Job
-    vector<float> saveposition(3, 0);
+    /*vector<float> saveposition(3, 0);
     saveposition[0] = 10;
     saveposition[1] = -25;
     saveposition[2] = 1.57;
@@ -70,12 +70,12 @@ JobList::JobList()
         testparafile >> parameters;
     WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
     
-    /*// Test Light Job
+    // Test Light Job
     vector<float> colour(3,0);
     colour[0] = 1;
     colour[1] = 0;
     colour[2] = 0;
-    ChestLedJob ledjob = ChestLedJob(0, colour);*/
+    ChestLedJob ledjob = ChestLedJob(0, colour);
     
     addMotionJob(savejob);
     addMotionJob(blockjob);
@@ -85,7 +85,7 @@ JobList::JobList()
     addMotionJob(panjob);
     addMotionJob(walkjob);
     addMotionJob(pointjob);
-    addMotionJob(parametersjob);
+    addMotionJob(parametersjob);*/
     
     /*ofstream tempjoblog;
     tempjoblog.open("testjobs.txt");
