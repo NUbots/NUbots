@@ -24,32 +24,18 @@
 
 #include "NUPlatform/NUActionators.h"
 #include "Tools/Image/NUimage.h"
+#include "NUCamera/CameraSettings.h"
 
 class NUCamera
 {
 public:
-	enum setting
-	{
-		Brightness,
-		Contrast,
-		Saturation,
-		Hue,
-		RedChroma,
-		BlueChroma,
-		Gain,
-		AutoExposition,
-		AutoWhiteBalance,
-		AutoGain,
-		Exposure,
-		FramesPerSecond,
-		CameraSelect
-	};
-
     virtual ~NUCamera();
-    virtual NUimage grabNewImage();
-    virtual void setControlSetting(unsigned int settingID, int value);
-    virtual int getControlSetting(unsigned int id);
+    virtual NUimage* grabNewImage() = 0;
+    virtual void setSettings(const CameraSettings& newset) = 0;
+    CameraSettings getSettings(){return settings;};
     
+protected:
+    CameraSettings settings;
 private:
     virtual void copyToHardwareCommunications();
 };

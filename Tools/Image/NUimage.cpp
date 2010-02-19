@@ -89,6 +89,8 @@ void NUimage::MapBufferToImage(pixels::Pixel* buffer, int width, int height)
         image[i] = &buffer[pixelIndex];
         pixelIndex += arrayWidth;
     }
+    imageWidth = width;
+    imageHeight = height;
 }
 
 void NUimage::setImageDimensions(int newWidth, int newHeight)
@@ -105,4 +107,44 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
     imageWidth = newWidth;
     imageHeight = newHeight;
     return;
+}
+
+/*! @brief Put the entire contents of the NUSensorsData class into a stream
+ */
+std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
+{
+    output << p_image.imageWidth << " ";
+    output << p_image.imageHeight << " ";
+
+    for(int y = 0; y <p_image.imageHeight; y++)
+    {
+       for(int x = 0; x <p_image.imageWidth; x++)
+        {
+            output.write((char*) &p_image.image[y][x], sizeof(p_image.image[y][x]));
+        }
+    }
+    return output;
+}
+
+/*! @brief Get the entire contents of the NUSensorsData class from a stream
+ */
+
+std::istream& operator>> (std::istream& input, NUimage& p_image)
+{
+    int width, height;
+    char temp;
+    input >> width;
+    input >> height;
+    p_image.useInternalBuffer();
+    p_image.setImageDimensions(width, height);
+
+    input.read(&temp, sizeof(char));         // skip over the single space after the size
+    for(int y = 0; y < height; y++)
+    {
+       for(int x = 0; x < width; x++)
+        {
+            input.read((char*) &p_image.image[y][x], sizeof(p_image.image[y][x]));
+        }
+    }
+    return input;
 }

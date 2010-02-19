@@ -20,14 +20,15 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS
+BresenhamLine.cpp
+ClassifiedImage.cpp
+NUimage.cpp
+JpegSaver.cpp  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Math
-Image
-FileFormats
 )
 ####################################################################################
 

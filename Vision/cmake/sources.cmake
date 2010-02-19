@@ -20,11 +20,19 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS
+LineDetection.cpp
+ClassifiedSection.cpp
+ObjectCandidate.cpp
+RobotCandidate.cpp
+ScanLine.cpp
+TransitionSegment.cpp
+Vision.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS
+FieldObjects
 )
 ####################################################################################
 

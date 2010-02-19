@@ -20,14 +20,17 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS
+AmbiguousObject.cpp
+FieldObjects.cpp
+MobileObject.cpp
+Object.cpp
+Self.cpp
+StationaryObject.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Math
-Image
-FileFormats
 )
 ####################################################################################
 

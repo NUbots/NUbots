@@ -11,6 +11,9 @@
 #include "NUbot.h"
 
 #include <sstream>
+#include <string.h>
+#include <stdlib.h>
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;

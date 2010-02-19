@@ -21,7 +21,7 @@
 #include <boost/shared_ptr.hpp>
 using boost::shared_ptr;
 
-#include "NBInclude/Sensors.h"3
+#include "NBInclude/Sensors.h"
 #include "WalkProvider.h"
 using namespace std;
 
@@ -65,7 +65,7 @@ void WalkProvider::hardReset(){
 
 void WalkProvider::calculateNextJointsAndStiffnesses() 
 {
-#ifdef DEBUG_NUMOTION_VERBOSITY > 4
+#if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "WalkProvider::calculateNextJointsAndStiffnesses()"<<endl;
 #endif
     pthread_mutex_lock(&walk_provider_mutex);
