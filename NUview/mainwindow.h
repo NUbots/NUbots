@@ -8,6 +8,7 @@
 #include "virtualNubot.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
+#include "locWmGlDisplay.h"
 
 class QMdiArea;
 class LayerSelectionWidget;
@@ -38,7 +39,8 @@ public:
 
 public slots:
     void open();                    //!< To open a file
-    void openLUT();                  //!< To open a LUT file
+    void copy();                    //!< To copy the contents of the selected display to file.
+    void openLUT();                 //!< To open a LUT file
     void firstFrame();              //!< Takes you back to first frame
     void previousFrame();           //!< Takes you back to previous frame
     void selectFrame();             //!< Takes you to a selected frame
@@ -46,6 +48,8 @@ public slots:
     void lastFrame();               //!< Takes you to last frame
     void cascade();                 //!< Cascades all widgets
     void tile();                    //!< tiles all widgets
+
+    void shrinkToNativeAspectRatio();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -98,6 +102,8 @@ private:
     GLDisplay* horizonDisplay;                  //!< Horizon Line display
     GLDisplay* miscDisplay;                     //!< Misc display
 
+    locWmGlDisplay* wmDisplay;
+
     LayerSelectionWidget* layerSelection;
     QDockWidget* layerSelectionDock;
 
@@ -119,6 +125,8 @@ private:
 
 
     QAction *openAction;            //!< Instance of the open action
+    QAction *copyAction;            //!< Instance of the copy action
+    QAction *undoAction;            //!< Instance of the undo action
     QAction *LUT_Action;            //!< Instance of the open action
     QAction *exitAction;            //!< Instance of the exit action
     QAction *firstFrameAction;      //!< Instance of the first frame action; brings you back to first frame
@@ -128,14 +136,11 @@ private:
     QAction *lastFrameAction;       //!< Instance of the last frame action
     QAction *cascadeAction;         //!< Instance of the cascade window action
     QAction *tileAction;            //!< Instance of the tile window action
+    QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
 
     int currentFrameNumber;         //!< Variable for current frame in a file
     int totalFrameNumber;                //!< Total frames in file
     QString fileName;               //!< Name of current file loaded
-
-protected:
-    //! Overriden keyPressEvent for input.
-    void keyPressEvent ( QKeyEvent * event );
 };
 
 #endif // MAINWINDOW_H

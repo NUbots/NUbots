@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     classification = new ClassificationWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, classification);
-
+/*
     miscDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(miscDisplay);
 
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     imageDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(imageDisplay);
-
+*/
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
@@ -57,6 +57,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
 
+
+    wmDisplay = new locWmGlDisplay(this);
+    mdiArea->addSubWindow(wmDisplay);
+
     mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
@@ -67,28 +71,28 @@ MainWindow::MainWindow(QWidget *parent)
     layerSelectionDock->setWidget(layerSelection);
     addDockWidget(Qt::RightDockWidgetArea, layerSelectionDock);
 
-    imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
+//    imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
     //imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
-    imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+//    imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
     //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
-    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
+//    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
 
-    classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
-    classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
-    classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
-    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(255,0,0));
+//    classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
+//    classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
+//    classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+//    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(255,0,0));
 
 
-    horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
-    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
-    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
+//    horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
+//    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
+//    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
-    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
+//    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
     setWindowTitle(QString("NUview"));
 }
@@ -109,6 +113,8 @@ MainWindow::~MainWindow()
 
 // Delete Actions
     delete openAction;
+    delete copyAction;
+    delete undoAction;
     delete exitAction;
     delete firstFrameAction;
     delete previousFrameAction;
@@ -117,24 +123,34 @@ MainWindow::~MainWindow()
     delete lastFrameAction;
     delete cascadeAction;
     delete tileAction;
+    delete nativeAspectAction;
     return;
-
 }
 
 void MainWindow::createActions()
 {
     // Open Action
-    openAction = new QAction(tr("&Open..."), this);
-    openAction->setShortcut(tr("Ctrl+O"));
+    openAction = new QAction(QIcon(":/icons/open.png"),tr("&Open..."), this);
+    openAction->setShortcut(QKeySequence::Open);
     openAction->setStatusTip(tr("Open a new file"));
-    openAction->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
+    // Copy Action
+    copyAction = new QAction(QIcon(":/icons/copy.png"),tr("&Copy"), this);
+    copyAction->setShortcut(QKeySequence::Copy);
+    copyAction->setStatusTip(tr("Copy"));
+    connect(copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+
+    // Undo action
+    undoAction = new QAction(QIcon(":/icons/undo.png"),tr("&Undo"), this);
+    undoAction->setShortcut(QKeySequence::Undo);
+    undoAction->setStatusTip(tr("Undo"));
+    connect(undoAction, SIGNAL(triggered()), &virtualRobot, SLOT(UndoLUT()));
+
     // LUT Action
-    LUT_Action = new QAction(tr("&Open LUT..."), this);
+    LUT_Action = new QAction(QIcon(":/icons/open.png"),tr("&Open LUT..."), this);
     LUT_Action->setShortcut(tr("Ctrl+L"));
     LUT_Action->setStatusTip(tr("Open a LUT file"));
-    LUT_Action->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
     connect(LUT_Action, SIGNAL(triggered()), this, SLOT(openLUT()));
 
     // Exit Action
@@ -146,7 +162,7 @@ void MainWindow::createActions()
 
     // First Frame
     firstFrameAction = new QAction(tr("&First Frame"), this);
-    firstFrameAction->setShortcut(tr("Home"));
+    firstFrameAction->setShortcut(QKeySequence::MoveToStartOfLine);
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString("../diagona/icon/16/138.png")));
 
@@ -154,7 +170,7 @@ void MainWindow::createActions()
 
     // Previous Frame
     previousFrameAction = new QAction(tr("&Previous Frame"), this);
-    previousFrameAction->setShortcut(tr("Left"));
+    previousFrameAction->setShortcut(QKeySequence::MoveToPreviousChar);
     previousFrameAction->setStatusTip(tr("Select the previous frame"));
     previousFrameAction->setIcon(QIcon(QString("../diagona/icon/16/132.png")));
     connect(previousFrameAction, SIGNAL(triggered()), this, SLOT(previousFrame()));
@@ -168,14 +184,14 @@ void MainWindow::createActions()
 
     // Next Frame
     nextFrameAction = new QAction(tr("&Next Frame"), this);
-    nextFrameAction->setShortcut(tr("Right"));
+    nextFrameAction->setShortcut(QKeySequence::MoveToNextChar);
     nextFrameAction->setStatusTip(tr("Select next frame"));
     nextFrameAction->setIcon(QIcon(QString("../diagona/icon/16/131.png")));
     connect(nextFrameAction, SIGNAL(triggered()), this, SLOT(nextFrame()));
 
     // Last Frame
     lastFrameAction = new QAction(tr("&Last Frame"), this);
-    lastFrameAction->setShortcut(tr("End"));
+    lastFrameAction->setShortcut(QKeySequence::MoveToEndOfLine);
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString("../diagona/icon/16/137.png")));
     connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
@@ -183,15 +199,18 @@ void MainWindow::createActions()
 
     // Cascade windows
     cascadeAction = new QAction(tr("&Cascade Window"), this);
-    //lastFrameAction->setShortcut(tr("Ctrl+O"));
     cascadeAction->setStatusTip(tr("Cascade windows in Main Area"));
     connect(cascadeAction, SIGNAL(triggered()), this, SLOT(cascade()));
 
     // Tile windows
     tileAction = new QAction(tr("&Tile Window"), this);
-    //lastFrameAction->setShortcut(tr("Ctrl+O"));
     tileAction->setStatusTip(tr("Tiles windows in Main Area"));
     connect(tileAction, SIGNAL(triggered()), this, SLOT(tile()));
+
+    nativeAspectAction = new QAction(tr("&Native Aspect"), this);
+    nativeAspectAction->setStatusTip(tr("Resize display to its native aspect ratio."));
+    connect(nativeAspectAction, SIGNAL(triggered()), this, SLOT(shrinkToNativeAspectRatio()));
+
 }
 
 void MainWindow::createMenus()
@@ -202,6 +221,12 @@ void MainWindow::createMenus()
     fileMenu->addAction(LUT_Action);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
+
+    // Edit Menu
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(undoAction);
+    editMenu->addSeparator();
+    editMenu->addAction(copyAction);
 
     // Navigation Menu
     navigationMenu = menuBar()->addMenu(tr("&Navigation"));
@@ -215,8 +240,10 @@ void MainWindow::createMenus()
     windowMenu = menuBar()->addMenu(tr("&Window"));
     visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
     networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+    windowMenu->addSeparator();
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
+    windowMenu->addAction(nativeAspectAction);
 }
 
 void MainWindow::createContextMenu()
@@ -237,7 +264,6 @@ void MainWindow::createToolBars()
     navigationToolbar->addAction(selectFrameAction);
     navigationToolbar->addAction(nextFrameAction);
     navigationToolbar->addAction(lastFrameAction);
-
     //windowDisplayToolbar = addToolBar(tr("&Display"));
 }
 
@@ -267,6 +293,43 @@ void MainWindow::open()
         firstFrame();
     }
 }
+
+void MainWindow::copy()
+{
+    if(QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow())
+    {
+        QWidget* widget = activeSubWindow->widget();
+        if(typeid(*widget) == typeid(GLDisplay))
+        {
+            GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
+            currWindow->snapshotToClipboard();
+        }
+    }
+}
+
+void MainWindow::shrinkToNativeAspectRatio()
+{
+    if(QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow())
+    {
+        QSize windowSize = activeSubWindow->size();
+        QSize sourceSize;
+        bool validWidget = false;
+        QWidget* widget = activeSubWindow->widget();
+        if(typeid(*widget) == typeid(GLDisplay))
+        {
+            GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
+            validWidget = true;
+            sourceSize = currWindow->imageSize();
+        }
+
+        if(validWidget)
+        {
+            sourceSize.scale(windowSize,Qt::KeepAspectRatio);
+            activeSubWindow->resize(sourceSize);
+        }
+    }
+}
+
 void MainWindow::openLUT()
 {
     classification->doOpen();
@@ -383,44 +446,5 @@ void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
     {
         SelectColourAtPixel(x,y);
         ClassifySelectedColour();
-    }
-}
-
-void MainWindow::keyPressEvent ( QKeyEvent * event )
-{
-    //! Undo key event
-    if(event->key() == Qt::Key_Z && (event->modifiers() & Qt::ControlModifier))
-    {
-        if(event->isAutoRepeat() == false)
-        {
-            virtualRobot.UndoLUT();
-        }
-    }
-
-    //! Last frame key event
-    if(event->key() == Qt::Key_End)
-    {
-        if(event->isAutoRepeat() == false)
-        {
-            lastFrame();
-        }
-    }
-
-    //! First Frame key event
-    if(event->key() == Qt::Key_Home)
-    {
-        if(event->isAutoRepeat() == false)
-        {
-            firstFrame();
-        }
-    }
-
-    //! Select frame key event
-    if(event->key() == Qt::Key_G && (event->modifiers() & Qt::ControlModifier))
-    {
-        if(event->isAutoRepeat() == false)
-        {
-            selectFrame();
-        }
     }
 }
