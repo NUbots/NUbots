@@ -23,6 +23,8 @@
 #include <errno.h>
 #include <signal.h>
 #include <execinfo.h>
+#include <string>
+#include <sstream>
 
 #include "NUbot.h"
 #ifdef TARGET_IS_NAOWEBOTS
@@ -80,7 +82,7 @@ NUbot::NUbot(int argc, const char *argv[])
     
     // Construct each enabled module 
     #ifdef USE_VISION
-        vision = new Vision();
+        //vision = new Vision();
     #endif
     #ifdef USE_LOCALISATION
         localisation = new Localisation();
@@ -524,13 +526,21 @@ void* runThreadVision(void* arg)
     
     double lastupdatetime = nusystem->getTime();
     
-    int err;
+    int err = 0;
     do 
     {
 #if defined THREAD_VISION_MONITOR_TIME && !defined TARGET_IS_NAOWEBOTS
         entrytime = NUSystem::getRealTimeFast();
 #endif
+#ifdef TARGET_IS_NAOWEBOTS
         err = nubot->waitForNewVisionData();
+#endif
+#ifdef USE_VISION
+#if DEBUG_NUBOT_VERBOSITY > 4
+        debug << "NUbot::NUbot(). Grabbing new image." << endl;
+#endif
+        nubot->image = nubot->platform->camera->grabNewImage();
+#endif // USE_VISION
         nubot->signalVisionStart();
         
 #ifdef THREAD_VISION_MONITOR_TIME
@@ -547,9 +557,21 @@ void* runThreadVision(void* arg)
             *nubot->platform->io >> joblist;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             //          image = nubot->platform->camera->getData()
+//            image = nubot->platform->camera->grabNewImage();
             data = nubot->platform->sensors->getData();
             //                 odometry = nubot->motion->getData()                // There is no deep copy here either
             //      gamectrl, teaminfo = nubot->network->getData()
+#ifdef USE_VISION
+            std::stringstream ConvertStream;
+            std::string tempStr;
+            ConvertStream << "/media/userdata/" << (int)nubot->image->timestamp << ".jpg";
+            ConvertStream >> tempStr;
+#if DEBUG_NUBOT_VERBOSITY > 4
+            debug << "NUbot::NUbot(). Saving Image " << tempStr << endl;
+#endif
+//            JpegSaver::saveNUimageAsJpeg(nubot->image, tempStr);
+            //nubot->image->writeToFile(tempStr);
+#endif // USE_VISION
             //          fieldobj = nubot->vision->process(image, data, gamectrl)
             //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #ifdef USE_BEHAVIOUR
