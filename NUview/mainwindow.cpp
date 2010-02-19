@@ -44,8 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
     imageDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(imageDisplay);
 
-    wmDisplay = new locWmGlDisplay(this);
-    mdiArea->addSubWindow(wmDisplay);
+    // Disabled
+    wmDisplay = NULL;
+    //wmDisplay = new locWmGlDisplay(this);
+    //mdiArea->addSubWindow(wmDisplay);
 
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
