@@ -13,6 +13,7 @@
 #include "Tools/Math/LSFittedLine.h"
 #include "Vision/Circle.h"
 #include <vector>
+#include <fstream>
 
 
 #define uint8 unsigned char
@@ -36,13 +37,14 @@ public:
     virtualNUbot(QObject * parent = 0);
     ~virtualNUbot();
     void loadFrame(int FrameNumber);
-    int loadFile(const char* fileName);
+    int loadFile(const QString& filename);
     pixels::Pixel selectRawPixel(int x, int y);
     bool imageAvailable()
     {
         return hasImage;
     }
 
+    QString fileType;
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
@@ -95,6 +97,8 @@ private:
 
     // File Access
     NUbotImage* file;               //!< Instance of the File reader
+    ifstream streamFile;
+    int streamFileLength;
     unsigned char* classificationTable;
     unsigned char* tempLut;
 

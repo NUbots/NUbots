@@ -295,19 +295,29 @@ void MainWindow::open()
 {
     fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), ".",
-                            tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf)"));
+                            tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;NUbot Log Files (*.nul)"));
 
     setWindowTitle(QString("NUview - ") + fileName);
     if (!fileName.isEmpty()){
-        //loadFile(fileName);
-        const char* filestr = fileName.toAscii();
-
-        totalFrameNumber = virtualRobot.loadFile(filestr);
+        totalFrameNumber = virtualRobot.loadFile(fileName);
         QString message = "Opening File: ";
         message.append(fileName);
         this->statusBar->showMessage(message,10000);
         qDebug() << "Number of Frames in File: " << totalFrameNumber;
         firstFrame();
+
+        if(virtualRobot.fileType == QString("nul"))
+        {
+            previousFrameAction->setEnabled(false);
+            selectFrameAction->setEnabled(false);
+            lastFrameAction->setEnabled(false);
+        }
+        else
+        {
+            previousFrameAction->setEnabled(true);
+            selectFrameAction->setEnabled(true);
+            lastFrameAction->setEnabled(true);
+        }
     }
 }
 
@@ -355,8 +365,6 @@ void MainWindow::openLUT()
 
 void MainWindow::firstFrame()
 {
-
-
     currentFrameNumber = 1;
     LoadFrame(currentFrameNumber);
     return;
