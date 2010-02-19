@@ -516,6 +516,7 @@ ostream& operator<<(ostream& output, JobList& joblist)
     static JobList::iterator it;     // the iterator over all of the jobs
     for (it = joblist.begin(); it != joblist.end(); ++it)
         output << *it;
+    return output;
 }
 
 istream& operator>>(istream& input, JobList& joblist)
@@ -531,6 +532,7 @@ istream& operator>>(istream& input, JobList& joblist)
         input >> &tempjob;
         joblist.addJob(tempjob);
     }
+    return input;
 }
 
 
