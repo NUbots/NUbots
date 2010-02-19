@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     classification = new ClassificationWidget(this);
     addDockWidget(Qt::RightDockWidgetArea, classification);
-/*
+
     miscDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(miscDisplay);
 
@@ -43,7 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     imageDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(imageDisplay);
-*/
+
+    wmDisplay = new locWmGlDisplay(this);
+    mdiArea->addSubWindow(wmDisplay);
+
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
@@ -61,9 +64,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
 
-    wmDisplay = new locWmGlDisplay(this);
-    mdiArea->addSubWindow(wmDisplay);
-
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
@@ -80,32 +80,32 @@ MainWindow::MainWindow(QWidget *parent)
     layerSelectionDock->setWidget(layerSelection);
     addDockWidget(Qt::RightDockWidgetArea, layerSelectionDock);
 
-//    imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
-    //imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
+    imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
+    imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
-//    imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+    //imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
     //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
 //    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
-    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
-    imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
-    imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
-    imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
+    //imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
+    //imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
+    //imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
+    //imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
 
-//    classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
-//    classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
-//    classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
+    classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
+    classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
+    classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
 //    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(255,0,0));
 
 
-//    horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
+    horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
 //    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
 //    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
-//    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
+    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
 
     miscDisplay->setOverlayDrawing(GLDisplay::FieldLines,true, QColor(255,0,0));
     miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
