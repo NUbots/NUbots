@@ -269,7 +269,9 @@ void JobList::removeBehaviourJob(Job* job)
  */
 void JobList::removeMotionJob(Job* job)
 {
+    debug << "JobList::removeMotionJob" << endl;
     removeJob(job, m_motion_jobs);
+    debug << "JobList::removeMotionJob. Finished" << endl;
 }
 
 /*! @brief Remove a light job from the list
@@ -318,7 +320,11 @@ void JobList::removeOtherJob(Job* job)
  */
 void JobList::removeJob(Job* job, list<Job*>& joblist)
 {
+    debug << "JobList::removeJob." << endl;
+    debug << "job:" << (void*) job << " " << job << endl;
+    debug << "joblist:" << (void*) &joblist << endl;
     joblist.remove(job);
+    debug << "JobList::removeJob. Finished." << endl;
 }
 
 /*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
@@ -496,8 +502,11 @@ void JobList::summaryTo(ostream& output)
 {
     output << "JobList " << size() << " -----------------------------------" << endl;
     static JobList::iterator it;     // the iterator over all of the jobs
-    for (it = begin(); it != end(); ++it)
-        (*it)->summaryTo(output);
+    if (size() != 0)
+    {   //<! @todo TODO. Investigate why we get a segment fault when the JobList size is zero!
+        for (it = begin(); it != end(); ++it)
+            (*it)->summaryTo(output);
+    }
     output << "-------------------------------------------" << endl;
 }
 

@@ -26,6 +26,7 @@ class GLDisplay;
 class NUSystem;
 class JobList;
 class NUIO;
+class WalkParameters;
 
 
 class WalkParameterWidget : public QWidget
@@ -83,6 +84,7 @@ private:
     NUSystem* m_nusystem;
     NUIO* m_io;
     JobList* m_job_list; 
+    WalkParameters* m_walk_parameters;
 
     public:
 

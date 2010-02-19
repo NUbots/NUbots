@@ -146,6 +146,7 @@ void NUMotion::process(JobList& jobs)
     static list<Job*>::iterator it;     // the iterator over the motion jobs
     for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
     {
+        debug << "Top of loop" << endl;
 #ifdef USE_WALK
         if ((*it)->getID() == Job::MOTION_WALK)
         {   // process a walk speed job
@@ -159,7 +160,7 @@ void NUMotion::process(JobList& jobs)
             #endif
             
             m_walk->walkSpeed(speed);
-            jobs.removeMotionJob(job);
+            //jobs.removeMotionJob(job);
         }
         else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
         {   // process a walk to point job
@@ -174,7 +175,7 @@ void NUMotion::process(JobList& jobs)
             #endif
             
             m_walk->walkToPoint(time, position);
-            jobs.removeMotionJob(job);
+            //jobs.removeMotionJob(job);
         }
         else if ((*it)->getID() == Job::MOTION_WALK_PARAMETERS)
         {   // process a walk to point job
@@ -186,10 +187,14 @@ void NUMotion::process(JobList& jobs)
             job->getWalkParameters(parameters);
             #if DEBUG_NUMOTION_VERBOSITY > 4
                 debug << "NUMotion::process(): Processing a walkparameter job." << endl;
+                parameters.summaryTo(debug);
             #endif
             
             m_walk->setWalkParameters(parameters);
-            jobs.removeMotionJob(job);
+            //jobs.removeMotionJob(job);
+            #if DEBUG_NUMOTION_VERBOSITY > 4
+                debug << "NUMotion::process(): Processing a walkparameter job. After remove." << endl;
+            #endif
         }
 #endif  // USE_WALK
         
@@ -212,5 +217,9 @@ void NUMotion::process(JobList& jobs)
         }
 #endif  // USE_KICK 
     }
+    jobs.clear();
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::process(): Finished." << endl;
+    #endif
 }
 

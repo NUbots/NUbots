@@ -448,7 +448,7 @@ void JuppWalk::updateActionatorsData()
         m_actions->addJointPositions(NUActionatorsData::RightArmJoints, firstruntime + 3000, zeroarm, zeroarm, m_right_arm_gains);
         firstrun = false;
     }
-    else if (m_current_time - firstrun > 3500)
+    else if (m_current_time - firstruntime > 3500)
     {
         m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
         m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);

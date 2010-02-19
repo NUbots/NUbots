@@ -46,6 +46,11 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     nusystem = m_nusystem;
     m_job_list = new JobList();
     m_io = new NUIO(0);
+    m_walk_parameters = new WalkParameters();
+    
+    ifstream testparafile("jupptestparameters.wp");
+    if (testparafile.is_open())
+        testparafile >> *m_walk_parameters;
 }
 
 void WalkParameterWidget::createWidgets()
@@ -53,7 +58,7 @@ void WalkParameterWidget::createWidgets()
     // Shift Amplitude
     shiftAmplitudeLabel = new QLabel("Amplitude");
     shiftAmplitudeSlider = new QSlider(Qt::Horizontal);
-    shiftAmplitudeSlider->setMinimum(0);
+    shiftAmplitudeSlider->setMinimum(1);
     shiftAmplitudeSlider->setMaximum(100);
 
     shiftAmplitudeSpinBox = new QSpinBox();
@@ -63,7 +68,7 @@ void WalkParameterWidget::createWidgets()
     // Shift Frequency
     shiftFrequencyLabel = new QLabel("Frequency");
     shiftFrequencySlider = new QSlider(Qt::Horizontal);
-    shiftFrequencySlider->setMinimum(0);
+    shiftFrequencySlider->setMinimum(1);
     shiftFrequencySlider->setMaximum(100);
     
     shiftFrequencySpinBox = new QSpinBox();
@@ -73,7 +78,7 @@ void WalkParameterWidget::createWidgets()
     // Step Size
     stepSizeLabel = new QLabel("Step Size");
     stepSizeSlider = new QSlider(Qt::Horizontal);
-    stepSizeSlider->setMinimum(0);
+    stepSizeSlider->setMinimum(1);
     stepSizeSlider->setMaximum(100);
     
     stepSizeSpinBox = new QSpinBox();
@@ -152,12 +157,33 @@ WalkParameterWidget::~WalkParameterWidget()
 
 void WalkParameterWidget::walkParameterChanged()
 {
-    shiftAmplitudeSlider->value();
-    shiftFrequencySlider->value();
-    stepSizeSlider->value();
+    static WalkParametersJob* parametersjob = new WalkParametersJob(*m_walk_parameters);
+    static vector<float> speed(3,0);
+    static WalkJob* walkjob = new WalkJob(speed);
+    static vector<vector<WalkParameters::Parameter> > params;
     
+    m_walk_parameters->getParameters(params);
+    
+    // params[0] is shift frequency
+    // params[2] is shift amplitude
+    
+    shiftAmplitudeSlider->value();
+    params[0][0].Value = shiftFrequencySlider->value()/50.0;
+    params[0][2].Value = shiftAmplitudeSlider->value()/200.0;
+    speed[0] = stepSizeSlider->value()/10.0;
+    
+    m_walk_parameters->setParameters(params);
+    
+    parametersjob->setWalkParameters(*m_walk_parameters);
+    walkjob->setSpeed(speed);
+    m_job_list->addMotionJob(walkjob);
+    m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
+    
     (*m_io) << m_job_list;
+    
+    m_job_list->removeMotionJob(parametersjob);
+    m_job_list->removeMotionJob(walkjob);
 }
 
 
