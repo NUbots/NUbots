@@ -84,17 +84,15 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     locWmGlDisplay.cpp \
     ../Vision/RobotCandidate.cpp \
-    ../Vision/ObjectCandidate.cpp
+    ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
-    ../Vision/RobotCandidate.cpp \
     ../Vision/FieldObjects/StationaryObject.cpp \
     ../Vision/FieldObjects/Self.cpp \
     ../Vision/FieldObjects/Object.cpp \
     ../Vision/FieldObjects/MobileObject.cpp \
     ../Vision/FieldObjects/AmbiguousObject.cpp \
     ../Vision/FieldObjects/FieldObjects.cpp \
-    ../Vision/ObjectCandidate.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
