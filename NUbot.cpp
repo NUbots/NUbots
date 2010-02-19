@@ -478,7 +478,7 @@ void* runThreadMotion(void* arg)
                 #endif
             #endif
             nubot->platform->actionators->process(actions);
-            *(nubot->platform->io) << data;
+            //*(nubot->platform->io) << data;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e)
@@ -510,13 +510,10 @@ void* runThreadMotion(void* arg)
 void* runThreadVision(void* arg)
 {
     debug << "NUbot::runThreadVision: Starting." << endl;
-    
     NUbot* nubot = (NUbot*) arg;                // the nubot
     NUSensorsData* data = NULL;
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
-    cout << "Initial JobList ----------------------------------------" << endl;
-    joblist.summaryTo(debug);
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -536,10 +533,10 @@ void* runThreadVision(void* arg)
         err = nubot->waitForNewVisionData();
 #endif
 #ifdef USE_VISION
-#if DEBUG_NUBOT_VERBOSITY > 4
-        debug << "NUbot::NUbot(). Grabbing new image." << endl;
-#endif
-        nubot->image = nubot->platform->camera->grabNewImage();
+    #if DEBUG_NUBOT_VERBOSITY > 4
+            debug << "NUbot::NUbot(). Grabbing new image." << endl;
+    #endif
+            nubot->image = nubot->platform->camera->grabNewImage();
 #endif // USE_VISION
         nubot->signalVisionStart();
         
