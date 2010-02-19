@@ -7,6 +7,28 @@ CameraSettings::CameraSettings()
     return;
 }
 
+CameraSettings::CameraSettings(const CameraSettings& source)
+{
+    // Image settings
+    brightness = source.brightness;
+    contrast = source.contrast;
+    saturation = source.saturation;
+    hue = source.hue;
+    redChroma = source.redChroma;
+    blueChroma = source.blueChroma;
+    gain = source.gain;
+    exposure = source.exposure;
+
+    // Auto values
+    autoExposure = source.autoExposure;
+    autoWhiteBalance = source.autoWhiteBalance;
+    autoGain = source.autoGain;
+
+    // Extra
+    activeCamera = source.activeCamera;
+    return;
+}
+
 CameraSettings::CameraSettings(const std::string& configFileName)
 {
     LoadFromFile(configFileName);
