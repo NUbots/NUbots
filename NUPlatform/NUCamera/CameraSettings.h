@@ -23,6 +23,8 @@ class CameraSettings
 
         CameraSettings();
         CameraSettings(const std::string& configFileName);
+        void SetDefaults();
+        void LoadFromFile(const std::string& configFileName);
 };
 #endif
 
