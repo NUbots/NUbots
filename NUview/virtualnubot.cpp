@@ -130,7 +130,7 @@ void virtualNUbot::loadFrame(int frameNumber)
             streamFile.clear();
         }
         if(streamFile.good()){
-            int currPos = streamFile.tellg();
+            unsigned int currPos = streamFile.tellg();
             if( (streamFileLength - currPos) > 2*sizeof(int) )
             {
                 streamFile >> rawImage;

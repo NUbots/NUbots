@@ -98,7 +98,7 @@ private:
     // File Access
     NUbotImage* file;               //!< Instance of the File reader
     ifstream streamFile;
-    int streamFileLength;
+    unsigned int streamFileLength;
     unsigned char* classificationTable;
     unsigned char* tempLut;
 
