@@ -18,6 +18,7 @@ INCLUDEPATH += 'C:/Program Files/boost/'
 #HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 }
 INCLUDEPATH += ../
+INCLUDEPATH += ../Autoconfig
 INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
@@ -41,12 +42,18 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
+    WalkParameterWidget.h \
+    ../Motion/NUWalk.h \
+    ../Motion/Walks/WalkParameters.h \
+    ../Behaviour/Jobs.h \
+    ../Behaviour/Jobs/*.h \
+    ../NUPlatform/NUIO.h \
+    ../Autoconfig/*.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
     ../Vision/RobotCandidate.h \
     ../Tools/Math/Vector3.h \
-    ../Vision/Object.h \
     ../Vision/FieldObjects/StationaryObject.h \
     ../Vision/FieldObjects/Self.h \
     ../Vision/FieldObjects/Object.h \
@@ -82,6 +89,17 @@ SOURCES += mainwindow.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
+    WalkParameterWidget.cpp \
+    ../Motion/NUWalk.cpp \
+    ../Motion/Walks/WalkParameters.cpp \
+    ../NUPlatform/NUIO.cpp \
+    ../NUPlatform/NUIO/*.cpp \
+    ../NUPlatform/NUSensors.cpp \
+    ../NUPlatform/NUSensors/*.cpp \
+    ../NUPlatform/NUSystem.cpp \
+    ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
+    ../Behaviour/Jobs/*.cpp \
+    ../Behaviour/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
     ../Vision/RobotCandidate.cpp \
     ../Vision/ObjectCandidate.cpp \

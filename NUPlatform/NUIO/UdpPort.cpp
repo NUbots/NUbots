@@ -51,7 +51,7 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
     memset(m_address.sin_zero, '\0', sizeof m_address.sin_zero);
     
     m_broadcast_address.sin_family = AF_INET;                   // host byte order
-    m_broadcast_address.sin_port = htons(m_port_number);        // short, network byte order
+    m_broadcast_address.sin_port = htons(m_port_number);        // short, network byte order 
     m_broadcast_address.sin_addr.s_addr = htonl(INADDR_BROADCAST);     // automatically fill with my local Broadcast IP
     memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
     
@@ -90,16 +90,22 @@ void UdpPort::run()
     debug << "UdpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
-    socklen_t local_addr_len;
+    socklen_t local_addr_len = sizeof(local_their_addr);
     byte localdata[10*1024];
     int localnumBytes;
     while(1)
     {
         localnumBytes = recvfrom(m_sockfd, localdata, 10*1024 , 0, (struct sockaddr *)&local_their_addr, &local_addr_len);
         if (local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
-        {
-            #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
+            #if DEBUG_NUSYSTEM_VERBOSITY > 3
                 debug << "UdpPort::run(). Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
+            #endif
+            #if DEBUG_NUSYSTEM_VERBOSITY > 4
+                debug << "UdpPort::run(). Received ";
+                for (int i=0; i<localnumBytes; i++)
+                    debug << localdata[i];
+                debug << endl;
             #endif
             pthread_mutex_lock(&m_socket_mutex);
             m_time_last_receive = nusystem->getTime();
@@ -127,7 +133,7 @@ network_data_t UdpPort::receiveData()
     {
         netdata.size = m_message_size;
         netdata.data = new byte[m_message_size];
-        memcpy(m_data, netdata.data, m_message_size);
+        memcpy(netdata.data, m_data, m_message_size);
         m_has_data = false;
     }
     pthread_mutex_unlock(&m_socket_mutex);
@@ -140,7 +146,7 @@ network_data_t UdpPort::receiveData()
 void UdpPort::sendData(network_data_t netdata)
 {
     pthread_mutex_lock(&m_socket_mutex);
-    if (nusystem->getTime() - m_time_last_receive < 3000)
+    if (true || nusystem->getTime() - m_time_last_receive < 3000)
     {
         #if DEBUG_NUSYSTEM_VERBOSITY > 4
             debug << "UdpPort::sendData(). Sending " << netdata.size << " bytes to " << inet_ntoa(m_broadcast_address.sin_addr) << endl;

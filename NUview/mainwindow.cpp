@@ -1,12 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "LayerSelectionWidget.h"
+#include "WalkParameterWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
 #include <stdio.h>
 
-
+#include <iostream>
+using namespace std;
+ofstream debug;
+ofstream errorlog;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -82,6 +86,12 @@ MainWindow::MainWindow(QWidget *parent)
     layerSelectionDock->setWidget(layerSelection);
     addDockWidget(Qt::RightDockWidgetArea, layerSelectionDock);
 
+    // Add walk parameter dock widget
+    walkParameter = new WalkParameterWidget(mdiArea,this);
+    walkParameterDock = new QDockWidget(walkParameter->windowTitle());
+    walkParameterDock->setWidget(walkParameter);
+    addDockWidget(Qt::RightDockWidgetArea, walkParameterDock);
+
     imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
     imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
@@ -128,6 +138,8 @@ MainWindow::~MainWindow()
     delete localisation;
     delete layerSelection;
     delete layerSelectionDock;
+    delete walkParameter;
+    delete walkParameterDock;
     delete mdiArea;
 
 // Delete Actions

@@ -10,7 +10,7 @@
 //using namespace std;
 #include <vector>
 //#include "../Kinematics/Kinematics.h"
-#include <QDebug>
+//#include <QDebug>
 
 LineDetection::LineDetection(){
 
@@ -107,14 +107,14 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
-                //qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
+                //// qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
 
             }
         }
 
     }
-    qDebug() << "Number of LinePoints: " << linePoints.size();
+    // qDebug() << "Number of LinePoints: " << linePoints.size();
     return;
 }
 
@@ -153,7 +153,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             if (linePoints[EndCheck].x <= linePoints[SearchFrom].x+LINE_SEARCH_GRID_SIZE*2)
             {
                 DistanceStep = (int)(linePoints[EndCheck].x-linePoints[SearchFrom].x)/LINE_SEARCH_GRID_SIZE;  //number of grid units long
-                //qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
+                //// qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
                 if (fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) <= LINE_SEARCH_GRID_SIZE*2*DistanceStep)//fabs(LINE_SEARCH_GRID_SIZE*DistanceStep))
                    // && fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) < LINE_SEARCH_GRID_SIZE)
                 {
@@ -201,7 +201,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
 
     //SORT POINTS
-    //qDebug() << "SORTING...";
+    //// qDebug() << "SORTING...";
     //qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
@@ -272,12 +272,12 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     if (fieldLines.size() < 1)
     {
             printf("No Lines... ABORT!!!!");
-            qDebug() << "No Lines... ABORT!!!!";
+            // qDebug() << "No Lines... ABORT!!!!";
             return;
     }
     else{
             printf("END FieldLinesCounter: %i\n", fieldLines.size());
-            qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
+            // qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
     }
 
     //for(int l = 0; l < FieldLinesCounter; l++)
@@ -366,11 +366,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
                     //Now make sure the slopes are both about the same degree angle....
                     // Seems to have a problem with lines "within" other lines, so pick them out..
-                    qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
+                    // qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
                     if ((r2tls1 > .99 && r2tls2 > .99 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
                     {
                         //They are the same line, so join them together...
-                        qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
+                        // qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
                         fieldLines[LineIDStart].joinLine(fieldLines[LineIDEnd]);
                         //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
                         fieldLines[LineIDEnd].clearPoints();
@@ -393,15 +393,15 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
 
     }
-    qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
+    // qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
 
 
     for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
-                << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
-                << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
-                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
+        // qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        //        << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
+        //        << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
+        //        << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
     }
 
 }
@@ -563,7 +563,7 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
         qDebug() << "Total Corners Found: " << cornerPoints.size();
         for (unsigned int i = 0; i < cornerPoints.size() ; i++)
         {
-            qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
+            // qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
         }
 }
 
@@ -949,7 +949,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 void LineDetection::swap(std::vector<LinePoint> array, int i, int j)
 {
         LinePoint temp;
-        //qDebug() << "Swapping "<< i << "," <<j;
+        //// qDebug() << "Swapping "<< i << "," <<j;
         temp     = array[i];
         array[i] = array[j];
         array[j] = temp;

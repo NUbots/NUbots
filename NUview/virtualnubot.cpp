@@ -220,6 +220,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
+    Circle circ;
     //qDebug() << "Start switch";
 
 

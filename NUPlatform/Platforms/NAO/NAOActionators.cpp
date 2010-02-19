@@ -219,6 +219,9 @@ void NAOActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOActionators::copyToHardwareCommunications()" << endl;
 #endif
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    m_data->summaryTo(debug);
+#endif
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
         if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length

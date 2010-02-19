@@ -27,7 +27,8 @@
  */
 WalkParameters::WalkParameters()
 {
-    m_num_max_speeds = 0;                      
+    m_num_max_speeds = 0;      
+    m_num_max_accelerations = 0;  
     m_num_parameters = 0;                      
     m_num_arm_gains = 0;                       
     m_num_torso_gains = 0;                     
