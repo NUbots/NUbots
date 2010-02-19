@@ -140,7 +140,7 @@ network_data_t UdpPort::receiveData()
 void UdpPort::sendData(network_data_t netdata)
 {
     pthread_mutex_lock(&m_socket_mutex);
-    if (nusystem->getTime() - m_time_last_receive < 3000)
+    if (true || nusystem->getTime() - m_time_last_receive < 3000)
     {
         #if DEBUG_NUSYSTEM_VERBOSITY > 4
             debug << "UdpPort::sendData(). Sending " << netdata.size << " bytes to " << inet_ntoa(m_broadcast_address.sin_addr) << endl;
