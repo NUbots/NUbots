@@ -1,5 +1,8 @@
 #include "GLDisplay.h"
 #include "openglmanager.h"
+#include <qclipboard.h>
+#include <QApplication>
+#include <qDebug>
 
 GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         QGLWidget(parent,(QGLWidget*)shareWidget), imageWidth(80), imageHeight(60)
@@ -213,4 +216,12 @@ QSize GLDisplay::minimumSizeHint() const
 QSize GLDisplay::sizeHint() const
 {
         return QSize(160, 120);
+}
+
+void GLDisplay::snapshotToClipboard()
+{
+    paintGL(); // Redraw the scene in case it needs to be updated.
+    QClipboard *cb = QApplication::clipboard(); // get the clipboard
+    QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
+    cb->setImage(tempPicture); // put current image on the clipboard.
 }

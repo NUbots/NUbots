@@ -246,8 +246,8 @@ void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDispl
     glBegin(GL_LINES);                              // Start Lines
     for(int i = 0;i<numLines;i++)
     {
-        glVertex2i(newWMLine[i].getStart().getx(),newWMLine[i].getStart().gety());                 // Starting point
-        glVertex2i(newWMLine[i].getEnd().getx(),newWMLine[i].getEnd().gety());    // End point
+        glVertex2f(newWMLine[i].getStart().getx(),newWMLine[i].getStart().gety());                 // Starting point
+        glVertex2f(newWMLine[i].getEnd().getx(),newWMLine[i].getEnd().gety());    // End point
     }
     glEnd();                                        // End Lines
     glEnable(GL_TEXTURE_2D);
@@ -324,8 +324,7 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
 {
     glLineWidth(2.0);       // Line width
     //std::vector<RobotCandidate>::const_iterator i;
-    unsigned char r,g,b;
-    for(int i = 0 ; i < fieldLines.size(); i++)
+    for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
         //Vector2<int> topLeft = i->getTopLeft();
         //Vector2<int> bottomRight = i->getBottomRight();
@@ -338,7 +337,7 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
             glEnd();  // End Lines
             glBegin(GL_TRIANGLES);
-             for (int j =0; j < linePoints.size(); j++)
+             for (unsigned int j =0; j < linePoints.size(); j++)
             {
                 glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
                 glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);

@@ -20,7 +20,7 @@ void AmbiguousObject::setPossibleObjectIDs(vector<int> VectorOfIDs)
 bool AmbiguousObject::isObjectAPossibility(int ID)
 {
 	bool isInVector = false;
-        for(int i = 0; i < PossibleObjectIDs.size(); i++)
+        for(unsigned int i = 0; i < PossibleObjectIDs.size(); i++)
 	{
                 if(PossibleObjectIDs[i] == ID)
 		{

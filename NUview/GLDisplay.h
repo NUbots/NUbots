@@ -34,6 +34,10 @@ public:
       */
     ~GLDisplay();
 
+    QSize imageSize()
+    {
+        return QSize(imageWidth, imageHeight);
+    }
     /*!
       @brief Classed used to represent a layer.
 
@@ -192,7 +196,10 @@ public slots:
       */
     void setOverlayDrawing(int displayID, bool enabled, QColor drawingColour);
 
-
+    /*!
+      @brief Copy the current image displayed to the system clipboard.
+      */
+    void snapshotToClipboard();
 
 signals:
     /*!
@@ -223,9 +230,9 @@ signals:
     void ctrlSelectPixel(int x,int y);
 
 protected:
-        void initializeGL();
-        void paintGL();
-        void resizeGL(int width, int height);
+    void initializeGL();
+    void paintGL();
+    void resizeGL(int width, int height);
 private:
     int imageWidth; //!< The width of the windows current primary display
     int imageHeight; //!< The height of the windows current primary display
@@ -239,6 +246,7 @@ private:
       @brief Function used to calculate the image coordinates from the screen coordinates.
       @param mouseEvent The mouse event from the selection.
       */
+
     QPoint calculateSelectedPixel(QMouseEvent * mouseEvent);
 
     /*!

@@ -57,8 +57,11 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
-    Circle circ;
-    //qDebug() << "Start switch";
+
+    //qDebug() << "CASE YUYVGenerate Classified Image: START";
+    //generateClassifiedImage(image);
+    //qDebug() << "Generate Classified Image: finnished";
+    setImage(&image);
     //! Find the green edges
     points = findGreenBorderPoints(spacings,&horizonLine);
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
@@ -78,7 +81,6 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     ClassifyScanArea(vertScanArea);
     ClassifyScanArea(horiScanArea);
     //qDebug() << "Classify Scanlines: finnished";
-
 
     //! Extract and Display Vertical Scan Points:
     tempNumScanLines = vertScanArea->getNumberOfScanLines();
@@ -163,7 +165,7 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
                 tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
                 //qDebug() << "POST-ROBOT";
                 robotClassifiedPoints = 0;
-            break;
+                break;
             case BALL:
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
@@ -171,38 +173,38 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
                 //qDebug() << "PRE-BALL";
                 tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
-            break;
+                 break;
             case GOALS:
                 validColours.push_back(ClassIndex::yellow);
                 validColours.push_back(ClassIndex::blue);
                 //qDebug() << "PRE-GOALS";
                 tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
                 //qDebug() << "POST-GOALS";
-            break;
-        }
-        while (tempCandidates.size())
-        {
-            candidates.push_back(tempCandidates.back());
-            tempCandidates.pop_back();
-        }
+                break;
+            }
+            while (tempCandidates.size())
+            {
+                candidates.push_back(tempCandidates.back());
+                tempCandidates.pop_back();
+            }
     }
-    //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    //qDebug() << "POSTclassifyCandidates";
-    circ = DetectBall(candidates);
+        //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+        //qDebug() << "POSTclassifyCandidates";
+
+    Circle circ = DetectBall(candidates);
     //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     /*
-    if(circ.isDefined)
-    {
-        //! Draw Ball:
-        //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-    }
-    else
-    {
-        emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-    }*/
+        if(circ.isDefined)
+        {
+            //! Draw Ball:
+            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+        }
+        else
+        {
+            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+        }*/
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
     return;
 }
 
@@ -810,7 +812,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
         std::queue<int> qUnprocessed;
         unsigned int rawSegsLeft = segments.size();
-        int nextRawSeg = 0;
+        unsigned int nextRawSeg = 0;
 
         bool isSegUsed [segments.size()];
 
@@ -854,7 +856,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             min_y = segments.at(nextRawSeg).getStartPoint().y;
             max_y = segments.at(nextRawSeg).getEndPoint().y;
             segCount = 0;
-            for (int i = 0; i < validColours.size(); i++)  colourHistogram[i] = 0;
+            for (unsigned int i = 0; i < validColours.size(); i++)  colourHistogram[i] = 0;
 
             //! For all unprocessed joined segment in a candidate O(M)
             //Build candidate
@@ -864,7 +866,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 thisSeg = qUnprocessed.front();
                 qUnprocessed.pop();
                 segCount++;
-                for (int i = 0; i < validColours.size(); i++)
+                for (unsigned int i = 0; i < validColours.size(); i++)
                 {
                     if ( segments.at(thisSeg).getColour() == validColours.at(i) && validColours.at(i) != ClassIndex::white)
                     {
@@ -912,7 +914,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
                 //! For each segment being processed in a candidate to the RIGHT attempt to join segments within range O(M)
                 //if there is a seg overlapping on the right AND 'close enough', then qUnprocessed->push()
-                for (int thatSeg = thisSeg + 1; thatSeg < segments.size(); thatSeg++)
+                for (unsigned int thatSeg = thisSeg + 1; thatSeg < segments.size(); thatSeg++)
                 {
                     if ( segments.at(thatSeg).getStartPoint().x - segments.at(thisSeg).getStartPoint().x <=  spacing*HORZ_JOIN_LIMIT)
                     {
@@ -1016,7 +1018,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
             {
                 //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y);
                 int max_col = 0;
-                for (int i = 0; i < validColours.size(); i++)
+                for (int i = 0; i < (int)validColours.size(); i++)
                 {
                     if (i != max_col && colourHistogram[i] > colourHistogram[max_col])
                         max_col = i;
