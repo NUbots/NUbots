@@ -168,6 +168,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
+    Circle circ;
     //qDebug() << "Start switch";
     switch (image.imageFormat)
     {
@@ -308,7 +309,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
             //qDebug() << "POSTclassifyCandidates";
 
-            Circle circ = vision.DetectBall(candidates);
+            circ = vision.DetectBall(candidates);
             //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
             if(circ.isDefined)
             {

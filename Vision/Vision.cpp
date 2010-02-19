@@ -57,6 +57,7 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
+    Circle circ;
     //qDebug() << "Start switch";
     switch (image.imageFormat)
     {
@@ -194,8 +195,7 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
             }
             //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
             //qDebug() << "POSTclassifyCandidates";
-
-            Circle circ = DetectBall(candidates);
+            circ = DetectBall(candidates);
             //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
             /*
             if(circ.isDefined)
