@@ -130,9 +130,21 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
  */
 NUIO& operator>>(NUIO& io, JobList& jobs)
 {
+#if DEBUG_NUSYSTEM_VERBOSITY > 4
+    debug << "NUIO >> JobList" << endl;
+#endif
     network_data_t netdata = io.m_jobs_port->receiveData();
     if (netdata.size > 0)
     {
+        #if DEBUG_NUSYSTEM_VERBOSITY > 3
+            debug << "NUIO >> JobList received: " << netdata.size << endl;
+        #endif
+        #if DEBUG_NUSYSTEM_VERBOSITY > 4
+            debug << "NUIO >> JobList received: ";
+            for (int i=0; i<netdata.size; i++)
+                debug << netdata.data[i];
+            debug << endl;
+        #endif
         stringstream buffer;
         buffer.write(reinterpret_cast<char*>(netdata.data), netdata.size);
         buffer >> jobs;

@@ -65,8 +65,9 @@ JobList::JobList()
     walkspeed[2] = 0.0;
     WalkJob* walkjob = new WalkJob(walkspeed);
     WalkParameters parameters = WalkParameters();
-    ifstream testparafile("jupptestparameters.wp");
-    testparafile >> parameters;
+    ifstream testparafile("/home/root/jupptestparameters.wp");
+    if (testparafile.is_open())
+        testparafile >> parameters;
     WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
     
     /*// Test Light Job
@@ -510,9 +511,10 @@ void JobList::csvTo(ostream& output)
 ostream& operator<<(ostream& output, JobList& joblist)
 {
 #if DEBUG_BEHAVIOUR_VERBOSITY > 4
-    debug << "<<JobList" << endl;
+    debug << "ostream << JobList. " << joblist.size() << " jobs." << endl;
 #endif
     output << joblist.size() << " ";
+    
     static JobList::iterator it;     // the iterator over all of the jobs
     for (it = joblist.begin(); it != joblist.end(); ++it)
         output << *it;
@@ -521,11 +523,16 @@ ostream& operator<<(ostream& output, JobList& joblist)
 
 istream& operator>>(istream& input, JobList& joblist)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
-    debug << ">>JobList" << endl;
-#endif
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList" << endl;
+    #endif
+    char buffer[8];
     unsigned int numnewjobs = 0;
     input >> numnewjobs;
+    input.read(buffer, sizeof(char));       // skip over the white space
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList. Adding " << numnewjobs << endl;
+    #endif
     Job* tempjob = NULL;
     for (unsigned int i=0; i<numnewjobs; i++)
     {
