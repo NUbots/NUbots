@@ -115,7 +115,7 @@ void sensor_t::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const sensor_t& p_sensor)
 {
     output << p_sensor.Name << " ";
-    output << (int)p_sensor.SensorID << " ";
+    output << (int) p_sensor.SensorID << " ";
     
     output << p_sensor.Data.size() << " ";
     // we save the sensor data as binary data
@@ -148,7 +148,7 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
 {
     int size = 0;
     int id = 9000;
-    char* inbuffer = new char[1000];                // temporary buffer for binary read
+    char inbuffer[1024];                // temporary buffer for binary read
     input >> p_sensor.Name;
     input >> id;
     p_sensor.SensorID = (sensor_t::sensor_id_t) id;

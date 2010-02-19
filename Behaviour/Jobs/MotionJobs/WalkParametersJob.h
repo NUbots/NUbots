@@ -1,13 +1,12 @@
-/*! @file HeadJob.h
-    @brief Declaration of HeadJob class.
+/*! @file WalkParameterJob.h
+    @brief Declaration of WalkParameterJob class.
  
-    @class HeadJob
-    @brief A class to encapsulate jobs issued for the head module. This particular job just moves the 
-           head to the given angles.
+    @class WalkParameterJob
+    @brief A base class to encapsulate jobs issued to change parameters inside the walk module.
  
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,32 +22,34 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef HEADJOB_H
-#define HEADJOB_H
+#ifndef WALKPARAMETERJOB_H
+#define WALKPARAMETERJOB_H
 
 #include "../MotionJob.h"
+#include "Motion/NUWalk.h"
+
 #include <vector>
 using namespace std;
 
-class HeadJob : public MotionJob
+class WalkParametersJob : public MotionJob
 {
 public:
-    HeadJob(double time, const vector<float>& position);
-    HeadJob(double time, istream& input);
-    ~HeadJob();
+    WalkParametersJob(const WalkParameters& walkparameters);
+    WalkParametersJob(istream& input);
+    ~WalkParametersJob();
     
-    void setPosition(double time, const vector<float>& newposition);
-    void getPosition(double& time, vector<float>& position);
+    void setWalkParameters(const WalkParameters& walkparameters);
+    void getWalkParameters(WalkParameters& walkparameters);
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadJob& job);
-    friend ostream& operator<<(ostream& output, const HeadJob* job);
+    friend ostream& operator<<(ostream& output, const WalkParametersJob& job);
+    friend ostream& operator<<(ostream& output, const WalkParametersJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    vector<float> m_head_position;                 //!< the head position [yaw (rad), pitch (rad), roll (rad)]
+    WalkParameters m_walk_parameters;               //!< the walk parameters to give to the walk engine
 };
 
 #endif

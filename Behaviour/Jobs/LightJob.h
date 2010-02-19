@@ -38,11 +38,11 @@ public:
     void setColour(double time, const vector<float>& colour) {m_job_time = time; m_colour = colour;};
     void getColour(double& time, vector<float>& colour) {time = m_job_time; colour = m_colour;};
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 protected:
     vector<float> m_colour;
     

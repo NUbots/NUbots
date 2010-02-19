@@ -90,12 +90,13 @@ public:
     list<Job*>::iterator other_end();
     
     void clear();
+    unsigned int size();
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
     
-    ostream& operator<< (ostream& output);
-    istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, JobList& joblist);
+    friend istream& operator>>(istream& input, JobList& joblist);
     
 private:
     void addJob(Job* job, list<Job*>& joblist);

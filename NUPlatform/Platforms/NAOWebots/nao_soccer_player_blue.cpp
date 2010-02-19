@@ -40,7 +40,7 @@ int main(int argc, const char *argv[])
     filename << getPlayerNumber(argc, argv) << "debug.log";
     debug.open(filename.str().c_str());    // I need to use a different name for each robot!
     stringstream errorlogname;
-    errorlogname << getPlayerNumber(argc, argv) << "debug.log";
+    errorlogname << getPlayerNumber(argc, argv) << "error.log";
     errorlog.open(errorlogname.str().c_str());
     NUbot* nubot = new NUbot(argc, argv);
     nubot->run();

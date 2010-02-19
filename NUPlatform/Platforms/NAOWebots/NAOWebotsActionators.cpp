@@ -73,6 +73,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     //Camera* camera = m_platform->getCamera("camera");
     //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
     
+    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);

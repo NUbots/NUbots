@@ -1,5 +1,5 @@
-/*! @file MotionJob.h
-    @brief Declaration of base MotionJob class.
+/*! @file MotionJob.cpp
+    @brief Implementation of base MotionJob class.
  
     @class MotionJob
     @brief A base class to encapsulate jobs issued for the motion module.
@@ -24,24 +24,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MOTIONJOB_H
-#define MOTIONJOB_H
 
-#include "Job.h"
+#include "MotionJob.h"
+#include "debug.h"
 
-class MotionJob : public Job
+
+/*! @relates MotionJob
+    @brief Stream insertion operator for MotionJob.
+ 
+    This operator calls the protected virtual member toStream(output). As toStream is virtual
+    the correct toStream function will be called for all types of jobs.
+
+    @param output the stream to put the job in
+    @param job the job to put in the stream
+ */
+ostream& operator<< (ostream& output, const MotionJob& job)
 {
-public:
-    MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){};
-    virtual ~MotionJob() {};
-    
-    virtual void summaryTo(ostream& output) = 0;
-    virtual void csvTo(ostream& output) = 0;
-    
-    friend ostream& operator<< (ostream& output, const MotionJob& job);
-protected:
-    virtual void toStream(ostream& output) const {};
-};
+    job.toStream(output);
+    return output;
+}
 
-#endif
 

@@ -37,6 +37,7 @@
 #include "Jobs/MotionJobs/SaveJob.h"
 #include "Jobs/MotionJobs/WalkJob.h"
 #include "Jobs/MotionJobs/WalkToPointJob.h"
+#include "Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "Jobs/LightJob.h"
 #include "Jobs/LightJobs/ChestLedJob.h"

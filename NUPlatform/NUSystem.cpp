@@ -38,7 +38,10 @@ long double NUSystem::m_time_offset = 0;
 
 NUSystem::NUSystem()
 {
-    debug << "NUSystem::NUSystem()" << std::endl;
+#if DEBUG_NUSYSTEM_VERBOSITY > 4
+    debug << "NUSystem::NUSystem()" << endl;
+#endif 
+
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
     clock_gettime(CLOCK_REALTIME_FAST, &m_gettimefast_starttime); 
@@ -50,6 +53,9 @@ NUSystem::NUSystem()
 
 NUSystem::~NUSystem()
 {
+#if DEBUG_NUSYSTEM_VERBOSITY > 4
+    debug << "NUSystem::~NUSystem()" << endl;
+#endif 
 }
 
 /*! @brief Returns a timestamp in milliseconds since the epoch (ie. The UNIX timestamp)

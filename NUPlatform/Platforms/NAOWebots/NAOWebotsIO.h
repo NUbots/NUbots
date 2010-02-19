@@ -1,14 +1,12 @@
-/*! @file MotionJob.h
-    @brief Declaration of base MotionJob class.
+/*! @file NAOWebotsIO.h
+    @brief Declaration of naoio class.
  
-    @class MotionJob
-    @brief A base class to encapsulate jobs issued for the motion module.
- 
-    All motion jobs should inherit from this base class.
- 
+    @class NAOWebotsIO
+    @brief NAOWebotsIO class for input and output to streams, files and networks on the NAO in Webots platform
+
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,23 +22,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MOTIONJOB_H
-#define MOTIONJOB_H
+#ifndef NAOWebotsIO_H
+#define NAOWebotsIO_H
 
-#include "Job.h"
+#include "NUPlatform/NUIO.h"
 
-class MotionJob : public Job
+class NAOWebotsIO: public NUIO
 {
+// Functions:
 public:
-    MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){};
-    virtual ~MotionJob() {};
+    NAOWebotsIO(int probotnumber);
+    ~NAOWebotsIO();
     
-    virtual void summaryTo(ostream& output) = 0;
-    virtual void csvTo(ostream& output) = 0;
-    
-    friend ostream& operator<< (ostream& output, const MotionJob& job);
 protected:
-    virtual void toStream(ostream& output) const {};
+private:
+    
+// Members:
+public:
+protected:
+private:
+    
 };
 
 #endif

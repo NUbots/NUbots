@@ -76,7 +76,7 @@ void JuppWalk::initWalkParameters()
     m_step_frequency = 0.8;
     m_param_phase_offset = 0.6;                 // the phase offset for the shortening, loading and swing phases
     // weight shift parameters
-    m_param_shift_c = 0.24;                     // controls the shift amplitude
+    m_param_shift_c = 0.17;                     // controls the shift amplitude
     m_param_ankle_shift = 0.125;                // controls the fraction of the shift done by the ankles
     // leg shortening parameters
     m_param_short_c = 0.3;                      // controls the leg shortening amplitude
@@ -141,12 +141,18 @@ void JuppWalk::initWalkParameters()
     m_gait_arm_gains[0].push_back(35);
     
     m_gait_leg_gains.push_back(vector<float>());
-    m_gait_leg_gains[0].push_back(30);
-    m_gait_leg_gains[0].push_back(30);
-    m_gait_leg_gains[0].push_back(30);
-    m_gait_leg_gains[0].push_back(30);
-    m_gait_leg_gains[0].push_back(30);
-    m_gait_leg_gains[0].push_back(30);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    m_gait_leg_gains[0].push_back(65);
+    
+    // this is a hack so that I can save a set of walk parameters
+    /*WalkParameters p;
+    getWalkParameters(p);
+    ofstream t("jupptestparameters.wp");
+    t << p;*/
 }
 
 /*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
