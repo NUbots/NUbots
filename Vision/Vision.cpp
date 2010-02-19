@@ -57,165 +57,154 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
-    //qDebug() << "Start switch";
-    switch (image.imageFormat)
+
+    //qDebug() << "CASE YUYVGenerate Classified Image: START";
+    //generateClassifiedImage(image);
+    //qDebug() << "Generate Classified Image: finnished";
+    setImage(&image);
+    //! Find the green edges
+    points = findGreenBorderPoints(spacings,&horizonLine);
+    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+    //qDebug() << "Find Edges: finnished";
+    //! Find the Field border
+    points = getConvexFieldBorders(points);
+    points = interpolateBorders(points,spacings);
+    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
+    //qDebug() << "Find Field border: finnished";
+    //! Scan Below Horizon Image
+    vertScanArea = verticalScan(points,spacings);
+    //! Scan Above the Horizon
+    horiScanArea = horizontalScan(points,spacings);
+    //qDebug() << "Generate Scanlines: finnished";
+    //! Classify Line Segments
+
+    ClassifyScanArea(vertScanArea);
+    ClassifyScanArea(horiScanArea);
+    //qDebug() << "Classify Scanlines: finnished";
+
+    //! Extract and Display Vertical Scan Points:
+    tempNumScanLines = vertScanArea->getNumberOfScanLines();
+    for (int i = 0; i < tempNumScanLines; i++)
     {
-        case pixels::YUYV:
-            //qDebug() << "CASE YUYVGenerate Classified Image: START";
-            //generateClassifiedImage(image);
-            //qDebug() << "Generate Classified Image: finnished";
-            setImage(&image);
-            //! Find the green edges
-            points = findGreenBorderPoints(spacings,&horizonLine);
-            //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
-            //qDebug() << "Find Edges: finnished";
-            //! Find the Field border
-            points = getConvexFieldBorders(points);
-            points = interpolateBorders(points,spacings);
-            //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
-            //qDebug() << "Find Field border: finnished";
-            //! Scan Below Horizon Image
-            vertScanArea = verticalScan(points,spacings);
-            //! Scan Above the Horizon
-            horiScanArea = horizontalScan(points,spacings);
-            //qDebug() << "Generate Scanlines: finnished";
-            //! Classify Line Segments
-
-            ClassifyScanArea(vertScanArea);
-            ClassifyScanArea(horiScanArea);
-            //qDebug() << "Classify Scanlines: finnished";
-
-
-            //! Extract and Display Vertical Scan Points:
-            tempNumScanLines = vertScanArea->getNumberOfScanLines();
-            for (int i = 0; i < tempNumScanLines; i++)
+        ScanLine* tempScanLine = vertScanArea->getScanLine(i);
+        int lengthOfLine = tempScanLine->getLength();
+        Vector2<int> startPoint = tempScanLine->getStart();
+        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+        {
+            verticalsegments.push_back((*tempScanLine->getSegment(seg)));
+            allsegments.push_back((*tempScanLine->getSegment(seg)));
+            segments.push_back((*tempScanLine->getSegment(seg)));
+        }
+        if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
+        {
+            for(int j = 0;  j < lengthOfLine; j++)
             {
-                ScanLine* tempScanLine = vertScanArea->getScanLine(i);
-                int lengthOfLine = tempScanLine->getLength();
-                Vector2<int> startPoint = tempScanLine->getStart();
-                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-                {
-                    verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-                    allsegments.push_back((*tempScanLine->getSegment(seg)));
-                    segments.push_back((*tempScanLine->getSegment(seg)));
-                }
-                if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
-                {
-                    for(int j = 0;  j < lengthOfLine; j++)
-                    {
-                        Vector2<int> temp;
-                        temp.x = startPoint.x;
-                        temp.y = startPoint.y + j;
-                        verticalPoints.push_back(temp);
-                    }
-                }
+                Vector2<int> temp;
+                temp.x = startPoint.x;
+                temp.y = startPoint.y + j;
+                verticalPoints.push_back(temp);
             }
-
-            //! Extract and Display Horizontal Scan Points:
-            tempNumScanLines = horiScanArea->getNumberOfScanLines();
-            for (int i = 0; i < tempNumScanLines; i++)
-            {
-                ScanLine* tempScanLine = horiScanArea->getScanLine(i);
-                int lengthOfLine = tempScanLine->getLength();
-                Vector2<int> startPoint = tempScanLine->getStart();
-                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-                {
-                    horzontalsegments.push_back((*tempScanLine->getSegment(seg)));
-                    allsegments.push_back((*tempScanLine->getSegment(seg)));
-                }
-                if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
-                {
-                    for(int j = 0;  j < lengthOfLine; j++)
-                    {
-                        Vector2<int> temp;
-                        temp.x = startPoint.x + j;
-                        temp.y = startPoint.y;
-                        horizontalPoints.push_back(temp);
-                    }
-                }
-            }
-            //! Form Lines
-            //fieldLines = vision.DetectLines(vertScanArea,spacings);
-            //! Extract Detected Line & Corners
-            //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
-
-
-
-            //emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
-            //emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-            //qDebug() << "disaplay scanPaths: finnished";
-
-            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-            //robotCandidates = vision.classifyCandidates(verticalsegments);
-            //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
-
-            //! Identify Field Objects
-            //qDebug() << "PREclassifyCandidates";
-
-            mode = ROBOTS;
-            method = Vision::PRIMS;
-            for (int i = 0; i < 3; i++)
-            {
-                validColours.clear();
-                switch (i)
-                {
-                    case ROBOTS:
-                        validColours.push_back(ClassIndex::white);
-                        validColours.push_back(ClassIndex::red);
-                        validColours.push_back(ClassIndex::shadow_blue);
-                        //qDebug() << "PRE-ROBOT";
-                        tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
-                        //qDebug() << "POST-ROBOT";
-                        robotClassifiedPoints = 0;
-                    break;
-                    case BALL:
-                        validColours.push_back(ClassIndex::orange);
-                        validColours.push_back(ClassIndex::red_orange);
-                        validColours.push_back(ClassIndex::yellow_orange);
-                        //qDebug() << "PRE-BALL";
-                        tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
-                        //qDebug() << "POST-BALL";
-                    break;
-                    case GOALS:
-                        validColours.push_back(ClassIndex::yellow);
-                        validColours.push_back(ClassIndex::blue);
-                        //qDebug() << "PRE-GOALS";
-                        tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
-                        //qDebug() << "POST-GOALS";
-                    break;
-                }
-                while (tempCandidates.size())
-                {
-                    candidates.push_back(tempCandidates.back());
-                    tempCandidates.pop_back();
-                }
-            }
-            //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-            //qDebug() << "POSTclassifyCandidates";
-
-            Circle circ = DetectBall(candidates);
-            //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-            /*
-            if(circ.isDefined)
-            {
-                //! Draw Ball:
-                //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-            }
-            else
-            {
-                emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-            }*/
-            //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
-            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-
-            break;
-        default:
-            break;
-
+        }
     }
+
+    //! Extract and Display Horizontal Scan Points:
+    tempNumScanLines = horiScanArea->getNumberOfScanLines();
+    for (int i = 0; i < tempNumScanLines; i++)
+    {
+        ScanLine* tempScanLine = horiScanArea->getScanLine(i);
+        int lengthOfLine = tempScanLine->getLength();
+        Vector2<int> startPoint = tempScanLine->getStart();
+        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+        {
+            horzontalsegments.push_back((*tempScanLine->getSegment(seg)));
+            allsegments.push_back((*tempScanLine->getSegment(seg)));
+        }
+        if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
+        {
+            for(int j = 0;  j < lengthOfLine; j++)
+            {
+                Vector2<int> temp;
+                temp.x = startPoint.x + j;
+                temp.y = startPoint.y;
+                horizontalPoints.push_back(temp);
+            }
+        }
+    }
+    //! Form Lines
+    //fieldLines = vision.DetectLines(vertScanArea,spacings);
+    //! Extract Detected Line & Corners
+    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+
+
+
+    //emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
+    //emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
+    //qDebug() << "disaplay scanPaths: finnished";
+
+    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
+
+    //robotCandidates = vision.classifyCandidates(verticalsegments);
+    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
+
+
+    //! Identify Field Objects
+    //qDebug() << "PREclassifyCandidates";
+
+    mode = ROBOTS;
+    method = Vision::PRIMS;
+    for (int i = 0; i < 3; i++)
+    {
+        validColours.clear();
+        switch (i)
+        {
+            case ROBOTS:
+                validColours.push_back(ClassIndex::white);
+                validColours.push_back(ClassIndex::red);
+                validColours.push_back(ClassIndex::shadow_blue);
+                //qDebug() << "PRE-ROBOT";
+                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
+                //qDebug() << "POST-ROBOT";
+                robotClassifiedPoints = 0;
+                break;
+            case BALL:
+                validColours.push_back(ClassIndex::orange);
+                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::yellow_orange);
+                //qDebug() << "PRE-BALL";
+                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
+                //qDebug() << "POST-BALL";
+                 break;
+            case GOALS:
+                validColours.push_back(ClassIndex::yellow);
+                validColours.push_back(ClassIndex::blue);
+                //qDebug() << "PRE-GOALS";
+                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                //qDebug() << "POST-GOALS";
+                break;
+            }
+            while (tempCandidates.size())
+            {
+                candidates.push_back(tempCandidates.back());
+                tempCandidates.pop_back();
+            }
+    }
+        //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+        //qDebug() << "POSTclassifyCandidates";
+
+    Circle circ = DetectBall(candidates);
+    //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
+    /*
+        if(circ.isDefined)
+        {
+            //! Draw Ball:
+            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+        }
+        else
+        {
+            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+        }*/
+    //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     return;
 }
 
