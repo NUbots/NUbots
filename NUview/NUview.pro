@@ -10,6 +10,12 @@ macx {
 }
 win32 {
 INCLUDEPATH += 'C:/Program Files/boost/'
+
+# Opencv library
+#INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
+#LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
+# Input
+#HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 }
 INCLUDEPATH += ../
 HEADERS += ui_mainwindow.h \
@@ -60,3 +66,4 @@ SOURCES += mainwindow.cpp \
     ../Vision/RobotCandidate.cpp \
     ../Vision/ObjectCandidate.cpp
 RESOURCES = textures.qrc
+RESOURCES += icons.qrc
