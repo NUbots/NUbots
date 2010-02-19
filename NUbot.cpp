@@ -210,7 +210,7 @@ void NUbot::createErrorHandling()
     struct sigaction newaction, oldaction;
     newaction.sa_handler = segFaultHandler;
     
-    sigaction(SIGSEGV, &newaction, &oldaction);
+    sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
 }
 
 /*! @brief Destructor for the nubot
@@ -249,9 +249,7 @@ NUbot::~NUbot()
     #ifdef USE_NETWORK
         delete network;
     #endif
-    #if DEBUG_NUBOT_VERBOSITY > 4
-        debug << "NUbot::~NUbot(). Finished." << endl;
-    #endif
+    debug << "NUbot::~NUbot(). Finished." << endl;
 }
 
 /*! @brief The nubot's main loop
@@ -429,8 +427,8 @@ int NUbot::waitForVisionCompletion()
     new sensor data, compute a response, and then send the commands to the actionators.
  
     Note that you can not safely use the job interface in this thread, if you need to add
-    jobs provide a process function for this thread, and another process for the behaviour 
-    thread.
+    jobs provide a process function for this thread, and *another* process for the behaviour 
+    thread which creates the jobs.
  
     @param arg a pointer to the nubot
  */
@@ -478,6 +476,7 @@ void* runThreadMotion(void* arg)
                 #endif
             #endif
             nubot->platform->actionators->process(actions);
+            *(nubot->platform->io) << data;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e)
@@ -514,6 +513,8 @@ void* runThreadVision(void* arg)
     NUSensorsData* data = NULL;
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
+    cout << "Initial JobList ----------------------------------------" << endl;
+    joblist.summaryTo(debug);
     
 #ifdef THREAD_VISION_MONITOR_TIME
     double entrytime;
@@ -543,6 +544,7 @@ void* runThreadVision(void* arg)
 #endif
         try
         {
+            *nubot->platform->io >> joblist;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             //          image = nubot->platform->camera->getData()
             data = nubot->platform->sensors->getData();
@@ -562,6 +564,8 @@ void* runThreadVision(void* arg)
             //          cmds = nubot->lcs->process(lcsactions)
             //nubot->platform->actionators->process(m_actions);
             //joblist.clear();                           // assume that all of the jobs have been completed
+            joblist.summaryTo(debug);
+            //*nubot->platform->io << joblist;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e) 

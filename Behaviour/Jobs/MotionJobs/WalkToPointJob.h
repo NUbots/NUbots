@@ -6,7 +6,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,16 +33,19 @@ class WalkToPointJob : public MotionJob
 {
 public:
     WalkToPointJob(double time, const vector<float>& position);
+    WalkToPointJob(double time, istream& input);
     ~WalkToPointJob();
     
     void setPosition(double time, const vector<float>& newposition);
     void getPosition(double& time, vector<float>& position);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    friend ostream& operator<<(ostream& output, const WalkToPointJob& job);
+    friend ostream& operator<<(ostream& output, const WalkToPointJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_walk_position;                 //!< the walk position x (cm), y (cm) and theta (rad)
 };

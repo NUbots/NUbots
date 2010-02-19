@@ -38,11 +38,11 @@ public:
     void setCameraNumber(double time, int camnumber) {m_job_time = time; m_camera_number = camnumber;};
     void getCameraNumber(double& time, int& camnumber) {time = m_job_time; camnumber = m_camera_number;};
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual ostream& operator<< (ostream& output) {return output;};
+    virtual istream& operator>> (istream& input) {return input;};
 private:
     int m_camera_number;
 };

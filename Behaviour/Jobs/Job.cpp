@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
  */
 
 #include "Job.h"
+#include "../Jobs.h"
+#include "debug.h"
 
 /*! @brief Job constructor
  */
@@ -58,10 +60,149 @@ double Job::getTime()
     return m_job_time;
 }
 
-/*! @brief Returns the unix timestamp of when the job was created
+/*! @brief A helper function to ease writing Job objects to stream.
+ 
+    The idea behind this virtual function is for each child Job to write its
+    own data to the stream. Each class level writes the members introduced at that level,
+    so that each child's implementation of toStream looks like:
+        @code
+        Job::toStream(output);
+        MotionJob::toStream(output);
+        WalkJob::toStream(output);
+        WalkToPointJob::toStream(output);
+        @endcode
+    and so on. I did it this way so I didn't have to write the implementation for the middle levels
+    in every child.
+ 
+    @param output the stream to write the job to
  */
-long double Job::getTimeStamp()
+void Job::toStream(ostream& output) const
 {
-    return m_timestamp;
+    debug << "Job::toStream" << endl;
+    
+    output << static_cast<unsigned int>(m_job_type) << " " << static_cast<unsigned int>(m_job_id) << " ";
+    output.write((char*) &m_job_time, sizeof(m_job_time));
+}
+
+/*! @relates Job
+    @brief Stream insertion operator for Job.
+ 
+    This operator calls the protected virtual member toStream(output). As toStream is virtual
+    the correct toStream function will be called for all types of jobs. Furthermore,
+    toStream functions for abstract classes write members introduced at that level of the
+    hierachy.
+ 
+    @param output the stream to put the job in
+    @param job the job to put in the stream
+ */
+ostream& operator<<(ostream& output, const Job& job)
+{
+    debug << "<<Job" << endl;
+    
+    job.toStream(output);
+    
+    return output;
+}
+
+/*! @relates Job
+    @brief Stream insertion operator for pointer to job
+ 
+    This operator is overloaded so that it writes the object pointed to by job,
+    not the value of the pointer itself.
+ 
+    @param output the stream to put the job in
+    @param job the pointer to the job to put in the stream
+ */
+ostream& operator<<(ostream& output, const Job* job)
+{
+    debug << "<<Job*" << endl;
+    if (job != NULL)
+        job->toStream(output);
+    else
+        output << "NULL";
+    
+    return output;
+}
+
+/*! @relates Job
+    @brief Stream extraction operator for Job
+ 
+    This operator 
+ 
+    @param input the stream in which the job is stored
+    @param job a pointer to the pointer to the job to store the job extracted from the stream
+           (it is done this way to avoid using the assignment operator which I haven't written yet)
+ 
+    @attention This operator needs to be updated when to want to stream a new type of Job.
+               You need to add a
+                    @code
+                    case Job::_JOB_ID_:
+                        *job = new NewTypeJob(jobtime, input);
+                        break;
+                    @endcode
+               there isn't a way around this (yet).
+ */
+istream& operator>>(istream& input, Job** job)
+{
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    debug << ">>Job**" << endl;
+#endif
+    
+    unsigned int tempuint = 0;
+    static char buffer[1024];
+    Job::job_type_t jobtype;
+    Job::job_id_t jobid;
+    double jobtime;
+    
+    // Read the type and id
+    input >> tempuint;
+    jobtype = static_cast<Job::job_type_t>(tempuint);
+    input >> tempuint;
+    jobid = static_cast<Job::job_id_t>(tempuint);
+
+    // Also read in the time (because it was written at the Job level)
+    input.read(buffer, sizeof(char));           // skip the white space!
+    input.read(buffer, sizeof(double));
+    jobtime = *((double*) buffer);
+    
+    // Now that we have the id (and the type) create a new Job of the correct concrete type
+    switch (jobid) 
+    {
+        case Job::MOTION_WALK_TO_POINT:
+            *job = new WalkToPointJob(jobtime, input);
+            break;
+        case Job::MOTION_WALK:
+            *job = new WalkJob(input);
+            break;
+        case Job::MOTION_WALK_PARAMETERS:
+            *job = new WalkParametersJob(input);
+            break;
+        case Job::MOTION_KICK:
+            *job = new KickJob(jobtime, input);
+            break;
+        case Job::MOTION_BLOCK:
+            *job = new BlockJob(jobtime, input);
+            break;
+        case Job::MOTION_SAVE:
+            *job = new SaveJob(jobtime, input);
+            break;
+        case Job::MOTION_HEAD:
+            *job = new HeadJob(jobtime, input);
+            break;
+        case Job::MOTION_NOD:
+            *job = new NodHeadJob(jobtime, input);
+            break;
+        case Job::MOTION_PAN:
+            *job = new PanHeadJob(jobtime, input);
+            break;
+        default:
+            errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
+            break;
+    }    
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    if (*job != NULL)
+        (*job)->summaryTo(debug);
+#endif
+    return input;
 }
 

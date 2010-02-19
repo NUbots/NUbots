@@ -20,11 +20,37 @@
  */
 
 #include "HeadJob.h"
+#include "debug.h"
 
+/*! @brief Constructs a HeadJob at the given position and time
+    @param time the time in ms to perform the save
+    @param position the head will move to this position
+ */
 HeadJob::HeadJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_HEAD)
 {
     m_job_time = time;     
     m_head_position = position;
+}
+
+/*! @brief Constructs a HeadJob from stream data
+    @param time the time in ms to perform the save
+    @param input the stream from which to read the job specific data
+ */
+HeadJob::HeadJob(double time, istream& input) : MotionJob(Job::MOTION_HEAD)
+{
+    m_job_time = time;
+    char buffer[1024];
+    // read in the head_position size
+    input.read(buffer, sizeof(unsigned int));
+    unsigned int m_head_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    
+    // read in the head_position vector
+    m_head_position = vector<float>(m_head_position_size, 0);
+    for (unsigned int i=0; i<m_head_position_size; i++)
+    {
+        input.read(buffer, sizeof(float));
+        m_head_position[i] = *reinterpret_cast<float*>(buffer);
+    }
 }
 
 /*! @brief WalkJob destructor
@@ -54,4 +80,74 @@ void HeadJob::getPosition(double& time, vector<float>& position)
 {
     time = m_job_time;
     position = m_head_position;
+}
+
+/*! @brief Prints a human-readable summary to the stream
+ @param output the stream to be written to
+ */
+void HeadJob::summaryTo(ostream& output)
+{
+    output << "HeadJob: " << m_job_time << " (";
+    for (unsigned int i=0; i<m_head_position.size(); i++)
+        output << m_head_position[i] << ",";
+    output << ")" << endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void HeadJob::csvTo(ostream& output)
+{
+    output << "HeadJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_head_position.size(); i++)
+        output << m_head_position[i] << ", ";
+    output << endl;
+}
+
+/*! @brief A helper function to ease writing Job objects to classes
+ 
+    This function calls its parents versions of the toStream, each parent
+    writes the members introduced at that level
+
+    @param output the stream to write the job to
+ */
+void HeadJob::toStream(ostream& output) const
+{
+    debug << "HeadJob::toStream" << endl;
+    Job::toStream(output);                  // This writes data introduced at the base level
+    MotionJob::toStream(output);            // This writes data introduced at the motion level
+    // Then we write HeadJob specific data
+    unsigned int m_head_position_size = m_head_position.size();
+    output.write((char*) &m_head_position_size, sizeof(m_head_position_size));
+    for (unsigned int i=0; i<m_head_position_size; i++)
+        output.write((char*) &m_head_position[i], sizeof(m_head_position[i]));
+}
+
+/*! @relates HeadJob
+    @brief Stream insertion operator for a HeadJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const HeadJob& job)
+{
+    debug << "<<HeadJob" << endl;
+    job.toStream(output);
+    return output;
+}
+
+/*! @relates HeadJob
+    @brief Stream insertion operator for a pointer to HeadJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+ostream& operator<<(ostream& output, const HeadJob* job)
+{
+    debug << "<<HeadJob" << endl;
+    if (job != NULL)
+        job->toStream(output);
+    else
+        output << "NULL";
+    return output;
 }

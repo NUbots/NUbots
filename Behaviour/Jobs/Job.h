@@ -8,7 +8,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #define JOB_H
 
 #include <vector>
+#include <iostream>
 using namespace std;
 
 class Job
@@ -44,7 +45,8 @@ public:
         CAMERA,
         SOUND,
         SYSTEM,
-        OTHER
+        OTHER,
+        TYPE_UNDEFINED
     };
     /*! @brief An enum for specific job ids (ie. Stand, Kick etc)
      */
@@ -58,11 +60,11 @@ public:
         // Motion job ids
         MOTION_WALK_TO_POINT,
         MOTION_WALK,
+        MOTION_WALK_PARAMETERS,
         MOTION_KICK,
         MOTION_BLOCK,
         MOTION_SAVE,
         MOTION_HEAD,
-        MOTION_TRACK,
         MOTION_NOD,
         MOTION_PAN,
         // Light job ids
@@ -103,7 +105,9 @@ public:
         SOUND_HIGH_TEMPERATURE,
         // System jobs
         SYSTEM_SLEEP,
-        SYSTEM_SHUTDOWN
+        SYSTEM_SHUTDOWN,
+        // Undefiend
+        ID_UNDEFINED
     };
     
 public:
@@ -113,20 +117,21 @@ public:
     job_type_t getType();
     job_id_t getID();
     double getTime();
-    long double getTimeStamp();
     
-    /*virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(ostream& output) = 0;
+    virtual void csvTo(ostream& output) = 0;
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    friend ostream& operator<<(ostream& output, const Job& job);
+    friend ostream& operator<<(ostream& output, const Job* job);
+    friend istream& operator>>(istream& input, Job** job);
+protected:
+    virtual void toStream(ostream& output) const;
 
 protected:
     // Properties that *every* job has
     const job_type_t m_job_type;              //!< The type of job (use this to decide which module to send the job to)
     const job_id_t m_job_id;                  //!< The job's id (use this to decide which specialised Job class to cast a Job to)
     double m_job_time;                        //!< The time the job is to be completed (milliseconds)
-    long double m_timestamp;                  //!< the unix timestamp the job was generated (milliseconds since epoch)
 };
 
 #endif
