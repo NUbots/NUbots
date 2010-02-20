@@ -34,6 +34,8 @@
 #ifdef USE_VISION
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
+    #include "Tools/FileFormats/LUTTools.h"
+
 #endif
 
 #ifdef USE_LOCALISATION
@@ -84,6 +86,7 @@ public:
     #ifdef USE_VISION
         Vision* vision;                 //!< vision module
         NUimage* image;
+        unsigned char LUT[256*256*256];
     #endif
     #ifdef USE_LOCALISATION
         Localisation* localisation;     //!< localisation module

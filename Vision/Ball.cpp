@@ -4,10 +4,11 @@
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
 //#include <QDebug>
+#include "debug.h"
 
 Ball::Ball()
 {
-
+    debug<< "Vision::DetectBall : Ball Class created" << endl;
 }
 Ball::~Ball()
 {

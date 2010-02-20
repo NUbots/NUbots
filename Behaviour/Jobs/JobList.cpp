@@ -65,8 +65,8 @@ JobList::JobList()
     walkspeed[2] = 0.0;
     WalkJob* walkjob = new WalkJob(walkspeed);
     WalkParameters parameters = WalkParameters();
-    ifstream testparafile("jupptestparameters.wp");
-    testparafile >> parameters;
+    /*ifstream testparafile("jupptestparameters.wp");
+    testparafile >> parameters;*/
     WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
     
     /*// Test Light Job

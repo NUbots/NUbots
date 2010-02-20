@@ -10,7 +10,7 @@
 //using namespace std;
 #include <vector>
 //#include "../Kinematics/Kinematics.h"
-#include <QDebug>
+//#include <QDebug>
 
 LineDetection::LineDetection(){
 
@@ -114,7 +114,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
         }
 
     }
-    qDebug() << "Number of LinePoints: " << linePoints.size();
+    //qDebug() << "Number of LinePoints: " << linePoints.size();
     return;
 }
 
@@ -272,12 +272,12 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     if (fieldLines.size() < 1)
     {
             printf("No Lines... ABORT!!!!");
-            qDebug() << "No Lines... ABORT!!!!";
+            //qDebug() << "No Lines... ABORT!!!!";
             return;
     }
     else{
             printf("END FieldLinesCounter: %i\n", fieldLines.size());
-            qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
+            //qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
     }
 
     //for(int l = 0; l < FieldLinesCounter; l++)
@@ -366,11 +366,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
                     //Now make sure the slopes are both about the same degree angle....
                     // Seems to have a problem with lines "within" other lines, so pick them out..
-                    qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
+                    //qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
                     if ((r2tls1 > .99 && r2tls2 > .99 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
                     {
                         //They are the same line, so join them together...
-                        qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
+                        //qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
                         fieldLines[LineIDStart].joinLine(fieldLines[LineIDEnd]);
                         //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
                         fieldLines[LineIDEnd].clearPoints();
@@ -393,15 +393,15 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
 
     }
-    qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
+    //qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
 
 
     for (int i = 0; i < fieldLines.size(); i++)
     {
-        qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        /*qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
-                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
+                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
     }
 
 }
@@ -560,10 +560,10 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 
 		}
 	}
-        qDebug() << "Total Corners Found: " << cornerPoints.size();
+        //qDebug() << "Total Corners Found: " << cornerPoints.size();
         for (int i = 0; i < cornerPoints.size() ; i++)
         {
-            qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
+            //qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
         }
 }
 

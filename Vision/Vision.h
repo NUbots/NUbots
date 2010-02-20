@@ -18,6 +18,8 @@
 #include "LineDetection.h"
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "debug.h"
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
@@ -48,8 +50,8 @@ class Vision
     //! Destructor.
     ~Vision();
 
-    void ProcessFrame(NUimage& image, Horizon horizonLine);
-
+    //void ProcessFrame(NUimage& image, Horizon horizonLine);
+    void ProcessFrame(NUimage& image, NUSensorsData* data);
 
     void setLUT(unsigned char* newLUT);
 

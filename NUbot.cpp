@@ -82,7 +82,14 @@ NUbot::NUbot(int argc, const char *argv[])
     
     // Construct each enabled module 
     #ifdef USE_VISION
-        //vision = new Vision();
+        vision = new Vision();
+        debug << "Loading LOOKUP TABLE" <<endl;
+        LUTTools* lutLoader =  new LUTTools();
+        
+        lutLoader->LoadLUT(LUT, 256*256*256,"/home/root/robotDetection.lut" );
+        this->vision->setLUT(LUT);
+        debug << "Finnished: Loading LOOKUP TABLE" <<endl;
+
     #endif
     #ifdef USE_LOCALISATION
         localisation = new Localisation();
@@ -195,6 +202,7 @@ void NUbot::createThreads()
         debug << "NUbot::createThreads(). threadMotion Policy: " << actualpolicy << " Priority: " << actualparam.sched_priority << endl;
     #endif
 #else   
+
     err = pthread_create(&threadVision, NULL, runThreadVision, (void*) this);
 #endif
     if (err != 0)
@@ -478,7 +486,7 @@ void* runThreadMotion(void* arg)
                 #endif
             #endif
             nubot->platform->actionators->process(actions);
-            *(nubot->platform->io) << data;
+            //*(nubot->platform->io) << data;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e)
@@ -511,8 +519,13 @@ void* runThreadVision(void* arg)
 {
     debug << "NUbot::runThreadVision: Starting." << endl;
     
+
+
     NUbot* nubot = (NUbot*) arg;                // the nubot
     NUSensorsData* data = NULL;
+    
+
+
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     cout << "Initial JobList ----------------------------------------" << endl;
@@ -558,21 +571,37 @@ void* runThreadVision(void* arg)
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             //          image = nubot->platform->camera->getData()
 //            image = nubot->platform->camera->grabNewImage();
-            data = nubot->platform->sensors->getData();
+            data = nubot->platform->sensors->update();
+            //data = nubot->platform->sensors->getData();
+            try{
+                debug << "TEST: HorizonLine INFO: " << data->BalanceHorizon->Data[0] << "," << data->BalanceHorizon->Data[1] << ","<<data->BalanceHorizon->Data[2] << endl;
+            }
+            catch (exception& e) 
+            {
+                debug << "Exception at debug line: data" << endl;
+                unhandledExceptionHandler(e);
+            }            
+                
+        
             //                 odometry = nubot->motion->getData()                // There is no deep copy here either
             //      gamectrl, teaminfo = nubot->network->getData()
 #ifdef USE_VISION
+//        FieldObject* fieldobj = NULL;
+            nubot->vision->ProcessFrame(*nubot->image, data);
+        
+/*
             std::stringstream ConvertStream;
             std::string tempStr;
             ConvertStream << "/media/userdata/" << (int)nubot->image->timestamp << ".jpg";
             ConvertStream >> tempStr;
+*/
 #if DEBUG_NUBOT_VERBOSITY > 4
-            debug << "NUbot::NUbot(). Saving Image " << tempStr << endl;
+//            debug << "NUbot::NUbot(). Saving Image " << tempStr << endl;
 #endif
 //            JpegSaver::saveNUimageAsJpeg(nubot->image, tempStr);
             //nubot->image->writeToFile(tempStr);
 #endif // USE_VISION
-            //          fieldobj = nubot->vision->process(image, data, gamectrl)
+            
             //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #ifdef USE_BEHAVIOUR
                 nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
