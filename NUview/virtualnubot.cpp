@@ -1,10 +1,12 @@
 #include "virtualnubot.h"
 #include "Tools/FileFormats/LUTTools.h"
-//#include <QDebug>
+#include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
 
-
+#include <QStringList>
+#include <iostream>
+#include <fstream>
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -30,9 +32,33 @@ virtualNUbot::~virtualNUbot()
     delete classificationTable;
 }
 
-int virtualNUbot::loadFile(const char* fileName)
+int virtualNUbot::loadFile(const QString& filename)
 {
-    return file->openFile(fileName, false);
+    QStringList list = filename.split('.');
+    fileType = list.last();
+
+    if(streamFile.is_open())
+    {
+        streamFile.close();
+    }
+
+    if(fileType == QString("nif"))
+    {
+        return file->openFile(filename.toAscii().data(), false);
+    }
+    else if(fileType == QString("nul"))
+    {
+        streamFile.open(filename.toAscii().data(),ios_base::in);
+        streamFile.seekg(0,ios_base::end);
+        streamFileLength = streamFile.tellg();
+        streamFile.seekg(0,ios_base::beg);
+        int x,y;
+        streamFile >> x >> y;
+        streamFile.seekg(0,ios_base::beg);
+        int numImages = streamFileLength / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
+        return numImages;
+    }
+    return 0;
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
@@ -60,34 +86,60 @@ pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 
 void virtualNUbot::loadFrame(int frameNumber)
 {
-    rawImage.setImageDimensions(160,120);
-    rawImage.useInternalBuffer();
-    rawImage.imageFormat = pixels::YUYV;
-
-    uint8* rawBuffer = (uint8*)&rawImage.image[0][0];
-    NaoCamera camera;
-    int robotFrameNumber;
-
-    file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
-    hasImage = true;
-
-    // Create double values of each joint and send to localisation widget
-    double jS[22];
-    double tS[10];
-    for (int i = 0; i <22;i++)
+    if(fileType == QString("nif"))
     {
-        jS[i] = jointSensors[i] * 57.2957795;
-    }
-    for (int j = 0; j<10;j++)
-    {
-        tS[j] = touchSensors[j];
-    }
-    emit imageDisplayChanged(jS,camera,tS);
+        rawImage.setImageDimensions(160,120);
+        rawImage.useInternalBuffer();
 
-    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-    emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-    processVisionFrame(rawImage);
+        uint8* rawBuffer = (uint8*)&rawImage.image[0][0];
+        NaoCamera camera;
+        int robotFrameNumber;
+
+        file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
+        hasImage = true;
+
+        ofstream test("test.nul", ios_base::out | ios_base::app);
+        test << rawImage;
+        test.close();
+
+        // Create double values of each joint and send to localisation widget
+        double jS[22];
+        double tS[10];
+        for (int i = 0; i <22;i++)
+        {
+            jS[i] = jointSensors[i] * 57.2957795;
+        }
+        for (int j = 0; j<10;j++)
+        {
+            tS[j] = touchSensors[j];
+        }
+        emit imageDisplayChanged(jS,camera,tS);
+
+        horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
+        //emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+        emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+        emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+        processVisionFrame(rawImage);
+        return;
+    }
+    else if (fileType == QString("nul"))
+    {
+        if(frameNumber == 1)
+        {
+            streamFile.seekg(0,ios_base::beg);
+            streamFile.clear();
+        }
+        if(streamFile.good()){
+            unsigned int currPos = streamFile.tellg();
+            if( (streamFileLength - currPos) > 2*sizeof(int) )
+            {
+                streamFile >> rawImage;
+                hasImage = true;
+                emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+                processVisionFrame(rawImage);
+            }
+        }
+    }
     return;
 }
 
@@ -168,166 +220,156 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     const int BALL   = 1;
     const int GOALS  = 2;
     int mode  = ROBOTS;
+    Circle circ;
     //qDebug() << "Start switch";
-    switch (image.imageFormat)
+
+
+    vision.setImage(&image);
+    vision.setLUT(classificationTable);
+    generateClassifiedImage(image);
+    //qDebug() << "Generate Classified Image: finnished";
+
+    //! Find the green edges
+    points = vision.findGreenBorderPoints(spacings,&horizonLine);
+    emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+    //qDebug() << "Find Edges: finnished";
+    //! Find the Field border
+    points = vision.getConvexFieldBorders(points);
+    points = vision.interpolateBorders(points,spacings);
+    emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
+    //qDebug() << "Find Field border: finnished";
+    //! Scan Below Horizon Image
+    vertScanArea = vision.verticalScan(points,spacings);
+    //! Scan Above the Horizon
+    horiScanArea = vision.horizontalScan(points,spacings);
+    //qDebug() << "Generate Scanlines: finnished";
+    //! Classify Line Segments
+
+    vision.ClassifyScanArea(vertScanArea);
+    vision.ClassifyScanArea(horiScanArea);
+    //qDebug() << "Classify Scanlines: finnished";
+
+
+    //! Extract and Display Vertical Scan Points:
+    tempNumScanLines = vertScanArea->getNumberOfScanLines();
+    for (int i = 0; i < tempNumScanLines; i++)
     {
-        case pixels::YUYV:
-            //qDebug() << "CASE YUYVGenerate Classified Image: START";
-            vision.setImage(&image);
-            vision.setLUT(classificationTable);
-            generateClassifiedImage(image);
-            //qDebug() << "Generate Classified Image: finnished";
-
-            //! Find the green edges
-            points = vision.findGreenBorderPoints(spacings,&horizonLine);
-            emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
-            //qDebug() << "Find Edges: finnished";
-            //! Find the Field border
-            points = vision.getConvexFieldBorders(points);
-            points = vision.interpolateBorders(points,spacings);
-            emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
-            //qDebug() << "Find Field border: finnished";
-            //! Scan Below Horizon Image
-            vertScanArea = vision.verticalScan(points,spacings);
-            //! Scan Above the Horizon
-            horiScanArea = vision.horizontalScan(points,spacings);
-            //qDebug() << "Generate Scanlines: finnished";
-            //! Classify Line Segments
-
-            vision.ClassifyScanArea(vertScanArea);
-            vision.ClassifyScanArea(horiScanArea);
-            //qDebug() << "Classify Scanlines: finnished";
-
-
-            //! Extract and Display Vertical Scan Points:
-            tempNumScanLines = vertScanArea->getNumberOfScanLines();
-            for (int i = 0; i < tempNumScanLines; i++)
+        ScanLine* tempScanLine = vertScanArea->getScanLine(i);
+        int lengthOfLine = tempScanLine->getLength();
+        Vector2<int> startPoint = tempScanLine->getStart();
+        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+        {
+            verticalsegments.push_back((*tempScanLine->getSegment(seg)));
+            allsegments.push_back((*tempScanLine->getSegment(seg)));
+            segments.push_back((*tempScanLine->getSegment(seg)));
+        }
+        if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
+        {
+            for(int j = 0;  j < lengthOfLine; j++)
             {
-                ScanLine* tempScanLine = vertScanArea->getScanLine(i);
-                int lengthOfLine = tempScanLine->getLength();
-                Vector2<int> startPoint = tempScanLine->getStart();
-                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-                {
-                    verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-                    allsegments.push_back((*tempScanLine->getSegment(seg)));
-                    segments.push_back((*tempScanLine->getSegment(seg)));
-                }
-                if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
-                {
-                    for(int j = 0;  j < lengthOfLine; j++)
-                    {
-                        Vector2<int> temp;
-                        temp.x = startPoint.x;
-                        temp.y = startPoint.y + j;
-                        verticalPoints.push_back(temp);
-                    }
-                }
+                Vector2<int> temp;
+                temp.x = startPoint.x;
+                temp.y = startPoint.y + j;
+                verticalPoints.push_back(temp);
             }
-
-            //! Extract and Display Horizontal Scan Points:
-            tempNumScanLines = horiScanArea->getNumberOfScanLines();
-            for (int i = 0; i < tempNumScanLines; i++)
-            {
-                ScanLine* tempScanLine = horiScanArea->getScanLine(i);
-                int lengthOfLine = tempScanLine->getLength();
-                Vector2<int> startPoint = tempScanLine->getStart();
-                for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-                {
-                    horzontalsegments.push_back((*tempScanLine->getSegment(seg)));
-                    allsegments.push_back((*tempScanLine->getSegment(seg)));
-                }
-                if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
-                {
-                    for(int j = 0;  j < lengthOfLine; j++)
-                    {
-                        Vector2<int> temp;
-                        temp.x = startPoint.x + j;
-                        temp.y = startPoint.y;
-                        horizontalPoints.push_back(temp);
-                    }
-                }
-            }
-            //! Form Lines
-            //fieldLines = vision.DetectLines(vertScanArea,spacings);
-            //! Extract Detected Line & Corners
-            //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
-
-
-
-            emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
-            emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-            //qDebug() << "disaplay scanPaths: finnished";
-
-            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-            //robotCandidates = vision.classifyCandidates(verticalsegments);
-            //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
-
-            //! Identify Field Objects
-            //qDebug() << "PREclassifyCandidates";
-
-            mode = ROBOTS;
-            method = Vision::PRIMS;
-            for (int i = 0; i < 3; i++)
-            {
-                validColours.clear();
-                switch (i)
-                {
-                    case ROBOTS:
-                        validColours.push_back(ClassIndex::white);
-                        validColours.push_back(ClassIndex::red);
-                        validColours.push_back(ClassIndex::shadow_blue);
-                        //qDebug() << "PRE-ROBOT";
-                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
-                        //qDebug() << "POST-ROBOT";
-                        robotClassifiedPoints = 0;
-                    break;
-                    case BALL:
-                        validColours.push_back(ClassIndex::orange);
-                        validColours.push_back(ClassIndex::red_orange);
-                        validColours.push_back(ClassIndex::yellow_orange);
-                        //qDebug() << "PRE-BALL";
-                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
-                        //qDebug() << "POST-BALL";
-                    break;
-                    case GOALS:
-                        validColours.push_back(ClassIndex::yellow);
-                        validColours.push_back(ClassIndex::blue);
-                        //qDebug() << "PRE-GOALS";
-                        tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
-                        //qDebug() << "POST-GOALS";
-                    break;
-                }
-                while (tempCandidates.size())
-                {
-                    candidates.push_back(tempCandidates.back());
-                    tempCandidates.pop_back();
-                }
-            }
-            emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-            //qDebug() << "POSTclassifyCandidates";
-
-            Circle circ = vision.DetectBall(candidates);
-            //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-            if(circ.isDefined)
-            {
-                //! Draw Ball:
-                emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-            }
-            else
-            {
-                emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-            }
-            //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
-            //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-
-            break;
-        default:
-            break;
-
+        }
     }
+
+    //! Extract and Display Horizontal Scan Points:
+    tempNumScanLines = horiScanArea->getNumberOfScanLines();
+    for (int i = 0; i < tempNumScanLines; i++)
+    {
+        ScanLine* tempScanLine = horiScanArea->getScanLine(i);
+        int lengthOfLine = tempScanLine->getLength();
+        Vector2<int> startPoint = tempScanLine->getStart();
+        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
+        {
+            horzontalsegments.push_back((*tempScanLine->getSegment(seg)));
+            allsegments.push_back((*tempScanLine->getSegment(seg)));
+        }
+        if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
+        {
+            for(int j = 0;  j < lengthOfLine; j++)
+            {
+                Vector2<int> temp;
+                temp.x = startPoint.x + j;
+                temp.y = startPoint.y;
+                horizontalPoints.push_back(temp);
+            }
+        }
+    }
+    //! Form Lines
+    //fieldLines = vision.DetectLines(vertScanArea,spacings);
+    //! Extract Detected Line & Corners
+    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+
+    emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
+    emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
+    //qDebug() << "disaplay scanPaths: finnished";
+
+    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
+
+    //robotCandidates = vision.classifyCandidates(verticalsegments);
+    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
+
+
+    //! Identify Field Objects
+    //qDebug() << "PREclassifyCandidates";
+
+    mode = ROBOTS;
+    method = Vision::PRIMS;
+    for (int i = 0; i < 3; i++)
+    {
+        validColours.clear();
+        switch (i)
+        {
+            case ROBOTS:
+                validColours.push_back(ClassIndex::white);
+                validColours.push_back(ClassIndex::red);
+                validColours.push_back(ClassIndex::shadow_blue);
+                //qDebug() << "PRE-ROBOT";
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
+                //qDebug() << "POST-ROBOT";
+                robotClassifiedPoints = 0;
+                break;
+            case BALL:
+                validColours.push_back(ClassIndex::orange);
+                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::yellow_orange);
+                //qDebug() << "PRE-BALL";
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
+                //qDebug() << "POST-BALL";
+                break;
+            case GOALS:
+                validColours.push_back(ClassIndex::yellow);
+                validColours.push_back(ClassIndex::blue);
+                //qDebug() << "PRE-GOALS";
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                //qDebug() << "POST-GOALS";
+                break;
+        }
+        while (tempCandidates.size())
+        {
+            candidates.push_back(tempCandidates.back());
+            tempCandidates.pop_back();
+        }
+    }
+    emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+    //qDebug() << "POSTclassifyCandidates";
+
+    Circle circ = vision.DetectBall(candidates);
+    //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
+    if(circ.isDefined)
+    {
+        //! Draw Ball:
+        emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+    }
+    else
+    {
+        emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+    }
+    //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     return;
 }
 
@@ -339,6 +381,7 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
 {
+    if(hasImage == false) return;
     pixels::Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
@@ -359,7 +402,6 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels
         tempLut[index] = ClassIndex::unclassified;
     }
     emit classifiedDisplayChanged(&previewClassImage, GLDisplay::classificationSelection);
-
 }
 
 void virtualNUbot::UndoLUT()

@@ -21,9 +21,13 @@
 # Common Ignores
 *.*~
 *.o
+*.orig
 
 Autoconfig/*
 *.old*
+*debug.log
+*error.log
+*parameters.wp
 
 # External files from archives
 /NUview/gl/*

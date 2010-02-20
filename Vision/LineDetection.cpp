@@ -27,13 +27,13 @@ return;
 void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing) {
 	//RESETING VARIABLES
         LINE_SEARCH_GRID_SIZE = spacing;
-        for(int i =0; i < linePoints.size() ; i++ )
+        for(unsigned int i =0; i < linePoints.size() ; i++ )
 	{
 		linePoints[i].x =0;
 		linePoints[i].y =0;
 	}
 
-        for(int i =0; i < fieldLines.size() ; i++ )
+        for(unsigned int i =0; i < fieldLines.size() ; i++ )
 	{
 		fieldLines[i].clearPoints();
 	}
@@ -92,11 +92,11 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
 
                 //CUT CLOSE LINE POINTS OFF
                 bool canNotAdd = false;
-                for (int num =0; num <linePoints.size(); num++)
+                for (unsigned int num =0; num <linePoints.size(); num++)
                 {
-                    if((abs(tempLinePoint.x - linePoints[num].x) < 1))
+                    if((fabs(tempLinePoint.x - linePoints[num].x) < 1.0))
                     {
-                        if((abs(tempLinePoint.y - linePoints[num].y) < 1))
+                        if((fabs(tempLinePoint.y - linePoints[num].y) < 1.0))
                         {
                             canNotAdd = true;
                         }
@@ -107,14 +107,13 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
-                //qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
+                //// qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
 
             }
         }
 
     }
-    //qDebug() << "Number of LinePoints: " << linePoints.size();
     return;
 }
 
@@ -140,12 +139,12 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
 
     //Only bother searching if there is enough points to make part of a line..
-    for (int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++)
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++)
     {   //for all line points recorded
 
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
-        for (int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){ 	//for remaining points recorded
+        for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){ 	//for remaining points recorded
             if(linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue; //STOP if LINE is too THICK, but can use if in Vertical Line Search.
             if (!(linePoints[EndCheck].inUse == false) && (linePoints[EndCheck].x != linePoints[SearchFrom].x))continue;
 
@@ -153,7 +152,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             if (linePoints[EndCheck].x <= linePoints[SearchFrom].x+LINE_SEARCH_GRID_SIZE*2)
             {
                 DistanceStep = (int)(linePoints[EndCheck].x-linePoints[SearchFrom].x)/LINE_SEARCH_GRID_SIZE;  //number of grid units long
-                //qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
+                //// qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
                 if (fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) <= LINE_SEARCH_GRID_SIZE*2*DistanceStep)//fabs(LINE_SEARCH_GRID_SIZE*DistanceStep))
                    // && fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) < LINE_SEARCH_GRID_SIZE)
                 {
@@ -164,7 +163,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     previousPointID = EndCheck;
                     ColSlopeVal = linePoints[SearchFrom].y - linePoints[EndCheck].y;
                     //loop through the rest of the points that maybe in this 'line'
-                    for (int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
+                    for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
                         if (linePoints[previousPointID].x == linePoints[PointID].x) continue;
                         if (fabs(linePoints[PointID].x - linePoints[previousPointID].x) < int(LINE_SEARCH_GRID_SIZE*2)){
                             double DisMod = (linePoints[PointID].x - linePoints[previousPointID].x)/LINE_SEARCH_GRID_SIZE;
@@ -201,14 +200,14 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
 
     //SORT POINTS
-    //qDebug() << "SORTING...";
+    //// qDebug() << "SORTING...";
     //qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
-    for (int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
         if(linePoints[SearchFrom].width < MIN_POINT_THICKNESS*3) continue;
-        for (int EndCheck = SearchFrom+1; EndCheck < linePoints.size(); EndCheck++){
+        for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size(); EndCheck++){
                 //std::cout << "Comparing.."<< SearchFrom << " with " << EndCheck <<std::endl;
                 //Skip all points on the same search line as this one or have already been removed..
             if (!((linePoints[EndCheck].inUse == false) && (linePoints[EndCheck].y != linePoints[SearchFrom].y)))continue;
@@ -228,7 +227,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     previousPointID = EndCheck;
                     ColSlopeVal = linePoints[SearchFrom].x - linePoints[EndCheck].x;
 
-                    for (int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
+                    for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
                         if (linePoints[previousPointID].y == linePoints[PointID].y) continue;
                         if (fabs(linePoints[previousPointID].y - linePoints[PointID].y) < LINE_SEARCH_GRID_SIZE*4){
                             double DisMod = (linePoints[PointID].y - linePoints[previousPointID].y)/LINE_SEARCH_GRID_SIZE;
@@ -266,18 +265,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     // START OF JOINING LINES
     //---------------------------------------------------
 
-    int LineIDStart;
+    unsigned int LineIDStart;
 
     //Drop out here if there isn't any point continuing.. DEBUG:
     if (fieldLines.size() < 1)
     {
             printf("No Lines... ABORT!!!!");
-            //qDebug() << "No Lines... ABORT!!!!";
             return;
     }
     else{
             printf("END FieldLinesCounter: %i\n", fieldLines.size());
-            //qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
     }
 
     //for(int l = 0; l < FieldLinesCounter; l++)
@@ -294,7 +291,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //We should now have about 10 lines max, some of which can be joined together (since they may be two lines seperated by a break but otherwise one line really...)
     for (LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
             if (!fieldLines[LineIDStart].valid) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
-            for (int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++){
+            for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++){
                     if (!fieldLines[LineIDEnd].valid) continue;
                     //Try extending the lines so they are near the ends of the other ones, and see if their in any way close...
 
@@ -366,11 +363,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
                     //Now make sure the slopes are both about the same degree angle....
                     // Seems to have a problem with lines "within" other lines, so pick them out..
-                    //qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
+                    // qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
                     if ((r2tls1 > .99 && r2tls2 > .99 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
                     {
                         //They are the same line, so join them together...
-                        //qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
+                        // qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
                         fieldLines[LineIDStart].joinLine(fieldLines[LineIDEnd]);
                         //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
                         fieldLines[LineIDEnd].clearPoints();
@@ -393,15 +390,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
 
     }
-    //qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
 
 
-    for (int i = 0; i < fieldLines.size(); i++)
+
+    for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
         /*qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
                 << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
+
     }
 
 }
@@ -430,13 +428,13 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 	unsigned short Top,Bottom,Left,Right,Type;
   
   //Now try and find where the lines intersect.
-        for (int LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
+        for (unsigned int LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
 		if (!fieldLines[LineIDStart].valid) continue;
 		//See if this line intersects with any other ones...
-                for (int LineIDCheck = LineIDStart+1; LineIDCheck < fieldLines.size(); LineIDCheck++){
+                for (unsigned int LineIDCheck = LineIDStart+1; LineIDCheck < fieldLines.size(); LineIDCheck++){
 			if (!fieldLines[LineIDCheck].valid) continue;
 			//Check this lines' slops are far enough apart...
-                        if (!(abs(fieldLines[LineIDStart].getAngle() - fieldLines[LineIDCheck].getAngle()) >=.08)) continue;
+                        if (!(fabs(fieldLines[LineIDStart].getAngle() - fieldLines[LineIDCheck].getAngle()) >=.08)) continue;
 			//std::cout << "Comparing Line Angles: " << LineIDStart << ", " << LineIDCheck<< std::endl;
 			//this seems to be very oblique?? make more acute for circle stuff ALEX
 			//Work out their intersecting X pos..
@@ -476,16 +474,16 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 				//Find the MaxX MinX MaxY MinY of each line...
                                 LSFittedLine tempLine = tempCornerPoint.Line[x];
 				int minX, minY, maxX, maxY;
-				minX = tempLine.leftPoint.x;
-				maxX = tempLine.rightPoint.x;
+                                minX = (int)tempLine.leftPoint.x;
+                                maxX = (int)tempLine.rightPoint.x;
 				//Check if the Y values(not in order):
 				if (tempLine.leftPoint.y > tempLine.rightPoint.y){
-					minY = tempLine.rightPoint.y;
-					maxY = tempLine.leftPoint.y;
+                                        minY = (int)tempLine.rightPoint.y;
+                                        maxY = (int)tempLine.leftPoint.y;
 				}
 				else{
-					maxY = tempLine.rightPoint.y;
-					minY = tempLine.leftPoint.y;
+                                        maxY = (int)tempLine.rightPoint.y;
+                                        minY = (int)tempLine.leftPoint.y;
 				}
 
 				// the '5' used here should be defined or enumerated. likely will need adjustment with new camera resolution. double it? ALEX
@@ -949,7 +947,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 void LineDetection::swap(std::vector<LinePoint> array, int i, int j)
 {
         LinePoint temp;
-        //qDebug() << "Swapping "<< i << "," <<j;
+        //// qDebug() << "Swapping "<< i << "," <<j;
         temp     = array[i];
         array[i] = array[j];
         array[j] = temp;

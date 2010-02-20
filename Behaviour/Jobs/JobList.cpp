@@ -40,7 +40,7 @@ JobList::JobList()
     
     
     // Test Save Job
-    vector<float> saveposition(3, 0);
+    /*vector<float> saveposition(3, 0);
     saveposition[0] = 10;
     saveposition[1] = -25;
     saveposition[2] = 1.57;
@@ -65,16 +65,19 @@ JobList::JobList()
     walkspeed[2] = 0.0;
     WalkJob* walkjob = new WalkJob(walkspeed);
     WalkParameters parameters = WalkParameters();
-    /*ifstream testparafile("jupptestparameters.wp");
-    testparafile >> parameters;*/
+
+    ifstream testparafile("/home/root/jupptestparameters.wp");
+    if (testparafile.is_open())
+        testparafile >> parameters;
+
     WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
     
-    /*// Test Light Job
+    // Test Light Job
     vector<float> colour(3,0);
     colour[0] = 1;
     colour[1] = 0;
     colour[2] = 0;
-    ChestLedJob ledjob = ChestLedJob(0, colour);*/
+    ChestLedJob ledjob = ChestLedJob(0, colour);
     
     addMotionJob(savejob);
     addMotionJob(blockjob);
@@ -84,7 +87,7 @@ JobList::JobList()
     addMotionJob(panjob);
     addMotionJob(walkjob);
     addMotionJob(pointjob);
-    addMotionJob(parametersjob);
+    addMotionJob(parametersjob);*/
     
     /*ofstream tempjoblog;
     tempjoblog.open("testjobs.txt");
@@ -268,7 +271,9 @@ void JobList::removeBehaviourJob(Job* job)
  */
 void JobList::removeMotionJob(Job* job)
 {
+    debug << "JobList::removeMotionJob" << endl;
     removeJob(job, m_motion_jobs);
+    debug << "JobList::removeMotionJob. Finished" << endl;
 }
 
 /*! @brief Remove a light job from the list
@@ -317,7 +322,11 @@ void JobList::removeOtherJob(Job* job)
  */
 void JobList::removeJob(Job* job, list<Job*>& joblist)
 {
+    debug << "JobList::removeJob." << endl;
+    debug << "job:" << (void*) job << " " << job << endl;
+    debug << "joblist:" << (void*) &joblist << endl;
     joblist.remove(job);
+    debug << "JobList::removeJob. Finished." << endl;
 }
 
 /*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
@@ -495,8 +504,11 @@ void JobList::summaryTo(ostream& output)
 {
     output << "JobList " << size() << " -----------------------------------" << endl;
     static JobList::iterator it;     // the iterator over all of the jobs
-    for (it = begin(); it != end(); ++it)
-        (*it)->summaryTo(output);
+    if (size() != 0)
+    {   //<! @todo TODO. Investigate why we get a segment fault when the JobList size is zero!
+        for (it = begin(); it != end(); ++it)
+            (*it)->summaryTo(output);
+    }
     output << "-------------------------------------------" << endl;
 }
 
@@ -510,27 +522,35 @@ void JobList::csvTo(ostream& output)
 ostream& operator<<(ostream& output, JobList& joblist)
 {
 #if DEBUG_BEHAVIOUR_VERBOSITY > 4
-    debug << "<<JobList" << endl;
+    debug << "ostream << JobList. " << joblist.size() << " jobs." << endl;
 #endif
     output << joblist.size() << " ";
+    
     static JobList::iterator it;     // the iterator over all of the jobs
     for (it = joblist.begin(); it != joblist.end(); ++it)
         output << *it;
+    return output;
 }
 
 istream& operator>>(istream& input, JobList& joblist)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
-    debug << ">>JobList" << endl;
-#endif
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList" << endl;
+    #endif
+    char buffer[8];
     unsigned int numnewjobs = 0;
     input >> numnewjobs;
+    input.read(buffer, sizeof(char));       // skip over the white space
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList. Adding " << numnewjobs << endl;
+    #endif
     Job* tempjob = NULL;
     for (unsigned int i=0; i<numnewjobs; i++)
     {
         input >> &tempjob;
         joblist.addJob(tempjob);
     }
+    return input;
 }
 
 

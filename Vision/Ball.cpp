@@ -26,7 +26,7 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
 
     //! Go through all the candidates: to find a possible ball
     //qDebug() <<"FO_Candidates.size():"<< FO_Candidates.size();
-    for(int i = 0; i  < FO_Candidates.size(); i++)
+    for(unsigned int i = 0; i  < FO_Candidates.size(); i++)
     {
 
         ObjectCandidate PossibleBall = FO_Candidates[i];
