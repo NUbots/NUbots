@@ -24,6 +24,7 @@
 
 #include "Behaviour/Jobs.h"
 #include "Vision/FieldObjects/FieldObjects.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 
 class Behaviour
 {
@@ -32,7 +33,9 @@ public:
     ~Behaviour();
     
     void process(JobList& jobs);
-    void processFieldObjects(FieldObjects* AllObjects,JobList& jobs);
+    void processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width);
+    void TrackPoint(JobList& jobs,float currPan, float currTilt, float x, float y, int IMAGE_HEIGHT, int IMAGE_WIDTH);
+
 };
 
 

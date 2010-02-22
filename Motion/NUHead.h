@@ -1,12 +1,12 @@
-/*! @file NUMotion.h
-    @brief Declaration of motion class
+/*! @file NUKick.h
+    @brief Declaration of nuhead class
  
-    @class NUMotion
-    @brief A module to provide motion
+    @class NUKick
+    @brief A module to provide head
  
-    @author Jason Kulk
+    @author Jed Rietveld
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jed Rietveld
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,43 +22,32 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NUMOTION_H
-#define NUMOTION_H
+#ifndef NUHEAD_H
+#define NUHEAD_H
 
-#include "motionconfig.h"
-#include "Behaviour/Jobs.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUWalk.h"
-#include "NUHead.h"
-#include "FallProtection.h"
-#include "Getup.h"
 
-class NUMotion
+class NUHead
 {
 public:
-    NUMotion();
-    ~NUMotion();
+    NUHead();
+    ~NUHead();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
-protected:
+    void process(const vector<float>& position);
 private:
-public:
-protected:
-public:         //! @todo TODO: Fix this. Jason needs a backdoor to the walk engine NOW!
-    // essential motion components
-    FallProtection* m_fall_protection;
-    Getup* m_getup;
-#ifdef USE_HEAD
-    NUHead* m_head;
-#endif
-#ifdef USE_WALK
-    NUWalk* m_walk;
-#endif
-#ifdef USE_KICK
-    NUKick* m_kick;
-#endif
+    void doHead();
+
+//private:
+    NUSensorsData* m_data;              //!< local pointer to the latest sensor data
+    NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
+    
+	double m_pitch;
+    double m_yaw;
+	
+    double m_head_timestamp;
+
 };
 
 #endif

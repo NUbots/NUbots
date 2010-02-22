@@ -617,7 +617,8 @@ void* runThreadVision(void* arg)
             //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #ifdef USE_BEHAVIOUR
                 //nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
-                nubot->behaviour->processFieldObjects(AllObjects, joblist);
+                
+                nubot->behaviour->processFieldObjects(joblist, AllObjects, data, nubot->image->height(), nubot->image->width());
             #endif
             #ifdef USE_MOTION
                 #ifdef USE_WALKOPTIMISER

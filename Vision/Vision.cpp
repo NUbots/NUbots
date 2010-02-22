@@ -33,6 +33,7 @@ Vision::~Vision()
 FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
 {
     debug << "Begin Process Frame" << endl;
+    AllFieldObjects = new FieldObjects();
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;

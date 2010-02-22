@@ -69,7 +69,7 @@ NUMotion::NUMotion()
     debug << "NUMotion::NUMotion" << endl;
 #endif
 #ifdef USE_HEAD
-    m_head = ?;
+    m_head = new NUHead();
 #endif
 #ifdef USE_WALK
     m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
@@ -216,6 +216,23 @@ void NUMotion::process(JobList& jobs)
             jobs.removeMotionJob(job);
         }
 #endif  // USE_KICK 
+#ifdef USE_HEAD
+        else if ((*it)->getID() == Job::MOTION_HEAD)
+        {   // process a kick job
+            static double time;
+            static vector<float> headposition;
+            static HeadJob* job;
+            
+            job = (HeadJob*) (*it);
+            job->getPosition(time, headposition);
+#if DEBUG_NUMOTION_VERBOSITY > 4
+            debug << "NUMotion::process(): Processing a head job." << endl;
+#endif
+            
+            m_head->process(headposition);
+            //jobs.removeMotionJob(job);
+        }
+#endif  // USE_HEAD 
     }
     jobs.clear();
     #if DEBUG_NUMOTION_VERBOSITY > 4
