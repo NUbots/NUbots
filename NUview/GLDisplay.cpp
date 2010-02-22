@@ -2,7 +2,7 @@
 #include "openglmanager.h"
 #include <qclipboard.h>
 #include <QApplication>
-#include <qDebug>
+#include <QDebug>
 
 GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         QGLWidget(parent,(QGLWidget*)shareWidget), imageWidth(80), imageHeight(60)

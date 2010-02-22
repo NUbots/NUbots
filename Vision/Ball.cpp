@@ -4,10 +4,11 @@
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
 //#include <QDebug>
+#include "debug.h"
 
 Ball::Ball()
 {
-
+    debug<< "Vision::DetectBall : Ball Class created" << endl;
 }
 Ball::~Ball()
 {
@@ -77,7 +78,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     TransitionSegment* tempSeg = new TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     ScanLine* tempLine = new ScanLine();
 
-    int spacings = 1;
+    int spacings = 2;
     int direction = ClassifiedSection::DOWN;
     vision->CloselyClassifyScanline(tempLine,tempSeg,spacings, direction);
     //qDebug() << TopLeft.y <<","<< BottomRight.y;

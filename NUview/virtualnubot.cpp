@@ -357,7 +357,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     //qDebug() << "POSTclassifyCandidates";
 
-    Circle circ = vision.DetectBall(candidates);
+    circ = vision.DetectBall(candidates);
     //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     if(circ.isDefined)
     {

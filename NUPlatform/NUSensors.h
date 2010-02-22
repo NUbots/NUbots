@@ -55,6 +55,7 @@ protected:
     void calculateJointAcceleration();
     
     void calculateOrientation();
+    void calculateHorizon();
     void calculateZMP();
     void calculateFallSense();
     

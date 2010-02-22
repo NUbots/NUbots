@@ -30,9 +30,10 @@ Vision::~Vision()
     return;
 }
 
-void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
+FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
 {
-       //qDebug() << "Begin Process Frame";
+    debug << "Begin Process Frame" << endl;
+    AllFieldObjects = new FieldObjects();
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -46,11 +47,28 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 8;
-
+    int spacings = 16;
+    Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
-
+    debug << "Setting Image: " <<endl;
+    setImage(&image);
+    debug << "Generating Horizon Line: " <<endl;
+    //Generate HorizonLine:
+    vector <float> horizonInfo;
+    Horizon horizonLine;
+    
+    if(data->getHorizon(horizonInfo))
+    {
+        horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+    }       
+    else
+    {
+        debug << "No Horizon Data" << endl;
+        return AllFieldObjects;
+    }
+    debug << "Generating Horizon Line: Finnished" <<endl;
+    debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
     std::vector<unsigned char> validColours;
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
@@ -58,10 +76,11 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
     const int GOALS  = 2;
     int mode  = ROBOTS;
 
+
     //qDebug() << "CASE YUYVGenerate Classified Image: START";
     //generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
-    setImage(&image);
+    //setImage(&image);
     //! Find the green edges
     points = findGreenBorderPoints(spacings,&horizonLine);
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
@@ -182,16 +201,32 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
                 //qDebug() << "POST-GOALS";
                 break;
             }
+
             while (tempCandidates.size())
             {
                 candidates.push_back(tempCandidates.back());
                 tempCandidates.pop_back();
             }
+
     }
         //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
         //qDebug() << "POSTclassifyCandidates";
-
-    Circle circ = DetectBall(candidates);
+    debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
+    if(candidates.size() > 0)
+    {
+        circ = DetectBall(candidates);
+        if(circ.isDefined)
+        {
+            //! Draw Ball:
+            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+            debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
+            debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing() << endl;
+        }
+        else
+        {
+            //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+        }
+    }
     //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     /*
         if(circ.isDefined)
@@ -205,7 +240,7 @@ void Vision::ProcessFrame(NUimage& image, Horizon horizonLine)
         }*/
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    return;
+    return AllFieldObjects;
 }
 
 void Vision::setLUT(unsigned char* newLUT)
@@ -272,7 +307,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-
+    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < currentImage->width(); x+=scanSpacing)
@@ -1111,7 +1146,7 @@ int Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&point
     }
 
     int y = findYFromX(points, current_x);
-    int diff_x;
+    int diff_x = 0;
     int diff_y = currentImage->height() - y;
 
     if (current_x < target_x)
@@ -1181,15 +1216,25 @@ std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int sp
 
 Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
 {
+    debug<< "Vision::DetectBall" << endl;
+
     Ball* BallFinding = new Ball();
+    
+
+    debug<< "Vision::DetectBall : Ball Class created" << endl;
     int width = currentImage->width();
     int height = currentImage->height();
+    debug<< "Vision::DetectBall : getting Image sizes" << endl;
+    debug<< "Vision::DetectBall : Init Ball" << endl;    
     Circle ball;
     ball.isDefined = false;
     if (FO_Candidates.size() <= 0) return ball;
+    debug<< "Vision::DetectBall : Find Ball" << endl;
     ball = BallFinding->FindBall(FO_Candidates, AllFieldObjects, this,height,width);
+    
     if(ball.isDefined)
     {
+        debug<< "Vision::DetectBall : Update FO_Ball" << endl;
         Vector2<int> viewPosition;
         Vector3<float> sphericalError;
         Vector3<float> sphericalPosition;
@@ -1215,6 +1260,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
                     << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Elevation();*/
 
     }
+    debug<< "Vision::DetectBall : Finnised" << endl;
     return ball;
 }
 double Vision::CalculateBearing(double cx){

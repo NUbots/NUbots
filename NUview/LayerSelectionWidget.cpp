@@ -10,7 +10,7 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QMdiSubWindow>
-#include <QStringlist>
+//#include <QStringlist>
 #include <QPixmap>
 #include <QPushButton>
 #include <QSignalMapper>
@@ -86,9 +86,9 @@ void LayerSelectionWidget::createWidgets()
     colourLabel = new QLabel("Drawing Colour");
 
     // Make the quick select colour buttons.
-    quickSelectPushButtons.resize(quickSelectColoursList.length());
+    quickSelectPushButtons.resize(quickSelectColoursList.size());
     QPainter painter(&smallTempPixmap);
-    for (int colId = 0; colId < quickSelectColoursList.length(); colId++)
+    for (int colId = 0; colId < quickSelectColoursList.size(); colId++)
     {
         quickSelectPushButtons[colId] = new QToolButton();
         smallTempPixmap.fill(QColor(quickSelectColoursList[colId]));

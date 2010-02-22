@@ -22,9 +22,10 @@
 #include "NUSensors.h"
 #include "NUSystem.h"
 #include "debug.h"
-
+#include "../Kinematics/Horizon.h"
 #include <math.h>
 #include <boost/circular_buffer.hpp>
+
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -117,6 +118,7 @@ void NUSensors::calculateSoftSensors()
         calculateJointAcceleration();
     
     calculateOrientation();
+    calculateHorizon();
     calculateFootForce();
     calculateFootImpact();
     calculateCoP();
@@ -160,6 +162,50 @@ void NUSensors::calculateOrientation()
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
     }
 }
+
+/*! @brief Updates the Horizon Line using the current sensor data
+    
+ */
+void NUSensors::calculateHorizon()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateHorizon()" << endl;
+#endif
+    Horizon HorizonLine;
+    float bodyPitch;
+    float bodyRoll;
+    bodyRoll = m_data->BalanceOrientation->Data[0];
+    bodyPitch = m_data->BalanceOrientation->Data[1];
+    float headYaw;
+    m_data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+    float headPitch;
+    m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    int camera = 1;
+
+    HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)-headYaw,(double)headPitch,camera);
+    vector<float> line;
+    line.push_back(HorizonLine.getA());
+    line.push_back(HorizonLine.getB());
+    line.push_back(HorizonLine.getC());
+    //debug << "HLINE IS: "<<line[0] << line[1] << line[2] << endl;
+    m_data->BalanceHorizon->setData(m_current_time, line, true );
+/*    static vector<float> orientation(3, 0);
+    static vector<float> acceleration(3, 0);
+    if (m_data->getAccelerometerValues(acceleration))
+    {
+        float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
+        if (fabs(accelsum - 981) < 0.1*981)
+        {   // only update the orientation estimate if not under other accelerations!
+            orientation[0] = atan2(-acceleration[1],-acceleration[2]);
+            orientation[1] = atan2(acceleration[0],-acceleration[2]);
+            orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
+        }
+        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+    }
+*/
+
+}
+
 
 /*! @brief Updates the zero moment point estimate using the current sensor data
     @todo TODO: Implement this function. Fuse data from inverted pendulum ZMP, CoP and kinematic ZMP

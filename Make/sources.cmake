@@ -19,6 +19,7 @@ SET(NUBOT_DIRS  NUPlatform
                 Motion
                 Vision
                 Tools
+                Kinematics
 )
 
 # list the top-level files here
