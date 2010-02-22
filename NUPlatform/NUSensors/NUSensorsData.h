@@ -113,6 +113,7 @@ public:
     bool getJointCurrents(bodypart_id_t bodypart, vector<float>& currents);
     bool getJointTorques(bodypart_id_t bodypart, vector<float>& torques);
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
+    bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
@@ -223,6 +224,7 @@ private:
     vector<joint_id_t> m_rleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each right leg joint
     vector<joint_id_t> m_body_ids;
     vector<joint_id_t> m_all_joint_ids;
+    vector<string> m_joint_names;
     int m_num_head_joints;
     int m_num_arm_joints;
     int m_num_torso_joints;
