@@ -32,6 +32,7 @@
 #endif
 #ifdef TARGET_IS_NAO
     #include "NUPlatform/Platforms/NAO/NAOPlatform.h"
+    
 #endif
 #ifdef TARGET_IS_CYCLOID
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
@@ -84,12 +85,26 @@ NUbot::NUbot(int argc, const char *argv[])
     #ifdef USE_VISION
         vision = new Vision();
         debug << "Loading LOOKUP TABLE" <<endl;
-        LUTTools* lutLoader =  new LUTTools();
-        
-        lutLoader->LoadLUT(LUT, 256*256*256,"/home/root/robotDetection.lut" );
+        LUTTools* lutLoader =  new LUTTools();        
+        lutLoader->LoadLUT(LUT, 256*256*256,"/home/root/default.lut" );
         this->vision->setLUT(LUT);
         debug << "Finnished: Loading LOOKUP TABLE" <<endl;
+        CameraSettings newSettings;
+        newSettings.gain = 200;
+        newSettings.exposure = 200;
+        newSettings.contrast = 100;
+        newSettings.blueChroma = 160;
+        newSettings.redChroma = 75;
+        newSettings.brightness = 100;
+        newSettings.saturation = 130;
+        newSettings.hue = 0;
+        platform->camera->setSettings(newSettings);
+        debug << "Finnished: Camera Settings" <<endl;
+        
+        imagefile.open ("/home/root/images.nul");
+        
 
+        debug <<"OPENING FILE: "<< "/home/root/images.nul";
     #endif
     #ifdef USE_LOCALISATION
         localisation = new Localisation();
@@ -246,6 +261,8 @@ NUbot::~NUbot()
     delete platform;
     #ifdef USE_VISION
         delete vision;
+        
+        imagefile.close();
     #endif
     #ifdef USE_LOCALISATION
         delete localisation;
@@ -549,6 +566,8 @@ void* runThreadVision(void* arg)
             debug << "NUbot::NUbot(). Grabbing new image." << endl;
     #endif
             nubot->image = nubot->platform->camera->grabNewImage();
+            //<! UNCOMMENT TO SAVE IMAGES!
+            //nubot->imagefile << *nubot->image;
 #endif // USE_VISION
         nubot->signalVisionStart();
         
@@ -567,23 +586,20 @@ void* runThreadVision(void* arg)
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             //          image = nubot->platform->camera->getData()
 //            image = nubot->platform->camera->grabNewImage();
-            data = nubot->platform->sensors->update();
+            data = nubot->platform->sensors->getData();
+            vector<float> horizonInfo;
             //data = nubot->platform->sensors->getData();
-            try{
-                debug << "TEST: HorizonLine INFO: " << data->BalanceHorizon->Data[0] << "," << data->BalanceHorizon->Data[1] << ","<<data->BalanceHorizon->Data[2] << endl;
-            }
-            catch (exception& e) 
+            if(data->getHorizon(horizonInfo))
             {
-                debug << "Exception at debug line: data" << endl;
-                unhandledExceptionHandler(e);
-            }            
                 
+                debug << "TEST: HorizonLine INFO: " << horizonInfo[0] << "," << horizonInfo[1] << ","<<horizonInfo[2] << endl;
+            
         
             //                 odometry = nubot->motion->getData()                // There is no deep copy here either
             //      gamectrl, teaminfo = nubot->network->getData()
 #ifdef USE_VISION
 //        FieldObject* fieldobj = NULL;
-            nubot->vision->ProcessFrame(*nubot->image, data);
+            FieldObjects* AllObjects= nubot->vision->ProcessFrame(*nubot->image, data);
         
 /*
             std::stringstream ConvertStream;
@@ -600,7 +616,8 @@ void* runThreadVision(void* arg)
             
             //          wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #ifdef USE_BEHAVIOUR
-                nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+                //nubot->behaviour->process(joblist);      //TODO: nubot->behaviour->process(wm, gamectrl, p_jobs)
+                nubot->behaviour->processFieldObjects(AllObjects, joblist);
             #endif
             #ifdef USE_MOTION
                 #ifdef USE_WALKOPTIMISER
@@ -613,6 +630,12 @@ void* runThreadVision(void* arg)
             //joblist.clear();                           // assume that all of the jobs have been completed
             joblist.summaryTo(debug);
             //*nubot->platform->io << joblist;
+            }       
+            else
+            {
+                debug << "NO DATA AVAILABLE:: VISION CONTINUING" << endl;
+                
+            }
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (exception& e) 

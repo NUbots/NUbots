@@ -20,7 +20,7 @@
  */
 
 #include "Behaviour.h"
-
+#include <debug.h>
 using namespace std;
 
 Behaviour::Behaviour()
@@ -38,4 +38,18 @@ void Behaviour::process(JobList& jobs)
 {
 
 }
+void Behaviour::processFieldObjects(FieldObjects* AllObjects,JobList& jobs)
+{
 
+
+    if(AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+    {
+        vector<float> walkVector;
+        walkVector.push_back(5);
+        walkVector.push_back(0);
+        walkVector.push_back(AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing()/2);
+        WalkJob* walk = new WalkJob(walkVector);
+        jobs.addMotionJob(walk);
+        debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing()/2 << endl;
+    }
+}

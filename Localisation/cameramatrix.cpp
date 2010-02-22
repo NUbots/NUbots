@@ -1,6 +1,6 @@
 #include "cameramatrix.h"
 #include <math.h>
-#include <qDebug>
+#include <QDebug>
 
 CameraMatrix::CameraMatrix()
 {

@@ -9,7 +9,6 @@
 #include "Tools/Math/Line.h"
 #include "ClassificationColours.h"
 #include "Ball.h"
-#include "Circle.h"
 #include "Tools/Math/General.h"
 #include <boost/circular_buffer.hpp>
 #include <queue>
@@ -31,7 +30,7 @@ Vision::~Vision()
     return;
 }
 
-void Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
+FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
 {
     debug << "Begin Process Frame" << endl;
     std::vector< Vector2<int> > points;
@@ -48,18 +47,25 @@ void Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
     int spacings = 16;
-
+    Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
     debug << "Setting Image: " <<endl;
     setImage(&image);
     debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
-    float A = data->BalanceHorizon->Data[0];
-    float B = data->BalanceHorizon->Data[1];
-    float C = data->BalanceHorizon->Data[2];
+    vector <float> horizonInfo;
     Horizon horizonLine;
-    horizonLine.setLine((double)A,(double)B,(double)C);
+    
+    if(data->getHorizon(horizonInfo))
+    {
+        horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+    }       
+    else
+    {
+        debug << "No Horizon Data" << endl;
+        return AllFieldObjects;
+    }
     debug << "Generating Horizon Line: Finnished" <<endl;
     debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
     std::vector<unsigned char> validColours;
@@ -233,7 +239,7 @@ void Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
         }*/
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    return;
+    return AllFieldObjects;
 }
 
 void Vision::setLUT(unsigned char* newLUT)
@@ -1139,7 +1145,7 @@ int Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&point
     }
 
     int y = findYFromX(points, current_x);
-    int diff_x;
+    int diff_x = 0;
     int diff_y = currentImage->height() - y;
 
     if (current_x < target_x)

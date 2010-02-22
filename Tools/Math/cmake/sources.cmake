@@ -23,7 +23,7 @@ ENDIF()
 SET (YOUR_SRCS
 Line.cpp
 LSFittedLine.cpp
-matrix.cpp  
+Matrix.cpp  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

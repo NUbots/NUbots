@@ -398,6 +398,20 @@ bool NUSensorsData::getAccelerometerValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
+    @param values will be updated with the current accelerometer readings
+ */
+bool NUSensorsData::getHorizon(vector<float>& values)
+{
+    if (BalanceHorizon == NULL || BalanceHorizon->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceHorizon->Data;
+        return true;
+    }
+}
+
 /*! @brief Gets the gyro values [gx, gy, gz] in rad/s
     @param values will be updated with the current gyro readings
  */

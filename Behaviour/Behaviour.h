@@ -23,6 +23,7 @@
 #define BEHAVIOUR_H
 
 #include "Behaviour/Jobs.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 
 class Behaviour
 {
@@ -31,6 +32,7 @@ public:
     ~Behaviour();
     
     void process(JobList& jobs);
+    void processFieldObjects(FieldObjects* AllObjects,JobList& jobs);
 };
 
 

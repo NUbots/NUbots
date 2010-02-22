@@ -32,9 +32,13 @@
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
 #ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
     #include "Tools/FileFormats/LUTTools.h"
+    #include "NUPlatform/NUCamera/CameraSettings.h"
+    #include <iostream>
+    #include <fstream>
 
 #endif
 
@@ -87,6 +91,7 @@ public:
         Vision* vision;                 //!< vision module
         NUimage* image;
         unsigned char LUT[256*256*256];
+        ofstream imagefile;
     #endif
     #ifdef USE_LOCALISATION
         Localisation* localisation;     //!< localisation module
