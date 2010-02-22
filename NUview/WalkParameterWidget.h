@@ -69,6 +69,12 @@ private:
     QSlider* shiftFrequencySlider;              //!< Slider for alpha selection
     QSpinBox* shiftFrequencySpinBox;            //!< SpinBox for alpha selection
     
+    // Phase offset
+    QHBoxLayout* phaseOffsetLayout;             //!< Layout for phase offset
+    QLabel* phaseOffsetLabel;                   //!< Label for phase offset
+    QSlider* phaseOffsetSlider;                 //!< Slider for phase offset
+    QSpinBox* phaseOffsetSpinBox;               //!< SpinBox for phase offset
+    
     // Step Size
     QHBoxLayout* stepSizeLayout;                //!< Layout for step size
     QLabel* stepSizeLabel;                      //!< Label for step size
