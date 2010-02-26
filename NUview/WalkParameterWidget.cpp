@@ -85,11 +85,21 @@ void WalkParameterWidget::createWidgets()
     phaseOffsetSpinBox->setMinimum(phaseOffsetSlider->minimum());
     phaseOffsetSpinBox->setMaximum(phaseOffsetSlider->maximum());
     
+    // Phase Reset
+    phaseResetLabel = new QLabel("Phase Reset");
+    phaseResetSlider = new QSlider(Qt::Horizontal);
+    phaseResetSlider->setMinimum(-100);
+    phaseResetSlider->setMaximum(100);
+    
+    phaseResetSpinBox = new QSpinBox();
+    phaseResetSpinBox->setMinimum(phaseResetSlider->minimum());
+    phaseResetSpinBox->setMaximum(phaseResetSlider->maximum());
+    
     // Step Size
     stepSizeLabel = new QLabel("Step Size");
     stepSizeSlider = new QSlider(Qt::Horizontal);
     stepSizeSlider->setMinimum(1);
-    stepSizeSlider->setMaximum(100);
+    stepSizeSlider->setMaximum(400);
     
     stepSizeSpinBox = new QSpinBox();
     stepSizeSpinBox->setMinimum(stepSizeSlider->minimum());
@@ -110,11 +120,17 @@ void WalkParameterWidget::createLayout()
     shiftFrequencyLayout->addWidget(shiftFrequencySlider);
     shiftFrequencyLayout->addWidget(shiftFrequencySpinBox);
     
-    // Shift Frequency 
+    // Phase Offset 
     phaseOffsetLayout = new QHBoxLayout();
     phaseOffsetLayout->addWidget(phaseOffsetLabel);
     phaseOffsetLayout->addWidget(phaseOffsetSlider);
     phaseOffsetLayout->addWidget(phaseOffsetSpinBox);
+    
+    // Phase Reset 
+    phaseResetLayout = new QHBoxLayout();
+    phaseResetLayout->addWidget(phaseResetLabel);
+    phaseResetLayout->addWidget(phaseResetSlider);
+    phaseResetLayout->addWidget(phaseResetSpinBox);
     
     // Step Size 
     stepSizeLayout = new QHBoxLayout();
@@ -127,6 +143,7 @@ void WalkParameterWidget::createLayout()
     overallLayout->addLayout(shiftAmplitudeLayout);
     overallLayout->addLayout(shiftFrequencyLayout);
     overallLayout->addLayout(phaseOffsetLayout);
+    overallLayout->addLayout(phaseResetLayout);
     overallLayout->addLayout(stepSizeLayout);
     setLayout(overallLayout);
 }
@@ -147,6 +164,11 @@ void WalkParameterWidget::createConnections()
     connect(phaseOffsetSlider,SIGNAL(valueChanged(int)),phaseOffsetSpinBox,SLOT(setValue(int)));
     connect(phaseOffsetSpinBox,SIGNAL(valueChanged(int)),phaseOffsetSlider,SLOT(setValue(int)));
     connect(phaseOffsetSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
+    
+    // Setup Phase Reset signals
+    connect(phaseResetSlider,SIGNAL(valueChanged(int)),phaseResetSpinBox,SLOT(setValue(int)));
+    connect(phaseResetSpinBox,SIGNAL(valueChanged(int)),phaseResetSlider,SLOT(setValue(int)));
+    connect(phaseResetSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
     
     // Setup Shift Amplitude signals
     connect(stepSizeSlider,SIGNAL(valueChanged(int)),stepSizeSpinBox,SLOT(setValue(int)));
@@ -174,6 +196,12 @@ WalkParameterWidget::~WalkParameterWidget()
     delete phaseOffsetSpinBox;   
     delete phaseOffsetLayout; 
     
+    // Phase Offset
+    delete phaseResetLabel;      
+    delete phaseResetSlider;    
+    delete phaseResetSpinBox;   
+    delete phaseResetLayout; 
+    
     // Step Size
     delete stepSizeLabel;           
     delete stepSizeSlider;          
@@ -199,6 +227,7 @@ void WalkParameterWidget::walkParameterChanged()
     params[0][0].Value = shiftFrequencySlider->value()/50.0;
     params[0][1].Value = phaseOffsetSlider->value()/100.0;
     params[0][2].Value = shiftAmplitudeSlider->value()/200.0;
+    params[0][13].Value = phaseResetSlider->value()/100.0;
     speed[0] = stepSizeSlider->value()/10.0;
     
     m_walk_parameters->setParameters(params);
