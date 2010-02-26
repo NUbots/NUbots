@@ -91,11 +91,14 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     ../Motion/NUWalk.cpp \
+    ../Motion/Walks/JuppWalk/*.cpp \
     ../Motion/Walks/WalkParameters.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
+    ../NUPlatform/NUActionators/*.cpp \
+    ../NUPlatform/NUActionators.cpp \
     ../NUPlatform/NUSystem.cpp \
     ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
     ../Behaviour/Jobs/*.cpp \
