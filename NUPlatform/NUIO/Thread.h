@@ -10,6 +10,7 @@ class Thread
 {
 	public:
 		Thread(std::string _name);
+                virtual ~Thread();
 		virtual int start();
 		virtual void stop();
     

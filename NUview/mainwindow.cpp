@@ -6,7 +6,7 @@
 #include <QMdiArea>
 #include <QStatusBar>
 #include <stdio.h>
-
+#include <QDebug>
 #include <iostream>
 using namespace std;
 ofstream debug;
@@ -15,7 +15,7 @@ ofstream errorlog;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-
+    qDebug() << "NUview is starting in: MainWindow.cpp";
     createActions();
     createMenus();
     createContextMenu();
