@@ -58,7 +58,6 @@ NAOActionators::NAOActionators()
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
 #endif
-    m_temptargetlog.open("/var/log/temptarget.csv");
 }
 
 NAOActionators::~NAOActionators()
@@ -137,7 +136,7 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<float> velocities;
     static vector<float> gains;
     
-    static vector<float> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
+    static vector<int> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
     static vector<float> dcmpositions(m_num_servo_positions, 0);
     static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, 0);
     
@@ -155,38 +154,28 @@ void NAOActionators::copyToHardwareCommunications()
             {
                 if (isvalid[i] == true)
                 {
-                    dcmtimes[i] = times[i] + m_al_time_offset;
+                    dcmtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
                     dcmstiffnesses[i] = gains[i]/100.0;
                     dcmpositions[i] = positions[i];
                 }
             }
         }
         else
-            errorlog << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
+            errorlog << "NAOActionators::copyToHardwareCommunications(). The input does not have the correct length, all data will be ignored!" << endl;
     }
     
     for (unsigned int i=0; i<m_num_servo_positions; i++)
     {
         m_stiffness_command[3][i][0][0] = dcmstiffnesses[i];
-        m_stiffness_command[3][i][0][1] = (int) dcmtimes[i];
+        m_stiffness_command[3][i][0][1] = dcmtimes[i];
         m_position_command[3][i][0][0] = dcmpositions[i];
-        m_position_command[3][i][0][1] = (int) dcmtimes[i];
+        m_position_command[3][i][0][1] = dcmtimes[i];
     }
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
     m_al_dcm->setAlias(m_led_command);
     
     m_data->removeCompletedPoints(m_current_time);
-    
-    m_temptargetlog << m_current_time << ", ";
-    debug << (m_current_time + m_al_time_offset) - m_al_dcm->getTime(0) << ", ";
-    for (unsigned int i=0; i<dcmpositions.size(); i++)
-    {
-        debug << dcmtimes[i] - m_al_dcm->getTime(0) << ", " << times[i] - m_current_time << ", ";
-        m_temptargetlog << dcmpositions[i] << ", ";
-    }
-    m_temptargetlog << endl;
-    debug << endl;
 }
 
 

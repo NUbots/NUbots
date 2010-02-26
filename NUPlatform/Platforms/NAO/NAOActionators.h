@@ -58,7 +58,6 @@ private:
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
     ALValue m_position_command, m_stiffness_command, m_led_command;
-    ofstream m_temptargetlog;
 };
 
 #endif
