@@ -35,6 +35,7 @@ Autoconfig/*
 /Tools/zlib/*
 
 # ignore Qt builds
+/NUview/pthreads/*
 /NUview/debug/*
 /NUview/release/*
 *.Debug

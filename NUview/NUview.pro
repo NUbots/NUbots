@@ -9,8 +9,10 @@ macx {
         /usr/lib/libz.dylib
 }
 win32 {
-INCLUDEPATH += 'C:/Program Files/boost/'
-
+    INCLUDEPATH += 'C:/Program Files/boost/'
+    INCLUDEPATH += '../NUview/pthreads/Pre-built/include/'
+    LIBS += '../NUView/pthreads/Pre-built/lib/libpthreadGC1.a'
+    LIBS += -lwsock32
 # Opencv library
 #INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
 #LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
@@ -91,14 +93,14 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     ../Motion/NUWalk.cpp \
-    ../Motion/Walks/JuppWalk/*.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Motion/Walks/JuppWalk/*.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
-    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUActionators.cpp \
+    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUSystem.cpp \
     ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
     ../Behaviour/Jobs/*.cpp \
