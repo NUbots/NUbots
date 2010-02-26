@@ -5,7 +5,7 @@
 #include <QPushButton>
 #include <QPainter>
 #include <QImage>
-#include <CString>
+#include <cstring>
 
 ConnectionWidget::ConnectionWidget(QWidget *parent): QDockWidget(parent)
 {

@@ -1,3 +1,6 @@
+#ifndef FIELDOBJECTS_H
+#define FIELDOBJECTS_H
+
 #include "StationaryObject.h"
 #include "Self.h"
 #include "MobileObject.h"
@@ -87,3 +90,5 @@ class FieldObjects{
             void InitStationaryFieldObjects();
             void InitMobileFieldObjects();
 };
+
+#endif

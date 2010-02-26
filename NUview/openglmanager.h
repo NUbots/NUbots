@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QGLWidget>
-#include "gldisplay.h"
+#include "GLDisplay.h"
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
 #include "Vision/RobotCandidate.h"

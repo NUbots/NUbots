@@ -72,6 +72,7 @@ NUSensorsData::NUSensorsData()
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
     addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
+    addSoftSensor(BalanceHorizon, string("BalanceHorzion"), sensor_t::BALANCE_HORIZON);
     addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
     addSoftSensor(BalanceFalling, string("BalanceFalling"), sensor_t::BALANCE_FALLING);
     addSoftSensor(BalanceFallen, string("BalanceFallen"), sensor_t::BALANCE_FALLEN);
@@ -393,6 +394,20 @@ bool NUSensorsData::getAccelerometerValues(vector<float>& values)
     else
     {
         values = BalanceAccelerometer->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
+    @param values will be updated with the current accelerometer readings
+ */
+bool NUSensorsData::getHorizon(vector<float>& values)
+{
+    if (BalanceHorizon == NULL || BalanceHorizon->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceHorizon->Data;
         return true;
     }
 }

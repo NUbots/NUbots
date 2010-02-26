@@ -6,7 +6,7 @@
 #include "classificationwidget.h"
 #include "connectionwidget.h"
 #include "Tools/Image/NUimage.h"
-#include "virtualNubot.h"
+#include "virtualnubot.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
 #include "locWmGlDisplay.h"

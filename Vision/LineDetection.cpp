@@ -114,7 +114,6 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
         }
 
     }
-    // qDebug() << "Number of LinePoints: " << linePoints.size();
     return;
 }
 
@@ -272,12 +271,10 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     if (fieldLines.size() < 1)
     {
             printf("No Lines... ABORT!!!!");
-            // qDebug() << "No Lines... ABORT!!!!";
             return;
     }
     else{
             printf("END FieldLinesCounter: %i\n", fieldLines.size());
-            // qDebug() << "Before Joining FieldLinesCounter: " << fieldLines.size();
     }
 
     //for(int l = 0; l < FieldLinesCounter; l++)
@@ -393,15 +390,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
 
     }
-    // qDebug() << "Total number of Vaild Lines: "<<TotalValidLines;
+
 
 
     for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        // qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
-        //        << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
-        //        << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
-        //        << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
+        /*qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+                << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
+                << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
+                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
+
     }
 
 }
@@ -561,9 +559,10 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 		}
 	}
         //qDebug() << "Total Corners Found: " << cornerPoints.size();
-        for (unsigned int i = 0; i < cornerPoints.size() ; i++)
+
+        for (int i = 0; i < cornerPoints.size() ; i++)
         {
-            // qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
+            //qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
         }
 }
 

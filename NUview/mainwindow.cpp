@@ -7,6 +7,7 @@
 #include <QStatusBar>
 #include <stdio.h>
 #include <QDebug>
+#include <QWidget>
 #include <iostream>
 using namespace std;
 ofstream debug;
@@ -340,11 +341,11 @@ void MainWindow::copy()
     if(QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow())
     {
         QWidget* widget = activeSubWindow->widget();
-        if(typeid(*widget) == typeid(GLDisplay))
+        /*if(typeid(*widget) == typeid(GLDisplay))
         {
             GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
             currWindow->snapshotToClipboard();
-        }
+        }*/
     }
 }
 
@@ -356,12 +357,12 @@ void MainWindow::shrinkToNativeAspectRatio()
         QSize sourceSize;
         bool validWidget = false;
         QWidget* widget = activeSubWindow->widget();
-        if(typeid(*widget) == typeid(GLDisplay))
+        /*if(typeid(*widget) == typeid(GLDisplay))
         {
             GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
             validWidget = true;
             sourceSize = currWindow->imageSize();
-        }
+        }*/
 
         if(validWidget)
         {
@@ -401,7 +402,7 @@ void MainWindow::selectFrame()
     int selectedFrameNumber;
     bool ok;
 
-    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
+    //selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
 
     if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
         currentFrameNumber = selectedFrameNumber;

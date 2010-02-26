@@ -28,6 +28,8 @@ RobotCandidate.cpp
 ScanLine.cpp
 TransitionSegment.cpp
 Vision.cpp
+Ball.cpp
+CircleFitting.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

@@ -118,6 +118,7 @@ public:
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
+    bool getHorizon(vector<float>& values);
     bool getZMP(vector<float>& values);
     bool getFalling(vector<float>& values);
     bool getFallen(vector<float>& values);
@@ -191,6 +192,7 @@ public:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
     sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
+    sensor_t* BalanceHorizon;                   //!< stores the Horizon line (A,B,C) Ax+ By +C =0
     sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
     sensor_t* BalanceFalling;                   //!< stores whether the robot is falling (sum, left, right, forward, backward)
     sensor_t* BalanceFallen;                    //!< stores whether the robot has fallen (sum, left, right, forward, backward)
