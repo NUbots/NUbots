@@ -19,7 +19,8 @@ INCLUDEPATH += 'C:/Program Files/boost/'
 }
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
-INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
+INCLUDEPATH += 'C:\Qt\2010.02.1\qt\src\3rdparty\zlib'
+INCLUDEPATH += 'C:\Qt\2010.02.1\qt\src\3rdparty\pthreads\include'
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \

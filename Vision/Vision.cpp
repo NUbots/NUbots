@@ -13,6 +13,8 @@
 #include <boost/circular_buffer.hpp>
 #include <queue>
 #include <algorithm>
+#include "debug.h"
+
 
 using namespace mathGeneral;
 Vision::Vision()
