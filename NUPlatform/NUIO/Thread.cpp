@@ -7,6 +7,11 @@ Thread::Thread(string _name): name(_name), running(false)
 {
 }
 
+Thread::~Thread()
+{
+    this->stop();
+}
+
 int Thread::start()
 {
 	if(running) 
@@ -31,5 +36,6 @@ void Thread::stop()
 void* Thread::runThread(void* _this)
 {
 	reinterpret_cast<Thread*>(_this)->run();
-	pthread_exit(NULL);	
+        pthread_exit(NULL);
+        return _this;
 }

@@ -22,9 +22,19 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef WIN32
+
+#include <winsock.h>
+#define socklen_t int
+#endif
+
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
+
+
 #include "Thread.h"
 
 #include <sstream>
@@ -35,14 +45,14 @@ typedef unsigned char byte;
 struct network_data_t
 {
     int size;
-    byte* data;
+    char* data;
 };
 
 class UdpPort : public Thread
 {
 public:
     UdpPort(int portnumber);
-    ~UdpPort();
+    virtual ~UdpPort();
     void sendData(network_data_t netData);
     void sendData(const stringstream& stream);
     network_data_t receiveData();
@@ -56,7 +66,7 @@ private:
     sockaddr_in m_broadcast_address;    //!< the socket broadcast address
     double m_time_last_receive;         //!< the time in milliseconds the last packet was received
     
-    byte m_data[10*1024];               //!< the data buffer for received data
+    char m_data[10*1024];               //!< the data buffer for received data
     int m_message_size;                 //!< the number of bytes received (ie the number of valid bytes in m_data)
     bool m_has_data;                    //!< flag indicating whether new data has been received
 
