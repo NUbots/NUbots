@@ -188,19 +188,20 @@ void WalkParameterWidget::walkParameterChanged()
     static WalkParametersJob* parametersjob = new WalkParametersJob(*m_walk_parameters);
     static vector<float> speed(3,0);
     static WalkJob* walkjob = new WalkJob(speed);
-    static vector<vector<WalkParameters::Parameter> > params;
-    
+    static vector< vector<WalkParameters::Parameter> > params;
+
     m_walk_parameters->getParameters(params);
     
     // params[0] is shift frequency
     // params[2] is shift amplitude
-    
+
     shiftAmplitudeSlider->value();
+
     params[0][0].Value = shiftFrequencySlider->value()/50.0;
     params[0][1].Value = phaseOffsetSlider->value()/100.0;
     params[0][2].Value = shiftAmplitudeSlider->value()/200.0;
     speed[0] = stepSizeSlider->value()/10.0;
-    
+
     m_walk_parameters->setParameters(params);
     
     parametersjob->setWalkParameters(*m_walk_parameters);
@@ -208,7 +209,7 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(walkjob);
     m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
-    
+
     (*m_io) << m_job_list;
     
     m_job_list->removeMotionJob(parametersjob);

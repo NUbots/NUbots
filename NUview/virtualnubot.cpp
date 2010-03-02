@@ -201,7 +201,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horzontalsegments;
     std::vector< TransitionSegment > allsegments;
-    std::vector< RobotCandidate > robotCandidates;
     std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
@@ -299,19 +298,15 @@ void virtualNUbot::processVisionFrame(NUimage& image)
         }
     }
     //! Form Lines
-    //fieldLines = vision.DetectLines(vertScanArea,spacings);
+    fieldLines = vision.DetectLines(vertScanArea,spacings);
     //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
     //qDebug() << "disaplay scanPaths: finnished";
 
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-    //robotCandidates = vision.classifyCandidates(verticalsegments);
-    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
+    emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
@@ -362,11 +357,11 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     if(circ.isDefined)
     {
         //! Draw Ball:
-        emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+        //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
     }
     else
     {
-        emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+        //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
     }
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);

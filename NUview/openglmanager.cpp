@@ -323,13 +323,9 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
     glLineWidth(2.0);       // Line width
-    //std::vector<RobotCandidate>::const_iterator i;
     for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
-        //Vector2<int> topLeft = i->getTopLeft();
-        //Vector2<int> bottomRight = i->getBottomRight();
-        //ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
-        //glColor3ub(255,255,255);
+
         if(fieldLines[i].valid == true){
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
