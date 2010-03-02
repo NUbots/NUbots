@@ -215,7 +215,7 @@ QSize GLDisplay::minimumSizeHint() const
 
 QSize GLDisplay::sizeHint() const
 {
-        return QSize(160, 120);
+        return QSize(320, 240);
 }
 
 void GLDisplay::snapshotToClipboard()
