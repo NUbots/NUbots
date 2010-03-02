@@ -1,3 +1,4 @@
+QT_ROOT = C:\Qt\2010.02.1
 QT += network \
     opengl
 macx { 
@@ -11,7 +12,7 @@ macx {
 win32 {
     INCLUDEPATH += 'C:/Program Files/boost/'
     INCLUDEPATH += '../NUview/pthreads/Pre-built/include/'
-    LIBS += '../NUView/pthreads/Pre-built/lib/libpthreadGC1.a'
+    #LIBS += '../NUView/pthreads/Pre-built/lib/libpthreadGC1.a'
     LIBS += -lwsock32
 # Opencv library
 #INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -21,8 +22,9 @@ win32 {
 }
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
-INCLUDEPATH += 'C:\Qt\2010.02.1\qt\src\3rdparty\zlib'
-INCLUDEPATH += 'C:\Qt\2010.02.1\qt\src\3rdparty\pthreads\include'
+INCLUDEPATH += ${QT_ROOT}\qt\src\3rdparty\zlib
+INCLUDEPATH += ${QT_ROOT}\qt\src\3rdparty\pthreads\include
+LIBS += ${QT_ROOT}\qt\src\3rdparty\pthreads\lib\libpthreadGC2.a
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
