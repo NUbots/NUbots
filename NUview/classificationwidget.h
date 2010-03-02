@@ -21,6 +21,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QPushButton;
 class QTimer;
+class QSlider;
 
 class SliderWithSpinBoxWidget;
 
@@ -74,6 +75,7 @@ public slots:
     std::vector<pixels::Pixel> getSelectedColours(int colourSpace);
     void PerformAutosave();
     void selectionChanged();
+    void setAllBoundaries(int newBounds);
 
 signals:
     void openLookupTableFile(QString fileName);
@@ -91,6 +93,7 @@ private:
     QLabel* maxLabel;
     QLabel* colourSpaceLabel;
     QLabel* channelLabels[numChannels];
+    QLabel* allValuesLabel;
 
     // selection Controls
     QComboBox* coloursComboBox;
@@ -98,6 +101,7 @@ private:
     QSpinBox* channelSelectors[numChannels];
     QSpinBox* channelMinSelectors[numChannels];
     QSpinBox* channelMaxSelectors[numChannels];
+    QSlider* allValuesSlider;
 
     // Buttons
     QPushButton* openFileButton;

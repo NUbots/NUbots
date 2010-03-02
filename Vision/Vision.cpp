@@ -629,7 +629,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
             }
-
+            //debug << currentPoint.x << " " << currentPoint.y;
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
 

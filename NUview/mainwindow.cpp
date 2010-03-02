@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <iostream>
+#include <QTabWidget>
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -28,14 +29,35 @@ MainWindow::MainWindow(QWidget *parent)
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    connection = new ConnectionWidget(this);
-    addDockWidget(Qt::RightDockWidgetArea, connection);
+
+
+
 
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);
 
+
+    
+
+    // Add Vision Widgets to Tab then Dock them on Screen
+    visionTabs = new QTabWidget(this);
+    layerSelection = new LayerSelectionWidget(mdiArea,this);
+    visionTabs->addTab(layerSelection,layerSelection->objectName());
     classification = new ClassificationWidget(this);
-    addDockWidget(Qt::RightDockWidgetArea, classification);
+    visionTabs->addTab(classification,classification->objectName());
+    visionTabDock = new QDockWidget("Vision");
+    visionTabDock->setWidget(visionTabs);
+    addDockWidget(Qt::RightDockWidgetArea, visionTabDock);
+    
+    // Add Network widgets to Tabs then dock them on Screen
+    networkTabs = new QTabWidget(this);
+    connection = new ConnectionWidget(this);
+    networkTabs->addTab(connection, connection->objectName());
+    walkParameter = new WalkParameterWidget(mdiArea,this);
+    networkTabs->addTab(walkParameter, walkParameter->objectName());
+    networkTabDock = new QDockWidget("Network");
+    networkTabDock->setWidget(networkTabs);
+    addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
 
     miscDisplay = new GLDisplay(this,&glManager);
     mdiArea->addSubWindow(miscDisplay);
@@ -81,18 +103,9 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
 
-    // Add layer selection dock widget
-    layerSelection = new LayerSelectionWidget(mdiArea,this);
-    layerSelectionDock = new QDockWidget(layerSelection->windowTitle());
-    layerSelectionDock->setWidget(layerSelection);
-    addDockWidget(Qt::RightDockWidgetArea, layerSelectionDock);
 
-    // Add walk parameter dock widget
-    walkParameter = new WalkParameterWidget(mdiArea,this);
-    walkParameterDock = new QDockWidget(walkParameter->windowTitle());
-    walkParameterDock->setWidget(walkParameter);
-    addDockWidget(Qt::RightDockWidgetArea, walkParameterDock);
 
+    
     imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
     imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
@@ -138,10 +151,10 @@ MainWindow::~MainWindow()
     delete connection;
     delete localisation;
     delete layerSelection;
-    delete layerSelectionDock;
     delete walkParameter;
-    delete walkParameterDock;
     delete mdiArea;
+    delete visionTabs;
+    delete networkTabs;
 
 // Delete Actions
     delete openAction;

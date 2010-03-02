@@ -61,6 +61,11 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     }
 
     // Colour Range Selections
+    allValuesLabel = new QLabel("All Bounds");
+    allValuesSlider = new QSlider(Qt::Horizontal);
+    allValuesSlider->setMinimum(0);
+    allValuesSlider->setMaximum(30);
+    allValuesSlider->setValue(10);
     boundaryGroupBox = new QGroupBox(tr("Selection Boundaries"));
     boundaryLayout = new QGridLayout;
     boundaryLayout->setColumnStretch(1,1);
@@ -68,9 +73,10 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
 
     minLabel = new QLabel(tr("Min"));
     maxLabel = new QLabel(tr("Max"));
-
-    boundaryLayout->addWidget(minLabel,0,1);
-    boundaryLayout->addWidget(maxLabel,0,2);
+    boundaryLayout->addWidget(allValuesLabel,0,1);
+    boundaryLayout->addWidget(allValuesSlider,0,2);
+    boundaryLayout->addWidget(minLabel,1,1);
+    boundaryLayout->addWidget(maxLabel,1,2);
 
     for(int channel = 0; channel < numChannels; channel++)
     {
@@ -81,9 +87,9 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
         channelMaxSelectors[channel] = new QSpinBox;
         channelMaxSelectors[channel]->setRange(0, 255);
         channelMaxSelectors[channel]->setValue(10);
-        boundaryLayout->addWidget(channelLabels[channel],channel+1,0);
-        boundaryLayout->addWidget(channelMinSelectors[channel],channel+1,1);
-        boundaryLayout->addWidget(channelMaxSelectors[channel],channel+1,2);
+        boundaryLayout->addWidget(channelLabels[channel],channel+2,0);
+        boundaryLayout->addWidget(channelMinSelectors[channel],channel+2,1);
+        boundaryLayout->addWidget(channelMaxSelectors[channel],channel+2,2);
     }
     boundaryGroupBox->setLayout(boundaryLayout);
 
@@ -136,7 +142,7 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     connect(openFileButton, SIGNAL(clicked()), this, SLOT(doOpen()));
     connect(saveAsFileButton, SIGNAL(clicked()), this, SLOT(doSaveAs()));
 
-
+    connect(allValuesSlider, SIGNAL(sliderMoved(int)), this, SLOT(setAllBoundaries(int)));
     // Set inital colour space
     currentColourSpace = YCbCr;
     colourSpaceComboBox->setCurrentIndex(currentColourSpace);
@@ -495,4 +501,13 @@ void ClassificationWidget::setColour(pixels::Pixel colour, int colourSpace)
     }
     drawSelectedColour(); // Now force a redraw of the newly selected colour.
     selectionChanged(); // Signal that the colour selection has changed.
+}
+
+void ClassificationWidget::setAllBoundaries( int newBound)
+{
+    for(int channel = 0; channel < numChannels; channel++)
+    {
+        channelMinSelectors[channel]->setValue(-newBound);
+        channelMaxSelectors[channel]->setValue(newBound);
+    }
 }

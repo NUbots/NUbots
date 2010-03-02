@@ -10,9 +10,9 @@ macx {
 }
 win32 {
     INCLUDEPATH += 'C:/Program Files/boost/'
-    INCLUDEPATH += '../NUview/pthreads/Pre-built/include/'
-    LIBS += '../NUView/pthreads/Pre-built/lib/libpthreadGC1.a'
     LIBS += -lwsock32
+    LIBS += -lpthreadGC2
+    INCLUDEPATH += 'C:\Qt\2009.03\qt\src\3rdparty\zlib'
 # Opencv library
 #INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
 #LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
@@ -21,7 +21,7 @@ win32 {
 }
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
-INCLUDEPATH += 'C:\Qt\2010.01\qt\src\3rdparty\zlib'
+
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -50,6 +50,7 @@ HEADERS += ui_mainwindow.h \
     ../Behaviour/Jobs.h \
     ../Behaviour/Jobs/*.h \
     ../NUPlatform/NUIO.h \
+    ../NUPlatform/NUIO/*.h \
     ../Autoconfig/*.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \

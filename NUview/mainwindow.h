@@ -15,6 +15,7 @@
 class QMdiArea;
 class LayerSelectionWidget;
 class WalkParameterWidget;
+class QTabsWidget;
 
 namespace Ui
 {
@@ -109,12 +110,16 @@ private:
     locWmGlDisplay* wmDisplay;
 
     LayerSelectionWidget* layerSelection;
-    QDockWidget* layerSelectionDock;
+    //QDockWidget* layerSelectionDock;
+    QDockWidget* visionTabDock;
+    QDockWidget* networkTabDock;
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
-    QDockWidget* walkParameterDock;
+    //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
     QMdiArea* mdiArea;              //!< Instance of QMdiArea: the main are in the middle of the app (focal point)
+    QTabWidget* visionTabs;
+    QTabWidget* networkTabs;
 
     QMenu *fileMenu;                //!< Instance of the file menu
     QMenu *editMenu;                //!< Instance of the edit menu
