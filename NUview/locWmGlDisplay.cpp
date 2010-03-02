@@ -267,5 +267,5 @@ QSize locWmGlDisplay::minimumSizeHint() const
 
 QSize locWmGlDisplay::sizeHint() const
 {
-        return QSize(160, 120);
+        return QSize(320, 240);
 }
