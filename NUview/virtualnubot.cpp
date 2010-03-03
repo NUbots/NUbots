@@ -98,10 +98,6 @@ void virtualNUbot::loadFrame(int frameNumber)
         file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
         hasImage = true;
 
-        ofstream test("test.nul", ios_base::out | ios_base::app);
-        test << rawImage;
-        test.close();
-
         // Create double values of each joint and send to localisation widget
         double jS[22];
         double tS[10];
