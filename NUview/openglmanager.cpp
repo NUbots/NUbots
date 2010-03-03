@@ -20,7 +20,7 @@ OpenglManager::~OpenglManager()
 {
     for(int id = 0; id < GLDisplay::numDisplays; id++)
     {
-        if(textureStored[id]) deleteTexture(textures[id]);
+        if(textureStored[id]) glDeleteTextures(1, &textures[id]);
         if(displayStored[id]) glDeleteLists(displays[id],1);
     }
 }
@@ -33,10 +33,19 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
         deleteTexture(textures[displayId]);
         textureStored[displayId] = false;
     }
+    //textures[displayId] = bindTexture(image, GL_TEXTURE_2D);
+    image.save("test.jpg");
+    QImage tex;
+    tex = QGLWidget::convertToGLFormat( image );
+    glGenTextures( 1, &textures[displayId] );
 
-    textures[displayId] = bindTexture(image, GL_TEXTURE_2D);
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D, textures[displayId]);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
+
     textureStored[displayId] = true;
-
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -86,7 +95,6 @@ void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDispla
     width = newImage->width();
     height = newImage->height();
     QImage image(width,height,QImage::Format_ARGB32);
-
     unsigned char r, g, b, alpha;
     QRgb* imageLine;
     int tempIndex;
@@ -193,7 +201,6 @@ void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegm
 
 void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
 {
-
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -298,6 +305,15 @@ void OpenglManager::clearDisplay(GLDisplay::display displayId)
     return;
 }
 
+void OpenglManager::clearAllDisplays()
+{
+    for (int disp = 0; disp < GLDisplay::numDisplays; disp++)
+    {
+        clearDisplay((GLDisplay::display)disp);
+    }
+    return;
+}
+
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
     int stepSize = 360 / num_segments;
@@ -323,13 +339,9 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
     glLineWidth(2.0);       // Line width
-    //std::vector<RobotCandidate>::const_iterator i;
     for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
-        //Vector2<int> topLeft = i->getTopLeft();
-        //Vector2<int> bottomRight = i->getBottomRight();
-        //ClassIndex::getColourIndexAsRGB(i->getTeamColour(),r,g,b);
-        //glColor3ub(255,255,255);
+
         if(fieldLines[i].valid == true){
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point

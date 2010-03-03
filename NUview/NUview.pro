@@ -21,7 +21,6 @@ win32 {
 }
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
-
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -55,7 +54,6 @@ HEADERS += ui_mainwindow.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
-    ../Vision/RobotCandidate.h \
     ../Tools/Math/Vector3.h \
     ../Vision/FieldObjects/StationaryObject.h \
     ../Vision/FieldObjects/Self.h \
@@ -107,7 +105,6 @@ SOURCES += mainwindow.cpp \
     ../Behaviour/Jobs/*.cpp \
     ../Behaviour/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
-    ../Vision/RobotCandidate.cpp \
     ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \

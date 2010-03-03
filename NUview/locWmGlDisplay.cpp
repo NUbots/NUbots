@@ -21,6 +21,16 @@ locWmGlDisplay::~locWmGlDisplay()
     return;
 }
 
+void locWmGlDisplay::restoreState(const QByteArray & state)
+{
+    return;
+}
+
+QByteArray locWmGlDisplay::saveState() const
+{
+    return QByteArray();
+}
+
 void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
 {
     switch (e->key())
@@ -109,10 +119,29 @@ void locWmGlDisplay::initializeGL()
     // Load Textures
     glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);                   // Setup Alpha Blending
-    QPixmap textureImage(QString(":/textures/FieldLines.png"));
-    QPixmap grassTextureImage(QString(":/textures/grass_texture.jpg"));
-    texture = bindTexture(textureImage);
-    grassTexture = bindTexture(grassTextureImage);
+    QImage linesTextureImage(QString(":/textures/FieldLines.png"));
+    QImage grassTextureImage(QString(":/textures/grass_texture.jpg"));
+    //texture = bindTexture(textureImage);
+    //grassTexture = bindTexture(grassTextureImage);
+
+    QImage tex;
+    tex = QGLWidget::convertToGLFormat( linesTextureImage );
+    glGenTextures( 1, &fieldLineTexture );
+
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D, fieldLineTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
+
+    tex = QGLWidget::convertToGLFormat( grassTextureImage );
+    glGenTextures( 1, &grassTexture );
+
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D,grassTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
 
     // Lighting
     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);			// Setup The Ambient Light
@@ -174,7 +203,7 @@ void locWmGlDisplay::drawField()
         glTexCoord2f(0.0f, 5.4f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
     glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, fieldLineTexture);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glBegin(GL_QUADS);
@@ -267,5 +296,5 @@ QSize locWmGlDisplay::minimumSizeHint() const
 
 QSize locWmGlDisplay::sizeHint() const
 {
-        return QSize(160, 120);
+        return QSize(320, 240);
 }

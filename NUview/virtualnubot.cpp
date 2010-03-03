@@ -98,10 +98,6 @@ void virtualNUbot::loadFrame(int frameNumber)
         file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
         hasImage = true;
 
-        ofstream test("test.nul", ios_base::out | ios_base::app);
-        test << rawImage;
-        test.close();
-
         // Create double values of each joint and send to localisation widget
         double jS[22];
         double tS[10];
@@ -201,7 +197,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horzontalsegments;
     std::vector< TransitionSegment > allsegments;
-    std::vector< RobotCandidate > robotCandidates;
     std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
@@ -308,10 +303,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //qDebug() << "disaplay scanPaths: finnished";
 
     emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-    //robotCandidates = vision.classifyCandidates(verticalsegments);
-    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
 
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
