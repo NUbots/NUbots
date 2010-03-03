@@ -31,15 +31,11 @@ NAOWebotsCamera::~NAOWebotsCamera()
 {
 }
 
-NUimage NAOWebotsCamera::grabNewImage()
+NUimage* NAOWebotsCamera::grabNewImage()
 {
 }
 
-void NAOWebotsCamera::setControlSetting(unsigned int settingID, int value)
-{
-}
-
-int NAOWebotsCamera::getControlSetting(unsigned int id)
+void NAOWebotsCamera::setSettings(const CameraSettings& newset)
 {
 }
 
