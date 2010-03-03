@@ -103,6 +103,16 @@ public:
           */
         void writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId);
 
+        /*!
+        @brief Removes all of the previous display instructions so old display data is not reused.
+        */
+        void clearAllDisplays();
+
+    public:
+        bool hasDisplayCommand(int id) const {return displayStored[id];};
+        GLuint getDisplayCommand(int id) const {return displays[id];};
+        int getWidth() const {return width;};
+        int getHeight() const {return height;};
     private:
         int width;                                  //!< Width of the current image.
         int height;                                 //!< Height of the current image.

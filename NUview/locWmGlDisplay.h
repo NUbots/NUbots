@@ -14,6 +14,8 @@ public:
     QSize minimumSizeHint() const;
     //! Returns the most desired size for the window
     QSize sizeHint() const;
+    void restoreState(const QByteArray & state);
+    QByteArray saveState() const;
 
 protected:
         void keyPressEvent ( QKeyEvent * e );
@@ -27,7 +29,7 @@ protected:
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
 
-        GLuint texture;
+        GLuint fieldLineTexture;
         GLuint grassTexture;
         GLUquadric* quadratic;
         float viewTranslation[3];
