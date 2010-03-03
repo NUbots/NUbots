@@ -40,6 +40,21 @@ ObjectCandidate::ObjectCandidate(int left, int top, int right, int bottom, unsig
     bottomRight.y = bottom;
 }
 
+ObjectCandidate::ObjectCandidate(int left, int top, int right, int bottom, unsigned char colour, std::vector<TransitionSegment> candidate_segments): colour(colour)
+{
+    topLeft.x = left;
+    topLeft.y = top;
+    bottomRight.x = right;
+    bottomRight.y = bottom;
+    segments = candidate_segments;
+}//*/
+
+std::vector<TransitionSegment> ObjectCandidate::getSegments() const
+{
+    return segments;
+}
+
+
 ObjectCandidate::~ObjectCandidate()
 {
     return;

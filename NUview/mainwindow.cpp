@@ -102,9 +102,6 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
 
-
-
-    
     imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
     imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
     //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
@@ -115,7 +112,6 @@ MainWindow::MainWindow(QWidget *parent)
     //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
 //    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
 
-    //imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
     //imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
