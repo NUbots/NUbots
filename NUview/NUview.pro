@@ -12,7 +12,7 @@ win32 {
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
-    #INCLUDEPATH += 'C:\Qt\2009.03\qt\src\3rdparty\zlib'
+
 # Opencv library
 #INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
 #LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
@@ -21,7 +21,6 @@ win32 {
 }
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
-
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -55,7 +54,6 @@ HEADERS += ui_mainwindow.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
-    ../Vision/RobotCandidate.h \
     ../Tools/Math/Vector3.h \
     ../Vision/FieldObjects/StationaryObject.h \
     ../Vision/FieldObjects/Self.h \
@@ -107,7 +105,6 @@ SOURCES += mainwindow.cpp \
     ../Behaviour/Jobs/*.cpp \
     ../Behaviour/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
-    ../Vision/RobotCandidate.cpp \
     ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \

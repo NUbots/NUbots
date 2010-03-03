@@ -75,7 +75,6 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
-        RobotCandidates,
         FieldLines,
         ObjectCandidates,
         wmRightLeg,
@@ -128,8 +127,6 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
-            case RobotCandidates:
-                return QString("Robot Candidates");
             case FieldLines:
                 return QString("Field Lines");
             case ObjectCandidates:

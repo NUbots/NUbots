@@ -197,7 +197,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horzontalsegments;
     std::vector< TransitionSegment > allsegments;
-    std::vector< RobotCandidate > robotCandidates;
     std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
@@ -304,10 +303,6 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //qDebug() << "disaplay scanPaths: finnished";
 
     emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-    //robotCandidates = vision.classifyCandidates(verticalsegments);
-    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
 
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";

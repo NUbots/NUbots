@@ -6,9 +6,9 @@
 #include "GLDisplay.h"
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
-#include "Vision/RobotCandidate.h"
 #include "Tools/Math/LSFittedLine.h"
 #include "localisationwidget.h"
+#include "Vision/ObjectCandidate.h"
 
 class NUimage;
 class ClassifiedImage;
@@ -96,9 +96,9 @@ public:
           */
         void clearDisplay(GLDisplay::display displayId);
 
-                /*!
-          @brief Accepts new robot candidate vector and maps it to display instructions.
-          @param robotCandidates The new Robot Candidates to display.
+        /*!
+          @brief Accepts new LSFittedLine vector and maps it to display instructions.
+          @param fieldLines The new LSFittedLines to display.
           @param displayId The id of the display layer to write to.
           */
         void writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId);

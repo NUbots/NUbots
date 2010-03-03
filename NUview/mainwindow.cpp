@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
+
+    // Add localisation widget
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);
     localisation->setVisible(false);
@@ -57,8 +59,6 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
 
     createConnections();
-
-    //mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
     setWindowTitle(QString("NUview"));
