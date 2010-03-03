@@ -135,7 +135,7 @@ void MainWindow::createActions()
     firstFrameAction = new QAction(tr("&First Frame"), this);
     firstFrameAction->setShortcut(QKeySequence::MoveToStartOfLine);
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
-    firstFrameAction->setIcon(QIcon(QString("../diagona/icon/16/138.png")));
+    firstFrameAction->setIcon(QIcon(QString(":/icons/first.png")));
 
     connect(firstFrameAction, SIGNAL(triggered()), this, SLOT(firstFrame()));
 
@@ -143,28 +143,28 @@ void MainWindow::createActions()
     previousFrameAction = new QAction(tr("&Previous Frame"), this);
     previousFrameAction->setShortcut(QKeySequence::MoveToPreviousChar);
     previousFrameAction->setStatusTip(tr("Select the previous frame"));
-    previousFrameAction->setIcon(QIcon(QString("../diagona/icon/16/132.png")));
+    previousFrameAction->setIcon(QIcon(QString(":/icons/previous.png")));
     connect(previousFrameAction, SIGNAL(triggered()), this, SLOT(previousFrame()));
 
     // Select Frame
     selectFrameAction = new QAction(tr("&Select Frame..."), this);
     selectFrameAction->setShortcut(tr("Ctrl+G"));
     selectFrameAction->setStatusTip(tr("Select frame number to go to"));
-    selectFrameAction->setIcon(QIcon(QString("../diagona/icon/16/134.png")));
+    selectFrameAction->setIcon(QIcon(QString(":/icons/select.png")));
     connect(selectFrameAction, SIGNAL(triggered()), this, SLOT(selectFrame()));
 
     // Next Frame
     nextFrameAction = new QAction(tr("&Next Frame"), this);
     nextFrameAction->setShortcut(QKeySequence::MoveToNextChar);
     nextFrameAction->setStatusTip(tr("Select next frame"));
-    nextFrameAction->setIcon(QIcon(QString("../diagona/icon/16/131.png")));
+    nextFrameAction->setIcon(QIcon(QString(":/icons/next.png")));
     connect(nextFrameAction, SIGNAL(triggered()), this, SLOT(nextFrame()));
 
     // Last Frame
     lastFrameAction = new QAction(tr("&Last Frame"), this);
     lastFrameAction->setShortcut(QKeySequence::MoveToEndOfLine);
     lastFrameAction->setStatusTip(tr("Select last frame"));
-    lastFrameAction->setIcon(QIcon(QString("../diagona/icon/16/137.png")));
+    lastFrameAction->setIcon(QIcon(QString(":/icons/last.png")));
     connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
 
 
