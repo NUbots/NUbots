@@ -28,6 +28,7 @@
 
 #include "targetconfig.h"
 #include "debug.h"
+#include "walkconfig.h"
 
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
