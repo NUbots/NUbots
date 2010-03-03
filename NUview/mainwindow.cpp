@@ -31,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     localisation = new LocalisationWidget(this);
-    addDockWidget(Qt::BottomDockWidgetArea,localisation);    
+    addDockWidget(Qt::BottomDockWidgetArea,localisation);
+    localisation->setVisible(false);
 
     // Add Vision Widgets to Tab then Dock them on Screen
     visionTabs = new QTabWidget(this);
