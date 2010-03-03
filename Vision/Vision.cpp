@@ -13,6 +13,8 @@
 #include <boost/circular_buffer.hpp>
 #include <queue>
 #include <algorithm>
+#include "debug.h"
+
 
 using namespace mathGeneral;
 Vision::Vision()
@@ -39,7 +41,6 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horzontalsegments;
     std::vector< TransitionSegment > allsegments;
-    std::vector< RobotCandidate > robotCandidates;
     std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
@@ -161,10 +162,6 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     //qDebug() << "disaplay scanPaths: finnished";
 
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
-    //robotCandidates = vision.classifyCandidates(verticalsegments);
-    //emit robotCandidatesDisplayChanged(robotCandidates, GLDisplay::RobotCandidates);
-
 
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
@@ -518,64 +515,7 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     }*/
     return scanArea;
 }
-/* removed temporarliy
-std::vector< ClassifiedSection > Vision::robotScanAreas(std::vector<RobotCandidate> robotCandidates, std::vector<Vector2<int> >&fieldBorders, Horizon horizonLine)
-{
-    int scanSpacing = 4;
-    std::vector< ClassifiedSection > robotScanAreas;
-    if(!robotCandidates.size()) return robotScanAreas;
-    std::vector< RobotCandidate >::const_iterator nextRobot = robotCandidates.begin();
-    int min_x = 0;
-    int max_x = 0;
-    int max_y = 0;
-    for (;nextRobot != robotCandidates.end(); nextRobot++)
-    {
-        ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::DOWN);
 
-        min_x = nextRobot->getTopLeft().x;
-        max_x = nextRobot->getBottomRight().x;
-        max_y = nextRobot->getBottomRight().y;
-        Vector2<int> temp;
-
-        if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/4 )
-        {
-            scanSpacing = 4;
-        }
-        else if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/8 )
-        {
-            scanSpacing = 3;
-        }
-        else if ( (max_x - min_x)*(max_y - (int)horizonLine.findYFromX((double)min_x)) > currentImage->width()*currentImage->height()/16 )
-        {
-            scanSpacing = 2;
-        }
-        else
-        {
-            scanSpacing = 1;
-        }
-        //scanSpacing = 2;
-        for ( int x = min_x; x <= max_x; x += scanSpacing)
-        {
-            temp.x = x;
-            temp.y = (int)horizonLine.findYFromX((double)x);
-            if (temp.y < 0) temp.y = 0;
-            //TODO
-            //Have option of only scanning from green border to horizon
-            //also compare the horizontal scan from feet to horizon
-            //qDebug() << findYFromX(fieldBorders,x) << " - " << temp.y << " = " << (findYFromX(fieldBorders,x)- temp.y);
-            //ScanLine* tempScanLine = new ScanLine(temp, (findYFromX(fieldBorders,x) - temp.y));
-            //qDebug() << "ScanLine Created...";
-            ScanLine* tempScanLine = new ScanLine(temp, max_y - temp.y);
-            scanArea->addScanLine(tempScanLine);
-            //qDebug() << "ScanLine added...";
-        }
-        ClassifyScanArea(scanArea);
-        //qDebug() << "ScanArea Classified...";
-        robotScanAreas.push_back(*scanArea);
-    }
-    return robotScanAreas;
-}
-*/
 void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 {
     int direction = scanArea->getDirection();
@@ -629,7 +569,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
             }
-
+            //debug << currentPoint.x << " " << currentPoint.y;
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
 

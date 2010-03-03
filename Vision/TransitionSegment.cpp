@@ -30,7 +30,7 @@ Vector2<int> TransitionSegment::getStartPoint() const
 }
 int TransitionSegment::getSize() const
 {
-    return (int)round(sqrt((end.x-start.x)^2 + (end.y-start.y)^2));
+    return (int)round(sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y)));
 }
 unsigned char TransitionSegment::getBeforeColour() const
 {

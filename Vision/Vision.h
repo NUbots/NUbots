@@ -21,6 +21,8 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "debug.h"
 
+
+
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
 
@@ -108,17 +110,6 @@ class Vision
                                                           std::vector<unsigned char> validColours,
                                                           int spacing,
                                                           float min_aspect, float max_aspect, int min_segments);
-
-    /*!
-      @brief Defines a finer scan area of where a candidate robot exists
-      @param robotCandidates The vector of RobotCandidates that contain the location of where the robot feet should be
-      @param horizonLine The HorizonLine is where the robotScanArea will scan upto and just a little bit beyond since this is theoretically the maximum height of a robot.
-      @param scanSpacing This value defines how fine the scan resolution should be when creating scan lines.
-      @returns
-    */
-    //std::vector< ClassifiedSection > robotScanAreas(std::vector<RobotCandidate> robotCandidates, std::vector<Vector2<int> >&fieldBorders, Horizon horizonLine);
-
-
 
 
     /*!

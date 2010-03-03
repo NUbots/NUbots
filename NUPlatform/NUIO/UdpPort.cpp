@@ -36,6 +36,10 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
 #ifdef WIN32
     WSADATA wsa_Data;
     int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
+    if (wsa_ReturnCode != 0)
+    {
+        debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
+    }
 #endif
 #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "UdpPort::UdpPort(" << portnumber << ")" << endl;

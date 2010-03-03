@@ -42,15 +42,15 @@ public:
     class Parameter 
     {
     public:
-        Parameter() {Value = 0; Min = 0; Max = 0;};
-        Parameter(float value, float min, float max) {Value = value; Min = min; Max = max;};
-        ~Parameter() {};
+        Parameter() {Value = 0; Min = 0; Max = 0;}
+        Parameter(float value, float min, float max) {Value = value; Min = min; Max = max;}
+        ~Parameter() {}
         float Value;
         float Min;
         float Max;
         
-        void summaryTo(ostream& output) {output << Value;};
-        void csvTo(ostream& output) {output << Value << ", ";};
+        void summaryTo(ostream& output) {output << Value;}
+        void csvTo(ostream& output) {output << Value << ", ";}
         
         friend ostream& operator<< (ostream& output, const Parameter& p) 
         {   
@@ -58,7 +58,7 @@ public:
             output.write((char*) &p.Min, sizeof(float)); 
             output.write((char*) &p.Max, sizeof(float));
             return output;
-        };
+        }
         friend istream& operator>> (istream& input, Parameter& p)
         {
             char inbuffer[10];

@@ -75,7 +75,6 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
-        RobotCandidates,
         FieldLines,
         ObjectCandidates,
         wmRightLeg,
@@ -88,6 +87,18 @@ public:
     QSize minimumSizeHint() const;
     //! Returns the most desired size for the window
     QSize sizeHint() const;
+
+    /*!
+      @brief Restores the windows display settings to those described in the QByteArray
+      @param state The state of the display settings to which the window will be set.
+      */
+    void restoreState(const QByteArray & state);
+
+    /*!
+      @brief Returns the current state of the windows display settings.
+      @return The QByteArray storing the current display settings.
+      */
+    QByteArray saveState() const;
 
     /*!
       @brief Returns the window title for the gien display type.
@@ -116,8 +127,6 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
-            case RobotCandidates:
-                return QString("Robot Candidates");
             case FieldLines:
                 return QString("Field Lines");
             case ObjectCandidates:
