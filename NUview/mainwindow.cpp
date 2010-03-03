@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <iostream>
 #include <QTabWidget>
+#include <typeinfo>
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -29,15 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-
-
-
-
     localisation = new LocalisationWidget(this);
-    addDockWidget(Qt::BottomDockWidgetArea,localisation);
-
-
-    
+    addDockWidget(Qt::BottomDockWidgetArea,localisation);    
 
     // Add Vision Widgets to Tab then Dock them on Screen
     visionTabs = new QTabWidget(this);
@@ -47,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     visionTabs->addTab(classification,classification->objectName());
     visionTabDock = new QDockWidget("Vision");
     visionTabDock->setWidget(visionTabs);
+    visionTabDock->setObjectName(tr("visionTab"));
     addDockWidget(Qt::RightDockWidgetArea, visionTabDock);
     
     // Add Network widgets to Tabs then dock them on Screen
@@ -57,85 +52,17 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabs->addTab(walkParameter, walkParameter->objectName());
     networkTabDock = new QDockWidget("Network");
     networkTabDock->setWidget(networkTabs);
+    networkTabDock->setObjectName(tr("networkTab"));
     addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
 
-    miscDisplay = new GLDisplay(this,&glManager);
-    mdiArea->addSubWindow(miscDisplay);
+    createConnections();
 
-    horizonDisplay = new GLDisplay(this,&glManager);
-    mdiArea->addSubWindow(horizonDisplay);
-
-    classDisplay = new GLDisplay(this,&glManager);
-    mdiArea->addSubWindow(classDisplay);
-
-    imageDisplay = new GLDisplay(this,&glManager);
-    mdiArea->addSubWindow(imageDisplay);
-
-    // Disabled
-    wmDisplay = NULL;
-    //wmDisplay = new locWmGlDisplay(this);
-    //mdiArea->addSubWindow(wmDisplay);
-
-    // Connect the virtual robot to the opengl manager.
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
-    //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
-    // Connect the virtual robot to the incoming packets.
-    connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
-    connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
-    connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
-    connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
-    connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
-
-    // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
-    connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
-    connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
-    connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
-
-    mdiArea->tileSubWindows();
+    //mdiArea->tileSubWindows();
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
-
-
-
-    
-    imageDisplay->setPrimaryDisplay(GLDisplay::rawImage);
-    imageDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
-    //imageDisplay->setOverlayDrawing(classifiedImage,true, 0.5);
-    //imageDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
-    //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonScanPoints,true, QColor(255,0,0));
-    //imageDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(0,255,127));
-    //imageDisplay->setOverlayDrawing(GLDisplay::horizontalScanPath,true, QColor(255,0,0));
-    //imageDisplay->setOverlayDrawing(GLDisplay::verticalScanPath,true, QColor(0,255,127));
-//    imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
-
-    //imageDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
-    //imageDisplay->setOverlayDrawing(GLDisplay::wmLeftLeg,true);
-    //imageDisplay->setOverlayDrawing(GLDisplay::wmRightLeg,true);
-    //imageDisplay->setOverlayDrawing(GLDisplay::wmBall,true);
-
-    classDisplay->setPrimaryDisplay(GLDisplay::classifiedImage);
-    classDisplay->setOverlayDrawing(GLDisplay::horizonLine,true,0.5);
-    classDisplay->setOverlayDrawing(GLDisplay::classificationSelection,true);
-//    classDisplay->setOverlayDrawing(GLDisplay::greenHorizonPoints,true, QColor(255,0,0));
-
-
-    horizonDisplay->setPrimaryDisplay(GLDisplay::horizonLine);
-//    horizonDisplay->setOverlayDrawing(GLDisplay::TransitionSegments,true);
-//    horizonDisplay->setOverlayDrawing(GLDisplay::ObjectCandidates,true);
-
-    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
-
-    miscDisplay->setOverlayDrawing(GLDisplay::FieldLines,true, QColor(255,0,0));
-    miscDisplay->setPrimaryDisplay(GLDisplay::classificationSelection);
     setWindowTitle(QString("NUview"));
+    glManager.clearAllDisplays();
+    readSettings();
     qDebug() << "Main Window Started";
 }
 
@@ -143,10 +70,6 @@ MainWindow::~MainWindow()
 {
 // Delete widgets and displays
     delete statusBar;
-    delete miscDisplay;
-    delete horizonDisplay;
-    delete classDisplay;
-    delete imageDisplay;
     delete classification;
     delete connection;
     delete localisation;
@@ -169,6 +92,8 @@ MainWindow::~MainWindow()
     delete cascadeAction;
     delete tileAction;
     delete nativeAspectAction;
+    delete newVisionDisplayAction;
+    delete newLocWMDisplayAction;
     return;
 }
 
@@ -256,6 +181,17 @@ void MainWindow::createActions()
     nativeAspectAction->setStatusTip(tr("Resize display to its native aspect ratio."));
     connect(nativeAspectAction, SIGNAL(triggered()), this, SLOT(shrinkToNativeAspectRatio()));
 
+    // New vision display window
+    newVisionDisplayAction = new QAction(tr("&New display"), this);
+    newVisionDisplayAction->setStatusTip(tr("Create a new vision display window."));
+    connect(newVisionDisplayAction, SIGNAL(triggered()), this, SLOT(createGLDisplay()));
+
+    // New LocWM display window
+    newLocWMDisplayAction = new QAction(tr("&New display"), this);
+    newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
+    connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
+
+
 }
 
 void MainWindow::createMenus()
@@ -283,7 +219,13 @@ void MainWindow::createMenus()
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
+
     visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
+    visionWindowMenu->addAction(newVisionDisplayAction);
+
+    localisationWindowMenu = windowMenu->addMenu(tr("&Localisation"));
+    localisationWindowMenu->addAction(newLocWMDisplayAction);
+
     networkWindowMenu = windowMenu->addMenu(tr("&Network"));
     windowMenu->addSeparator();
     windowMenu->addAction(cascadeAction);
@@ -301,6 +243,7 @@ void MainWindow::createToolBars()
     fileToolBar = addToolBar(tr("&File"));
     fileToolBar->addAction(openAction);
     fileToolBar->addAction(exitAction);
+    fileToolBar->setObjectName(tr("fileToolbar"));
 
     // Navigation Toolbar
     navigationToolbar = addToolBar(tr("N&avigation"));
@@ -309,6 +252,7 @@ void MainWindow::createToolBars()
     navigationToolbar->addAction(selectFrameAction);
     navigationToolbar->addAction(nextFrameAction);
     navigationToolbar->addAction(lastFrameAction);
+    navigationToolbar->setObjectName(tr("navigationToolbar"));
     //windowDisplayToolbar = addToolBar(tr("&Display"));
 }
 
@@ -319,21 +263,52 @@ void MainWindow::createStatusBar()
         this->statusBar->showMessage("NUViewer Loaded",10000);
 }
 
+void MainWindow::createConnections()
+{
+    // Connect the virtual robot to the opengl manager.
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
+    //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
+    // Connect the virtual robot to the incoming packets.
+    connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
+    connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
+    connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
+    connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
+    connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
+
+    // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
+    connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
+    connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
+    connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
+}
+
 void MainWindow::open()
 {
     fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), ".",
                             tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;NUbot Log Files (*.nul)"));
+    openFile(fileName);
+}
 
-    setWindowTitle(QString("NUview - ") + fileName);
+void MainWindow::openFile(const QString& fileName)
+{
     if (!fileName.isEmpty()){
+        this->fileName = fileName;
+        setWindowTitle(QString("NUview - ") + fileName);
+        glManager.clearAllDisplays();
         totalFrameNumber = virtualRobot.loadFile(fileName);
         QString message = "Opening File: ";
         message.append(fileName);
         this->statusBar->showMessage(message,10000);
         qDebug() << "Number of Frames in File: " << totalFrameNumber;
         firstFrame();
-
         if(virtualRobot.fileType == QString("nul"))
         {
             previousFrameAction->setEnabled(false);
@@ -354,11 +329,11 @@ void MainWindow::copy()
     if(QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow())
     {
         QWidget* widget = activeSubWindow->widget();
-        /*if(typeid(*widget) == typeid(GLDisplay))
+        if(typeid(*widget) == typeid(GLDisplay))
         {
             GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
             currWindow->snapshotToClipboard();
-        }*/
+        }
     }
 }
 
@@ -370,12 +345,12 @@ void MainWindow::shrinkToNativeAspectRatio()
         QSize sourceSize;
         bool validWidget = false;
         QWidget* widget = activeSubWindow->widget();
-        /*if(typeid(*widget) == typeid(GLDisplay))
+        if(typeid(*widget) == typeid(GLDisplay))
         {
             GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
             validWidget = true;
             sourceSize = currWindow->imageSize();
-        }*/
+        }
 
         if(validWidget)
         {
@@ -383,6 +358,106 @@ void MainWindow::shrinkToNativeAspectRatio()
             activeSubWindow->resize(sourceSize);
         }
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    //mdiArea->closeAllSubWindows();
+    //if (mdiArea->currentSubWindow()) {
+    //    event->ignore();
+    //} else {
+        writeSettings();
+        event->accept();
+    //}
+}
+
+
+void MainWindow::readSettings()
+{
+    QSettings settings("NUbots", "NUview");
+
+    // Restore the main window.
+    settings.beginGroup("mainWindow");
+    restoreGeometry(settings.value("geometry").toByteArray());  // Set previous position/size
+    restoreState(settings.value("state").toByteArray());    // restore the other main widgets layout.
+//    openFile(settings.value("logFile").toString());
+    settings.endGroup();
+
+    int numWindows = settings.beginReadArray("midWindows"); // Get midi windows settings
+    for (int i = 0; i < numWindows; ++i) {
+        settings.setArrayIndex(i);      // set to element
+        QString windowType = settings.value("type").toString(); // Get the window type
+        if(windowType == "unknown")
+        {
+            continue;
+        }
+        else if(windowType == "GLDisplay")
+        {
+            QMdiSubWindow* tempGl = createGLDisplay();
+            tempGl->restoreGeometry(settings.value("geometry").toByteArray());
+            GLDisplay *GLDisp = qobject_cast<GLDisplay *>(tempGl->widget());
+            GLDisp->restoreState(settings.value("state").toByteArray());
+        }
+        else if(windowType == "locWmGlDisplay")
+        {
+            QMdiSubWindow* tempLocwm = createLocWmGlDisplay();
+            tempLocwm->restoreGeometry(settings.value("geometry").toByteArray());
+            locWmGlDisplay *lwmDisp = qobject_cast<locWmGlDisplay *>(tempLocwm->widget());
+            lwmDisp->restoreState(settings.value("state").toByteArray());
+        }
+    }
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings("NUbots", "NUview");
+
+    // Save the main window setting
+    settings.beginGroup("mainWindow");
+    settings.setValue("geometry", saveGeometry()); // Save the position and size.
+    settings.setValue("state", saveState()); // Save the main widget layouts.
+//    settings.setValue("logFile",fileName);
+    settings.endGroup();
+
+    // Save the individual mdi views
+    QList<QMdiSubWindow *> mdiWindows = mdiArea->subWindowList(); // Get the windows.
+    int numWindows = mdiWindows.count();    // Find how many there are.
+    settings.beginWriteArray("midWindows"); // begin array entry
+    for (int i = 0; i < numWindows; ++i) {
+        settings.setArrayIndex(i);      // set to element
+        QString windowType = getMdiWindowType(mdiWindows[i]->widget()); // Get the window type
+        settings.setValue("type", windowType); // Save display type
+        settings.setValue("geometry", mdiWindows[i]->saveGeometry()); // Save size/position
+        if(windowType == "GLDisplay")
+        {
+            GLDisplay* glDisp = qobject_cast<GLDisplay *> (mdiWindows[i]->widget());
+            settings.setValue("state", glDisp->saveState()); // Save size/position
+        }
+        else if(windowType == "locWmGlDisplay")
+        {
+            locWmGlDisplay* lwmDisp = qobject_cast<locWmGlDisplay *> (mdiWindows[i]->widget());
+            settings.setValue("state", lwmDisp->saveState()); // Save size/position
+        }
+    }
+    settings.endArray();   // end array entry
+}
+
+QString MainWindow::getMdiWindowType(QWidget* theWidget)
+{
+    QString windowType;
+    if(typeid(*theWidget) == typeid(GLDisplay))
+    {
+        windowType = QString("GLDisplay");
+    }
+    else if(typeid(*theWidget) == typeid(locWmGlDisplay))
+    {
+        windowType = QString("locWmGlDisplay");
+    }
+    else
+    {
+        windowType = QString("unknown");
+    }
+    return windowType;
 }
 
 void MainWindow::openLUT()
@@ -407,15 +482,28 @@ void MainWindow::previousFrame()
     return;
 }
 
+QMdiSubWindow* MainWindow::createGLDisplay()
+{
+    GLDisplay* temp = new GLDisplay(this, &glManager);
+    QMdiSubWindow* window = mdiArea->addSubWindow(temp);
+    temp->show();
+    return window;
+}
 
+QMdiSubWindow* MainWindow::createLocWmGlDisplay()
+{
+    locWmGlDisplay* temp = new locWmGlDisplay(this);
+    QMdiSubWindow* window = mdiArea->addSubWindow(temp);
+    temp->show();
+    return window;
+}
 
 void MainWindow::selectFrame()
 {
-
     int selectedFrameNumber;
-    bool ok;
+    bool ok = true;
 
-    //selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
+    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
 
     if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
         currentFrameNumber = selectedFrameNumber;
@@ -444,6 +532,7 @@ void MainWindow::lastFrame()
 
 void MainWindow::LoadFrame(int frameNumber)
 {
+    //glManager.clearAllDisplays(); // Turn this on if we have trouble with old data being displayed.
     virtualRobot.loadFrame(frameNumber);
     updateSelection();
     QString message = "Frame Loaded:  Number ";
