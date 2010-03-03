@@ -654,7 +654,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
         unsigned char subAfterColour;
         unsigned char subBeforeColour;
         unsigned char tempColour = tempTransition->getColour();
-        for(int k =0; k < length; k = k+spacings)
+        for(int k = 0; k < length; k = k+spacings)
         {
             tempSubEndPoint.y = tempStartPoint.y+k;
             tempSubStartPoint.y = tempStartPoint.y+k;

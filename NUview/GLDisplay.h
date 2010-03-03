@@ -89,6 +89,18 @@ public:
     QSize sizeHint() const;
 
     /*!
+      @brief Restores the windows display settings to those described in the QByteArray
+      @param state The state of the display settings to which the window will be set.
+      */
+    void restoreState(const QByteArray & state);
+
+    /*!
+      @brief Returns the current state of the windows display settings.
+      @return The QByteArray storing the current display settings.
+      */
+    QByteArray saveState() const;
+
+    /*!
       @brief Returns the window title for the gien display type.
       @param displayID Id of the display whose title is required.
       @return The title of the display type.
