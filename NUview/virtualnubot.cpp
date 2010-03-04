@@ -213,7 +213,9 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
     const int BALL   = 1;
-    const int GOALS  = 2;
+    const int YELLOW_GOALS  = 2;
+    const int BLUE_GOALS  = 3;
+
     int mode  = ROBOTS;
     Circle circ;
     //qDebug() << "Start switch";
@@ -309,7 +311,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
         validColours.clear();
         switch (i)
@@ -317,6 +319,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
             case ROBOTS:
                 validColours.push_back(ClassIndex::white);
                 validColours.push_back(ClassIndex::red);
+                validColours.push_back(ClassIndex::red_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
                 tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
@@ -331,11 +334,17 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
                 break;
-            case GOALS:
+            case YELLOW_GOALS:
                 validColours.push_back(ClassIndex::yellow);
-                validColours.push_back(ClassIndex::blue);
+                validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
+                //qDebug() << "POST-GOALS";
+            case BLUE_GOALS:
+                validColours.push_back(ClassIndex::blue);
+                validColours.push_back(ClassIndex::shadow_blue);
+                //qDebug() << "PRE-GOALS";
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
         }
@@ -353,11 +362,11 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     if(circ.isDefined)
     {
         //! Draw Ball:
-        //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+        emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
     }
     else
     {
-        //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
+        emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     }
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
