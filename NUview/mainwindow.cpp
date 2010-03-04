@@ -61,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
     createConnections();
     setCentralWidget(mdiArea);
     currentFrameNumber = -1;
+
+
     setWindowTitle(QString("NUview"));
     glManager.clearAllDisplays();
     readSettings();
