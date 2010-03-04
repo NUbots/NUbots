@@ -309,6 +309,15 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
+    /*
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
+                                                    std::vector<Vector2<int> >&fieldBorders,
+                                                    std::vector<unsigned char> validColours,
+                                                    int spacing,
+                                                    float min_aspect, float max_aspect, int min_segments,
+                                                    tCLASSIFY_METHOD method);
+    */
+
     mode = ROBOTS;
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
@@ -338,13 +347,13 @@ void virtualNUbot::processVisionFrame(NUimage& image)
                 validColours.push_back(ClassIndex::yellow);
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
             case BLUE_GOALS:
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = vision.classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
         }
