@@ -74,7 +74,8 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
     const int BALL   = 1;
-    const int GOALS  = 2;
+    const int YELLOW_GOALS  = 2;
+    const int BLUE_GOALS  = 3;
     int mode  = ROBOTS;
 
 
@@ -83,23 +84,28 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     //qDebug() << "Generate Classified Image: finnished";
     //setImage(&image);
     //! Find the green edges
+    
     points = findGreenBorderPoints(spacings,&horizonLine);
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
     //qDebug() << "Find Edges: finnished";
     //! Find the Field border
     points = getConvexFieldBorders(points);
     points = interpolateBorders(points,spacings);
+    debug << "Generating Green Boarder: Finnished" <<endl;
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
     vertScanArea = verticalScan(points,spacings);
+    debug << "Vert ScanPaths : Finnished " << vertScanArea->getNumberOfScanLines() <<endl;
     //! Scan Above the Horizon
     horiScanArea = horizontalScan(points,spacings);
+    debug << "Horizontal ScanPaths : Finnished " << horiScanArea->getNumberOfScanLines() <<endl;
     //qDebug() << "Generate Scanlines: finnished";
     //! Classify Line Segments
 
     ClassifyScanArea(vertScanArea);
     ClassifyScanArea(horiScanArea);
+    debug << "Classify ScanPaths : Finnished" <<endl;
     //qDebug() << "Classify Scanlines: finnished";
 
     //! Extract and Display Vertical Scan Points:
@@ -168,7 +174,7 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-    for (int i = 0; i < 3; i++)
+   for (int i = 0; i < 4; i++)
     {
         validColours.clear();
         switch (i)
@@ -176,9 +182,10 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
             case ROBOTS:
                 validColours.push_back(ClassIndex::white);
                 validColours.push_back(ClassIndex::red);
+                validColours.push_back(ClassIndex::red_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
-                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
+                tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.2, 2.0, 12, method);
                 //qDebug() << "POST-ROBOT";
                 robotClassifiedPoints = 0;
                 break;
@@ -187,24 +194,28 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
                 validColours.push_back(ClassIndex::red_orange);
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
-                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
+                tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
-                 break;
-            case GOALS:
+                break;
+            case YELLOW_GOALS:
                 validColours.push_back(ClassIndex::yellow);
-                validColours.push_back(ClassIndex::blue);
+                validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates =classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
+                //qDebug() << "POST-GOALS";
+            case BLUE_GOALS:
+                validColours.push_back(ClassIndex::blue);
+                validColours.push_back(ClassIndex::shadow_blue);
+                //qDebug() << "PRE-GOALS";
+                tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
-            }
-
-            while (tempCandidates.size())
-            {
-                candidates.push_back(tempCandidates.back());
-                tempCandidates.pop_back();
-            }
-
+        }
+        while (tempCandidates.size())
+        {
+            candidates.push_back(tempCandidates.back());
+            tempCandidates.pop_back();
+        }
     }
         //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
         //qDebug() << "POSTclassifyCandidates";

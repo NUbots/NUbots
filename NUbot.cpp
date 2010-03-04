@@ -90,13 +90,21 @@ NUbot::NUbot(int argc, const char *argv[])
         this->vision->setLUT(LUT);
         debug << "Finnished: Loading LOOKUP TABLE" <<endl;
         CameraSettings newSettings;
-        newSettings.gain = 200;
+        /*newSettings.gain = 200;
         newSettings.exposure = 200;
         newSettings.contrast = 100;
         newSettings.blueChroma = 160;
         newSettings.redChroma = 75;
         newSettings.brightness = 100;
         newSettings.saturation = 130;
+        newSettings.hue = 0;*/
+        newSettings.gain = 210;
+        newSettings.exposure = 200;
+        newSettings.blueChroma = 119;
+        newSettings.redChroma = 75;
+        newSettings.brightness = 113;
+        newSettings.saturation = 128;
+        newSettings.contrast = 64;
         newSettings.hue = 0;
         platform->camera->setSettings(newSettings);
         debug << "Finnished: Camera Settings" <<endl;
@@ -104,7 +112,7 @@ NUbot::NUbot(int argc, const char *argv[])
         imagefile.open ("/home/root/images.nul");
         
 
-        debug <<"OPENING FILE: "<< "/home/root/images.nul";
+        debug <<"OPENING FILE: "<< "/home/root/images.nul" << endl;
     #endif
     #ifdef USE_LOCALISATION
         localisation = new Localisation();

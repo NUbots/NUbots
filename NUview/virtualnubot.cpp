@@ -204,7 +204,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 8;
+    int spacings = 16;
 
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
