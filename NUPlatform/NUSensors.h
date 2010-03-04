@@ -67,6 +67,7 @@ private:
 protected:
     NUSensorsData* m_data;
     double m_current_time;
+    double m_previous_time;
     
 private:
 };

@@ -58,82 +58,6 @@ NAOActionators::NAOActionators()
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
 #endif
-    
-    vector<float> pos (6, 0);
-    vector<float> vel (6, 0);
-    vector<float> gain (6, 80);
-    
-    
-    /* Old LeftKick
-     */
-    /*
-    const int getuptime = 6000;
-    // Left Leg
-    pos[0] = -0.11;
-    pos[1] = -0.26;
-    pos[2] = 0;
-    pos[3] = 0.52;
-    pos[4] = -0.07;
-    pos[5] = -0.25;
-    m_data->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + getuptime, pos, vel, gain);
-    
-    pos[0] = -0.11;
-    pos[1] = -0.61;
-    pos[2] = 0;
-    pos[3] = 1.22;
-    pos[4] = -0.07;
-    pos[5] = -0.61;
-    m_data->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + getuptime + 470, pos, vel, gain);
-    
-    pos[0] = -0.11;
-    pos[1] = -0.27;
-    pos[2] = 0;
-    pos[3] = 1.22;
-    pos[4] = -0.07;
-    pos[5] = -0.92;
-    m_data->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + getuptime + 670, pos, vel, gain);
-    
-    pos[0] = -0.11;
-    pos[1] = -1.06;
-    pos[2] = 0;
-    pos[3] = 0.53;
-    pos[4] = -0.07;
-    pos[5] = -0.30;
-    m_data->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + getuptime + 800, pos, vel, gain);
-    
-    // Right Leg
-    pos[0] = -0.02;
-    pos[1] = -0.45;
-    pos[2] = 0;
-    pos[3] = 0.81;
-    pos[4] = -0.23;
-    pos[5] = -0.42;
-    m_data->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + getuptime, pos, vel, gain);
-    
-    pos[0] = -0.02;
-    pos[1] = -0.45;
-    pos[2] = 0;
-    pos[3] = 0.83;
-    pos[4] = -0.24;
-    pos[5] = -0.43;
-    m_data->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + getuptime + 470, pos, vel, gain);
-    
-    pos[0] = -0.02;
-    pos[1] = -0.45;
-    pos[2] = 0;
-    pos[3] = 0.85;
-    pos[4] = -0.24;
-    pos[5] = -0.44;
-    m_data->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + getuptime + 670, pos, vel, gain);
-    
-    pos[0] = -0.02;
-    pos[1] = -0.46;
-    pos[2] = 0;
-    pos[3] = 0.84;
-    pos[4] = -0.24;
-    pos[5] = -0.45;
-    m_data->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + getuptime + 800, pos, vel, gain);
-    */
 }
 
 NAOActionators::~NAOActionators()
@@ -212,7 +136,7 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<float> velocities;
     static vector<float> gains;
     
-    static vector<float> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
+    static vector<int> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
     static vector<float> dcmpositions(m_num_servo_positions, 0);
     static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, 0);
     
@@ -230,29 +154,26 @@ void NAOActionators::copyToHardwareCommunications()
             {
                 if (isvalid[i] == true)
                 {
-                    dcmtimes[i] = times[i] + m_al_time_offset;
+                    dcmtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
                     dcmstiffnesses[i] = gains[i]/100.0;
                     dcmpositions[i] = positions[i];
                 }
             }
         }
         else
-            errorlog << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
+            errorlog << "NAOActionators::copyToHardwareCommunications(). The input does not have the correct length, all data will be ignored!" << endl;
     }
     
     for (unsigned int i=0; i<m_num_servo_positions; i++)
     {
         m_stiffness_command[3][i][0][0] = dcmstiffnesses[i];
-        m_stiffness_command[3][i][0][1] = (int) dcmtimes[i];
+        m_stiffness_command[3][i][0][1] = dcmtimes[i];
         m_position_command[3][i][0][0] = dcmpositions[i];
-        m_position_command[3][i][0][1] = (int) dcmtimes[i];
+        m_position_command[3][i][0][1] = dcmtimes[i];
     }
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
     m_al_dcm->setAlias(m_led_command);
-    
-    //debug << m_position_command.toString(VerbosityMini) << endl;
-    //debug << m_stiffness_command.toString(VerbosityMini) << endl;
     
     m_data->removeCompletedPoints(m_current_time);
 }

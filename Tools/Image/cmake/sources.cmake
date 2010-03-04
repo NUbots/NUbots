@@ -24,7 +24,7 @@ SET (YOUR_SRCS
 BresenhamLine.cpp
 ClassifiedImage.cpp
 NUimage.cpp
-JpegSaver.cpp  
+#JpegSaver.cpp  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

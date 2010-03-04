@@ -36,9 +36,8 @@ public:
     NAOWebotsCamera(NAOWebotsPlatform* platform);
     ~NAOWebotsCamera();
     
-    NUimage grabNewImage();
-    void setControlSetting(unsigned int settingID, int value);
-    int getControlSetting(unsigned int id);
+    NUimage* grabNewImage();
+    void setSettings(const CameraSettings& newset);
 private:
     void copyToHardwareCommunications();
 };

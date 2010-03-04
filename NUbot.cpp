@@ -522,7 +522,7 @@ void* runThreadMotion(void* arg)
         realendtime = NUSystem::getRealTime();
         processendtime = NUSystem::getProcessTime();
         threadendtime = NUSystem::getThreadTime();
-        if (threadendtime - threadstarttime > 3)
+        if (threadendtime - threadstarttime > 5)
             debug << "NUbot::runThreadMotion. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
     #endif
         nubot->signalMotionCompletion();

@@ -73,13 +73,13 @@ JuppWalk::JuppWalk()
 
 void JuppWalk::initWalkParameters()
 {
-    m_step_frequency = 0.5;
-    m_param_phase_offset = -0.16;                 // the phase offset for the shortening, loading and swing phases
+    m_step_frequency = 1.0;
+    m_param_phase_offset = 0.05;                 // the phase offset for the shortening, loading and swing phases
     // weight shift parameters
-    m_param_shift_c = 0.275;                     // controls the shift amplitude
-    m_param_ankle_shift = 0.125;                // controls the fraction of the shift done by the ankles
+    m_param_shift_c = 0.12;                     // controls the shift amplitude
+    m_param_ankle_shift = 0.50;                // controls the fraction of the shift done by the ankles
     // leg shortening parameters
-    m_param_short_c = 0.3;                      // controls the leg shortening amplitude
+    m_param_short_c = 0.4;                      // controls the leg shortening amplitude
     m_param_short_v = 2.0;                      // controls the duration of the leg shortening phase
     // leg loading parameters
     m_param_load_c = 0.025;                     // controls the loading amplitude
@@ -93,7 +93,7 @@ void JuppWalk::initWalkParameters()
     m_param_gyro_roll = 0.1;
     m_param_gyro_pitch = 0.1;
     // gait phase resetting
-    m_param_phase_reset_offset = 0.24;
+    m_param_phase_reset_offset = 0.88;
     
     // At the moment this walk engine uses the same walk parameters for an entire walking cycle
     m_gait_walk_parameters.push_back(vector<WalkParameters::Parameter>());
@@ -112,7 +112,7 @@ void JuppWalk::initWalkParameters()
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_pitch, 0.0, 1.0));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_phase_reset_offset, -1.0, 1.0));
     
-    m_gait_max_speeds.push_back(7.0);
+    m_gait_max_speeds.push_back(10.0);
     m_gait_max_speeds.push_back(3.0);
     m_gait_max_speeds.push_back(0.5);
     
@@ -215,17 +215,43 @@ void JuppWalk::doWalk()
 
 void JuppWalk::calculateGaitPhase()
 {
-    // do the phase feedback here!
-    float impacttime = 0;
-
-    m_current_time = nusystem->getTime();
-    /*if (m_data->footImpact(NUSensorsData::LeftFoot, impacttime))
-        m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset - M_PI + m_param_phase_reset_offset;
-    else if (m_data->footImpact(NUSensorsData::RightFoot, impacttime))
-        m_gait_phase = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
-    else*/
-        m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
-
+    // I need to learn to interpolate, because abrupt changes destablise the robot
+    // so I want to shift to the measured phase over m_step_frequency/8 seconds
+    static float leftimpacttime;
+    static float rightimpacttime;
+    static const float interpolationtime = 1000*m_step_frequency/4.0;
+    static float gaitphaseonimpact = m_gait_phase;
+    m_current_time = m_data->CurrentTime;
+    
+    if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
+        gaitphaseonimpact = m_gait_phase;
+        
+    if (m_data->footImpact(NUSensorsData::RightFoot, rightimpacttime))
+        gaitphaseonimpact = m_gait_phase;
+        
+    if (m_current_time - leftimpacttime < interpolationtime)
+    {
+        float measuredphaseonimpact = M_PI/m_param_short_v - M_PI + m_param_phase_offset + m_param_phase_reset_offset;
+        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
+        if (fabs(phasediff) < M_PI/8)
+        {
+            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
+            debug << "Shifting Phase. Based on leftimpact by " << (measuredphaseonimpact - gaitphaseonimpact)*(m_current_time - m_previous_time)/interpolationtime << " from " << gaitphaseonimpact << " to " << measuredphaseonimpact << endl;
+        }
+    }
+    if (m_current_time - rightimpacttime < interpolationtime)
+    {
+        float measuredphaseonimpact = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
+        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
+        if (fabs(phasediff) < M_PI/8)
+        {
+            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
+            debug << "Shifting Phase. Based on rightimpact by " << (measuredphaseonimpact - gaitphaseonimpact)*(m_current_time - m_previous_time)/interpolationtime << " from " << gaitphaseonimpact << " to " << measuredphaseonimpact << endl;
+        }
+    }
+    
+    m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
+    
     m_previous_time = m_current_time;
 }
 
@@ -306,7 +332,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // Balance
     float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
-    float balance_foot_pitch = m_param_balance_orientation + 0.15*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
+    float balance_foot_pitch = m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
     float balance_leg_pitch = -0.00;
     float balance_leg_roll = legsign*-0.03 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     

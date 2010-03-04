@@ -325,6 +325,41 @@ bool NUSensorsData::getJointTemperatures(bodypart_id_t bodypart, vector<float>& 
     return getJointsData(JointTemperatures, bodypart, temperatures);
 }
 
+/*! @brief Gets the names of the joints in a particular body part.
+    @param partid the id of the body part 
+    @param names will be updated to contain the names of the joints in that body part
+ */
+bool NUSensorsData::getJointNames(bodypart_id_t partid, vector<string>& names)
+{
+    static vector<joint_id_t> selectedjoints;
+    if (partid == AllJoints)
+        selectedjoints = m_all_joint_ids;
+    if (partid == BodyJoints)
+        selectedjoints = m_body_ids;
+    else if (partid == HeadJoints)
+        selectedjoints = m_head_ids;
+    else if (partid == LeftArmJoints)
+        selectedjoints = m_larm_ids;
+    else if (partid == RightArmJoints)
+        selectedjoints = m_rarm_ids;
+    else if (partid == TorsoJoints)
+        selectedjoints = m_torso_ids;
+    else if (partid == LeftLegJoints)
+        selectedjoints = m_lleg_ids;
+    else if (partid == RightLegJoints)
+        selectedjoints = m_rleg_ids;
+    else
+    {
+        errorlog << "NUSensorsData::getJointNames. UNDEFINED Body part.";
+        return false;
+    }
+    
+    names.clear();
+    for (unsigned int i=0; i<selectedjoints.size(); i++)
+        names.push_back(m_joint_names[selectedjoints[i]]);
+    return true;
+}
+
 /* The grunt work for getting single joint data values
     @param p_sensor a pointer to the sensor from which the value will come
     @param jointid the unique joint id
@@ -378,7 +413,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
         
         data.clear();
         for (unsigned int i=0; i<selectedjoints.size(); i++)
-            data.push_back(p_sensor->Data[i]);
+            data.push_back(p_sensor->Data[selectedjoints[i]]);
         return true;
     }
     return true;
@@ -721,6 +756,7 @@ bool NUSensorsData::footImpact(foot_id_t footid, float& time)
  */
 void NUSensorsData::setAvailableJoints(const vector<string>& joints)
 {
+    m_joint_names = joints;
     // NOTE: This function is the same as setAvailableJoints in NUActionatorsData; so if you change this you probably want to change that too
     // first convert everything to lower case and remove whitespace and underscores
     vector<string> simplejointnames;
@@ -829,37 +865,37 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
         else if (simplejointnames[i].find("rhipyaw") != string::npos)
         {
             RHipYaw = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhippitch") != string::npos)
         {
             RHipPitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhiproll") != string::npos)
         {
             RHipRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rkneepitch") != string::npos)
         {
             RKneePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("ranklepitch") != string::npos)
         {
             RAnklePitch = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rankleroll") != string::npos)
         {
             RAnkleRoll = i;
-            m_lleg_ids.push_back(i);
+            m_rleg_ids.push_back(i);
         }
     }
     // add the arms, torso and legs to the body_ids
