@@ -22,13 +22,10 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
 		NUWalk.cpp NUWalk.h
-<<<<<<< HEAD:Motion/cmake/sources.cmake
 		NUKick.cpp NUKick.h
-=======
         NUHead.cpp NUHead.h
 		Getup
 		FallProtection
->>>>>>> origin/master:Motion/cmake/sources.cmake
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
