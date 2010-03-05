@@ -284,7 +284,7 @@ double NAOCamera::getTimeStamp() const
 NUimage* NAOCamera::grabNewImage()
 {
     while(!capturedNew());
-    currentBufferedImage.MapBufferToImage((pixels::Pixel*)getImage(), WIDTH/2, HEIGHT/2);
+    currentBufferedImage.MapYUV422BufferToImage((pixels::Pixel*)getImage(), WIDTH, HEIGHT);
     currentBufferedImage.timestamp = getTimeStamp();
     return &currentBufferedImage;
 }
