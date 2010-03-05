@@ -8,17 +8,17 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-win32 {
+win32 { 
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
+}
 
 # Opencv library
-#INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
-#LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
+# INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
+# LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
 # Input
-#HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
-}
+# HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 INCLUDEPATH += ../
 INCLUDEPATH += ../Autoconfig
 HEADERS += ui_mainwindow.h \
@@ -70,7 +70,9 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/matrix.h \
     localisationwidget.h \
     ../Vision/Ball.h \
-    ../Vision/CircleFitting.h
+    ../Vision/CircleFitting.h \
+    LogFileFormatReader.h \
+    nifVersion1FormatReader.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -122,6 +124,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
     ../Vision/Ball.cpp \
-    ../Vision/CircleFitting.cpp
+    ../Vision/CircleFitting.cpp \
+    LogFileFormatReader.cpp \
+    nifVersion1FormatReader.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
