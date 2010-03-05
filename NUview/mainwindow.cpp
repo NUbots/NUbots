@@ -271,7 +271,7 @@ void MainWindow::createStatusBar()
 void MainWindow::createConnections()
 {
     // Connect the virtual robot to the opengl manager.
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(NUimage*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(const NUimage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
@@ -288,7 +288,7 @@ void MainWindow::createConnections()
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
 
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(double*,bool,double*)),localisation, SLOT(frameChange(double*,bool,double*)));
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
