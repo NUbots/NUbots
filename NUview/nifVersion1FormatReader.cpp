@@ -12,6 +12,11 @@ nifVersion1FormatReader::nifVersion1FormatReader(const QString& filename, QObjec
     return;
 }
 
+nifVersion1FormatReader::~nifVersion1FormatReader()
+{
+    closeFile();
+}
+
 int nifVersion1FormatReader::openFile(const QString& filename)
 {
     fileInformation.setFile(filename);
@@ -74,7 +79,7 @@ int nifVersion1FormatReader::lastFrame()
 
 int nifVersion1FormatReader::setFrame(int frameNumber)
 {
-    if( (frameNumber > 0) && (frameNumber < numFrames()) && fileGood())
+    if( (frameNumber > 0) && (frameNumber <= numFrames()) && fileGood())
     {
         uint8 imgbuffer[320*240*2];
         int robotFrameNumber;
