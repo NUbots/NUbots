@@ -5,16 +5,16 @@
 #include <QPushButton>
 #include <QPainter>
 #include <QImage>
-#include <CString>
+#include <cstring>
 
 ConnectionWidget::ConnectionWidget(QWidget *parent): QDockWidget(parent)
 {
     robotName = QString("");
     setWindowTitle(tr("Conection Manager"));
-    setObjectName(tr("ConectionManager"));
+    setObjectName(tr("Conection Manager"));
     nameLabel = new QLabel("Robot name: ");
     nameLineEdit = new QLineEdit();
-    nameLineEdit->setText("Type Name: *.local");
+    nameLineEdit->setText("[name].local");
     connectButton = new QPushButton("Connect");
     disconnectButton = new QPushButton("Disconnect");
     layout = new QVBoxLayout;

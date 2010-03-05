@@ -25,6 +25,7 @@ SET (YOUR_SRCS  NUPlatform.cpp NUPlatform.h
                 NUActionators.cpp NUActionators.h
                 NUSensors.cpp NUSensors.h
                 NUSystem.cpp NUSystem.h
+		NUIO.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
@@ -32,6 +33,7 @@ SET (YOUR_DIRS  NUCamera
                 NUSensors
                 NUActionators	
                 NUSystem	
+		NUIO
 )
 ####################################################################################
 

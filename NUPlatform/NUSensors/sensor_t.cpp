@@ -20,7 +20,7 @@
 
 #include "sensor_t.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 
 /*! @brief Default constructor for a sensor_t. Initialises the sensor to be undefined and invalid
@@ -38,12 +38,12 @@ sensor_t::sensor_t()
     @param sensorname the name of the sensor
     @param sensorid the id of the sensor
  */
-sensor_t::sensor_t(string sensorname, sensor_id_t sensorid)
+sensor_t::sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated)
 {
     Name = sensorname; 
     SensorID = sensorid;
     IsValid = false;
-    IsCalculated = false;
+    IsCalculated = iscalculated;
     m_time_offset = NUSystem::getTimeOffset();
     Time = 0;
     TimeStamp = Time + m_time_offset;
@@ -83,7 +83,7 @@ void sensor_t::summaryTo(ostream& output)
     output << Name << ": " << Time << " ";
     if (IsValid)
     {
-        for (int i=0; i<Data.size(); i++)
+        for (unsigned int i=0; i<Data.size(); i++)
             output << Data[i] << " ";
     }
     else
@@ -99,7 +99,7 @@ void sensor_t::csvTo(ostream& output)
     output << Time << ", ";
     if (IsValid)
     {
-        for (int i=0; i<Data.size(); i++)
+        for (unsigned int i=0; i<Data.size(); i++)
             output << Data[i] << ", ";
     }
     output << endl;
@@ -115,17 +115,17 @@ void sensor_t::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const sensor_t& p_sensor)
 {
     output << p_sensor.Name << " ";
-    output << (int)p_sensor.SensorID << " ";
+    output << (int) p_sensor.SensorID << " ";
     
     output << p_sensor.Data.size() << " ";
     // we save the sensor data as binary data
-    for (int i=0; i<p_sensor.Data.size(); i++)
+    for (unsigned int i=0; i<p_sensor.Data.size(); i++)
         output.write((char*) &p_sensor.Data[i], sizeof(float));
     output << " ";
     
     output << p_sensor.StdDev.size() << " ";
     // we save the standard deviation data as binary data
-    for (int i=0; i<p_sensor.StdDev.size(); i++)
+    for (unsigned int i=0; i<p_sensor.StdDev.size(); i++)
         output.write((char*) &p_sensor.StdDev[i], sizeof(float));
     output << " ";
     
@@ -148,7 +148,7 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
 {
     int size = 0;
     int id = 9000;
-    char* inbuffer = new char[1000];                // temporary buffer for binary read
+    char inbuffer[1024];                // temporary buffer for binary read
     input >> p_sensor.Name;
     input >> id;
     p_sensor.SensorID = (sensor_t::sensor_id_t) id;
@@ -185,6 +185,21 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
     return input;
 }
 
+/*! @brief Overloaded subscript operator has been written for easy access to sensor data.
+ */
+float& sensor_t::operator[] (const unsigned int index)
+{
+    if (index < Data.size())
+        return Data[index];
+    else
+        return Data[Data.size() - 1];
+}
 
+/*! @brief Returns the size of the sensor_t, where the size is the size of Data
+ */
+int sensor_t::size()
+{
+    return Data.size();
+}
 
 

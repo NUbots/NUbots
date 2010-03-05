@@ -55,6 +55,7 @@ public:
         CAMERA_SETTING,
         LEDS,
         SOUND,
+        TELEPORTER,
         UNDEFINED
     };
 public:

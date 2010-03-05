@@ -23,12 +23,17 @@
 using namespace std;
 
 #include "NUPlatform.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 NUPlatform::~NUPlatform()
 {
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "NUPlatform::~NUPlatform()" << endl;
+#endif
     if (system != NULL)
         delete system;
+    if (io != NULL)
+        delete io;
     if (camera != NULL)
         delete camera;
     if (sensors != NULL)
@@ -46,3 +51,15 @@ void NUPlatform::getNumber(int& number)
 {
     number = m_number;
 }
+
+void NUPlatform::getTeamColour(string& name)
+{
+    name = m_team_colour;
+}
+
+void NUPlatform::getTeamNumber(int& number)
+{
+    number = m_team_number;
+}
+
+

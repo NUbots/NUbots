@@ -95,7 +95,7 @@ NAODarwinExternal:
 #log into vm.local and make the project dir
 	@ssh $(LOGNAME)@$(VM) mkdir -p naoqi/projects/robocup;
 #copy everything in this directory except the existing .*, Build, Documentation directories
-	@scp -prC $(filter-out Build Documentation targetconfig.h, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
+	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
 #run make inside the vm
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
 #copy the binary back
@@ -124,7 +124,6 @@ endif
 ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
 	@set -e; \
 		cd $(NAO_BUILD_DIR); \
-		sh $(ALD_CC_SCRIPT) $(ALD_CTC) $(MAKE_DIR); \
 		ccmake .; \
 		make $(MAKE_OPTIONS);
 endif
@@ -207,23 +206,6 @@ CycloidVeryClean:
 ################ NUView ################
 NUView:
 	@echo "Building NUView"
-# the first thing we need to do is check whether we have unzipped the external libraries
-# I am not entirely sure this is a good idea. Especially for zlib, because OS-X and Linux will have this installed already!
-	@if [ -d $(CUR_DIR)/NUview/gl ]; then \
-		set -e; \
-	else \
-		echo "Cute, this must be your first time."; \
-		mkdir -p $(CUR_DIR)/NUview/gl; \
-		cd $(CUR_DIR)/NUview/gl; \
-		tar -xf $(EXT_SOURCE_DIR)/GLee-5.4.0-src.tar.gz; \
-		mkdir -p $(CUR_DIR)/NUview/diagona; \
-		cd $(CUR_DIR)/NUview/diagona; \
-		tar -xf $(EXT_SOURCE_DIR)/diagona.zip; \
-		mkdir -p $(CUR_DIR)/Tools; \
-		cd $(CUR_DIR)/Tools; \
-		tar -xf $(EXT_SOURCE_DIR)/zlib-1.2.3.tar.gz; \
-		mv zlib-1.2.3 zlib; \
-	fi
 # now qmake and then make the NUview project
 	@set -e; \
 		cd $(CUR_DIR)/NUview; \

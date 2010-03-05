@@ -72,3 +72,5 @@ double dot(const Matrix& mat1, const Matrix& mat2);
 
 
 #endif
+
+

@@ -19,51 +19,33 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUbot.h"
-
-#include <albroker.h>
-#include <alproxy.h>
-#include <almemoryproxy.h>
-#include <almemoryfastaccess.h>
-using namespace AL;
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <time.h>
-using namespace std;
+#include "NUNAO.h"
 
 ofstream debug;
+ofstream errorlog;
+ALPtr<ALBroker> NUNAO::m_broker;
 
-class NUNAO : public ALModule
+NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
 {
-public:
-    NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
-    {
-        debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
-        NUbot* nubot = new NUbot(0, NULL);
-        nubot->run();
-        delete nubot;
-    }
+    debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
+    m_broker = pBroker;
+    m_nubot = new NUbot(0, NULL);
+    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(NUbot::signalMotion);
+    m_nubot->run();
+}
 
-    virtual ~NUNAO()
-    {
-    }
-    
-    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage)
-    {
-    }
-    
-    bool innerTest() 
-    {
-        return true;
-    }
-}; 
+NUNAO::~NUNAO()
+{
+    delete m_nubot;
+}
 
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
     debug.open("/var/log/debug.log");
+    debug << "NUbot Debug Log" << endl;
     debug << "NUNAO.cpp: _createModule" << endl;
+    errorlog.open("/var/log/error.log");
+    errorlog << "NUbot Error Log" << endl;
     ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
 }

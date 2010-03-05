@@ -20,7 +20,9 @@
  */
 
 #include "JobList.h"
-#include "Tools/debug.h"
+#include "debug.h"
+
+#include "../Jobs.h"            //!< @todo remove this after finished testing!
 
 /*! @brief JobList constructor
  */
@@ -35,6 +37,62 @@ JobList::JobList()
     m_job_lists.push_back(&m_sound_jobs);
     m_job_lists.push_back(&m_system_jobs);
     m_job_lists.push_back(&m_other_jobs);
+    
+    
+    // Test Save Job
+    /*vector<float> saveposition(3, 0);
+    saveposition[0] = 10;
+    saveposition[1] = -25;
+    saveposition[2] = 1.57;
+    SaveJob* savejob = new SaveJob(300.1, saveposition);
+    BlockJob* blockjob = new BlockJob(69, saveposition);
+    HeadJob* headjob = new HeadJob(9000, saveposition);
+    WalkToPointJob* pointjob = new WalkToPointJob(33, saveposition);
+    // Test Kick Job
+    vector<float> kickposition(2, 0);
+    vector<float> kicktarget(2, 0);
+    kickposition[0] = 0;
+    kickposition[1] = -5.7;
+    kicktarget[0] = 330.33;
+    kicktarget[1] = 55.5;
+    KickJob* kickjob = new KickJob(1010.19, kickposition, kicktarget);
+    NodHeadJob* nodjob = new NodHeadJob(123, kicktarget, kickposition);
+    PanHeadJob* panjob = new PanHeadJob(0.0000123, kicktarget, kickposition);
+    // Test Walk Job
+    vector<float> walkspeed(3, 0);
+    walkspeed[0] = 10;
+    walkspeed[1] = -25;
+    walkspeed[2] = 0.0;
+    WalkJob* walkjob = new WalkJob(walkspeed);
+    WalkParameters parameters = WalkParameters();
+
+    ifstream testparafile("/home/root/jupptestparameters.wp");
+    if (testparafile.is_open())
+        testparafile >> parameters;
+
+    WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
+    
+    // Test Light Job
+    vector<float> colour(3,0);
+    colour[0] = 1;
+    colour[1] = 0;
+    colour[2] = 0;
+    ChestLedJob ledjob = ChestLedJob(0, colour);
+    
+    addMotionJob(savejob);
+    addMotionJob(blockjob);
+    addMotionJob(headjob);
+    addMotionJob(kickjob);
+    addMotionJob(nodjob);
+    addMotionJob(panjob);
+    addMotionJob(walkjob);
+    addMotionJob(pointjob);
+    addMotionJob(parametersjob);*/
+    
+    /*ofstream tempjoblog;
+    tempjoblog.open("testjobs.txt");
+    tempjoblog << (*this);
+    tempjoblog.close();*/
 }
 
 /*! @brief Job destructor
@@ -213,7 +271,9 @@ void JobList::removeBehaviourJob(Job* job)
  */
 void JobList::removeMotionJob(Job* job)
 {
+    debug << "JobList::removeMotionJob" << endl;
     removeJob(job, m_motion_jobs);
+    debug << "JobList::removeMotionJob. Finished" << endl;
 }
 
 /*! @brief Remove a light job from the list
@@ -262,7 +322,11 @@ void JobList::removeOtherJob(Job* job)
  */
 void JobList::removeJob(Job* job, list<Job*>& joblist)
 {
+    debug << "JobList::removeJob." << endl;
+    debug << "job:" << (void*) job << " " << job << endl;
+    debug << "joblist:" << (void*) &joblist << endl;
     joblist.remove(job);
+    debug << "JobList::removeJob. Finished." << endl;
 }
 
 /*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
@@ -424,8 +488,75 @@ void JobList::clear()
         (*it)->clear();
 }
 
+/*! @brief Returns the size of the job list
+    @return Returns the size of the job list 
+ */
+unsigned int JobList::size()
+{
+    unsigned int size = 0;
+    list<list<Job*>*>::iterator it;
+    for (it = m_job_lists.begin(); it != m_job_lists.end(); it++)
+        size += (*it)->size();
+    return size;
+}
+
+void JobList::summaryTo(ostream& output)
+{
+    output << "JobList " << size() << " -----------------------------------" << endl;
+    static JobList::iterator it;     // the iterator over all of the jobs
+    if (size() != 0)
+    {   //<! @todo TODO. Investigate why we get a segment fault when the JobList size is zero!
+        for (it = begin(); it != end(); ++it)
+            (*it)->summaryTo(output);
+    }
+    output << "-------------------------------------------" << endl;
+}
+
+void JobList::csvTo(ostream& output)
+{
+    static JobList::iterator it;     // the iterator over all of the jobs
+    for (it = begin(); it != end(); ++it)
+        (*it)->csvTo(output);
+}
+
+ostream& operator<<(ostream& output, JobList& joblist)
+{
+#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    debug << "ostream << JobList. " << joblist.size() << " jobs." << endl;
+#endif
+    output << joblist.size() << " ";
+    
+    static JobList::iterator it;     // the iterator over all of the jobs
+    for (it = joblist.begin(); it != joblist.end(); ++it)
+        output << *it;
+    return output;
+}
+
+istream& operator>>(istream& input, JobList& joblist)
+{
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList" << endl;
+    #endif
+    char buffer[8];
+    unsigned int numnewjobs = 0;
+    input >> numnewjobs;
+    input.read(buffer, sizeof(char));       // skip over the white space
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+        debug << "istream >> JobList. Adding " << numnewjobs << endl;
+    #endif
+    Job* tempjob = NULL;
+    for (unsigned int i=0; i<numnewjobs; i++)
+    {
+        input >> &tempjob;
+        joblist.addJob(tempjob);
+    }
+    return input;
+}
+
+
+
 /******************************************************************************************************************************************
- JobListIterator Implementation
+                                                                                                            JobListIterator Implementation
  ******************************************************************************************************************************************/
 /*! @brief Default constructor
  */

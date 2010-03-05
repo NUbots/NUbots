@@ -30,6 +30,9 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUWalk.h"
+#include "NUHead.h"
+#include "FallProtection.h"
+#include "Getup.h"
 
 class NUMotion
 {
@@ -43,7 +46,10 @@ protected:
 private:
 public:
 protected:
-private:
+public:         //! @todo TODO: Fix this. Jason needs a backdoor to the walk engine NOW!
+    // essential motion components
+    FallProtection* m_fall_protection;
+    Getup* m_getup;
 #ifdef USE_HEAD
     NUHead* m_head;
 #endif

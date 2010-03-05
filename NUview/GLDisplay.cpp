@@ -1,5 +1,8 @@
 #include "GLDisplay.h"
 #include "openglmanager.h"
+#include <qclipboard.h>
+#include <QApplication>
+#include <QDataStream>
 
 GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         QGLWidget(parent,(QGLWidget*)shareWidget), imageWidth(80), imageHeight(60)
@@ -10,8 +13,12 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         overlays[id].primary = false;
         overlays[id].enabled = false;
         overlays[id].colour = getDefaultColour(id);
-        overlays[id].hasDisplayCommand = false;
+        //overlays[id].hasDisplayCommand = false;
+        overlays[id].hasDisplayCommand = shareWidget->hasDisplayCommand(id);
+        overlays[id].displayCommand = shareWidget->getDisplayCommand(id);
     }
+    imageWidth = shareWidget->getWidth();
+    imageHeight = shareWidget->getHeight();
     primaryLayer = &overlays[0];
     setPrimaryDisplay(unknown);
     setMouseTracking(true);
@@ -27,6 +34,38 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
 GLDisplay::~GLDisplay()
 {
     return;
+}
+
+void GLDisplay::restoreState(const QByteArray & state)
+{
+    QDataStream stream(state);
+    int primaryLayerIndex;
+    int numDisplays;
+    stream >> primaryLayerIndex;
+    stream >> numDisplays;
+    for(int i = 0; i < numDisplays; i++)
+    {
+        stream >> overlays[i].displayID;
+        stream >> overlays[i].enabled;
+        stream >> overlays[i].colour;
+    }
+    setPrimaryDisplay(primaryLayerIndex,overlays[primaryLayerIndex].colour);
+    return;
+}
+
+QByteArray GLDisplay::saveState() const
+{
+    QByteArray state;
+    QDataStream stream(&state,QIODevice::WriteOnly);
+    stream << primaryLayer->displayID;
+    stream << numDisplays;
+    for(int i = 0; i < numDisplays; i++)
+    {
+        stream << overlays[i].displayID;
+        stream << overlays[i].enabled;
+        stream << overlays[i].colour;
+    }
+    return state;
 }
 
 void GLDisplay::initializeGL()
@@ -47,9 +86,8 @@ void GLDisplay::initializeGL()
 
 void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int height)
 {
-
     bool newSize = ((imageWidth != width) || (imageHeight != height));
-    if(primaryLayer->displayID == displayID)
+    if( (primaryLayer->displayID == displayID) || (primaryLayer->displayID == unknown))
     {
         if(newSize)
         {
@@ -59,7 +97,7 @@ void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int 
     }
     overlays[displayID].displayCommand = newDisplay;
     overlays[displayID].hasDisplayCommand = true;
-    update();
+    updateGL();
 }
 
 void GLDisplay::setPrimaryDisplay(int displayID)
@@ -76,6 +114,8 @@ void GLDisplay::setPrimaryDisplay(int displayID, QColor drawingColour)
     primaryLayer->enabled = true;
     primaryLayer->colour = drawingColour;
     setWindowTitle(getLayerName(displayID) + " Image");
+    updateGL();
+    return;
 }
 
 void GLDisplay::setOverlayDrawing(int displayID, bool enabled)
@@ -212,5 +252,13 @@ QSize GLDisplay::minimumSizeHint() const
 
 QSize GLDisplay::sizeHint() const
 {
-        return QSize(160, 120);
+        return QSize(320, 240);
+}
+
+void GLDisplay::snapshotToClipboard()
+{
+    paintGL(); // Redraw the scene in case it needs to be updated.
+    QClipboard *cb = QApplication::clipboard(); // get the clipboard
+    QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
+    cb->setImage(tempPicture); // put current image on the clipboard.
 }

@@ -1,16 +1,22 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
 #include <QtGui/QMainWindow>
 #include "classificationwidget.h"
 #include "connectionwidget.h"
 #include "Tools/Image/NUimage.h"
-#include "virtualNubot.h"
+#include "virtualnubot.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
+#include "locWmGlDisplay.h"
+#include "localisationwidget.h"
 
 class QMdiArea;
+class QMdiSubWindow;
 class LayerSelectionWidget;
+class WalkParameterWidget;
+class QTabsWidget;
 
 namespace Ui
 {
@@ -38,7 +44,9 @@ public:
 
 public slots:
     void open();                    //!< To open a file
-    void openLUT();                  //!< To open a LUT file
+    void openFile(const QString& fileName); //!< To open a file
+    void copy();                    //!< To copy the contents of the selected display to file.
+    void openLUT();                 //!< To open a LUT file
     void firstFrame();              //!< Takes you back to first frame
     void previousFrame();           //!< Takes you back to previous frame
     void selectFrame();             //!< Takes you to a selected frame
@@ -46,6 +54,8 @@ public slots:
     void lastFrame();               //!< Takes you to last frame
     void cascade();                 //!< Cascades all widgets
     void tile();                    //!< tiles all widgets
+
+    void shrinkToNativeAspectRatio();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -69,7 +79,11 @@ public slots:
       @brief Updates the selected colours.
       */
     void updateSelection();
-
+protected slots:
+//    GLDisplay* createGLDisplay();
+//    locWmGlDisplay* createLocWmGlDisplay();
+    QMdiSubWindow* createGLDisplay();
+    QMdiSubWindow* createLocWmGlDisplay();
 
 private:
     //! Virtual robot, does data storage and robot based processing.
@@ -83,6 +97,7 @@ private:
       @param Number of the frame to load.
       */
     void LoadFrame(int frameNumber);
+    int getNumMdiWindowType(const QString& windowType);
 
     // Initialisation functions
     void createActions();           //!< Generate Actions
@@ -90,25 +105,34 @@ private:
     void createContextMenu();       //!< Generate Context Menus
     void createToolBars();          //!< Generate Toolbars
     void createStatusBar();         //!< Generate Status Bars
+    void createConnections();       //!< Make required connections
+
+    void readSettings();
+    void writeSettings();
+    QString getMdiWindowType(QWidget* theWidget);
 
     ClassificationWidget* classification;       //!< Instance of the classification widget
     ConnectionWidget* connection;               //!< Instance of the connection widget; allows connections with robots
-    GLDisplay* imageDisplay;                    //!< Raw Image display.
-    GLDisplay* classDisplay;                    //!< Classified Image display
-    GLDisplay* horizonDisplay;                  //!< Horizon Line display
-    GLDisplay* miscDisplay;                     //!< Misc display
+    LocalisationWidget* localisation;           //!< Instance of the localisation widget.
 
     LayerSelectionWidget* layerSelection;
-    QDockWidget* layerSelectionDock;
+    //QDockWidget* layerSelectionDock;
+    QDockWidget* visionTabDock;
+    QDockWidget* networkTabDock;
+    WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
+    //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
     QMdiArea* mdiArea;              //!< Instance of QMdiArea: the main are in the middle of the app (focal point)
+    QTabWidget* visionTabs;
+    QTabWidget* networkTabs;
 
     QMenu *fileMenu;                //!< Instance of the file menu
     QMenu *editMenu;                //!< Instance of the edit menu
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
     QMenu *windowMenu;              //!< Instance of the window menu
     QMenu *visionWindowMenu;        //!< Instance of the vision window menu
+    QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
     QMenu *networkWindowMenu;        //!< Instance of the network window menu
 
 
@@ -119,6 +143,8 @@ private:
 
 
     QAction *openAction;            //!< Instance of the open action
+    QAction *copyAction;            //!< Instance of the copy action
+    QAction *undoAction;            //!< Instance of the undo action
     QAction *LUT_Action;            //!< Instance of the open action
     QAction *exitAction;            //!< Instance of the exit action
     QAction *firstFrameAction;      //!< Instance of the first frame action; brings you back to first frame
@@ -128,14 +154,16 @@ private:
     QAction *lastFrameAction;       //!< Instance of the last frame action
     QAction *cascadeAction;         //!< Instance of the cascade window action
     QAction *tileAction;            //!< Instance of the tile window action
+    QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
+    QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
+    QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
 
     int currentFrameNumber;         //!< Variable for current frame in a file
     int totalFrameNumber;                //!< Total frames in file
     QString fileName;               //!< Name of current file loaded
 
 protected:
-    //! Overriden keyPressEvent for input.
-    void keyPressEvent ( QKeyEvent * event );
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

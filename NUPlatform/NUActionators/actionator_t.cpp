@@ -21,7 +21,7 @@
 
 #include "actionator_t.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/debug.h"
+#include "debug.h"
 
 #include <algorithm>
 
@@ -56,9 +56,9 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
  */
 void actionator_t::addPoint(double time, const vector<float>& data)
 {
-    if (time == 0 || data.size() == 0)
+    if (time < 0 || data.size() == 0)
     {
-        debug << "actionator_t::addPoint. Your data is invalid. It will be ignored!." << endl;
+        debug << "actionator_t::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
         return;
     }
     actionator_point_t* point = new actionator_point_t();
@@ -71,9 +71,17 @@ void actionator_t::addPoint(double time, const vector<float>& data)
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
         static deque<actionator_point_t*>::iterator insertposition;
-        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
-        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
-        m_points.push_back(point);  
+        try 
+        {
+            insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+            m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+            m_points.push_back(point);
+        }
+        catch (exception& e) 
+        {
+            debug << "actionator_t::addPoint has thrown an exception: " << e.what() << endl;
+            debug << "Attempted to resize with " << (int) (insertposition - m_points.begin()) << endl;
+        }
     }
     
     // Option 1: Merge all actionator points; this can produce very 'surprising' results and it is not possible to change your mind after sending off the commands
@@ -90,10 +98,10 @@ void actionator_t::addPoint(double time, const vector<float>& data)
  */
 void actionator_t::removeCompletedPoints(double currenttime)
 {
-    if (m_points.size() > 0 && m_points[0]->Time < currenttime)
+    if (m_points.size() > 0 && m_points[0]->Time <= currenttime)
         m_previous_point = m_points.front();            // I make the first point that is removed to previous point
     
-    while (m_points.size() > 0 && m_points[0]->Time < currenttime)
+    while (m_points.size() > 0 && m_points[0]->Time <= currenttime)
     {
         m_points.pop_front();
     }
@@ -139,10 +147,10 @@ void actionator_t::summaryTo(ostream& output)
         output << "EMPTY" << endl;
     else {
         output << endl;
-        for (int i=0; i<m_points.size(); i++)
+        for (unsigned int i=0; i<m_points.size(); i++)
         {
             output << m_points[i]->Time << ": ";
-            for (int j=0; j<m_points[i]->Data.size(); j++)
+            for (unsigned int j=0; j<m_points[i]->Data.size(); j++)
                 output << m_points[i]->Data[j] << " ";
             output << endl;
         }
@@ -157,10 +165,12 @@ void actionator_t::csvTo(ostream& output)
 ostream& operator<< (ostream& output, const actionator_t& p_actionator)
 {
     //! @todo TODO: implement this function
+    return output;
 }
 
 istream& operator>> (istream& input, actionator_t& p_actionator)
 {
     //! @todo TODO: implement this function
+    return input;
 }
 

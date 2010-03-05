@@ -113,10 +113,16 @@ public:
     bool getJointCurrents(bodypart_id_t bodypart, vector<float>& currents);
     bool getJointTorques(bodypart_id_t bodypart, vector<float>& torques);
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
+    bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
+    bool getOrientation(vector<float>& values);
+    bool getHorizon(vector<float>& values);
+    bool getZMP(vector<float>& values);
+    bool getFalling(vector<float>& values);
+    bool getFallen(vector<float>& values);
     bool getDistanceValues(vector<float>& values);
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
@@ -124,7 +130,12 @@ public:
     // Get methods for other sensors that have logical groups
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
+    bool getFootForce(foot_id_t footid, float& force);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
+    
+    // Common sub-get methods
+    bool isFallen();
+    bool footImpact(foot_id_t footid, float& time);
     
     void setAvailableJoints(const vector<string>& joints);
     
@@ -157,6 +168,7 @@ public:
     int size() const;
 private:
     void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
+    void addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     
     bool getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data);
     bool getJointsData(sensor_t* p_sensor, bodypart_id_t bodypartid, vector<float>& data);
@@ -165,6 +177,7 @@ private:
     
     void updateNamedSensorPointer(sensor_t* p_sensor);
 public:
+    double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
     // NAMED SENSORS
     // Proprioception Sensors:
     sensor_t* JointPositions;                   //!< stores the joint position sensors (in radians)
@@ -179,6 +192,11 @@ public:
     // Balance Sensors:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
+    sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
+    sensor_t* BalanceHorizon;                   //!< stores the Horizon line (A,B,C) Ax+ By +C =0
+    sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
+    sensor_t* BalanceFalling;                   //!< stores whether the robot is falling (sum, left, right, forward, backward)
+    sensor_t* BalanceFallen;                    //!< stores whether the robot has fallen (sum, left, right, forward, backward)
     
     // Distance Sensors:
     sensor_t* DistanceValues;                   //!< stores the distance to obstacle measurements in cm
@@ -186,6 +204,8 @@ public:
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
+    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons
+    sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     
     // Buttons Sensors:
     sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed
@@ -206,6 +226,7 @@ private:
     vector<joint_id_t> m_rleg_ids;              //!< a vector of joint_id_t (index into sensor_t Joint*->Data) for each right leg joint
     vector<joint_id_t> m_body_ids;
     vector<joint_id_t> m_all_joint_ids;
+    vector<string> m_joint_names;
     int m_num_head_joints;
     int m_num_arm_joints;
     int m_num_torso_joints;

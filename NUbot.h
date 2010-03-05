@@ -27,12 +27,20 @@
 #define NUBOT_H
 
 #include "targetconfig.h"
-#include "Tools/debug.h"
+#include "debug.h"
+#include "walkconfig.h"
 
 #include "NUPlatform/NUPlatform.h"
 // Selectively include modules depending on targetconfig.h
 #ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
+    #include "Tools/FileFormats/LUTTools.h"
+    #include "NUPlatform/NUCamera/CameraSettings.h"
+    #include <iostream>
+    #include <fstream>
+
 #endif
 
 #ifdef USE_LOCALISATION
@@ -46,6 +54,9 @@
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
+    #ifdef USE_WALKOPTIMISER
+        #include "Motion/Walks/Optimisation/WalkOptimiserBehaviour.h"
+    #endif
 #endif
 
 #include <pthread.h>
@@ -73,11 +84,15 @@ public:
     int waitForVisionCompletion();
 private:
     void createThreads();
+    void createErrorHandling();
     
 public:
     NUPlatform* platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* vision;                 //!< vision module
+        NUimage* image;
+        unsigned char LUT[256*256*256];
+        ofstream imagefile;
     #endif
     #ifdef USE_LOCALISATION
         Localisation* localisation;     //!< localisation module
@@ -87,6 +102,9 @@ public:
     #endif
     #ifdef USE_MOTION
         NUMotion* motion;               //!< motion module
+        #ifdef USE_WALKOPTIMISER
+            WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
+        #endif
     #endif
 private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)

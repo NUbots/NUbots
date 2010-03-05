@@ -49,12 +49,25 @@ public:
 protected:
     virtual void copyFromHardwareCommunications();
     
-    void calculateJointVelocityFromPosition();
-    void calculateJointAccelerationFromVelocity();
+    virtual void calculateSoftSensors();
+    
+    void calculateJointVelocity();
+    void calculateJointAcceleration();
+    
+    void calculateOrientation();
+    void calculateHorizon();
+    void calculateZMP();
+    void calculateFallSense();
+    
+    void calculateFootForce();
+    void calculateFootImpact();
+    void calculateCoP();
     
 private:
 protected:
     NUSensorsData* m_data;
+    double m_current_time;
+    double m_previous_time;
     
 private:
 };

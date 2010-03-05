@@ -35,11 +35,11 @@ public:
     VisionJob(job_id_t jobid) : Job(Job::VISION, jobid){};
     virtual ~VisionJob() {};
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
     virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    virtual istream& operator>> (istream& input);
 };
 
 #endif

@@ -33,16 +33,19 @@ class SaveJob : public MotionJob
 {
 public:
     SaveJob(double time, const vector<float>& position);
+    SaveJob(double time, istream& input);
     ~SaveJob();
     
     void setPosition(double time, const vector<float>& newposition);
     void getPosition(double& time, vector<float>& position);
     
-    /*virtual void summaryTo(ostream& output);
+    virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);*/
+    friend ostream& operator<<(ostream& output, const SaveJob& job);
+    friend ostream& operator<<(ostream& output, const SaveJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
 private:
     vector<float> m_save_position;                 //!< the save position [x (cm), y (cm), theta (rad)]
 };

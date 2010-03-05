@@ -21,12 +21,13 @@
 # Common Ignores
 *.*~
 *.o
+*.orig
 
-*motionconfig.h
-*walkconfig.h
-targetconfig.h
-/Tools/debug.h
+Autoconfig/*
 *.old*
+*debug.log
+*error.log
+*parameters.wp
 
 # External files from archives
 /NUview/gl/*
@@ -34,6 +35,7 @@ targetconfig.h
 /Tools/zlib/*
 
 # ignore Qt builds
+/NUview/pthreads/*
 /NUview/debug/*
 /NUview/release/*
 *.Debug
@@ -43,3 +45,5 @@ targetconfig.h
 /NUview/NU*.app
 /NUview/moc_*
 /NUview/autosave.lut
+/NUview/qrc_icons.cpp
+/NUview/qrc_textures.cpp

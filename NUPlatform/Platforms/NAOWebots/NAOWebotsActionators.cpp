@@ -20,7 +20,9 @@
  */
 
 #include "NAOWebotsActionators.h"
-#include "Tools/debug.h"
+#include "debug.h"
+#include <string.h>
+
 
 // init m_actionator_names:
 static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};
@@ -43,6 +45,9 @@ static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Righ
                                   string("ChestBoard/Led"), \
                                   string("LFoot/Led"), string("RFoot/Led")};
 vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+// init m_other_names:
+static string temp_other_names[] = {string("Teleporter")};
+vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
 
 /*! @brief Constructs a nubot actionator class with a Webots backend
  
@@ -60,32 +65,13 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableCameraSettings(m_camera_setting_names);
-    //m_data->setAvailableOtherActionators();      there are no other actionators at the moment 
-    
-    
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 350, 0, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 4000, -1.57, 1, 30);
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 8000, 1.57, 1, 30);
-    
-    vector<float> pos (2, 0);
-    vector<float> vel (2, 1);
-    vector<float> gain (2, 100);
-    pos[1] = -0.7;
-    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 10000, pos, vel, gain);
-    pos[1] = 0;
-    m_data->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime() + 15000, pos, vel, gain);
+    m_data->setAvailableLeds(m_led_names);
+    m_data->setAvailableOtherActionators(m_other_names);
     
     // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
-    Camera* camera = m_platform->getCamera("camera");
-    camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
-    
-    vector<float> data (1,0);
-    data[0] = 0;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 5000, data);
-    data[0] = 1;
-    m_data->addCameraSetting(NUActionatorsData::SelectCamera, nusystem->getTime() + 10000, data);
+    //Camera* camera = m_platform->getCamera("camera");
+    //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
     
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
@@ -107,6 +93,8 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
     //! @todo TODO: get the sound from webots
+    // Get the teleporter
+    m_teleporter = platform->getEmitter("super_emitter");
 }
 
 /*! @brief enable the actionators in the simulated NAO
@@ -122,21 +110,20 @@ NAOWebotsActionators::~NAOWebotsActionators()
 
 void NAOWebotsActionators::copyToHardwareCommunications()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+#if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
 #endif
-    
-    m_current_time = nusystem->getTime();
-    m_data->removeCompletedPoints(m_current_time);
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    m_data->summaryTo(debug);
+#endif
     
     copyToServos();
     copyToCamera();
     copyToLeds();
     copyToSound();
+    copyToTeleporter();
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    m_data->summaryTo(debug);
-#endif
+    m_data->removeCompletedPoints(m_current_time);
 }
 
 /*! @brief Copies the joint positions and torques to the servos
@@ -163,20 +150,21 @@ void NAOWebotsActionators::copyToServos()
             {
                 if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
-                    if ((times[i] - m_current_time) >= 0)
+                    JServo* jservo = (JServo*) m_servos[i];
+                    if (times[i] >= m_current_time)
                     {
-                        float c = m_servos[i]->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
+                        float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
                         float dt = times[i] - m_current_time;
                         float v = 1000*(positions[i] - c)/dt;
-                        // we need to clip to velocity to the max
-                        float maxv = ((JServo*) m_servos[i])->getMaxVelocity();
-                        if (v < -maxv)
-                            v = -maxv;
-                        else if (v > maxv)
-                            v = maxv;
-                        m_servos[i]->setControlP(gains[i]/10.0);
-                        m_servos[i]->setVelocity(fabs(v));
-                        m_servos[i]->setPosition(positions[i]);
+                        jservo->setGain(gains[i]);
+                        jservo->setVelocity(v);
+                        jservo->setPosition(positions[i]);
+                    }
+                    else
+                    {   // the command has already past, we should get there as fast as possible
+                        jservo->setGain(gains[i]);
+                        jservo->setVelocity(jservo->getMaxVelocity());
+                        jservo->setPosition(positions[i]);
                     }
                 }
             }
@@ -267,6 +255,45 @@ void NAOWebotsActionators::copyToSound()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToSound()" << endl;
 #endif
+}
+
+/*! @brief Copies the teleportation data to the teleporter (super_emitter)
+ */
+void NAOWebotsActionators::copyToTeleporter()
+{
+    static bool l_isvalid;
+    static double l_time;
+    static vector<float> l_position(3, 0);
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOWebotsActionators::copyToTeleporter()" << endl;
+#endif 
+    if (m_data->getNextTeleportation(l_isvalid, l_time, l_position))
+    {
+        if (l_isvalid == true)// && (l_time - m_current_time) < m_simulation_step)
+        {
+            static char buf[256];
+            static char teamred[] = "RED";
+            static char teamblue[] = "BLUE";
+            static int id;             // webots id = id - 1
+            static string colour;
+            // get the player id
+            m_platform->getNumber(id);
+            id--;
+            
+            // get the player's colour
+            m_platform->getTeamColour(colour);
+            char* team;
+            if (colour.compare("red") == 0)
+                team = teamred;
+            else
+                team = teamblue;
+            
+            // convert from our standard coordinates to webots teleporter coords (I can do the conversion in-line cause it is simple)
+            // x is toward yellow goal, y is up and z is right
+            sprintf(buf, "move robot %s %d %f %f %f %f", team, id, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
+            m_teleporter->send(buf, strlen(buf) + 1);
+        }
+    }
 }
 
 

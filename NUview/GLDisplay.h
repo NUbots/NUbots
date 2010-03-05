@@ -34,6 +34,10 @@ public:
       */
     ~GLDisplay();
 
+    QSize imageSize()
+    {
+        return QSize(imageWidth, imageHeight);
+    }
     /*!
       @brief Classed used to represent a layer.
 
@@ -71,7 +75,11 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
-        RobotCandidates,
+        FieldLines,
+        ObjectCandidates,
+        wmRightLeg,
+        wmLeftLeg,
+        wmBall,
         numDisplays
     };
 
@@ -79,6 +87,18 @@ public:
     QSize minimumSizeHint() const;
     //! Returns the most desired size for the window
     QSize sizeHint() const;
+
+    /*!
+      @brief Restores the windows display settings to those described in the QByteArray
+      @param state The state of the display settings to which the window will be set.
+      */
+    void restoreState(const QByteArray & state);
+
+    /*!
+      @brief Returns the current state of the windows display settings.
+      @return The QByteArray storing the current display settings.
+      */
+    QByteArray saveState() const;
 
     /*!
       @brief Returns the window title for the gien display type.
@@ -107,8 +127,16 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
-            case RobotCandidates:
-                return QString("Robot Candidates");
+            case FieldLines:
+                return QString("Field Lines");
+            case ObjectCandidates:
+                return QString("Field Object Candidates");
+            case wmLeftLeg:
+                return QString("World Model: Left Leg");
+            case wmRightLeg:
+                return QString("World Model: Right Leg");
+            case wmBall:
+                return QString("World Model: Ball");
             default:
                 return QString("Unknown");
         }
@@ -177,7 +205,10 @@ public slots:
       */
     void setOverlayDrawing(int displayID, bool enabled, QColor drawingColour);
 
-
+    /*!
+      @brief Copy the current image displayed to the system clipboard.
+      */
+    void snapshotToClipboard();
 
 signals:
     /*!
@@ -208,9 +239,9 @@ signals:
     void ctrlSelectPixel(int x,int y);
 
 protected:
-        void initializeGL();
-        void paintGL();
-        void resizeGL(int width, int height);
+    void initializeGL();
+    void paintGL();
+    void resizeGL(int width, int height);
 private:
     int imageWidth; //!< The width of the windows current primary display
     int imageHeight; //!< The height of the windows current primary display
@@ -224,6 +255,7 @@ private:
       @brief Function used to calculate the image coordinates from the screen coordinates.
       @param mouseEvent The mouse event from the selection.
       */
+
     QPoint calculateSelectedPixel(QMouseEvent * mouseEvent);
 
     /*!
@@ -253,8 +285,16 @@ private:
                 return QColor(0,255,127);
             case TransitionSegments:
                 return QColor(255,255,255);
-            case RobotCandidates:
+            case ObjectCandidates:
                 return QColor(255,128,64);
+            case FieldLines:
+                return QColor(100,100,100);
+            case wmLeftLeg:
+                return QColor(0,0,200);
+            case wmRightLeg:
+                return QColor(200,0,0);
+            case wmBall:
+                return QColor(255,102,0);
             default:
                 return QColor(255,255,255);
         }

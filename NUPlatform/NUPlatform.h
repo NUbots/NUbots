@@ -29,6 +29,7 @@ using namespace std;
 #include "NUSensors.h"
 #include "NUActionators.h"
 #include "NUSystem.h"
+#include "NUIO.h"
 
 class NUPlatform
 {
@@ -38,6 +39,8 @@ public:
     
     virtual void getName(string& name);
     virtual void getNumber(int& number);
+    virtual void getTeamColour(string& colour);
+    virtual void getTeamNumber(int& number);
     
 protected:
 private:
@@ -45,12 +48,15 @@ private:
 // Members:
 public:
     NUSystem* system;
+    NUIO* io;
     NUCamera* camera;
     NUSensors* sensors;
     NUActionators* actionators;
 protected:
     string m_name;
     int m_number;
+    string m_team_colour;
+    int m_team_number;
 private:
     
 };
