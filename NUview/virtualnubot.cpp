@@ -33,6 +33,13 @@ virtualNUbot::~virtualNUbot()
     delete classificationTable;
 }
 
+void virtualNUbot::newRawImage(const NUimage* image)
+{
+    rawImage = *image;
+    emit imageDisplayChanged(image, GLDisplay::rawImage);
+    return;
+}
+
 int virtualNUbot::openFile(const QString& filename)
 {
     try{
@@ -46,7 +53,10 @@ int virtualNUbot::openFile(const QString& filename)
 
         if(fileType == QString("nif"))
         {
-            return file->openFile(filename.toAscii().data(), false);
+            //return file->openFile(filename.toAscii().data(), false);
+            test.openFile(filename);
+            connect(&test,SIGNAL(newRawImageAvailable(const NUimage*)),this,SLOT(newRawImage(const NUimage*)));
+            return test.numFrames();
         }
         else if(fileType == QString("nul"))
         {
@@ -108,11 +118,15 @@ bool virtualNUbot::loadFrame(int frameNumber)
     try{
         if(fileType == QString("nif"))
         {
+            /*
             uint8 imgbuffer[320*240*2];
             int robotFrameNumber;
 
             file->getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensors, balanceSensors, touchSensors);
             rawImage.CopyFromYUV422Buffer(imgbuffer,320,240);
+            */
+            test.setFrame(frameNumber);
+            //rawImage = test.getImage();
         }
         else if (fileType == QString("nul"))
         {
@@ -127,6 +141,7 @@ bool virtualNUbot::loadFrame(int frameNumber)
                 {
                     streamFile >> rawImage;
                 }
+                emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
             }
             else
             {
@@ -171,8 +186,8 @@ bool virtualNUbot::loadFrame(int frameNumber)
     }
     emit imageDisplayChanged(jS,camera,tS);
 
+    //emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
     horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-    emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
     processVisionFrame(rawImage);
 

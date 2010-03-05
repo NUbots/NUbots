@@ -14,7 +14,7 @@
 #include "Vision/Circle.h"
 #include <vector>
 #include <fstream>
-
+#include "LogFileReader.h"
 
 #define uint8 unsigned char
 
@@ -55,10 +55,11 @@ public slots:
     void UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
-    void loadLookupTableFile(QString fileName);    
+    void loadLookupTableFile(QString fileName);
+    void newRawImage(const NUimage* image);
 
 signals:
-    void imageDisplayChanged(NUimage* updatedImage, GLDisplay::display displayId);
+    void imageDisplayChanged(const NUimage* updatedImage, GLDisplay::display displayId);
 
     /*!
       @brief Sends the robot data to the localisation widget
@@ -66,7 +67,7 @@ signals:
       @param bottomCamera The camera being used.
       @param touch The values of the robot's touch sensors.
       */
-    void imageDisplayChanged(double* joints,bool bottomCamera,double * touch);
+    void imageDisplayChanged(const double* joints,const bool bottomCamera,const double * touch);
 
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
@@ -100,6 +101,7 @@ private:
     unsigned int streamFileLength;
     unsigned char* classificationTable;
     unsigned char* tempLut;
+    LogFileReader test;
 
 
     // Image Storage
