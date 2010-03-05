@@ -23,7 +23,7 @@ ENDIF()
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
 		NUWalk.cpp NUWalk.h
 		NUKick.cpp NUKick.h
-        	NUHead.cpp NUHead.h
+        NUHead.cpp NUHead.h
 		Getup
 		FallProtection
 )

@@ -560,7 +560,7 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 	}
         //qDebug() << "Total Corners Found: " << cornerPoints.size();
 
-        for (int i = 0; i < cornerPoints.size() ; i++)
+        for (unsigned int i = 0; i < cornerPoints.size() ; i++)
         {
             //qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
         }

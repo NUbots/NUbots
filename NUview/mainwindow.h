@@ -98,6 +98,7 @@ private:
       @param Number of the frame to load.
       */
     void LoadFrame(int frameNumber);
+    int getNumMdiWindowType(const QString& windowType);
 
     // Initialisation functions
     void createActions();           //!< Generate Actions

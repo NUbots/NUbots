@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <iostream>
 #include <fstream>
+#include <qmessagebox.h>
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -32,31 +33,46 @@ virtualNUbot::~virtualNUbot()
     delete classificationTable;
 }
 
-int virtualNUbot::loadFile(const QString& filename)
+int virtualNUbot::openFile(const QString& filename)
 {
-    QStringList list = filename.split('.');
-    fileType = list.last();
+    try{
+        QStringList list = filename.split('.');
+        fileType = list.last();
 
-    if(streamFile.is_open())
-    {
-        streamFile.close();
-    }
+        if(streamFile.is_open())
+        {
+            streamFile.close();
+        }
 
-    if(fileType == QString("nif"))
-    {
-        return file->openFile(filename.toAscii().data(), false);
+        if(fileType == QString("nif"))
+        {
+            return file->openFile(filename.toAscii().data(), false);
+        }
+        else if(fileType == QString("nul"))
+        {
+            streamFile.open(filename.toAscii().data(),ios_base::in|ios_base::binary);
+            streamFile.seekg(0,ios_base::end);
+            streamFileLength = streamFile.tellg();
+            streamFile.seekg(0,ios_base::beg);
+            int x,y;
+            streamFile >> x >> y;
+            streamFile.seekg(0,ios_base::beg);
+//            qDebug() << "File Length is " << streamFileLength;
+//            qDebug() << "Image resolution is " << x << "x" << y;
+//            qDebug() << "Estimated image size per frame is " << (2*sizeof(x) + 2*x*y*sizeof(int) + 3*sizeof(' '));
+            int numImages = streamFileLength / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
+//            qDebug() << "Number of frames is therefore " << numImages;
+            return numImages;
+        }
     }
-    else if(fileType == QString("nul"))
+    catch(...)
     {
-        streamFile.open(filename.toAscii().data(),ios_base::in);
-        streamFile.seekg(0,ios_base::end);
-        streamFileLength = streamFile.tellg();
-        streamFile.seekg(0,ios_base::beg);
-        int x,y;
-        streamFile >> x >> y;
-        streamFile.seekg(0,ios_base::beg);
-        int numImages = streamFileLength / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
-        return numImages;
+        QString message = "Cannot access (%1) for reading";
+        message = message.arg(filename);
+        qDebug() << message;
+        debug << message.toStdString();
+        QMessageBox::warning( 0, "IO Error", message);
+        return -1;
     }
     return 0;
 }
@@ -84,59 +100,83 @@ pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
     }
 }
 
-void virtualNUbot::loadFrame(int frameNumber)
+bool virtualNUbot::loadFrame(int frameNumber)
 {
-    if(fileType == QString("nif"))
-    {
-        rawImage.setImageDimensions(160,120);
-        rawImage.useInternalBuffer();
+    hasImage = false;
+    NaoCamera camera;
 
-        uint8* rawBuffer = (uint8*)&rawImage.image[0][0];
-        NaoCamera camera;
-        int robotFrameNumber;
-
-        file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
-        hasImage = true;
-
-        // Create double values of each joint and send to localisation widget
-        double jS[22];
-        double tS[10];
-        for (int i = 0; i <22;i++)
+    try{
+        if(fileType == QString("nif"))
         {
-            jS[i] = jointSensors[i] * 57.2957795;
-        }
-        for (int j = 0; j<10;j++)
-        {
-            tS[j] = touchSensors[j];
-        }
-        emit imageDisplayChanged(jS,camera,tS);
+            uint8 imgbuffer[320*240*2];
+            int robotFrameNumber;
 
-        horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-        //emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-        emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-        emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-        processVisionFrame(rawImage);
-        return;
-    }
-    else if (fileType == QString("nul"))
-    {
-        if(frameNumber == 1)
-        {
-            streamFile.seekg(0,ios_base::beg);
-            streamFile.clear();
+            file->getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensors, balanceSensors, touchSensors);
+            rawImage.CopyFromYUV422Buffer(imgbuffer,320,240);
         }
-        if(streamFile.good()){
-            unsigned int currPos = streamFile.tellg();
-            if( (streamFileLength - currPos) > 2*sizeof(int) )
+        else if (fileType == QString("nul"))
+        {
+            if(frameNumber == 1)
             {
-                streamFile >> rawImage;
-                hasImage = true;
-                emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-                processVisionFrame(rawImage);
+                streamFile.seekg(0,ios_base::beg);
+                streamFile.clear();
+            }
+            if(streamFile.good()){
+                unsigned int currPos = streamFile.tellg();
+                if( (streamFileLength - currPos) > 2*sizeof(int) )
+                {
+                    streamFile >> rawImage;
+                }
+            }
+            else
+            {
+                QString message = "streamFile: %1 bit set.";
+                if(streamFile.bad())
+                    qDebug() << message.arg("bad");
+                if(streamFile.eof())
+                    qDebug() << message.arg("eof");
+                if(streamFile.fail())
+                    qDebug() << message.arg("fail");
+
+                return false;
             }
         }
+        else
+        {
+            return false;
+        }
     }
-    return;
+    catch(exception &e)
+    {
+        QString message = "Error loading frame number %1";
+        message = message.arg(frameNumber);
+        message += e.what();
+        debug << message.toStdString();
+        qDebug() << message;
+        QMessageBox::warning( 0, "IO Error", message);
+        return false;
+    }
+
+    hasImage = true;
+    // Create double values of each joint and send to localisation widget
+    double jS[22];
+    double tS[10];
+    for (int i = 0; i <22;i++)
+    {
+        jS[i] = jointSensors[i] * 57.2957795;
+    }
+    for (int j = 0; j<10;j++)
+    {
+        tS[j] = touchSensors[j];
+    }
+    emit imageDisplayChanged(jS,camera,tS);
+
+    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
+    emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+    processVisionFrame(rawImage);
+
+    return true;
 }
 
 void virtualNUbot::ProcessPacket(QByteArray* packet)
@@ -176,11 +216,8 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
 
 void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
 {
-    //qDebug() << "Generating CLASS Image";
     vision.classifyImage(classImage);
-    //qDebug() << "Displaying CLASS Image";
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
-    //qDebug() << "Returning ";
     return;
 }
 
