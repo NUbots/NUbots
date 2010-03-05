@@ -554,7 +554,7 @@ void LocalisationWidget::angleToPoint(WMPoint point)
 
 }
 
-void LocalisationWidget::frameChange(double* jointSensors, bool camera,double* touchSensors)
+void LocalisationWidget::frameChange(const double* jointSensors, bool camera,const double* touchSensors)
 {
     for(int i=0;i<22;i++)
     {

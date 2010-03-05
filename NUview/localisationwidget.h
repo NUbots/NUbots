@@ -184,7 +184,7 @@ public slots:
       @param camera A boolean representing the camera that is being used.
       @param touchSensors A pointer to the start of an array of doubles containing the touch sensor data.
       */
-    void frameChange(double* jointSensors,bool camera,double* touchSensors);
+    void frameChange(const double* jointSensors,bool camera,const double* touchSensors);
 
     /*!
       @brief Accepts a new value for the x ordinate of anglePoint.
