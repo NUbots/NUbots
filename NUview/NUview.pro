@@ -72,7 +72,8 @@ HEADERS += ui_mainwindow.h \
     ../Vision/Ball.h \
     ../Vision/CircleFitting.h \
     LogFileFormatReader.h \
-    nifVersion1FormatReader.h
+    nifVersion1FormatReader.h \
+    LogFileReader.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -126,6 +127,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/Ball.cpp \
     ../Vision/CircleFitting.cpp \
     LogFileFormatReader.cpp \
-    nifVersion1FormatReader.cpp
+    nifVersion1FormatReader.cpp \
+    LogFileReader.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
