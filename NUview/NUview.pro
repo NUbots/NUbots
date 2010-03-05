@@ -44,6 +44,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/TransitionSegment.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
+    KickWidget.h \
     ../Motion/NUWalk.h \
     ../Motion/Walks/WalkParameters.h \
     ../Behaviour/Jobs.h \
@@ -91,6 +92,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/TransitionSegment.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
+    KickWidget.cpp \
     ../Motion/NUWalk.cpp \
     ../Motion/Walks/WalkParameters.cpp \
     ../Motion/Walks/JuppWalk/*.cpp \

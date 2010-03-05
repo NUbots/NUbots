@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "LayerSelectionWidget.h"
 #include "WalkParameterWidget.h"
+#include "KickWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
@@ -51,8 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabs = new QTabWidget(this);
     connection = new ConnectionWidget(this);
     networkTabs->addTab(connection, connection->objectName());
-    walkParameter = new WalkParameterWidget(mdiArea,this);
+    walkParameter = new WalkParameterWidget(mdiArea, this);
+    kick = new KickWidget(mdiArea, this);
     networkTabs->addTab(walkParameter, walkParameter->objectName());
+    networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
     networkTabDock->setWidget(networkTabs);
     networkTabDock->setObjectName(tr("networkTab"));
@@ -78,6 +81,7 @@ MainWindow::~MainWindow()
     delete localisation;
     delete layerSelection;
     delete walkParameter;
+    delete kick;
     delete mdiArea;
     delete visionTabs;
     delete networkTabs;

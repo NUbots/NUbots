@@ -16,6 +16,7 @@ class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
 class WalkParameterWidget;
+class KickWidget;
 class QTabsWidget;
 
 namespace Ui
@@ -119,6 +120,7 @@ private:
     QDockWidget* visionTabDock;
     QDockWidget* networkTabDock;
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
+    KickWidget* kick;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
