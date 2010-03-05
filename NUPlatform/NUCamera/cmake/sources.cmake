@@ -17,7 +17,7 @@
 
 IF(DEBUG)
     MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
-ENDIF()
+ENDIF(DEBUG)
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  

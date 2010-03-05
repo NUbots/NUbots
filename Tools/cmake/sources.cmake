@@ -20,11 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  debug.cpp debug.h
+SET (YOUR_SRCS  debug.cpp debug.h 
+		Math/Matrix.cpp Math/Matrix.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS   	
 )
 ####################################################################################
 
