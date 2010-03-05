@@ -11,6 +11,7 @@
 #include "openglmanager.h"
 #include "locWmGlDisplay.h"
 #include "localisationwidget.h"
+#include "LogFileReader.h"
 
 class QMdiArea;
 class QMdiSubWindow;
@@ -161,6 +162,7 @@ private:
     int currentFrameNumber;         //!< Variable for current frame in a file
     int totalFrameNumber;                //!< Total frames in file
     QString fileName;               //!< Name of current file loaded
+    LogFileReader LogReader;
 
 protected:
     void closeEvent(QCloseEvent *event);
