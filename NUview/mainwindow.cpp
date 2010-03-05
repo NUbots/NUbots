@@ -313,8 +313,6 @@ void MainWindow::openFile(const QString& fileName)
         message.append(fileName);
         qDebug() << message;
         this->statusBar->showMessage(message,10000);
-        qDebug() << "Number of Frames in File: " << totalFrameNumber;
-        qDebug() << "getting first frame";
         firstFrame();
         if(virtualRobot.fileType == QString("nul"))
         {
@@ -571,7 +569,6 @@ void MainWindow::lastFrame()
 void MainWindow::LoadFrame(int frameNumber)
 {
     //glManager.clearAllDisplays(); // Turn this on if we have trouble with old data being displayed.
-    qDebug() << "loading frame: " << frameNumber;
     if(virtualRobot.loadFrame(frameNumber))
     {
         updateSelection();
