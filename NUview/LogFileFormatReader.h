@@ -23,6 +23,7 @@ public:
     int numFrames() const {return totalFrames;};
     int currentFrame() const {return currentFrameIndex;};
     virtual bool fileGood() = 0;
+    const NUimage& getImage(){return rawImageBuffer;};
 
     virtual bool isNextFrameAvailable(){return false;};
     virtual bool isPreviousFrameAvailable(){return false;};
