@@ -42,7 +42,11 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         std::vector < Vector2<int> > ballPoints = classifyBallClosely(PossibleBall, vision,height, width);
 
         //! Perform Circle Fit: Must pass a threshold on fit to become a circle!
-        result = isCorrectFit(ballPoints,PossibleBall);
+        Circle tempresult = isCorrectFit(ballPoints,PossibleBall);
+        if (tempresult.radius  > result.radius)
+        {
+            result = tempresult;
+        }
         //! Use Circle Fit information to update the FieldObjects
 
 
@@ -71,10 +75,10 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     int midX =  (int)((BottomRight.x-TopLeft.x)/2)+TopLeft.x;
     Vector2<int> SegStart;
     SegStart.x = midX;
-    SegStart.y = TopLeft.y-5;
+    SegStart.y = TopLeft.y;
     Vector2<int> SegEnd;
     SegEnd.x = midX;
-    SegEnd.y = BottomRight.y-5;
+    SegEnd.y = BottomRight.y;
     TransitionSegment* tempSeg = new TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     ScanLine* tempLine = new ScanLine();
 
@@ -116,15 +120,16 @@ bool Ball::isCorrectCheckRatio(ObjectCandidate PossibleBall,int height, int widt
     //qDebug() << "Checking Ratio: " << PossibleBall.aspect();
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
-    if (PossibleBall.getBottomRight().x <= width-5 &&
-        PossibleBall.getBottomRight().y <= height-5 &&
-        PossibleBall.getTopLeft().x >=0+5  &&
-        PossibleBall.getTopLeft().y >=0+5  )
+    int boarder = 10; //! Boarder of pixels
+    if (PossibleBall.getBottomRight().x <= width-10 &&
+        PossibleBall.getBottomRight().y <= height-10 &&
+        PossibleBall.getTopLeft().x >=0+10  &&
+        PossibleBall.getTopLeft().y >=0+10  )
     {
         //POSSIBLE BALLS ARE:
         //      Objects which have grouped segments,
         //      or objects with one segment, but very small (still like to consider).
-        if((PossibleBall.aspect() > 0.5 && PossibleBall.aspect() < 1.5 )|| PossibleBall.aspect()==0)
+        if((PossibleBall.aspect() > 0.3 && PossibleBall.aspect() < 2 )|| PossibleBall.aspect()==0)
         {
             return true;
         }
@@ -153,7 +158,7 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
     {
             CircleFitting* CircleFit = new CircleFitting();
             circ = CircleFit->FitCircleLMA(ballPoints);
-            //qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd;
+            //debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
     }
     else
     {

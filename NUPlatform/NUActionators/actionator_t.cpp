@@ -77,7 +77,8 @@ void actionator_t::addPoint(double time, const vector<float>& data)
             m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
             m_points.push_back(point);
         }
-        catch (exception& e) {
+        catch (exception& e) 
+        {
             debug << "actionator_t::addPoint has thrown an exception: " << e.what() << endl;
             debug << "Attempted to resize with " << (int) (insertposition - m_points.begin()) << endl;
         }

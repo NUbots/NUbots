@@ -654,7 +654,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
         unsigned char subAfterColour;
         unsigned char subBeforeColour;
         unsigned char tempColour = tempTransition->getColour();
-        for(int k =0; k < length; k = k+spacings)
+        for(int k = 0; k < length; k = k+spacings)
         {
             tempSubEndPoint.y = tempStartPoint.y+k;
             tempSubStartPoint.y = tempStartPoint.y+k;
@@ -786,6 +786,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
         sort(segments.begin(), segments.end(), Vision::sortTransitionSegments);
 
         std::queue<int> qUnprocessed;
+        std::vector<TransitionSegment> candidate_segments;
         unsigned int rawSegsLeft = segments.size();
         unsigned int nextRawSeg = 0;
 
@@ -835,6 +836,9 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
             //! For all unprocessed joined segment in a candidate O(M)
             //Build candidate
+
+            candidate_segments.clear();
+
             while (!qUnprocessed.empty())
             {
                 unsigned int thisSeg;
@@ -981,6 +985,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 }
 
                 //add thisSeg to CandidateVector
+                candidate_segments.push_back(segments.at(thisSeg));
             }//while (!qUnprocessed->empty())
             //qDebug() << "Candidate ready...";
             //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
@@ -998,7 +1003,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                     if (i != max_col && colourHistogram[i] > colourHistogram[max_col])
                         max_col = i;
                 }
-                ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col));
+                ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
 

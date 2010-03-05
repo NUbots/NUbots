@@ -75,6 +75,12 @@ private:
     QSlider* phaseOffsetSlider;                 //!< Slider for phase offset
     QSpinBox* phaseOffsetSpinBox;               //!< SpinBox for phase offset
     
+    // Phase Reset Offset
+    QHBoxLayout* phaseResetLayout;             //!< Layout for phase offset
+    QLabel* phaseResetLabel;                   //!< Label for phase offset
+    QSlider* phaseResetSlider;                 //!< Slider for phase offset
+    QSpinBox* phaseResetSpinBox;               //!< SpinBox for phase offset
+    
     // Step Size
     QHBoxLayout* stepSizeLayout;                //!< Layout for step size
     QLabel* stepSizeLabel;                      //!< Label for step size

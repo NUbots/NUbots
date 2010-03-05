@@ -45,3 +45,5 @@ Autoconfig/*
 /NUview/NU*.app
 /NUview/moc_*
 /NUview/autosave.lut
+/NUview/qrc_icons.cpp
+/NUview/qrc_textures.cpp
