@@ -5,7 +5,6 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
-#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
