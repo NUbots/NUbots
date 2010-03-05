@@ -14,7 +14,7 @@ public:
     ~LogFileReader();
     int openFile(QString fileName);
     bool closeFile();
-    const NUimage& getImage(){if(currentFileReader){return currentFileReader->getImage();}return NUimage();};
+    const NUimage* getImage(){if(currentFileReader){return currentFileReader->getImage();}return 0;};
     int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;};
     // Fetching information
     //const QString& fileName() const {return currentFileName;};
