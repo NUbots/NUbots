@@ -68,12 +68,13 @@ pixels::Pixel* NUimage::allocateBuffer(int width, int height)
     return buffer;
 }
 
-void NUimage::MapYUV422BufferToImage(pixels::Pixel* buffer, int width, int height)
+void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
 {
     int arrayWidth = width;
     // halve the width and height since we want to skip
     width /= 2;
     height /= 2;
+    pixels::Pixel* pixelisedBuffer = (pixels::Pixel*) buffer;
     if(height != this->height())
     {
         delete [] image;
@@ -88,14 +89,14 @@ void NUimage::MapYUV422BufferToImage(pixels::Pixel* buffer, int width, int heigh
     int pixelIndex = 0;
     for( int i = 0; i < height; ++i)
     {
-        image[i] = &buffer[pixelIndex];
+        image[i] = &pixelisedBuffer[pixelIndex];
         pixelIndex += arrayWidth;
     }
     imageWidth = width;
     imageHeight = height;
 }
 
-void NUimage::CopyFromYUV422Buffer(unsigned char* buffer, int width, int height)
+void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
 {
     width /= 2;
     height /= 2;
