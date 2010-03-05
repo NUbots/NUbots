@@ -136,6 +136,7 @@ void MainWindow::createActions()
     firstFrameAction->setShortcut(QKeySequence::MoveToStartOfLine);
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString(":/icons/first.png")));
+    firstFrameAction->setEnabled(false);
 
     connect(firstFrameAction, SIGNAL(triggered()), this, SLOT(firstFrame()));
 
@@ -145,6 +146,7 @@ void MainWindow::createActions()
     previousFrameAction->setStatusTip(tr("Select the previous frame"));
     previousFrameAction->setIcon(QIcon(QString(":/icons/previous.png")));
     connect(previousFrameAction, SIGNAL(triggered()), this, SLOT(previousFrame()));
+    previousFrameAction->setEnabled(false);
 
     // Select Frame
     selectFrameAction = new QAction(tr("&Select Frame..."), this);
@@ -152,6 +154,7 @@ void MainWindow::createActions()
     selectFrameAction->setStatusTip(tr("Select frame number to go to"));
     selectFrameAction->setIcon(QIcon(QString(":/icons/select.png")));
     connect(selectFrameAction, SIGNAL(triggered()), this, SLOT(selectFrame()));
+    selectFrameAction->setEnabled(false);
 
     // Next Frame
     nextFrameAction = new QAction(tr("&Next Frame"), this);
@@ -159,6 +162,7 @@ void MainWindow::createActions()
     nextFrameAction->setStatusTip(tr("Select next frame"));
     nextFrameAction->setIcon(QIcon(QString(":/icons/next.png")));
     connect(nextFrameAction, SIGNAL(triggered()), this, SLOT(nextFrame()));
+    nextFrameAction->setEnabled(false);
 
     // Last Frame
     lastFrameAction = new QAction(tr("&Last Frame"), this);
@@ -166,7 +170,7 @@ void MainWindow::createActions()
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString(":/icons/last.png")));
     connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
-
+    lastFrameAction->setEnabled(false);
 
     // Cascade windows
     cascadeAction = new QAction(tr("&Cascade Window"), this);
@@ -191,8 +195,6 @@ void MainWindow::createActions()
     newLocWMDisplayAction = new QAction(tr("&New display"), this);
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
-
-
 }
 
 void MainWindow::createMenus()
@@ -304,23 +306,37 @@ void MainWindow::openFile(const QString& fileName)
         this->fileName = fileName;
         setWindowTitle(QString("NUview - ") + fileName);
         glManager.clearAllDisplays();
-        totalFrameNumber = virtualRobot.loadFile(fileName);
+        totalFrameNumber = virtualRobot.openFile(fileName);
         QString message = "Opening File: ";
         message.append(fileName);
+        qDebug() << message;
         this->statusBar->showMessage(message,10000);
         qDebug() << "Number of Frames in File: " << totalFrameNumber;
+        qDebug() << "getting first frame";
         firstFrame();
         if(virtualRobot.fileType == QString("nul"))
         {
+            firstFrameAction->setEnabled(true);
             previousFrameAction->setEnabled(false);
             selectFrameAction->setEnabled(false);
+            nextFrameAction->setEnabled(true);
             lastFrameAction->setEnabled(false);
+        }
+        else if(virtualRobot.fileType == QString("nif"))
+        {
+            firstFrameAction->setEnabled(true);
+            previousFrameAction->setEnabled(true);
+            selectFrameAction->setEnabled(true);
+            nextFrameAction->setEnabled(true);
+            lastFrameAction->setEnabled(true);
         }
         else
         {
-            previousFrameAction->setEnabled(true);
-            selectFrameAction->setEnabled(true);
-            lastFrameAction->setEnabled(true);
+            firstFrameAction->setEnabled(false);
+            previousFrameAction->setEnabled(false);
+            selectFrameAction->setEnabled(false);
+            nextFrameAction->setEnabled(false);
+            lastFrameAction->setEnabled(false);
         }
     }
 }
@@ -483,11 +499,30 @@ void MainWindow::previousFrame()
     return;
 }
 
+int MainWindow::getNumMdiWindowType(const QString& windowType)
+{
+    QList<QMdiSubWindow *> mdiWindows = mdiArea->subWindowList(); // Get the windows.
+    int count = 0;
+    for (int i = 0; i < mdiWindows.count(); i++)
+    {
+        if(windowType == getMdiWindowType(mdiWindows[i]->widget())) // Get the window type
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
 QMdiSubWindow* MainWindow::createGLDisplay()
 {
     GLDisplay* temp = new GLDisplay(this, &glManager);
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
+    // Required because openGL drawing command do not seem to work when there is no associated display.
+    if(getNumMdiWindowType("GLDisplay") <= 1)
+    {
+        LoadFrame(currentFrameNumber); // reload the current frame.
+    }
     return window;
 }
 
@@ -534,13 +569,25 @@ void MainWindow::lastFrame()
 void MainWindow::LoadFrame(int frameNumber)
 {
     //glManager.clearAllDisplays(); // Turn this on if we have trouble with old data being displayed.
-    virtualRobot.loadFrame(frameNumber);
-    updateSelection();
-    QString message = "Frame Loaded:  Number ";
-    message.append(QString::number(frameNumber));
-    message.append("/");
-    message.append(QString::number(totalFrameNumber));
-    this->statusBar->showMessage(message, 10000);
+    qDebug() << "loading frame: " << frameNumber;
+    if(virtualRobot.loadFrame(frameNumber))
+    {
+        updateSelection();
+        QString message = "Frame Loaded:  Number ";
+        message.append(QString::number(frameNumber));
+        message.append("/");
+        message.append(QString::number(totalFrameNumber));
+        this->statusBar->showMessage(message, 10000);
+    }
+    else
+    {
+        glManager.clearAllDisplays(); // Clear all vision displays
+        QString message = "ERROR - Loading Frame Number ";
+        message.append(QString::number(frameNumber));
+        message.append("/");
+        message.append(QString::number(totalFrameNumber));
+        setWindowTitle(QString("NUview"));
+    }
     return;
 }
 
