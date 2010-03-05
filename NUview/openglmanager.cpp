@@ -5,7 +5,6 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
-#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -34,7 +33,7 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
         textureStored[displayId] = false;
     }
     //textures[displayId] = bindTexture(image, GL_TEXTURE_2D);
-    image.save("test.jpg");
+
     QImage tex;
     tex = QGLWidget::convertToGLFormat( image );
     glGenTextures( 1, &textures[displayId] );
