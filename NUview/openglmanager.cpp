@@ -33,8 +33,6 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
         deleteTexture(textures[displayId]);
         textureStored[displayId] = false;
     }
-    //textures[displayId] = bindTexture(image, GL_TEXTURE_2D);
-    image.save("test.jpg");
     QImage tex;
     tex = QGLWidget::convertToGLFormat( image );
     glGenTextures( 1, &textures[displayId] );
