@@ -24,7 +24,7 @@ OpenglManager::~OpenglManager()
     }
 }
 
-void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
+void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 {
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
@@ -66,7 +66,7 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
     displayStored[displayId] = true;
 }
 
-void OpenglManager::writeNUimageToDisplay(NUimage* newImage, GLDisplay::display displayId)
+void OpenglManager::writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId)
 {
     width = newImage->width();
     height = newImage->height();
