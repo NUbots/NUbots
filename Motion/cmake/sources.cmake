@@ -22,7 +22,8 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
 		NUWalk.cpp NUWalk.h
-        NUHead.cpp NUHead.h
+		NUKick.cpp NUKick.h
+        	NUHead.cpp NUHead.h
 		Getup
 		FallProtection
 )
