@@ -44,19 +44,14 @@ public:
     ~MainWindow();
 
 public slots:
-    void open();                    //!< To open a file
-    void openFile(const QString& fileName); //!< To open a file
+    void openLog();                    //!< To open a file
+    void openLog(const QString& fileName); //!< To open a log file
     void copy();                    //!< To copy the contents of the selected display to file.
     void openLUT();                 //!< To open a LUT file
-    void firstFrame();              //!< Takes you back to first frame
-    void previousFrame();           //!< Takes you back to previous frame
     void selectFrame();             //!< Takes you to a selected frame
-    void nextFrame();               //!< Takes you to next frame
-    void lastFrame();               //!< Takes you to last frame
-    void cascade();                 //!< Cascades all widgets
-    void tile();                    //!< tiles all widgets
 
     void shrinkToNativeAspectRatio();
+    void filenameChanged(QString filename); //!< New filename
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -80,6 +75,8 @@ public slots:
       @brief Updates the selected colours.
       */
     void updateSelection();
+
+    void imageFrameChanged(int currFrame, int totalFrames);
 protected slots:
 //    GLDisplay* createGLDisplay();
 //    locWmGlDisplay* createLocWmGlDisplay();
@@ -92,12 +89,6 @@ private:
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
 
-    //File Opperation Variables
-    /*!
-      @brief Load the given frame.
-      @param Number of the frame to load.
-      */
-    void LoadFrame(int frameNumber);
     int getNumMdiWindowType(const QString& windowType);
 
     // Initialisation functions
@@ -159,9 +150,6 @@ private:
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
 
-    int currentFrameNumber;         //!< Variable for current frame in a file
-    int totalFrameNumber;                //!< Total frames in file
-    QString fileName;               //!< Name of current file loaded
     LogFileReader LogReader;
 
 protected:

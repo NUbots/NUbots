@@ -19,17 +19,17 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
+
+    // create mdi workspace
+    mdiArea = new QMdiArea(this);
+    mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     createActions();
     createMenus();
     createContextMenu();
     createToolBars();
     createStatusBar();
-
-  // create mdi workspace
-    mdiArea = new QMdiArea(this);
-    mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
 
     // Add localisation widget
     localisation = new LocalisationWidget(this);
@@ -60,8 +60,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     createConnections();
     setCentralWidget(mdiArea);
-    currentFrameNumber = -1;
-
 
     setWindowTitle(QString("NUview"));
     glManager.clearAllDisplays();
@@ -106,7 +104,7 @@ void MainWindow::createActions()
     openAction = new QAction(QIcon(":/icons/open.png"),tr("&Open..."), this);
     openAction->setShortcut(QKeySequence::Open);
     openAction->setStatusTip(tr("Open a new file"));
-    connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
+    connect(openAction, SIGNAL(triggered()), this, SLOT(openLog()));
 
     // Copy Action
     copyAction = new QAction(QIcon(":/icons/copy.png"),tr("&Copy"), this);
@@ -139,15 +137,14 @@ void MainWindow::createActions()
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString(":/icons/first.png")));
     firstFrameAction->setEnabled(false);
-
-    connect(firstFrameAction, SIGNAL(triggered()), this, SLOT(firstFrame()));
+    connect(firstFrameAction, SIGNAL(triggered()), &LogReader, SLOT(firstFrame()));
 
     // Previous Frame
     previousFrameAction = new QAction(tr("&Previous Frame"), this);
     previousFrameAction->setShortcut(QKeySequence::MoveToPreviousChar);
     previousFrameAction->setStatusTip(tr("Select the previous frame"));
     previousFrameAction->setIcon(QIcon(QString(":/icons/previous.png")));
-    connect(previousFrameAction, SIGNAL(triggered()), this, SLOT(previousFrame()));
+    connect(previousFrameAction, SIGNAL(triggered()), &LogReader, SLOT(previousFrame()));
     previousFrameAction->setEnabled(false);
 
     // Select Frame
@@ -163,7 +160,7 @@ void MainWindow::createActions()
     nextFrameAction->setShortcut(QKeySequence::MoveToNextChar);
     nextFrameAction->setStatusTip(tr("Select next frame"));
     nextFrameAction->setIcon(QIcon(QString(":/icons/next.png")));
-    connect(nextFrameAction, SIGNAL(triggered()), this, SLOT(nextFrame()));
+    connect(nextFrameAction, SIGNAL(triggered()), &LogReader, SLOT(nextFrame()));
     nextFrameAction->setEnabled(false);
 
     // Last Frame
@@ -171,18 +168,17 @@ void MainWindow::createActions()
     lastFrameAction->setShortcut(QKeySequence::MoveToEndOfLine);
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString(":/icons/last.png")));
-    connect(lastFrameAction, SIGNAL(triggered()), this, SLOT(lastFrame()));
+    connect(lastFrameAction, SIGNAL(triggered()), &LogReader, SLOT(lastFrame()));
     lastFrameAction->setEnabled(false);
 
     // Cascade windows
     cascadeAction = new QAction(tr("&Cascade Window"), this);
     cascadeAction->setStatusTip(tr("Cascade windows in Main Area"));
-    connect(cascadeAction, SIGNAL(triggered()), this, SLOT(cascade()));
-
+    connect(cascadeAction, SIGNAL(triggered()), mdiArea, SLOT(cascadeSubWindows()));
     // Tile windows
     tileAction = new QAction(tr("&Tile Window"), this);
     tileAction->setStatusTip(tr("Tiles windows in Main Area"));
-    connect(tileAction, SIGNAL(triggered()), this, SLOT(tile()));
+    connect(tileAction, SIGNAL(triggered()), mdiArea, SLOT(tileSubWindows()));
 
     nativeAspectAction = new QAction(tr("&Native Aspect"), this);
     nativeAspectAction->setStatusTip(tr("Resize display to its native aspect ratio."));
@@ -265,11 +261,27 @@ void MainWindow::createStatusBar()
 {
         statusBar = new QStatusBar;
         this->setStatusBar(statusBar);
-        this->statusBar->showMessage("NUViewer Loaded",10000);
+        this->statusBar->showMessage("Welcome to NUview!",10000);
 }
 
 void MainWindow::createConnections()
 {
+    // Connect to log file reader
+    connect(&LogReader,SIGNAL(frameLoadingCompleted(int,int)),this, SLOT(imageFrameChanged(int,int)));
+
+    connect(&LogReader,SIGNAL(newRawImageAvailable(const NUimage*)),&glManager, SLOT(newRawImage(const NUimage*)));
+
+    connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
+
+
+    // Setup navigation control enabling/disabling
+    connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
+    connect(&LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
+    connect(&LogReader,SIGNAL(previousFrameAvailable(bool)),previousFrameAction, SLOT(setEnabled(bool)));
+    connect(&LogReader,SIGNAL(lastFrameAvailable(bool)),lastFrameAction, SLOT(setEnabled(bool)));
+    connect(&LogReader,SIGNAL(setFrameAvailable(bool)),selectFrameAction, SLOT(setEnabled(bool)));
+
+
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(const NUimage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
@@ -294,16 +306,21 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
 }
 
-void MainWindow::open()
+void MainWindow::openLog()
 {
-    fileName = QFileDialog::getOpenFileName(this,
-                            tr("Open Replay File"), ".",
+    QString filename = QFileDialog::getOpenFileName(this,
+                            tr("Open Log File"), ".",
                             tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;NUbot Log Files (*.nul)"));
-    openFile(fileName);
+    openLog(filename);
 }
 
-void MainWindow::openFile(const QString& fileName)
+void MainWindow::openLog(const QString& fileName)
 {
+    if (!fileName.isEmpty()){
+        LogReader.openFile(fileName);
+        LogReader.firstFrame();
+    }
+    /*
     if (!fileName.isEmpty()){
         this->fileName = fileName;
         setWindowTitle(QString("NUview - ") + fileName);
@@ -339,6 +356,7 @@ void MainWindow::openFile(const QString& fileName)
             lastFrameAction->setEnabled(false);
         }
     }
+    */
 }
 
 void MainWindow::copy()
@@ -482,19 +500,33 @@ void MainWindow::openLUT()
     classification->doOpen();
 }
 
-
-void MainWindow::firstFrame()
+void  MainWindow::filenameChanged(QString filename)
 {
-    currentFrameNumber = 1;
-    LoadFrame(currentFrameNumber);
-    return;
+    if(!filename.isEmpty()){
+        setWindowTitle(QString("NUview - ") + filename);
+    }
+    else
+    {
+        setWindowTitle(QString("NUview"));
+    }
 }
 
-void MainWindow::previousFrame()
+void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
 {
-    if (!fileName.isEmpty() && currentFrameNumber > 1){
-        currentFrameNumber = currentFrameNumber -1;
-        LoadFrame(currentFrameNumber);
+    QString message = "Frame Loaded:  Number ";
+    message.append(QString::number(currFrame));
+    message.append("/");
+    message.append(QString::number(totalFrames));
+    this->statusBar->showMessage(message, 10000);
+}
+
+void MainWindow::selectFrame()
+{
+    bool ok;
+    int selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), LogReader.currentFrame(), 1, LogReader.numFrames(), 1, &ok);
+    if(ok)
+    {
+        LogReader.setFrame(selectedFrameNumber);
     }
     return;
 }
@@ -521,7 +553,7 @@ QMdiSubWindow* MainWindow::createGLDisplay()
     // Required because openGL drawing command do not seem to work when there is no associated display.
     if(getNumMdiWindowType("GLDisplay") <= 1)
     {
-        LoadFrame(currentFrameNumber); // reload the current frame.
+        LogReader.setFrame(LogReader.currentFrame());
     }
     return window;
 }
@@ -532,75 +564,6 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;
-}
-
-void MainWindow::selectFrame()
-{
-    int selectedFrameNumber;
-    bool ok = true;
-
-    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
-
-    if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
-        currentFrameNumber = selectedFrameNumber;
-        LoadFrame(currentFrameNumber);
-    }
-    return;
-}
-
-void MainWindow::nextFrame()
-{
-    if (!fileName.isEmpty() && currentFrameNumber < totalFrameNumber){
-        currentFrameNumber = currentFrameNumber +1;
-        LoadFrame(currentFrameNumber);
-    }
-    return;
-}
-
-void MainWindow::lastFrame()
-{
-    if (!fileName.isEmpty()){
-        currentFrameNumber = totalFrameNumber;
-        LoadFrame(currentFrameNumber);
-    }
-    return;
-}
-
-void MainWindow::LoadFrame(int frameNumber)
-{
-    //glManager.clearAllDisplays(); // Turn this on if we have trouble with old data being displayed.
-    if(virtualRobot.loadFrame(frameNumber))
-    {
-        updateSelection();
-        QString message = "Frame Loaded:  Number ";
-        message.append(QString::number(frameNumber));
-        message.append("/");
-        message.append(QString::number(totalFrameNumber));
-        this->statusBar->showMessage(message, 10000);
-    }
-    else
-    {
-        glManager.clearAllDisplays(); // Clear all vision displays
-        QString message = "ERROR - Loading Frame Number ";
-        message.append(QString::number(frameNumber));
-        message.append("/");
-        message.append(QString::number(totalFrameNumber));
-        setWindowTitle(QString("NUview"));
-    }
-    return;
-}
-
-//WINDOW MENU
-void MainWindow::cascade()
-{
-    mdiArea->cascadeSubWindows();
-    return;
-}
-
-void MainWindow::tile()
-{
-    mdiArea->tileSubWindows();
-    return;
 }
 
 void MainWindow::updateSelection()
