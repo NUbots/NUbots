@@ -1,6 +1,8 @@
 #include "LogFileReader.h"
 #include "nifVersion1FormatReader.h"
+#include "nulVersion1FormatReader.h"
 #include <QFileInfo>
+#include <QDebug>
 
 LogFileReader::LogFileReader(QObject *parent) :
     QObject(parent)
@@ -19,9 +21,21 @@ int LogFileReader::openFile(QString fileName)
 {
     closeFile();
     QFileInfo fileInfo(fileName);
-    if(fileInfo.suffix().toLower() == QString("nif"))
+    if(fileName.isEmpty()) return 0;
+    QString ext = fileInfo.suffix().toLower();
+    try{
+        if(ext == "nif")
+        {
+            currentFileReader = new nifVersion1FormatReader(fileName);
+        }
+        else if(ext == "nul")
+        {
+           currentFileReader = new nulVersion1FormatReader(fileName);
+        }
+    }
+    catch(exception &e)
     {
-        currentFileReader = new nifVersion1FormatReader(fileName);
+        qDebug() << e.what();
     }
 
     if(currentFileReader)
@@ -60,7 +74,10 @@ int LogFileReader::nextFrame()
 {
     if(currentFileReader)
     {
-        return currentFileReader->nextFrame();
+        int curr = currentFileReader->nextFrame();
+        emitControlAvailability();
+        return curr;
+
     }
     return 0;
 }
@@ -69,7 +86,9 @@ int LogFileReader::previousFrame()
 {
     if(currentFileReader)
     {
-        return currentFileReader->previousFrame();
+        int curr = currentFileReader->previousFrame();
+        emitControlAvailability();
+        return curr;
     }
     return 0;
 }
@@ -78,7 +97,9 @@ int LogFileReader::firstFrame()
 {
     if(currentFileReader)
     {
-        return currentFileReader->firstFrame();
+        int curr = currentFileReader->firstFrame();
+        emitControlAvailability();
+        return curr;
     }
     return 0;
 }
@@ -87,7 +108,9 @@ int LogFileReader::lastFrame()
 {
     if(currentFileReader)
     {
-        return currentFileReader->lastFrame();
+        int curr = currentFileReader->lastFrame();
+        emitControlAvailability();
+        return curr;
     }
     return 0;
 }
@@ -96,7 +119,29 @@ int LogFileReader::setFrame(int frameNumber)
 {
     if(currentFileReader)
     {
-        return currentFileReader->setFrame(frameNumber);
+        int curr = currentFileReader->setFrame(frameNumber);
+        emitControlAvailability();
+        return curr;
     }
     return 0;
+}
+
+void LogFileReader::emitControlAvailability()
+{
+    if(currentFileReader)
+    {
+        emit nextFrameAvailable(currentFileReader->isNextFrameAvailable());
+        emit previousFrameAvailable(currentFileReader->isPreviousFrameAvailable());
+        emit firstFrameAvailable(currentFileReader->isFirstFrameAvailable());
+        emit lastFrameAvailable(currentFileReader->isLastFrameAvailable());
+        emit setFrameAvailable(currentFileReader->isSetFrameAvailable());
+    }
+    else
+    {
+        emit nextFrameAvailable(false);
+        emit previousFrameAvailable(false);
+        emit firstFrameAvailable(false);
+        emit lastFrameAvailable(false);
+        emit setFrameAvailable(false);
+    }
 }
