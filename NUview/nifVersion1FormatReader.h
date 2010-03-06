@@ -13,6 +13,7 @@ public:
     explicit nifVersion1FormatReader(QObject *parent = 0);
     explicit nifVersion1FormatReader(const QString& filename, QObject *parent = 0);
     ~nifVersion1FormatReader();
+
     int openFile(const QString& filename);
     bool closeFile();
     bool fileGood(){return nifFileReader.currentFile.good();};
@@ -31,8 +32,6 @@ public slots:
     int firstFrame();
     int lastFrame();
     int setFrame(int frameNumber);
-
-
 
 protected:
     NUbotImage nifFileReader;

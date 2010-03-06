@@ -69,7 +69,7 @@ int nifVersion1FormatReader::previousFrame()
 
 int nifVersion1FormatReader::firstFrame()
 {
-    return setFrame(0);
+    return setFrame(1);
 }
 
 int nifVersion1FormatReader::lastFrame()
@@ -81,6 +81,7 @@ int nifVersion1FormatReader::setFrame(int frameNumber)
 {
     if( (frameNumber > 0) && (frameNumber <= numFrames()) && fileGood())
     {
+        currentFrameIndex = frameNumber;
         uint8 imgbuffer[320*240*2];
         int robotFrameNumber;
         NaoCamera camera;
