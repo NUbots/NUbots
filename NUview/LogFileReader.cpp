@@ -51,8 +51,7 @@ int LogFileReader::openFile(QString fileName)
         }
         else
         {
-            delete currentFileReader;
-            currentFileReader = 0;
+            closeFile();
         }
     }
     return currentFileReader->numFrames();
