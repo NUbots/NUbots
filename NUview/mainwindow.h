@@ -52,6 +52,7 @@ public slots:
 
     void shrinkToNativeAspectRatio();
     void filenameChanged(QString filename); //!< New filename
+    void fileClosed(); //!< File was closed.
 
     /*!
       @brief Used to select the colour at a given position in the image and

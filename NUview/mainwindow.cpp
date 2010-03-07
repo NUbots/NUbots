@@ -272,6 +272,8 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(newRawImageAvailable(const NUimage*)),&glManager, SLOT(newRawImage(const NUimage*)));
 
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
+    connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
+
 
 
     // Setup navigation control enabling/disabling
@@ -509,6 +511,11 @@ void  MainWindow::filenameChanged(QString filename)
     {
         setWindowTitle(QString("NUview"));
     }
+}
+
+void  MainWindow::fileClosed()
+{
+    filenameChanged(QString());
 }
 
 void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
