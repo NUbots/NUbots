@@ -39,7 +39,7 @@ public:
     pixels::Pixel selectRawPixel(int x, int y);
     bool imageAvailable()
     {
-        return hasImage;
+        return (rawImage != 0);
     }
 
     QString fileType;
@@ -54,7 +54,10 @@ public slots:
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);
+
     void setRawImage(const NUimage* image);
+    void setSensorData(const float* joint, const float* balance, const float* touch);
+    void processVisionFrame();
 
 signals:
     void imageDisplayChanged(const NUimage* updatedImage, GLDisplay::display displayId);
@@ -66,7 +69,6 @@ signals:
       @param touch The values of the robot's touch sensors.
       */
     void imageDisplayChanged(const double* joints,const bool bottomCamera,const double * touch);
-
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
@@ -89,7 +91,6 @@ private:
     void processVisionFrame(const NUimage* image);
     void processVisionFrame(ClassifiedImage& image);
 
-    void processVisionFrame();
     void generateClassifiedImage(const NUimage* yuvImage);
 
     unsigned char* classificationTable;
@@ -102,12 +103,14 @@ private:
 
     Horizon horizonLine;
     //TODO: these should change later..
-    float jointSensors[100];
-    float balanceSensors[100];
-    float touchSensors[100];
+    //float jointSensors[100];
+    //float balanceSensors[100];
+    //float touchSensors[100];
+    const float* jointSensors;
+    const float* balanceSensors;
+    const float* touchSensors;
     static const int maxUndoLength = 10;
     int nextUndoIndex;
-    bool hasImage;
     std::vector<classEntry> undoHistory[maxUndoLength];
 };
 

@@ -275,6 +275,8 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
+    connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
 
     // Setup navigation control enabling/disabling

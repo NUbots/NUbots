@@ -22,7 +22,10 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     classImage.useInternalBuffer();
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
-    hasImage = false;
+    rawImage = 0;
+    jointSensors = 0;
+    balanceSensors = 0;
+    touchSensors = 0;
     //debug<<"VirtualNUBot started";
 }
 
@@ -35,9 +38,15 @@ void virtualNUbot::setRawImage(const NUimage* image)
 {
     rawImage = image;
     vision.setImage(image);
-    hasImage = true;
-    processVisionFrame();
     return;
+}
+
+void virtualNUbot::setSensorData(const float* joint, const float* balance, const float* touch)
+{
+    jointSensors = joint;
+    balanceSensors = balance;
+    touchSensors = touch;
+    //horizonLine.Calculate();
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
@@ -53,7 +62,7 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage->width() && y < rawImage->height() && hasImage)
+    if(x < rawImage->width() && y < rawImage->height() && imageAvailable())
     {
         return rawImage->image[y][x];
     }
@@ -79,7 +88,6 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
         //qDebug() << "Error occured in Extraction: " << text;
         return;
     }
-
 
     ClassifiedPacketData* currentPacket = (ClassifiedPacketData*) uncompressed;
     classImage.useInternalBuffer(false);
@@ -112,7 +120,7 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(const NUimage* image)
 {
-    if(hasImage == false) return;
+    if(!imageAvailable()) return;
     //qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
@@ -303,7 +311,7 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
 {
-    if(hasImage == false) return;
+    if(!imageAvailable()) return;
     pixels::Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
