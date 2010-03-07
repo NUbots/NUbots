@@ -31,9 +31,9 @@ signals:
     void lastFrameAvailable(bool);
     void setFrameAvailable(bool);
 
-    void newRawImageAvailable(const NUimage*);
-    void newSensorDataAvailable(const float*, const float*, const float*);
-    void frameLoadingCompleted(int,int);
+    void rawImageChanged(const NUimage*);
+    void sensorDataChanged(const float*, const float*, const float*);
+    void frameChanged(int,int);
 
     void fileOpened(QString);
     void fileClosed();

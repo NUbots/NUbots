@@ -57,8 +57,8 @@ int nulVersion1FormatReader::nextFrame()
 
         currentFrameIndex++;
         fileStream >> rawImageBuffer;
-        emit newRawImageAvailable(&rawImageBuffer);
-        emit frameLoadingCompleted(currentFrame(),numFrames());
+        emit rawImageChanged(&rawImageBuffer);
+        emit frameChanged(currentFrame(),numFrames());
     }
     return currentFrame();
 

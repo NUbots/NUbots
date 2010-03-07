@@ -32,9 +32,9 @@ public:
     virtual bool isSetFrameAvailable(){return false;};
 
 signals:
-    void newRawImageAvailable(const NUimage*);
-    void newSensorDataAvailable(const float*,const float*,const float*);
-    void frameLoadingCompleted(int,int);
+    void rawImageChanged(const NUimage*);
+    void sensorDataChanged(const float*,const float*,const float*);
+    void frameChanged(int,int);
 
 public slots:
     virtual int nextFrame();

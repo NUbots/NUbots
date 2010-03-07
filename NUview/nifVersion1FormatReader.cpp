@@ -87,9 +87,9 @@ int nifVersion1FormatReader::setFrame(int frameNumber)
         NaoCamera camera;
         nifFileReader.getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
         rawImageBuffer.CopyFromYUV422Buffer(imgbuffer,320,240);
-        emit newRawImageAvailable(&rawImageBuffer);
-        emit newSensorDataAvailable(jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
-        emit frameLoadingCompleted(currentFrame(),numFrames());
+        emit rawImageChanged(&rawImageBuffer);
+        emit sensorDataChanged(jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
+        emit frameChanged(currentFrame(),numFrames());
     }
     return currentFrame();
 }

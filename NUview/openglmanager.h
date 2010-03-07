@@ -34,7 +34,7 @@ public:
         void updatedDisplay(int displayID, GLuint newDisplay, int width, int height);
 
     public slots:
-        void newRawImage(const NUimage* newImage){writeNUimageToDisplay(newImage, GLDisplay::rawImage);};
+        void setRawImage(const NUimage* newImage){writeNUimageToDisplay(newImage, GLDisplay::rawImage);};
         /*!
           @brief Accepts a new raw image and maps it to display instructions.
           @param newImage The new raw image.
