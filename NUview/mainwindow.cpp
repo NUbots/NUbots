@@ -267,13 +267,14 @@ void MainWindow::createStatusBar()
 void MainWindow::createConnections()
 {
     // Connect to log file reader
-    connect(&LogReader,SIGNAL(frameLoadingCompleted(int,int)),this, SLOT(imageFrameChanged(int,int)));
+    connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
-    connect(&LogReader,SIGNAL(newRawImageAvailable(const NUimage*)),&glManager, SLOT(newRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
 
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
 
 
     // Setup navigation control enabling/disabling

@@ -54,7 +54,7 @@ public slots:
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);
-    void newRawImage(const NUimage* image);
+    void setRawImage(const NUimage* image);
 
 signals:
     void imageDisplayChanged(const NUimage* updatedImage, GLDisplay::display displayId);
@@ -75,7 +75,6 @@ signals:
     void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void drawFO_Ball(float cx, float cy, float radius, GLDisplay::display displayId);
 
-
 private:
     class classEntry
     {
@@ -87,23 +86,17 @@ private:
     };
 
 
-    void processVisionFrame(NUimage& image);
+    void processVisionFrame(const NUimage* image);
     void processVisionFrame(ClassifiedImage& image);
 
     void processVisionFrame();
-    void generateClassifiedImage(const NUimage& yuvImage);
+    void generateClassifiedImage(const NUimage* yuvImage);
 
-    // File Access
-    NUbotImage* file;               //!< Instance of the File reader
-    ifstream streamFile;
-    unsigned int streamFileLength;
     unsigned char* classificationTable;
     unsigned char* tempLut;
-    LogFileReader test;
-
 
     // Image Storage
-    NUimage rawImage;
+    const NUimage* rawImage;
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
 

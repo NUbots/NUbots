@@ -11,7 +11,6 @@
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
-    file = new NUbotImage();
     //! TODO: Load LUT from filename.
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
@@ -29,14 +28,15 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
 virtualNUbot::~virtualNUbot()
 {
-    delete file;
     delete classificationTable;
 }
 
-void virtualNUbot::newRawImage(const NUimage* image)
+void virtualNUbot::setRawImage(const NUimage* image)
 {
-    rawImage = *image;
-    emit imageDisplayChanged(image, GLDisplay::rawImage);
+    rawImage = image;
+    vision.setImage(image);
+    hasImage = true;
+    processVisionFrame();
     return;
 }
 
@@ -53,9 +53,9 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage.width() && y < rawImage.height() && hasImage)
+    if(x < rawImage->width() && y < rawImage->height() && hasImage)
     {
-        return rawImage.image[y][x];
+        return rawImage->image[y][x];
     }
     else
     {
@@ -98,7 +98,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     */
 }
 
-void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
+void virtualNUbot::generateClassifiedImage(const NUimage* yuvImage)
 {
     vision.classifyImage(classImage);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
@@ -110,7 +110,7 @@ void virtualNUbot::processVisionFrame()
     processVisionFrame(rawImage);
 }
 
-void virtualNUbot::processVisionFrame(NUimage& image)
+void virtualNUbot::processVisionFrame(const NUimage* image)
 {
     if(hasImage == false) return;
     //qDebug() << "Begin Process Frame";
@@ -143,7 +143,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //qDebug() << "Start switch";
 
 
-    vision.setImage(&image);
+    vision.setImage(image);
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
