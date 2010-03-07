@@ -13,7 +13,6 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         overlays[id].primary = false;
         overlays[id].enabled = false;
         overlays[id].colour = getDefaultColour(id);
-        //overlays[id].hasDisplayCommand = false;
         overlays[id].hasDisplayCommand = shareWidget->hasDisplayCommand(id);
         overlays[id].displayCommand = shareWidget->getDisplayCommand(id);
     }
