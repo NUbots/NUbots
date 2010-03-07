@@ -16,7 +16,7 @@ public:
 
     int openFile(const QString& filename);
     bool closeFile();
-    bool fileGood(){return nifFileReader.currentFile.good();};
+    bool fileGood(){return (nifFileReader.currentFile.good() && nifFileReader.currentFile.is_open());};
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
