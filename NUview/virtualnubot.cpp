@@ -40,53 +40,6 @@ void virtualNUbot::newRawImage(const NUimage* image)
     return;
 }
 
-int virtualNUbot::openFile(const QString& filename)
-{
-    try{
-        QStringList list = filename.split('.');
-        fileType = list.last();
-
-        if(streamFile.is_open())
-        {
-            streamFile.close();
-        }
-
-        if(fileType == QString("nif"))
-        {
-            //return file->openFile(filename.toAscii().data(), false);
-            test.openFile(filename);
-            connect(&test,SIGNAL(newRawImageAvailable(const NUimage*)),this,SLOT(newRawImage(const NUimage*)));
-            return test.numFrames();
-        }
-        else if(fileType == QString("nul"))
-        {
-            streamFile.open(filename.toAscii().data(),ios_base::in|ios_base::binary);
-            streamFile.seekg(0,ios_base::end);
-            streamFileLength = streamFile.tellg();
-            streamFile.seekg(0,ios_base::beg);
-            int x,y;
-            streamFile >> x >> y;
-            streamFile.seekg(0,ios_base::beg);
-//            qDebug() << "File Length is " << streamFileLength;
-//            qDebug() << "Image resolution is " << x << "x" << y;
-//            qDebug() << "Estimated image size per frame is " << (2*sizeof(x) + 2*x*y*sizeof(int) + 3*sizeof(' '));
-            int numImages = streamFileLength / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
-//            qDebug() << "Number of frames is therefore " << numImages;
-            return numImages;
-        }
-    }
-    catch(...)
-    {
-        QString message = "Cannot access (%1) for reading";
-        message = message.arg(filename);
-        qDebug() << message;
-        debug << message.toStdString();
-        QMessageBox::warning( 0, "IO Error", message);
-        return -1;
-    }
-    return 0;
-}
-
 void virtualNUbot::saveLookupTableFile(QString fileName)
 {
     LUTTools::SaveLUT(classificationTable,LUTTools::LUT_SIZE,fileName.toAscii());
@@ -108,90 +61,6 @@ pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
     {
         return pixels::Pixel();
     }
-}
-
-bool virtualNUbot::loadFrame(int frameNumber)
-{
-    hasImage = false;
-    NaoCamera camera;
-
-    try{
-        if(fileType == QString("nif"))
-        {
-            /*
-            uint8 imgbuffer[320*240*2];
-            int robotFrameNumber;
-
-            file->getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensors, balanceSensors, touchSensors);
-            rawImage.CopyFromYUV422Buffer(imgbuffer,320,240);
-            */
-            test.setFrame(frameNumber);
-            //rawImage = test.getImage();
-        }
-        else if (fileType == QString("nul"))
-        {
-            if(frameNumber == 1)
-            {
-                streamFile.seekg(0,ios_base::beg);
-                streamFile.clear();
-            }
-            if(streamFile.good()){
-                unsigned int currPos = streamFile.tellg();
-                if( (streamFileLength - currPos) > 2*sizeof(int) )
-                {
-                    streamFile >> rawImage;
-                }
-                emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-            }
-            else
-            {
-                QString message = "streamFile: %1 bit set.";
-                if(streamFile.bad())
-                    qDebug() << message.arg("bad");
-                if(streamFile.eof())
-                    qDebug() << message.arg("eof");
-                if(streamFile.fail())
-                    qDebug() << message.arg("fail");
-
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    catch(exception &e)
-    {
-        QString message = "Error loading frame number %1";
-        message = message.arg(frameNumber);
-        message += e.what();
-        debug << message.toStdString();
-        qDebug() << message;
-        QMessageBox::warning( 0, "IO Error", message);
-        return false;
-    }
-
-    hasImage = true;
-    // Create double values of each joint and send to localisation widget
-    double jS[22];
-    double tS[10];
-    for (int i = 0; i <22;i++)
-    {
-        jS[i] = jointSensors[i] * 57.2957795;
-    }
-    for (int j = 0; j<10;j++)
-    {
-        tS[j] = touchSensors[j];
-    }
-    emit imageDisplayChanged(jS,camera,tS);
-
-    //emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-    processVisionFrame(rawImage);
-
-    return true;
 }
 
 void virtualNUbot::ProcessPacket(QByteArray* packet)
@@ -243,6 +112,7 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(NUimage& image)
 {
+    if(hasImage == false) return;
     //qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;

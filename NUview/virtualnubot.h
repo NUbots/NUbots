@@ -36,8 +36,6 @@ Q_OBJECT
 public:
     virtualNUbot(QObject * parent = 0);
     ~virtualNUbot();
-    bool loadFrame(int FrameNumber);
-    int openFile(const QString& filename);
     pixels::Pixel selectRawPixel(int x, int y);
     bool imageAvailable()
     {
