@@ -43,10 +43,10 @@ int LogFileReader::openFile(QString fileName)
         if(currentFileReader->fileGood())
         {
             connect(currentFileReader,SIGNAL(rawImageChanged(const NUimage*)), this, SIGNAL(rawImageChanged(const NUimage*)));
+            connect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
             connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
                     this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
-            connect(currentFileReader,SIGNAL(frameChanged(int,int)),
-                    this, SIGNAL(frameChanged(int,int)));
+            connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
         }
         else

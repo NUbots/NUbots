@@ -274,6 +274,7 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
+    connect(&LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
     connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));

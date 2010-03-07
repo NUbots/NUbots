@@ -35,6 +35,7 @@ signals:
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*,const float*,const float*);
     void frameChanged(int,int);
+    void cameraChanged(int);
 
 public slots:
     virtual int nextFrame();

@@ -46,7 +46,28 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
     jointSensors = joint;
     balanceSensors = balance;
     touchSensors = touch;
+    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],cameraNumber);
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
     //horizonLine.Calculate();
+    /*
+    // Create double values of each joint and send to localisation widget
+    double jS[22];
+    double tS[10];
+    for (int i = 0; i <22;i++)
+    {
+        jS[i] = jointSensors[i] * 57.2957795;
+    }
+    for (int j = 0; j<10;j++)
+    {
+        tS[j] = touchSensors[j];
+    }
+    emit imageDisplayChanged(jS,camera,tS);
+
+    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
+    emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+    processVisionFrame(rawImage);
+    */
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)

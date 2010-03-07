@@ -57,6 +57,7 @@ public slots:
 
     void setRawImage(const NUimage* image);
     void setSensorData(const float* joint, const float* balance, const float* touch);
+    void setCamera(int newCamera){cameraNumber = newCamera;};
     void processVisionFrame();
 
 signals:
@@ -96,11 +97,11 @@ private:
     unsigned char* classificationTable;
     unsigned char* tempLut;
 
-    // Image Storage
+    // Data Storage
     const NUimage* rawImage;
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
-
+    int cameraNumber;
     Horizon horizonLine;
     //TODO: these should change later..
     //float jointSensors[100];
