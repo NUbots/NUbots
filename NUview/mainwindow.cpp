@@ -279,7 +279,6 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
-
     // Setup navigation control enabling/disabling
     connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
     connect(&LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
@@ -306,7 +305,9 @@ void MainWindow::createConnections()
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
 
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));
+    //connect(&virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));
+    connect(&LogReader,SIGNAL(cameraChanged(int)),localisation, SLOT(setCamera(int)));
+    connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),localisation, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
