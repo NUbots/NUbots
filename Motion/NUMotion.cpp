@@ -196,6 +196,10 @@ void NUMotion::process(JobList& jobs)
                 debug << "NUMotion::process(): Processing a walkparameter job. After remove." << endl;
             #endif
         }
+#else
+        if (false)
+        {
+        }
 #endif  // USE_WALK
         
 #ifdef USE_KICK
@@ -212,8 +216,8 @@ void NUMotion::process(JobList& jobs)
             debug << "NUMotion::process(): Processing a kick job." << endl;
 #endif
             
-            m_kick->kick(time, kickposition, kicktarget);
-            jobs.removeMotionJob(job);
+            m_kick->kickToPoint(kickposition, kicktarget);
+            //jobs.removeMotionJob(job);
         }
 #endif  // USE_KICK 
 #ifdef USE_HEAD

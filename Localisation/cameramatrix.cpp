@@ -76,10 +76,10 @@ CameraMatrix::CameraMatrix(double* paramaters,double* joints,double x, double y,
     leftLegTemp[3][0] = 1;
     rightLegTemp[3][0] = 1;
 
-    leftLegTemp = bearingRot * GaussJordan(footHeightTrans * lAnkleRollRot * lAnklePitchRot * tibiaTrans * lKneePitchRot *
+    leftLegTemp = bearingRot * InverseMatrix(footHeightTrans * lAnkleRollRot * lAnklePitchRot * tibiaTrans * lKneePitchRot *
                thighTrans * lHipPitchRot * lHipRollRot * lHipYawPitchRot * lHipOffsetTrans) * leftLegTemp;
 
-    rightLegTemp = bearingRot * GaussJordan(footHeightTrans * rAnkleRollRot * rAnklePitchRot * tibiaTrans * rKneePitchRot *
+    rightLegTemp = bearingRot * InverseMatrix(footHeightTrans * rAnkleRollRot * rAnklePitchRot * tibiaTrans * rKneePitchRot *
                thighTrans * rHipPitchRot * rHipRollRot * rHipYawPitchRot * rHipOffsetTrans) * rightLegTemp;
 
     // Create both position transformations based on position of feet
@@ -101,8 +101,8 @@ CameraMatrix::CameraMatrix(double* paramaters,double* joints,double x, double y,
 
 
     // Create total transformation matrices. Note: inverted to provide World-to-Camera coordinates
-    leftCam = GaussJordan(totalLeftLegTransformation * totalTorsoTransformation);
-    rightCam = GaussJordan(totalRightLegTransformation * totalTorsoTransformation);
+    leftCam = InverseMatrix(totalLeftLegTransformation * totalTorsoTransformation);
+    rightCam = InverseMatrix(totalRightLegTransformation * totalTorsoTransformation);
 
 
 
