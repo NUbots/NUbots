@@ -369,6 +369,11 @@ std::vector<pixels::Pixel> ClassificationWidget::getSelectedColours(int desiredC
             channel[1] = currentColour.g;
             channel[2] = currentColour.b;
             break;
+        default:
+            channel[0] = 0;
+            channel[1] = 0;
+            channel[2] = 0;
+            break;
     }
 
     int min[3];
