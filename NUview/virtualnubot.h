@@ -58,6 +58,7 @@ public slots:
     void setRawImage(const NUimage* image);
     void setSensorData(const float* joint, const float* balance, const float* touch);
     void setCamera(int newCamera){cameraNumber = newCamera;};
+    void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;};
     void processVisionFrame();
 
 signals:
@@ -85,10 +86,11 @@ private:
     void processVisionFrame(ClassifiedImage& image);
 
     void generateClassifiedImage(const NUimage* yuvImage);
+    ClassIndex::Colour getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour);
 
     unsigned char* classificationTable;
     unsigned char* tempLut;
-
+    bool autoSoftColour;
     // Data Storage
     const NUimage* rawImage;
     ClassifiedImage classImage, previewClassImage;

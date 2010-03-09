@@ -291,7 +291,6 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(lastFrameAvailable(bool)),lastFrameAction, SLOT(setEnabled(bool)));
     connect(&LogReader,SIGNAL(setFrameAvailable(bool)),selectFrameAction, SLOT(setEnabled(bool)));
 
-
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(const NUimage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
@@ -308,6 +307,8 @@ void MainWindow::createConnections()
     connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
+
+    connect(classification,SIGNAL(autoSoftColourChanged(bool)),&virtualRobot, SLOT(setAutoSoftColour(bool)));
 
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
     //connect(&virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));

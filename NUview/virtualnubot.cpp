@@ -26,6 +26,8 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     jointSensors = 0;
     balanceSensors = 0;
     touchSensors = 0;
+
+    autoSoftColour = false;
     //debug<<"VirtualNUBot started";
 }
 
@@ -363,7 +365,7 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixe
         if(classificationTable[index] != colour)
         {
             undoHistory[nextUndoIndex].push_back(classEntry(index,classificationTable[index])); // Save index and colour
-            classificationTable[index] = colour;
+            classificationTable[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
         }
     }
     nextUndoIndex++;
@@ -372,3 +374,90 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixe
     processVisionFrame(rawImage);
     return;
 }
+
+ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour)
+{
+    if(autoSoftColour == false) return requestedColour;
+    switch(currentColour)
+    {
+        case ClassIndex::red:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::orange:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::red_orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::red:
+            case ClassIndex::orange:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::red:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            case ClassIndex::yellow:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::yellow_orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::yellow:
+            case ClassIndex::orange:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::yellow:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::orange:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+
+    }
+    return requestedColour;
+}
+
