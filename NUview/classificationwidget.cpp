@@ -183,6 +183,7 @@ ClassificationWidget::~ClassificationWidget()
     // Delete Controls
     delete coloursComboBox;
     delete colourSpaceComboBox;
+    delete autoSoftColourCheckBox;
     for(int channel = 0; channel < numChannels; channel++)
     {
         delete channelSelectors[channel];
