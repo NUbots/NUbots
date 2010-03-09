@@ -296,7 +296,7 @@ void MainWindow::open()
 {
     fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), ".",
-                            tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;NUbot Log Files (*.nul)"));
+                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;All Files(*.*)"));
     openFile(fileName);
 }
 
@@ -506,7 +506,7 @@ void MainWindow::selectFrame()
     int selectedFrameNumber;
     bool ok = true;
 
-    selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
+    selectedFrameNumber = QInputDialog::getInteger(this, tr("Select Frame"), tr("Enter frame to jump to:"), currentFrameNumber, 1, totalFrameNumber, 1, &ok);
 
     if (ok && !fileName.isEmpty() && selectedFrameNumber <= totalFrameNumber && selectedFrameNumber >= 1){
         currentFrameNumber = selectedFrameNumber;
