@@ -61,9 +61,16 @@ bool LogFileReader::closeFile()
 {
     if(currentFileReader)
     {
+        try{
         currentFileReader->closeFile();
         delete currentFileReader;
         currentFileReader = 0;
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
     }
     emit fileClosed();
     return true;
@@ -73,7 +80,15 @@ int LogFileReader::nextFrame()
 {
     if(currentFileReader)
     {
-        int curr = currentFileReader->nextFrame();
+        int curr = 0;
+        try{
+            curr = currentFileReader->nextFrame();
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
         emitControlAvailability();
         return curr;
 
@@ -85,7 +100,15 @@ int LogFileReader::previousFrame()
 {
     if(currentFileReader)
     {
-        int curr = currentFileReader->previousFrame();
+        int curr = 0;
+        try{
+            curr = currentFileReader->previousFrame();
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
         emitControlAvailability();
         return curr;
     }
@@ -96,7 +119,16 @@ int LogFileReader::firstFrame()
 {
     if(currentFileReader)
     {
-        int curr = currentFileReader->firstFrame();
+        int curr = 0;
+        try{
+            curr = currentFileReader->firstFrame();
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
+
         emitControlAvailability();
         return curr;
     }
@@ -107,7 +139,15 @@ int LogFileReader::lastFrame()
 {
     if(currentFileReader)
     {
-        int curr = currentFileReader->lastFrame();
+        int curr = 0;
+        try{
+            curr = currentFileReader->lastFrame();
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
         emitControlAvailability();
         return curr;
     }
@@ -118,7 +158,15 @@ int LogFileReader::setFrame(int frameNumber)
 {
     if(currentFileReader)
     {
-        int curr = currentFileReader->setFrame(frameNumber);
+        int curr = 0;
+        try{
+            curr = currentFileReader->setFrame(frameNumber);
+        }
+        catch(exception e)
+        {
+            qDebug() << "I/O Error: " << e.what();
+            closeFile();
+        }
         emitControlAvailability();
         return curr;
     }
