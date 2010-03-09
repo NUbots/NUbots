@@ -36,7 +36,7 @@ Q_OBJECT
 public:
     virtualNUbot(QObject * parent = 0);
     ~virtualNUbot();
-    pixels::Pixel selectRawPixel(int x, int y);
+    Pixel selectRawPixel(int x, int y);
     bool imageAvailable()
     {
         return (rawImage != 0);
@@ -49,8 +49,8 @@ public slots:
     */
     void ProcessPacket(QByteArray* packet);
     void updateLookupTable(unsigned char* packetBuffer){return;}
-    void updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
-    void UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
+    void updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs);
+    void UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);

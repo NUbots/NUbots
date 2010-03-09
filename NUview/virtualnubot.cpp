@@ -63,7 +63,7 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
     processVisionFrame();
 }
 
-pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
+Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
     if(x < rawImage->width() && y < rawImage->height() && imageAvailable())
     {
@@ -71,7 +71,7 @@ pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
     }
     else
     {
-        return pixels::Pixel();
+        return Pixel();
     }
 }
 
@@ -321,10 +321,10 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 }
 
 
-void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
+void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
     if(!imageAvailable()) return;
-    pixels::Pixel temp;
+    Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
@@ -361,9 +361,9 @@ void virtualNUbot::UndoLUT()
 }
 
 
-void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
+void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
-    pixels::Pixel temp;
+    Pixel temp;
     undoHistory[nextUndoIndex].clear();
     std::vector<classEntry>(undoHistory[nextUndoIndex]).swap(undoHistory[nextUndoIndex]); // Free up vector memory
 

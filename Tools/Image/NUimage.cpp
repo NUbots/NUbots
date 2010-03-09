@@ -59,14 +59,14 @@ void NUimage::removeInternalBuffer()
 
 void NUimage::addInternalBuffer(int width, int height)
 {
-    pixels::Pixel* buffer = allocateBuffer(width, height);
+    Pixel* buffer = allocateBuffer(width, height);
     MapBufferToImage(buffer, width, height);
     usingInternalBuffer = true;
 }
 
-pixels::Pixel* NUimage::allocateBuffer(int width, int height)
+Pixel* NUimage::allocateBuffer(int width, int height)
 {
-    pixels::Pixel* buffer = new pixels::Pixel[width * height];
+    Pixel* buffer = new Pixel[width * height];
     localBuffer = buffer;
     return buffer;
 }
@@ -77,7 +77,7 @@ void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int
     // halve the width and height since we want to skip
     width /= 2;
     height /= 2;
-    pixels::Pixel* pixelisedBuffer = (pixels::Pixel*) buffer;
+    Pixel* pixelisedBuffer = (Pixel*) buffer;
     if(height != this->height())
     {
         delete [] image;
@@ -86,7 +86,7 @@ void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int
     if(image == 0)
     {
         //Allocate memory for array of elements of column
-        image = new pixels::Pixel*[height];
+        image = new Pixel*[height];
     }
     // Now point the pointers in the right place
     int pixelIndex = 0;
@@ -105,7 +105,7 @@ void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int h
     height /= 2;
     setImageDimensions(width, height);
     useInternalBuffer(true);
-    pixels::Pixel* pixelisedBuffer = (pixels::Pixel*)buffer;
+    Pixel* pixelisedBuffer = (Pixel*)buffer;
     for(int y = 0; y < height; y++)
     {
        for(int x = 0; x < width; x++)
@@ -116,7 +116,7 @@ void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int h
     return;
 }
 
-void NUimage::MapBufferToImage(pixels::Pixel* buffer, int width, int height)
+void NUimage::MapBufferToImage(Pixel* buffer, int width, int height)
 {
     if(height != this->height())
     {
@@ -126,7 +126,7 @@ void NUimage::MapBufferToImage(pixels::Pixel* buffer, int width, int height)
     if(image == 0)
     {
         //Allocate memory for array of elements of column
-        image = new pixels::Pixel*[height];
+        image = new Pixel*[height];
     }
     // Now point the pointers in the right place
     int pixelIndex = 0;

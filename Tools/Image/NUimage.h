@@ -7,8 +7,7 @@
 #ifndef NUIMAGE_H
 #define NUIMAGE_H
 
-#include "NUPlatform/NUCamera/NUCameraData.h"
-#include "pixels.h"
+#include "Pixel.h"
 #include <iostream>
 
 /*!
@@ -30,8 +29,8 @@ public:
     void useInternalBuffer(bool newCondition = true);
     void removeInternalBuffer();
     void addInternalBuffer(int width, int height);
-    pixels::Pixel* allocateBuffer(int width, int height);
-    void MapBufferToImage(pixels::Pixel* buffer, int width, int height);
+    Pixel* allocateBuffer(int width, int height);
+    void MapBufferToImage(Pixel* buffer, int width, int height);
     void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height);
     void CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height);
     void setImageDimensions(int newWidth, int newHeight);
@@ -54,10 +53,9 @@ public:
         return width()*height();
     }
 
-    pixels::Pixel **image;
-    pixels::Pixel *localBuffer;
+    Pixel **image;
+    Pixel *localBuffer;
 
-    //CameraData cameraInfo;		//!< Properties and settings of the camera used to capture the image.
     double timestamp;			//!< Time point at which the image was captured. (Unix Time)
 private:
     int imageWidth;
