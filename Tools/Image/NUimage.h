@@ -27,7 +27,6 @@ public:
     NUimage(int width, int height, bool useInternalBuffer);
     ~NUimage();
 
-
     void useInternalBuffer(bool newCondition = true);
     void removeInternalBuffer();
     void addInternalBuffer(int width, int height);
@@ -63,6 +62,6 @@ public:
 private:
     int imageWidth;
     int imageHeight;
-    bool internalBuffer;
+    bool usingInternalBuffer;
 };
 #endif

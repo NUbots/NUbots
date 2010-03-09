@@ -5,15 +5,15 @@
 @brief Declaration of NUbots NUimage class. Storage class for images.
 */
 
-NUimage::NUimage(): imageWidth(0), imageHeight(0), internalBuffer(false)
+NUimage::NUimage(): imageWidth(0), imageHeight(0), usingInternalBuffer(false)
 {
     image = 0;
 }
 
-NUimage::NUimage(int width, int height, bool useInternalBuffer): imageWidth(width), imageHeight(height), internalBuffer(useInternalBuffer)
+NUimage::NUimage(int width, int height, bool useInternalBuffer): imageWidth(width), imageHeight(height), usingInternalBuffer(useInternalBuffer)
 {
     image = 0;
-    if(internalBuffer)
+    if(usingInternalBuffer)
     {
         addInternalBuffer(width, height);
     }
@@ -21,7 +21,7 @@ NUimage::NUimage(int width, int height, bool useInternalBuffer): imageWidth(widt
 
 NUimage::~NUimage()
 {
-    if (internalBuffer)
+    if (usingInternalBuffer)
     {
         removeInternalBuffer();
     }
@@ -31,34 +31,35 @@ NUimage::~NUimage()
 
 void NUimage::useInternalBuffer(bool newCondition)
 {
-    if(internalBuffer == newCondition) return;
-    if (internalBuffer == true)
+    if(usingInternalBuffer == newCondition) return;
+    if (newCondition == true)
     {
-        // Remove old buffer.
-        removeInternalBuffer();
+        addInternalBuffer(width(), height());
     }
     else
     {
-        addInternalBuffer(width(), height());
+        // Remove old buffer.
+        removeInternalBuffer();
     }
 }
 
 void NUimage::removeInternalBuffer()
 {
-    if (internalBuffer)
+    if (usingInternalBuffer)
     {
         delete [] *image;
-        delete [] image;
+        delete [] localBuffer;
         image = 0;
+        localBuffer = 0;
     }
-    internalBuffer = false;
+    usingInternalBuffer = false;
 }
 
 void NUimage::addInternalBuffer(int width, int height)
 {
     pixels::Pixel* buffer = allocateBuffer(width, height);
     MapBufferToImage(buffer, width, height);
-    internalBuffer = true;
+    usingInternalBuffer = true;
 }
 
 pixels::Pixel* NUimage::allocateBuffer(int width, int height)
@@ -142,7 +143,7 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
     {
         return;
     }
-    if(internalBuffer == true)
+    if(usingInternalBuffer == true)
     {
         removeInternalBuffer();
         addInternalBuffer(newWidth, newHeight);
