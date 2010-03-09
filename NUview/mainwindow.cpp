@@ -284,6 +284,8 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
+
     // Setup navigation control enabling/disabling
     connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
     connect(&LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
@@ -303,7 +305,7 @@ void MainWindow::createConnections()
     connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
-    connect(classification,SIGNAL(newSelection()), this, SLOT(updateSelection()));
+    connect(classification,SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
     connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
@@ -589,14 +591,14 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 
 void MainWindow::updateSelection()
 {
-    virtualRobot.updateSelection(classification->getColourLabel(),classification->getSelectedColours(ClassificationWidget::YCbCr));
+    virtualRobot.updateSelection(classification->getColourLabel(),classification->getSelectedColours());
 }
 
 void MainWindow::SelectColourAtPixel(int x, int y)
 {
     if(virtualRobot.imageAvailable())
     {
-        pixels::Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
+        Pixel tempPixel = virtualRobot.selectRawPixel(x,y);
 
         QString message = "(";
         message.append(QString::number(x));
@@ -604,13 +606,13 @@ void MainWindow::SelectColourAtPixel(int x, int y)
         message.append(QString::number(y));
         message.append(")");
         this->statusBar->showMessage(message, 10000);
-        classification->setColour(tempPixel,ClassificationWidget::YCbCr);
+        classification->setColour(tempPixel);
     }
 }
 
 void MainWindow::ClassifySelectedColour()
 {
-    virtualRobot.UpdateLUT(classification->getColourLabel(),classification->getSelectedColours(ClassificationWidget::YCbCr));
+    virtualRobot.UpdateLUT(classification->getColourLabel(),classification->getSelectedColours());
 }
 
 void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
