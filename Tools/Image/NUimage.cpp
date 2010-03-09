@@ -1,5 +1,5 @@
 #include "NUimage.h"
-
+#include <QDebug>
 /*!
 @file NUimage.h
 @brief Declaration of NUbots NUimage class. Storage class for images.
@@ -25,8 +25,11 @@ NUimage::~NUimage()
     {
         removeInternalBuffer();
     }
-    delete [] image;
-    image = 0;
+    else
+    {
+        delete [] image;
+        image = 0;
+    }
 }
 
 void NUimage::useInternalBuffer(bool newCondition)
@@ -47,7 +50,7 @@ void NUimage::removeInternalBuffer()
 {
     if (usingInternalBuffer)
     {
-        delete [] *image;
+        delete [] image;
         delete [] localBuffer;
         image = 0;
         localBuffer = 0;
@@ -179,10 +182,11 @@ std::istream& operator>> (std::istream& input, NUimage& p_image)
     char temp;
     input >> width;
     input >> height;
-    p_image.useInternalBuffer();
-    p_image.setImageDimensions(width, height);
 
-    input.read(&temp, sizeof(char));         // skip over the single space after the size
+    p_image.setImageDimensions(width, height);
+    p_image.useInternalBuffer(true);
+    input.read(&temp, sizeof(temp));
+
     for(int y = 0; y < height; y++)
     {
        for(int x = 0; x < width; x++)
