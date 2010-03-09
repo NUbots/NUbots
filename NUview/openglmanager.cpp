@@ -5,7 +5,6 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
-#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -25,7 +24,7 @@ OpenglManager::~OpenglManager()
     }
 }
 
-void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
+void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 {
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
@@ -33,8 +32,6 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
         deleteTexture(textures[displayId]);
         textureStored[displayId] = false;
     }
-    //textures[displayId] = bindTexture(image, GL_TEXTURE_2D);
-    image.save("test.jpg");
     QImage tex;
     tex = QGLWidget::convertToGLFormat( image );
     glGenTextures( 1, &textures[displayId] );
@@ -69,7 +66,7 @@ void OpenglManager::createDrawTextureImage(QImage& image, int displayId)
     displayStored[displayId] = true;
 }
 
-void OpenglManager::writeNUimageToDisplay(NUimage* newImage, GLDisplay::display displayId)
+void OpenglManager::writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId)
 {
     width = newImage->width();
     height = newImage->height();

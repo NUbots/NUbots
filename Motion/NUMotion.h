@@ -30,6 +30,7 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUWalk.h"
+#include "NUKick.h"
 #include "NUHead.h"
 #include "FallProtection.h"
 #include "Getup.h"

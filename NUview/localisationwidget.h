@@ -178,13 +178,14 @@ public slots:
       */
     void rHipRollChanged(double newRHipRoll);
 
-    /*!
+    /*//!
       @brief Accepts the robot's sensor data each change of frame and updates the local variables.
       @param jointSensors A pointer to the start of an array of doubles containing the joint sensor data.
       @param camera A boolean representing the camera that is being used.
       @param touchSensors A pointer to the start of an array of doubles containing the touch sensor data.
       */
-    void frameChange(double* jointSensors,bool camera,double* touchSensors);
+    void setSensorData(const float* jointSensors, const float* balanceSensors ,const float* touchSensors);
+    void setCamera(int cameraId){bottomCamera = (cameraId==1);};
 
     /*!
       @brief Accepts a new value for the x ordinate of anglePoint.

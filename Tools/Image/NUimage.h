@@ -33,6 +33,8 @@ public:
     void addInternalBuffer(int width, int height);
     pixels::Pixel* allocateBuffer(int width, int height);
     void MapBufferToImage(pixels::Pixel* buffer, int width, int height);
+    void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height);
+    void CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height);
     void setImageDimensions(int newWidth, int newHeight);
 
     friend std::ostream& operator<< (std::ostream& output, const NUimage& p_nuimage);

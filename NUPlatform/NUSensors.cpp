@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ NUSensors::NUSensors()
     debug << "NUSensors::NUSensors" << endl;
 #endif
     m_current_time = nusystem->getTime();
+    m_previous_time = 0;
     m_data = new NUSensorsData();
 }
 
@@ -79,6 +80,7 @@ NUSensorsData* NUSensors::update()
     debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
     m_data->summaryTo(debug);
 #endif
+    m_previous_time = m_current_time;
     return getData();
 }
 
@@ -284,6 +286,9 @@ void NUSensors::calculateFallSense()
 }
 
 /*! @brief Calculates the total force in Newtons on each foot
+ 
+    The total force on each foot is calibrated online assuming that over time the force on the left and right foot
+    will average out to be the same value.
  */
 void NUSensors::calculateFootForce()
 {
@@ -291,6 +296,7 @@ void NUSensors::calculateFootForce()
     debug << "NUSensors::calculateFootForce()" << endl;
 #endif
     static vector<float> forces(3,0);
+    const float MINIMUM_CONTACT_FORCE = 2;          // If we register a force less than 2N (approx. 200g)
     forces[0] = 0;
     // now I assume that the left foot values are stored first (because they are ;)) and that the left and right feet have the same number of sensors
     for (int i=0; i<m_data->FootSoleValues->size()/2; i++)
@@ -298,53 +304,155 @@ void NUSensors::calculateFootForce()
     forces[1] = 0;
     for (int i=m_data->FootSoleValues->size()/2; i<m_data->FootSoleValues->size(); i++)
         forces[1] += (*m_data->FootSoleValues)[i];
+    
+    // Now I attempt to compensate for uncalibrated foot sensors by using the long term averages, to scale each foot
+    // I assume that the force on the left and right foot over time should be the same.
+    static float leftforcesum = 0;
+    static float rightforcesum = 0;
+    static int forcecount = 0;
+    static float leftforceaverage = 0;
+    static float rightforceaverage = 0;
+    
+    if (forces[0] + forces[1] > MINIMUM_CONTACT_FORCE)
+    {   // only use forces which exceed a minimum contact force
+        leftforcesum += forces[0];
+        rightforcesum += forces[1];
+        forcecount++;
+        leftforceaverage = leftforcesum/forcecount;
+        rightforceaverage = rightforcesum/forcecount;
+        
+        if (forcecount > 500)
+        {   // only scale using the long term averages, if we have enough data
+            forces[0] *= (leftforceaverage + rightforceaverage)/leftforceaverage;
+            forces[1] *= (leftforceaverage + rightforceaverage)/rightforceaverage;
+        }
+        
+        if (forcecount > 5000)
+        {   // if the number of forcecount is getting large, then the sums are getting large, and we should avoid overflow
+            forcecount = 2000;
+            leftforcesum = leftforceaverage*forcecount;
+            rightforcesum = rightforceaverage*forcecount;
+        }
+    }
+    
+    // save the foot forces in the FootForce sensor
     forces[2] = forces[0] + forces[1];
     m_data->FootForce->setData(m_current_time, forces, true);
 }
 
 /*! @brief Determines the time at which each foot last impacted with the ground
+
  */
 void NUSensors::calculateFootImpact()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFootImpact()" << endl;
 #endif   
-    const int numpastvalues = 4;
-    static boost::circular_buffer<float> previousleftforces(numpastvalues, 0);      // forces on the left foot
-    static boost::circular_buffer<float> previousrightforces(numpastvalues, 0);     // forces on the right foot
-    static boost::circular_buffer<float> previousforces(numpastvalues, 0);          // forces on the feet
-    
-    const float minimumtotalforce = 3;          //!< @todo This should be defined based on the robot weight, or in someother platform specific way
+    const float MINIMUM_CONTACT_FORCE = 2;          // If we register a force less than 2N (approx. 200g)
     static vector<float> impacttimes(2,0);
-    float leftforce = (*(m_data->FootForce))[0];
-    float rightforce = (*(m_data->FootForce))[1];
-    float totalforce = (*(m_data->FootForce))[2];
+    static vector<float> previousimpacttimes(2,0);
     
-    // detect impacts on the left
-    bool previousleftoff = true;
-    for (int i=0; i<numpastvalues; i++)
+    // The idea is to keep track of what is 'small' and what is 'large' for foot forces
+    // And then define an impact to be a transisition from small to large foot force
+    if (m_previous_time != 0)
     {
-        if (previousleftforces[i] > 0.5*previousforces[i] || previousforces[i] < minimumtotalforce)
-            previousleftoff = false;
+        // grab the current force readings
+        float leftforce = (*(m_data->FootForce))[0];
+        float rightforce = (*(m_data->FootForce))[1];
+        float totalforce = (*(m_data->FootForce))[2];
+        
+        const int numpastvalues = static_cast<int> (200.0/(m_current_time - m_previous_time));
+        static boost::circular_buffer<float> previousleftforces(numpastvalues, 0);      // forces on the left foot
+        static boost::circular_buffer<float> previousrightforces(numpastvalues, 0);     // forces on the right foot
+        static boost::circular_buffer<float> previoustotalforces(numpastvalues, 0);     // forces on the right foot
+        static float leftforcemin = leftforce;
+        static float leftforcemax = leftforce;
+        static float rightforcemin = rightforce;
+        static float rightforcemax = rightforce;
+        static unsigned int forcecount = 0;
+        
+        previousleftforces.push_back(leftforce);
+        previousrightforces.push_back(rightforce);
+        previoustotalforces.push_back(totalforce);
+        
+        // calculate the average left and right forces
+        float leftsum = 0;
+        float rightsum = 0;
+        for (unsigned int i=0; i<previousleftforces.size(); i++)
+        {
+            leftsum += previousleftforces[i];
+            rightsum += previousrightforces[i];
+        }
+        float leftavg = leftsum/numpastvalues;
+        float rightavg = rightsum/numpastvalues;
+        
+        // update the left and right min and max values
+        if (leftavg < leftforcemin)
+            leftforcemin = leftavg;
+        else if (leftavg > leftforcemax)
+            leftforcemax = leftavg;
+        else
+        {   // we slowly decay the min and max values to implement a form of min/max tracking
+            leftforcemin *= 1.0005;
+            leftforcemax *= 0.9995;
+        }
+        
+        if (rightavg < rightforcemin)
+            rightforcemin = rightavg;
+        else if (rightavg > rightforcemax)
+            rightforcemax = rightavg;
+        else 
+        {
+            rightforcemin *= 1.0005;
+            rightforcemax *= 0.9995;
+        }
+        
+        // now I know what 'small' is, I define an impact to be a transition from 'small' to not 'small'
+        if (leftforcemax > 3*leftforcemin)
+        {   // we can only use the foot sensors to detect impacts if there is sufficent range
+            bool leftprevioussmall = true;
+            for (unsigned int i=0; i<previousleftforces.size()-1; i++)
+            {
+                if (previoustotalforces[i] < MINIMUM_CONTACT_FORCE)
+                    leftprevioussmall = false;
+                else if (previousleftforces[i] > (leftforcemin + leftforcemax)/4.0)
+                    leftprevioussmall = false;
+            }
+            if (leftprevioussmall == true && leftforce > (leftforcemin + leftforcemax)/4.0)
+            {
+                previousimpacttimes[0] - impacttimes[0];
+                impacttimes[0] = m_current_time;
+                for (unsigned int i=0; i<previousleftforces.size(); i++)
+                {
+                    debug << " " << previousleftforces[i];
+                }
+                debug << endl;
+            }
+        }
+        if (rightforcemax > 3*rightforcemin)
+        {   // again only use the foot sensors if there is sufficient range
+            bool rightprevioussmall = true;
+            for (unsigned int i=0; i<previousrightforces.size()-1; i++)
+            {
+                if (previoustotalforces[i] < MINIMUM_CONTACT_FORCE)
+                    rightprevioussmall = false;
+                else if (previousrightforces[i] > (rightforcemin + rightforcemax)/4.0)
+                    rightprevioussmall = false;
+            }
+            if (rightprevioussmall == true && rightforce > (rightforcemin + rightforcemax)/4.0)
+            {
+                previousimpacttimes[1] = impacttimes[1];
+                impacttimes[1] = m_current_time;
+                for (unsigned int i=0; i<previousrightforces.size(); i++)
+                {
+                    debug << " " << previousrightforces[i];
+                }
+                debug << endl;
+            }
+        }
     }
-    if (previousleftoff == true && leftforce > 0.5*totalforce && totalforce > minimumtotalforce)
-        impacttimes[0] = m_data->CurrentTime;
-    
-    // detect impacts on the right
-    bool previousrightoff = true;
-    for (int i=0; i<numpastvalues; i++)
-    {
-        if (previousrightforces[i] > 0.5*previousforces[i] || previousforces[i] < minimumtotalforce)
-            previousrightoff = false;
-    }
-    if (previousrightoff == true && rightforce > 0.5*totalforce && totalforce > minimumtotalforce)
-        impacttimes[1] = m_data->CurrentTime;
     
     m_data->FootImpact->setData(m_data->CurrentTime, impacttimes, true);
-    
-    previousleftforces.push_back(leftforce);
-    previousrightforces.push_back(rightforce);
-    previousforces.push_back(totalforce);
 }
 
 void NUSensors::calculateCoP()

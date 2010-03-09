@@ -63,15 +63,58 @@ void NUimage::addInternalBuffer(int width, int height)
 
 pixels::Pixel* NUimage::allocateBuffer(int width, int height)
 {
-    int arrayWidth = 2*width;
-    pixels::Pixel* buffer = new pixels::Pixel[arrayWidth * height];
+    pixels::Pixel* buffer = new pixels::Pixel[width * height];
     localBuffer = buffer;
     return buffer;
 }
 
+void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
+{
+    int arrayWidth = width;
+    // halve the width and height since we want to skip
+    width /= 2;
+    height /= 2;
+    pixels::Pixel* pixelisedBuffer = (pixels::Pixel*) buffer;
+    if(height != this->height())
+    {
+        delete [] image;
+        image = 0;
+    }
+    if(image == 0)
+    {
+        //Allocate memory for array of elements of column
+        image = new pixels::Pixel*[height];
+    }
+    // Now point the pointers in the right place
+    int pixelIndex = 0;
+    for( int i = 0; i < height; ++i)
+    {
+        image[i] = &pixelisedBuffer[pixelIndex];
+        pixelIndex += arrayWidth;
+    }
+    imageWidth = width;
+    imageHeight = height;
+}
+
+void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
+{
+    width /= 2;
+    height /= 2;
+    setImageDimensions(width, height);
+    useInternalBuffer(true);
+    pixels::Pixel* pixelisedBuffer = (pixels::Pixel*)buffer;
+    for(int y = 0; y < height; y++)
+    {
+       for(int x = 0; x < width; x++)
+       {
+           this->image[y][x] = pixelisedBuffer[y*width*2 + x];
+       }
+    }
+    return;
+}
+
 void NUimage::MapBufferToImage(pixels::Pixel* buffer, int width, int height)
 {
-    int arrayWidth = 2*width;
     if(height != this->height())
     {
         delete [] image;
@@ -87,7 +130,7 @@ void NUimage::MapBufferToImage(pixels::Pixel* buffer, int width, int height)
     for( int i = 0; i < height; ++i)
     {
         image[i] = &buffer[pixelIndex];
-        pixelIndex += arrayWidth;
+        pixelIndex += width;
     }
     imageWidth = width;
     imageHeight = height;

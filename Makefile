@@ -95,7 +95,7 @@ NAODarwinExternal:
 #log into vm.local and make the project dir
 	@ssh $(LOGNAME)@$(VM) mkdir -p naoqi/projects/robocup;
 #copy everything in this directory except the existing .*, Build, Documentation directories
-	@scp -prC $(filter-out Build Documentation Autoconfig, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
+	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
 #run make inside the vm
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
 #copy the binary back

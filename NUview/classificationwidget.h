@@ -14,6 +14,7 @@
 class QComboBox;
 class QLabel;
 class QSpinBox;
+class QCheckBox;
 class QPixmap;
 class QGroupBox;
 class QGridLayout;
@@ -76,12 +77,14 @@ public slots:
     void PerformAutosave();
     void selectionChanged();
     void setAllBoundaries(int newBounds);
+    void autoSoftColourStateChanged(int newState);
 
 signals:
     void openLookupTableFile(QString fileName);
     void saveLookupTableFile(QString fileName);
     void displayStatusBarMessage(QString message, int timeout=0);
     void newSelection();
+    void autoSoftColourChanged(bool);
 private:
     ColourSpace currentColourSpace;
 
@@ -102,6 +105,7 @@ private:
     QSpinBox* channelMinSelectors[numChannels];
     QSpinBox* channelMaxSelectors[numChannels];
     QSlider* allValuesSlider;
+    QCheckBox* autoSoftColourCheckBox;
 
     // Buttons
     QPushButton* openFileButton;

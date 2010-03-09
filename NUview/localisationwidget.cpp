@@ -554,13 +554,12 @@ void LocalisationWidget::angleToPoint(WMPoint point)
 
 }
 
-void LocalisationWidget::frameChange(double* jointSensors, bool camera,double* touchSensors)
+void LocalisationWidget::setSensorData(const float* jointSensors, const float* balanceSensors ,const float* touchSensors)
 {
     for(int i=0;i<22;i++)
     {
-        joints[i] = jointSensors[i];
+        joints[i] = jointSensors[i] * 57.2957795;;
     }
-    bottomCamera = camera;
 
     double sumLeft = touchSensors[0] + touchSensors[1] + touchSensors[2] + touchSensors[3];
     double sumRight = touchSensors[6] + touchSensors[7] + touchSensors[8] + touchSensors[9];
@@ -570,6 +569,7 @@ void LocalisationWidget::frameChange(double* jointSensors, bool camera,double* t
     calculateLines();
     updateJoints();
 }
+
 void LocalisationWidget::angleXChanged(double newAngleX)
 {
     anglePoint.setx(newAngleX);

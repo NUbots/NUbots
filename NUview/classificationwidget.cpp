@@ -2,6 +2,7 @@
 #include <QPixmap>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QCheckBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -37,10 +38,12 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     }
 
     // Colour selection group
-
+    autoSoftColourCheckBox = new QCheckBox("Auto Soft Colour");
     colourSelectLayout = new QHBoxLayout;
     //colourSelectLayout->addWidget(colourLabel);
     colourSelectLayout->addWidget(coloursComboBox,1);
+    colourSelectLayout->addWidget(autoSoftColourCheckBox,0);
+
 
     // Selected Colour
     selectedColourLabel = new QLabel("Selected Colour: ");
@@ -138,6 +141,7 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
 
     connect(colourSpaceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectionChanged()));
     connect(coloursComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectionChanged()));
+    connect(autoSoftColourCheckBox,SIGNAL(stateChanged(int)), this, SLOT(autoSoftColourStateChanged(int)));
 
     connect(openFileButton, SIGNAL(clicked()), this, SLOT(doOpen()));
     connect(saveAsFileButton, SIGNAL(clicked()), this, SLOT(doSaveAs()));
@@ -192,6 +196,11 @@ ClassificationWidget::~ClassificationWidget()
     delete window;
     return;
 }
+
+void ClassificationWidget::autoSoftColourStateChanged(int newState){
+    emit autoSoftColourChanged(newState == Qt::Checked);
+}
+
 
 void ClassificationWidget::selectionChanged()
 {
@@ -368,6 +377,11 @@ std::vector<pixels::Pixel> ClassificationWidget::getSelectedColours(int desiredC
             channel[0] = currentColour.r;
             channel[1] = currentColour.g;
             channel[2] = currentColour.b;
+            break;
+        default:
+            channel[0] = 0;
+            channel[1] = 0;
+            channel[2] = 0;
             break;
     }
 
