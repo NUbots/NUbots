@@ -22,7 +22,7 @@ int nulVersion1FormatReader::openFile(const QString& filename)
 {
     fileInformation.setFile(filename);
     closeFile();
-    fileStream.open(filename.toStdString().c_str());
+    fileStream.open(filename.toStdString().c_str(),std::ios_base::in|std::ios_base::binary);
     if(fileGood())
     {
         fileStream.seekg(0,std::ios_base::beg);
