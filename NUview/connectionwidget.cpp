@@ -14,7 +14,7 @@ ConnectionWidget::ConnectionWidget(QWidget *parent): QDockWidget(parent)
     setObjectName(tr("Conection Manager"));
     nameLabel = new QLabel("Robot name: ");
     nameLineEdit = new QLineEdit();
-    nameLineEdit->setText("[name].local");
+    nameLineEdit->setText("IP ADDRESS");
     connectButton = new QPushButton("Connect");
     disconnectButton = new QPushButton("Disconnect");
     layout = new QVBoxLayout;

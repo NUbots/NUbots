@@ -321,10 +321,12 @@ void MainWindow::createConnections()
 
 void MainWindow::openLog()
 {
-    QString filename = QFileDialog::getOpenFileName(this,
-                            tr("Open Log File"), ".",
-                            tr("NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;NUbot Log Files (*.nul)"));
-    openLog(filename);
+
+    QString fileName = QFileDialog::getOpenFileName(this,
+                            tr("Open Replay File"), ".",
+                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;All Files(*.*)"));
+    openLog(fileName);
+
 }
 
 void MainWindow::openLog(const QString& fileName)
@@ -540,8 +542,9 @@ void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
 
 void MainWindow::selectFrame()
 {
+
     bool ok;
-    int selectedFrameNumber = QInputDialog::getInt(this, tr("Select Frame"), tr("Enter frame to jump to:"), LogReader.currentFrame(), 1, LogReader.numFrames(), 1, &ok);
+    int selectedFrameNumber = QInputDialog::getInteger(this, tr("Select Frame"), tr("Enter frame to jump to:"), LogReader.currentFrame(), 1, LogReader.numFrames(), 1, &ok);
     if(ok)
     {
         LogReader.setFrame(selectedFrameNumber);

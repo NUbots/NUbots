@@ -242,6 +242,15 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
+    /*
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
+                                                    std::vector<Vector2<int> >&fieldBorders,
+                                                    std::vector<unsigned char> validColours,
+                                                    int spacing,
+                                                    float min_aspect, float max_aspect, int min_segments,
+                                                    tCLASSIFY_METHOD method);
+    */
+
     mode = ROBOTS;
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
@@ -456,6 +465,8 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
             }
             break;
         }
+        default:
+            break;
 
     }
     return requestedColour;
