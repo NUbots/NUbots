@@ -1,5 +1,4 @@
 #include "NUimage.h"
-#include <QDebug>
 /*!
 @file NUimage.h
 @brief Declaration of NUbots NUimage class. Storage class for images.
