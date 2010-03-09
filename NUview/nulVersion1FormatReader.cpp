@@ -67,6 +67,7 @@ int nulVersion1FormatReader::nextFrame()
 int nulVersion1FormatReader::firstFrame()
 {
     currentFrameIndex = 0;
+    fileStream.seekg(0,std::ios_base::beg);
     nextFrame();
     return currentFrame();
 }
