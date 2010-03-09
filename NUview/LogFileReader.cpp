@@ -35,7 +35,7 @@ int LogFileReader::openFile(QString fileName)
     }
     catch(exception &e)
     {
-        qDebug() << e.what();
+        qDebug() << "I/O Error:" << e.what();
     }
 
     if(currentFileReader)
