@@ -317,7 +317,6 @@ void ClassificationWidget::setColourSpace(int newColourSpaceIndex)
     };
 
     setColour(currColour);
-    emit selectionChanged();
 }
 
 void ClassificationWidget::drawSelectedColour()
