@@ -29,11 +29,12 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
-        deleteTexture(textures[displayId]);
+        //deleteTexture(textures[displayId]);
+        glDeleteTextures( 1, &textures[displayId] );
         textureStored[displayId] = false;
     }
-    QImage tex;
-    tex = QGLWidget::convertToGLFormat( image );
+
+    QImage tex = QGLWidget::convertToGLFormat( image );
     glGenTextures( 1, &textures[displayId] );
 
     // Create Nearest Filtered Texture
@@ -43,6 +44,7 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
 
     textureStored[displayId] = true;
+
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
