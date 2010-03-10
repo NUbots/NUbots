@@ -29,11 +29,10 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
-        deleteTexture(textures[displayId]);
+        glDeleteTextures(1,&textures[displayId]);
         textureStored[displayId] = false;
     }
-    QImage tex;
-    tex = QGLWidget::convertToGLFormat( image );
+    QImage tex = QGLWidget::convertToGLFormat( image );
     glGenTextures( 1, &textures[displayId] );
 
     // Create Nearest Filtered Texture
