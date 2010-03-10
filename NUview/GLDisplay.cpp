@@ -154,16 +154,24 @@ void GLDisplay::mousePressEvent(QMouseEvent * mouseEvent)
         if(mod & Qt::ControlModifier)
         {
             emit ctrlSelectPixel(pixel.x(),pixel.y());
+            mouseEvent->accept();
         }
         else
         {
             emit selectPixel(pixel.x(),pixel.y());
+            mouseEvent->accept();
         }
     }
     else if (mouseEvent->button() == Qt::RightButton)
     {
         emit rightSelectPixel(pixel.x(),pixel.y());
+        mouseEvent->accept();
     }
+    else
+    {
+        mouseEvent->ignore();
+    }
+
     setMouseTracking(true);
     return;
 }
@@ -180,6 +188,7 @@ void GLDisplay::mouseMoveEvent(QMouseEvent * mouseEvent)
         this->setCursor(Qt::ArrowCursor);
     }
     setMouseTracking(true);
+    mouseEvent->accept();
 }
 
 QPoint GLDisplay::calculateSelectedPixel(QMouseEvent * mouseEvent)
