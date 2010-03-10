@@ -330,7 +330,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     {
         temp = indexs[i];
         unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
-        tempLut[index] = colour;
+        tempLut[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
     }
 
     // Create Classifed Image based on lookup table.

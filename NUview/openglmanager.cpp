@@ -29,8 +29,8 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
-        //deleteTexture(textures[displayId]);
-        glDeleteTextures( 1, &textures[displayId] );
+
+        glDeleteTextures(1,&textures[displayId]);
         textureStored[displayId] = false;
     }
 
