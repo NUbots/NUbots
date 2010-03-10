@@ -45,6 +45,7 @@ void ClassifiedImage::removeInternalBuffer()
         delete [] localBuffer;  // Delete the old buffer.
         delete [] image;        // Delete the array of line pointers.
         image = 0;
+        localBuffer = 0;
     }
     internalBuffer = false;
 }
