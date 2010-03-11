@@ -29,13 +29,7 @@ Autoconfig/*
 *error.log
 *parameters.wp
 
-# External files from archives
-/NUview/gl/*
-/NUview/diagona/*
-/Tools/zlib/*
-
 # ignore Qt builds
-/NUview/pthreads/*
 /NUview/debug/*
 /NUview/release/*
 *.Debug
