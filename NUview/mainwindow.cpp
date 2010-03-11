@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     //kick = new KickWidget(mdiArea, this);
     kick = 0;
     networkTabs->addTab(walkParameter, walkParameter->objectName());
+    VisionStreamer = new visionStreamWidget(mdiArea, this);
+    networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
     networkTabDock->setWidget(networkTabs);
@@ -285,6 +287,12 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
+
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(processVisionFrame()));
+
 
     // Setup navigation control enabling/disabling
     connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));

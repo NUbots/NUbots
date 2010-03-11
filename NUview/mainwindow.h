@@ -12,7 +12,7 @@
 #include "locWmGlDisplay.h"
 #include "localisationwidget.h"
 #include "LogFileReader.h"
-
+#include "visionstreamwidget.h"
 class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
@@ -110,6 +110,8 @@ private:
     LocalisationWidget* localisation;           //!< Instance of the localisation widget.
 
     LayerSelectionWidget* layerSelection;
+    visionStreamWidget* VisionStreamer;         //!< Instance of VisionStreamWidget
+
     //QDockWidget* layerSelectionDock;
     QDockWidget* visionTabDock;
     QDockWidget* networkTabDock;

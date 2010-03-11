@@ -304,7 +304,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < currentImage->width(); x+=scanSpacing)
@@ -323,7 +323,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
             {
                 consecutiveGreenPixels = 0;
             }
-            if(consecutiveGreenPixels >= 3)
+            if(consecutiveGreenPixels >= 6)
             {
                 results.push_back(Vector2<int>(x,y-consecutiveGreenPixels+1));
                 break;
