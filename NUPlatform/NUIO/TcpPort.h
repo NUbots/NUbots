@@ -41,7 +41,6 @@
 using namespace std;
 
 typedef unsigned char byte;
-
 #ifndef NETDATA
 #define NETDATA
 struct network_data_t
@@ -51,11 +50,11 @@ struct network_data_t
 };
 #endif
 
-class UdpPort : public Thread
+class TcpPort : public Thread
 {
 public:
-    UdpPort(int portnumber);
-    virtual ~UdpPort();
+    TcpPort(int portnumber);
+    virtual ~TcpPort();
     void sendData(network_data_t netData);
     void sendData(const stringstream& stream);
     network_data_t receiveData();
@@ -74,6 +73,8 @@ private:
     bool m_has_data;                    //!< flag indicating whether new data has been received
 
     pthread_mutex_t m_socket_mutex;     //!< lock to prevent simultaneous reading and writing on the same port
+
+    int m_clientSockfd;                 //!< Connected Clients socket
 
 };
 

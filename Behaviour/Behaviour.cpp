@@ -50,7 +50,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
         float headYaw;
         data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
         vector<float> walkVector;
-        walkVector.push_back(5);
+        walkVector.push_back(3);
         walkVector.push_back(0);
         walkVector.push_back(headYaw/2);
         WalkJob* walk = new WalkJob(walkVector);

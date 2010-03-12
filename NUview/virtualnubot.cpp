@@ -48,7 +48,7 @@ int virtualNUbot::loadFile(const QString& filename)
     }
     else if(fileType == QString("nul"))
     {
-        streamFile.open(filename.toAscii().data(),ios_base::in);
+        streamFile.open(filename.toAscii().data(),ios_base::in|ios_base::binary);
         streamFile.seekg(0,ios_base::end);
         streamFileLength = streamFile.tellg();
         streamFile.seekg(0,ios_base::beg);
