@@ -14,7 +14,7 @@
 #include "Vision/Circle.h"
 #include <vector>
 #include <fstream>
-
+#include "LogFileReader.h"
 
 #define uint8 unsigned char
 
@@ -36,12 +36,10 @@ Q_OBJECT
 public:
     virtualNUbot(QObject * parent = 0);
     ~virtualNUbot();
-    void loadFrame(int FrameNumber);
-    int loadFile(const QString& filename);
-    pixels::Pixel selectRawPixel(int x, int y);
+    Pixel selectRawPixel(int x, int y);
     bool imageAvailable()
     {
-        return hasImage;
+        return (rawImage != 0);
     }
 
     QString fileType;
@@ -51,23 +49,20 @@ public slots:
     */
     void ProcessPacket(QByteArray* packet);
     void updateLookupTable(unsigned char* packetBuffer){return;}
-    void updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
-    void UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs);
+    void updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs);
+    void UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
-    void loadLookupTableFile(QString fileName);    
+    void loadLookupTableFile(QString fileName);
+
+    void setRawImage(const NUimage* image);
+    void setSensorData(const float* joint, const float* balance, const float* touch);
+    void setCamera(int newCamera){cameraNumber = newCamera;};
+    void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;};
+    void processVisionFrame();
 
 signals:
-    void imageDisplayChanged(NUimage* updatedImage, GLDisplay::display displayId);
-
-    /*!
-      @brief Sends the robot data to the localisation widget
-      @param joints The angles of the robot's joints.
-      @param bottomCamera The camera being used.
-      @param touch The values of the robot's touch sensors.
-      */
-    void imageDisplayChanged(double* joints,bool bottomCamera,double * touch);
-
+    void imageDisplayChanged(const NUimage* updatedImage, GLDisplay::display displayId);
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
@@ -75,7 +70,6 @@ signals:
     void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
     void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void drawFO_Ball(float cx, float cy, float radius, GLDisplay::display displayId);
-
 
 private:
     class classEntry
@@ -88,33 +82,30 @@ private:
     };
 
 
-    void processVisionFrame(NUimage& image);
+    void processVisionFrame(const NUimage* image);
     void processVisionFrame(ClassifiedImage& image);
 
-    void processVisionFrame();
-    void generateClassifiedImage(const NUimage& yuvImage);
+    void generateClassifiedImage(const NUimage* yuvImage);
+    ClassIndex::Colour getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour);
 
-    // File Access
-    NUbotImage* file;               //!< Instance of the File reader
-    ifstream streamFile;
-    unsigned int streamFileLength;
     unsigned char* classificationTable;
     unsigned char* tempLut;
-
-
-    // Image Storage
-    NUimage rawImage;
+    bool autoSoftColour;
+    // Data Storage
+    const NUimage* rawImage;
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
-
+    int cameraNumber;
     Horizon horizonLine;
     //TODO: these should change later..
-    float jointSensors[100];
-    float balanceSensors[100];
-    float touchSensors[100];
+    //float jointSensors[100];
+    //float balanceSensors[100];
+    //float touchSensors[100];
+    const float* jointSensors;
+    const float* balanceSensors;
+    const float* touchSensors;
     static const int maxUndoLength = 10;
     int nextUndoIndex;
-    bool hasImage;
     std::vector<classEntry> undoHistory[maxUndoLength];
 };
 

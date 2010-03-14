@@ -29,13 +29,7 @@ Autoconfig/*
 *error.log
 *parameters.wp
 
-# External files from archives
-/NUview/gl/*
-/NUview/diagona/*
-/Tools/zlib/*
-
 # ignore Qt builds
-/NUview/pthreads/*
 /NUview/debug/*
 /NUview/release/*
 *.Debug
@@ -47,3 +41,8 @@ Autoconfig/*
 /NUview/autosave.lut
 /NUview/qrc_icons.cpp
 /NUview/qrc_textures.cpp
+
+# Ignore our data file formats
+*.lut
+*.nif
+*.nul

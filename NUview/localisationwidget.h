@@ -27,8 +27,11 @@
 
 class LocalisationWidget : public QDockWidget
 {
+
     Q_OBJECT
+
 public:
+
     /*!
       @brief A constructor for LocalisationWidget class.
       @param parent The QWidget parent of this widget.
@@ -112,6 +115,7 @@ public:
     void calculateLines();
 
 public slots:
+
     /*!
       @brief Accepts a new value for xInput and updates the visible lines.
       @param newX The new value for xInput.
@@ -184,7 +188,8 @@ public slots:
       @param camera A boolean representing the camera that is being used.
       @param touchSensors A pointer to the start of an array of doubles containing the touch sensor data.
       */
-    void frameChange(double* jointSensors,bool camera,double* touchSensors);
+    void setSensorData(const float* jointSensors, const float* balanceSensors ,const float* touchSensors);
+    void setCamera(int cameraId){bottomCamera = (cameraId==1);};
 
     /*!
       @brief Accepts a new value for the x ordinate of anglePoint.

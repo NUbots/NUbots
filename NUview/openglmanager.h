@@ -34,12 +34,13 @@ public:
         void updatedDisplay(int displayID, GLuint newDisplay, int width, int height);
 
     public slots:
+        void setRawImage(const NUimage* newImage){writeNUimageToDisplay(newImage, GLDisplay::rawImage);};
         /*!
           @brief Accepts a new raw image and maps it to display instructions.
           @param newImage The new raw image.
           @param displayId The id of the display layer to write to.
           */
-        void writeNUimageToDisplay(NUimage* newImage, GLDisplay::display displayId);
+        void writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId);
         /*!
           @brief Accepts a new classified image and maps it to display instructions.
           @param newImage The new classified image.
@@ -125,7 +126,7 @@ public:
           @param image The image to be mapped.
           @param displayId The .display Id to associatie this texture with.
           */
-        void createDrawTextureImage(QImage& image, int displayId);
+        void createDrawTextureImage(const QImage& image, int displayId);
         void drawHollowCircle(float cx, float cy, float r, int num_segments);
         void drawSolidCircle(float cx, float cy, float r, int num_segments);
 

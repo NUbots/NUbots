@@ -7,10 +7,10 @@
 #include <QStringList>
 #include <iostream>
 #include <fstream>
+#include <qmessagebox.h>
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
-    file = new NUbotImage();
     //! TODO: Load LUT from filename.
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
@@ -22,43 +22,36 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     classImage.useInternalBuffer();
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
-    hasImage = false;
+    rawImage = 0;
+    jointSensors = 0;
+    balanceSensors = 0;
+    touchSensors = 0;
+
+    autoSoftColour = false;
     //debug<<"VirtualNUBot started";
 }
 
 virtualNUbot::~virtualNUbot()
 {
-    delete file;
     delete classificationTable;
 }
 
-int virtualNUbot::loadFile(const QString& filename)
+void virtualNUbot::setRawImage(const NUimage* image)
 {
-    QStringList list = filename.split('.');
-    fileType = list.last();
+    rawImage = image;
+    vision.setImage(image);
+    return;
+}
 
-    if(streamFile.is_open())
-    {
-        streamFile.close();
-    }
 
-    if(fileType == QString("nif"))
-    {
-        return file->openFile(filename.toAscii().data(), false);
-    }
-    else if(fileType == QString("nul"))
-    {
-        streamFile.open(filename.toAscii().data(),ios_base::in|ios_base::binary);
-        streamFile.seekg(0,ios_base::end);
-        streamFileLength = streamFile.tellg();
-        streamFile.seekg(0,ios_base::beg);
-        int x,y;
-        streamFile >> x >> y;
-        streamFile.seekg(0,ios_base::beg);
-        int numImages = streamFileLength / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
-        return numImages;
-    }
-    return 0;
+void virtualNUbot::setSensorData(const float* joint, const float* balance, const float* touch)
+{
+    jointSensors = joint;
+    balanceSensors = balance;
+    touchSensors = touch;
+    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],cameraNumber);
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
@@ -72,71 +65,16 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
     processVisionFrame();
 }
 
-pixels::Pixel virtualNUbot::selectRawPixel(int x, int y)
+Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage.width() && y < rawImage.height() && hasImage)
+    if(x < rawImage->width() && y < rawImage->height() && imageAvailable())
     {
-        return rawImage.image[y][x];
+        return rawImage->image[y][x];
     }
     else
     {
-        return pixels::Pixel();
+        return Pixel();
     }
-}
-
-void virtualNUbot::loadFrame(int frameNumber)
-{
-    if(fileType == QString("nif"))
-    {
-        rawImage.setImageDimensions(160,120);
-        rawImage.useInternalBuffer();
-
-        uint8* rawBuffer = (uint8*)&rawImage.image[0][0];
-        NaoCamera camera;
-        int robotFrameNumber;
-
-        file->getImageFrame(frameNumber, robotFrameNumber, camera, rawBuffer, jointSensors, balanceSensors, touchSensors);
-        hasImage = true;
-
-        // Create double values of each joint and send to localisation widget
-        double jS[22];
-        double tS[10];
-        for (int i = 0; i <22;i++)
-        {
-            jS[i] = jointSensors[i] * 57.2957795;
-        }
-        for (int j = 0; j<10;j++)
-        {
-            tS[j] = touchSensors[j];
-        }
-        emit imageDisplayChanged(jS,camera,tS);
-
-        horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],camera);
-        //emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-        emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-        emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-        processVisionFrame(rawImage);
-        return;
-    }
-    else if (fileType == QString("nul"))
-    {
-        if(frameNumber == 1)
-        {
-            streamFile.seekg(0,ios_base::beg);
-            streamFile.clear();
-        }
-        if(streamFile.good()){
-            unsigned int currPos = streamFile.tellg();
-            if( (streamFileLength - currPos) > 2*sizeof(int) )
-            {
-                streamFile >> rawImage;
-                hasImage = true;
-                emit imageDisplayChanged(&rawImage, GLDisplay::rawImage);
-                processVisionFrame(rawImage);
-            }
-        }
-    }
-    return;
 }
 
 void virtualNUbot::ProcessPacket(QByteArray* packet)
@@ -156,7 +94,6 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
         return;
     }
 
-
     ClassifiedPacketData* currentPacket = (ClassifiedPacketData*) uncompressed;
     classImage.useInternalBuffer(false);
     classImage.setImageDimensions(currentPacket->frameWidth, currentPacket->frameHeight);
@@ -174,13 +111,10 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     */
 }
 
-void virtualNUbot::generateClassifiedImage(const NUimage& yuvImage)
+void virtualNUbot::generateClassifiedImage(const NUimage* yuvImage)
 {
-    //qDebug() << "Generating CLASS Image";
     vision.classifyImage(classImage);
-    //qDebug() << "Displaying CLASS Image";
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
-    //qDebug() << "Returning ";
     return;
 }
 
@@ -189,8 +123,9 @@ void virtualNUbot::processVisionFrame()
     processVisionFrame(rawImage);
 }
 
-void virtualNUbot::processVisionFrame(NUimage& image)
+void virtualNUbot::processVisionFrame(const NUimage* image)
 {
+    if(!imageAvailable()) return;
     //qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
@@ -221,7 +156,7 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //qDebug() << "Start switch";
 
 
-    vision.setImage(&image);
+    vision.setImage(image);
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
@@ -309,6 +244,15 @@ void virtualNUbot::processVisionFrame(NUimage& image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
+    /*
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
+                                                    std::vector<Vector2<int> >&fieldBorders,
+                                                    std::vector<unsigned char> validColours,
+                                                    int spacing,
+                                                    float min_aspect, float max_aspect, int min_segments,
+                                                    tCLASSIFY_METHOD method);
+    */
+
     mode = ROBOTS;
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
@@ -379,16 +323,16 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 }
 
 
-void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
+void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
-    if(hasImage == false) return;
-    pixels::Pixel temp;
+    if(!imageAvailable()) return;
+    Pixel temp;
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
         unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
-        tempLut[index] = colour;
+        tempLut[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
     }
 
     // Create Classifed Image based on lookup table.
@@ -419,9 +363,9 @@ void virtualNUbot::UndoLUT()
 }
 
 
-void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixel> indexs)
+void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
-    pixels::Pixel temp;
+    Pixel temp;
     undoHistory[nextUndoIndex].clear();
     std::vector<classEntry>(undoHistory[nextUndoIndex]).swap(undoHistory[nextUndoIndex]); // Free up vector memory
 
@@ -432,7 +376,7 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixe
         if(classificationTable[index] != colour)
         {
             undoHistory[nextUndoIndex].push_back(classEntry(index,classificationTable[index])); // Save index and colour
-            classificationTable[index] = colour;
+            classificationTable[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
         }
     }
     nextUndoIndex++;
@@ -441,3 +385,92 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<pixels::Pixe
     processVisionFrame(rawImage);
     return;
 }
+
+ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour)
+{
+    if(autoSoftColour == false) return requestedColour;
+    switch(currentColour)
+    {
+        case ClassIndex::red:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::orange:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::red_orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::red:
+            case ClassIndex::orange:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::red:
+            case ClassIndex::red_orange:
+                return ClassIndex::red_orange;
+                break;
+            case ClassIndex::yellow:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::yellow_orange:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::yellow:
+            case ClassIndex::orange:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        case ClassIndex::yellow:
+        {
+            switch(requestedColour)
+            {
+            case ClassIndex::orange:
+            case ClassIndex::yellow_orange:
+                return ClassIndex::yellow_orange;
+                break;
+            default:
+                return requestedColour;
+                break;
+            }
+            break;
+        }
+        default:
+            break;
+
+    }
+    return requestedColour;
+}
+

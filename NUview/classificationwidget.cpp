@@ -2,6 +2,7 @@
 #include <QPixmap>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QCheckBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -37,10 +38,12 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     }
 
     // Colour selection group
-
+    autoSoftColourCheckBox = new QCheckBox("Auto Soft Colour");
     colourSelectLayout = new QHBoxLayout;
     //colourSelectLayout->addWidget(colourLabel);
     colourSelectLayout->addWidget(coloursComboBox,1);
+    colourSelectLayout->addWidget(autoSoftColourCheckBox,0);
+
 
     // Selected Colour
     selectedColourLabel = new QLabel("Selected Colour: ");
@@ -130,14 +133,15 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
         connect(channelSelectors[channel], SIGNAL(valueChanged(int)), this, SLOT(drawSelectedColour()));
 
         // Setup selection changed signals
-        connect(channelSelectors[channel], SIGNAL(valueChanged(int)), this, SLOT(selectionChanged()));
-        connect(channelMinSelectors[channel], SIGNAL(valueChanged(int)), this, SLOT(selectionChanged()));
-        connect(channelMaxSelectors[channel], SIGNAL(valueChanged(int)), this, SLOT(selectionChanged()));
+        connect(channelSelectors[channel], SIGNAL(valueChanged(int)), this, SIGNAL(selectionChanged()));
+        connect(channelMinSelectors[channel], SIGNAL(valueChanged(int)), this, SIGNAL(selectionChanged()));
+        connect(channelMaxSelectors[channel], SIGNAL(valueChanged(int)), this, SIGNAL(selectionChanged()));
     }
-    connect(colourSpaceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateColourSpace(int)));
+    connect(colourSpaceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setColourSpace(int)));
 
-    connect(colourSpaceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectionChanged()));
-    connect(coloursComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectionChanged()));
+    connect(colourSpaceComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(selectionChanged()));
+    connect(coloursComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(selectionChanged()));
+    connect(autoSoftColourCheckBox,SIGNAL(stateChanged(int)), this, SLOT(autoSoftColourStateChanged(int)));
 
     connect(openFileButton, SIGNAL(clicked()), this, SLOT(doOpen()));
     connect(saveAsFileButton, SIGNAL(clicked()), this, SLOT(doSaveAs()));
@@ -146,7 +150,7 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     // Set inital colour space
     currentColourSpace = YCbCr;
     colourSpaceComboBox->setCurrentIndex(currentColourSpace);
-    updateColourSpace(currentColourSpace);
+    setColourSpace(currentColourSpace);
 
     // Start autosave timer.
     autosaveTimer = new QTimer(this);
@@ -179,6 +183,7 @@ ClassificationWidget::~ClassificationWidget()
     // Delete Controls
     delete coloursComboBox;
     delete colourSpaceComboBox;
+    delete autoSoftColourCheckBox;
     for(int channel = 0; channel < numChannels; channel++)
     {
         delete channelSelectors[channel];
@@ -193,9 +198,8 @@ ClassificationWidget::~ClassificationWidget()
     return;
 }
 
-void ClassificationWidget::selectionChanged()
-{
-    emit newSelection();
+void ClassificationWidget::autoSoftColourStateChanged(int newState){
+    emit autoSoftColourChanged(newState == Qt::Checked);
 }
 
 void ClassificationWidget::doOpen()
@@ -233,143 +237,24 @@ void ClassificationWidget::PerformAutosave()
     emit displayStatusBarMessage(message, 3000);
 }
 
-pixels::Pixel ClassificationWidget::getCurrentColour()
-{
-    ColourSpace currentSpace = getCurrentColourSpace();
-    pixels::Pixel currentColour;
-    switch(currentSpace){
-        case YCbCr:
-            currentColour.y = channelSelectors[0]->value();
-            currentColour.cb = channelSelectors[1]->value();
-            currentColour.cr = channelSelectors[2]->value();
-            break;
-        case HSV:
-            currentColour.h = channelSelectors[0]->value();
-            currentColour.s = channelSelectors[1]->value();
-            currentColour.v = channelSelectors[2]->value();
-            break;
-        case RGB:
-            currentColour.r = channelSelectors[0]->value();
-            currentColour.g = channelSelectors[1]->value();
-            currentColour.b = channelSelectors[2]->value();
-            break;
-    }
+Pixel ClassificationWidget::getCurrentColour()
+{    
+    Pixel currentColour =   convertToYCbCr( channelSelectors[0]->value(),
+                                            channelSelectors[1]->value(),
+                                            channelSelectors[2]->value(),
+                                            getCurrentColourSpace());
     return currentColour;
 }
 
-pixels::Pixel ClassificationWidget::convertToColourSpace(pixels::Pixel source, int sourceColourSpace, int desiredColourSpace)
+std::vector<Pixel> ClassificationWidget::getSelectedColours()
 {
-    pixels::Pixel result = source;
-    if(sourceColourSpace == desiredColourSpace) return result;
-
-    switch(sourceColourSpace){
-        case YCbCr:
-            switch(desiredColourSpace){
-                case YCbCr:
-                    // No conversion needed
-                    break;
-                case HSV:
-                    ColorModelConversions::fromYCbCrToHSV(  source.y,
-                                                            source.cb,
-                                                            source.cr,
-                                                            result.h,
-                                                            result.s,
-                                                            result.v);
-                    break;
-                case RGB:
-                    ColorModelConversions::fromYCbCrToRGB(  source.y,
-                                                            source.cb,
-                                                            source.cr,
-                                                            result.r,
-                                                            result.g,
-                                                            result.b);
-                    break;
-            };
-            break;
-        case HSV:
-            switch(desiredColourSpace){
-                case YCbCr:
-                    ColorModelConversions::fromHSVToYCbCr(  source.h,
-                                                            source.s,
-                                                            source.v,
-                                                            result.y,
-                                                            result.cb,
-                                                            result.cr);
-                    break;
-                case HSV:
-                    // No conversion required
-                    break;
-                case RGB:
-                    ColorModelConversions::fromHSVToRGB(    source.h,
-                                                            source.s,
-                                                            source.v,
-                                                            result.r,
-                                                            result.g,
-                                                            result.b);
-                    break;
-            };
-            break;
-        case RGB:
-            switch(desiredColourSpace){
-                case YCbCr:
-                    ColorModelConversions::fromRGBToYCbCr(  source.r,
-                                                            source.g,
-                                                            source.b,
-                                                            result.y,
-                                                            result.cb,
-                                                            result.cr);
-                    break;
-                case HSV:
-                    ColorModelConversions::fromRGBToHSV(    source.r,
-                                                            source.g,
-                                                            source.b,
-                                                            result.h,
-                                                            result.s,
-                                                            result.v);
-                    break;
-                case RGB:
-                    // No conversion required
-                    break;
-            };
-            break;
-    };
-    return result;
-}
-
-
-pixels::Pixel ClassificationWidget::getCurrentColourInColourModel(int desiredColourSpace)
-{
+    std::vector<Pixel> result;
     ColourSpace currentSpace = getCurrentColourSpace();
-    pixels::Pixel currentColour = getCurrentColour();
-    return convertToColourSpace(currentColour, currentSpace, desiredColourSpace);
-}
-
-std::vector<pixels::Pixel> ClassificationWidget::getSelectedColours(int desiredColourSpace)
-{
-    std::vector<pixels::Pixel> result;
-    ColourSpace currentSpace = getCurrentColourSpace();
-    pixels::Pixel currentColour = getCurrentColour();
-    pixels::Pixel tempColour = currentColour;
-
+    Pixel tempColour;
     int channel[3];
-    switch(currentSpace)
-    {
-        case YCbCr:
-            channel[0] = currentColour.y;
-            channel[1] = currentColour.cb;
-            channel[2] = currentColour.cr;
-            break;
-        case HSV:
-            channel[0] = currentColour.h;
-            channel[1] = currentColour.s;
-            channel[2] = currentColour.v;
-            break;
-        case RGB:
-            channel[0] = currentColour.r;
-            channel[1] = currentColour.g;
-            channel[2] = currentColour.b;
-            break;
-    }
+    channel[0] = channelSelectors[0]->value();
+    channel[1] = channelSelectors[1]->value();
+    channel[2] = channelSelectors[2]->value();
 
     int min[3];
     int max[3];
@@ -388,25 +273,8 @@ std::vector<pixels::Pixel> ClassificationWidget::getSelectedColours(int desiredC
             for (int chan2 = min[2]; chan2 <= max[2]; chan2++)
             {
                 if((chan2 < 0) || (chan2 > 255)) continue;
-                switch(currentSpace)
-                {
-                    case YCbCr:
-                        tempColour.y = chan0;
-                        tempColour.cb = chan1;
-                        tempColour.cr = chan2;
-                        break;
-                    case HSV:
-                        tempColour.h = chan0;
-                        tempColour.s = chan1;
-                        tempColour.v = chan2;
-                        break;
-                    case RGB:
-                        tempColour.r = chan0;
-                        tempColour.g = chan1;
-                        tempColour.b = chan2;
-                        break;
-                }
-                result.push_back(convertToColourSpace(tempColour,currentSpace,desiredColourSpace));
+                tempColour = convertToYCbCr(chan0, chan1, chan2, currentSpace);
+                result.push_back(tempColour);
             }
         }
     }
@@ -419,16 +287,15 @@ ClassIndex::Colour ClassificationWidget::getColourLabel()
 }
 
 // Slots
-void ClassificationWidget::updateColourSpace(int newColourSpaceIndex)
+void ClassificationWidget::setColourSpace(int newColourSpaceIndex)
 {
-    pixels::Pixel selectedColour;
+    Pixel currColour = getCurrentColour();
     switch(newColourSpaceIndex)
     {
         case YCbCr:
             channelLabels[0]->setText(tr("Y: "));
             channelLabels[1]->setText(tr("Cb: "));
             channelLabels[2]->setText(tr("Cr: "));
-            selectedColour = getCurrentColourInColourModel(YCbCr);
             currentColourSpace = YCbCr;
             break;
         case HSV:
@@ -436,7 +303,6 @@ void ClassificationWidget::updateColourSpace(int newColourSpaceIndex)
             channelLabels[1]->setText(tr("Saturation: "));
             channelLabels[2]->setText(tr("Value: "));
             // Convert the selected value to the new colour model if required.
-            selectedColour = getCurrentColourInColourModel(HSV);
             currentColourSpace = HSV;
             break;
         case RGB:
@@ -444,55 +310,37 @@ void ClassificationWidget::updateColourSpace(int newColourSpaceIndex)
             channelLabels[1]->setText(tr("Green: "));
             channelLabels[2]->setText(tr("Blue: "));
             // Convert the selected value to the new colour model if required.
-            selectedColour = getCurrentColourInColourModel(RGB);
             currentColourSpace = RGB;
             break;
         default:
             break;
     };
-    setColour(selectedColour, currentColourSpace);
-    selectionChanged();
+
+    setColour(currColour);
 }
 
 void ClassificationWidget::drawSelectedColour()
 {
-    pixels::Pixel drawingColour = getCurrentColourInColourModel(RGB);
+    Pixel drawingColour = getCurrentColour();
+    unsigned char temp[3];
+    ColorModelConversions::fromYCbCrToRGB(drawingColour.y,drawingColour.cb,drawingColour.cr,temp[0],temp[1],temp[2]);
     QPixmap temp_pixmap(22,22);
-    temp_pixmap.fill(QColor(drawingColour.r, drawingColour.g, drawingColour.b));
+    temp_pixmap.fill(QColor(temp[0], temp[1], temp[2]));
     colourPreviewLabel->setPixmap(temp_pixmap);
 }
 
-void ClassificationWidget::setColour(pixels::Pixel colour, int colourSpace)
+void ClassificationWidget::setColour(Pixel colour)
 {
-    ColourSpace currentSpace = getCurrentColourSpace();
     // Disable the signals that update the colour selection, otherwise weird things happen.
     for(int channel = 0; channel < numChannels; channel++)
     {
         channelSelectors[channel]->blockSignals(true);
     }
-
-    // Convert if we need to.
-    if(colourSpace != currentSpace){
-        colour = convertToColourSpace(colour, colourSpace, currentSpace);
-    }
-
-    switch(getCurrentColourSpace()){
-        case YCbCr:
-            channelSelectors[0]->setValue(colour.y);
-            channelSelectors[1]->setValue(colour.cb);
-            channelSelectors[2]->setValue(colour.cr);
-            break;
-        case HSV:
-            channelSelectors[0]->setValue(colour.h);
-            channelSelectors[1]->setValue(colour.s);
-            channelSelectors[2]->setValue(colour.v);
-            break;
-        case RGB:
-            channelSelectors[0]->setValue(colour.r);
-            channelSelectors[1]->setValue(colour.g);
-            channelSelectors[2]->setValue(colour.b);
-            break;
-    }
+    unsigned char temp[3];
+    convertfromYCbCr(colour, temp[0], temp[1], temp[2], getCurrentColourSpace());
+    channelSelectors[0]->setValue(temp[0]);
+    channelSelectors[1]->setValue(temp[1]);
+    channelSelectors[2]->setValue(temp[2]);
 
     // Enable the signals that update the colour selection
     for(int channel = 0; channel < numChannels; channel++)
@@ -500,7 +348,7 @@ void ClassificationWidget::setColour(pixels::Pixel colour, int colourSpace)
         channelSelectors[channel]->blockSignals(false);
     }
     drawSelectedColour(); // Now force a redraw of the newly selected colour.
-    selectionChanged(); // Signal that the colour selection has changed.
+    emit selectionChanged(); // Signal that the colour selection has changed.
 }
 
 void ClassificationWidget::setAllBoundaries( int newBound)
@@ -509,5 +357,42 @@ void ClassificationWidget::setAllBoundaries( int newBound)
     {
         channelMinSelectors[channel]->setValue(-newBound);
         channelMaxSelectors[channel]->setValue(newBound);
+    }
+}
+
+Pixel ClassificationWidget::convertToYCbCr(unsigned char chan0,unsigned char chan1,unsigned char chan2, ColourSpace originalColourSpace)
+{
+    Pixel result;
+    switch(originalColourSpace)
+    {
+        case YCbCr:
+            result.y = chan0;
+            result.cb = chan1;
+            result.cr = chan2;
+            break;
+        case HSV:
+            ColorModelConversions::fromHSVToYCbCr(chan0,chan1,chan2,result.y,result.cb,result.cr);
+            break;
+        case RGB:
+            ColorModelConversions::fromRGBToYCbCr(chan0,chan1,chan2,result.y,result.cb,result.cr);
+            break;
+    }
+    return result;
+}
+
+void ClassificationWidget::convertfromYCbCr(Pixel colour, unsigned char& chan0, unsigned char& chan1, unsigned char& chan2, ColourSpace newColourSpace)
+{
+    switch(newColourSpace){
+        case YCbCr:
+            chan0 = colour.y;
+            chan1 = colour.cb;
+            chan2 = colour.cr;
+            break;
+        case HSV:
+            ColorModelConversions::fromYCbCrToHSV(colour.y, colour.cb, colour.cr, chan0, chan1, chan2);
+            break;
+        case RGB:
+            ColorModelConversions::fromYCbCrToRGB(colour.y, colour.cb, colour.cr, chan0, chan1, chan2);
+            break;
     }
 }

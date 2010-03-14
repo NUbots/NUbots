@@ -2,7 +2,6 @@
 #include "openglmanager.h"
 #include <qclipboard.h>
 #include <QApplication>
-#include <QDebug>
 #include <QDataStream>
 
 GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
@@ -14,7 +13,6 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         overlays[id].primary = false;
         overlays[id].enabled = false;
         overlays[id].colour = getDefaultColour(id);
-        //overlays[id].hasDisplayCommand = false;
         overlays[id].hasDisplayCommand = shareWidget->hasDisplayCommand(id);
         overlays[id].displayCommand = shareWidget->getDisplayCommand(id);
     }
@@ -87,9 +85,8 @@ void GLDisplay::initializeGL()
 
 void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int height)
 {
-
     bool newSize = ((imageWidth != width) || (imageHeight != height));
-    if(primaryLayer->displayID == displayID)
+    if( (primaryLayer->displayID == displayID) || (primaryLayer->displayID == unknown))
     {
         if(newSize)
         {
@@ -99,7 +96,7 @@ void GLDisplay::updatedDisplay(int displayID, GLuint newDisplay, int width, int 
     }
     overlays[displayID].displayCommand = newDisplay;
     overlays[displayID].hasDisplayCommand = true;
-    update();
+    updateGL();
 }
 
 void GLDisplay::setPrimaryDisplay(int displayID)
@@ -116,7 +113,7 @@ void GLDisplay::setPrimaryDisplay(int displayID, QColor drawingColour)
     primaryLayer->enabled = true;
     primaryLayer->colour = drawingColour;
     setWindowTitle(getLayerName(displayID) + " Image");
-    update();
+    updateGL();
     return;
 }
 
@@ -157,16 +154,24 @@ void GLDisplay::mousePressEvent(QMouseEvent * mouseEvent)
         if(mod & Qt::ControlModifier)
         {
             emit ctrlSelectPixel(pixel.x(),pixel.y());
+            mouseEvent->accept();
         }
         else
         {
             emit selectPixel(pixel.x(),pixel.y());
+            mouseEvent->accept();
         }
     }
     else if (mouseEvent->button() == Qt::RightButton)
     {
         emit rightSelectPixel(pixel.x(),pixel.y());
+        mouseEvent->accept();
     }
+    else
+    {
+        mouseEvent->ignore();
+    }
+
     setMouseTracking(true);
     return;
 }
@@ -183,6 +188,7 @@ void GLDisplay::mouseMoveEvent(QMouseEvent * mouseEvent)
         this->setCursor(Qt::ArrowCursor);
     }
     setMouseTracking(true);
+    mouseEvent->accept();
 }
 
 QPoint GLDisplay::calculateSelectedPixel(QMouseEvent * mouseEvent)
