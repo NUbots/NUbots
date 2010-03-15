@@ -75,7 +75,12 @@ HEADERS += ui_mainwindow.h \
     LogFileFormatReader.h \
     nifVersion1FormatReader.h \
     LogFileReader.h \
-    nulVersion1FormatReader.h
+    nulVersion1FormatReader.h \
+    visionstreamwidget.h \
+    camerasettingswidget.h \
+    ../NUPlatform/NUCamera/CameraSettings.h \
+    ../Tools/FileFormats/Parse.h
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -132,6 +137,11 @@ SOURCES += mainwindow.cpp \
     LogFileFormatReader.cpp \
     nifVersion1FormatReader.cpp \
     LogFileReader.cpp \
-    nulVersion1FormatReader.cpp
+    nulVersion1FormatReader.cpp \
+    visionstreamwidget.cpp \
+    camerasettingswidget.cpp \
+    ../NUPlatform/NUCamera/CameraSettings.cpp \
+    ../Tools/FileFormats/Parse.cpp
+
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
