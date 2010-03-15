@@ -43,6 +43,7 @@ void virtualNUbot::setRawImage(const NUimage* image)
     return;
 }
 
+
 void virtualNUbot::setSensorData(const float* joint, const float* balance, const float* touch)
 {
     jointSensors = joint;
@@ -50,6 +51,7 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
     touchSensors = touch;
     horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],cameraNumber);
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
@@ -137,7 +139,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     ClassifiedSection* horiScanArea = new ClassifiedSection();
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 8;
+    int spacings = 16;
 
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;

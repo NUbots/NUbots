@@ -27,8 +27,11 @@
 
 class LocalisationWidget : public QDockWidget
 {
+
     Q_OBJECT
+
 public:
+
     /*!
       @brief A constructor for LocalisationWidget class.
       @param parent The QWidget parent of this widget.
@@ -112,6 +115,7 @@ public:
     void calculateLines();
 
 public slots:
+
     /*!
       @brief Accepts a new value for xInput and updates the visible lines.
       @param newX The new value for xInput.
@@ -178,7 +182,7 @@ public slots:
       */
     void rHipRollChanged(double newRHipRoll);
 
-    /*//!
+    /*!
       @brief Accepts the robot's sensor data each change of frame and updates the local variables.
       @param jointSensors A pointer to the start of an array of doubles containing the joint sensor data.
       @param camera A boolean representing the camera that is being used.

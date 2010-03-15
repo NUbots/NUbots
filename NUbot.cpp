@@ -90,21 +90,23 @@ NUbot::NUbot(int argc, const char *argv[])
         this->vision->setLUT(LUT);
         debug << "Finnished: Loading LOOKUP TABLE" <<endl;
         CameraSettings newSettings;
-        newSettings.gain = 200;
+        newSettings.gain = 180;
         newSettings.exposure = 200;
-        newSettings.contrast = 100;
-        newSettings.blueChroma = 160;
-        newSettings.redChroma = 75;
-        newSettings.brightness = 100;
-        newSettings.saturation = 130;
+        newSettings.blueChroma = 112;
+        newSettings.redChroma = 64;
+        newSettings.brightness = 128;    
+        newSettings.contrast = 64;
+        newSettings.saturation = 124;
         newSettings.hue = 0;
         platform->camera->setSettings(newSettings);
         debug << "Finnished: Camera Settings" <<endl;
+        ImageFrameNumber = 0;
         
         imagefile.open ("/home/root/images.nul");
         
+        SAVE_IMAGES = false;
 
-        debug <<"OPENING FILE: "<< "/home/root/images.nul";
+        debug <<"OPENING FILE: "<< "/home/root/images.nul" << endl;
     #endif
     #ifdef USE_LOCALISATION
         localisation = new Localisation();
@@ -565,9 +567,52 @@ void* runThreadVision(void* arg)
     #if DEBUG_NUBOT_VERBOSITY > 4
             debug << "NUbot::NUbot(). Grabbing new image." << endl;
     #endif
+        if(nubot->SAVE_IMAGES)
+        {
+            CameraSettings newSettings;
+            newSettings.gain = 180;
+            if( nubot->ImageFrameNumber % 6 == 0 )
+            {
+                newSettings.exposure = 100;
+            }
+            else if( nubot->ImageFrameNumber % 6 == 1 )
+            {
+                newSettings.exposure = 200;
+            }
+            else if( nubot->ImageFrameNumber % 6 == 2 )
+            {
+                newSettings.exposure = 300;
+            }
+            else if( nubot->ImageFrameNumber % 6 == 3 )
+            {
+                newSettings.exposure = 400;
+            }
+            else if( nubot->ImageFrameNumber % 6 == 4 )
+            {
+                newSettings.exposure = 500;
+            }
+            else if(  nubot->ImageFrameNumber % 6 == 5 )
+            {
+                newSettings.exposure = 75;
+            } 
+            //newSettings.exposure = 500;
+            newSettings.blueChroma = 112;
+            newSettings.redChroma = 64;
+            newSettings.brightness = 128;
+            newSettings.contrast = 60;
+            newSettings.saturation = 124;
+            newSettings.hue = 0;
+            nubot->platform->camera->setSettings(newSettings);
             nubot->image = nubot->platform->camera->grabNewImage();
+            debug << "NUbot::NUbot(). Changing Setting ExP: " << newSettings.exposure << "  "<<nubot->ImageFrameNumber<< endl;
             //<! UNCOMMENT TO SAVE IMAGES!
-            //nubot->imagefile << *nubot->image;
+            nubot->imagefile << *nubot->image;
+            nubot->ImageFrameNumber =  nubot->ImageFrameNumber+1;
+        }
+        else{
+            nubot->image = nubot->platform->camera->grabNewImage();
+            *nubot->platform-> io << nubot->image;
+        }
 #endif // USE_VISION
         nubot->signalVisionStart();
         

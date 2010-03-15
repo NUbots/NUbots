@@ -26,11 +26,13 @@
 #define NUIO_H
 
 #include "NUIO/UdpPort.h"
+#include "NUIO/TcpPort.h"
 
 class NUSensorsData;
 class NUActionatorsData;
 class NUCamera;
 class JobList;
+class NUimage;
 
 class NUIO
 {
@@ -49,6 +51,11 @@ public:
     friend NUIO& operator>>(NUIO& io, JobList& jobs);
     friend NUIO& operator>>(NUIO& io, JobList* jobs);
     
+
+    //Raw Image streaming 
+    friend NUIO& operator<<(NUIO& io, NUimage& p_image);
+    friend NUIO& operator<<(NUIO& io, NUimage* p_image);
+    
 protected:
 private:
     
@@ -61,7 +68,7 @@ private:
     UdpPort* m_camera_port;
     UdpPort* m_sensors_port;
     UdpPort* m_actionators_port;
-    UdpPort* m_vision_port;
+    TcpPort* m_vision_port;
     UdpPort* m_wm_port;
     UdpPort* m_behaviour_port;
     UdpPort* m_motion_port;

@@ -24,7 +24,7 @@
 #include "Behaviour/Jobs.h"
 #include "NUIO/RoboCupGameControlData.h"
 #include "NUIO/NetworkPorts.h"
-
+#include "Tools/Image/NUimage.h"
 #include <sstream>
 using namespace std;
 
@@ -44,7 +44,7 @@ NUIO::NUIO(int robotnumber)
     m_camera_port = new UdpPort(CAMERA_PORT + robotnumber);
     m_sensors_port = new UdpPort(SENSORS_PORT + robotnumber);
     m_actionators_port = new UdpPort(ACTIONATORS_PORT + robotnumber);
-    m_vision_port = new UdpPort(VISION_PORT + robotnumber);
+    m_vision_port = new TcpPort(VISION_PORT + robotnumber);
     m_wm_port = new UdpPort(WM_PORT + robotnumber);
     m_behaviour_port = new UdpPort(BEHAVIOUR_PORT + robotnumber);
     m_motion_port = new UdpPort(MOTION_PORT + robotnumber);
@@ -161,5 +161,29 @@ NUIO& operator>>(NUIO& io, JobList* jobs)
     io >> *jobs;
     return io;
 }
+/*! @brief Stream insertion operator for NUimage
+    @param io the nuio stream object
+    @param sensors the NUimage data to stream
+ */
+NUIO& operator<<(NUIO& io, NUimage& p_image)
+{
+    network_data_t netdata = io.m_vision_port->receiveData();
+    if(netdata.size > 0)
+    {
+        stringstream buffer;
+        buffer << p_image;    
+        io.m_vision_port->sendData(buffer);
+    }
+    return io;
+}
 
+/*! @brief Stream insertion operator for a pointer to NUimage
+    @param io the nuio stream object
+    @param sensors the pointer to the NUimage data to put in the stream
+ */
+NUIO& operator<<(NUIO& io, NUimage* p_image)
+{
+    io << *p_image;
+    return io;
+}
 
