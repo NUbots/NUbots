@@ -3,7 +3,7 @@
 #include "LayerSelectionWidget.h"
 #include "WalkParameterWidget.h"
 #include "KickWidget.h"
-#include "cameraSettingsWidget.h"
+#include "camerasettingswidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
