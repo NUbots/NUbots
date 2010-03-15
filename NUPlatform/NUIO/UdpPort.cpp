@@ -84,6 +84,7 @@ UdpPort::~UdpPort()
 {
 #ifdef WIN32
     closesocket(m_sockfd);
+    WSACleanup();
 #endif
 #ifndef WIN32
     close(m_sockfd);

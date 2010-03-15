@@ -1,4 +1,4 @@
-/*! @file UdpPort.cpp
+/*! @file TCPPort.cpp
     @brief Implementation of UdpPort class.
 
     @author Aaron Wong, Jason Kulk
@@ -24,10 +24,8 @@
 #include "NUPlatform/NUSystem.h"
 #include <string.h>
 
-/*! @brief Constructs a udp port on the specified port
+/*! @brief Constructs a tcp port on the specified port
  
-    The port is setup to always broadcast on the local subnet provided m_listener_count is non-zero.
-    It is important to make sure that you are allowed to broadcast on this port!
 
     @param portnumber the port number the data will be sent and received on
  */
@@ -84,6 +82,7 @@ TcpPort::~TcpPort()
 {
 #ifdef WIN32
     closesocket(m_sockfd);
+    WSACleanup();
 #endif
 #ifndef WIN32
     close(m_sockfd);
@@ -91,7 +90,7 @@ TcpPort::~TcpPort()
     pthread_mutex_destroy(&m_socket_mutex);
 }
 
-/*! @brief Run the UDP port's main loop
+/*! @brief Run the TCP port's main loop
  
     Waits until data is received on the appropriate port.
     Then copies it to m_data, setting m_message_size, m_has_data and m_time_last_receive in the process
@@ -110,7 +109,12 @@ void TcpPort::run()
     while(1)
     {
         m_clientSockfd = accept(m_sockfd, (struct sockaddr *)&local_their_addr, &local_addr_len);
-        localnumBytes = read(m_clientSockfd,localdata,sizeof(localdata));
+        #ifdef WIN32
+            localnumBytes = recv(m_clientSockfd, localdata, sizeof(localdata),0);
+        #endif
+        #ifndef WIN32
+            localnumBytes = read(m_clientSockfd, localdata,sizeof(localdata));
+        #endif
         if ( localnumBytes != -1 && local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
         {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
             #if DEBUG_NUSYSTEM_VERBOSITY > 3
@@ -177,7 +181,12 @@ void TcpPort::sendData(network_data_t netdata)
 
             //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
         #endif
-        int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
+        #ifdef WIN32
+            int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
+        #endif
+        #ifndef WIN32
+            int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
+        #endif
         if(localnumBytes < 0)
         #if DEBUG_NUSYSTEM_VERBOSITY > 4
             debug << "TcpPort::sendData(). Sending Error "<< endl;
