@@ -19,6 +19,7 @@ class LayerSelectionWidget;
 class WalkParameterWidget;
 class KickWidget;
 class QTabsWidget;
+class cameraSettingsWidget;
 
 namespace Ui
 {
@@ -117,6 +118,7 @@ private:
     QDockWidget* networkTabDock;
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
     KickWidget* kick;
+    cameraSettingsWidget* cameraSetting;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

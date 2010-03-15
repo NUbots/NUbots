@@ -3,6 +3,7 @@
 #include "LayerSelectionWidget.h"
 #include "WalkParameterWidget.h"
 #include "KickWidget.h"
+#include "cameraSettingsWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
@@ -58,6 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabs->addTab(walkParameter, walkParameter->objectName());
     VisionStreamer = new visionStreamWidget(mdiArea, this);
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
+    cameraSetting = new cameraSettingsWidget(mdiArea, this);
+    networkTabs->addTab(cameraSetting, cameraSetting->objectName());
+
+
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
     networkTabDock->setWidget(networkTabs);
