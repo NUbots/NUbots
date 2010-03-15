@@ -25,8 +25,8 @@ NAOWEBOTS_BUILD_DIR = Build/NAOWebots
 CYCLOID_BUILD_DIR = Build/Cycloid
 
 # Aldebaran build tools
-ALD_CC_SCRIPT = $(AL_DIR)/tools/crosscompile.sh
-ALD_CTC = $(AL_DIR)/crosstoolchain
+#ALD_CC_SCRIPT = $(AL_DIR)/tools/crosscompile.sh
+ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
 
 # External source directory
 EXT_SOURCE_DIR = $(CUR_DIR)/Install
@@ -80,10 +80,16 @@ ifeq ($(SYSTEM),Linux)					## if it is Linux then compile the source here!
 		cd $(NAO_BUILD_DIR); \
 		tput sgr0; \
 		make $(MAKE_OPTIONS); \
+		#forward the binary to the robot, if a robot was specified
+		ifneq ($(robot),)
+			@ssh nao@$(ROBOT) /etc/init.d/naoqi stop
+			@scp -pC ./$(NAO_BUILD_DIR)/libnubot.so nao@$(ROBOT):/home/nao/naoqi/lib/naoqi/
+			@ssh nao@$(ROBOT) /etc/init.d/naoqi start
+		endif
 	else \
 		mkdir -p $(NAO_BUILD_DIR); \
 		cd $(NAO_BUILD_DIR); \
-		sh $(ALD_CC_SCRIPT) $(ALD_CTC) $(MAKE_DIR); \
+		cmake -DCMAKE_TOOLCHAIN_FILE=$(ALD_CTC) $(MAKE_DIR); \
 		ccmake .; \
 		echo "Configuration complete"; \
 		make $(MAKE_OPTIONS); \
@@ -100,13 +106,7 @@ NAODarwinExternal:
 	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
 #copy the binary back
 	@mkdir -p ./$(NAO_BUILD_DIR)
-	@scp -prC $(LOGNAME)@$(VM):naoqi/projects/robocup/$(NAO_BUILD_DIR)/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
-#forward the binary to the robot, if a robot was specified
-ifneq ($(robot),)
-	@ssh root@$(ROBOT) /etc/init.d/naoqi stop
-	@scp -C ./$(NAO_BUILD_DIR)/libnubot.so root@$(ROBOT):/opt/naoqi/modules/lib/
-	@ssh -f root@$(ROBOT) /etc/init.d/naoqi start
-endif
+	@scp -prC $(LOGNAME)@$(VM):naoqi/projects/robocup/$(NAO_BUILD_DIR)/sdk/lib/naoqi/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
 	
 NAOWindowsExternal:
 	@echo "Using virtual machine to target NAO"

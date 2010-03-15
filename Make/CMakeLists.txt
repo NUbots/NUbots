@@ -37,6 +37,8 @@ ENDIF (DEBUG)
 # this is used by target specific cmake files to locate appropriate sources
 SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms)
 
+INCLUDE(sources.cmake)
+
 ########## Selectively include target specific CMake files
 IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     MESSAGE(STATUS "CMake for Nao in Webots")
@@ -55,8 +57,6 @@ ELSE (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     ENDIF (${TARGET_ROBOT} STREQUAL NAO)
 ENDIF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
 
-INCLUDE(sources.cmake)
-
 IF (DEBUG)
 MESSAGE(STATUS "Target Robot location: ${TARGET_ROBOT_DIR}")
 ENDIF (DEBUG)
@@ -67,7 +67,7 @@ ENDIF (WIN32)
 
 ########### Version
 # Check cMake version
-CMAKE_MINIMUM_REQUIRED( VERSION 2.2.0 )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6.4 )
 
 ########### Colourize makefile
 # Colorized output
@@ -101,7 +101,7 @@ CONFIGURE_FILE(
 # Add definitions needed here
 ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
                  ${BOOST_DEFINITIONS}
-				 ${LIBRT_DEFINITIONS}
+		 ${LIBRT_DEFINITIONS}
 )
 
 
@@ -109,7 +109,7 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 # Define include directories here
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
                      ${BOOST_INCLUDE_DIR}
-					 ${LIBRT_INCLUDE_DIR}
+		     ${LIBRT_INCLUDE_DIR}
 )
 
 IF (DEBUG)
@@ -120,11 +120,13 @@ IF (DEBUG)
 ENDIF (DEBUG)  
 
 ############################ CHECK LIBRARY / EXECUTABLE OPTION
-IF (NUBOT_IS_EXECUTABLE)
+IF (NUBOT_IS_REMOTE)
     ADD_EXECUTABLE( nubot ${NUBOT_SRCS} )
-ELSE (NUBOT_IS_EXECUTABLE)
-    ADD_LIBRARY( nubot SHARED ${NUBOT_SRCS} )
-ENDIF (NUBOT_IS_EXECUTABLE)
+ELSE (NUBOT_IS_REMOTE)
+    IF (NOT ${TARGET_ROBOT} STREQUAL NAO)
+        ADD_LIBRARY( nubot SHARED ${NUBOT_SRCS} )
+    ENDIF (NOT ${TARGET_ROBOT} STREQUAL NAO)
+ENDIF (NUBOT_IS_REMOTE)
 
 
 ############################ SET LIBRARIES TO LINK WITH
@@ -132,41 +134,33 @@ TARGET_LINK_LIBRARIES( nubot
                        ${NUBOT_LINK_LIBRARIES} 
                        ${PTHREAD_LIBRARIES}
                        ${BOOST_LIBRARIES}
-					   ${LIBRT_LIBRARIES}
+		       ${LIBRT_LIBRARIES}
 )
 
 ############################ BINARY COPY
 # copy binaries in the output folder automatically
 GET_TARGET_PROPERTY( NUBOT_LOCATION nubot LOCATION)
 
-
 IF ( WIN32 )
     STRING(REGEX REPLACE "nubot.dll" "" NUBOT_LOCATION_SRC ${NUBOT_LOCATION})
-    SET (OUTPUT_ROOT_DIR_LIB ${AL_DIR}/modules/lib/ )
     FILE(TO_NATIVE_PATH ${NUBOT_LOCATION_SRC} NUBOT_LOCATION_SRC)
     FILE(TO_NATIVE_PATH ${OUTPUT_ROOT_DIR_LIB} OUTPUT_ROOT_DIR_LIB)
 ENDIF ( WIN32 )
 
 IF (WIN32)
-	  ADD_CUSTOM_COMMAND(
-	    TARGET nubot
-	    POST_BUILD
-	    COMMAND echo ${NUBOT_LOCATION_SRC}*
-    	    COMMAND echo ${OUTPUT_ROOT_DIR_LIB}
-	    COMMAND xcopy  ${NUBOT_LOCATION_SRC}*.dll ${OUTPUT_ROOT_DIR_LIB} /Y /C
-	  )
+    ADD_CUSTOM_COMMAND(
+    TARGET nubot
+    POST_BUILD
+    COMMAND xcopy  ${NUBOT_LOCATION_SRC}*.dll ${OUTPUT_ROOT_DIR_LIB} /Y /C
+    )
 ELSE (WIN32)
-
-  ADD_CUSTOM_COMMAND(
+    ADD_CUSTOM_COMMAND(
     TARGET nubot
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
-    ARGS -E copy
-    ${NUBOT_LOCATION}
-    ${OUTPUT_ROOT_DIR_LIB}
-  )
+    ARGS -E copy ${NUBOT_LOCATION} ${OUTPUT_ROOT_DIR_LIB}
+    )
 ENDIF (WIN32)
-
 
 ############################ OPTIONS
 SET(DEBUG_NUBOT_VERBOSITY 5 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")

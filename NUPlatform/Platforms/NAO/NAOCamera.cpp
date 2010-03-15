@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #undef __STRICT_ANSI__
 #include <linux/videodev.h>

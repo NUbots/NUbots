@@ -25,7 +25,7 @@ SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
 FIND_PACKAGE(WEBOTS REQUIRED)
 
 ######### Set NUBOT_EXECUTABLE so that the code is compiled into an executable
-SET(NUBOT_IS_EXECUTABLE ON)
+SET(NUBOT_IS_REMOTE ON)
 
 ######### Set the output path so it goes nicely into the webots file structure
 SET( OUTPUT_ROOT_DIR_EXE "${WEBOTS_DIR}/projects/contests/nao_robocup/controllers/nao_soccer_player_blue/nao_soccer_player_blue" )
