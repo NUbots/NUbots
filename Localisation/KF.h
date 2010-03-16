@@ -27,16 +27,16 @@ class KF {
 	    void linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12, double SR22, int index1, int index2);
 
         // Data retrieval
-	    double sd(int Xi);
- 	    double variance(int Xi);
+        double sd(int Xi);
+        double variance(int Xi);
         double getState(int stateID);
         Matrix GetBallSR();
         double getDistanceToPosition(double posX, double posY);
         double getBearingToPosition(double posX, double posY);
 
         // Utility
-	    void init();
-	    void Reset();
+        void init();
+        void Reset();
         bool clipState(int stateIndex, double minValue, double maxValue);
 
 
@@ -55,7 +55,7 @@ class KF {
         Matrix sqrtOfTestWeightings; // Square root of W (Constant)
         Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
         Matrix sqrtOfProcessNoiseReset; // Square root of Q when resetting. (Conastant) 
-	    double frameRate; // Constant from init on.
+        double frameRate; // Constant from init on.
 
         // Tuning Values (Constants) -- Values assigned in KF.cpp
         static const float c_Kappa;

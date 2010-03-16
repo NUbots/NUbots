@@ -88,7 +88,6 @@ KF::KF(){
 }
 
 
-
 void KF::init(){
   // Initial state estimates
     stateEstimates= Matrix(7,1,true);
