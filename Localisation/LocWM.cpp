@@ -38,7 +38,6 @@ const float LocWM::R_obj_range_relative = 0.02f; // 10% of range added. (0.1)^2
 
 const float LocWM::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
-
 LocWM::LocWM()
 {
     models[0].isActive = true; // Start with just the first model model
