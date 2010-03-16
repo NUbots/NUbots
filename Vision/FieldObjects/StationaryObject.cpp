@@ -2,31 +2,35 @@
 
 StationaryObject::StationaryObject()
 {
-	AbsoluteLocation[0] = 0;
-	AbsoluteLocation[1] = 0;
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
-}
-StationaryObject::~StationaryObject()
-{
-	
+    ID = 0;
+    AbsoluteLocation[0] = 0;
+    AbsoluteLocation[1] = 0;
+    WorldModelRelativeLocation[0] = 0;
+    WorldModelRelativeLocation[1] = 0;
+    WorldModelRelativeLocation[2] = 0;
 }
 
-StationaryObject::StationaryObject(float x, float y)
+StationaryObject::StationaryObject(int id, float x, float y): ID(id), AbsoluteLocation(x,y)
 {
-	AbsoluteLocation[0] = x;
-	AbsoluteLocation[1] = y;
 	WorldModelRelativeLocation[0] = 0;
 	WorldModelRelativeLocation[1] = 0;
 	WorldModelRelativeLocation[2] = 0;
 }
-StationaryObject::StationaryObject(Vector2<float> newAbsoluteLocation)
+StationaryObject::StationaryObject(int id, Vector2<float> newAbsoluteLocation):ID(id), AbsoluteLocation(newAbsoluteLocation)
 {
-	AbsoluteLocation = newAbsoluteLocation;
 	WorldModelRelativeLocation[0] = 0;
 	WorldModelRelativeLocation[1] = 0;
 	WorldModelRelativeLocation[2] = 0;
+}
+
+StationaryObject::StationaryObject(const StationaryObject& otherObject): ID(otherObject.getID()), AbsoluteLocation(otherObject.getAbsoluteLocation())
+{
+
+}
+
+StationaryObject::~StationaryObject()
+{
+
 }
 
 void StationaryObject::updateWorldModelRelativeLocation(Vector3<float> newWMRelLoc)
