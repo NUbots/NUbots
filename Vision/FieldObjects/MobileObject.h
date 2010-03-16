@@ -1,3 +1,7 @@
+#ifndef MOBILEOBJECTS_H
+#define MOBILEOBJECTS_H
+
+
 #include "Object.h"
 #include "../../Tools/Math/Vector2.h"
 #include "../../Tools/Math/Vector3.h"
@@ -51,3 +55,4 @@ class MobileObject : public Object{
                 float sdwmElevation(){return WorldModelRelativeLocationError[2];}
 		
 };
+#endif
