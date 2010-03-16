@@ -79,7 +79,7 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 # usefull to your project
 
 FIND_PACKAGE( PTHREAD REQUIRED )
-FIND_PACKAGE( BOOST REQUIRED )
+FIND_PACKAGE( Boost REQUIRED )
 FIND_PACKAGE( RT )
 
 ############################ targetconfig.h GENERATION
@@ -100,7 +100,7 @@ CONFIGURE_FILE(
 ############################ DEFINITION
 # Add definitions needed here
 ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
-                 ${BOOST_DEFINITIONS}
+                 ${Boost_DEFINITIONS}
 		 ${LIBRT_DEFINITIONS}
 )
 
@@ -108,7 +108,7 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 ############################ INCLUDE DIRECTORY
 # Define include directories here
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
-                     ${BOOST_INCLUDE_DIR}
+                     ${Boost_INCLUDE_DIR}
 		     ${LIBRT_INCLUDE_DIR}
 )
 
@@ -128,19 +128,17 @@ ELSE (NUBOT_IS_REMOTE)
     ENDIF (NOT ${TARGET_ROBOT} STREQUAL NAO)
 ENDIF (NUBOT_IS_REMOTE)
 
-
 ############################ SET LIBRARIES TO LINK WITH
 TARGET_LINK_LIBRARIES( nubot 
                        ${NUBOT_LINK_LIBRARIES} 
                        ${PTHREAD_LIBRARIES}
-                       ${BOOST_LIBRARIES}
+                       ${Boost_LIBRARIES}
 		       ${LIBRT_LIBRARIES}
 )
 
 ############################ BINARY COPY
 # copy binaries in the output folder automatically
 GET_TARGET_PROPERTY( NUBOT_LOCATION nubot LOCATION)
-MESSAGE(STATUS ${CMAKE_COMMAND} copy ${NUBOT_LOCATION} ${OUTPUT_ROOT_DIR_LIB})
 
 IF ( WIN32 )
     STRING(REGEX REPLACE "nubot.dll" "" NUBOT_LOCATION_SRC ${NUBOT_LOCATION})
