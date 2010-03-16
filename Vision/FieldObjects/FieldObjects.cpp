@@ -15,13 +15,13 @@ void FieldObjects::InitStationaryFieldObjects()
         float x,y;
         for(int ID =0; ID < NUM_STAT_FIELD_OBJECTS; ID++)
 	{
-            x = y = 0.0f;
 		switch(ID)
 		{
 		// Blue Goal.
                 //case FO_BLUE_GOAL:
-                //statObject = StationaryObject(-300.0f, 0.0f);
-                //break;
+                //    x = -300.0f;
+                //    y = 0.0f;
+                //    break;
 		case FO_BLUE_LEFT_GOALPOST:
                     x = -300.0f;
                     y = -70.0f;
@@ -110,6 +110,9 @@ void FieldObjects::InitStationaryFieldObjects()
 		case FO_CORNER_BLUE_PEN_RIGHT:
                     x = -237.5f;
                     y = 150.0f;
+                    break;
+                default:
+                    x = y = 0.0f;
                     break;
 		}
                 stationaryFieldObjects.push_back(StationaryObject(ID,x,y));
