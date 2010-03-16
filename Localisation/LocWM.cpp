@@ -8,7 +8,7 @@
 //#define debug_out cout
 #if LOCWM_VERBOSITY > 0
 #define debug_out debug_file
-#endif
+#endif // LOCWM_VERBOSITY > 0
 
 using namespace mathGeneral;
 
@@ -53,23 +53,25 @@ LocWM::LocWM()
     for(int m = 0; m < c_MAX_MODELS; m++){
         for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[m][i] = 0.0;
     }
-#if LOCWM_VERBOSITY > 0
-#ifdef WIN32
+
+    #if LOCWM_VERBOSITY > 0
+    #ifdef WIN32
     debug_file.open("LocWM.log", ios::out | ios::trunc);
-#else
+    #else
     debug_file.open("/var/log/LocWM.log", ios::out | ios::trunc);
-#endif
-#endif
-	return;
+    #endif // WIN32
+    #endif // LOCWM_VERBOSITY > 0
+
+    return;
 }
 
 
 
 LocWM::~LocWM()
 {
-#if LOCWM_VERBOSITY > 0
+    #if LOCWM_VERBOSITY > 0
     debug_file.close();
-#endif
+    #endif // LOCWM_VERBOSITY > 0
 }
 
 
@@ -89,7 +91,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
 
     //if(balanceFallen) return;
 
-#if LOCWM_VERBOSITY > 2
+    #if LOCWM_VERBOSITY > 2
     if(numUpdates == 0 ){ 
         debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << endl;
         for(int i = 0; i < c_MAX_MODELS; i++){
@@ -101,16 +103,17 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
             debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
         }
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 2
 
-	varianceCheckAll(); // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
-
+    varianceCheckAll(); // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
 
     // Do Time update.
     //doTimeUpdate(odomForward, odomLeft, odomTurn);
-#if LOCWM_VERBOSITY > 2
+    doTimeUpdate(0.0f, 0.0f, 0.0f); //!TODO: This function needs to take values.
+
+    #if LOCWM_VERBOSITY > 2
     //debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
-#endif
+    #endif // LOCWM_VERBOSITY > 2
 
     // Proccess the Known Field Objects
     StationaryObjectsIt currStat(objects->stationaryFieldObjects.begin());
@@ -130,7 +133,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
     }
     NormaliseAlphas();
 
-#if SHARED_BALL_ON
+    #if SHARED_BALL_ON
     /*
     // Check the game packets.
     // We only want to do the shared ball updates if we can't see the ball ourselves.
@@ -157,11 +160,11 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
         }
     }
     */
-#endif // SHARED_BALL_ON
+    #endif // SHARED_BALL_ON
 
     NormaliseAlphas();
 
-#if MULTIPLE_MODELS_ON
+    #if MULTIPLE_MODELS_ON
     // Do Ambiguous objects.
     AmbiguousObjectsIt currAmb(objects->ambiguousFieldObjects.begin());
     AmbiguousObjectsConstIt endAmb(objects->ambiguousFieldObjects.end());
@@ -173,14 +176,13 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
     }
 
     MergeModels(c_MAX_MODELS_AFTER_MERGE);
-#endif // MULTIPLE_MODELS_ON
+    #endif // MULTIPLE_MODELS_ON
 
     // Check for model reset. -> with multiple models just remove if not last one??
     // Need to re-do reset to be model specific.
     int numReset = CheckForOutlierResets();
     // clip models back on to field.
-	clipActiveModelsToField();
-
+    clipActiveModelsToField();
 
     // Store WM Data in Field Objects.
     int bestModelID = getBestModelID(); // Get the best model to use.
@@ -210,23 +212,24 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
         }
     }
     */
-#if LOCWM_VERBOSITY > 2
-	if(numUpdates > 0){
+
+    #if LOCWM_VERBOSITY > 2
+    if(numUpdates > 0){
         for (int i = 0; i < c_MAX_MODELS; i++){
             if(models[i].isActive == false) continue;
-	        debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
-	        debug_out  << " [alpha = " << models[i].alpha << "]";
+            debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
+            debug_out  << " [alpha = " << models[i].alpha << "]";
             debug_out  << " Robot X: " << models[i].getState(0);
             debug_out  << " Robot Y: " << models[i].getState(1);
             debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
         }
-	    debug_out  << "[" << currentFrameNumber << "]: Best Model";
-	    debug_out  << " [alpha = " << models[bestModelID].alpha << "]";
+        debug_out  << "[" << currentFrameNumber << "]: Best Model";
+        debug_out  << " [alpha = " << models[bestModelID].alpha << "]";
         debug_out  << " Robot X: " << models[bestModelID].getState(0);
         debug_out  << " Robot Y: " << models[bestModelID].getState(1);
         debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << endl;
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 2
 }
 
 void LocWM::CheckGameState()
@@ -318,9 +321,9 @@ void LocWM::doPenaltyReset()
 
 void LocWM::doPlayerReset()
 {
-#if LOCWM_VERBOSITY > 0
+    #if LOCWM_VERBOSITY > 0
     debug_out  << "[" << currentFrameNumber << "] Performing player reset." << endl;
-#endif // LOCWM_VERBOSITY > 0
+    #endif // LOCWM_VERBOSITY > 0
 
     // Reset all of the models
     for(int m = 0; m < c_MAX_MODELS; m++){
@@ -427,15 +430,15 @@ bool LocWM::clipModelToField(int modelID)
     prevTheta = models[modelID].getState(2);
 
     clipped = models[modelID].clipState(0, fieldXMin, fieldXMax);		// Clipping for robot's X
-#if LOCWM_VERBOSITY > 1
+    #if LOCWM_VERBOSITY > 1
     if(clipped){
-	    debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
-	    debug_out  << " [alpha = " << models[modelID].alpha << "]";
+        debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+        debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(0) clipped.";
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
 
     prevX = models[modelID].getState(0);
@@ -444,7 +447,7 @@ bool LocWM::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(1, fieldYMin, fieldYMax);		// Clipping for robot's Y
 
-#if LOCWM_VERBOSITY > 1
+    #if LOCWM_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -452,7 +455,7 @@ bool LocWM::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 1
 
     wasClipped = wasClipped || clipped;
     prevX = models[modelID].getState(0);
@@ -461,7 +464,7 @@ bool LocWM::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(3, fieldXMin, fieldXMax);		// Clipping for ball's X
 
-#if LOCWM_VERBOSITY > 1
+    #if LOCWM_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -469,7 +472,7 @@ bool LocWM::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 1
     
     wasClipped = wasClipped || clipped;
 
@@ -479,7 +482,7 @@ bool LocWM::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(4, fieldYMin, fieldYMax);		// Clipping for ball's Y
 
-#if LOCWM_VERBOSITY > 1
+    #if LOCWM_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -487,7 +490,7 @@ bool LocWM::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-#endif
+    #endif // LOCWM_VERBOSITY > 1
     
     wasClipped = wasClipped || clipped;
 
@@ -511,13 +514,13 @@ bool LocWM::clipActiveModelsToField()
 
 
 
-bool LocWM::doTimeUpdate(double odomForward, double odomLeft, double odomTurn)
+bool LocWM::doTimeUpdate(float odomForward, float odomLeft, float odomTurn)
 {
     bool result = false;
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
         result = true;
-  	    models[modelID].timeUpdate(odomForward, odomLeft, odomTurn);
+        models[modelID].timeUpdate(odomForward, odomLeft, odomTurn);
     }
     return result;
 }
@@ -556,7 +559,7 @@ int LocWM::doBallMeasurementUpdate(MobileObject &ball)
 
     #if LOCWM_VERBOSITY > 1
     debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.Distance() << " Bearing = " << ball.Bearing() << endl;
-    #endif
+    #endif // LOCWM_VERBOSITY > 1
 
     double flatBallDistance = ball.Distance() * cos(ball.Elevation());
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -589,26 +592,32 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
-#if LOCWM_VERBOSITY > 1
+
+        #if LOCWM_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
         //debug_out  << "Object = " << landmark.name();
         debug_out  << " Distance = " << landmark.Distance();
         debug_out  << " Bearing = " << landmark.Bearing();
         debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
-#endif
+        #endif // LOCWM_VERBOSITY > 1
+
         if(landmark.Bearing() != landmark.Bearing()){
-#if LOCWM_VERBOSITY > 0
+
+            #if LOCWM_VERBOSITY > 0
             debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
-#endif
+            #endif // LOCWM_VERBOSITY > 0
+
             continue;
         }
         kf_return = KF_OK;
         kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.Bearing(),landmark.X(), landmark.Y(), distanceOffsetError, distanceRelativeError, bearingError);
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
-#if LOCWM_VERBOSITY > 1
+
+        #if LOCWM_VERBOSITY > 1
         if(kf_return == KF_OK) debug_out  << "OK" << endl;
         else debug_out  << "OUTLIER" << endl;
-#endif
+        #endif // LOCWM_VERBOSITY > 1
+
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
@@ -621,15 +630,16 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
     int kf_return;
 
     /*
-#if AMBIGUOUS_CORNERS_ON <= 0
+    #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FO_YELLOW_GOALPOST_UNKNOWN)){
-#if LOCWM_VERBOSITY > 1
+    #if LOCWM_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: ingored unkown object " << ambigousObject.name() << std::endl;
-#endif // LOCWM_VERBOSITY > 1
+    #endif // LOCWM_VERBOSITY > 1
         return KF_OUTLIER;
     }
-#endif //AMBIGUOUS_CORNERS_ON <= 0
+    #endif // AMBIGUOUS_CORNERS_ON <= 0
     */
+
     vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
     unsigned int numOptions = possabilities.size();
     int outlierModelID = -1;
@@ -639,26 +649,34 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
 
     if(numFreeModels < numRequiredModels){
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
-#if LOCWM_VERBOSITY > 2
+
+        #if LOCWM_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
         debug_out  <<"[" << currentFrameNumber << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
-#endif
+        #endif // LOCWM_VERBOSITY > 2
+
         MergeModels(maxActiveAfterMerge);
-#if LOCWM_VERBOSITY > 2
+
+        #if LOCWM_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << endl;
-#endif
+        #endif // LOCWM_VERBOSITY > 2
+
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
-#if LOCWM_VERBOSITY > 0
+
+            #if LOCWM_VERBOSITY > 0
             debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << endl;
-#endif
+            #endif // LOCWM_VERBOSITY > 0
+
             return KF_OUTLIER;
         }
     }
-#if LOCWM_VERBOSITY > 1
+
+    #if LOCWM_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
     debug_out << " Distance = " << ambigousObject.Distance();
     debug_out  << " Bearing = " << ambigousObject.Bearing() << endl;
-#endif
+    #endif // LOCWM_VERBOSITY > 1
+
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip inactive models.
 
@@ -679,9 +697,11 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
     
             // If an invalid modelID has been returned, something has gone horribly wrong, so stop here.
             if(newModelID < 0){ 
-#if LOCWM_VERBOSITY > 0
+
+                #if LOCWM_VERBOSITY > 0
                 debug_out  <<"[" << currentFrameNumber << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
-#endif
+                #endif // LOCWM_VERBOSITY > 0
+
                 for(int m = 0; m < c_MAX_MODELS; m++) models[m].toBeActivated = false;
                 return -1;
             }
@@ -696,11 +716,11 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
             // Do the update.
             kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.Distance(), ambigousObject.Bearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
-#if LOCWM_VERBOSITY > 2
+            #if LOCWM_VERBOSITY > 2
             debug_out  <<"[" << currentFrameNumber << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
             //debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
             debug_out  << "\tLocation = (" << possibleObjects[possibleObjectID].X() << "," << possibleObjects[possibleObjectID].Y() << ")...";
-#endif
+            #endif // LOCWM_VERBOSITY > 2
 
             // If the update reult was an outlier rejection, the model need not be kept as the
             // information is already contained in the designated outlier model created earlier
@@ -746,7 +766,7 @@ bool LocWM::MergeTwoModels(int index1, int index2)
 
 #if LOCWM_VERBOSITY > 0
         debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
-#endif
+#endif // LOCWM_VERBOSITY > 0
 
         return success;
     }
@@ -793,7 +813,6 @@ bool LocWM::MergeTwoModels(int index1, int index2)
     models[index2].toBeActivated = false;
 
     for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[index2][i] = 0.0; // Reset outlier values.
-
     return true;
 }
 
@@ -841,29 +860,28 @@ int LocWM::getBestModelID()
 
 bool LocWM::CheckModelForOutlierReset(int modelID)
 {
-	// RHM 7/7/08: Suggested incorporation of 'Resetting' for possibly 'kidnapped' robot
-	//----------------------------------------------------------
-  	double sum = 0.0;
-  	int numObjects = 0;
+    // RHM 7/7/08: Suggested incorporation of 'Resetting' for possibly 'kidnapped' robot
+    //----------------------------------------------------------
+    double sum = 0.0;
+    int numObjects = 0;
     bool reset = false;
     for(int objID = 0; objID < FieldObjects::NUM_STAT_FIELD_OBJECTS; objID++){
-  		sum += modelObjectErrors[modelID][objID];
-  		if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;   
-  		modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;   
-  	}
+        sum += modelObjectErrors[modelID][objID];
+        if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
+        modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
+    }
 
-  	// Check if enough recent 'outliers' that we should reset ?
-  	if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
+    // Check if enough recent 'outliers' that we should reset ?
+    if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
         reset = true;
-  		//debug_out  <<">>>>>>>>>>>>>>>>>>>>RESET"<<std::endl;
-  		models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
+        models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
-#if LOCWM_VERBOSITY > 1
+        #if LOCWM_VERBOSITY > 1
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
-#endif
+        #endif // LOCWM_VERBOSITY > 1
 
         for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
-  	}
+    }
     return reset;
 }
 

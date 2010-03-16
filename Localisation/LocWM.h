@@ -26,7 +26,7 @@ class LocWM
         int varianceCheckAll();
         void ResetAll();
         void writeToLog();
-        bool doTimeUpdate(double odomForward, double odomLeft, double odomTurn);
+        bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
