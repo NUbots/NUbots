@@ -25,11 +25,10 @@ NAOWEBOTS_BUILD_DIR = Build/NAOWebots
 CYCLOID_BUILD_DIR = Build/Cycloid
 
 # Aldebaran build tools
-#ALD_CC_SCRIPT = $(AL_DIR)/tools/crosscompile.sh
 ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
 
-# External source directory
-EXT_SOURCE_DIR = $(CUR_DIR)/Install
+# Source directory on external machine
+SOURCE_EXT_DIR = naoqi/projects/robocup
 
 .PHONY: default_target all 
 .PHONY: NAO NAOConfig NAOClean NAOVeryClean
@@ -56,105 +55,99 @@ export TARGET_ROBOT
 SYSTEM = $(strip $(shell uname -s))
 
 # If I choose to use an external machine to do the compiling; these are the username and ip address used
-LOGNAME = $(strip $(shell logname))
-VM = $(strip $(vm))
+ifeq ($(strip $(user)), )
+	LOGNAME = $(strip $(shell logname))
+else
+	LOGNAME = $(strip $(user))
+endif
+VM_IP = $(strip $(vm))
 
 # If I choose to install it on a particular robot this is the ip used
-ROBOT = $(strip $(robot))
+ROBOT_IP = $(strip $(robot))
 default_target: NAOWebots
 
 all: NAO NAOWebots Cycloid NUView
 
 ################ NAO ################
 NAO:
-	@echo "Targetting NAO";
-ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
-	@make NAOWindowsExternal
-endif
-ifeq ($(SYSTEM),Darwin)
-	@make NAODarwinExternal				## if this file is run on Darwin also using a virtual machine (for now)
-endif
-ifeq ($(SYSTEM),Linux)					## if it is Linux then compile the source here!
-	@if [ -f $(CUR_DIR)/$(NAO_BUILD_DIR)/Makefile ]; then \
-		echo "Already configured"; \
-		cd $(NAO_BUILD_DIR); \
-		tput sgr0; \
-		make $(MAKE_OPTIONS); \
-		#forward the binary to the robot, if a robot was specified
-		ifneq ($(robot),)
-			@ssh nao@$(ROBOT) /etc/init.d/naoqi stop
-			@scp -pC ./$(NAO_BUILD_DIR)/libnubot.so nao@$(ROBOT):/home/nao/naoqi/lib/naoqi/
-			@ssh nao@$(ROBOT) /etc/init.d/naoqi start
-		endif
-	else \
-		mkdir -p $(NAO_BUILD_DIR); \
-		cd $(NAO_BUILD_DIR); \
-		cmake -DCMAKE_TOOLCHAIN_FILE=$(ALD_CTC) $(MAKE_DIR); \
-		ccmake .; \
-		echo "Configuration complete"; \
-		make $(MAKE_OPTIONS); \
-	fi
+ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
+    ifeq ($(SYSTEM),Linux)					## can only cross-compile on linux
+		@echo "Cross-compiling for NAO"
+        ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(NAO_BUILD_DIR)/*)), )		## check if the project has already been configured
+			@set -e; \
+				echo "Configuring for first use"; \
+				mkdir -p $(NAO_BUILD_DIR); \
+				cd $(NAO_BUILD_DIR); \
+				cmake -DCMAKE_TOOLCHAIN_FILE=$(ALD_CTC) $(MAKE_DIR); \
+				ccmake .; \
+				make $(MAKE_OPTIONS);
+        else
+			@set -e; \
+				cd $(NAO_BUILD_DIR); \
+				make $(MAKE_OPTIONS);
+        endif
+		@echo $(ROBOT_IP)
+        ifneq ($(ROBOT_IP),)
+			@ssh nao@$(ROBOT_IP) /etc/init.d/naoqi stop
+			@scp -pC ./$(NAO_BUILD_DIR)/sdk/lib/naoqi/libnubot.so nao@$(ROBOT_IP):/home/nao/naoqi/lib/naoqi/
+			@ssh nao@$(ROBOT_IP) /etc/init.d/naoqi start
+        endif
+    else
+		@echo "Cannot cross-compile on this machine"
+    endif
+else
+	@make NAOExternal
 endif
 
-NAODarwinExternal:
-	@echo "Using virtual machine to target NAO";
-#log into vm.local and make the project dir
-	@ssh $(LOGNAME)@$(VM) mkdir -p naoqi/projects/robocup;
+NAOExternal:
+	@echo "Send source to external machine $(LOGNAME)@$(VM_IP)";
+#log into VM_IP and make the project dir
+	@ssh $(LOGNAME)@$(VM_IP) mkdir -p naoqi/projects/robocup;
 #copy everything in this directory except the existing .*, Build, Documentation directories
-	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM):naoqi/projects/robocup;
+	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM_IP):$(SOURCE_EXT_DIR);
 #run make inside the vm
-	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAO;"
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAO robot=$(ROBOT_IP);"
 #copy the binary back
 	@mkdir -p ./$(NAO_BUILD_DIR)
-	@scp -prC $(LOGNAME)@$(VM):naoqi/projects/robocup/$(NAO_BUILD_DIR)/sdk/lib/naoqi/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
-	
-NAOWindowsExternal:
-	@echo "Using virtual machine to target NAO"
-	@echo "TODO"
+	@scp -prC $(LOGNAME)@$(VM_IP):$(SOURCE_EXT_DIR)/$(NAO_BUILD_DIR)/sdk/lib/naoqi/libnubot.so ./$(NAO_BUILD_DIR)/libnubot.so
 	
 
 NAOConfig:
-	@echo "Configuring NAO Build";
-ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
-	@echo "TODO configure on a windows machine"
-endif
-ifeq ($(SYSTEM),Darwin)
-	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAOConfig;"
-endif
-ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
-	@set -e; \
-		cd $(NAO_BUILD_DIR); \
-		ccmake .; \
-		make $(MAKE_OPTIONS);
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			cd $(NAO_BUILD_DIR); \
+			ccmake .;
+    endif
+else
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAOConfig;"
 endif
 
+
 NAOClean:
-	@echo "Cleaning NAO Build";
-ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
-	@echo "TODO clean on a windows machine"
-endif
-ifeq ($(SYSTEM),Darwin)
-	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAOClean;"
-endif
-ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
-	@set -e; \
-		cd $(NAO_BUILD_DIR); \
-		make $(MAKE_OPTIONS) clean;
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			echo "Cleaning NAO Build"; \
+			cd $(NAO_BUILD_DIR); \
+			make $(MAKE_OPTIONS) clean;
+    endif
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAOClean;"
 endif
 
 NAOVeryClean:
-	@echo "Hosing NAO Build";
-ifeq ($(SYSTEM),windows32)				## if this file is run on windows using gnumake, use a virtual machine to compile
-	@echo "TODO very clean on a windows machine"
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			echo "Hosing NAO Build"; \
+			cd $(NAO_BUILD_DIR); \
+			rm -rf ./*;
+    endif
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAOVeryClean;"
 endif
-ifeq ($(SYSTEM),Darwin)
-	@ssh -t $(LOGNAME)@$(VM) "cd naoqi/projects/robocup; make NAOVeryClean;"
-endif
-ifeq ($(SYSTEM),Linux)					## if it is Linux then configure the source here!
-	@set -e; \
-		cd $(NAO_BUILD_DIR); \
-		rm -rf ./*;
-endif
+
 
 ################ NAOWebots ################
 
