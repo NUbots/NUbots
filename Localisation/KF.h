@@ -21,7 +21,7 @@ class KF {
 
         // Update functions
         void timeUpdate(double odometeryForward, double odometeryLeft, double odometeryTurn);
-        KfUpdateResult odometeryUpdate(double deltaX, double deltaY, double deltaTheta);
+        KfUpdateResult odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta);
         KfUpdateResult ballmeas(double Ballmeas, double theta_Ballmeas);
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);
 	    void linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12, double SR22, int index1, int index2);

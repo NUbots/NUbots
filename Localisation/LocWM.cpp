@@ -10,6 +10,19 @@
 #define debug_out debug_file
 #endif
 
+using namespace mathGeneral;
+
+typedef std::vector<StationaryObject> StationaryObjects;
+typedef StationaryObjects::iterator StationaryObjectsIt;
+typedef StationaryObjects::const_iterator StationaryObjectsConstIt;
+
+typedef std::vector<MobileObject> MobileObjects;
+typedef MobileObjects::iterator MobileObjectsIt;
+typedef MobileObjects::const_iterator MobileObjectsConstIt;
+
+typedef std::vector<AmbiguousObject> AmbiguousObjects;
+typedef AmbiguousObjects::iterator AmbiguousObjectsIt;
+typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 
 // Constant value initialisation
 const float LocWM::c_LargeAngleSD = 1.5f;   //For variance check
@@ -23,7 +36,7 @@ const float LocWM::R_obj_theta = 0.001f; // (0.01 rad)^2
 const float LocWM::R_obj_range_offset = 10.0f*10.0f; // (10cm)^2
 const float LocWM::R_obj_range_relative = 0.02f; // 10% of range added. (0.1)^2
 
-const float LocWM::centreCircleBearingError = (float)(mathGeneral::deg2rad(10)*mathGeneral::deg2rad(10)); // (10 degrees)^2
+const float LocWM::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
 
 LocWM::LocWM()
@@ -32,7 +45,9 @@ LocWM::LocWM()
     models[0].toBeActivated = false;
 	
     wasPreviouslyPenalised = false;
-    previousGameState = STATE_INITIAL;
+
+    // State
+    //previousGameState = STATE_INITIAL;
 
 	// RHM 7/7/08: Extra array for resetting algorithm
     for(int m = 0; m < c_MAX_MODELS; m++){
@@ -63,7 +78,7 @@ LocWM::~LocWM()
 
 
 
-void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, StoredGamePackets* mostRecentPackets)
+void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets)
 {
     int numUpdates = 0;
     int updateResult;  
@@ -72,7 +87,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
 	// RHM 26/6/08: Modified below	
     CheckGameState();
 
-    if(balanceFallen) return;
+    //if(balanceFallen) return;
 
 #if LOCWM_VERBOSITY > 2
     if(numUpdates == 0 ){ 
@@ -92,24 +107,24 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
 
 
     // Do Time update.
-    doTimeUpdate(odomForward, odomLeft, odomTurn);
+    //doTimeUpdate(odomForward, odomLeft, odomTurn);
 #if LOCWM_VERBOSITY > 2
-    debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
+    //debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
 #endif
 
     // Proccess the Known Field Objects
-    const vector<StationaryObject>::iterator startStat = objects->stationaryFieldObjects.begin();
-    const vector<StationaryObject>::iterator endStat = objects->stationaryFieldObjects.end();
-    for(vector<StationaryObject>::iterator currStat = startStat; currStat != endStat; ++currStat){
-        if((*currStat).seen == false) continue; // Skip objects that were not seen.
+    StationaryObjectsIt currStat(objects->stationaryFieldObjects.begin());
+    StationaryObjectsConstIt endStat(objects->stationaryFieldObjects.end());
+    for(; currStat != endStat; ++currStat){
+        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
         updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
         numUpdates++;
     }
 
-    const vector<MobileObject>::iterator startMob = objects->mobileFieldObjects.begin();
-    const vector<MobileObject>::iterator endMob = objects->mobileFieldObjects.end();
-    for (vector<MobileObject>::iterator currMob = startMob; currMob != endMob; ++currMob){
-           if((*currMob).seen == false) continue; // Skip objects that were not seen.
+    MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
+    MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
+    for (; currMob != endMob; ++currMob){
+           if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
            updateResult = doBallMeasurementUpdate((*currMob));
            numUpdates++;
     }
@@ -148,12 +163,11 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
 
 #if MULTIPLE_MODELS_ON
     // Do Ambiguous objects.
-    const vector<AmbiguousObject>::iterator startAmb = objects->ambiguousFieldObjects.begin();
-    const vector<AmbiguousObject>::iterator endAmb = objects->ambiguousFieldObjects.end();
-
-    for(vector<AmbiguousObject>::iterator currAmb = startAmb; currAmb != endAmb; ++curAmb){
-        if((*currAmb).seen == false) continue; // Skip objects that were not seen.
-        updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb));
+    AmbiguousObjectsIt currAmb(objects->ambiguousFieldObjects.begin());
+    AmbiguousObjectsConstIt endAmb(objects->ambiguousFieldObjects.end());
+    for(; currAmb != endAmb; ++currAmb){
+        if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
+        updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
         NormaliseAlphas();
         numUpdates++;
     }
@@ -167,8 +181,10 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
     // clip models back on to field.
 	clipActiveModelsToField();
 
+
     // Store WM Data in Field Objects.
     int bestModelID = getBestModelID(); // Get the best model to use.
+    /*
     for(int objID = 0; objID < NUM_FIELD_OBJECTS; objID++){
         if(ourfieldObjects[objID].isFixed()){
             ourfieldObjects[objID].wmDistance = models[bestModelID].getDistanceToPosition(ourfieldObjects[objID].wmX, ourfieldObjects[objID].wmY);
@@ -193,6 +209,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
             ourfieldObjects[objID].sdtheta = models[bestModelID].sd(2);
         }
     }
+    */
 #if LOCWM_VERBOSITY > 2
 	if(numUpdates > 0){
         for (int i = 0; i < c_MAX_MODELS; i++){
@@ -214,6 +231,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, Store
 
 void LocWM::CheckGameState()
 {
+    /*
     GameController* gc = &GameController::getInstance();
     bool isPenalised = gc->isPenalised();
     int currentState = gc->getGameState();
@@ -294,7 +312,7 @@ void LocWM::doPenaltyReset()
 
     // Set the uncertainties
     resetSdMatrix(1);
-
+*/
     return;
 }
 
@@ -307,7 +325,7 @@ void LocWM::doPlayerReset()
     // Reset all of the models
     for(int m = 0; m < c_MAX_MODELS; m++){
         // reset outlier error count
-	    for (int i=0; i<NUM_FIELD_OBJECTS; i++) modelObjectErrors[m][i] = 0.0;
+            for (unsigned int i=0; i<objects->stationaryFieldObjects.size(); i++) modelObjectErrors[m][i] = 0.0;
 
         // Disable models    
         models[m].isActive = false;
@@ -320,7 +338,7 @@ void LocWM::doPlayerReset()
 
     models[0].stateEstimates[0][0] = 300.0;         // Robot x
     models[0].stateEstimates[1][0] = 0.0;           // Robot y
-    models[0].stateEstimates[2][0] = PI;           // Robot heading    
+    models[0].stateEstimates[2][0] = PI;           // Robot heading
     models[0].stateEstimates[3][0] = 0.0;       // Ball x 
     models[0].stateEstimates[4][0] = 0.0;       // Ball y
     models[0].stateEstimates[5][0] = 0.0;       // Ball vx
@@ -531,38 +549,38 @@ int LocWM::doSharedBallUpdate(WirelessFieldObj &sharedBall)
 */
 
 
-int LocWM::doBallMeasurementUpdate(FieldObject &ball)
+int LocWM::doBallMeasurementUpdate(MobileObject &ball)
 {
     int kf_return;
     int numSuccessfulUpdates = 0;
 
     #if LOCWM_VERBOSITY > 1
-    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.visionDistance << " Bearing = " << ball.visionBearing << endl;
+    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.Distance() << " Bearing = " << ball.Bearing() << endl;
     #endif
 
-    double flatBallDistance = ball.visionDistance * cos(ball.visionElevation);
+    double flatBallDistance = ball.Distance() * cos(ball.Elevation());
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
         kf_return = KF_OK;
-        kf_return = models[modelID].ballmeas(flatBallDistance, ball.visionBearing);
+        kf_return = models[modelID].ballmeas(flatBallDistance, ball.Bearing());
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
 }
 
-int LocWM::doKnownLandmarkMeasurementUpdate(FieldObject &landmark)
+int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 {
     int kf_return;
     int numSuccessfulUpdates = 0;
     int objID = landmark.getID();
-    double flatObjectDistance = landmark.visionDistance * cos(landmark.visionElevation);
+    double flatObjectDistance = landmark.Distance() * cos(landmark.Elevation());
 
 	double distanceOffsetError = R_obj_range_offset;
 	double distanceRelativeError = R_obj_range_relative;
 	double bearingError = R_obj_theta;
 
 	switch(objID){
-		case FO_CORNER_CENTRE_CIRCLE:
+        case FieldObjects::FO_CORNER_CENTRE_CIRCLE:
 			bearingError = centreCircleBearingError;
 			break;
 		default:
@@ -573,19 +591,19 @@ int LocWM::doKnownLandmarkMeasurementUpdate(FieldObject &landmark)
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
 #if LOCWM_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
-        debug_out  << "Object = " << landmark.name(); 
-        debug_out  << " Distance = " << landmark.visionDistance;
-        debug_out  << " Bearing = " << landmark.visionBearing;
-        debug_out  << " Location = (" << landmark.wmX << "," << landmark.wmY << ")...";
+        //debug_out  << "Object = " << landmark.name();
+        debug_out  << " Distance = " << landmark.Distance();
+        debug_out  << " Bearing = " << landmark.Bearing();
+        debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
 #endif
-        if(landmark.visionBearing != landmark.visionBearing){
+        if(landmark.Bearing() != landmark.Bearing()){
 #if LOCWM_VERBOSITY > 0
             debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
 #endif
             continue;
         }
         kf_return = KF_OK;
-        kf_return = models[modelID].fieldObjectmeas(landmark.visionDistance, landmark.visionBearing,landmark.wmX, landmark.wmY, distanceOffsetError, distanceRelativeError, bearingError);
+        kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.Bearing(),landmark.X(), landmark.Y(), distanceOffsetError, distanceRelativeError, bearingError);
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
 #if LOCWM_VERBOSITY > 1
         if(kf_return == KF_OK) debug_out  << "OK" << endl;
@@ -598,10 +616,11 @@ int LocWM::doKnownLandmarkMeasurementUpdate(FieldObject &landmark)
 
 
 
-int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
+int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
 
+    /*
 #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FO_YELLOW_GOALPOST_UNKNOWN)){
 #if LOCWM_VERBOSITY > 1
@@ -610,8 +629,9 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
         return KF_OUTLIER;
     }
 #endif //AMBIGUOUS_CORNERS_ON <= 0
-
-    int numOptions = (int)ambigousObject.ambiguousOptions.size();
+    */
+    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
+    unsigned int numOptions = possabilities.size();
     int outlierModelID = -1;
     int numFreeModels = getNumFreeModels();
     int numActiveModels = getNumActiveModels();
@@ -627,7 +647,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
 #if LOCWM_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << endl;
 #endif
-        if(getNumFreeModels() < getNumActiveModels() * numOptions){
+        if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 #if LOCWM_VERBOSITY > 0
             debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << endl;
 #endif
@@ -635,9 +655,9 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
         }
     }
 #if LOCWM_VERBOSITY > 1
-    debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
-    debug_out << " Distance = " << ambigousObject.visionDistance;
-    debug_out  << " Bearing = " << ambigousObject.visionBearing << endl;
+    //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
+    debug_out << " Distance = " << ambigousObject.Distance();
+    debug_out  << " Bearing = " << ambigousObject.Bearing() << endl;
 #endif
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip inactive models.
@@ -653,8 +673,8 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
 //        modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
   
         // Now go through each of the possible options, and apply it to a copy of the model
-        for(int optionNumber = 0; optionNumber < numOptions; optionNumber++){
-            int possibleObjectID = ambigousObject.ambiguousOptions[optionNumber];
+        for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++){
+            int possibleObjectID = possabilities[optionNumber];
             int newModelID = FindNextFreeModel();
     
             // If an invalid modelID has been returned, something has gone horribly wrong, so stop here.
@@ -669,17 +689,17 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(FieldObject &ambigousObject)
             models[newModelID] = tempModel; // Get the new model from the temp
 
             // Copy outlier history from the current model.
-            for (int i=0; i<NUM_FIELD_OBJECTS; i++){
+            for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++){
                 modelObjectErrors[newModelID][i] = modelObjectErrors[modelID][i];
             }
 
             // Do the update.
-            kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.visionDistance, ambigousObject.visionBearing,fieldObjects[possibleObjectID].wmX, fieldObjects[possibleObjectID].wmY, R_obj_range_offset, R_obj_range_relative, R_obj_theta);
+            kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.Distance(), ambigousObject.Bearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
 #if LOCWM_VERBOSITY > 2
             debug_out  <<"[" << currentFrameNumber << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
-            debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
-            debug_out  << "\tLocation = (" << fieldObjects[possibleObjectID].wmX << "," << fieldObjects[possibleObjectID].wmY << ")...";
+            //debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
+            debug_out  << "\tLocation = (" << possibleObjects[possibleObjectID].X() << "," << possibleObjects[possibleObjectID].Y() << ")...";
 #endif
 
             // If the update reult was an outlier rejection, the model need not be kept as the
@@ -750,8 +770,8 @@ bool LocWM::MergeTwoModels(int index1, int index2)
         xMerged = (alpha1 * models[index1].stateEstimates + alpha1 * models[index2].stateEstimates);
         // Fix angle.
         double angleDiff = models[index2].stateEstimates[2][0] - models[index1].stateEstimates[2][0];
-        angleDiff = NORMALISE(angleDiff);
-        xMerged[2][0] = NORMALISE(models[index1].stateEstimates[2][0] + alpha2*angleDiff);
+        angleDiff = normaliseAngle(angleDiff);
+        xMerged[2][0] = normaliseAngle(models[index1].stateEstimates[2][0] + alpha2*angleDiff);
     }
  
     // Merge Covariance matrix (S = sqrt(P))
@@ -772,7 +792,7 @@ bool LocWM::MergeTwoModels(int index1, int index2)
     models[index2].isActive = false;
     models[index2].toBeActivated = false;
 
-    for (int i=0; i<NUM_FIELD_OBJECTS; i++) modelObjectErrors[index2][i] = 0.0; // Reset outlier values.
+    for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[index2][i] = 0.0; // Reset outlier values.
 
     return true;
 }
@@ -826,8 +846,7 @@ bool LocWM::CheckModelForOutlierReset(int modelID)
   	double sum = 0.0;
   	int numObjects = 0;
     bool reset = false;
-  	for(int objID = 0; objID < NUM_FIELD_OBJECTS; objID++){
-    	if (objID ==  FO_BLUE_GOAL || objID == FO_YELLOW_GOAL) continue;   // Ignore goal object for Reset
+    for(int objID = 0; objID < FieldObjects::NUM_STAT_FIELD_OBJECTS; objID++){
   		sum += modelObjectErrors[modelID][objID];
   		if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;   
   		modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;   
@@ -843,7 +862,7 @@ bool LocWM::CheckModelForOutlierReset(int modelID)
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
 #endif
 
-  		for (int i=0; i<NUM_FIELD_OBJECTS; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
+        for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
   	}
     return reset;
 }
@@ -885,43 +904,39 @@ bool LocWM::varianceCheck(int modelID)
 
     // If we think we know where we are facing don't change anything
     if(largeVariance == false) return changed;
- 
+
     // Otherwise try to adjust to fit a goal we can see.
     // Blue Goal - From center at PI radians bearing.
-	if( (objects[FO_BLUE_GOAL].seen == true) && (objects[FO_BLUE_GOAL].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(blueDirection - objects[FO_BLUE_GOAL].visionBearing);
+    if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Distance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Bearing());
+            changed = true;
+    }
+    else if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Distance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Bearing());
         changed = true;
-	}
-	else if( (objects[FO_BLUE_LEFT_GOALPOST].seen == true) && (objects[FO_BLUE_LEFT_GOALPOST].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(blueDirection - objects[FO_BLUE_LEFT_GOALPOST].visionBearing);
-        changed = true;
-	}
-	else if( (objects[FO_BLUE_RIGHT_GOALPOST].seen == true) && (objects[FO_BLUE_RIGHT_GOALPOST].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(blueDirection - objects[FO_BLUE_RIGHT_GOALPOST].visionBearing);
-        changed = true;
-	}
+    }
+        /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!
 	else if( (objects[FO_BLUE_GOALPOST_UNKNOWN].seen == true) && (objects[FO_BLUE_GOALPOST_UNKNOWN].visionDistance > 100) ){
 		models[modelID].stateEstimates[2][0]=(blueDirection - objects[FO_BLUE_GOALPOST_UNKNOWN].visionBearing);
         changed = true;
 	}
+        */
 
   // Yellow Goal - From center at 0.0 radians bearing.
-	if( (objects[FO_YELLOW_GOAL].seen == true) && (objects[FO_YELLOW_GOAL].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_GOAL].visionBearing);
+    if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Distance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Bearing());
         changed = true;
-	}
-	else if( (objects[FO_YELLOW_LEFT_GOALPOST].seen == true) && (objects[FO_YELLOW_LEFT_GOALPOST].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_LEFT_GOALPOST].visionBearing);
+    }
+    else if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Distance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Bearing());
         changed = true;
-	}
-	else if( (objects[FO_YELLOW_RIGHT_GOALPOST].seen == true) && (objects[FO_YELLOW_RIGHT_GOALPOST].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_RIGHT_GOALPOST].visionBearing);
+    }
+    /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!
+    else if( (objects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true) && (objects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance > 100) ){
+        models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_GOALPOST_UNKNOWN].visionBearing);
         changed = true;
-	}
-	else if( (objects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true) && (objects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance > 100) ){
-		models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_GOALPOST_UNKNOWN].visionBearing);
-        changed = true;
-	}
+    }
+    */
 
 #if LOCWM_VERBOSITY > 1
     if(changed){
@@ -974,7 +989,7 @@ void LocWM::ResetAll()
 
     for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++){
         models[modelNum].init();
-        for (int i=0; i<NUM_FIELD_OBJECTS; i++) modelObjectErrors[modelNum][i] = 0.0; // Reset outlier values.
+        for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[modelNum][i] = 0.0; // Reset outlier values.
     }
 }
 
@@ -1020,7 +1035,7 @@ void LocWM::MergeModelsBelowThreshold(double MergeMetricThreshold)
         for (int j = i; j < c_MAX_MODELS; j++) {
             if(i == j) continue;
             if (!models[i].isActive || !models[j].isActive ) continue;
-            mergeM = ABS( MergeMetric(i,j) );
+            mergeM = abs( MergeMetric(i,j) );
             if (mergeM < MergeMetricThreshold) { //0.5
 #if LOCWM_VERBOSITY > 2
                 debug_out  <<"[" << currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << models[j].alpha << "]";
@@ -1044,7 +1059,7 @@ double LocWM::MergeMetric(int index1, int index2)
     Matrix p1 = models[index1].stateStandardDeviations * models[index1].stateStandardDeviations.transp();
     Matrix p2 = models[index2].stateStandardDeviations * models[index2].stateStandardDeviations.transp();
   
-    xdif[2][0] = NORMALISE(xdif[2][0]);
+    xdif[2][0] = normaliseAngle(xdif[2][0]);
 
     double dij=0;
     for (int i=0; i<p1.getm(); i++) {

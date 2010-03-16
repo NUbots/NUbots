@@ -8,13 +8,13 @@ Xhat[4][0]=ballY
 Xhat[5][0]=ballVeocityX
 Xhat[6][0]=ballVeocityY
 **/
-#include "stdafx.h"
-#include "../Globals.h"
-#include "../FieldObject.h"
+
 #include "KF.h"
-#include "Matrix.h"
+#include "Tools/Math/Matrix.h"
+#include "Tools/Math/General.h"
 #include <iostream>
 
+using namespace mathGeneral;
 
 // Tuning Values (Constants)
 const float KF::c_Kappa = 1.0f; // weight used in w matrix. (Constant)
@@ -30,7 +30,8 @@ const float KF::c_R_ball_range_relative = 0.0025f; // 5% of range added.
 KF::KF(){
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/
-  frameRate = g_fps;
+  //frameRate = g_fps;
+  frameRate = 30;
 
   alpha = 1.0; // Accuracy of model (0.0 -> 1.0)
   isActive = false; // Model currently in use.
@@ -126,7 +127,7 @@ void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odomet
   // Householder transform. Unscented KF algorithm. Takes a while.
 	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
 	
-	stateEstimates[2][0] = NORMALISE(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+        stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
 	return;
 }
 
@@ -162,11 +163,11 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
     // Addition Portion.
     scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading
-    scriptX[2][i] = CROP(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
     // Subtraction Portion.
     scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading
-    scriptX[2][nStates + i] = CROP(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
   }
 	//----------------------------------------------------------------
  
@@ -303,11 +304,11 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
     // Addition Portion.
     scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading.
-    scriptX[2][i] = CROP(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
     // Subtraction Portion.
     scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading.
-    scriptX[2][nStates + i] = CROP(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
   }
 	//----------------------------------------------------------------
   Matrix scriptY = Matrix(2, 2 * nStates + 1, false);
@@ -484,7 +485,7 @@ double KF::getBearingToPosition(double posX, double posY){
   double diffY = posY - selfY;
   if( (diffX == 0) && (diffY == 0)) diffY = 0.0001;
   double positionHeading = atan2(diffY, diffX);
-  double bearing = NORMALISE(positionHeading - selfHeading);
+  double bearing = normaliseAngle(positionHeading - selfHeading);
   return bearing;
 }
 
@@ -512,6 +513,6 @@ bool KF::clipState(int stateIndex, double minValue, double maxValue){
 		stateEstimates[stateIndex][0] = minValue;
         clipped = true;
 	}
-    stateEstimates[2][0] = NORMALISE(stateEstimates[2][0]);
+        stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]);
     return clipped;
 }

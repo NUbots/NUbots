@@ -20,7 +20,7 @@ class LocWM
 	public:
         LocWM();
         ~LocWM();
-        void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, StoredGamePackets* mostRecentPackets);
+        void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets);
         void CheckGameState();
         bool varianceCheck(int modelID);
         int varianceCheckAll();
@@ -30,9 +30,9 @@ class LocWM
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
-        int doSharedBallUpdate(WirelessFieldObj &sharedBall);
+        //int doSharedBallUpdate(WirelessFieldObj &sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
-        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject);
+        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
         int getNumActiveModels();
         int getNumFreeModels();
         bool CheckModelForOutlierReset(int modelID);
