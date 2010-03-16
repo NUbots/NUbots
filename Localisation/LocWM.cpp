@@ -48,9 +48,9 @@ LocWM::LocWM()
     // State
     //previousGameState = STATE_INITIAL;
 
-	// RHM 7/7/08: Extra array for resetting algorithm
+    // RHM 7/7/08: Extra array for resetting algorithm
     for(int m = 0; m < c_MAX_MODELS; m++){
-        for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[m][i] = 0.0;
+        for (int i=0; i< c_numOutlierTrackedObjects; i++) modelObjectErrors[m][i] = 0.0;
     }
 
     #if LOCWM_VERBOSITY > 0
@@ -74,10 +74,7 @@ LocWM::~LocWM()
 }
 
 
-
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
-
-
 
 void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets)
 {
@@ -85,9 +82,8 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
     int updateResult;  
     currentFrameNumber = frameNumber;
     objects = ourfieldObjects;
-	// RHM 26/6/08: Modified below	
-    CheckGameState();
 
+    CheckGameState();
     //if(balanceFallen) return;
 
     #if LOCWM_VERBOSITY > 2
@@ -95,8 +91,8 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
         debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << endl;
         for(int i = 0; i < c_MAX_MODELS; i++){
             if(models[i].isActive == false) continue;
-	        debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
-	        debug_out  << " [alpha = " << models[i].alpha << "]";
+            debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
+            debug_out  << " [alpha = " << models[i].alpha << "]";
             debug_out  << " Robot X: " << models[i].getState(0);
             debug_out  << " Robot Y: " << models[i].getState(1);
             debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
@@ -708,7 +704,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
             models[newModelID] = tempModel; // Get the new model from the temp
 
             // Copy outlier history from the current model.
-            for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++){
+            for (int i=0; i<c_numOutlierTrackedObjects; i++){
                 modelObjectErrors[newModelID][i] = modelObjectErrors[modelID][i];
             }
 
@@ -811,7 +807,7 @@ bool LocWM::MergeTwoModels(int index1, int index2)
     models[index2].isActive = false;
     models[index2].toBeActivated = false;
 
-    for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[index2][i] = 0.0; // Reset outlier values.
+    for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[index2][i] = 0.0; // Reset outlier values.
     return true;
 }
 
@@ -864,7 +860,7 @@ bool LocWM::CheckModelForOutlierReset(int modelID)
     double sum = 0.0;
     int numObjects = 0;
     bool reset = false;
-    for(int objID = 0; objID < FieldObjects::NUM_STAT_FIELD_OBJECTS; objID++){
+    for(int objID = 0; objID < c_numOutlierTrackedObjects; objID++){
         sum += modelObjectErrors[modelID][objID];
         if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
         modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
@@ -879,7 +875,7 @@ bool LocWM::CheckModelForOutlierReset(int modelID)
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
         #endif // LOCWM_VERBOSITY > 1
 
-        for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
+        for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
     }
     return reset;
 }
@@ -1006,7 +1002,7 @@ void LocWM::ResetAll()
 
     for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++){
         models[modelNum].init();
-        for (int i=0; i<FieldObjects::NUM_STAT_FIELD_OBJECTS; i++) modelObjectErrors[modelNum][i] = 0.0; // Reset outlier values.
+        for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[modelNum][i] = 0.0; // Reset outlier values.
     }
 }
 

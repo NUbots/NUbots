@@ -56,14 +56,17 @@ class LocWM
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 4; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
+        static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         KF tempModel;
         KF models[c_MAX_MODELS];
         FieldObjects *objects;
-#if LOCWM_VERBOSITY > 0
+
+        #if LOCWM_VERBOSITY > 0
         fstream debug_file; // Logging file
-#endif
-	    int currentFrameNumber;
-            float modelObjectErrors[c_MAX_MODELS][FieldObjects::NUM_STAT_FIELD_OBJECTS]; // Storage of outlier history.
+        #endif // LOCWM_VERBOSITY > 0
+
+        int currentFrameNumber;
+        float modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
 
         // Game state memory
         bool wasPreviouslyPenalised;
@@ -71,16 +74,16 @@ class LocWM
 
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
-	    static const float c_OBJECT_ERROR_THRESHOLD;
-	    static const float c_OBJECT_ERROR_DECAY;
-	    static const float c_RESET_SUM_THRESHOLD;
-	    static const int c_RESET_NUM_THRESHOLD;
+        static const float c_OBJECT_ERROR_THRESHOLD;
+        static const float c_OBJECT_ERROR_DECAY;
+        static const float c_RESET_SUM_THRESHOLD;
+        static const int c_RESET_NUM_THRESHOLD;
 
-		// Object distance measurement error weightings (Constant) -- Values assigned in LocWM.cpp
+        // Object distance measurement error weightings (Constant) -- Values assigned in LocWM.cpp
         static const float R_obj_theta;
         static const float R_obj_range_offset;
         static const float R_obj_range_relative;
-		static const float centreCircleBearingError;
+        static const float centreCircleBearingError;
 };
 
 #endif
