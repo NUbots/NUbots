@@ -93,6 +93,8 @@ public:
         NUimage* image;
         unsigned char LUT[256*256*256];
         ofstream imagefile;
+        int ImageFrameNumber;
+        bool SAVE_IMAGES;
     #endif
     #ifdef USE_LOCALISATION
         Localisation* localisation;     //!< localisation module

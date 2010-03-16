@@ -12,13 +12,14 @@
 #include "locWmGlDisplay.h"
 #include "localisationwidget.h"
 #include "LogFileReader.h"
-
+#include "visionstreamwidget.h"
 class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
 class WalkParameterWidget;
 class KickWidget;
 class QTabsWidget;
+class cameraSettingsWidget;
 
 namespace Ui
 {
@@ -110,11 +111,14 @@ private:
     LocalisationWidget* localisation;           //!< Instance of the localisation widget.
 
     LayerSelectionWidget* layerSelection;
+    visionStreamWidget* VisionStreamer;         //!< Instance of VisionStreamWidget
+
     //QDockWidget* layerSelectionDock;
     QDockWidget* visionTabDock;
     QDockWidget* networkTabDock;
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
     KickWidget* kick;
+    cameraSettingsWidget* cameraSetting;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

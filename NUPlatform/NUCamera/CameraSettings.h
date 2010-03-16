@@ -8,6 +8,7 @@
 #define CAMERASETTINGS_H
 
 #include <string>
+#include <iostream>
 
 /*!
     @brief Class used to store camera settings.
@@ -56,6 +57,11 @@ class CameraSettings
             If a setting is not found, the default value is used.
         */
         void LoadFromFile(const std::string& configFileName);
+
+        friend std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSetting);
+        friend std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting);
+
+
 };
 #endif
 
