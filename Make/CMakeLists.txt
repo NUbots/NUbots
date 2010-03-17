@@ -74,12 +74,10 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6.4 )
 SET( CMAKE_COLOR_MAKEFILE TRUE )
 
 
-############################ FIND PACKAGE
-# Libraries specifics. Define here cmake packages
-# usefull to your project
+############################ FIND PACKAGES
 
 FIND_PACKAGE( PTHREAD REQUIRED )
-FIND_PACKAGE( Boost REQUIRED )
+FIND_PACKAGE( BOOST REQUIRED )
 FIND_PACKAGE( RT )
 
 ############################ targetconfig.h GENERATION
@@ -89,13 +87,20 @@ CONFIGURE_FILE(
     ESCAPE_QUOTES
 )
 
-############################ DEBUG.H GENERATION
+############################ debug.h GENERATION
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/debug.in"
   	"${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debug.h"
     ESCAPE_QUOTES
 )
 
+# Some people use BOOST and others use Boost. I need to be able to handle both. So if someone's using CAPS
+# copy into to the non caps (standard version)
+IF (NOT "${BOOST_INCLUDE_DIR}" STREQUAL "")
+	SET(Boost_DEFINITIONS ${BOOST_DEFINITIONS})
+	SET(Boost_INCLUDE_DIR ${BOOST_INCLUDE_DIR})
+	SET(Boost_LIBRARIES ${BOOST_LIBRARIES})
+ENDIF()
 
 ############################ DEFINITION
 # Add definitions needed here
