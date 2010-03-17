@@ -61,9 +61,19 @@ else
 	LOGNAME = $(strip $(user))
 endif
 VM_IP = $(strip $(vm))
+# so we can log into the external machine with $(LOGNAME)@$(VM_IP)
 
 # If I choose to install it on a particular robot this is the ip used
 ROBOT_IP = $(strip $(robot))
+
+# on windows we need to use a different cmake tool to config
+ifeq ($(SYSTEM), windows32)
+	CCMAKE = cmake-gui
+else
+	CCMAKE = ccmake
+endif
+
+
 default_target: NAOWebots
 
 all: NAO NAOWebots Cycloid NUView
@@ -153,22 +163,25 @@ endif
 
 NAOWebots:
 	@echo "Targetting NAOWebots";
-	@if [ -f $(CUR_DIR)/$(NAOWEBOTS_BUILD_DIR)/Makefile ]; then \
-		cd $(NAOWEBOTS_BUILD_DIR); \
-		make $(MAKE_OPTIONS); \
-	else \
-		mkdir -p $(NAOWEBOTS_BUILD_DIR); \
-		cd $(NAOWEBOTS_BUILD_DIR); \
-		cmake $(MAKE_DIR); \
-		ccmake .; \
-		make $(MAKE_OPTIONS); \
-	fi
+    ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(NAOWEBOTS_BUILD_DIR)/*)), )		## check if the project has already been configured
+		@set -e; \
+			echo "Configuring for first use"; \
+			mkdir -p $(NAOWEBOTS_BUILD_DIR); \
+			cd $(NAOWEBOTS_BUILD_DIR); \
+			cmake $(MAKE_DIR); \
+			$(CCMAKE) .; \
+			make $(MAKE_OPTIONS);
+    else
+		@set -e; \
+			cd $(NAOWEBOTS_BUILD_DIR); \
+			make $(MAKE_OPTIONS);
+    endif
 
 NAOWebotsConfig:
 	@set -e; \
 		cd $(NAOWEBOTS_BUILD_DIR); \
 		cmake $(MAKE_DIR); \
-		ccmake .; \
+		$(CCMAKE) .; \
 		make $(MAKE_OPTIONS);
 
 NAOWebotsClean:
