@@ -420,7 +420,7 @@ void NUSensors::calculateFootImpact()
             }
             if (leftprevioussmall == true && leftforce > (leftforcemin + leftforcemax)/4.0)
             {
-                previousimpacttimes[0] - impacttimes[0];
+                previousimpacttimes[0] = impacttimes[0];
                 impacttimes[0] = m_current_time;
                 for (unsigned int i=0; i<previousleftforces.size(); i++)
                 {

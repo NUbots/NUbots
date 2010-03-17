@@ -56,7 +56,9 @@ SYSTEM = $(strip $(shell uname -s))
 
 # If I choose to use an external machine to do the compiling; these are the username and ip address used
 ifeq ($(strip $(user)), )
-	LOGNAME = $(strip $(shell logname))
+    ifneq ($(strip $(vm)), )
+		LOGNAME = $(strip $(shell logname))
+	endif
 else
 	LOGNAME = $(strip $(user))
 endif
