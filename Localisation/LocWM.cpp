@@ -175,7 +175,8 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
 
     // Check for model reset. -> with multiple models just remove if not last one??
     // Need to re-do reset to be model specific.
-    int numReset = CheckForOutlierResets();
+    //int numReset = CheckForOutlierResets();
+    CheckForOutlierResets();
     // clip models back on to field.
     clipActiveModelsToField();
 
@@ -553,14 +554,14 @@ int LocWM::doBallMeasurementUpdate(MobileObject &ball)
     int numSuccessfulUpdates = 0;
 
     #if LOCWM_VERBOSITY > 1
-    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.Distance() << " Bearing = " << ball.Bearing() << endl;
+    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
     #endif // LOCWM_VERBOSITY > 1
 
-    double flatBallDistance = ball.Distance() * cos(ball.Elevation());
+    double flatBallDistance = ball.measuredDistance() * cos(ball.measuredElevation());
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
         kf_return = KF_OK;
-        kf_return = models[modelID].ballmeas(flatBallDistance, ball.Bearing());
+        kf_return = models[modelID].ballmeas(flatBallDistance, ball.measuredBearing());
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
@@ -571,7 +572,7 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
     int kf_return;
     int numSuccessfulUpdates = 0;
     int objID = landmark.getID();
-    double flatObjectDistance = landmark.Distance() * cos(landmark.Elevation());
+    double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
 
 	double distanceOffsetError = R_obj_range_offset;
 	double distanceRelativeError = R_obj_range_relative;
@@ -591,12 +592,12 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         #if LOCWM_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
         //debug_out  << "Object = " << landmark.name();
-        debug_out  << " Distance = " << landmark.Distance();
-        debug_out  << " Bearing = " << landmark.Bearing();
+        debug_out  << " Distance = " << landmark.measuredDistance();
+        debug_out  << " Bearing = " << landmark.measuredBearing();
         debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
         #endif // LOCWM_VERBOSITY > 1
 
-        if(landmark.Bearing() != landmark.Bearing()){
+        if(landmark.measuredBearing() != landmark.measuredBearing()){
 
             #if LOCWM_VERBOSITY > 0
             debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
@@ -605,7 +606,7 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
             continue;
         }
         kf_return = KF_OK;
-        kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.Bearing(),landmark.X(), landmark.Y(), distanceOffsetError, distanceRelativeError, bearingError);
+        kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.measuredBearing(),landmark.X(), landmark.Y(), distanceOffsetError, distanceRelativeError, bearingError);
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
         #if LOCWM_VERBOSITY > 1
@@ -668,8 +669,8 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
 
     #if LOCWM_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
-    debug_out << " Distance = " << ambigousObject.Distance();
-    debug_out  << " Bearing = " << ambigousObject.Bearing() << endl;
+    debug_out << " Distance = " << ambigousObject.measuredDistance();
+    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
     #endif // LOCWM_VERBOSITY > 1
 
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -709,7 +710,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
             }
 
             // Do the update.
-            kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.Distance(), ambigousObject.Bearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
+            kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.measuredDistance(), ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
             #if LOCWM_VERBOSITY > 2
             debug_out  <<"[" << currentFrameNumber << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
@@ -920,12 +921,12 @@ bool LocWM::varianceCheck(int modelID)
 
     // Otherwise try to adjust to fit a goal we can see.
     // Blue Goal - From center at PI radians bearing.
-    if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Distance() > 100) ){
-        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Bearing());
+    if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredBearing());
             changed = true;
     }
-    else if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Distance() > 100) ){
-        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Bearing());
+    else if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredBearing());
         changed = true;
     }
         /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!
@@ -936,12 +937,12 @@ bool LocWM::varianceCheck(int modelID)
         */
 
   // Yellow Goal - From center at 0.0 radians bearing.
-    if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Distance() > 100) ){
-        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Bearing());
+    if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredBearing());
         changed = true;
     }
-    else if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Distance() > 100) ){
-        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Bearing());
+    else if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() > 100) ){
+        models[modelID].stateEstimates[2][0]=(yellowDirection - objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredBearing());
         changed = true;
     }
     /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!

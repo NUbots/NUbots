@@ -1,29 +1,26 @@
 #include "StationaryObject.h"
 
-StationaryObject::StationaryObject()
+StationaryObject::StationaryObject(const Vector2<float>& initialFieldLocation, int id, const std::string& initName):
+        Object(id, initName),
+        fieldLocation(initialFieldLocation)
 {
-    ID = 0;
-    AbsoluteLocation[0] = 0;
-    AbsoluteLocation[1] = 0;
-    WorldModelRelativeLocation[0] = 0;
-    WorldModelRelativeLocation[1] = 0;
-    WorldModelRelativeLocation[2] = 0;
+    estimatedRelativeLocation[0] = 0;
+    estimatedRelativeLocation[1] = 0;
+    estimatedRelativeLocation[2] = 0;
 }
 
-StationaryObject::StationaryObject(int id, float x, float y): ID(id), AbsoluteLocation(x,y)
+StationaryObject::StationaryObject(float x, float y, int id, const std::string& initName):
+        Object(id, initName),
+        fieldLocation(x,y)
 {
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
-}
-StationaryObject::StationaryObject(int id, Vector2<float> newAbsoluteLocation):ID(id), AbsoluteLocation(newAbsoluteLocation)
-{
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
+    estimatedRelativeLocation[0] = 0;
+    estimatedRelativeLocation[1] = 0;
+    estimatedRelativeLocation[2] = 0;
 }
 
-StationaryObject::StationaryObject(const StationaryObject& otherObject): ID(otherObject.getID()), AbsoluteLocation(otherObject.getAbsoluteLocation())
+StationaryObject::StationaryObject(const StationaryObject& otherObject):
+        Object(otherObject.getID(), otherObject.getName()),
+        fieldLocation(otherObject.getFieldLocation())
 {
 
 }
@@ -33,13 +30,13 @@ StationaryObject::~StationaryObject()
 
 }
 
-void StationaryObject::updateWorldModelRelativeLocation(Vector3<float> newWMRelLoc)
+void StationaryObject::updateEstimatedRelativeLocation(const Vector3<float>& newWMRelLoc)
 {
-	WorldModelRelativeLocation = newWMRelLoc;
+        estimatedRelativeLocation = newWMRelLoc;
 }
-void StationaryObject::updateWorldModelRelativeVariables(float distance, float bearing, float elevation)
+void StationaryObject::updateEstimatedRelativeVariables(float distance, float bearing, float elevation)
 {
-	WorldModelRelativeLocation[0] = distance;
-	WorldModelRelativeLocation[1] = bearing;
-	WorldModelRelativeLocation[2] = elevation;
+        estimatedRelativeLocation[0] = distance;
+        estimatedRelativeLocation[1] = bearing;
+        estimatedRelativeLocation[2] = elevation;
 }

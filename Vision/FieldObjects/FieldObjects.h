@@ -12,7 +12,6 @@ class FieldObjects{
 
 
 	public:
-
             enum StationaryFieldObjectID{
                 // 2 Goals: Blue, Yellow + posts
                 // Left/Right post is the side when viewing the goals from the front. i.e. on the field.

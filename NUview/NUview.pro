@@ -81,7 +81,8 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
     ../Localisation/LocWM.h \
-    ../Localisation/KF.h
+    ../Localisation/KF.h \
+    ../Vision/FieldObjects/WorldModelShareObject.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -144,6 +145,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/LocWM.cpp \
-    ../Localisation/KF.cpp
+    ../Localisation/KF.cpp \
+    ../Vision/FieldObjects/WorldModelShareObject.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
