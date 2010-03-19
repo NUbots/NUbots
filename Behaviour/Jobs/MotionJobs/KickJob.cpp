@@ -41,29 +41,33 @@ KickJob::KickJob(double time, const vector<float>& kickposition, const vector<fl
 KickJob::KickJob(double time, istream& input) : MotionJob(Job::MOTION_KICK)
 {
     m_job_time = time;
-    char buffer[1024];
+
+    // Temporary read buffers
+    unsigned int uintBuffer;
+    float floatBuffer;
+
     // read in the kick position size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_kick_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_kick_position_size = uintBuffer;
     
     // read in the kick position vector
     m_kick_position = vector<float>(m_kick_position_size, 0);
     for (unsigned int i=0; i<m_kick_position_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_kick_position[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_kick_position[i] = floatBuffer;
     }
     
     // read in the kick target size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_kick_target_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_kick_target_size = uintBuffer;
     
     // read in the kick position vector
     m_kick_target = vector<float>(m_kick_target_size, 0);
     for (unsigned int i=0; i<m_kick_target_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_kick_target[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_kick_target[i] = floatBuffer;
     }
 }
 

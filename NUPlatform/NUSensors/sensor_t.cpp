@@ -148,39 +148,45 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
 {
     int size = 0;
     int id = 9000;
-    char inbuffer[1024];                // temporary buffer for binary read
+
+    // temporary buffers for binary read
+    char charBuffer;
+    float floatBuffer;
+    double doubleBuffer;
+    long double lDoubleBuffer;
+
     input >> p_sensor.Name;
     input >> id;
     p_sensor.SensorID = (sensor_t::sensor_id_t) id;
     
     input >> size;
     p_sensor.Data.resize(size, 0);
-    input.read(inbuffer, sizeof(char));         // skip over the single space after the size
+    input.read(&charBuffer, sizeof(char));         // skip over the single space after the size
     for (int i=0; i<size; i++)
     {
-        input.read(inbuffer, sizeof(float));
-        p_sensor.Data[i] = *((float*) inbuffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        p_sensor.Data[i] = floatBuffer;
     }
     
     input >> size;
     p_sensor.StdDev.resize(size, 0);
-    input.read(inbuffer, sizeof(char));         // skip over the single space after the size
+    input.read(&charBuffer, sizeof(char));         // skip over the single space after the size
     for (int i=0; i<size; i++)
     {
-        input.read(inbuffer, sizeof(float));
-        p_sensor.StdDev[i] = *((float*) inbuffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        p_sensor.StdDev[i] = floatBuffer;
     }
     
     // Read in flags
     input >> p_sensor.IsValid;
     input >> p_sensor.IsCalculated;
     // Read in Time
-    input.read(inbuffer, sizeof(char));         // skip over the single space after the iscalculated flag
-    input.read(inbuffer, sizeof(double));
-    p_sensor.Time = *((double*) inbuffer);
+    input.read(&charBuffer, sizeof(char));         // skip over the single space after the iscalculated flag
+    input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(double));
+    p_sensor.Time = doubleBuffer;
     // Read in TimeStamp
-    input.read(inbuffer, sizeof(long double));
-    p_sensor.TimeStamp = *((long double*) inbuffer);
+    input.read(reinterpret_cast<char*>(&lDoubleBuffer), sizeof(long double));
+    p_sensor.TimeStamp = lDoubleBuffer;
     p_sensor.m_time_offset = p_sensor.TimeStamp - p_sensor.Time;
     return input;
 }
