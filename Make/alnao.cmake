@@ -44,13 +44,6 @@ SET( CMAKE_CXX_FLAGS_DEBUG
 CONFIGURE_SRC_MODULE(nubot ${NUBOT_SRCS})
 USE_LIB(nubot ALCOMMON ALMATH LIBCORE TOOLS ALVALUE PROXIES)
 
-# At the moment I would consider this to be a hack.
-# Aldebaran have switched over to using config files instead of the FIND*.cmake
-# I do not want to change our build system, so for now, we will need to add the following:
-SET (PTHREAD_DIR ${CMAKE_MODULE_PATH})
-SET (BOOST_DIR ${CMAKE_MODULE_PATH})
-SET (RT_DIR ${CMAKE_MODULE_PATH})
-
 SET( OUTPUT_ROOT_DIR_LIB "${CMAKE_CURRENT_SOURCE_DIR}/../Build/NAO/" )
 
 
