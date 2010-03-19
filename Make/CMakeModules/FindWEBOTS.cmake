@@ -52,7 +52,7 @@ IF ("x$ENV{WEBOTS_HOME}x" STREQUAL "xx")
     ENDIF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 ENDIF ("x$ENV{WEBOTS_HOME}x" STREQUAL "xx")
 
-## See if we were sucessful in finding webots
+## See if we were successful in finding webots
 IF ("x$ENV{WEBOTS_HOME}x" STREQUAL "xx")
     MESSAGE(ERROR "Unable to find Webots. You will need to set ENV{WEBOTS_HOME}")
 ELSE ("x$ENV{WEBOTS_HOME}x" STREQUAL "xx")
@@ -68,7 +68,7 @@ SET(WEBOTS_INCLUDE_DIR  "${WEBOTS_DIR}/include/controller/cpp"
 
 # now set the platform dependant library
 IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    SET(WEBOTS_LIBRARIES "${WEBOTS_DIR}/lib/libCppController.dll" CACHE FILEPATH "Cleared." FORCE)
+    SET(WEBOTS_LIBRARIES "${WEBOTS_DIR}/lib/libCppController.a" CACHE FILEPATH "Cleared." FORCE)
 
 ELSE (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     IF (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
