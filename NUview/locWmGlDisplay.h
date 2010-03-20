@@ -26,6 +26,9 @@ protected:
         void paintGL();
         void resizeGL(int width, int height);
         void drawField();
+
+        bool loadTexture(QString fileName, GLuint* textureId);
+
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
         void drawRobot(QColor colour, float x, float y, float theta);

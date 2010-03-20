@@ -1,6 +1,7 @@
 #include "locWmGlDisplay.h"
 #include <QDebug>
 #include <QMouseEvent>
+#include "Tools/Math/General.h"
 
 
 locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent)
@@ -97,6 +98,22 @@ void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
     update();
 }
 
+bool locWmGlDisplay::loadTexture(QString fileName, GLuint* textureId)
+{
+    glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
+    QImage image(fileName);
+    QImage texture(QGLWidget::convertToGLFormat( image ));
+    glGenTextures( 1, textureId);
+
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D, *textureId);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+    glDisable(GL_TEXTURE_2D);   // Disable Texture Mapping
+    return true;
+}
+
 void locWmGlDisplay::initializeGL()
 {
     GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };         // Ambient Light Values
@@ -116,53 +133,11 @@ void locWmGlDisplay::initializeGL()
     glDepthFunc(GL_LEQUAL);					// The Type Of Depth Test To Do
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);		// Really Nice Perspective Calculations
 
-    // Load Textures
-    glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);                   // Setup Alpha Blending
-    QImage linesTextureImage(QString(":/textures/FieldLines.png"));
-    QImage grassTextureImage(QString(":/textures/grass_texture.jpg"));
-    //texture = bindTexture(textureImage);
-    //grassTexture = bindTexture(grassTextureImage);
 
-    QImage tex;
-    tex = QGLWidget::convertToGLFormat( linesTextureImage );
-    glGenTextures( 1, &fieldLineTexture );
-
-    // Create Nearest Filtered Texture
-    glBindTexture(GL_TEXTURE_2D, fieldLineTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
-
-    tex = QGLWidget::convertToGLFormat( grassTextureImage );
-    glGenTextures( 1, &grassTexture );
-
-    // Create Nearest Filtered Texture
-    glBindTexture(GL_TEXTURE_2D,grassTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
-
-    // Robot texture
-    QImage robotTextureImage(QString(":/textures/PlaceholderRobot.png"));
-    tex = QGLWidget::convertToGLFormat( robotTextureImage );
-    glGenTextures( 1, &robotTexture );
-
-    // Create Nearest Filtered Texture
-    glBindTexture(GL_TEXTURE_2D, robotTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
-
-    QImage robotBackTextureImage(QString(":/textures/PlaceholderRobotBack.png"));
-    tex = QGLWidget::convertToGLFormat( robotBackTextureImage );
-    glGenTextures( 1, &robotBackTexture );
-
-    // Create Nearest Filtered Texture
-    glBindTexture(GL_TEXTURE_2D, robotBackTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
+    loadTexture(":/textures/FieldLines.png", &fieldLineTexture);
+    loadTexture(":/textures/grass_texture.jpg", &grassTexture);
+    loadTexture(":/textures/PlaceholderRobot.png", &robotTexture);
+    loadTexture(":/textures/PlaceholderRobotBack.png", &robotBackTexture);
 
     // Lighting
     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);			// Setup The Ambient Light
@@ -200,6 +175,7 @@ void locWmGlDisplay::paintGL()
 
     drawField();        // Draw the Standard Field Layout.
     drawBall(QColor(255,165,0,255), 0.0f, 0.0f);    // Draw the ball.
+    drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.75f);
     glFlush ();         // Run Queued Commands
     return;
 }
@@ -239,7 +215,6 @@ void locWmGlDisplay::drawField()
 
     drawGoal(QColor(0,0,255,255),-300,0.0,0.0);
     drawGoal(QColor(255,255,0,255),300,0.0,180.0);
-    drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.0f);
     glPopMatrix();
 }
 
@@ -301,9 +276,12 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     const float robotHeight = 58.0f;
     const float robotWidth = 30.0f;
     glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);       // Disable Texture Mapping
     glColor4f(1.0f,1.0f,1.0f,1.0f); // White
     glTranslatef(x,y,robotHeight/2.0);    // Move to centre of goal.
+    glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
     // Draw Front
     glBindTexture(GL_TEXTURE_2D, robotTexture);
@@ -323,13 +301,14 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glBegin(GL_QUADS);
         glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(0.1f,  robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(0.1f, -robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(0.1f, -robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(0.1f, robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(0.1f,  -robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(0.1f, robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(0.1f, robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(0.1f, -robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
     glEnd();
 
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glDisable(GL_BLEND);		// Turn Blending On
     glPopMatrix();
 }
 
