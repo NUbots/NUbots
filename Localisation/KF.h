@@ -21,6 +21,7 @@ class KF {
 
         // Update functions
         void timeUpdate(double odometeryForward, double odometeryLeft, double odometeryTurn);
+        //! TODO: Add motion model code to odometery update.
         KfUpdateResult odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta);
         KfUpdateResult ballmeas(double Ballmeas, double theta_Ballmeas);
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);

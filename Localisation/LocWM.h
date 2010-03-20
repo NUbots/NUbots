@@ -20,6 +20,8 @@ class LocWM
 	public:
         LocWM();
         ~LocWM();
+        //! TODO: Require robots state to be sent to enable smart model resetting.
+        //! TODO: Need to add shared packets.
         void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets);
         void CheckGameState();
         bool varianceCheck(int modelID);
