@@ -28,9 +28,12 @@ protected:
         void drawField();
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
+        void drawRobot(QColor colour, float x, float y, float theta);
 
         GLuint fieldLineTexture;
         GLuint grassTexture;
+        GLuint robotTexture;
+        GLuint robotBackTexture;
         GLUquadric* quadratic;
         float viewTranslation[3];
         float viewOrientation[3];

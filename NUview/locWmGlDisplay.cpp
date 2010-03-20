@@ -143,6 +143,27 @@ void locWmGlDisplay::initializeGL()
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
 
+    // Robot texture
+    QImage robotTextureImage(QString(":/textures/PlaceholderRobot.png"));
+    tex = QGLWidget::convertToGLFormat( robotTextureImage );
+    glGenTextures( 1, &robotTexture );
+
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D, robotTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
+
+    QImage robotBackTextureImage(QString(":/textures/PlaceholderRobotBack.png"));
+    tex = QGLWidget::convertToGLFormat( robotBackTextureImage );
+    glGenTextures( 1, &robotBackTexture );
+
+    // Create Nearest Filtered Texture
+    glBindTexture(GL_TEXTURE_2D, robotBackTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
+
     // Lighting
     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);			// Setup The Ambient Light
     glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);			// Setup The Diffuse Light
@@ -218,7 +239,7 @@ void locWmGlDisplay::drawField()
 
     drawGoal(QColor(0,0,255,255),-300,0.0,0.0);
     drawGoal(QColor(255,255,0,255),300,0.0,180.0);
-    
+    drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.0f);
     glPopMatrix();
 }
 
@@ -265,13 +286,50 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 
 void locWmGlDisplay::drawBall(QColor colour, float x, float y)
 {
-    float ballRadius = 6.5/2.0;
+    const float ballRadius = 6.5/2.0;
 
     glPushMatrix();
     glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    glTranslatef(x,y,ballRadius);    // Move to centre of goal.
+    glTranslatef(x,y,ballRadius);    // Move to centre of ball.
     gluSphere(quadratic,ballRadius,128,128);		// Draw A Sphere
     glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    glPopMatrix();
+}
+
+void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
+{
+    const float robotHeight = 58.0f;
+    const float robotWidth = 30.0f;
+    glPushMatrix();
+    glEnable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glColor4f(1.0f,1.0f,1.0f,1.0f); // White
+    glTranslatef(x,y,robotHeight/2.0);    // Move to centre of goal.
+
+    // Draw Front
+    glBindTexture(GL_TEXTURE_2D, robotTexture);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f,  robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(0.0f, -robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(0.0f, -robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f, robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
+    glEnd();
+
+    // Draw back
+    glBindTexture(GL_TEXTURE_2D, robotBackTexture);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(0.1f,  robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(0.1f, -robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(0.1f, -robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(0.1f, robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
     glPopMatrix();
 }
 
