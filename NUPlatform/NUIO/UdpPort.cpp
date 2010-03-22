@@ -23,6 +23,7 @@
 #include "debug.h"
 #include "NUPlatform/NUSystem.h"
 #include <string.h>
+#include <errno.h>
 
 /*! @brief Constructs a udp port on the specified port
  
@@ -47,9 +48,12 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
     m_port_number = portnumber;
     if ((m_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
         errorlog << "UdpPort::UdpPort(" << m_port_number << "). Failed to create socket file descriptor." << endl;
-
+#ifdef WIN32
     char broadcastflag = 1;
-    if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof broadcastflag) == -1)
+#else
+    int broadcastflag = 1;
+#endif
+    if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof(broadcastflag)) == -1)
         errorlog << "UdpPort::UdpPort(" << m_port_number << "). Failed to set socket options." << endl;
         
     m_address.sin_family = AF_INET;                             // host byte order
