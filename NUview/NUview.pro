@@ -82,7 +82,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/Parse.h \
     ../Localisation/LocWM.h \
     ../Localisation/KF.h \
-    ../Vision/FieldObjects/WorldModelShareObject.h
+    ../Vision/FieldObjects/WorldModelShareObject.h \
+    ../GameController/GameInformation.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -146,6 +147,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
-    ../Vision/FieldObjects/WorldModelShareObject.cpp
+    ../Vision/FieldObjects/WorldModelShareObject.cpp \
+    ../GameController/GameInformation.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
