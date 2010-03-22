@@ -315,6 +315,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // Swinging
     float swing_phase = m_param_swing_v*(legphase + M_PI/2.0 - m_param_phase_offset);
+    float other_swing_phase = m_param_swing_v*(NORMALISE(legphase + M_PI) + M_PI/2.0 - m_param_phase_offset);       // swing phase for the other leg
     float swing = 0;
     float b = -(2/(2*M_PI*2.0 - M_PI));                 // makes the reverse of the swing linear
     if (fabs(swing_phase) < M_PI/2.0)
@@ -324,14 +325,31 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     else
         swing = b*(swing_phase + M_PI/2) - 1;
     
-    if (legsign > 0)
-        m_pattern_debug << swing_phase << ", " << swing << endl;
-    
     float swing_leg_roll = m_swing_amplitude_roll*swing;      // you always want the swing leg to go outwards
     float swing_leg_pitch = m_swing_amplitude_pitch*swing;
-    float swing_leg_yaw = legsign*m_swing_amplitude_yaw*swing;
     float swing_foot_roll = -0.125*legsign*m_swing_amplitude_roll*swing;
     float swing_foot_pitch = 0.25*m_swing_amplitude_pitch*swing;
+    
+    
+    float swing_leg_yaw = 0;
+    if (fabs(swing_phase) < M_PI/2.0)       // then we are swinging this leg!
+    {
+        swing_leg_yaw = m_swing_amplitude_yaw*sin(swing_phase) - m_swing_amplitude_yaw;
+    }
+    else if (fabs(other_swing_phase) < M_PI/2.0)  // then we are swing the other leg!
+    {
+        swing_leg_yaw = -m_swing_amplitude_yaw*sin(other_swing_phase) - m_swing_amplitude_yaw;
+    }            
+    else if (swing_phase > M_PI/2.0 && swing_phase < 3*M_PI/2.0)
+    {
+        swing_leg_yaw = 0;
+    }
+    else
+    {
+        swing_leg_yaw = -2*m_swing_amplitude_yaw;
+    }
+    
+    m_pattern_debug << swing_phase << ", " << swing_leg_yaw << endl;
     
     // Balance
     float balance_foot_roll = 0.125*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
