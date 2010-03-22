@@ -77,7 +77,7 @@ void JuppWalk::initWalkParameters()
     m_param_phase_offset = 0.05;                 // the phase offset for the shortening, loading and swing phases
     // weight shift parameters
     m_param_shift_c = 0.12;                     // controls the shift amplitude
-    m_param_ankle_shift = 0.50;                // controls the fraction of the shift done by the ankles
+    m_param_ankle_shift = 0.50;                 // controls the fraction of the shift done by the ankles
     // leg shortening parameters
     m_param_short_c = 0.4;                      // controls the leg shortening amplitude
     m_param_short_v = 2.0;                      // controls the duration of the leg shortening phase
@@ -223,11 +223,11 @@ void JuppWalk::calculateGaitPhase()
     static float gaitphaseonimpact = m_gait_phase;
     m_current_time = m_data->CurrentTime;
     
-    if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
+    /*if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
         gaitphaseonimpact = m_gait_phase;
         
     if (m_data->footImpact(NUSensorsData::RightFoot, rightimpacttime))
-        gaitphaseonimpact = m_gait_phase;
+        gaitphaseonimpact = m_gait_phase;*/
         
     if (m_current_time - leftimpacttime < interpolationtime)
     {
@@ -331,10 +331,10 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     float swing_foot_pitch = 0.25*m_swing_amplitude_pitch*swing;
     
     // Balance
-    float balance_foot_roll = 0.5*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
-    float balance_foot_pitch = m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
+    float balance_foot_roll = 0.125*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
+    float balance_foot_pitch = 0.03 + m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
     float balance_leg_pitch = -0.00;
-    float balance_leg_roll = legsign*-0.03 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
+    float balance_leg_roll = legsign*-0.01 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
     // Apply gyro feedback
     if (fabs(swing_phase) < M_PI/2.0)      // if we are in the swing phase don't apply the foot_gyro_* offsets
