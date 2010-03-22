@@ -148,7 +148,7 @@ void NAOWebotsActionators::copyToServos()
         {
             for (int i=0; i<m_servos.size(); i++)
             {
-                if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
+                if (isvalid[i] == true && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
                     JServo* jservo = (JServo*) m_servos[i];
                     if (times[i] >= m_current_time)
