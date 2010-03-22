@@ -152,7 +152,7 @@ istream& operator>>(istream& input, Job** job)
 
     // Buffer for reading
     char charBuffer;
-    char doubleBuffer;
+    double doubleBuffer;
 
     Job::job_type_t jobtype;
     Job::job_id_t jobid;
