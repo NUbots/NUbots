@@ -227,14 +227,14 @@ void NUSensors::calculateButtonTriggers()
         }
 
 	vector<float> tempData;
-        if(m_data->getButtonValues(MainButton, tempData) && tempData >= 1)
+        if(m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
         {
             if(tempData[0] > prevValueChest)
                 pressTimeChest = m_current_time;
             prevValueChest = tempData[0];
         }
 
-        if(m_data->getFootBumperValues(AllFeet,tempData) && tempData.size() >= 2)
+        if(m_data->getFootBumperValues(NUSensorsData::AllFeet,tempData) && tempData.size() >= 2)
         {
             // Left Bumper
             if(tempData[0] > prevValueLeftBumper)
