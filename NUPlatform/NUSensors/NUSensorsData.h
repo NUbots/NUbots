@@ -209,7 +209,8 @@ public:
     
     // Buttons Sensors:
     sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed
-    
+    sensor_t* ButtonTriggers;                   //!< stores the time of the last positive edge trigger for the button.
+
     // Battery Sensors:
     sensor_t* BatteryValues;                    //!< stores the battery values in Volts, Amperes and Watts
     
