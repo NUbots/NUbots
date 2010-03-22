@@ -1,6 +1,6 @@
 #include "AmbiguousObject.h"
 
-AmbiguousObject::AmbiguousObject()
+AmbiguousObject::AmbiguousObject(): Object()
 {
 }
 AmbiguousObject::~AmbiguousObject()

@@ -1,4 +1,5 @@
 #include "FieldObjects.h"
+#include <string>
 
 FieldObjects::FieldObjects()
 {
@@ -12,86 +13,127 @@ FieldObjects::~FieldObjects()
 
 void FieldObjects::InitStationaryFieldObjects()
 {
-	for(int ID =0; ID < NUM_STAT_FIELD_OBJECTS; ID++)
+        float x,y;
+        std::string objectName;
+        for(int ID =0; ID < NUM_STAT_FIELD_OBJECTS; ID++)
 	{
-		StationaryObject statObject;
 		switch(ID)
 		{
 		// Blue Goal.
                 //case FO_BLUE_GOAL:
-                //statObject = StationaryObject(-300.0f, 0.0f);
-                //break;
+                //    x = -300.0f;
+                //    y = 0.0f;
+                //    break;
 		case FO_BLUE_LEFT_GOALPOST:
-		statObject = StationaryObject(-300.0f, -70.0f);
-		break;
+                    x = -300.0f;
+                    y = -70.0f;
+                    objectName = "Left Blue Goal Post";
+                    break;
 		case FO_BLUE_RIGHT_GOALPOST:
-		statObject = StationaryObject(-300.0f, 70.0f);
-		break;
+                    x = -300.0f;
+                    y = 70.0f;
+                    objectName = "Right Blue Goal Post";
+                    break;
 		// Yellow Goal.
                 //case FO_YELLOW_GOAL:
-                //statObject = StationaryObject(300.0f, 0.0f);
-                //break;
+                //    x = 300.0f;
+                //    y = 0.0f;
+                //    break;
 		case FO_YELLOW_LEFT_GOALPOST:
-		statObject = StationaryObject(300.0f, 70.0f);
-		break;
+                    x = 300.0f;
+                    y = 70.0f;
+                    objectName = "Left Yellow Goal Post";
+                    break;
 		case FO_YELLOW_RIGHT_GOALPOST:
-		statObject = StationaryObject(300.0f, -70.0f);
-		break;
+                    x = 300.0f;
+                    y = -70.0f;
+                    objectName = "Right Yellow Goal Post";
+                    break;
 		// Corners
 		// Yellow half
 		// Back Line
 		case FO_CORNER_YELLOW_FIELD_LEFT:
-		statObject = StationaryObject(300.0f, 200.0f);
-		break;
+                    x = 300.0f;
+                    y = 200.0f;
+                    objectName = "Left Yellow Field Corner";
+                    break;
 		case FO_CORNER_YELLOW_T_LEFT:
-		statObject = StationaryObject(300.0f, 150.0f);
-		break;        
+                    x = 300.0f;
+                    y = 150.0f;
+                    objectName = "Left Yellow T Intersect";
+                    break;
 		case FO_CORNER_YELLOW_T_RIGHT:
-		statObject = StationaryObject(300.0f, -150.0f);
-		break;
+                    x = 300.0f;
+                    y = -150.0f;
+                    objectName = "Right Yellow T Intersect";
+                    break;
 		case FO_CORNER_YELLOW_FIELD_RIGHT:
-		statObject = StationaryObject(300.0f, -200.0f);
-		break;
+                    x = 300.0f;
+                    y = -200.0f;
+                    objectName = "Right Yellow Field Corner";
+                    break;
 		// Yellow Penalty Box
 		case FO_CORNER_YELLOW_PEN_LEFT:
-		statObject = StationaryObject(237.5f, 150.0f);
-		break;
+                    x = 237.5f;
+                    y = 150.0f;
+                    objectName = "Left Yellow Penalty Box Corner";
+                    break;
 		case FO_CORNER_YELLOW_PEN_RIGHT:
-		statObject = StationaryObject(237.5f, -150.0f);
-		break;
+                    x = 237.5f;
+                    y = -150.0f;
+                    objectName = "Right Yellow Penalty Box Corner";
+                    break;
 		// Half-Way Line
 		case FO_CORNER_CENTRE_T_LEFT:
-		statObject = StationaryObject(0.0f, 200.0f);
-		break;
-		case FO_CORNER_CENTRE_CIRCLE:
-		statObject = StationaryObject(0.0f, 0.0f);
-		break;
+                    x = 0.0f;
+                    y = 200.0f;
+                    objectName = "Left Half-Way T Intersect";
+                    y = 0.0f;
+                    break;
 		case FO_CORNER_CENTRE_T_RIGHT:
-		statObject = StationaryObject(0.0f, -200.0f);
-		break;
+                    x = 0.0f;
+                    y = -200.0f;
+                    objectName = "Right Half-Way T Intersect";
+                    break;
 		// Blue half
 		// Back Line
 		case FO_CORNER_BLUE_FIELD_LEFT:
-		statObject = StationaryObject(-300.0f, -200.0f);
-		break;
+                    x = -300.0f;
+                    y = -200.0f;
+                    objectName = "Left Blue Field Corner";
+                    break;
 		case FO_CORNER_BLUE_T_LEFT:
-		statObject = StationaryObject(-300.0f, -150.0f);
-		break;        
+                    x = -300.0f;
+                    y = -150.0f;
+                    objectName = "Left Blue T intersect";
+                    break;
 		case FO_CORNER_BLUE_T_RIGHT:
-		statObject = StationaryObject(-300.0f, 150.0f);
-		break;
+                    x = -300.0f;
+                    y = 150.0f;
+                    objectName = "Right Blue T intersect";
+                    break;
 		case FO_CORNER_BLUE_FIELD_RIGHT:
-		statObject = StationaryObject(-300.0f, 200.0f);
-		break;
+                    x = -300.0f;
+                    y = 200.0f;
+                    objectName = "Left Blue Field Corner";
+                    break;
 		// Yellow Penalty Box
 		case FO_CORNER_BLUE_PEN_LEFT:
-		statObject = StationaryObject(-237.5f, -150.0f);
-		break;
+                    x = -237.5f;
+                    y = -150.0f;
+                    objectName = "Left Blue Penalty Box Corner";
+                    break;
 		case FO_CORNER_BLUE_PEN_RIGHT:
-		statObject = StationaryObject(-237.5f, 150.0f);
-		break;
+                    x = -237.5f;
+                    y = 150.0f;
+                    objectName = "Right Blue Penalty Box Corner";
+                    break;
+                default:
+                    x = y = 0.0f;
+                    objectName = "Undefined";
+                    break;
 		}
-		stationaryFieldObjects.push_back(statObject);
+                stationaryFieldObjects.push_back(StationaryObject(x, y, ID, objectName));
 	}
 }
 

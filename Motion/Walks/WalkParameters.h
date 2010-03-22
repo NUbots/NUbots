@@ -61,13 +61,13 @@ public:
         }
         friend istream& operator>> (istream& input, Parameter& p)
         {
-            char inbuffer[10];
-            input.read(inbuffer, sizeof(float));
-            p.Value = *((float*) inbuffer);
-            input.read(inbuffer, sizeof(float));
-            p.Min = *((float*) inbuffer);
-            input.read(inbuffer, sizeof(float));
-            p.Max = *((float*) inbuffer);
+            float floatBuffer;
+            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+            p.Value = floatBuffer;
+            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+            p.Min = floatBuffer;
+            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+            p.Max = floatBuffer;
             return input;
         };
     };

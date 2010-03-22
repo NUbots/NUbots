@@ -42,29 +42,33 @@ NodHeadJob::NodHeadJob(double period, const vector<float>& centre, const vector<
 NodHeadJob::NodHeadJob(double time, istream& input) : MotionJob(Job::MOTION_NOD)
 {
     m_job_time = time;
-    char buffer[1024];
+
+    // Temporary read buffers
+    unsigned int uintBuffer;
+    float floatBuffer;
+
     // read in the centre position size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_centre_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_centre_position_size = uintBuffer;
     
     // read in the centre position vector
     m_centre_position = vector<float>(m_centre_position_size, 0);
     for (unsigned int i=0; i<m_centre_position_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_centre_position[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_centre_position[i] = floatBuffer;
     }
     
     // read in the limit position size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_limit_positions_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_limit_positions_size = uintBuffer;
     
     // read in the limit position vector
     m_limit_positions = vector<float>(m_limit_positions_size, 0);
     for (unsigned int i=0; i<m_limit_positions_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_limit_positions[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_limit_positions[i] = floatBuffer;
     }
 }
 

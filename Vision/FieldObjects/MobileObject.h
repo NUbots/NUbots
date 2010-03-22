@@ -1,53 +1,58 @@
+#ifndef MOBILEOBJECTS_H
+#define MOBILEOBJECTS_H
+
+
 #include "Object.h"
 #include "../../Tools/Math/Vector2.h"
 #include "../../Tools/Math/Vector3.h"
 
 class MobileObject : public Object{
 	private:
-		Vector2<float> AbsoluteLocation;
-		Vector2<float> AbsoluteLocationError;
-		Vector2<float> Velocity;
-		Vector2<float> VelocityError;
-		Vector3<float> WorldModelRelativeLocation;
-		Vector3<float> WorldModelRelativeLocationError;
+                Vector2<float> estimatedFieldLocation;
+                Vector2<float> estimatedFieldLocationError;
+                Vector2<float> estimatedVelocity;
+                Vector2<float> estimatedVelocityError;
+                Vector3<float> estimatedRelativeLocation;
+                Vector3<float> estimatedRelativeLocationError;
 	public:
-		MobileObject();
 		~MobileObject();
-		MobileObject(Vector2<float> newAbsoluteLocation);
-		MobileObject(float x, float y);
-		void updateAbsoluteLocation(Vector2<float> newAbsoluteLocation);
-		void updateAbsoluteLocationError(Vector2<float> newAbsoluteLocationError);
+                MobileObject(float x = 0, float y = 0, int initID = -1, const std::string& initName = "Unknown");
+                MobileObject(const Vector2<float>& newAbsoluteLocation, int initID = -1, const std::string& initName = "Unknown");
+                MobileObject(const MobileObject& srcObj);
+                void updateAbsoluteLocation(const Vector2<float>& newAbsoluteLocation);
+                void updateAbsoluteLocationError(const Vector2<float>& newAbsoluteLocationError);
 		void updateObjectLocation(float x, float y, float sdx, float sdy);
 		
-		void updateVelocity(Vector2<float> newVelocity);
-		void updateVelocityError(Vector2<float> newVelocityError);
+                void updateVelocity(const Vector2<float>& newVelocity);
+                void updateVelocityError(const Vector2<float>& newVelocityError);
 		void updateObjectVelocities(float velX, float velY, float sdVelX, float sdVelY);
 	
-		void updateWorldModelRelativeLocation(Vector3<float> newWMRelLoc);
-		void updateWorldModelRelativeLocationError(Vector3<float> newWNRelLocError);
+                void updateWorldModelRelativeLocation(const Vector3<float>& newWMRelLoc);
+                void updateWorldModelRelativeLocationError(const Vector3<float>& newWNRelLocError);
 		void updateWorldModelRelativeVaribles(float wmDistance, float wmBearing, float wmElevation, float sdWmDistance, float sdWmBearing, float sdWmElevation );
 
 		//Access:
-                Vector2<float> getAbsoluteLocation(){return AbsoluteLocation;}
-                Vector2<float> getAbsoluteLocationError(){return AbsoluteLocationError;}
-                Vector2<float> getVelocity(){return Velocity;}
-                Vector2<float> getVelocityError(){return VelocityError;}
-		Vector3<float> getWorldModelRelativeLocation(){return WorldModelRelativeLocation;}
+                Vector2<float> getEstimatedFieldLocation() const {return estimatedFieldLocation;}
+                Vector2<float> getEstimatedFieldLocationError() const {return estimatedFieldLocationError;}
+                Vector2<float> getEstimatedVelocity() const {return estimatedVelocity;}
+                Vector2<float> getEstimatedVelocityError() const {return estimatedVelocityError;}
+                Vector3<float> getEstimatedRelativeLocation() const {return estimatedRelativeLocation;}
 		
 		//ShortCuts (single variableAccess):
-		float X(){return AbsoluteLocation[0];}
-		float Y(){return AbsoluteLocation[1];}
-		float sdX(){return AbsoluteLocationError[0];}
-		float sdY(){return AbsoluteLocationError[1];}
-		float velX(){return Velocity[0];}
-		float velY(){return Velocity[1];}
-		float sdVelX(){return VelocityError[0];}
-		float sdVelY(){return VelocityError[1];}
-		float wmDistance(){return WorldModelRelativeLocation[0];}
-		float wmBearing(){return WorldModelRelativeLocation[1];}
-		float wmElevation(){return WorldModelRelativeLocation[2];}
-                float sdwmDistance(){return WorldModelRelativeLocationError[0];}
-                float sdwmBearing(){return WorldModelRelativeLocationError[1];}
-                float sdwmElevation(){return WorldModelRelativeLocationError[2];}
+                float X() const {return estimatedFieldLocation.x;}
+                float Y() const {return estimatedFieldLocation.y;}
+                float sdX() const {return estimatedFieldLocationError.x;}
+                float sdY() const {return estimatedFieldLocationError.y;}
+                float velX() const {return estimatedVelocity.x;}
+                float velY() const {return estimatedVelocity.y;}
+                float sdVelX() const {return estimatedVelocityError.x;}
+                float sdVelY() const {return estimatedVelocityError.y;}
+                float estimatedDistance() const {return estimatedRelativeLocation.x;}
+                float estimatedBearing() const {return estimatedRelativeLocation.y;}
+                float estimatedElevation() const {return estimatedRelativeLocation.z;}
+                float sdEstimatedDistance() const {return estimatedRelativeLocationError.x;}
+                float sdEstimatedBearing() const {return estimatedRelativeLocationError.y;}
+                float sdEstimatedElevation() const {return estimatedRelativeLocationError.z;}
 		
 };
+#endif
