@@ -121,6 +121,7 @@ void NUSensors::calculateSoftSensors()
     
     calculateOrientation();
     calculateHorizon();
+    calculateButtonTriggers();
     calculateFootForce();
     calculateFootImpact();
     calculateCoP();
@@ -229,7 +230,7 @@ void NUSensors::calculateButtonTriggers()
 	vector<float> tempData;
         if(m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
         {
-            if(tempData[0] > prevValueChest)
+            if(tempData[0] != prevValueChest)
                 pressTimeChest = m_current_time;
             prevValueChest = tempData[0];
         }
@@ -237,20 +238,21 @@ void NUSensors::calculateButtonTriggers()
         if(m_data->getFootBumperValues(NUSensorsData::AllFeet,tempData) && tempData.size() >= 2)
         {
             // Left Bumper
-            if(tempData[0] > prevValueLeftBumper)
+            if(tempData[0] != prevValueLeftBumper)
                 pressTimeLeftBumper = m_current_time;
             prevValueLeftBumper = tempData[0];
 
             // Right Bumper
-            if(tempData[1] > prevValueLeftBumper)
+            if(tempData[1] != prevValueLeftBumper)
                 pressTimeRightBumper = m_current_time;
             prevValueRightBumper = tempData[1];
         }
 
+        // Now find the time since triggered and set to soft sensor value.
         tempData.clear();
-        tempData.push_back(pressTimeChest);
-        tempData.push_back(pressTimeLeftBumper);
-        tempData.push_back(pressTimeRightBumper);
+        tempData.push_back(m_current_time - pressTimeChest);
+        tempData.push_back(m_current_time - pressTimeLeftBumper);
+        tempData.push_back(m_current_time - pressTimeRightBumper);
         m_data->ButtonTriggers->setData(m_current_time, tempData, true);
         return;
 }

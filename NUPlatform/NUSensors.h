@@ -56,7 +56,7 @@ protected:
     
     void calculateOrientation();
     void calculateHorizon();
-	void calculateButtonTriggers();
+    void calculateButtonTriggers();
     void calculateZMP();
     void calculateFallSense();
     
