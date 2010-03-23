@@ -68,15 +68,15 @@ JuppWalk::JuppWalk()
     m_right_arm_gains = vector<float> (4, 0);
     
     m_pattern_debug.open("patternDebug.csv");
-    m_pattern_debug << "Phase (rad), Swing" << endl;
+    m_pattern_debug << "Phase (rad), Swing, Phase (rad), Swing" << endl;
 }
 
 void JuppWalk::initWalkParameters()
 {
     m_step_frequency = 1.0;
-    m_param_phase_offset = 0.05;                 // the phase offset for the shortening, loading and swing phases
+    m_param_phase_offset = 0.20;                 // the phase offset for the shortening, loading and swing phases
     // weight shift parameters
-    m_param_shift_c = 0.12;                     // controls the shift amplitude
+    m_param_shift_c = 0.11;                     // controls the shift amplitude
     m_param_ankle_shift = 0.50;                 // controls the fraction of the shift done by the ankles
     // leg shortening parameters
     m_param_short_c = 0.4;                      // controls the leg shortening amplitude
@@ -302,7 +302,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     float short_foot_pitch = 0;
     if (fabs(short_phase) < M_PI)
     {
-        short_leg_length = -short_amp*(cos(short_phase) + 1);
+        short_leg_length = -short_amp*0.5*(cos(short_phase) + 1);
         short_foot_pitch = fabs(m_swing_amplitude_pitch)*0.125*(cos(short_phase) + 1);       // this works really well when walking backwards!
     }
     
@@ -332,30 +332,32 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     
     float swing_leg_yaw = 0;
-    if (fabs(swing_phase) < M_PI/2.0)       // then we are swinging this leg!
-    {
-        swing_leg_yaw = m_swing_amplitude_yaw*sin(swing_phase) - m_swing_amplitude_yaw;
+    if (fabs(swing_phase) < M_PI/2.0)
+    {   // if we are swinging this leg
+        swing_leg_yaw = legsign*m_swing_amplitude_yaw*sin(swing_phase);
     }
-    else if (fabs(other_swing_phase) < M_PI/2.0)  // then we are swing the other leg!
-    {
-        swing_leg_yaw = -m_swing_amplitude_yaw*sin(other_swing_phase) - m_swing_amplitude_yaw;
+    else if (fabs(other_swing_phase) < M_PI/2.0)
+    {   // if we are swinging the other leg
+        swing_leg_yaw = -legsign*m_swing_amplitude_yaw*sin(other_swing_phase);
     }            
     else if (swing_phase > M_PI/2.0 && swing_phase < 3*M_PI/2.0)
     {
-        swing_leg_yaw = 0;
+        swing_leg_yaw = legsign*m_swing_amplitude_yaw;
     }
     else
     {
-        swing_leg_yaw = -2*m_swing_amplitude_yaw;
+        swing_leg_yaw = -legsign*m_swing_amplitude_yaw;
     }
     
-    m_pattern_debug << swing_phase << ", " << swing_leg_yaw << endl;
+    m_pattern_debug << swing_phase << ", " << swing_leg_yaw << ", ";
+    if (legsign > 0) 
+        m_pattern_debug << endl;
     
     // Balance
     float balance_foot_roll = 0.125*legsign*fabs(m_swing_amplitude_roll)*cos(legphase + 0.35);
     float balance_foot_pitch = 0.03 + m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
     float balance_leg_pitch = -0.00;
-    float balance_leg_roll = legsign*-0.01 - 1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
+    float balance_leg_roll = -1.08*m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.1*m_swing_amplitude_yaw;
     
     // Apply gyro feedback
     if (fabs(swing_phase) < M_PI/2.0)      // if we are in the swing phase don't apply the foot_gyro_* offsets
@@ -385,7 +387,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // now translate to my coordinate system
     angles[0] = -hip_roll;
-    angles[1] = -hip_pitch - 0.5*hip_yaw;      // I need to compensate for the NAO's yawpitch joint
+    angles[1] = -hip_pitch - 0.65*hip_yaw;      //!< @todo TODO: Figure out why this needs to be 0.65!
     angles[2] = hip_yaw;
     angles[3] = -knee_pitch;
     angles[4] = -ankle_roll;
