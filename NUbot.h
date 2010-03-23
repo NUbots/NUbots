@@ -48,6 +48,7 @@
 #endif
 
 #ifdef USE_BEHAVIOUR
+    #include "GameController/GameInformation.h"
     #include "Behaviour/Behaviour.h"
     #include "Behaviour/Jobs.h"
 #endif
@@ -100,6 +101,7 @@ public:
         Localisation* localisation;     //!< localisation module
     #endif
     #ifdef USE_BEHAVIOUR
+        GameInformation* gameInfo;
         Behaviour* behaviour;           //!< behaviour module
     #endif
     #ifdef USE_MOTION

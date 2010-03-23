@@ -112,6 +112,7 @@ NUbot::NUbot(int argc, const char *argv[])
         localisation = new Localisation();
     #endif
     #ifdef USE_BEHAVIOUR
+        gameInfo = new GameInformation(1,2);
         behaviour = new Behaviour();
     #endif
     #ifdef USE_MOTION
@@ -270,6 +271,7 @@ NUbot::~NUbot()
         delete localisation;
     #endif
     #ifdef USE_BEHAVIOUR
+        delete gameInfo;
         delete behaviour;
     #endif
     #ifdef USE_MOTION
@@ -632,6 +634,9 @@ void* runThreadVision(void* arg)
             //          image = nubot->platform->camera->getData()
 //            image = nubot->platform->camera->grabNewImage();
             data = nubot->platform->sensors->getData();
+
+            nubot->gameInfo->update(data,0);
+
             vector<float> horizonInfo;
             //data = nubot->platform->sensors->getData();
             if(data->getHorizon(horizonInfo))
