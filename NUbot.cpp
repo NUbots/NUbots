@@ -542,7 +542,6 @@ void* runThreadVision(void* arg)
     NUSensorsData* data = NULL;
     
 
-
     NUActionatorsData* actions = NULL;
     JobList joblist = JobList();
     
@@ -606,7 +605,7 @@ void* runThreadVision(void* arg)
             nubot->image = nubot->platform->camera->grabNewImage();
             debug << "NUbot::NUbot(). Changing Setting ExP: " << newSettings.exposure << "  "<<nubot->ImageFrameNumber<< endl;
             //<! UNCOMMENT TO SAVE IMAGES!
-            nubot->imagefile << *nubot->image;
+            //nubot->imagefile << *nubot->image;
             nubot->ImageFrameNumber =  nubot->ImageFrameNumber+1;
         }
         else{
