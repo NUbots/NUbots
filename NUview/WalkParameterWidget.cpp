@@ -98,8 +98,8 @@ void WalkParameterWidget::createWidgets()
     // X Speed
     xSpeedLabel = new QLabel("x (cm/s)");
     xSpeedSlider = new QSlider(Qt::Horizontal);
-    xSpeedSlider->setMinimum(-30);
-    xSpeedSlider->setMaximum(30);
+    xSpeedSlider->setMinimum(-300);
+    xSpeedSlider->setMaximum(300);
     
     xSpeedSpinBox = new QSpinBox();
     xSpeedSpinBox->setMinimum(xSpeedSlider->minimum());
@@ -108,8 +108,8 @@ void WalkParameterWidget::createWidgets()
     // Y Speed
     ySpeedLabel = new QLabel("y (cm/s)");
     ySpeedSlider = new QSlider(Qt::Horizontal);
-    ySpeedSlider->setMinimum(-30);
-    ySpeedSlider->setMaximum(30);
+    ySpeedSlider->setMinimum(-300);
+    ySpeedSlider->setMaximum(300);
     
     ySpeedSpinBox = new QSpinBox();
     ySpeedSpinBox->setMinimum(ySpeedSlider->minimum());
@@ -285,9 +285,9 @@ void WalkParameterWidget::walkParameterChanged()
     params[0][1].Value = phaseOffsetSlider->value()/100.0;
     params[0][2].Value = shiftAmplitudeSlider->value()/100.0;
     params[0][13].Value = phaseResetSlider->value()/100.0;
-    speed[0] = xSpeedSlider->value();
-    speed[1] = ySpeedSlider->value();
-    speed[2] = yawSpeedSlider->value()/10.0;
+    speed[0] = xSpeedSlider->value()/10.0;
+    speed[1] = ySpeedSlider->value()/10.0;
+    speed[2] = yawSpeedSlider->value()/100.0;
 
     m_walk_parameters->setParameters(params);
     
