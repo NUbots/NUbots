@@ -2,6 +2,7 @@
 #define GAME_INFORMATION_H
 
 #include "RoboCupGameControlData.h"
+#include <string>
 
 enum robotState
 {
@@ -63,6 +64,7 @@ public:
 
 private:
     static robotState getNextState(robotState currentState);
+    static std::string stateName(robotState theState);
     void updateSensorData(NUSensorsData* sensorData);
     void updateNetworkData(const RoboCupGameControlData* gameControllerPacket);
     // My information

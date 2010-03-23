@@ -1,6 +1,7 @@
 #include "GameInformation.h"
 #include "NUPlatform/NUSensors.h"
 #include <vector>
+#include "debug.h"
 
 GameInformation::GameInformation(int playerNumber, int teamNumber):
         m_myPlayerNumber(playerNumber),
@@ -57,7 +58,6 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
         rightFootPressed = (tempButtonValues[1] > 0.0f);
     }
 
-    ;
     if(sensorData->getButtonTriggers(tempButtonTriggers) && tempButtonTriggers.size() >= 3)
     {
         if(chestPressed && (tempButtonTriggers[0] < 33.0f ))
@@ -70,6 +70,7 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
     {
         m_myPreviousState = m_myCurrentState;
         m_myCurrentState = getNextState(m_myCurrentState);
+        debug << "State Changed: " << stateName(m_myPreviousState) << " -> " << stateName(m_myCurrentState) << endl;
         m_myStateChanged = true;
     }
 }
@@ -80,6 +81,41 @@ void GameInformation::updateNetworkData(const RoboCupGameControlData* gameContro
     m_currentControlData = *gameControllerPacket;
 }
 
+std::string GameInformation::stateName(robotState theState)
+{
+    std::string stateName;
+    switch(theState)
+    {
+        case state_initial:
+            stateName = "Initial";
+            break;
+        case state_ready:
+            stateName = "Ready";
+            break;
+        case state_set:
+            stateName = "Set";
+            break;
+        case state_playing:
+            stateName = "Playing";
+            break;
+        case state_finished:
+            stateName = "Finished";
+            break;
+        case state_penalised:
+            stateName = "Penalised";
+            break;
+        case state_substitute:
+            stateName = "Sustitute";
+            break;
+        case state_requires_substitution:
+            stateName = "Requires Substitution";
+            break;
+        default:
+            stateName = "Unknown";
+            break;
+    }
+    return stateName;
+}
 
 robotState GameInformation::getNextState(robotState currentState)
 {
