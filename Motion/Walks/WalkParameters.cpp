@@ -276,35 +276,36 @@ ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
  */
 istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 {
-    char inbuffer[100];
+    int intBuffer;
+    float floatBuffer;
     // m_num_max_speeds
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_max_speeds = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_max_speeds = intBuffer;
     // m_max_speeds
     p_walkparameters.m_max_speeds.resize(p_walkparameters.m_num_max_speeds, 0);
     for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
     {
-        input.read(inbuffer, sizeof(float));
-        p_walkparameters.m_max_speeds[i] = *((float*) inbuffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        p_walkparameters.m_max_speeds[i] = floatBuffer;
     }
     // m_num_max_accelerations
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_max_accelerations = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_max_accelerations = intBuffer;
     // m_max_accelerations
     p_walkparameters.m_max_accelerations.resize(p_walkparameters.m_num_max_accelerations, 0);
     for (int i=0; i<p_walkparameters.m_num_max_accelerations; i++)
     {
-        input.read(inbuffer, sizeof(float));
-        p_walkparameters.m_max_accelerations[i] = *((float*) inbuffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        p_walkparameters.m_max_accelerations[i] = floatBuffer;
     }
     
     // m_num_parameters, numperphase
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_parameters = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_parameters = intBuffer;
     if (p_walkparameters.m_num_parameters > 0)
     {
-        input.read(inbuffer, sizeof(int));
-        int numperphase = *((int*) inbuffer);
+        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+        int numperphase = intBuffer;
         p_walkparameters.m_parameters.resize(p_walkparameters.m_num_parameters/numperphase);
         // m_parameters
         for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
@@ -318,12 +319,12 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         p_walkparameters.m_parameters.clear();
     
     // m_num_arm_gains, numperphase
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_arm_gains = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_arm_gains = intBuffer;
     if (p_walkparameters.m_num_arm_gains > 0)
     {
-        input.read(inbuffer, sizeof(int));
-        int numperphase = *((int*) inbuffer);
+        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+        int numperphase = intBuffer;
         p_walkparameters.m_arm_gains.resize(p_walkparameters.m_num_arm_gains/numperphase);
         // m_arm_gains
         for (int i=0; i<p_walkparameters.m_num_arm_gains/numperphase; i++)
@@ -331,8 +332,8 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
             p_walkparameters.m_arm_gains[i].resize(numperphase);
             for (int j=0; j<numperphase; j++)
             {
-                input.read(inbuffer, sizeof(float));
-                p_walkparameters.m_arm_gains[i][j] = *((float*) inbuffer);
+                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+                p_walkparameters.m_arm_gains[i][j] = floatBuffer;
             }
         }
     }
@@ -340,12 +341,12 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         p_walkparameters.m_arm_gains.clear();
     
     // m_num_torso_gains, numperphase
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_torso_gains = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_torso_gains = intBuffer;
     if (p_walkparameters.m_num_torso_gains > 0)
     {
-        input.read(inbuffer, sizeof(int));
-        int numperphase = *((int*) inbuffer);
+        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+        int numperphase = intBuffer;
         p_walkparameters.m_torso_gains.resize(p_walkparameters.m_num_torso_gains/numperphase);
         // m_torso_gains
         for (int i=0; i<p_walkparameters.m_num_torso_gains/numperphase; i++)
@@ -353,8 +354,8 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
             p_walkparameters.m_torso_gains[i].resize(numperphase);
             for (int j=0; j<numperphase; j++)
             {
-                input.read(inbuffer, sizeof(float));
-                p_walkparameters.m_torso_gains[i][j] = *((float*) inbuffer);
+                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+                p_walkparameters.m_torso_gains[i][j] = floatBuffer;
             }
         }
     }
@@ -362,12 +363,12 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         p_walkparameters.m_torso_gains.clear();
     
     // m_num_leg_gains, numperphase
-    input.read(inbuffer, sizeof(int));
-    p_walkparameters.m_num_leg_gains = *((int*) inbuffer);
+    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+    p_walkparameters.m_num_leg_gains = intBuffer;
     if (p_walkparameters.m_num_leg_gains > 0)
     {
-        input.read(inbuffer, sizeof(int));
-        int numperphase = *((int*) inbuffer);
+        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
+        int numperphase = intBuffer;
         p_walkparameters.m_leg_gains.resize(p_walkparameters.m_num_leg_gains/numperphase);
         // m_leg_gains
         for (int i=0; i<p_walkparameters.m_num_leg_gains/numperphase; i++)
@@ -375,8 +376,8 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
             p_walkparameters.m_leg_gains[i].resize(numperphase);
             for (int j=0; j<numperphase; j++)
             {
-                input.read(inbuffer, sizeof(float));
-                p_walkparameters.m_leg_gains[i][j] = *((float*) inbuffer);
+                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+                p_walkparameters.m_leg_gains[i][j] = floatBuffer;
             }
         }
     }

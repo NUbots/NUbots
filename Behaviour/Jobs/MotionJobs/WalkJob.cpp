@@ -38,17 +38,20 @@ WalkJob::WalkJob(const vector<float>& speed) : MotionJob(Job::MOTION_WALK)
 WalkJob::WalkJob(istream& input) : MotionJob(Job::MOTION_WALK)
 {
     m_job_time = 0;
-    char buffer[1024];
+    // Temporary read buffers
+    unsigned int uintBuffer;
+    float floatBuffer;
+
     // read in the head_position size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_walk_speed_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_walk_speed_size = uintBuffer;
     
     // read in the head_position vector
     m_walk_speed = vector<float>(m_walk_speed_size, 0);
     for (unsigned int i=0; i<m_walk_speed_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_walk_speed[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_walk_speed[i] = floatBuffer;
     }
 }
 

@@ -1,17 +1,19 @@
 //OBJECT.cpp
 #include "Object.h"
 
-Object::Object()
+Object::Object(int initID, const std::string& initName):
+        ID(initID),
+        name(initName)
 {
-	sphericalPosition[0] = 0;
-	sphericalPosition[1] = 0;
-	sphericalPosition[2] = 0;
-	sphericalError[0] = 0;
-	sphericalError[1] = 0;
-	sphericalError[2] = 0;
+        measuredRelativePosition[0] = 0;
+        measuredRelativePosition[1] = 0;
+        measuredRelativePosition[2] = 0;
+        relativeMeasurementError[0] = 0;
+        relativeMeasurementError[1] = 0;
+        relativeMeasurementError[2] = 0;
 	isVisible = false;
-	viewPosition[0] = 0;
-	viewPosition[1] = 0;
+        imagePosition[0] = 0;
+        imagePosition[1] = 0;
 	numberOfTimesSeen = 0;
 	framesSinceLastSeen = 0;
 	framesSeen = 0;
@@ -21,13 +23,13 @@ Object::~Object()
 {	
 }
 
-void Object::UpdateVisualObject( Vector3<float> newSpherical,
-                                Vector3<float> newSphericalError,
-                                Vector2<int> newViewPosition)
+void Object::UpdateVisualObject(    const Vector3<float>& newMeasured,
+                                    const Vector3<float>& newMeasuredError,
+                                    const Vector2<int>& newImagePosition)
 {
-	sphericalPosition = newSpherical;
-	sphericalError = newSphericalError;
-	viewPosition = newViewPosition;
+        measuredRelativePosition = newMeasured;
+        relativeMeasurementError = newMeasuredError;
+        imagePosition = newImagePosition;
 	framesSinceLastSeen = 0;
 	numberOfTimesSeen++;
 	framesSeen++;
@@ -44,12 +46,12 @@ void Object::ResetFrame()
 	isVisible = false;
 }
 
-void Object::CopyObject(Object sourceObject)
+void Object::CopyObject(const Object& sourceObject)
 {
-        sphericalPosition = sourceObject.getRelativeLocation();
-        sphericalError = sourceObject.getRelativeLocationError();
+        measuredRelativePosition = sourceObject.getMeasuredRelativeLocation();
+        relativeMeasurementError = sourceObject.getRelativeMeasurementError();
 
-        viewPosition = sourceObject.getViewPosition();
+        imagePosition = sourceObject.getImagePosition();
         isVisible = sourceObject.isObjectVisible();
 }
 /*

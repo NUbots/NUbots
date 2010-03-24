@@ -1,3 +1,37 @@
+/*! @file openglmanager.h
+    @brief Decleration of OpenglManager class.
+
+    @class OpenglManager
+    @brief Class used to generate openGL drawing lists to display various vision data.
+
+    OpenglManager is used to convert various visualisations of data
+    produced by the NUbots vision system into OpenGL display lists.
+    Each display list is converted into a display 'Layer'. These layers
+    can be displayed within the GLDisplay widget in any number of
+    combinations. By centralising the conversion of data into drawing
+    instruction and buffering these instructions within this widget,
+    the often lengthy proces of conversion between large sets of data
+    and images into drawing instructions is kept to a minimum. The openGL
+    instructions produced run entirely on the video hardware when available.
+
+    @author Steven Nicklin
+
+  Copyright (c) 2010 Steven Nicklin
+
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef OPENGLMANAGER_H
 #define OPENGLMANAGER_H
 
@@ -19,8 +53,13 @@ class OpenglManager : public QGLWidget
 {
 Q_OBJECT
 public:
-
+    /*!
+      @brief Standard constructor.
+      */
     OpenglManager();
+    /*!
+      @brief Destructor.
+      */
     ~OpenglManager();
 
     signals:
@@ -34,6 +73,10 @@ public:
         void updatedDisplay(int displayID, GLuint newDisplay, int width, int height);
 
     public slots:
+        /*!
+          @brief Accepts a new raw image and maps it to the default display layer.
+          @param newImage The new raw image.
+          */
         void setRawImage(const NUimage* newImage){writeNUimageToDisplay(newImage, GLDisplay::rawImage);};
         /*!
           @brief Accepts a new raw image and maps it to display instructions.
@@ -110,9 +153,27 @@ public:
         void clearAllDisplays();
 
     public:
+        /*!
+            @brief Determine if a layer has a valid display instruction.
+            @param id The id of the display layer.
+            @return True if a valid instruction is available. False if no valid instruction exists.
+        */
         bool hasDisplayCommand(int id) const {return displayStored[id];};
+        /*!
+            @brief Retrieve the display instruction for a display layer.
+            @param id The id of the display layer.
+            @return The openGL drawing instruction for the specified layer.
+        */
         GLuint getDisplayCommand(int id) const {return displays[id];};
+        /*!
+            @brief Retrieve width of the current displays produced
+            @return The width of the images produced in pixels.
+        */
         int getWidth() const {return width;};
+        /*!
+            @brief Retrieve height of the current displays produced
+            @return The height of the images produced in pixels.
+        */
         int getHeight() const {return height;};
     private:
         int width;                                  //!< Width of the current image.
@@ -124,10 +185,24 @@ public:
         /*!
           @brief Maps an image to a texture and loads it to the graphics card for display.
           @param image The image to be mapped.
-          @param displayId The .display Id to associatie this texture with.
+          @param displayId The id of the display layer to which to draw the texture.
           */
         void createDrawTextureImage(const QImage& image, int displayId);
+        /*!
+          @brief Draw the circumference of a circle.
+          @param cx The x coordinate of the circles centre.
+          @param cy The y coordinate of the circles centre.
+          @param r The radius of the circle.
+          @param num_segments The Number of segments to use when constructing the circle.
+          */
         void drawHollowCircle(float cx, float cy, float r, int num_segments);
+        /*!
+          @brief Draw a solid circle.
+          @param cx The x coordinate of the circles centre.
+          @param cy The y coordinate of the circles centre.
+          @param r The radius of the circle.
+          @param num_segments The Number of segments to use when constructing the circle.
+          */
         void drawSolidCircle(float cx, float cy, float r, int num_segments);
 
 };

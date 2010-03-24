@@ -4,8 +4,8 @@
  */
 
 
-#ifndef Math_General_h
-#define Math_General_h
+#ifndef MATH_GENERAL_H
+#define MATH_GENERAL_H
 
 #include <cmath>
 
@@ -38,11 +38,6 @@ inline T min(T x, T y){
 }
 
 template <class T>
-inline T norm(T theta){
-    return atan2(sin(theta), cos(theta));
-}
-
-template <class T>
 inline T crop(T num, T low, T high){
   if (num < low) num = low;
   else if (num > high) num = high;
@@ -56,13 +51,16 @@ inline int sign(T x){
   else return 0;
 }
 
-
 inline double rad2deg(double x){
   return ((x)*180.0)/PI;
 }
 
 inline double deg2rad(double x){
   return ((x)*PI)/180.0;
+}
+
+inline double normaliseAngle(double theta){
+    return atan2(sin(theta), cos(theta));
 }
 
 /**
@@ -77,4 +75,4 @@ inline int roundNumberToInt(double d)
 
 } // End namespace
 
-#endif
+#endif //MATH_GENERAL_H

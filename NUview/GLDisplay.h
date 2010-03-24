@@ -1,8 +1,32 @@
-/*!
-  @file GLDisplay.h
-  @brief Declaration of NUbots Vision class.
-  @author Steven Nicklin
-  @author Aaron Wong
+/*! @file GLDisplay.h
+    @brief Decleration of GLDisplay class.
+
+    @class GLDisplay
+    @brief GLDisplay is used to combine and display openGL display layers
+    produced by an OpenglManager object.
+
+    The GLDisplay class combines display layers with an adjustable
+    colour and transparency to create customised views of the data produced
+    primarily by the NUbots vision system. This includes data such as images,
+    feature points, lines and more.
+
+    @author Steven Nicklin
+    @author Aaron Wong
+
+    Copyright (c) 2010 Steven Nicklin, Aaron Wong
+
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef GLDISPLAY_H
@@ -14,10 +38,6 @@
 
 class OpenglManager;
 
-/*!
-  @brief Widget used to display images related to images captured by the robots camera,
-  as well as subsequent vision processing done on this image.
-  */
 class GLDisplay : public QGLWidget
 {
 Q_OBJECT
@@ -25,8 +45,7 @@ public:
     /*!
       @brief Constructor.
       @param parent The parent widget.
-      @param shareWidget Another 'QGLWidget' with which this one will share textures and
-      drawing lists.
+      @param shareWidget An OpenglManager producing the display lists used to create displays.
       */
     GLDisplay(QWidget *parent = 0,const OpenglManager * shareWidget = 0);
     /*!
@@ -34,12 +53,16 @@ public:
       */
     ~GLDisplay();
 
+    /*!
+      @brief Retrieve the size of the images displayed by the widget.
+      @return The size of the images that are displayed.
+      */
     QSize imageSize()
     {
         return QSize(imageWidth, imageHeight);
     }
     /*!
-      @brief Classed used to represent a layer.
+      @brief Class used to represent a layer.
 
       The images displayed in the GLDisplay class are made up of layers. Each window has a primary
       Layer and additional overlay layers. These layers have adjustable alphas when drawn and also
@@ -62,7 +85,7 @@ public:
         bool hasDisplayCommand;
     };
 
-    //! List of the display types
+    //! List of the display layers
     enum display
     {
         unknown,
@@ -239,8 +262,11 @@ signals:
     void ctrlSelectPixel(int x,int y);
 
 protected:
+    //! Initialise the openGL display area.
     void initializeGL();
+    //! Draw the openGL display area.
     void paintGL();
+    //! Resize the openGL display area.
     void resizeGL(int width, int height);
 private:
     int imageWidth; //!< The width of the windows current primary display
