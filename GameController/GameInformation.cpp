@@ -25,13 +25,19 @@ GameInformation::GameInformation(int playerNumber, int teamNumber):
 
 void GameInformation::update(NUSensorsData* sensorData, const RoboCupGameControlData* gameControllerPacket)
 {
+    // Check if there is sensor data.
     if(sensorData)
     {
         updateSensorData(sensorData);
     }
+    // Check if there is some network data.
     if(gameControllerPacket)
     {
-        updateNetworkData(gameControllerPacket);
+        // Check if the packet belongs to our team.
+        if((gameControllerPacket->teams[0].teamNumber == teamId() || gameControllerPacket->teams[1].teamNumber == teamId()))
+        {
+            updateNetworkData(gameControllerPacket);
+        }
     }
     return;
 }
@@ -60,6 +66,7 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
 
     if(sensorData->getButtonTriggers(tempButtonTriggers) && tempButtonTriggers.size() >= 3)
     {
+       // Trigger if the button has been pressed for less than a full frame.
         if(chestPressed && (tempButtonTriggers[0] < 33.0f ))
         {
             stateChangeTriggered = true;
@@ -79,6 +86,14 @@ void GameInformation::updateNetworkData(const RoboCupGameControlData* gameContro
 {
     m_previousControlData = m_currentControlData;
     m_currentControlData = *gameControllerPacket;
+    bool myTeamIndex = 0;
+    if(m_currentControlData.teams[TEAM_RED].teamNumber == m_myTeamNumber)
+        myTeamIndex = TEAM_RED;
+    if(m_currentControlData.teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
+        myTeamIndex = TEAM_BLUE;
+
+    myTeam = &m_currentControlData.teams[myTeamIndex];
+    opponentTeam = &m_currentControlData.teams[!myTeamIndex];
 }
 
 std::string GameInformation::stateName(robotState theState)
