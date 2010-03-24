@@ -120,7 +120,7 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 # Define include directories here
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIR}
-		     ${LIBRT_INCLUDE_DIR}
+                     ${LIBRT_INCLUDE_DIR}
 )
 
 IF (DEBUG)
@@ -141,14 +141,14 @@ ENDIF (NUBOT_IS_REMOTE)
 
 ############################ SET LIBRARIES TO LINK WITH
 IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-	LIST(APPEND NUBOT_LINK_LIBRARIES wsock32)
+	LIST(APPEND NUBOT_LINK_LIBRARIES ws2_32)
 ENDIF()
 
 TARGET_LINK_LIBRARIES( nubot 
                        ${NUBOT_LINK_LIBRARIES} 
                        ${PTHREAD_LIBRARIES}
                        ${Boost_LIBRARIES}
-		       ${LIBRT_LIBRARIES}
+                       ${LIBRT_LIBRARIES}
 )
 
 ############################ BINARY COPY

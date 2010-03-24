@@ -3,10 +3,7 @@ QT += network \
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -L \
-        /usr/lib/libz.dylib
+    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files/boost/'
