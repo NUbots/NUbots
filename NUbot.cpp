@@ -20,13 +20,21 @@
  */
 
 #include <time.h>
-#include <errno.h>
-#include <signal.h>
-#include <execinfo.h>
+
 #include <string>
 #include <sstream>
 
 #include "NUbot.h"
+
+#ifndef MY_OS_IS_WINDOWS
+	#include <errno.h>
+#endif
+#include <signal.h>
+#ifndef MY_OS_IS_WINDOWS
+	#include <execinfo.h>
+#endif
+
+
 #ifdef TARGET_IS_NAOWEBOTS
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
 #endif
@@ -234,10 +242,12 @@ void NUbot::createThreads()
  */
 void NUbot::createErrorHandling()
 {
-    struct sigaction newaction, oldaction;
-    newaction.sa_handler = segFaultHandler;
+	#ifndef MY_OS_IS_WINDOWS
+		struct sigaction newaction, oldaction;
+		newaction.sa_handler = segFaultHandler;
     
-    sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+		sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+	#endif
 }
 
 /*! @brief Destructor for the nubot
@@ -706,15 +716,17 @@ void* runThreadVision(void* arg)
  */
 void segFaultHandler (int value)
 {
-    errorlog << "SEGMENTATION FAULT. " << endl;
-    void *array[10];
-    size_t size;
-    char **strings;
-    size = backtrace(array, 10);
-    strings = backtrace_symbols(array, size);
-    for (size_t i=0; i<size; i++)
-        errorlog << strings[i] << endl;
-    //!< @todo TODO: after a seg fault I should fail safely!
+	#ifndef MY_OS_IS_WINDOWS
+	    errorlog << "SEGMENTATION FAULT. " << endl;
+	    void *array[10];
+	    size_t size;
+	    char **strings;
+	    size = backtrace(array, 10);
+	    strings = backtrace_symbols(array, size);
+	    for (size_t i=0; i<size; i++)
+		errorlog << strings[i] << endl;
+		//!< @todo TODO: after a seg fault I should fail safely!
+	#endif
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
@@ -722,6 +734,7 @@ void segFaultHandler (int value)
  */
 void unhandledExceptionHandler(exception& e)
 {
+	#ifndef MY_OS_IS_WINDOWS
     //!< @todo TODO: check whether the exception is serious, if it is fail safely
     errorlog << "UNHANDLED EXCEPTION. " << endl;
     void *array[10];
@@ -732,6 +745,7 @@ void unhandledExceptionHandler(exception& e)
     for (size_t i=0; i<size; i++)
         errorlog << strings[i] << endl;
     errorlog << e.what() << endl;
+	#endif
 }
 
 

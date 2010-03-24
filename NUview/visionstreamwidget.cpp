@@ -63,8 +63,9 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     connect(nameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateRobotName(QString)));
     connect(getImageButton,SIGNAL(pressed()),this,SLOT(sendRequestForImage()));
     connect(startStreamButton,SIGNAL(pressed()),&time,SLOT(start()));
-    time.setInterval(2000);
+    time.setInterval(1000);
     connect(stopStreamButton,SIGNAL(pressed()),&time,SLOT(stop()));
+    connect(tcpSocket,SIGNAL(connected()),this,SLOT(sendDataToRobot()));
 
 
     //time.setSingleShot(true);
@@ -84,11 +85,39 @@ void visionStreamWidget::connectToRobot()
     //udpSocket->bind(QHostAddress::Any, port);
     tcpSocket->connectToHost(address,port,QIODevice::ReadWrite);
     tcpSocket->flush();
-    const char* data = "1";
+
     QString text = QString("Connecting to: ");
     text.append(robotName);
     statusNetworkLabel->setText(text);
     //if(udpSocket->writeDatagram (data, 1, address, port) == -1)
+
+/*  const char* data = "1";
+      if(tcpSocket->write(data) == -1)
+    {
+        statusNetworkLabel->setText("Disconnect Error: Unable to send packet.");
+        disconnectButton->setEnabled(false);
+        connectButton->setEnabled(true);
+        datasize = 0;
+        if(time.isActive())
+        {
+            time.stop();
+        }
+    }
+    else
+    {
+        QString text = QString("Connected to: ");
+        text.append(robotName);
+        statusNetworkLabel->setText(text);
+        disconnectButton->setEnabled(true);
+        connectButton->setEnabled(false);
+        datasize = 0;
+    }
+*/
+}
+
+void visionStreamWidget::sendDataToRobot()
+{
+    const char* data = "1";
     if(tcpSocket->write(data) == -1)
     {
         statusNetworkLabel->setText("Disconnect Error: Unable to send packet.");
@@ -109,7 +138,6 @@ void visionStreamWidget::connectToRobot()
         connectButton->setEnabled(false);
         datasize = 0;
     }
-
 }
 
 void visionStreamWidget::disconnectFromRobot()

@@ -50,6 +50,8 @@ public slots:
 
     void sendRequestForImage();
 
+    void sendDataToRobot();
+
 signals:
     /**
       *    A function that sends a signal to other connected widgets.

@@ -8,8 +8,17 @@ macx {
         -L \
         /usr/lib/libz.dylib
 }
-win32 { 
-    INCLUDEPATH += 'C:/Program Files/boost/'
+win32 {
+    contains($$(OS), "AMD64")
+    {
+        INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+        INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    }
+    contains($$(OS), "x86")
+    {
+        INCLUDEPATH += 'C:/Program Files/boost/'
+        INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    }
     LIBS += -lwsock32
     LIBS += -lpthread
 }
@@ -42,6 +51,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
+    ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
     KickWidget.h \
@@ -99,6 +109,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/ClassifiedSection.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
+    ../Vision/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
