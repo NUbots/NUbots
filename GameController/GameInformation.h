@@ -259,10 +259,6 @@ private:
     robotState m_myPreviousState;   //!< Previous robot state.
     bool m_myStateChanged;          //!< Player state has changed. true if state has changed, false if not.
 
-    // Team Information
-    TeamInfo* myTeam;               //!< Pointer to current team data for my team.
-    TeamInfo* opponentTeam;         //!< Pointer to current team data for opponents team.
-
     // Game Information
     RoboCupGameControlData m_currentControlData;        //!< The current game info.
     RoboCupGameControlData m_previousControlData;       //!< The previous game info.

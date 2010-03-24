@@ -86,14 +86,6 @@ void GameInformation::updateNetworkData(const RoboCupGameControlData* gameContro
 {
     m_previousControlData = m_currentControlData;
     m_currentControlData = *gameControllerPacket;
-    bool myTeamIndex = 0;
-    if(m_currentControlData.teams[TEAM_RED].teamNumber == m_myTeamNumber)
-        myTeamIndex = TEAM_RED;
-    if(m_currentControlData.teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
-        myTeamIndex = TEAM_BLUE;
-
-    myTeam = &m_currentControlData.teams[myTeamIndex];
-    opponentTeam = &m_currentControlData.teams[!myTeamIndex];
 }
 
 std::string GameInformation::stateName(robotState theState)
