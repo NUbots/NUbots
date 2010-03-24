@@ -1,5 +1,5 @@
 /*! @file GLDisplay.h
-    @brief Decleration of GLDisplay class.
+    @brief Declaration of GLDisplay class.
 
     @class GLDisplay
     @brief GLDisplay is used to combine and display openGL display layers
