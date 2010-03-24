@@ -16,16 +16,20 @@
 #include <QToolButton>
 #include <QColorDialog>
 #include <QLineEdit>
-
+#include <QTcpSocket>
+#include <sstream>
 
 cameraSettingsWidget::cameraSettingsWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
     setObjectName(tr("Camera Settings"));
     setWindowTitle(tr("Camera Settings"));
+    tcpSocket = new QTcpSocket();
     robotName = "";
+    timer.setInterval(500);
     createWidgets();
     createLayout();
     createConnections();
+
     this->setEnabled(true);
 }
 
@@ -255,6 +259,8 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(streamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(streamCameraSetting()));
     connect(stopStreamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(stopStreamCameraSetting()));
 
+    connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(readPendingData()));
+    connect(&timer,SIGNAL(timeout()),this,SLOT(sendSettingsToRobot()));
 }
 
 
@@ -268,7 +274,6 @@ void cameraSettingsWidget::cameraSettingsChanged()
     settings.saturation = shiftSaturationSlider->value();
     settings.contrast = shiftContrastSlider->value();
     settings.hue = shiftHueSlider->value();
-
 }
 
 
@@ -288,16 +293,93 @@ void cameraSettingsWidget::getCameraSetting()
     getCameraSettingsButton->setEnabled(false);
     streamCameraSettingsButton->setEnabled(true);
     stopStreamCameraSettingsButton->setEnabled(false);
+    connectToRobot();
 }
+void cameraSettingsWidget::connectToRobot()
+{
+    tcpSocket->flush();
+    netdata.clear();
+    quint16 port = quint16(15438);
+    if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
+    {
+        tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
+
+        const char* data = "1";
+        if (tcpSocket->write(data) == -1)
+        {
+            qDebug() <<"Failed";
+        }
+        datasize = 0;
+    }
+}
+void cameraSettingsWidget::disconnectFromRobot()
+{
+
+    if(tcpSocket->isOpen())
+    {
+        //qDebug() << "disconnecting the Socket";
+        tcpSocket->disconnectFromHost();
+    }
+
+
+}
+void cameraSettingsWidget::sendSettingsToRobot()
+{
+    tcpSocket->flush();
+    quint16 port = quint16(15438);
+    if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
+    {
+        tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
+        std::stringstream buffer;
+        buffer << settings;
+        if(tcpSocket->write((const char*)buffer.str().c_str()) == -1)
+        {
+            timer.stop();
+        }
+        disconnectFromRobot();
+    }
+}
+
+void cameraSettingsWidget::readPendingData()
+{
+    if(netdata.isEmpty())
+    {
+        CameraSettings tempSettings;
+        netdata.append(tcpSocket->readAll());
+        qDebug() << "Got Data:" << netdata.size();
+        std::stringstream buffer;
+        buffer.write(reinterpret_cast<char*>(netdata.data()),netdata.size());
+        buffer >> tempSettings;
+        //Settings Display Values
+        shiftExposureSlider->setValue(tempSettings.gain);
+        shiftGainSlider->setValue(tempSettings.exposure);
+        shiftBlueChromaSlider->setValue(tempSettings.blueChroma);
+        shiftRedChromaSlider->setValue(tempSettings.redChroma);
+        shiftBrightnessSlider->setValue(tempSettings.brightness);
+        shiftSaturationSlider->setValue(tempSettings.saturation);
+        shiftContrastSlider->setValue(tempSettings.contrast);
+        shiftHueSlider->setValue(tempSettings.hue);
+        settings.autoExposure = tempSettings.autoExposure;
+        settings.autoGain = tempSettings.autoGain;
+        settings.autoWhiteBalance = tempSettings.autoWhiteBalance;
+
+    }
+
+}
+
 void cameraSettingsWidget::streamCameraSetting()
 {
     getCameraSettingsButton->setEnabled(false);
     streamCameraSettingsButton->setEnabled(false);
     stopStreamCameraSettingsButton->setEnabled(true);
+    timer.start();
 }
 void cameraSettingsWidget::stopStreamCameraSetting()
 {
     getCameraSettingsButton->setEnabled(true);
     streamCameraSettingsButton->setEnabled(true);
     stopStreamCameraSettingsButton->setEnabled(false);
+    timer.stop();
+    disconnectFromRobot();
+
 }
