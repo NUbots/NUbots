@@ -121,6 +121,7 @@ bool Ball::isCorrectCheckRatio(ObjectCandidate PossibleBall,int height, int widt
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
     int boarder = 10; //! Boarder of pixels
+
     if (PossibleBall.getBottomRight().x <= width-boarder &&
         PossibleBall.getBottomRight().y <= height-boarder &&
         PossibleBall.getTopLeft().x >=0+boarder  &&

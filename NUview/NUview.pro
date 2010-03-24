@@ -9,16 +9,9 @@ macx {
         /usr/lib/libz.dylib
 }
 win32 {
-    contains($$(OS), "AMD64")
-    {
-        INCLUDEPATH += 'C:/Program Files (x86)/boost/'
-        INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
-    }
-    contains($$(OS), "x86")
-    {
-        INCLUDEPATH += 'C:/Program Files/boost/'
-        INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
-    }
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+    INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
 }

@@ -5,6 +5,10 @@
 #include <QString>
 #include <QDockWidget>
 #include "NUPlatform/NUCamera/CameraSettings.h"
+#include <QByteArray>
+#include <stdio.h>
+#include <iostream>
+#include <QTimer>
 class QMdiArea;
 class QComboBox;
 class QCheckBox;
@@ -19,6 +23,8 @@ class QPushButton;
 class QSignalMapper;
 class QToolButton;
 class QLineEdit;
+class QTcpSocket;
+
 
 class cameraSettingsWidget: public QWidget
 {
@@ -38,7 +44,8 @@ private slots:
     void getCameraSetting();
     void streamCameraSetting();
     void stopStreamCameraSetting();
-
+    void readPendingData();
+    void sendSettingsToRobot();
 
 private:
     QVBoxLayout* overallLayout;                 //!< Overall widget layout.
@@ -98,16 +105,21 @@ private:
     QHBoxLayout* pushButtonLayout;
     QString robotName;
     int datasize;
-    QByteArray netdata;
     QLabel* nameLabel;
     QLineEdit* nameLineEdit;
 
     CameraSettings settings;
 
+    void connectToRobot();
+    void disconnectFromRobot();
     void createWidgets();       //!< Create all of the child widgets.
     void createLayout();        //!< Layout all of the child widgets.
     void createConnections();   //!< Connect all of the child widgets.
     bool disableWriting;        //!< Flag used to disable the writing of settings back to the layers when updating the displays.
+    //NETWORKING:
+    QTcpSocket* tcpSocket;
+    QByteArray netdata;
+    QTimer timer;
 
 };
 

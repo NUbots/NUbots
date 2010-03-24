@@ -1,96 +1,96 @@
 #include "MobileObject.h"
-MobileObject::MobileObject()
+
+MobileObject::MobileObject(float x, float y, int initID, const std::string& initName):
+        Object(initID, initName), estimatedFieldLocation(x,y)
 {
-	AbsoluteLocation[0] = 0;
-	AbsoluteLocation[1] = 0;
-	AbsoluteLocationError[0] = 0;
-	AbsoluteLocationError[1] = 0;
-	Velocity[0] = 0;
-	Velocity[1] = 0;
-	VelocityError[0] = 0;
-	VelocityError[1] = 0;
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
+    estimatedFieldLocationError[0] = 0;
+    estimatedFieldLocationError[1] = 0;
+    estimatedVelocity[0] = 0;
+    estimatedVelocity[1] = 0;
+    estimatedVelocityError[0] = 0;
+    estimatedVelocityError[1] = 0;
+    estimatedRelativeLocation[0] = 0;
+    estimatedRelativeLocation[1] = 0;
+    estimatedRelativeLocation[2] = 0;
 }
+
+MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
+                Object(initID, initName),
+                estimatedFieldLocation(newEstimatedLocation)
+{
+        estimatedFieldLocationError[0] = 0;
+        estimatedFieldLocationError[1] = 0;
+        estimatedVelocity[0] = 0;
+        estimatedVelocity[1] = 0;
+        estimatedVelocityError[0] = 0;
+        estimatedVelocityError[1] = 0;
+        estimatedRelativeLocation[0] = 0;
+        estimatedRelativeLocation[1] = 0;
+        estimatedRelativeLocation[2] = 0;
+	
+}
+
+MobileObject::MobileObject(const MobileObject& srcObj):
+        Object(srcObj.getID(), srcObj.getName()),
+        estimatedFieldLocation(srcObj.getEstimatedFieldLocation()),
+        estimatedFieldLocationError(srcObj.getEstimatedFieldLocationError()),
+        estimatedVelocity(srcObj.getEstimatedVelocity()),
+        estimatedVelocityError(srcObj.getEstimatedVelocityError()),
+        estimatedRelativeLocation(srcObj.getEstimatedRelativeLocation())
+{
+}
+
 MobileObject::~MobileObject()
 {
 }
-MobileObject::MobileObject(Vector2<float> newAbsoluteLocation)
+
+void MobileObject::updateAbsoluteLocation(const Vector2<float>& newAbsoluteLocation)
 {
-	AbsoluteLocation = newAbsoluteLocation;
-	AbsoluteLocationError[0] = 0;
-	AbsoluteLocationError[1] = 0;
-	Velocity[0] = 0;
-	Velocity[1] = 0;
-	VelocityError[0] = 0;
-	VelocityError[1] = 0;
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
-	
+        estimatedFieldLocation = newAbsoluteLocation;
 }
-MobileObject::MobileObject(float x, float y)
+void MobileObject::updateAbsoluteLocationError(const Vector2<float>& newAbsoluteLocationError)
 {
-	AbsoluteLocation[0] = x;
-	AbsoluteLocation[1] = y;
-	AbsoluteLocationError[0] = 0;
-	AbsoluteLocationError[1] = 0;
-	Velocity[0] = 0;
-	Velocity[1] = 0;
-	VelocityError[0] = 0;
-	VelocityError[1] = 0;
-	WorldModelRelativeLocation[0] = 0;
-	WorldModelRelativeLocation[1] = 0;
-	WorldModelRelativeLocation[2] = 0;
-}
-void MobileObject::updateAbsoluteLocation(Vector2<float> newAbsoluteLocation)
-{
-	AbsoluteLocation = newAbsoluteLocation;
-}
-void MobileObject::updateAbsoluteLocationError(Vector2<float> newAbsoluteLocationError)
-{
-	AbsoluteLocationError = newAbsoluteLocationError;
+        estimatedFieldLocationError = newAbsoluteLocationError;
 }
 void MobileObject::updateObjectLocation(float x, float y, float sdx, float sdy)
 {
-	AbsoluteLocation[0] = x;
-	AbsoluteLocation[1] = y;
-	AbsoluteLocationError[0] = sdx;
-	AbsoluteLocationError[1] = sdy;
+        estimatedFieldLocation[0] = x;
+        estimatedFieldLocation[1] = y;
+        estimatedFieldLocationError[0] = sdx;
+        estimatedFieldLocationError[1] = sdy;
 }
 
-void MobileObject::updateVelocity(Vector2<float> newVelocity)
+void MobileObject::updateVelocity(const Vector2<float>& newVelocity)
 {
-	Velocity = newVelocity;
+        estimatedVelocity = newVelocity;
 }
-void MobileObject::updateVelocityError(Vector2<float> newVelocityError)
+void MobileObject::updateVelocityError(const Vector2<float>& newVelocityError)
 {
-	VelocityError = newVelocityError;
+        estimatedVelocityError = newVelocityError;
 	
 }
 void MobileObject::updateObjectVelocities(float velX, float velY, float sdVelX, float sdVelY)
 {
-	Velocity[0] = velX;
-	Velocity[1] = velY;
-	VelocityError[0] = sdVelX;
-	VelocityError[1] = sdVelY;
+        estimatedVelocity[0] = velX;
+        estimatedVelocity[1] = velY;
+        estimatedVelocityError[0] = sdVelX;
+        estimatedVelocityError[1] = sdVelY;
 }
 
-void MobileObject::updateWorldModelRelativeLocation(Vector3<float> newWMRelLoc)
+void MobileObject::updateWorldModelRelativeLocation(const Vector3<float>& newWMRelLoc)
 {
-	WorldModelRelativeLocation = newWMRelLoc;
+        estimatedRelativeLocation = newWMRelLoc;
 }
-void MobileObject::updateWorldModelRelativeLocationError(Vector3<float> newWMRelLocError)
+void MobileObject::updateWorldModelRelativeLocationError(const Vector3<float>& newWMRelLocError)
 {
-	WorldModelRelativeLocationError = newWMRelLocError;
+        estimatedRelativeLocationError = newWMRelLocError;
 }
 void MobileObject::updateWorldModelRelativeVaribles(float wmDistance, float wmBearing, float wmElevation, float sdWmDistance, float sdWmBearing, float sdWmElevation )
 {
-	WorldModelRelativeLocation[0] = wmDistance;
-	WorldModelRelativeLocation[1] = wmBearing;
-	WorldModelRelativeLocation[2] = wmElevation;
-	WorldModelRelativeLocationError[0] = sdWmDistance;
-	WorldModelRelativeLocationError[1] = sdWmBearing;
-	WorldModelRelativeLocationError[2] = sdWmElevation;
+        estimatedRelativeLocation[0] = wmDistance;
+        estimatedRelativeLocation[1] = wmBearing;
+        estimatedRelativeLocation[2] = wmElevation;
+        estimatedRelativeLocationError[0] = sdWmDistance;
+        estimatedRelativeLocationError[1] = sdWmBearing;
+        estimatedRelativeLocationError[2] = sdWmElevation;
 }

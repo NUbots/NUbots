@@ -33,19 +33,28 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     selectLayout2 = new QHBoxLayout;
     statusLabel = new QLabel("Status: ");
     statusNetworkLabel = new QLabel("Not connected");
+    frameRateLabel = new QLabel("Maximum Frame Rate (FPS): ");
+    frameRateMessageLabel = new QLabel("0");
     selectLayout2->setAlignment(Qt::AlignTop);
     selectLayout2->addWidget(statusLabel);
     selectLayout2->addWidget(statusNetworkLabel,2);
+
 
     selectLayout3 = new QHBoxLayout;
     selectLayout3->setAlignment(Qt::AlignTop);
     selectLayout3->addWidget(startStreamButton,1);
     selectLayout3->addWidget(stopStreamButton,1);
 
+    selectLayout4 = new QHBoxLayout;
+    selectLayout4->setAlignment(Qt::AlignTop);
+    selectLayout4->addWidget(frameRateLabel,2);
+    selectLayout4->addWidget(frameRateMessageLabel,1);
+
     //selectLayout2->addWidget(disconnectButton,1);
     layout->addLayout(selectLayout1);
     layout->addLayout(selectLayout2);
     layout->addLayout(selectLayout3);
+    layout->addLayout(selectLayout4);
     layout->setAlignment(Qt::AlignLeft);
     //window = new QWidget;
     setLayout(layout);
@@ -63,7 +72,9 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     connect(nameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateRobotName(QString)));
     connect(getImageButton,SIGNAL(pressed()),this,SLOT(sendRequestForImage()));
     connect(startStreamButton,SIGNAL(pressed()),&time,SLOT(start()));
-    time.setInterval(1000);
+
+    time.setInterval(800);
+
     connect(stopStreamButton,SIGNAL(pressed()),&time,SLOT(stop()));
     connect(tcpSocket,SIGNAL(connected()),this,SLOT(sendDataToRobot()));
 
@@ -143,8 +154,8 @@ void visionStreamWidget::sendDataToRobot()
 void visionStreamWidget::disconnectFromRobot()
 {
     //Disconnect Code HERE
-    QString text = QString("Disconnected");
-    statusNetworkLabel->setText(text);
+    //QString text = QString("Disconnected");
+    //statusNetworkLabel->setText(text);
     disconnectButton->setEnabled(false);
     connectButton->setEnabled(true);
     tcpSocket->disconnectFromHost();
@@ -162,6 +173,8 @@ void visionStreamWidget::readPendingData()
 
     if(netdata.isEmpty())
     {
+        timeToRecievePacket = QTime();
+        timeToRecievePacket.start();
         netdata.append(tcpSocket->readAll());
         //update total bytes to recieve:
         //datasize = (((int)netdata[1])*((int)netdata[2]));
@@ -205,14 +218,16 @@ void visionStreamWidget::readPendingData()
             buffer.write(reinterpret_cast<char*>(netdata.data()), netdata.size());
             buffer >> image;
             emit rawImageChanged(&image);
-
+            int mstime = timeToRecievePacket.elapsed();
+            float frameRate = (float)(1000.00/mstime);
             QString text = QString("Recieved Total Size: ");
             //datasize = datasize +netdata.size();
             text.append(QString::number(netdata.size()));
             text.append(" of ");
             text.append(QString::number(datasize));
-            statusNetworkLabel->setText(text);
 
+            frameRateMessageLabel->setText(QString::number(frameRate));
+            statusNetworkLabel->setText(text);
             netdata.clear();
             disconnectFromRobot();
         }

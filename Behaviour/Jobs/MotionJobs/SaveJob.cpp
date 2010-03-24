@@ -40,17 +40,21 @@ SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MO
 SaveJob::SaveJob(double time, istream& input) : MotionJob(Job::MOTION_SAVE)
 {
     m_job_time = time;
-    char buffer[1024];
+
+    // Temporary read buffers.
+    unsigned int uintBuffer;
+    float floatBuffer;
+
     // read in the save_position size
-    input.read(buffer, sizeof(unsigned int));
-    unsigned int m_save_position_size = *reinterpret_cast<unsigned int*>(buffer);
+    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
+    unsigned int m_save_position_size = uintBuffer;
     
     // read in the save position vector
     m_save_position = vector<float>(m_save_position_size, 0);
     for (unsigned int i=0; i<m_save_position_size; i++)
     {
-        input.read(buffer, sizeof(float));
-        m_save_position[i] = *reinterpret_cast<float*>(buffer);
+        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
+        m_save_position[i] = floatBuffer;
     }
 }
 

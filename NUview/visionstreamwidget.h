@@ -9,6 +9,7 @@
 #include <iostream>
 #include "Tools/Image/NUimage.h"
 #include <QTimer>
+#include <QTime>
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -76,14 +77,18 @@ private:
     QHBoxLayout* selectLayout1;
     QHBoxLayout* selectLayout2;
     QHBoxLayout* selectLayout3;
+    QHBoxLayout* selectLayout4;
     QLabel* frameLabel;
     QLabel* frameNumberLabel;
     QLabel* statusLabel;
     QLabel* statusNetworkLabel;
+    QLabel* frameRateLabel;
+    QLabel* frameRateMessageLabel;
     QWidget* window;
     QTcpSocket* tcpSocket;
     QTimer time;
     NUimage image;
+    QTime timeToRecievePacket;
 
 };
 

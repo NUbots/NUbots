@@ -149,7 +149,11 @@ istream& operator>>(istream& input, Job** job)
 #endif
     
     unsigned int tempuint = 0;
-    static char buffer[1024];
+
+    // Buffer for reading
+    char charBuffer;
+    char doubleBuffer;
+
     Job::job_type_t jobtype;
     Job::job_id_t jobid;
     double jobtime;
@@ -161,9 +165,9 @@ istream& operator>>(istream& input, Job** job)
     jobid = static_cast<Job::job_id_t>(tempuint);
 
     // Also read in the time (because it was written at the Job level)
-    input.read(buffer, sizeof(char));           // skip the white space!
-    input.read(buffer, sizeof(double));
-    jobtime = *((double*) buffer);
+    input.read(&charBuffer, sizeof(char));           // skip the white space!
+    input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(double));
+    jobtime = doubleBuffer;
     
     // Now that we have the id (and the type) create a new Job of the correct concrete type
     switch (jobid) 
