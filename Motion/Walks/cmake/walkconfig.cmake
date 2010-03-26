@@ -55,6 +55,12 @@ OPTION(
         OFF
 )
 
+OPTION(
+        USE_WALK_ALWALK
+        "Set to ON to use almotion's walk, set to OFF use something else"
+        OFF
+)
+
 ############################ walkconfig.h generation
 CONFIGURE_FILE(
 	"${THIS_SRC_DIR}/cmake/walkconfig.in"

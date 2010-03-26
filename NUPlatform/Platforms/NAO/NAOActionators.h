@@ -30,6 +30,12 @@
 #include "NUPlatform/NUActionators.h"
 #include "NUNAO.h"
 
+#include "walkconfig.h"
+#include <dcmproxy.h>
+#ifdef USE_ALWALK
+    #include <almotionproxy.h>
+#endif
+
 class NAOActionators : public NUActionators
 {
 #define ALIAS_POSITION "PositionActionators"
@@ -39,13 +45,14 @@ public:
     NAOActionators();
     ~NAOActionators();
 private:
-    void getActionatorsFromALDCM();
+    void getActionatorsFromAldebaran();
     void createALDCMCommands();
     void createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators);
     void copyToHardwareCommunications();
     
 private:
     static vector<string> m_servo_control_names;
+    static vector<string> m_servo_names;
     static vector<string> m_servo_position_names;
     static unsigned int m_num_servo_positions;
     static vector<string> m_servo_stiffness_names;
@@ -57,6 +64,9 @@ private:
     
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
+#ifdef USE_ALWALK
+    ALMotionProxy* m_al_motion;
+#endif
     ALValue m_position_command, m_stiffness_command, m_led_command;
 };
 

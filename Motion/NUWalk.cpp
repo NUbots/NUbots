@@ -31,7 +31,10 @@
     #include "Walks/NBWalk/NBWalk.h"
 #endif
 #ifdef USE_VSCWALK
-#include "Walks/VSCWalk/VSCWalk.h"
+    #include "Walks/VSCWalk/VSCWalk.h"
+#endif
+#ifdef USE_ALWALK
+    #include "Walks/ALWalk/ALWalk.h"
 #endif
 
 #include "NUPlatform/NUSystem.h"
@@ -53,6 +56,10 @@ NUWalk* NUWalk::getWalkEngine()
         #else
             #ifdef USE_VSCWALK
                 return new VSCWalk();
+            #else
+                #ifdef USE_ALWALK
+                    return new ALWalk();
+                #endif
             #endif
         #endif
     #endif

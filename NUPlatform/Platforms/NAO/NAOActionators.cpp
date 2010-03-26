@@ -21,11 +21,16 @@
 
 #include "NAOActionators.h"
 #include "NAOActionatorNames.h"
+
 #include "debug.h"
 
 // init m_actionator_names:
 static string temp_servo_control_names[] = {string("JointPositions")};
 vector<string> NAOActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
+
+// init m_servo_names:
+static string temp_servo_names[] = {HEAD_PITCH, HEAD_YAW, L_SHOULDER_ROLL, L_SHOULDER_PITCH, L_ELBOW_ROLL, L_ELBOW_YAW, R_SHOULDER_ROLL, R_SHOULDER_PITCH, R_ELBOW_ROLL, R_ELBOW_YAW, L_HIP_ROLL, L_HIP_PITCH, L_HIP_YAWPITCH, L_KNEE_PITCH, L_ANKLE_ROLL, L_ANKLE_PITCH, R_HIP_ROLL, R_HIP_PITCH, R_HIP_YAWPITCH, R_KNEE_PITCH, R_ANKLE_ROLL, R_ANKLE_PITCH};
+vector<string> NAOActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 // init m_servo_position_names:
 static string temp_servo_position_names[] = {DN_HEAD_PITCH_POSITION, DN_HEAD_YAW_POSITION, DN_L_SHOULDER_ROLL_POSITION, DN_L_SHOULDER_PITCH_POSITION, DN_L_ELBOW_ROLL_POSITION, DN_L_ELBOW_YAW_POSITION, DN_R_SHOULDER_ROLL_POSITION, DN_R_SHOULDER_PITCH_POSITION, DN_R_ELBOW_ROLL_POSITION, DN_R_ELBOW_YAW_POSITION, DN_L_HIP_ROLL_POSITION, DN_L_HIP_PITCH_POSITION, DN_L_HIP_YAWPITCH_POSITION, DN_L_KNEE_PITCH_POSITION, DN_L_ANKLE_ROLL_POSITION, DN_L_ANKLE_PITCH_POSITION, DN_R_HIP_ROLL_POSITION, DN_R_HIP_PITCH_POSITION, DN_R_HIP_YAWPITCH_POSITION, DN_R_KNEE_PITCH_POSITION, DN_R_ANKLE_ROLL_POSITION, DN_R_ANKLE_PITCH_POSITION};
@@ -50,10 +55,15 @@ NAOActionators::NAOActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOActionators::NAOActionators()" << endl;
 #endif
-    getActionatorsFromALDCM();
+    
+    getActionatorsFromAldebaran();
+    
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
+    
+    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 100000, -1.57, 0, 100);
+    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
@@ -64,7 +74,7 @@ NAOActionators::~NAOActionators()
 {
 }
 
-void NAOActionators::getActionatorsFromALDCM()
+void NAOActionators::getActionatorsFromAldebaran()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOActionators::getActionatorsFromALDCM()" << endl;
@@ -72,22 +82,32 @@ void NAOActionators::getActionatorsFromALDCM()
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
     m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
     ALValue param;
-    
     param.arraySetSize(2);
-    param[0] = ALIAS_POSITION;
-    param[1] = m_servo_position_names;
-    param = m_al_dcm->createAlias(param);
-    debug << param.toString(VerbosityMini) << endl;
-    
-    param[0] = ALIAS_STIFFNESS;
-    param[1] = m_servo_stiffness_names;
-    param = m_al_dcm->createAlias(param);
-    debug << param.toString(VerbosityMini) << endl;
+
+    #ifndef USE_ALWALK
+        param[0] = ALIAS_POSITION;
+        param[1] = m_servo_position_names;
+        param = m_al_dcm->createAlias(param);
+        #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+            debug << param.toString(VerbosityMini) << endl;
+        #endif
+        
+        param[0] = ALIAS_STIFFNESS;
+        param[1] = m_servo_stiffness_names;
+        param = m_al_dcm->createAlias(param);
+        #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+            debug << param.toString(VerbosityMini) << endl;
+        #endif
+    #else
+        m_al_motion = new ALMotionProxy(NUNAO::m_broker);
+    #endif
     
     param[0] = ALIAS_LED;
     param[1] = m_led_names;
     param = m_al_dcm->createAlias(param);
-    debug << param.toString(VerbosityMini) << endl;
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << param.toString(VerbosityMini) << endl;
+    #endif
     
     createALDCMCommands();
 }
@@ -130,6 +150,13 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
 
 void NAOActionators::copyToHardwareCommunications()
 {
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    debug << "NAOActionators::copyToHardwareCommunications()" << endl;
+#endif
+#if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    m_data->summaryTo(debug);
+#endif
+    
     static vector<bool> isvalid;            
     static vector<double> times;
     static vector<float> positions;
@@ -137,15 +164,11 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<float> gains;
     
     static vector<int> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
+    static vector<float> dcmleds(m_num_leds, 0);
+#ifndef USE_ALWALK    
     static vector<float> dcmpositions(m_num_servo_positions, 0);
     static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, 0);
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOActionators::copyToHardwareCommunications()" << endl;
-#endif
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    m_data->summaryTo(debug);
-#endif
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
         if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
@@ -173,6 +196,46 @@ void NAOActionators::copyToHardwareCommunications()
     }
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
+#else
+    static ALValue alnames;
+    static ALValue altimes;
+    static ALValue alpositions;
+    static ALValue alstiffnesses;
+    
+    alnames.clear();
+    altimes.clear();
+    alpositions.clear();
+    alstiffnesses.clear();
+    
+    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
+    {
+        if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
+        {
+            for (unsigned int i=0; i<m_num_servo_positions; i++)
+            {
+                if (isvalid[i] == true)
+                {
+                    string name(m_servo_names[i]);
+                    float time((times[i] - m_current_time)/1000.0);
+                    if (time <= 0) time = 0.01;
+                    float position(positions[i]);
+                    float gain(gains[i]/100.0);
+                 
+                    alnames.arrayPush(name);
+                    altimes.arrayPush(time);
+                    alpositions.arrayPush(position);
+                    alstiffnesses.arrayPush(gain);
+                }
+            }
+        }
+    }
+    
+    if (alnames.getSize() > 0)
+    {
+        m_al_motion->post.angleInterpolation(alnames, alpositions, altimes, true);
+        m_al_motion->post.stiffnessInterpolation(alnames, alstiffnesses, altimes);
+    }
+#endif
     m_al_dcm->setAlias(m_led_command);
     
     m_data->removeCompletedPoints(m_current_time);

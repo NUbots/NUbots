@@ -21,6 +21,7 @@
 
 #include "NAOSensors.h"
 #include "NAOSensorNames.h"
+#include "NUNAO.h"
 #include "debug.h"
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array

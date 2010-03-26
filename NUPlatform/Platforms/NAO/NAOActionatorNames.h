@@ -24,7 +24,29 @@
 
 #include <string>
 using namespace std;
-// Position
+
+#define HEAD_YAW             std::string("HeadYaw")
+#define HEAD_PITCH           std::string("HeadPitch")
+#define L_SHOULDER_ROLL      std::string("LShoulderRoll")
+#define L_SHOULDER_PITCH     std::string("LShoulderPitch")
+#define L_ELBOW_YAW          std::string("LElbowYaw") 
+#define L_ELBOW_ROLL         std::string("LElbowRoll")
+#define R_SHOULDER_ROLL      std::string("RShoulderRoll")
+#define R_SHOULDER_PITCH     std::string("RShoulderPitch")
+#define R_ELBOW_YAW          std::string("RElbowYaw") 
+#define R_ELBOW_ROLL         std::string("RElbowRoll")
+#define L_HIP_YAWPITCH       std::string("LHipYawPitch") 
+#define L_HIP_ROLL           std::string("LHipRoll") 
+#define L_HIP_PITCH          std::string("LHipPitch")
+#define L_KNEE_PITCH         std::string("LKneePitch")
+#define L_ANKLE_PITCH        std::string("LAnklePitch") 
+#define L_ANKLE_ROLL         std::string("LAnkleRoll")
+#define R_HIP_YAWPITCH       std::string("RHipYawPitch")
+#define R_HIP_ROLL           std::string("RHipRoll") 
+#define R_HIP_PITCH          std::string("RHipPitch")
+#define R_KNEE_PITCH         std::string("RKneePitch")
+#define R_ANKLE_PITCH        std::string("RAnklePitch") 
+#define R_ANKLE_ROLL         std::string("RAnkleRoll")
 
 #define DN_HEAD_YAW_POSITION          std::string("HeadYaw/Position/Actuator/Value")
 #define DN_HEAD_PITCH_POSITION        std::string("HeadPitch/Position/Actuator/Value")

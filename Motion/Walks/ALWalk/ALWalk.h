@@ -1,9 +1,12 @@
-/*! @file NUNAO.h
-    @brief Declaration of NUNAO class.
+/*! @file ALWalk.h
+    @brief Declaration of walk class to use Aldebaran's
+ 
+    @class ALWalk
+    @brief A module to provide locomotion using Aldebaran's stuff
  
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,38 +20,31 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
- */
-#ifndef NUNAO_H
-#define NUNAO_H
+*/
 
-#include "NUbot.h"
+#ifndef ALWALK_H
+#define ALWALK_H
 
-#include <albroker.h>
-#include <alproxy.h>
+#include "Motion/NUWalk.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
+#include <almotionproxy.h>
 using namespace AL;
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <time.h>
-using namespace std;
-
-class NUNAO : public ALModule
+class ALWalk : public NUWalk
 {
 public:
-    static ALPtr<ALBroker> m_broker;
-    NUbot* m_nubot;
-    
+    ALWalk();
+    ~ALWalk();
+protected:
+    void doWalk();
+private:
 public:
-    NUNAO(ALPtr<ALBroker> pBroker, const string& pName);
-    virtual ~NUNAO();
-    
-    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage) {};
-    
-    bool innerTest() {return true;};
-}; 
+protected:
+private:
+    ALMotionProxy* m_al_motion;
+};
 
 #endif
-
-
 
