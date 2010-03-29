@@ -27,6 +27,7 @@
 #include "NAOIO.h"
 
 #include "debug.h"
+#include "debugverbositynuplatform.h"
 
 /*! @brief Constructor for NAO robotic platform
  */

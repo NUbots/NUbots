@@ -21,6 +21,7 @@
 
 #include "NAOWebotsSensors.h"
 #include "debug.h"
+#include "debugverbositynusensors.h"
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 

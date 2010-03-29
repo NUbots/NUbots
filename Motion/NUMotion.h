@@ -25,13 +25,23 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "motionconfig.h"
-#include "Behaviour/Jobs.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+
+#include "motionconfig.h"
+#ifdef USE_HEAD
+    #include "NUHead.h"
+#endif
+
+#ifdef USE_WALK
 #include "NUWalk.h"
-#include "NUKick.h"
-#include "NUHead.h"
+#endif
+
+#ifdef USE_KICK
+    #include "NUKick.h"
+#endif
+
+#include "Behaviour/Jobs.h"
 #include "FallProtection.h"
 #include "Getup.h"
 

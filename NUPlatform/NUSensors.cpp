@@ -22,6 +22,7 @@
 #include "NUSensors.h"
 #include "NUSystem.h"
 #include "debug.h"
+#include "debugverbositynusensors.h"
 #include "../Kinematics/Horizon.h"
 #include <math.h>
 #include <boost/circular_buffer.hpp>

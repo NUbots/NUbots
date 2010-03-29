@@ -21,6 +21,7 @@
 
 #include "HeadJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a HeadJob at the given position and time
     @param time the time in ms to perform the save

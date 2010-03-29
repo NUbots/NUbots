@@ -20,8 +20,9 @@
  */
 
 #include "UdpPort.h"
-#include "debug.h"
 #include "NUPlatform/NUSystem.h"
+#include "debug.h"
+#include "debugverbositynetwork.h"
 #include <string.h>
 #include <errno.h>
 
@@ -42,7 +43,7 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
         debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
     }
 #endif
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "UdpPort::UdpPort(" << portnumber << ")" << endl;
 #endif
     m_port_number = portnumber;
@@ -66,7 +67,7 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
     m_broadcast_address.sin_addr.s_addr = htonl(INADDR_BROADCAST);     // automatically fill with my local Broadcast IP
     memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
     
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "UdpPort::UdpPort(). Binding socket." << endl;
 #endif
     if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
@@ -103,7 +104,7 @@ UdpPort::~UdpPort()
  */
 void UdpPort::run()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "UdpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
@@ -115,10 +116,10 @@ void UdpPort::run()
         localnumBytes = recvfrom(m_sockfd, localdata, 10*1024 , 0, (struct sockaddr *)&local_their_addr, &local_addr_len);
         if ( localnumBytes != -1 && local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
         {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
-            #if DEBUG_NUSYSTEM_VERBOSITY > 3
+            #if DEBUG_NETWORK_VERBOSITY > 3
                 debug << "UdpPort::run()." << m_port_number <<" Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            #if DEBUG_NUSYSTEM_VERBOSITY > 4
+            #if DEBUG_NETWORK_VERBOSITY > 4
                 debug << "UdpPort::run(). Received ";
                 for (int i=0; i<localnumBytes; i++)
                     debug << localdata[i];
@@ -165,7 +166,7 @@ void UdpPort::sendData(network_data_t netdata)
     pthread_mutex_lock(&m_socket_mutex);
     if (true || nusystem->getTime() - m_time_last_receive < 3000)
     {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        #if DEBUG_NETWORK_VERBOSITY > 4
             debug << "UdpPort::sendData(). Sending " << netdata.size << " bytes to " << inet_ntoa(m_broadcast_address.sin_addr) << endl;
         #endif
         sendto(m_sockfd, netdata.data, netdata.size, 0, (struct sockaddr *)&m_broadcast_address, sizeof(m_broadcast_address));

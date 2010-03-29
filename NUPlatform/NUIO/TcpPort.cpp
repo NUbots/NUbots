@@ -20,8 +20,9 @@
  */
 
 #include "TcpPort.h"
-#include "debug.h"
 #include "NUPlatform/NUSystem.h"
+#include "debug.h"
+#include "debugverbositynetwork.h"
 #include <string.h>
 
 /*! @brief Constructs a tcp port on the specified port

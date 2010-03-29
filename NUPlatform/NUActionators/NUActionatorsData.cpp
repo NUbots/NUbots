@@ -21,6 +21,7 @@
 
 #include "NUActionatorsData.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;

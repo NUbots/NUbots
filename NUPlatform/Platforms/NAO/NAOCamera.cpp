@@ -88,6 +88,7 @@ enum  v4l2_exposure_auto_type {
 #include "NUPlatform/NUSystem.h"
 #include "GTAssert.h"
 #include "debug.h"
+#include "debugverbositynucamera.h"
 
 NAOCamera::NAOCamera() :
 currentBuf(0),

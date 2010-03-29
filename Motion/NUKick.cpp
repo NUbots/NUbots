@@ -23,6 +23,7 @@
 #include "NUKick.h"
 #include "NUPlatform/NUSystem.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 
 NUKick::NUKick()

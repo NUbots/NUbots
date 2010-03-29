@@ -5,6 +5,7 @@
 #include "ClassifiedSection.h"
 //#include <QDebug>
 #include "debug.h"
+#include "debugverbosityvision.h"
 
 Ball::Ball()
 {

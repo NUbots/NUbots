@@ -23,6 +23,7 @@
 #include "NAOActionatorNames.h"
 
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 
 // init m_actionator_names:
 static string temp_servo_control_names[] = {string("JointPositions")};

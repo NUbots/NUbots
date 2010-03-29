@@ -27,11 +27,10 @@
 #define NUBOT_H
 
 #include "targetconfig.h"
-#include "debug.h"
-#include "walkconfig.h"
+#include "nubotconfig.h"
 
 #include "NUPlatform/NUPlatform.h"
-// Selectively include modules depending on targetconfig.h
+
 #ifdef USE_VISION
     #include "Vision/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
@@ -41,10 +40,7 @@
     #include <iostream>
     #include <fstream>
 
-#endif
-
-#ifdef USE_LOCALISATION
-    #include "Localisation/Localisation.h"
+    //#include "Localisation/Localisation.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -59,13 +55,16 @@
     #endif
 #endif
 
+#ifdef USE_NETWORK
+    //#include "???.h"
+#endif
+
 #include <pthread.h>
 
 /*! @brief The top-level class
  */
 class NUbot
 {
-// Functions:
 public:
     NUbot(int argc, const char *argv[]);
     ~NUbot();
@@ -95,9 +94,8 @@ public:
         ofstream imagefile;
         int ImageFrameNumber;
         bool SAVE_IMAGES;
-    #endif
-    #ifdef USE_LOCALISATION
-        Localisation* localisation;     //!< localisation module
+
+        //Localisation* localisation;     //!< localisation module
     #endif
     #ifdef USE_BEHAVIOUR
         Behaviour* behaviour;           //!< behaviour module
@@ -107,6 +105,9 @@ public:
         #ifdef USE_WALKOPTIMISER
             WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
         #endif
+    #endif
+    #ifdef USE_NETWORK
+        //Network* network;
     #endif
 private:
     pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)

@@ -24,6 +24,7 @@ using namespace std;
 
 #include "NUPlatform.h"
 #include "debug.h"
+#include "debugverbositynuplatform.h"
 
 NUPlatform::~NUPlatform()
 {

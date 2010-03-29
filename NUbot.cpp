@@ -26,6 +26,9 @@
 #include <string>
 #include <sstream>
 
+#include "debugverbositynubot.h"
+#include "debug.h"
+
 #include "NUbot.h"
 #ifdef TARGET_IS_NAOWEBOTS
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
@@ -107,9 +110,8 @@ NUbot::NUbot(int argc, const char *argv[])
         SAVE_IMAGES = false;
 
         debug <<"OPENING FILE: "<< "/home/root/images.nul" << endl;
-    #endif
-    #ifdef USE_LOCALISATION
-        localisation = new Localisation();
+
+        //localisation = new Localisation();
     #endif
     #ifdef USE_BEHAVIOUR
         behaviour = new Behaviour();
@@ -121,7 +123,7 @@ NUbot::NUbot(int argc, const char *argv[])
         #endif
     #endif
     #ifdef USE_NETWORK
-        network = new Network();
+        //network = new Network();
     #endif
     
     createThreads();
@@ -262,12 +264,10 @@ NUbot::~NUbot()
     // delete modules
     delete platform;
     #ifdef USE_VISION
-        delete vision;
-        
         imagefile.close();
-    #endif
-    #ifdef USE_LOCALISATION
-        delete localisation;
+        delete vision;
+    
+        //delete localisation;
     #endif
     #ifdef USE_BEHAVIOUR
         delete behaviour;
@@ -276,7 +276,7 @@ NUbot::~NUbot()
         delete motion;
     #endif
     #ifdef USE_NETWORK
-        delete network;
+        //delete network;
     #endif
     debug << "NUbot::~NUbot(). Finished." << endl;
 }

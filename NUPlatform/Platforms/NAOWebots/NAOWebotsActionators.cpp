@@ -21,6 +21,7 @@
 
 #include "NAOWebotsActionators.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 #include <string.h>
 
 

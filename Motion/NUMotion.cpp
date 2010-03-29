@@ -60,6 +60,7 @@
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 /*! @brief Constructor for motion module
  */

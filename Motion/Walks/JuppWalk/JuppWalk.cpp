@@ -23,6 +23,7 @@
 
 #include "NUPlatform/NUSystem.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
@@ -223,11 +224,11 @@ void JuppWalk::calculateGaitPhase()
     static float gaitphaseonimpact = m_gait_phase;
     m_current_time = m_data->CurrentTime;
     
-    /*if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
+    if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
         gaitphaseonimpact = m_gait_phase;
         
     if (m_data->footImpact(NUSensorsData::RightFoot, rightimpacttime))
-        gaitphaseonimpact = m_gait_phase;*/
+        gaitphaseonimpact = m_gait_phase;
         
     if (m_current_time - leftimpacttime < interpolationtime)
     {
@@ -354,10 +355,10 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
         m_pattern_debug << endl;
     
     // Balance
-    float balance_foot_roll = 0.0*m_swing_amplitude_roll;//-2*legsign*m_swing_amplitude_roll*cos(legphase + 0.35);
+    float balance_foot_roll = 0;//-2*legsign*m_swing_amplitude_roll*cos(legphase + 0.35);
     float balance_foot_pitch = m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
     // leans in the sideward walk direction + term to keep the feet apart + term to keep the feet apart
-    float balance_leg_roll = -0.0*m_swing_amplitude_roll + 0.75*legsign*fabs(m_swing_amplitude_roll) + 0.1*legsign*fabs(m_swing_amplitude_yaw);
+    float balance_leg_roll = -m_swing_amplitude_roll + legsign*fabs(m_swing_amplitude_roll) + 0.2*legsign*fabs(m_swing_amplitude_yaw);
     
     // Apply gyro feedback
     if (fabs(swing_phase) < M_PI/2.0)      // if we are in the swing phase don't apply the foot_gyro_* offsets
@@ -387,7 +388,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     
     // now translate to my coordinate system
     angles[0] = -hip_roll;
-    angles[1] = -hip_pitch - 0.73*hip_yaw;      //!< @todo TODO: Figure out why this needs to be 0.65!
+    angles[1] = -hip_pitch - 0.5*hip_yaw;      //!< @todo TODO: Figure out why this needs to be 0.65!
     angles[2] = hip_yaw;
     angles[3] = -knee_pitch;
     angles[4] = -ankle_roll;

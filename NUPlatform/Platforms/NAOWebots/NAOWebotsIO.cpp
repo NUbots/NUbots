@@ -21,17 +21,18 @@
 
 #include "NAOWebotsIO.h"
 #include "debug.h"
+#include "debugverbositynetwork.h"
 
 NAOWebotsIO::NAOWebotsIO(int probotnumber) : NUIO(probotnumber)
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::NAOWebotsIO()" << endl;
 #endif
 }
 
 NAOWebotsIO::~NAOWebotsIO()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::~NAOWebotsIO()" << endl;
 #endif
 }

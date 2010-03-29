@@ -21,6 +21,7 @@
 
 #include "NAOWebotsCamera.h"
 #include "debug.h"
+#include "debugverbositynucamera.h"
 
 NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {

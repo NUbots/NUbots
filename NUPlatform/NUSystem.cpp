@@ -21,6 +21,7 @@
 
 #include "NUSystem.h"
 #include "debug.h"
+#include "debugverbositynusystem.h"
 
 NUSystem* nusystem;
 

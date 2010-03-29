@@ -14,6 +14,7 @@
 #include <queue>
 #include <algorithm>
 #include "debug.h"
+#include "debugverbosityvision.h"
 
 
 using namespace mathGeneral;

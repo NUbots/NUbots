@@ -19,8 +19,8 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "walkconfig.h"
 #include "NUWalk.h"
+#include "walkconfig.h"
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
 #endif
@@ -38,7 +38,9 @@
 #endif
 
 #include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 #include <math.h>
 using namespace std;

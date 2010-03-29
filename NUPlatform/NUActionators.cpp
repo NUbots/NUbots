@@ -22,6 +22,7 @@
 #include "NUActionators.h"
 #include "NUSystem.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 
 NUActionators::NUActionators()
 {

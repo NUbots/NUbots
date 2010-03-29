@@ -153,8 +153,8 @@ ifeq ($(VM_IP), )
     ifeq ($(SYSTEM),Linux)
 		@set -e; \
 			echo "Hosing NAO Build"; \
-			cd $(NAO_BUILD_DIR); \
-			rm -rf ./*;
+			rm -rf $(NAO_BUILD_DIR)/*; \
+			rm -rf Autoconfig/*;
     endif
 else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAOVeryClean;"
@@ -195,8 +195,8 @@ NAOWebotsClean:
 NAOWebotsVeryClean:
 	@echo "Hosing NAOWebots Build";
 	@set -e; \
-		cd $(NAOWEBOTS_BUILD_DIR); \
-		rm -rf ./*;
+		rm -rf $(NAOWEBOTS_BUILD_DIR)/*; \
+		rm -rf Autoconfig/*;
 
 ################ Cycloid ################
 

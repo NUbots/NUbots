@@ -21,6 +21,7 @@
 
 #include "WalkParametersJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkParametersJob
     @param walkparameters the walk parameters associated with the job

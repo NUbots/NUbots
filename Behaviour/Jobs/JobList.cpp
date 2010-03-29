@@ -21,6 +21,7 @@
 
 #include "JobList.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 #include "../Jobs.h"            //!< @todo remove this after finished testing!
 

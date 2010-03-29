@@ -22,6 +22,7 @@
 #include "WalkParameters.h"
 
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 /*! @brief Construct a walk parameter set with no parameters
  */

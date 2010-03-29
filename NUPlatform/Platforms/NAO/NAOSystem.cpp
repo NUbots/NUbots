@@ -22,6 +22,7 @@
 #include "NAOSystem.h"
 
 #include "debug.h"
+#include "debugverbositynusystem.h"
 
 NAOSystem::NAOSystem()
 {

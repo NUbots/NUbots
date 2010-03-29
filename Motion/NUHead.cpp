@@ -22,7 +22,8 @@
 
 #include "NUHead.h"
 #include "NUPlatform/NUSystem.h"
-#include <debug.h>
+#include "debug.h"
+#include "debugverbositynumotion.h"
 
 
 NUHead::NUHead()

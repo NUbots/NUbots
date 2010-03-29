@@ -22,6 +22,7 @@
 #include "Job.h"
 #include "../Jobs.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Job constructor
  */

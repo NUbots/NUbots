@@ -24,6 +24,8 @@
 #include "NUPlatform/NUSystem.h"
 #include "NUPlatform/Platforms/NAO/NUNAO.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
+
 #include <albroker.h>
 #include <time.h>
 
