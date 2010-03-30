@@ -219,31 +219,25 @@ SET(NUBOT_DEBUG_JOBS_VERBOSITY 0 CACHE STRING "Set the verbosity of debug inform
 SET(NUBOT_DEBUG_NUMOTION_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
 SET(NUBOT_DEBUG_NETWORK_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the motion (0 to 5)")
 
-OPTION(
-        NUBOT_USE_VISION
+OPTION( NUBOT_USE_VISION
         "Set to ON to run vision, set to OFF to run blind"
-        ON
-)
-OPTION(
-        NUBOT_USE_BEHAVIOUR
+        ON)
+OPTION( NUBOT_USE_LOCALISATION
+        "Set to ON to run localisation, set to OFF to be lost"
+        ON)
+OPTION( NUBOT_USE_BEHAVIOUR
         "Set to ON to run behaviour, set to OFF to have a lobotomy"
-        ON
-)
-OPTION(
-        NUBOT_USE_MOTION
+        ON)
+OPTION( NUBOT_USE_MOTION
         "Set to ON to run motion, set to OFF to be paralysed"
-        ON
-)
-OPTION(
-	NUBOT_USE_NETWORK
+        ON)
+OPTION(	NUBOT_USE_NETWORK
         "Set to ON to run motion, set to OFF to be paralysed"
-        ON
-)
+        ON)
 
 ############################ NUbot.cpp Threading Options
 SET(NUBOT_THREAD_VISION_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
 SET(NUBOT_THREAD_MOTION_PRIORITY 40 CACHE STRING "Set the priority of the motion thread (0 to 100)")
-SET(NUBOT_THREAD_BEHAVIOUR_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
 SET(NUBOT_THREAD_NETWORK_PRIORITY 0 CACHE STRING "Set the priority of the vision thread (0 to 100)")
 
 OPTION( NUBOT_THREAD_VISION_MONITOR_TIME
@@ -252,9 +246,6 @@ OPTION( NUBOT_THREAD_VISION_MONITOR_TIME
 OPTION( NUBOT_THREAD_MOTION_MONITOR_TIME
         "Set to ON to monitor the computation time of the motion thread"
         OFF)
-OPTION( NUBOT_THREAD_BEHAVIOUR_MONITOR_TIME
-        "Set to ON to monitor the computation time of the vision thread"
-        OFF)
 OPTION( NUBOT_THREAD_NETWORK_MONITOR_TIME
         "Set to ON to monitor the computation time of the motion thread"
         OFF)
@@ -262,10 +253,8 @@ OPTION( NUBOT_THREAD_NETWORK_MONITOR_TIME
 MARK_AS_ADVANCED(
 	NUBOT_THREAD_VISION_PRIORITY
 	NUBOT_THREAD_MOTION_PRIORITY
-	NUBOT_THREAD_BEHAVIOUR_PRIORITY
 	NUBOT_THREAD_NETWORK_PRIORITY
 	NUBOT_THREAD_VISION_MONITOR_TIME
 	NUBOT_THREAD_MOTION_MONITOR_TIME
-	NUBOT_THREAD_BEHAVIOUR_MONITOR_TIME
 	NUBOT_THREAD_NETWORK_MONITOR_TIME
 )
