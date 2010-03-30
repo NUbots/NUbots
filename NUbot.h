@@ -39,7 +39,9 @@
     #include "NUPlatform/NUCamera/CameraSettings.h"
     #include <iostream>
     #include <fstream>
+#endif
 
+#ifdef USE_LOCALISATION
     //#include "Localisation/Localisation.h"
 #endif
 
@@ -94,18 +96,23 @@ public:
         ofstream imagefile;
         int ImageFrameNumber;
         bool SAVE_IMAGES;
-
+    #endif
+    
+    #ifdef USE_LOCALISATION
         //Localisation* localisation;     //!< localisation module
     #endif
+    
     #ifdef USE_BEHAVIOUR
         Behaviour* behaviour;           //!< behaviour module
     #endif
+    
     #ifdef USE_MOTION
         NUMotion* motion;               //!< motion module
         #ifdef USE_WALKOPTIMISER
             WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
         #endif
     #endif
+    
     #ifdef USE_NETWORK
         //Network* network;
     #endif

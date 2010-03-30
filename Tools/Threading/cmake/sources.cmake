@@ -20,13 +20,13 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  UdpPort
-                TcpPort
-        
+SET (YOUR_SRCS
+Thread.cpp 
+ConditionalThread.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS
 )
 ####################################################################################
 

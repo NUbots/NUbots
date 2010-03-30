@@ -131,6 +131,9 @@ CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/debugverbositynusensors.in"
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/debugverbositynusystem.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debugverbositynusystem.h"
                 ESCAPE_QUOTES)
+CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/debugverbositythreading.in"
+                "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debugverbositythreading.h"
+                ESCAPE_QUOTES)
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/debugverbosityvision.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/debugverbosityvision.h"
                 ESCAPE_QUOTES)
@@ -207,6 +210,7 @@ ENDIF (WIN32)
 
 ############################ OPTIONS
 SET(NUBOT_DEBUG_NUBOT_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
+SET(NUBOT_DEBUG_THREADING_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the threading (0 to 5)")
 SET(NUBOT_DEBUG_NUPLATFORM_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
 SET(NUBOT_DEBUG_NUCAMERA_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")
 SET(NUBOT_DEBUG_NUSENSORS_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the nubot (0 to 5)")

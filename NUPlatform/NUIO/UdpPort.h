@@ -35,7 +35,7 @@
 #endif
 
 
-#include "Thread.h"
+#include "Tools/Threading/Thread.h"
 
 #include <sstream>
 using namespace std;

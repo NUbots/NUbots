@@ -66,23 +66,28 @@ static void unhandledExceptionHandler(exception& e);
 NUbot::NUbot(int argc, const char *argv[])
 {
     createErrorHandling();
-#if DEBUG_NUBOT_VERBOSITY > 4
-    debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
-#endif
+    #if DEBUG_NUBOT_VERBOSITY > 1
+        debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
+    #endif
+    
     // Construct the right Platform
     #ifdef TARGET_IS_NAOWEBOTS
         platform = new NAOWebotsPlatform(argc, argv);
-    #endif
-    #ifdef TARGET_IS_NAO
-        platform = new NAOPlatform();
-    #endif
-    #ifdef TARGET_IS_CYCLOID
-        platform = new CycloidPlatform();
+    #else
+        #ifdef TARGET_IS_NAO
+            platform = new NAOPlatform();
+        #else
+            #ifdef TARGET_IS_CYCLOID
+                platform = new CycloidPlatform();
+            #else
+                #error There is no platform (TARGET_IS_${}) defined
+            #endif
+        #endif
     #endif
 
-#if DEBUG_NUBOT_VERBOSITY > 4
-    debug << "NUbot::NUbot(). Constructing modules." << endl;
-#endif
+    #if DEBUG_NUBOT_VERBOSITY > 1
+        debug << "NUbot::NUbot(). Constructing modules." << endl;
+    #endif
     
     // Construct each enabled module 
     #ifdef USE_VISION
@@ -110,25 +115,30 @@ NUbot::NUbot(int argc, const char *argv[])
         SAVE_IMAGES = false;
 
         debug <<"OPENING FILE: "<< "/home/root/images.nul" << endl;
-
+    #endif
+    
+    #ifdef USE_LOCALISATION
         //localisation = new Localisation();
     #endif
+    
     #ifdef USE_BEHAVIOUR
         behaviour = new Behaviour();
     #endif
+    
     #ifdef USE_MOTION
         motion = new NUMotion();
         #ifdef USE_WALKOPTIMISER
             walkoptimiser = new WalkOptimiserBehaviour(platform, motion->m_walk);
         #endif
     #endif
+    
     #ifdef USE_NETWORK
         //network = new Network();
     #endif
     
     createThreads();
     
-#if DEBUG_NUBOT_VERBOSITY > 4
+#if DEBUG_NUBOT_VERBOSITY > 1
     debug << "NUbot::NUbot(). Finished." << endl;
 #endif
 }

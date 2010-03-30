@@ -30,7 +30,7 @@
 
     @param portnumber the port number the data will be sent and received on
  */
-TcpPort::TcpPort(int portnumber): Thread("Tcp Thread")
+TcpPort::TcpPort(int portnumber): Thread("Tcp Thread", 0, NULL)
 {
 #ifdef WIN32
     WSADATA wsa_Data;
