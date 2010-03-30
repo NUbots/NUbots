@@ -56,6 +56,13 @@ void NUActionators::process(NUActionatorsData*& data)
     copyToHardwareCommunications();
 }
 
+/*! @brief Returns the actions storage class
+ */
+NUActionatorsData* NUActionators::getActions()
+{
+    return m_data;
+}
+
 /* @brief A function to copy NUActionatorsData to the hardware communications system.
           This function must be implemented for each platform.
  */

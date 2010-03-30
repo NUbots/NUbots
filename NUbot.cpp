@@ -82,13 +82,13 @@ NUbot::NUbot(int argc, const char *argv[])
     
     // --------------------------------- construct the public storage
     #ifdef USE_VISION
-        Image = NULL;
+        Image = new NUimage();
     #endif
-    SensorData = NULL;
-    Actions = NULL;
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
     Jobs = new JobList();
     
-    // Construct each enabled module 
+    // --------------------------------- construct each enabled module 
     #ifdef USE_VISION
         m_vision = new Vision();
     #endif
