@@ -35,10 +35,6 @@
     #include "Vision/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
-    #include "Tools/FileFormats/LUTTools.h"
-    #include "NUPlatform/NUCamera/CameraSettings.h"
-    #include <iostream>
-    #include <fstream>
 #endif
 
 #ifdef USE_LOCALISATION
@@ -47,21 +43,29 @@
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
-    #include "Behaviour/Jobs.h"
 #endif
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
-    #ifdef USE_WALKOPTIMISER
-        #include "Motion/Walks/Optimisation/WalkOptimiserBehaviour.h"
-    #endif
 #endif
 
 #ifdef USE_NETWORK
     //#include "???.h"
 #endif
 
-#include <pthread.h>
+class NUSensorsData;
+class NUActionatorsData;
+class JobList;
+
+#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    class SeeThinkThread;
+#endif
+
+class SenseMoveThread;
+
+#if defined(USE_NETWORK)
+    //class NetworkThread;
+#endif
 
 /*! @brief The top-level class
  */
@@ -72,53 +76,56 @@ public:
     ~NUbot();
     void run();
     
-    static int signalMotion();
-    int signalMotionStart();
-    int signalMotionCompletion();
-    static int signalVision();
-    int signalVisionStart();
-    int signalVisionCompletion();
-    
-    int waitForNewMotionData();
-    int waitForMotionCompletion();
-    int waitForNewVisionData();
-    int waitForVisionCompletion();
 private:
+    void connectErrorHandling();
+    static void segFaultHandler(int value);
+    void unhandledExceptionHandler(std::exception& e);
+    
     void createThreads();
-    void createErrorHandling();
     
 public:
-    NUPlatform* platform;               //!< interface to robot platform
     #ifdef USE_VISION
-        Vision* vision;                 //!< vision module
-        NUimage* image;
-        unsigned char LUT[256*256*256];
-        ofstream imagefile;
-        int ImageFrameNumber;
-        bool SAVE_IMAGES;
+        NUimage* Image;
+    #endif
+    NUSensorsData* SensorData;
+    NUActionatorsData* Actions;
+    JobList* Jobs;
+    
+private:
+    NUPlatform* m_platform;               //!< interface to robot platform
+    #ifdef USE_VISION
+        Vision* m_vision;                 //!< vision module
     #endif
     
     #ifdef USE_LOCALISATION
-        //Localisation* localisation;     //!< localisation module
+        //Localisation* m_localisation;     //!< localisation module
     #endif
     
     #ifdef USE_BEHAVIOUR
-        Behaviour* behaviour;           //!< behaviour module
+        Behaviour* m_behaviour;           //!< behaviour module
     #endif
     
     #ifdef USE_MOTION
-        NUMotion* motion;               //!< motion module
-        #ifdef USE_WALKOPTIMISER
-            WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
-        #endif
+        NUMotion* m_motion;               //!< motion module
     #endif
     
     #ifdef USE_NETWORK
-        //Network* network;
+        //Network* m_network;              //!< network module
     #endif
-private:
-    pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)
-    pthread_t threadVision;             //!< thread containing vision and higher-level though processes (cerebrum)
+    
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+        friend class SeeThinkThread;
+        SeeThinkThread* m_seethink_thread;
+    #endif
+
+    friend class SenseMoveThread;
+    SenseMoveThread* m_sensemove_thread;
+
+    #if defined(USE_NETWORK)
+        //friend class NetworkThread;
+        //NetworkThread* m_network_thread;
+    #endif
+    
 };
 
 #endif

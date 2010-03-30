@@ -1,8 +1,8 @@
-/*! @file SenseMoveThread.h
-    @brief Declaration of the sense->move thread class.
+/*! @file SeeThinkThread.h
+    @brief Declaration of the see->think thread class.
 
-    @class SenseMoveThread
-    @brief The sense->move thread that links sensor data to motion
+    @class SeeThinkThread
+    @brief The see->think thread that links vision information with thoughts
  
     @author Jason Kulk
  
@@ -22,8 +22,8 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SENSEMOVE_THREAD_H
-#define SENSEMOVE_THREAD_H
+#ifndef SEETHINK_THREAD_H
+#define SEETHINK_THREAD_H
 
 #include "Tools/Threading/ConditionalThread.h"
 
@@ -31,11 +31,11 @@ class NUbot;
 
 /*! @brief The top-level class
  */
-class SenseMoveThread : public ConditionalThread
+class SeeThinkThread : public ConditionalThread
 {
 public:
-    SenseMoveThread(NUbot* nubot);
-    ~SenseMoveThread();
+    SeeThinkThread(NUbot* nubot);
+    ~SeeThinkThread();
 protected:
     void run();
     
