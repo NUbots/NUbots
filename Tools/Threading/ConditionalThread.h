@@ -46,7 +46,7 @@ class ConditionalThread : public Thread
     protected:
         virtual void run() = 0;                // To be overridden by code to run.
         void waitForCondition();
-        void loopCompleted();                  
+        void onLoopCompleted();                  
 
     protected:
         pthread_mutex_t m_condition_mutex;     //!< lock for new data signal

@@ -14,11 +14,15 @@
 
 # list the project's subdirectories here:
 SET(NUBOT_DIRS  NUPlatform
+		NUbot
                 Tools
                 Kinematics
 )
 IF(NUBOT_USE_VISION)
-	LIST(APPEND NUBOT_DIRS Vision Localisation)
+	LIST(APPEND NUBOT_DIRS Vision)
+ENDIF()
+IF(NUBOT_USE_LOCALISATION)
+	LIST(APPEND NUBOT_DIRS Localisation)
 ENDIF()
 IF(NUBOT_USE_BEHAVIOUR)
 	LIST(APPEND NUBOT_DIRS Behaviour)

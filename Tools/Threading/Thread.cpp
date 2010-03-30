@@ -32,7 +32,7 @@ using namespace std;
 Thread::Thread(string name, unsigned char priority) : m_name(name), m_priority(priority), running(false)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "Thread::Thread(" << m_name << ", " << m_priority << ")" << endl;
+        debug << "Thread::Thread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
     #endif
 }
 

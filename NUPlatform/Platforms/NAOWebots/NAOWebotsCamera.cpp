@@ -34,6 +34,7 @@ NAOWebotsCamera::~NAOWebotsCamera()
 
 NUimage* NAOWebotsCamera::grabNewImage()
 {
+    return NULL;
 }
 
 void NAOWebotsCamera::setSettings(const CameraSettings& newset)

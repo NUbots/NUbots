@@ -36,7 +36,7 @@ using namespace std;
 ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thread(name, priority)
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << m_priority << ")" << endl;
+        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
     #endif
     int err;
     err = pthread_mutex_init(&m_condition_mutex, NULL);
@@ -98,9 +98,9 @@ void ConditionalThread::startLoop()
  */
 void ConditionalThread::waitForCondition()
 {
-    pthread_mutex_lock(&mutexMotionData);
-    pthread_cond_wait(&condMotionData, &mutexMotionData);
-    pthread_mutex_unlock(&mutexMotionData);
+    pthread_mutex_lock(&m_condition_mutex);
+    pthread_cond_wait(&m_condition, &m_condition_mutex);
+    pthread_mutex_unlock(&m_condition_mutex);
 }
 
 /*! @brief Unlocks the m_running_mutex, consequently allowing the main loop to be started again with startLoop()
@@ -108,7 +108,7 @@ void ConditionalThread::waitForCondition()
     It would be really nice to have this happen automatically, at the end of each iteration...Because you must call
     it in your implementation of run() if you want it to ever run again ;).
  */
-void ConditionalThread::loopCompleted()
+void ConditionalThread::onLoopCompleted()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::loopCompleted() " << m_name << " at " << nusystem->getTime() << endl;

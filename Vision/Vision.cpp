@@ -33,10 +33,13 @@ Vision::~Vision()
     return;
 }
 
-FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
+FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 {
     debug << "Begin Process Frame" << endl;
     AllFieldObjects = new FieldObjects();
+    if (image == NULL)
+        return AllFieldObjects;
+    
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -54,7 +57,7 @@ FieldObjects* Vision::ProcessFrame(NUimage& image, NUSensorsData* data)
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
     debug << "Setting Image: " <<endl;
-    setImage(&image);
+    setImage(image);
     debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
     vector <float> horizonInfo;

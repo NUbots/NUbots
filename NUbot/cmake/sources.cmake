@@ -20,7 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS  SeeThinkThread.cpp
+		SenseMoveThread.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

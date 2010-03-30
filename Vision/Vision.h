@@ -52,7 +52,7 @@ class Vision
     ~Vision();
 
     //void ProcessFrame(NUimage& image, Horizon horizonLine);
-    FieldObjects* ProcessFrame(NUimage& image, NUSensorsData* data);
+    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
 
     void setLUT(unsigned char* newLUT);
 

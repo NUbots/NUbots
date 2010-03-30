@@ -33,7 +33,7 @@
 
     @param portnumber the port number the data will be sent and received on
  */
-UdpPort::UdpPort(int portnumber): Thread(string("UDP Thread"), 0, NULL)
+UdpPort::UdpPort(int portnumber): Thread(string("UDP Thread"), 0)
 {
 #ifdef WIN32
     WSADATA wsa_Data;
