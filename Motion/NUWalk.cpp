@@ -91,6 +91,9 @@ NUWalk::NUWalk()
  */
 NUWalk::~NUWalk()
 {
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << "NUWalk::~NUWalk()" << endl;
+#endif
     m_gait_walk_parameters.clear();
     m_gait_max_speeds.clear();
     m_gait_max_accelerations.clear();
@@ -106,6 +109,9 @@ NUWalk::~NUWalk()
 */
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
+#if DEBUG_NUMOTION_VERBOSITY > 3
+    debug << "NUWalk::process(" << data << ", " << actions << ")" << endl;
+#endif
     if (actions == NULL || data == NULL)
         return;
     m_data = data;
