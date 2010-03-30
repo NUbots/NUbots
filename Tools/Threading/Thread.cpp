@@ -28,12 +28,11 @@ using namespace std;
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
-    @param param a single variable accessible from within the main loop of the thread
  */
-Thread::Thread(string name, unsigned char priority, void* param) : m_name(name), m_priority(priority), m_param(param), running(false)
+Thread::Thread(string name, unsigned char priority) : m_name(name), m_priority(priority), running(false)
 {
-    #if DEBUG_THREADING_VERBOSITY > 3
-        debug << "Thread::Thread(" << m_name << ", " << m_priority << ", " << m_param << ")" << endl;
+    #if DEBUG_THREADING_VERBOSITY > 2
+        debug << "Thread::Thread(" << m_name << ", " << m_priority << ")" << endl;
     #endif
 }
 
@@ -41,7 +40,7 @@ Thread::Thread(string name, unsigned char priority, void* param) : m_name(name),
  */
 Thread::~Thread()
 {
-    #if DEBUG_THREADING_VERBOSITY > 3
+    #if DEBUG_THREADING_VERBOSITY > 2
         debug << "Thread::~Thread(): " << m_name << endl;
     #endif
     this->stop();
@@ -55,7 +54,7 @@ int Thread::start()
 	if(running) 
 		return -1;
     
-    #if DEBUG_THREADING_VERBOSITY > 1
+    #if DEBUG_THREADING_VERBOSITY > 0
         debug << "Thread::start(): " << m_name << endl;
     #endif
     
@@ -77,7 +76,7 @@ int Thread::start()
         int actualpolicy;
         sched_param actualparam;
         pthread_getschedparam(m_pthread, &actualpolicy, &actualparam);
-        #if DEBUG_THREADING_VERBOSITY > 1
+        #if DEBUG_THREADING_VERBOSITY > 0
             debug << "Thread::start(). " << m_name << " Policy: " << actualpolicy << " Priority: " << actualparam.sched_priority << endl;
         #endif
         if (actualpolicy != SCHED_FIFO)
@@ -101,7 +100,7 @@ int Thread::join()
  */
 void Thread::stop()
 {
-    #if DEBUG_THREADING_VERBOSITY > 1
+    #if DEBUG_THREADING_VERBOSITY > 0
         debug << "Thread::stop(): " << m_name << endl;
     #endif
     pthread_cancel(m_pthread);

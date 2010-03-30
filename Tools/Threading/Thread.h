@@ -31,7 +31,7 @@
 class Thread
 {
 	public:
-		Thread(std::string name, unsigned char priority, void* param);
+		Thread(std::string name, unsigned char priority);
         virtual ~Thread();
 		int start();
         int join();
@@ -49,7 +49,6 @@ class Thread
     protected:
         bool running;                           //!< true if the thread is running, false if it hasn't been started yet, or it has been stopped
         const unsigned char m_priority;         //!< the priority of the thread. A priority of zero means this thread is not real-time
-        const void* m_param;                    //!< a single parameter accessable inside the thread.
 
 	private:
         pthread_t m_pthread;                    //!< the underlying pthread instance

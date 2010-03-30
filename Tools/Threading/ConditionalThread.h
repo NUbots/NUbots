@@ -37,7 +37,7 @@
 class ConditionalThread : public Thread
 {
 	public:
-		ConditionalThread(std::string name, unsigned char priority, void* param);
+		ConditionalThread(std::string name, unsigned char priority);
         virtual ~ConditionalThread();
     
         void startLoop();
@@ -45,6 +45,7 @@ class ConditionalThread : public Thread
     
     protected:
         virtual void run() = 0;                // To be overridden by code to run.
+        void waitForCondition();
         void loopCompleted();                  
 
     protected:

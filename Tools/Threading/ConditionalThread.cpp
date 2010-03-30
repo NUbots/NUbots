@@ -22,7 +22,7 @@
 #include "ConditionalThread.h"
 #include "debug.h"
 #include "debugverbositythreading.h"
-#if DEBUG_THREADING_VERBOSITY > 3
+#if DEBUG_THREADING_VERBOSITY > 2
     #include "NUPlatform/NUSystem.h"
 #endif
 
@@ -33,10 +33,10 @@ using namespace std;
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
     @param param a single variable accessible from within the main loop of the thread
  */
-ConditionalThread::ConditionalThread(string name, unsigned char priority, void* param) : Thread(name, priority, param)
+ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thread(name, priority)
 {
-    #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << m_priority << ", " << m_param << ")" << endl;
+    #if DEBUG_THREADING_VERBOSITY > 1
+        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << m_priority << ")" << endl;
     #endif
     int err;
     err = pthread_mutex_init(&m_condition_mutex, NULL);
@@ -56,7 +56,7 @@ ConditionalThread::ConditionalThread(string name, unsigned char priority, void* 
  */
 ConditionalThread::~ConditionalThread()
 {
-    #if DEBUG_THREADING_VERBOSITY > 2
+    #if DEBUG_THREADING_VERBOSITY > 1
         debug << "ConditionalThread::~ConditionalThread() " << m_name << endl;
     #endif
     this->stop();
@@ -74,7 +74,7 @@ ConditionalThread::~ConditionalThread()
  */
 void ConditionalThread::startLoop()
 {
-    #if DEBUG_THREADING_VERBOSITY > 3
+    #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::startLoop() " << m_name << endl;
     #endif
     int err = 0;
@@ -87,11 +87,20 @@ void ConditionalThread::startLoop()
     }
     else 
     {
-        #if DEBUG_THREADING_VERBOSITY > 3
+        #if DEBUG_THREADING_VERBOSITY > 2
             debug << "ConditionalThread::startLoop() " << m_name << " is already running!" << endl;
         #endif
     }
 
+}
+
+/*! @brief Blocks this thread until the condition is signalled
+ */
+void ConditionalThread::waitForCondition()
+{
+    pthread_mutex_lock(&mutexMotionData);
+    pthread_cond_wait(&condMotionData, &mutexMotionData);
+    pthread_mutex_unlock(&mutexMotionData);
 }
 
 /*! @brief Unlocks the m_running_mutex, consequently allowing the main loop to be started again with startLoop()
@@ -101,7 +110,7 @@ void ConditionalThread::startLoop()
  */
 void ConditionalThread::loopCompleted()
 {
-    #if DEBUG_THREADING_VERBOSITY > 3
+    #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::loopCompleted() " << m_name << " at " << nusystem->getTime() << endl;
     #endif
     pthread_mutex_unlock(&m_running_mutex);
@@ -111,12 +120,12 @@ void ConditionalThread::loopCompleted()
  */
 void ConditionalThread::waitForLoopCompletion()
 {
-    #if DEBUG_THREADING_VERBOSITY > 3
+    #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << nusystem->getTime() << endl;
     #endif
     pthread_mutex_lock(&m_running_mutex);            // block if motion thread is STILL running
     pthread_mutex_unlock(&m_running_mutex);
-    #if DEBUG_THREADING_VERBOSITY > 3
+    #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << nusystem->getTime() << endl;
     #endif
 }
