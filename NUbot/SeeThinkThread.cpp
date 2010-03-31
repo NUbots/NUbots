@@ -68,7 +68,7 @@ void SeeThinkThread::run()
         debug << "SeeThinkThread::run()" << endl;
     #endif
     
-    #ifdef THREAD_SENSEMOVE_MONITOR_TIME
+    #ifdef THREAD_SEETHINK_MONITOR_TIME
         double entrytime;
         double realstarttime, processstarttime, threadstarttime; 
         double realendtime, processendtime, threadendtime;
@@ -77,7 +77,7 @@ void SeeThinkThread::run()
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
-        #ifdef THREAD_MOTION_MONITOR_TIME
+        #ifdef THREAD_SEETHINK_MONITOR_TIME
             entrytime = NUSystem::getRealTime();
         #endif
         
@@ -89,7 +89,7 @@ void SeeThinkThread::run()
             m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
         #endif
 
-        #ifdef THREAD_MOTION_MONITOR_TIME
+        #ifdef THREAD_SEETHINK_MONITOR_TIME
             realstarttime = NUSystem::getRealTime();
             #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
             if (realstarttime - entrytime > 40)
@@ -121,7 +121,7 @@ void SeeThinkThread::run()
             m_nubot->Jobs->summaryTo(debug);
         #endif
         
-        #ifdef THREAD_MOTION_MONITOR_TIME
+        #ifdef THREAD_SEETHINK_MONITOR_TIME
             realendtime = NUSystem::getRealTime();
             processendtime = NUSystem::getProcessTime();
             threadendtime = NUSystem::getThreadTime();
