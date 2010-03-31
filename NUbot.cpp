@@ -25,7 +25,7 @@
 #include "NUbot.h"
 #include "Behaviour/Jobs.h"
 
-#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
 
@@ -141,14 +141,14 @@ void NUbot::createThreads()
     debug << "NUbot::createThreads(). Constructing threads." << endl;
 #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread = new SeeThinkThread(this);
     #endif
         
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
     #endif
         
@@ -171,7 +171,7 @@ NUbot::~NUbot()
     #endif
 
     // --------------------------------- delete threads
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         if (m_seethink_thread != NULL)
             delete m_seethink_thread;
     #endif
@@ -261,7 +261,7 @@ void NUbot::run()
             m_sensemove_thread->startLoop();
         #endif
         
-        #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+        #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
             if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
             {
                 m_seethink_thread->startLoop();         
