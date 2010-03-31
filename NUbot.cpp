@@ -32,7 +32,7 @@
 #include "NUbot/SenseMoveThread.h"
 
 #if defined(USE_NETWORK)
-    //#include "NUbot/NetworkThread.h"
+    #include "NUbot/NetworkThread.h"
 #endif
 
 #if defined(TARGET_IS_NAOWEBOTS)
@@ -153,8 +153,8 @@ void NUbot::createThreads()
     #endif
         
     #if defined(USE_NETWORK)
-        //m_network_thread = new NetworkThread(this);
-        //m_network_thread->start();
+        m_network_thread = new NetworkThread(this);
+        m_network_thread->start();
     #endif
 
 #if DEBUG_NUBOT_VERBOSITY > 1
@@ -180,8 +180,8 @@ NUbot::~NUbot()
         delete m_sensemove_thread;
         
     #if defined(USE_NETWORK)
-    //if (m_network_thread != NULL)
-    //        delete m_network_thread;
+        if (m_network_thread != NULL)
+            delete m_network_thread;
     #endif
     
     // --------------------------------- delete modules

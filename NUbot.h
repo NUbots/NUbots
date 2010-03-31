@@ -64,7 +64,7 @@ class JobList;
 class SenseMoveThread;
 
 #if defined(USE_NETWORK)
-    //class NetworkThread;
+    class NetworkThread;
 #endif
 
 /*! @brief The top-level class
@@ -122,8 +122,8 @@ private:
     SenseMoveThread* m_sensemove_thread;
 
     #if defined(USE_NETWORK)
-        //friend class NetworkThread;
-        //NetworkThread* m_network_thread;
+        friend class NetworkThread;
+        NetworkThread* m_network_thread;
     #endif
     
 };
