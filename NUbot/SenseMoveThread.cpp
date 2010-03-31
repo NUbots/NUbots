@@ -77,37 +77,44 @@ void SenseMoveThread::run()
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
-        #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-            entrytime = NUSystem::getRealTime();
-        #endif
-        waitForCondition();
-
-        #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-            realstarttime = NUSystem::getRealTime();
-            #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
-            if (realstarttime - entrytime > 15)
-                debug << "SenseMoveThread. Warning. Waittime " << realstarttime - entrytime << "ms."<< endl;
+        try 
+        {
+            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
+                entrytime = NUSystem::getRealTime();
             #endif
-            processstarttime = NUSystem::getProcessTime();
-            threadstarttime = NUSystem::getThreadTime();
-        #endif
-            
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        m_nubot->SensorData = m_nubot->m_platform->sensors->update();
-        #ifdef USE_MOTION
-            m_nubot->m_motion->process(m_nubot->SensorData, m_nubot->Actions);
-        #endif
-        m_nubot->m_platform->actionators->process(m_nubot->Actions);
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            waitForCondition();
 
-    #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-        realendtime = NUSystem::getRealTime();
-        processendtime = NUSystem::getProcessTime();
-        threadendtime = NUSystem::getThreadTime();
-        if (threadendtime - threadstarttime > 7)
-            debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
-    #endif
-        onLoopCompleted();
-    } 
+            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
+                realstarttime = NUSystem::getRealTime();
+                #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
+                if (realstarttime - entrytime > 15)
+                    debug << "SenseMoveThread. Warning. Waittime " << realstarttime - entrytime << "ms."<< endl;
+                #endif
+                processstarttime = NUSystem::getProcessTime();
+                threadstarttime = NUSystem::getThreadTime();
+            #endif
+                
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            m_nubot->SensorData = m_nubot->m_platform->sensors->update();
+            #ifdef USE_MOTION
+                m_nubot->m_motion->process(m_nubot->SensorData, m_nubot->Actions);
+            #endif
+            m_nubot->m_platform->actionators->process(m_nubot->Actions);
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
+                realendtime = NUSystem::getRealTime();
+                processendtime = NUSystem::getProcessTime();
+                threadendtime = NUSystem::getThreadTime();
+                if (threadendtime - threadstarttime > 7)
+                    debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
+            #endif
+            onLoopCompleted();
+        }
+        catch (std::exception& e) 
+        {
+            m_nubot->unhandledExceptionHandler(e);
+        }
+    }
     errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << endl;
 }

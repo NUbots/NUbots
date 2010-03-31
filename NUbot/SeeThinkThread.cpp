@@ -77,61 +77,68 @@ void SeeThinkThread::run()
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
-        #ifdef THREAD_SEETHINK_MONITOR_TIME
-            entrytime = NUSystem::getRealTime();
-        #endif
-        
-        #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-            waitForCondition();
-        #endif
-        
-        #ifdef USE_VISION
-            m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
-        #endif
-
-        #ifdef THREAD_SEETHINK_MONITOR_TIME
-            realstarttime = NUSystem::getRealTime();
-            #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
-            if (realstarttime - entrytime > 40)
-                debug << "SeeThinkThread. Warning. Waittime " << realstarttime - entrytime << "ms."<< endl;
+        try
+        {
+            #ifdef THREAD_SEETHINK_MONITOR_TIME
+                entrytime = NUSystem::getRealTime();
             #endif
-            processstarttime = NUSystem::getProcessTime();
-            threadstarttime = NUSystem::getThreadTime();
-        #endif
             
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        #ifdef USE_VISION
-            FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
-        #endif
-        
-        #ifdef USE_LOCALISATION
-            //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
-        #endif
-        
-        #ifdef USE_BEHAVIOUR
-            //m_nubot->m_behaviour->process();
-        #endif
-        
-        #ifdef USE_MOTION
-            m_nubot->m_motion->process(*m_nubot->Jobs);
-        #endif
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+                waitForCondition();
+            #endif
+            
+            #ifdef USE_VISION
+                m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
+            #endif
 
-        #if DEBUG_VERBOSITY > 0
-            m_nubot->Jobs->summaryTo(debug);
-        #endif
-        
-        #ifdef THREAD_SEETHINK_MONITOR_TIME
-            realendtime = NUSystem::getRealTime();
-            processendtime = NUSystem::getProcessTime();
-            threadendtime = NUSystem::getThreadTime();
-            if (threadendtime - threadstarttime > 7)
-                debug << "SeeThinkThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
-        #endif
-        
-        #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-            onLoopCompleted();
-        #endif
+            #ifdef THREAD_SEETHINK_MONITOR_TIME
+                realstarttime = NUSystem::getRealTime();
+                #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
+                if (realstarttime - entrytime > 40)
+                    debug << "SeeThinkThread. Warning. Waittime " << realstarttime - entrytime << "ms."<< endl;
+                #endif
+                processstarttime = NUSystem::getProcessTime();
+                threadstarttime = NUSystem::getThreadTime();
+            #endif
+                
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #ifdef USE_VISION
+                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+            #endif
+            
+            #ifdef USE_LOCALISATION
+                //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
+            #endif
+            
+            #ifdef USE_BEHAVIOUR
+                //m_nubot->m_behaviour->process();
+            #endif
+            
+            #ifdef USE_MOTION
+                m_nubot->m_motion->process(*m_nubot->Jobs);
+            #endif
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #if DEBUG_VERBOSITY > 0
+                m_nubot->Jobs->summaryTo(debug);
+            #endif
+            
+            #ifdef THREAD_SEETHINK_MONITOR_TIME
+                realendtime = NUSystem::getRealTime();
+                processendtime = NUSystem::getProcessTime();
+                threadendtime = NUSystem::getThreadTime();
+                if (threadendtime - threadstarttime > 7)
+                    debug << "SeeThinkThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
+            #endif
+            
+            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+                onLoopCompleted();
+            #endif
+        }
+        catch (std::exception& e)
+        {
+            m_nubot->unhandledExceptionHandler(e);
+        }
     } 
     errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
 }
