@@ -46,11 +46,16 @@
 #endif
 
 #include <time.h>
-#include <errno.h>
 #include <signal.h>
-#include <execinfo.h>
 #include <string>
 #include <sstream>
+
+#ifndef TARGET_OS_IS_WINDOWS
+    #include <errno.h>
+#endif
+#ifndef TARGET_OS_IS_WINDOWS
+    #include <execinfo.h>
+#endif
 
 /*! @brief Constructor for the nubot
     
@@ -120,15 +125,16 @@ NUbot::NUbot(int argc, const char *argv[])
  */
 void NUbot::connectErrorHandling()
 {
-    struct sigaction newaction, oldaction;
-    newaction.sa_handler = segFaultHandler;
-    
-    sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+    #ifndef TARGET_OS_IS_WINDOWS
+        struct sigaction newaction, oldaction;
+        newaction.sa_handler = segFaultHandler;
+        
+        sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+    #endif
 }
 
 /*! @brief Create nubot's threads
  */
-
 void NUbot::createThreads()
 {
 #if DEBUG_NUBOT_VERBOSITY > 1
@@ -276,16 +282,18 @@ void NUbot::run()
  */
 void NUbot::segFaultHandler(int value)
 {
-    errorlog << "SEGMENTATION FAULT. " << endl;
-    debug << "SEGMENTATION FAULT. " << endl;
-    void *array[10];
-    size_t size;
-    char **strings;
-    size = backtrace(array, 10);
-    strings = backtrace_symbols(array, size);
-    for (size_t i=0; i<size; i++)
-        errorlog << strings[i] << endl;
-    //!< @todo TODO: after a seg fault I should fail safely!
+	#ifndef TARGET_OS_IS_WINDOWS
+	    errorlog << "SEGMENTATION FAULT. " << endl;
+        debug << "SEGMENTATION FAULT. " << endl;
+	    void *array[10];
+	    size_t size;
+	    char **strings;
+	    size = backtrace(array, 10);
+	    strings = backtrace_symbols(array, size);
+	    for (size_t i=0; i<size; i++)
+		errorlog << strings[i] << endl;
+		//!< @todo TODO: after a seg fault I should fail safely!
+	#endif
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
@@ -293,17 +301,19 @@ void NUbot::segFaultHandler(int value)
  */
 void NUbot::unhandledExceptionHandler(exception& e)
 {
-    //!< @todo TODO: check whether the exception is serious, if it is fail safely
-    errorlog << "UNHANDLED EXCEPTION. " << endl;
-    debug << "UNHANDLED EXCEPTION. " << endl; 
-    void *array[10];
-    size_t size;
-    char **strings;
-    size = backtrace(array, 10);
-    strings = backtrace_symbols(array, size);
-    for (size_t i=0; i<size; i++)
-        errorlog << strings[i] << endl;
-    errorlog << e.what() << endl;
+	#ifndef TARGET_OS_IS_WINDOWS
+        //!< @todo TODO: check whether the exception is serious, if it is fail safely
+        errorlog << "UNHANDLED EXCEPTION. " << endl;
+        debug << "UNHANDLED EXCEPTION. " << endl; 
+        void *array[10];
+        size_t size;
+        char **strings;
+        size = backtrace(array, 10);
+        strings = backtrace_symbols(array, size);
+        for (size_t i=0; i<size; i++)
+            errorlog << strings[i] << endl;
+        errorlog << e.what() << endl;
+	#endif
 }
 
 

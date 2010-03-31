@@ -11,7 +11,8 @@ class ObjectCandidate
 public:
     Vector2<int> getTopLeft() const;
     Vector2<int> getBottomRight() const;
-
+    void setTopLeft(Vector2<int> point);
+    void setBottomRight(Vector2<int> point);
     int width();
     int height();
     float aspect();
