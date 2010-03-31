@@ -30,11 +30,14 @@
 #include "NUPlatform/NUActionators.h"
 #include "NUNAO.h"
 
-#include "walkconfig.h"
-#include <dcmproxy.h>
-#ifdef USE_ALWALK
-    #include <almotionproxy.h>
+#include "nubotconfig.h"
+#ifdef USE_MOTION
+    #include "walkconfig.h"
+    #ifdef USE_ALWALK
+        #include <almotionproxy.h>
+    #endif
 #endif
+#include <dcmproxy.h>
 
 class NAOActionators : public NUActionators
 {

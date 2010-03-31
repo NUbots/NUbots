@@ -21,6 +21,7 @@
 
 #include "NAOActionators.h"
 #include "NAOActionatorNames.h"
+#include "NUPlatform/NUSystem.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"

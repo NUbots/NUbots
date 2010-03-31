@@ -120,6 +120,9 @@ private:
 
     friend class SenseMoveThread;
     SenseMoveThread* m_sensemove_thread;
+    #if defined(TARGET_IS_NAO)
+        friend class NUNAO;
+    #endif
 
     #if defined(USE_NETWORK)
         friend class NetworkThread;

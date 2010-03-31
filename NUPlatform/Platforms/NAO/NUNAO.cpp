@@ -20,6 +20,8 @@
  */
 
 #include "NUNAO.h"
+#include "NUbot.h"
+#include "NUbot/SenseMoveThread.h"
 #include <dcmproxy.h>
 using namespace AL;
 
@@ -32,7 +34,7 @@ NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pN
     debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
     m_broker = pBroker;
     m_nubot = new NUbot(0, NULL);
-    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(NUbot::signalMotion);
+    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(boost::bind<void>(&SenseMoveThread::startLoop, m_nubot->m_sensemove_thread));
     m_nubot->run();
 }
 
@@ -43,12 +45,12 @@ NUNAO::~NUNAO()
 
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
-    //debug.open("/var/log/debug.log");
-    debug.open("/home/nao/log/debug.log");
+    debug.open("/var/log/debug.log");
+    //debug.open("/home/nao/log/debug.log");
     debug << "NUbot Debug Log" << endl;
     debug << "NUNAO.cpp: _createModule" << endl;
-    //errorlog.open("/var/log/error.log");
-    errorlog.open("/home/nao/log/error.log");
+    errorlog.open("/var/log/error.log");
+    //errorlog.open("/home/nao/log/error.log");
     errorlog << "NUbot Error Log" << endl;
     ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
