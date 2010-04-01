@@ -23,25 +23,30 @@ GameInformation::GameInformation(int playerNumber, int teamNumber):
     }
 }
 
-void GameInformation::update(NUSensorsData* sensorData, const RoboCupGameControlData* gameControllerPacket)
+void GameInformation::process()
 {
-    // Check if there is sensor data.
-    if(sensorData)
+    if(m_hasUnprocessedControlData)
     {
-        updateSensorData(sensorData);
+        updateNetworkData(m_unprocessedControlData);
+        m_hasUnprocessedControlData = false;
     }
-    // Check if there is some network data.
-    if(gameControllerPacket)
+    else
     {
-        // Check if the packet belongs to our team.
-        if((gameControllerPacket->teams[0].teamNumber == teamId() || gameControllerPacket->teams[1].teamNumber == teamId()))
+        if(m_hasUnprocessedStateTrigger)
         {
-            updateNetworkData(gameControllerPacket);
+            m_hasUnprocessedStateTrigger = false;
+        }
+        if(m_hasUnprocessedTeamTrigger)
+        {
+            m_hasUnprocessedTeamTrigger = false;
+        }
+        if(m_hasUnprocessedKickoffTrigger)
+        {
+            m_hasUnprocessedKickoffTrigger = false;
         }
     }
     return;
 }
-
 
 void GameInformation::updateSensorData(NUSensorsData* sensorData)
 {
@@ -82,10 +87,10 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
     }
 }
 
-void GameInformation::updateNetworkData(const RoboCupGameControlData* gameControllerPacket)
+void GameInformation::updateNetworkData(const RoboCupGameControlData& gameControllerPacket)
 {
     m_previousControlData = m_currentControlData;
-    m_currentControlData = *gameControllerPacket;
+    m_currentControlData = gameControllerPacket;
 }
 
 std::string GameInformation::stateName(robotState theState)

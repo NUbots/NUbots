@@ -54,12 +54,7 @@ public:
       */
     GameInformation(int playerNumber = 0, int teamNumber = 0);
 
-    /*!
-      @brief Update the game and robot information based on the available data.
-      @param sensorData Data from the sensors.
-      @param gameControllerPacket An update packet received from game controller.
-      */
-    void update(NUSensorsData* sensorData, const RoboCupGameControlData* gameControllerPacket);
+    void process();
 
     // My information
     /*!
@@ -250,7 +245,22 @@ private:
       @param gameControllerPacket The game controller packet.
       @return None
       */
-    void updateNetworkData(const RoboCupGameControlData* gameControllerPacket);
+    void updateNetworkData(const RoboCupGameControlData& gameControllerPacket);
+
+    /*!
+      @brief Update the current information based on a manual state change.
+      */
+    void triggerManualStateChange();
+
+    /*!
+      @brief Update the current information based on a manual team change.
+      */
+    void triggerManualTeamChange();
+
+    /*!
+      @brief Update the current information based on a manual kick-off change.
+      */
+    void triggerManualKickoffChange();
 
     // My information
     int m_myPlayerNumber;           //!< Player number.
@@ -262,6 +272,13 @@ private:
     // Game Information
     RoboCupGameControlData m_currentControlData;        //!< The current game info.
     RoboCupGameControlData m_previousControlData;       //!< The previous game info.
+
+    // Unprocessed info holding area
+    bool m_hasUnprocessedControlData;
+    RoboCupGameControlData m_unprocessedControlData;    //!< The new game packet.
+    bool m_hasUnprocessedStateTrigger;      //!< New state trigger.
+    bool m_hasUnprocessedTeamTrigger;       //!< New team trigger.
+    bool m_hasUnprocessedKickoffTrigger;    //!< New kick-off trigger.
 
 };
 
