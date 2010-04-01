@@ -16,6 +16,7 @@
 #include <algorithm>
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "Tools/FileFormats/LUTTools.h"
 
 
 using namespace mathGeneral;
@@ -24,6 +25,7 @@ Vision::Vision()
 
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
+    currentLookupTable = LUTBuffer;
     //qDebug() << "Vision Started..";
     return;
 }
@@ -276,7 +278,16 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 void Vision::setLUT(unsigned char* newLUT)
 {
     currentLookupTable = newLUT;
+    return;
 }
+
+void Vision::loadLUTFromFile(const std::string& fileName)
+{
+    LUTTools lutLoader;
+    lutLoader.LoadLUT(LUTBuffer, c_LUTLength,"/home/nao/default.lut" );
+    setLUT(LUTBuffer);
+}
+
 void Vision::setImage(const NUimage* newImage)
 {
     currentImage = newImage;
@@ -285,8 +296,8 @@ void Vision::setImage(const NUimage* newImage)
 unsigned char Vision::classifyPixel(int x, int y)
 {
     classifiedCounter++;
-    Pixel* temp = &currentImage->image[y][x];
-    return currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
+    //Pixel* temp = &currentImage->image[y][x];
+    return 0;//currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
 }
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {
@@ -337,7 +348,8 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    debug << currentImage->width() << " , "<<currentImage->height() << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < currentImage->width(); x+=scanSpacing)

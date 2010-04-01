@@ -87,7 +87,7 @@ NUbot::NUbot(int argc, const char *argv[])
     
     // --------------------------------- construct the public storage
     #ifdef USE_VISION
-        Image = new NUimage();
+        Image = NULL;
     #endif
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();

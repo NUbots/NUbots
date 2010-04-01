@@ -24,7 +24,6 @@
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
-
 class Circle;
 class NUimage;
 
@@ -32,13 +31,13 @@ class NUimage;
 class Vision
 {
     private:
+    static const unsigned int c_LUTLength = 256*256*256;
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
-
+    const unsigned char* currentLookupTable; //!< Storage of the current colour lookup table.
+    unsigned char LUTBuffer[c_LUTLength]; //!< Storage of the current colour lookup table.
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
-    
-
+   
     public:
     //! FieldObjects Container
     FieldObjects* AllFieldObjects;
@@ -58,8 +57,10 @@ class Vision
     //void ProcessFrame(NUimage& image, Horizon horizonLine);
     FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
 
+    
+    
     void setLUT(unsigned char* newLUT);
-
+    void loadLUTFromFile(const std::string& fileName);
 
     void setImage(const NUimage* sourceImage);
 
