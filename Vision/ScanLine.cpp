@@ -29,9 +29,9 @@ int  ScanLine::getNumberOfSegments()
     return segments.size();
 }
 
-void ScanLine::addSegement(TransitionSegment* segment)
+void ScanLine::addSegement(const TransitionSegment& segment)
 {
-    segments.push_back(*segment);
+    segments.push_back(segment);
     return;
 }
 
