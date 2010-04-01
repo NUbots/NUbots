@@ -45,12 +45,10 @@ NUNAO::~NUNAO()
 
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
-    debug.open("/var/log/debug.log");
-    //debug.open("/home/nao/log/debug.log");
+    debug.open("/var/volatile/debug.log");
     debug << "NUbot Debug Log" << endl;
     debug << "NUNAO.cpp: _createModule" << endl;
-    errorlog.open("/var/log/error.log");
-    //errorlog.open("/home/nao/log/error.log");
+    errorlog.open("/var/volatile/error.log");
     errorlog << "NUbot Error Log" << endl;
     ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
