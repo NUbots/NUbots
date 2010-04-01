@@ -72,6 +72,14 @@ NUbot::NUbot(int argc, const char *argv[])
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
     #endif
     
+    // --------------------------------- construct the public storage
+    #ifdef USE_VISION
+        Image = NULL;
+    #endif
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
+    Jobs = new JobList();
+    
     // --------------------------------- construct the platform
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
@@ -84,14 +92,6 @@ NUbot::NUbot(int argc, const char *argv[])
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing modules." << endl;
     #endif
-    
-    // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = new NUimage();
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Jobs = new JobList();
     
     // --------------------------------- construct each enabled module 
     #ifdef USE_VISION
@@ -113,6 +113,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #ifdef USE_NETWORK
         //m_network = new Network();
     #endif
+    m_io = new NUIO(0);         //<! @todo TODO pass nuio the player number!
     
     createThreads();
     
@@ -211,6 +212,8 @@ NUbot::~NUbot()
         //if (m_network != NULL)
             //delete network;
     #endif
+    if (m_io != NULL)
+        delete m_io;
     
     // --------------------------------- delete public storage variables
     #if DEBUG_NUBOT_VERBOSITY > 0

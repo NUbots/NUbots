@@ -52,6 +52,7 @@
 #ifdef USE_NETWORK
     //#include "???.h"
 #endif
+#include "NUPlatform/NUIO.h"
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -112,6 +113,7 @@ private:
     #ifdef USE_NETWORK
         //Network* m_network;              //!< network module
     #endif
+    NUIO* m_io;
     
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
         friend class SeeThinkThread;
