@@ -12,7 +12,7 @@ class ScanLine
         ScanLine(Vector2<int> newStartPoint, int length);
         int getLength();
         int getNumberOfSegments();
-        void addSegement(TransitionSegment* segment);
+        void addSegement(const TransitionSegment& segment);
         TransitionSegment* getSegment(int position);
         Vector2<int> getStart();
     private:

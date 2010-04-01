@@ -16,6 +16,7 @@
 #include <algorithm>
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "Tools/FileFormats/LUTTools.h"
 
 
 using namespace mathGeneral;
@@ -24,6 +25,7 @@ Vision::Vision()
 
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
+    currentLookupTable = LUTBuffer;
     //qDebug() << "Vision Started..";
     return;
 }
@@ -276,7 +278,16 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 void Vision::setLUT(unsigned char* newLUT)
 {
     currentLookupTable = newLUT;
+    return;
 }
+
+void Vision::loadLUTFromFile(const std::string& fileName)
+{
+    LUTTools lutLoader;
+    lutLoader.LoadLUT(LUTBuffer, c_LUTLength,fileName.c_str() );
+    setLUT(LUTBuffer);
+}
+
 void Vision::setImage(const NUimage* newImage)
 {
     currentImage = newImage;
@@ -285,8 +296,8 @@ void Vision::setImage(const NUimage* newImage)
 unsigned char Vision::classifyPixel(int x, int y)
 {
     classifiedCounter++;
-    Pixel* temp = &currentImage->image[y][x];
-    return currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
+    //Pixel* temp = &currentImage->image[y][x];
+    return 0;//currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
 }
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {
@@ -337,7 +348,8 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    debug << currentImage->width() << " , "<<currentImage->height() << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < currentImage->width(); x+=scanSpacing)
@@ -555,7 +567,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     int numOfLines = scanArea->getNumberOfScanLines();
     int lineLength = 0;
     ScanLine* tempLine;
-    TransitionSegment* tempTransition ;
     Vector2<int> currentPoint;
     Vector2<int> tempStartPoint;
     Vector2<int> tempEndPoint;
@@ -611,7 +622,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 //! End Of Screen detected: Generate new segment and add to the line
                 if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
                 {
-                    tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                    TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                     tempLine->addSegement(tempTransition);
                     /*int spacing = 16;
                     if(abs(tempTransition->getSize())>spacing)
@@ -654,7 +665,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             currentPoint.x = startPoint.x - j;// + bufferSize;
                             currentPoint.y = startPoint.y;
                         }
-                        tempTransition = new TransitionSegment(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        TransitionSegment tempTransition(startPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
                         //SCAN FOR OTHER SEGMENTS:
                         /*int spacing = 16;
@@ -733,8 +744,8 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
-            TransitionSegment* tempTransitionA = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
-            if(tempTransitionA->getSize() >1)
+            TransitionSegment tempTransitionA(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
+            if(tempTransitionA.getSize() >1)
             {
             tempLine->addSegement(tempTransitionA);
             }
@@ -802,10 +813,11 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
-            TransitionSegment* tempTransitionA = new TransitionSegment(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
-            if(tempTransitionA->getSize() >1)
+
+            TransitionSegment tempTransitionA(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
+            if(tempTransitionA.getSize() >1)
             {
-            tempLine->addSegement(tempTransitionA);
+                tempLine->addSegement(tempTransitionA);
             }
         }
     }
@@ -1240,13 +1252,12 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 */
 std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
-    LineDetection* LineDetector = new LineDetection();
+    LineDetection LineDetector;
     int image_width = currentImage->width();
     int image_height = currentImage->height();
-    LineDetector->FormLines(scanArea,image_width,image_height,spacing);
-    std::vector<CornerPoint> cornerPoints= LineDetector->cornerPoints;
-    std::vector<LSFittedLine> fieldLines= LineDetector->fieldLines;
-
+    LineDetector.FormLines(scanArea,image_width,image_height,spacing);
+    std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
+    std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
     return fieldLines;
 }
 
@@ -1254,7 +1265,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
 {
     debug<< "Vision::DetectBall" << endl;
 
-    Ball* BallFinding = new Ball();
+    Ball BallFinding;
     
 
     debug<< "Vision::DetectBall : Ball Class created" << endl;
@@ -1264,9 +1275,13 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
     debug<< "Vision::DetectBall : Init Ball" << endl;    
     Circle ball;
     ball.isDefined = false;
-    if (FO_Candidates.size() <= 0) return ball;
+    if (FO_Candidates.size() <= 0)
+    {
+        
+        return ball;
+    }
     debug<< "Vision::DetectBall : Find Ball" << endl;
-    ball = BallFinding->FindBall(FO_Candidates, AllFieldObjects, this,height,width);
+    ball = BallFinding.FindBall(FO_Candidates, AllFieldObjects, this,height,width);
     
     if(ball.isDefined)
     {
@@ -1298,15 +1313,16 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
     }
     debug<< "Vision::DetectBall : Finnised" << endl;
     return ball;
+    
 }
 
 void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector< TransitionSegment > horizontalSegments)
 {
     int width = currentImage->width();
     int height = currentImage->height();
-    GoalDetection* goalDetector = new GoalDetection();
-    goalDetector->FindGoal(FO_Candidates,AllFieldObjects, horizontalSegments, this,height,width);
-
+    GoalDetection goalDetector;
+    goalDetector.FindGoal(FO_Candidates,AllFieldObjects, horizontalSegments, this,height,width);
+    return;
 }
 
 double Vision::CalculateBearing(double cx){

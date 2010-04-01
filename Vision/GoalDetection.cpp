@@ -176,26 +176,25 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     Vector2<int> SegEnd;
     SegEnd.x = BottomRight.x;
     SegEnd.y = y;
-    TransitionSegment* tempSeg = new TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleGoal->getColour(),ClassIndex::unclassified);
+    TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleGoal->getColour(),ClassIndex::unclassified);
     //qDebug() << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
-    ScanLine* tempLine = new ScanLine();
+    ScanLine tempLine;
 
     int spacings = 8;
     int direction = ClassifiedSection::RIGHT;
-    vision->CloselyClassifyScanline(tempLine,tempSeg,spacings, direction);
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
-    std::vector< Vector2<int> > BallPoints;
     //qDebug() << "segments found: " << tempLine->getNumberOfSegments();
     //! Debug Output for small scans:
     int min = PossibleGoal->getTopLeft().y;
-    for(int i = 0; i < tempLine->getNumberOfSegments(); i++)
+    for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
-        tempSeg = tempLine->getSegment(i);
+        TransitionSegment* tempSegment = tempLine.getSegment(i);
         //qDebug() << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
         //qDebug() << "segments (end): " << tempSeg->getEndPoint().x << "," << tempSeg->getEndPoint().y;
-        if(tempSeg->getStartPoint().y < min)
+        if(tempSegment->getStartPoint().y < min)
         {
-            min = tempSeg->getStartPoint().y;
+            min = tempSegment->getStartPoint().y;
         }
     }
     Vector2<int> tempTopLeft;
