@@ -32,7 +32,7 @@ OPTION(
 OPTION(
         USE_MOTION_KICK
         "Set to ON to use kick, set to OFF to not have kick"
-        ON
+        OFF
 )
 
 ############################ motionconfig.h generation
