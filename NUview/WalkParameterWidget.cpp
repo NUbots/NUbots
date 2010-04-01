@@ -24,8 +24,6 @@
 #include "../Motion/NUWalk.h"
 #include "../Behaviour/Jobs.h"
 #include "../NUPlatform/NUIO.h"
-#include "../NUPlatform/NUSystem.h"
-#include "../NUPlatform/Platforms/NAO/NAOSystem.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -42,8 +40,6 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     debug.open("debug.log");
     errorlog.open("error.log");
     
-    m_nusystem = new NAOSystem();
-    nusystem = m_nusystem;
     m_job_list = new JobList();
     m_io = new NUIO(0, NULL);
     m_walk_parameters = new WalkParameters();
