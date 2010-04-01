@@ -151,7 +151,7 @@ public:
       */
     int ourScore()
     {
-        return myTeam->score;
+        return getTeam(teamId())->score;
     }
 
     /*!
@@ -160,7 +160,7 @@ public:
       */
     int opponentScore()
     {
-        return opponentTeam->score;
+        return 0;
     }
 
     const RobotInfo* getPlayer(int teamNumber, int playerNumber)
