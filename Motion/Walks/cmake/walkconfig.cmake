@@ -37,12 +37,23 @@ OPTION(
         OFF
 )
 
-OPTION(
-        USE_WALK_JUPPWALK
-        "Set to ON to use juppwalk, set to OFF use something else"
-        ON
-)
-
+IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
+    OPTION( USE_WALK_JUPPWALK
+            "Set to ON to use juppwalk, set to OFF use something else"
+            ON)
+    OPTION( USE_WALK_ALWALK
+            "Set to ON to use almotion's walk, set to OFF use something else"
+            OFF)
+ELSE ()
+    IF (${TARGET_ROBOT} STREQUAL NAO)
+        OPTION( USE_WALK_JUPPWALK
+                "Set to ON to use juppwalk, set to OFF use something else"
+                OFF)
+        OPTION( USE_WALK_ALWALK
+                "Set to ON to use almotion's walk, set to OFF use something else"
+                ON)
+    ENDIF ()
+ENDIF()
 OPTION(
         USE_WALK_NBWALK
         "Set to ON to use nbwalk, set to OFF use something else"
