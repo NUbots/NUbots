@@ -17,6 +17,7 @@ SET(NUBOT_DIRS  NUPlatform
 		NUbot
                 Tools
                 Kinematics
+		GameController
 )
 IF(NUBOT_USE_VISION)
 	LIST(APPEND NUBOT_DIRS Vision)
