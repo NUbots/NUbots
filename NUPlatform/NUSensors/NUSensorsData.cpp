@@ -89,6 +89,7 @@ NUSensorsData::NUSensorsData()
     
     // Buttons Sensors:
     addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
+    addSoftSensor(ButtonTriggers, string("ButtonTriggers"), sensor_t::BUTTON_TRIGGERS);
     
     // Battery Sensors:
     addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
@@ -444,6 +445,21 @@ bool NUSensorsData::getHorizon(vector<float>& values)
     else
     {
         values = BalanceHorizon->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the last button trigger times for the chest button, left
+            foot bumper and right foot bumper.
+    @param values will be updated with the current utton trigger times.
+ */
+bool NUSensorsData::getButtonTriggers(vector<float>& values)
+{
+    if (ButtonTriggers == NULL || ButtonTriggers->IsValid == false)
+        return false;
+    else
+    {
+        values = ButtonTriggers->Data;
         return true;
     }
 }

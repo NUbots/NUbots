@@ -92,6 +92,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_BEHAVIOUR
+		m_gameInfo = new GameInformation(1,2);
         m_behaviour = new Behaviour();
     #endif
     
@@ -187,6 +188,8 @@ NUbot::~NUbot()
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
             delete m_behaviour;
+		if (m_gameInfo != NULL)
+            delete m_gameInfo;
     #endif
     #ifdef USE_MOTION
         if (m_motion != NULL)

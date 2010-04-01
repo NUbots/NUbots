@@ -36,9 +36,9 @@
 #define _RoboCupGameControlData_h_DEFINED
 
 //Defining int types:
-//#define  uint8 char 
-#define  uint16 unsigned short int
-#define  uint32 unsigned long int 
+typedef char uint8;
+typedef unsigned short int uint16;
+typedef unsigned long int uint32;
 
 // port for GameController network traffic
 #define GAMECONTROLLER_PORT             3838

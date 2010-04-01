@@ -42,6 +42,7 @@
 #endif
 
 #ifdef USE_BEHAVIOUR
+    #include "GameController/GameInformation.h"
     #include "Behaviour/Behaviour.h"
 #endif
 
@@ -96,6 +97,7 @@ private:
     #endif
     
     #ifdef USE_BEHAVIOUR
+		GameInformation* m_gameInfo;
         Behaviour* m_behaviour;           //!< behaviour module
     #endif
     

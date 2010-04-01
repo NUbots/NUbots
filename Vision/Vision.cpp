@@ -32,14 +32,16 @@ Vision::Vision()
 
 Vision::~Vision()
 {
-
+    delete AllFieldObjects;
     return;
 }
 
 FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 {
     debug << "Begin Process Frame" << endl;
+    AllFieldObjects->~FieldObjects();
     AllFieldObjects = new FieldObjects();
+
     if (image == NULL)
         return AllFieldObjects;
     
@@ -51,8 +53,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
-    ClassifiedSection* vertScanArea = new ClassifiedSection();
-    ClassifiedSection* horiScanArea = new ClassifiedSection();
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
     int spacings = 16;
@@ -102,24 +102,24 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
-    vertScanArea = verticalScan(points,spacings);
-    debug << "Vert ScanPaths : Finnished " << vertScanArea->getNumberOfScanLines() <<endl;
+    ClassifiedSection vertScanArea = verticalScan(points,spacings);
+    debug << "Vert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
     //! Scan Above the Horizon
-    horiScanArea = horizontalScan(points,spacings);
-    debug << "Horizontal ScanPaths : Finnished " << horiScanArea->getNumberOfScanLines() <<endl;
+    ClassifiedSection horiScanArea = horizontalScan(points,spacings);
+    debug << "Horizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
     //qDebug() << "Generate Scanlines: finnished";
     //! Classify Line Segments
 
-    ClassifyScanArea(vertScanArea);
-    ClassifyScanArea(horiScanArea);
+    ClassifyScanArea(&vertScanArea);
+    ClassifyScanArea(&horiScanArea);
     debug << "Classify ScanPaths : Finnished" <<endl;
     //qDebug() << "Classify Scanlines: finnished";
 
     //! Extract and Display Vertical Scan Points:
-    tempNumScanLines = vertScanArea->getNumberOfScanLines();
+    tempNumScanLines = vertScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
-        ScanLine* tempScanLine = vertScanArea->getScanLine(i);
+        ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         //int lengthOfLine = tempScanLine->getLength();
         //Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
@@ -141,10 +141,10 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     }
 
     //! Extract and Display Horizontal Scan Points:
-    tempNumScanLines = horiScanArea->getNumberOfScanLines();
+    tempNumScanLines = horiScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
-        ScanLine* tempScanLine = horiScanArea->getScanLine(i);
+        ScanLine* tempScanLine = horiScanArea.getScanLine(i);
         //int lengthOfLine = tempScanLine->getLength();
         //Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
@@ -272,6 +272,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 
     DetectGoals(YellowGoalCandidates,horizontalsegments);
     DetectGoals(BlueGoalCandidates,horizontalsegments);
+   
+
     return AllFieldObjects;
 }
 
@@ -431,10 +433,10 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
     return interpolatedBorders;
 }
 
-ClassifiedSection* Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
     //std::vector<Vector2<int> > scanPoints;
-    ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::DOWN);
+    ClassifiedSection scanArea(ClassifiedSection::DOWN);
     if(!fieldBorders.size()) return scanArea;
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     //std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++; //This iterator is unused
@@ -457,24 +459,24 @@ ClassifiedSection* Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,
         temp.y = y;
 
         fullLineLength = int(currentImage->height() - y);
-        ScanLine* tempScanLine = new ScanLine(temp, fullLineLength);
-        scanArea->addScanLine(tempScanLine);
+        ScanLine tempScanLine(temp, fullLineLength);
+        scanArea.addScanLine(tempScanLine);
 
         //!Create half ScanLine
         midX = x-skip;
         temp.x = midX;
         halfLineLength = int((currentImage->height() - y)/2);
-        ScanLine* tempMidScanLine = new ScanLine(temp,halfLineLength);
-        scanArea->addScanLine(tempMidScanLine);
+        ScanLine tempMidScanLine(temp,halfLineLength);
+        scanArea.addScanLine(tempMidScanLine);
 
         //!Create Quarter ScanLines
         temp.x = int(midX - skip/2);
         quarterLineLength = int((currentImage->height() - y)/4);
-        ScanLine* tempLeftQuarterLine = new ScanLine(temp,quarterLineLength);
-        scanArea->addScanLine(tempLeftQuarterLine);
+        ScanLine tempLeftQuarterLine(temp,quarterLineLength);
+        scanArea.addScanLine(tempLeftQuarterLine);
         temp.x = int(midX + skip/2);
-        ScanLine* tempRightQuarterLine = new ScanLine(temp,quarterLineLength);
-        scanArea->addScanLine(tempRightQuarterLine);
+        ScanLine tempRightQuarterLine(temp,quarterLineLength);
+        scanArea.addScanLine(tempRightQuarterLine);
     }
 
     //!Generate the last Lines:
@@ -482,23 +484,23 @@ ClassifiedSection* Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,
     y = fieldBorders.back().y;
     temp.x = midX;
     temp.y = y;
-    ScanLine* tempMidScanLine = new ScanLine(temp,halfLineLength);
-    scanArea->addScanLine(tempMidScanLine);
+    ScanLine tempMidScanLine(temp,halfLineLength);
+    scanArea.addScanLine(tempMidScanLine);
     temp.x = midX-skip/2;
     temp.y = y;
-    ScanLine* tempLeftQuarterLine = new ScanLine(temp,quarterLineLength);
-    scanArea->addScanLine(tempLeftQuarterLine);
+    ScanLine tempLeftQuarterLine(temp,quarterLineLength);
+    scanArea.addScanLine(tempLeftQuarterLine);
     temp.x = midX+skip/2;
     temp.y = y;
-    ScanLine* tempRightQuarterLine = new ScanLine(temp,quarterLineLength);
-    scanArea->addScanLine(tempRightQuarterLine);
+    ScanLine tempRightQuarterLine(temp,quarterLineLength);
+    scanArea.addScanLine(tempRightQuarterLine);
 
     return scanArea;
 }
 
-ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
-    ClassifiedSection* scanArea = new ClassifiedSection(ClassifiedSection::RIGHT);
+    ClassifiedSection scanArea(ClassifiedSection::RIGHT);
     if(!currentImage) return scanArea;
     Vector2<int> temp;
     //! Case for No FieldBorders
@@ -509,8 +511,8 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
         {
             temp.x = 0;
             temp.y = y;
-            ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
-            scanArea->addScanLine(tempScanLine);
+            ScanLine tempScanLine(temp,currentImage->width());
+            scanArea.addScanLine(tempScanLine);
         }
         return scanArea;
     }
@@ -539,16 +541,16 @@ ClassifiedSection* Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorder
     {
         temp.x =0;
         temp.y = y;
-        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
-        scanArea->addScanLine(tempScanLine);
+        ScanLine tempScanLine(temp,currentImage->width());
+        scanArea.addScanLine(tempScanLine);
     }
     //! Generate Scan Pattern for in between the max and min of green horizon.
     for(int y = minY; y < maxY; y = y + scanSpacing*2)
     {
         temp.x =0;
         temp.y = y;
-        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
-        scanArea->addScanLine(tempScanLine);
+        ScanLine tempScanLine(temp,currentImage->width());
+        scanArea.addScanLine(tempScanLine);
     }
     /*//! Generate Scan Pattern under green horizon
     for(int y = minY; y < currentImage->height(); y = y + scanSpacing/2)
@@ -1086,7 +1088,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-
+        delete colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())

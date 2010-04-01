@@ -63,6 +63,7 @@ public:
         FOOT_FORCE,
         FOOT_IMPACT,
         BUTTON_VALUES,
+        BUTTON_TRIGGERS,
         BATTERY_VALUES,
         GPS_VALUES,
         UNDEFINED
