@@ -79,6 +79,10 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
+    ../Localisation/LocWM.h \
+    ../Localisation/KF.h \
+    ../Vision/FieldObjects/WorldModelShareObject.h \
+    ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h
 
 SOURCES += mainwindow.cpp \
@@ -143,6 +147,10 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
+    ../Localisation/LocWM.cpp \
+    ../Localisation/KF.cpp \
+    ../Vision/FieldObjects/WorldModelShareObject.cpp \
+    ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp
 
 RESOURCES = textures.qrc

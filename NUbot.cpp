@@ -31,10 +31,6 @@
 
 #include "NUbot/SenseMoveThread.h"
 
-#if defined(USE_NETWORK)
-    #include "NUbot/NetworkThread.h"
-#endif
-
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
 #elif defined(TARGET_IS_NAO)
@@ -85,14 +81,6 @@ NUbot::NUbot(int argc, const char *argv[])
         debug << "NUbot::NUbot(). Constructing modules." << endl;
     #endif
     
-    // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Jobs = new JobList();
-    
     // --------------------------------- construct each enabled module 
     #ifdef USE_VISION
         m_vision = new Vision();
@@ -104,6 +92,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_BEHAVIOUR
+		m_gameInfo = new GameInformation(1,2);
         m_behaviour = new Behaviour();
     #endif
     
@@ -111,9 +100,15 @@ NUbot::NUbot(int argc, const char *argv[])
         m_motion = new NUMotion();
     #endif
     
-    #ifdef USE_NETWORK
-        //m_network = new Network();
+    m_io = new NUIO(0, this);         //<! @todo TODO pass nuio the player number!
+    
+    // --------------------------------- construct the public storage
+    #ifdef USE_VISION
+        Image = NULL;
     #endif
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
+    Jobs = new JobList();
     
     createThreads();
     
@@ -152,11 +147,6 @@ void NUbot::createThreads()
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
     #endif
-        
-    #if defined(USE_NETWORK)
-        m_network_thread = new NetworkThread(this);
-        m_network_thread->start();
-    #endif
 
 #if DEBUG_NUBOT_VERBOSITY > 1
     debug << "NUbot::createThreads(). Finished." << endl;
@@ -179,11 +169,6 @@ NUbot::~NUbot()
         
     if (m_sensemove_thread != NULL)
         delete m_sensemove_thread;
-        
-    #if defined(USE_NETWORK)
-        if (m_network_thread != NULL)
-            delete m_network_thread;
-    #endif
     
     // --------------------------------- delete modules
     #if DEBUG_NUBOT_VERBOSITY > 0
@@ -203,15 +188,15 @@ NUbot::~NUbot()
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
             delete m_behaviour;
+		if (m_gameInfo != NULL)
+            delete m_gameInfo;
     #endif
     #ifdef USE_MOTION
         if (m_motion != NULL)
             delete m_motion;
     #endif
-    #ifdef USE_NETWORK
-        //if (m_network != NULL)
-            //delete network;
-    #endif
+    if (m_io != NULL)
+        delete m_io;
     
     // --------------------------------- delete public storage variables
     #if DEBUG_NUBOT_VERBOSITY > 0

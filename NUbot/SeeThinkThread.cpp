@@ -74,7 +74,7 @@ void SeeThinkThread::run()
         double realendtime, processendtime, threadendtime;
     #endif
     
-    int err = 0;                
+    int err = 0;
     while (err == 0 && errno != EINTR)
     {
         try

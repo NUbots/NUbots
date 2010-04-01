@@ -42,6 +42,7 @@
 #endif
 
 #ifdef USE_BEHAVIOUR
+    #include "GameController/GameInformation.h"
     #include "Behaviour/Behaviour.h"
 #endif
 
@@ -49,9 +50,7 @@
     #include "Motion/NUMotion.h"
 #endif
 
-#ifdef USE_NETWORK
-    //#include "???.h"
-#endif
+#include "NUPlatform/NUIO.h"
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -62,10 +61,6 @@ class JobList;
 #endif
 
 class SenseMoveThread;
-
-#if defined(USE_NETWORK)
-    class NetworkThread;
-#endif
 
 /*! @brief The top-level class
  */
@@ -102,6 +97,7 @@ private:
     #endif
     
     #ifdef USE_BEHAVIOUR
+		GameInformation* m_gameInfo;
         Behaviour* m_behaviour;           //!< behaviour module
     #endif
     
@@ -109,9 +105,7 @@ private:
         NUMotion* m_motion;               //!< motion module
     #endif
     
-    #ifdef USE_NETWORK
-        //Network* m_network;              //!< network module
-    #endif
+    NUIO* m_io;                           //!< io module
     
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
         friend class SeeThinkThread;
@@ -123,12 +117,6 @@ private:
     #if defined(TARGET_IS_NAO)
         friend class NUNAO;
     #endif
-
-    #if defined(USE_NETWORK)
-        friend class NetworkThread;
-        NetworkThread* m_network_thread;
-    #endif
-    
 };
 
 #endif

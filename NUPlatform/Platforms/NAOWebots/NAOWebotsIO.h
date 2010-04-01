@@ -27,11 +27,13 @@
 
 #include "NUPlatform/NUIO.h"
 
+class NUbot;
+
 class NAOWebotsIO: public NUIO
 {
 // Functions:
 public:
-    NAOWebotsIO(int probotnumber);
+    NAOWebotsIO(int probotnumber, NUbot* nubot);
     ~NAOWebotsIO();
     
 protected:

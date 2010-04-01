@@ -25,12 +25,13 @@
 #ifndef NUIO_H
 #define NUIO_H
 
-#include "NUIO/UdpPort.h"
-#include "NUIO/TcpPort.h"
+#include "ioconfig.h"
 
-class NUSensorsData;
-class NUActionatorsData;
-class NUCamera;
+class NUbot;
+
+class UdpPort;
+class TcpPort;
+
 class JobList;
 class NUimage;
 
@@ -38,12 +39,8 @@ class NUIO
 {
 // Functions:
 public:
-    NUIO(int robotnumber);
+    NUIO(int robotnumber, NUbot* nubot);
     virtual ~NUIO();
-    
-    // Sensor data streaming
-    friend NUIO& operator<<(NUIO& io, const NUSensorsData& sensors);
-    friend NUIO& operator<<(NUIO& io, const NUSensorsData* sensors);
     
     // JobList streaming
     friend NUIO& operator<<(NUIO& io, JobList& jobs);
@@ -52,7 +49,7 @@ public:
     friend NUIO& operator>>(NUIO& io, JobList* jobs);
     
 
-    //Raw Image streaming 
+    // Raw Image streaming 
     friend NUIO& operator<<(NUIO& io, NUimage& p_image);
     friend NUIO& operator<<(NUIO& io, NUimage* p_image);
     
@@ -63,15 +60,11 @@ private:
 public:
 protected:
 private:
+    NUbot* m_nubot;
+    
     UdpPort* m_gamecontroller_port;
     UdpPort* m_team_port;
-    UdpPort* m_camera_port;
-    UdpPort* m_sensors_port;
-    UdpPort* m_actionators_port;
     TcpPort* m_vision_port;
-    UdpPort* m_wm_port;
-    UdpPort* m_behaviour_port;
-    UdpPort* m_motion_port;
     UdpPort* m_jobs_port;
 };
 

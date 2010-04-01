@@ -45,7 +45,6 @@ NAOPlatform::NAOPlatform()
     m_number = 0;
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules!
     nusystem = system;                        // we access the system in other modules using this pointer.  
-    io = new NAOIO(m_number);
     camera = new NAOCamera();
     sensors = new NAOSensors();
     actionators = new NAOActionators();
