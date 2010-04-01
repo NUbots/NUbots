@@ -132,8 +132,8 @@ class Vision
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
 
-    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
