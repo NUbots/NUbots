@@ -45,7 +45,6 @@ HEADERS += ui_mainwindow.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
     KickWidget.h \
-    ../Motion/NUWalk.h \
     ../Motion/Walks/WalkParameters.h \
     ../Behaviour/Jobs.h \
     ../Behaviour/Jobs/*.h \
@@ -104,9 +103,7 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
-    ../Motion/NUWalk.cpp \
     ../Motion/Walks/WalkParameters.cpp \
-    ../Motion/Walks/JuppWalk/*.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     ../NUPlatform/NUSensors.cpp \
@@ -116,6 +113,8 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUSystem.cpp \
     ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
     ../Behaviour/Jobs/*.cpp \
+    ../Behaviour/Jobs/CameraJobs/*.cpp \
+    ../Behaviour/Jobs/VisionJobs/*.cpp \
     ../Behaviour/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
     ../Vision/ObjectCandidate.cpp \
