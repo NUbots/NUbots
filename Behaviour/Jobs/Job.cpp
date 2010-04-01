@@ -200,6 +200,12 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_PAN:
             *job = new PanHeadJob(jobtime, input);
             break;
+        case Job::CAMERA_CHANGE_SETTINGS:
+            *job = new ChangeCameraSettingsJob(input);
+            break;
+        case Job::VISION_SAVE_IMAGES:
+            *job = new SaveImagesJob(input);
+            break;
         default:
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
             break;
