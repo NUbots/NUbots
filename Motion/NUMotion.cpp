@@ -60,6 +60,7 @@
 #include "NUPlatform/NUPlatform.h"
 #include "NUMotion.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 /*! @brief Constructor for motion module
  */
@@ -97,6 +98,9 @@ NUMotion::~NUMotion()
  */
 void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
+#if DEBUG_NUMOTION_VERBOSITY > 2
+    debug << "NUMotion::process(" << data << ", " << actions << ")" << endl;
+#endif
     if (data == NULL || actions == NULL)
         return;
     
@@ -146,7 +150,6 @@ void NUMotion::process(JobList& jobs)
     static list<Job*>::iterator it;     // the iterator over the motion jobs
     for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
     {
-        debug << "Top of loop" << endl;
 #ifdef USE_WALK
         if ((*it)->getID() == Job::MOTION_WALK)
         {   // process a walk speed job

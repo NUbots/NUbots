@@ -5,10 +5,11 @@
 #include "ClassifiedSection.h"
 //#include <QDebug>
 #include "debug.h"
+#include "debugverbosityvision.h"
 
 Ball::Ball()
 {
-    debug<< "Vision::DetectBall : Ball Class created" << endl;
+    //debug<< "Vision::DetectBall : Ball Class created" << endl;
 }
 Ball::~Ball()
 {
@@ -79,12 +80,12 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     Vector2<int> SegEnd;
     SegEnd.x = midX;
     SegEnd.y = BottomRight.y;
-    TransitionSegment* tempSeg = new TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
-    ScanLine* tempLine = new ScanLine();
+    TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
+    ScanLine tempLine;
 
     int spacings = 2;
     int direction = ClassifiedSection::DOWN;
-    vision->CloselyClassifyScanline(tempLine,tempSeg,spacings, direction);
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
     //qDebug() << TopLeft.y <<","<< BottomRight.y;
     //qDebug() << SegStart.y <<","<< SegEnd.y;
 
@@ -93,17 +94,17 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
 
 
     //! Debug Output for small scans:
-    for(int i = 0; i < tempLine->getNumberOfSegments(); i++)
+    for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
-        tempSeg = tempLine->getSegment(i);
+        TransitionSegment* tempSegement = tempLine.getSegment(i);
         //! Check if the segments are at the edge of screen
-        if(!(tempSeg->getStartPoint().x < 0 || tempSeg->getStartPoint().y < 0))
+        if(!(tempSegement->getStartPoint().x < 0 || tempSegement->getStartPoint().y < 0))
         {
-            BallPoints.push_back(tempSeg->getStartPoint());
+            BallPoints.push_back(tempSegement->getStartPoint());
         }
-        if(!(tempSeg->getEndPoint().x >= heigth-1 || tempSeg->getEndPoint().x >= width-1))
+        if(!(tempSegement->getEndPoint().x >= heigth-1 || tempSegement->getEndPoint().x >= width-1))
         {
-            BallPoints.push_back(tempSeg->getEndPoint());
+            BallPoints.push_back(tempSegement->getEndPoint());
         }
 
         /*qDebug()<< "At " <<i<<"\t Size: "<< tempSeg->getSize()<< "\t Start(x,y),End(x,y):("<< tempSeg->getStartPoint().x
@@ -121,10 +122,11 @@ bool Ball::isCorrectCheckRatio(ObjectCandidate PossibleBall,int height, int widt
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
     int boarder = 10; //! Boarder of pixels
-    if (PossibleBall.getBottomRight().x <= width-10 &&
-        PossibleBall.getBottomRight().y <= height-10 &&
-        PossibleBall.getTopLeft().x >=0+10  &&
-        PossibleBall.getTopLeft().y >=0+10  )
+
+    if (PossibleBall.getBottomRight().x <= width-boarder &&
+        PossibleBall.getBottomRight().y <= height-boarder &&
+        PossibleBall.getTopLeft().x >=0+boarder  &&
+        PossibleBall.getTopLeft().y >=0+boarder  )
     {
         //POSSIBLE BALLS ARE:
         //      Objects which have grouped segments,
@@ -156,8 +158,8 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
     }*/
     if(ballPoints.size() > 5)
     {
-            CircleFitting* CircleFit = new CircleFitting();
-            circ = CircleFit->FitCircleLMA(ballPoints);
+            CircleFitting CircleFit;
+            circ = CircleFit.FitCircleLMA(ballPoints);
             //debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
     }
     else

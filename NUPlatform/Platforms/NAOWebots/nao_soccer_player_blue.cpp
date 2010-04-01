@@ -9,6 +9,7 @@
 //---------------------------------------------------------------------------------------
 
 #include "NUbot.h"
+#include "debug.h"
 
 #include <sstream>
 #include <string.h>

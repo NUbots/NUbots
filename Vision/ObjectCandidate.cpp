@@ -91,3 +91,14 @@ void ObjectCandidate::setColour(unsigned char c)
 {
     colour = c;
 }
+void ObjectCandidate::setTopLeft(Vector2<int> point)
+{
+    topLeft.x = point.x;
+    topLeft.y = point.y;
+}
+
+void ObjectCandidate::setBottomRight(Vector2<int> point)
+{
+    bottomRight.x = point.x;
+    bottomRight.y = point.y;
+}

@@ -26,6 +26,7 @@
 #include "NAOWebotsSystem.h"
 #include "NAOWebotsIO.h"
 #include "debug.h"
+#include "debugverbositynuplatform.h"
 
 #include <string.h>
 #include <iostream>

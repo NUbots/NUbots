@@ -29,13 +29,14 @@
 using namespace std;
 
 #include "debug.h"
+#include "debugverbositynetwork.h"
 
 /*! @brief Create a new NUIO interface to network and log files
     @param robotnumber the unique number of the robot (this is used to select a port offset)
  */
 NUIO::NUIO(int robotnumber)
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUIO::NUIO(" << robotnumber << ")" << endl;
 #endif
     
@@ -53,7 +54,7 @@ NUIO::NUIO(int robotnumber)
 
 NUIO::~NUIO()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUIO::~NUIO()" << endl;
 #endif
     if (m_gamecontroller_port != NULL)
@@ -130,16 +131,16 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
  */
 NUIO& operator>>(NUIO& io, JobList& jobs)
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUIO >> JobList" << endl;
 #endif
     network_data_t netdata = io.m_jobs_port->receiveData();
     if (netdata.size > 0)
     {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 3
+        #if DEBUG_NETWORK_VERBOSITY > 3
             debug << "NUIO >> JobList received: " << netdata.size << endl;
         #endif
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        #if DEBUG_NETWORK_VERBOSITY > 4
             debug << "NUIO >> JobList received: ";
             for (int i=0; i<netdata.size; i++)
                 debug << netdata.data[i];

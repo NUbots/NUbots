@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+GoalDetection.cpp
 LineDetection.cpp
 ClassifiedSection.cpp
 ObjectCandidate.cpp

@@ -53,6 +53,7 @@ public:
     enum job_id_t {
         // Vision job ids
         VISION_LOAD_LUT,
+        VISION_SAVE_IMAGES,
         // Localisation job ids
         LOCALISATION_RESET,
         // Behaviour job ids
@@ -76,18 +77,7 @@ public:
         LIGHT_L_FOOT,
         LIGHT_R_FOOT,
         // Camera job ids
-        CAMERA_RESOLUTION,
-        CAMERA_FPS,
-        CAMERA_AUTO_EXPOSURE,
-        CAMERA_AUTO_WHITE_BALANCE,
-        CAMERA_AUTO_GAIN,
-        CAMERA_BRIGHTNESS,
-        CAMERA_CONTRAST,
-        CAMERA_SATURATION,
-        CAMERA_RED_CHROMA,
-        CAMERA_BLUE_CHROMA,
-        CAMERA_GAIN,
-        CAMERA_EXPOSURE,
+        CAMERA_CHANGE_SETTINGS,
         CAMERA_SELECT_CAMERA,
         // Sound job ids
         SOUND_SUBSTITUTE,

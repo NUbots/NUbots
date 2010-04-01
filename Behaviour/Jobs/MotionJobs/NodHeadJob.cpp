@@ -21,6 +21,7 @@
 
 #include "NodHeadJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a NodHeadJob
  

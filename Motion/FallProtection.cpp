@@ -20,7 +20,9 @@
  */
 
 #include "FallProtection.h"
+#include "motionconfig.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 /*! @brief Constructor for FallProtection module
  */

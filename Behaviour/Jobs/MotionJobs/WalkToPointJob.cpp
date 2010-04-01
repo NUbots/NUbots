@@ -21,6 +21,7 @@
 
 #include "WalkToPointJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkToPointJob
     @param time the time in ms to reach the position

@@ -4,6 +4,7 @@
 /Build/NAO/*
 /Build/NAOWebots/*
 /Build/Cycloid/*
+/Build/temp/*
 # We don't want to include Xcode project files
 /Build/jwalk2.build
 /Build/robocup.build
@@ -42,6 +43,7 @@ Autoconfig/*
 /NUview/qrc_icons.cpp
 /NUview/qrc_textures.cpp
 /NUview/diagona/*.*
+/NUview/NUview
 
 # Ignore our data file formats
 *.lut

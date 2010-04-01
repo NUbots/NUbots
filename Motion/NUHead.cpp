@@ -22,12 +22,14 @@
 
 #include "NUHead.h"
 #include "NUPlatform/NUSystem.h"
-#include <debug.h>
+#include "debug.h"
+#include "debugverbositynumotion.h"
 
 
 NUHead::NUHead()
 {
-
+    m_pitch = 0;
+    m_yaw = 0;
 }
 
 /*! @brief Destructor for motion module
@@ -64,14 +66,13 @@ void NUHead::process(const vector<float>& position)
 
 void NUHead::doHead()
 {
-	vector<float> pos (2,0);
-	vector<float> vel (2,0);
-	vector<float> gain (2,45);
+	static vector<float> pos (2,0);
+	static vector<float> vel (2,0);
+	static vector<float> gain (2,45);
 
 	pos[0] = m_pitch;
 	pos[1] = m_yaw;
 
-	m_actions->addJointPositions(NUActionatorsData::HeadJoints, nusystem->getTime(), pos, vel, gain);
-    
+	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime, pos, vel, gain);
 }
 

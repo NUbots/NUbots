@@ -21,6 +21,7 @@
 
 #include "NAOWebotsActionators.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 #include <string.h>
 
 
@@ -148,8 +149,11 @@ void NAOWebotsActionators::copyToServos()
         {
             for (int i=0; i<m_servos.size(); i++)
             {
-                if (isvalid[i] == true)// && i != NUActionatorsData::RHipYawPitch)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
+                if (isvalid[i] == true)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
                 {
+                    if (i == NUActionatorsData::RHipYawPitch)
+                        positions[i] = positions[NUActionatorsData::LHipYawPitch];
+                    
                     JServo* jservo = (JServo*) m_servos[i];
                     if (times[i] >= m_current_time)
                     {

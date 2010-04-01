@@ -28,7 +28,8 @@
 #define NAOSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
-#include "NUNAO.h"
+#include <almemoryfastaccess.h>
+using namespace AL;
 
 class NAOSensors : public NUSensors
 {

@@ -23,6 +23,7 @@
 
 #include "NUPlatform/NUSystem.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 JWalk::JWalk()
 {

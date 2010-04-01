@@ -32,14 +32,26 @@
 class CameraJob : public Job
 {
 public:
-    CameraJob(job_id_t jobid, double time) : Job(Job::CAMERA, jobid){m_job_time = time;};
+    CameraJob(job_id_t jobid) : Job(Job::CAMERA, jobid) {};
     virtual ~CameraJob() {};
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(ostream& output) = 0;
+    virtual void csvTo(ostream& output) = 0;
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<< (ostream& output, const CameraJob& job) 
+    {   job.toStream(output); 
+        return output;
+    };
+    friend ostream& operator<< (ostream& output, const CameraJob* job)
+    {
+        if (job != NULL) 
+            job->toStream(output);
+        else
+            output << "NULL";
+        return output;
+    };
+protected:
+    virtual void toStream(ostream& output) const {};
 };
 
 #endif

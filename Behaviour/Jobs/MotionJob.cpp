@@ -27,6 +27,7 @@
 
 #include "MotionJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 
 /*! @relates MotionJob

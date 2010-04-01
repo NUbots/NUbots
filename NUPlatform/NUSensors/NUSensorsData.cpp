@@ -21,6 +21,7 @@
 
 #include "NUSensorsData.h"
 #include "debug.h"
+#include "debugverbositynusensors.h"
 
 #include <fstream>
 #include <cctype>       // for tolower()

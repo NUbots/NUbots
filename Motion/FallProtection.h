@@ -34,7 +34,6 @@
 #ifndef FALLPROTECTION_H
 #define FALLPROTECTION_H
 
-#include "motionconfig.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 

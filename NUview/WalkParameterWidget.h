@@ -81,13 +81,24 @@ private:
     QSlider* phaseResetSlider;                 //!< Slider for phase offset
     QSpinBox* phaseResetSpinBox;               //!< SpinBox for phase offset
     
-    // Step Size
-    QHBoxLayout* stepSizeLayout;                //!< Layout for step size
-    QLabel* stepSizeLabel;                      //!< Label for step size
-    QSlider* stepSizeSlider;                    //!< Slider for alpha selection
-    QSpinBox* stepSizeSpinBox;                  //!< SpinBox for alpha selection
+    // X Speed
+    QHBoxLayout* xSpeedLayout;                 //!< Layout for step size
+    QLabel* xSpeedLabel;                       //!< Label for step size
+    QSlider* xSpeedSlider;                     //!< Slider for alpha selection
+    QSpinBox* xSpeedSpinBox;                   //!< SpinBox for alpha selection
     
-
+    // Y Speed
+    QHBoxLayout* ySpeedLayout;                 //!< Layout for step size
+    QLabel* ySpeedLabel;                       //!< Label for step size
+    QSlider* ySpeedSlider;                     //!< Slider for alpha selection
+    QSpinBox* ySpeedSpinBox;                   //!< SpinBox for alpha selection
+    
+    // Yaw Speed
+    QHBoxLayout* yawSpeedLayout;               //!< Layout for step size
+    QLabel* yawSpeedLabel;                     //!< Label for step size
+    QSlider* yawSpeedSlider;                   //!< Slider for alpha selection
+    QSpinBox* yawSpeedSpinBox;                 //!< SpinBox for alpha selection
+    
     void createWidgets();       //!< Create all of the child widgets.
     void createLayout();        //!< Layout all of the child widgets.
     void createConnections();   //!< Connect all of the child widgets.

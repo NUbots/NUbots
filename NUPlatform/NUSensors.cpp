@@ -22,6 +22,7 @@
 #include "NUSensors.h"
 #include "NUSystem.h"
 #include "debug.h"
+#include "debugverbositynusensors.h"
 #include "../Kinematics/Horizon.h"
 #include <math.h>
 #include <boost/circular_buffer.hpp>
@@ -468,7 +469,7 @@ void NUSensors::calculateFootImpact()
             }
             if (leftprevioussmall == true && leftforce > (leftforcemin + leftforcemax)/4.0)
             {
-                previousimpacttimes[0] - impacttimes[0];
+                previousimpacttimes[0] = impacttimes[0];
                 impacttimes[0] = m_current_time;
                 for (unsigned int i=0; i<previousleftforces.size(); i++)
                 {

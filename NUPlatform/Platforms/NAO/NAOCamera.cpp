@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #undef __STRICT_ANSI__
 #include <linux/videodev.h>
@@ -87,6 +88,7 @@ enum  v4l2_exposure_auto_type {
 #include "NUPlatform/NUSystem.h"
 #include "GTAssert.h"
 #include "debug.h"
+#include "debugverbositynucamera.h"
 
 NAOCamera::NAOCamera() :
 currentBuf(0),

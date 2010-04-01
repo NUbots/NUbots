@@ -22,6 +22,7 @@
 #include "NUActionators.h"
 #include "NUSystem.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 
 NUActionators::NUActionators()
 {
@@ -53,6 +54,13 @@ void NUActionators::process(NUActionatorsData*& data)
 #endif
     m_current_time = nusystem->getTime();
     copyToHardwareCommunications();
+}
+
+/*! @brief Returns the actions storage class
+ */
+NUActionatorsData* NUActionators::getActions()
+{
+    return m_data;
 }
 
 /* @brief A function to copy NUActionatorsData to the hardware communications system.

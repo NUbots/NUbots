@@ -22,6 +22,7 @@
 #include "Job.h"
 #include "../Jobs.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Job constructor
  */
@@ -152,7 +153,7 @@ istream& operator>>(istream& input, Job** job)
 
     // Buffer for reading
     char charBuffer;
-    char doubleBuffer;
+    double doubleBuffer;
 
     Job::job_type_t jobtype;
     Job::job_id_t jobid;
@@ -198,6 +199,12 @@ istream& operator>>(istream& input, Job** job)
             break;
         case Job::MOTION_PAN:
             *job = new PanHeadJob(jobtime, input);
+            break;
+        case Job::CAMERA_CHANGE_SETTINGS:
+            *job = new ChangeCameraSettingsJob(input);
+            break;
+        case Job::VISION_SAVE_IMAGES:
+            *job = new SaveImagesJob(input);
             break;
         default:
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;

@@ -3,12 +3,11 @@ QT += network \
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -L \
-        /usr/lib/libz.dylib
+    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
 }
-win32 { 
+win32 {
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+    INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
@@ -42,6 +41,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
+    ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
     KickWidget.h \
@@ -83,7 +83,9 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocWM.h \
     ../Localisation/KF.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
-    ../GameController/GameInformation.h
+    ../GameController/GameInformation.h \
+    ../Tools/Threading/Thread.h
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -102,6 +104,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/ClassifiedSection.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
+    ../Vision/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
@@ -148,6 +151,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
-    ../GameController/GameInformation.cpp
+    ../GameController/GameInformation.cpp \
+    ../Tools/Threading/Thread.cpp
+
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

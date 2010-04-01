@@ -20,9 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Thread
-		UdpPort
-        TcpPort
+SET (YOUR_SRCS  UdpPort
+                TcpPort
         
 )
 ####################################################################################

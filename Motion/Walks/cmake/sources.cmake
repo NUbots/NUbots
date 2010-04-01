@@ -19,23 +19,36 @@ IF(DEBUG)
     MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
 ENDIF()
 
+# I need to prefix each file and directory with the correct path
+STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
+
+INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
+
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  WalkParameters
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  JWalk
-           	JuppWalk
-     		NBWalk
-		VSCWalk
-		Optimisation
-)
+SET (YOUR_DIRS )
+IF(USE_WALK_JWALK)
+	LIST(APPEND YOUR_DIRS JWalk)
+ENDIF()
+IF(USE_WALK_JUPPWALK)
+	LIST(APPEND YOUR_DIRS JuppWalk)
+ENDIF()
+IF(USE_WALK_NBWALK)
+	LIST(APPEND YOUR_DIRS NBWalk)
+ENDIF()
+IF(USE_WALK_VSCWALK)
+	LIST(APPEND YOUR_DIRS VSCWalk)
+ENDIF()
+IF(USE_WALK_ALWALK)
+	LIST(APPEND YOUR_DIRS ALWalk)
+ENDIF()
+IF(USE_WALKOPTIMISER)
+	LIST(APPEND YOUR_DIRS Optimisation)
+ENDIF()
 ####################################################################################
-
-# I need to prefix each file and directory with the correct path
-STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 
