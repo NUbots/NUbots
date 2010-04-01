@@ -41,7 +41,7 @@ KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(pare
     m_nusystem = new NAOSystem();
     nusystem = m_nusystem;
     m_job_list = new JobList();
-    m_io = new NUIO(0);
+    m_io = new NUIO(0, NULL);
 }
 
 void KickWidget::createWidgets()
