@@ -48,14 +48,18 @@ ALWalk::~ALWalk()
 
 void ALWalk::doWalk()
 {
-    if (fabs(m_speed_x) > 10)
-        m_speed_x = (m_speed_x/fabs(m_speed_x))*10;
-    if (fabs(m_speed_y) > 10)
-        m_speed_y = (m_speed_y/fabs(m_speed_y))*10;
-    if (fabs(m_speed_yaw) > 1)
-        m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw));
-    
-    m_al_motion->setWalkTargetVelocity(m_speed_x/10.0, m_speed_y/10.0, m_speed_yaw, 1);
+    static unsigned int count = 0;
+    if (count%4 == 0)
+    {   // this is a very simple hack to get almotion to use alot less CPU. It is perfectly reasonable to do this because almotion isn't going to respond that quickly anyway.
+        if (fabs(m_speed_x) > 10)
+            m_speed_x = (m_speed_x/fabs(m_speed_x))*10;
+        if (fabs(m_speed_y) > 10)
+            m_speed_y = (m_speed_y/fabs(m_speed_y))*10;
+        if (fabs(m_speed_yaw) > 1)
+            m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw));
+        
+        m_al_motion->setWalkTargetVelocity(m_speed_x/10.0, m_speed_y/10.0, m_speed_yaw, 1);
+    }
 }
 
 
