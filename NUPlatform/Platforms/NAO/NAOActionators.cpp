@@ -64,8 +64,6 @@ NAOActionators::NAOActionators()
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
     
-    m_data->addJointPosition(NUActionatorsData::HeadYaw, nusystem->getTime() + 100000, -1.57, 0, 100);
-    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
