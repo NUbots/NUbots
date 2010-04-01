@@ -284,7 +284,7 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, c_LUTLength,"/home/nao/default.lut" );
+    lutLoader.LoadLUT(LUTBuffer, c_LUTLength,fileName.c_str() );
     setLUT(LUTBuffer);
 }
 
