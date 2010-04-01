@@ -79,7 +79,8 @@ HEADERS += ui_mainwindow.h \
     visionstreamwidget.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
-    ../Tools/FileFormats/Parse.h
+    ../Tools/FileFormats/Parse.h \
+    ../Tools/Threading/Thread.h
 
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -142,7 +143,8 @@ SOURCES += mainwindow.cpp \
     visionstreamwidget.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
-    ../Tools/FileFormats/Parse.cpp
+    ../Tools/FileFormats/Parse.cpp \
+    ../Tools/Threading/Thread.cpp
 
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
