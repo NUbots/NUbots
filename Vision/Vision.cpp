@@ -25,6 +25,7 @@ Vision::Vision()
 
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
+    LUTBuffer = new unsigned char[c_LUTLength];
     currentLookupTable = LUTBuffer;
     //qDebug() << "Vision Started..";
     return;
@@ -32,6 +33,8 @@ Vision::Vision()
 
 Vision::~Vision()
 {
+    if (LUTBuffer != NULL)
+        delete LUTBuffer;
     delete AllFieldObjects;
     return;
 }
