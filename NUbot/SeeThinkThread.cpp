@@ -74,7 +74,7 @@ void SeeThinkThread::run()
         double realendtime, processendtime, threadendtime;
     #endif
     
-    int err = 0;                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+    int err = 0;
     while (err == 0 && errno != EINTR)
     {
         try

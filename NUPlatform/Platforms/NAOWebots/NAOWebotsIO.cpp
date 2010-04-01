@@ -23,7 +23,9 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-NAOWebotsIO::NAOWebotsIO(int probotnumber) : NUIO(probotnumber)
+#include "NUbot.h"
+
+NAOWebotsIO::NAOWebotsIO(int probotnumber, NUbot* nubot) : NUIO(probotnumber, nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::NAOWebotsIO()" << endl;

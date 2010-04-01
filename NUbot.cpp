@@ -68,14 +68,6 @@ NUbot::NUbot(int argc, const char *argv[])
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
     #endif
     
-    // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Jobs = new JobList();
-    
     // --------------------------------- construct the platform
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
@@ -107,7 +99,15 @@ NUbot::NUbot(int argc, const char *argv[])
         m_motion = new NUMotion();
     #endif
     
-    m_io = new NUIO(0);         //<! @todo TODO pass nuio the player number!
+    m_io = new NUIO(0, this);         //<! @todo TODO pass nuio the player number!
+    
+    // --------------------------------- construct the public storage
+    #ifdef USE_VISION
+        Image = NULL;
+    #endif
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
+    Jobs = new JobList();
     
     createThreads();
     

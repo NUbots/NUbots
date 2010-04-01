@@ -33,8 +33,6 @@ NUPlatform::~NUPlatform()
 #endif
     if (system != NULL)
         delete system;
-    if (io != NULL)
-        delete io;
     if (camera != NULL)
         delete camera;
     if (sensors != NULL)
