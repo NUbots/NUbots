@@ -23,8 +23,6 @@
 
 #include "../Behaviour/Jobs.h"
 #include "../NUPlatform/NUIO.h"
-#include "../NUPlatform/NUSystem.h"
-#include "../NUPlatform/Platforms/NAO/NAOSystem.h"
 #include "debug.h"
 
 KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
