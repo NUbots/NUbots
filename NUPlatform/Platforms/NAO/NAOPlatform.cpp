@@ -42,7 +42,8 @@ NAOPlatform::NAOPlatform()
      string m_team_colour;
      int m_team_number;
      */
-    m_number = 0;
+    m_robot_number = 0;
+    m_player_number = 0;
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules! 
     camera = new NAOCamera();
     sensors = new NAOSensors();
