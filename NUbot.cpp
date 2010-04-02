@@ -24,6 +24,8 @@
 
 #include "NUbot.h"
 #include "Behaviour/Jobs.h"
+#include "GameController/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
 
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
@@ -115,6 +117,7 @@ NUbot::NUbot(int argc, const char *argv[])
     Actions = m_platform->actionators->getActions();
     Jobs = new JobList();
     GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    TeamInfo = new TeamInformation();
     
     createThreads();
     
@@ -219,6 +222,8 @@ NUbot::~NUbot()
         delete Jobs;
     if (GameInfo != NULL)
         delete GameInfo;
+    if (TeamInfo != NULL)
+        delete TeamInfo;
     
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::~NUbot(). Finished!" << endl;

@@ -1,12 +1,12 @@
-/*! @file TeamPort.h
-    @brief Declaration of TeamPort class.
-
-    @class TeamPort
-    @brief TeamPort a network port for sending jobs wirelessly to/from robots
+/*! @file TeamInformation.h
+    @brief Declaration of TeamInformation
+ 
+    @class TeamInformation
+    @brief A class to hold all of the team information
 
     @author Jason Kulk
  
- Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2009 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,28 +20,18 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
- */
-#ifndef TEAMPORT_H
-#define TEAMPORT_H
+*/
 
-#include "UdpPort.h"
+#ifndef TEAMINFORMATION_H
+#define TEAMINFORMATION_H
 
-class TeamInformation;
-
-class TeamPort : public UdpPort
+class TeamInformation
 {
 public:
-    TeamPort(TeamInformation* nubotteaminformation, int portnumber);
-    ~TeamPort();
-    
-    friend TeamPort& operator<<(TeamPort& port, TeamInformation& teaminfo);
-    friend TeamPort& operator<<(TeamPort& port, TeamInformation* teaminfo);
-private:
-    void handleNewData(std::stringstream& buffer);
-public:
-private:
-    TeamInformation* m_team_information;
+    TeamInformation();
+    ~TeamInformation();
 };
+
 
 #endif
 

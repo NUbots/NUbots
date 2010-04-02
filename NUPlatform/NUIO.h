@@ -35,6 +35,8 @@ class JobPort;
 class TcpPort;
 
 class JobList;
+class GameInformation;
+class TeamInformation;
 class NUimage;
 
 class NUIO
@@ -42,6 +44,7 @@ class NUIO
 // Functions:
 public:
     NUIO(NUbot* nubot);
+    NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs);
     virtual ~NUIO();
     
     // JobList streaming
@@ -56,7 +59,7 @@ public:
     friend NUIO& operator<<(NUIO& io, NUimage* p_image);
     
 protected:
-    virtual void createTeamPort();
+    virtual void createTeamPort(TeamInformation* teaminfo);
 private:
     
 // Members:

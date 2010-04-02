@@ -31,9 +31,9 @@
 /*! @brief Constructs a TeamPort
     @param nubotjobs the public nubot job list
  */
-TeamPort::TeamPort(GameInformation* nubotgameinformation, int portnumber): UdpPort(std::string("TeamPort"), portnumber)
+TeamPort::TeamPort(TeamInformation* nubotteaminformation, int portnumber): UdpPort(std::string("TeamPort"), portnumber)
 {
-    m_game_information = nubotgameinformation;
+    m_team_information = nubotteaminformation;
 }
 
 /*! @brief Closes the job port
@@ -44,7 +44,7 @@ TeamPort::~TeamPort()
 
 /*! @brief Sends this robot's team packet over the network
  */
-TeamPort& operator<<(TeamPort& port, GameInformation& gameinfo)
+TeamPort& operator<<(TeamPort& port, TeamInformation& teaminfo)
 {
     // tp = m_game_information.getTeamPacket()
     // buffer << tp;
@@ -54,7 +54,7 @@ TeamPort& operator<<(TeamPort& port, GameInformation& gameinfo)
 
 /*! @brief Sends this robot's team packet over the network
  */
-TeamPort& operator<<(TeamPort& port, GameInformation* gameinfo)
+TeamPort& operator<<(TeamPort& port, TeamInformation* teaminfo)
 {
     // tp = m_game_information->getTeamPacket()
     // buffer << tp;

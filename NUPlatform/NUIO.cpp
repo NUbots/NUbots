@@ -54,18 +54,35 @@ NUIO::NUIO(NUbot* nubot)
     m_nubot = nubot;            // we need the nubot so that we can access the public store
     
     m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
-    createTeamPort();
-    m_vision_port = new TcpPort(VISION_PORT);
+    createTeamPort(m_nubot->TeamInfo);
     m_jobs_port = new JobPort(m_nubot->Jobs);
+    
+    m_vision_port = new TcpPort(VISION_PORT);
+}
+
+/*! @brief Create a new NUIO interface to network and log files. Use this version in NUview
+    @param gameinfo a pointer to the public game information
+    @param teaminfo a pointer to the public team information
+    @param jobs a pointer to the public joblist
+ 
+ */
+NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
+{
+    m_nubot = NULL;
+    m_gamecontroller_port = new GameControllerPort(gameinfo);
+    createTeamPort(teaminfo);
+    m_jobs_port = new JobPort(jobs);
+    
+    m_vision_port = new TcpPort(VISION_PORT);
 }
 
 /*! @brief Creates the team communications port
     
  This function is virtual because simulators will need to implement this differently.
  */
-void NUIO::createTeamPort()
+void NUIO::createTeamPort(TeamInformation* teaminfo)
 {
-    m_team_port = new TeamPort(m_nubot->GameInfo, TEAM_PORT);
+    m_team_port = new TeamPort(teaminfo, TEAM_PORT);
 }
 
 NUIO::~NUIO()
