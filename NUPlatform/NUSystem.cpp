@@ -23,6 +23,8 @@
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
+using namespace std;
+
 NUSystem* nusystem;
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME

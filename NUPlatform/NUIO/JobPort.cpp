@@ -31,6 +31,9 @@
  */
 JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT)
 {
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "JobPort::JobPort(" << nubotjobs << ")" << endl;
+    #endif
     m_jobs = nubotjobs;
 }
 
@@ -38,6 +41,9 @@ JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT)
  */
 JobPort::~JobPort()
 {
+#if DEBUG_NETWORK_VERBOSITY > 0
+    debug << "JobPort::~JobPort()" << endl;
+#endif
 }
 
 /*! @brief Sets the target ip address to that which is specified
@@ -87,5 +93,8 @@ JobPort& operator<<(JobPort& port, JobList* jobs)
 */
 void JobPort::handleNewData(std::stringstream& buffer)
 {
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "JobPort::handleNewData(" << buffer.str().c_str() << ")" << endl;
+    #endif
     buffer >> *m_jobs;
 }

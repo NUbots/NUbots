@@ -23,6 +23,8 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
+using namespace std;
+
 NAOIO::NAOIO(NUbot* nubot): NUIO(nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4

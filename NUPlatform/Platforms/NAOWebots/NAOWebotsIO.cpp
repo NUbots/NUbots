@@ -23,6 +23,8 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
+using namespace std;
+
 #include "NUbot.h"
 
 /*! @brief Construct a NAOWebotsIO object

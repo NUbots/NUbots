@@ -522,7 +522,7 @@ void JobList::csvTo(ostream& output)
 
 ostream& operator<<(ostream& output, JobList& joblist)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     debug << "ostream << JobList. " << joblist.size() << " jobs." << endl;
 #endif
     output << joblist.size() << " ";
@@ -535,14 +535,14 @@ ostream& operator<<(ostream& output, JobList& joblist)
 
 istream& operator>>(istream& input, JobList& joblist)
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    #if DEBUG_JOBS_VERBOSITY > 4
         debug << "istream >> JobList" << endl;
     #endif
     char buffer[8];
     unsigned int numnewjobs = 0;
     input >> numnewjobs;
     input.read(buffer, sizeof(char));       // skip over the white space
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    #if DEBUG_JOBS_VERBOSITY > 4
         debug << "istream >> JobList. Adding " << numnewjobs << endl;
     #endif
     Job* tempjob = NULL;
@@ -573,7 +573,7 @@ JobListIterator::JobListIterator()
 JobListIterator::JobListIterator(JobList* joblist, bool end)
 {
     m_joblist = joblist;
-#if DEBUG_BEHAVIOUR_VERBOSITY > 5
+#if DEBUG_JOBS_VERBOSITY > 5
     debug << "JobListIterator::JobListIterator. Contents of JobList:" << endl;
     list<list<Job*>*>::iterator it;
     list<Job*>::iterator sit;
