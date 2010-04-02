@@ -32,6 +32,8 @@ Vision::Vision()
 
 Vision::~Vision()
 {
+    if (LUTBuffer != NULL)
+        delete LUTBuffer;
     delete AllFieldObjects;
     delete [] LUTBuffer;
     return;

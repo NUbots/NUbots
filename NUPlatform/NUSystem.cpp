@@ -42,6 +42,7 @@ NUSystem::NUSystem()
 #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "NUSystem::NUSystem()" << endl;
 #endif 
+    nusystem = this;
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);

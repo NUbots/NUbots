@@ -23,7 +23,6 @@ class QSignalMapper;
 class QToolButton;
 class GLDisplay;
 
-class NUSystem;
 class JobList;
 class NUIO;
 
@@ -75,7 +74,6 @@ private:
     void createConnections();   //!< Connect all of the child widgets.
     bool disableWriting;        //!< Flag used to disable the writing of settings back to the layers when updating the displays.
     
-    NUSystem* m_nusystem;
     NUIO* m_io;
     JobList* m_job_list; 
 

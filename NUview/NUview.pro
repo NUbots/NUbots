@@ -1,5 +1,6 @@
 QT += network \
     opengl
+DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -19,7 +20,7 @@ win32 {
 # Input
 # HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 INCLUDEPATH += ../
-INCLUDEPATH += ../Autoconfig
+INCLUDEPATH += NUviewconfig/
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -45,12 +46,6 @@ HEADERS += ui_mainwindow.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
     KickWidget.h \
-    ../Motion/Walks/WalkParameters.h \
-    ../Behaviour/Jobs.h \
-    ../Behaviour/Jobs/*.h \
-    ../NUPlatform/NUIO.h \
-    ../NUPlatform/NUIO/*.h \
-    ../Autoconfig/*.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
@@ -112,10 +107,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUIO/*.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
-    ../NUPlatform/NUActionators.cpp \
-    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUSystem.cpp \
-    ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
     ../Behaviour/Jobs/*.cpp \
     ../Behaviour/Jobs/CameraJobs/*.cpp \
     ../Behaviour/Jobs/VisionJobs/*.cpp \

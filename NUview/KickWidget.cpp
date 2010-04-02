@@ -23,8 +23,6 @@
 
 #include "../Behaviour/Jobs.h"
 #include "../NUPlatform/NUIO.h"
-#include "../NUPlatform/NUSystem.h"
-#include "../NUPlatform/Platforms/NAO/NAOSystem.h"
 #include "debug.h"
 
 KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -38,8 +36,6 @@ KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(pare
     this->setEnabled(true);
     disableWriting = false;
     
-    m_nusystem = new NAOSystem();
-    nusystem = m_nusystem;
     m_job_list = new JobList();
     m_io = new NUIO(0, NULL);
 }
@@ -118,7 +114,6 @@ KickWidget::~KickWidget()
     delete kickButtonLayout;              //!< Laout fo the kick button
     delete kickButton;                    //!< Button to trigger sending of kick job to robot
     
-    delete m_nusystem;
     delete m_io;
     delete m_job_list; 
     
