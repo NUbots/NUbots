@@ -32,8 +32,6 @@ Vision::Vision()
 
 Vision::~Vision()
 {
-    if (LUTBuffer != NULL)
-        delete LUTBuffer;
     delete AllFieldObjects;
     delete [] LUTBuffer;
     return;
@@ -301,8 +299,8 @@ void Vision::setImage(const NUimage* newImage)
 unsigned char Vision::classifyPixel(int x, int y)
 {
     classifiedCounter++;
-    //Pixel* temp = &currentImage->image[y][x];
-    return 0;//currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
+    Pixel* temp = &currentImage->image[y][x];
+    return currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
 }
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {
