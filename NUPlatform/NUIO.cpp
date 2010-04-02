@@ -68,6 +68,9 @@ NUIO::NUIO(NUbot* nubot)
  */
 NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
 {
+#if DEBUG_NETWORK_VERBOSITY > 4
+    debug << "NUIO::NUIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << endl;
+#endif
     m_nubot = NULL;
     m_gamecontroller_port = new GameControllerPort(gameinfo);
     createTeamPort(teaminfo);

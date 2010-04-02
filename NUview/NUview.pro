@@ -78,7 +78,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/KF.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
     ../GameController/GameInformation.h \
-    ../Tools/Threading/Thread.h
+    ../Tools/Threading/Thread.h \
+    NUviewIO/NUviewIO.h
 
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -105,6 +106,7 @@ SOURCES += mainwindow.cpp \
     ../Motion/Walks/WalkParameters.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
+    NUviewIO/NUviewIO.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
     ../NUPlatform/NUSystem.cpp \
