@@ -20,10 +20,14 @@
  */
 
 #include "NUIO.h"
-#include "NUIO/UdpPort.h"
+
+#include "NUIO/GameControllerPort.h"
+#include "NUIO/TeamPort.h"
+#include "NUIO/JobPort.h"
+
 #include "NUIO/TcpPort.h"
 #include "NUIO/RoboCupGameControlData.h"
-#include "NUIO/NetworkPorts.h"
+#include "NUIO/NetworkPortNumbers.h"
 
 #include "NUbot.h"
 #include "NUPlatform/NUPlatform.h"
@@ -31,6 +35,7 @@
 #include "Tools/Image/NUimage.h"
 
 #include <sstream>
+#include <string>
 using namespace std;
 
 #include "debug.h"
@@ -40,18 +45,27 @@ using namespace std;
     @param robotnumber the unique number of the robot (this is used to select a port offset)
     @param nubot a pointer to the nubot
  */
-NUIO::NUIO(int robotnumber, NUbot* nubot)
+NUIO::NUIO(NUbot* nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUIO::NUIO(" << robotnumber << ")" << endl;
+    debug << "NUIO::NUIO(" << nubot << ")" << endl;
 #endif
     
     m_nubot = nubot;            // we need the nubot so that we can access the public store
     
-    m_gamecontroller_port = new UdpPort(GAMECONTROLLER_PORT);
-    m_team_port = NULL;                                         // The implementation of the team network is going to be platform specific!
-    m_vision_port = new TcpPort(VISION_PORT + robotnumber);
-    m_jobs_port = new UdpPort(JOBS_PORT + robotnumber);
+    m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
+    createTeamPort();
+    m_vision_port = new TcpPort(VISION_PORT);
+    m_jobs_port = new JobPort(m_nubot->Jobs);
+}
+
+/*! @brief Creates the team communications port
+    
+ This function is virtual because simulators will need to implement this differently.
+ */
+void NUIO::createTeamPort()
+{
+    m_team_port = new TeamPort(m_nubot->GameInfo, TEAM_PORT);
 }
 
 NUIO::~NUIO()
@@ -75,10 +89,7 @@ NUIO::~NUIO()
  */
 NUIO& operator<<(NUIO& io, JobList& jobs)
 {
-    stringstream buffer;
-    buffer << jobs;
-    
-    io.m_jobs_port->sendData(buffer);
+    (*io.m_jobs_port) << jobs;
     return io;
 }
 
@@ -88,47 +99,10 @@ NUIO& operator<<(NUIO& io, JobList& jobs)
  */
 NUIO& operator<<(NUIO& io, JobList* jobs)
 {
-    io << *jobs;
+    (*io.m_jobs_port) << jobs;
     return io;
 }
 
-/*! @brief Stream extraction operator for a JobList
-    @param io the nuio stream object to extract the new jobs from
-    @param jobs the job list to add the extracted jobs
- */
-NUIO& operator>>(NUIO& io, JobList& jobs)
-{
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUIO >> JobList" << endl;
-#endif
-    network_data_t netdata = io.m_jobs_port->receiveData();
-    if (netdata.size > 0)
-    {
-        #if DEBUG_NETWORK_VERBOSITY > 3
-            debug << "NUIO >> JobList received: " << netdata.size << endl;
-        #endif
-        #if DEBUG_NETWORK_VERBOSITY > 4
-            debug << "NUIO >> JobList received: ";
-            for (int i=0; i<netdata.size; i++)
-                debug << netdata.data[i];
-            debug << endl;
-        #endif
-        stringstream buffer;
-        buffer.write(reinterpret_cast<char*>(netdata.data), netdata.size);
-        buffer >> jobs;
-    }
-    return io;
-}
-
-/*! @brief Stream extraction operator for a JobList
-    @param io the nuio stream object to extract the new jobs from
-    @param jobts the pointer to the job list to add the extracted jobs
- */
-NUIO& operator>>(NUIO& io, JobList* jobs)
-{
-    io >> *jobs;
-    return io;
-}
 /*! @brief Stream insertion operator for NUimage
     @param io the nuio stream object
     @param sensors the NUimage data to stream

@@ -1,9 +1,12 @@
-/*! @file NAOIO.cpp
-    @brief Implementation of NAOIO input/output class
+/*! @file TeamPort.h
+    @brief Declaration of TeamPort class.
+
+    @class TeamPort
+    @brief TeamPort a network port for sending jobs wirelessly to/from robots
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,22 +21,27 @@
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef TEAMPORT_H
+#define TEAMPORT_H
 
-#include "NAOIO.h"
-#include "debug.h"
-#include "debugverbositynetwork.h"
+#include "UdpPort.h"
 
-NAOIO::NAOIO(NUbot* nubot): NUIO(nubot)
+class GameInformation;
+
+class TeamPort : public UdpPort
 {
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::NAOIO(" << nubot << ")" << endl;
-#endif
-}
+public:
+    TeamPort(GameInformation* nubotgameinformation, int portnumber);
+    ~TeamPort();
+    
+    friend TeamPort& operator<<(TeamPort& port, GameInformation& gameinfo);
+    friend TeamPort& operator<<(TeamPort& port, GameInformation* gameinfo);
+private:
+    void handleNewData(std::stringstream& buffer);
+public:
+private:
+    GameInformation* m_game_information;
+};
 
-NAOIO::~NAOIO()
-{
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::~NAOIO()" << endl;
 #endif
-}
 

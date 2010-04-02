@@ -41,7 +41,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     errorlog.open("error.log");
     
     m_job_list = new JobList();
-    m_io = new NUIO(0, NULL);
+    m_io = new NUIO(NULL);
     m_walk_parameters = new WalkParameters();
     
     ifstream testparafile("jupptestparameters.wp");

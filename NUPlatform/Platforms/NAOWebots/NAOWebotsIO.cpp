@@ -25,11 +25,18 @@
 
 #include "NUbot.h"
 
-NAOWebotsIO::NAOWebotsIO(int probotnumber, NUbot* nubot) : NUIO(probotnumber, nubot)
+/*! @brief Construct a NAOWebotsIO object
+    @param probotnumber the robot number, we need this to calculate the team port
+    @param pteamnumber the team number, we need this to calculate the team port
+    @param nubot a pointer to the NUbot, we need this to gain access to the public store
+ */
+NAOWebotsIO::NAOWebotsIO(int probotnumber, int pteamnumber, NUbot* nubot) : NUIO(nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::NAOWebotsIO()" << endl;
 #endif
+    m_robot_number = probotnumber;
+    m_team_number = pteamnumber;
 }
 
 NAOWebotsIO::~NAOWebotsIO()

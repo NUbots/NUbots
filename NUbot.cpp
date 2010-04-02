@@ -33,10 +33,15 @@
 
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
+    #include "NUPlatform/Platforms/NAOWebots/NAOWebotsIO.h"
 #elif defined(TARGET_IS_NAO)
     #include "NUPlatform/Platforms/NAO/NAOPlatform.h"
+    #include "NUPlatform/Platforms/NAO/NAOIO.h"
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
+    #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_NUVIEW)
+    #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
     #error There is no platform (TARGET_IS_${}) defined
 #endif
@@ -71,10 +76,13 @@ NUbot::NUbot(int argc, const char *argv[])
     // --------------------------------- construct the platform
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
+        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
     #elif defined(TARGET_IS_NAO)
         m_platform = new NAOPlatform();
+        m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
+        m_io = new CycloidIO(this);
     #endif
 
     #if DEBUG_NUBOT_VERBOSITY > 0
@@ -92,15 +100,12 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_BEHAVIOUR
-		m_gameInfo = new GameInformation(1,2);
         m_behaviour = new Behaviour();
     #endif
     
     #ifdef USE_MOTION
         m_motion = new NUMotion();
     #endif
-    
-    m_io = new NUIO(0, this);         //<! @todo TODO pass nuio the player number!
     
     // --------------------------------- construct the public storage
     #ifdef USE_VISION
@@ -109,6 +114,7 @@ NUbot::NUbot(int argc, const char *argv[])
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();
     Jobs = new JobList();
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
     
     createThreads();
     
@@ -188,8 +194,6 @@ NUbot::~NUbot()
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
             delete m_behaviour;
-		if (m_gameInfo != NULL)
-            delete m_gameInfo;
     #endif
     #ifdef USE_MOTION
         if (m_motion != NULL)
@@ -213,6 +217,8 @@ NUbot::~NUbot()
         delete Actions;
     if (Jobs != NULL)
         delete Jobs;
+    if (GameInfo != NULL)
+        delete GameInfo;
     
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::~NUbot(). Finished!" << endl;

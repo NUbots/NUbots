@@ -37,7 +37,7 @@ KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(pare
     disableWriting = false;
     
     m_job_list = new JobList();
-    m_io = new NUIO(0, NULL);
+    m_io = new NUIO(NULL);
 }
 
 void KickWidget::createWidgets()

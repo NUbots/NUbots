@@ -1,9 +1,12 @@
-/*! @file NAOIO.cpp
-    @brief Implementation of NAOIO input/output class
+/*! @file JobPort.h
+    @brief Declaration of JobPort class.
+
+    @class JobPort
+    @brief JobPort a network port for sending jobs wirelessly to/from robots
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,22 +21,31 @@
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef JOBPORT_H
+#define JOBPORT_H
 
-#include "NAOIO.h"
-#include "debug.h"
-#include "debugverbositynetwork.h"
+#include "UdpPort.h"
+#include <string>
 
-NAOIO::NAOIO(NUbot* nubot): NUIO(nubot)
+class JobList;
+
+class JobPort : public UdpPort
 {
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::NAOIO(" << nubot << ")" << endl;
-#endif
-}
+public:
+    JobPort(JobList* nubotjobs);
+    ~JobPort();
+    
+    void setTargetAddress(std::string ipaddress);
+    void setBroadcast();
+    
+    friend JobPort& operator<<(JobPort& port, JobList& jobs);
+    friend JobPort& operator<<(JobPort& port, JobList* jobs);
+private:
+    void handleNewData(std::stringstream& buffer);
+public:
+private:
+    JobList* m_jobs;
+};
 
-NAOIO::~NAOIO()
-{
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::~NAOIO()" << endl;
 #endif
-}
 

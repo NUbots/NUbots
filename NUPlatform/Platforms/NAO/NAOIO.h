@@ -33,7 +33,7 @@ class NAOIO: public NUIO
 {
 // Functions:
 public:
-    NAOIO(int probotnumber, NUbot* nubot);
+    NAOIO(NUbot* nubot);
     ~NAOIO();
     
 protected:

@@ -21,6 +21,9 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  UdpPort
+		GameControllerPort
+		JobPort
+		TeamPort
                 TcpPort
         
 )

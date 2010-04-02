@@ -1,9 +1,12 @@
-/*! @file NAOIO.cpp
-    @brief Implementation of NAOIO input/output class
+/*! @file GameControllerPort.h
+    @brief Declaration of GameControllerPort class.
+
+    @class GameControllerPort
+    @brief GameControllerPort a network port for listening
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,22 +21,24 @@
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef GAMECONTROLLERPORT_H
+#define GAMECONTROLLERPORT_H
 
-#include "NAOIO.h"
-#include "debug.h"
-#include "debugverbositynetwork.h"
+#include "UdpPort.h"
 
-NAOIO::NAOIO(NUbot* nubot): NUIO(nubot)
+class GameInformation;
+
+class GameControllerPort : public UdpPort
 {
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::NAOIO(" << nubot << ")" << endl;
-#endif
-}
+public:
+    GameControllerPort(GameInformation* nubotgameinformation);
+    ~GameControllerPort();
+    
+private:
+    void handleNewData(std::stringstream& buffer);
+public:
+private:
+    GameInformation* m_game_information;
+};
 
-NAOIO::~NAOIO()
-{
-#if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::~NAOIO()" << endl;
 #endif
-}
-
