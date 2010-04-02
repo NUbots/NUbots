@@ -78,15 +78,31 @@ NUbot::NUbot(int argc, const char *argv[])
     // --------------------------------- construct the platform
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
-        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
     #elif defined(TARGET_IS_NAO)
         m_platform = new NAOPlatform();
-        m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
+    #endif
+    
+    // --------------------------------- construct the public storage
+    #ifdef USE_VISION
+        Image = NULL;
+    #endif
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
+    Jobs = new JobList();
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    TeamInfo = new TeamInformation();
+
+    // --------------------------------- construct the io
+    #if defined(TARGET_IS_NAOWEBOTS)
+        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
+    #elif defined(TARGET_IS_NAO)
+        m_io = new NAOIO(this);
+    #elif defined(TARGET_IS_CYCLOID)
         m_io = new CycloidIO(this);
     #endif
-
+    
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing modules." << endl;
     #endif
@@ -108,16 +124,6 @@ NUbot::NUbot(int argc, const char *argv[])
     #ifdef USE_MOTION
         m_motion = new NUMotion();
     #endif
-    
-    // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Jobs = new JobList();
-    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
-    TeamInfo = new TeamInformation();
     
     createThreads();
     
