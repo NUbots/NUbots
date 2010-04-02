@@ -26,6 +26,7 @@
 
 #include <netdb.h>
 #include <errno.h>
+#include <cstring>
 using namespace std;
 
 /*! @brief Constructs a udp port on the specified port
@@ -59,7 +60,13 @@ UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
     m_host_name = string(hostname);
     struct hostent* host_entry;
     host_entry = gethostbyname(hostname);
-    m_local_address = *((struct in_addr*) host_entry->h_addr);
+    if (host_entry != NULL)
+        m_local_address = *((struct in_addr*) host_entry->h_addr);
+    else
+    {
+        m_local_address.s_addr = INADDR_BROADCAST;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to get the ip address, defaulting to 255.255.255.255." << endl;
+    }
     
     // On the socket as UDP
     if ((m_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
@@ -135,7 +142,7 @@ void UdpPort::run()
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
             handleNewData(buffer);
             #if DEBUG_NETWORK_VERBOSITY > 4
-            debug << "UdpPort::run(). Received " << buffer << endl;
+                debug << "UdpPort::run(). Received " << buffer.str().c_str() << endl;
             #endif
         }
     }
