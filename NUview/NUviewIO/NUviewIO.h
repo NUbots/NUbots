@@ -29,19 +29,22 @@
 
 class NUSystem;
 
-class NUViewIO: public NUIO
+class NUviewIO: public NUIO
 {
 // Functions:
 public:
-    NUViewIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs);
-    ~NUViewIO();
+    NUviewIO();
+    ~NUviewIO();
     
-    static NUViewIO& getInstance();
 private:
-    NUSystem* m_nusystem;
+    static NUSystem* m_nusystem;
+    
+    static GameInformation* m_gameinfo;
+    static TeamInformation* m_teaminfo;
+    static JobList* m_jobs;
 };
 
-extern NUViewIO* nuio;
+extern NUviewIO* nuio;
 
 #endif
 

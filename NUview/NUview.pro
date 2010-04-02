@@ -110,6 +110,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
     ../NUPlatform/NUSystem.cpp \
+    ../Behaviour/TeamInformation.cpp \
     ../Behaviour/Jobs/*.cpp \
     ../Behaviour/Jobs/CameraJobs/*.cpp \
     ../Behaviour/Jobs/VisionJobs/*.cpp \

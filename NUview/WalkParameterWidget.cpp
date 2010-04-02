@@ -21,9 +21,9 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
-#include "../Motion/NUWalk.h"
-#include "../Behaviour/Jobs.h"
-#include "../NUPlatform/NUIO.h"
+#include "Motion/NUWalk.h"
+#include "Behaviour/Jobs.h"
+#include "NUviewIO/NUviewIO.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -37,11 +37,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     this->setEnabled(true);
     disableWriting = false;
     
-    debug.open("debug.log");
-    errorlog.open("error.log");
-    
     m_job_list = new JobList();
-    m_io = new NUIO(NULL);
     m_walk_parameters = new WalkParameters();
     
     ifstream testparafile("jupptestparameters.wp");
@@ -261,6 +257,7 @@ WalkParameterWidget::~WalkParameterWidget()
     delete yawSpeedLayout; 
     
     delete overallLayout;
+    delete m_job_list;
 }
 
 void WalkParameterWidget::walkParameterChanged()
@@ -293,7 +290,7 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
 
-    (*m_io) << m_job_list;
+    (*nuio) << m_job_list;
     
     m_job_list->removeMotionJob(parametersjob);
     m_job_list->removeMotionJob(walkjob);

@@ -13,6 +13,7 @@
 #include <iostream>
 #include <QTabWidget>
 #include <typeinfo>
+#include "NUviewIO/NUviewIO.h"
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -21,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
+    debug.open("debug.log");
+    errorlog.open("error.log");
+    m_nuview_io = new NUviewIO();
 
     // create mdi workspace
     mdiArea = new QMdiArea(this);
@@ -54,9 +58,9 @@ MainWindow::MainWindow(QWidget *parent)
     connection = new ConnectionWidget(this);
     networkTabs->addTab(connection, connection->objectName());
     walkParameter = new WalkParameterWidget(mdiArea, this);
-    //kick = new KickWidget(mdiArea, this);
-    kick = 0;
+    kick = new KickWidget(mdiArea, this);
     networkTabs->addTab(walkParameter, walkParameter->objectName());
+    networkTabs->addTab(kick, kick->objectName());
     VisionStreamer = new visionStreamWidget(mdiArea, this);
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
@@ -87,7 +91,7 @@ MainWindow::~MainWindow()
     delete localisation;
     delete layerSelection;
     delete walkParameter;
-    //delete kick;
+    delete kick;
     delete mdiArea;
     delete visionTabs;
     delete networkTabs;
@@ -107,6 +111,8 @@ MainWindow::~MainWindow()
     delete nativeAspectAction;
     delete newVisionDisplayAction;
     delete newLocWMDisplayAction;
+    
+    delete m_nuview_io;
     return;
 }
 

@@ -19,29 +19,35 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUViewIO.h"
+#include "NUviewIO.h"
 #include "NUPlatform/NUSystem.h"
+#include "GameController/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
+#include "Behaviour/Jobs/JobList.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
 using namespace std;
 
-NUViewIO* nuio;
+NUviewIO* nuio;
+NUSystem* NUviewIO::m_nusystem = new NUSystem();
+GameInformation* NUviewIO::m_gameinfo = new GameInformation(1,1);
+TeamInformation* NUviewIO::m_teaminfo = new TeamInformation();
+JobList* NUviewIO::m_jobs = new JobList();
 
-NUViewIO::NUViewIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs): NUIO(gameinfo, teaminfo, jobs)
+NUviewIO::NUviewIO(): NUIO(m_gameinfo, m_teaminfo, m_jobs)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUViewIO::NUViewIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << endl;
+    debug << "NUviewIO::NUviewIO(" << static_cast<void*>(m_gameinfo) << ", " << static_cast<void*>(m_teaminfo) << ", " << static_cast<void*>(m_jobs) << ")" << endl;
 #endif
-    m_nusystem = new NUSystem();
     if (nuio == NULL)
         nuio = this;
 }
 
-NUViewIO::~NUViewIO()
+NUviewIO::~NUviewIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUViewIO::~NUViewIO()" << endl;
+    debug << "NUviewIO::~NUviewIO()" << endl;
 #endif
     if (m_nusystem != NULL)
         delete m_nusystem;

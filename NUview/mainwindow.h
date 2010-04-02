@@ -21,6 +21,8 @@ class KickWidget;
 class QTabsWidget;
 class cameraSettingsWidget;
 
+class NUviewIO;
+
 namespace Ui
 {
     class MainWindow;
@@ -89,6 +91,7 @@ protected slots:
 private:
     //! Virtual robot, does data storage and robot based processing.
     virtualNUbot virtualRobot;
+    NUviewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
 
