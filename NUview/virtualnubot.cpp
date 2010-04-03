@@ -254,7 +254,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
     std::vector< ObjectCandidate > YellowGoalCandidates;
-
+    std::vector< ObjectCandidate > BlueGoalAboveHorizonCandidates;
+    std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
     mode = ROBOTS;
     method = Vision::PRIMS;
    for (int i = 0; i < 4; i++)
@@ -291,6 +292,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
                 YellowGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS" << tempCandidates.size();
                 break;
@@ -300,13 +302,14 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
                 BlueGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS";
                 break;
         }
         while (tempCandidates.size() > 0)
         {
-            candidates.push_back(tempCandidates.back());
+            //candidates.push_back(tempCandidates.back());
             tempCandidates.pop_back();
         }
     }
@@ -342,20 +345,24 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     //qDebug() << "Crash Check: Before Yellow Goals Detection:";
-    vision.DetectGoals(YellowGoalCandidates, horizontalsegments);
+
+    vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     while (YellowGoalCandidates.size() > 0)
     {
         candidates.push_back(YellowGoalCandidates.back());
         YellowGoalCandidates.pop_back();
     }
     //qDebug() << "Crash Check: Before BLue Goals Detection:";
-    vision.DetectGoals(BlueGoalCandidates,horizontalsegments);
+    vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     while (BlueGoalCandidates.size() > 0)
     {
         candidates.push_back(BlueGoalCandidates.back());
         BlueGoalCandidates.pop_back();
     }
     //qDebug() << "Crash Check: Before Final Update:";
+
+    //TESTING:
+
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     return;
 }

@@ -260,6 +260,7 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(stopStreamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(stopStreamCameraSetting()));
 
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(readPendingData()));
+    connect(tcpSocket,SIGNAL(connected()),this,SLOT(sendDataToRobot()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(sendSettingsToRobot()));
 }
 
@@ -274,6 +275,9 @@ void cameraSettingsWidget::cameraSettingsChanged()
     settings.saturation = shiftSaturationSlider->value();
     settings.contrast = shiftContrastSlider->value();
     settings.hue = shiftHueSlider->value();
+    settings.autoExposure = 1;
+    settings.autoGain = 0;
+    settings.autoWhiteBalance = 0;
 }
 
 
@@ -304,6 +308,15 @@ void cameraSettingsWidget::connectToRobot()
     {
         tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
 
+    }
+}
+
+void cameraSettingsWidget::sendDataToRobot()
+{
+    if(!(getCameraSettingsButton->isEnabled()) &&
+       streamCameraSettingsButton->isEnabled() &&
+       !(stopStreamCameraSettingsButton->isEnabled()))
+    {
         const char* data = "1";
         if (tcpSocket->write(data) == -1)
         {
@@ -311,7 +324,17 @@ void cameraSettingsWidget::connectToRobot()
         }
         datasize = 0;
     }
+    else{
+        std::stringstream buffer;
+        buffer << settings;
+        if(tcpSocket->write((const char*)buffer.str().c_str()) == -1)
+        {
+            timer.stop();
+        }
+        disconnectFromRobot();
+    }
 }
+
 void cameraSettingsWidget::disconnectFromRobot()
 {
 
@@ -330,13 +353,7 @@ void cameraSettingsWidget::sendSettingsToRobot()
     if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
     {
         tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
-        std::stringstream buffer;
-        buffer << settings;
-        if(tcpSocket->write((const char*)buffer.str().c_str()) == -1)
-        {
-            timer.stop();
-        }
-        disconnectFromRobot();
+
     }
 }
 

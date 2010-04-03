@@ -46,6 +46,7 @@ private slots:
     void stopStreamCameraSetting();
     void readPendingData();
     void sendSettingsToRobot();
+    void sendDataToRobot();
 
 private:
     QVBoxLayout* overallLayout;                 //!< Overall widget layout.
