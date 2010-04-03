@@ -198,13 +198,19 @@ void NAOActionators::copyToHardwareCommunications()
     m_al_dcm->setAlias(m_position_command);
 #else
     static ALValue alnames;
+    static ALValue altime;
     static ALValue altimes;
+    static ALValue alposition;
     static ALValue alpositions;
+    static ALValue alstiffness;
     static ALValue alstiffnesses;
     
     alnames.clear();
+    altime.arraySetSize(1);
     altimes.clear();
+    alposition.arraySetSize(1);
     alpositions.clear();
+    alstiffness.arraySetSize(1);
     alstiffnesses.clear();
     
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
@@ -218,13 +224,15 @@ void NAOActionators::copyToHardwareCommunications()
                     string name(m_servo_names[i]);
                     float time((times[i] - m_current_time)/1000.0);
                     if (time <= 0) time = 0.01;
-                    float position(positions[i]);
-                    float gain(gains[i]/100.0);
-                 
+
+                    altime[0] = time;
+                    alposition[0] = positions[i];
+                    alstiffness[0] = gains[i]/100.0;
+                    
                     alnames.arrayPush(name);
-                    altimes.arrayPush(time);
-                    alpositions.arrayPush(position);
-                    alstiffnesses.arrayPush(gain);
+                    altimes.arrayPush(altime);
+                    alpositions.arrayPush(alposition);
+                    alstiffnesses.arrayPush(alstiffness);
                 }
             }
         }
