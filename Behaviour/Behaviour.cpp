@@ -20,9 +20,11 @@
  */
 
 #include "Behaviour.h"
-#include "Tools/Math/General.h"
-#include <debug.h>
 #include "NUPlatform/NUSystem.h"
+#include "Tools/Math/General.h"
+#include "debug.h"
+#include "debugverbositybehaviour.h"
+
 using namespace std;
 using namespace mathGeneral;
 

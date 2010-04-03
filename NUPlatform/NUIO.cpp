@@ -20,85 +20,87 @@
  */
 
 #include "NUIO.h"
+
+#include "NUIO/GameControllerPort.h"
+#include "NUIO/TeamPort.h"
+#include "NUIO/JobPort.h"
+
+#include "NUIO/TcpPort.h"
+#include "NUIO/RoboCupGameControlData.h"
+#include "NUIO/NetworkPortNumbers.h"
+
+#include "NUbot.h"
 #include "NUPlatform/NUPlatform.h"
 #include "Behaviour/Jobs.h"
-#include "NUIO/RoboCupGameControlData.h"
-#include "NUIO/NetworkPorts.h"
 #include "Tools/Image/NUimage.h"
+
 #include <sstream>
+#include <string>
 using namespace std;
 
 #include "debug.h"
+#include "debugverbositynetwork.h"
 
 /*! @brief Create a new NUIO interface to network and log files
     @param robotnumber the unique number of the robot (this is used to select a port offset)
+    @param nubot a pointer to the nubot
  */
-NUIO::NUIO(int robotnumber)
+NUIO::NUIO(NUbot* nubot)
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "NUIO::NUIO(" << robotnumber << ")" << endl;
+#if DEBUG_NETWORK_VERBOSITY > 4
+    debug << "NUIO::NUIO(" << nubot << ")" << endl;
 #endif
     
-    m_gamecontroller_port = new UdpPort(GAMECONTROLLER_PORT);
-    //m_team_port; The implementation of the team network is going to be platform specific!
-    m_camera_port = new UdpPort(CAMERA_PORT + robotnumber);
-    m_sensors_port = new UdpPort(SENSORS_PORT + robotnumber);
-    m_actionators_port = new UdpPort(ACTIONATORS_PORT + robotnumber);
-    m_vision_port = new TcpPort(VISION_PORT + robotnumber);
-    m_wm_port = new UdpPort(WM_PORT + robotnumber);
-    m_behaviour_port = new UdpPort(BEHAVIOUR_PORT + robotnumber);
-    m_motion_port = new UdpPort(MOTION_PORT + robotnumber);
-    m_jobs_port = new UdpPort(JOBS_PORT + robotnumber);
+    m_nubot = nubot;            // we need the nubot so that we can access the public store
+    
+    m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
+    createTeamPort(m_nubot->TeamInfo);
+    m_jobs_port = new JobPort(m_nubot->Jobs);
+    
+    m_vision_port = new TcpPort(VISION_PORT);
+}
+
+/*! @brief Create a new NUIO interface to network and log files. Use this version in NUview
+    @param gameinfo a pointer to the public game information
+    @param teaminfo a pointer to the public team information
+    @param jobs a pointer to the public joblist
+ 
+ */
+NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
+{
+#if DEBUG_NETWORK_VERBOSITY > 4
+    debug << "NUIO::NUIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << endl;
+#endif
+    m_nubot = NULL;
+    m_gamecontroller_port = new GameControllerPort(gameinfo);
+    createTeamPort(teaminfo);
+    m_jobs_port = new JobPort(jobs);
+    
+    m_vision_port = new TcpPort(VISION_PORT);
+}
+
+/*! @brief Creates the team communications port
+    
+ This function is virtual because simulators will need to implement this differently.
+ */
+void NUIO::createTeamPort(TeamInformation* teaminfo)
+{
+    m_team_port = new TeamPort(teaminfo, TEAM_PORT);
 }
 
 NUIO::~NUIO()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUIO::~NUIO()" << endl;
 #endif
     if (m_gamecontroller_port != NULL)
         delete m_gamecontroller_port;
     if (m_team_port != NULL)
         delete m_team_port;
-    if (m_camera_port != NULL)
-        delete m_camera_port;
-    if (m_sensors_port != NULL)
-        delete m_sensors_port;
-    if (m_actionators_port != NULL)
-        delete m_actionators_port;
     if (m_vision_port != NULL)
         delete m_vision_port;
-    if (m_wm_port != NULL)
-        delete m_wm_port;
-    if (m_behaviour_port != NULL)
-        delete m_behaviour_port;
-    if (m_motion_port != NULL)
-        delete m_motion_port;
     if (m_jobs_port != NULL)
         delete m_jobs_port;
-}
-
-/*! @brief Stream insertion operator for NUSensorsData
-    @param io the nuio stream object
-    @param sensors the sensor data to stream
- */
-NUIO& operator<<(NUIO& io, const NUSensorsData& sensors)
-{
-    stringstream buffer;
-    buffer << sensors;
-    
-    io.m_sensors_port->sendData(buffer);
-    return io;
-}
-
-/*! @brief Stream insertion operator for a pointer to NUSensorsData
-    @param io the nuio stream object
-    @param sensors the pointer to the sensor data to put in the stream
- */
-NUIO& operator<<(NUIO& io, const NUSensorsData* sensors)
-{
-    io << *sensors;
-    return io;
 }
 
 /*! @brief Stream insertion operator for a JobList
@@ -107,10 +109,7 @@ NUIO& operator<<(NUIO& io, const NUSensorsData* sensors)
  */
 NUIO& operator<<(NUIO& io, JobList& jobs)
 {
-    stringstream buffer;
-    buffer << jobs;
-    
-    io.m_jobs_port->sendData(buffer);
+    (*io.m_jobs_port) << jobs;
     return io;
 }
 
@@ -120,47 +119,10 @@ NUIO& operator<<(NUIO& io, JobList& jobs)
  */
 NUIO& operator<<(NUIO& io, JobList* jobs)
 {
-    io << *jobs;
+    (*io.m_jobs_port) << jobs;
     return io;
 }
 
-/*! @brief Stream extraction operator for a JobList
-    @param io the nuio stream object to extract the new jobs from
-    @param jobs the job list to add the extracted jobs
- */
-NUIO& operator>>(NUIO& io, JobList& jobs)
-{
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "NUIO >> JobList" << endl;
-#endif
-    network_data_t netdata = io.m_jobs_port->receiveData();
-    if (netdata.size > 0)
-    {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 3
-            debug << "NUIO >> JobList received: " << netdata.size << endl;
-        #endif
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            debug << "NUIO >> JobList received: ";
-            for (int i=0; i<netdata.size; i++)
-                debug << netdata.data[i];
-            debug << endl;
-        #endif
-        stringstream buffer;
-        buffer.write(reinterpret_cast<char*>(netdata.data), netdata.size);
-        buffer >> jobs;
-    }
-    return io;
-}
-
-/*! @brief Stream extraction operator for a JobList
-    @param io the nuio stream object to extract the new jobs from
-    @param jobts the pointer to the job list to add the extracted jobs
- */
-NUIO& operator>>(NUIO& io, JobList* jobs)
-{
-    io >> *jobs;
-    return io;
-}
 /*! @brief Stream insertion operator for NUimage
     @param io the nuio stream object
     @param sensors the NUimage data to stream

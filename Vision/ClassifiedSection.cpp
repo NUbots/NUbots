@@ -27,9 +27,9 @@ int ClassifiedSection::getDirection()
     return direction;
 }
 
-void ClassifiedSection::addScanLine(ScanLine* line)
+void ClassifiedSection::addScanLine(const ScanLine& line)
 {
-    scanLines.push_back(*line);
+    scanLines.push_back(line);
     return;
 }
 ScanLine* ClassifiedSection::getScanLine(int position)

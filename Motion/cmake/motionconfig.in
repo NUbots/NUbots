@@ -9,7 +9,13 @@
 #ifndef MOTIONCONFIG_H
 #define MOTIONCONFIG_H
 
-#include "targetconfig.h"
+// define variable to selectivly run motion
+#define USE_MOTION_${NUBOT_USE_MOTION}
+#ifdef USE_MOTION_ON
+    #define USE_MOTION                                           //!< this will be defined when the build is configured to include motion
+#else
+    #undef USE_MOTION
+#endif
 
 #ifdef USE_MOTION
     #define USE_HEAD_${USE_MOTION_HEAD}

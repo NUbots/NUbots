@@ -21,11 +21,9 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
-#include "../Motion/NUWalk.h"
-#include "../Behaviour/Jobs.h"
-#include "../NUPlatform/NUIO.h"
-#include "../NUPlatform/NUSystem.h"
-#include "../NUPlatform/Platforms/NAO/NAOSystem.h"
+#include "Motion/NUWalk.h"
+#include "Behaviour/Jobs.h"
+#include "NUviewIO/NUviewIO.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -39,13 +37,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     this->setEnabled(true);
     disableWriting = false;
     
-    debug.open("debug.log");
-    errorlog.open("error.log");
-    
-    m_nusystem = new NAOSystem();
-    nusystem = m_nusystem;
     m_job_list = new JobList();
-    m_io = new NUIO(0);
     m_walk_parameters = new WalkParameters();
     
     ifstream testparafile("jupptestparameters.wp");
@@ -59,7 +51,7 @@ void WalkParameterWidget::createWidgets()
     shiftAmplitudeLabel = new QLabel("Amplitude");
     shiftAmplitudeSlider = new QSlider(Qt::Horizontal);
     shiftAmplitudeSlider->setMinimum(1);
-    shiftAmplitudeSlider->setMaximum(100);
+    shiftAmplitudeSlider->setMaximum(25);
 
     shiftAmplitudeSpinBox = new QSpinBox();
     shiftAmplitudeSpinBox->setMinimum(shiftAmplitudeSlider->minimum());
@@ -69,7 +61,7 @@ void WalkParameterWidget::createWidgets()
     shiftFrequencyLabel = new QLabel("Frequency");
     shiftFrequencySlider = new QSlider(Qt::Horizontal);
     shiftFrequencySlider->setMinimum(1);
-    shiftFrequencySlider->setMaximum(100);
+    shiftFrequencySlider->setMaximum(15);
     
     shiftFrequencySpinBox = new QSpinBox();
     shiftFrequencySpinBox->setMinimum(shiftFrequencySlider->minimum());
@@ -95,15 +87,35 @@ void WalkParameterWidget::createWidgets()
     phaseResetSpinBox->setMinimum(phaseResetSlider->minimum());
     phaseResetSpinBox->setMaximum(phaseResetSlider->maximum());
     
-    // Step Size
-    stepSizeLabel = new QLabel("Step Size");
-    stepSizeSlider = new QSlider(Qt::Horizontal);
-    stepSizeSlider->setMinimum(1);
-    stepSizeSlider->setMaximum(400);
+    // X Speed
+    xSpeedLabel = new QLabel("x (cm/s)");
+    xSpeedSlider = new QSlider(Qt::Horizontal);
+    xSpeedSlider->setMinimum(-300);
+    xSpeedSlider->setMaximum(300);
     
-    stepSizeSpinBox = new QSpinBox();
-    stepSizeSpinBox->setMinimum(stepSizeSlider->minimum());
-    stepSizeSpinBox->setMaximum(stepSizeSlider->maximum());
+    xSpeedSpinBox = new QSpinBox();
+    xSpeedSpinBox->setMinimum(xSpeedSlider->minimum());
+    xSpeedSpinBox->setMaximum(xSpeedSlider->maximum());
+    
+    // Y Speed
+    ySpeedLabel = new QLabel("y (cm/s)");
+    ySpeedSlider = new QSlider(Qt::Horizontal);
+    ySpeedSlider->setMinimum(-300);
+    ySpeedSlider->setMaximum(300);
+    
+    ySpeedSpinBox = new QSpinBox();
+    ySpeedSpinBox->setMinimum(ySpeedSlider->minimum());
+    ySpeedSpinBox->setMaximum(ySpeedSlider->maximum());
+    
+    // Yaw Speed
+    yawSpeedLabel = new QLabel("yaw (crad/s)");
+    yawSpeedSlider = new QSlider(Qt::Horizontal);
+    yawSpeedSlider->setMinimum(-30);
+    yawSpeedSlider->setMaximum(30);
+    
+    yawSpeedSpinBox = new QSpinBox();
+    yawSpeedSpinBox->setMinimum(yawSpeedSlider->minimum());
+    yawSpeedSpinBox->setMaximum(yawSpeedSlider->maximum());
 }
 
 void WalkParameterWidget::createLayout()
@@ -132,19 +144,33 @@ void WalkParameterWidget::createLayout()
     phaseResetLayout->addWidget(phaseResetSlider);
     phaseResetLayout->addWidget(phaseResetSpinBox);
     
-    // Step Size 
-    stepSizeLayout = new QHBoxLayout();
-    stepSizeLayout->addWidget(stepSizeLabel);
-    stepSizeLayout->addWidget(stepSizeSlider);
-    stepSizeLayout->addWidget(stepSizeSpinBox);
+    // X Speed 
+    xSpeedLayout = new QHBoxLayout();
+    xSpeedLayout->addWidget(xSpeedLabel);
+    xSpeedLayout->addWidget(xSpeedSlider);
+    xSpeedLayout->addWidget(xSpeedSpinBox);
 
+    // Y Speed 
+    ySpeedLayout = new QHBoxLayout();
+    ySpeedLayout->addWidget(ySpeedLabel);
+    ySpeedLayout->addWidget(ySpeedSlider);
+    ySpeedLayout->addWidget(ySpeedSpinBox);
+    
+    // Y Speed 
+    yawSpeedLayout = new QHBoxLayout();
+    yawSpeedLayout->addWidget(yawSpeedLabel);
+    yawSpeedLayout->addWidget(yawSpeedSlider);
+    yawSpeedLayout->addWidget(yawSpeedSpinBox);
+    
     // Setup overall layout
     overallLayout = new QVBoxLayout();
     overallLayout->addLayout(shiftAmplitudeLayout);
     overallLayout->addLayout(shiftFrequencyLayout);
     overallLayout->addLayout(phaseOffsetLayout);
     overallLayout->addLayout(phaseResetLayout);
-    overallLayout->addLayout(stepSizeLayout);
+    overallLayout->addLayout(xSpeedLayout);
+    overallLayout->addLayout(ySpeedLayout);
+    overallLayout->addLayout(yawSpeedLayout);
     setLayout(overallLayout);
 }
 
@@ -170,10 +196,20 @@ void WalkParameterWidget::createConnections()
     connect(phaseResetSpinBox,SIGNAL(valueChanged(int)),phaseResetSlider,SLOT(setValue(int)));
     connect(phaseResetSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
     
-    // Setup Shift Amplitude signals
-    connect(stepSizeSlider,SIGNAL(valueChanged(int)),stepSizeSpinBox,SLOT(setValue(int)));
-    connect(stepSizeSpinBox,SIGNAL(valueChanged(int)),stepSizeSlider,SLOT(setValue(int)));
-    connect(stepSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
+    // Setup speed signals
+    connect(xSpeedSlider,SIGNAL(valueChanged(int)),xSpeedSpinBox,SLOT(setValue(int)));
+    connect(xSpeedSpinBox,SIGNAL(valueChanged(int)),xSpeedSlider,SLOT(setValue(int)));
+    connect(xSpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
+    
+    // Setup speed signals
+    connect(ySpeedSlider,SIGNAL(valueChanged(int)),ySpeedSpinBox,SLOT(setValue(int)));
+    connect(ySpeedSpinBox,SIGNAL(valueChanged(int)),ySpeedSlider,SLOT(setValue(int)));
+    connect(ySpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
+    
+    // Setup speed signals
+    connect(yawSpeedSlider,SIGNAL(valueChanged(int)),yawSpeedSpinBox,SLOT(setValue(int)));
+    connect(yawSpeedSpinBox,SIGNAL(valueChanged(int)),yawSpeedSlider,SLOT(setValue(int)));
+    connect(yawSpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
 }
 
 WalkParameterWidget::~WalkParameterWidget()
@@ -202,13 +238,26 @@ WalkParameterWidget::~WalkParameterWidget()
     delete phaseResetSpinBox;   
     delete phaseResetLayout; 
     
-    // Step Size
-    delete stepSizeLabel;           
-    delete stepSizeSlider;          
-    delete stepSizeSpinBox;    
-    delete stepSizeLayout; 
+    // X speed
+    delete xSpeedLabel;           
+    delete xSpeedSlider;          
+    delete xSpeedSpinBox;    
+    delete xSpeedLayout; 
+    
+    // Y speed
+    delete ySpeedLabel;           
+    delete ySpeedSlider;          
+    delete ySpeedSpinBox;    
+    delete ySpeedLayout; 
+    
+    // yaw speed
+    delete yawSpeedLabel;           
+    delete yawSpeedSlider;          
+    delete yawSpeedSpinBox;    
+    delete yawSpeedLayout; 
     
     delete overallLayout;
+    delete m_job_list;
 }
 
 void WalkParameterWidget::walkParameterChanged()
@@ -225,11 +274,13 @@ void WalkParameterWidget::walkParameterChanged()
 
     shiftAmplitudeSlider->value();
 
-    params[0][0].Value = shiftFrequencySlider->value()/50.0;
+    params[0][0].Value = shiftFrequencySlider->value()/10.0;
     params[0][1].Value = phaseOffsetSlider->value()/100.0;
-    params[0][2].Value = shiftAmplitudeSlider->value()/200.0;
+    params[0][2].Value = shiftAmplitudeSlider->value()/100.0;
     params[0][13].Value = phaseResetSlider->value()/100.0;
-    speed[0] = stepSizeSlider->value()/10.0;
+    speed[0] = xSpeedSlider->value()/10.0;
+    speed[1] = ySpeedSlider->value()/10.0;
+    speed[2] = yawSpeedSlider->value()/100.0;
 
     m_walk_parameters->setParameters(params);
     
@@ -239,7 +290,7 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
 
-    (*m_io) << m_job_list;
+    (*nuio) << m_job_list;
     
     m_job_list->removeMotionJob(parametersjob);
     m_job_list->removeMotionJob(walkjob);

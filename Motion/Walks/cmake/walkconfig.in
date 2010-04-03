@@ -42,11 +42,18 @@
     #else
         #undef USE_VSCWALK
     #endif
+    #define USE_WALK_ALWALK_${USE_WALK_ALWALK}
+    #ifdef USE_WALK_ALWALK_ON
+        #define USE_ALWALK
+    #else
+        #undef USE_ALWALK
+    #endif
 #else
     #undef USE_JWALK
     #undef USE_JUPPWALK
     #undef USE_NBWALK
     #undef USE_VSCWALK
+    #undef USE_ALWALK
 #endif
 
 #endif // !WALKCONFIG_H

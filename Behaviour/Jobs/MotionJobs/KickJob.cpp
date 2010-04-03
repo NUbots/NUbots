@@ -21,6 +21,7 @@
 
 #include "KickJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a KickJob
     @param time the time you want to kick

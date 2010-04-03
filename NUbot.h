@@ -27,90 +27,98 @@
 #define NUBOT_H
 
 #include "targetconfig.h"
-#include "debug.h"
-#include "walkconfig.h"
+#include "nubotconfig.h"
 
 #include "NUPlatform/NUPlatform.h"
-// Selectively include modules depending on targetconfig.h
+
 #ifdef USE_VISION
     #include "Vision/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
-    #include "Tools/FileFormats/LUTTools.h"
-    #include "NUPlatform/NUCamera/CameraSettings.h"
-    #include <iostream>
-    #include <fstream>
-
 #endif
 
 #ifdef USE_LOCALISATION
-    #include "Localisation/Localisation.h"
+    //#include "Localisation/Localisation.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
-    #include "Behaviour/Jobs.h"
 #endif
 
 #ifdef USE_MOTION
     #include "Motion/NUMotion.h"
-    #ifdef USE_WALKOPTIMISER
-        #include "Motion/Walks/Optimisation/WalkOptimiserBehaviour.h"
-    #endif
 #endif
 
-#include <pthread.h>
+#include "NUPlatform/NUIO.h"
+
+class NUSensorsData;
+class NUActionatorsData;
+class JobList;
+class GameInformation;
+class TeamInformation;
+
+#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    class SeeThinkThread;
+#endif
+
+class SenseMoveThread;
 
 /*! @brief The top-level class
  */
 class NUbot
 {
-// Functions:
 public:
     NUbot(int argc, const char *argv[]);
     ~NUbot();
     void run();
     
-    static int signalMotion();
-    int signalMotionStart();
-    int signalMotionCompletion();
-    static int signalVision();
-    int signalVisionStart();
-    int signalVisionCompletion();
-    
-    int waitForNewMotionData();
-    int waitForMotionCompletion();
-    int waitForNewVisionData();
-    int waitForVisionCompletion();
 private:
+    void connectErrorHandling();
+    static void segFaultHandler(int value);
+    void unhandledExceptionHandler(std::exception& e);
+    
     void createThreads();
-    void createErrorHandling();
     
 public:
-    NUPlatform* platform;               //!< interface to robot platform
     #ifdef USE_VISION
-        Vision* vision;                 //!< vision module
-        NUimage* image;
-        unsigned char LUT[256*256*256];
-        ofstream imagefile;
-        int ImageFrameNumber;
-        bool SAVE_IMAGES;
+        NUimage* Image;
     #endif
-    #ifdef USE_LOCALISATION
-        Localisation* localisation;     //!< localisation module
-    #endif
-    #ifdef USE_BEHAVIOUR
-        Behaviour* behaviour;           //!< behaviour module
-    #endif
-    #ifdef USE_MOTION
-        NUMotion* motion;               //!< motion module
-        #ifdef USE_WALKOPTIMISER
-            WalkOptimiserBehaviour* walkoptimiser;      //!< walk optimisation module
-        #endif
-    #endif
+    NUSensorsData* SensorData;
+    NUActionatorsData* Actions;
+    JobList* Jobs;
+    GameInformation* GameInfo;
+    TeamInformation* TeamInfo;
+    
 private:
-    pthread_t threadMotion;             //!< thread containing the direct sensory links to motion (cerebellum)
-    pthread_t threadVision;             //!< thread containing vision and higher-level though processes (cerebrum)
+    NUPlatform* m_platform;               //!< interface to robot platform
+    #ifdef USE_VISION
+        Vision* m_vision;                 //!< vision module
+    #endif
+    
+    #ifdef USE_LOCALISATION
+        //Localisation* m_localisation;     //!< localisation module
+    #endif
+    
+    #ifdef USE_BEHAVIOUR
+        Behaviour* m_behaviour;           //!< behaviour module
+    #endif
+    
+    #ifdef USE_MOTION
+        NUMotion* m_motion;               //!< motion module
+    #endif
+    
+    NUIO* m_io;                           //!< io module
+    
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+        friend class SeeThinkThread;
+        SeeThinkThread* m_seethink_thread;
+    #endif
+
+    friend class SenseMoveThread;
+    SenseMoveThread* m_sensemove_thread;
+    #if defined(TARGET_IS_NAO)
+        friend class NUNAO;
+    #endif
 };
 
 #endif

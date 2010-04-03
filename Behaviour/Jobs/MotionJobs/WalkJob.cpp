@@ -21,6 +21,7 @@
 
 #include "WalkJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkJob
 

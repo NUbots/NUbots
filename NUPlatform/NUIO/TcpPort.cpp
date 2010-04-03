@@ -20,8 +20,9 @@
  */
 
 #include "TcpPort.h"
-#include "debug.h"
 #include "NUPlatform/NUSystem.h"
+#include "debug.h"
+#include "debugverbositynetwork.h"
 #include <string.h>
 
 /*! @brief Constructs a tcp port on the specified port
@@ -29,7 +30,7 @@
 
     @param portnumber the port number the data will be sent and received on
  */
-TcpPort::TcpPort(int portnumber): Thread("Tcp Thread")
+TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
 {
 #ifdef WIN32
     WSADATA wsa_Data;
@@ -183,13 +184,12 @@ void TcpPort::sendData(network_data_t netdata)
         #endif
         #ifdef WIN32
             int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
-        #endif
-        #ifndef WIN32
+        #else
             int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
         #endif
-        if(localnumBytes < 0)
         #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            debug << "TcpPort::sendData(). Sending Error "<< endl;
+            if(localnumBytes < 0)
+                debug << "TcpPort::sendData(). Sending Error "<< endl;
         #endif
         
     }

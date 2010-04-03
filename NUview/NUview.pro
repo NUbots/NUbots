@@ -1,12 +1,10 @@
 QT += network \
     opengl
+DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -L \
-        /usr/lib/libz.dylib
+    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
 }
 win32 {
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
@@ -22,7 +20,7 @@ win32 {
 # Input
 # HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 INCLUDEPATH += ../
-INCLUDEPATH += ../Autoconfig
+INCLUDEPATH += NUviewconfig/
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -48,13 +46,6 @@ HEADERS += ui_mainwindow.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
     KickWidget.h \
-    ../Motion/NUWalk.h \
-    ../Motion/Walks/WalkParameters.h \
-    ../Behaviour/Jobs.h \
-    ../Behaviour/Jobs/*.h \
-    ../NUPlatform/NUIO.h \
-    ../NUPlatform/NUIO/*.h \
-    ../Autoconfig/*.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
@@ -82,7 +73,14 @@ HEADERS += ui_mainwindow.h \
     visionstreamwidget.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
-    ../Tools/FileFormats/Parse.h
+    ../Tools/FileFormats/Parse.h \
+    ../Localisation/LocWM.h \
+    ../Localisation/KF.h \
+    ../Vision/FieldObjects/WorldModelShareObject.h \
+    ../GameController/GameInformation.h \
+    ../Tools/Threading/Thread.h \
+    NUviewIO/NUviewIO.h
+
 
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -106,18 +104,17 @@ SOURCES += mainwindow.cpp \
     LayerSelectionWidget.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
-    ../Motion/NUWalk.cpp \
     ../Motion/Walks/WalkParameters.cpp \
-    ../Motion/Walks/JuppWalk/*.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
+    NUviewIO/NUviewIO.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
-    ../NUPlatform/NUActionators.cpp \
-    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUSystem.cpp \
-    ../NUPlatform/Platforms/NAO/NAOSystem.cpp \
+    ../Behaviour/TeamInformation.cpp \
     ../Behaviour/Jobs/*.cpp \
+    ../Behaviour/Jobs/CameraJobs/*.cpp \
+    ../Behaviour/Jobs/VisionJobs/*.cpp \
     ../Behaviour/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
     ../Vision/ObjectCandidate.cpp \
@@ -145,7 +142,12 @@ SOURCES += mainwindow.cpp \
     visionstreamwidget.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
-    ../Tools/FileFormats/Parse.cpp
+    ../Tools/FileFormats/Parse.cpp \
+    ../Localisation/LocWM.cpp \
+    ../Localisation/KF.cpp \
+    ../Vision/FieldObjects/WorldModelShareObject.cpp \
+    ../GameController/GameInformation.cpp \
+    ../Tools/Threading/Thread.cpp
 
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

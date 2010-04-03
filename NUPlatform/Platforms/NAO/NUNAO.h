@@ -21,11 +21,8 @@
 #ifndef NUNAO_H
 #define NUNAO_H
 
-#include "NUbot.h"
-
 #include <albroker.h>
-#include <dcmproxy.h>
-#include <almemoryfastaccess.h>
+#include <alproxy.h>
 using namespace AL;
 
 #include <iostream>
@@ -33,6 +30,8 @@ using namespace AL;
 #include <string>
 #include <time.h>
 using namespace std;
+
+class NUbot;
 
 class NUNAO : public ALModule
 {

@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  Behaviour.cpp Behaviour.h
+		TeamInformation
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

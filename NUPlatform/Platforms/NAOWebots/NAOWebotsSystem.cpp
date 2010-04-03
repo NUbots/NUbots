@@ -21,6 +21,9 @@
 
 #include "NAOWebotsSystem.h"
 #include "debug.h"
+#include "debugverbositynusystem.h"
+
+using namespace std;
 
 NAOWebotsSystem::NAOWebotsSystem(NAOWebotsPlatform* platform)
 {

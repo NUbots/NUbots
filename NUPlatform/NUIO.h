@@ -25,25 +25,27 @@
 #ifndef NUIO_H
 #define NUIO_H
 
-#include "NUIO/UdpPort.h"
-#include "NUIO/TcpPort.h"
+#include "ioconfig.h"
 
-class NUSensorsData;
-class NUActionatorsData;
-class NUCamera;
+class NUbot;
+
+class GameControllerPort;
+class TeamPort;
+class JobPort;
+class TcpPort;
+
 class JobList;
+class GameInformation;
+class TeamInformation;
 class NUimage;
 
 class NUIO
 {
 // Functions:
 public:
-    NUIO(int robotnumber);
+    NUIO(NUbot* nubot);
+    NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs);
     virtual ~NUIO();
-    
-    // Sensor data streaming
-    friend NUIO& operator<<(NUIO& io, const NUSensorsData& sensors);
-    friend NUIO& operator<<(NUIO& io, const NUSensorsData* sensors);
     
     // JobList streaming
     friend NUIO& operator<<(NUIO& io, JobList& jobs);
@@ -52,27 +54,24 @@ public:
     friend NUIO& operator>>(NUIO& io, JobList* jobs);
     
 
-    //Raw Image streaming 
+    // Raw Image streaming 
     friend NUIO& operator<<(NUIO& io, NUimage& p_image);
     friend NUIO& operator<<(NUIO& io, NUimage* p_image);
     
 protected:
+    virtual void createTeamPort(TeamInformation* teaminfo);
 private:
     
 // Members:
 public:
 protected:
 private:
-    UdpPort* m_gamecontroller_port;
-    UdpPort* m_team_port;
-    UdpPort* m_camera_port;
-    UdpPort* m_sensors_port;
-    UdpPort* m_actionators_port;
+    NUbot* m_nubot;
+    
+    GameControllerPort* m_gamecontroller_port;
+    TeamPort* m_team_port;
     TcpPort* m_vision_port;
-    UdpPort* m_wm_port;
-    UdpPort* m_behaviour_port;
-    UdpPort* m_motion_port;
-    UdpPort* m_jobs_port;
+    JobPort* m_jobs_port;
 };
 
 #endif

@@ -21,6 +21,7 @@
 
 #include "NUActionatorsData.h"
 #include "debug.h"
+#include "debugverbositynuactionators.h"
 
 NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
@@ -203,14 +204,14 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
             TorsoRoll = i;
             m_torso_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("lhipyaw") != string::npos)
-        {
-            LHipYaw = i;
-            m_lleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
+        {
+            LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("lhippitch") != string::npos)
@@ -238,14 +239,14 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("rhipyaw") != string::npos)
-        {
-            RHipYaw = i;
-            m_rleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
+            m_rleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
+        {
+            RHipYaw = i;
             m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhippitch") != string::npos)

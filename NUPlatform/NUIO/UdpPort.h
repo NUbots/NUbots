@@ -4,9 +4,9 @@
     @class UdpPort
     @brief UdpPort class encapsulating a udp socket
 
-    @author Aaron Wong
+    @author Aaron Wong, Jason Kulk
  
- Copyright (c) 2009 Aaron Wong
+ Copyright (c) 2009, 2010 Aaron Wong
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,59 +21,50 @@
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef UDPPORT_H
+#define UDPPORT_H
 
 #ifdef WIN32
-
-#include <winsock.h>
-#define socklen_t int
+    #include <winsock.h>
+    #define socklen_t int
+#else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
 #endif
 
-#ifndef WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#endif
-
-
-#include "Thread.h"
+#include "Tools/Threading/Thread.h"
 
 #include <sstream>
-using namespace std;
-
-typedef unsigned char byte;
-
-#ifndef NETDATA
-#define NETDATA
-struct network_data_t
-{
-    int size;
-    char* data;
-};
-#endif
+#include <string>
 
 class UdpPort : public Thread
 {
 public:
-    UdpPort(int portnumber);
+    UdpPort(std::string name, int portnumber);
     virtual ~UdpPort();
-    void sendData(network_data_t netData);
-    void sendData(const stringstream& stream);
-    network_data_t receiveData();
+protected:
+    void sendData(const std::stringstream& stream);
+    virtual void handleNewData(std::stringstream& buffer) = 0;
 private:
     void run();
-public:
+    
+protected:
+    std::string m_port_name;            //!< the name of this port
+    std::string m_host_name;            //!< the name of the host machine
+    in_addr m_local_address;            //!< the machine's local address
+    sockaddr_in m_target_address;       //!< the socket target address
+    
+    double m_time_last_receive;         //!< the time in milliseconds the last packet was received
 private:
     int m_sockfd;                       //!< the socket
     int m_port_number;                  //!< the port number of the socket
-    sockaddr_in m_address;              //!< the socket address
-    sockaddr_in m_broadcast_address;    //!< the socket broadcast address
-    double m_time_last_receive;         //!< the time in milliseconds the last packet was received
     
-    char m_data[10*1024];               //!< the data buffer for received data
-    int m_message_size;                 //!< the number of bytes received (ie the number of valid bytes in m_data)
-    bool m_has_data;                    //!< flag indicating whether new data has been received
+    sockaddr_in m_address;              //!< the socket address
 
     pthread_mutex_t m_socket_mutex;     //!< lock to prevent simultaneous reading and writing on the same port
 
 };
+
+#endif
 

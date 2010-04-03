@@ -120,6 +120,7 @@ public:
     bool getGyroValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
     bool getHorizon(vector<float>& values);
+    bool getButtonTriggers(vector<float>& values);
     bool getZMP(vector<float>& values);
     bool getFalling(vector<float>& values);
     bool getFallen(vector<float>& values);
@@ -209,7 +210,8 @@ public:
     
     // Buttons Sensors:
     sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed
-    
+    sensor_t* ButtonTriggers;                   //!< stores the time since that last edge trigger for the button.
+
     // Battery Sensors:
     sensor_t* BatteryValues;                    //!< stores the battery values in Volts, Amperes and Watts
     

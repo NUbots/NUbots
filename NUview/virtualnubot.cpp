@@ -134,8 +134,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     std::vector< TransitionSegment > allsegments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
-    ClassifiedSection* vertScanArea = new ClassifiedSection();
-    ClassifiedSection* horiScanArea = new ClassifiedSection();
+
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
     int spacings = 16;
@@ -170,22 +169,22 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
-    vertScanArea = vision.verticalScan(points,spacings);
+    ClassifiedSection vertScanArea = vision.verticalScan(points,spacings);
     //! Scan Above the Horizon
-    horiScanArea = vision.horizontalScan(points,spacings);
+    ClassifiedSection horiScanArea = vision.horizontalScan(points,spacings);
     //qDebug() << "Generate Scanlines: finnished";
     //! Classify Line Segments
 
-    vision.ClassifyScanArea(vertScanArea);
-    vision.ClassifyScanArea(horiScanArea);
+    vision.ClassifyScanArea(&vertScanArea);
+    vision.ClassifyScanArea(&horiScanArea);
     //qDebug() << "Classify Scanlines: finnished";
 
 
     //! Extract and Display Vertical Scan Points:
-    tempNumScanLines = vertScanArea->getNumberOfScanLines();
+    tempNumScanLines = vertScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
-        ScanLine* tempScanLine = vertScanArea->getScanLine(i);
+        ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         int lengthOfLine = tempScanLine->getLength();
         Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
@@ -193,7 +192,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
+        if(vertScanArea.getDirection() == ClassifiedSection::DOWN)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -206,10 +205,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     }
 
     //! Extract and Display Horizontal Scan Points:
-    tempNumScanLines = horiScanArea->getNumberOfScanLines();
+    tempNumScanLines = horiScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
-        ScanLine* tempScanLine = horiScanArea->getScanLine(i);
+        ScanLine* tempScanLine = horiScanArea.getScanLine(i);
         int lengthOfLine = tempScanLine->getLength();
         Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
@@ -217,7 +216,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
+        if(horiScanArea.getDirection() == ClassifiedSection::RIGHT)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -229,7 +228,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    fieldLines = vision.DetectLines(vertScanArea,spacings);
+    fieldLines = vision.DetectLines(&vertScanArea,spacings);
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 

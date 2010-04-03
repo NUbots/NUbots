@@ -26,6 +26,7 @@
 #include "NAOWebotsSystem.h"
 #include "NAOWebotsIO.h"
 #include "debug.h"
+#include "debugverbositynuplatform.h"
 
 #include <string.h>
 #include <iostream>
@@ -57,13 +58,12 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     if (port == -1) {
         debug << "Error: could not find port number in controllerArgs" << endl;
     }
-    m_number = (port % 10) + 1;
+    m_robot_number = (port % 10) + 1;
+    m_player_number = m_robot_number;
     setNameFromNumber();
     setTeam(Robot::getName());
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
-    nusystem = system;                                  // we access the system in other modules using this pointer.
-    io = new NAOWebotsIO(m_number);
     camera = new NAOWebotsCamera(this);
     sensors = new NAOWebotsSensors(this);
     actionators = new NAOWebotsActionators(this);
@@ -80,7 +80,7 @@ NAOWebotsPlatform::~NAOWebotsPlatform()
  */
 void NAOWebotsPlatform::setNameFromNumber()
 {
-    switch (m_number) {
+    switch (m_robot_number) {
         case 1:
             m_name = string("Susannah");
             break;

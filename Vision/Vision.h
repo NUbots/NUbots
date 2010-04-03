@@ -19,12 +19,10 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "debug.h"
 
 
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
-
 
 class Circle;
 class NUimage;
@@ -32,13 +30,14 @@ class NUimage;
 //! Contains vision processing tools and functions.
 class Vision
 {
-    private:
-    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of a pointer to the current colour lookup table.
 
+    private:
+    static const unsigned int c_LUTLength = 256*256*256;
+    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable; //!< Storage of the current colour lookup table.
+    unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
-    
 
     public:
     //! FieldObjects Container
@@ -57,10 +56,12 @@ class Vision
 
 
     //void ProcessFrame(NUimage& image, Horizon horizonLine);
-    FieldObjects* ProcessFrame(NUimage& image, NUSensorsData* data);
+    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
+
+
 
     void setLUT(unsigned char* newLUT);
-
+    void loadLUTFromFile(const std::string& fileName);
 
     void setImage(const NUimage* sourceImage);
 
@@ -132,8 +133,8 @@ class Vision
     std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
 
-    ClassifiedSection* horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    ClassifiedSection* verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);

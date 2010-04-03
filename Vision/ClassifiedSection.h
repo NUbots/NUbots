@@ -26,7 +26,7 @@ public:
 
     void setDirection(int newDirection);
     int getDirection();
-    void addScanLine(ScanLine* line);
+    void addScanLine(const ScanLine& line);
     ScanLine* getScanLine(int position);
     int getNumberOfScanLines();
 

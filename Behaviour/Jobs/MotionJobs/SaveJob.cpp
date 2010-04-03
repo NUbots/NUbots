@@ -21,6 +21,7 @@
 
 #include "SaveJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a SaveJob at the given position and time
     @param time the time in ms to perform the save

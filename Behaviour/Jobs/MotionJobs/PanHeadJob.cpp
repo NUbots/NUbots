@@ -21,6 +21,7 @@
 
 #include "PanHeadJob.h"
 #include "debug.h"
+#include "debugverbosityjobs.h"
 
 /*! @brief Constructs a PanHeadJob
  

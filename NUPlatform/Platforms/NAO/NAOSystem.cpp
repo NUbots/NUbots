@@ -22,6 +22,9 @@
 #include "NAOSystem.h"
 
 #include "debug.h"
+#include "debugverbositynusystem.h"
+
+using namespace std;
 
 NAOSystem::NAOSystem()
 {

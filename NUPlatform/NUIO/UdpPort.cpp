@@ -20,58 +20,86 @@
  */
 
 #include "UdpPort.h"
-#include "debug.h"
 #include "NUPlatform/NUSystem.h"
-#include <string.h>
+#include "debug.h"
+#include "debugverbositynetwork.h"
+
+#ifndef WIN32
+    #include <netdb.h>
+#endif
+#include <errno.h>
+#include <cstring>
+using namespace std;
 
 /*! @brief Constructs a udp port on the specified port
  
-    The port is setup to always broadcast on the local subnet provided m_listener_count is non-zero.
-    It is important to make sure that you are allowed to broadcast on this port!
+    The port is setup to always broadcast on the local subnet.
 
+    @param name the name of the network used for debug purposes eg. TeamPort, GameController, Jobs, etc
     @param portnumber the port number the data will be sent and received on
  */
-UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
+UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
 {
-#ifdef WIN32
-    WSADATA wsa_Data;
-    int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
-    if (wsa_ReturnCode != 0)
-    {
-        debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
-    }
-#endif
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "UdpPort::UdpPort(" << portnumber << ")" << endl;
-#endif
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "UdpPort::UdpPort(" << name << ", " << portnumber << ")" << endl;
+    #endif
+    #ifdef WIN32
+        WSADATA wsa_Data;
+        int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
+        if (wsa_ReturnCode != 0)
+        {
+            debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
+        }
+    #endif
+    
+    m_port_name = name;
     m_port_number = portnumber;
+    
+    // We need to get the machine's local ip address.
+    // We use gethostname followed by gethostbyname, and save the in_addr in m_local_address
+    char hostname[255];
+    gethostname(hostname, 255);
+    m_host_name = string(hostname);
+    struct hostent* host_entry;
+    host_entry = gethostbyname(hostname);
+    if (host_entry != NULL)
+        m_local_address = *((struct in_addr*) host_entry->h_addr);
+    else
+    {
+        m_local_address.s_addr = INADDR_BROADCAST;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to get the ip address, defaulting to 255.255.255.255." << endl;
+    }
+    
+    // On the socket as UDP
     if ((m_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
-        errorlog << "UdpPort::UdpPort(" << m_port_number << "). Failed to create socket file descriptor." << endl;
-
-    char broadcastflag = 1;
-    if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof broadcastflag) == -1)
-        errorlog << "UdpPort::UdpPort(" << m_port_number << "). Failed to set socket options." << endl;
-        
-    m_address.sin_family = AF_INET;                             // host byte order
-    m_address.sin_port = htons(m_port_number);                  // short, network byte order
-    m_address.sin_addr.s_addr = htonl(INADDR_ANY);                     // automatically fill with my IP
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to create socket file descriptor, errno: " << errno << endl;
+    
+    // Set the broadcast flag (a) so we receive broadcasted packets, and (b) so we can broadcast if we want to
+    #ifdef WIN32
+        char broadcastflag = 1;
+    #else
+        int broadcastflag = 1;
+    #endif
+    if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof(broadcastflag)) == -1)
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set socket options, errno: " << errno << endl;
+    
+    // Construct this address
+    m_address.sin_family = AF_INET;                                     // host byte order
+    m_address.sin_port = htons(m_port_number);                          // short, network byte order
+    m_address.sin_addr.s_addr = INADDR_ANY;                             // automatically fill with my IP
     memset(m_address.sin_zero, '\0', sizeof m_address.sin_zero);
     
-    m_broadcast_address.sin_family = AF_INET;                   // host byte order
-    m_broadcast_address.sin_port = htons(m_port_number);        // short, network byte order 
-    m_broadcast_address.sin_addr.s_addr = htonl(INADDR_BROADCAST);     // automatically fill with my local Broadcast IP
-    memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
+    // Construct the target address (we set the address to broadcast on the local subnet by default)
+    m_target_address.sin_family = AF_INET;                              // host byte order
+    m_target_address.sin_port = htons(m_port_number);                   // short, network byte order
+    m_target_address.sin_addr.s_addr = m_local_address.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
+    memset(m_target_address.sin_zero, '\0', sizeof m_target_address.sin_zero);
     
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "UdpPort::UdpPort(). Binding socket." << endl;
-#endif
+    // Bind the socket to this address
     if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
-        errorlog << "UdpPort::UdpPort(" << portnumber << "). Failed to bind socket." << endl;
-    
-    m_time_last_receive = 0;           //!< @todo TODO: change the initial value for this to something -3000ms!
-    
-    m_message_size = 0;
-    m_has_data = false;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << endl;
+
+    m_time_last_receive = 0;
     
     pthread_mutex_init(&m_socket_mutex, NULL);
     
@@ -82,25 +110,22 @@ UdpPort::UdpPort(int portnumber): Thread("UDP Thread")
  */
 UdpPort::~UdpPort()
 {
-#ifdef WIN32
-    closesocket(m_sockfd);
-    WSACleanup();
-#endif
-#ifndef WIN32
-    close(m_sockfd);
-#endif
+    #ifdef WIN32
+        closesocket(m_sockfd);
+        WSACleanup();
+    #else
+        close(m_sockfd);
+    #endif
     pthread_mutex_destroy(&m_socket_mutex);
 }
 
 /*! @brief Run the UDP port's main loop
- 
-    Waits until data is received on the appropriate port.
-    Then copies it to m_data, setting m_message_size, m_has_data and m_time_last_receive in the process
+
  */
 void UdpPort::run()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "UdpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << endl;
+#if DEBUG_NETWORK_VERBOSITY > 4
+    debug << "UdpPort::run(). Starting udpport: " << m_port_name << "'s mainloop" << endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
     socklen_t local_addr_len = sizeof(local_their_addr);
@@ -109,71 +134,36 @@ void UdpPort::run()
     while(1)
     {
         localnumBytes = recvfrom(m_sockfd, localdata, 10*1024 , 0, (struct sockaddr *)&local_their_addr, &local_addr_len);
-        if ( localnumBytes != -1 && local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
-        {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
-            #if DEBUG_NUSYSTEM_VERBOSITY > 3
-                debug << "UdpPort::run()." << m_port_number <<" Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
+        if (localnumBytes != -1)// && local_their_addr.sin_addr.s_addr != m_local_address.s_addr)
+        {
+            #if DEBUG_NETWORK_VERBOSITY > 0
+                debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            #if DEBUG_NUSYSTEM_VERBOSITY > 4
-                debug << "UdpPort::run(). Received ";
-                for (int i=0; i<localnumBytes; i++)
-                    debug << localdata[i];
-                debug << endl;
-            #endif
-            pthread_mutex_lock(&m_socket_mutex);
             m_time_last_receive = nusystem->getTime();
-            memcpy(m_data, localdata, 10*1024);
-            m_message_size = localnumBytes; 
-            m_has_data = true;
-            pthread_mutex_unlock(&m_socket_mutex);
+            stringstream buffer;
+            buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
+            handleNewData(buffer);
+            #if DEBUG_NETWORK_VERBOSITY > 4
+                debug << "UdpPort::run(). Received " << buffer.str().c_str() << endl;
+            #endif
         }
     }
     return;
 }
 
-/*! @brief Wraps the received data (m_data) into a network_data_t and returns it
-        
-    @return the data received is returned. If there is not data then the returned object will have a size of -1
+/*! @brief Sends a string stream over the network
+    @param stream the stream containing the information to be sent over the network
  */
-network_data_t UdpPort::receiveData()
-{
-    network_data_t netdata;
-    netdata.size = -1;
-    netdata.data = NULL; 
-    
-    pthread_mutex_lock(&m_socket_mutex);
-    if (m_has_data == true)
-    {
-        netdata.size = m_message_size;
-        netdata.data = new char[m_message_size];
-        memcpy(netdata.data, m_data, m_message_size);
-        m_has_data = false;
-    }
-    pthread_mutex_unlock(&m_socket_mutex);
-    
-    return netdata;
-}
-
-/*! @brief Sends the network data (netdata) to all local hosts provided I think someone is listening
- */
-void UdpPort::sendData(network_data_t netdata)
-{
-    pthread_mutex_lock(&m_socket_mutex);
-    if (true || nusystem->getTime() - m_time_last_receive < 3000)
-    {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            debug << "UdpPort::sendData(). Sending " << netdata.size << " bytes to " << inet_ntoa(m_broadcast_address.sin_addr) << endl;
-        #endif
-        sendto(m_sockfd, netdata.data, netdata.size, 0, (struct sockaddr *)&m_broadcast_address, sizeof(m_broadcast_address));
-    }
-    pthread_mutex_unlock(&m_socket_mutex);
-    return;
-}
-
 void UdpPort::sendData(const stringstream& stream)
 {
-    static network_data_t netdata;
-    netdata.size = stream.str().size();
-    netdata.data = (char*) stream.str().c_str();
-    sendData(netdata);
+    char* data;
+    int numbytes;
+    numbytes = stream.str().size();
+    data = (char*) stream.str().c_str();
+    #if DEBUG_NETWORK_VERBOSITY > 4
+        debug << "UdpPort::sendData(). Sending " << numbytes << " bytes to " << inet_ntoa(m_target_address.sin_addr) << endl;
+    #endif
+    pthread_mutex_lock(&m_socket_mutex);
+    sendto(m_sockfd, data, numbytes, 0, (struct sockaddr *)&m_target_address, sizeof(m_target_address));
+    pthread_mutex_unlock(&m_socket_mutex);
 }

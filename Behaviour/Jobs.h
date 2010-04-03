@@ -25,7 +25,12 @@
 #include "Jobs/JobList.h"
 #include "Jobs/Job.h"
 
+#include "Jobs/CameraJob.h"
+#include "Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+
 #include "Jobs/VisionJob.h"
+#include "Jobs/VisionJobs/SaveImagesJob.h"
+
 #include "Jobs/LocalisationJob.h"
 #include "Jobs/BehaviourJob.h"
 #include "Jobs/MotionJob.h"
@@ -48,8 +53,6 @@
 #include "Jobs/LightJobs/REyeLedJob.h"
 #include "Jobs/LightJobs/RFootLedJob.h"
 
-#include "Jobs/CameraJob.h"
-#include "Jobs/CameraJobs/SelectCameraJob.h"
 #include "Jobs/SoundJob.h"
 #include "Jobs/SystemJob.h"
 #include "Jobs/OtherJob.h"

@@ -21,17 +21,29 @@
 
 #include "NAOWebotsIO.h"
 #include "debug.h"
+#include "debugverbositynetwork.h"
 
-NAOWebotsIO::NAOWebotsIO(int probotnumber) : NUIO(probotnumber)
+using namespace std;
+
+#include "NUbot.h"
+
+/*! @brief Construct a NAOWebotsIO object
+    @param probotnumber the robot number, we need this to calculate the team port
+    @param pteamnumber the team number, we need this to calculate the team port
+    @param nubot a pointer to the NUbot, we need this to gain access to the public store
+ */
+NAOWebotsIO::NAOWebotsIO(int probotnumber, int pteamnumber, NUbot* nubot) : NUIO(nubot)
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::NAOWebotsIO()" << endl;
 #endif
+    m_robot_number = probotnumber;
+    m_team_number = pteamnumber;
 }
 
 NAOWebotsIO::~NAOWebotsIO()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::~NAOWebotsIO()" << endl;
 #endif
 }

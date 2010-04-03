@@ -21,6 +21,7 @@
 
 #include "NAOWebotsCamera.h"
 #include "debug.h"
+#include "debugverbositynucamera.h"
 
 NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {
@@ -33,6 +34,7 @@ NAOWebotsCamera::~NAOWebotsCamera()
 
 NUimage* NAOWebotsCamera::grabNewImage()
 {
+    return NULL;
 }
 
 void NAOWebotsCamera::setSettings(const CameraSettings& newset)

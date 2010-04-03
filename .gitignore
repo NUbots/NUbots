@@ -43,6 +43,7 @@ Autoconfig/*
 /NUview/qrc_icons.cpp
 /NUview/qrc_textures.cpp
 /NUview/diagona/*.*
+/NUview/NUview
 
 # Ignore our data file formats
 *.lut

@@ -27,6 +27,7 @@
 #include "NAOIO.h"
 
 #include "debug.h"
+#include "debugverbositynuplatform.h"
 
 /*! @brief Constructor for NAO robotic platform
  */
@@ -41,10 +42,9 @@ NAOPlatform::NAOPlatform()
      string m_team_colour;
      int m_team_number;
      */
-    m_number = 0;
-    system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules!
-    nusystem = system;                        // we access the system in other modules using this pointer.  
-    io = new NAOIO(m_number);
+    m_robot_number = 0;
+    m_player_number = 0;
+    system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules! 
     camera = new NAOCamera();
     sensors = new NAOSensors();
     actionators = new NAOActionators();

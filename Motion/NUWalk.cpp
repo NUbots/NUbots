@@ -19,8 +19,8 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "walkconfig.h"
 #include "NUWalk.h"
+#include "walkconfig.h"
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
 #endif
@@ -31,11 +31,16 @@
     #include "Walks/NBWalk/NBWalk.h"
 #endif
 #ifdef USE_VSCWALK
-#include "Walks/VSCWalk/VSCWalk.h"
+    #include "Walks/VSCWalk/VSCWalk.h"
+#endif
+#ifdef USE_ALWALK
+    #include "Walks/ALWalk/ALWalk.h"
 #endif
 
 #include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 #include <math.h>
 using namespace std;
@@ -53,6 +58,10 @@ NUWalk* NUWalk::getWalkEngine()
         #else
             #ifdef USE_VSCWALK
                 return new VSCWalk();
+            #else
+                #ifdef USE_ALWALK
+                    return new ALWalk();
+                #endif
             #endif
         #endif
     #endif
@@ -82,6 +91,9 @@ NUWalk::NUWalk()
  */
 NUWalk::~NUWalk()
 {
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << "NUWalk::~NUWalk()" << endl;
+#endif
     m_gait_walk_parameters.clear();
     m_gait_max_speeds.clear();
     m_gait_max_accelerations.clear();
@@ -97,6 +109,9 @@ NUWalk::~NUWalk()
 */
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
+#if DEBUG_NUMOTION_VERBOSITY > 3
+    debug << "NUWalk::process(" << data << ", " << actions << ")" << endl;
+#endif
     if (actions == NULL || data == NULL)
         return;
     m_data = data;
