@@ -228,9 +228,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    fieldLines = vision.DetectLines(&vertScanArea,spacings);
+    //fieldLines = vision.DetectLines(&vertScanArea,spacings);
     //! Extract Detected Line & Corners
-    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -310,7 +310,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-        //qDebug() << "POSTclassifyCandidates";
+    qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
@@ -327,17 +327,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
         }
     }
-    //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    /*
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-        }
-        else
-        {
-            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-        }*/
+    qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     //qDebug() << "Crash Check: Before Yellow Goals Detection:";

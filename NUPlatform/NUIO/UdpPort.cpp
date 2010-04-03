@@ -60,7 +60,7 @@ UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
     m_host_name = string(hostname);
     struct hostent* host_entry;
     host_entry = gethostbyname(hostname);
-    if (host_entry != NULL)
+    if (false  && host_entry != NULL)
         m_local_address = *((struct in_addr*) host_entry->h_addr);
     else
     {

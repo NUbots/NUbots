@@ -18,7 +18,6 @@
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
 
-
 using namespace mathGeneral;
 Vision::Vision()
 {
@@ -257,7 +256,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
             //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
         }
     }
-    //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
+    //debug << "Ball Detected:" << this->AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     /*
         if(circ.isDefined)
         {
@@ -274,7 +273,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     DetectGoals(YellowGoalCandidates,horizontalsegments);
     DetectGoals(BlueGoalCandidates,horizontalsegments);
 
-
+    //qDebug()<< "Process Frame Finnished";
     return AllFieldObjects;
 }
 
@@ -668,7 +667,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             currentPoint.x = startPoint.x - j;// + bufferSize;
                             currentPoint.y = startPoint.y;
                         }
-                        TransitionSegment tempTransition(startPoint, currentPoint, beforeColour, currentColour, afterColour);
+                        TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
                         //SCAN FOR OTHER SEGMENTS:
                         /*int spacing = 16;
@@ -1088,7 +1087,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-        delete colourHistogram;
+        //delete colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
@@ -1270,24 +1269,23 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
     Ball BallFinding;
 
 
-    debug<< "Vision::DetectBall : Ball Class created" << endl;
+    //qDebug() << "Vision::DetectBall : Ball Class created" << endl;
     int width = currentImage->width();
     int height = currentImage->height();
-    debug<< "Vision::DetectBall : getting Image sizes" << endl;
-    debug<< "Vision::DetectBall : Init Ball" << endl;
+    //qDebug() << "Vision::DetectBall : getting Image sizes" << endl;
+    //qDebug() << "Vision::DetectBall : Init Ball" << endl;
     Circle ball;
     ball.isDefined = false;
     if (FO_Candidates.size() <= 0)
     {
-
         return ball;
     }
-    debug<< "Vision::DetectBall : Find Ball" << endl;
-    ball = BallFinding.FindBall(FO_Candidates, AllFieldObjects, this,height,width);
-
+    //qDebug() << "Vision::DetectBall : Find Ball" << endl;
+    ball = BallFinding.FindBall(FO_Candidates, AllFieldObjects, this, height, width);
+    //qDebug() << "Vision::DetectBall : Finnised FO_Ball" << endl;
     if(ball.isDefined)
     {
-        debug<< "Vision::DetectBall : Update FO_Ball" << endl;
+        //qDebug()<< "Vision::DetectBall : Update FO_Ball" << endl;
         Vector2<int> viewPosition;
         Vector3<float> sphericalError;
         Vector3<float> sphericalPosition;
@@ -1313,7 +1311,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
                     << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Elevation();*/
 
     }
-    debug<< "Vision::DetectBall : Finnised" << endl;
+    //qDebug() << "Vision::DetectBall : Finnised" << endl;
     return ball;
 
 }

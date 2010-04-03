@@ -38,7 +38,6 @@ CircleFitting::CircleFitting() {
 
 CircleFitting::~CircleFitting() {
 
-  fittedPoints.~vector();
 
 }
 
@@ -58,7 +57,7 @@ inline bool CircleFitting::CHECK_PIXEL(int pixel){
 Circle CircleFitting::FitCircleLMA(std::vector < Vector2<int> > points)
 {
     numFittedPoints = points.size();
-
+    fittedPoints.empty();
     for(int i = 0; i < numFittedPoints; i++)
     {
          point tempPoint;
