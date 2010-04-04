@@ -132,6 +132,7 @@ NUIO& operator<<(NUIO& io, NUimage& p_image)
     network_data_t netdata = io.m_vision_port->receiveData();
     if(netdata.size > 0)
     {
+        
         stringstream buffer;
         buffer << p_image;    
         io.m_vision_port->sendData(buffer);

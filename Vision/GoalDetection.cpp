@@ -8,7 +8,7 @@
 
 GoalDetection::GoalDetection()
 {
-    debug<< "Vision::GoalDetection : GoalDetection Class created" << endl;
+    //debug<< "Vision::GoalDetection : GoalDetection Class created" << endl;
 }
 GoalDetection::~GoalDetection()
 {

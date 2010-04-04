@@ -97,4 +97,5 @@ void JobPort::handleNewData(std::stringstream& buffer)
         debug << "JobPort::handleNewData(" << buffer.str().c_str() << ")" << endl;
     #endif
     buffer >> *m_jobs;
+    debug << m_jobs->size()<< endl;
 }

@@ -19,23 +19,34 @@
 #include <QTcpSocket>
 #include <sstream>
 
+
+#include "NUviewIO/NUviewIO.h"
+#include "Behaviour/Jobs.h"
+#include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "NUPlatform/NUCamera/CameraSettings.h"
+#include "debug.h"
+
+
 cameraSettingsWidget::cameraSettingsWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
     setObjectName(tr("Camera Settings"));
     setWindowTitle(tr("Camera Settings"));
     tcpSocket = new QTcpSocket();
     robotName = "";
-    timer.setInterval(500);
+    timer.setInterval(200);
+    readPacketTimer.setInterval(100);
     createWidgets();
     createLayout();
     createConnections();
-
+    settings = new CameraSettings();
+    m_job_list = new JobList();
     this->setEnabled(true);
 }
 
 cameraSettingsWidget::~cameraSettingsWidget()
 {
-    
+    delete settings;
+    delete m_job_list;
 
 }
 
@@ -132,7 +143,7 @@ void cameraSettingsWidget::createWidgets()  //!< Create all of the child widgets
     streamCameraSettingsButton = new QPushButton("Start Stream");
     getCameraSettingsButton = new QPushButton("Get Current Settings");
     stopStreamCameraSettingsButton = new QPushButton("Stop Stream");
-    getCameraSettingsButton->setEnabled(false);
+    getCameraSettingsButton->setEnabled(true);
     streamCameraSettingsButton->setEnabled(false);
     stopStreamCameraSettingsButton->setEnabled(false);
 }
@@ -244,7 +255,7 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(shiftSaturationSpinBox,SIGNAL(valueChanged(int)),shiftSaturationSlider,SLOT(setValue(int)));
     connect(shiftSaturationSlider,SIGNAL(valueChanged(int)),this,SLOT(cameraSettingsChanged()));
 
-    // Setup Shift Contrast signals
+    // Setup Shift Contrast signals.
     connect(shiftContrastSlider,SIGNAL(valueChanged(int)),shiftContrastSpinBox,SLOT(setValue(int)));
     connect(shiftContrastSpinBox,SIGNAL(valueChanged(int)),shiftContrastSlider,SLOT(setValue(int)));
     connect(shiftContrastSlider,SIGNAL(valueChanged(int)),this,SLOT(cameraSettingsChanged()));
@@ -259,21 +270,22 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(streamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(streamCameraSetting()));
     connect(stopStreamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(stopStreamCameraSetting()));
 
-    connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(readPendingData()));
+    connect(&readPacketTimer,SIGNAL(timeout()),this,SLOT(readPendingData()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(sendSettingsToRobot()));
 }
 
 
 void cameraSettingsWidget::cameraSettingsChanged()
 {
-    settings.gain = shiftGainSlider->value();
-    settings.exposure = shiftExposureSlider->value();
-    settings.blueChroma = shiftBlueChromaSlider->value();
-    settings.redChroma = shiftRedChromaSlider->value();
-    settings.brightness = shiftBrightnessSlider->value();
-    settings.saturation = shiftSaturationSlider->value();
-    settings.contrast = shiftContrastSlider->value();
-    settings.hue = shiftHueSlider->value();
+    settings->gain = shiftGainSlider->value();
+    settings->exposure = shiftExposureSlider->value();
+    settings->blueChroma = shiftBlueChromaSlider->value();
+    settings->redChroma = shiftRedChromaSlider->value();
+    settings->brightness = shiftBrightnessSlider->value();
+    settings->saturation = shiftSaturationSlider->value();
+    settings->contrast = shiftContrastSlider->value();
+    settings->hue = shiftHueSlider->value();
+
 }
 
 
@@ -290,14 +302,14 @@ void cameraSettingsWidget::updateRobotName(const QString name)
 }
 void cameraSettingsWidget::getCameraSetting()
 {
-    getCameraSettingsButton->setEnabled(false);
+    getCameraSettingsButton->setEnabled(true);
     streamCameraSettingsButton->setEnabled(true);
     stopStreamCameraSettingsButton->setEnabled(false);
     connectToRobot();
 }
 void cameraSettingsWidget::connectToRobot()
 {
-    tcpSocket->flush();
+    /*tcpSocket->flush();
     netdata.clear();
     quint16 port = quint16(15438);
     if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
@@ -309,23 +321,44 @@ void cameraSettingsWidget::connectToRobot()
         {
             qDebug() <<"Failed";
         }
+
+
         datasize = 0;
-    }
+    }*/
+
+    //USING THE JOB INTERFACE: (SENDS -1s to robot)
+    CameraSettings tempSettings;
+    tempSettings.gain = -1;
+    tempSettings.exposure = -1;
+    tempSettings.contrast = -1;
+
+    static ChangeCameraSettingsJob* camerajob = new ChangeCameraSettingsJob(tempSettings);
+
+
+    m_job_list->addCameraJob(camerajob);
+    m_job_list->summaryTo(debug);
+
+    (*nuio) << m_job_list;
+
+    m_job_list->removeCameraJob(camerajob);
+
+    readPacketTimer.start();
+
 }
 void cameraSettingsWidget::disconnectFromRobot()
 {
 
-    if(tcpSocket->isOpen())
+   /* if(tcpSocket->isOpen())
     {
         //qDebug() << "disconnecting the Socket";
         tcpSocket->disconnectFromHost();
     }
-
+    */
 
 }
 void cameraSettingsWidget::sendSettingsToRobot()
 {
-    tcpSocket->flush();
+    /*tcpSocket->flush();
     quint16 port = quint16(15438);
     if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
     {
@@ -337,12 +370,28 @@ void cameraSettingsWidget::sendSettingsToRobot()
             timer.stop();
         }
         disconnectFromRobot();
-    }
+    }*/
+
+    qDebug() << "Settings: " << settings->gain << ","<<settings->exposure;
+
+    ChangeCameraSettingsJob* camerajob = new ChangeCameraSettingsJob(*settings);
+
+    qDebug() << "Settings: " << camerajob->getSettings().gain << ","<<camerajob->getSettings().exposure;
+
+    m_job_list->addCameraJob(camerajob);
+    m_job_list->summaryTo(debug);
+
+    (*nuio) << m_job_list;
+
+    m_job_list->removeCameraJob(camerajob);
+
+
+
 }
 
 void cameraSettingsWidget::readPendingData()
 {
-    if(netdata.isEmpty())
+    /*if(netdata.isEmpty())
     {
         CameraSettings tempSettings;
         netdata.append(tcpSocket->readAll());
@@ -359,11 +408,42 @@ void cameraSettingsWidget::readPendingData()
         shiftSaturationSlider->setValue(tempSettings.saturation);
         shiftContrastSlider->setValue(tempSettings.contrast);
         shiftHueSlider->setValue(tempSettings.hue);
-        settings.autoExposure = tempSettings.autoExposure;
-        settings.autoGain = tempSettings.autoGain;
-        settings.autoWhiteBalance = tempSettings.autoWhiteBalance;
+        settings->autoExposure = tempSettings.autoExposure;
+        settings->autoGain = tempSettings.autoGain;
+        settings->autoWhiteBalance = tempSettings.autoWhiteBalance;
 
-    }
+    }*/
+
+     //(*nuio) >> m_job_list;
+
+        static list<Job*>::iterator it;     // the iterator over the motion jobs
+        for (it = nuio->m_jobs->camera_begin(); it !=nuio->m_jobs->camera_end(); ++it)
+        {
+           // debug  << "Vision::Process - Processing Job" << endl;
+            if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
+            {   // process a walk speed job
+                //CameraSettings settings;
+                static ChangeCameraSettingsJob* job;
+                job = (ChangeCameraSettingsJob*) (*it);
+
+                CameraSettings tempsettings = job->getSettings();
+                if(tempsettings.exposure > 0 && tempsettings.exposure != settings->exposure)
+                {
+                    stopStreamCameraSetting();
+                    //*settings = tempsettings;
+                    debug << "Job Processed: " << endl;
+                    shiftExposureSlider->setValue(tempsettings.gain);
+                    shiftGainSlider->setValue(tempsettings.exposure);
+                    shiftBlueChromaSlider->setValue(tempsettings.blueChroma);
+                    shiftRedChromaSlider->setValue(tempsettings.redChroma);
+                    shiftBrightnessSlider->setValue(tempsettings.brightness);
+                    shiftSaturationSlider->setValue(tempsettings.saturation);
+                    shiftContrastSlider->setValue(tempsettings.contrast);
+                    shiftHueSlider->setValue(tempsettings.hue);
+                }
+            }
+        }
+        nuio->m_jobs->clear();
 
 }
 
@@ -372,6 +452,8 @@ void cameraSettingsWidget::streamCameraSetting()
     getCameraSettingsButton->setEnabled(false);
     streamCameraSettingsButton->setEnabled(false);
     stopStreamCameraSettingsButton->setEnabled(true);
+    dostream = true;
+    readPacketTimer.stop();
     timer.start();
 }
 void cameraSettingsWidget::stopStreamCameraSetting()
@@ -380,6 +462,7 @@ void cameraSettingsWidget::stopStreamCameraSetting()
     streamCameraSettingsButton->setEnabled(true);
     stopStreamCameraSettingsButton->setEnabled(false);
     timer.stop();
-    disconnectFromRobot();
+    dostream = false;
+    readPacketTimer.stop();
 
 }

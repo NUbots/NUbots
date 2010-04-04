@@ -159,7 +159,9 @@ network_data_t TcpPort::receiveData()
         m_has_data = false;
     }
     pthread_mutex_unlock(&m_socket_mutex);
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "TCP Recieved: " << netdata.size;
+    #endif
     return netdata;
 }
 

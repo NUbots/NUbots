@@ -18,6 +18,11 @@
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
 
+#include "NUPlatform/NUCamera.h"
+#include "Behaviour/Jobs/JobList.h"
+#include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "NUPlatform/NUIO.h"
+
 using namespace mathGeneral;
 Vision::Vision()
 {
@@ -36,9 +41,51 @@ Vision::~Vision()
     return;
 }
 
+void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
+{
+    //debug  << "Vision::Process - Begin" << endl;
+    //#ifdef USE_VISION
+    static list<Job*>::iterator it;     // the iterator over the motion jobs
+    for (it = jobs.camera_begin(); it != jobs.camera_end(); ++it)
+    {
+        //debug  << "Vision::Process - Processing Job" << endl;
+        if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
+        {   // process a walk speed job
+            CameraSettings settings;
+            static ChangeCameraSettingsJob* job;
+            job = (ChangeCameraSettingsJob*) (*it);
+            settings = job->getSettings();
+            #if DEBUG_VISION_VERBOSITY > 4
+                debug << "Vision::process(): Processing a camera job." << endl;
+            #endif
+            
+            if( settings.exposure == -1 ||
+                settings.contrast == -1 ||
+                settings.gain     == -1 )
+            {
+                #if DEBUG_VISION_VERBOSITY > 4
+                    debug << "Vision::Process - Send CAMERASETTINGS Request Recieved: " << endl;
+                #endif
+                JobList toSendList;
+                ChangeCameraSettingsJob newJob(m_camera->getSettings());
+                toSendList.addCameraJob(&newJob);
+                (*m_io) << toSendList;
+            }
+            else
+            {   
+                //debug << "Exposure,gain: " << settings.exposure << ","<<settings.gain << endl;
+                m_camera->setSettings(settings);
+            }
+            //jobs.removeMotionJob(job);
+        }
+    }
+    //#endif
+}
+
+
 FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 {
-    debug << "Begin Process Frame" << endl;
+    //debug << "Begin Process Frame" << endl;
     AllFieldObjects->~FieldObjects();
     AllFieldObjects = new FieldObjects();
 
@@ -59,9 +106,9 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
-    debug << "Setting Image: " <<endl;
+    //debug << "Setting Image: " <<endl;
     setImage(image);
-    debug << "Generating Horizon Line: " <<endl;
+    //debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
     vector <float> horizonInfo;
     Horizon horizonLine;
@@ -72,11 +119,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     }
     else
     {
-        debug << "No Horizon Data" << endl;
+        //debug << "No Horizon Data" << endl;
         return AllFieldObjects;
     }
-    debug << "Generating Horizon Line: Finnished" <<endl;
-    debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
+    //debug << "Generating Horizon Line: Finnished" <<endl;
+    //debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
     std::vector<unsigned char> validColours;
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
@@ -98,21 +145,21 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     //! Find the Field border
     points = getConvexFieldBorders(points);
     points = interpolateBorders(points,spacings);
-    debug << "Generating Green Boarder: Finnished" <<endl;
+    //debug << "Generating Green Boarder: Finnished" <<endl;
     //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
-    debug << "Vert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
+    //debug << "Vert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
     //! Scan Above the Horizon
     ClassifiedSection horiScanArea = horizontalScan(points,spacings);
-    debug << "Horizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
+    //debug << "Horizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
     //qDebug() << "Generate Scanlines: finnished";
     //! Classify Line Segments
 
     ClassifyScanArea(&vertScanArea);
     ClassifyScanArea(&horiScanArea);
-    debug << "Classify ScanPaths : Finnished" <<endl;
+    //debug << "Classify ScanPaths : Finnished" <<endl;
     //qDebug() << "Classify Scanlines: finnished";
 
     //! Extract and Display Vertical Scan Points:
@@ -240,35 +287,12 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     }
         //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
         //qDebug() << "POSTclassifyCandidates";
-    debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
-    if(candidates.size() > 0)
+    //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
+    if(BallCandidates.size() > 0)
     {
         circ = DetectBall(BallCandidates);
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-            debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
-            debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing() << endl;
-        }
-        else
-        {
-            //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-        }
+        debug << "Ball Detected:" << this->AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     }
-    //debug << "Ball Detected:" << this->AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    /*
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-        }
-        else
-        {
-            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-        }*/
-    //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
     DetectGoals(YellowGoalCandidates,horizontalsegments);
     DetectGoals(BlueGoalCandidates,horizontalsegments);
@@ -350,8 +374,8 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
-    debug << currentImage->width() << " , "<<currentImage->height() << endl;
+    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    //debug << currentImage->width() << " , "<<currentImage->height() << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < currentImage->width(); x+=scanSpacing)
@@ -1264,7 +1288,7 @@ std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int sp
 
 Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
 {
-    debug<< "Vision::DetectBall" << endl;
+    //debug<< "Vision::DetectBall" << endl;
 
     Ball BallFinding;
 
@@ -1285,7 +1309,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
     //qDebug() << "Vision::DetectBall : Finnised FO_Ball" << endl;
     if(ball.isDefined)
     {
-        //qDebug()<< "Vision::DetectBall : Update FO_Ball" << endl;
+        //debug<< "Vision::DetectBall : Update FO_Ball" << endl;
         Vector2<int> viewPosition;
         Vector3<float> sphericalError;
         Vector3<float> sphericalPosition;
@@ -1306,9 +1330,9 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-        /*qDebug()    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance()
-                    << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing()
-                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Elevation();*/
+        /*debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()
+                    << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing()
+                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;*/
 
     }
     //qDebug() << "Vision::DetectBall : Finnised" << endl;

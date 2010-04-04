@@ -26,7 +26,9 @@
 
 class Circle;
 class NUimage;
-
+class NUCamera;
+class JobList;
+class NUIO;
 //! Contains vision processing tools and functions.
 class Vision
 {
@@ -55,7 +57,8 @@ class Vision
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
 
-    //void ProcessFrame(NUimage& image, Horizon horizonLine);
+    void process (JobList& jobs, NUCamera* m_camera, NUIO* m_io);
+
     FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
 
 

@@ -35,13 +35,13 @@ class NUviewIO: public NUIO
 public:
     NUviewIO();
     ~NUviewIO();
-    
+    static JobList* m_jobs;
 private:
     static NUSystem* m_nusystem;
     
     static GameInformation* m_gameinfo;
     static TeamInformation* m_teaminfo;
-    static JobList* m_jobs;
+
 };
 
 extern NUviewIO* nuio;

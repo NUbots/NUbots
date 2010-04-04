@@ -67,7 +67,7 @@ void NUHead::process(const vector<float>& position)
 void NUHead::doHead()
 {
 	static vector<float> pos (2,0);
-	static vector<float> vel (2,0);
+	static vector<float> vel (1,0);
 	static vector<float> gain (2,45);
 
 	pos[0] = m_pitch;
