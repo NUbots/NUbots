@@ -18,6 +18,7 @@
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
 
+
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -160,7 +161,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     ClassifyScanArea(&vertScanArea);
     ClassifyScanArea(&horiScanArea);
     //debug << "Classify ScanPaths : Finnished" <<endl;
-    //qDebug() << "Classify Scanlines: finnished";
 
     //! Extract and Display Vertical Scan Points:
     tempNumScanLines = vertScanArea.getNumberOfScanLines();
@@ -229,6 +229,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
     std::vector< ObjectCandidate > YellowGoalCandidates;
+    std::vector< ObjectCandidate > BlueGoalAboveHorizonCandidates;
+    std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
 
     mode = ROBOTS;
     method = Vision::PRIMS;
@@ -245,8 +247,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
-                tempCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.2, 2.0, 12, method);
-                RobotCandidates = tempCandidates;
+                RobotCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.2, 2.0, 12, method);
                 //qDebug() << "POST-ROBOT";
                 robotClassifiedPoints = 0;
                 break;
@@ -256,8 +257,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
                 validColours.push_back(ClassIndex::red_orange);
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
-                tempCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
-                BallCandidates = tempCandidates;
+                BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
                 break;
             case YELLOW_GOALS:
@@ -266,38 +266,27 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                tempCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                YellowGoalCandidates = tempCandidates;
+                YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                YellowGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                BlueGoalCandidates = tempCandidates;
+                BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                BlueGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
         }
-        /*while (tempCandidates.size())
-        {
-            candidates.push_back(tempCandidates.back());
-            tempCandidates.pop_back();
-        }*/
     }
-        //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-        //qDebug() << "POSTclassifyCandidates";
-    //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
         circ = DetectBall(BallCandidates);
-        debug << "Ball Detected:" << this->AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
     }
+    DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
+    DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
 
-    DetectGoals(YellowGoalCandidates,horizontalsegments);
-    DetectGoals(BlueGoalCandidates,horizontalsegments);
-
-    //qDebug()<< "Process Frame Finnished";
     return AllFieldObjects;
 }
 
@@ -1251,30 +1240,133 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
     return true;
 
 }
-/*
+
 std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std::vector< TransitionSegment > horizontalsegments,
-                                                                            std::vector<Vector2<int> >&fieldBorders,
                                                                             std::vector<unsigned char> validColours,
                                                                             int spacing,
-                                                                            float min_aspect, float max_aspect, int min_segments)
+                                                                            int min_segments)
 {
     std::vector< ObjectCandidate > candidates;
-    for(int i = 0; i < horizontalsegments.size(); i++)
+    std::vector< TransitionSegment > tempSegments;
+    bool usedSegments[horizontalsegments.size()];
+
+    for (int i = 0; i < (int)horizontalsegments.size(); i++)
     {
+        usedSegments[i] = false;
+    }
+
+    int Xstart, Xend, Ystart, Yend;
+    //Work Backwards: As post width is acurrate at bottom (no crossbar)
+    //ASSUMING EVERYTHING IS ALREADY ORDERED
+    for(int i = horizontalsegments.size(); i > 0; i--)
+    {
+        tempSegments.clear();
+        std::vector<int> tempUsedSegments;
         if(!isValidColour(horizontalsegments[i].getColour(), validColours))
         {
             continue;
         }
-        //ObjectCandidate tempCandidate;
-        //tempCandidate = start
-        for(int j = i; j < horizontalSegments.size(); j++)
+        //Setting up:
+        if(usedSegments[i] != false)
         {
+            continue;
+        }
+        Ystart = horizontalsegments[i].getStartPoint().y;
+        Yend = horizontalsegments[i].getEndPoint().y;
+        Xstart = horizontalsegments[i].getStartPoint().x;
+        Xend = horizontalsegments[i].getEndPoint().x;
+        tempSegments.push_back(horizontalsegments[i]);
+        tempUsedSegments.push_back(i);
+        int nextSegCounter = i+1;
+
+        //We want to stop searching when it leaves the line
+        //Searching for a new Xend, close to this current Xstart
+        //Then update with new xstart
+        //qDebug() << "While:";
+        while(horizontalsegments[nextSegCounter].getStartPoint().y ==  Yend && nextSegCounter >0)
+        {
+            if(usedSegments[nextSegCounter] != false)
+            {
+                nextSegCounter--;
+                continue;
+            }
+            if(!isValidColour(horizontalsegments[nextSegCounter].getColour(), validColours))
+            {
+                nextSegCounter--;
+                continue;
+            }
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing/2
+               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing/2)
+            {
+                //Update with new info
+                tempSegments.push_back(horizontalsegments[nextSegCounter]);
+                tempUsedSegments.push_back(nextSegCounter);
+                if (horizontalsegments[nextSegCounter].getStartPoint().x < Xstart)
+                {
+                    Xstart = horizontalsegments[nextSegCounter].getStartPoint().x;
+                }
+
+            }
+            nextSegCounter--;
+        }
+        //Once all the segments on same line has been found scan between
+        //(Xstart-spacing) and (Xend+spacing) for segments that are likely to be above the
+        //Starting from your where you left off in horzontal count
+        //qDebug() << "for:" << nextSegCounter;
+        for(int j = nextSegCounter; j > 0; j--)
+        {
+            if(usedSegments[j] != false)
+            {
+                continue;
+            }
+            if(!isValidColour(horizontalsegments[j].getColour(), validColours))
+            {
+                continue;
+            }
+            if(horizontalsegments[j].getStartPoint().y < Ystart - spacing*4)
+            {
+                break;
+            }
+            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/4
+               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/4)
+            {
+                if (horizontalsegments[j].getStartPoint().x < Xstart)
+                {
+                    Xstart = horizontalsegments[j].getStartPoint().x;
+                }
+                if (horizontalsegments[j].getEndPoint().x > Xend)
+                {
+                    Xend = horizontalsegments[j].getEndPoint().x;
+                }
+                if(horizontalsegments[j].getStartPoint().y < Ystart)
+                {
+                    Ystart = horizontalsegments[j].getEndPoint().y;
+                }
+                tempSegments.push_back(horizontalsegments[j]);
+                tempUsedSegments.push_back(j);
+            }
 
         }
+        //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
+        //Create Object Candidate if greater then the minimum number of segments
+        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/4)
+        {
+            //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
+
+            ObjectCandidate tempCandidate(Xstart, Ystart, Xend, Yend, validColours[0], tempSegments);
+            candidates.push_back(tempCandidate);
+            while (!tempUsedSegments.empty())
+            {
+                usedSegments[tempUsedSegments.back()] = true;
+                tempUsedSegments.pop_back();
+            }
+        }
+
     }
+    //qDebug() << "candidate size: " << candidates.size();
     return candidates;
 }
-*/
+
 std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
     LineDetection LineDetector;
@@ -1340,12 +1432,12 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
 
 }
 
-void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector< TransitionSegment > horizontalSegments)
+void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,std::vector< TransitionSegment > horizontalSegments)
 {
     int width = currentImage->width();
     int height = currentImage->height();
     GoalDetection goalDetector;
-    goalDetector.FindGoal(FO_Candidates,AllFieldObjects, horizontalSegments, this,height,width);
+    goalDetector.FindGoal(FO_Candidates, FO_AboveHorizonCandidates, AllFieldObjects, horizontalSegments, this,height,width);
     return;
 }
 

@@ -81,6 +81,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Threading/Thread.h \
     NUviewIO/NUviewIO.h
 
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

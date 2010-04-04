@@ -277,6 +277,7 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
 
 void cameraSettingsWidget::cameraSettingsChanged()
 {
+
     settings->gain = shiftGainSlider->value();
     settings->exposure = shiftExposureSlider->value();
     settings->blueChroma = shiftBlueChromaSlider->value();
@@ -316,6 +317,17 @@ void cameraSettingsWidget::connectToRobot()
     {
         tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
 
+    }
+    */
+    sendDataToRobot();
+}
+
+void cameraSettingsWidget::sendDataToRobot()
+{
+    /*if(!(getCameraSettingsButton->isEnabled()) &&
+       streamCameraSettingsButton->isEnabled() &&
+       !(stopStreamCameraSettingsButton->isEnabled()))
+    {
         const char* data = "1";
         if (tcpSocket->write(data) == -1)
         {
@@ -345,6 +357,7 @@ void cameraSettingsWidget::connectToRobot()
     readPacketTimer.start();
 
 }
+
 void cameraSettingsWidget::disconnectFromRobot()
 {
 
@@ -358,25 +371,13 @@ void cameraSettingsWidget::disconnectFromRobot()
 }
 void cameraSettingsWidget::sendSettingsToRobot()
 {
-    /*tcpSocket->flush();
-    quint16 port = quint16(15438);
-    if(tcpSocket->state() == QAbstractSocket::UnconnectedState)
-    {
-        tcpSocket->connectToHost(robotName,port,QIODevice::ReadWrite);
-        std::stringstream buffer;
-        buffer << settings;
-        if(tcpSocket->write((const char*)buffer.str().c_str()) == -1)
-        {
-            timer.stop();
-        }
-        disconnectFromRobot();
-    }*/
 
-    qDebug() << "Settings: " << settings->gain << ","<<settings->exposure;
+
+    //qDebug() << "Settings: " << settings->gain << ","<<settings->exposure;
 
     ChangeCameraSettingsJob* camerajob = new ChangeCameraSettingsJob(*settings);
 
-    qDebug() << "Settings: " << camerajob->getSettings().gain << ","<<camerajob->getSettings().exposure;
+    //qDebug() << "Settings: " << camerajob->getSettings().gain << ","<<camerajob->getSettings().exposure;
 
     m_job_list->addCameraJob(camerajob);
     m_job_list->summaryTo(debug);
@@ -384,8 +385,6 @@ void cameraSettingsWidget::sendSettingsToRobot()
     (*nuio) << m_job_list;
 
     m_job_list->removeCameraJob(camerajob);
-
-
 
 }
 

@@ -24,7 +24,9 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-#include <netdb.h>
+#ifndef WIN32
+    #include <netdb.h>
+#endif
 #include <errno.h>
 #include <cstring>
 using namespace std;

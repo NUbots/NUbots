@@ -142,14 +142,15 @@ class Vision
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
 
-    /* std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
-                                                                      std::vector<Vector2<int> >&fieldBorders,
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
                                                                       std::vector<unsigned char> validColours,
-                                                                      int spacing,
-                                                                      float min_aspect, float max_aspect, int min_segments);*/
+                                                                      int spacing, int min_segments);
 
     Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
-    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector< TransitionSegment > horizontalSegments);
+
+    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,
+                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
+                     std::vector< TransitionSegment > horizontalSegments);
 
 
 
