@@ -19,14 +19,14 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
-
-
+#include "NUPlatform/NUCamera.h"
+#include <iostream>
+#include <fstream>
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
 class Circle;
 class NUimage;
-class NUCamera;
 class JobList;
 class NUIO;
 //! Contains vision processing tools and functions.
@@ -40,6 +40,15 @@ class Vision
     unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+
+    //! SavingImages:
+    bool isSavingImages;
+    ofstream imagefile;
+    int ImageFrameNumber;
+    CameraSettings currentSettings;
+    NUCamera* camera;
+
+    void SaveAnImage();
 
     public:
     //! FieldObjects Container

@@ -23,6 +23,7 @@
 #include "NUviewIO/NUviewIO.h"
 #include "Behaviour/Jobs.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 #include "NUPlatform/NUCamera/CameraSettings.h"
 #include "debug.h"
 
@@ -146,6 +147,10 @@ void cameraSettingsWidget::createWidgets()  //!< Create all of the child widgets
     getCameraSettingsButton->setEnabled(true);
     streamCameraSettingsButton->setEnabled(false);
     stopStreamCameraSettingsButton->setEnabled(false);
+
+    StartSavingImagesButton = new QPushButton("Start Saving Images");
+    StopSavingImagesButton = new QPushButton("Stop Saving Images");
+
 }
 void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets.
 {
@@ -209,6 +214,10 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     pushButtonLayout->addWidget(streamCameraSettingsButton);
     pushButtonLayout->addWidget(stopStreamCameraSettingsButton);
 
+    saveImagesButtonLayout = new QHBoxLayout();
+    saveImagesButtonLayout->addWidget(StartSavingImagesButton);
+    saveImagesButtonLayout->addWidget(StopSavingImagesButton);
+
     overallLayout = new QVBoxLayout();                 //!< Overall widget layout.
     overallLayout->addLayout(shiftGainLayout);
     overallLayout->addLayout(shiftExposureLayout);
@@ -218,8 +227,9 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     overallLayout->addLayout(shiftSaturationLayout);
     overallLayout->addLayout(shiftContrastLayout);
     overallLayout->addLayout(shiftHueLayout);
-    overallLayout->addLayout(robotNameInputLayout);
+    //overallLayout->addLayout(robotNameInputLayout);
     overallLayout->addLayout(pushButtonLayout);
+    overallLayout->addLayout(saveImagesButtonLayout);
 
     setLayout(overallLayout);
 }
@@ -272,6 +282,8 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
 
     connect(&readPacketTimer,SIGNAL(timeout()),this,SLOT(readPendingData()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(sendSettingsToRobot()));
+    connect(StartSavingImagesButton, SIGNAL(pressed()),this,SLOT(sendStartSavingImagesJob()));
+    connect(StopSavingImagesButton, SIGNAL(pressed()),this,SLOT(sendStopSavingImagesJob()));
 }
 
 
@@ -463,5 +475,30 @@ void cameraSettingsWidget::stopStreamCameraSetting()
     timer.stop();
     dostream = false;
     readPacketTimer.stop();
+
+}
+
+
+void cameraSettingsWidget::sendStartSavingImagesJob()
+{
+    SaveImagesJob* saveimagesjob = new SaveImagesJob(true);
+    m_job_list->addVisionJob(saveimagesjob);
+    m_job_list->summaryTo(debug);
+
+    (*nuio) << m_job_list;
+
+    m_job_list->removeVisionJob(saveimagesjob);
+
+}
+
+void cameraSettingsWidget::sendStopSavingImagesJob()
+{
+    SaveImagesJob* saveimagesjob = new SaveImagesJob(false);
+    m_job_list->addVisionJob(saveimagesjob);
+    m_job_list->summaryTo(debug);
+
+    (*nuio) << m_job_list;
+
+    m_job_list->removeVisionJob(saveimagesjob);
 
 }

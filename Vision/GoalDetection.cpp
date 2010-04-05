@@ -3,7 +3,7 @@
 #include "TransitionSegment.h"
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
-#include <QDebug>
+//#include <QDebug>
 #include "debug.h"
 
 GoalDetection::GoalDetection()
@@ -58,7 +58,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             {
                 //use height
 
-                qDebug() << i <<": HEIGHT GOAL Distance: " << GoalDistance;
+                //qDebug() << i <<": HEIGHT GOAL Distance: " << GoalDistance;
             }
             else if(RatioOK)
             {
@@ -66,7 +66,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 //use width
                 //qDebug() << vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
                 float GoalDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((FO_Candidates[i].getBottomRight().x - FO_Candidates[i].getTopLeft().x)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-                qDebug() << i<<": WIDTH GOAL Distance: " << GoalDistance;
+                //qDebug() << i<<": WIDTH GOAL Distance: " << GoalDistance;
             }
             */
             if(RatioOK)
@@ -75,16 +75,16 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 //float GoalHeightDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (FO_Candidates[i].getBottomRight().y - FO_Candidates[i].getTopLeft().y); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
                 //float GoalWidthDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((FO_Candidates[i].getBottomRight().x - FO_Candidates[i].getTopLeft().x)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
                 FinalDistance = FindGoalDistance(FO_Candidates[i],vision);
-                qDebug() << "Distance to Goal: "<<FinalDistance;
+                //qDebug() << "Distance to Goal: "<<FinalDistance;
                 /*if(GoalHeightDistance > GoalWidthDistance)
                 {
                     FinalDistance = GoalWidthDistance;
-                    qDebug() << i<<": WIDTH GOAL Distance: " << GoalWidthDistance;
+                    //qDebug() << i<<": WIDTH GOAL Distance: " << GoalWidthDistance;
                 }
                 else
                 {
                     FinalDistance = GoalHeightDistance;
-                    qDebug() << i<<": Height GOAL Distance: " << GoalHeightDistance;
+                    //qDebug() << i<<": Height GOAL Distance: " << GoalHeightDistance;
                 }*/
             }
 	}
@@ -142,7 +142,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
             PossibleGoal->setTopLeft(TopLeft);
             PossibleGoal->setBottomRight(BottomRight);
             usedAbovehorizonCandidate[i] = true;
-            qDebug() <<"Found OverLapping Candidate Above horizon";
+            //qDebug() <<"Found OverLapping Candidate Above horizon";
         }
 
     }
@@ -314,8 +314,8 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
     {\
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
-        qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
-                            << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
+        //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
+        //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
         int j = i+1;
         while(tempStart.y == tempSegments[j].getStartPoint().y)
         {
@@ -334,7 +334,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         }
 
     }
-    qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
+    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
     if(midpoints.size() < 3 )
     {
         float FinalDistance;
@@ -344,12 +344,12 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         if(GoalHeightDistance > GoalWidthDistance)
         {
             FinalDistance = GoalWidthDistance;
-            qDebug() <<": WIDTH GOAL Distance: " << GoalWidthDistance;
+            //qDebug() <<": WIDTH GOAL Distance: " << GoalWidthDistance;
         }
         else
         {
             FinalDistance = GoalHeightDistance;
-            qDebug() <<": Height GOAL Distance: " << GoalHeightDistance;
+            //qDebug() <<": Height GOAL Distance: " << GoalHeightDistance;
         }
         return FinalDistance;
     }
@@ -364,7 +364,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         point.y = midpoints[i].y;
         midPointLine.addPoint(point);
     }
-    qDebug() << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0";
+    //qDebug() << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0";
    /* for(int i = 0 ; i < (int)leftPoints.size(); i++)
     {
         tempDistance = (leftPoints[i].x * midPointLine.getA() + leftPoints[i].y *  midPointLine.getB() + midPointLine.getC())/math.sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB())

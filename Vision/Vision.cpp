@@ -22,6 +22,7 @@
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 #include "NUPlatform/NUIO.h"
 
 using namespace mathGeneral;
@@ -32,6 +33,9 @@ Vision::Vision()
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[c_LUTLength];
     currentLookupTable = LUTBuffer;
+    imagefile.open ("/home/nao/images.nul");
+    isSavingImages = false;
+    ImageFrameNumber = 0;
     return;
 }
 
@@ -46,6 +50,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 {
     //debug  << "Vision::Process - Begin" << endl;
     //#ifdef USE_VISION
+    camera = m_camera;
     static list<Job*>::iterator it;     // the iterator over the motion jobs
     for (it = jobs.camera_begin(); it != jobs.camera_end(); ++it)
     {
@@ -71,14 +76,42 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 ChangeCameraSettingsJob newJob(m_camera->getSettings());
                 toSendList.addCameraJob(&newJob);
                 (*m_io) << toSendList;
+                toSendList.removeCameraJob(&newJob);
             }
             else
             {   
-                //debug << "Exposure,gain: " << settings.exposure << ","<<settings.gain << endl;
                 m_camera->setSettings(settings);
             }
-            //jobs.removeMotionJob(job);
+            
         }
+        
+    }
+    for (it = jobs.vision_begin(); it != jobs.vision_end(); ++it)
+    {
+        if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
+        {   
+            #if DEBUG_VISION_VERBOSITY > 4
+                debug << "Vision::process(): Processing a save images job." << endl;
+            #endif
+            static SaveImagesJob* job;
+            job = (SaveImagesJob*) (*it);
+            if(isSavingImages != job->saving())
+            {
+                if(job->saving() == true)
+                {
+                    
+                    currentSettings = m_camera->getSettings();
+                    system("aplay /home/nao/data/Sounds/StartSavingImages.wav");
+                }
+                else
+                {
+                    
+                    m_camera->setSettings(currentSettings);
+                    system("aplay /home/nao/data/Sounds/StopSavingImages.wav");
+                }
+                isSavingImages = job->saving();
+            }
+         }
     }
     //#endif
 }
@@ -92,6 +125,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 
     if (image == NULL)
         return AllFieldObjects;
+
 
     std::vector< Vector2<int> > points;
     //std::vector< Vector2<int> > verticalPoints;
@@ -109,6 +143,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     int robotClassifiedPoints = 0;
     //debug << "Setting Image: " <<endl;
     setImage(image);
+
+    if(isSavingImages)
+    {
+        SaveAnImage();
+    }
     //debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
     vector <float> horizonInfo;
@@ -290,6 +329,40 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     return AllFieldObjects;
 }
 
+void Vision::SaveAnImage()
+{
+    imagefile << *currentImage;
+
+    //Set NextCameraSetting:
+    CameraSettings tempCameraSettings = camera->getSettings();
+    if(ImageFrameNumber % 6 == 0 )
+    {
+        tempCameraSettings.exposure = 100;
+    }
+    else if(ImageFrameNumber % 6 == 1 )
+    {
+        tempCameraSettings.exposure = 150;
+    }
+    else if( ImageFrameNumber % 6 == 2 )
+    {
+        tempCameraSettings.exposure = 200;
+    }
+    else if( ImageFrameNumber % 6 == 3 )
+    {
+        tempCameraSettings.exposure = 250;
+    }
+    else if( ImageFrameNumber % 6 == 4 )
+    {
+        tempCameraSettings.exposure = 300;
+    }
+    else if( ImageFrameNumber % 6 == 5 )
+    {
+        tempCameraSettings.exposure = 400;
+    }
+    camera->setSettings(tempCameraSettings);
+    
+}
+
 void Vision::setLUT(unsigned char* newLUT)
 {
     currentLookupTable = newLUT;
@@ -306,6 +379,7 @@ void Vision::loadLUTFromFile(const std::string& fileName)
 void Vision::setImage(const NUimage* newImage)
 {
     currentImage = newImage;
+    ImageFrameNumber++;
 }
 
 unsigned char Vision::classifyPixel(int x, int y)
