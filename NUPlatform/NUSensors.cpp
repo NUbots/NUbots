@@ -127,6 +127,8 @@ void NUSensors::calculateSoftSensors()
     calculateFootImpact();
     calculateCoP();
     calculateZMP();
+    calculateOdometry();
+    calculateCameraHeight();
     calculateFallSense();
 }
 
@@ -191,23 +193,7 @@ void NUSensors::calculateHorizon()
     line.push_back(HorizonLine.getA());
     line.push_back(HorizonLine.getB());
     line.push_back(HorizonLine.getC());
-    //debug << "HLINE IS: "<<line[0] << line[1] << line[2] << endl;
     m_data->BalanceHorizon->setData(m_current_time, line, true );
-/*    static vector<float> orientation(3, 0);
-    static vector<float> acceleration(3, 0);
-    if (m_data->getAccelerometerValues(acceleration))
-    {
-        float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-        if (fabs(accelsum - 981) < 0.1*981)
-        {   // only update the orientation estimate if not under other accelerations!
-            orientation[0] = atan2(-acceleration[1],-acceleration[2]);
-            orientation[1] = atan2(acceleration[0],-acceleration[2]);
-            orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
-        }
-        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-    }
-*/
-
 }
 
 
@@ -509,5 +495,24 @@ void NUSensors::calculateCoP()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCoP()" << endl;
 #endif
+    //!< @todo Implement NUSensors::calculateCoP
 }
+
+void NUSensors::calculateOdometry()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateOdometry()" << endl;
+#endif
+    //!< @todo Implement NUSensors::calculateOdometry
+}
+
+void NUSensors::calculateCameraHeight()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateCameraHeight()" << endl;
+#endif
+    //!< @todo Implement NUSensors::calculateCameraHeight
+}
+
+
 

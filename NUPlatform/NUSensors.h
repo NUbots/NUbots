@@ -64,6 +64,9 @@ protected:
     void calculateFootImpact();
     void calculateCoP();
     
+    void calculateOdometry();
+    void calculateCameraHeight();
+    
 private:
 protected:
     NUSensorsData* m_data;
