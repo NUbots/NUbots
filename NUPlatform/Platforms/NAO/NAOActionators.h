@@ -31,12 +31,6 @@
 #include "NUNAO.h"
 
 #include "nubotconfig.h"
-#ifdef USE_MOTION
-    #include "walkconfig.h"
-    #ifdef USE_ALWALK
-        #include <almotionproxy.h>
-    #endif
-#endif
 #include <dcmproxy.h>
 
 class NAOActionators : public NUActionators
@@ -67,9 +61,6 @@ private:
     
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
-#ifdef USE_ALWALK
-    ALMotionProxy* m_al_motion;
-#endif
     ALValue m_position_command, m_stiffness_command, m_led_command;
 };
 

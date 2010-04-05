@@ -67,12 +67,12 @@ void NUHead::process(const vector<float>& position)
 void NUHead::doHead()
 {
 	static vector<float> pos (2,0);
-	static vector<float> vel (2,2);
-	static vector<float> gain (20,20);
+	static vector<float> vel (2,0);
+	static vector<float> gain (2,40);
 
 	pos[0] = m_pitch;
 	pos[1] = m_yaw;
 
-	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime, pos, vel, gain);
+	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 40, pos, vel, gain);
 }
 

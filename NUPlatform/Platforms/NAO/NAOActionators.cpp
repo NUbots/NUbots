@@ -84,22 +84,18 @@ void NAOActionators::getActionatorsFromAldebaran()
     ALValue param;
     param.arraySetSize(2);
 
-    #ifndef USE_ALWALK
-        param[0] = ALIAS_POSITION;
-        param[1] = m_servo_position_names;
-        param = m_al_dcm->createAlias(param);
-        #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-            debug << param.toString(VerbosityMini) << endl;
-        #endif
-        
-        param[0] = ALIAS_STIFFNESS;
-        param[1] = m_servo_stiffness_names;
-        param = m_al_dcm->createAlias(param);
-        #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-            debug << param.toString(VerbosityMini) << endl;
-        #endif
-    #else
-        m_al_motion = new ALMotionProxy(NUNAO::m_broker);
+    param[0] = ALIAS_POSITION;
+    param[1] = m_servo_position_names;
+    param = m_al_dcm->createAlias(param);
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << param.toString(VerbosityMini) << endl;
+    #endif
+    
+    param[0] = ALIAS_STIFFNESS;
+    param[1] = m_servo_stiffness_names;
+    param = m_al_dcm->createAlias(param);
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << param.toString(VerbosityMini) << endl;
     #endif
     
     param[0] = ALIAS_LED;
@@ -121,10 +117,13 @@ void NAOActionators::createALDCMCommands()
 
 void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators)
 {
+    // The format for a command to the DCM in alias mode is the following:
+    // [AliasName, "ClearAfter", "time-mixed",[actionator0, actionator1, ... , actionatorn]]
+    //      where each actionator is [[command0, dcmtime0, importance0], [command1, dcmtime1, importance1], ...]
+    // However, as we only ever give the dcm one command at a time an actionator is always [[command0, dcmtime0, importance0]]
     ALValue l_command;
     
     // time-mixed mode always has a command length of 4
-    // [AliasName, ClearAfter, time-mixed,[...]]
     l_command.arraySetSize(4);
     l_command[0] = p_name;
     l_command[1] = "ClearAfter";
@@ -132,10 +131,10 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
     
     ALValue actionators;
     actionators.arraySetSize(numactionators);
-    ALValue points;
-    points.arraySetSize(1);
-    ALValue point;
-    point.arraySetSize(3);
+    ALValue points;             // the list of commands for each actionator
+    points.arraySetSize(1);     // we always send only one command 
+    ALValue point;              // the actionator value
+    point.arraySetSize(3);      // a actionator point is always [value, dcmtime, importance]
     for (unsigned int i=0; i<numactionators; i++)
     {
         point[0] = 0;
@@ -164,10 +163,9 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<float> gains;
     
     static vector<int> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
-    static vector<float> dcmleds(m_num_leds, 0);
-#ifndef USE_ALWALK    
-    static vector<float> dcmpositions(m_num_servo_positions, 0);
-    static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, 0);
+    static vector<float> dcmleds(m_num_leds, NAN);
+    static vector<float> dcmpositions(m_num_servo_positions, NAN);
+    static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, NAN);
     
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
@@ -180,6 +178,12 @@ void NAOActionators::copyToHardwareCommunications()
                     dcmtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
                     dcmstiffnesses[i] = gains[i]/100.0;
                     dcmpositions[i] = positions[i];
+                }
+                else
+                {
+                    dcmtimes[i] = NAN;
+                    dcmstiffnesses[i] = NAN;
+                    dcmpositions[i] = NAN;
                 }
             }
         }
@@ -196,54 +200,6 @@ void NAOActionators::copyToHardwareCommunications()
     }
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
-#else
-    static ALValue alnames;
-    static ALValue altime;
-    static ALValue altimes;
-    static ALValue alposition;
-    static ALValue alpositions;
-    static ALValue alstiffness;
-    static ALValue alstiffnesses;
-    
-    alnames.clear();
-    altime.arraySetSize(1);
-    altimes.clear();
-    alposition.arraySetSize(1);
-    alpositions.clear();
-    alstiffness.arraySetSize(1);
-    alstiffnesses.clear();
-    
-    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
-    {
-        if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
-        {
-            for (unsigned int i=0; i<m_num_servo_positions; i++)
-            {
-                if (isvalid[i] == true)
-                {
-                    string name(m_servo_names[i]);
-                    float time((times[i] - m_current_time)/1000.0);
-                    if (time <= 0) time = 0.01;
-
-                    altime[0] = time;
-                    alposition[0] = positions[i];
-                    alstiffness[0] = gains[i]/100.0;
-                    
-                    alnames.arrayPush(name);
-                    altimes.arrayPush(altime);
-                    alpositions.arrayPush(alposition);
-                    alstiffnesses.arrayPush(alstiffness);
-                }
-            }
-        }
-    }
-    
-    if (alnames.getSize() > 0)
-    {
-        m_al_motion->post.angleInterpolation(alnames, alpositions, altimes, true);
-        m_al_motion->post.stiffnessInterpolation(alnames, alstiffnesses, altimes);
-    }
-#endif
     m_al_dcm->setAlias(m_led_command);
     
     m_data->removeCompletedPoints(m_current_time);
