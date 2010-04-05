@@ -21,7 +21,7 @@
 
 
 #include "NUHead.h"
-#include "NUPlatform/NUSystem.h"
+#include "Head/PIDController.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -30,13 +30,17 @@ NUHead::NUHead()
 {
     m_pitch = 0;
     m_yaw = 0;
+    
+    m_pitch_pid = new PIDController(string("HeadPitch"), 0.6, 1.2/1000.0, 0.16*1000, -0.67, 0.51);
+    m_yaw_pid = new PIDController(string("HeadYaw"), 0.6, 1.2/1000.0, 0.16*1000, -2.08, 2.08);
 }
 
 /*! @brief Destructor for motion module
  */
 NUHead::~NUHead()
 {
-
+    if (m_pitch_pid != NULL) delete m_pitch_pid;
+    if (m_yaw_pid != NULL) delete m_yaw_pid;
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -56,12 +60,9 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 
 void NUHead::process(const vector<float>& position)
 {
+    m_head_timestamp = m_data->CurrentTime;
 	m_pitch = position[0];
 	m_yaw = position[1];
-	
-	m_head_timestamp = nusystem->getTime();
-
-
 }
 
 void NUHead::doHead()
@@ -70,9 +71,17 @@ void NUHead::doHead()
 	static vector<float> vel (2,0);
 	static vector<float> gain (2,40);
 
-	pos[0] = m_pitch;
-	pos[1] = m_yaw;
+    m_pitch_pid->setTarget(m_pitch);
+    m_yaw_pid->setTarget(m_yaw);
+    
+    static vector<float> sensorpositions(2, 0);
+    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
+    
+	pos[0] = m_pitch_pid->doControl(m_data->CurrentTime, sensorpositions[0]);
+	pos[1] = m_yaw_pid->doControl(m_data->CurrentTime, sensorpositions[1]);
+    
+    cout << "target:" << m_pitch << " " << m_yaw << endl;
 
-	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 40, pos, vel, gain);
+	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gain);
 }
 
