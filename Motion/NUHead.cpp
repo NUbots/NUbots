@@ -60,6 +60,8 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 
 void NUHead::process(const vector<float>& position)
 {
+    if (m_data == NULL || position.size() < 2)
+        return;
     m_head_timestamp = m_data->CurrentTime;
 	m_pitch = position[0];
 	m_yaw = position[1];
