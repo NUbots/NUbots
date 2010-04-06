@@ -162,16 +162,25 @@ void NAOActionators::copyToHardwareCommunications()
     m_data->summaryTo(debug);
 #endif
     
-    static vector<bool> isvalid;            
-    static vector<double> times;
-    static vector<float> positions;
-    static vector<float> velocities;
-    static vector<float> gains;
+    static vector<bool> isvalid;
     
-    static vector<int> dcmtimes(m_num_servo_positions, m_al_dcm->getTime(0));
-    static vector<float> dcmleds(m_num_leds, NAN);
+    static vector<double> times;
+    static vector<int> dcmpositiontimes(m_num_servo_positions, m_al_dcm->getTime(0));
+    static vector<int> dcmledtimes(m_num_leds, m_al_dcm->getTime(0));
+    
+    static vector<float> positions;
     static vector<float> dcmpositions(m_num_servo_positions, NAN);
+    
+    static vector<float> velocities;
+    
+    static vector<float> gains;
     static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, NAN);
+    
+    static vector<float> redleds, greenleds, blueleds;
+    static vector<float> dcmredleds(m_num_leds, NAN);
+    static vector<float> dcmgreenleds(m_num_leds, NAN);
+    static vector<float> dcmblueleds(m_num_leds, NAN);
+    
     
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
@@ -181,41 +190,57 @@ void NAOActionators::copyToHardwareCommunications()
             {
                 if (isvalid[i] == true)
                 {
-                    dcmtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
+                    dcmpositiontimes[i] = static_cast<int> (times[i] + m_al_time_offset);
                     dcmstiffnesses[i] = gains[i]/100.0;
                     dcmpositions[i] = positions[i];
                 }
                 else
                 {
-                    dcmtimes[i] = 0;
+                    dcmpositiontimes[i] = 0;
                     dcmstiffnesses[i] = NAN;
                     dcmpositions[i] = NAN;
                 }
             }
         }
         else
-            errorlog << "NAOActionators::copyToHardwareCommunications(). The input does not have the correct length, all data will be ignored!" << endl;
+            errorlog << "NAOActionators::copyToHardwareCommunications(). The positions do not have the correct length, all data will be ignored!" << endl;
     }
-    
     for (unsigned int i=0; i<m_num_servo_positions; i++)
     {
         m_stiffness_command[3][i][0][0] = dcmstiffnesses[i];
-        m_stiffness_command[3][i][0][1] = dcmtimes[i];
+        m_stiffness_command[3][i][0][1] = dcmpositiontimes[i];
         m_position_command[3][i][0][0] = dcmpositions[i];
-        m_position_command[3][i][0][1] = dcmtimes[i];
+        m_position_command[3][i][0][1] = dcmpositiontimes[i];
     }
+    
+    if (m_data->getNextLeds(isvalid, times, redleds, greenleds, blueleds))
+    {
+        if (m_num_leds == isvalid.size())
+        {
+            for (unsigned int i=0; i<m_num_leds; i++)
+            {
+                if (isvalid[i] == true)
+                {
+                    dcmledtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
+                    dcmredleds[i] = redleds[i];
+                    dcmgreenleds[i] = greenleds[i];
+                    dcmblueleds[i] = blueleds[i];
+                }
+                else
+                {
+                    dcmledtimes[i] = 0;
+                    dcmredleds[i] = NAN;
+                    dcmgreenleds[i] = NAN;
+                    dcmblueleds[i] = NAN;
+                }
+            }
+        }
+        else
+            errorlog << "NAOActionators::copyToHardwareCommunications(). The leds do not have the correct length, all data will be ignored!" << endl;
+    }
+    
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
-    
-    
-    static float intensity = 0;
-    intensity += 0.001;
-    if (intensity > 1) intensity = 0;
-    for (unsigned int i=0; i<m_num_leds; i++)
-    {
-        m_led_command[3][i][0][0] = intensity;
-        m_led_command[3][i][0][1] = m_al_dcm->getTime(0);
-    }
     m_al_dcm->setAlias(m_led_command);
     
     m_data->removeCompletedPoints(m_current_time);

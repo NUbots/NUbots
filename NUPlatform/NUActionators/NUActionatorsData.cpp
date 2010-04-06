@@ -51,27 +51,6 @@ NUActionatorsData::joint_id_t NUActionatorsData::RKneePitch = NUActionatorsData:
 NUActionatorsData::joint_id_t NUActionatorsData::RAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
 NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 
-NUActionatorsData::led_id_t NUActionatorsData::LEar = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::REar = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::LEye = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::REye = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::Chest = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::LFoot = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::led_id_t NUActionatorsData::RFoot = NUActionatorsData::ACTIONATOR_MISSING;
-
-NUActionatorsData::camera_setting_id_t NUActionatorsData::Resolution = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::FramesPerSecond = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoExposure = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoWhiteBalance = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::AutoGain = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::Brightness = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::Saturation = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::RedChroma = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::BlueChroma = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::Gain = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::Exposure = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::camera_setting_id_t NUActionatorsData::SelectCamera = NUActionatorsData::ACTIONATOR_MISSING;
-
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
 NUActionatorsData::NUActionatorsData()
@@ -311,60 +290,27 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
     {
         addLedActionator(lednames[i]);
         if (simplelednames[i].find("lear") != string::npos || simplelednames[i].find("earsledleft") != string::npos)
-            LEar = i;
+            m_lear_ids.push_back(i);
         else if (simplelednames[i].find("rear") != string::npos || simplelednames[i].find("earsledright") != string::npos)
-            REar = i;
-        else if (simplelednames[i].find("leye") != string::npos || simplelednames[i].find("faceledleft") != string::npos)
-            LEye = i;
-        else if (simplelednames[i].find("reye") != string::npos || simplelednames[i].find("faceledright") != string::npos)
-            REye = i;
-        else if (simplelednames[i].find("chest") != string::npos || simplelednames[i].find("chestboardled") != string::npos)
-            Chest = i;
-        else if (simplelednames[i].find("lfoot") != string::npos || simplelednames[i].find("lfootled") != string::npos)
-            LFoot = i;
-        else if (simplelednames[i].find("rfoot") != string::npos || simplelednames[i].find("rfootled") != string::npos)
-            RFoot = i;
+            m_rear_ids.push_back(i);
+        else if (simplelednames[i].find("leye") != string::npos || simplelednames[i].find("faceledleft") != string::npos  || simplelednames[i].find("faceledredleft") != string::npos)
+            m_leye_ids.push_back(i);
+        else if (simplelednames[i].find("reye") != string::npos || simplelednames[i].find("faceledright") != string::npos || simplelednames[i].find("faceledredright") != string::npos)
+            m_reye_ids.push_back(i);
+        else if (simplelednames[i].find("chest") != string::npos || simplelednames[i].find("chestboardled") != string::npos || simplelednames[i].find("chestboardredled") != string::npos)
+            m_chest_ids.push_back(i);
+        else if (simplelednames[i].find("lfoot") != string::npos || simplelednames[i].find("lfootled") != string::npos || simplelednames[i].find("lfootredled") != string::npos)
+            m_lfoot_ids.push_back(i);
+        else if (simplelednames[i].find("rfoot") != string::npos || simplelednames[i].find("rfootled") != string::npos || simplelednames[i].find("rfootredled") != string::npos)
+            m_rfoot_ids.push_back(i);
     }
-}
-
-/*! @brief Adds the camera setting actionator and sets each of the static camera_setting_id_t if the setting is in the list.
- @param camerasettingnames a vector of strings where each string is a name of a setting
- */
-void NUActionatorsData::setAvailableCameraSettings(const vector<string>& camerasettingnames)
-{
-    vector<string> simplecamerasettingnames;
-    simplifyNames(camerasettingnames, simplecamerasettingnames);
-    
-    for (unsigned int i=0; i<simplecamerasettingnames.size(); i++) 
-    {
-        addCameraSettingActionator(camerasettingnames[i]);
-        if (simplecamerasettingnames[i].compare("resolution") == 0)
-            Resolution = i;
-        else if (simplecamerasettingnames[i].compare("framespersecond") == 0 || simplecamerasettingnames[i].compare("fps") == 0 )
-            FramesPerSecond = i;
-        else if (simplecamerasettingnames[i].compare("autoexposure") == 0)
-            AutoExposure = i;
-        else if (simplecamerasettingnames[i].compare("autowhitebalance") == 0)
-            AutoWhiteBalance = i;
-        else if (simplecamerasettingnames[i].compare("autogain") == 0)
-            AutoGain = i;
-        else if (simplecamerasettingnames[i].compare("brightness") == 0)
-            Brightness = i;
-        else if (simplecamerasettingnames[i].compare("saturation") == 0)
-            Saturation = i;
-        else if (simplecamerasettingnames[i].compare("redchroma") == 0)
-            RedChroma = i;
-        else if (simplecamerasettingnames[i].compare("bluechroma") == 0)
-            BlueChroma = i;
-        else if (simplecamerasettingnames[i].compare("gain") == 0)
-            Gain = i;
-        else if (simplecamerasettingnames[i].compare("exposure") == 0)
-            Exposure = i;
-        else if (simplecamerasettingnames[i].compare("selectcamera") == 0)
-            SelectCamera = i;
-        else
-            debug << "NUActionatorsData::setAvailableCameraSettings. You have added an unrecognised camera setting: " << camerasettingnames[i] << endl;
-    }
+    m_all_led_ids.insert(m_all_led_ids.end(), m_lear_ids.begin(), m_lear_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_rear_ids.begin(), m_rear_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_leye_ids.begin(), m_leye_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_reye_ids.begin(), m_reye_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_chest_ids.begin(), m_chest_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_lfoot_ids.begin(), m_lfoot_ids.end());
+    m_all_led_ids.insert(m_all_led_ids.end(), m_rfoot_ids.begin(), m_rfoot_ids.end());
 }
 
 /*! @brief Sets the available actionators based on the names found in the passed in strings
@@ -397,15 +343,6 @@ void NUActionatorsData::addJointActionator(string actionatorname)
         addActionator(PositionActionators, actionatorname, actionator_t::JOINT_POSITION);
     if (m_torqueactionation == true)
         addActionator(TorqueActionators, actionatorname, actionator_t::JOINT_TORQUE);
-}
-
-/*! @brief Adds a camera setting actionator with the specified name
- 
- @param actionatorname the name of the actionator to be added
- */
-void NUActionatorsData::addCameraSettingActionator(string actionatorname)
-{
-    addActionator(CameraActionators, actionatorname, actionator_t::CAMERA_SETTING);
 }
 
 /*! @brief Adds a led actionator with the specified name
@@ -443,8 +380,12 @@ void NUActionatorsData::addActionator(actionator_t*& p_actionator, string action
 }
 
 /*! @brief Simplifies a name
- @param input the name to be simplified
- @return the simplified string
+ 
+    The name is converted to lowercase.
+    Spaces, underscores, forward slash, backward slash and dots are removed from the name.
+ 
+    @param input the name to be simplified
+    @return the simplified string
  */
 string NUActionatorsData::simplifyName(const string& input)
 {
@@ -650,46 +591,6 @@ bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double
         return false;
 }
 
-/*! @brief Gets the next set of camera settings
- 
-    @param isvalid a vector of bools that indicates whether there is a new setting for each setting.
-    @param time the time each setting should be completed will be put in this vector
-    @param settingids the id of each setting for which there could be a new setting
-    @param data the vector of data for each camera setting
- */
-bool NUActionatorsData::getNextCameraSettings(vector<bool>& isvalid, vector<double>& time, vector<vector<float> >& data)
-{
-    static int l_num_settings = CameraActionators.size();
-    static vector<bool> l_isvalid(l_num_settings, false);
-    static vector<double> l_time(l_num_settings, 0);
-    static vector<camera_setting_id_t> l_settingids(l_num_settings, 0);
-    static vector<vector<float> > l_data(l_num_settings, vector<float>());
-
-    
-    // loop through each actionator in CameraActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<l_num_settings; i++)
-    {
-        if(CameraActionators[i]->isEmpty())
-            l_isvalid[i] = false;
-        else
-        {
-            l_isvalid[i] = true;
-            l_time[i] = CameraActionators[i]->m_points[0]->Time;
-            l_data[i] = CameraActionators[i]->m_points[0]->Data;
-        }
-    }
-    
-    // now copy the results to the output vectors
-    isvalid = l_isvalid;
-    time = l_time;
-    data = l_data;
-    
-    if (l_num_settings > 0)
-        return true;
-    else
-        return false;
-}
-
 /*! @brief Gets the next led point
  
     @param isvalid a vector of bools that indicates whether there is a new target for each led.
@@ -829,22 +730,6 @@ bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float to
     }
 }
 
-/*! @brief Adds a new camera setting
-    @param settingid the id of the camera setting to be changed
-    @param time the time the setting will be applied
-    @param data the new setting(s)
- */
-bool NUActionatorsData::addCameraSetting(camera_setting_id_t settingid, double time, vector<float>& data)
-{
-    if (settingid == ACTIONATOR_MISSING || CameraActionators.size() == 0)
-        return false;
-    else 
-    {
-        CameraActionators[settingid]->addPoint(time, data);
-        return true;
-    }
-}
-
 /*! @brief Adds a single led control point
     @param ledid the id of the led you want to control
     @param time the time at which you want the led to reach its target (in milliseconds)
@@ -852,25 +737,54 @@ bool NUActionatorsData::addCameraSetting(camera_setting_id_t settingid, double t
     @param greenvalue the target red value (0 to 1, or 0 to 255)
     @param bluevalue the target red value (0 to 1, or 0 to 255)
  */
-bool NUActionatorsData::addLed(led_id_t ledid, double time, float redvalue, float greenvalue, float bluevalue)
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values)
 {
-    static vector<float> data (3, 0);
-    if (ledid == ACTIONATOR_MISSING || LedActionators.size() == 0)
+    vector<joint_id_t> selectedleds;
+    if (LedActionators.size() == 0)
         return false;
-    else 
+    
+    if (ledgroup == AllLeds)
+        selectedleds = m_all_led_ids;
+    else if (ledgroup == LeftEarLeds)
+        selectedleds = m_body_ids;
+    else if (ledgroup == RightEarLeds)
+        selectedleds = m_head_ids;
+    else if (ledgroup == LeftEyeLeds)
+        selectedleds = m_larm_ids;
+    else if (ledgroup == RightEyeLeds)
+        selectedleds = m_rarm_ids;
+    else if (ledgroup == ChestLeds)
+        selectedleds = m_torso_ids;
+    else if (ledgroup == LeftFootLeds)
+        selectedleds = m_lleg_ids;
+    else if (ledgroup == RightFootLeds)
+        selectedleds = m_rleg_ids;
+    else
     {
-        if (redvalue > 1.1)
-        {
-            redvalue /= 255;
-            greenvalue /= 255;
-            bluevalue /= 255;
-        }
-        data[0] = redvalue;
-        data[1] = greenvalue;
-        data[2] = bluevalue;
-        LedActionators[ledid]->addPoint(time, data);
-        return true;
+        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
+        return false;
     }
+    
+    int numpoints = std::min(selectedleds.size(), values.size());
+
+    vector<float> data (3, 0);
+    for (unsigned int i=0; i<numpoints; i++)
+    {
+        if (values[i].size() < 3)
+        {
+            data[0] = values[i][0];
+            data[1] = values[i][0];
+            data[2] = values[i][0];
+        }
+        else
+        {
+            data[0] = values[i][0];
+            data[1] = values[i][1];
+            data[2] = values[i][2];
+        }
+        LedActionators[selectedleds[i]]->addPoint(time, data);
+    }
+    return true;
 }
 
 /*! @brief Adds a single sound
