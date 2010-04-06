@@ -81,8 +81,6 @@ void NUHead::doHead()
     
 	pos[0] = m_pitch_pid->doControl(m_data->CurrentTime, sensorpositions[0]);
 	pos[1] = m_yaw_pid->doControl(m_data->CurrentTime, sensorpositions[1]);
-    
-    cout << "target:" << m_pitch << " " << m_yaw << endl;
 
 	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gain);
 }

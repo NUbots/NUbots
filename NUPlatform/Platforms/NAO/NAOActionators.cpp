@@ -45,7 +45,13 @@ vector<string> NAOActionators::m_servo_stiffness_names(temp_servo_stiffness_name
 unsigned int NAOActionators::m_num_servo_stiffnesses = NAOActionators::m_servo_stiffness_names.size();
 
 // init m_led_names:
-static string temp_led_names[] = {};
+static string temp_led_names[] = {  DN_LED_EAR_LEFT_0DEG, DN_LED_EAR_LEFT_36DEG, DN_LED_EAR_LEFT_72DEG, DN_LED_EAR_LEFT_108DEG, DN_LED_EAR_LEFT_144DEG, DN_LED_EAR_LEFT_180DEG, DN_LED_EAR_LEFT_216DEG, DN_LED_EAR_LEFT_252DEG, DN_LED_EAR_LEFT_288DEG, DN_LED_EAR_LEFT_324DEG, \
+                                    DN_LED_EAR_RIGHT_0DEG, DN_LED_EAR_RIGHT_36DEG, DN_LED_EAR_RIGHT_72DEG, DN_LED_EAR_RIGHT_108DEG, DN_LED_EAR_RIGHT_144DEG, DN_LED_EAR_RIGHT_180DEG, DN_LED_EAR_RIGHT_216DEG, DN_LED_EAR_RIGHT_252DEG, DN_LED_EAR_RIGHT_288DEG, DN_LED_EAR_RIGHT_324DEG, \
+                                    DN_LED_EYE_LEFT_RED_0DEG, DN_LED_EYE_LEFT_GREEN_0DEG, DN_LED_EYE_LEFT_BLUE_0DEG, DN_LED_EYE_LEFT_RED_45DEG, DN_LED_EYE_LEFT_GREEN_45DEG, DN_LED_EYE_LEFT_BLUE_45DEG, DN_LED_EYE_LEFT_RED_90DEG, DN_LED_EYE_LEFT_GREEN_90DEG, DN_LED_EYE_LEFT_BLUE_90DEG, DN_LED_EYE_LEFT_RED_135DEG, DN_LED_EYE_LEFT_GREEN_135DEG, DN_LED_EYE_LEFT_BLUE_135DEG, DN_LED_EYE_LEFT_RED_180DEG, DN_LED_EYE_LEFT_GREEN_180DEG, DN_LED_EYE_LEFT_BLUE_180DEG, DN_LED_EYE_LEFT_RED_225DEG, DN_LED_EYE_LEFT_GREEN_225DEG, DN_LED_EYE_LEFT_BLUE_225DEG, DN_LED_EYE_LEFT_RED_270DEG, DN_LED_EYE_LEFT_GREEN_270DEG, DN_LED_EYE_LEFT_BLUE_270DEG, DN_LED_EYE_LEFT_RED_315DEG, DN_LED_EYE_LEFT_GREEN_315DEG, DN_LED_EYE_LEFT_BLUE_315DEG, \
+                                    DN_LED_EYE_RIGHT_RED_0DEG, DN_LED_EYE_RIGHT_GREEN_0DEG, DN_LED_EYE_RIGHT_BLUE_0DEG, DN_LED_EYE_RIGHT_RED_45DEG, DN_LED_EYE_RIGHT_GREEN_45DEG, DN_LED_EYE_RIGHT_BLUE_45DEG, DN_LED_EYE_RIGHT_RED_90DEG, DN_LED_EYE_RIGHT_GREEN_90DEG, DN_LED_EYE_RIGHT_BLUE_90DEG, DN_LED_EYE_RIGHT_RED_135DEG, DN_LED_EYE_RIGHT_GREEN_135DEG, DN_LED_EYE_RIGHT_BLUE_135DEG, DN_LED_EYE_RIGHT_RED_180DEG, DN_LED_EYE_RIGHT_GREEN_180DEG, DN_LED_EYE_RIGHT_BLUE_180DEG, DN_LED_EYE_RIGHT_RED_225DEG, DN_LED_EYE_RIGHT_GREEN_225DEG, DN_LED_EYE_RIGHT_BLUE_225DEG, DN_LED_EYE_RIGHT_RED_270DEG, DN_LED_EYE_RIGHT_GREEN_270DEG, DN_LED_EYE_RIGHT_BLUE_270DEG, DN_LED_EYE_RIGHT_RED_315DEG, DN_LED_EYE_RIGHT_GREEN_315DEG, DN_LED_EYE_RIGHT_BLUE_315DEG, \
+                                    DN_LED_CHEST_RED, DN_LED_CHEST_BLUE, DN_LED_CHEST_GREEN, \
+                                    DN_LED_FOOT_LEFT_RED, DN_LED_FOOT_LEFT_GREEN, DN_LED_FOOT_LEFT_BLUE, \
+                                    DN_LED_FOOT_RIGHT_RED, DN_LED_FOOT_RIGHT_GREEN, DN_LED_FOOT_RIGHT_BLUE};
 vector<string> NAOActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
 unsigned int NAOActionators::m_num_leds = NAOActionators::m_led_names.size();
 
@@ -137,9 +143,9 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
     point.arraySetSize(3);      // a actionator point is always [value, dcmtime, importance]
     for (unsigned int i=0; i<numactionators; i++)
     {
-        point[0] = 0;
-        point[1] = (int) 0;
-        point[2] = 0;
+        point[0] = 0.0f;                      // value
+        point[1] = m_al_dcm->getTime(0);     // time
+        point[2] = 0;                        // importance
         points[0] = point;
         actionators[i] = points;
     }
@@ -200,6 +206,16 @@ void NAOActionators::copyToHardwareCommunications()
     }
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
+    
+    
+    static float intensity = 0;
+    intensity += 0.001;
+    if (intensity > 1) intensity = 0;
+    for (unsigned int i=0; i<m_num_leds; i++)
+    {
+        m_led_command[3][i][0][0] = intensity;
+        m_led_command[3][i][0][1] = m_al_dcm->getTime(0);
+    }
     m_al_dcm->setAlias(m_led_command);
     
     m_data->removeCompletedPoints(m_current_time);
