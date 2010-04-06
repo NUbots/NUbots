@@ -5,6 +5,9 @@
 #include "ClassifiedSection.h"
 //#include <QDebug>
 #include "debug.h"
+#include "Tools/Math/General.h"
+using namespace mathGeneral;
+
 
 GoalDetection::GoalDetection()
 {
@@ -19,12 +22,12 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 {
 	ObjectCandidate result;
         bool usedAboveHorizonCandidate[FO_AboveHorizonCandidates.size()];
-        for(int i = 0; i < FO_AboveHorizonCandidates.size();i++)
+        for(int i = 0; i < (int)FO_AboveHorizonCandidates.size();i++)
         {
             usedAboveHorizonCandidate[i] = false;
         }
         //! Go through all the candidates: to find a possible goal
-	for(unsigned int i = 0; i  < FO_Candidates.size(); i++)
+        for(unsigned int i = 0; i  < (int)FO_Candidates.size(); i++)
 	{
             if(!isObjectAPossibleGoal(FO_Candidates[i]))
             {
@@ -72,20 +75,9 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             if(RatioOK)
             {
                 float FinalDistance;
-                //float GoalHeightDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (FO_Candidates[i].getBottomRight().y - FO_Candidates[i].getTopLeft().y); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-                //float GoalWidthDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((FO_Candidates[i].getBottomRight().x - FO_Candidates[i].getTopLeft().x)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
                 FinalDistance = FindGoalDistance(FO_Candidates[i],vision);
-                //qDebug() << "Distance to Goal: "<<FinalDistance;
-                /*if(GoalHeightDistance > GoalWidthDistance)
-                {
-                    FinalDistance = GoalWidthDistance;
-                    //qDebug() << i<<": WIDTH GOAL Distance: " << GoalWidthDistance;
-                }
-                else
-                {
-                    FinalDistance = GoalHeightDistance;
-                    //qDebug() << i<<": Height GOAL Distance: " << GoalHeightDistance;
-                }*/
+                debug << "Distance to Goal[" << i <<"]: "<< FinalDistance << endl;
+
             }
 	}
 
@@ -316,14 +308,23 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         tempEnd = tempSegments[i].getEndPoint();
         //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
         //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
+
         int j = i+1;
-        while(tempStart.y == tempSegments[j].getStartPoint().y)
+        if(j < (int)tempSegments.size())
         {
-            tempEnd = tempSegments[j].getEndPoint();
-            j++;
+            while(tempStart.y == tempSegments[j].getStartPoint().y)
+            {
+                tempEnd = tempSegments[j].getEndPoint();
+                j++;
+                if(j > (int)tempSegments.size())
+                {
+                    break;
+                }
+            }
         }
+
         i = j-1;
-        if(tempEnd.x-tempStart.x > 2)
+        if(tempEnd.x-tempStart.x > 10)
         {
             Vector2<int> tempMidPoint;
             tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
@@ -344,29 +345,56 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         if(GoalHeightDistance > GoalWidthDistance)
         {
             FinalDistance = GoalWidthDistance;
-            //qDebug() <<": WIDTH GOAL Distance: " << GoalWidthDistance;
+            //debug <<"WIDTH GOAL Distance: " << GoalWidthDistance <<endl;
         }
         else
         {
             FinalDistance = GoalHeightDistance;
-            //qDebug() <<": Height GOAL Distance: " << GoalHeightDistance;
+            //debug <<"Height GOAL Distance: " << GoalHeightDistance <<endl;
         }
         return FinalDistance;
     }
 
     //FORM EQUATION if MidPointLine
-    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
+    //debug << "Number Of MidPoints: " <<(int) midpoints.size() << endl;
     LSFittedLine midPointLine;
     for (int i = 0; i < (int) midpoints.size(); i++)
     {
+
         LinePoint  point;
         point.x = midpoints[i].x;
         point.y = midpoints[i].y;
         midPointLine.addPoint(point);
+        //debug << "MidPoint: \t" << point.x << "," <<point.y << endl;
     }
-    //qDebug() << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0";
-   /* for(int i = 0 ; i < (int)leftPoints.size(); i++)
+    //debug << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0" << endl;
+    //debug << "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << endl;
+    //debug << "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(320)<< ","<< 320 << endl;
+    float leftWidth = 0;
+    float rightWidth = 0;
+    for(int i = 0 ; i < (int)leftPoints.size(); i++)
     {
-        tempDistance = (leftPoints[i].x * midPointLine.getA() + leftPoints[i].y *  midPointLine.getB() + midPointLine.getC())/math.sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB())
-    */return distance;
+        Vector2<int> point = leftPoints[i];
+        leftWidth = leftWidth + DistanceLineToPoint(midPointLine, point);
+    }
+    leftWidth = leftWidth / (float)leftPoints.size();
+    //debug << "Distance from centre of Line to Left Points: " << leftWidth<< endl;
+    for(int i = 0 ; i < (int)rightPoints.size(); i++)
+    {
+        Vector2<int> point = rightPoints[i];
+        rightWidth = rightWidth + DistanceLineToPoint(midPointLine, point);
+    }
+    rightWidth = rightWidth / (float)rightPoints.size();
+    //debug << "Distance from centre of Line to Right Points: " << rightWidth << endl;
+    float totalwidth = rightWidth + leftWidth;
+    distance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((totalwidth)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+    return distance;
+}
+
+float GoalDetection::DistanceLineToPoint(LSFittedLine midPointLine, Vector2<int>  point)
+{
+    float distance = fabs( - point.x * midPointLine.getA() + point.y *  midPointLine.getB() + midPointLine.getC())
+                   / sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB());
+    //debug << "Distance L2P: " << distance << "\t Using: "<<point.x << ","<< point.y<<endl;
+    return distance;
 }

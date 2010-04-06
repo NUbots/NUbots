@@ -3,6 +3,7 @@
 #include "nulVersion1FormatReader.h"
 #include <QFileInfo>
 #include <QDebug>
+#include "debug.h"
 
 LogFileReader::LogFileReader(QObject *parent) :
     QObject(parent)
@@ -83,6 +84,7 @@ int LogFileReader::nextFrame()
         int curr = 0;
         try{
             curr = currentFileReader->nextFrame();
+            debug << "Processing Frame: " << curr << endl;
         }
         catch(exception e)
         {
@@ -90,6 +92,7 @@ int LogFileReader::nextFrame()
             closeFile();
         }
         emitControlAvailability();
+
         return curr;
 
     }

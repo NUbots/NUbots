@@ -1,5 +1,6 @@
 #include "Vision.h"
 #include "ObjectCandidate.h"
+#include "Tools/Math/LSFittedLine.h"
 
 class GoalDetection
 {
@@ -30,5 +31,7 @@ class GoalDetection
         bool isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,int width);
 
         float FindGoalDistance(ObjectCandidate PossibleGoal, Vision* vision);
+        float DistanceLineToPoint(LSFittedLine midPointLine, Vector2<int> point);
+
 };
 
