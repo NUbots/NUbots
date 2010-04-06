@@ -164,10 +164,7 @@ std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
 
     for(int y = 0; y <p_image.imageHeight; y++)
     {
-       for(int x = 0; x <p_image.imageWidth; x++)
-        {
-            output.write((char*) &p_image.image[y][x], sizeof(p_image.image[y][x]));
-        }
+        output.write((char*) &p_image.image[y][0], sizeof(p_image.image[y][0])*p_image.imageWidth);
     }
     return output;
 }

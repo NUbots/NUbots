@@ -36,6 +36,7 @@
 
 
 #include "Tools/Threading/Thread.h"
+class NUimage;
 
 #include <sstream>
 using namespace std;
@@ -56,7 +57,7 @@ public:
     TcpPort(int portnumber);
     virtual ~TcpPort();
     void sendData(network_data_t netData);
-    void sendData(const stringstream& stream);
+    void sendData(const NUimage& p_image);
     network_data_t receiveData();
 private:
     void run();

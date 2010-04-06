@@ -56,6 +56,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/FieldObjects/MobileObject.h \
     ../Vision/FieldObjects/AmbiguousObject.h \
     ../Vision/FieldObjects/FieldObjects.h \
+    ../Vision/Threads/SaveImagesThread.h \
     ../Vision/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
     ../Localisation/WMLine.h \
@@ -79,6 +80,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
     ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
+    ../Tools/Threading/ConditionalThread.h \
     NUviewIO/NUviewIO.h
 
 
@@ -126,6 +128,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/FieldObjects/MobileObject.cpp \
     ../Vision/FieldObjects/AmbiguousObject.cpp \
     ../Vision/FieldObjects/FieldObjects.cpp \
+    ../Vision/Threads/SaveImagesThread.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
@@ -147,7 +150,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/KF.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
     ../GameController/GameInformation.cpp \
-    ../Tools/Threading/Thread.cpp
+    ../Tools/Threading/Thread.cpp \
+    ../Tools/Threading/ConditionalThread.cpp
 
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
