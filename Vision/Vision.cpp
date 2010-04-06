@@ -25,6 +25,9 @@
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 #include "NUPlatform/NUIO.h"
 
+#include "Vision/Threads/SaveImagesThread.h"
+#include <iostream>
+
 using namespace mathGeneral;
 Vision::Vision()
 {
@@ -33,7 +36,8 @@ Vision::Vision()
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[c_LUTLength];
     currentLookupTable = LUTBuffer;
-    imagefile.open ("/home/nao/images.nul");
+    imagefile.open ("/var/volatile/images.nul");
+    m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
     return;
@@ -119,7 +123,9 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 
 FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 {
-    //debug << "Begin Process Frame" << endl;
+    #if DEBUG_VISION_VERBOSITY > 4
+        debug << "Vision::ProcessFrame()." << endl;
+    #endif
     AllFieldObjects->~FieldObjects();
     AllFieldObjects = new FieldObjects();
 
@@ -146,7 +152,10 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 
     if(isSavingImages)
     {
-        SaveAnImage();
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Vision::starting the save images loop." << endl;
+        #endif
+        //m_saveimages_thread->startLoop();
     }
     //debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
@@ -331,7 +340,14 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 
 void Vision::SaveAnImage()
 {
-    imagefile << *currentImage;
+    #if DEBUG_VISION_VERBOSITY > 1
+        debug << "Vision::SaveAnImage(). Starting..." << endl;
+    #endif
+    //std::stringstream buffer;
+    //buffer << *currentImage;
+    NUimage buffer;
+    buffer.MapYUV422BufferToImage((unsigned char*) &currentImage->image[0][0], currentImage->width(), currentImage->height());
+    imagefile << buffer;
 
     //Set NextCameraSetting:
     CameraSettings tempCameraSettings = camera->getSettings();
@@ -360,7 +376,9 @@ void Vision::SaveAnImage()
         tempCameraSettings.exposure = 400;
     }
     camera->setSettings(tempCameraSettings);
-    
+    #if DEBUG_VISION_VERBOSITY > 1
+        debug << "Vision::SaveAnImage(). Finished" << endl;
+    #endif
 }
 
 void Vision::setLUT(unsigned char* newLUT)

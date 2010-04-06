@@ -23,6 +23,8 @@
 #include <iostream>
 #include <fstream>
 
+class SaveImagesThread;
+
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
 class Circle;
@@ -48,6 +50,8 @@ class Vision
     CameraSettings currentSettings;
     NUCamera* camera;
 
+    friend class SaveImagesThread;
+    SaveImagesThread* m_saveimages_thread;
     void SaveAnImage();
 
     public:
