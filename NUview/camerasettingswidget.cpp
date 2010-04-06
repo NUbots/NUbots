@@ -227,7 +227,7 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     overallLayout->addLayout(shiftSaturationLayout);
     overallLayout->addLayout(shiftContrastLayout);
     overallLayout->addLayout(shiftHueLayout);
-    //overallLayout->addLayout(robotNameInputLayout);
+    overallLayout->addLayout(robotNameInputLayout);
     overallLayout->addLayout(pushButtonLayout);
     overallLayout->addLayout(saveImagesButtonLayout);
 
@@ -312,6 +312,7 @@ void cameraSettingsWidget::updateRobotName(const QString name)
         stopStreamCameraSetting();
     }
     robotName = name;
+    //nuio->;
 }
 void cameraSettingsWidget::getCameraSetting()
 {
