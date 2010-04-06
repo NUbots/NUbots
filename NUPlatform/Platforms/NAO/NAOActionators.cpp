@@ -181,7 +181,7 @@ void NAOActionators::copyToHardwareCommunications()
                 }
                 else
                 {
-                    dcmtimes[i] = NAN;
+                    dcmtimes[i] = 0;
                     dcmstiffnesses[i] = NAN;
                     dcmpositions[i] = NAN;
                 }
