@@ -287,7 +287,7 @@ NUimage* NAOCamera::grabNewImage()
 {
     while(!capturedNew());
     currentBufferedImage.MapYUV422BufferToImage(getImage(), WIDTH, HEIGHT);
-    currentBufferedImage.timestamp = getTimeStamp();
+    currentBufferedImage.m_timestamp = getTimeStamp();
     return &currentBufferedImage;
 }
 

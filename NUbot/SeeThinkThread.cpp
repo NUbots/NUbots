@@ -114,7 +114,7 @@ void SeeThinkThread::run()
             
             #ifdef USE_BEHAVIOUR
                 //m_nubot->m_behaviour->process();
-                m_nubot->m_behaviour->processFieldObjects(*m_nubot->Jobs,AllObjects,m_nubot->SensorData, m_nubot->Image->height(), m_nubot->Image->width());
+                m_nubot->m_behaviour->processFieldObjects(*m_nubot->Jobs,AllObjects,m_nubot->SensorData, m_nubot->Image->getHeight(), m_nubot->Image->getWidth());
             #endif
             
             #ifdef USE_MOTION
