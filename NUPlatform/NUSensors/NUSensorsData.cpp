@@ -68,6 +68,8 @@ NUSensorsData::NUSensorsData()
     addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
     addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
     addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+    addSoftSensor(Odometry, string("Odometry"), sensor_t::JOINT_ODOMETRY);
+    addSoftSensor(CameraHeight, string("CameraHeight"), sensor_t::JOINT_CAMERAHEIGHT);
     
     // Balance Sensors:
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
@@ -325,6 +327,39 @@ bool NUSensorsData::getJointTorques(bodypart_id_t bodypart, vector<float>& torqu
 bool NUSensorsData::getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures)
 {
     return getJointsData(JointTemperatures, bodypart, temperatures);
+}
+
+/*! @brief Gets the odometry data since the last call
+    @param time the time of the last call
+    @param values will be updated with the odometry [x (cm), y(cm), yaw(rad)] since time
+ */
+bool NUSensorsData::getOdometry(float& time, vector<float>& values)
+{
+    static double timeoflastcall = 0;
+    if (Odometry == NULL || Odometry->IsValid == false)
+        return false;
+    else
+    {
+        time = timeoflastcall;
+        values = Odometry->Data;
+        timeoflastcall = CurrentTime;
+        Odometry->Data = vector<float> (Odometry->size(),0);
+        return true;
+    }
+}
+
+/* @brief Gets the height of the camera off the ground in cm
+   @param height will be updated with the height of the camera from the ground
+ */
+bool NUSensorsData::getCameraHeight(float& height)
+{
+    if (CameraHeight == NULL || CameraHeight->IsValid == false)
+        return false;
+    else
+    {
+        height = CameraHeight->Data[0];
+        return true;
+    }
 }
 
 /*! @brief Gets the names of the joints in a particular body part.

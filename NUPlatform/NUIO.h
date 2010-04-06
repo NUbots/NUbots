@@ -26,6 +26,7 @@
 #define NUIO_H
 
 #include "ioconfig.h"
+#include <string>
 
 class NUbot;
 
@@ -50,8 +51,8 @@ public:
     // JobList streaming
     friend NUIO& operator<<(NUIO& io, JobList& jobs);
     friend NUIO& operator<<(NUIO& io, JobList* jobs);
-    friend NUIO& operator>>(NUIO& io, JobList& jobs);
-    friend NUIO& operator>>(NUIO& io, JobList* jobs);
+    void setJobPortTargetAddress(std::string ipaddress);
+    void setJobPortToBroadcast();
     
 
     // Raw Image streaming 

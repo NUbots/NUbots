@@ -123,6 +123,21 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
     return io;
 }
 
+/*! @brief Sets the target ip address for the job port
+    @param ipaddress the new target ip address.
+ */
+void NUIO::setJobPortTargetAddress(string ipaddress)
+{
+    m_jobs_port->setTargetAddress(ipaddress);
+}
+
+/*! @brief Sets the job port to broadcast to all robots
+ */
+void NUIO::setJobPortToBroadcast()
+{
+    m_jobs_port->setBroadcast();
+}
+
 /*! @brief Stream insertion operator for NUimage
     @param io the nuio stream object
     @param sensors the NUimage data to stream

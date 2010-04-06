@@ -28,6 +28,8 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
+class PIDController;
+
 class NUHead
 {
 public:
@@ -39,13 +41,16 @@ public:
 private:
     void doHead();
 
-//private:
+private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
     
-	double m_pitch;
-    double m_yaw;
-	
+	double m_pitch;                     //!< current pitch target
+    double m_yaw;                       //!< current yaw target
+
+	PIDController* m_pitch_pid;         //!< low level PID controller for the pitch
+    PIDController* m_yaw_pid;           //!< low level PID controller for the yaw
+    
     double m_head_timestamp;
 
 };
