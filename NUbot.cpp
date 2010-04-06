@@ -24,6 +24,8 @@
 
 #include "NUbot.h"
 #include "Behaviour/Jobs.h"
+#include "GameController/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
 
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
@@ -33,10 +35,15 @@
 
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
+    #include "NUPlatform/Platforms/NAOWebots/NAOWebotsIO.h"
 #elif defined(TARGET_IS_NAO)
     #include "NUPlatform/Platforms/NAO/NAOPlatform.h"
+    #include "NUPlatform/Platforms/NAO/NAOIO.h"
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
+    #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_NUVIEW)
+    #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
     #error There is no platform (TARGET_IS_${}) defined
 #endif
@@ -76,7 +83,26 @@ NUbot::NUbot(int argc, const char *argv[])
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
     #endif
+    
+    // --------------------------------- construct the public storage
+    #ifdef USE_VISION
+        Image = NULL;
+    #endif
+    SensorData = m_platform->sensors->getData();
+    Actions = m_platform->actionators->getActions();
+    Jobs = new JobList();
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    TeamInfo = new TeamInformation();
 
+    // --------------------------------- construct the io
+    #if defined(TARGET_IS_NAOWEBOTS)
+        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
+    #elif defined(TARGET_IS_NAO)
+        m_io = new NAOIO(this);
+    #elif defined(TARGET_IS_CYCLOID)
+        m_io = new CycloidIO(this);
+    #endif
+    
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing modules." << endl;
     #endif
@@ -92,23 +118,12 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_BEHAVIOUR
-		m_gameInfo = new GameInformation(1,2);
         m_behaviour = new Behaviour();
     #endif
     
     #ifdef USE_MOTION
         m_motion = new NUMotion();
     #endif
-    
-    m_io = new NUIO(0, this);         //<! @todo TODO pass nuio the player number!
-    
-    // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Jobs = new JobList();
     
     createThreads();
     
@@ -188,8 +203,6 @@ NUbot::~NUbot()
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
             delete m_behaviour;
-		if (m_gameInfo != NULL)
-            delete m_gameInfo;
     #endif
     #ifdef USE_MOTION
         if (m_motion != NULL)
@@ -213,6 +226,10 @@ NUbot::~NUbot()
         delete Actions;
     if (Jobs != NULL)
         delete Jobs;
+    if (GameInfo != NULL)
+        delete GameInfo;
+    if (TeamInfo != NULL)
+        delete TeamInfo;
     
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::~NUbot(). Finished!" << endl;

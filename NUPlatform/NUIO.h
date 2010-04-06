@@ -26,27 +26,33 @@
 #define NUIO_H
 
 #include "ioconfig.h"
+#include <string>
 
 class NUbot;
 
-class UdpPort;
+class GameControllerPort;
+class TeamPort;
+class JobPort;
 class TcpPort;
 
 class JobList;
+class GameInformation;
+class TeamInformation;
 class NUimage;
 
 class NUIO
 {
 // Functions:
 public:
-    NUIO(int robotnumber, NUbot* nubot);
+    NUIO(NUbot* nubot);
+    NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs);
     virtual ~NUIO();
     
     // JobList streaming
     friend NUIO& operator<<(NUIO& io, JobList& jobs);
     friend NUIO& operator<<(NUIO& io, JobList* jobs);
-    friend NUIO& operator>>(NUIO& io, JobList& jobs);
-    friend NUIO& operator>>(NUIO& io, JobList* jobs);
+    void setJobPortTargetAddress(std::string ipaddress);
+    void setJobPortToBroadcast();
     
 
     // Raw Image streaming 
@@ -54,6 +60,7 @@ public:
     friend NUIO& operator<<(NUIO& io, NUimage* p_image);
     
 protected:
+    virtual void createTeamPort(TeamInformation* teaminfo);
 private:
     
 // Members:
@@ -62,10 +69,10 @@ protected:
 private:
     NUbot* m_nubot;
     
-    UdpPort* m_gamecontroller_port;
-    UdpPort* m_team_port;
+    GameControllerPort* m_gamecontroller_port;
+    TeamPort* m_team_port;
     TcpPort* m_vision_port;
-    UdpPort* m_jobs_port;
+    JobPort* m_jobs_port;
 };
 
 #endif

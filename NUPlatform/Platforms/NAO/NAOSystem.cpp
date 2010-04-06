@@ -24,6 +24,8 @@
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
+using namespace std;
+
 NAOSystem::NAOSystem()
 {
 #if DEBUG_NUSYSTEM_VERBOSITY > 4

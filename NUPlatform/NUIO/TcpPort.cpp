@@ -21,6 +21,7 @@
 
 #include "TcpPort.h"
 #include "NUPlatform/NUSystem.h"
+#include "Tools/Image/NUimage.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include <string.h>
@@ -159,7 +160,9 @@ network_data_t TcpPort::receiveData()
         m_has_data = false;
     }
     pthread_mutex_unlock(&m_socket_mutex);
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "TCP Recieved: " << netdata.size;
+    #endif
     return netdata;
 }
 
@@ -175,32 +178,45 @@ void TcpPort::sendData(network_data_t netdata)
         #endif
         return;
     }
-    if (true || nusystem->getTime() - m_time_last_receive < 3000)
-    {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
 
-            //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
-        #endif
-        #ifdef WIN32
-            int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
-        #else
-            int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
-        #endif
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            if(localnumBytes < 0)
-                debug << "TcpPort::sendData(). Sending Error "<< endl;
-        #endif
-        
-    }
+        //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
+    #endif
+    #ifdef WIN32
+        int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
+    #else
+        int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
+    #endif
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        if(localnumBytes < 0)
+            debug << "TcpPort::sendData(). Sending Error "<< endl;
+    #endif
     pthread_mutex_unlock(&m_socket_mutex);
     return;
 }
 
-void TcpPort::sendData(const stringstream& stream)
+void TcpPort::sendData(const NUimage& p_image)
 {
-    static network_data_t netdata;
-    netdata.size = stream.str().size();
-    netdata.data = (char*) stream.str().c_str();
+    network_data_t netdata;
+    stringstream buffer;
+    
+    int imagewidth = p_image.getWidth();
+    int imageheight = p_image.getHeight();
+    buffer << imagewidth << " ";
+    buffer << imageheight << " ";
+    
+    string s = buffer.str();
+    netdata.data = (char*) s.c_str();
+    netdata.size = s.size();
+    
     sendData(netdata);
+    
+    for(int y = 0; y < imageheight; y++)
+    {
+        network_data_t linedata;
+        linedata.data = (char*) &p_image.m_image[y][0];
+        linedata.size = sizeof(p_image.m_image[y][0])*imagewidth;
+        sendData(linedata);
+    }
 }

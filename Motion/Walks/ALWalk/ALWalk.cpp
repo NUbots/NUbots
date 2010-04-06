@@ -34,7 +34,7 @@ ALWalk::ALWalk()
     debug << "ALWalk::ALWalk()" << endl;
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
 
-    m_al_motion->setStiffnesses(string("Body"), 1.0f);
+    m_al_motion->setStiffnesses(string("Body"), 0.7f);
     m_al_motion->setWalkTargetVelocity(0.0, 0, 0, 0);
 }
 
@@ -49,16 +49,20 @@ ALWalk::~ALWalk()
 void ALWalk::doWalk()
 {
     static unsigned int count = 0;
+    static float max_x = 10.0;
+    static float max_y = 2.0;
+    static float max_yaw = 0.5;
+    
     if (count%4 == 0)
     {   // this is a very simple hack to get almotion to use alot less CPU. It is perfectly reasonable to do this because almotion isn't going to respond that quickly anyway.
-        if (fabs(m_speed_x) > 10)
-            m_speed_x = (m_speed_x/fabs(m_speed_x))*10;
-        if (fabs(m_speed_y) > 10)
-            m_speed_y = (m_speed_y/fabs(m_speed_y))*10;
-        if (fabs(m_speed_yaw) > 1)
-            m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw));
+        if (fabs(m_speed_x) > max_x)
+            m_speed_x = (m_speed_x/fabs(m_speed_x))*max_x;
+        if (fabs(m_speed_y) > max_y)
+            m_speed_y = (m_speed_y/fabs(m_speed_y))*max_y;
+        if (fabs(m_speed_yaw) > max_yaw)
+            m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw))*max_yaw;
         
-        m_al_motion->setWalkTargetVelocity(m_speed_x/10.0, m_speed_y/10.0, m_speed_yaw, 1);
+        m_al_motion->setWalkTargetVelocity(m_speed_x/max_x, m_speed_y/max_y, m_speed_yaw/max_yaw, 1);
     }
 }
 

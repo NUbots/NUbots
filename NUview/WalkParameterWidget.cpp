@@ -21,9 +21,9 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
-#include "../Motion/NUWalk.h"
-#include "../Behaviour/Jobs.h"
-#include "../NUPlatform/NUIO.h"
+#include "Motion/NUWalk.h"
+#include "Behaviour/Jobs.h"
+#include "NUviewIO/NUviewIO.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -37,11 +37,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     this->setEnabled(true);
     disableWriting = false;
     
-    debug.open("debug.log");
-    errorlog.open("error.log");
-    
     m_job_list = new JobList();
-    m_io = new NUIO(0, NULL);
     m_walk_parameters = new WalkParameters();
     
     ifstream testparafile("jupptestparameters.wp");
@@ -92,7 +88,7 @@ void WalkParameterWidget::createWidgets()
     phaseResetSpinBox->setMaximum(phaseResetSlider->maximum());
     
     // X Speed
-    xSpeedLabel = new QLabel("x (cm/s)");
+    xSpeedLabel = new QLabel("x (mm/s)");
     xSpeedSlider = new QSlider(Qt::Horizontal);
     xSpeedSlider->setMinimum(-300);
     xSpeedSlider->setMaximum(300);
@@ -102,7 +98,7 @@ void WalkParameterWidget::createWidgets()
     xSpeedSpinBox->setMaximum(xSpeedSlider->maximum());
     
     // Y Speed
-    ySpeedLabel = new QLabel("y (cm/s)");
+    ySpeedLabel = new QLabel("y (mm/s)");
     ySpeedSlider = new QSlider(Qt::Horizontal);
     ySpeedSlider->setMinimum(-300);
     ySpeedSlider->setMaximum(300);
@@ -114,8 +110,8 @@ void WalkParameterWidget::createWidgets()
     // Yaw Speed
     yawSpeedLabel = new QLabel("yaw (crad/s)");
     yawSpeedSlider = new QSlider(Qt::Horizontal);
-    yawSpeedSlider->setMinimum(-30);
-    yawSpeedSlider->setMaximum(30);
+    yawSpeedSlider->setMinimum(-100);
+    yawSpeedSlider->setMaximum(100);
     
     yawSpeedSpinBox = new QSpinBox();
     yawSpeedSpinBox->setMinimum(yawSpeedSlider->minimum());
@@ -261,6 +257,7 @@ WalkParameterWidget::~WalkParameterWidget()
     delete yawSpeedLayout; 
     
     delete overallLayout;
+    delete m_job_list;
 }
 
 void WalkParameterWidget::walkParameterChanged()
@@ -293,7 +290,7 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
 
-    (*m_io) << m_job_list;
+    (*nuio) << m_job_list;
     
     m_job_list->removeMotionJob(parametersjob);
     m_job_list->removeMotionJob(walkjob);

@@ -219,6 +219,7 @@ void visionStreamWidget::readPendingData()
             buffer >> image;
             emit rawImageChanged(&image);
             int mstime = timeToRecievePacket.elapsed();
+            time.setInterval(0);
             float frameRate = (float)(1000.00/mstime);
             QString text = QString("Recieved Total Size: ");
             //datasize = datasize +netdata.size();

@@ -115,6 +115,10 @@ public:
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
     bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
+    // Get methods for soft proprioception
+    bool getOdometry(float& time, vector<float>& values);
+    bool getCameraHeight(float& height);
+    
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
@@ -187,8 +191,11 @@ public:
     sensor_t* JointTargets;                     //!< stores the joint position targets (in radians)
     sensor_t* JointStiffnesses;                 //!< stores the joint stiffness values (as a percent)
     sensor_t* JointCurrents;                    //!< stores the joint motor current sensors (in A)
-    sensor_t* JointTorques;                     //!< stores the joint temperatures (in degrees C)
-    sensor_t* JointTemperatures;
+    sensor_t* JointTorques;                     //!< stores the joint torques (in Nm)
+    sensor_t* JointTemperatures;                //!< stores the joint temperatures (in degrees C)
+    
+    sensor_t* Odometry;                         //!< stores the movement in the [x (cm), y (cm),yaw (rad)] calculated from proprioception
+    sensor_t* CameraHeight;                     //!< stores the height of the camera from the ground (cm) calculate from proprioception
     
     // Balance Sensors:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s

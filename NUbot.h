@@ -42,7 +42,6 @@
 #endif
 
 #ifdef USE_BEHAVIOUR
-    #include "GameController/GameInformation.h"
     #include "Behaviour/Behaviour.h"
 #endif
 
@@ -55,6 +54,8 @@
 class NUSensorsData;
 class NUActionatorsData;
 class JobList;
+class GameInformation;
+class TeamInformation;
 
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
     class SeeThinkThread;
@@ -85,6 +86,8 @@ public:
     NUSensorsData* SensorData;
     NUActionatorsData* Actions;
     JobList* Jobs;
+    GameInformation* GameInfo;
+    TeamInformation* TeamInfo;
     
 private:
     NUPlatform* m_platform;               //!< interface to robot platform
@@ -97,7 +100,6 @@ private:
     #endif
     
     #ifdef USE_BEHAVIOUR
-		GameInformation* m_gameInfo;
         Behaviour* m_behaviour;           //!< behaviour module
     #endif
     

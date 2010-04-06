@@ -57,7 +57,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
         walkVector.push_back(headYaw/2);
         WalkJob* walk = new WalkJob(walkVector);
         jobs.addMotionJob(walk);
-        debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
+        //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
 
         
         float headPitch;
@@ -73,7 +73,8 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
         walkVector.push_back(0);
         WalkJob* walk = new WalkJob(walkVector);
         jobs.addMotionJob(walk);
-        debug << "WalkJob not created: STOP WALKING " << endl;
+        //debug << "WalkJob not created: STOP WALKING " << endl;
+        Pan(jobs);
     }
 }
 
@@ -106,11 +107,30 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
     vector<float> headVector;
     headVector.push_back(newTilt);
     headVector.push_back(newPan);
-    HeadJob* head = new HeadJob(nusystem->getTime(),headVector);
+    HeadJob* head = new HeadJob(0,headVector);
     
     jobs.addMotionJob(head);
  
   return;
 }
 
+void Behaviour::Pan(JobList& jobs)
+{
+    
+    vector<float> headVector;
+    HeadJob* head;
+    float newPan;
+    float newTilt;
+
+    newPan = sin(nusystem->getTime()/1000) * deg2rad(70.0f);
+    newTilt = sin(nusystem->getTime()/500) * PI/5;
+    headVector.push_back(newTilt);
+    headVector.push_back(newPan);
+    head = new HeadJob(10000,headVector);
+    jobs.addMotionJob(head);
+
+    //debug << "JobList Size " << jobs.size()<<  "Time: "<< nusystem->getTime()<<endl; 
+ 
+  return;
+}
 

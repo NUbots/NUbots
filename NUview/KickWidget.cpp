@@ -22,7 +22,7 @@
 #include "GLDisplay.h"
 
 #include "../Behaviour/Jobs.h"
-#include "../NUPlatform/NUIO.h"
+#include "NUviewIO/NUviewIO.h"
 #include "debug.h"
 
 KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -37,7 +37,6 @@ KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(pare
     disableWriting = false;
     
     m_job_list = new JobList();
-    m_io = new NUIO(0, NULL);
 }
 
 void KickWidget::createWidgets()
@@ -113,8 +112,7 @@ KickWidget::~KickWidget()
     // Kick Button
     delete kickButtonLayout;              //!< Laout fo the kick button
     delete kickButton;                    //!< Button to trigger sending of kick job to robot
-    
-    delete m_io;
+
     delete m_job_list; 
     
     delete overallLayout;
@@ -136,7 +134,7 @@ void KickWidget::kickPressed()
     m_job_list->addMotionJob(kickjob);
     m_job_list->summaryTo(debug);
 
-    (*m_io) << m_job_list;
+    (*nuio) << m_job_list;
     
     m_job_list->removeMotionJob(kickjob);
 }

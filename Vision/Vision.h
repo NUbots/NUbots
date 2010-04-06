@@ -19,14 +19,18 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUCamera.h"
+#include <iostream>
+#include <fstream>
 
-
+class SaveImagesThread;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
 class Circle;
 class NUimage;
-
+class JobList;
+class NUIO;
 //! Contains vision processing tools and functions.
 class Vision
 {
@@ -38,6 +42,17 @@ class Vision
     unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+
+    //! SavingImages:
+    bool isSavingImages;
+    ofstream imagefile;
+    int ImageFrameNumber;
+    CameraSettings currentSettings;
+    NUCamera* camera;
+
+    friend class SaveImagesThread;
+    SaveImagesThread* m_saveimages_thread;
+    void SaveAnImage();
 
     public:
     //! FieldObjects Container
@@ -55,7 +70,8 @@ class Vision
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
 
-    //void ProcessFrame(NUimage& image, Horizon horizonLine);
+    void process (JobList& jobs, NUCamera* m_camera, NUIO* m_io);
+
     FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
 
 
@@ -139,14 +155,15 @@ class Vision
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
 
-    /* std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
-                                                                      std::vector<Vector2<int> >&fieldBorders,
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
                                                                       std::vector<unsigned char> validColours,
-                                                                      int spacing,
-                                                                      float min_aspect, float max_aspect, int min_segments);*/
+                                                                      int spacing, int min_segments);
 
     Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
-    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector< TransitionSegment > horizontalSegments);
+
+    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,
+                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
+                     std::vector< TransitionSegment > horizontalSegments);
 
 
 

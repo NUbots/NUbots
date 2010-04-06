@@ -31,7 +31,6 @@ using namespace std;
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
-    @param param a single variable accessible from within the main loop of the thread
  */
 ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thread(name, priority)
 {

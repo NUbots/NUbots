@@ -23,6 +23,8 @@
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
+using namespace std;
+
 NUSystem* nusystem;
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
@@ -42,7 +44,9 @@ NUSystem::NUSystem()
 #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "NUSystem::NUSystem()" << endl;
 #endif 
-    nusystem = this;
+    if (nusystem == NULL)
+        nusystem = this;
+        
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
