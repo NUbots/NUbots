@@ -25,29 +25,44 @@ GameInformation::GameInformation(int playerNumber, int teamNumber):
 
 void GameInformation::process()
 {
+    // Get info from network packet.
     if(m_hasUnprocessedControlData)
     {
         updateNetworkData(m_unprocessedControlData);
         m_hasUnprocessedControlData = false;
+        m_hasUnprocessedStateTrigger = false;
+        m_hasUnprocessedTeamTrigger = false;
+        m_hasUnprocessedKickoffTrigger = false;
     }
+    // Get info from manual commands.
     else
     {
         if(m_hasUnprocessedStateTrigger)
         {
+            doManualStateChange();
             m_hasUnprocessedStateTrigger = false;
         }
         if(m_hasUnprocessedTeamTrigger)
         {
+            doManualTeamChange();
             m_hasUnprocessedTeamTrigger = false;
         }
         if(m_hasUnprocessedKickoffTrigger)
         {
+            doManualKickoffChange();
             m_hasUnprocessedKickoffTrigger = false;
         }
     }
     return;
 }
 
+void GameInformation::addNewNetworkData(const RoboCupGameControlData& gameControllerPacket)
+{
+    m_unprocessedControlData = gameControllerPacket;    //!< The new game packet.
+    m_hasUnprocessedControlData = true;
+}
+
+/*
 void GameInformation::updateSensorData(NUSensorsData* sensorData)
 {
     std::vector<float> tempButtonValues;
@@ -86,11 +101,27 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
         m_myStateChanged = true;
     }
 }
+*/
 
 void GameInformation::updateNetworkData(const RoboCupGameControlData& gameControllerPacket)
 {
     m_previousControlData = m_currentControlData;
     m_currentControlData = gameControllerPacket;
+}
+
+void GameInformation::doManualStateChange()
+{
+
+}
+
+void GameInformation::doManualTeamChange()
+{
+
+}
+
+void GameInformation::doManualKickoffChange()
+{
+
 }
 
 std::string GameInformation::stateName(robotState theState)

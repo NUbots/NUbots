@@ -209,6 +209,7 @@ public:
         return robotState(m_previousControlData.state);
     }
 
+
     /*!
       @brief Determine if the game state has changed.
       @return true if the game state has changed. false if it has not.
@@ -216,6 +217,39 @@ public:
     bool gameStateChanged() const
     {
         return (m_currentControlData.state != m_previousControlData.state);
+    }
+
+    /*!
+      @brief Queues a new network packet to be processed.
+      @param gameControllerPacket The new packet data.
+      */
+    void addNewNetworkData(const RoboCupGameControlData& gameControllerPacket);
+
+    /*!
+      @brief Signal whether a manual state change is requested.
+      @param hasChange True if the state should be manually changed. False if it should not.
+      */
+    void triggerManualStateChange(bool hasChange = true)
+    {
+        m_hasUnprocessedStateTrigger = hasChange;
+    }
+
+    /*!
+      @brief Signal whether a manual team change is requested.
+      @param hasChange True if the state should be manually changed. False if it should not.
+      */
+    void triggerManualTeamChange(bool hasChange = true)
+    {
+        m_hasUnprocessedTeamTrigger = hasChange;
+    }
+
+    /*!
+      @brief Signal whether a manual kick-off change is requested.
+      @param hasChange True if the state should be manually changed. False if it should not.
+      */
+    void triggerManualKickoffChange(bool hasChange = true)
+    {
+        m_hasUnprocessedKickoffTrigger = hasChange;
     }
 
 private:
@@ -234,13 +268,6 @@ private:
     static std::string stateName(robotState theState);
 
     /*!
-      @brief Update the current information based on sensor data.
-      @param sensorData The sensor data.
-      @return None
-      */
-    void updateSensorData(NUSensorsData* sensorData);
-
-    /*!
       @brief Update the current information based on a new game controller packet.
       @param gameControllerPacket The game controller packet.
       @return None
@@ -250,17 +277,17 @@ private:
     /*!
       @brief Update the current information based on a manual state change.
       */
-    void triggerManualStateChange();
+    void doManualStateChange();
 
     /*!
       @brief Update the current information based on a manual team change.
       */
-    void triggerManualTeamChange();
+    void doManualTeamChange();
 
     /*!
       @brief Update the current information based on a manual kick-off change.
       */
-    void triggerManualKickoffChange();
+    void doManualKickoffChange();
 
     // My information
     int m_myPlayerNumber;           //!< Player number.
