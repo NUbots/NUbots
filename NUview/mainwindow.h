@@ -13,6 +13,8 @@
 #include "localisationwidget.h"
 #include "LogFileReader.h"
 #include "visionstreamwidget.h"
+#include <QHostInfo>
+
 class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
@@ -22,6 +24,8 @@ class QTabsWidget;
 class cameraSettingsWidget;
 
 class NUviewIO;
+class BonjourServiceResolver;
+
 
 namespace Ui
 {
@@ -89,6 +93,7 @@ protected slots:
 //    locWmGlDisplay* createLocWmGlDisplay();
     QMdiSubWindow* createGLDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
+    void connectToRobot(const QHostInfo &hostInfo, int);
 
 private:
     //! Virtual robot, does data storage and robot based processing.
@@ -163,6 +168,7 @@ private:
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
 
     QAction *doTestAction;    //!< Instance of the do test Action
+    BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
 

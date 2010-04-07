@@ -1,8 +1,10 @@
 #include <QtGui>
 #include "robotSelectDialog.h"
 #include "bonjourservicebrowser.h"
+#include "bonjourserviceresolver.h"
+#include <QDebug>
 
-robotSelectDialog::robotSelectDialog(QWidget * parent): QDialog(parent)
+robotSelectDialog::robotSelectDialog(QWidget * parent, const QString& service): QDialog(parent)
 {
     bonjourBrowser = new BonjourServiceBrowser(this);
     treeWidget = new QTreeWidget(this);
@@ -20,6 +22,7 @@ robotSelectDialog::robotSelectDialog(QWidget * parent): QDialog(parent)
     buttonBox = new QDialogButtonBox;
     buttonBox->addButton(connectButton, QDialogButtonBox::AcceptRole);
     buttonBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSelected()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
@@ -31,8 +34,24 @@ robotSelectDialog::robotSelectDialog(QWidget * parent): QDialog(parent)
 
     setWindowTitle(tr("Robot Selection"));
     treeWidget->setFocus();
-    bonjourBrowser->browseForServiceType(QLatin1String("_nao._tcp"));
+    bonjourBrowser->browseForServiceType(service);
 }
+
+void robotSelectDialog::saveSelected()
+{
+    QList<QTreeWidgetItem *> selectedItems = treeWidget->selectedItems();
+    if(selectedItems.length() > 0)
+    {
+        QTreeWidgetItem *item = selectedItems.at(0);
+        QVariant variant = item->data(0, Qt::UserRole);
+        m_selectedHost = variant.value<BonjourRecord>();
+    }
+    else
+    {
+        m_selectedHost = BonjourRecord();
+    }
+}
+
 
 void robotSelectDialog::enableConnectButton()
 {

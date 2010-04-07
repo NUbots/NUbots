@@ -23,7 +23,7 @@ ofstream debug;
 ofstream errorlog;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), bonjourResolver(0)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
     debug.open("debug.log");
@@ -442,14 +442,32 @@ void MainWindow::shrinkToNativeAspectRatio()
 
 void MainWindow::doTest()
 {
-    robotSelectDialog test;
+    robotSelectDialog test(this, "_nuview._tcp");
     if(test.exec())
     {
-        qDebug() << "Connect" << endl;
+        BonjourRecord bonjourHost = test.getBonjourHost();
+        if (!bonjourResolver)
+        {
+                bonjourResolver = new BonjourServiceResolver(this);
+                connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)),
+                        this, SLOT(connectToRobot(const QHostInfo &, int)));
+        }
+        bonjourResolver->resolveBonjourRecord(bonjourHost);
     }
     else
     {
         qDebug() << "Cancelled" << endl;
+    }
+}
+
+void MainWindow::connectToRobot(const QHostInfo &hostInfo, int port)
+{
+    const QList<QHostAddress> &addresses = hostInfo.addresses();
+
+    if (!addresses.isEmpty())
+    {
+        QHostAddress address = addresses.first();
+        qDebug() << "Connect: " << address.toString() << " Port: " << port << endl;
     }
 }
 
