@@ -117,9 +117,10 @@ void SeeThinkThread::run()
                 m_nubot->m_behaviour->processFieldObjects(*m_nubot->Jobs,AllObjects,m_nubot->SensorData, m_nubot->Image->height(), m_nubot->Image->width());
             #endif
             
+            #ifdef USE_VISION
+                m_nubot->m_vision->process(*m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
+            #endif
             #ifdef USE_MOTION
-                //debug << "SeeThinkThread JobSize: " << m_nubot->Jobs->size()<< endl; 
-                m_nubot->m_vision->process(*m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision;
                 m_nubot->m_motion->process(*m_nubot->Jobs);
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------

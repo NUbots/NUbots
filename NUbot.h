@@ -57,7 +57,7 @@ class JobList;
 class GameInformation;
 class TeamInformation;
 
-#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     class SeeThinkThread;
 #endif
 
@@ -109,7 +109,7 @@ private:
     
     NUIO* m_io;                           //!< io module
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         friend class SeeThinkThread;
         SeeThinkThread* m_seethink_thread;
     #endif
