@@ -14,6 +14,10 @@
 #include <QTabWidget>
 #include <typeinfo>
 #include "NUviewIO/NUviewIO.h"
+
+#include "bonjour/robotSelectDialog.h"
+#include "bonjour/bonjourserviceresolver.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -211,6 +215,10 @@ void MainWindow::createActions()
     newLocWMDisplayAction = new QAction(tr("&New display"), this);
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
+
+    doTestAction = new QAction(tr("&Do Test"), this);
+    doTestAction->setStatusTip(tr("Test something."));
+    connect(doTestAction, SIGNAL(triggered()), this, SLOT(doTest()));
 }
 
 void MainWindow::createMenus()
@@ -250,6 +258,7 @@ void MainWindow::createMenus()
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
     windowMenu->addAction(nativeAspectAction);
+    windowMenu->addAction(doTestAction);
 }
 
 void MainWindow::createContextMenu()
@@ -428,6 +437,19 @@ void MainWindow::shrinkToNativeAspectRatio()
             sourceSize.scale(windowSize,Qt::KeepAspectRatio);
             activeSubWindow->resize(sourceSize);
         }
+    }
+}
+
+void MainWindow::doTest()
+{
+    robotSelectDialog test;
+    if(test.exec())
+    {
+        qDebug() << "Connect" << endl;
+    }
+    else
+    {
+        qDebug() << "Cancelled" << endl;
     }
 }
 

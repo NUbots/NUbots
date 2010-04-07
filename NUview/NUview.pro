@@ -4,15 +4,19 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
+    LIBS += -framework \
+        CoreFoundation \
+        -L \
+        /usr/lib/libz.dylib
 }
-win32 {
+win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
 }
+!mac:LIBS += -ldns_sd
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -81,9 +85,12 @@ HEADERS += ui_mainwindow.h \
     ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
-    NUviewIO/NUviewIO.h
-
-
+    NUviewIO/NUviewIO.h \
+    bonjour/robotSelectDialog.h \
+    bonjour/bonjourserviceresolver.h \
+    bonjour/bonjourservicebrowser.h \
+    bonjour/bonjourrecord.h \
+    bonjour/bonjourIncludeHack.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -151,7 +158,9 @@ SOURCES += mainwindow.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
     ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
-    ../Tools/Threading/ConditionalThread.cpp
-
+    ../Tools/Threading/ConditionalThread.cpp \
+    bonjour/robotSelectDialog.cpp \
+    bonjour/bonjourserviceresolver.cpp \
+    bonjour/bonjourservicebrowser.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

@@ -58,6 +58,8 @@ public slots:
     void filenameChanged(QString filename); //!< New filename
     void fileClosed(); //!< File was closed.
 
+    void doTest();
+
     /*!
       @brief Used to select the colour at a given position in the image and
       set it as the selected colour in the classification widget.
@@ -159,6 +161,8 @@ private:
     QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
+
+    QAction *doTestAction;    //!< Instance of the do test Action
 
     LogFileReader LogReader;
 
