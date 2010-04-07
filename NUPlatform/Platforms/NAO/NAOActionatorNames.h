@@ -173,8 +173,8 @@ using namespace std;
 
 // Device names for the chest LEDs
 #define DN_LED_CHEST_RED                std::string("ChestBoard/Led/Red/Actuator/Value")
-#define DN_LED_CHEST_BLUE               std::string("ChestBoard/Led/Blue/Actuator/Value")
 #define DN_LED_CHEST_GREEN              std::string("ChestBoard/Led/Green/Actuator/Value")
+#define DN_LED_CHEST_BLUE               std::string("ChestBoard/Led/Blue/Actuator/Value")
 
 // Device names for the feet LEDs
 #define DN_LED_FOOT_LEFT_RED            std::string("LFoot/Led/Red/Actuator/Value")

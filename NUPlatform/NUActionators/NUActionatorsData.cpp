@@ -668,9 +668,9 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
     // now copy the results to the output vectors
     isvalid = l_isvalid;
     time = l_time;
-    l_redvalues = redvalues;
-    l_greenvalues = greenvalues;
-    l_bluevalues = bluevalues;
+    redvalues = l_redvalues;
+    greenvalues = l_greenvalues;
+    bluevalues = l_bluevalues;
     
     if (l_num_leds > 0)
         return true;
