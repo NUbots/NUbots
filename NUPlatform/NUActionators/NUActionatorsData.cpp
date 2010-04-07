@@ -117,7 +117,7 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     
     for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
-        addJointActionator(jointnames[i]);
+        addJointActionator(simplejointnames[i]);
         if (simplejointnames[i].find("headyaw") != string::npos)
         {
             HeadYaw = i;
@@ -278,30 +278,32 @@ void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
     m_num_joints = m_all_joint_ids.size();
 }
 
-/*! @brief Adds the led actionators and sets each of the static led_id_t if the led is in the list.
- @param leds a vector of strings where each string is a name of a led
+/*! @brief Adds the led actionators. Maintains the m_*_ids vector for led group access
+    @param leds a vector of strings where each string is a name of a led
  */
 void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
 {
     vector<string> simplelednames;
     simplifyNames(lednames, simplelednames);
+    vector<string> colourlesslednames;
+    removeColours(simplelednames, colourlesslednames);
     
-    for (unsigned int i=0; i<simplelednames.size(); i++) 
+    for (unsigned int i=0; i<colourlesslednames.size(); i++) 
     {
-        addLedActionator(lednames[i]);
-        if (simplelednames[i].find("lear") != string::npos || simplelednames[i].find("earsledleft") != string::npos)
+        addLedActionator(colourlesslednames[i]);
+        if (colourlesslednames[i].find("lear") != string::npos || colourlesslednames[i].find("earsledleft") != string::npos)
             m_lear_ids.push_back(i);
-        else if (simplelednames[i].find("rear") != string::npos || simplelednames[i].find("earsledright") != string::npos)
+        else if (colourlesslednames[i].find("rear") != string::npos || colourlesslednames[i].find("earsledright") != string::npos)
             m_rear_ids.push_back(i);
-        else if (simplelednames[i].find("leye") != string::npos || simplelednames[i].find("faceledleft") != string::npos  || simplelednames[i].find("faceledredleft") != string::npos)
+        else if (colourlesslednames[i].find("leye") != string::npos || colourlesslednames[i].find("faceledleft") != string::npos  || colourlesslednames[i].find("faceledredleft") != string::npos)
             m_leye_ids.push_back(i);
-        else if (simplelednames[i].find("reye") != string::npos || simplelednames[i].find("faceledright") != string::npos || simplelednames[i].find("faceledredright") != string::npos)
+        else if (colourlesslednames[i].find("reye") != string::npos || colourlesslednames[i].find("faceledright") != string::npos || colourlesslednames[i].find("faceledredright") != string::npos)
             m_reye_ids.push_back(i);
-        else if (simplelednames[i].find("chest") != string::npos || simplelednames[i].find("chestboardled") != string::npos || simplelednames[i].find("chestboardredled") != string::npos)
+        else if (colourlesslednames[i].find("chest") != string::npos || colourlesslednames[i].find("chestboardled") != string::npos || colourlesslednames[i].find("chestboardredled") != string::npos)
             m_chest_ids.push_back(i);
-        else if (simplelednames[i].find("lfoot") != string::npos || simplelednames[i].find("lfootled") != string::npos || simplelednames[i].find("lfootredled") != string::npos)
+        else if (colourlesslednames[i].find("lfoot") != string::npos || colourlesslednames[i].find("lfootled") != string::npos || colourlesslednames[i].find("lfootredled") != string::npos)
             m_lfoot_ids.push_back(i);
-        else if (simplelednames[i].find("rfoot") != string::npos || simplelednames[i].find("rfootled") != string::npos || simplelednames[i].find("rfootredled") != string::npos)
+        else if (colourlesslednames[i].find("rfoot") != string::npos || colourlesslednames[i].find("rfootled") != string::npos || colourlesslednames[i].find("rfootredled") != string::npos)
             m_rfoot_ids.push_back(i);
     }
     m_all_led_ids.insert(m_all_led_ids.end(), m_lear_ids.begin(), m_lear_ids.end());
@@ -411,6 +413,42 @@ void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string
     for (unsigned int i=0; i<input.size(); i++)
         simplifiednames.push_back(simplifyName(input[i]));
     output = simplifiednames;
+}
+
+/*! @brief Removes colours from a string. Also trys to only add a single actionator for LEDs at the same location but with different colours.
+    @param input the base string to pick out names which don't have colours, or add a single version without the colour
+    @param output the colourless actionatornames
+*/
+void NUActionatorsData::removeColours(const vector<string>& input, vector<string>& output)
+{
+    vector<string> outputnames;
+    
+    string previousname;
+    for (unsigned int i=0; i<input.size(); i++)
+    {
+        string temp;
+        unsigned int pos = 0;
+        pos = input[i].find("red");
+        if (pos != string::npos)
+            temp = input[i].substr(0, pos) + input[i].substr(pos+3, string::npos);
+            
+        pos = input[i].find("green");
+        if (pos != string::npos)
+            temp = input[i].substr(0, pos) + input[i].substr(pos+5, string::npos);
+        
+        pos = input[i].find("blue");
+        if (pos != string::npos)
+            temp = input[i].substr(0, pos) + input[i].substr(pos+4, string::npos);
+            
+        if (temp.compare(previousname) != 0)        // if the colourless part matches does not match previous then add it
+            outputnames.push_back(temp);
+        
+        if (temp.size() == 0)                       // if the name contains no colour then add it anyway
+            outputnames.push_back(input[i]);
+
+        previousname = temp;
+    }
+    output = outputnames;
 }
 
 /******************************************************************************************************************************************
@@ -768,7 +806,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, vector<vect
     int numpoints = std::min(selectedleds.size(), values.size());
 
     vector<float> data (3, 0);
-    for (unsigned int i=0; i<numpoints; i++)
+    for (int i=0; i<numpoints; i++)
     {
         if (values[i].size() < 3)
         {

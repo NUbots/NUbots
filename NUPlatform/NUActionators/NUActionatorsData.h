@@ -59,8 +59,7 @@ public:
         RightFootLeds,
         AllLeds
     };
-    
-    typedef int camera_setting_id_t;
+
     typedef int sound_id_t;
     static const int ACTIONATOR_MISSING = -1;
     
@@ -145,6 +144,7 @@ private:
     void addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype);
     string simplifyName(const string& input);
     void simplifyNames(const vector<string>& input, vector<string>& output);
+    void removeColours(const vector<string>& input, vector<string>& output);
     
 private:
     vector<actionator_t*> m_all_actionators;        //!< a vector with every actionator
