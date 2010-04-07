@@ -31,7 +31,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtCore/QObject>
 
-
+#include "bonjourIncludeHack.h"
 #include <dns_sd.h>
 
 class QSocketNotifier;
