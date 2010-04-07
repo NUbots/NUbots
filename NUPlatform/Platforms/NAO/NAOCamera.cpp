@@ -235,6 +235,13 @@ storedTimeStamp(nusystem->getTime())
   // enable streaming
   int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   VERIFY(ioctl(fd, VIDIOC_STREAMON, &type) != -1);
+  
+  	//READ CAMERA SETTINGS FROM FILE:
+
+	CameraSettings fileSettings;
+	fileSettings.LoadFromFile("/home/nao/data/Camera.cfg");
+	setSettings(fileSettings);
+	
 }
 
 NAOCamera::~NAOCamera()

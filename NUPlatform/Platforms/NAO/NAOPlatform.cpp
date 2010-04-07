@@ -49,11 +49,6 @@ NAOPlatform::NAOPlatform()
     sensors = new NAOSensors();
     actionators = new NAOActionators();
 	
-	//READ CAMERA SETTINGS FROM FILE:
-	CameraSettings fileSettings;
-	fileSettings.LoadFromFile("/home/nao/data/Camera.cfg");
-	camera->setSettings(fileSettings);
-	
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "NAOPlatform::NAOPlatform(). Completed." << endl;
 #endif
