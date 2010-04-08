@@ -86,7 +86,7 @@ NAOActionators::NAOActionators()
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 3
+#if DEBUG_NUACTIONATORS_VERBOSITY > 0
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);
 #endif
@@ -109,14 +109,14 @@ void NAOActionators::getActionatorsFromAldebaran()
     param[0] = ALIAS_POSITION;
     param[1] = m_servo_position_names;
     param = m_al_dcm->createAlias(param);
-    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << param.toString(VerbosityMini) << endl;
     #endif
     
     param[0] = ALIAS_STIFFNESS;
     param[1] = m_servo_stiffness_names;
     param = m_al_dcm->createAlias(param);
-    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << param.toString(VerbosityMini) << endl;
     #endif
     
@@ -128,7 +128,18 @@ void NAOActionators::getActionatorsFromAldebaran()
     m_num_leds = m_led_names.size();
     param[1] = m_led_names;
     param = m_al_dcm->createAlias(param);
-    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << param.toString(VerbosityMini) << endl;
+    #endif
+    
+    param[0] = ALIAS_ALL;
+    m_actionator_names.insert(m_actionator_names.end(), m_servo_position_names.begin(), m_servo_position_names.end());
+    m_actionator_names.insert(m_actionator_names.end(), m_servo_stiffness_names.begin(), m_servo_stiffness_names.end());
+    m_actionator_names.insert(m_actionator_names.end(), m_led_names.begin(), m_led_names.end());
+    m_num_actionators = m_actionator_names.size();
+    param[1] = m_actionator_names;
+    param = m_al_dcm->createAlias(param);
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << param.toString(VerbosityMini) << endl;
     #endif
     
@@ -140,6 +151,7 @@ void NAOActionators::createALDCMCommands()
     createALDCMCommand(ALIAS_POSITION, m_position_command, m_num_servo_positions);
     createALDCMCommand(ALIAS_STIFFNESS, m_stiffness_command, m_num_servo_stiffnesses);
     createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);
+    createALDCMCommand(ALIAS_ALL, m_actionator_command, m_num_actionators);
 }
 
 void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators)
