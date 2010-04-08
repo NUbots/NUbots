@@ -234,14 +234,17 @@ void NAOActionators::copyToHardwareCommunications()
         unsigned int dcmoffset = 0;
         unsigned int actoffset = 0;
         
+        redleds = vector<float>(redleds.size(), 1.0);
+        greenleds = vector<float>(greenleds.size(), 0.0);
+        blueleds = vector<float>(blueleds.size(), 0);
+        
         // On the NAO the ears only have blue leds
         for (unsigned int i=0; i<m_num_earleds; i++)
             dcmleds[i] = blueleds[i];
         dcmoffset = actoffset = m_num_earleds;
         
         // On the NAO the eyes are red, green and blue leds
-        // Currently BROKEN green = green + blue
-        //                  red = red + green + blue    
+        // The left eye the blue is stuck on, on the right eye the blue and green are stuck on    
         for (unsigned int i=0; i<m_num_eyeleds/3; i++)
         {
             dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
