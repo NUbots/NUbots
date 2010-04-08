@@ -203,12 +203,9 @@ void NAOActionators::copyToHardwareCommunications()
     static vector<bool> isvalid;
     static vector<double> times;
     
-    static vector<int> dcmpositiontimes(m_num_servo_positions, m_al_dcm->getTime(0));
     static vector<float> positions;
-    static vector<float> dcmpositions(m_num_servo_positions, NAN);
     static vector<float> velocities;
     static vector<float> gains;
-    static vector<float> dcmstiffnesses(m_num_servo_stiffnesses, NAN);
     
     if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
@@ -218,27 +215,22 @@ void NAOActionators::copyToHardwareCommunications()
             {
                 if (isvalid[i] == true)
                 {
-                    dcmpositiontimes[i] = static_cast<int> (times[i] + m_al_time_offset);
-                    dcmstiffnesses[i] = gains[i]/100.0;
-                    dcmpositions[i] = positions[i];
+                    int time = static_cast<int> (times[i] + m_al_time_offset);
+                    
+                    m_stiffness_command[3][i][0][0] = gains[i]/100.0;
+                    m_position_command[3][i][0][0] = positions[i];
+                    m_position_command[3][i][0][1] = time; 
+                    m_stiffness_command[3][i][0][1] = time;
                 }
                 else
                 {
-                    dcmpositiontimes[i] = 0;
-                    dcmstiffnesses[i] = NAN;
-                    dcmpositions[i] = NAN;
+                    m_stiffness_command[3][i][0][0] = NAN;
+                    m_position_command[3][i][0][0] = NAN;
                 }
             }
         }
         else
             errorlog << "NAOActionators::copyToHardwareCommunications(). The positions do not have the correct length, all data will be ignored!" << endl;
-    }
-    for (unsigned int i=0; i<m_num_servo_positions; i++)
-    {
-        m_stiffness_command[3][i][0][0] = dcmstiffnesses[i];
-        m_stiffness_command[3][i][0][1] = dcmpositiontimes[i];
-        m_position_command[3][i][0][0] = dcmpositions[i];
-        m_position_command[3][i][0][1] = dcmpositiontimes[i];
     }
     
     double posendtime = NUSystem::getThreadTime();
@@ -262,8 +254,9 @@ void NAOActionators::copyToHardwareCommunications()
         // On the NAO the ears only have blue leds
         for (unsigned int i=0; i<m_num_earleds; i++)
         {
-            dcmledtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
-            dcmleds[i] = blueleds[i];
+            int time = static_cast<int> (times[i] + m_al_time_offset);
+            m_led_command[3][i][0][0] = blueleds[i];
+            m_led_command[3][i][0][1] = time;
         }
         dcmoffset = actoffset = m_num_earleds;
         
@@ -271,12 +264,15 @@ void NAOActionators::copyToHardwareCommunications()
         // The left eye the blue is stuck on, on the right eye the blue and green are stuck on    
         for (unsigned int i=0; i<m_num_eyeleds/3; i++)
         {
-            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
-            dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
-            dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
+            int j = 3*i + dcmoffset;
+            int k = i + actoffset;
+            int time = static_cast<int> (times[k] + m_al_time_offset);
+            m_led_command[3][j][0][0] = redleds[k];
+            m_led_command[3][j+1][0][0] = greenleds[k];
+            m_led_command[3][j+2][0][0] = blueleds[k];
+            m_led_command[3][j][0][1] = time;
+            m_led_command[3][j+1][0][1] = time;
+            m_led_command[3][j+2][0][1] = time;
         }
         dcmoffset += m_num_eyeleds;
         actoffset += m_num_eyeleds/3;
@@ -284,12 +280,15 @@ void NAOActionators::copyToHardwareCommunications()
         // On the NAO the chest has a red, green and blue led
         for (unsigned int i=0; i<m_num_chestleds/3; i++)
         {
-            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
-            dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
-            dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
+            int j = 3*i + dcmoffset;
+            int k = i + actoffset;
+            int time = static_cast<int> (times[k] + m_al_time_offset);
+            m_led_command[3][j][0][0] = redleds[k];
+            m_led_command[3][j+1][0][0] = greenleds[k];
+            m_led_command[3][j+2][0][0] = blueleds[k];
+            m_led_command[3][j][0][1] = time;
+            m_led_command[3][j+1][0][1] = time;
+            m_led_command[3][j+2][0][1] = time;
         }
         dcmoffset += m_num_chestleds;
         actoffset += m_num_chestleds/3;
@@ -297,18 +296,16 @@ void NAOActionators::copyToHardwareCommunications()
         // On the NAO the feet each have red, green and blue leds
         for (unsigned int i=0; i<m_num_footleds/3; i++)
         {
-            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
-            dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
-            dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
-            dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
+            int j = 3*i + dcmoffset;
+            int k = i + actoffset;
+            int time = static_cast<int> (times[k] + m_al_time_offset);
+            m_led_command[3][j][0][0] = redleds[k];
+            m_led_command[3][j+1][0][0] = greenleds[k];
+            m_led_command[3][j+2][0][0] = blueleds[k];
+            m_led_command[3][j][0][1] = time;
+            m_led_command[3][j+1][0][1] = time;
+            m_led_command[3][j+2][0][1] = time;
         }
-    }
-    for (unsigned int i=0; i<m_num_leds; i++)
-    {
-        m_led_command[3][i][0][0] = dcmleds[i];
-        m_led_command[3][i][0][1] = dcmledtimes[i];
     }
     double ledendtime = NUSystem::getThreadTime();
     debug << "NAOActionators::copyToHardwareCommunications. Time spent on leds:" << ledendtime - ledstarttime << endl;
