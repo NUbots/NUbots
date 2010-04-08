@@ -91,8 +91,9 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 
 void OpenglManager::writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId)
 {
-    width = newImage->width();
-    height = newImage->height();
+    width = newImage->getWidth();
+    height = newImage->getHeight();
+
     QImage image(width,height,QImage::Format_ARGB32);
     unsigned char r, g, b;
     QRgb* imageLine;
@@ -101,7 +102,7 @@ void OpenglManager::writeNUimageToDisplay(const NUimage* newImage, GLDisplay::di
         imageLine = (QRgb*)image.scanLine(y);
         for (int x = 0; x < width; x++)
         {
-            ColorModelConversions::fromYCbCrToRGB(newImage->image[y][x].y,newImage->image[y][x].cb,newImage->image[y][x].cr,r,g,b);
+            ColorModelConversions::fromYCbCrToRGB(newImage->m_image[y][x].y,newImage->m_image[y][x].cb,newImage->m_image[y][x].cr,r,g,b);
             imageLine[x] = qRgb(r,g,b);
         }
     }

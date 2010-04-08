@@ -67,9 +67,9 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage->width() && y < rawImage->height() && imageAvailable())
+    if(x < rawImage->getWidth() && y < rawImage->getHeight() && imageAvailable())
     {
-        return rawImage->image[y][x];
+        return rawImage->m_image[y][x];
     }
     else
     {

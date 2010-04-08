@@ -201,8 +201,8 @@ void TcpPort::sendData(const NUimage& p_image)
     network_data_t netdata;
     stringstream buffer;
     
-    int imagewidth = p_image.width();
-    int imageheight = p_image.height();
+    int imagewidth = p_image.getWidth();
+    int imageheight = p_image.getHeight();
     buffer << imagewidth << " ";
     buffer << imageheight << " ";
     
@@ -215,8 +215,8 @@ void TcpPort::sendData(const NUimage& p_image)
     for(int y = 0; y < imageheight; y++)
     {
         network_data_t linedata;
-        linedata.data = (char*) &p_image.image[y][0];
-        linedata.size = sizeof(p_image.image[y][0])*imagewidth;
+        linedata.data = (char*) &p_image.m_image[y][0];
+        linedata.size = sizeof(p_image.m_image[y][0])*imagewidth;
         sendData(linedata);
     }
 }

@@ -48,6 +48,7 @@ NAOPlatform::NAOPlatform()
     camera = new NAOCamera();
     sensors = new NAOSensors();
     actionators = new NAOActionators();
+	
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "NAOPlatform::NAOPlatform(). Completed." << endl;
 #endif
