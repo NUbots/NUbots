@@ -147,7 +147,7 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
     // The format for a command to the DCM in alias mode is the following:
     // [AliasName, "ClearAfter", "time-mixed",[actionator0, actionator1, ... , actionatorn]]
     //      where each actionator is [[command0, dcmtime0, importance0], [command1, dcmtime1, importance1], ...]
-    // However, as we only ever give the dcm one command at a time an actionator is always [[command0, dcmtime0, importance0]]
+    // However, as we only ever give the dcm one command at a time, an actionator is always [[command0, dcmtime0, importance0]]
     ALValue l_command;
     
     // time-mixed mode always has a command length of 4
@@ -174,6 +174,10 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
     p_command = l_command;
 }
 
+/*! @brief Copies the commands stored in the NUActionators to the ALDcm.
+ 
+    As of 8/4/2010 this function uses 17% of the CPU
+ */
 void NAOActionators::copyToHardwareCommunications()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
@@ -182,6 +186,7 @@ void NAOActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
+    double starttime = NUSystem::getThreadTime();
     
     static vector<bool> isvalid;
     static vector<double> times;
@@ -224,6 +229,9 @@ void NAOActionators::copyToHardwareCommunications()
         m_position_command[3][i][0][1] = dcmpositiontimes[i];
     }
     
+    double posendtime = NUSystem::getThreadTime();
+    debug << "NAOActionators::copyToHardwareCommunications. Time spent on positions:" << posendtime - starttime << endl;
+    double ledstarttime = NUSystem::getThreadTime();
     
     static vector<int> dcmledtimes(m_num_leds, m_al_dcm->getTime(0));
     static vector<float> redleds, greenleds, blueleds;
@@ -234,19 +242,26 @@ void NAOActionators::copyToHardwareCommunications()
         unsigned int dcmoffset = 0;
         unsigned int actoffset = 0;
         
-        redleds = vector<float>(redleds.size(), 1.0);
+        times = vector<double>(times.size(), nusystem->getTime());
+        redleds = vector<float>(redleds.size(), 0.0);
         greenleds = vector<float>(greenleds.size(), 0.0);
-        blueleds = vector<float>(blueleds.size(), 0);
+        blueleds = vector<float>(blueleds.size(), 1.0);
         
         // On the NAO the ears only have blue leds
         for (unsigned int i=0; i<m_num_earleds; i++)
+        {
+            dcmledtimes[i] = static_cast<int> (times[i] + m_al_time_offset);
             dcmleds[i] = blueleds[i];
+        }
         dcmoffset = actoffset = m_num_earleds;
         
         // On the NAO the eyes are red, green and blue leds
         // The left eye the blue is stuck on, on the right eye the blue and green are stuck on    
         for (unsigned int i=0; i<m_num_eyeleds/3; i++)
         {
+            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
             dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
             dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
             dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
@@ -257,6 +272,9 @@ void NAOActionators::copyToHardwareCommunications()
         // On the NAO the chest has a red, green and blue led
         for (unsigned int i=0; i<m_num_chestleds/3; i++)
         {
+            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
             dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
             dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
             dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
@@ -267,6 +285,9 @@ void NAOActionators::copyToHardwareCommunications()
         // On the NAO the feet each have red, green and blue leds
         for (unsigned int i=0; i<m_num_footleds/3; i++)
         {
+            dcmledtimes[3*i + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 1 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
+            dcmledtimes[3*i + 2 + dcmoffset] = static_cast<int> (times[i + actoffset] + m_al_time_offset);
             dcmleds[3*i + dcmoffset] = redleds[i + actoffset];
             dcmleds[3*i + 1 + dcmoffset] = greenleds[i + actoffset];
             dcmleds[3*i + 2 + dcmoffset] = blueleds[i + actoffset];
@@ -277,10 +298,18 @@ void NAOActionators::copyToHardwareCommunications()
         m_led_command[3][i][0][0] = dcmleds[i];
         m_led_command[3][i][0][1] = dcmledtimes[i];
     }
+    double ledendtime = NUSystem::getThreadTime();
+    debug << "NAOActionators::copyToHardwareCommunications. Time spent on leds:" << ledendtime - ledstarttime << endl;
+    double setaliasstarttime = NUSystem::getThreadTime();
     
+    
+    // Setting the alias for stiffness, position and leds separately takes 1.05ms
     m_al_dcm->setAlias(m_stiffness_command);
     m_al_dcm->setAlias(m_position_command);
     m_al_dcm->setAlias(m_led_command);
+    
+    double setaliasendtime = NUSystem::getThreadTime();
+    debug << "NAOActionators::copyToHardwareCommunications. Time spent on setting dcm:" << setaliasendtime - setaliasstarttime << endl;
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << m_led_command.toString(VerbosityMini) << endl;
     #endif
