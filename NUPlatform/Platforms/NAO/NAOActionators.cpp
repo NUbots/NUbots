@@ -262,7 +262,8 @@ void NAOActionators::copyToHardwareCommunications()
         
         // On the NAO the eyes are red, green and blue leds
         // The left eye the blue is stuck on, on the right eye the blue and green are stuck on    
-        for (unsigned int i=0; i<m_num_eyeleds/3; i++)
+        unsigned int num = m_num_eyeleds/3;
+        for (unsigned int i=0; i<num; i++)
         {
             int j = 3*i + dcmoffset;
             int k = i + actoffset;
@@ -278,7 +279,8 @@ void NAOActionators::copyToHardwareCommunications()
         actoffset += m_num_eyeleds/3;
         
         // On the NAO the chest has a red, green and blue led
-        for (unsigned int i=0; i<m_num_chestleds/3; i++)
+        num = m_num_chestleds/3;
+        for (unsigned int i=0; i<num; i++)
         {
             int j = 3*i + dcmoffset;
             int k = i + actoffset;
@@ -294,7 +296,8 @@ void NAOActionators::copyToHardwareCommunications()
         actoffset += m_num_chestleds/3;
         
         // On the NAO the feet each have red, green and blue leds
-        for (unsigned int i=0; i<m_num_footleds/3; i++)
+        num = m_num_footleds/3;
+        for (unsigned int i=0; i<num; i++)
         {
             int j = 3*i + dcmoffset;
             int k = i + actoffset;
