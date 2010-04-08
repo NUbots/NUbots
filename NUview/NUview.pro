@@ -16,7 +16,11 @@ win32 {
     LIBS += -lwsock32
     LIBS += -lpthread
 }
-!mac:LIBS += -ldns_sd
+
+unix:!macx:LIBS += -ldns_sd
+win32:LIBS += -L"c:\\PROGRA~1\\BONJOU~1\\lib\\win32" \
+    -ldnssd
+win32:INCLUDEPATH += "c:\\program files\\bonjour sdk\\include"
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
