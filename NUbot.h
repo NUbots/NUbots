@@ -109,8 +109,8 @@ private:
     
     NUIO* m_io;                           //!< io module
     
+    friend class SeeThinkThread;
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
-        friend class SeeThinkThread;
         SeeThinkThread* m_seethink_thread;
     #endif
 
