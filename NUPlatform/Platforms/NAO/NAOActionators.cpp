@@ -216,16 +216,15 @@ void NAOActionators::copyToHardwareCommunications()
                 if (isvalid[i] == true)
                 {
                     int time = static_cast<int> (times[i] + m_al_time_offset);
-                    
-                    m_stiffness_command[3][i][0][0] = gains[i]/100.0;
-                    m_position_command[3][i][0][0] = positions[i];
-                    m_position_command[3][i][0][1] = time; 
-                    m_stiffness_command[3][i][0][1] = time;
+                    m_actionator_command[3][i][0][0] = positions[i];
+                    m_actionator_command[3][i+m_num_servo_positions][0][0] = gains[i]/100.0;
+                    m_actionator_command[3][i][0][1] = time; 
+                    m_actionator_command[3][i+m_num_servo_positions][0][1] = time;
                 }
                 else
                 {
-                    m_stiffness_command[3][i][0][0] = NAN;
-                    m_position_command[3][i][0][0] = NAN;
+                    m_actionator_command[3][i][0][0] = NAN;
+                    m_actionator_command[3][i+m_num_servo_positions][0][0] = NAN;
                 }
             }
         }
@@ -245,18 +244,20 @@ void NAOActionators::copyToHardwareCommunications()
     {
         unsigned int dcmoffset = 0;
         unsigned int actoffset = 0;
+        unsigned int ledoffset = 2*m_num_servo_positions;
         
         times = vector<double>(times.size(), nusystem->getTime());
-        redleds = vector<float>(redleds.size(), 0.0);
+        redleds = vector<float>(redleds.size(), 1.0);
         greenleds = vector<float>(greenleds.size(), 0.0);
         blueleds = vector<float>(blueleds.size(), 1.0);
         
         // On the NAO the ears only have blue leds
         for (unsigned int i=0; i<m_num_earleds; i++)
         {
+            int j = i + ledoffset;
             int time = static_cast<int> (times[i] + m_al_time_offset);
-            m_led_command[3][i][0][0] = blueleds[i];
-            m_led_command[3][i][0][1] = time;
+            m_actionator_command[3][j][0][0] = blueleds[i];
+            m_actionator_command[3][j][0][1] = time;
         }
         dcmoffset = actoffset = m_num_earleds;
         
@@ -265,15 +266,15 @@ void NAOActionators::copyToHardwareCommunications()
         unsigned int num = m_num_eyeleds/3;
         for (unsigned int i=0; i<num; i++)
         {
-            int j = 3*i + dcmoffset;
+            int j = 3*i + dcmoffset + ledoffset;
             int k = i + actoffset;
             int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_led_command[3][j][0][0] = redleds[k];
-            m_led_command[3][j+1][0][0] = greenleds[k];
-            m_led_command[3][j+2][0][0] = blueleds[k];
-            m_led_command[3][j][0][1] = time;
-            m_led_command[3][j+1][0][1] = time;
-            m_led_command[3][j+2][0][1] = time;
+            m_actionator_command[3][j][0][0] = redleds[k];
+            m_actionator_command[3][j+1][0][0] = greenleds[k];
+            m_actionator_command[3][j+2][0][0] = blueleds[k];
+            m_actionator_command[3][j][0][1] = time;
+            m_actionator_command[3][j+1][0][1] = time;
+            m_actionator_command[3][j+2][0][1] = time;
         }
         dcmoffset += m_num_eyeleds;
         actoffset += m_num_eyeleds/3;
@@ -282,15 +283,15 @@ void NAOActionators::copyToHardwareCommunications()
         num = m_num_chestleds/3;
         for (unsigned int i=0; i<num; i++)
         {
-            int j = 3*i + dcmoffset;
+            int j = 3*i + dcmoffset + ledoffset;
             int k = i + actoffset;
             int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_led_command[3][j][0][0] = redleds[k];
-            m_led_command[3][j+1][0][0] = greenleds[k];
-            m_led_command[3][j+2][0][0] = blueleds[k];
-            m_led_command[3][j][0][1] = time;
-            m_led_command[3][j+1][0][1] = time;
-            m_led_command[3][j+2][0][1] = time;
+            m_actionator_command[3][j][0][0] = redleds[k];
+            m_actionator_command[3][j+1][0][0] = greenleds[k];
+            m_actionator_command[3][j+2][0][0] = blueleds[k];
+            m_actionator_command[3][j][0][1] = time;
+            m_actionator_command[3][j+1][0][1] = time;
+            m_actionator_command[3][j+2][0][1] = time;
         }
         dcmoffset += m_num_chestleds;
         actoffset += m_num_chestleds/3;
@@ -299,15 +300,15 @@ void NAOActionators::copyToHardwareCommunications()
         num = m_num_footleds/3;
         for (unsigned int i=0; i<num; i++)
         {
-            int j = 3*i + dcmoffset;
+            int j = 3*i + dcmoffset + ledoffset;
             int k = i + actoffset;
             int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_led_command[3][j][0][0] = redleds[k];
-            m_led_command[3][j+1][0][0] = greenleds[k];
-            m_led_command[3][j+2][0][0] = blueleds[k];
-            m_led_command[3][j][0][1] = time;
-            m_led_command[3][j+1][0][1] = time;
-            m_led_command[3][j+2][0][1] = time;
+            m_actionator_command[3][j][0][0] = redleds[k];
+            m_actionator_command[3][j+1][0][0] = greenleds[k];
+            m_actionator_command[3][j+2][0][0] = blueleds[k];
+            m_actionator_command[3][j][0][1] = time;
+            m_actionator_command[3][j+1][0][1] = time;
+            m_actionator_command[3][j+2][0][1] = time;
         }
     }
     double ledendtime = NUSystem::getThreadTime();
@@ -316,9 +317,10 @@ void NAOActionators::copyToHardwareCommunications()
     
     
     // Setting the alias for stiffness, position and leds separately takes 1.05ms
-    m_al_dcm->setAlias(m_stiffness_command);
-    m_al_dcm->setAlias(m_position_command);
-    m_al_dcm->setAlias(m_led_command);
+//    m_al_dcm->setAlias(m_stiffness_command);
+//    m_al_dcm->setAlias(m_position_command);
+//    m_al_dcm->setAlias(m_led_command);
+    m_al_dcm->setAlias(m_actionator_command);
     
     double setaliasendtime = NUSystem::getThreadTime();
     debug << "NAOActionators::copyToHardwareCommunications. Time spent on setting dcm:" << setaliasendtime - setaliasstarttime << endl;
