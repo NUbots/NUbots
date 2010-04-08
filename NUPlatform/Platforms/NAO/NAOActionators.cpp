@@ -173,12 +173,11 @@ void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, 
     ALValue points;             // the list of commands for each actionator
     points.arraySetSize(1);     // we always send only one command 
     ALValue point;              // the actionator value
-    point.arraySetSize(3);      // a actionator point is always [value, dcmtime, importance]
+    point.arraySetSize(2);      // a actionator point is always [value, dcmtime]
     for (unsigned int i=0; i<numactionators; i++)
     {
         point[0] = 0.0f;                      // value
         point[1] = m_al_dcm->getTime(0);     // time
-        point[2] = 0;                        // importance
         points[0] = point;
         actionators[i] = points;
     }
@@ -198,7 +197,6 @@ void NAOActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
-    double starttime = NUSystem::getThreadTime();
     
     static vector<bool> isvalid;
     static vector<double> times;
@@ -232,24 +230,13 @@ void NAOActionators::copyToHardwareCommunications()
             errorlog << "NAOActionators::copyToHardwareCommunications(). The positions do not have the correct length, all data will be ignored!" << endl;
     }
     
-    double posendtime = NUSystem::getThreadTime();
-    debug << "NAOActionators::copyToHardwareCommunications. Time spent on positions:" << posendtime - starttime << endl;
-    double ledstarttime = NUSystem::getThreadTime();
-    
-    static vector<int> dcmledtimes(m_num_leds, m_al_dcm->getTime(0));
     static vector<float> redleds, greenleds, blueleds;
-    static vector<float> dcmleds(m_num_leds, 0);
     
     if (m_data->getNextLeds(isvalid, times, redleds, greenleds, blueleds))
     {
         unsigned int dcmoffset = 0;
         unsigned int actoffset = 0;
         unsigned int ledoffset = 2*m_num_servo_positions;
-        
-        times = vector<double>(times.size(), nusystem->getTime());
-        redleds = vector<float>(redleds.size(), 1.0);
-        greenleds = vector<float>(greenleds.size(), 0.0);
-        blueleds = vector<float>(blueleds.size(), 1.0);
         
         // On the NAO the ears only have blue leds
         for (unsigned int i=0; i<m_num_earleds; i++)
@@ -311,21 +298,12 @@ void NAOActionators::copyToHardwareCommunications()
             m_actionator_command[3][j+2][0][1] = time;
         }
     }
-    double ledendtime = NUSystem::getThreadTime();
-    debug << "NAOActionators::copyToHardwareCommunications. Time spent on leds:" << ledendtime - ledstarttime << endl;
-    double setaliasstarttime = NUSystem::getThreadTime();
-    
     
     // Setting the alias for stiffness, position and leds separately takes 1.05ms
-//    m_al_dcm->setAlias(m_stiffness_command);
-//    m_al_dcm->setAlias(m_position_command);
-//    m_al_dcm->setAlias(m_led_command);
     m_al_dcm->setAlias(m_actionator_command);
     
-    double setaliasendtime = NUSystem::getThreadTime();
-    debug << "NAOActionators::copyToHardwareCommunications. Time spent on setting dcm:" << setaliasendtime - setaliasstarttime << endl;
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << m_led_command.toString(VerbosityMini) << endl;
+        debug << m_actionator_command.toString(VerbosityMini) << endl;
     #endif
     
     m_data->removeCompletedPoints(m_current_time);
