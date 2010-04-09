@@ -518,6 +518,7 @@ void NUSensors::calculateOdometry()
     vector<float> leftFootPosition;
     vector<float> rightFootPosition;
     vector<float> odometeryData = m_data->Odometry->Data;
+    if(odometeryData.size() < 3) odometeryData.resize(3,0.0);
 
     float hipYawPitch;
     m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
