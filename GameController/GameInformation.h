@@ -54,6 +54,11 @@ public:
       */
     GameInformation(int playerNumber = 0, int teamNumber = 0);
 
+    /*!
+      @brief Destructor.
+      */
+    ~GameInformation();
+
     void process();
 
     // My information
@@ -110,7 +115,7 @@ public:
       */
     unsigned char getNumPlayers()
     {
-        return m_currentControlData.playersPerTeam;
+        return m_currentControlData->playersPerTeam;
     }
 
     /*!
@@ -119,7 +124,7 @@ public:
       */
     bool isFirstHalf()
     {
-        return (bool)m_currentControlData.firstHalf;
+        return (bool)m_currentControlData->firstHalf;
     }
 
     /*!
@@ -128,7 +133,7 @@ public:
       */
     bool haveKickoff()
     {
-        return (m_currentControlData.kickOffTeam == m_myTeamNumber);
+        return (m_currentControlData->kickOffTeam == m_myTeamNumber);
     }
 
     /*!
@@ -137,7 +142,7 @@ public:
       */
     int timeRemaining()
     {
-        return m_currentControlData.secsRemaining;
+        return m_currentControlData->secsRemaining;
     }
 
     /*!
@@ -177,13 +182,13 @@ public:
 
     const TeamInfo* getTeam(int teamNumber)
     {
-        if(m_currentControlData.teams[TEAM_BLUE].teamNumber == teamNumber)
+        if(m_currentControlData->teams[TEAM_BLUE].teamNumber == teamNumber)
         {
-            return &m_currentControlData.teams[TEAM_BLUE];
+            return &m_currentControlData->teams[TEAM_BLUE];
         }
-        else if (m_currentControlData.teams[TEAM_RED].teamNumber == teamNumber)
+        else if (m_currentControlData->teams[TEAM_RED].teamNumber == teamNumber)
         {
-            return &m_currentControlData.teams[TEAM_RED];
+            return &m_currentControlData->teams[TEAM_RED];
         }
         else
         {
@@ -197,7 +202,7 @@ public:
       */
     robotState getCurrentGameState() const
     {
-        return robotState(m_currentControlData.state);
+        return robotState(m_currentControlData->state);
     }
 
     /*!
@@ -206,7 +211,7 @@ public:
       */
     robotState getPreviousGameState() const
     {
-        return robotState(m_previousControlData.state);
+        return robotState(m_previousControlData->state);
     }
 
 
@@ -216,7 +221,7 @@ public:
       */
     bool gameStateChanged() const
     {
-        return (m_currentControlData.state != m_previousControlData.state);
+        return (m_currentControlData->state != m_previousControlData->state);
     }
 
     /*!
@@ -268,11 +273,15 @@ private:
     static std::string stateName(robotState theState);
 
     /*!
-      @brief Update the current information based on a new game controller packet.
-      @param gameControllerPacket The game controller packet.
-      @return None
+      @brief Determine if the state is a game playing state.
+      @param theState The state in question.
       */
-    void updateNetworkData(const RoboCupGameControlData& gameControllerPacket);
+    static bool isGameState(robotState theState);
+
+    /*!
+      @brief Update the current information based on a new game controller packet.
+      */
+    void updateData();
 
     /*!
       @brief Update the current information based on a manual state change.
@@ -296,13 +305,22 @@ private:
     robotState m_myPreviousState;   //!< Previous robot state.
     bool m_myStateChanged;          //!< Player state has changed. true if state has changed, false if not.
 
+    // game packet buffers
+
+    enum parameters
+    {
+        numPacketBuffers = 3
+    };
+
+    RoboCupGameControlData* m_gamePacketBuffers[numPacketBuffers];
+
     // Game Information
-    RoboCupGameControlData m_currentControlData;        //!< The current game info.
-    RoboCupGameControlData m_previousControlData;       //!< The previous game info.
+    RoboCupGameControlData* m_currentControlData;        //!< The current game info.
+    RoboCupGameControlData* m_previousControlData;       //!< The previous game info.
 
     // Unprocessed info holding area
     bool m_hasUnprocessedControlData;
-    RoboCupGameControlData m_unprocessedControlData;    //!< The new game packet.
+    RoboCupGameControlData* m_unprocessedControlData;    //!< The new game packet.    
     bool m_hasUnprocessedStateTrigger;      //!< New state trigger.
     bool m_hasUnprocessedTeamTrigger;       //!< New team trigger.
     bool m_hasUnprocessedKickoffTrigger;    //!< New kick-off trigger.

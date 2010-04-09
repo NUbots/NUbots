@@ -21,36 +21,59 @@ GameInformation::GameInformation(int playerNumber, int teamNumber):
         m_myCurrentState = state_substitute;
         m_myPreviousState = state_substitute;
     }
+    for (int i = 0; i < numPacketBuffers; i++)
+    {
+        m_gamePacketBuffers[i] = new RoboCupGameControlData;
+    }
+    m_currentControlData = m_gamePacketBuffers[0];
+    m_previousControlData = m_gamePacketBuffers[1];
+    m_unprocessedControlData = m_gamePacketBuffers[2];
+}
+
+GameInformation::~GameInformation()
+{
+    for (int i = 0; i < numPacketBuffers; i++)
+    {
+        delete m_gamePacketBuffers[i];
+    }
+    m_currentControlData = 0;
+    m_previousControlData = 0;
+    m_unprocessedControlData = 0;
 }
 
 void GameInformation::process()
 {
-    // Get info from network packet.
-    if(m_hasUnprocessedControlData)
+    // Check if there is a new network packet
+    if(!m_hasUnprocessedControlData)
     {
-        updateNetworkData(m_unprocessedControlData);
-        m_hasUnprocessedControlData = false;
-        m_hasUnprocessedStateTrigger = false;
-        m_hasUnprocessedTeamTrigger = false;
-        m_hasUnprocessedKickoffTrigger = false;
-    }
-    // Get info from manual commands.
-    else
-    {
+        // Start current update with the most current data.
+        memcpy(m_unprocessedControlData, m_currentControlData, sizeof(RoboCupGameControlData));
         if(m_hasUnprocessedStateTrigger)
         {
             doManualStateChange();
-            m_hasUnprocessedStateTrigger = false;
         }
         if(m_hasUnprocessedTeamTrigger)
         {
             doManualTeamChange();
-            m_hasUnprocessedTeamTrigger = false;
         }
         if(m_hasUnprocessedKickoffTrigger)
         {
             doManualKickoffChange();
-            m_hasUnprocessedKickoffTrigger = false;
+        }
+    }
+
+    m_hasUnprocessedControlData = false;
+    m_hasUnprocessedStateTrigger = false;
+    m_hasUnprocessedTeamTrigger = false;
+    m_hasUnprocessedKickoffTrigger = false;
+    updateData();
+
+    if( (getPlayer(m_myTeamNumber,m_myPlayerNumber)->penalty != PENALTY_NONE) && isGameState(m_myCurrentState) )
+    {
+        if(m_myCurrentState != m_currentControlData->state)
+        {
+            m_myPreviousState = m_myCurrentState;
+            m_myCurrentState = robotState(m_currentControlData->state);
         }
     }
     return;
@@ -58,7 +81,8 @@ void GameInformation::process()
 
 void GameInformation::addNewNetworkData(const RoboCupGameControlData& gameControllerPacket)
 {
-    m_unprocessedControlData = gameControllerPacket;    //!< The new game packet.
+    // Copy the new data
+    memcpy(m_unprocessedControlData, &gameControllerPacket, sizeof(RoboCupGameControlData));
     m_hasUnprocessedControlData = true;
 }
 
@@ -103,10 +127,15 @@ void GameInformation::updateSensorData(NUSensorsData* sensorData)
 }
 */
 
-void GameInformation::updateNetworkData(const RoboCupGameControlData& gameControllerPacket)
+void GameInformation::updateData()
 {
+    RoboCupGameControlData* temp;
+    temp = m_previousControlData;
     m_previousControlData = m_currentControlData;
-    m_currentControlData = gameControllerPacket;
+    m_currentControlData = m_unprocessedControlData;
+    m_unprocessedControlData = temp;
+    return;
+
 }
 
 void GameInformation::doManualStateChange()
@@ -121,6 +150,24 @@ void GameInformation::doManualTeamChange()
 
 void GameInformation::doManualKickoffChange()
 {
+
+}
+
+bool GameInformation::isGameState(robotState theState)
+{
+    bool result = false;
+    switch(theState)
+    {
+        case state_initial:
+        case state_ready:
+        case state_set:
+        case state_playing:
+        case state_finished:
+            result = true;
+        default:
+            result = false;
+    }
+    return result;
 
 }
 
