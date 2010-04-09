@@ -24,6 +24,7 @@
 #include "debug.h"
 #include "debugverbositynusensors.h"
 #include "../Kinematics/Horizon.h"
+#include "Kinematics/Kinematics.h"
 #include <math.h>
 #include <boost/circular_buffer.hpp>
 
@@ -503,7 +504,90 @@ void NUSensors::calculateOdometry()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateOdometry()" << endl;
 #endif
-    //!< @todo Implement NUSensors::calculateOdometry
+
+    const float turnMultiplier = 1.0;
+    const float xMultiplier = 1.25; // 2.5;
+    const float yMultiplier = -1.0;
+
+    static float prevHipYaw = 0.0;
+    static float prevLeftX = 0.0;
+    static float prevRightX = 0.0;
+    static float prevLeftY = 0.0;
+    static float prevRightY = 0.0;
+
+    vector<float> leftFootPosition;
+    vector<float> rightFootPosition;
+    vector<float> odometeryData = m_data->Odometry->Data;
+
+    float hipYawPitch;
+    m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
+    
+    // Get the left foots position in 3d space.
+    float leftHipPitch, leftHipRoll, leftKneePitch, leftAnkleRoll, leftAnklePitch;
+    m_data->getJointPosition(NUSensorsData::LHipPitch,leftHipPitch);
+    m_data->getJointPosition(NUSensorsData::LHipRoll,leftHipRoll);
+    m_data->getJointPosition(NUSensorsData::LKneePitch,leftKneePitch);
+    m_data->getJointPosition(NUSensorsData::LAnkleRoll,leftAnkleRoll);
+    m_data->getJointPosition(NUSensorsData::LAnklePitch,leftAnklePitch);
+    leftFootPosition = Kinematics::CalculateLeftFootPosition(hipYawPitch,leftHipRoll, leftHipPitch, leftKneePitch, leftAnklePitch, leftAnkleRoll);
+
+    // Get the right foots position in 3d space.
+    float rightHipPitch, rightHipRoll, rightKneePitch, rightAnkleRoll, rightAnklePitch;
+    m_data->getJointPosition(NUSensorsData::RHipPitch,rightHipPitch);
+    m_data->getJointPosition(NUSensorsData::RHipRoll,rightHipRoll);
+    m_data->getJointPosition(NUSensorsData::RKneePitch,rightKneePitch);
+    m_data->getJointPosition(NUSensorsData::RAnkleRoll,rightAnkleRoll);
+    m_data->getJointPosition(NUSensorsData::RAnklePitch,rightAnklePitch);
+    rightFootPosition = Kinematics::CalculateRightFootPosition(hipYawPitch,rightHipRoll, rightHipPitch, rightKneePitch, rightAnklePitch, rightAnkleRoll);
+
+    bool leftFootSupport = false;
+    bool rightFootSupport = false;
+
+    float leftForce, rightForce;
+    m_data->getFootForce(NUSensorsData::LeftFoot,leftForce);
+    m_data->getFootForce(NUSensorsData::RightFoot,rightForce);
+
+    if(leftForce > rightForce)
+    {
+        leftFootSupport = true;
+        rightFootSupport = false;
+    }
+    else
+    {
+        leftFootSupport = false;
+        rightFootSupport = true;
+    }
+    
+    // Calculate movement
+    float deltaX;
+    float deltaY;
+    float deltaTheta;
+    
+    if(leftFootSupport && !rightFootSupport)
+    {
+        deltaX = xMultiplier * (leftFootPosition[0] - prevLeftX);
+        deltaY = yMultiplier * (leftFootPosition[1] - prevLeftY);
+        deltaTheta = turnMultiplier * (hipYawPitch - prevHipYaw);
+    }
+    else if(!leftFootSupport && rightFootSupport)
+    {
+        deltaX = xMultiplier * (rightFootPosition[0] - prevRightX);
+        deltaY = yMultiplier * (rightFootPosition[1] - prevRightY);
+        deltaTheta = turnMultiplier * (prevHipYaw - hipYawPitch);
+    }
+    
+    odometeryData[0] += deltaX;
+    odometeryData[1] += deltaY;
+    odometeryData[2] += deltaTheta;
+
+    m_data->Odometry->Data = odometeryData;
+
+    // Save the historical data
+    prevHipYaw = hipYawPitch;
+    prevLeftX = leftFootPosition[0];
+    prevRightX = rightFootPosition[0];
+    prevLeftY = leftFootPosition[1];
+    prevRightY = rightFootPosition[1];
 }
 
 void NUSensors::calculateCameraHeight()
