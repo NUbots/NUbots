@@ -34,7 +34,8 @@ Vision::Vision()
 
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
-    LUTBuffer = new unsigned char[c_LUTLength];
+    LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
+   // testLUTBuffer = new unsigned char [128*128*128];
     currentLookupTable = LUTBuffer;
     imagefile.open ("/var/volatile/images.nul");
     m_saveimages_thread = new SaveImagesThread(this);
@@ -183,7 +184,10 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 
 
     //qDebug() << "CASE YUYVGenerate Classified Image: START";
-    //generateClassifiedImage(image);
+    classifiedCounter = 0;
+    //ClassifiedImage target(currentImage->getWidth(),currentImage->getHeight(),true);
+    //classifyImage(target);
+
     //qDebug() << "Generate Classified Image: finnished";
     //setImage(&image);
     //! Find the green edges
@@ -204,8 +208,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     ClassifiedSection horiScanArea = horizontalScan(points,spacings);
     //debug << "Horizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
     //qDebug() << "Generate Scanlines: finnished";
+    
     //! Classify Line Segments
-
     ClassifyScanArea(&vertScanArea);
     ClassifyScanArea(&horiScanArea);
     //debug << "Classify ScanPaths : Finnished" <<endl;
@@ -215,24 +219,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     for (int i = 0; i < tempNumScanLines; i++)
     {
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
-        //int lengthOfLine = tempScanLine->getLength();
-        //Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-            //allsegments.push_back((*tempScanLine->getSegment(seg)));
             segments.push_back((*tempScanLine->getSegment(seg)));
         }
-        /*if(vertScanArea->getDirection() == ClassifiedSection::DOWN)
-        {
-            for(int j = 0;  j < lengthOfLine; j++)
-            {
-                Vector2<int> temp;
-                temp.x = startPoint.x;
-                temp.y = startPoint.y + j;
-                verticalPoints.push_back(temp);
-            }
-        }*/
     }
 
     //! Extract and Display Horizontal Scan Points:
@@ -240,23 +231,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     for (int i = 0; i < tempNumScanLines; i++)
     {
         ScanLine* tempScanLine = horiScanArea.getScanLine(i);
-        //int lengthOfLine = tempScanLine->getLength();
-        //Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        /*if(horiScanArea->getDirection() == ClassifiedSection::RIGHT)
-        {
-            for(int j = 0;  j < lengthOfLine; j++)
-            {
-                Vector2<int> temp;
-                temp.x = startPoint.x + j;
-                temp.y = startPoint.y;
-                horizontalPoints.push_back(temp);
-            }
-        }*/
     }
     //! Form Lines
     //fieldLines = vision.DetectLines(vertScanArea,spacings);
@@ -334,7 +313,12 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     }
     DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
-
+    
+    #if DEBUG_VISION_VERBOSITY > 4
+	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
+			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
+    #endif
+    
     return AllFieldObjects;
 }
 
@@ -390,7 +374,7 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, c_LUTLength,fileName.c_str() );
+    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
     setLUT(LUTBuffer);
 }
 
@@ -404,7 +388,9 @@ unsigned char Vision::classifyPixel(int x, int y)
 {
     classifiedCounter++;
     Pixel* temp = &currentImage->m_image[y][x];
-    return currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr];
+//    return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
+    return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+	//return  currentLookupTable[((temp->y >> 2)<<12) + ((temp->cb >> 2)<<6) + (temp->cr>>2)]; // 6bit LUT
 }
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {

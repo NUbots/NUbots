@@ -74,6 +74,11 @@ void SeeThinkThread::run()
         double realendtime, processendtime, threadendtime;
     #endif
     
+    #if defined (THREAD_SEETHINK_MONITOR_TIME) and defined(USE_VISION)
+        double visionrealstarttime, visionprocessstarttime, visionthreadstarttime; 
+        double visionrealendtime, visionprocessendtime, visionthreadendtime;
+    #endif
+	
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
@@ -88,6 +93,12 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
+		 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+			visionrealstarttime = NUSystem::getRealTime();
+			visionprocessstarttime = NUSystem::getProcessTime();
+			visionthreadstarttime = NUSystem::getThreadTime();
+		#endif
+		
                 m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
                 *(m_nubot->m_io) << m_nubot->Image;  //<! Raw IMAGE STREAMING (TCP)
             #endif
@@ -104,8 +115,19 @@ void SeeThinkThread::run()
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                
+               
+		
                 FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+		
+		#if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+		visionrealendtime = NUSystem::getRealTime();
+                visionprocessendtime = NUSystem::getProcessTime();
+                visionthreadendtime = NUSystem::getThreadTime();
+		debug 	<< "SeeThinkThread. Vision Timing: " 
+				<< (visionthreadendtime - visionthreadstarttime) << "ms, in this process: " << (visionprocessendtime - visionprocessstarttime) 
+				<< "ms, in realtime: " << visionrealendtime - visionrealstarttime << "ms." << endl;
+		#endif
+		
             #endif
             
             #ifdef USE_LOCALISATION
