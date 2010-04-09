@@ -46,7 +46,6 @@ private:
     void enableActionatorsInWebots();
     
     void copyToServos();
-    void copyToCamera();
     void copyToLeds();
     void copyToSound();
     void copyToTeleporter();
@@ -60,8 +59,6 @@ private:
     static vector<string> m_servo_control_names;    //!< the names of the available joint control methods (usually position and/or torque)
     static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
     vector<Servo*> m_servos;                        //!< the actual webots::Servo pointers.
-    static vector<string> m_camera_setting_names;   //!< the names of the camera settings available in webots (just SelectCamera) 
-    Servo* m_camera_select;                         //!< a servo which selects which camera to use, webots doesn't have any 'camera setttings' as such so this is the only camera control
     static vector<string> m_led_names;              //!< the names of the leds available in webots
     vector<LED*> m_leds;                            //!< the actual webots::LED pointers
     static vector<string> m_other_names;            //!< the names of other available actionators in webots

@@ -371,7 +371,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         tempLut[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
     }
 
@@ -382,7 +382,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         tempLut[index] = ClassIndex::unclassified;
     }
     emit classifiedDisplayChanged(&previewClassImage, GLDisplay::classificationSelection);
@@ -412,7 +412,7 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> index
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         if(classificationTable[index] != colour)
         {
             undoHistory[nextUndoIndex].push_back(classEntry(index,classificationTable[index])); // Save index and colour

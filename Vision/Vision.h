@@ -36,10 +36,10 @@ class Vision
 {
 
     private:
-    static const unsigned int c_LUTLength = 256*256*256;
     const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
     const unsigned char* currentLookupTable; //!< Storage of the current colour lookup table.
     unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
+    unsigned char* testLUTBuffer;
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
 
@@ -62,6 +62,7 @@ class Vision
     Vision();
     //! Destructor.
     ~Vision();
+
 
 
     double CalculateBearing(double cx);
