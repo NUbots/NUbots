@@ -4,9 +4,12 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
+    LIBS += -framework \
+        CoreFoundation \
+        -L \
+        /usr/lib/libz.dylib
 }
-win32 {
+win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
@@ -81,9 +84,9 @@ HEADERS += ui_mainwindow.h \
     ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
-    NUviewIO/NUviewIO.h
-
-
+    NUviewIO/NUviewIO.h \
+    ../Kinematics/Kinematics.h \
+    ../Tools/Math/TransformMatrices.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -151,7 +154,8 @@ SOURCES += mainwindow.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
     ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
-    ../Tools/Threading/ConditionalThread.cpp
-
+    ../Tools/Threading/ConditionalThread.cpp \
+    ../Kinematics/Kinematics.cpp \
+    ../Tools/Math/TransformMatrices.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
