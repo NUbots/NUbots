@@ -86,6 +86,39 @@ NAOActionators::NAOActionators()
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
     
+    double time = nusystem->getTime();
+    vector<float> rgb(3,0);
+    vector<vector<float> > chest;
+    chest.push_back(rgb);
+    
+    chest[0][0] = 1.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, chest);
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, chest);
+    
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, chest);
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, chest);
+    
+    chest[0][0] = 0.0; chest[0][1] = 1.0; chest[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, chest);
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, chest);
+    
+    chest[0][0] = 1.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, chest);
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, chest);
+    
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, chest);
+    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, chest);
+    
+    chest[0][0] = 0.0; chest[0][1] = 1.0; chest[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, chest);
+    
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
     m_data->summaryTo(debug);

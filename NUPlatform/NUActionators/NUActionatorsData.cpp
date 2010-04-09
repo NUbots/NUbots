@@ -306,6 +306,7 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
         else if (colourlesslednames[i].find("rfoot") != string::npos || colourlesslednames[i].find("rfootled") != string::npos || colourlesslednames[i].find("rfootredled") != string::npos)
             m_rfoot_ids.push_back(i);
     }
+    
     m_all_led_ids.insert(m_all_led_ids.end(), m_lear_ids.begin(), m_lear_ids.end());
     m_all_led_ids.insert(m_all_led_ids.end(), m_rear_ids.begin(), m_rear_ids.end());
     m_all_led_ids.insert(m_all_led_ids.end(), m_leye_ids.begin(), m_leye_ids.end());
@@ -779,48 +780,72 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, vector<vect
 {
     vector<joint_id_t> selectedleds;
     if (LedActionators.size() == 0)
-        return false;
+        return false;                       
     
     if (ledgroup == AllLeds)
         selectedleds = m_all_led_ids;
     else if (ledgroup == LeftEarLeds)
-        selectedleds = m_body_ids;
+        selectedleds = m_lear_ids;
     else if (ledgroup == RightEarLeds)
-        selectedleds = m_head_ids;
+        selectedleds = m_rear_ids;
     else if (ledgroup == LeftEyeLeds)
-        selectedleds = m_larm_ids;
+        selectedleds = m_leye_ids;
     else if (ledgroup == RightEyeLeds)
-        selectedleds = m_rarm_ids;
+        selectedleds = m_reye_ids;
     else if (ledgroup == ChestLeds)
-        selectedleds = m_torso_ids;
+        selectedleds = m_chest_ids;
     else if (ledgroup == LeftFootLeds)
-        selectedleds = m_lleg_ids;
+        selectedleds = m_lfoot_ids;
     else if (ledgroup == RightFootLeds)
-        selectedleds = m_rleg_ids;
+        selectedleds = m_rfoot_ids;
     else
     {
         debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
         return false;
     }
     
-    int numpoints = std::min(selectedleds.size(), values.size());
+    if (values.size() == 1)
+    {   // if the size of the values is one, then set that value to all in the group
+        static vector<float> data(3,0);
+        if (values[0].size() < 3)
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][0];
+            data[2] = values[0][0];
+        }
+        else 
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][1];
+            data[2] = values[0][2];
+        }
 
-    vector<float> data (3, 0);
-    for (int i=0; i<numpoints; i++)
-    {
-        if (values[i].size() < 3)
+        for (unsigned int i=0; i<selectedleds.size(); i++)
         {
-            data[0] = values[i][0];
-            data[1] = values[i][0];
-            data[2] = values[i][0];
+            LedActionators[selectedleds[i]]->addPoint(time, data);
         }
-        else
+    }
+    else
+    {   // otherwise set each led individually.
+        int numpoints = std::min(selectedleds.size(), values.size());
+        
+        static vector<float> data (3, 0);
+        for (int i=0; i<numpoints; i++)
         {
-            data[0] = values[i][0];
-            data[1] = values[i][1];
-            data[2] = values[i][2];
+            if (values[i].size() < 3)
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][0];
+                data[2] = values[i][0];
+            }
+            else
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][1];
+                data[2] = values[i][2];
+            }
+            LedActionators[selectedleds[i]]->addPoint(time, data);
         }
-        LedActionators[selectedleds[i]]->addPoint(time, data);
     }
     return true;
 }
