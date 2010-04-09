@@ -37,10 +37,6 @@ static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
                                     string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
 vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
-// init m_camera_setting_names:
-static string temp_setting_names[] = {string("SelectCamera")};
-vector<string> NAOWebotsActionators::m_camera_setting_names(temp_setting_names, temp_setting_names + sizeof(temp_setting_names)/sizeof(*temp_setting_names));
-
 // init m_led_names:
 static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
                                   string("ChestBoard/Led"), \
@@ -66,7 +62,6 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableCameraSettings(m_camera_setting_names);
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableOtherActionators(m_other_names);
     
@@ -88,8 +83,6 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     // Get the servos
     for (int i=0; i<m_servo_names.size(); i++)
         m_servos.push_back(platform->getServo(m_servo_names[i]));
-    // Get the camera
-    m_camera_select = platform->getServo("CameraSelect");
     // Get the leds
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
@@ -119,7 +112,6 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #endif
     
     copyToServos();
-    copyToCamera();
     copyToLeds();
     copyToSound();
     copyToTeleporter();
@@ -190,33 +182,6 @@ void NAOWebotsActionators::copyToServos()
         }
         else
             debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
-    }
-}
-
-/*! @brief Copies the camera settings to the camera
- */
-void NAOWebotsActionators::copyToCamera()
-{
-    static vector<bool> isvalid;
-    static vector<double> times;
-    static vector<vector<float> > data;
-    
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToCamera()" << endl;
-#endif
-    
-    if (m_data->getNextCameraSettings(isvalid, times, data))
-    {
-        if (isvalid[0] == true)
-        {
-            if (data[0].size() > 0)
-            {
-                if (data[0][0] == 0)
-                    m_camera_select->setPosition(0);
-                else
-                    m_camera_select->setPosition(0.6981);       // offset between top and bottom camera is 40 degrees = 0.6981
-            }
-        }
     }
 }
 
