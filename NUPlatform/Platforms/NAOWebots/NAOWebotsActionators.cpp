@@ -22,6 +22,10 @@
 #include "NAOWebotsActionators.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+
+#include "webots/Robot.hpp"
+using namespace webots;
+
 #include <string.h>
 
 
@@ -65,10 +69,38 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableOtherActionators(m_other_names);
     
-    // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
-    //Camera* camera = m_platform->getCamera("camera");
-    //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
+    double time = nusystem->getTime();
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
     
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, allleds);
+    
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -207,7 +239,11 @@ void NAOWebotsActionators::copyToLeds()
             {
                 if (isvalid[i] == true)
                 {
-                    int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
+                    unsigned char rgb[3];
+                    rgb[0] = static_cast<unsigned char> (255*redvalues[i]);
+                    rgb[1] = static_cast<unsigned char> (255*greenvalues[i]);
+                    rgb[2] = static_cast<unsigned char> (255*bluevalues[i]);
+                    int ledvalue = *reinterpret_cast<int*> (&rgb);
                     m_leds[i]->set(ledvalue);
                 }
             }
