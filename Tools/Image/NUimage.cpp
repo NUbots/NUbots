@@ -162,6 +162,32 @@ void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int h
     return;
 }
 
+void NUimage::MapYUV422BufferToImageNoDownsize(const unsigned char* buffer, int width, int height)
+{
+    useInternalBuffer(false);
+    int arrayWidth = width;
+    Pixel* pixelisedBuffer = (Pixel*) buffer;
+    if(height != this->getHeight())
+    {
+        delete [] m_image;
+        m_image = 0;
+    }
+    if(m_image == 0)
+    {
+        //Allocate memory for array of elements of column
+        m_image = new Pixel*[height];
+    }
+    // Now point the pointers in the right place
+    int pixelIndex = 0;
+    for( int i = 0; i < height; ++i)
+    {
+        m_image[i] = &pixelisedBuffer[pixelIndex];
+        pixelIndex += arrayWidth;
+    }
+    m_imageWidth = width;
+    m_imageHeight = height;
+}
+
 void NUimage::MapBufferToImage(Pixel* buffer, int width, int height)
 {
     if(height != this->getHeight())

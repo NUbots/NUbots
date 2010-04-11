@@ -85,9 +85,8 @@ NUimage* NAOWebotsCamera::grabNewImage()
         m_yuyv_buffer[k + 2] = y2;
         m_yuyv_buffer[k + 3] = (v1 + v2)/2;
     }
-    m_image->MapYUV422BufferToImage(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
+    m_image->MapYUV422BufferToImageNoDownsize(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
     
-    debug << m_image->getWidth() << " " << m_image->getHeight() << endl;
     return m_image;
 }
 
