@@ -50,7 +50,7 @@ NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 #endif
     
     m_image = new NUimage(m_width, m_height, false);
-    m_yuyv_buffer = new unsigned char[m_totalpixels*2];
+    m_yuyv_buffer = new Pixel[m_totalpixels];
 }
 
 /*! @brief Destory the NAOWebotsCamera
@@ -72,20 +72,20 @@ NUimage* NAOWebotsCamera::grabNewImage()
 {
     const unsigned char* rgb_image = m_camera->getImage();              // grab the image from webots
     
-    unsigned char y1, u1, v1, y2, u2, v2;
+    unsigned char y, u, v;
     int j,k;
-    for (int i=0; i<m_totalpixels; i=i+2)                               // convert from rgb to yuv422
+    for (int i=0; i<m_totalpixels; i++)                                 // convert from rgb to yuv422
     {
         j = 3*i;
-        ColorModelConversions::fromRGBToYCbCr(rgb_image[j], rgb_image[j + 1], rgb_image[j + 2], y1, u1, v1);
-        ColorModelConversions::fromRGBToYCbCr(rgb_image[j + 3], rgb_image[j + 4], rgb_image[j + 5], y2, u2, v2);
-        k = 2*i;
-        m_yuyv_buffer[k] = y1;
-        m_yuyv_buffer[k + 1] = (u1 + u2)/2;
-        m_yuyv_buffer[k + 2] = y2;
-        m_yuyv_buffer[k + 3] = (v1 + v2)/2;
+        ColorModelConversions::fromRGBToYCbCr(rgb_image[j], rgb_image[j + 1], rgb_image[j + 2], y, u, v);
+        // each rgb maps to a yuyv, which in Pixel.h is defined to be a single pixel ;)
+        m_yuyv_buffer[i].yCbCrPadding = y;
+        m_yuyv_buffer[i].cb = u;
+        m_yuyv_buffer[i].y = y;
+        m_yuyv_buffer[i].cr = v;
     }
-    m_image->MapYUV422BufferToImageNoDownsize(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
+
+    m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
     
     return m_image;
 }

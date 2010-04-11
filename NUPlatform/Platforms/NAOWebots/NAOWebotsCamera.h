@@ -46,7 +46,7 @@ private:
     int m_width, m_height, m_totalpixels;
     
     NUimage* m_image;
-    unsigned char* m_yuyv_buffer;
+    Pixel* m_yuyv_buffer;
 };
 
 #endif
