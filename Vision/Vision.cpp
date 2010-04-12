@@ -81,16 +81,16 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 ChangeCameraSettingsJob newJob(m_camera->getSettings());
                 toSendList.addCameraJob(&newJob);
                 (*m_io) << toSendList;
-                toSendList.removeCameraJob(&newJob);
+                toSendList.clear();
             }
             else
             {   
                 m_camera->setSettings(settings);
             }
-            
+            it = jobs.removeCameraJob(it);
         }
-        
     }
+    
     for (it = jobs.vision_begin(); it != jobs.vision_end(); ++it)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
@@ -116,6 +116,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 }
                 isSavingImages = job->saving();
             }
+            it = jobs.removeVisionJob(it);
          }
     }
     //#endif
