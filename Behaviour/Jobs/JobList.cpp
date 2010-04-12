@@ -213,121 +213,130 @@ void JobList::addJob(Job* job, list<Job*>& joblist)
     joblist.push_back(job);
 }
 
-/*! @brief Remove a job from the list
-    @param job the job to be removed
+/*! @brief Remove a job from the list based on its an iterator's position
+    @param iter the position of the job you want to remove
+    @return the new iterator position post job-removal
  */
-void JobList::removeJob(Job* job)
+list<Job*>::iterator JobList::removeJob(list<Job*>::iterator iter)
 {
+    Job* job = *iter;
     if (job == NULL)
-        return;
+        return iter;
     Job::job_type_t jobtype = job->getType();
     if (jobtype == Job::MOTION)
-        removeMotionJob(job);
+        return removeMotionJob(iter);
     else if (jobtype == Job::VISION)
-        removeVisionJob(job);
+        return removeVisionJob(iter);
     else if (jobtype == Job::LOCALISATION)
-        removeLocalisationJob(job);
+        return removeLocalisationJob(iter);
     else if (jobtype == Job::BEHAVIOUR)
-        removeBehaviourJob(job);
+        return removeBehaviourJob(iter);
     else if (jobtype == Job::LIGHT)
-        removeLightJob(job);
+        return removeLightJob(iter);
     else if (jobtype == Job::CAMERA)
-        removeCameraJob(job);
+        return removeCameraJob(iter);
     else if (jobtype == Job::SOUND)
-        removeSoundJob(job);
+        return removeSoundJob(iter);
     else if (jobtype == Job::SYSTEM)
-        removeSystemJob(job);
+        return removeSystemJob(iter);
     else if (jobtype == Job::OTHER)
-        removeOtherJob(job);
+        return removeOtherJob(iter);
     else
-        debug << "JobList::removeJob. Unknown job type. Your job was never added to begin with." << endl;
+    {
+        errorlog << "JobList::removeJob. Unknown job type. Your job was never added to begin with." << endl;
+        return iter;
+    }
 }
 
 /*! @brief Remove a vision job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeVisionJob(Job* job)
+list<Job*>::iterator JobList::removeVisionJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_vision_jobs);
+    return removeJob(m_vision_jobs, iter);
 }
 
 /*! @brief Remove a localisation job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeLocalisationJob(Job* job)
+list<Job*>::iterator JobList::removeLocalisationJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_localisation_jobs);
+    return removeJob(m_localisation_jobs, iter);
 }
 
 /*! @brief Remove a behaviour job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeBehaviourJob(Job* job)
+list<Job*>::iterator JobList::removeBehaviourJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_behaviour_jobs);
+    return removeJob(m_behaviour_jobs, iter);
 }
 
 /*! @brief Remove a motion job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeMotionJob(Job* job)
+list<Job*>::iterator JobList::removeMotionJob(list<Job*>::iterator iter)
 {
-    debug << "JobList::removeMotionJob" << endl;
-    removeJob(job, m_motion_jobs);
-    debug << "JobList::removeMotionJob. Finished" << endl;
+    return removeJob(m_motion_jobs, iter);
 }
 
 /*! @brief Remove a light job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeLightJob(Job* job)
+list<Job*>::iterator JobList::removeLightJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_light_jobs);
+    return removeJob(m_light_jobs, iter);
 }
 
 /*! @brief Remove a camera job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeCameraJob(Job* job)
+list<Job*>::iterator JobList::removeCameraJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_camera_jobs);
+    return removeJob(m_camera_jobs, iter);
 }
 
 /*! @brief Remove a sound job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeSoundJob(Job* job)
+list<Job*>::iterator JobList::removeSoundJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_sound_jobs);
+    return removeJob(m_sound_jobs, iter);
 }
 
 /*! @brief Remove a system job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeSystemJob(Job* job)
+list<Job*>::iterator JobList::removeSystemJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_system_jobs);
+    return removeJob(m_system_jobs, iter);
 }
 
-/*! @brief Remove a other job from the list
-    @param job the job to be removed
+/*! @brief Remove an other job from the list
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeOtherJob(Job* job)
+list<Job*>::iterator JobList::removeOtherJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_other_jobs);
+    return removeJob(m_other_jobs, iter);
 }
 
 /*! @brief Remove a job from the passed in list
-    @param job the job to be removed
     @param joblist the list from which the job will be removed
+    @param iter the position in the list of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeJob(Job* job, list<Job*>& joblist)
+list<Job*>::iterator JobList::removeJob(list<Job*>& joblist, list<Job*>::iterator iter)
 {
-    debug << "JobList::removeJob." << endl;
-    debug << "job:" << (void*) job << " " << job << endl;
-    debug << "joblist:" << (void*) &joblist << endl;
-    joblist.remove(job);
-    debug << "JobList::removeJob. Finished." << endl;
+    return joblist.erase(iter);
 }
 
 /*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
