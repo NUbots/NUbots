@@ -84,14 +84,6 @@ public:
     @param height The height of the image.
     */
     void CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height);
-    
-    /*!
-     @brief Maps a YUV422 formatted image buffer to the image without downsizing it. A local copy IS NOT made.
-     @param buffer The YUV422 image.
-     @param width The width of the image.
-     @param height The height of the image.
-     */
-    void MapYUV422BufferToImageNoDownsize(const unsigned char* buffer, int width, int height);
 
     /*!
     @brief Output streaming operation.
