@@ -49,12 +49,12 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         //debug << "BALL::FindBall  Circle Fit finnsihed";
         if (tempresult.radius  > result.radius)
         {
-            debug << "BALL::FindBall  Updated with larger circle"<< endl;
+            //debug << "BALL::FindBall  Updated with larger circle"<< endl;
             result = tempresult;
         }
         //! Use Circle Fit information to update the FieldObjects
 
-        debug << "BALL::FindBall  Circle Fit finnsihed"<<endl;
+        //debug << "BALL::FindBall  Circle Fit finnsihed"<<endl;
         //! check if current object is larger then object before.
     }
 
@@ -164,7 +164,7 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
+            //debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
 
     }
     else
@@ -185,7 +185,7 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
         {
             circ.radius = fabs(bottomRight.y - topLeft.y)/2;
         }
-        debug << "Circle cannot be fitted: Used Candidate information" << endl;
+        //debug << "Circle cannot be fitted: Used Candidate information" << endl;
     }
 
     //debug << "BALL::CircleFit returning circle r =" << circ.radius;

@@ -332,7 +332,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
+    qDebug()<< (double)((double)vision.classifiedCounter/(double)(image->getHeight()*image->getWidth()))*100 << " percent of image classified";
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
     //qDebug() << "Crash Check: Before Yellow Goals Detection:";
 
