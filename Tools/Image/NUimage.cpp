@@ -71,7 +71,7 @@ void NUimage::cloneExisting(const NUimage& source)
     }
     else
     {
-        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth, sourceHeight);
+        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth*2, sourceHeight*2);
     }
     m_timestamp = source.m_timestamp;
 }

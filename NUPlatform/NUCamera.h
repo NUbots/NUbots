@@ -37,7 +37,6 @@ public:
 protected:
     CameraSettings settings;
 private:
-    virtual void copyToHardwareCommunications();
 };
 
 #endif

@@ -88,36 +88,36 @@ NAOActionators::NAOActionators()
     
     double time = nusystem->getTime();
     vector<float> rgb(3,0);
-    vector<vector<float> > chest;
-    chest.push_back(rgb);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
     
-    chest[0][0] = 1.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // red
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, chest);
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, chest);
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, allleds);
     
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 1.0;        // blue
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, chest);
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, chest);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, allleds);
     
-    chest[0][0] = 0.0; chest[0][1] = 1.0; chest[0][2] = 0.0;        // green
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, chest);
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, chest);
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, allleds);
     
-    chest[0][0] = 1.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // red
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, chest);
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, chest);
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, allleds);
     
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 1.0;        // blue
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, chest);
-    chest[0][0] = 0.0; chest[0][1] = 0.0; chest[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, chest);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, allleds);
     
-    chest[0][0] = 0.0; chest[0][1] = 1.0; chest[0][2] = 0.0;        // green
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, chest);
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;

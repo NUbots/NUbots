@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include <string.h>
+#include <errno.h>
 
 /*! @brief Constructs a tcp port on the specified port
  
@@ -48,9 +49,14 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
     if ((m_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
         errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to create socket file descriptor." << endl;
 
-    //char broadcastflag = 1;
-    //if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof broadcastflag) == -1)
-    //    errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to set socket options." << endl;
+    // Set the reuse address flag
+    #ifdef WIN32
+        char reuseflag = 1;
+    #else
+        int reuseflag = 1;
+    #endif
+    if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
+        errorlog << "TcpPort::TcpPort(). Failed to set reuseaddr socket options, errno: " << errno << endl;
         
     m_address.sin_family = AF_INET;                             // host byte order
     m_address.sin_port = htons(m_port_number);                  // short, network byte order

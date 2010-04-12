@@ -30,6 +30,9 @@
 #include "NUPlatform/NUCamera.h"
 #include "NAOWebotsPlatform.h"
 
+class webots::Camera;
+class NUimage;
+
 class NAOWebotsCamera : public NUCamera
 {
 public:
@@ -39,7 +42,11 @@ public:
     NUimage* grabNewImage();
     void setSettings(const CameraSettings& newset);
 private:
-    void copyToHardwareCommunications();
+    Camera* m_camera;
+    int m_width, m_height, m_totalpixels;
+    
+    NUimage* m_image;
+    Pixel* m_yuyv_buffer;
 };
 
 #endif

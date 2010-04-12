@@ -178,7 +178,7 @@ public:
     float f, p, q, t;
     hDeg = 360.0 / 255.0 * (float)H;
     float hfloor = floor(hDeg / 60.0);
-    int hi = (int)(fmod(hfloor, 6.0));
+      int hi = (int)(std::fmod(hfloor, 6.0f));
     f = (hDeg / 60 - hfloor);
     p = V * (255 - S) / 255.0;
     q = V * (255 - f*S) / 255.0;
