@@ -365,7 +365,7 @@ void cameraSettingsWidget::sendDataToRobot()
 
     (*nuio) << m_job_list;
 
-    m_job_list->removeCameraJob(camerajob);
+    m_job_list->clear();
 
     readPacketTimer.start();
 
@@ -397,7 +397,7 @@ void cameraSettingsWidget::sendSettingsToRobot()
 
     (*nuio) << m_job_list;
 
-    m_job_list->removeCameraJob(camerajob);
+    m_job_list->clear();
 
 }
 
@@ -488,7 +488,7 @@ void cameraSettingsWidget::sendStartSavingImagesJob()
 
     (*nuio) << m_job_list;
 
-    m_job_list->removeVisionJob(saveimagesjob);
+    m_job_list->clear();
 
 }
 
@@ -500,6 +500,6 @@ void cameraSettingsWidget::sendStopSavingImagesJob()
 
     (*nuio) << m_job_list;
 
-    m_job_list->removeVisionJob(saveimagesjob);
+    m_job_list->clear();
 
 }

@@ -89,6 +89,7 @@ public:
         SecondaryButton,
         AllButtons
     };
+    // sensor group ids
 public:
     NUSensorsData();
     ~NUSensorsData();

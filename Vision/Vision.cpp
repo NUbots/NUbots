@@ -54,10 +54,9 @@ Vision::~Vision()
 void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 {
     //debug  << "Vision::Process - Begin" << endl;
-    //#ifdef USE_VISION
     camera = m_camera;
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.camera_begin(); it != jobs.camera_end(); ++it)
+    for (it = jobs.camera_begin(); it != jobs.camera_end();)
     {
         //debug  << "Vision::Process - Processing Job" << endl;
         if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
@@ -89,9 +88,14 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
             }
             it = jobs.removeCameraJob(it);
         }
+        else 
+        {
+            ++it;
+        }
+
     }
     
-    for (it = jobs.vision_begin(); it != jobs.vision_end(); ++it)
+    for (it = jobs.vision_begin(); it != jobs.vision_end();)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
@@ -118,8 +122,12 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
             }
             it = jobs.removeVisionJob(it);
          }
+        else 
+        {
+            ++it;
+        }
+
     }
-    //#endif
 }
 
 

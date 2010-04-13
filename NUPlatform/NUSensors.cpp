@@ -62,7 +62,7 @@ NUSensors::~NUSensors()
  */
 NUSensorsData* NUSensors::update()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
     m_current_time = nusystem->getTime();
@@ -78,7 +78,7 @@ NUSensorsData* NUSensors::update()
         firstrun = false;
     }
 #endif
-#if DEBUG_NUSENSORS_VERBOSITY > 5
+#if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
     m_data->summaryTo(debug);
 #endif
@@ -138,6 +138,17 @@ void NUSensors::calculateJointVelocity()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateJointVelocity()" << endl;
 #endif
+    static vector<float> previousjointpositions = m_data->JointPositions->Data;
+    static vector<float> jointvelocities(m_data->JointPositions->Data.size(), 0);
+    if (m_previous_time != 0)
+    {
+        for (unsigned i=0; i<m_data->JointPositions->Data.size(); i++)
+        {
+            jointvelocities[i] = (m_data->JointPositions->Data[i] - previousjointpositions[i])/(m_current_time - m_previous_time);
+        }
+    }
+    m_data->JointVelocities->setData(m_current_time, jointvelocities, true);
+    previousjointpositions = m_data->JointPositions->Data;
 }
 
 void NUSensors::calculateJointAcceleration()
@@ -145,6 +156,17 @@ void NUSensors::calculateJointAcceleration()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateJointAcceleration()" << endl;
 #endif
+    static vector<float> previousjointvelocities = m_data->JointVelocities->Data;
+    static vector<float> jointaccelerations(m_data->JointVelocities->Data.size(), 0);
+    if (m_previous_time != 0)
+    {
+        for (unsigned i=0; i<m_data->JointVelocities->Data.size(); i++)
+        {
+            jointaccelerations[i] = (m_data->JointVelocities->Data[i] - previousjointvelocities[i])/(m_current_time - m_previous_time);
+        }
+    }
+    m_data->JointAccelerations->setData(m_current_time, jointaccelerations, true);
+    previousjointvelocities = m_data->JointVelocities->Data;
 }
 
 /*! @brief Updates the orientation estimate using the current sensor data
