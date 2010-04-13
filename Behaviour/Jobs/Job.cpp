@@ -134,7 +134,7 @@ ostream& operator<<(ostream& output, const Job* job)
     @param job a pointer to the pointer to the job to store the job extracted from the stream
            (it is done this way to avoid using the assignment operator which I haven't written yet)
  
-    @attention This operator needs to be updated when to want to stream a new type of Job.
+    @attention This operator needs to be updated when you want to stream a new type of Job.
                You need to add a
                     @code
                     case Job::_JOB_ID_:
@@ -205,6 +205,9 @@ istream& operator>>(istream& input, Job** job)
             break;
         case Job::VISION_SAVE_IMAGES:
             *job = new SaveImagesJob(input);
+            break;
+        case Job::SOUND_FILE:
+            *job = new SoundJob(jobtime, input);
             break;
         default:
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;

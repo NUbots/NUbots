@@ -30,7 +30,7 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		LightJob.h
 		CameraJob.h
 		CameraJobs/ChangeCameraSettingsJob.h CameraJobs/ChangeCameraSettingsJob.cpp
-		SoundJob.h
+		SoundJob.h SoundJob.cpp
 		SystemJob.h
 		OtherJob.h
 		MotionJobs/WalkToPointJob.cpp MotionJobs/WalkToPointJob.h

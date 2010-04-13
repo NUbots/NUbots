@@ -1,14 +1,12 @@
 /*! @file SoundJob.h
-    @brief Declaration of base SoundJob class.
+    @brief Declaration of SoundJob class.
  
     @class SoundJob
-    @brief A base class to encapsulate jobs issued for the sound module.
- 
-    All sound jobs should inherit from this base class.
+    @brief A job to play a sound. We only need one sound job; it plays a specifed file.
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,19 +25,28 @@
 #ifndef SOUNDJOB_H
 #define SOUNDJOB_H
 
+#include <string>
+
 #include "Job.h"
 
 class SoundJob : public Job
 {
 public:
-    SoundJob(job_id_t jobid) : Job(Job::SOUND, jobid){};
-    virtual ~SoundJob() {};
+    SoundJob(double time, const std::string filename);
+    SoundJob(double time, istream& input);
+    virtual ~SoundJob();
+    
+    std::string getFilename();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    friend ostream& operator<<(ostream& output, const SoundJob& job);
+    friend ostream& operator<<(ostream& output, const SoundJob* job);
+protected:
+    virtual void toStream(ostream& output) const;
+private:
+    std::string m_filename;         //!< filename of the audio file to be played.
 };
 
 #endif
