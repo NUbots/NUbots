@@ -136,7 +136,7 @@ void KickWidget::kickPressed()
 
     (*nuio) << m_job_list;
     
-    m_job_list->removeMotionJob(kickjob);
+    m_job_list->clear();
 }
 
 

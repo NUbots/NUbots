@@ -148,7 +148,7 @@ void NUMotion::process(JobList& jobs)
 #endif
     
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
+    for (it = jobs.motion_begin(); it != jobs.motion_end();)
     {
         #ifdef USE_WALK         // ---------------------------------------------------------- WalkJob processing
             if ((*it)->getID() == Job::MOTION_WALK)
@@ -239,6 +239,11 @@ void NUMotion::process(JobList& jobs)
                 it = jobs.removeMotionJob(it);
             }
         #endif
+            else 
+            {
+                ++it;
+            }
+
     }
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::process(): Finished." << endl;
