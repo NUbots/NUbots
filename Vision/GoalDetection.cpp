@@ -3,7 +3,7 @@
 #include "TransitionSegment.h"
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
-#include <QDebug>
+//#include <QDebug>
 #include "debug.h"
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
@@ -30,7 +30,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 	{
             if(!isObjectAPossibleGoal(*it))
             {
-                qDebug() << "Erasing FO_CANDIDATE";
+                //qDebug() << "Erasing FO_CANDIDATE";
                 it = FO_Candidates.erase(it);
                 continue;
             }
@@ -45,7 +45,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //Combine Any "OverLapping Candidates:
         CombineOverlappingCandidates(FO_Candidates);
 
-        for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
         {
         //qDebug() << "Crash Check: Before Closely classify Detection:";
             classifyGoalClosely(&(*it), vision, height, width);
@@ -55,13 +55,12 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             {
                 float FinalDistance;
                 FinalDistance = FindGoalDistance(*it,vision);
-                debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
-
+                ++it;
+                //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
             }
             else
             {
-                FO_Candidates.erase(it);
-                it--;
+                it = FO_Candidates.erase(it);
             }
 	}
 
@@ -298,7 +297,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                qDebug() << "Found: Overlapping TopLeft Goal";
+                //qDebug() << "Found: Overlapping TopLeft Goal";
             }
             //! CHECK INSIDE Object BOTTOMRIGHT is within outside Object
             else if ((  it->getTopLeft().x - boarder     <= itInside->getBottomRight().x     &&
@@ -331,7 +330,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                qDebug() << "Found: Overlapping BottomRight Goal";
+                //qDebug() << "Found: Overlapping BottomRight Goal";
             }
             //! CHECK OUTSIDE Object TOPLEFT is within inside Object
             else if((    itInside->getTopLeft().x-boarder      <= it->getTopLeft().x     &&
@@ -364,7 +363,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                qDebug() << "Found: Overlapping TopLeft Goal OutSide";
+                //qDebug() << "Found: Overlapping TopLeft Goal OutSide";
             }
             //! CHECK OUTSIDE Object BOTTOMRIGHT is within inside Object
             else if ((  itInside->getTopLeft().x - boarder     <= it->getBottomRight().x     &&
@@ -397,7 +396,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                qDebug() << "Found: Overlapping BottomRight Goal OutSide";
+                //qDebug() << "Found: Overlapping BottomRight Goal OutSide";
             }
         }
     }
