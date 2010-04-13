@@ -254,12 +254,11 @@ void NUbot::run()
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
+    int timestep = webots->getBasicTimeStep();
     while (true)
     {
         previoussimtime = nusystem->getTime();
-        webots->step(40);           // stepping the simulator generates new data to run motion, and vision data
-        if (nusystem->getTime() - previoussimtime > 81)
-            debug << "NUbot::run(): simulationskip: " << (nusystem->getTime() - previoussimtime) << endl;
+        webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
             m_sensemove_thread->startLoop();
         #endif

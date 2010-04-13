@@ -81,7 +81,16 @@ UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
         int broadcastflag = 1;
     #endif
     if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof(broadcastflag)) == -1)
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set socket options, errno: " << errno << endl;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set broadcast socket options, errno: " << errno << endl;
+    
+    // Set the reuse address flag
+    #ifdef WIN32
+        char reuseflag = 1;
+    #else
+        int reuseflag = 1;
+    #endif
+    if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set reuseaddr socket options, errno: " << errno << endl;
     
     // Construct this address
     m_address.sin_family = AF_INET;                                     // host byte order

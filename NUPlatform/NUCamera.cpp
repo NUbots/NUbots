@@ -30,10 +30,5 @@ NUCamera::~NUCamera()
 {
 }
 
-void NUCamera::copyToHardwareCommunications()
-{
-    // implementation in PlatformCamera!
-}
-
 
 

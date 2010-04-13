@@ -292,8 +292,7 @@ void WalkParameterWidget::walkParameterChanged()
 
     (*nuio) << m_job_list;
     
-    m_job_list->removeMotionJob(parametersjob);
-    m_job_list->removeMotionJob(walkjob);
+    m_job_list->clear();
 }
 
 

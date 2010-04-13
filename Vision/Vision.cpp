@@ -54,10 +54,9 @@ Vision::~Vision()
 void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 {
     //debug  << "Vision::Process - Begin" << endl;
-    //#ifdef USE_VISION
     camera = m_camera;
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.camera_begin(); it != jobs.camera_end(); ++it)
+    for (it = jobs.camera_begin(); it != jobs.camera_end();)
     {
         //debug  << "Vision::Process - Processing Job" << endl;
         if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
@@ -81,17 +80,22 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 ChangeCameraSettingsJob newJob(m_camera->getSettings());
                 toSendList.addCameraJob(&newJob);
                 (*m_io) << toSendList;
-                toSendList.removeCameraJob(&newJob);
+                toSendList.clear();
             }
             else
             {   
                 m_camera->setSettings(settings);
             }
-            
+            it = jobs.removeCameraJob(it);
         }
-        
+        else 
+        {
+            ++it;
+        }
+
     }
-    for (it = jobs.vision_begin(); it != jobs.vision_end(); ++it)
+    
+    for (it = jobs.vision_begin(); it != jobs.vision_end();)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
@@ -116,9 +120,14 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 }
                 isSavingImages = job->saving();
             }
+            it = jobs.removeVisionJob(it);
          }
+        else 
+        {
+            ++it;
+        }
+
     }
-    //#endif
 }
 
 
@@ -156,7 +165,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Vision::starting the save images loop." << endl;
         #endif
-        //m_saveimages_thread->startLoop();
+        m_saveimages_thread->startLoop();
     }
     //debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:

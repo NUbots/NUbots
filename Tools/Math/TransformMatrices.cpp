@@ -1,5 +1,5 @@
 #include <cmath>
-#include "transformMatrices.h"
+#include "TransformMatrices.h"
 
 Matrix TransformMatrices::RotX(double angle){
   Matrix result = Matrix(4,4,true);
