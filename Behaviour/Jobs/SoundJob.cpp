@@ -26,13 +26,23 @@
 using namespace std;
 
 /*! @brief Constructs a SoundJob
+ @param time the time the sound is to be played
+ @param filenames the filenames of each sound to be played
+ */
+SoundJob::SoundJob(double time, const vector<string> filenames) : Job(Job::SOUND, Job::SOUND_FILE)
+{
+    m_job_time = time;
+    m_filenames = filenames;
+}
+
+/*! @brief Constructs a SoundJob
     @param time the time the sound is to be played
     @param filename filename of the sound to be played
  */
 SoundJob::SoundJob(double time, const std::string filename) : Job(Job::SOUND, Job::SOUND_FILE)
 {
     m_job_time = time;
-    m_filename = filename;
+    m_filenames = vector<string>(1, filename);
 }
 
 /*! @brief Constructs a SoundJob from stream data
@@ -44,7 +54,14 @@ SoundJob::SoundJob(double time, const std::string filename) : Job(Job::SOUND, Jo
 SoundJob::SoundJob(double time, istream& input) : Job(Job::SOUND, Job::SOUND_FILE)
 {
     m_job_time = time;
-    input >> m_filename;
+    unsigned int numfiles;
+    string filename;
+    input >> numfiles;
+    for (unsigned int i=0; i<numfiles; i++)
+    {
+        input >> filename;
+        m_filenames.push_back(filename);
+    }
 }
 
 /*! @brief SoundJob destructor
@@ -55,9 +72,9 @@ SoundJob::~SoundJob()
 
 /*! @brief Returns the filename of the sound to be played
  */
-string SoundJob::getFilename()
+vector<string> SoundJob::getFilenames()
 {
-    return m_filename;
+    return m_filenames;
 }
 
 /*! @brief Prints a human-readable summary to the stream
@@ -65,7 +82,9 @@ string SoundJob::getFilename()
  */
 void SoundJob::summaryTo(ostream& output)
 {
-    output << "SoundJob: " << m_job_time << " " << m_filename;
+    output << "SoundJob: " << m_job_time << " ";
+    for (unsigned int i=0; i<m_filenames.size(); i++)
+        output << m_filenames[i];
     output << endl;
 }
 
@@ -74,7 +93,9 @@ void SoundJob::summaryTo(ostream& output)
  */
 void SoundJob::csvTo(ostream& output)
 {
-    output << "SoundJob, " << m_job_time << ", " << m_filename;
+    output << "SoundJob, " << m_job_time << ", ";
+    for (unsigned int i=0; i<m_filenames.size(); i++)
+        output << m_filenames[i] << ", ";
     output << endl;
 }
 
@@ -89,7 +110,9 @@ void SoundJob::toStream(ostream& output) const
 {
     Job::toStream(output);                  // This writes data introduced at the base level
                                             // Then we write SoundJob specific data
-    output << m_filename;
+    output << m_filenames.size() << " ";
+    for (unsigned int i=0; i<m_filenames.size(); i++)
+        output << m_filenames[i] << " ";
 }
 
 /*! @relates SoundJob

@@ -26,6 +26,7 @@
 #define SOUNDJOB_H
 
 #include <string>
+#include <vector>
 
 #include "Job.h"
 
@@ -33,10 +34,11 @@ class SoundJob : public Job
 {
 public:
     SoundJob(double time, const std::string filename);
+    SoundJob(double time, const std::vector<std::string> filename);
     SoundJob(double time, istream& input);
     virtual ~SoundJob();
     
-    std::string getFilename();
+    std::vector<std::string> getFilenames();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
@@ -46,7 +48,7 @@ public:
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    std::string m_filename;         //!< filename of the audio file to be played.
+    std::vector<std::string> m_filenames;         //!< The vector of filenames of the audio files to be played.
 };
 
 #endif

@@ -155,7 +155,6 @@ private:
     vector<actionator_t*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
 
     // Peripheral actionators 
-    vector<actionator_t*> CameraActionators;        //!< The camera control actionators, a single actionator for each setting Steve.
     vector<actionator_t*> LedActionators;           //!< The led actionators
     actionator_t* Sound;                            //!< The sound actionator
     
