@@ -3,7 +3,7 @@
 #include "TransitionSegment.h"
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
-//#include <QDebug>
+#include <QDebug>
 #include "debug.h"
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
@@ -21,63 +21,47 @@ GoalDetection::~GoalDetection()
 ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candidates,std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,FieldObjects* AllObjects, std::vector< TransitionSegment > horizontalSegments,Vision* vision,int height,int width)
 {
 	ObjectCandidate result;
-        bool usedAboveHorizonCandidate[FO_AboveHorizonCandidates.size()];
-        for(int i = 0; i < (int)FO_AboveHorizonCandidates.size();i++)
-        {
-            usedAboveHorizonCandidate[i] = false;
-        }
+
+
+        vector < ObjectCandidate > ::iterator it;
+
         //! Go through all the candidates: to find a possible goal
-        for(unsigned int i = 0; i  < (int)FO_Candidates.size(); i++)
+        for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
 	{
-            if(!isObjectAPossibleGoal(FO_Candidates[i]))
+            if(!isObjectAPossibleGoal(*it))
             {
+                qDebug() << "Erasing FO_CANDIDATE";
+                it = FO_Candidates.erase(it);
                 continue;
             }
             //qDebug() << "Crash Check: Before Extend with Horizontal Segments Detection:";
-            ExtendGoalAboveHorizon(&FO_Candidates[i], FO_AboveHorizonCandidates, usedAboveHorizonCandidate, horizontalSegments);
+            ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
+            ++it;
         }
         //ADD REMAINING GOAL CANDIDATES above horizon:
-        for( int i = 0; i < (int)FO_AboveHorizonCandidates.size(); i++)
-        {
-            if(!usedAboveHorizonCandidate[i])
-            {
-                FO_Candidates.push_back(FO_AboveHorizonCandidates[i]);
-            }
-        }
+        FO_Candidates.insert(FO_Candidates.end(), FO_AboveHorizonCandidates.begin(), FO_AboveHorizonCandidates.end());
+        FO_AboveHorizonCandidates.clear();
 
-        for (int i = 0; i < FO_Candidates.size(); i++)
+        //Combine Any "OverLapping Candidates:
+        CombineOverlappingCandidates(FO_Candidates);
+
+        for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         {
         //qDebug() << "Crash Check: Before Closely classify Detection:";
-            classifyGoalClosely(&FO_Candidates[i], vision, height, width);
+            classifyGoalClosely(&(*it), vision, height, width);
             //qDebug() << "Crash Check: Before Ratio check Detection:";
-            bool RatioOK = isCorrectCheckRatio(FO_Candidates[i], height, width);
-            //qDebug() << "RatioOK: " << RatioOK;
-            int boarder = 16;
-            /*
-            if ( RatioOK && FO_Candidates[i].getBottomRight().x <= width-boarder &&
-                        FO_Candidates[i].getBottomRight().y <= height-boarder &&
-                        FO_Candidates[i].getTopLeft().x >=0+boarder &&
-                        FO_Candidates[i].getTopLeft().y >=0+boarder  )
-            {
-                //use height
-
-                //qDebug() << i <<": HEIGHT GOAL Distance: " << GoalDistance;
-            }
-            else if(RatioOK)
-            {
-
-                //use width
-                //qDebug() << vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
-                float GoalDistance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((FO_Candidates[i].getBottomRight().x - FO_Candidates[i].getTopLeft().x)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-                //qDebug() << i<<": WIDTH GOAL Distance: " << GoalDistance;
-            }
-            */
+            bool RatioOK = isCorrectCheckRatio(*it, height, width);
             if(RatioOK)
             {
                 float FinalDistance;
-                FinalDistance = FindGoalDistance(FO_Candidates[i],vision);
-                debug << "Distance to Goal[" << i <<"]: "<< FinalDistance << endl;
+                FinalDistance = FindGoalDistance(*it,vision);
+                debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
 
+            }
+            else
+            {
+                FO_Candidates.erase(it);
+                it--;
             }
 	}
 
@@ -99,7 +83,6 @@ bool GoalDetection::isObjectAPossibleGoal(ObjectCandidate PossibleGoal)
 }
 void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
-                                           bool* usedAbovehorizonCandidate,
                                            std::vector < TransitionSegment > horizontalSegments)
 {
     Vector2<int> TopLeft = PossibleGoal->getTopLeft();
@@ -107,37 +90,48 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     int Colour = PossibleGoal->getColour();
     int min = TopLeft.x;
     int max = BottomRight.x;
+    int margin = 16;
     if((int)horizontalSegments.size() ==0 && (int)FO_AboveHorizonCandidates.size() ==0) return;
 
-    for (int i = 0; i < (int)FO_AboveHorizonCandidates.size(); i++)
+    vector < ObjectCandidate > ::iterator itAboveHorizon;
+
+    for (itAboveHorizon = FO_AboveHorizonCandidates.begin(); itAboveHorizon < FO_AboveHorizonCandidates.end(); )
     {
-        if( FO_AboveHorizonCandidates[i].getTopLeft().x > TopLeft.x - 16 &&
-            FO_AboveHorizonCandidates[i].getBottomRight().x < BottomRight.x + 16 &&
-            Colour == FO_AboveHorizonCandidates[i].getColour())
+        if( itAboveHorizon->getTopLeft().x > TopLeft.x - margin &&
+            itAboveHorizon->getBottomRight().x < BottomRight.x + margin &&
+            Colour == itAboveHorizon->getColour())
         {
-            if(FO_AboveHorizonCandidates[i].getTopLeft().x < TopLeft.x)
+            if(itAboveHorizon->getTopLeft().x < TopLeft.x)
             {
-                TopLeft.x = FO_AboveHorizonCandidates[i].getTopLeft().x;
+                TopLeft.x = itAboveHorizon->getTopLeft().x;
             }
-            if(FO_AboveHorizonCandidates[i].getTopLeft().y > TopLeft.y)
+            if(itAboveHorizon->getTopLeft().y > TopLeft.y)
             {
-                TopLeft.y = FO_AboveHorizonCandidates[i].getTopLeft().y;
+                TopLeft.y = itAboveHorizon->getTopLeft().y;
             }
-            if(FO_AboveHorizonCandidates[i].getBottomRight().x < BottomRight.x)
+            if(itAboveHorizon->getBottomRight().x < BottomRight.x)
             {
-                BottomRight.x = FO_AboveHorizonCandidates[i].getBottomRight().x;
+                BottomRight.x = itAboveHorizon->getBottomRight().x;
             }
-            if(FO_AboveHorizonCandidates[i].getBottomRight().y > BottomRight.y)
+            if(itAboveHorizon->getBottomRight().y > BottomRight.y)
             {
-                BottomRight.y = FO_AboveHorizonCandidates[i].getBottomRight().y;
+                BottomRight.y = itAboveHorizon->getBottomRight().y;
             }
             PossibleGoal->setTopLeft(TopLeft);
             PossibleGoal->setBottomRight(BottomRight);
-            usedAbovehorizonCandidate[i] = true;
-            //qDebug() <<"Found OverLapping Candidate Above horizon";
+            itAboveHorizon = FO_AboveHorizonCandidates.erase(itAboveHorizon);
+
+            //usedAbovehorizonCandidate[i] = true;
+            //qDebug() <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
+        }
+        else
+        {
+            ++itAboveHorizon;
         }
 
     }
+    //SCANS UP THE IMAGE
+
     for (int i = (int)horizontalSegments.size(); i >= 0; i--)
     {
         //qDebug() << "Crash Check: Access HZsegs: " << i;
@@ -146,7 +140,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
         {
             if(tempSegment.getColour() == ClassIndex::yellow || tempSegment.getColour() == ClassIndex::yellow_orange)
             {
-                if(tempSegment.getStartPoint().x > min-5 && tempSegment.getEndPoint().x < max+5)
+                if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
                 {
                     //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
                     if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
@@ -184,7 +178,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
         {
             if(tempSegment.getColour() == ClassIndex::blue || tempSegment.getColour() == ClassIndex::shadow_blue)
             {
-                if(tempSegment.getStartPoint().x > min-5 && tempSegment.getEndPoint().x < max+5)
+                if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
                 {
                     //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
                     if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
@@ -262,6 +256,153 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     return;
 
 }
+
+void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& FO_Candidates)
+{
+    vector < ObjectCandidate > ::iterator it;
+    int boarder = 10;
+    //! Go through all the candidates: to find overlapping and add to the bigger object candidate:
+    for(it = FO_Candidates.begin(); it  < FO_Candidates.end();  it++)
+    {
+        vector < ObjectCandidate > ::iterator itInside;
+        for(itInside = it+1; itInside  < FO_Candidates.end(); itInside++)
+        {
+            //! CHECK INSIDE Object TOPLEFT is within outside Object
+            if((    it->getTopLeft().x-boarder      <= itInside->getTopLeft().x     &&
+                    it->getTopLeft().y-boarder      <= itInside->getTopLeft().y)    &&
+               (    it->getBottomRight().x+boarder  >= itInside->getTopLeft().x     &&
+                    it->getBottomRight().y+boarder  >= itInside->getTopLeft().y)  )
+            {
+                //EDIT OUTSIDE
+                Vector2<int> tempTopLeft,tempBottomRight;
+                tempTopLeft = it->getTopLeft();
+                tempBottomRight = it->getBottomRight();
+                //UPDATECODE:
+                if(tempTopLeft.x > itInside->getTopLeft().x)
+                {
+                    tempTopLeft.x = itInside->getTopLeft().x;
+                }
+                if(tempTopLeft.y > itInside->getTopLeft().y)
+                {
+                    tempTopLeft.y = itInside->getTopLeft().y;
+                }
+                if(tempBottomRight.x < itInside->getBottomRight().x)
+                {
+                    tempBottomRight.x = itInside->getBottomRight().x;
+                }
+                if(tempBottomRight.y < itInside->getBottomRight().y)
+                {
+                    tempBottomRight.y = itInside->getBottomRight().y;
+                }
+                it->setTopLeft(tempTopLeft);
+                it->setBottomRight(tempBottomRight);
+                FO_Candidates.erase(itInside);
+                itInside = FO_Candidates.begin();
+                qDebug() << "Found: Overlapping TopLeft Goal";
+            }
+            //! CHECK INSIDE Object BOTTOMRIGHT is within outside Object
+            else if ((  it->getTopLeft().x - boarder     <= itInside->getBottomRight().x     &&
+                        it->getTopLeft().y - boarder     <= itInside->getBottomRight().y)    &&
+                     (  it->getBottomRight().x + boarder >= itInside->getBottomRight().x     &&
+                        it->getBottomRight().y + boarder >= itInside->getBottomRight().y)  )
+            {
+                //EDIT OUTSIDE
+                Vector2<int> tempTopLeft,tempBottomRight;
+                tempTopLeft = it->getTopLeft();
+                tempBottomRight = it->getBottomRight();
+                //UPDATECODE:
+                if(tempTopLeft.x > itInside->getTopLeft().x)
+                {
+                    tempTopLeft.x = itInside->getTopLeft().x;
+                }
+                if(tempTopLeft.y > itInside->getTopLeft().y)
+                {
+                    tempTopLeft.y = itInside->getTopLeft().y;
+                }
+                if(tempBottomRight.x < itInside->getBottomRight().x)
+                {
+                    tempBottomRight.x = itInside->getBottomRight().x;
+                }
+                if(tempBottomRight.y < itInside->getBottomRight().y)
+                {
+                    tempBottomRight.y = itInside->getBottomRight().y;
+                }
+                it->setTopLeft(tempTopLeft);
+                it->setBottomRight(tempBottomRight);
+                FO_Candidates.erase(itInside);
+                itInside = FO_Candidates.begin();
+                qDebug() << "Found: Overlapping BottomRight Goal";
+            }
+            //! CHECK OUTSIDE Object TOPLEFT is within inside Object
+            else if((    itInside->getTopLeft().x-boarder      <= it->getTopLeft().x     &&
+                        itInside->getTopLeft().y-boarder      <= it->getTopLeft().y)    &&
+                    (   itInside->getBottomRight().x+boarder  >= it->getTopLeft().x     &&
+                        itInside->getBottomRight().y+boarder  >= it->getTopLeft().y)  )
+            {
+                //EDIT OUTSIDE
+                Vector2<int> tempTopLeft,tempBottomRight;
+                tempTopLeft = it->getTopLeft();
+                tempBottomRight = it->getBottomRight();
+                //UPDATECODE:
+                if(tempTopLeft.x > itInside->getTopLeft().x)
+                {
+                    tempTopLeft.x = itInside->getTopLeft().x;
+                }
+                if(tempTopLeft.y > itInside->getTopLeft().y)
+                {
+                    tempTopLeft.y = itInside->getTopLeft().y;
+                }
+                if(tempBottomRight.x < itInside->getBottomRight().x)
+                {
+                    tempBottomRight.x = itInside->getBottomRight().x;
+                }
+                if(tempBottomRight.y < itInside->getBottomRight().y)
+                {
+                    tempBottomRight.y = itInside->getBottomRight().y;
+                }
+                it->setTopLeft(tempTopLeft);
+                it->setBottomRight(tempBottomRight);
+                FO_Candidates.erase(itInside);
+                itInside = FO_Candidates.begin();
+                qDebug() << "Found: Overlapping TopLeft Goal OutSide";
+            }
+            //! CHECK OUTSIDE Object BOTTOMRIGHT is within inside Object
+            else if ((  itInside->getTopLeft().x - boarder     <= it->getBottomRight().x     &&
+                        itInside->getTopLeft().y - boarder     <= it->getBottomRight().y)    &&
+                     (  itInside->getBottomRight().x + boarder >= it->getBottomRight().x     &&
+                        itInside->getBottomRight().y + boarder >= it->getBottomRight().y)  )
+            {
+                //EDIT OUTSIDE
+                Vector2<int> tempTopLeft,tempBottomRight;
+                tempTopLeft = it->getTopLeft();
+                tempBottomRight = it->getBottomRight();
+                //UPDATECODE:
+                if(tempTopLeft.x > itInside->getTopLeft().x)
+                {
+                    tempTopLeft.x = itInside->getTopLeft().x;
+                }
+                if(tempTopLeft.y > itInside->getTopLeft().y)
+                {
+                    tempTopLeft.y = itInside->getTopLeft().y;
+                }
+                if(tempBottomRight.x < itInside->getBottomRight().x)
+                {
+                    tempBottomRight.x = itInside->getBottomRight().x;
+                }
+                if(tempBottomRight.y < itInside->getBottomRight().y)
+                {
+                    tempBottomRight.y = itInside->getBottomRight().y;
+                }
+                it->setTopLeft(tempTopLeft);
+                it->setBottomRight(tempBottomRight);
+                FO_Candidates.erase(itInside);
+                itInside = FO_Candidates.begin();
+                qDebug() << "Found: Overlapping BottomRight Goal OutSide";
+            }
+        }
+    }
+}
+
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
     //qDebug() << "Checking Ratio: " << PossibleBall.aspect();

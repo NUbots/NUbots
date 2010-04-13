@@ -21,12 +21,13 @@ class GoalDetection
 
         void ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
-                                    bool* usedAboveHorizonCandidate,
                                     std::vector < TransitionSegment > horizontalSegments);
 
   	bool isObjectAPossibleGoal(ObjectCandidate PossibleGoal);
 
         void classifyGoalClosely(ObjectCandidate* PossibleBall,Vision* vision,int height,int width);
+
+        void CombineOverlappingCandidates(std::vector<ObjectCandidate>& FO_Candidates);
 
         bool isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,int width);
 

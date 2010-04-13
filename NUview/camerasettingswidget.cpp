@@ -444,8 +444,8 @@ void cameraSettingsWidget::readPendingData()
                     stopStreamCameraSetting();
                     //*settings = tempsettings;
                     debug << "Job Processed: " << endl;
-                    shiftExposureSlider->setValue(tempsettings.gain);
-                    shiftGainSlider->setValue(tempsettings.exposure);
+                    shiftExposureSlider->setValue(tempsettings.exposure);
+                    shiftGainSlider->setValue(tempsettings.gain);
                     shiftBlueChromaSlider->setValue(tempsettings.blueChroma);
                     shiftRedChromaSlider->setValue(tempsettings.redChroma);
                     shiftBrightnessSlider->setValue(tempsettings.brightness);
