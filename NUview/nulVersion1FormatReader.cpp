@@ -27,7 +27,8 @@ int nulVersion1FormatReader::openFile(const QString& filename)
     {
         fileStream.seekg(0,std::ios_base::beg);
         int x,y;
-        fileStream >> x >> y;
+        fileStream.read(reinterpret_cast<char*>(&x), sizeof(x));
+        fileStream.read(reinterpret_cast<char*>(&y), sizeof(y));
         fileStream.seekg(0,std::ios_base::beg);
         totalFrames = fileInformation.size() / (2*sizeof(x) + x*y*sizeof(int) + 3*sizeof(' '));
     }
