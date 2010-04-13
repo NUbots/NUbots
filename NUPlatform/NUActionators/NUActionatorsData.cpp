@@ -20,6 +20,7 @@
  */
 
 #include "NUActionatorsData.h"
+#include "actionator_t.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
@@ -316,6 +317,18 @@ void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
     m_all_led_ids.insert(m_all_led_ids.end(), m_rfoot_ids.begin(), m_rfoot_ids.end());
 }
 
+/*! @brief Adds an actionator with the specified name and type
+ 
+ @param p_actionator the actionator pointer for the new actionator
+ @param actionatorname the name of the actionator to be added
+ @param actionatortype the type of the actionator to be added
+ */
+template <> void NUActionatorsData::addActionator(actionator_t<string>*& p_actionator, string actionatorname, actionator_t<string>::actionator_type_t actionatortype)
+{
+    p_actionator = new actionator_t<string>(actionatorname, actionatortype);
+    //m_all_actionators.push_back(p_actionator);
+}
+
 /*! @brief Sets the available actionators based on the names found in the passed in strings
  
  @param actionators a vector of names for each of the available actionators.
@@ -328,9 +341,9 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     for (unsigned int i=0; i<simpleactionatornames.size(); i++) 
     {
         if (simpleactionatornames[i].compare("sound") == 0)
-            addActionator(Sound, actionatornames[i], actionator_t::SOUND);
+            addActionator(Sound, actionatornames[i], actionator_t<string>::SOUND);
         if (simpleactionatornames[i].compare("teleporter") == 0 || simpleactionatornames[i].compare("teleportation") == 0 || simpleactionatornames[i].compare("magichand") == 0 || simpleactionatornames[i].compare("handofgod") == 0)
-            addActionator(Teleporter, actionatornames[i], actionator_t::TELEPORTER);
+            addActionator(Teleporter, actionatornames[i], actionator_t<float>::TELEPORTER);
         else
             debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
     }
@@ -343,9 +356,9 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
 void NUActionatorsData::addJointActionator(string actionatorname)
 {
     if (m_positionactionation == true)
-        addActionator(PositionActionators, actionatorname, actionator_t::JOINT_POSITION);
+        addActionator(PositionActionators, actionatorname, actionator_t<>::JOINT_POSITION);
     if (m_torqueactionation == true)
-        addActionator(TorqueActionators, actionatorname, actionator_t::JOINT_TORQUE);
+        addActionator(TorqueActionators, actionatorname, actionator_t<>::JOINT_TORQUE);
 }
 
 /*! @brief Adds a led actionator with the specified name
@@ -354,7 +367,7 @@ void NUActionatorsData::addJointActionator(string actionatorname)
  */
 void NUActionatorsData::addLedActionator(string actionatorname)
 {
-    addActionator(LedActionators, actionatorname, actionator_t::LEDS);
+    addActionator(LedActionators, actionatorname, actionator_t<>::LEDS);
 }
 
 /*! @brief Adds an actionator to the actionator group with the specified name and type
@@ -363,9 +376,9 @@ void NUActionatorsData::addLedActionator(string actionatorname)
  @param actionatorname the name of the actionator to be added
  @param actionatortype the type of the actionator to be added
  */
-void NUActionatorsData::addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype)
+template <typename T> void NUActionatorsData::addActionator(vector<actionator_t<T>*>& actionatorgroup, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype)
 {
-    actionator_t* newactionator = new actionator_t(actionatorname, actionatortype);
+    actionator_t<T>* newactionator = new actionator_t<T>(actionatorname, actionatortype);
     actionatorgroup.push_back(newactionator);
     m_all_actionators.push_back(newactionator);
 }
@@ -376,9 +389,9 @@ void NUActionatorsData::addActionator(vector<actionator_t*>& actionatorgroup, st
  @param actionatorname the name of the actionator to be added
  @param actionatortype the type of the actionator to be added
  */
-void NUActionatorsData::addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype)
+template <typename T> void NUActionatorsData::addActionator(actionator_t<T>*& p_actionator, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype)
 {
-    p_actionator = new actionator_t(actionatorname, actionatortype);
+    p_actionator = new actionator_t<T>(actionatorname, actionatortype);
     m_all_actionators.push_back(p_actionator);
 }
 
@@ -696,7 +709,7 @@ bool NUActionatorsData::getNextSound(bool& isvalid, double& time, int& soundid, 
     {
         isvalid = true;
         time = Sound->m_points[0]->Time;
-        soundid = (int) Sound->m_points[0]->Data[0];
+        //soundid = (int) Sound->m_points[0]->Data[0];
         return true;
     }
 
@@ -865,7 +878,7 @@ bool NUActionatorsData::addSound(sound_id_t soundid, double time)
     else 
     {
         data[0] = soundid;
-        Sound->addPoint(time, data);
+        //Sound->addPoint(time, data);
         return true;
     }
 }

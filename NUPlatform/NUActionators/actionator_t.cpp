@@ -2,8 +2,7 @@
     @brief Implementation of a single actionator class
     @author Jason Kulk
  
- 
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,12 +25,10 @@
 
 #include <algorithm>
 
-static bool comparePointTimes(const void* a, const void* b);     //! @todo TODO: make this a member of the class!
-
-
 /*! @brief Default constructor for a actionator_t. Initialises the actionator to be undefined and unavailable
  */
-actionator_t::actionator_t()
+template <typename T> 
+actionator_t<T>::actionator_t()
 {
     Name = string("Undefined");
     ActionatorType = UNDEFINED;
@@ -43,7 +40,8 @@ actionator_t::actionator_t()
     @param actionatorname the name of the actionator
     @param actionatortype the type of the actionator to be used for RTTI
  */
-actionator_t::actionator_t(string actionatorname, actionator_type_t actionatortype)
+template <typename T> 
+actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionatortype)
 {
     Name = actionatorname;
     ActionatorType = actionatortype;
@@ -55,11 +53,12 @@ actionator_t::actionator_t(string actionatorname, actionator_type_t actionatorty
     @param time the time the point will be completed
     @param data the data for the point (careful the data size is hardcoded in many places, if you get it wrong your data will be ignored!)
  */
-void actionator_t::addPoint(double time, const vector<float>& data)
+template <typename T>
+void actionator_t<T>::addPoint(double time, const vector<T>& data)
 {
     if (time < 0 || data.size() == 0)
     {
-        debug << "actionator_t::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
+        debug << "actionator_t<T>::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
         return;
     }
     actionator_point_t* point = new actionator_point_t();
@@ -71,33 +70,18 @@ void actionator_t::addPoint(double time, const vector<float>& data)
         m_points.push_back(point);
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
-        static deque<actionator_point_t*>::iterator insertposition;
-        try 
-        {
-            insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
-            m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
-            m_points.push_back(point);
-        }
-        catch (exception& e) 
-        {
-            debug << "actionator_t::addPoint has thrown an exception: " << e.what() << endl;
-            debug << "Attempted to resize with " << (int) (insertposition - m_points.begin()) << endl;
-        }
+        static typename deque<actionator_point_t*>::iterator insertposition;
+        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+        m_points.push_back(point);
     }
-    
-    // Option 1: Merge all actionator points; this can produce very 'surprising' results and it is not possible to change your mind after sending off the commands
-    // m_points.insert(insertposition, point); // Merge-type actionator points
-    
-    // Option 2: Clear all actionator points after the current one; this would be ideal but it is hard to implement correctly; I need
-    //           to go through and look at all points after and see if they have valid data that is not overwritten because the new point has invalid data
-    // m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
-    // m_points.push_back(point);  
 }
 
 /*! @brief Remove all of the completed points
  @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
  */
-void actionator_t::removeCompletedPoints(double currenttime)
+template <typename T>
+void actionator_t<T>::removeCompletedPoints(double currenttime)
 {
     if (m_points.size() > 0 && m_points[0]->Time <= currenttime)
         m_previous_point = m_points.front();            // I make the first point that is removed to previous point
@@ -110,7 +94,8 @@ void actionator_t::removeCompletedPoints(double currenttime)
 
 /*! @brief Returns true if there are no points in the queue, false if there are point to be applied
  */
-bool actionator_t::isEmpty()
+template <typename T>
+bool actionator_t<T>::isEmpty()
 {
     if (m_points.size() == 0)
         return true;
@@ -120,13 +105,16 @@ bool actionator_t::isEmpty()
 
 /*! Returns true if a should go before b, false otherwise.
  */
-bool comparePointTimes(const void* a, const void* b)
+template <typename T>
+bool actionator_t<T>::comparePointTimes(const void* a, const void* b)
 {
     static double timea = 0;
     static double timeb = 0;
     
-    timea = ((actionator_t::actionator_point_t*)a)->Time;
-    timeb = ((actionator_t::actionator_point_t*)b)->Time;
+    const typename actionator_t<T>::actionator_point_t* a_a = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (a);
+    const typename actionator_t<T>::actionator_point_t* a_b = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (b);
+    timea = a_a->Time;
+    timeb = a_b->Time;
     
     if (timea < timeb)
         return true;
@@ -141,7 +129,8 @@ bool comparePointTimes(const void* a, const void* b)
  
  @param output the ostream in which to put the string
  */
-void actionator_t::summaryTo(ostream& output)
+template <typename T>
+void actionator_t<T>::summaryTo(ostream& output)
 {
     output << Name << " ";
     if (isEmpty())
@@ -159,17 +148,20 @@ void actionator_t::summaryTo(ostream& output)
 
 }
 
-void actionator_t::csvTo(ostream& output)
+template <typename T>
+void actionator_t<T>::csvTo(ostream& output)
 {
 }
 
-ostream& operator<< (ostream& output, const actionator_t& p_actionator)
+template <typename T>
+ostream& operator<< (ostream& output, const actionator_t<T>& p_actionator)
 {
     //! @todo TODO: implement this function
     return output;
 }
 
-istream& operator>> (istream& input, actionator_t& p_actionator)
+template <typename T>
+istream& operator>> (istream& input, actionator_t<T>& p_actionator)
 {
     //! @todo TODO: implement this function
     return input;
