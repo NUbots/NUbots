@@ -157,7 +157,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Vision::starting the save images loop." << endl;
         #endif
-        //m_saveimages_thread->startLoop();
+        m_saveimages_thread->startLoop();
     }
     //debug << "Generating Horizon Line: " <<endl;
     //Generate HorizonLine:
