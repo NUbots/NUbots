@@ -139,11 +139,13 @@ void NAOSensors::copyFromHardwareCommunications()
     
     m_al_accel_access->GetValues(temp);
     for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to cm/s/s
-        temp[i] = temp[i]*100;
+        temp[i] = temp[i]*15.571;                   // 63 units is approx equal to 981 cm/s/s; (981/63) = 15.571
     m_data->setBalanceAccelerometer(m_current_time, temp);
     
     m_al_gyro_access->GetValues(temp);
-    m_data->setBalanceGyro(m_current_time, temp);
+    for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to rad/s
+        temp[i] = temp[i]/154.7;                    // scaling factor: Alderbaran say it is 2.7 deg/s (PI/(2.7*180) = 1/154.7
+    m_data->setBalanceGyro(m_current_time, temp);   
     
     m_al_footsole_access->GetValues(temp);
     for (unsigned int i=0; i<temp.size(); i++)

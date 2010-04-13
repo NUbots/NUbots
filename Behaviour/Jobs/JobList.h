@@ -56,16 +56,16 @@ public:
     void addOtherJob(Job* job);
     
     // Remove job interface
-    void removeJob(Job* job);
-    void removeVisionJob(Job* job);
-    void removeLocalisationJob(Job* job);
-    void removeBehaviourJob(Job* job);
-    void removeMotionJob(Job* job);
-    void removeLightJob(Job* job);
-    void removeCameraJob(Job* job);
-    void removeSoundJob(Job* job);
-    void removeSystemJob(Job* job);
-    void removeOtherJob(Job* job);
+    list<Job*>::iterator removeJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeVisionJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeLocalisationJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeBehaviourJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeMotionJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeLightJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeCameraJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeSoundJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeSystemJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeOtherJob(list<Job*>::iterator iter);
     
     // Iterators over the jobs
     iterator begin();
@@ -100,7 +100,7 @@ public:
     
 private:
     void addJob(Job* job, list<Job*>& joblist);
-    void removeJob(Job* job, list<Job*>& joblist);
+    list<Job*>::iterator removeJob(list<Job*>& joblist, list<Job*>::iterator iter);
 
 private:
     list<Job*> m_vision_jobs;               //!< a list of all the current vision jobs
