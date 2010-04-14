@@ -16,11 +16,7 @@ win32 {
     LIBS += -lwsock32
     LIBS += -lpthread
 }
-
-unix:!macx:LIBS += -ldns_sd
-win32:LIBS += -L"c:\\PROGRA~1\\BONJOU~1\\lib\\win32" \
-    -ldnssd
-win32:INCLUDEPATH += "c:\\program files\\bonjour sdk\\include"
+!macx:LIBS += -ldns_sd
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -93,8 +89,7 @@ HEADERS += ui_mainwindow.h \
     bonjour/robotSelectDialog.h \
     bonjour/bonjourserviceresolver.h \
     bonjour/bonjourservicebrowser.h \
-    bonjour/bonjourrecord.h \
-    bonjour/bonjourIncludeHack.h
+    bonjour/bonjourrecord.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
