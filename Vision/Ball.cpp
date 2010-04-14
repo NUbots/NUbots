@@ -87,7 +87,12 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     ScanLine tempLine;
 
-    int spacings = 2;
+    int spacings = (int)(BottomRight.y - TopLeft.y)/6;
+    if(spacings < 2)
+    {
+        spacings = 2;
+    }
+    //qDebug() << spacings ;
     int direction = ClassifiedSection::DOWN;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
@@ -108,9 +113,9 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
-        /* debug << "At " <<i<<"\t Size: "<< tempSeg->getSize()<< "\t Start(x,y),End(x,y):("<< tempSeg->getStartPoint().x
-                <<","<< tempSeg->getStartPoint().y << ")("<< tempSeg->getEndPoint().x
-                <<","<< tempSeg->getEndPoint().y << ")";*/
+        /*qDebug() << "At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+                <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
+                <<","<< tempSegement->getEndPoint().y << ")";*/
 
     }
 

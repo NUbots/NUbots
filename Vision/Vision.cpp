@@ -18,7 +18,6 @@
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
 
-
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -853,7 +852,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 5;
+        int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -869,20 +868,28 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
 
         for(int k = 0; k < length; k = k+spacings)
         {
-            tempSubEndPoint.y = StartPoint.y+k;
+            tempSubEndPoint.y   = StartPoint.y+k;
             tempSubStartPoint.y = StartPoint.y+k;
-            int tempsubPoint = StartPoint.x;
-            tempColour = tempTransition->getColour();
-
+            int tempsubPoint    = StartPoint.x;
+            tempColour          = tempTransition->getColour();
+            //Reset Buffer: to OriginalColour
+            for (int i = 0; i < bufferSize; i++)
+            {
+                colourBuff.push_back(tempTransition->getColour());
+            }
             while(checkIfBufferSame(colourBuff))
             {
-                if(tempsubPoint+1 > width) break;
+                if(tempsubPoint+1 > width)
+                {
+                    break;
+                }
 
                 tempsubPoint++;
 
-                if(StartPoint.y+k < height && StartPoint.y+k > 0 &&
-                   tempsubPoint < width && tempsubPoint > 0)
+                if(StartPoint.y+k < height && StartPoint.y+k > 0
+                   && tempsubPoint < width && tempsubPoint > 0)
                 {
+
                     tempColour= classifyPixel(tempsubPoint,StartPoint.y+k);
                     colourBuff.push_back(tempColour);
                 }
@@ -891,6 +898,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                     break;
                 }
             }
+
             tempSubEndPoint.x = tempsubPoint;
             subAfterColour = tempColour;
             tempsubPoint = StartPoint.x;
@@ -931,12 +939,9 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
 
-        int bufferSize = 5;
+        int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
-        for (int i = 0; i < bufferSize; i++)
-        {
-            colourBuff.push_back(tempTransition->getColour());
-        }
+
 
         int length = abs(tempTransition->getEndPoint().x - tempTransition->getStartPoint().x);
         Vector2<int> tempSubEndPoint;
@@ -950,6 +955,11 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             tempSubStartPoint.x = StartPoint.x+k;
             int tempY = StartPoint.y;
             tempColour = tempTransition->getColour();
+            //Reseting ColourBuffer
+            for (int i = 0; i < bufferSize; i++)
+            {
+                colourBuff.push_back(tempTransition->getColour());
+            }
             //Search for End of Perpendicular Segment
             while(checkIfBufferSame(colourBuff))
             {
