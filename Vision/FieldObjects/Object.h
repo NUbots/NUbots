@@ -17,6 +17,7 @@ class Object
         Vector2<int> imagePosition;
         int numberOfTimesSeen;		// Number Of Times this objects been seen 
         int framesSinceLastSeen;	// Number of frames since we last saw this object
+        float timeLastSeen;         // The time in ms the object was last seen
         int framesSeen;			// Number of consecutive frames seen from this object
 
 
@@ -26,7 +27,8 @@ class Object
 
         void UpdateVisualObject(    const Vector3<float>& newMeasured,
                                     const Vector3<float>& newMeasuredError,
-                                    const Vector2<int>& newImagePosition);
+                                    const Vector2<int>& newImagePosition,
+                                    const float timestamp);
 
         void ResetFrame();
 
@@ -51,6 +53,7 @@ class Object
         int FramesSeen() const {return framesSeen;}
         int NumberOfTimesSeen() const {return numberOfTimesSeen;}
         int FrameSinceLastSeen() const {return framesSinceLastSeen;}
+        float TimeLastSeen() const {return timeLastSeen;}
         float measuredDistance() const {return measuredRelativePosition.x;}
         float measuredBearing() const {return measuredRelativePosition.y;}
         float measuredElevation() const {return measuredRelativePosition.z;}

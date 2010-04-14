@@ -1549,7 +1549,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         //qDebug() << "Setting FieldObject:";
         //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
         //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
-        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
+        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition, sphericalError, viewPosition, currentImage->m_timestamp);
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
         /*debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()

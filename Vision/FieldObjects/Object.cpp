@@ -5,17 +5,18 @@ Object::Object(int initID, const std::string& initName):
         ID(initID),
         name(initName)
 {
-        measuredRelativePosition[0] = 0;
-        measuredRelativePosition[1] = 0;
-        measuredRelativePosition[2] = 0;
-        relativeMeasurementError[0] = 0;
-        relativeMeasurementError[1] = 0;
-        relativeMeasurementError[2] = 0;
+    measuredRelativePosition[0] = 0;
+    measuredRelativePosition[1] = 0;
+    measuredRelativePosition[2] = 0;
+    relativeMeasurementError[0] = 0;
+    relativeMeasurementError[1] = 0;
+    relativeMeasurementError[2] = 0;
 	isVisible = false;
-        imagePosition[0] = 0;
-        imagePosition[1] = 0;
+    imagePosition[0] = 0;
+    imagePosition[1] = 0;
 	numberOfTimesSeen = 0;
 	framesSinceLastSeen = 0;
+    timeLastSeen = 0;
 	framesSeen = 0;
 }
 
@@ -25,15 +26,17 @@ Object::~Object()
 
 void Object::UpdateVisualObject(    const Vector3<float>& newMeasured,
                                     const Vector3<float>& newMeasuredError,
-                                    const Vector2<int>& newImagePosition)
+                                    const Vector2<int>& newImagePosition,
+                                    const float timestamp)
 {
-        measuredRelativePosition = newMeasured;
-        relativeMeasurementError = newMeasuredError;
-        imagePosition = newImagePosition;
+    measuredRelativePosition = newMeasured;
+    relativeMeasurementError = newMeasuredError;
+    imagePosition = newImagePosition;
 	framesSinceLastSeen = 0;
 	numberOfTimesSeen++;
 	framesSeen++;
 	isVisible = true;
+    timeLastSeen = timestamp;
 }
 
 void Object::ResetFrame()
