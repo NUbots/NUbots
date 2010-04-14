@@ -1,5 +1,5 @@
-#ifndef BONJOUR_INCLUDE_HACK_H
-#define BONJOUR_INCLUDE_HACK_H
+#ifndef BONJOUR_INCLUDE_DATA_TYPES_H
+#define BONJOUR_INCLUDE_DATA_TYPES_H
 
 #ifndef INT8
 typedef signed char	   INT8;	 // 8 bit signed
