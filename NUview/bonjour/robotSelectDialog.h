@@ -24,12 +24,13 @@ private slots:
     void updateRecords(const QList<BonjourRecord> &list);
     void enableConnectButton();
     void saveSelected();
+    void refresh();
 private:
     QPushButton *connectButton;
     QPushButton *cancelButton;
     QDialogButtonBox *buttonBox;
 
-
+    QString m_service;
     QTreeWidget *treeWidget;
     BonjourServiceBrowser *bonjourBrowser;
     BonjourRecord m_selectedHost;

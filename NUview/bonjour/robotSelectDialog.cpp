@@ -8,7 +8,14 @@ robotSelectDialog::robotSelectDialog(QWidget * parent, const QString& service): 
 {
     bonjourBrowser = new BonjourServiceBrowser(this);
     treeWidget = new QTreeWidget(this);
-    treeWidget->setHeaderLabels(QStringList() << tr("Available NUbot Robots"));
+    QString serviceDisplay(service);
+    QStringList tempList = serviceDisplay.split('.');
+    if(!tempList.empty())
+    {
+        serviceDisplay = tempList.first();
+        serviceDisplay.remove('_');
+    }
+    treeWidget->setHeaderLabels(QStringList() << tr("Available %1 services").arg(serviceDisplay));
 
     connect(bonjourBrowser, SIGNAL(currentBonjourRecordsChanged(const QList<BonjourRecord> &)),
                 this, SLOT(updateRecords(const QList<BonjourRecord> &)));
@@ -34,7 +41,8 @@ robotSelectDialog::robotSelectDialog(QWidget * parent, const QString& service): 
 
     setWindowTitle(tr("Robot Selection"));
     treeWidget->setFocus();
-    bonjourBrowser->browseForServiceType(service);
+    m_service = service;
+    refresh();
 }
 
 void robotSelectDialog::saveSelected()
@@ -43,7 +51,7 @@ void robotSelectDialog::saveSelected()
     if(selectedItems.length() > 0)
     {
         QTreeWidgetItem *item = selectedItems.at(0);
-        QVariant variant = item->data(0, Qt::UserRole);
+        QVariant variant = item->data(1, Qt::UserRole);
         m_selectedHost = variant.value<BonjourRecord>();
     }
     else
@@ -75,5 +83,13 @@ void robotSelectDialog::updateRecords(const QList<BonjourRecord> &list)
     if (treeWidget->invisibleRootItem()->childCount() > 0) {
         treeWidget->invisibleRootItem()->child(0)->setSelected(true);
     }
+    treeWidget->setSortingEnabled(true);
+    treeWidget->sortByColumn(0,Qt::AscendingOrder);
+    treeWidget->setSortingEnabled(false);
     enableConnectButton();
+}
+
+void robotSelectDialog::refresh()
+{
+    bonjourBrowser->browseForServiceType(m_service);
 }
