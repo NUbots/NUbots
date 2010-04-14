@@ -464,6 +464,11 @@ void MainWindow::connectToRobot(const QHostInfo &hostInfo, int port)
 {
     const QList<QHostAddress> &addresses = hostInfo.addresses();
 
+    if (hostInfo.error() != QHostInfo::NoError) {
+        qWarning(QString("Lookup failed: %1").arg(hostInfo.errorString()).toAscii());
+        return;
+    }
+
     if (!addresses.isEmpty())
     {
         QHostAddress address = addresses.first();
