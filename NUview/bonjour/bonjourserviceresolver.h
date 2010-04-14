@@ -31,8 +31,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtCore/QObject>
 
-#include "bonjourIncludeHack.h"
+#include "bonjourIncludeDataTypes.h"
 #include <dns_sd.h>
+#include <QTimer>
 
 class QSocketNotifier;
 class QHostInfo;
@@ -61,6 +62,7 @@ private:
                                     quint32 interfaceIndex, DNSServiceErrorType errorCode,
                                     const char *fullName, const char *hosttarget, quint16 port,
                                     quint16 txtLen, const char *txtRecord, void *context);
+    QTimer* dnsResolveTimer;
     DNSServiceRef dnssref;
     QSocketNotifier *bonjourSocket;
     int bonjourPort;

@@ -28,6 +28,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtCore/QSocketNotifier>
 #include <QtNetwork/QHostInfo>
+#include <QTimer>
 
 #include "bonjourrecord.h"
 #include "bonjourserviceresolver.h"
@@ -35,10 +36,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 BonjourServiceResolver::BonjourServiceResolver(QObject *parent)
     : QObject(parent), dnssref(0), bonjourSocket(0), bonjourPort(-1)
 {
+    dnsResolveTimer = new QTimer();
 }
 
 BonjourServiceResolver::~BonjourServiceResolver()
 {
+    delete dnsResolveTimer;
     cleanupResolve();
 }
 
@@ -63,6 +66,9 @@ void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record)
                                                 record.registeredType.toUtf8().constData(),
                                                 record.replyDomain.toUtf8().constData(),
                                                 (DNSServiceResolveReply)bonjourResolveReply, this);
+    connect(dnsResolveTimer, SIGNAL(timeout()), this, SLOT(cleanupResolve()));
+    dnsResolveTimer->setSingleShot(true);
+    dnsResolveTimer->start(5000);
     if (err != kDNSServiceErr_NoError) {
         emit error(err);
     } else {
@@ -100,7 +106,12 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
         }
 #endif
     serviceResolver->bonjourPort = port;
-    QHostInfo::lookupHost(QString::fromUtf8(hosttarget),
+    QString hostName = QString::fromUtf8(hosttarget);
+    if(hostName.endsWith('.'))
+    {
+        hostName.remove(hostName.size()-1,1);
+    }
+    QHostInfo::lookupHost(hostName,
                           serviceResolver, SLOT(finishConnect(const QHostInfo &)));
 }
 
