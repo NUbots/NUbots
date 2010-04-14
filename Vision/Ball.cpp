@@ -49,12 +49,12 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         //debug << "BALL::FindBall  Circle Fit finnsihed";
         if (tempresult.radius  > result.radius)
         {
-            debug << "BALL::FindBall  Updated with larger circle"<< endl;
+            //debug << "BALL::FindBall  Updated with larger circle"<< endl;
             result = tempresult;
         }
         //! Use Circle Fit information to update the FieldObjects
 
-        debug << "BALL::FindBall  Circle Fit finnsihed"<<endl;
+        //debug << "BALL::FindBall  Circle Fit finnsihed"<<endl;
         //! check if current object is larger then object before.
     }
 
@@ -87,7 +87,12 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     ScanLine tempLine;
 
-    int spacings = 2;
+    int spacings = (int)(BottomRight.y - TopLeft.y)/6;
+    if(spacings < 2)
+    {
+        spacings = 2;
+    }
+    //qDebug() << spacings ;
     int direction = ClassifiedSection::DOWN;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
@@ -108,9 +113,9 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
-        /* debug << "At " <<i<<"\t Size: "<< tempSeg->getSize()<< "\t Start(x,y),End(x,y):("<< tempSeg->getStartPoint().x
-                <<","<< tempSeg->getStartPoint().y << ")("<< tempSeg->getEndPoint().x
-                <<","<< tempSeg->getEndPoint().y << ")";*/
+        /*qDebug() << "At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+                <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
+                <<","<< tempSegement->getEndPoint().y << ")";*/
 
     }
 
@@ -164,7 +169,7 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
+            //debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
 
     }
     else
@@ -185,7 +190,7 @@ Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandida
         {
             circ.radius = fabs(bottomRight.y - topLeft.y)/2;
         }
-        debug << "Circle cannot be fitted: Used Candidate information" << endl;
+        //debug << "Circle cannot be fitted: Used Candidate information" << endl;
     }
 
     //debug << "BALL::CircleFit returning circle r =" << circ.radius;

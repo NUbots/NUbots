@@ -86,7 +86,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Threading/ConditionalThread.h \
     NUviewIO/NUviewIO.h \
     ../Kinematics/Kinematics.h \
-    ../Tools/Math/TransformMatrices.h
+    ../Tools/Math/TransformMatrices.h \
+    frameInformationWidget.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -156,6 +157,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Kinematics/Kinematics.cpp \
-    ../Tools/Math/TransformMatrices.cpp
+    ../Tools/Math/TransformMatrices.cpp \
+    frameInformationWidget.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

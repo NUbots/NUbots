@@ -12,23 +12,23 @@ class Object
         std::string name;
         Vector3<float> measuredRelativePosition;
         Vector3<float> relativeMeasurementError;
-        //Vision Parameters:
-        bool isVisible;
+        
+        // Vision Parameters:
+        bool isVisible;                     // true if the object was seen in this image, false otherwise
         Vector2<int> imagePosition;
-        int numberOfTimesSeen;		// Number Of Times this objects been seen 
-        int framesSinceLastSeen;	// Number of frames since we last saw this object
-        int framesSeen;			// Number of consecutive frames seen from this object
+        float timeLastSeen;                 // The time in ms the object was last seen
+        float timeSinceLastSeen;            // The time in ms since the object was last seen
+        float timeSeen;                     // The consecutive time in ms the object has been seen
+        float previousFrameTimestamp;       // The previous frame's timestamp (I use this to increment the timeSeen)
 
 
     public:
         Object(int initID = -1, const std::string& initName = "Unknown");
         ~Object();
 
-        void UpdateVisualObject(    const Vector3<float>& newMeasured,
-                                    const Vector3<float>& newMeasuredError,
-                                    const Vector2<int>& newImagePosition);
-
-        void ResetFrame();
+        void preProcess(const float timestamp);
+        void UpdateVisualObject(    const Vector3<float>& newMeasured, const Vector3<float>& newMeasuredError, const Vector2<int>& newImagePosition, const float timestamp);
+        void postProcess(const float timestamp);
 
         int getID() const {return ID;};
         std::string getName() const {return name;};
@@ -48,9 +48,9 @@ class Object
 
         //Access vision variables:
         bool isObjectVisible() const {return isVisible;}
-        int FramesSeen() const {return framesSeen;}
-        int NumberOfTimesSeen() const {return numberOfTimesSeen;}
-        int FrameSinceLastSeen() const {return framesSinceLastSeen;}
+        float TimeLastSeen() const {return timeLastSeen;}
+        float TimeSinceLastSeen() const {return timeSinceLastSeen;}
+        float TimeSeen() const {return timeSeen;}
         float measuredDistance() const {return measuredRelativePosition.x;}
         float measuredBearing() const {return measuredRelativePosition.y;}
         float measuredElevation() const {return measuredRelativePosition.z;}

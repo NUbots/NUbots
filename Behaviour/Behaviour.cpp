@@ -47,7 +47,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
 {
 
 
-    if(AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+    if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 3000)
     {
         float headYaw;
         data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
@@ -123,7 +123,7 @@ void Behaviour::Pan(JobList& jobs)
     float newTilt;
 
     newPan = sin(nusystem->getTime()/1000) * deg2rad(70.0f);
-    newTilt = sin(nusystem->getTime()/500) * PI/5;
+    newTilt = sin(nusystem->getTime()/200) * PI/5;
     headVector.push_back(newTilt);
     headVector.push_back(newPan);
     head = new HeadJob(10000,headVector);

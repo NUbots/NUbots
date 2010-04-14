@@ -84,6 +84,9 @@ class FieldObjects{
             vector<AmbiguousObject> ambiguousFieldObjects;
             FieldObjects();
             ~FieldObjects();
+    
+            void preProcess(const float timestamp);
+            void postProcess(const float timestamp);
 
 	private:
             void InitStationaryFieldObjects();
