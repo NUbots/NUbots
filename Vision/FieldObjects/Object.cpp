@@ -14,39 +14,55 @@ Object::Object(int initID, const std::string& initName):
 	isVisible = false;
     imagePosition[0] = 0;
     imagePosition[1] = 0;
-	numberOfTimesSeen = 0;
-	framesSinceLastSeen = 0;
-    timeLastSeen = 0;
-	framesSeen = 0;
+    timeLastSeen = 0;  
+    timeSinceLastSeen = 0;
+    timeSeen = 0;         
+    previousFrameTimestamp = 0;
 }
 
 Object::~Object()
 {	
 }
 
-void Object::UpdateVisualObject(    const Vector3<float>& newMeasured,
-                                    const Vector3<float>& newMeasuredError,
-                                    const Vector2<int>& newImagePosition,
-                                    const float timestamp)
+/*! @brief Preprocess the field object prior to updating visual information
+ */
+void Object::preProcess(const float timestamp)
+{
+}
+
+/*! @brief Updates the field object's measured position, measured error, position in image, and last seen time
+    @param newMeasured the measured visual relative position (distance, bearing, elevation)
+    @param newMeasuredError the error in the measured visual relative position (distance, bearing, elevation)
+    @param newImagePosition the position in the image the object was seen (x pixels, y pixels)
+    @param timestamp the current time that is used to set the last seen time
+ */
+void Object::UpdateVisualObject(const Vector3<float>& newMeasured, const Vector3<float>& newMeasuredError, const Vector2<int>& newImagePosition, const float timestamp)
 {
     measuredRelativePosition = newMeasured;
     relativeMeasurementError = newMeasuredError;
     imagePosition = newImagePosition;
-	framesSinceLastSeen = 0;
-	numberOfTimesSeen++;
-	framesSeen++;
-	isVisible = true;
+    
+    isVisible = true;
     timeLastSeen = timestamp;
+    timeSinceLastSeen = 0;
+    timeSeen += timestamp - previousFrameTimestamp;
 }
 
-void Object::ResetFrame()
+/*! @brief Postprocess the field object after updating visual information
+    @param timestamp the current image timestamp
+ 
+    This function sets isVisible, timeSinceLastSeen and timeSeen if the object has received no new visual information.
+    We also always set the previousFrameTimestamp here.
+ */
+void Object::postProcess(const float timestamp)
 {
-	if(!isVisible)
-	{
-		framesSinceLastSeen++;
-		framesSeen = 0;
-	}
-	isVisible = false;
+    if (timeLastSeen != timestamp)
+    {
+        isVisible = false;
+        timeSinceLastSeen = timestamp - timeLastSeen;
+        timeSeen = 0;
+    }
+    previousFrameTimestamp = timestamp;
 }
 
 void Object::CopyObject(const Object& sourceObject)

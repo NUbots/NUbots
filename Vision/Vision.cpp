@@ -136,12 +136,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
-    AllFieldObjects->~FieldObjects();
-    AllFieldObjects = new FieldObjects();
 
     if (image == NULL)
         return AllFieldObjects;
-
+    setImage(image);
+    AllFieldObjects->preProcess(image->m_timestamp);
 
     std::vector< Vector2<int> > points;
     //std::vector< Vector2<int> > verticalPoints;
@@ -158,7 +157,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
     //debug << "Setting Image: " <<endl;
-    setImage(image);
 
     if(isSavingImages)
     {
@@ -328,6 +326,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
     #endif
     
+    AllFieldObjects->postProcess(image->m_timestamp);
     return AllFieldObjects;
 }
 
@@ -1557,6 +1556,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
                     << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;*/
 
     }
+
     //qDebug() << "Vision::DetectBall : Finnised" << endl;
     return ball;
 

@@ -47,7 +47,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
 {
 
 
-    if(AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+    if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 3000)
     {
         float headYaw;
         data->getJointPosition(NUSensorsData::HeadYaw,headYaw);

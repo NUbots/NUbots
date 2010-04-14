@@ -11,6 +11,35 @@ FieldObjects::~FieldObjects()
 	
 }
 
+/*! @brief Preprocesses each field object
+    @param timestamp the current timestamp in ms
+ 
+    This calls preprocess on each object, and clears all of the ambiguous objects
+ */
+void FieldObjects::preProcess(const float timestamp)
+{
+    for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
+        stationaryFieldObjects[i].preProcess(timestamp);
+    for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
+        mobileFieldObjects[i].preProcess(timestamp);
+    ambiguousFieldObjects.clear();
+}
+
+/*! @brief Postprocesses each field object
+    @brief timestamp the current timestamp in ms
+ 
+    This calls the postprocess on each object, including the ambiguous objects
+ */
+void FieldObjects::postProcess(const float timestamp)
+{
+    for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
+        stationaryFieldObjects[i].postProcess(timestamp);
+    for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
+        mobileFieldObjects[i].postProcess(timestamp);
+    for (unsigned int i=0; i<ambiguousFieldObjects.size(); i++)
+        ambiguousFieldObjects[i].postProcess(timestamp);
+}
+
 void FieldObjects::InitStationaryFieldObjects()
 {
         float x,y;

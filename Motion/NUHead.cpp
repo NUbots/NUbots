@@ -79,8 +79,8 @@ void NUHead::doHead()
     static vector<float> sensorpositions(2, 0);
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
     
-	pos[0] = m_pitch_pid->doControl(m_data->CurrentTime, sensorpositions[0]);
-	pos[1] = m_yaw_pid->doControl(m_data->CurrentTime, sensorpositions[1]);
+	pos[0] = m_pitch;//->doControl(m_data->CurrentTime, sensorpositions[0]);
+	pos[1] = m_yaw;//->doControl(m_data->CurrentTime, sensorpositions[1]);
 
 	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gain);
 }
