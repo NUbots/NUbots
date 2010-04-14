@@ -209,8 +209,10 @@ void TcpPort::sendData(const NUimage& p_image)
     
     int imagewidth = p_image.getWidth();
     int imageheight = p_image.getHeight();
-    buffer << imagewidth << " ";
-    buffer << imageheight << " ";
+    double timeStamp = p_image.m_timestamp;
+    buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
+    buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
+    buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
     
     string s = buffer.str();
     netdata.data = (char*) s.c_str();

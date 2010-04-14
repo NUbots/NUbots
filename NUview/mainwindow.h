@@ -20,6 +20,7 @@ class WalkParameterWidget;
 class KickWidget;
 class QTabsWidget;
 class cameraSettingsWidget;
+class frameInformationWidget;
 
 class NUviewIO;
 
@@ -122,6 +123,7 @@ private:
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
     KickWidget* kick;
     cameraSettingsWidget* cameraSetting;
+    frameInformationWidget* frameInfo;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

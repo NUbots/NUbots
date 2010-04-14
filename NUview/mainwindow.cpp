@@ -14,6 +14,7 @@
 #include <QTabWidget>
 #include <typeinfo>
 #include "NUviewIO/NUviewIO.h"
+#include "frameInformationWidget.h"
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -73,6 +74,13 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabDock->setObjectName(tr("networkTab"));
     addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
 
+    frameInfo = new frameInformationWidget(this);
+    QDockWidget* temp = new QDockWidget(this);
+    temp->setWidget(frameInfo);
+    temp->setObjectName("Frame Information Dock");
+    temp->setWindowTitle(frameInfo->windowTitle());
+    addDockWidget(Qt::RightDockWidgetArea,temp);
+
     createConnections();
     setCentralWidget(mdiArea);
 
@@ -95,6 +103,7 @@ MainWindow::~MainWindow()
     delete mdiArea;
     delete visionTabs;
     delete networkTabs;
+    delete frameInfo;
 
 // Delete Actions
     delete openAction;
@@ -288,8 +297,10 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), frameInfo, SLOT(setRawImage(const NUimage*)));
 
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
+    connect(&LogReader,SIGNAL(fileOpened(QString)),frameInfo, SLOT(setFrameSource(QString)));
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
     connect(&LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));

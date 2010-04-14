@@ -209,12 +209,13 @@ std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
 {
     int sourceWidth = p_image.getWidth();
     int sourceHeight = p_image.getHeight();
-    output << sourceWidth << " ";
-    output << sourceHeight << " ";
-
+    double timeStamp = p_image.m_timestamp;
+    output.write(reinterpret_cast<char*>(&sourceWidth), sizeof(sourceWidth));
+    output.write(reinterpret_cast<char*>(&sourceHeight), sizeof(sourceHeight));
+    output.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
     for(int y = 0; y < sourceHeight; y++)
     {
-        output.write((char*) p_image.m_image[y], sizeof(p_image.m_image[y][0])*sourceWidth);
+        output.write(reinterpret_cast<char*>(p_image.m_image[y]), sizeof(p_image.m_image[y][0])*sourceWidth);
     }
     return output;
 }
@@ -222,13 +223,12 @@ std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
 std::istream& operator>> (std::istream& input, NUimage& p_image)
 {
     int width, height;
-    char temp;
-    input >> width;
-    input >> height;
+    input.read(reinterpret_cast<char*>(&width), sizeof(width));
+    input.read(reinterpret_cast<char*>(&height), sizeof(height));
+    input.read(reinterpret_cast<char*>(&p_image.m_timestamp), sizeof(p_image.m_timestamp));
 
     p_image.setImageDimensions(width, height);
     p_image.useInternalBuffer(true);
-    input.read(&temp, sizeof(temp));
 
     for(int y = 0; y < height; y++)
     {
