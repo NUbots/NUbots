@@ -61,7 +61,6 @@ public:
         AllLeds
     };
 
-    typedef int sound_id_t;
     static const int ACTIONATOR_MISSING = -1;
     
     // joints
@@ -116,7 +115,7 @@ public:
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
         // other data for the NUActionators
     bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
-    bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
+    bool getNextSounds(bool& isvalid, double& time, vector<string>& sounds);
         // magical data for the NUActionators
     bool getNextTeleportation(bool& isvalid, double& time, vector<float>& data);
     
@@ -128,7 +127,8 @@ public:
     bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
         // add other commands
     bool addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values);
-    bool addSound(sound_id_t soundid, double time);
+    bool addSound(double time, string sound);
+    bool addSounds(double time, vector<string> sound);
         // add magic commands
     bool addTeleportation(double time, float x, float y, float bearing);
     

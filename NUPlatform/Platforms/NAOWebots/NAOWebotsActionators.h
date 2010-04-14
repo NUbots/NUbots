@@ -48,7 +48,6 @@ private:
     
     void copyToServos();
     void copyToLeds();
-    void copyToSound();
     void copyToTeleporter();
     
 private:
@@ -64,7 +63,6 @@ private:
     vector<webots::LED*> m_leds;                            //!< the actual webots::LED pointers
     static vector<string> m_other_names;            //!< the names of other available actionators in webots
     webots::Emitter* m_teleporter;
-    //! @todo TODO: add the sound actionator
 };
 
 #endif

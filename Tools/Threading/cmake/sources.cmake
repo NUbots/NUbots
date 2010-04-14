@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS
 Thread.cpp 
 ConditionalThread.cpp
+QueueThread.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
