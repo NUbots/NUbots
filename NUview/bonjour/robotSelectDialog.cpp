@@ -61,12 +61,15 @@ void robotSelectDialog::enableConnectButton()
 void robotSelectDialog::updateRecords(const QList<BonjourRecord> &list)
 {
     treeWidget->clear();
+    treeWidget->setIconSize(QSize(36,36));
+    QIcon robotIcon(QString(":/icons/Robot-icon.png"));
     foreach (BonjourRecord record, list) {
         QVariant variant;
         variant.setValue(record);
         QTreeWidgetItem *processItem = new QTreeWidgetItem(treeWidget,
                                                            QStringList() << record.serviceName);
-        processItem->setData(0, Qt::UserRole, variant);
+        processItem->setIcon(0,robotIcon);
+        processItem->setData(1, Qt::UserRole, variant);
     }
 
     if (treeWidget->invisibleRootItem()->childCount() > 0) {

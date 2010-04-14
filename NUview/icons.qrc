@@ -13,5 +13,6 @@
         <file>icons/next.png</file>
         <file>icons/previous.png</file>
         <file>icons/select.png</file>
+        <file>icons/Robot-icon.png</file>
     </qresource>
 </RCC>
