@@ -66,7 +66,7 @@ void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record)
                                                 record.registeredType.toUtf8().constData(),
                                                 record.replyDomain.toUtf8().constData(),
                                                 (DNSServiceResolveReply)bonjourResolveReply, this);
-    connect(dnsResolveTimer, SIGNAL(timeout()), this, SLOT(cleanupResolve()));
+    connect(dnsResolveTimer, SIGNAL(timeout()), this, SLOT(resolveTimeout()));
     dnsResolveTimer->setSingleShot(true);
     dnsResolveTimer->start(5000);
     if (err != kDNSServiceErr_NoError) {
@@ -117,6 +117,16 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
 
 void BonjourServiceResolver::finishConnect(const QHostInfo &hostInfo)
 {
-    emit bonjourRecordResolved(hostInfo, bonjourPort);
-    QMetaObject::invokeMethod(this, "cleanupResolve", Qt::QueuedConnection);
+    if(dnssref && (bonjourPort != -1))
+    {
+        dnsResolveTimer->stop();
+        emit bonjourRecordResolved(hostInfo, bonjourPort);
+        QMetaObject::invokeMethod(this, "cleanupResolve", Qt::QueuedConnection);
+    }
+}
+
+void BonjourServiceResolver::resolveTimeout()
+{
+    qWarning("DNS Resolve timed out.");
+    cleanupResolve();
 }

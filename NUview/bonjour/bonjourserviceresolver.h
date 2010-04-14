@@ -56,6 +56,7 @@ private slots:
     void bonjourSocketReadyRead();
     void cleanupResolve();
     void finishConnect(const QHostInfo &hostInfo);
+    void resolveTimeout();
 
 private:
     static void DNSSD_API bonjourResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags,
