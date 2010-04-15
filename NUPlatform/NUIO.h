@@ -25,7 +25,6 @@
 #ifndef NUIO_H
 #define NUIO_H
 
-#include "ioconfig.h"
 #include <string>
 
 class NUbot;
