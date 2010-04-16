@@ -195,7 +195,6 @@ void NUWalk::setCurrentSpeeds()
         acceleration_y = 0;
         acceleration_yaw = 0;
     }
-    debug << "After accel calc." << endl;
     // clip the accelerations to the max values (if the max values exist)
     if (m_gait_max_accelerations.size() > 0 && fabs(acceleration_x) > fabs(m_gait_max_accelerations[0]))      // if clipping is available, and the input is greater than the limit, then clip it
         acceleration_x = sign(acceleration_x)*m_gait_max_accelerations[0];
@@ -205,7 +204,6 @@ void NUWalk::setCurrentSpeeds()
     
     if (m_gait_max_accelerations.size() > 2 && fabs(acceleration_yaw) > fabs(m_gait_max_accelerations[2]))      // if clipping is available, and the input is greater than the limit, then clip it
         acceleration_yaw = sign(acceleration_yaw)*m_gait_max_accelerations[2];
-    debug << "After accel clip." << endl;
     // set the current speeds 
     m_speed_x = m_speed_x + acceleration_x*timestep;
     m_speed_y = m_speed_y + acceleration_y*timestep;
