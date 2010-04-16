@@ -1,12 +1,12 @@
-/*! @file NUKick.h
+/*! @file NUHead.h
     @brief Declaration of nuhead class
  
-    @class NUKick
+    @class NUHead
     @brief A module to provide head
  
-    @author Jed Rietveld
+    @author Jason Kulk, Jed Rietveld
  
-  Copyright (c) 2010 Jed Rietveld
+  Copyright (c) 2010 Jason Kulk, Jed Rietveld
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,10 +25,11 @@
 #ifndef NUHEAD_H
 #define NUHEAD_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-
+class NUSensorsData;
+class NUActionatorsData;
 class PIDController;
+
+#include <vector>
 
 class NUHead
 {
@@ -37,7 +38,7 @@ public:
     ~NUHead();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(const vector<float>& position);
+    void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
 private:
     void doHead();
 
