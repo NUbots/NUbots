@@ -18,28 +18,42 @@
 #endif
 
 #ifdef USE_MOTION
-    #define USE_HEAD_${USE_MOTION_HEAD}
+    #define USE_HEAD_${NUBOT_USE_MOTION_HEAD}
     #ifdef USE_HEAD_ON
         #define USE_HEAD
     #else
         #undef USE_HEAD
     #endif
-    #define USE_WALK_${USE_MOTION_WALK}
+    #define USE_WALK_${NUBOT_USE_MOTION_WALK}
     #ifdef USE_WALK_ON
         #define USE_WALK
     #else
         #undef USE_WALK
     #endif
-    #define USE_KICK_${USE_MOTION_KICK}
+    #define USE_KICK_${NUBOT_USE_MOTION_KICK}
     #ifdef USE_KICK_ON
         #define USE_KICK
     #else
         #undef USE_KICK
     #endif
+    #define USE_GETUP_${NUBOT_USE_MOTION_GETUP}
+    #ifdef USE_GETUP_ON
+        #define USE_GETUP
+    #else
+        #undef USE_GETUP
+    #endif
+    #define USE_FALL_PROTECTION_${NUBOT_USE_MOTION_FALL_PROTECTION}
+    #ifdef USE_FALL_PROTECTION_ON
+        #define USE_FALL_PROTECTION
+    #else
+        #undef USE_FALL_PROTECTION
+    #endif
 #else
     #undef USE_HEAD
     #undef USE_WALK
     #undef USE_KICK
+    #undef USE_GETUP
+    #undef USE_FALL_PROTECTION
 #endif
 
 #endif // !MOTIONCONFIG_H

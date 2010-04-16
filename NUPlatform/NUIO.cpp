@@ -20,6 +20,7 @@
  */
 
 #include "NUIO.h"
+#include "ioconfig.h"
 
 #include "NUIO/GameControllerPort.h"
 #include "NUIO/TeamPort.h"
@@ -53,11 +54,18 @@ NUIO::NUIO(NUbot* nubot)
     
     m_nubot = nubot;            // we need the nubot so that we can access the public store
     
-    m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
-    createTeamPort(m_nubot->TeamInfo);
-    m_jobs_port = new JobPort(m_nubot->Jobs);
-    
-    m_vision_port = new TcpPort(VISION_PORT);
+    #ifdef USE_NETWORK_GAMECONTROLLER
+        m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
+    #endif
+    #ifdef USE_NETWORK_TEAMINFO
+        createTeamPort(m_nubot->TeamInfo);
+    #endif
+    #ifdef USE_NETWORK_JOBS
+        m_jobs_port = new JobPort(m_nubot->Jobs);
+    #endif
+    #ifdef USE_NETWORK_DEBUGSTREAM
+        m_vision_port = new TcpPort(VISION_PORT);
+    #endif
 }
 
 /*! @brief Create a new NUIO interface to network and log files. Use this version in NUview
@@ -72,11 +80,18 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     debug << "NUIO::NUIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << endl;
 #endif
     m_nubot = NULL;
-    m_gamecontroller_port = new GameControllerPort(gameinfo);
-    createTeamPort(teaminfo);
-    m_jobs_port = new JobPort(jobs);
-    
-    m_vision_port = new TcpPort(VISION_PORT);
+    #ifdef USE_NETWORK_GAMECONTROLLER
+        m_gamecontroller_port = new GameControllerPort(gameinfo);
+    #endif
+    #ifdef USE_NETWORK_TEAMINFO
+        createTeamPort(teaminfo);
+    #endif
+    #ifdef USE_NETWORK_JOBS
+        m_jobs_port = new JobPort(jobs);
+    #endif
+    #ifdef USE_NETWORK_DEBUGSTREAM
+        m_vision_port = new TcpPort(VISION_PORT);
+    #endif
 }
 
 /*! @brief Creates the team communications port
@@ -109,7 +124,9 @@ NUIO::~NUIO()
  */
 NUIO& operator<<(NUIO& io, JobList& jobs)
 {
-    (*io.m_jobs_port) << jobs;
+    #ifdef USE_NETWORK_JOBS
+        (*io.m_jobs_port) << jobs;
+    #endif
     return io;
 }
 
@@ -119,7 +136,9 @@ NUIO& operator<<(NUIO& io, JobList& jobs)
  */
 NUIO& operator<<(NUIO& io, JobList* jobs)
 {
-    (*io.m_jobs_port) << jobs;
+    #ifdef USE_NETWORK_JOBS
+        (*io.m_jobs_port) << jobs;
+    #endif
     return io;
 }
 
@@ -128,14 +147,20 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
  */
 void NUIO::setJobPortTargetAddress(string ipaddress)
 {
-    m_jobs_port->setTargetAddress(ipaddress);
+    if (m_jobs_port != NULL)
+        m_jobs_port->setTargetAddress(ipaddress);
+    else
+        errorlog << "NUIO::setJobPortToBroadcast(). Network jobs are OFF" << endl;
 }
 
 /*! @brief Sets the job port to broadcast to all robots
  */
 void NUIO::setJobPortToBroadcast()
 {
-    m_jobs_port->setBroadcast();
+    if (m_jobs_port != NULL)
+        m_jobs_port->setBroadcast();
+    else
+        errorlog << "NUIO::setJobPortToBroadcast(). Network jobs are OFF" << endl;
 }
 
 /*! @brief Stream insertion operator for NUimage
@@ -144,11 +169,13 @@ void NUIO::setJobPortToBroadcast()
  */
 NUIO& operator<<(NUIO& io, NUimage& p_image)
 {
-    network_data_t netdata = io.m_vision_port->receiveData();
-    if(netdata.size > 0)
-    {
-        io.m_vision_port->sendData(p_image);
-    }
+    #ifdef USE_NETWORK_DEBUGSTREAM
+        network_data_t netdata = io.m_vision_port->receiveData();
+        if(netdata.size > 0)
+        {
+            io.m_vision_port->sendData(p_image);
+        }
+    #endif
     return io;
 }
 

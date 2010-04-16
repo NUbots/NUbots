@@ -19,18 +19,29 @@ ENDIF()
 STRING(REPLACE "/cmake/ioconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
 ############################ io options
-OPTION( NUBOT_USE_NETWORK_GAMECONTROLLER
-        "Set to ON to use network gamecontroller, set to OFF to use only the buttons"
-        ON)
-OPTION( NUBOT_USE_NETWORK_TEAMINFO
-        "Set to ON to use team packets, set to OFF to go solo"
-        ON)
-OPTION( NUBOT_USE_NETWORK_JOBS
-        "Set to ON to allow remote jobs to be executed, set to OFF to be ignorant of others"
-        ON)
-OPTION( NUBOT_USE_NETWORK_DEBUGSTREAM
-        "Set to ON to enable streaming of data of the network, set to OFF to keep quiet"
-        ON)
+SET( NUBOT_USE_NETWORK_GAMECONTROLLER
+     ON
+     CACHE BOOL
+     "Set to ON to use network gamecontroller, set to OFF to use only the buttons")
+SET( NUBOT_USE_NETWORK_TEAMINFO
+     ON
+     CACHE BOOL
+     "Set to ON to use team packets, set to OFF to go solo")
+SET( NUBOT_USE_NETWORK_JOBS
+     ON
+     CACHE BOOL
+     "Set to ON to allow remote jobs to be executed, set to OFF to be ignorant of others")
+SET( NUBOT_USE_NETWORK_DEBUGSTREAM
+     ON
+     CACHE BOOL
+     "Set to ON to enable streaming of data of the network, set to OFF to keep quiet")
+     
+MARK_AS_ADVANCED(
+    NUBOT_USE_NETWORK_GAMECONTROLLER
+    NUBOT_USE_NETWORK_TEAMINFO
+    NUBOT_USE_NETWORK_JOBS
+    NUBOT_USE_NETWORK_DEBUGSTREAM
+)
 
 ############################ ioconfig.h generation
 CONFIGURE_FILE(
