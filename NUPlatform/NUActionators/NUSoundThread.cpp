@@ -39,7 +39,7 @@ NUSoundThread::NUSoundThread() : QueueThread<std::string>(string("NUSoundThread"
         debug << "NUSoundThread::NUSoundThread() with priority " << static_cast<int>(m_priority) << endl;
     #endif
     #if defined(TARGET_OS_IS_WINDOWS)
-        m_player_command = string("start/min sndrec32 ");
+        m_player_command = string("start/min sndrec32 /play /close ");
     #elif defined(TARGET_OS_IS_DARWIN)
         m_player_command = string("afplay ");
     #else
