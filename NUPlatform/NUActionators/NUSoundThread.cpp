@@ -23,6 +23,8 @@
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+#include "nubotdataconfig.h"
+#include "targetconfig.h"
 
 #include <errno.h>
 
@@ -36,6 +38,14 @@ NUSoundThread::NUSoundThread() : QueueThread<std::string>(string("NUSoundThread"
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "NUSoundThread::NUSoundThread() with priority " << static_cast<int>(m_priority) << endl;
     #endif
+    #if defined(TARGET_OS_IS_WINDOWS)
+        m_player_command = string("start/min sndrec32 ");
+    #elif defined(TARGET_OS_IS_DARWIN)
+        m_player_command = string("afplay ");
+    #else
+        m_player_command = string("aplay ");
+    #endif
+    m_sound_dir = string(DATA_DIR) + string("/Sounds/");
     start();
 }
 
@@ -61,8 +71,8 @@ void NUSoundThread::run()
     {
         waitForCondition();
         // ------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUSoundThread Processing: " << m_queue.front() << endl;
-        system((string("afplay ") + m_queue.front()).c_str());
+        debug << "NUSoundThread Processing: " << m_player_command + m_sound_dir + m_queue.front() << endl;
+        system((m_player_command + m_sound_dir + m_queue.front()).c_str());
         m_queue.pop_front();
         // ------------------------------------------------------------------------------------------------------------------------------------------
     } 

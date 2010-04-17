@@ -37,6 +37,9 @@ public:
     
 protected:
     void run();
+private:
+    std::string m_player_command;
+    std::string m_sound_dir;
 };
 
 #endif
