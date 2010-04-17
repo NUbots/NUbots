@@ -14,7 +14,6 @@
 #	- Append required libraries to NUBOT_LINK_LIBRARIES
 #	- print debug information
 
-SET(TARGET_ROBOT_DIR ${TARGET_ROBOT_DIR}/NAO)
 INCLUDE(${TARGET_ROBOT_DIR}/cmake/sources.cmake)
 INCLUDE(${TOOLCHAIN_DIR}/cmake/bootstrap.cmake)
 USE(NAOQI-PLUGINS-TOOLS)
