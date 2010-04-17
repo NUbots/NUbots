@@ -34,7 +34,10 @@ ALWalk::ALWalk()
     debug << "ALWalk::ALWalk()" << endl;
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
 
-    m_al_motion->setStiffnesses(string("Body"), 0.7f);
+    m_al_motion->setStiffnesses(string("LLeg"), 0.7f);
+    m_al_motion->setStiffnesses(string("RLeg"), 0.7f);
+    m_al_motion->setStiffnesses(string("LArm"), 0.3f);
+    m_al_motion->setStiffnesses(string("RArm"), 0.3f);
     m_al_motion->setWalkTargetVelocity(0.0, 0, 0, 0);
 }
 

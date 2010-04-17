@@ -9,40 +9,45 @@
 #ifndef WALKCONFIG_H
 #define WALKCONFIG_H
 
-#include "motionconfig.h"
+#define USE_MOTION_WALK_${NUBOT_USE_MOTION_WALK}
+#ifdef USE_MOTION_WALK_ON
+    #define USE_WALK                                           //!< this will be defined when the build is configured to include motion
+#else
+    #undef USE_WALK
+#endif
 
 #ifdef USE_WALK
-    #define USE_WALKOPTIMISER_${USE_WALKOPTIMISER}
+    #define USE_WALKOPTIMISER_${NUBOT_USE_MOTION_WALK_WALKOPTIMISER} 
 	#ifdef USE_WALKOPTIMISER_ON
         #define USE_WALKOPTIMISER
     #else
         #undef USE_WALKOPTIMISER
     #endif
-    #define USE_WALK_JWALK_${USE_WALK_JWALK}
+    #define USE_WALK_JWALK_${NUBOT_USE_MOTION_WALK_JWALK} 
     #ifdef USE_WALK_JWALK_ON
         #define USE_JWALK
     #else
         #undef USE_JWALK
     #endif
-    #define USE_WALK_JUPPWALK_${USE_WALK_JUPPWALK}
+    #define USE_WALK_JUPPWALK_${NUBOT_USE_MOTION_WALK_JUPPWALK} 
     #ifdef USE_WALK_JUPPWALK_ON
         #define USE_JUPPWALK
     #else
         #undef USE_JUPPWALK
     #endif
-    #define USE_WALK_NBWALK_${USE_WALK_NBWALK}
+    #define USE_WALK_NBWALK_${NUBOT_USE_MOTION_WALK_NBWALK} 
     #ifdef USE_WALK_NBWALK_ON
         #define USE_NBWALK
     #else
         #undef USE_NBWALK
     #endif
-    #define USE_WALK_VSCWALK_${USE_WALK_VSCWALK}
+    #define USE_WALK_VSCWALK_${NUBOT_USE_MOTION_WALK_VSCWALK} 
     #ifdef USE_WALK_VSCWALK_ON
         #define USE_VSCWALK
     #else
         #undef USE_VSCWALK
     #endif
-    #define USE_WALK_ALWALK_${USE_WALK_ALWALK}
+    #define USE_WALK_ALWALK_${NUBOT_USE_MOTION_WALK_ALWALK} 
     #ifdef USE_WALK_ALWALK_ON
         #define USE_ALWALK
     #else

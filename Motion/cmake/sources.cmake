@@ -21,18 +21,27 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
-		NUWalk.cpp NUWalk.h
-		NUKick.cpp NUKick.h
-        	NUHead.cpp NUHead.h
-		Getup
 		FallProtection
 )
-####################################################################################
-########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Kicks
-		Head
-		Walks
-)
+
+SET (YOUR_DIRS 	)
+
+IF(NUBOT_USE_MOTION_HEAD)
+	LIST(APPEND YOUR_SRCS NUHead.cpp NUHead.h)
+	LIST(APPEND YOUR_DIRS Head)
+ENDIF()
+IF(NUBOT_USE_MOTION_WALK)
+	LIST(APPEND YOUR_SRCS NUWalk.cpp NUWalk.h)
+	LIST(APPEND YOUR_DIRS Walks)
+ENDIF()
+IF(NUBOT_USE_MOTION_KICK)
+	LIST(APPEND YOUR_SRCS NUKick.cpp NUKick.h)
+	LIST(APPEND YOUR_DIRS Kicks)
+ENDIF()
+IF(NUBOT_USE_MOTION_GETUP)
+	LIST(APPEND YOUR_SRCS Getup)
+	LIST(APPEND YOUR_DIRS )
+ENDIF()
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
