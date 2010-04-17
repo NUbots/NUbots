@@ -116,6 +116,9 @@ CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/nubotconfig.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/nubotconfig.h"
                 ESCAPE_QUOTES)
+CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/nubotdataconfig.in"
+                "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/nubotdataconfig.h"
+                ESCAPE_QUOTES)
 
 ############################ debug.h GENERATION
 CONFIGURE_FILE(	"${CMAKE_CURRENT_SOURCE_DIR}/debug.in"
