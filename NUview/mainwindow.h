@@ -13,6 +13,8 @@
 #include "localisationwidget.h"
 #include "LogFileReader.h"
 #include "visionstreamwidget.h"
+#include <QHostInfo>
+
 class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
@@ -23,6 +25,8 @@ class cameraSettingsWidget;
 class frameInformationWidget;
 
 class NUviewIO;
+class BonjourServiceResolver;
+
 
 namespace Ui
 {
@@ -59,6 +63,8 @@ public slots:
     void filenameChanged(QString filename); //!< New filename
     void fileClosed(); //!< File was closed.
 
+    void BonjourTest();
+
     /*!
       @brief Used to select the colour at a given position in the image and
       set it as the selected colour in the classification widget.
@@ -88,6 +94,7 @@ protected slots:
 //    locWmGlDisplay* createLocWmGlDisplay();
     QMdiSubWindow* createGLDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
+    void PrintConnectionInfo(const QHostInfo &hostInfo, int);
 
 private:
     //! Virtual robot, does data storage and robot based processing.
@@ -161,6 +168,9 @@ private:
     QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
+
+    QAction *doBonjourTestAction;    //!< Instance of the do test Action
+    BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
 
