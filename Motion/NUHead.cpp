@@ -21,6 +21,8 @@
 
 
 #include "NUHead.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Head/PIDController.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -58,18 +60,24 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 }
 
 
-void NUHead::process(const vector<float>& position)
+void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& positions)
 {
-    if (m_data == NULL || position.size() < 2)
+    unsigned int length = times.size();
+    if (m_data == NULL || length == 0 || positions.size() == 0)
         return;
-    m_head_timestamp = m_data->CurrentTime;
-	m_pitch = position[0];
-	m_yaw = position[1];
+    unsigned int width = positions[0].size();
+
+    vector<float> vel (width, 0);
+    vector<float> gain (width, 40);
+    for (unsigned int i=0; i<length; i++)
+    {
+        m_actions->addJointPositions(NUActionatorsData::HeadJoints, times[i], positions[i], vel, gain);
+    }
 }
 
 void NUHead::doHead()
 {
-	static vector<float> pos (2,0);
+	/*static vector<float> pos (2,0);
 	static vector<float> vel (2,0);
 	static vector<float> gain (2,40);
 
@@ -77,11 +85,14 @@ void NUHead::doHead()
     m_yaw_pid->setTarget(m_yaw);
     
     static vector<float> sensorpositions(2, 0);
+    static vector<float> targetpositions(2, 0);
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
+    m_data->getJointTargets(NUSensorsData::HeadJoints, targetpositions);
     
-	pos[0] = m_pitch;//->doControl(m_data->CurrentTime, sensorpositions[0]);
-	pos[1] = m_yaw;//->doControl(m_data->CurrentTime, sensorpositions[1]);
+    
+	pos[0] = m_pitch;
+	pos[1] = m_yaw;
 
-	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 80, pos, vel, gain);
+	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 0, pos, vel, gain);*/
 }
 

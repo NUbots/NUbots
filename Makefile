@@ -47,8 +47,8 @@ NAO: TARGET_ROBOT=NAO
 NAOConfig: TARGET_ROBOT=NAO
 Cycloid: TARGET_ROBOT=CYCLOID
 CycloidConfig: TARGET_ROBOT=CYCLOID
-NUView: TARGET_ROBOT=VIRTUAL
-NUViewConfig: TARGET_ROBOT=VIRTUAL
+NUView: TARGET_ROBOT=NUVIEW
+NUViewConfig: TARGET_ROBOT=NUVIEW
 export TARGET_ROBOT
 
 # I need to determine which platform this makefile is run on

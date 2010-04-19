@@ -7,7 +7,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,8 @@
 #ifndef NUACTIONATORSDATA_H
 #define NUACTIONATORSDATA_H
 
-#include "actionator_t.h"
+template <class T>
+class actionator_t;
 
 #include <vector>
 #include <string>
@@ -60,7 +61,6 @@ public:
         AllLeds
     };
 
-    typedef int sound_id_t;
     static const int ACTIONATOR_MISSING = -1;
     
     // joints
@@ -115,7 +115,7 @@ public:
     bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
         // other data for the NUActionators
     bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
-    bool getNextSound(bool& isvalid, double& time, int& soundid, string& text);
+    bool getNextSounds(bool& isvalid, double& time, vector<string>& sounds);
         // magical data for the NUActionators
     bool getNextTeleportation(bool& isvalid, double& time, vector<float>& data);
     
@@ -127,7 +127,8 @@ public:
     bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
         // add other commands
     bool addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values);
-    bool addSound(sound_id_t soundid, double time);
+    bool addSound(double time, string sound);
+    bool addSounds(double time, vector<string> sound);
         // add magic commands
     bool addTeleportation(double time, float x, float y, float bearing);
     
@@ -140,26 +141,29 @@ public:
 private:
     void addJointActionator(string actionatorname);
     void addLedActionator(string actionatorname);
-    void addActionator(vector<actionator_t*>& actionatorgroup, string actionatorname, actionator_t::actionator_type_t actionatortype); 
-    void addActionator(actionator_t*& p_actionator, string actionatorname, actionator_t::actionator_type_t actionatortype);
+    
+    template <typename T> void addActionator(vector<actionator_t<T>*>& actionatorgroup, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
+    template <typename T> void addActionator(actionator_t<T>*& p_actionator, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
+    
     string simplifyName(const string& input);
     void simplifyNames(const vector<string>& input, vector<string>& output);
     void removeColours(const vector<string>& input, vector<string>& output);
     
 private:
-    vector<actionator_t*> m_all_actionators;        //!< a vector with every actionator
+    vector<actionator_t<float>*> m_all_actionators;        //!< a vector with every float actionator
+    vector<actionator_t<string>*> m_all_string_actionators;      //!< a vector with every string actionator
     // Limb position and torque actionators
     bool m_positionactionation;
     bool m_torqueactionation;
-    vector<actionator_t*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
-    vector<actionator_t*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
+    vector<actionator_t<float>*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
+    vector<actionator_t<float>*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
 
     // Peripheral actionators 
-    vector<actionator_t*> LedActionators;           //!< The led actionators
-    actionator_t* Sound;                            //!< The sound actionator
+    vector<actionator_t<float>*> LedActionators;           //!< The led actionators
+    actionator_t<string>* Sound;                            //!< The sound actionator
     
     // Magic actionators
-    actionator_t* Teleporter;                       //!< A magical actionator that teleports the robot from one location to another
+    actionator_t<float>* Teleporter;                       //!< A magical actionator that teleports the robot from one location to another
     
     // Variables to provide fast access to body part actionator groups
     vector<joint_id_t> m_head_ids;                  //!< a vector of joint_id_t's for each joint in the head

@@ -20,6 +20,7 @@
  */
 
 #include "NAOWebotsActionators.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
@@ -47,7 +48,7 @@ static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Righ
                                   string("LFoot/Led"), string("RFoot/Led")};
 vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
 // init m_other_names:
-static string temp_other_names[] = {string("Teleporter")};
+static string temp_other_names[] = {string("Teleporter"), string("Sound")};
 vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
 
 /*! @brief Constructs a nubot actionator class with a Webots backend
@@ -251,15 +252,6 @@ void NAOWebotsActionators::copyToLeds()
         else
             debug << "NAOWebotsActionators::copyToLeds(). The input does not have the correct length, all data will be ignored!" << endl;
     }
-}
-
-/*! @brief Copies the sound to the sound driver
- */
-void NAOWebotsActionators::copyToSound()
-{
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToSound()" << endl;
-#endif
 }
 
 /*! @brief Copies the teleportation data to the teleporter (super_emitter)

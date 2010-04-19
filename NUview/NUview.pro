@@ -16,6 +16,7 @@ win32 {
     LIBS += -lwsock32
     LIBS += -lpthread
 }
+!macx:LIBS += -ldns_sd
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -87,7 +88,11 @@ HEADERS += ui_mainwindow.h \
     NUviewIO/NUviewIO.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
-    frameInformationWidget.h
+    frameInformationWidget.h \
+    bonjour/robotSelectDialog.h \
+    bonjour/bonjourserviceresolver.h \
+    bonjour/bonjourservicebrowser.h \
+    bonjour/bonjourrecord.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -158,6 +163,9 @@ SOURCES += mainwindow.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
-    frameInformationWidget.cpp
+    frameInformationWidget.cpp \
+    bonjour/robotSelectDialog.cpp \
+    bonjour/bonjourserviceresolver.cpp \
+    bonjour/bonjourservicebrowser.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

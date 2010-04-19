@@ -225,17 +225,17 @@ void NUMotion::process(JobList& jobs)
         #ifdef USE_HEAD         // ---------------------------------------------------------- HeadJob processing
             else if ((*it)->getID() == Job::MOTION_HEAD)
             {   // process a kick job
-                static double time;
-                static vector<float> headposition;
+                static vector<double> times;
+                static vector<vector<float> > headpositions;
                 static HeadJob* job;
                 
                 job = (HeadJob*) (*it);
-                job->getPosition(time, headposition);
+                job->getPositions(times, headpositions);
                 #if DEBUG_NUMOTION_VERBOSITY > 4
                     debug << "NUMotion::process(): Processing a head job." << endl;
                 #endif
                 
-                m_head->process(headposition);
+                m_head->moveTo(times, headpositions);
                 it = jobs.removeMotionJob(it);
             }
         #endif

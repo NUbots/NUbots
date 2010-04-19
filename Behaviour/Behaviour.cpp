@@ -45,36 +45,48 @@ void Behaviour::process(JobList& jobs)
 }
 void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width)
 {
-
-
-    if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 3000)
+    static int runcount = 0;
+    if (runcount < 5)
     {
-        float headYaw;
-        data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
         vector<float> walkVector;
-        walkVector.push_back(3);
+        walkVector.push_back(5);
         walkVector.push_back(0);
-        walkVector.push_back(headYaw/2);
-        //WalkJob* walk = new WalkJob(walkVector);
-        //jobs.addMotionJob(walk);
-        //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
-
-        
-        float headPitch;
-        data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-        data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
-        TrackPoint(jobs,headYaw, headPitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
+        walkVector.push_back(0);
+        WalkJob* walk = new WalkJob(walkVector);
+        jobs.addMotionJob(walk);
+        runcount++;
     }
     else
     {
-        vector<float> walkVector;
-        walkVector.push_back(0);
-        walkVector.push_back(0);
-        walkVector.push_back(0);
-        //WalkJob* walk = new WalkJob(walkVector);
-        //jobs.addMotionJob(walk);
-        //debug << "WalkJob not created: STOP WALKING " << endl;
-        Pan(jobs);
+        if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
+        {
+            float headYaw;
+            data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+            vector<float> walkVector;
+            walkVector.push_back(0);
+            walkVector.push_back(0);
+            walkVector.push_back(0);
+            WalkJob* walk = new WalkJob(walkVector);
+            jobs.addMotionJob(walk);
+            //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
+
+            
+            float headPitch;
+            data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+            data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+            TrackPoint(jobs,headYaw, headPitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
+        }
+        else
+        {
+            vector<float> walkVector;
+            walkVector.push_back(0);
+            walkVector.push_back(0);
+            walkVector.push_back(0);
+            WalkJob* walk = new WalkJob(walkVector);
+            jobs.addMotionJob(walk);
+            //debug << "WalkJob not created: STOP WALKING " << endl;
+            Pan(jobs);
+        }
     }
 }
 
@@ -116,20 +128,48 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
 
 void Behaviour::Pan(JobList& jobs)
 {
-    
-    vector<float> headVector;
-    
-    float newPan;
-    float newTilt;
+    static double lastpantime = 0;
+    if (nusystem->getTime() - lastpantime > 3200)
+    {
+        lastpantime = nusystem->getTime();
+        vector<double> times(8, 0);
+        vector<vector<float> > positions(8, vector<float> (2,0));
+        times[0] = nusystem->getTime() + 100;
+        positions[0][0] = 0.43;
+        positions[0][1] = 0.81;
+        
+        times[1] = nusystem->getTime() + 500;
+        positions[1][0] = 0.43;
+        positions[1][1] = -0.81;
+        
+        times[2] = nusystem->getTime() + 700;
+        positions[2][0] = 0.06;
+        positions[2][1] = -0.81;
+        
+        times[3] = nusystem->getTime() + 1200;
+        positions[3][0] = 0.06;
+        positions[3][1] = 0.81;
+        
+        times[4] = nusystem->getTime() + 1400;
+        positions[4][0] = -0.27;
+        positions[4][1] = 0.81;
+        
+        times[5] = nusystem->getTime() + 1600;
+        positions[5][0] = -0.50;
+        positions[5][1] = 1.3;
+        
+        times[6] = nusystem->getTime() + 3000;
+        positions[6][0] = -0.50;
+        positions[6][1] = -1.3;
+        
+        times[7] = nusystem->getTime() + 3200;
+        positions[7][0] = 0;
+        positions[7][1] = 0;
+        
+        HeadJob* head = new HeadJob(times, positions);
 
-    newPan = sin(nusystem->getTime()/1000) * deg2rad(70.0f);
-    newTilt = sin(nusystem->getTime()/200) * PI/10;
-    headVector.push_back(newTilt);
-    headVector.push_back(newPan);
-    HeadJob * head = new HeadJob(10000,headVector);
-    jobs.addMotionJob(head);
-
-    //debug << "JobList Size " << jobs.size()<<  "Time: "<< nusystem->getTime()<<endl; 
+        jobs.addMotionJob(head);
+    }
  
   return;
 }

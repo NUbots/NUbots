@@ -20,8 +20,9 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  actionator_t.cpp actionator_t.h
+SET (YOUR_SRCS  actionator_t.h
                 NUActionatorsData.cpp NUActionatorsData.h
+		NUSoundThread.h NUSoundThread.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

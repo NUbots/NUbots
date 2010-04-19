@@ -14,13 +14,17 @@
 #include <QTabWidget>
 #include <typeinfo>
 #include "NUviewIO/NUviewIO.h"
+
 #include "frameInformationWidget.h"
+#include "bonjour/robotSelectDialog.h"
+#include "bonjour/bonjourserviceresolver.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), bonjourResolver(0)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
     debug.open("debug.log");
@@ -220,6 +224,10 @@ void MainWindow::createActions()
     newLocWMDisplayAction = new QAction(tr("&New display"), this);
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
+
+    doBonjourTestAction = new QAction(tr("&Do Bonjour Test..."), this);
+    doBonjourTestAction->setStatusTip(tr("Test something."));
+    connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
 }
 
 void MainWindow::createMenus()
@@ -259,6 +267,7 @@ void MainWindow::createMenus()
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
     windowMenu->addAction(nativeAspectAction);
+    windowMenu->addAction(doBonjourTestAction);
 }
 
 void MainWindow::createContextMenu()
@@ -439,6 +448,42 @@ void MainWindow::shrinkToNativeAspectRatio()
             sourceSize.scale(windowSize,Qt::KeepAspectRatio);
             activeSubWindow->resize(sourceSize);
         }
+    }
+}
+
+void MainWindow::BonjourTest()
+{
+    robotSelectDialog test(this, "_nuview._tcp");
+    if(test.exec())
+    {
+        BonjourRecord bonjourHost = test.getBonjourHost();
+        if (!bonjourResolver)
+        {
+                bonjourResolver = new BonjourServiceResolver(this);
+                connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)),
+                        this, SLOT(PrintConnectionInfo(const QHostInfo &, int)));
+        }
+        bonjourResolver->resolveBonjourRecord(bonjourHost);
+    }
+    else
+    {
+        qDebug() << "Cancelled" << endl;
+    }
+}
+
+void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
+{
+    const QList<QHostAddress> &addresses = hostInfo.addresses();
+
+    if (hostInfo.error() != QHostInfo::NoError) {
+        qWarning(QString("Lookup failed: %1").arg(hostInfo.errorString()).toAscii());
+        return;
+    }
+
+    if (!addresses.isEmpty())
+    {
+        QHostAddress address = addresses.first();
+        qDebug() << "Connect: " << address.toString() << " Port: " << port << endl;
     }
 }
 
