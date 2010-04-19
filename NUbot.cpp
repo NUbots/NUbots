@@ -60,6 +60,8 @@
     #include <execinfo.h>
 #endif
 
+NUbot* NUbot::m_this = NULL;
+
 /*! @brief Constructor for the nubot
     
     The parameters are for command line arguements. Webots gives the binary arguements which tell us the 
@@ -70,6 +72,7 @@
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+    NUbot::m_this = this;
     connectErrorHandling();
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
@@ -138,7 +141,7 @@ void NUbot::connectErrorHandling()
 {
     #ifndef TARGET_OS_IS_WINDOWS
         struct sigaction newaction, oldaction;
-        newaction.sa_handler = segFaultHandler;
+        newaction.sa_handler =segFaultHandler;
         
         sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
     #endif
@@ -284,6 +287,12 @@ void NUbot::run()
  */
 void NUbot::segFaultHandler(int value)
 {
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // red
+    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
+    sleep(2);
 	#ifndef TARGET_OS_IS_WINDOWS
 	    errorlog << "SEGMENTATION FAULT. " << endl;
         debug << "SEGMENTATION FAULT. " << endl;
@@ -295,6 +304,7 @@ void NUbot::segFaultHandler(int value)
 	    for (size_t i=0; i<size; i++)
 		errorlog << strings[i] << endl;
 		//!< @todo TODO: after a seg fault I should fail safely!
+
 	#endif
 }
 
