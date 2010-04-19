@@ -216,9 +216,9 @@ void MainWindow::createActions()
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
 
-    doTestAction = new QAction(tr("&Do Test"), this);
-    doTestAction->setStatusTip(tr("Test something."));
-    connect(doTestAction, SIGNAL(triggered()), this, SLOT(doTest()));
+    doBonjourTestAction = new QAction(tr("&Do Bonjour Test"), this);
+    doBonjourTestAction->setStatusTip(tr("Test something."));
+    connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
 }
 
 void MainWindow::createMenus()
@@ -258,7 +258,7 @@ void MainWindow::createMenus()
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
     windowMenu->addAction(nativeAspectAction);
-    windowMenu->addAction(doTestAction);
+    windowMenu->addAction(doBonjourTestAction);
 }
 
 void MainWindow::createContextMenu()
@@ -440,7 +440,7 @@ void MainWindow::shrinkToNativeAspectRatio()
     }
 }
 
-void MainWindow::doTest()
+void MainWindow::BonjourTest()
 {
     robotSelectDialog test(this, "_nuview._tcp");
     if(test.exec())
@@ -450,7 +450,7 @@ void MainWindow::doTest()
         {
                 bonjourResolver = new BonjourServiceResolver(this);
                 connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)),
-                        this, SLOT(connectToRobot(const QHostInfo &, int)));
+                        this, SLOT(PrintConnectionInfo(const QHostInfo &, int)));
         }
         bonjourResolver->resolveBonjourRecord(bonjourHost);
     }
@@ -460,7 +460,7 @@ void MainWindow::doTest()
     }
 }
 
-void MainWindow::connectToRobot(const QHostInfo &hostInfo, int port)
+void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
 {
     const QList<QHostAddress> &addresses = hostInfo.addresses();
 

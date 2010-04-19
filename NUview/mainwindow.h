@@ -62,7 +62,7 @@ public slots:
     void filenameChanged(QString filename); //!< New filename
     void fileClosed(); //!< File was closed.
 
-    void doTest();
+    void BonjourTest();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -93,7 +93,7 @@ protected slots:
 //    locWmGlDisplay* createLocWmGlDisplay();
     QMdiSubWindow* createGLDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
-    void connectToRobot(const QHostInfo &hostInfo, int);
+    void PrintConnectionInfo(const QHostInfo &hostInfo, int);
 
 private:
     //! Virtual robot, does data storage and robot based processing.
@@ -167,7 +167,7 @@ private:
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
 
-    QAction *doTestAction;    //!< Instance of the do test Action
+    QAction *doBonjourTestAction;    //!< Instance of the do test Action
     BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
