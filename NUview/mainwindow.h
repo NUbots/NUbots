@@ -142,6 +142,7 @@ private:
     QMenu *editMenu;                //!< Instance of the edit menu
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
     QMenu *windowMenu;              //!< Instance of the window menu
+    QMenu *testMenu;                //!< Instance of the test menu
     QMenu *visionWindowMenu;        //!< Instance of the vision window menu
     QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
     QMenu *networkWindowMenu;        //!< Instance of the network window menu
