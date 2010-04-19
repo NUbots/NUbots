@@ -225,7 +225,7 @@ void MainWindow::createActions()
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
 
-    doBonjourTestAction = new QAction(tr("&Do Bonjour Test..."), this);
+    doBonjourTestAction = new QAction(tr("&Bonjour Test..."), this);
     doBonjourTestAction->setStatusTip(tr("Test something."));
     connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
 }
@@ -253,6 +253,9 @@ void MainWindow::createMenus()
     navigationMenu->addAction(nextFrameAction);
     navigationMenu->addAction(lastFrameAction);
 
+    testMenu = menuBar()->addMenu(tr("&Testing"));
+    testMenu->addAction(doBonjourTestAction);
+
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
 
@@ -267,7 +270,6 @@ void MainWindow::createMenus()
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
     windowMenu->addAction(nativeAspectAction);
-    windowMenu->addAction(doBonjourTestAction);
 }
 
 void MainWindow::createContextMenu()
