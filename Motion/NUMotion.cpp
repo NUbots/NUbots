@@ -273,7 +273,6 @@ void NUMotion::calculateCycleTime()
     
     cycle_time_accumulator(m_current_time - m_previous_time);
     m_cycle_time = static_cast<int> (mean(cycle_time_accumulator));
-    cout << m_cycle_time << endl;
 }
 
 

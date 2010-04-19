@@ -24,6 +24,7 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Head/PIDController.h"
+#include "Tools/MotionCurves.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -73,6 +74,15 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     {
         m_actions->addJointPositions(NUActionatorsData::HeadJoints, times[i], positions[i], vel, gain);
     }
+    
+    vector<float> sensorpositions;
+    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
+    vector<float> curvetimes, curvepositions;
+    MotionCurves::calculate(m_data->CurrentTime, times[0], sensorpositions[0], positions[0][0], 0.5, 10, curvetimes, curvepositions);
+    
+    cout << "MotionCurve: " << m_data->CurrentTime << " to " << times[0] << endl;
+    for (unsigned int i=0; i<curvetimes.size(); i++)
+        cout << curvetimes[i] << ", " << curvepositions[i] << endl;
 }
 
 void NUHead::doHead()
