@@ -74,13 +74,13 @@ JuppWalk::JuppWalk()
 
 void JuppWalk::initWalkParameters()
 {
-    m_step_frequency = 0.1;
-    m_param_phase_offset = 0.20;                // the phase offset for the shortening, loading and swing phases
+    m_step_frequency = 0.8;
+    m_param_phase_offset = 0.60;                // the phase offset for the shortening, loading and swing phases
     // weight shift parameters
-    m_param_shift_c = 0.45;                     // controls the shift amplitude
-    m_param_ankle_shift = 0.0;                 // controls the fraction of the shift done by the ankles
+    m_param_shift_c = 0.24;                     // controls the shift amplitude
+    m_param_ankle_shift = 0.125;                 // controls the fraction of the shift done by the ankles
     // leg shortening parameters
-    m_param_short_c = 0.4;                      // controls the leg shortening amplitude
+    m_param_short_c = 0.3;                      // controls the leg shortening amplitude
     m_param_short_v = 2.0;                      // controls the duration of the leg shortening phase
     // leg loading parameters
     m_param_load_c = 0.025;                     // controls the loading amplitude
@@ -94,7 +94,7 @@ void JuppWalk::initWalkParameters()
     m_param_gyro_roll = 0.1;
     m_param_gyro_pitch = 0.1;
     // gait phase resetting
-    m_param_phase_reset_offset = 0.88;
+    m_param_phase_reset_offset = 0.24;
     
     // At the moment this walk engine uses the same walk parameters for an entire walking cycle
     m_gait_walk_parameters.push_back(vector<WalkParameters::Parameter>());
@@ -113,7 +113,7 @@ void JuppWalk::initWalkParameters()
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_gyro_pitch, 0.0, 1.0));
     m_gait_walk_parameters[0].push_back(WalkParameters::Parameter(m_param_phase_reset_offset, -1.0, 1.0));
     
-    m_gait_max_speeds.push_back(6.0);
+    m_gait_max_speeds.push_back(7.0);
     m_gait_max_speeds.push_back(2.5);
     m_gait_max_speeds.push_back(0.4);
     
@@ -450,8 +450,6 @@ void JuppWalk::calculateGyroFeedback()
 {
     static vector<float> values;        // [vx, vy, vz]
     m_data->getGyroValues(values);
-    
-    return;
 
     static const float roll_threshold = 0.10;
     static const float pitch_threshold = 0.10;          
