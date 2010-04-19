@@ -225,7 +225,7 @@ void MainWindow::createActions()
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
 
-    doBonjourTestAction = new QAction(tr("&Do Bonjour Test"), this);
+    doBonjourTestAction = new QAction(tr("&Do Bonjour Test..."), this);
     doBonjourTestAction->setStatusTip(tr("Test something."));
     connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
 }
