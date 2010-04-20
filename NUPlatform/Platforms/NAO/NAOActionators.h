@@ -44,6 +44,7 @@ public:
     ~NAOActionators();
 private:
     void getActionatorsFromAldebaran();
+    void startUltrasonics();
     void createALDCMCommands();
     void createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators);
     void copyToHardwareCommunications();

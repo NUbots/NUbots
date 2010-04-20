@@ -137,8 +137,10 @@ void NAOActionators::getActionatorsFromAldebaran()
 #endif
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
     m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
+    
+    // Create actionator aliases
     ALValue param;
-    param.arraySetSize(2);
+    param.arraySetSize(2);      // an alias always has length two [aliasname, [device0, device1, device2, ..., deviceN]
 
     param[0] = ALIAS_POSITION;
     param[1] = m_servo_position_names;
@@ -178,6 +180,29 @@ void NAOActionators::getActionatorsFromAldebaran()
     #endif
     
     createALDCMCommands();
+    startUltrasonics();
+}
+
+/*! @brief Starts the ultrasonic sensors in periodic left and right mode
+ */
+void NAOActionators::startUltrasonics()
+{
+    // nowadays the ultrasonics need only be started in periodic mode:
+    // the distances are put in US/Sensor/Right/Value and US/Sensor/Left/Value
+    ALValue command;            // [actuatorname, "ClearAll", [[value, time]] ]
+    command.arraySetSize(3);
+    command[0] = "US/Actuator/Value";
+    command[1] = "ClearAll";
+    
+    ALValue params, param;
+    params.arraySetSize(1);
+    param.arraySetSize(2);
+    param[0] = 68.0;                    // left/right periodic mode = 64.0 + 4.0
+    param[1] = m_al_dcm->getTime(0);
+    params[0] = param;
+    command[2] = params;
+    
+    m_al_dcm->set(command);
 }
 
 void NAOActionators::createALDCMCommands()
