@@ -466,7 +466,7 @@ void MainWindow::UKFTest()
     mean[1][0] = 5;
     test.setMean(mean);
     Matrix cov(2,2,true);
-    cov = 2*cov;
+    cov = 3*cov;
     test.setCovariance(cov);
 
     debug << "Original Data: " << endl << "Mean:" << endl << mean << "Covariance:" << endl << cov << endl;

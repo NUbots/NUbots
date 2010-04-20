@@ -23,6 +23,7 @@ protected:
    unsigned int m_numStates;
    Matrix m_mean;
    Matrix m_covariance;
+   Matrix m_sigmaWeights;
    float m_kappa;
 };
 
