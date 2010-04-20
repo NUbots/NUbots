@@ -119,7 +119,7 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
     vector<float> headVector;
     headVector.push_back(newTilt);
     headVector.push_back(newPan);
-    HeadJob* head = new HeadJob(0,headVector);
+    HeadJob * head = new HeadJob(0,headVector);
     
     jobs.addMotionJob(head);
  
@@ -167,7 +167,6 @@ void Behaviour::Pan(JobList& jobs)
         positions[7][1] = 0;
         
         HeadJob* head = new HeadJob(times, positions);
-        
 
         jobs.addMotionJob(head);
     }

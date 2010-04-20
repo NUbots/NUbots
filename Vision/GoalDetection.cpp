@@ -93,7 +93,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     if((int)horizontalSegments.size() ==0 && (int)FO_AboveHorizonCandidates.size() ==0) return;
 
     vector < ObjectCandidate > ::iterator itAboveHorizon;
-
+    debug << "AboveHoriCands:" << endl;
     for (itAboveHorizon = FO_AboveHorizonCandidates.begin(); itAboveHorizon < FO_AboveHorizonCandidates.end(); )
     {
         if( itAboveHorizon->getTopLeft().x > TopLeft.x - margin &&
@@ -119,7 +119,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
             PossibleGoal->setTopLeft(TopLeft);
             PossibleGoal->setBottomRight(BottomRight);
             itAboveHorizon = FO_AboveHorizonCandidates.erase(itAboveHorizon);
-
+            debug << "OverLapping: Join Cand " << endl;
             //usedAbovehorizonCandidate[i] = true;
             //qDebug() <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
         }
@@ -130,85 +130,53 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 
     }
     //SCANS UP THE IMAGE
-
+    debug << "TransitionSeg Join:" << endl;
     for (int i = (int)horizontalSegments.size(); i >= 0; i--)
     {
         //qDebug() << "Crash Check: Access HZsegs: " << i;
         TransitionSegment tempSegment = horizontalSegments[i];
-        if(Colour == ClassIndex::yellow || Colour == ClassIndex::yellow_orange)
+        //! If     Candidate colour is a blue varient and Segment colour is a blue varient OR
+        //!        Candidate colour is a yellow varient and Segment colour is a yellow varient
+        //! THEN   Extend the Candidate with Segment information.
+
+        if(     ((Colour == ClassIndex::blue || Colour == ClassIndex::shadow_blue) &&
+                (tempSegment.getColour() == ClassIndex::blue || tempSegment.getColour() == ClassIndex::shadow_blue)) ||
+                ((Colour == ClassIndex::yellow || Colour == ClassIndex::yellow_orange) &&
+                (tempSegment.getColour() == ClassIndex::yellow || tempSegment.getColour() == ClassIndex::yellow_orange))
+            )
         {
-            if(tempSegment.getColour() == ClassIndex::yellow || tempSegment.getColour() == ClassIndex::yellow_orange)
+            if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
             {
-                if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
+                //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
+                if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
                 {
-                    //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
-                    if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = PossibleGoal->getTopLeft().x;
-                        tempPoint.y = tempSegment.getStartPoint().y;
-                        PossibleGoal->setTopLeft(tempPoint);
-                    }
-                    if(tempSegment.getStartPoint().x < PossibleGoal->getTopLeft().x)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = tempSegment.getStartPoint().x;
-                        tempPoint.y = PossibleGoal->getTopLeft().y;
-                        PossibleGoal->setTopLeft(tempPoint);
-                    }
-                    if(tempSegment.getEndPoint().y > PossibleGoal->getBottomRight().y)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = PossibleGoal->getBottomRight().x;
-                        tempPoint.y = tempSegment.getEndPoint().y;
-                        PossibleGoal->setBottomRight(tempPoint);
-                    }
-                    if(tempSegment.getEndPoint().x > PossibleGoal->getBottomRight().x)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = tempSegment.getEndPoint().x;
-                        tempPoint.y = PossibleGoal->getBottomRight().y;
-                        PossibleGoal->setBottomRight(tempPoint);
-                    }
+                    Vector2<int> tempPoint;
+                    tempPoint.x = PossibleGoal->getTopLeft().x;
+                    tempPoint.y = tempSegment.getStartPoint().y;
+                    PossibleGoal->setTopLeft(tempPoint);
                 }
-            }
-        }
-        else if(Colour == ClassIndex::blue || Colour == ClassIndex::shadow_blue)
-        {
-            if(tempSegment.getColour() == ClassIndex::blue || tempSegment.getColour() == ClassIndex::shadow_blue)
-            {
-                if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
+                if(tempSegment.getStartPoint().x < PossibleGoal->getTopLeft().x)
                 {
-                    //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
-                    if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = PossibleGoal->getTopLeft().x;
-                        tempPoint.y = tempSegment.getStartPoint().y;
-                        PossibleGoal->setTopLeft(tempPoint);
-                    }
-                    if(tempSegment.getStartPoint().x < PossibleGoal->getTopLeft().x)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = tempSegment.getStartPoint().x;
-                        tempPoint.y = PossibleGoal->getTopLeft().y;
-                        PossibleGoal->setTopLeft(tempPoint);
-                    }
-                    if(tempSegment.getEndPoint().y > PossibleGoal->getBottomRight().y)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = PossibleGoal->getBottomRight().x;
-                        tempPoint.y = tempSegment.getEndPoint().y;
-                        PossibleGoal->setBottomRight(tempPoint);
-                    }
-                    if(tempSegment.getEndPoint().x > PossibleGoal->getBottomRight().x)
-                    {
-                        Vector2<int> tempPoint;
-                        tempPoint.x = tempSegment.getEndPoint().x;
-                        tempPoint.y = PossibleGoal->getBottomRight().y;
-                        PossibleGoal->setBottomRight(tempPoint);
-                    }
+                    Vector2<int> tempPoint;
+                    tempPoint.x = tempSegment.getStartPoint().x;
+                    tempPoint.y = PossibleGoal->getTopLeft().y;
+                    PossibleGoal->setTopLeft(tempPoint);
                 }
+                if(tempSegment.getEndPoint().y > PossibleGoal->getBottomRight().y)
+                {
+                    Vector2<int> tempPoint;
+                    tempPoint.x = PossibleGoal->getBottomRight().x;
+                    tempPoint.y = tempSegment.getEndPoint().y;
+                    PossibleGoal->setBottomRight(tempPoint);
+                }
+                if(tempSegment.getEndPoint().x > PossibleGoal->getBottomRight().x)
+                {
+                    Vector2<int> tempPoint;
+                    tempPoint.x = tempSegment.getEndPoint().x;
+                    tempPoint.y = PossibleGoal->getBottomRight().y;
+                    PossibleGoal->setBottomRight(tempPoint);
+                }
+                debug << "OverLapping: Join TranSeg [" << i<< "]"<< endl;
             }
         }
     }

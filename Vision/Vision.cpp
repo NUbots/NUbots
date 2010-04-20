@@ -36,7 +36,7 @@ Vision::Vision()
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
    // testLUTBuffer = new unsigned char [128*128*128];
     currentLookupTable = LUTBuffer;
-    imagefile.open ("/var/volatile/images.nul");
+    imagefile.open ("/home/nao/images.nul");
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
@@ -257,6 +257,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
 
     //! Identify Field Objects
+
     //qDebug() << "PREclassifyCandidates";
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
@@ -319,7 +320,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     }
     DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
-    
+
     #if DEBUG_VISION_VERBOSITY > 4
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
@@ -632,7 +633,9 @@ ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++;
     int minY = height;
+    int minX = width;
     int maxY = 0;
+    int maxX = 0;
     for (; nextPoint != fieldBorders.end(); nextPoint++)
     {
         if(nextPoint->y < minY)
@@ -642,6 +645,14 @@ ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders
         if(nextPoint->y >maxY)
         {
             maxY = nextPoint->y;
+        }
+        if(nextPoint->x < minX)
+        {
+            minX = nextPoint->x;
+        }
+        if(nextPoint->x > maxX)
+        {
+            maxX = nextPoint->x;
         }
     }
 
@@ -662,14 +673,29 @@ ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders
         ScanLine tempScanLine(temp,width);
         scanArea.addScanLine(tempScanLine);
     }
-    /*//! Generate Scan Pattern under green horizon
-    for(int y = minY; y < currentImage->height(); y = y + scanSpacing/2)
+    //! Generate Scan Pattern premature end of horizon
+    for(int y = maxY; y < height; y = y + scanSpacing*2)
     {
-        temp.x =0;
+        if(maxX > width - scanSpacing*3)
+        {
+            break;
+        }
+        temp.x = maxX;
         temp.y = y;
-        ScanLine* tempScanLine = new ScanLine(temp,currentImage->width());
-        scanArea->addScanLine(tempScanLine);
-    }*/
+        ScanLine tempScanLine(temp,width-maxX);
+        scanArea.addScanLine(tempScanLine);
+    }
+    for(int y = maxY; y < height; y = y + scanSpacing*2)
+    {
+        if(minX < scanSpacing*3)
+        {
+            break;
+        }
+        temp.x = 0;
+        temp.y = y;
+        ScanLine tempScanLine(temp,minX);
+        scanArea.addScanLine(tempScanLine);
+    }
     return scanArea;
 }
 
@@ -1283,7 +1309,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-        //delete colourHistogram;
+	    delete colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())

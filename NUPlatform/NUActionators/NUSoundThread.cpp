@@ -25,7 +25,7 @@
 #include "debugverbositynuactionators.h"
 #include "nubotdataconfig.h"
 #include "targetconfig.h"
-
+#include <stdlib.h>
 #include <errno.h>
 
 using namespace std;

@@ -90,6 +90,7 @@ public:
     TeamInformation* TeamInfo;
     
 private:
+    static NUbot* m_this;
     NUPlatform* m_platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* m_vision;                 //!< vision module
