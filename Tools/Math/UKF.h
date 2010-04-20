@@ -12,11 +12,13 @@ public:
     ~UKF();
     Matrix GenerateSigmaWeights(float kappa = 1.0f) const;
     Matrix GenerateSigmaPoints() const;
-    Matrix CalculateSigmaPointsMean(const Matrix& sigmaPoints) const;
-    Matrix CalculateSigmaPointsCovariance(const Matrix& sigmaPoints, const Matrix& mean) const;
+    Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const;
+    Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const;
+    Matrix PerformTimeUpdate(const Matrix& updateSigmaPoints);
     void setMean(const Matrix& newMean) {m_mean = newMean;};
     void setCovariance(const Matrix& newCovariance) {m_covariance = newCovariance;};
     double getMean(int stateId) const;
+    double calculateSd(int stateId) const;
     bool setState(Matrix mean, Matrix covariance);
 
 protected:

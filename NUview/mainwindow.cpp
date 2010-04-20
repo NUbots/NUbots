@@ -460,13 +460,15 @@ void MainWindow::shrinkToNativeAspectRatio()
 
 void MainWindow::UKFTest()
 {
-    UKF test(2);
-    Matrix mean(2,1,false);
+    int numStates = 7;
+    UKF test(numStates);
+    Matrix mean(numStates,1,false);
     mean[0][0] = 10;
     mean[1][0] = 5;
     test.setMean(mean);
-    Matrix cov(2,2,true);
+    Matrix cov(numStates,numStates,true);
     cov = 3*cov;
+    cov[0][0] += 5;
     test.setCovariance(cov);
 
     debug << "Original Data: " << endl << "Mean:" << endl << mean << "Covariance:" << endl << cov << endl;
@@ -474,9 +476,16 @@ void MainWindow::UKFTest()
     debug << "Sigma Points:" << endl << sigmas << endl;
     debug << "Sigma Weights:" << endl << test.GenerateSigmaWeights() << endl;
     Matrix testMean, testCov;
-    testMean = test.CalculateSigmaPointsMean(sigmas);
-    testCov = test.CalculateSigmaPointsCovariance(sigmas,testMean);
+    testMean = test.CalculateMeanFromSigmas(sigmas);
+    testCov = test.CalculateCovarianceFromSigmas(sigmas,testMean);
     debug << "Converted Data: " << endl << "Mean:" << endl << testMean << "Covariance:" << endl << testCov << endl;
+
+    for (int i = 0; i < numStates; i++)
+    {
+        debug << endl << "State " << i << endl;
+        debug << "Mean: " << test.getMean(i) << endl;
+        debug << "Standard Deviation: " << test.calculateSd(i) << endl;
+    }
 }
 
 void MainWindow::BonjourTest()
