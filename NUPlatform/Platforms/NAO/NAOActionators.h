@@ -68,6 +68,9 @@ private:
     static vector<string> m_led_names;
     static unsigned int m_num_leds;
     
+    static vector<string> m_other_names;
+    static unsigned int m_num_others;
+    
     static vector<string> m_actionator_names;
     static unsigned int m_num_actionators;
     

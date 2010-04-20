@@ -63,7 +63,6 @@ vector<string> NAOActionators::m_chestled_names(temp_chestled_names, temp_chestl
 unsigned int NAOActionators::m_num_chestleds = NAOActionators::m_chestled_names.size();
 
 // init m_footled_names
-
 static string temp_footled_names[] = {  DN_LED_FOOT_LEFT_RED, DN_LED_FOOT_LEFT_GREEN, DN_LED_FOOT_LEFT_BLUE, \
                                         DN_LED_FOOT_RIGHT_RED, DN_LED_FOOT_RIGHT_GREEN, DN_LED_FOOT_RIGHT_BLUE};
 vector<string> NAOActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
@@ -71,6 +70,11 @@ unsigned int NAOActionators::m_num_footleds = NAOActionators::m_footled_names.si
 
 vector<string> NAOActionators::m_led_names;
 unsigned int NAOActionators::m_num_leds;
+
+// init m_other_names
+static string temp_other_names[] = {"Sound"};
+vector<string> NAOActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
+unsigned int NAOActionators::m_num_others = NAOActionators::m_other_names.size();
 
 vector<string> NAOActionators::m_actionator_names;
 unsigned int NAOActionators::m_num_actionators;
@@ -86,6 +90,7 @@ NAOActionators::NAOActionators()
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
+    m_data->setAvailableOtherActionators(m_other_names);
     
     double time = nusystem->getTime();
     vector<float> rgb(3,0);
@@ -364,6 +369,8 @@ void NAOActionators::copyToHardwareCommunications()
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << m_actionator_command.toString(VerbosityMini) << endl;
     #endif
+    
+    copyToSound();
     
     m_data->removeCompletedPoints(m_current_time);
 }
