@@ -206,7 +206,7 @@ Matrix& Matrix::operator =  (const Matrix& a)
 }
 
 // Matrix Transpose
-Matrix	Matrix::transp()
+Matrix	Matrix::transp() const
 {
 	Matrix transpAns(getn(),getm());
 	int i=0,j=0;
@@ -220,7 +220,7 @@ Matrix	Matrix::transp()
 	return transpAns;
 }
 
-Matrix  Matrix::getRow(int index)
+Matrix  Matrix::getRow(int index) const
 {
     Matrix Row (1,getn());
     int i=0;
@@ -230,7 +230,7 @@ Matrix  Matrix::getRow(int index)
     return Row;
 }
 
-Matrix  Matrix::getCol(int index)
+Matrix  Matrix::getCol(int index) const
 {
     Matrix Col (getm(),1);
     int i=0;

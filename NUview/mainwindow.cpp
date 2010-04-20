@@ -19,6 +19,8 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
+#include "Tools/Math/UKF.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -70,7 +72,6 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
     networkTabs->addTab(cameraSetting, cameraSetting->objectName());
-
 
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
@@ -228,6 +229,9 @@ void MainWindow::createActions()
     doBonjourTestAction = new QAction(tr("&Bonjour Test..."), this);
     doBonjourTestAction->setStatusTip(tr("Test something."));
     connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
+
+    UKFTestAction = new QAction(tr("&UKF Test"), this);
+    connect(UKFTestAction, SIGNAL(triggered()), this, SLOT(UKFTest()));
 }
 
 void MainWindow::createMenus()
@@ -255,6 +259,7 @@ void MainWindow::createMenus()
 
     testMenu = menuBar()->addMenu(tr("&Testing"));
     testMenu->addAction(doBonjourTestAction);
+    testMenu->addAction(UKFTestAction);
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -451,6 +456,27 @@ void MainWindow::shrinkToNativeAspectRatio()
             activeSubWindow->resize(sourceSize);
         }
     }
+}
+
+void MainWindow::UKFTest()
+{
+    UKF test(2);
+    Matrix mean(2,1,false);
+    mean[0][0] = 10;
+    mean[1][0] = 5;
+    test.setMean(mean);
+    Matrix cov(2,2,true);
+    cov = 2*cov;
+    test.setCovariance(cov);
+
+    debug << "Original Data: " << endl << "Mean:" << endl << mean << "Covariance:" << endl << cov << endl;
+    Matrix sigmas = test.GenerateSigmaPoints();
+    debug << "Sigma Points:" << endl << sigmas << endl;
+    debug << "Sigma Weights:" << endl << test.GenerateSigmaWeights() << endl;
+    Matrix testMean, testCov;
+    testMean = test.CalculateSigmaPointsMean(sigmas);
+    testCov = test.CalculateSigmaPointsCovariance(sigmas,testMean);
+    debug << "Converted Data: " << endl << "Mean:" << endl << testMean << "Covariance:" << endl << testCov << endl;
 }
 
 void MainWindow::BonjourTest()
