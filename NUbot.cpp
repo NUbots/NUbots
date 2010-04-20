@@ -21,6 +21,7 @@
 
 #include "debugverbositynubot.h"
 #include "debug.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "NUbot.h"
 #include "Behaviour/Jobs.h"
@@ -141,7 +142,7 @@ void NUbot::connectErrorHandling()
 {
     #ifndef TARGET_OS_IS_WINDOWS
         struct sigaction newaction, oldaction;
-        newaction.sa_handler =segFaultHandler;
+        newaction.sa_handler = segFaultHandler;
         
         sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
     #endif
@@ -176,7 +177,23 @@ void NUbot::createThreads()
 NUbot::~NUbot()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Deleting Threads" << endl;
+        debug << "NUbot::~NUbot()." << endl;
+    #endif
+    
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.25; allleds[0][2] = 0.0;
+    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
+    
+    #ifdef USE_MOTION
+        float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
+        vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+        vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+        vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
+        NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
+        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        sleep(2);
     #endif
 
     // --------------------------------- delete threads
@@ -290,9 +307,16 @@ void NUbot::segFaultHandler(int value)
     vector<float> rgb(3,0);
     vector<vector<float> > allleds;
     allleds.push_back(rgb);
-    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // red
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;
     NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
-    sleep(2);
+    NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+    
+    float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
+    vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+    vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+    vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
+    NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
+    NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
 	#ifndef TARGET_OS_IS_WINDOWS
 	    errorlog << "SEGMENTATION FAULT. " << endl;
         debug << "SEGMENTATION FAULT. " << endl;
@@ -303,9 +327,8 @@ void NUbot::segFaultHandler(int value)
 	    strings = backtrace_symbols(array, size);
 	    for (size_t i=0; i<size; i++)
 		errorlog << strings[i] << endl;
-		//!< @todo TODO: after a seg fault I should fail safely!
-
 	#endif
+    sleep(3);
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
@@ -315,6 +338,7 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
+        NUbot::m_this->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
         void *array[10];

@@ -90,7 +90,7 @@ public:
     TeamInformation* TeamInfo;
     
 private:
-    static NUbot* m_this;
+    static NUbot* m_this;                 //!< a pointer to the last instance of a NUbot
     NUPlatform* m_platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* m_vision;                 //!< vision module
