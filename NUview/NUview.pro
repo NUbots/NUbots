@@ -93,7 +93,8 @@ HEADERS += ui_mainwindow.h \
     bonjour/bonjourserviceresolver.h \
     bonjour/bonjourservicebrowser.h \
     bonjour/bonjourrecord.h \
-    ../Tools/Math/UKF.h
+    ../Tools/Math/UKF.h \
+    ../Kinematics/AngleUKF.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -168,6 +169,7 @@ SOURCES += mainwindow.cpp \
     bonjour/robotSelectDialog.cpp \
     bonjour/bonjourserviceresolver.cpp \
     bonjour/bonjourservicebrowser.cpp \
-    ../Tools/Math/UKF.cpp
+    ../Tools/Math/UKF.cpp \
+    ../Kinematics/AngleUKF.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
