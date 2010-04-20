@@ -29,6 +29,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
+    //TEST:
 }
 
 virtualNUbot::~virtualNUbot()
