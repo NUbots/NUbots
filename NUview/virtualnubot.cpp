@@ -349,7 +349,6 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     }
     //qDebug() << "Crash Check: Before Final Update:";
 
-    //TESTING:
 
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     return;
