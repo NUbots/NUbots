@@ -109,12 +109,12 @@ void SenseMoveThread::run()
                 if (threadendtime - threadstarttime > 7)
                     debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
             #endif
-            onLoopCompleted();
         }
         catch (std::exception& e) 
         {
             m_nubot->unhandledExceptionHandler(e);
         }
+        onLoopCompleted();
     }
     errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << endl;
 }
