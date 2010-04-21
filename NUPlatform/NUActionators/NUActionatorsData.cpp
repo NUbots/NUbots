@@ -368,7 +368,7 @@ void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actio
     {
         if (simpleactionatornames[i].find("sound") != string::npos)
             addActionator(Sound, actionatornames[i], actionator_t<string>::SOUND);
-        else if (simpleactionatornames[i].compare("teleporter") != string::npos || simpleactionatornames[i].compare("teleportation") != string::npos)
+        else if (simpleactionatornames[i].find("teleporter") != string::npos || simpleactionatornames[i].find("teleportation") != string::npos)
             addActionator(Teleporter, actionatornames[i], actionator_t<float>::TELEPORTER);
         else
             debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
