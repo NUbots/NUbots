@@ -93,11 +93,11 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-		 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
-			visionrealstarttime = NUSystem::getRealTime();
-			visionprocessstarttime = NUSystem::getProcessTime();
-			visionthreadstarttime = NUSystem::getThreadTime();
-		#endif
+                 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+                    visionrealstarttime = NUSystem::getRealTime();
+                    visionprocessstarttime = NUSystem::getProcessTime();
+                    visionthreadstarttime = NUSystem::getThreadTime();
+                #endif
 		
                 m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
                 *(m_nubot->m_io) << m_nubot->Image;  //<! Raw IMAGE STREAMING (TCP)
