@@ -78,6 +78,7 @@ private:
     void unhandledExceptionHandler(std::exception& e);
     
     void createThreads();
+    void periodicSleep(int period);
     
 public:
     #ifdef USE_VISION

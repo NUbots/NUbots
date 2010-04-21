@@ -270,7 +270,7 @@ NUbot::~NUbot()
  */
 void NUbot::run()
 {
-#ifdef TARGET_IS_NAOWEBOTS
+#if defined(TARGET_IS_NAOWEBOTS)
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
@@ -297,7 +297,38 @@ void NUbot::run()
         
         count++;
     };
+#else
+    #if !defined(USE_VISION)
+        while (true)
+        {
+            periodicSleep(33);
+            m_seethink_thread->startLoop();
+            m_seethink_thread->waitForLoopCompletion();
+        }
+    #endif
 #endif
+}
+
+void NUbot::periodicSleep(int period)
+{
+    static double starttime = nusystem->getTime();
+    double timenow = nusystem->getTime();
+    double requiredsleeptime = period - (timenow - starttime);
+    if (requiredsleeptime > 0)
+    {
+        #ifdef __USE_POSIX199309
+            struct timespec sleeptime;
+            sleeptime.tv_sec = static_cast<int> (requiredsleeptime/1000.0);
+            sleeptime.tv_nsec = 1e6*requiredsleeptime - sleeptime.tv_sec*1e9;
+            clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
+        #else
+            if (requiredsleeptime > 1000)
+                sleep(requiredsleeptime/1000.0);
+            else
+                usleep(requiredsleeptime*1000);
+        #endif
+    }
+    starttime = nusystem->getTime();
 }
 
 /*! @brief 'Handles' a segmentation fault; logs the backtrace to errorlog
