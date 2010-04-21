@@ -229,9 +229,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    //fieldLines = vision.DetectLines(&vertScanArea,spacings);
+    fieldLines = vision.DetectLines(&vertScanArea,spacings);
     //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -349,6 +349,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     }
     //qDebug() << "Crash Check: Before Final Update:";
 
+    //TESTING:
 
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     return;

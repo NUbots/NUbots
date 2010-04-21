@@ -26,6 +26,7 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
+#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -299,10 +300,6 @@ void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDispl
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
 
-
-
-
-
     drawHollowCircle(x, y, radius, 50);
 
     glEnable(GL_TEXTURE_2D);
@@ -359,24 +356,48 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
     glLineWidth(2.0);       // Line width
+
     for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
 
-        if(fieldLines[i].valid == true){
+        if(fieldLines[i].valid == true)
+        {
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));                 // Starting point
-            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
             glEnd();  // End Lines
+
+            qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
+                        << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);
+
+            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
             glBegin(GL_TRIANGLES);
-             for (unsigned int j =0; j < linePoints.size(); j++)
+            for (unsigned int j =0; j < linePoints.size(); j++)
             {
                 glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
-                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y+0.5),0.0);
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+2),0.0);
+                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y-2),0.0);
             }
             glEnd();
+        }
+        else
+        {
+            //glBegin(GL_LINES);                              // Start Lines
+            //glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
+            //glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
+            //glEnd();  // End Lines
+
         }
     }
         glEnable(GL_TEXTURE_2D);
@@ -384,7 +405,7 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
 
         displayStored[displayId] = true;
 
-
+        //qDebug() << "Updating FieldLines:" << fieldLines.size();
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }

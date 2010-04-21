@@ -43,6 +43,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
         //CornerPointCounter = 0;
 	//FIND LINE POINTS:
         FindLinePoints(scanArea);
+        //qDebug() << "Line Points: " << linePoints.size();
         FindFieldLines(image_width,image_height);
         FindCornerPoints(image_height);
         //DecodeCorners();
@@ -53,7 +54,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
     int numberOfLines = scanArea->getNumberOfScanLines();
     int maxLengthOfScanLine = 0;
 
-    //Find Length of Longest ScanLines as we want to only have longest scan lines.
+    //! Find Length of Longest ScanLines as we want to only have longest scan lines.
     for(int i = 0; i < numberOfLines; i++)
     {
         if(scanArea->getScanLine(i)->getLength() > maxLengthOfScanLine)
@@ -61,24 +62,29 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                 maxLengthOfScanLine = scanArea->getScanLine(i)->getLength();
         }
     }
+    //! Find the LinePoints:
     for(int i = 0; i< numberOfLines; i++)
     {
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
         for(int j = 0; j < numberOfSegments; j++)
         {
-            if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
+            //! Throw out short segments
+            //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
             //int segmentSize = segment->getSize();
-            //CHECK SIZE
+            //! CHECK The Length of the segment
             if(segment->getSize() < MIN_POINT_THICKNESS || segment->getSize() > VERT_POINT_THICKNESS ) continue;
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            if(     ClassIndex::green   ==  segment->getBeforeColour()
+            if(     (ClassIndex::green   ==  segment->getBeforeColour()
                 &&  ClassIndex::white   ==  segment->getColour()
                 &&  ClassIndex::green   ==  segment->getAfterColour())
-                    /*(ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
-                    || (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour()))*/
+                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
+                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour())
+                || (ClassIndex::white   ==  segment->getColour() &&
+                    (ClassIndex::unclassified == segment->getAfterColour() || ClassIndex::unclassified ==segment->getBeforeColour())
+                &&  (ClassIndex::green == segment->getAfterColour() || ClassIndex::green ==segment->getBeforeColour())))
 
             {
                 //ADD A FIELD LINEPOINT!
@@ -94,12 +100,10 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                 bool canNotAdd = false;
                 for (unsigned int num =0; num <linePoints.size(); num++)
                 {
-                    if((fabs(tempLinePoint.x - linePoints[num].x) < 1.0))
+                    if((fabs(tempLinePoint.x - linePoints[num].x) < 0.5) &&
+                       (fabs(tempLinePoint.y - linePoints[num].y) < 0.5))
                     {
-                        if((fabs(tempLinePoint.y - linePoints[num].y) < 1.0))
-                        {
-                            canNotAdd = true;
-                        }
+                        canNotAdd = true;
                     }
                 }
                 if(!canNotAdd)
@@ -107,7 +111,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
-                //// qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
+                 qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
 
             }
