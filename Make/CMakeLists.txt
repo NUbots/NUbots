@@ -41,20 +41,27 @@ ENDIF (DEBUG)
 
 ######################################################## The location of target specific files 
 # this is used by target specific cmake files to locate appropriate sources
+#	- we have TARGET_ROBOT_NAME for a case sensitive name of the platform.
 # 	- we have target specific sources in TARGET_ROBOT_DIR
 # 	- we have target specific configuration and data files in NUBOT_CONFIG_DIR
 # 	- we have target specific location for data files NUBOT_DATA_DIR. This is the location on the actual platform that data files are placed.
 IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
-    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms/NAOWebots)
+    SET(TARGET_ROBOT_NAME NAOWebots)
 ELSEIF(${TARGET_ROBOT} STREQUAL NAO)
-    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms/NAO)
+    SET(TARGET_ROBOT_NAME NAO)
 ELSEIF(${TARGET_ROBOT} STREQUAL CYCLOID)
-    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms/Cycloid)
+    SET(TARGET_ROBOT_NAME Cycloid)
 ELSEIF(${TARGET_ROBOT} STREQUAL NUVIEW)
-    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUview)
+    SET(TARGET_ROBOT_NAME NUview)
 ENDIF()
 
-SET(NUBOT_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../Config/${TARGET_ROBOT} CACHE STRING "Directory for nubot configuration files, i.e. where the Config directory is on your computer")
+IF(${TARGET_ROBOT} STREQUAL NUVIEW)
+    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../${TARGET_ROBOT_NAME})
+ELSE()
+    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms/${TARGET_ROBOT_NAME})
+ENDIF()
+
+SET(NUBOT_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../Config/${TARGET_ROBOT_NAME} CACHE STRING "Directory for nubot configuration files, i.e. where the Config directory for the target platform is on your computer")
 
 SET(TEMP_DATA_DIR "~/nubot")
 IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS OR ${TARGET_ROBOT} STREQUAL NUVIEW)
