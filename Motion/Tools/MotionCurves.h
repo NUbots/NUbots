@@ -30,11 +30,11 @@
 class MotionCurves
 {
 public:
-    static void calculate(float starttime, float stoptime, float startposition, float stopposition, float smoothness, int cycletime, std::vector<float>& calculatedtimes, std::vector<float>& calculatedpositions);
+    static void calculate(double starttime, double stoptime, float startposition, float stopposition, float smoothness, int cycletime, std::vector<double>& calculatedtimes, std::vector<float>& calculatedpositions);
 private:
     MotionCurves() {};
     ~MotionCurves() {};
-    static void calculateTrapezoidalCurve(float starttime, float stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, std::vector<float>& calculatedtimes, std::vector<float>& calculatedpositions);
+    static void calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, std::vector<double>& calculatedtimes, std::vector<float>& calculatedpositions);
 protected:
 public:
 };

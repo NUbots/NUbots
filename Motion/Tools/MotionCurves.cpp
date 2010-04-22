@@ -35,7 +35,7 @@ using namespace std;
     @param calculatedtimes the calculated times for the curve. Do not assume the times will be evenly spaced!
     @param calculatedpositions the calculated positions for the curve.
  */
-void MotionCurves::calculate(float starttime, float stoptime, float startposition, float stopposition, float smoothness, int cycletime, vector<float>& calculatedtimes, vector<float>& calculatedpositions)
+void MotionCurves::calculate(double starttime, double stoptime, float startposition, float stopposition, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions)
 {
     calculateTrapezoidalCurve(starttime, stoptime, startposition, stopposition, 0, 0, smoothness, cycletime, calculatedtimes, calculatedpositions);
 }
@@ -65,19 +65,17 @@ void MotionCurves::calculate(float starttime, float stoptime, float startpositio
       t0  t1     t2   tf
  where t1 and t2 move closer to 0.5*tf as the smoothness is increased to 1.
  */
-void MotionCurves::calculateTrapezoidalCurve(float starttime, float stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<float>& calculatedtimes, vector<float>& calculatedpositions)
+void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions)
 {
     if (smoothness < 0)
         smoothness = - smoothness;
     if (smoothness > 1)
         smoothness = 1;
     
-    float t0 = starttime;
-    float t1 = starttime + 0.5*smoothness*(stoptime - starttime);
-    float t2 = starttime + (stoptime - starttime)*(1 - 0.5*smoothness);
-    float tf = stoptime;
-    
-    cout << t0 << ", " << t1 << ", " << t2 << ", " << tf << endl;
+    double t0 = starttime;
+    double t1 = starttime + 0.5*smoothness*(stoptime - starttime);
+    double t2 = starttime + (stoptime - starttime)*(1 - 0.5*smoothness);
+    double tf = stoptime;
     
     if (t0 > tf)
         return;
@@ -94,7 +92,7 @@ void MotionCurves::calculateTrapezoidalCurve(float starttime, float stoptime, fl
     float As = (vf - v0 - Af*tf + Af*t2)/(t1-t0);
     
     // Calculate the times to calculate the curve points at
-    vector<float> times;
+    vector<double> times;
     for (float t = t0; t <= t1; t += cycletime)
         times.push_back(t);
     for (float t = t2; t < tf; t += cycletime)
