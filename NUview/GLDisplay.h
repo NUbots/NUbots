@@ -98,8 +98,10 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
+        VisionBall,
         FieldLines,
         ObjectCandidates,
+        FieldObjects,
         wmRightLeg,
         wmLeftLeg,
         wmBall,
@@ -150,10 +152,14 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
+            case VisionBall:
+                return QString("Vision Ball");
             case FieldLines:
                 return QString("Field Lines");
             case ObjectCandidates:
                 return QString("Field Object Candidates");
+            case FieldObjects:
+                return QString("Field Objects");
             case wmLeftLeg:
                 return QString("World Model: Left Leg");
             case wmRightLeg:

@@ -110,13 +110,13 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 {
                     
                     currentSettings = m_camera->getSettings();
-                    system("aplay /home/nao/data/Sounds/StartSavingImages.wav");
+                    system("aplay /home/nao/nubot/Sounds/StartSavingImages.wav");
                 }
                 else
                 {
                     
                     m_camera->setSettings(currentSettings);
-                    system("aplay /home/nao/data/Sounds/StopSavingImages.wav");
+                    system("aplay /home/nao/nubot/Sounds/StopSavingImages.wav");
                 }
                 isSavingImages = job->saving();
             }
@@ -290,7 +290,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
@@ -761,10 +761,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
 
-            if(j >= lineLength - skipPixel*2)
+            if(j >= lineLength - skipPixel)
             {
                 //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
-                if((currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                if((currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                 {
                     tempStartPoint = currentPoint;
                     beforeColour = ClassIndex::unclassified;
@@ -833,7 +833,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     }
                     afterColour = classifyPixel(currentPoint.x,currentPoint.y);
                     colourBuff.push_back(afterColour);
-                    j = j+skipPixel*2;
+                    j = j+skipPixel*3;
                     /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
                             "\t"<<currentColour<< "," << afterColour <<
                             "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
@@ -859,7 +859,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     //! Transition detected: Generate new segment and add to the line
                     //Adjust the position:
-                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                     {
                         //SHIFTING THE POINTS TO THE START OF BUFFER:
                         if(direction == ClassifiedSection::DOWN)
@@ -1675,7 +1675,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
         //AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
-        //qDebug() << "Setting FieldObject:";
+        //qDebug() << "Setting FieldObject Distance:" << distance;
         //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
         //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition, sphericalError, viewPosition, currentImage->m_timestamp);
