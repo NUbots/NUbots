@@ -1,4 +1,6 @@
 #include "UKF.h"
+#include "debug.h"
+using namespace std;
 
 
 UKF::UKF(): m_numStates(0)
@@ -9,7 +11,7 @@ UKF::UKF(unsigned int numStates): m_numStates(numStates)
 {
     m_mean = Matrix(m_numStates,1,false);
     m_covariance = Matrix(m_numStates,m_numStates,true);
-    m_sigmaWeights = GenerateSigmaWeights();
+    CalculateSigmaWeights();
 }
 
 UKF::UKF(const UKF& source)
@@ -17,7 +19,7 @@ UKF::UKF(const UKF& source)
     m_numStates = source.m_numStates;
     m_mean = source.m_mean;
     m_covariance = source.m_covariance;
-    m_sigmaWeights = GenerateSigmaWeights();
+    CalculateSigmaWeights();
 }
 
 UKF::~UKF()
@@ -26,12 +28,15 @@ UKF::~UKF()
 
 Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
 {
-    unsigned int numPoints = sigmaPoints.getn();
+    //unsigned int numPoints = sigmaPoints.getn();
     Matrix mean(sigmaPoints.getm(),1,false);
+    mean = sigmaPoints * m_sigmaWeights.transp();
+    /*
     for(unsigned int i = 0; i < numPoints; i++)
     {
         mean = mean + m_sigmaWeights[0][i]*sigmaPoints.getCol(i);
     }
+    */
     return mean;
 }
 
@@ -48,18 +53,24 @@ Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matri
     return covariance;
 }
 
-Matrix UKF::GenerateSigmaWeights(float kappa) const
+void UKF::CalculateSigmaWeights(float kappa)
 {
     unsigned int numPoints = 2*m_numStates + 1;
-    Matrix sigmaWeights(1,numPoints, false);
+    m_sigmaWeights = Matrix(1,numPoints, false);
+    m_sqrtSigmaWeights = Matrix(1,numPoints, false);
+
     double meanWeight = kappa/(m_numStates+kappa);
     double outerWeight = (1.0-meanWeight)/(2*m_numStates);
-    sigmaWeights[0][0] = meanWeight;
+
+    // First weight
+    m_sigmaWeights[0][0] = meanWeight;
+    m_sqrtSigmaWeights[0][0] = sqrt(meanWeight);
+    // The rest
     for(unsigned int i = 1; i < numPoints; i++)
     {
-        sigmaWeights[0][i] = outerWeight;
+        m_sigmaWeights[0][i] = outerWeight;
+        m_sqrtSigmaWeights[0][i] = sqrt(outerWeight);
     }
-    return sigmaWeights;
 }
 
 Matrix UKF::GenerateSigmaPoints() const
@@ -97,11 +108,79 @@ bool UKF::setState(Matrix mean, Matrix covariance)
         m_numStates = mean.getm();
         m_mean = mean;
         m_covariance = covariance;
-        m_sigmaWeights = GenerateSigmaWeights();
+        CalculateSigmaWeights();
         return true;
     }
     else
     {
         return false;
     }
+}
+
+bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
+{
+
+    int numberOfSigmaPoints = stateEstimateSigmas.getn();
+    debug << "Predicted measurement sigmas:" << endl << predictedMeasurementSigmas;
+
+    Matrix predictedMeasurement = CalculateMeanFromSigmas(predictedMeasurementSigmas);
+
+    debug << "Predicted measurement (mean):" << endl << predictedMeasurement;
+    debug << "Measurement:" << endl << measurement;
+
+    Matrix Pyy(2,2,false);
+    Matrix Pxy(2,2,false);
+
+    Matrix temp;
+    for(int i =0; i < numberOfSigmaPoints; i++)
+    {
+        temp = predictedMeasurementSigmas.getCol(i) - predictedMeasurement;
+        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp();
+        Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
+    }
+    Matrix K = Pxy * Invert22(Pyy);
+
+    debug << "Pyy:" << endl << Pyy;
+
+    debug << "Pxy:" << endl << Pxy;
+
+
+    debug << "K:" << endl << K;
+
+    Matrix S_Obs(2,2,false);
+    S_Obs[0][0]=1;
+    S_Obs[1][1]=1;
+    m_mean  = m_mean + K * (measurement - predictedMeasurement);
+
+    debug << "K*Pyy = " << endl << K*Pyy << endl;
+    debug << "K*Pyy*K.transp() = " << endl << K*Pyy*K.transp() << endl;
+
+    //m_covariance = m_covariance - K*Pyy*K.transp();
+
+    m_covariance = HT(horzcat(stateEstimateSigmas-m_mean*m_sigmaWeights - K*predictedMeasurementSigmas +
+                              K*predictedMeasurement*m_sigmaWeights,K*S_Obs));
+
+    // Stolen from last years code... does not all seem right for this iplementation.
+/*
+  WORKING (Sort of)
+    temp = predictedObservationSigmas - predictedObservation*m_sigmaWeights;
+    Matrix Pyy = temp * temp.transp();
+    Matrix Pxy = (sigmaPoints - m_mean * m_sigmaWeights) * temp.transp();
+    Matrix K = Pxy * Invert22(Pyy);
+
+    debug << "Pyy:" << endl << Pyy;
+
+    debug << "Pxy:" << endl << Pxy;
+
+
+    debug << "K:" << endl << K;
+    Matrix S_Obs(2,2,false);
+    S_Obs[0][0]=1;
+    S_Obs[1][1]=1;
+    m_mean  = m_mean + K * (observation - predictedObservation);
+    m_mean[Angle][0] = mathGeneral::normaliseAngle(m_mean[Angle][0]);
+    m_covariance = HT(horzcat(sigmaPoints-m_mean*m_sigmaWeights - K*predictedObservationSigmas +
+                              K*predictedObservation*m_sigmaWeights,K*S_Obs));
+                              */
+    return true;
 }

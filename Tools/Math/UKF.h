@@ -10,7 +10,7 @@ public:
     UKF(unsigned int numStates);
     UKF(const UKF& source);
     ~UKF();
-    Matrix GenerateSigmaWeights(float kappa = 1.0f) const;
+    void CalculateSigmaWeights(float kappa = 1.0f);
     Matrix GenerateSigmaPoints() const;
     Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const;
     Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const;
@@ -20,12 +20,14 @@ public:
     double getMean(int stateId) const;
     double calculateSd(int stateId) const;
     bool setState(Matrix mean, Matrix covariance);
+    bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas);
 
 protected:
    unsigned int m_numStates;
    Matrix m_mean;
    Matrix m_covariance;
    Matrix m_sigmaWeights;
+   Matrix m_sqrtSigmaWeights;
    float m_kappa;
 };
 
