@@ -125,6 +125,11 @@ public:
     bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
     bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
     bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
+        // add new motion curves
+    bool addJointPositions(joint_id_t jointid, const vector<double>& times, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
+    bool addJointTorques(joint_id_t jointid, const vector<double>& times, const vector<float>& torques, const vector<float>& gains);
+    bool addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<vector<float> >& gains);
+    bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains);
         // add other commands
     bool addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values);
     bool addSound(double time, string sound);
