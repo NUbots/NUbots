@@ -63,7 +63,6 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 it = FO_Candidates.erase(it);
             }
 	}
-
         return result;
 }
 

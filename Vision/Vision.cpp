@@ -30,6 +30,7 @@
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
+//#include <QDebug>
 
 using namespace mathGeneral;
 Vision::Vision()
@@ -295,7 +296,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
@@ -720,9 +721,12 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 1;
+    int bufferSize = 2;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
-
+    for (int i = 0; i < bufferSize; i++)
+    {
+        colourBuff.push_back(0);
+    }
     for (int i = 0; i < numOfLines; i++)
     {
         tempLine = scanArea->getScanLine(i);
@@ -730,10 +734,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
         lineLength = tempLine->getLength();
         tempStartPoint = startPoint;
 
-        for (int i = 0; i < bufferSize; i++)
-        {
-            colourBuff.push_back(0);
-        }
+
         beforeColour    = 0; //!< Colour Before the segment
         afterColour     = 0;  //!< Colour in the next Segment
         currentColour   = 0; //!< Colour in the current segment
@@ -769,51 +770,93 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
             if(j >= lineLength - skipPixel)
             {
-                //! End Of Screen detected: Generate new segment and add to the line
-
-                if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
+                if((currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                 {
-                    //SHIFTING THE POINTS TO THE START OF BUFFER:
-                    /*if(direction == ClassifiedSection::DOWN)
+                    tempStartPoint = currentPoint;
+                    beforeColour = ClassIndex::unclassified;
+                    currentColour = afterColour;
+                    for (int i = 0; i < bufferSize; i++)
                     {
-                        if(tempStartPoint.y > startPoint.y)
+                        colourBuff.push_back(0);
+                    }
+                    continue;
+                }
+
+                while( ( checkIfBufferSame(colourBuff) && currentColour == afterColour) )
+                {
+
+                    if(direction == ClassifiedSection::DOWN)
+                    {
+
+                        if(startPoint.y + j < currentImage->getHeight())
                         {
-                            tempStartPoint.y = tempStartPoint.y - bufferSize * skipPixel;
+                            currentPoint.y = startPoint.y + j;
+                            currentPoint.x = startPoint.x;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                     else if (direction == ClassifiedSection::RIGHT)
                     {
-                        if(tempStartPoint.x > startPoint.x)
+                        if(startPoint.x + j < currentImage->getWidth())
                         {
-                            tempStartPoint.x = tempStartPoint.x - bufferSize * skipPixel;
+                            currentPoint.x = startPoint.x + j;
+                            currentPoint.y = startPoint.y;
                         }
+                        else
+                        {
+                            break;
+                        }
+
                     }
                     else if(direction == ClassifiedSection::UP)
                     {
-                        if(tempStartPoint.y < startPoint.y)
+
+                        if(startPoint.y - j > 0)
                         {
-                            tempStartPoint.y = tempStartPoint.y + bufferSize * skipPixel;
+                            currentPoint.y = startPoint.y - j;
+                            currentPoint.x = startPoint.x;
                         }
+                        else
+                        {
+                            break;
+                        }
+
                     }
                     else if(direction == ClassifiedSection::LEFT)
                     {
-                        if(tempStartPoint.x < startPoint.x)
+                        if(startPoint.x - j > 0)
                         {
-                            tempStartPoint.x = tempStartPoint.x + bufferSize * skipPixel;
+                            currentPoint.x = startPoint.x - j;
+                            currentPoint.y = startPoint.y;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
-                    */
-                    TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
-                    tempLine->addSegement(tempTransition);
-                    /*int spacing = 16;
-                    if(abs(tempTransition->getSize())>spacing)
-                    {
-                        CloselyClassifyScanline(tempLine, tempTransition,spacing, direction);//tempStartPoint,currentColour,segmentlength, spacing, direction);
-                    }*/
+                    afterColour = classifyPixel(currentPoint.x,currentPoint.y);
+                    colourBuff.push_back(afterColour);
+                    j = j+skipPixel*3;
+                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                            "\t"<<currentColour<< "," << afterColour <<
+                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
+                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
                 }
+
+                TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                tempLine->addSegement(tempTransition);
+
                 tempStartPoint = currentPoint;
                 beforeColour = ClassIndex::unclassified;
                 currentColour = afterColour;
+                for (int i = 0; i < bufferSize; i++)
+                {
+                    colourBuff.push_back(0);
+                }
                 continue;
             }
 
@@ -823,7 +866,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     //! Transition detected: Generate new segment and add to the line
                     //Adjust the position:
-                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                     {
                         //SHIFTING THE POINTS TO THE START OF BUFFER:
                         if(direction == ClassifiedSection::DOWN)
@@ -868,7 +911,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
-
+                    for (int i = 0; i < bufferSize; i++)
+                    {
+                        colourBuff.push_back(0);
+                    }
                 }
             }
         }
@@ -1587,12 +1633,14 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 
 std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
+    //qDebug() << "Forming Lines:" << endl;
     LineDetection LineDetector;
     int image_width = currentImage->getWidth();
     int image_height = currentImage->getHeight();
     LineDetector.FormLines(scanArea,image_width,image_height,spacing);
     std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
+    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
     return fieldLines;
 }
 
@@ -1634,7 +1682,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
         //AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
-        //qDebug() << "Setting FieldObject:";
+        //qDebug() << "Setting FieldObject Distance:" << distance;
         //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
         //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition, sphericalError, viewPosition, currentImage->m_timestamp);
