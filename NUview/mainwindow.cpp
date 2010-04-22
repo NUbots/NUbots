@@ -19,7 +19,7 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
-#include "Tools/Math/UKF.h"
+#include "Kinematics/AngleUKF.h"
 
 using namespace std;
 ofstream debug;
@@ -232,6 +232,8 @@ void MainWindow::createActions()
 
     UKFTestAction = new QAction(tr("&UKF Test"), this);
     connect(UKFTestAction, SIGNAL(triggered()), this, SLOT(UKFTest()));
+    AngleUKFTestAction = new QAction(tr("&Angle UKF Test"), this);
+    connect(AngleUKFTestAction, SIGNAL(triggered()), this, SLOT(AngleUKFTest()));
 }
 
 void MainWindow::createMenus()
@@ -260,6 +262,7 @@ void MainWindow::createMenus()
     testMenu = menuBar()->addMenu(tr("&Testing"));
     testMenu->addAction(doBonjourTestAction);
     testMenu->addAction(UKFTestAction);
+    testMenu->addAction(AngleUKFTestAction);
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -474,7 +477,7 @@ void MainWindow::UKFTest()
     debug << "Original Data: " << endl << "Mean:" << endl << mean << "Covariance:" << endl << cov << endl;
     Matrix sigmas = test.GenerateSigmaPoints();
     debug << "Sigma Points:" << endl << sigmas << endl;
-    debug << "Sigma Weights:" << endl << test.GenerateSigmaWeights() << endl;
+    //debug << "Sigma Weights:" << endl << test.GenerateSigmaWeights() << endl;
     Matrix testMean, testCov;
     testMean = test.CalculateMeanFromSigmas(sigmas);
     testCov = test.CalculateCovarianceFromSigmas(sigmas,testMean);
@@ -485,6 +488,46 @@ void MainWindow::UKFTest()
         debug << endl << "State " << i << endl;
         debug << "Mean: " << test.getMean(i) << endl;
         debug << "Standard Deviation: " << test.calculateSd(i) << endl;
+    }
+}
+
+void MainWindow::AngleUKFTest()
+{
+    const int numUpdates = 50;
+    const float gravity = 980;
+    float haccel,vaccel;
+    AngleUKF test;
+
+    double timestamp = 0.0;
+    test.initialiseFilter(timestamp);
+    qDebug() << "Initial estimate" << endl;
+    qDebug() << "Angle: " << test.getMean(AngleUKF::Angle) << endl;
+    qDebug() << "GyroOffset: " << test.getMean(AngleUKF::GyroOffset) << endl;
+
+    float gyroOffset;
+    float velocity;
+    float gyroValue;
+    float deltaAngle = 0.01;
+    float deltaTime = 0.1;
+    float angle = 0.0;
+    for (int i = 0; i < numUpdates; i++)
+    {
+        gyroOffset = 11.0;
+        angle += deltaAngle;
+        timestamp += deltaTime;
+        velocity = deltaAngle / deltaTime;
+        gyroValue = gyroOffset + velocity;
+        haccel = gravity * sin(angle);
+        vaccel = gravity * cos(angle);
+
+        test.TimeUpdate(gyroValue, timestamp);
+        test.AccelerometerMeasurementUpdate(haccel,vaccel);
+
+        qDebug() << "Gyro value at time (" << timestamp << "): " << gyroValue;
+        qDebug() << "Angle: " << angle;
+        qDebug() << "Gyro offset:" << gyroOffset;
+        qDebug() << "Estimated angle: " << test.getMean(AngleUKF::Angle);
+        qDebug() << "Estimated gyro offset: " << test.getMean(AngleUKF::GyroOffset) << endl;
     }
 }
 
