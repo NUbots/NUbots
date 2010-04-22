@@ -114,7 +114,6 @@ NUbot::NUbot(int argc, const char *argv[])
     // --------------------------------- construct each enabled module 
     #ifdef USE_VISION
         m_vision = new Vision();
-        m_vision->loadLUTFromFile("/home/nao/default.lut");
     #endif
     
     #ifdef USE_LOCALISATION

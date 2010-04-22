@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS  actionator_t.h
                 NUActionatorsData.cpp NUActionatorsData.h
 		NUSoundThread.h NUSoundThread.cpp
+		NUSounds.h NUSounds.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

@@ -18,11 +18,12 @@
 #include "LineDetection.h"
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUCamera.h"
 #include <iostream>
 #include <fstream>
 
+class NUSensorsData;
+class NUActionatorsData;
 class SaveImagesThread;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
@@ -36,10 +37,17 @@ class Vision
 {
 
     private:
-    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of the current colour lookup table.
-    unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
+    const NUimage* currentImage;                //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable;    //!< Storage of the current colour lookup table.
+    unsigned char* LUTBuffer;                   //!< Storage of the current colour lookup table.
     unsigned char* testLUTBuffer;
+    
+    NUCamera* m_camera;                         //!< pointer to the camera 
+    NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
+    NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
+    friend class SaveImagesThread;
+    SaveImagesThread* m_saveimages_thread;      //!< an external thread to do saving images in parallel with vision processing
+    
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
 
@@ -48,10 +56,7 @@ class Vision
     ofstream imagefile;
     int ImageFrameNumber;
     CameraSettings currentSettings;
-    NUCamera* camera;
 
-    friend class SaveImagesThread;
-    SaveImagesThread* m_saveimages_thread;
     void SaveAnImage();
 
     public:
@@ -71,9 +76,9 @@ class Vision
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
 
-    void process (JobList& jobs, NUCamera* m_camera, NUIO* m_io);
+    void process (JobList* jobs, NUCamera* camera, NUIO* m_io);
 
-    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
+    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions);
 
 
 

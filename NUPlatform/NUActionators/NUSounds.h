@@ -1,6 +1,9 @@
 /*! @file NUSounds.h
     @brief Declaration of a sounds.
  
+    @class NUSounds
+    @brief Definitions of sound filenames
+ 
     @author Jason Kulk
  
   Copyright (c) 2010 Jason Kulk
@@ -23,33 +26,40 @@
 #define NUSOUNDS_H
 
 #include <string>
+using namespace std;
 
-namespace NUSounds 
+class NUSounds 
 {
-    std::string PRE_INITIAL = std::string("pre_initial.wav");
-    std::string INITIAL = std::string("initial.wav");
-    std::string READY = std::string("ready.wav");
-    std::string SET = std::string("set.wav");
-    std::string PLAYING = std::string("playing.wav");
-    std::string FINISHED = std::string("finished.wav");
-    std::string PENALISED = std::string("penalised.wav");
-    std::string REQUEST_PICK_UP = std::string("request_pick_up.wav");
-    std::string SUBSTITUTE = std::string("substitute.wav");
-    std::string RED_TEAM = std::string("red_team.wav");
-    std::string BLUE_TEAM = std::string("blue_team.wav");
-    std::string NUBOT1 = std::string("nubot1.wav");
-    std::string NUBOT2 = std::string("nubot2.wav");
-    std::string NUBOT3 = std::string("nubot3.wav");
-    std::string NUBOT4 = std::string("nubot4.wav");
-    std::string NUBOT5 = std::string("nubot5.wav");
-    std::string NUBOT6 = std::string("nubot6.wav");
-    std::string NUBOT7 = std::string("nubot7.wav");
-    std::string NUBOT8 = std::string("nubot8.wav");
-    std::string NUBOT9 = std::string("nubot9.wav");
-    std::string NUBOT10 = std::string("nubot10.wav");
-    std::string SEG_FAULT = std::string("seg_fault.wav");
-    std::string UNHANDLED_EXCEPTION = std::string("unhandled_exception.wav");
-}
+public:
+    static string PRE_INITIAL;
+    static string INITIAL;
+    static string READY;
+    static string SET;
+    static string PLAYING;
+    static string FINISHED;
+    static string PENALISED;
+    static string REQUEST_PICK_UP;
+    static string SUBSTITUTE;
+    static string RED_TEAM;
+    static string BLUE_TEAM;
+    static string NUBOT1;
+    static string NUBOT2;
+    static string NUBOT3;
+    static string NUBOT4;
+    static string NUBOT5;
+    static string NUBOT6;
+    static string NUBOT7;
+    static string NUBOT8;
+    static string NUBOT9;
+    static string NUBOT10;
+    static string MY_IP_IS;
+    static string SEG_FAULT;
+    static string UNHANDLED_EXCEPTION;
+    
+    static string START_SAVING_IMAGES;
+    static string STOP_SAVING_IMAGES;
+    static string LOADING_LUT;
+};
 
 #endif
 

@@ -115,7 +115,7 @@ void SeeThinkThread::run()
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData, m_nubot->Actions);
 		
                 #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
                     visionrealendtime = NUSystem::getRealTime();
@@ -138,7 +138,7 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                m_nubot->m_vision->process(*m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
+                m_nubot->m_vision->process(m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
             #endif
             #ifdef USE_MOTION
                 m_nubot->m_motion->process(*m_nubot->Jobs);

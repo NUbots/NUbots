@@ -12,8 +12,11 @@
 #ifndef NUBOTDATACONFIG_H
 #define NUBOTDATACONFIG_H
 
-#define DATA_DIR "${NUBOT_DATA_DIR}"
-#define CONFIG_DIR "${NUBOT_DATA_DIR}/Config/${TARGET_ROBOT_NAME}"
+#include <stdlib.h>
+#include <string>
+
+#define DATA_DIR (std::string(getenv("${HOME_ENV_VAR}")) + std::string("/nubot/"))
+#define CONFIG_DIR (DATA_DIR + std::string("/Config/${TARGET_ROBOT_NAME}/"))
 
 #endif // !NUBOTCONFIG_H
 
