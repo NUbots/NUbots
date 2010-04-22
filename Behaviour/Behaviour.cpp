@@ -60,6 +60,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
     {
         if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
         {
+            static const float maxspeed = 10;
             float headyaw;
             data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
@@ -72,16 +73,14 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
             
             vector<float> walkVector(3, 0);
             if (balldistance > 30)
-                walkVector[0] = 10;
+                walkVector[0] = maxspeed;
             else
-                walkVector[0] = 10*(balldistance/30);
+                walkVector[0] = maxspeed*(balldistance/30);
             if (fabs(ballbearing) > 0.05)
                 walkVector[2] = 2*walkVector[0]*sin(ballbearing)/balldistance;
             WalkJob* walk = new WalkJob(walkVector);
             jobs.addMotionJob(walk);
             //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
-            
-            cout << balldistance << ", " << AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance() << ", " << ballbearing << endl;
             
             float headpitch;
             data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
