@@ -67,7 +67,7 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     allValuesSlider = new QSlider(Qt::Horizontal);
     allValuesSlider->setMinimum(0);
     allValuesSlider->setMaximum(20);
-    allValuesSlider->setValue(10);
+    allValuesSlider->setValue(5);
     boundaryGroupBox = new QGroupBox(tr("Selection Boundaries"));
     boundaryLayout = new QGridLayout;
     boundaryLayout->setColumnStretch(1,1);

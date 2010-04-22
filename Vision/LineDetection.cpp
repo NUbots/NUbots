@@ -100,9 +100,9 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                 &&  ClassIndex::green   ==  segment->getAfterColour())
                 //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
                 //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour())
-                || (ClassIndex::white   ==  segment->getColour() &&
-                    (ClassIndex::unclassified == segment->getAfterColour() || ClassIndex::unclassified ==segment->getBeforeColour())
-                &&  (ClassIndex::green == segment->getAfterColour() || ClassIndex::green ==segment->getBeforeColour())))
+                ||  (ClassIndex::white   ==  segment->getColour() &&
+                    (segment->getAfterColour() == ClassIndex::unclassified || segment->getAfterColour() == ClassIndex::green || segment->getAfterColour() == ClassIndex::shadow_object )
+                &&  (segment->getBeforeColour() == ClassIndex::unclassified || segment->getBeforeColour() == ClassIndex::green || segment->getBeforeColour() == ClassIndex::shadow_object)))
 
             {
                 //ADD A FIELD LINEPOINT!
