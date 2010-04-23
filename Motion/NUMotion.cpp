@@ -56,16 +56,23 @@
  You should have received a copy of the GNU General Public License
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "NUMotion.h"
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUMotion.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
 {
+    m_current_time = 0;
+    m_previous_time = 0;
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::NUMotion" << endl;
 #endif
@@ -103,6 +110,10 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 #endif
     if (data == NULL || actions == NULL)
         return;
+    m_data = data;
+    m_actions = actions;
+    m_current_time = m_data->CurrentTime;
+    calculateCycleTime();
     
     static vector<float> fallingvalues;
     static vector<float> fallenvalues;
@@ -132,6 +143,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             m_kick->process(data, actions);
         #endif
     }
+    m_previous_time = m_current_time;
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
@@ -249,4 +261,18 @@ void NUMotion::process(JobList& jobs)
         debug << "NUMotion::process(): Finished." << endl;
     #endif
 }
+
+/*! @brief Calculates the cycle time. 
+ 
+ To be platform independent I calculate the motion cycle time online by averaging the cycle times
+*/
+void NUMotion::calculateCycleTime()
+{
+    using namespace boost::accumulators;
+    static accumulator_set<float, stats<tag::mean> > cycle_time_accumulator;
+    
+    cycle_time_accumulator(m_current_time - m_previous_time);
+    m_cycle_time = static_cast<int> (mean(cycle_time_accumulator));
+}
+
 

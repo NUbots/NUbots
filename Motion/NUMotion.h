@@ -25,8 +25,8 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
@@ -53,23 +53,32 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList& jobs);
+    
+    int getCycleTime() {return m_cycle_time;};
 protected:
 private:
+    void calculateCycleTime();
 public:
 protected:
-public:         //! @todo TODO: Fix this. Jason needs a backdoor to the walk engine NOW!
+private:
+    NUSensorsData* m_data;              //!< pointer to shared sensors data object
+    NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
     // essential motion components
-    FallProtection* m_fall_protection;
-    Getup* m_getup;
+    FallProtection* m_fall_protection;  //!< the fall protection module
+    Getup* m_getup;                     //!< the getup module
 #ifdef USE_HEAD
-    NUHead* m_head;
+    NUHead* m_head;                     //!< the head module
 #endif
 #ifdef USE_WALK
-    NUWalk* m_walk;
+    NUWalk* m_walk;                     //!< the walk module
 #endif
 #ifdef USE_KICK
-    NUKick* m_kick;
+    NUKick* m_kick;                     //!< the kick module
 #endif
+    
+    double m_current_time;              //!< the current time (ms)
+    double m_previous_time;             //!< the previous time (ms)
+    int m_cycle_time;                   //!< the cycle time in ms
 };
 
 #endif
