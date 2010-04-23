@@ -388,10 +388,11 @@ void Vision::setLUT(unsigned char* newLUT)
 
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
-    debug << fileName << endl;
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
-    setLUT(LUTBuffer);
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        setLUT(LUTBuffer);
+    else
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
 void Vision::setImage(const NUimage* newImage)
