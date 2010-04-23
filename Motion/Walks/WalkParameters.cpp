@@ -470,8 +470,13 @@ istream& operator>> (istream& input, WalkParameters* p_walkparameters)
 void WalkParameters::save()
 {
     ofstream file((CONFIG_DIR + string("Motion/Walks/") + m_name + ".cfg").c_str());
-    file << this;
-    file.close();
+    if (file.is_open())
+    {
+        file << this;
+        file.close();
+    }
+    else
+        errorlog << "WalkParameters::save(): Failed to open file");
 }
 
 /*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
