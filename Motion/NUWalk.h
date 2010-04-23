@@ -25,9 +25,9 @@
 #ifndef NUWALK_H
 #define NUWALK_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Walks/WalkParameters.h"
+class NUSensorsData;
+class NUActionatorsData;
 
 class NUWalk
 {
@@ -74,14 +74,7 @@ protected:
     float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
     double m_point_timestamp;                       //!< the timestamp of the last point command
     
-    // A semi-standard way of storing gait parameters for every walk engine
-    vector<vector<float> > m_gait_arm_gains;        //!< the arm gains over a gait cycle
-    vector<vector<float> > m_gait_torso_gains;      //!< the torso gains over a gait cycle
-    vector<vector<float> > m_gait_leg_gains;        //!< the leg gains over a gait cycle
-    
-    vector<vector<WalkParameters::Parameter> > m_gait_walk_parameters;  //!< the walk engine parameters over a gait cycle
-    vector<float> m_gait_max_speeds;                //!< the maximum allowed speeds in the x,y,theta directions
-    vector<float> m_gait_max_accelerations;         //!< the maximum allowed accelerations in the x,y, theta directions
+    WalkParameters* m_walk_parameters;              //!< the current set of walk parameters
 
 private:
 };

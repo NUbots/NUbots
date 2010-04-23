@@ -20,6 +20,9 @@
  */
 
 #include "NUWalk.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 #include "walkconfig.h"
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
@@ -93,13 +96,10 @@ NUWalk::~NUWalk()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 0
     debug << "NUWalk::~NUWalk()" << endl;
-#endif
-    m_gait_walk_parameters.clear();
-    m_gait_max_speeds.clear();
-    m_gait_max_accelerations.clear();
-    m_gait_arm_gains.clear();      
-    m_gait_torso_gains.clear();    
-    m_gait_leg_gains.clear();      
+#endif  
+    
+    if (m_walk_parameters != NULL)
+        delete m_walk_parameters;
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -132,7 +132,7 @@ void NUWalk::walkSpeed(const vector<float>& speed)
 {
     setTargetSpeeds(speed);
     setCurrentSpeeds();
-    m_speed_timestamp = nusystem->getTime();
+    m_speed_timestamp = m_data->CurrentTime;
 }
 
 /*! @brief Sets the target speeds. The given speeds will be clipped if they are faster than the maximum possible speeds
@@ -148,6 +148,7 @@ void NUWalk::setTargetSpeeds(const vector<float>& speed)
     temp_x = 0;
     temp_y = 0;
     temp_yaw = 0;
+    /*
     if (speed.size() > 0)
     {
         temp_x = speed[0];
@@ -165,7 +166,7 @@ void NUWalk::setTargetSpeeds(const vector<float>& speed)
         temp_yaw = speed[2];
         if (m_gait_max_speeds.size() > 2 && fabs(temp_yaw) > fabs(m_gait_max_speeds[2]))      // if clipping is available, and the input is greater than the limit, then clip it
             temp_yaw = (fabs(temp_yaw)/temp_yaw)*m_gait_max_speeds[2];
-    }
+    }*/
     m_target_speed_x = temp_x;
     m_target_speed_y = temp_y;
     m_target_speed_yaw = temp_yaw;
@@ -195,6 +196,7 @@ void NUWalk::setCurrentSpeeds()
         acceleration_y = 0;
         acceleration_yaw = 0;
     }
+    /*
     // clip the accelerations to the max values (if the max values exist)
     if (m_gait_max_accelerations.size() > 0 && fabs(acceleration_x) > fabs(m_gait_max_accelerations[0]))      // if clipping is available, and the input is greater than the limit, then clip it
         acceleration_x = sign(acceleration_x)*m_gait_max_accelerations[0];
@@ -204,6 +206,7 @@ void NUWalk::setCurrentSpeeds()
     
     if (m_gait_max_accelerations.size() > 2 && fabs(acceleration_yaw) > fabs(m_gait_max_accelerations[2]))      // if clipping is available, and the input is greater than the limit, then clip it
         acceleration_yaw = sign(acceleration_yaw)*m_gait_max_accelerations[2];
+     */
     // set the current speeds 
     m_speed_x = m_speed_x + acceleration_x*timestep;
     m_speed_y = m_speed_y + acceleration_y*timestep;
@@ -269,29 +272,27 @@ void NUWalk::doWalk()
  */
 void NUWalk::setWalkParameters(WalkParameters& walkparameters)
 {
-    // walkparameters >> m_gait_*
-    walkparameters.getArmGains(m_gait_arm_gains);
-    walkparameters.getTorsoGains(m_gait_torso_gains);
-    walkparameters.getLegGains(m_gait_leg_gains);
+    /*m_gait_max_speeds = walkparameters.getMaxSpeeds();
+    m_gait_max_accelerations = walkparameters.getMaxAccelerations();
+    m_gait_walk_parameters = walkparameters.getParameters();
     
-    walkparameters.getParameters(m_gait_walk_parameters);
-    walkparameters.getMaxSpeeds(m_gait_max_speeds);
-    walkparameters.getMaxAccelerations(m_gait_max_accelerations);
+    m_gait_arm_gains = walkparameters.getArmGains();
+    m_gait_torso_gains = walkparameters.getTorsoGains();
+    m_gait_leg_gains = walkparameters.getLegGains();*/
 }
 
 /*! @brief Gets the walk parameters and stores them in the passed variable
-    @param walkparameters the storage variable for the current parameters
+    @return the current walkparameters
  */
 void NUWalk::getWalkParameters(WalkParameters& walkparameters)
 {
-    // m_gait_* >> walkparameters
+    /*walkparameters.setMaxSpeeds(m_gait_max_speeds);
+    walkparameters.setMaxAccelerations(m_gait_max_accelerations);
+    walkparameters.setParameters(m_gait_walk_parameters);
+    
     walkparameters.setArmGains(m_gait_arm_gains);
     walkparameters.setTorsoGains(m_gait_torso_gains);
-    walkparameters.setLegGains(m_gait_leg_gains);
-    
-    walkparameters.setParameters(m_gait_walk_parameters);
-    walkparameters.setMaxSpeeds(m_gait_max_speeds);
-    walkparameters.setMaxAccelerations(m_gait_max_accelerations);
+    walkparameters.setLegGains(m_gait_leg_gains);*/
 }
 
 
