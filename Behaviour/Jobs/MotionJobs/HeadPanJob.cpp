@@ -24,90 +24,52 @@
 #include "debugverbosityjobs.h"
 
 /*! @brief Constructs a HeadPanJob
- 
-    @param period the new pan period in milliseconds
-    @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the pan (rad)
+    @param pantype the type of pan (Ball, BallAndLocalisation, Localisation)
  */
-HeadPanJob::HeadPanJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(head_pan_t pantype) : MotionJob(Job::MOTION_PAN)
 {
-    m_job_time = period;     
-    m_centre_position = centre;
-    m_limit_positions = limits;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadPanJob::HeadPanJob()" << endl;
+    #endif
+    m_job_time = 0;
+    m_pan_type = pantype;
+    #if DEBUG_JOBS_VERBOSITY > 0
+        summaryTo(debug);
+    #endif
 }
 
 /*! @brief Constructs a HeadPanJob from stream data
-    @param time the time in ms to perform the kick
     @param input the stream from which to read the job specific data
  */
-HeadPanJob::HeadPanJob(double time, istream& input) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(istream& input) : MotionJob(Job::MOTION_PAN)
 {
-    m_job_time = time;
-
+    m_job_time = 0;
     // Temporary read buffers
-    unsigned int uintBuffer;
-    float floatBuffer;
-
-    // read in the centre position size
-    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
-    unsigned int m_centre_position_size = uintBuffer;
+    head_pan_t hptBuffer;
     
-    // read in the centre position vector
-    m_centre_position = vector<float>(m_centre_position_size, 0);
-    for (unsigned int i=0; i<m_centre_position_size; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        m_centre_position[i] = floatBuffer;
-    }
+    // read in the pan type
+    input.read(reinterpret_cast<char*>(&hptBuffer), sizeof(hptBuffer));
+    m_pan_type = hptBuffer;
     
-    // read in the limit position size
-    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
-    unsigned int m_limit_positions_size = uintBuffer;
-    
-    // read in the limit position vector
-    m_limit_positions = vector<float>(m_limit_positions_size, 0);
-    for (unsigned int i=0; i<m_limit_positions_size; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        m_limit_positions[i] = floatBuffer;
-    }
+    #if DEBUG_JOBS_VERBOSITY > 0
+        summaryTo(debug);
+    #endif
 }
 
-/*! @brief WalkJob destructor
+/*! @brief HeadPanJob destructor
  */
 HeadPanJob::~HeadPanJob()
 {
-    m_centre_position.clear();
-    m_limit_positions.clear();
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadPanJob::~HeadPanJob()" << endl;
+    #endif
 }
 
-/*! @brief Sets the pan for the head
- 
-    You should only need to use this function if you are recycling the one job 
-    (ie. I provide this function if you are worried about creating a new job every time)
-    
-    @param period the new pan period in milliseconds
-    @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the pan (rad)
+/*! @brief Returns the type of pan
  */
-void HeadPanJob::setPan(double period, const vector<float>& centre, const vector<float>& limits)
+HeadPanJob::head_pan_t HeadPanJob::getPanType()
 {
-    m_job_time = period;     
-    m_centre_position = centre;
-    m_limit_positions = limits;
-}
-
-/*! @brief Gets the pan for the head
- 
-    @param period the pan period in milliseconds
-    @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the pan (rad)
- */
-void HeadPanJob::getPan(double& period, vector<float>& centre, vector<float>& limits)
-{
-    period = m_job_time;
-    centre = m_centre_position;
-    limits = m_limit_positions;
+    return m_pan_type;
 }
 
 /*! @brief Prints a human-readable summary to the stream
@@ -115,13 +77,15 @@ void HeadPanJob::getPan(double& period, vector<float>& centre, vector<float>& li
  */
 void HeadPanJob::summaryTo(ostream& output)
 {
-    output << "HeadPanJob: " << m_job_time << " ";
-    for (unsigned int i=0; i<m_centre_position.size(); i++)
-        output << m_centre_position[i] << ",";
-    output << " ";
-    for (unsigned int i=0; i<m_limit_positions.size(); i++)
-        output << m_limit_positions[i] << ",";
+    output << "HeadPanJob: ";
+    if (m_pan_type == Ball)
+        output << "Ball";
+    else if (m_pan_type == BallAndLocalisation)
+        output << "BallAndLocalisation";
+    else
+        output << "Localisation";
     output << endl;
+    
 }
 
 /*! @brief Prints a csv version to the stream
@@ -129,11 +93,13 @@ void HeadPanJob::summaryTo(ostream& output)
  */
 void HeadPanJob::csvTo(ostream& output)
 {
-    output << "HeadPanJob: " << m_job_time << " ";
-    for (unsigned int i=0; i<m_centre_position.size(); i++)
-        output << m_centre_position[i] << ", ";
-    for (unsigned int i=0; i<m_limit_positions.size(); i++)
-        output << m_limit_positions[i] << ", ";
+    output << "HeadPanJob: ";
+    if (m_pan_type == Ball)
+        output << "Ball";
+    else if (m_pan_type == BallAndLocalisation)
+        output << "BallAndLocalisation";
+    else
+        output << "Localisation";
     output << endl;
 }
 
@@ -146,46 +112,43 @@ void HeadPanJob::csvTo(ostream& output)
  */
 void HeadPanJob::toStream(ostream& output) const
 {
+#if DEBUG_JOBS_VERBOSITY > 1
     debug << "HeadPanJob::toStream" << endl;
+#endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
                                             // Then we write HeadPanJob specific data
-    unsigned int m_centre_position_size = m_centre_position.size();
-    output.write((char*) &m_centre_position_size, sizeof(m_centre_position_size));
-    for (unsigned int i=0; i<m_centre_position_size; i++)
-        output.write((char*) &m_centre_position[i], sizeof(m_centre_position[i]));
-    unsigned int m_limit_positions_size = m_limit_positions.size();
-    output.write((char*) &m_limit_positions_size, sizeof(m_limit_positions_size));
-    for (unsigned int i=0; i<m_limit_positions_size; i++)
-        output.write((char*) &m_limit_positions[i], sizeof(m_limit_positions[i]));
+    output.write((char*) &m_pan_type, sizeof(m_pan_type));
 }
 
 /*! @relates HeadPanJob
- @brief Stream insertion operator for a HeadPanJob
- 
- @param output the stream to write to
- @param job the job to be written to the stream
+    @brief Stream insertion operator for a HeadPanJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
  */
 ostream& operator<<(ostream& output, const HeadPanJob& job)
 {
-    debug << "<<HeadPanJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadPanJob::operator<<" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
 
 /*! @relates HeadPanJob
- @brief Stream insertion operator for a pointer to HeadPanJob
- 
- @param output the stream to write to
- @param job the job to be written to the stream
+    @brief Stream insertion operator for a pointer to HeadPanJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
  */
 ostream& operator<<(ostream& output, const HeadPanJob* job)
 {
-    debug << "<<HeadPanJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadPanJob::operator<<" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }
 

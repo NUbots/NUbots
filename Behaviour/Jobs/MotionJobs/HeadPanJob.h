@@ -4,10 +4,10 @@
     @class HeadPanJob
     @brief A class to encapsulate pan jobs issued for the head module. 
  
-    I can have NUHead decide how to do the pan, or I can have behaviour decide how to do the pan.
-    I think I should provide both sorts:
-        So we can simply have a pan type, or we can have a pan type with several parameters.
- 
+    There are three types of pans:
+        - Ball --- a pan to just look for the ball
+        - BallAndLocalisation --- a pan to both look for the ball and to passively localise
+        - Localisation -- a pan just for localisation
  
     @author Jason Kulk
  
@@ -37,12 +37,18 @@ using namespace std;
 class HeadPanJob : public MotionJob
 {
 public:
-    HeadPanJob(double period, const vector<float>& centre, const vector<float>& limits);
-    HeadPanJob(double time, istream& input);
+    enum head_pan_t
+    {
+        Ball,
+        BallAndLocalisation,
+        Localisation
+    };
+public:
+    HeadPanJob(head_pan_t pantype);
+    HeadPanJob(istream& input);
     ~HeadPanJob();
     
-    void setPan(double period, const vector<float>& centre, const vector<float>& limits);
-    void getPan(double& period, vector<float>& centre, vector<float>& limits);
+    head_pan_t getPanType();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
@@ -52,8 +58,7 @@ public:
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
-    vector<float> m_limit_positions;                 //!< the limit positions for the pan [lower (rad), upper(rad)]
+    head_pan_t m_pan_type;
 };
 
 #endif

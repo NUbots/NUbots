@@ -79,7 +79,9 @@ double Job::getTime()
  */
 void Job::toStream(ostream& output) const
 {
-    debug << "Job::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "Job::toStream()" << endl;
+    #endif
     
     output << static_cast<unsigned int>(m_job_type) << " " << static_cast<unsigned int>(m_job_id) << " ";
     output.write((char*) &m_job_time, sizeof(m_job_time));
@@ -98,10 +100,7 @@ void Job::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const Job& job)
 {
-    debug << "<<Job" << endl;
-    
     job.toStream(output);
-    
     return output;
 }
 
@@ -116,12 +115,8 @@ ostream& operator<<(ostream& output, const Job& job)
  */
 ostream& operator<<(ostream& output, const Job* job)
 {
-    debug << "<<Job*" << endl;
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
-    
     return output;
 }
 
@@ -145,7 +140,7 @@ ostream& operator<<(ostream& output, const Job* job)
  */
 istream& operator>>(istream& input, Job** job)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     debug << ">>Job**" << endl;
 #endif
     
@@ -198,7 +193,7 @@ istream& operator>>(istream& input, Job** job)
             *job = new HeadNodJob(jobtime, input);
             break;
         case Job::MOTION_PAN:
-            *job = new HeadPanJob(jobtime, input);
+            *job = new HeadPanJob(input);
             break;
         case Job::CAMERA_CHANGE_SETTINGS:
             *job = new ChangeCameraSettingsJob(input);
@@ -213,7 +208,7 @@ istream& operator>>(istream& input, Job** job)
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
             break;
     }    
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     if (*job != NULL)
         (*job)->summaryTo(debug);
 #endif
