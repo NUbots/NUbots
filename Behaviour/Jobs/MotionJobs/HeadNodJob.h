@@ -1,7 +1,7 @@
-/*! @file NodHeadJob.h
-    @brief Declaration of NodHeadJob class.
+/*! @file HeadNodJob.h
+    @brief Declaration of HeadNodJob class.
  
-    @class NodHeadJob
+    @class HeadNodJob
     @brief A class to encapsulate jobs issued for the head module. This particular job nods the head 
            up and down at the given centre to the given limits
  
@@ -30,12 +30,12 @@
 #include <vector>
 using namespace std;
 
-class NodHeadJob : public MotionJob
+class HeadNodJob : public MotionJob
 {
 public:
-    NodHeadJob(double period, const vector<float>& centre, const vector<float>& limits);
-    NodHeadJob(double time, istream& input);
-    ~NodHeadJob();
+    HeadNodJob(double period, const vector<float>& centre, const vector<float>& limits);
+    HeadNodJob(double time, istream& input);
+    ~HeadNodJob();
     
     void setNod(double period, const vector<float>& centre, const vector<float>& limits);
     void getNod(double& period, vector<float>& centre, vector<float>& limits);
@@ -43,8 +43,8 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const NodHeadJob& job);
-    friend ostream& operator<<(ostream& output, const NodHeadJob* job);
+    friend ostream& operator<<(ostream& output, const HeadNodJob& job);
+    friend ostream& operator<<(ostream& output, const HeadNodJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:

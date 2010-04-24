@@ -1,9 +1,13 @@
-/*! @file PanHeadJob.h
-    @brief Declaration of PanHeadJob class.
+/*! @file HeadPanJob.h
+    @brief Declaration of HeadPanJob class.
  
-    @class PanHeadJob
-    @brief A class to encapsulate jobs issued for the head module. This particular job pans the head 
-           left and right at the given centre to the given limits
+    @class HeadPanJob
+    @brief A class to encapsulate pan jobs issued for the head module. 
+ 
+    I can have NUHead decide how to do the pan, or I can have behaviour decide how to do the pan.
+    I think I should provide both sorts:
+        So we can simply have a pan type, or we can have a pan type with several parameters.
+ 
  
     @author Jason Kulk
  
@@ -30,12 +34,12 @@
 #include <vector>
 using namespace std;
 
-class PanHeadJob : public MotionJob
+class HeadPanJob : public MotionJob
 {
 public:
-    PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits);
-    PanHeadJob(double time, istream& input);
-    ~PanHeadJob();
+    HeadPanJob(double period, const vector<float>& centre, const vector<float>& limits);
+    HeadPanJob(double time, istream& input);
+    ~HeadPanJob();
     
     void setPan(double period, const vector<float>& centre, const vector<float>& limits);
     void getPan(double& period, vector<float>& centre, vector<float>& limits);
@@ -43,8 +47,8 @@ public:
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const PanHeadJob& job);
-    friend ostream& operator<<(ostream& output, const PanHeadJob* job);
+    friend ostream& operator<<(ostream& output, const HeadPanJob& job);
+    friend ostream& operator<<(ostream& output, const HeadPanJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:

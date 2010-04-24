@@ -1,5 +1,5 @@
-/*! @file PanHeadJob.cpp
-    @brief Implementation of PanHeadJob class
+/*! @file HeadPanJob.cpp
+    @brief Implementation of HeadPanJob class
 
     @author Jason Kulk
  
@@ -19,28 +19,28 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PanHeadJob.h"
+#include "HeadPanJob.h"
 #include "debug.h"
 #include "debugverbosityjobs.h"
 
-/*! @brief Constructs a PanHeadJob
+/*! @brief Constructs a HeadPanJob
  
     @param period the new pan period in milliseconds
     @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
     @param limits the lower and upper angle limits for the pan (rad)
  */
-PanHeadJob::PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = period;     
     m_centre_position = centre;
     m_limit_positions = limits;
 }
 
-/*! @brief Constructs a PanHeadJob from stream data
+/*! @brief Constructs a HeadPanJob from stream data
     @param time the time in ms to perform the kick
     @param input the stream from which to read the job specific data
  */
-PanHeadJob::PanHeadJob(double time, istream& input) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(double time, istream& input) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = time;
 
@@ -75,7 +75,7 @@ PanHeadJob::PanHeadJob(double time, istream& input) : MotionJob(Job::MOTION_PAN)
 
 /*! @brief WalkJob destructor
  */
-PanHeadJob::~PanHeadJob()
+HeadPanJob::~HeadPanJob()
 {
     m_centre_position.clear();
     m_limit_positions.clear();
@@ -90,7 +90,7 @@ PanHeadJob::~PanHeadJob()
     @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
     @param limits the lower and upper angle limits for the pan (rad)
  */
-void PanHeadJob::setPan(double period, const vector<float>& centre, const vector<float>& limits)
+void HeadPanJob::setPan(double period, const vector<float>& centre, const vector<float>& limits)
 {
     m_job_time = period;     
     m_centre_position = centre;
@@ -103,7 +103,7 @@ void PanHeadJob::setPan(double period, const vector<float>& centre, const vector
     @param centre the centre head position about which we will pan [yaw (rad), pitch (rad), roll (rad)]
     @param limits the lower and upper angle limits for the pan (rad)
  */
-void PanHeadJob::getPan(double& period, vector<float>& centre, vector<float>& limits)
+void HeadPanJob::getPan(double& period, vector<float>& centre, vector<float>& limits)
 {
     period = m_job_time;
     centre = m_centre_position;
@@ -113,9 +113,9 @@ void PanHeadJob::getPan(double& period, vector<float>& centre, vector<float>& li
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void PanHeadJob::summaryTo(ostream& output)
+void HeadPanJob::summaryTo(ostream& output)
 {
-    output << "PanHeadJob: " << m_job_time << " ";
+    output << "HeadPanJob: " << m_job_time << " ";
     for (unsigned int i=0; i<m_centre_position.size(); i++)
         output << m_centre_position[i] << ",";
     output << " ";
@@ -127,9 +127,9 @@ void PanHeadJob::summaryTo(ostream& output)
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void PanHeadJob::csvTo(ostream& output)
+void HeadPanJob::csvTo(ostream& output)
 {
-    output << "PanHeadJob: " << m_job_time << " ";
+    output << "HeadPanJob: " << m_job_time << " ";
     for (unsigned int i=0; i<m_centre_position.size(); i++)
         output << m_centre_position[i] << ", ";
     for (unsigned int i=0; i<m_limit_positions.size(); i++)
@@ -144,12 +144,12 @@ void PanHeadJob::csvTo(ostream& output)
  
  @param output the stream to write the job to
  */
-void PanHeadJob::toStream(ostream& output) const
+void HeadPanJob::toStream(ostream& output) const
 {
-    debug << "PanHeadJob::toStream" << endl;
+    debug << "HeadPanJob::toStream" << endl;
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
-                                            // Then we write PanHeadJob specific data
+                                            // Then we write HeadPanJob specific data
     unsigned int m_centre_position_size = m_centre_position.size();
     output.write((char*) &m_centre_position_size, sizeof(m_centre_position_size));
     for (unsigned int i=0; i<m_centre_position_size; i++)
@@ -160,28 +160,28 @@ void PanHeadJob::toStream(ostream& output) const
         output.write((char*) &m_limit_positions[i], sizeof(m_limit_positions[i]));
 }
 
-/*! @relates PanHeadJob
- @brief Stream insertion operator for a PanHeadJob
+/*! @relates HeadPanJob
+ @brief Stream insertion operator for a HeadPanJob
  
  @param output the stream to write to
  @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const PanHeadJob& job)
+ostream& operator<<(ostream& output, const HeadPanJob& job)
 {
-    debug << "<<PanHeadJob" << endl;
+    debug << "<<HeadPanJob" << endl;
     job.toStream(output);
     return output;
 }
 
-/*! @relates PanHeadJob
- @brief Stream insertion operator for a pointer to PanHeadJob
+/*! @relates HeadPanJob
+ @brief Stream insertion operator for a pointer to HeadPanJob
  
  @param output the stream to write to
  @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const PanHeadJob* job)
+ostream& operator<<(ostream& output, const HeadPanJob* job)
 {
-    debug << "<<PanHeadJob" << endl;
+    debug << "<<HeadPanJob" << endl;
     if (job != NULL)
         job->toStream(output);
     else
