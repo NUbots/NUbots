@@ -29,6 +29,10 @@
 class NUSensorsData;
 class NUActionatorsData;
 
+class WalkJob;
+class WalkToPointJob;
+class WalkParametersJob;
+
 class NUWalk
 {
 public:
@@ -37,16 +41,20 @@ public:
     virtual ~NUWalk();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(WalkJob* job);
+    void process(WalkToPointJob* job);
+    void process(WalkParametersJob* job);
+    
     void walkSpeed(const vector<float>& speed);
     void walkToPoint(double time, const vector<float>& position);
     
-    void getCurrentSpeed(vector<float>& currentspeed);
-    
     virtual void setWalkParameters(WalkParameters& walkparameters);
     virtual void getWalkParameters(WalkParameters& walkparameters);
+    
+    void getCurrentSpeed(vector<float>& currentspeed);
 protected:
     virtual void doWalk();
-    
+
     void setTargetSpeeds(const vector<float>& speed);
     void setCurrentSpeeds();
     

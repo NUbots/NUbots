@@ -27,7 +27,10 @@
 
 class NUSensorsData;
 class NUActionatorsData;
-class PIDController;
+
+class HeadJob;
+class HeadPanJob;
+class HeadNodJob;
 
 #include <vector>
 
@@ -38,8 +41,11 @@ public:
     ~NUHead();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
+    void process(HeadJob* job);
+    void process(HeadPanJob* job);
+    void process(HeadNodJob* job);
 private:
+    void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
 
 private:

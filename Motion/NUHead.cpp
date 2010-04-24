@@ -23,8 +23,12 @@
 #include "NUHead.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Head/PIDController.h"
 #include "Tools/MotionCurves.h"
+
+#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -53,7 +57,33 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
-    doHead();
+}
+
+/*! @brief Process a generic head job
+    @param job the head job
+ */
+void NUHead::process(HeadJob* job)
+{
+    static vector<double> times;                // the times to reach each headposition tuple
+    static vector<vector<float> > positions;    // a vector of headposition tuples
+    job->getPositions(times, positions);
+    moveTo(times, positions);
+}
+
+/*! @brief Process a head pan job
+    @param job the head pan job
+ */
+void NUHead::process(HeadPanJob* job)
+{
+    HeadPanJob::head_pan_t pantype = job->getPanType();
+}
+
+/*! @brief Process a head nod job
+    @param job the nod job
+ */
+void NUHead::process(HeadNodJob* job)
+{
+    HeadNodJob::head_nod_t nodtype = job->getNodType();
 }
 
 

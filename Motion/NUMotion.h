@@ -63,18 +63,19 @@ protected:
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
+    
     // essential motion components
     FallProtection* m_fall_protection;  //!< the fall protection module
     Getup* m_getup;                     //!< the getup module
-#ifdef USE_HEAD
-    NUHead* m_head;                     //!< the head module
-#endif
-#ifdef USE_WALK
-    NUWalk* m_walk;                     //!< the walk module
-#endif
-#ifdef USE_KICK
-    NUKick* m_kick;                     //!< the kick module
-#endif
+    #ifdef USE_HEAD
+        NUHead* m_head;                     //!< the head module
+    #endif
+    #ifdef USE_WALK
+        NUWalk* m_walk;                     //!< the walk module
+    #endif
+    #ifdef USE_KICK
+        NUKick* m_kick;                     //!< the kick module
+    #endif
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
