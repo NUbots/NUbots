@@ -146,12 +146,8 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, cons
 void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
     unsigned int numjoints = times.size();
-    
     if (numjoints == 0 || startpositions.size() < numjoints || positions.size() < numjoints)
-    {
-        cout << "Wrong length" << endl;
         return;
-    }
     
     calculatedtimes = vector<vector<double> >();
     calculatedpositions = vector<vector<float> >();
@@ -210,14 +206,13 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     float v0 = startvelocity;
     float vf = startvelocity;
     
-    if (t0 > tf || fabs(g0 - gf) < 0.05)
+    // if the time is short or the movement is small, don't bother calculating a curve
+    if (fabs(t0 - tf) < 4*cycletime || fabs(g0 - gf) < 0.05)
     {
         calculatedtimes = vector<double> (1, tf);
         calculatedpositions = vector<float> (1, gf);
         return;
     }
-    
-    cout << "MotionCurves::calculateTrapezoidalCurve(" << t0 << ", " << tf << ", " << g0 << ", " << gf << ", " << v0 << ", " << vf << ", " << smoothness << ", " << cycletime << ")" << endl;
     
     // Calculate the required acceleration magnitudes
     float Af = 2*(gf - g0 - vf*tf - v0*t0 + 0.5*(t1 + t0)*(vf - v0))/(t2*t2 - tf*tf - (t1+t0)*(t2 - tf));

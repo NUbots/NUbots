@@ -33,17 +33,13 @@ NUHead::NUHead()
 {
     m_pitch = 0;
     m_yaw = 0;
-    
-    m_pitch_pid = new PIDController(string("HeadPitch"), 0.6, 1.2/1000.0, 0.16*1000, -0.67, 0.51);
-    m_yaw_pid = new PIDController(string("HeadYaw"), 0.6, 1.2/1000.0, 0.16*1000, -2.08, 2.08);
 }
 
 /*! @brief Destructor for motion module
  */
 NUHead::~NUHead()
 {
-    if (m_pitch_pid != NULL) delete m_pitch_pid;
-    if (m_yaw_pid != NULL) delete m_yaw_pid;
+
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -63,10 +59,8 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 
 void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& positions)
 {
-    unsigned int length = times.size();
-    if (m_data == NULL || length == 0 || positions.size() == 0)
+    if (m_data == NULL || m_actions == NULL)
         return;
-    unsigned int width = positions[0].size();
 
     vector<float> sensorpositions;
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
@@ -74,30 +68,13 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
-    vector<vector<double> > newtimes = vector<vector<double> >(2, times);
-    MotionCurves::calculate(m_data->CurrentTime, newtimes, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
+    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, 40);
     
 }
 
 void NUHead::doHead()
 {
-	/*static vector<float> pos (2,0);
-	static vector<float> vel (2,0);
-	static vector<float> gain (2,40);
-
-    m_pitch_pid->setTarget(m_pitch);
-    m_yaw_pid->setTarget(m_yaw);
-    
-    static vector<float> sensorpositions(2, 0);
-    static vector<float> targetpositions(2, 0);
-    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
-    m_data->getJointTargets(NUSensorsData::HeadJoints, targetpositions);
-    
-    
-	pos[0] = m_pitch;
-	pos[1] = m_yaw;
-
-	m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_data->CurrentTime + 0, pos, vel, gain);*/
+	// at this stage there is nothing to do here
 }
 

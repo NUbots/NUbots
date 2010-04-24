@@ -48,9 +48,6 @@ private:
     
 	double m_pitch;                     //!< current pitch target
     double m_yaw;                       //!< current yaw target
-
-	PIDController* m_pitch_pid;         //!< low level PID controller for the pitch
-    PIDController* m_yaw_pid;           //!< low level PID controller for the yaw
     
     double m_head_timestamp;
 

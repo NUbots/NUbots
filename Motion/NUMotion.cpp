@@ -3,45 +3,7 @@
 
     @author Jason Kulk
  
- So what can Motion do?
-    - walk
-    - track points, pan, nod with the head
-    - do kicks
-    - play scripts (get-ups, and probably blocks)
- 
- So that looks like four sub modules.
- 
- NUMotion gets some jobs; BODY and HEAD. Now I need to convert those jobs into
- other jobs, or put the actions in the NUActionatorsData
- 
- WALK.
-    Input:
-        NUSensorsData
-        Current walk-related job
-    Output:
-        NUActionatorsData
- 
- HEAD.
-    Input: 
-        NUSensorsData (I think that you should proably try to stablise the head, and maybe use some smarter control)
-        Current head-related job
-    Output:
-        NUActionatorsData
- 
- KICK.
-    Input:
-        NUSensorsData (The kick should be closed loop)
-        Current kick-related job
-    Output:
-        NUActionatorsData
- 
- BLOCK.
- 
- SAVE.
- 
- GETUP.
- 
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -71,26 +33,43 @@
  */
 NUMotion::NUMotion()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::NUMotion" << endl;
+    #endif
     m_current_time = 0;
     m_previous_time = 0;
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::NUMotion" << endl;
-#endif
-#ifdef USE_HEAD
-    m_head = new NUHead();
-#endif
-#ifdef USE_WALK
-    m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
-#endif
-#ifdef USE_KICK
-    m_kick = new NUKick();
-#endif
+    #ifdef USE_HEAD
+        m_head = new NUHead();
+    #endif
+    #ifdef USE_WALK
+        m_walk = NUWalk::getWalkEngine();
+    #endif
+    #ifdef USE_KICK
+        m_kick = new NUKick();
+    #endif
 }
 
 /*! @brief Destructor for motion module
  */
 NUMotion::~NUMotion()
 {
+    if (m_fall_protection != NULL)
+        delete m_fall_protection;
+    
+    if (m_getup != NULL)
+        delete m_getup;                   
+    #ifdef USE_HEAD
+        if (m_head != NULL)
+            delete m_head;
+    #endif
+    #ifdef USE_WALK
+        if (m_head != NULL)
+            delete m_walk;                
+    #endif
+    #ifdef USE_KICK
+        if (m_kick != NULL)
+            delete m_kick;                   
+    #endif
 }
 
 /*! @brief Process new sensor data, and produce actionator commands.
@@ -147,9 +126,6 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
- 
-    @attention There is a very rare segmentation fault in this function. This will need to be looked at eventually.
-               I think I might need to change things around so I don't remove jobs mid loop!
     
     @param jobs the current list of jobs
  */

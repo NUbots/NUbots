@@ -22,6 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
                 FallProtection.cpp FallProtection.h
+                Getup.cpp Getup.h
 )
 
 SET (YOUR_DIRS 	Tools)
