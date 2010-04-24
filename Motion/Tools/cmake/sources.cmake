@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  MotionCurves.cpp MotionCurves.h
+                MotionFileTools.cpp MotionFileTools.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
