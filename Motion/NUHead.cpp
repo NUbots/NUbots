@@ -68,47 +68,16 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
         return;
     unsigned int width = positions[0].size();
 
-    /*vector<float> vel (width, 0);
-    vector<float> gain (width, 40);
-    for (unsigned int i=0; i<length; i++)
-    {
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, times[i], positions[i], vel, gain);
-    }*/
     vector<float> sensorpositions;
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
-    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
+    vector<vector<double> > newtimes = vector<vector<double> >(2, times);
+    MotionCurves::calculate(m_data->CurrentTime, newtimes, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, 40);
     
-    /*MotionCurves::calculate(m_data->CurrentTime, times[0], sensorpositions[0], positions[0][0], 0.5, 10, curvetimes, curvepositions);
-    vector<float> curvevelocities(curvetimes.size(), 0);
-    vector<float> curvegains(curvetimes.size(), 40);
-    m_actions->addJointPositions(NUActionatorsData::HeadPitch, curvetimes, curvepositions, curvevelocities, curvegains);
-    
-    MotionCurves::calculate(m_data->CurrentTime, times[0], sensorpositions[1], positions[0][1], 0.5, 10, curvetimes, curvepositions);
-    curvevelocities = vector<float>(curvetimes.size(), 0);
-    curvegains = vector<float>(curvetimes.size(), 0);
-    m_actions->addJointPositions(NUActionatorsData::HeadYaw, curvetimes, curvepositions, curvevelocities, curvegains);
-    
-    for (unsigned int i=1; i<times.size(); i++)
-    {
-        MotionCurves::calculate(times[i-1], times[i], positions[i-1][0], positions[i][0], 0.5, 10, curvetimes, curvepositions);
-        vector<float> curvevelocities(curvetimes.size(), 0);
-        vector<float> curvegains(curvetimes.size(), 40);
-        m_actions->addJointPositions(NUActionatorsData::HeadPitch, curvetimes, curvepositions, curvevelocities, curvegains);
-        
-        MotionCurves::calculate(times[i-1], times[i], positions[i-1][1], positions[i][1], 0.5, 10, curvetimes, curvepositions);
-        curvevelocities = vector<float>(curvetimes.size(), 0);
-        curvegains = vector<float>(curvetimes.size(), 40);
-        m_actions->addJointPositions(NUActionatorsData::HeadYaw, curvetimes, curvepositions, curvevelocities, curvegains);
-    }*/
-    
-    /*cout << "MotionCurve: " << m_data->CurrentTime << " to " << times[0] << endl;
-    for (unsigned int i=0; i<curvetimes.size(); i++)
-        cout << curvetimes[i] << ", " << curvepositions[i] << endl;*/
 }
 
 void NUHead::doHead()

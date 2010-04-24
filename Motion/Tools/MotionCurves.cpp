@@ -93,6 +93,7 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, floa
     @param cycletime the motion cycle time in ms. This is used to decide how many points to generate
     @param calculatedtimes the calculated times for the curve. Do not assume the times will be evenly spaced! [[time0, time1, ...]_0, [time0, time1, ...]_1, ..., [time0, time1, ...]]_M
     @param calculatedpositions the calculated positions for the curve. [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ..., [posi0, posi1, ...]]_M
+    @param calculatedvelocities the calculated velocities for the curve. [[velo0, velo1, ...]_0, [velo0, velo1, ...]_1, ..., [velo0, velo1, ...]]_M
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
@@ -117,6 +118,48 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, cons
         vector<float> temppositions;
         vector<float> tempvelocities;
         calculate(starttime, times, startpositions[i], reorderedpositions[i], smoothness, cycletime, temptimes, temppositions, tempvelocities);
+        calculatedtimes.push_back(temptimes);
+        calculatedpositions.push_back(temppositions);
+        calculatedvelocities.push_back(tempvelocities);
+    }
+}
+
+/*! @brief Calculates a smooth motion curve for several joints. Each joint has its own time vector
+ 
+    The data needs to be of the following format:
+    [[time0, time1, ..., timeI]_0, [time0, time1, ..., timeJ]_1, ... , [time0, time1, ..., posiZ]_N]
+    [[posi0, posi1, ..., posiI]_0, [posi0, posi1, ..., posiJ]_1, ... , [posi0, posi1, ..., posiZ]_N]
+    where each time-position pair has the same length, and there are N joints
+ 
+    @param starttime the time in ms to start moving
+    @param times the times in ms to reach the given positions [time0, time1, ... , timeN]
+    @param startpositions the start postion for each joint [start0, start1, ... , startM]
+    @param positions the target positions for the curve [[position0, ..., positionM]_0, [position1, ..., positionM]_1, ... , [position1, ..., positionM]_N]
+    @param smoothness a fraction indicating the smoothness of the motion: 0 means linear motion curve, 1 minimises the acceleration and jerk
+    @param cycletime the motion cycle time in ms. This is used to decide how many points to generate
+    @param calculatedtimes the calculated times for the curve. Do not assume the times will be evenly spaced! [[time0, time1, ...]_0, [time0, time1, ...]_1, ..., [time0, time1, ...]]_M
+    @param calculatedpositions the calculated positions for the curve. [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ..., [posi0, posi1, ...]]_M
+    @param calculatedvelocities the calculated velocities for the curve. [[velo0, velo1, ...]_0, [velo0, velo1, ...]_1, ..., [velo0, velo1, ...]]_M
+ */
+void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
+{
+    unsigned int numjoints = times.size();
+    
+    if (numjoints == 0 || startpositions.size() < numjoints || positions.size() < numjoints)
+    {
+        cout << "Wrong length" << endl;
+        return;
+    }
+    
+    calculatedtimes = vector<vector<double> >();
+    calculatedpositions = vector<vector<float> >();
+    calculatedvelocities = vector<vector<float> >();
+    for (unsigned int i=0; i<numjoints; i++)
+    {
+        vector<double> temptimes;
+        vector<float> temppositions;
+        vector<float> tempvelocities;
+        calculate(starttime, times[i], startpositions[i], positions[i], smoothness, cycletime, temptimes, temppositions, tempvelocities);
         calculatedtimes.push_back(temptimes);
         calculatedpositions.push_back(temppositions);
         calculatedvelocities.push_back(tempvelocities);
