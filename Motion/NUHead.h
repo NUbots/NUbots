@@ -29,8 +29,8 @@ class NUSensorsData;
 class NUActionatorsData;
 
 class HeadJob;
-class HeadPanJob;
-class HeadNodJob;
+#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 
 #include <vector>
 
@@ -47,16 +47,37 @@ public:
 private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
+    
+    void calculatePan();
+    void calculateBallPan();
+    void calculateBallAndLocalisationPan();
+    void calculateLocalisationPan();
+    
+    void calculateNod();
+    void calculateBallNod();
+    void calculateBallAndLocalisationNod();
+    void calculateLocalisationNod();
+    
+    void load();
+    void loadConfig();
 
 private:
-    NUSensorsData* m_data;              //!< local pointer to the latest sensor data
-    NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
+    NUSensorsData* m_data;                      //!< local pointer to the latest sensor data
+    NUActionatorsData* m_actions;               //!< local pointer to the next actionators data
     
-	double m_pitch;                     //!< current pitch target
-    double m_yaw;                       //!< current yaw target
+    bool m_is_panning;                          //!< true if we are currently panning the head
+    HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
+    bool m_is_nodding;                          //!< true if we are currently nodding the head
+    HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing
     
-    double m_head_timestamp;
-
+    double m_next_add_time;                     //!< the time at which we need to resend the calculated curves to the actionators
+    vector<vector<double> > m_curve_times;      //!< the motion curve times in ms
+    vector<vector<float> > m_curve_positions;   //!< the motion curve positions in radians
+    vector<vector<float> > m_curve_velocities;  //!< the motion curve velocities in radians
+    
+    vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s
+    vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s
+    vector<float> m_default_gains;              //!< the default gains
 };
 
 #endif

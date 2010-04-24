@@ -24,19 +24,22 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Tools/MotionCurves.h"
+#include "Tools/MotionFileTools.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
+#include "nubotdataconfig.h"
 
 
 NUHead::NUHead()
 {
-    m_pitch = 0;
-    m_yaw = 0;
+    m_is_panning = false;
+    m_is_nodding = false;
+    m_next_add_time = 0;
+    
+    load();
 }
 
 /*! @brief Destructor for motion module
@@ -66,6 +69,9 @@ void NUHead::process(HeadJob* job)
 {
     static vector<double> times;                // the times to reach each headposition tuple
     static vector<vector<float> > positions;    // a vector of headposition tuples
+    
+    m_is_panning = false;
+    m_is_nodding = false;
     job->getPositions(times, positions);
     moveTo(times, positions);
 }
@@ -76,6 +82,13 @@ void NUHead::process(HeadJob* job)
 void NUHead::process(HeadPanJob* job)
 {
     HeadPanJob::head_pan_t pantype = job->getPanType();
+    if (m_is_panning == false || pantype != m_pan_type)
+    {
+        m_is_panning = true;
+        m_is_nodding = false;
+        m_pan_type = pantype;
+        calculatePan();
+    }
 }
 
 /*! @brief Process a head nod job
@@ -84,6 +97,13 @@ void NUHead::process(HeadPanJob* job)
 void NUHead::process(HeadNodJob* job)
 {
     HeadNodJob::head_nod_t nodtype = job->getNodType();
+    if (m_is_nodding == false || nodtype != m_nod_type)
+    {
+        m_is_nodding = true;
+        m_is_panning = false;
+        m_nod_type = nodtype;
+        calculateNod();
+    }
 }
 
 
@@ -107,4 +127,71 @@ void NUHead::doHead()
 {
 	// at this stage there is nothing to do here
 }
+
+void NUHead::calculatePan()
+{
+    if (m_pan_type == HeadPanJob::Ball)
+        calculateBallPan();
+    else if (m_pan_type == HeadPanJob::BallAndLocalisation)
+        calculateBallAndLocalisationPan();
+    else if (m_pan_type == HeadPanJob::Localisation)
+        calculateLocalisationPan();
+}
+
+void NUHead::calculateBallPan()
+{
+}
+
+void NUHead::calculateBallAndLocalisationPan()
+{
+}
+
+void NUHead::calculateLocalisationPan()
+{
+}
+
+void NUHead::calculateNod()
+{
+    if (m_nod_type == HeadNodJob::Ball)
+        calculateBallNod();
+    else if (m_nod_type == HeadNodJob::BallAndLocalisation)
+        calculateBallAndLocalisationNod();
+    else if (m_nod_type == HeadNodJob::Localisation)
+        calculateLocalisationNod();
+}
+
+void NUHead::calculateBallNod()
+{
+}
+
+void NUHead::calculateBallAndLocalisationNod()
+{
+}
+
+void NUHead::calculateLocalisationNod()
+{
+}
+
+void NUHead::load()
+{
+    loadConfig();
+}
+
+void NUHead::loadConfig()
+{
+    ifstream file((CONFIG_DIR + string("Motion/Head.cfg")).c_str());
+    if (file.is_open() == false)
+    {
+        errorlog << "NUHead::loadConfig(). Unable to open head configuration file" << endl;
+    }
+    else
+    {
+        m_max_speeds = MotionFileTools::toFloatVector(file);
+        m_max_accelerations = MotionFileTools::toFloatVector(file);
+        m_default_gains = MotionFileTools::toFloatVector(file);
+        file.close();
+    }
+}
+
+
 
