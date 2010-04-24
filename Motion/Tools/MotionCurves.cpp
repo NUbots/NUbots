@@ -23,6 +23,8 @@
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
+#include <math.h>
+
 using namespace std;
 
 /*! @brief Calculates a smooth motion curve for a single joint to a single position
@@ -203,13 +205,17 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     double t2 = starttime + (stoptime - starttime)*(1 - 0.5*smoothness);
     double tf = stoptime;
     
-    if (t0 > tf)
-        return;
-    
     float g0 = startposition;
     float gf = stopposition;
     float v0 = startvelocity;
     float vf = startvelocity;
+    
+    if (t0 > tf || fabs(g0 - gf) < 0.05)
+    {
+        calculatedtimes = vector<double> (1, tf);
+        calculatedpositions = vector<float> (1, gf);
+        return;
+    }
     
     cout << "MotionCurves::calculateTrapezoidalCurve(" << t0 << ", " << tf << ", " << g0 << ", " << gf << ", " << v0 << ", " << vf << ", " << smoothness << ", " << cycletime << ")" << endl;
     

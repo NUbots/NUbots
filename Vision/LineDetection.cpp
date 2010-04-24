@@ -3,7 +3,7 @@
 #include "ClassificationColours.h"
 #include <math.h>
 #define MIN_POINTS_ON_LINE_FINAL 5
-#define MIN_POINTS_ON_LINE 4
+#define MIN_POINTS_ON_LINE 3
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
@@ -43,8 +43,27 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
         //CornerPointCounter = 0;
 	//FIND LINE POINTS:
         FindLinePoints(scanArea);
+        //qDebug() << "Line Points: " << linePoints.size();
         FindFieldLines(image_width,image_height);
+        //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
+        for(int i = 0; i < fieldLines.size(); i++)
+        {
+            if(fieldLines[i].valid)
+            {
+                //qDebug()<<i << ": "<< fieldLines[i].leftPoint.x << "," << fieldLines[i].leftPoint.y << "\t"
+                        //<< fieldLines[i].rightPoint.x << "," << fieldLines[i].rightPoint.y
+                        //<< "\t Points: " << fieldLines[i].numPoints;
+                std::vector<LinePoint*> points = fieldLines[i].getPoints();
+                for( int j = 0; j < fieldLines[i].numPoints ; j++)
+                {
+
+                    //qDebug() << "Point " <<j << ":" << points[j]->x << "," << points[j]->y;
+                }
+
+            }
+        }
         FindCornerPoints(image_height);
+        //qDebug() << "Corners found: " << cornerPoints.size();
         //DecodeCorners();
 }
 
@@ -53,7 +72,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
     int numberOfLines = scanArea->getNumberOfScanLines();
     int maxLengthOfScanLine = 0;
 
-    //Find Length of Longest ScanLines as we want to only have longest scan lines.
+    //! Find Length of Longest ScanLines as we want to only have longest scan lines.
     for(int i = 0; i < numberOfLines; i++)
     {
         if(scanArea->getScanLine(i)->getLength() > maxLengthOfScanLine)
@@ -61,24 +80,29 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                 maxLengthOfScanLine = scanArea->getScanLine(i)->getLength();
         }
     }
+    //! Find the LinePoints:
     for(int i = 0; i< numberOfLines; i++)
     {
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
         for(int j = 0; j < numberOfSegments; j++)
         {
-            if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
+            //! Throw out short segments
+            //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
             //int segmentSize = segment->getSize();
-            //CHECK SIZE
+            //! CHECK The Length of the segment
             if(segment->getSize() < MIN_POINT_THICKNESS || segment->getSize() > VERT_POINT_THICKNESS ) continue;
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            if(     ClassIndex::green   ==  segment->getBeforeColour()
+            if(     (ClassIndex::green   ==  segment->getBeforeColour()
                 &&  ClassIndex::white   ==  segment->getColour()
                 &&  ClassIndex::green   ==  segment->getAfterColour())
-                    /*(ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
-                    || (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour()))*/
+                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
+                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour())
+                ||  (ClassIndex::white   ==  segment->getColour() &&
+                    (segment->getAfterColour() == ClassIndex::unclassified || segment->getAfterColour() == ClassIndex::green || segment->getAfterColour() == ClassIndex::shadow_object )
+                &&  (segment->getBeforeColour() == ClassIndex::unclassified || segment->getBeforeColour() == ClassIndex::green || segment->getBeforeColour() == ClassIndex::shadow_object)))
 
             {
                 //ADD A FIELD LINEPOINT!
@@ -89,17 +113,16 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                 tempLinePoint.width = (int)segment->getSize();
                 tempLinePoint.x = round((start.x + end.x) / 2);
                 tempLinePoint.y = round((start.y + end.y) / 2);
-
+                tempLinePoint.inUse = false;
                 //CUT CLOSE LINE POINTS OFF
                 bool canNotAdd = false;
                 for (unsigned int num =0; num <linePoints.size(); num++)
                 {
-                    if((fabs(tempLinePoint.x - linePoints[num].x) < 1.0))
+
+                    if((fabs(tempLinePoint.x - linePoints[num].x) < 0.5) &&
+                       (fabs(tempLinePoint.y - linePoints[num].y) < 0.5))
                     {
-                        if((fabs(tempLinePoint.y - linePoints[num].y) < 1.0))
-                        {
-                            canNotAdd = true;
-                        }
+                        canNotAdd = true;
                     }
                 }
                 if(!canNotAdd)
@@ -107,7 +130,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
-                //// qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
+                 //qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
 
             }
@@ -145,8 +168,9 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
         for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){ 	//for remaining points recorded
-            if(linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue; //STOP if LINE is too THICK, but can use if in Vertical Line Search.
-            if (!(linePoints[EndCheck].inUse == false) && (linePoints[EndCheck].x != linePoints[SearchFrom].x))continue;
+            if (linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue; //STOP if LINE is too THICK, but can use if in Vertical Line Search.
+            if ((linePoints[EndCheck].inUse == true)) continue;
+            //if ((linePoints[EndCheck].x != linePoints[SearchFrom].x))continue;
 
                 // Skip all points on the same search line as this one or have already been removed..
             if (linePoints[EndCheck].x <= linePoints[SearchFrom].x+LINE_SEARCH_GRID_SIZE*2)
@@ -165,6 +189,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     //loop through the rest of the points that maybe in this 'line'
                     for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
                         if (linePoints[previousPointID].x == linePoints[PointID].x) continue;
+                        if (linePoints[PointID].inUse == true) continue;
                         if (fabs(linePoints[PointID].x - linePoints[previousPointID].x) < int(LINE_SEARCH_GRID_SIZE*2)){
                             double DisMod = (linePoints[PointID].x - linePoints[previousPointID].x)/LINE_SEARCH_GRID_SIZE;
                             //Check if the slope is about right..
@@ -203,6 +228,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //// qDebug() << "SORTING...";
     //qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
+    /*
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
@@ -211,8 +237,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                 //std::cout << "Comparing.."<< SearchFrom << " with " << EndCheck <<std::endl;
                 //Skip all points on the same search line as this one or have already been removed..
             if (!((linePoints[EndCheck].inUse == false) && (linePoints[EndCheck].y != linePoints[SearchFrom].y)))continue;
-            if(linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
-            if(linePoints[EndCheck].width < MIN_POINT_THICKNESS*3) continue;
+            if (linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
+            if (linePoints[EndCheck].width < MIN_POINT_THICKNESS*3) continue;
             if (linePoints[EndCheck].y <= linePoints[SearchFrom].y+LINE_SEARCH_GRID_SIZE*4)
             {
                 DistanceStep = (int)(linePoints[EndCheck].y-linePoints[SearchFrom].y)/LINE_SEARCH_GRID_SIZE;
@@ -258,7 +284,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //}
         }
     }
-
+*/
 
 
     //---------------------------------------------------
@@ -290,90 +316,94 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //We should now have about 10 lines max, some of which can be joined together (since they may be two lines seperated by a break but otherwise one line really...)
     for (LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
-            if (!fieldLines[LineIDStart].valid) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
-            for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++){
-                    if (!fieldLines[LineIDEnd].valid) continue;
-                    //Try extending the lines so they are near the ends of the other ones, and see if their in any way close...
+        if (!fieldLines[LineIDStart].valid) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
+        for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++)
+        {
+            if (!fieldLines[LineIDEnd].valid) continue;
+            //Try extending the lines so they are near the ends of the other ones, and see if their in any way close...
+            //qDebug() << "Trying to join: " << LineIDStart << " \t with " << LineIDEnd;
+            //We need to check both, since in the actual points can be close enough together to make a small short segment
+            //of a corner be added to a line, while the far comparision points allow lines which are fairly para get joined
+            //togther.. by checking both, only the correct lines are actually joined...
 
-                    //We need to check both, since in the actual points can be close enough together to make a small short segment
-                    //of a corner be added to a line, while the far comparision points allow lines which are fairly para get joined
-                    //togther.. by checking both, only the correct lines are actually joined...
+            double MSD1, MSD2, r2tls1, r2tls2;
+            double sxx, syy, sxy, Sigma;
+            LSFittedLine Line1 = fieldLines[LineIDStart];
+            LSFittedLine Line2 = fieldLines[LineIDEnd];
+            double L1sumCompX, L1sumCompY, L1sumCompXY, L1sumCompX2, L1sumCompY2;
+            double L2sumCompX, L2sumCompY, L2sumCompXY, L2sumCompX2, L2sumCompY2;
+            //Working Out Variables for comparision:
 
-                    double MSD1, MSD2, r2tls1, r2tls2;
-                    double sxx, syy, sxy, Sigma;
-                    LSFittedLine Line1 = fieldLines[LineIDStart];
-                    LSFittedLine Line2 = fieldLines[LineIDEnd];
-                    double L1sumCompX, L1sumCompY, L1sumCompXY, L1sumCompX2, L1sumCompY2;
-                    double L2sumCompX, L2sumCompY, L2sumCompXY, L2sumCompX2, L2sumCompY2;
-                    //Working Out Variables for comparision:
+            //if(Line1.getGradient() > 1){
+                L1sumCompX =    IMAGE_WIDTH;
+                L1sumCompY =    Line1.getGradient()*IMAGE_WIDTH + 2*Line1.getYIntercept();
+                L1sumCompX2 =   L1sumCompX*L1sumCompX;
+                L1sumCompY2 =   (Line1.getYIntercept())*(Line1.getYIntercept())+
+                                ((Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept())*
+                                (Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept()));
+                L1sumCompXY =   L1sumCompX * (Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept());
 
-                    //if(Line1.getGradient() > 1){
-                        L1sumCompX =    IMAGE_WIDTH;
-                        L1sumCompY =    Line1.getGradient()*IMAGE_WIDTH + 2*Line1.getYIntercept();
-                        L1sumCompX2 =   L1sumCompX*L1sumCompX;
-                        L1sumCompY2 =   (Line1.getYIntercept())*(Line1.getYIntercept())+
-                                        ((Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept())*
-                                        (Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept()));
-                        L1sumCompXY =   L1sumCompX * (Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept());
+                L2sumCompX =    IMAGE_WIDTH;
+                L2sumCompY =    Line2.getGradient()*IMAGE_WIDTH + 2*Line2.getYIntercept();
+                L2sumCompX2 =   L2sumCompX*L2sumCompX;
+                L2sumCompY2 =   (Line2.getYIntercept())*(Line2.getYIntercept())+
+                                ((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
+                                (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
+                L2sumCompXY = L2sumCompX * (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept());
+            /*}
+            else{ //Switch the X and Ys around
+                L1sumCompX =    Line1.getGradient()*IMAGE_HEIGHT + 2*Line1.getXIntercept(); //IMAGE_WIDTH;
+                L1sumCompY =    IMAGE_HEIGHT;//Line1.getGradient()*IMAGE_WIDTH + 2*Line1.getYIntercept();
+                L1sumCompX2 =   (Line1.getXIntercept())*(Line1.getXIntercept())+
+                                ((Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept())*
+                                (Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept()));
+                L1sumCompY2 =   L1sumCompY*L1sumCompY;//(Line1.getYIntercept())*(Line1.getYIntercept())+
+                                //((Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept())*
+                                //(Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept()));
+                L1sumCompXY =   L1sumCompY * (Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept());
 
-                        L2sumCompX =    IMAGE_WIDTH;
-                        L2sumCompY =    Line2.getGradient()*IMAGE_WIDTH + 2*Line2.getYIntercept();
-                        L2sumCompX2 =   L2sumCompX*L2sumCompX;
-                        L2sumCompY2 =   (Line2.getYIntercept())*(Line2.getYIntercept())+
-                                        ((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
-                                        (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
-                        L2sumCompXY = L2sumCompX * (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept());
-                    /*}
-                    else{ //Switch the X and Ys around
-                        L1sumCompX =    Line1.getGradient()*IMAGE_HEIGHT + 2*Line1.getXIntercept(); //IMAGE_WIDTH;
-                        L1sumCompY =    IMAGE_HEIGHT;//Line1.getGradient()*IMAGE_WIDTH + 2*Line1.getYIntercept();
-                        L1sumCompX2 =   (Line1.getXIntercept())*(Line1.getXIntercept())+
-                                        ((Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept())*
-                                        (Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept()));
-                        L1sumCompY2 =   L1sumCompY*L1sumCompY;//(Line1.getYIntercept())*(Line1.getYIntercept())+
-                                        //((Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept())*
-                                        //(Line1.getGradient()*IMAGE_WIDTH + Line1.getYIntercept()));
-                        L1sumCompXY =   L1sumCompY * (Line1.getGradient()*IMAGE_HEIGHT + Line1.getXIntercept());
+                L2sumCompX =    Line2.getGradient()*IMAGE_HEIGHT + 2*Line2.getXIntercept();//IMAGE_WIDTH;
+                L2sumCompY =    IMAGE_HEIGHT;//Line2.getGradient()*IMAGE_WIDTH + 2*Line2.getYIntercept();
+                L2sumCompX2 =   (Line2.getXIntercept())*(Line2.getXIntercept())+
+                                ((Line2.getGradient()*IMAGE_HEIGHT + Line2.getXIntercept())*
+                                (Line2.getGradient()*IMAGE_HEIGHT + Line2.getXIntercept()));//L2sumCompX*L2sumCompX;
+                L2sumCompY2 =   L2sumCompY*L2sumCompY;//(Line2.getYIntercept())*(Line2.getYIntercept())+
+                                //((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
+                                //(Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
+                L2sumCompXY = L2sumCompY * (Line2.getGradient()*IMAGE_HEIGHT+ Line2.getXIntercept());
+            }*/
 
-                        L2sumCompX =    Line2.getGradient()*IMAGE_HEIGHT + 2*Line2.getXIntercept();//IMAGE_WIDTH;
-                        L2sumCompY =    IMAGE_HEIGHT;//Line2.getGradient()*IMAGE_WIDTH + 2*Line2.getYIntercept();
-                        L2sumCompX2 =   (Line2.getXIntercept())*(Line2.getXIntercept())+
-                                        ((Line2.getGradient()*IMAGE_HEIGHT + Line2.getXIntercept())*
-                                        (Line2.getGradient()*IMAGE_HEIGHT + Line2.getXIntercept()));//L2sumCompX*L2sumCompX;
-                        L2sumCompY2 =   L2sumCompY*L2sumCompY;//(Line2.getYIntercept())*(Line2.getYIntercept())+
-                                        //((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
-                                        //(Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
-                        L2sumCompXY = L2sumCompY * (Line2.getGradient()*IMAGE_HEIGHT+ Line2.getXIntercept());
-                    }*/
+            sxx = L2sumCompX2+L1sumCompX2 - (L2sumCompX+L1sumCompX)*(L2sumCompX+L1sumCompX)/4;
+            syy = L2sumCompY2+L1sumCompY2 - (L2sumCompY+L1sumCompY)*(L2sumCompY+L1sumCompY)/4;
+            sxy = L2sumCompXY+L1sumCompXY - (L2sumCompX+L1sumCompX)*(L2sumCompY+L1sumCompY)/4;
 
-                    sxx = L2sumCompX2+L1sumCompX2 - (L2sumCompX+L1sumCompX)*(L2sumCompX+L1sumCompX)/4;
-                    syy = L2sumCompY2+L1sumCompY2 - (L2sumCompY+L1sumCompY)*(L2sumCompY+L1sumCompY)/4;
-                    sxy = L2sumCompXY+L1sumCompXY - (L2sumCompX+L1sumCompX)*(L2sumCompY+L1sumCompY)/4;
-
-                    Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
-                    MSD1 = Sigma/4;
-                    r2tls1 = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
-
-
-                    //JOIN Copies of LINEs:
-                    Line1.joinLine(Line2);
-                    MSD2 = Line1.getMSD();
-                    r2tls2 = Line2.getr2tls();
+            Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
+            MSD1 = Sigma/4;
+            r2tls1 = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
 
 
-                    //Now make sure the slopes are both about the same degree angle....
-                    // Seems to have a problem with lines "within" other lines, so pick them out..
-                    // qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
-                    if ((r2tls1 > .99 && r2tls2 > .99 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
-                    {
-                        //They are the same line, so join them together...
-                        // qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
-                        fieldLines[LineIDStart].joinLine(fieldLines[LineIDEnd]);
-                        //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
-                        fieldLines[LineIDEnd].clearPoints();
+            //JOIN Copies of LINEs:
+            Line1.joinLine(Line2);
+            MSD2 = Line1.getMSD();
+            r2tls2 = Line2.getr2tls();
 
-                    }
+
+            //Now make sure the slopes are both about the same degree angle....
+            // Seems to have a problem with lines "within" other lines, so pick them out..
+            // qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
+            if ((r2tls1 > .90 && r2tls2 > .90 && MSD1 < 40  && MSD2 < 40))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
+            {
+                //They are the same line, so join them together...
+                //qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
+                fieldLines[LineIDStart].joinLine(fieldLines[LineIDEnd]);
+                //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
+                fieldLines[LineIDEnd].clearPoints();
+                //! Reset ans start again:
+                LineIDStart = 0;
+                LineIDEnd = LineIDStart+1;
+
             }
+        }
     }
 
     //Remove any lines that are still too small (or really badly fitted)..

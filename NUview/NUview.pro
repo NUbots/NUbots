@@ -121,6 +121,8 @@ SOURCES += mainwindow.cpp \
     NUviewIO/NUviewIO.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
+    ../NUPlatform/NUActionators.cpp \
+    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUSystem.cpp \
     ../Behaviour/TeamInformation.cpp \
     ../Behaviour/Jobs/*.cpp \

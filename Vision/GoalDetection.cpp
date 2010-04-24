@@ -63,7 +63,6 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 it = FO_Candidates.erase(it);
             }
 	}
-
         return result;
 }
 
@@ -130,11 +129,11 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 
     }
     //SCANS UP THE IMAGE
-    debug << "TransitionSeg Join:" << endl;
-    for (int i = (int)horizontalSegments.size(); i >= 0; i--)
+    std::vector<TransitionSegment>::reverse_iterator revIt = horizontalSegments.rbegin();
+    for (; revIt != horizontalSegments.rend(); ++revIt)
     {
         //qDebug() << "Crash Check: Access HZsegs: " << i;
-        TransitionSegment tempSegment = horizontalSegments[i];
+        TransitionSegment tempSegment = *revIt;
         //! If     Candidate colour is a blue varient and Segment colour is a blue varient OR
         //!        Candidate colour is a yellow varient and Segment colour is a yellow varient
         //! THEN   Extend the Candidate with Segment information.
@@ -176,7 +175,6 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                     tempPoint.y = PossibleGoal->getBottomRight().y;
                     PossibleGoal->setBottomRight(tempPoint);
                 }
-                debug << "OverLapping: Join TranSeg [" << i<< "]"<< endl;
             }
         }
     }

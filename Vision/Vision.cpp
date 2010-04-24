@@ -17,15 +17,20 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
+#include "nubotdataconfig.h"
 
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
+//#include <QDebug>
 
 using namespace mathGeneral;
 Vision::Vision()
@@ -34,9 +39,9 @@ Vision::Vision()
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
-   // testLUTBuffer = new unsigned char [128*128*128];
     currentLookupTable = LUTBuffer;
-    imagefile.open ("/home/nao/images.nul");
+    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
@@ -50,12 +55,12 @@ Vision::~Vision()
     return;
 }
 
-void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
+void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 {
     //debug  << "Vision::Process - Begin" << endl;
-    camera = m_camera;
+    m_camera = camera;
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.camera_begin(); it != jobs.camera_end();)
+    for (it = jobs->camera_begin(); it != jobs->camera_end();)
     {
         //debug  << "Vision::Process - Processing Job" << endl;
         if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
@@ -85,7 +90,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
             {   
                 m_camera->setSettings(settings);
             }
-            it = jobs.removeCameraJob(it);
+            it = jobs->removeCameraJob(it);
         }
         else 
         {
@@ -94,7 +99,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 
     }
     
-    for (it = jobs.vision_begin(); it != jobs.vision_end();)
+    for (it = jobs->vision_begin(); it != jobs->vision_end();)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
@@ -109,17 +114,17 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 {
                     
                     currentSettings = m_camera->getSettings();
-                    system("aplay /home/nao/data/Sounds/StartSavingImages.wav");
+                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
                 {
                     
                     m_camera->setSettings(currentSettings);
-                    system("aplay /home/nao/data/Sounds/StopSavingImages.wav");
+                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
                 isSavingImages = job->saving();
             }
-            it = jobs.removeVisionJob(it);
+            it = jobs->removeVisionJob(it);
          }
         else 
         {
@@ -130,14 +135,16 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 }
 
 
-FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
+FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
 
-    if (image == NULL)
+    if (image == NULL || data == NULL || actions == NULL)
         return AllFieldObjects;
+    m_sensor_data = data;
+    m_actions = actions;
     setImage(image);
     AllFieldObjects->preProcess(image->m_timestamp);
 
@@ -169,7 +176,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     vector <float> horizonInfo;
     Horizon horizonLine;
 
-    if(data->getHorizon(horizonInfo))
+    if(m_sensor_data->getHorizon(horizonInfo))
     {
         horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
     }
@@ -289,7 +296,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 //qDebug() << "POST-BALL";
@@ -342,7 +349,7 @@ void Vision::SaveAnImage()
     imagefile << buffer;
 
     //Set NextCameraSetting:
-    CameraSettings tempCameraSettings = camera->getSettings();
+    CameraSettings tempCameraSettings = m_camera->getSettings();
     if(ImageFrameNumber % 6 == 0 )
     {
         tempCameraSettings.exposure = 100;
@@ -367,7 +374,7 @@ void Vision::SaveAnImage()
     {
         tempCameraSettings.exposure = 400;
     }
-    camera->setSettings(tempCameraSettings);
+    m_camera->setSettings(tempCameraSettings);
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
@@ -382,8 +389,10 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
-    setLUT(LUTBuffer);
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        setLUT(LUTBuffer);
+    else
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
 void Vision::setImage(const NUimage* newImage)
@@ -713,9 +722,12 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 1;
+    int bufferSize = 2;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
-
+    for (int i = 0; i < bufferSize; i++)
+    {
+        colourBuff.push_back(0);
+    }
     for (int i = 0; i < numOfLines; i++)
     {
         tempLine = scanArea->getScanLine(i);
@@ -723,10 +735,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
         lineLength = tempLine->getLength();
         tempStartPoint = startPoint;
 
-        for (int i = 0; i < bufferSize; i++)
-        {
-            colourBuff.push_back(0);
-        }
+
         beforeColour    = 0; //!< Colour Before the segment
         afterColour     = 0;  //!< Colour in the next Segment
         currentColour   = 0; //!< Colour in the current segment
@@ -762,51 +771,93 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
             if(j >= lineLength - skipPixel)
             {
-                //! End Of Screen detected: Generate new segment and add to the line
-
-                if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified))
+                //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
+                if((currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                 {
-                    //SHIFTING THE POINTS TO THE START OF BUFFER:
-                    /*if(direction == ClassifiedSection::DOWN)
+                    tempStartPoint = currentPoint;
+                    beforeColour = ClassIndex::unclassified;
+                    currentColour = afterColour;
+                    for (int i = 0; i < bufferSize; i++)
                     {
-                        if(tempStartPoint.y > startPoint.y)
+                        colourBuff.push_back(0);
+                    }
+                    continue;
+                }
+
+                while( ( checkIfBufferSame(colourBuff) && currentColour == afterColour) )
+                {
+
+                    if(direction == ClassifiedSection::DOWN)
+                    {
+
+                        if(startPoint.y + j < currentImage->getHeight())
                         {
-                            tempStartPoint.y = tempStartPoint.y - bufferSize * skipPixel;
+                            currentPoint.y = startPoint.y + j;
+                            currentPoint.x = startPoint.x;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                     else if (direction == ClassifiedSection::RIGHT)
                     {
-                        if(tempStartPoint.x > startPoint.x)
+                        if(startPoint.x + j < currentImage->getWidth())
                         {
-                            tempStartPoint.x = tempStartPoint.x - bufferSize * skipPixel;
+                            currentPoint.x = startPoint.x + j;
+                            currentPoint.y = startPoint.y;
                         }
+                        else
+                        {
+                            break;
+                        }
+
                     }
                     else if(direction == ClassifiedSection::UP)
                     {
-                        if(tempStartPoint.y < startPoint.y)
+
+                        if(startPoint.y - j > 0)
                         {
-                            tempStartPoint.y = tempStartPoint.y + bufferSize * skipPixel;
+                            currentPoint.y = startPoint.y - j;
+                            currentPoint.x = startPoint.x;
                         }
+                        else
+                        {
+                            break;
+                        }
+
                     }
                     else if(direction == ClassifiedSection::LEFT)
                     {
-                        if(tempStartPoint.x < startPoint.x)
+                        if(startPoint.x - j > 0)
                         {
-                            tempStartPoint.x = tempStartPoint.x + bufferSize * skipPixel;
+                            currentPoint.x = startPoint.x - j;
+                            currentPoint.y = startPoint.y;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
-                    */
-                    TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
-                    tempLine->addSegement(tempTransition);
-                    /*int spacing = 16;
-                    if(abs(tempTransition->getSize())>spacing)
-                    {
-                        CloselyClassifyScanline(tempLine, tempTransition,spacing, direction);//tempStartPoint,currentColour,segmentlength, spacing, direction);
-                    }*/
+                    afterColour = classifyPixel(currentPoint.x,currentPoint.y);
+                    colourBuff.push_back(afterColour);
+                    j = j+skipPixel*3;
+                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                            "\t"<<currentColour<< "," << afterColour <<
+                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
+                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
                 }
+
+                TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
+                tempLine->addSegement(tempTransition);
+
                 tempStartPoint = currentPoint;
                 beforeColour = ClassIndex::unclassified;
                 currentColour = afterColour;
+                for (int i = 0; i < bufferSize; i++)
+                {
+                    colourBuff.push_back(0);
+                }
                 continue;
             }
 
@@ -816,7 +867,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 {
                     //! Transition detected: Generate new segment and add to the line
                     //Adjust the position:
-                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified ))
+                    if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                     {
                         //SHIFTING THE POINTS TO THE START OF BUFFER:
                         if(direction == ClassifiedSection::DOWN)
@@ -861,7 +912,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;
                     currentColour = afterColour;
-
+                    for (int i = 0; i < bufferSize; i++)
+                    {
+                        colourBuff.push_back(0);
+                    }
                 }
             }
         }
@@ -1580,12 +1634,14 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 
 std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
+    //qDebug() << "Forming Lines:" << endl;
     LineDetection LineDetector;
     int image_width = currentImage->getWidth();
     int image_height = currentImage->getHeight();
     LineDetector.FormLines(scanArea,image_width,image_height,spacing);
     std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
+    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
     return fieldLines;
 }
 
@@ -1627,7 +1683,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
         //AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
-        //qDebug() << "Setting FieldObject:";
+        //qDebug() << "Setting FieldObject Distance:" << distance;
         //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
         //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition, sphericalError, viewPosition, currentImage->m_timestamp);

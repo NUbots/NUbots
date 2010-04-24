@@ -29,6 +29,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
+    //TEST:
 }
 
 virtualNUbot::~virtualNUbot()
@@ -228,9 +229,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    //fieldLines = vision.DetectLines(&vertScanArea,spacings);
+    fieldLines = vision.DetectLines(&vertScanArea,spacings);
     //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -279,7 +280,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 BallCandidates = tempCandidates;
@@ -321,10 +322,16 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         if(circ.isDefined)
         {
             //! Draw Ball:
-            emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
+            emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::VisionBall);
 
             //debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
             //debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing() << endl;
+        }
+        else
+        {
+            //No ball so clear the layer
+            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::VisionBall);
+
         }
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
