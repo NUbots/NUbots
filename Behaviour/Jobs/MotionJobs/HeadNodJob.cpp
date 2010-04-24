@@ -29,111 +29,76 @@
     @param centre the centre head position about which we will nod [yaw (rad), pitch (rad), roll (rad)]
     @param limits the lower and upper angle limits for the nod (rad)
  */
-HeadNodJob::HeadNodJob(double period, const vector<float>& centre, const vector<float>& limits) : MotionJob(Job::MOTION_NOD)
+HeadNodJob::HeadNodJob(head_nod_t nodtype) : MotionJob(Job::MOTION_NOD)
 {
-    m_job_time = period;     
-    m_centre_position = centre;
-    m_limit_positions = limits;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadNodJob::HeadNodJob()" << endl;
+    #endif
+        m_job_time = 0;
+        m_nod_type = nodtype;
+    #if DEBUG_JOBS_VERBOSITY > 0
+        summaryTo(debug);
+    #endif
 }
 
 /*! @brief Constructs a HeadNodJob from stream data
-    @param time the time in ms to perform the kick
     @param input the stream from which to read the job specific data
  */
-HeadNodJob::HeadNodJob(double time, istream& input) : MotionJob(Job::MOTION_NOD)
+HeadNodJob::HeadNodJob(istream& input) : MotionJob(Job::MOTION_NOD)
 {
-    m_job_time = time;
-
+    m_job_time = 0;
     // Temporary read buffers
-    unsigned int uintBuffer;
-    float floatBuffer;
-
-    // read in the centre position size
-    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
-    unsigned int m_centre_position_size = uintBuffer;
+    head_nod_t hntBuffer;
     
-    // read in the centre position vector
-    m_centre_position = vector<float>(m_centre_position_size, 0);
-    for (unsigned int i=0; i<m_centre_position_size; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        m_centre_position[i] = floatBuffer;
-    }
+    // read in the pan type
+    input.read(reinterpret_cast<char*>(&hntBuffer), sizeof(hntBuffer));
+    m_nod_type = hntBuffer;
     
-    // read in the limit position size
-    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
-    unsigned int m_limit_positions_size = uintBuffer;
-    
-    // read in the limit position vector
-    m_limit_positions = vector<float>(m_limit_positions_size, 0);
-    for (unsigned int i=0; i<m_limit_positions_size; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        m_limit_positions[i] = floatBuffer;
-    }
+#if DEBUG_JOBS_VERBOSITY > 0
+    summaryTo(debug);
+#endif
 }
 
-/*! @brief WalkJob destructor
+/*! @brief HeadNodJob destructor
  */
 HeadNodJob::~HeadNodJob()
 {
-    m_centre_position.clear();
-    m_limit_positions.clear();
 }
 
-/*! @brief Sets the nod for the head
- 
-    You should only need to use this function if you are recycling the one job 
-    (ie. I provide this function if you are worried about creating a new job every time)
-    
-    @param period the new nod period in milliseconds
-    @param centre the centre head position about which we will nod [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the nod (rad)
+/* @ brief Returns the type of nod
  */
-void HeadNodJob::setNod(double period, const vector<float>& centre, const vector<float>& limits)
+HeadNodJob::head_nod_t HeadNodJob::getNodType()
 {
-    m_job_time = period;     
-    m_centre_position = centre;
-    m_limit_positions = limits;
-}
-
-/*! @brief Gets the nod for the head
- 
-    @param period the nod period in milliseconds
-    @param centre the centre head position about which we will nod [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the nod (rad)
- */
-void HeadNodJob::getNod(double& period, vector<float>& centre, vector<float>& limits)
-{
-    period = m_job_time;
-    centre = m_centre_position;
-    limits = m_limit_positions;
+    return m_nod_type;
 }
 
 /*! @brief Prints a human-readable summary to the stream
- @param output the stream to be written to
+    @param output the stream to be written to
  */
 void HeadNodJob::summaryTo(ostream& output)
 {
-    output << "HeadNodJob: " << m_job_time << " ";
-    for (unsigned int i=0; i<m_centre_position.size(); i++)
-        output << m_centre_position[i] << ",";
-    output << " ";
-    for (unsigned int i=0; i<m_limit_positions.size(); i++)
-        output << m_limit_positions[i] << ",";
+    output << "HeadNodJob: ";
+    if (m_nod_type == Ball)
+        output << "Ball";
+    else if (m_nod_type == BallAndLocalisation)
+        output << "BallAndLocalisation";
+    else
+        output << "Localisation";
     output << endl;
 }
 
 /*! @brief Prints a csv version to the stream
- @param output the stream to be written to
+    @param output the stream to be written to
  */
 void HeadNodJob::csvTo(ostream& output)
 {
-    output << "HeadNodJob: " << m_job_time << " ";
-    for (unsigned int i=0; i<m_centre_position.size(); i++)
-        output << m_centre_position[i] << ", ";
-    for (unsigned int i=0; i<m_limit_positions.size(); i++)
-        output << m_limit_positions[i] << ", ";
+    output << "HeadNodJob: ";
+    if (m_nod_type == Ball)
+        output << "Ball";
+    else if (m_nod_type == BallAndLocalisation)
+        output << "BallAndLocalisation";
+    else
+        output << "Localisation";
     output << endl;
 }
 
@@ -146,18 +111,13 @@ void HeadNodJob::csvTo(ostream& output)
  */
 void HeadNodJob::toStream(ostream& output) const
 {
-    debug << "HeadNodJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadPanJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
-    // Then we write HeadNodJob specific data
-    unsigned int m_centre_position_size = m_centre_position.size();
-    output.write((char*) &m_centre_position_size, sizeof(m_centre_position_size));
-    for (unsigned int i=0; i<m_centre_position_size; i++)
-        output.write((char*) &m_centre_position[i], sizeof(m_centre_position[i]));
-    unsigned int m_limit_positions_size = m_limit_positions.size();
-    output.write((char*) &m_limit_positions_size, sizeof(m_limit_positions_size));
-    for (unsigned int i=0; i<m_limit_positions_size; i++)
-        output.write((char*) &m_limit_positions[i], sizeof(m_limit_positions[i]));
+                                            // Then we write HeadPanJob specific data
+    output.write((char*) &m_nod_type, sizeof(m_nod_type));
 }
 
 /*! @relates HeadNodJob
@@ -168,7 +128,9 @@ void HeadNodJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const HeadNodJob& job)
 {
-    debug << "<<HeadNodJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadNodJob::operator<<" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -181,10 +143,10 @@ ostream& operator<<(ostream& output, const HeadNodJob& job)
  */
 ostream& operator<<(ostream& output, const HeadNodJob* job)
 {
-    debug << "<<HeadNodJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadNodJob::operator<<" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

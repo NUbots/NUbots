@@ -2,8 +2,12 @@
     @brief Declaration of HeadNodJob class.
  
     @class HeadNodJob
-    @brief A class to encapsulate jobs issued for the head module. This particular job nods the head 
-           up and down at the given centre to the given limits
+    @brief A class to encapsulate jobs head nods.
+ 
+    There are three types of nods
+        - Ball
+        - BallAndLocalisation
+        - Localisation
  
     @author Jason Kulk
  
@@ -33,12 +37,18 @@ using namespace std;
 class HeadNodJob : public MotionJob
 {
 public:
-    HeadNodJob(double period, const vector<float>& centre, const vector<float>& limits);
-    HeadNodJob(double time, istream& input);
+    enum head_nod_t
+    {
+        Ball,
+        BallAndLocalisation,
+        Localisation
+    };
+public:
+    HeadNodJob(head_nod_t nodtype);
+    HeadNodJob(istream& input);
     ~HeadNodJob();
     
-    void setNod(double period, const vector<float>& centre, const vector<float>& limits);
-    void getNod(double& period, vector<float>& centre, vector<float>& limits);
+    head_nod_t getNodType();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
@@ -48,8 +58,7 @@ public:
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
-    vector<float> m_limit_positions;                 //!< the limit positions for the nod [lower (rad), upper(rad)]
+    head_nod_t m_nod_type;
 };
 
 #endif
