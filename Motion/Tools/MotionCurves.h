@@ -31,14 +31,14 @@ using namespace std;
 class MotionCurves
 {
 public:
-    static void calculate(double starttime, double stoptime, float startposition, float stopposition, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions);
-    static void calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions); 
-    static void calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions); 
-    static void calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions); 
+    static void calculate(double starttime, double stoptime, float startposition, float stopposition, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities);
+    static void calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities); 
+    static void calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities); 
+    static void calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities); 
 private:
     MotionCurves() {};
     ~MotionCurves() {};
-    static void calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions);
+    static void calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities);
 protected:
 public:
 };

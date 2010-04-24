@@ -79,11 +79,8 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
-    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions);
-    
     vector<vector<float> > curvevelocities;
-    for (unsigned int i=0; i<curvetimes.size(); i++)
-        curvevelocities.push_back(vector<float>(curvetimes[i].size(), 0));
+    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, 40);
     
     /*MotionCurves::calculate(m_data->CurrentTime, times[0], sensorpositions[0], positions[0][0], 0.5, 10, curvetimes, curvepositions);
