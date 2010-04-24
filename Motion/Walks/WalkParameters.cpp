@@ -211,7 +211,6 @@ void WalkParameters::setLegGains(const vector<vector<float> >& leggains)
  */
 void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains)
 {
-    cout << "setGains" << endl;
     if (newgains.size() == 0)
     {
         gains = newgains;
@@ -245,8 +244,6 @@ void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numga
         }
         gains = tempgains;
         numgains = gains.size()*width;
-        
-        cout << gains[0][0] << endl;
     }
 }
 
@@ -476,7 +473,7 @@ void WalkParameters::save()
         file.close();
     }
     else
-        errorlog << "WalkParameters::save(): Failed to open file");
+        errorlog << "WalkParameters::save(): Failed to open file" << endl;
 }
 
 /*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
