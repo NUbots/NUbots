@@ -39,10 +39,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     
     m_job_list = new JobList();
     m_walk_parameters = new WalkParameters();
-    
-    ifstream testparafile("jupptestparameters.wp");
-    if (testparafile.is_open())
-        testparafile >> *m_walk_parameters;
+    m_walk_parameters->load("JuppWalkDefault");
 }
 
 void WalkParameterWidget::createWidgets()
@@ -265,19 +262,18 @@ void WalkParameterWidget::walkParameterChanged()
     static WalkParametersJob* parametersjob = new WalkParametersJob(*m_walk_parameters);
     static vector<float> speed(3,0);
     static WalkJob* walkjob = new WalkJob(speed);
-    static vector< vector<WalkParameters::Parameter> > params;
 
-    m_walk_parameters->getParameters(params);
+    vector<WalkParameters::Parameter> params = m_walk_parameters->getParameters();
     
     // params[0] is shift frequency
     // params[2] is shift amplitude
 
     shiftAmplitudeSlider->value();
 
-    params[0][0].Value = shiftFrequencySlider->value()/10.0;
-    params[0][1].Value = phaseOffsetSlider->value()/100.0;
-    params[0][2].Value = shiftAmplitudeSlider->value()/100.0;
-    params[0][13].Value = phaseResetSlider->value()/100.0;
+    params[0].Value = shiftFrequencySlider->value()/10.0;
+    params[1].Value = phaseOffsetSlider->value()/100.0;
+    params[2].Value = shiftAmplitudeSlider->value()/100.0;
+    params[13].Value = phaseResetSlider->value()/100.0;
     speed[0] = xSpeedSlider->value()/10.0;
     speed[1] = ySpeedSlider->value()/10.0;
     speed[2] = yawSpeedSlider->value()/100.0;

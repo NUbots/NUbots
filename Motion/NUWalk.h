@@ -48,15 +48,15 @@ public:
     void walkSpeed(const vector<float>& speed);
     void walkToPoint(double time, const vector<float>& position);
     
-    virtual void setWalkParameters(WalkParameters& walkparameters);
-    virtual void getWalkParameters(WalkParameters& walkparameters);
+    void setWalkParameters(const WalkParameters& walkparameters);
+    WalkParameters& getWalkParameters();
     
     void getCurrentSpeed(vector<float>& currentspeed);
 protected:
-    virtual void doWalk();
+    virtual void doWalk() = 0;
 
-    void setTargetSpeeds(const vector<float>& speed);
-    void setCurrentSpeeds();
+    void setTargetSpeed(const vector<float>& speed);
+    void calculateCurrentSpeed();
     
     inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};
 private:
@@ -70,19 +70,17 @@ protected:
     float m_target_speed_y;                         //!< the current target y speed cm/s
     float m_target_speed_yaw;                       //!< the current target yaw speed rad/s
     
-    // the current speeds
+    // the current speeds (use these ones in doWalk)
     float m_speed_x;                                //!< the current x speed in cm/s
     float m_speed_y;                                //!< the current y speed in cm/s
     float m_speed_yaw;                              //!< the current rotation speed in rad/s
-    double m_speed_timestamp;                       //!< the timestamp of the last speed command
     
     double m_point_time;                            //!< the desired time to reach the current target point in milliseconds from now
     float m_point_x;                                //!< the current target point's x position in cm
     float m_point_y;                                //!< the current target point's y position in cm
     float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
-    double m_point_timestamp;                       //!< the timestamp of the last point command
     
-    WalkParameters* m_walk_parameters;              //!< the current set of walk parameters
+    WalkParameters m_walk_parameters;               //!< the current set of walk parameters
 
 private:
 };
