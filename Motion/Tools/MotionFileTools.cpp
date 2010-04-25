@@ -22,31 +22,95 @@
 #include "MotionFileTools.h"
 
 #include <cstring>
+#include <sstream>
 #include <iostream>
 using namespace std;
 
-vector<float> MotionFileTools::toFloatVector(char* data)
+float MotionFileTools::toFloat(const char* data)
 {
-    char *pch = strtok (data, " ,/t");
-    vector<float> values;
-    while (pch != NULL)
-    {
-        values.push_back(atof(pch));
-        pch = strtok (NULL, " ,/t");
-    }
-    return values;
+    return atof(data);
 }
 
-vector<float> MotionFileTools::toFloatVector(string& data)
+float MotionFileTools::toFloat(const string& data)
 {
-    char* buffer = (char*) data.c_str();
-    return toFloatVector(buffer);
+    return toFloat(data.c_str());
+}
+
+float MotionFileTools::toFloat(istream& input)
+{
+    char buffer[128];
+    input.ignore(128, ':');
+    input.getline(buffer, 128);
+    return toFloat(buffer);
+}
+
+string MotionFileTools::fromVector(vector<float> data)
+{
+    stringstream ss;
+    ss << "[";
+    for (unsigned int i=0; i<data.size()-1; i++)
+        ss << data[i] << ", ";
+    ss << data[data.size()-1] << "]";
+    return ss.str();
+}
+
+vector<float> MotionFileTools::toFloatVector(const string& data)
+{
+    stringstream ss(data);
+    string buffer;
+    vector<float> values;
+    while (getline(ss, buffer, ','))
+        values.push_back(toFloat(buffer));
+    
+    return values;
 }
 
 vector<float> MotionFileTools::toFloatVector(istream& input)
 {
-    char buffer[128];
+    string buffer;
     input.ignore(128, '[');
-    input.getline(buffer, 128, ']');
+    getline(input, buffer, ']');
     return toFloatVector(buffer);
 }
+
+string MotionFileTools::fromMatrix(const vector<vector<float> >& data)
+{
+    stringstream ss;
+    ss << "[";
+    for (unsigned int i=0; i<data.size(); i++)
+        ss << fromVector(data[i]);
+    ss << "]";
+    return ss.str();
+}
+
+vector<vector<float> > MotionFileTools::toFloatMatrix(const string& data)
+{
+    stringstream ss(data);
+    string buffer;
+    vector<vector<float> > values;
+    ss.ignore(10, '[');
+    while(getline(ss, buffer, ']'))
+    {
+        values.push_back(toFloatVector(buffer));
+        ss.ignore(10, '[');
+    }
+    
+    return values;
+}
+
+vector<vector<float> > MotionFileTools::toFloatMatrix(istream& input)
+{
+    char buffer[256];
+    input.ignore(256, '[');
+    input.getline(buffer, 256);
+    return toFloatMatrix(buffer);
+}
+
+unsigned int MotionFileTools::size(vector<vector<float> > data)
+{
+    unsigned int size = 0;
+    for (unsigned int i=0; i<data.size(); i++)
+        size += data[i].size();
+    return size;
+}
+

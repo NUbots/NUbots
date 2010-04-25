@@ -22,8 +22,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FILETOOLS_H
-#define FILETOOLS_H
+#ifndef MOTIONFILETOOLS_H
+#define MOTIONFILETOOLS_H
 
 #include <vector>
 #include <string>
@@ -32,9 +32,18 @@ using namespace std;
 class MotionFileTools
 {
 public:
-    static vector<float> toFloatVector(char* data);
-    static vector<float> toFloatVector(string& data);
+    static float toFloat(const char* data);
+    static float toFloat(const string& data);
+    static float toFloat(istream& input);
+    
+    static string fromVector(vector<float> data);
+    static vector<float> toFloatVector(const string& data);
     static vector<float> toFloatVector(istream& input);
+    
+    static string fromMatrix(const vector<vector<float> >& data);
+    static vector<vector<float> > toFloatMatrix(const string& data);
+    static vector<vector<float> > toFloatMatrix(istream& input);
+    static unsigned int size(vector<vector<float> > data);
     
 private:
     MotionFileTools() {};

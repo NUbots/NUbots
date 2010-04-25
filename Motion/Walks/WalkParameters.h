@@ -35,6 +35,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 class WalkParameters
@@ -68,7 +69,7 @@ public:
         
         friend ostream& operator<< (ostream& output, const Parameter& p) 
         {   
-            output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description << " ";
+            output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
             return output;
         }
         friend istream& operator>> (istream& input, Parameter& p)
@@ -81,14 +82,15 @@ public:
             input.ignore(10, '[');
             // we need to enclose the min and max in square brackets
             input >> p.Min;
-            input.ignore(10, ']');
+            input.ignore(10, ',');
             input >> p.Max;
+            input.ignore(10, ']');
             
             // read in the rest of the line and call it the description
             char charbuffer[500];
             input.getline(charbuffer, 500);
             p.Description = string(charbuffer);
-            
+
             return input;
         };
     };
@@ -128,7 +130,8 @@ public:
     friend istream& operator>> (istream& input, WalkParameters* p_walkparameters);
     
     void save();
-    void load();
+    void saveAs(const string& name);
+    void load(const string& name);
     
     // operator overloading
     float& operator[] (const int index);
@@ -138,7 +141,6 @@ private:
 public:
 private:
     string m_name;                             //!< the name of the walk parameter set
-    string m_performance;                      //!< the performance of the walk parameter set (this is used to pick which set of parameters to load
     vector<float> m_max_speeds;                //!< stores the maximum speeds (x,y,theta) allowed by the walk engine
     vector<float> m_max_accelerations;         //!< stores the maximum accelerations (x,y,theta) allowed by the walk engine
     
