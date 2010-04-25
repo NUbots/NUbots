@@ -41,7 +41,6 @@ Vision::Vision()
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
-    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
@@ -114,6 +113,8 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                 {
                     
                     currentSettings = m_camera->getSettings();
+                    if (!imagefile.is_open())
+                        imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
@@ -346,7 +347,10 @@ void Vision::SaveAnImage()
     //buffer << *currentImage;
     NUimage buffer;
     buffer.cloneExisting(*currentImage);
-    imagefile << buffer;
+    if (imagefile.is_open())
+        imagefile << buffer;
+    else
+        debug << "Vision::SaveAnImage() Unable to saving images. Probably because the directory does not exist" << endl;
 
     //Set NextCameraSetting:
     CameraSettings tempCameraSettings = m_camera->getSettings();
