@@ -45,7 +45,7 @@ NUSoundThread::NUSoundThread() : QueueThread<std::string>(string("NUSoundThread"
     #else
         m_player_command = string("aplay ");
     #endif
-    m_sound_dir = string(DATA_DIR) + string("/Sounds/");
+    m_sound_dir = string(DATA_DIR) + string("Sounds/");
     start();
 }
 

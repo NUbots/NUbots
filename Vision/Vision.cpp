@@ -17,11 +17,15 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "Tools/FileFormats/LUTTools.h"
+#include "nubotdataconfig.h"
 
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
@@ -35,9 +39,9 @@ Vision::Vision()
     AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
-   // testLUTBuffer = new unsigned char [128*128*128];
     currentLookupTable = LUTBuffer;
-    imagefile.open ("/home/nao/images.nul");
+    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
@@ -51,12 +55,12 @@ Vision::~Vision()
     return;
 }
 
-void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
+void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 {
     //debug  << "Vision::Process - Begin" << endl;
-    camera = m_camera;
+    m_camera = camera;
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.camera_begin(); it != jobs.camera_end();)
+    for (it = jobs->camera_begin(); it != jobs->camera_end();)
     {
         //debug  << "Vision::Process - Processing Job" << endl;
         if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
@@ -86,7 +90,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
             {   
                 m_camera->setSettings(settings);
             }
-            it = jobs.removeCameraJob(it);
+            it = jobs->removeCameraJob(it);
         }
         else 
         {
@@ -95,7 +99,7 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 
     }
     
-    for (it = jobs.vision_begin(); it != jobs.vision_end();)
+    for (it = jobs->vision_begin(); it != jobs->vision_end();)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
@@ -110,17 +114,17 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
                 {
                     
                     currentSettings = m_camera->getSettings();
-                    system("aplay /home/nao/nubot/Sounds/StartSavingImages.wav");
+                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
                 {
                     
                     m_camera->setSettings(currentSettings);
-                    system("aplay /home/nao/nubot/Sounds/StopSavingImages.wav");
+                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
                 isSavingImages = job->saving();
             }
-            it = jobs.removeVisionJob(it);
+            it = jobs->removeVisionJob(it);
          }
         else 
         {
@@ -131,14 +135,16 @@ void Vision::process(JobList& jobs, NUCamera* m_camera, NUIO* m_io)
 }
 
 
-FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
+FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
 
-    if (image == NULL)
+    if (image == NULL || data == NULL || actions == NULL)
         return AllFieldObjects;
+    m_sensor_data = data;
+    m_actions = actions;
     setImage(image);
     AllFieldObjects->preProcess(image->m_timestamp);
 
@@ -170,7 +176,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data)
     vector <float> horizonInfo;
     Horizon horizonLine;
 
-    if(data->getHorizon(horizonInfo))
+    if(m_sensor_data->getHorizon(horizonInfo))
     {
         horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
     }
@@ -343,7 +349,7 @@ void Vision::SaveAnImage()
     imagefile << buffer;
 
     //Set NextCameraSetting:
-    CameraSettings tempCameraSettings = camera->getSettings();
+    CameraSettings tempCameraSettings = m_camera->getSettings();
     if(ImageFrameNumber % 6 == 0 )
     {
         tempCameraSettings.exposure = 100;
@@ -368,7 +374,7 @@ void Vision::SaveAnImage()
     {
         tempCameraSettings.exposure = 400;
     }
-    camera->setSettings(tempCameraSettings);
+    m_camera->setSettings(tempCameraSettings);
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
@@ -382,6 +388,7 @@ void Vision::setLUT(unsigned char* newLUT)
 
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
+    debug << fileName << endl;
     LUTTools lutLoader;
     lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
     setLUT(LUTBuffer);
