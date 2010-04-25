@@ -409,3 +409,192 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }
+void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId)
+{
+    //! CLEAR DRAWING LIST
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(2.0);       // Line width
+
+    //! DRAW STATIONARY OBJECTS:
+    vector < StationaryObject > ::iterator statFOit;
+    for(statFOit = AllObjects->stationaryFieldObjects.begin(); statFOit  < AllObjects->stationaryFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*statFOit).isObjectVisible() == false)
+        {
+            ++statFOit;
+            continue;
+        }
+        unsigned char r,g,b;
+        if(     (*statFOit).getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
+                (*statFOit).getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*statFOit).getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
+                     (*statFOit).getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        int X = (*statFOit).ScreenX();
+        int Y = (*statFOit).ScreenY();
+        int ObjectWidth = (*statFOit).getObjectWidth();
+        int ObjectHeight = (*statFOit).getObjectHeight();
+
+        glBegin(GL_QUADS);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
+        glEnd();
+
+        //! Incrememnt to next object:
+        ++statFOit;
+    }
+
+    //! DRAW MOBILE OBJECTS:
+    vector < MobileObject > ::iterator mobileFOit;
+    for(mobileFOit = AllObjects->mobileFieldObjects.begin(); mobileFOit  < AllObjects->mobileFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*mobileFOit).isObjectVisible() == false)
+        {
+            ++mobileFOit;
+            continue;
+        }
+        qDebug() << "Seen: Mobile: " <<(*mobileFOit).getID() ;
+        unsigned char r,g,b;
+        //CHECK IF BALL: if so Draw a circle
+        if(     (*mobileFOit).getID() == FieldObjects::FO_BALL)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::orange,r,g,b);
+            glColor3ub(r,g,b);
+
+            int cx = (*mobileFOit).ScreenX();
+            int cy = (*mobileFOit).ScreenY();
+            int radius = (*mobileFOit).getObjectWidth()/2;
+            int num_segments = 360;
+
+            drawSolidCircle(cx, cy, radius, num_segments);
+            ++mobileFOit;
+            continue;
+        }
+
+
+        if(     (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_1  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_2  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_3  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_4  )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        else if(     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_1 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_2 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        int X = (*mobileFOit).ScreenX();
+        int Y = (*mobileFOit).ScreenY();
+        int ObjectWidth = (*mobileFOit).getObjectWidth();
+        int ObjectHeight = (*mobileFOit).getObjectHeight();
+
+        glBegin(GL_LINE_STRIP);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+        glEnd();
+
+        //! Increment to next object
+        ++mobileFOit;
+    }
+
+    //! DRAW AMBIGUOUS OBJECTS: Using itterator as size is unknown
+
+    vector < AmbiguousObject > ::iterator ambigFOit;
+    qDebug() <<"Size Of Ambig Objects: " <<  AllObjects->ambiguousFieldObjects.size();
+    for(ambigFOit = AllObjects->ambiguousFieldObjects.begin(); ambigFOit  < AllObjects->ambiguousFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*ambigFOit).isObjectVisible() == false)
+        {
+            ++ambigFOit;
+            continue;
+        }
+        qDebug() <<"Ambig Objects seen: " <<  (*ambigFOit).getID();
+        unsigned char r,g,b;
+        if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            glColor3ub(r,g,b);
+
+        }
+        int X = (*ambigFOit).ScreenX();
+        int Y = (*ambigFOit).ScreenY();
+        int ObjectWidth = (*ambigFOit).getObjectWidth();
+        int ObjectHeight = (*ambigFOit).getObjectHeight();
+
+        glBegin(GL_LINE_STRIP);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+        glEnd();
+
+        //! Increment to next object
+        ++ambigFOit;
+    }
+
+
+    //! UPDATE THE DISPLAY:
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+}

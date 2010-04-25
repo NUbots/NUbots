@@ -15,11 +15,14 @@ class Object
         
         // Vision Parameters:
         bool isVisible;                     // true if the object was seen in this image, false otherwise
-        Vector2<int> imagePosition;
+        Vector2<int> imagePosition;         // Position on Screen (centre of object)
+        Vector2<int> sizeOnScreen;          // (x,y) = (width, height) with ImagePosition at the center.
         float timeLastSeen;                 // The time in ms the object was last seen
         float timeSinceLastSeen;            // The time in ms since the object was last seen
         float timeSeen;                     // The consecutive time in ms the object has been seen
         float previousFrameTimestamp;       // The previous frame's timestamp (I use this to increment the timeSeen)
+
+
 
 
     public:
@@ -27,7 +30,13 @@ class Object
         ~Object();
 
         void preProcess(const float timestamp);
-        void UpdateVisualObject(    const Vector3<float>& newMeasured, const Vector3<float>& newMeasuredError, const Vector2<int>& newImagePosition, const float timestamp);
+
+        void UpdateVisualObject(    const Vector3<float>& newMeasured,
+                                    const Vector3<float>& newMeasuredError,
+                                    const Vector2<int>& newImagePosition,
+                                    const Vector2<int>& newSizeOnScreen,
+                                    const float timestamp);
+
         void postProcess(const float timestamp);
 
         int getID() const {return ID;};
@@ -56,6 +65,8 @@ class Object
         float measuredElevation() const {return measuredRelativePosition.z;}
         int ScreenX() const {return imagePosition.x;}
         int ScreenY() const {return imagePosition.y;}
+        int getObjectWidth() const {return sizeOnScreen.x;}
+        int getObjectHeight() const {return sizeOnScreen.y;}
 
 };
 

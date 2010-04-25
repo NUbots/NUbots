@@ -87,9 +87,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     createConnections();
     setCentralWidget(mdiArea);
-
+    qDebug() << "Main Window Starting";
     setWindowTitle(QString("NUview"));
     glManager.clearAllDisplays();
+    qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
 }
@@ -304,6 +305,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createConnections()
 {
+    qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
@@ -343,7 +345,7 @@ void MainWindow::createConnections()
     //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
+    connect(&virtualRobot,SIGNAL(fieldObjectsDisplayChanged(FieldObjects*,GLDisplay::display)),&glManager,SLOT(writeFieldObjectsToDisplay(FieldObjects*,GLDisplay::display)));
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
@@ -360,6 +362,7 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
+    qDebug() <<"Finnished Connecting Widgets";
 }
 
 void MainWindow::openLog()
@@ -504,7 +507,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::readSettings()
 {
     QSettings settings("NUbots", "NUview");
-
+    qDebug() <<"Start Reading Settings";
     // Restore the main window.
     settings.beginGroup("mainWindow");
     restoreGeometry(settings.value("geometry").toByteArray());  // Set previous position/size

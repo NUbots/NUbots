@@ -15,6 +15,8 @@ public:
     void setBottomRight(Vector2<int> point);
     int width();
     int height();
+    int getCentreX();
+    int getCentreY();
     float aspect();
     unsigned char getColour()  const;
     void setColour(unsigned char c);

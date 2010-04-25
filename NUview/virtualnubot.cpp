@@ -156,6 +156,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
 
     vision.setImage(image);
+    vision.AllFieldObjects->preProcess(image->m_timestamp);
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
@@ -319,45 +320,23 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     if(BallCandidates.size() > 0)
     {
         circ = vision.DetectBall(BallCandidates);
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::VisionBall);
-
-            //debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
-            //debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing() << endl;
-        }
-        else
-        {
-            //No ball so clear the layer
-            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::VisionBall);
-
-        }
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
-    qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    qDebug()<< (double)((double)vision.classifiedCounter/(double)(image->getHeight()*image->getWidth()))*100 << " percent of image classified";
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    //qDebug() << "Crash Check: Before Yellow Goals Detection:";
+
 
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
-    while (YellowGoalCandidates.size() > 0)
-    {
-        candidates.push_back(YellowGoalCandidates.back());
-        YellowGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before BLue Goals Detection:";
+    candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
+
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
-    while (BlueGoalCandidates.size() > 0)
-    {
-        candidates.push_back(BlueGoalCandidates.back());
-        BlueGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before Final Update:";
+    candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
 
-    //TESTING:
-
+    //POST PROCESS:
+    vision.AllFieldObjects->postProcess(image->m_timestamp);
+    //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+    emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
+
+
     return;
 }
 
