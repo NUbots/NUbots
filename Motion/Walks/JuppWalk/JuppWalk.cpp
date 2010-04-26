@@ -103,9 +103,9 @@ void JuppWalk::initWalkParameters()
     maxspeeds.push_back(0.4);
     
     vector<float> maxaccels;
-    maxaccels.push_back(5.0);
-    maxaccels.push_back(2.0);
-    maxaccels.push_back(0.5);
+    maxaccels.push_back(3.5);
+    maxaccels.push_back(1.25);
+    maxaccels.push_back(0.2);
     
     vector<WalkParameters::Parameter> parameters;
     parameters.push_back(WalkParameters::Parameter("StepFrequency", m_step_frequency, 0.1, 3.0, "The step frequency in Hz"));
@@ -141,15 +141,19 @@ void JuppWalk::initWalkParameters()
     leggains[0].push_back(65);
     leggains[0].push_back(65);
     
-    m_walk_parameters = new WalkParameters("JuppWalkDefault", maxspeeds, maxaccels, parameters, armgains, torsogains, leggains);
-    m_walk_parameters->save();
+    m_walk_parameters = WalkParameters("JuppWalkDefault", maxspeeds, maxaccels, parameters, armgains, torsogains, leggains);
+    m_walk_parameters.save();
+    
+    WalkParameters test;
+    test.load("JuppWalkTest");
+    test.summaryTo(cout);
 }
 
 /*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
  */
 void JuppWalk::getParameters()
 {
-    static vector<WalkParameters::Parameter> parameters = m_walk_parameters->getParameters();
+    vector<WalkParameters::Parameter> parameters = m_walk_parameters.getParameters();
     m_step_frequency = parameters[0].Value; 
     m_param_phase_offset = parameters[1].Value;
     m_param_shift_c = parameters[2].Value;
@@ -224,20 +228,14 @@ void JuppWalk::calculateGaitPhase()
         float measuredphaseonimpact = M_PI/m_param_short_v - M_PI + m_param_phase_offset + m_param_phase_reset_offset;
         float phasediff = measuredphaseonimpact - gaitphaseonimpact;
         if (fabs(phasediff) < M_PI/8)
-        {
             m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-            debug << "Shifting Phase. Based on leftimpact by " << (measuredphaseonimpact - gaitphaseonimpact)*(m_current_time - m_previous_time)/interpolationtime << " from " << gaitphaseonimpact << " to " << measuredphaseonimpact << endl;
-        }
     }
     if (m_current_time - rightimpacttime < interpolationtime)
     {
         float measuredphaseonimpact = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
         float phasediff = measuredphaseonimpact - gaitphaseonimpact;
         if (fabs(phasediff) < M_PI/8)
-        {
             m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-            debug << "Shifting Phase. Based on rightimpact by " << (measuredphaseonimpact - gaitphaseonimpact)*(m_current_time - m_previous_time)/interpolationtime << " from " << gaitphaseonimpact << " to " << measuredphaseonimpact << endl;
-        }
     }
     
     m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
@@ -390,7 +388,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    static vector<vector<float> > leggains = m_walk_parameters->getLegGains();
+    vector<vector<float> > leggains = m_walk_parameters.getLegGains();
     gains = leggains[0];
 }
 
@@ -428,7 +426,7 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
  */
 void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 {
-    static vector<vector<float> > armgains = m_walk_parameters->getArmGains();
+    vector<vector<float> > armgains = m_walk_parameters.getArmGains();
     gains = armgains[0];
 }
 
