@@ -620,7 +620,7 @@ void NUSensors::calculateCameraHeight()
 #endif
     //!< @todo Implement NUSensors::calculateCameraHeight
     static vector<float> height(1, 46.0);       // at the moment the height is about 46cm.
-    m_data->CameraHeight->Data = height;
+    m_data->CameraHeight->setData(m_data->CurrentTime, height);
 }
 
 
