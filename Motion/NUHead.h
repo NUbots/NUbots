@@ -52,6 +52,9 @@ private:
     void calculateBallPan();
     void calculateBallAndLocalisationPan();
     void calculateLocalisationPan();
+    void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
+    int getPanLimitIndex(float pitch);
+    bool panYawLimitsChange(float pitch_a, float pitch_b);
     
     void calculateNod();
     void calculateBallNod();
@@ -60,7 +63,7 @@ private:
     
     void load();
     void loadConfig();
-    void loadPans();
+    void loadPanConfig();
 
 private:
     NUSensorsData* m_data;                      //!< local pointer to the latest sensor data
@@ -68,6 +71,9 @@ private:
     
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
+    vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits
+    vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (loaded from platform specific file)
+    
     bool m_is_nodding;                          //!< true if we are currently nodding the head
     HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing
     
@@ -79,6 +85,8 @@ private:
     vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s
     vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s
     vector<float> m_default_gains;              //!< the default gains
+    vector<float> m_pitch_limits;               //!< the pitch min and max
+    vector<float> m_yaw_limits;                 //!< the yaw min and max
 };
 
 #endif

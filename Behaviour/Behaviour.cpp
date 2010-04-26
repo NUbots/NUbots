@@ -139,7 +139,7 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
 void Behaviour::Pan(JobList& jobs)
 {
     static double lastpantime = 0;
-    if (nusystem->getTime() - lastpantime > 3200)
+    if (nusystem->getTime() - lastpantime > 7000)
     {
         lastpantime = nusystem->getTime();
         vector<double> times(8, 0);
