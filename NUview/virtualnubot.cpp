@@ -138,7 +138,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 16;
+
 
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -157,6 +157,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     vision.setImage(image);
     vision.AllFieldObjects->preProcess(image->m_timestamp);
+    int spacings = (int)image->getWidth()/20;
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";

@@ -158,7 +158,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
-    int spacings = 16;
+    int spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -332,7 +332,32 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
     #endif
-    
+    #if DEBUG_VISION_VERBOSITY > 5
+        //! Debug information for Frame:
+        debug << "Time: " << m_timestamp << endl;
+        for(int i = 0; i < AllFieldObjects->stationaryFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Stationary Object: " << i << ":" << AllFieldObjects->stationaryFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+        for(int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Mobile Object: " << i << ":" << AllFieldObjects->mobileFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+
+        for(int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Ambiguous Object: " << i << ":" << AllFieldObjects->ambiguousFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+    #endif
     AllFieldObjects->postProcess(image->m_timestamp);
     return AllFieldObjects;
 }
