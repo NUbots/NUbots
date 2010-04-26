@@ -21,9 +21,9 @@
 
 #include "MotionFileTools.h"
 
-#include <cstring>
 #include <sstream>
 #include <iostream>
+#include <stdlib.h>
 using namespace std;
 
 float MotionFileTools::toFloat(const char* data)
