@@ -30,11 +30,15 @@
     using namespace boost::posix_time;
 #endif
 
+class NUSensorsData;
+class NUActionatorsData;
+
 class NUSystem
 {
 public:
     NUSystem();
     virtual ~NUSystem();
+    // time functions
     virtual long double getPosixTimeStamp();
     virtual double getTime();
     virtual double getTimeFast(); 
@@ -44,6 +48,11 @@ public:
     static double getRealTimeFast();
     static double getProcessTime();    
     static double getThreadTime();
+    // battery functions
+    virtual void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
+    // watchdog functions
+    virtual void displayRunning(NUActionatorsData* actions);
+    virtual void displayVisionFrameDrop(NUActionatorsData* actions);
 private:
     // System time members
     #ifdef __NU_SYSTEM_CLOCK_GETTIME

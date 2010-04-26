@@ -20,6 +20,9 @@
  */
 
 #include "NUSystem.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
@@ -198,6 +201,29 @@ double NUSystem::getThreadTime()
     return timeinmilliseconds;
 }
 
+/*! @brief Display the current state of the battery
+    @param data a pointer to the shared sensor data object (it contains the battery values)
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
 
+/*! @brief Display some sign that the code is running OK
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayRunning(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
+/*! @brief Display some sign that a vision frame has been dropped
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayVisionFrameDrop(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
 
 
