@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
-
+#include <QDebug>
 #include <QStringList>
 #include <iostream>
 #include <fstream>
@@ -337,6 +337,38 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
 
+
+    //SUMMARY:
+    qDebug() << "Time: " << vision.m_timestamp;
+
+    for(int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Stationary Object: " << i << ":" //<< vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
+                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY();
+        }
+    }
+    for(int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Mobile Object: " << i << ":" //<< vision.AllFieldObjects->mobileFieldObjects[i].getName()
+                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
+                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY();
+        }
+    }
+
+    for(int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
+                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
+                     <<","                  <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY();
+        }
+    }
 
     return;
 }
