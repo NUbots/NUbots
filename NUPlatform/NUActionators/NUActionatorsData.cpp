@@ -510,6 +510,35 @@ int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
     }
 }
 
+/*! @brief Returns the number of joints in the specified led group
+    @param groupid the id of the led group
+    @return the number of lights in the group
+ */
+int NUActionatorsData::getNumberOfLeds(ledgroup_id_t groupid)
+{
+    if (groupid == AllLeds)
+        return m_all_led_ids.size();
+    else if (groupid == LeftEarLeds)
+        return m_lear_ids.size();
+    else if (groupid == RightEarLeds)
+        return m_rear_ids.size();
+    else if (groupid == LeftEyeLeds)
+        return m_leye_ids.size();
+    else if (groupid == RightEyeLeds)
+         return m_reye_ids.size();
+    else if (groupid == ChestLeds)
+        return m_chest_ids.size();
+    else if (groupid == LeftFootLeds)
+        return m_lfoot_ids.size();
+    else if (groupid == RightFootLeds)
+        return m_rfoot_ids.size();
+    else
+    {
+        debug << "NUActionatorsData::getNumberOfLeds. UNDEFINED led group.";
+        return 0;
+    }
+}
+
 /*! @brief Gets the next joint position for the specified joint
     @param id the id of the joint you want the next command
     @param time will be updated with the next command's time
