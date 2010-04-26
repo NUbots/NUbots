@@ -31,8 +31,8 @@
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
-
 #include "NUbot/SenseMoveThread.h"
+#include "NUbot/WatchDogThread.h"
 
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
@@ -162,6 +162,9 @@ void NUbot::createThreads()
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
+    m_watchdog_thread = new WatchDogThread(this);
+    m_watchdog_thread->start();
+    
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
     #endif
@@ -200,9 +203,11 @@ NUbot::~NUbot()
         if (m_seethink_thread != NULL)
             delete m_seethink_thread;
     #endif
-        
     if (m_sensemove_thread != NULL)
         delete m_sensemove_thread;
+    if (m_watchdog_thread != NULL)
+        delete m_watchdog_thread;
+    
     
     // --------------------------------- delete modules
     #if DEBUG_NUBOT_VERBOSITY > 0
