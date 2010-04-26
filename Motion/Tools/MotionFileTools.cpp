@@ -73,6 +73,22 @@ vector<float> MotionFileTools::toFloatVector(istream& input)
     return toFloatVector(buffer);
 }
 
+void MotionFileTools::toFloatWithRange(const string& data, float& value, vector<float>& range)
+{
+    stringstream ss(data);
+    toFloatWithRange(data, value, range);
+}
+
+void MotionFileTools::toFloatWithRange(istream& input, float& value, vector<float>& range)
+{
+    char buffer[128];
+    input.ignore(128, ':');
+    input.getline(buffer, 128, '[');
+    value = toFloat(buffer);
+    input.getline(buffer, 128, ']');
+    range = toFloatVector(buffer);
+}
+
 string MotionFileTools::fromMatrix(const vector<vector<float> >& data)
 {
     stringstream ss;
