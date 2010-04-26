@@ -67,7 +67,7 @@ class Vision
     Vision();
     //! Destructor.
     ~Vision();
-
+    double m_timestamp;
 
 
     double CalculateBearing(double cx);

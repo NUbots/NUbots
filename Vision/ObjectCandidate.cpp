@@ -102,3 +102,11 @@ void ObjectCandidate::setBottomRight(Vector2<int> point)
     bottomRight.x = point.x;
     bottomRight.y = point.y;
 }
+int ObjectCandidate::getCentreX()
+{
+    return (int)(round((bottomRight.x + topLeft.x)/2));
+}
+int ObjectCandidate::getCentreY()
+{
+    return (int)(round((bottomRight.y + topLeft.y)/2));
+}

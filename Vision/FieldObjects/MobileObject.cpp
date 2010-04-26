@@ -1,7 +1,7 @@
 #include "MobileObject.h"
 
-MobileObject::MobileObject(float x, float y, int initID, const std::string& initName):
-        Object(initID, initName), estimatedFieldLocation(x,y)
+MobileObject::MobileObject(int initID, const std::string& initName):
+        Object(initID, initName)
 {
     estimatedFieldLocationError[0] = 0;
     estimatedFieldLocationError[1] = 0;

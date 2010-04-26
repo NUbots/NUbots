@@ -106,6 +106,7 @@ public:
     
     // Misc. get methods
     int getNumberOfJoints(bodypart_id_t partid);
+    int getNumberOfLeds(ledgroup_id_t groupid);
     
     // Get methods for NUActionators
         // joint data for the NUActionators

@@ -159,7 +159,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
-    int spacings = 16;
+    int spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -333,7 +333,32 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
     #endif
-    
+    #if DEBUG_VISION_VERBOSITY > 5
+        //! Debug information for Frame:
+        debug << "Time: " << m_timestamp << endl;
+        for(int i = 0; i < AllFieldObjects->stationaryFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Stationary Object: " << i << ":" << AllFieldObjects->stationaryFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+        for(int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Mobile Object: " << i << ":" << AllFieldObjects->mobileFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+
+        for(int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                debug << "Ambiguous Object: " << i << ":" << AllFieldObjects->ambiguousFieldObjects[i].getName() << "Seen."<< endl;
+            }
+        }
+    #endif
     AllFieldObjects->postProcess(image->m_timestamp);
     return AllFieldObjects;
 }
@@ -401,7 +426,9 @@ void Vision::loadLUTFromFile(const std::string& fileName)
 
 void Vision::setImage(const NUimage* newImage)
 {
+
     currentImage = newImage;
+    m_timestamp = currentImage->m_timestamp;
     ImageFrameNumber++;
 }
 
@@ -1674,6 +1701,7 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
     {
         //debug<< "Vision::DetectBall : Update FO_Ball" << endl;
         Vector2<int> viewPosition;
+        Vector2<int> sizeOnScreen;
         Vector3<float> sphericalError;
         Vector3<float> sphericalPosition;
         viewPosition.x = (int)round(ball.centreX);
@@ -1686,11 +1714,14 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[0] = distance;
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
-        //AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
-        //qDebug() << "Setting FieldObject Distance:" << distance;
-        //qDebug() << "FO_MOBILE size" << AllFieldObjects->mobileFieldObjects.size();
-        //qDebug() << "FO_Stationary size" << AllFieldObjects->stationaryFieldObjects.size();
-        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition, sphericalError, viewPosition, currentImage->m_timestamp);
+        sizeOnScreen.x = ball.radius*2;
+        sizeOnScreen.y = ball.radius*2;
+
+        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,
+                                                                                      sphericalError,
+                                                                                      viewPosition,
+                                                                                      sizeOnScreen,
+                                                                                      currentImage->m_timestamp);
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
         /*debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()

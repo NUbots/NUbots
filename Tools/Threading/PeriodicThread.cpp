@@ -83,10 +83,6 @@ void PeriodicThread::sleepThread()
  */
 void PeriodicThread::run()
 {
-    // so I just need an accurate sleep function!
-    // clock_nanosleep() when it is available usleep when it is not!
-    
-    
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
