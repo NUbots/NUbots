@@ -53,8 +53,53 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             bool RatioOK = isCorrectCheckRatio(*it, height, width);
             if(RatioOK)
             {
-                float FinalDistance;
-                FinalDistance = FindGoalDistance(*it,vision);
+                //ASSIGNING as ambiguous FIELDOBJECT:
+
+                //MAKE AN AMBIGUOUS OBJECT:
+                AmbiguousObject newAmbObj = AmbiguousObject();
+                //Assign Possible IDs: Yellow or Blue, Left or Right Posts
+                if((*it).getColour() == ClassIndex::blue || (*it).getColour() == ClassIndex::shadow_blue)
+                {
+                    newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN);
+                    newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+                    newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+
+                }
+                else if((*it).getColour() == ClassIndex::yellow || (*it).getColour() == ClassIndex::yellow_orange)
+                {
+                    newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN);
+                    newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+                    newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+
+                }
+                else{
+                    ++it;
+                    continue;
+                }
+
+                Vector2<int> viewPosition;
+                Vector2<int> sizeOnScreen;
+                Vector3<float> sphericalError;
+                Vector3<float> sphericalPosition;
+                viewPosition.x = (*it).getCentreX();
+                viewPosition.y = (*it).getCentreY();
+                float bearing = (float)vision->CalculateBearing(viewPosition.x);
+                float elevation = (float)vision->CalculateElevation(viewPosition.y);
+                sphericalPosition[0] = FindGoalDistance(*it,vision);;
+                sphericalPosition[1] = bearing;
+                sphericalPosition[2] = elevation;
+                sizeOnScreen.x = (*it).width();
+                sizeOnScreen.y = (*it).height();
+
+                newAmbObj.UpdateVisualObject(   sphericalPosition,
+                                                sphericalError,
+                                                viewPosition,
+                                                sizeOnScreen,
+                                                vision->m_timestamp);
+
+                AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
+
+                //qDebug() << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
                 ++it;
                 //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
             }
@@ -63,6 +108,8 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 it = FO_Candidates.erase(it);
             }
 	}
+
+
         return result;
 }
 

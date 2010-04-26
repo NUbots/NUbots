@@ -98,7 +98,6 @@ public:
         horizontalScanPath,
         verticalScanPath,
         TransitionSegments,
-        VisionBall,
         FieldLines,
         ObjectCandidates,
         FieldObjects,
@@ -152,8 +151,6 @@ public:
                 return QString("Vertical Scan Path");
             case TransitionSegments:
                 return QString("Transition Segment");
-            case VisionBall:
-                return QString("Vision Ball");
             case FieldLines:
                 return QString("Field Lines");
             case ObjectCandidates:

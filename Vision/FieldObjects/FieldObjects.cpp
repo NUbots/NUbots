@@ -170,8 +170,42 @@ void FieldObjects::InitMobileFieldObjects()
 {
         for(int ID =0; ID < NUM_MOBILE_FIELD_OBJECTS; ID++)
 	{
-                MobileObject mobileObject = MobileObject();
+                std::string objectName;
+                switch (ID)
+                {
+                case FO_BALL:
+                    objectName = "Ball";
+                    break;
+                case FO_BLUE_ROBOT_1:
+                    objectName = "Blue Robot 1";
+                    break;
+                case FO_BLUE_ROBOT_2:
+                    objectName = "Blue Robot 2";
+                    break;
+                case FO_BLUE_ROBOT_3:
+                    objectName = "Blue Robot 3";
+                    break;
+                case FO_BLUE_ROBOT_4:
+                    objectName = "Blue Robot 4";
+                    break;
+                case FO_PINK_ROBOT_1:
+                    objectName = "Pink Robot 1";
+                    break;
+                case FO_PINK_ROBOT_2:
+                    objectName = "Pink Robot 2";
+                    break;
+                case FO_PINK_ROBOT_3:
+                    objectName = "Pink Robot 3";
+                    break;
+                case FO_PINK_ROBOT_4:
+                    objectName = "Pink Robot 4";
+                    break;
+                default:
+                    objectName = "Unknown Mobile Object";
+                    break;
+                }
+
+                MobileObject mobileObject = MobileObject(ID, objectName);
                 mobileFieldObjects.push_back(mobileObject);
 	}
 }
-
