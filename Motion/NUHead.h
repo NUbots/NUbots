@@ -60,6 +60,7 @@ private:
     
     void load();
     void loadConfig();
+    void loadPans();
 
 private:
     NUSensorsData* m_data;                      //!< local pointer to the latest sensor data

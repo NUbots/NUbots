@@ -175,6 +175,7 @@ void NUHead::calculateLocalisationNod()
 void NUHead::load()
 {
     loadConfig();
+    loadPans();
 }
 
 void NUHead::loadConfig()
@@ -191,6 +192,10 @@ void NUHead::loadConfig()
         m_default_gains = MotionFileTools::toFloatVector(file);
         file.close();
     }
+}
+
+void NUHead::loadPans()
+{
 }
 
 
