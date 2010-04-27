@@ -38,8 +38,9 @@ public:
     // battery functions
     void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
     // watchdog functions
-    void displayRunning(NUActionatorsData* actions);
     void displayVisionFrameDrop(NUActionatorsData* actions);
+    void displayGamePacketReceived(NUActionatorsData* actions);
+    void displayTeamPacketReceived(NUActionatorsData* actions);
     
 private:
     double m_battery_state_previous_time;          //!< the previous time displayBatteryState was called

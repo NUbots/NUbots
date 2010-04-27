@@ -71,36 +71,38 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
         current = battery[1];
     if (current >= 0 && numon < numleds)
     {   // the battery is charging
-        double slope = period/(numleds - numon);
-        for (int i=numon; i<numleds; i++)
+        int loops = current/0.5 + 1;
+        double timeperloop = period/loops;
+        double slope = timeperloop/(numleds - numon);
+        for (int l=0; l<loops; l++)
         {
-            vector<vector<float> > chargeleds = leds;
-            chargeleds[i] = vector<float> (3, 1.0);
-            actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*(i - numon), chargeleds);
-            actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*(i - numon), chargeleds);
+            for (int i=numon; i<numleds; i++)
+            {
+                vector<vector<float> > chargeleds = leds;
+                chargeleds[i] = vector<float> (3, 1.0);
+                actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
+            }
         }
     }
     else
     {   // the battery is discharging
-        double slope = period/numon;
-        for (int i=0; i<numon; i++)
+        int loops = -current/1.0 + 1;
+        double timeperloop = period/loops;
+        double slope = timeperloop/numon;
+        for (int l=0; l<loops; l++)
         {
-            vector<vector<float> > chargeleds = leds;
-            chargeleds[(numon-1) - i] = vector<float> (3, 0.0);
-            actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*i, chargeleds);
-            actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*i, chargeleds);
+            for (int i=0; i<numon; i++)
+            {
+                vector<vector<float> > chargeleds = leds;
+                chargeleds[(numon-1) - i] = vector<float> (3, 0.0);
+                actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
+            }
         }
     }
     
     m_battery_state_previous_time = data->CurrentTime;
-}
-
-/*! @brief Display some sign that the code is running OK
-    @param actions a pointer to the shared actionator object
- */
-void NAOSystem::displayRunning(NUActionatorsData* actions)
-{
-    // by default there is no way to display such information!
 }
 
 /*! @brief Display some sign that a vision frame has been dropped

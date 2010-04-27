@@ -38,7 +38,7 @@
 /*! @brief Constructs the sense->move thread
  */
 
-WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogThread"), 500, 0)
+WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogThread"), 1000, 0)
 {
     #if DEBUG_VERBOSITY > 0
         debug << "WatchDogThread::WatchDogThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
