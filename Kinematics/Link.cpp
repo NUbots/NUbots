@@ -1,7 +1,7 @@
 #include "Link.h"
 using namespace TransformMatrices;
 Link::Link(const TransformMatrices::DHParameters& linkParameters, const std::string& name):
-        jointName(name), parameters(jointParameters)
+        linkName(name), parameters(linkParameters)
 {
 }
 
