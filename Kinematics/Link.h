@@ -1,19 +1,19 @@
-#ifndef JOINT_H
-#define JOINT_H
+#ifndef LINK_H
+#define LINK_H
 #include "Tools/Math/TransformMatrices.h"
 #include <string>
 
-class Joint
+class Link
 {
 public:
-    Joint(const TransformMatrices::DHParameters& jointParameters, const std::string& name);
-    ~Joint();
+    Link(const TransformMatrices::DHParameters& linkParameters, const std::string& name);
+    ~Link();
     Matrix calculateTransform(double angle);
 private:
-    std::string jointName;
+    std::string linkName;
     TransformMatrices::DHParameters parameters;
     double bufferedAngle;
     Matrix bufferedTransform;
 };
 
-#endif // JOINT_H
+#endif // LINK_H

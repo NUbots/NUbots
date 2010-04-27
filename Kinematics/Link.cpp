@@ -1,17 +1,17 @@
-#include "Joint.h"
+#include "Link.h"
 using namespace TransformMatrices;
-Joint::Joint(const TransformMatrices::DHParameters& jointParameters, const std::string& name):
+Link::Link(const TransformMatrices::DHParameters& linkParameters, const std::string& name):
         jointName(name), parameters(jointParameters)
 {
 }
 
 
-Joint::~Joint()
+Link::~Link()
 {
 
 }
 
-Matrix Joint::calculateTransform(double angle)
+Matrix Link::calculateTransform(double angle)
 {
     if(angle != bufferedAngle)
     {

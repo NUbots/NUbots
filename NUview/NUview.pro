@@ -92,7 +92,9 @@ HEADERS += ui_mainwindow.h \
     bonjour/robotSelectDialog.h \
     bonjour/bonjourserviceresolver.h \
     bonjour/bonjourservicebrowser.h \
-    bonjour/bonjourrecord.h
+    bonjour/bonjourrecord.h \
+    ../Kinematics/Link.h \
+    ../Kinematics/EndEffector.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -168,6 +170,8 @@ SOURCES += mainwindow.cpp \
     frameInformationWidget.cpp \
     bonjour/robotSelectDialog.cpp \
     bonjour/bonjourserviceresolver.cpp \
-    bonjour/bonjourservicebrowser.cpp
+    bonjour/bonjourservicebrowser.cpp \
+    ../Kinematics/Link.cpp \
+    ../Kinematics/EndEffector.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

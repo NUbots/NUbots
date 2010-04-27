@@ -2,12 +2,12 @@
 #define ENDEFFECTOR_H
 #include <vector>
 #include "Tools/Math/Matrix.h"
-#include "Joint.h"
+#include "Link.h"
 
 class EndEffector
 {
     Matrix startTransform;
-    std::vector<Joint> joints;
+    std::vector<Link> links;
     Matrix endTransform;
 
 public:
