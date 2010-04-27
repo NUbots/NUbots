@@ -78,7 +78,7 @@ void SeeThinkThread::run()
         double visionrealstarttime, visionprocessstarttime, visionthreadstarttime; 
         double visionrealendtime, visionprocessendtime, visionthreadendtime;
     #endif
-	
+    
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
@@ -93,11 +93,11 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-		 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
-			visionrealstarttime = NUSystem::getRealTime();
-			visionprocessstarttime = NUSystem::getProcessTime();
-			visionthreadstarttime = NUSystem::getThreadTime();
-		#endif
+                 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+                    visionrealstarttime = NUSystem::getRealTime();
+                    visionprocessstarttime = NUSystem::getProcessTime();
+                    visionthreadstarttime = NUSystem::getThreadTime();
+                #endif
 		
                 m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
                 *(m_nubot->m_io) << m_nubot->Image;  //<! Raw IMAGE STREAMING (TCP)
@@ -115,16 +115,16 @@ void SeeThinkThread::run()
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData, m_nubot->Actions);
 		
-		#if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
-		visionrealendtime = NUSystem::getRealTime();
-                visionprocessendtime = NUSystem::getProcessTime();
-                visionthreadendtime = NUSystem::getThreadTime();
-		debug 	<< "SeeThinkThread. Vision Timing: " 
-				<< (visionthreadendtime - visionthreadstarttime) << "ms, in this process: " << (visionprocessendtime - visionprocessstarttime) 
-				<< "ms, in realtime: " << visionrealendtime - visionrealstarttime << "ms." << endl;
-		#endif
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+                    visionrealendtime = NUSystem::getRealTime();
+                            visionprocessendtime = NUSystem::getProcessTime();
+                            visionthreadendtime = NUSystem::getThreadTime();
+                    debug 	<< "SeeThinkThread. Vision Timing: " 
+                            << (visionthreadendtime - visionthreadstarttime) << "ms, in this process: " << (visionprocessendtime - visionprocessstarttime) 
+                            << "ms, in realtime: " << visionrealendtime - visionrealstarttime << "ms." << endl;
+                #endif
 		
             #endif
             
@@ -138,7 +138,7 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                m_nubot->m_vision->process(*m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
+                m_nubot->m_vision->process(m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
             #endif
             #ifdef USE_MOTION
                 m_nubot->m_motion->process(*m_nubot->Jobs);
@@ -156,15 +156,14 @@ void SeeThinkThread::run()
                 if (threadendtime - threadstarttime > 7)
                     debug << "SeeThinkThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
             #endif
-            
-            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-                onLoopCompleted();
-            #endif
         }
         catch (std::exception& e)
         {
             m_nubot->unhandledExceptionHandler(e);
         }
+        #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+            onLoopCompleted();
+        #endif
     } 
     errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
 }

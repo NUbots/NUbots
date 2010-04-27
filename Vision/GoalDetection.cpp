@@ -3,7 +3,6 @@
 #include "TransitionSegment.h"
 #include "ScanLine.h"
 #include "ClassifiedSection.h"
-//#include <QDebug>
 #include "debug.h"
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
@@ -38,31 +37,118 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
             ++it;
         }
-        //ADD REMAINING GOAL CANDIDATES above horizon:
+        //! ADD REMAINING GOAL CANDIDATES above horizon:
         FO_Candidates.insert(FO_Candidates.end(), FO_AboveHorizonCandidates.begin(), FO_AboveHorizonCandidates.end());
         FO_AboveHorizonCandidates.clear();
 
-        //Combine Any "OverLapping Candidates:
+        //! Combine Any "OverLapping Candidates:
         CombineOverlappingCandidates(FO_Candidates);
+
+        //! Check if the ratio of the object candidate is OK
+        CheckCandidateRatio(FO_Candidates, height, width);
+
+        //! Sort In order of Largest to Smallest:
+        SortObjectCandidates(FO_Candidates);
+
+        //! Assign FieldObjects: if more then 2 the first 2 (largest 2 posts) will be assigned left and right post
+
+        if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX())
+        {
+            if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
+               (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
+            {
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+            }
+            else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
+                     (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
+            {
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+            }
+        }
+        else if (FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() > FO_Candidates[1].getCentreX())
+        {
+            if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
+               (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
+            {
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST);
+            }
+            else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
+                     (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
+            {
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+            }
+        }
 
         for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
         {
-        //qDebug() << "Crash Check: Before Closely classify Detection:";
-            classifyGoalClosely(&(*it), vision, height, width);
-            //qDebug() << "Crash Check: Before Ratio check Detection:";
-            bool RatioOK = isCorrectCheckRatio(*it, height, width);
-            if(RatioOK)
+            //! SKIP first 2 objects if greater then size is greater or equal then 2!
+            if(FO_Candidates.size() > 2 && it == FO_Candidates.begin())
             {
-                float FinalDistance;
-                FinalDistance = FindGoalDistance(*it,vision);
                 ++it;
-                //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
+                ++it;
             }
-            else
+            if(FO_Candidates.size() == 2)
             {
-                it = FO_Candidates.erase(it);
+                break;
             }
+            classifyGoalClosely(&(*it), vision);
+
+            //ASSIGNING as ambiguous FIELDOBJECT:
+
+            //MAKE AN AMBIGUOUS OBJECT:
+            AmbiguousObject newAmbObj = AmbiguousObject();
+            //Assign Possible IDs: Yellow or Blue, Left or Right Posts
+            if((*it).getColour() == ClassIndex::blue || (*it).getColour() == ClassIndex::shadow_blue)
+            {
+                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN);
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+
+            }
+            else if((*it).getColour() == ClassIndex::yellow || (*it).getColour() == ClassIndex::yellow_orange)
+            {
+                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN);
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+
+            }
+            else{
+                ++it;
+                continue;
+            }
+
+            Vector2<int> viewPosition;
+            Vector2<int> sizeOnScreen;
+            Vector3<float> sphericalError;
+            Vector3<float> sphericalPosition;
+            viewPosition.x = (*it).getCentreX();
+            viewPosition.y = (*it).getCentreY();
+            float bearing = (float)vision->CalculateBearing(viewPosition.x);
+            float elevation = (float)vision->CalculateElevation(viewPosition.y);
+            sphericalPosition[0] = FindGoalDistance(*it,vision);;
+            sphericalPosition[1] = bearing;
+            sphericalPosition[2] = elevation;
+            sizeOnScreen.x = (*it).width();
+            sizeOnScreen.y = (*it).height();
+
+            newAmbObj.UpdateVisualObject(   sphericalPosition,
+                                            sphericalError,
+                                            viewPosition,
+                                            sizeOnScreen,
+                                            vision->m_timestamp);
+
+            AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
+
+            //qDebug() << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
+            ++it;
+            //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
+
 	}
+
 
         return result;
 }
@@ -182,7 +268,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 }
 
 
-void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vision,int height, int width)
+void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vision)
 {
     Vector2<int> TopLeft = PossibleGoal->getTopLeft();
     Vector2<int> BottomRight = PossibleGoal->getBottomRight();
@@ -368,6 +454,22 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
         }
     }
 }
+void GoalDetection::CheckCandidateRatio(std::vector< ObjectCandidate >& FO_Candidates,int height, int width)
+{
+    vector < ObjectCandidate > ::iterator it;
+
+    //! Go through all the candidates: to find a possible goal
+    for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
+        if(!isCorrectCheckRatio(*it,height, width))
+        {
+            it = FO_Candidates.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    return;
+}
 
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
@@ -504,4 +606,51 @@ float GoalDetection::DistanceLineToPoint(LSFittedLine midPointLine, Vector2<int>
                    / sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB());
     //debug << "Distance L2P: " << distance << "\t Using: "<<point.x << ","<< point.y<<endl;
     return distance;
+}
+
+void GoalDetection::SortObjectCandidates(std::vector<ObjectCandidate>& FO_Candidates)
+{
+    /*for(unsigned int i = 0; i < FO_Candidates.size(); i++)
+    {
+        qDebug() << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
+    }*/
+
+    std::sort(FO_Candidates.begin(), FO_Candidates.end(), ObjectCandidateSizeSortPredicate);
+
+    /*for(unsigned int i = 0; i < FO_Candidates.size(); i++)
+    {
+        qDebug() << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
+    }*/
+    return;
+}
+
+
+bool GoalDetection::ObjectCandidateSizeSortPredicate(const ObjectCandidate& goal1, const ObjectCandidate& goal2)
+{
+    return goal1.width()*goal1.height() > goal2.width()*goal2.height();
+}
+
+void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,ObjectCandidate& GoalPost , int ID)
+{
+    classifyGoalClosely(&GoalPost, vision);
+    Vector2<int> viewPosition;
+    Vector2<int> sizeOnScreen;
+    Vector3<float> sphericalError;
+    Vector3<float> sphericalPosition;
+    viewPosition.x = GoalPost.getCentreX();
+    viewPosition.y = GoalPost.getCentreY();
+    float bearing = (float)vision->CalculateBearing(viewPosition.x);
+    float elevation = (float)vision->CalculateElevation(viewPosition.y);
+    sphericalPosition[0] = FindGoalDistance(GoalPost,vision);
+    sphericalPosition[1] = bearing;
+    sphericalPosition[2] = elevation;
+    sizeOnScreen.x = GoalPost.width();
+    sizeOnScreen.y = GoalPost.height();
+
+    AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      sphericalPosition,
+                                                                    sphericalError,
+                                                                    viewPosition,
+                                                                    sizeOnScreen,
+                                                                    vision->m_timestamp);
+    return;
 }

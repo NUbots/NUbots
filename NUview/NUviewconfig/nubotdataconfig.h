@@ -15,8 +15,20 @@
 #include <stdlib.h>
 #include <string>
 
-#define DATA_DIR (std::string(getenv("${HOME_ENV_VAR}")) + std::string("/nubot/"))
-#define CONFIG_DIR (DATA_DIR + std::string("/Config/${TARGET_ROBOT_NAME}/"))
+#ifdef WIN32
+    #include <wchar.h>
+#endif
+
+#ifndef WIN32
+    #define DATA_DIR (std::string(std::getenv("HOME")) + std::string("/nubot/"))
+#endif
+
+#ifdef WIN32
+    #define DATA_DIR (std::string(getenv("HOMEPATH")) + std::string("/nubot/"))
+#endif
+
+
+#define CONFIG_DIR (DATA_DIR + std::string("/Config/NUview/"))
 
 #endif // !NUBOTCONFIG_H
 

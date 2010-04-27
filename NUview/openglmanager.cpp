@@ -26,6 +26,7 @@
 #include "Tools/Image/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
+#include <QDebug>
 
 OpenglManager::OpenglManager(): width(0), height(0)
 {
@@ -299,10 +300,6 @@ void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDispl
     glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
     glDisable(GL_TEXTURE_2D);
 
-
-
-
-
     drawHollowCircle(x, y, radius, 50);
 
     glEnable(GL_TEXTURE_2D);
@@ -359,24 +356,48 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
     glLineWidth(2.0);       // Line width
+
     for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
 
-        if(fieldLines[i].valid == true){
+        if(fieldLines[i].valid == true)
+        {
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));                 // Starting point
-            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
             glEnd();  // End Lines
+
+            /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
+                        << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);*/
+
+            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
             glBegin(GL_TRIANGLES);
-             for (unsigned int j =0; j < linePoints.size(); j++)
+            for (unsigned int j =0; j < linePoints.size(); j++)
             {
                 glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
-                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y+0.5),0.0);
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+2),0.0);
+                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y-2),0.0);
             }
             glEnd();
+        }
+        else
+        {
+            //glBegin(GL_LINES);                              // Start Lines
+            //glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
+            //glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
+            //glEnd();  // End Lines
+
         }
     }
         glEnable(GL_TEXTURE_2D);
@@ -384,7 +405,196 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
 
         displayStored[displayId] = true;
 
-
+        //qDebug() << "Updating FieldLines:" << fieldLines.size();
     emit updatedDisplay(displayId, displays[displayId], width, height);
 
+}
+void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId)
+{
+    //! CLEAR DRAWING LIST
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(2.0);       // Line width
+
+    //! DRAW STATIONARY OBJECTS:
+    vector < StationaryObject > ::iterator statFOit;
+    for(statFOit = AllObjects->stationaryFieldObjects.begin(); statFOit  < AllObjects->stationaryFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*statFOit).isObjectVisible() == false)
+        {
+            ++statFOit;
+            continue;
+        }
+        unsigned char r,g,b;
+        if(     (*statFOit).getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
+                (*statFOit).getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*statFOit).getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
+                     (*statFOit).getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        int X = (*statFOit).ScreenX();
+        int Y = (*statFOit).ScreenY();
+        int ObjectWidth = (*statFOit).getObjectWidth();
+        int ObjectHeight = (*statFOit).getObjectHeight();
+
+        glBegin(GL_QUADS);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
+        glEnd();
+
+        //! Incrememnt to next object:
+        ++statFOit;
+    }
+
+    //! DRAW MOBILE OBJECTS:
+    vector < MobileObject > ::iterator mobileFOit;
+    for(mobileFOit = AllObjects->mobileFieldObjects.begin(); mobileFOit  < AllObjects->mobileFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*mobileFOit).isObjectVisible() == false)
+        {
+            ++mobileFOit;
+            continue;
+        }
+        qDebug() << "Seen: Mobile: " <<(*mobileFOit).getID() ;
+        unsigned char r,g,b;
+        //CHECK IF BALL: if so Draw a circle
+        if(     (*mobileFOit).getID() == FieldObjects::FO_BALL)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::orange,r,g,b);
+            glColor3ub(r,g,b);
+
+            int cx = (*mobileFOit).ScreenX();
+            int cy = (*mobileFOit).ScreenY();
+            int radius = (*mobileFOit).getObjectWidth()/2;
+            int num_segments = 360;
+
+            drawSolidCircle(cx, cy, radius, num_segments);
+            ++mobileFOit;
+            continue;
+        }
+
+
+        if(     (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_1  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_2  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_3  ||
+                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_4  )
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        else if(     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_1 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_2 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
+                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        int X = (*mobileFOit).ScreenX();
+        int Y = (*mobileFOit).ScreenY();
+        int ObjectWidth = (*mobileFOit).getObjectWidth();
+        int ObjectHeight = (*mobileFOit).getObjectHeight();
+
+        glBegin(GL_LINE_STRIP);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+        glEnd();
+
+        //! Increment to next object
+        ++mobileFOit;
+    }
+
+    //! DRAW AMBIGUOUS OBJECTS: Using itterator as size is unknown
+
+    vector < AmbiguousObject > ::iterator ambigFOit;
+    qDebug() <<"Size Of Ambig Objects: " <<  AllObjects->ambiguousFieldObjects.size();
+    for(ambigFOit = AllObjects->ambiguousFieldObjects.begin(); ambigFOit  < AllObjects->ambiguousFieldObjects.end(); )
+    {
+        //! Check if the object is seen, if seen then continue to next Object
+        if((*ambigFOit).isObjectVisible() == false)
+        {
+            ++ambigFOit;
+            continue;
+        }
+        qDebug() <<"Ambig Objects seen: " <<  (*ambigFOit).getID();
+        unsigned char r,g,b;
+        if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
+            glColor3ub(r,g,b);
+        }
+        else
+        {
+            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            glColor3ub(r,g,b);
+
+        }
+        int X = (*ambigFOit).ScreenX();
+        int Y = (*ambigFOit).ScreenY();
+        int ObjectWidth = (*ambigFOit).getObjectWidth();
+        int ObjectHeight = (*ambigFOit).getObjectHeight();
+
+        glBegin(GL_LINE_STRIP);                              // Start Lines
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+        glEnd();
+
+        //! Increment to next object
+        ++ambigFOit;
+    }
+
+
+    //! UPDATE THE DISPLAY:
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
 }

@@ -603,7 +603,7 @@ void NUSensors::calculateOdometry()
     odometeryData[1] += deltaY;
     odometeryData[2] += deltaTheta;
 
-    m_data->Odometry->Data = odometeryData;
+    m_data->Odometry->setData(m_data->CurrentTime, odometeryData, true);
 
     // Save the historical data
     prevHipYaw = hipYawPitch;
