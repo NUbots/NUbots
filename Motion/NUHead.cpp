@@ -186,7 +186,7 @@ void NUHead::calculateBallPan()
             scan_levels.push_back(maxpitch + i*spacing);
     }
     for (unsigned int i=0; i<scan_levels.size(); i++)
-        cout << scan_levels[i] << ", ";
+        cout << scan_levels[i] << " " << (cameraheight - ballsize)/tan(scan_levels[i] + cameraoffset - 0.5*camerafov + orientation_pitch) << ", ";
     cout << endl;
     
     // now calculate the point sequence
