@@ -23,6 +23,7 @@
 #include "NUPlatform/NUSystem.h"
 #include "debug.h"
 #include "debugverbositythreading.h"
+#include <unistd.h>
     
 #include <time.h>
 #ifdef __USE_POSIX199309                // Check if clock_nanosleep is avaliable
@@ -71,7 +72,7 @@ void PeriodicThread::sleepThread()
             clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
         #else
             if (requiredsleeptime > 1000)
-                sleep(requiredsleeptime/1000.0);
+                ;//sleep(requiredsleeptime/1000.0);
             else
                 usleep(requiredsleeptime*1000);
         #endif

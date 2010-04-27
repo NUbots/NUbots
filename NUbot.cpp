@@ -53,6 +53,7 @@
 #include <signal.h>
 #include <string>
 #include <sstream>
+#include <unistd.h>
 
 #ifndef TARGET_OS_IS_WINDOWS
     #include <errno.h>
@@ -192,7 +193,7 @@ NUbot::~NUbot()
         vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
         NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
         NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-        sleep(2);
+        //sleep(2);
     #endif
 
     // --------------------------------- delete threads
@@ -322,7 +323,7 @@ void NUbot::periodicSleep(int period)
             clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
         #else
             if (requiredsleeptime > 1000)
-                sleep(requiredsleeptime/1000.0);
+                ;//sleep(requiredsleeptime/1000.0);
             else
                 usleep(requiredsleeptime*1000);
         #endif
@@ -358,7 +359,7 @@ void NUbot::segFaultHandler(int value)
 	    for (size_t i=0; i<size; i++)
 		errorlog << strings[i] << endl;
 	#endif
-    sleep(3);
+    //sleep(3);
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
