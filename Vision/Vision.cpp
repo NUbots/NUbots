@@ -814,7 +814,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     continue;
                 }
 
-                while( ( checkIfBufferSame(colourBuff) && currentColour == afterColour) )
+                while( (currentColour == afterColour) )
                 {
 
                     if(direction == ClassifiedSection::DOWN)
@@ -1590,8 +1590,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 nextSegCounter--;
                 continue;
             }
-            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing/2
-               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing/2)
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing)
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
@@ -1622,8 +1622,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
             {
                 break;
             }
-            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/4
-               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/4)
+            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/2)
             {
                 if (horizontalsegments[j].getStartPoint().x < Xstart)
                 {
@@ -1644,7 +1644,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         }
         //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
         //Create Object Candidate if greater then the minimum number of segments
-        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/4)
+        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
 
