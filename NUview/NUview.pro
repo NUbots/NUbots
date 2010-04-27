@@ -94,7 +94,10 @@ HEADERS += ui_mainwindow.h \
     bonjour/bonjourservicebrowser.h \
     bonjour/bonjourrecord.h \
     ../Tools/Math/UKF.h \
-    ../Kinematics/AngleUKF.h
+    ../Kinematics/AngleUKF.h \
+    ../Tools/Math/SRUKF.h \
+    ../Kinematics/EndEffector.h \
+    ../Kinematics/Joint.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -170,6 +173,9 @@ SOURCES += mainwindow.cpp \
     bonjour/bonjourserviceresolver.cpp \
     bonjour/bonjourservicebrowser.cpp \
     ../Tools/Math/UKF.cpp \
-    ../Kinematics/AngleUKF.cpp
+    ../Kinematics/AngleUKF.cpp \
+    ../Tools/Math/SRUKF.cpp \
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/Joint.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

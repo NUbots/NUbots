@@ -20,6 +20,7 @@
 #include "bonjour/bonjourserviceresolver.h"
 
 #include "Kinematics/AngleUKF.h"
+#include "Tools/Math/UKF.h"
 
 using namespace std;
 ofstream debug;
@@ -512,7 +513,7 @@ void MainWindow::AngleUKFTest()
     float angle = 0.0;
     for (int i = 0; i < numUpdates; i++)
     {
-        gyroOffset = 11.0;
+        gyroOffset = 10.0;
         angle += deltaAngle;
         timestamp += deltaTime;
         velocity = deltaAngle / deltaTime;

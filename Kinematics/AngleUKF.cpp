@@ -16,12 +16,14 @@ void AngleUKF::initialiseFilter(double timestamp)
     // Initial angle estimate is zero.
     m_mean[Angle][0] = 0.0;
     // Initial gryro offset is 10.0.
-    m_mean[GyroOffset][0] = 10.0;
+    m_mean[GyroOffset][0] = 7.0;
 
-    // Set the initial angle variance to pi^2 (means that it could be any angle)
-    m_covariance[Angle][Angle] = mathGeneral::PI;
+    Matrix covariance(NumStates,NumStates,false);
+    // Set the initial angle variance to pi (means that it could be any angle)
+    covariance[Angle][Angle] = mathGeneral::PI;
     // Set the gyro offset variance to 10.0^2 rad / sec
-    m_covariance[GyroOffset][GyroOffset] = 10.0;
+    covariance[GyroOffset][GyroOffset] = 10.0;
+    setCovariance(covariance);
 
 }
 
@@ -60,9 +62,11 @@ void AngleUKF::TimeUpdate(float gyroReading, double timestamp)
     m_mean = CalculateMeanFromSigmas(m_updateSigmaPoints);
     // Normalise the angle.
     m_mean[Angle][0] = mathGeneral::normaliseAngle(m_mean[Angle][0]);
+    //m_sqrtCovariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean);
     m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean);
     debug << "Time Update Complete." << endl << "Mean:" << endl << m_mean << endl;
-    debug << "Covariance:" << endl << m_covariance << endl;
+    //debug << "Covariance:" << endl << m_sqrtCovariance << endl;
+    //debug << "Covariance:" << endl << m_covariance << endl;
 }
 
 
@@ -83,9 +87,8 @@ void AngleUKF::AccelerometerMeasurementUpdate(float horizontalAccel, float verti
     observation[0][0] = horizontalAccel;
     observation[1][0] = verticalAccel;
 
-    Matrix S_Obs(2,2,false);
-    S_Obs[0][0]=1;
-    S_Obs[1][1]=1;
+    Matrix S_Obs(2,2,true);
+    S_Obs = 10.0*S_Obs;
 
     // Temp working variables
     Matrix temp(2,1,false);

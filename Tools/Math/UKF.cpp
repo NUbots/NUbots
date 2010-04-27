@@ -117,6 +117,13 @@ bool UKF::setState(Matrix mean, Matrix covariance)
     }
 }
 
+bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints)
+{
+    m_mean = CalculateMeanFromSigmas(updatedSigmaPoints);
+    m_covariance = CalculateCovarianceFromSigmas(updatedSigmaPoints, m_mean);
+    return true;
+}
+
 bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
 {
 
@@ -131,11 +138,17 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     Matrix Pyy(2,2,false);
     Matrix Pxy(2,2,false);
 
+    Matrix S_Obs(2,2,false);
+    S_Obs[0][0]=1;
+    S_Obs[1][1]=1;
+
     Matrix temp;
     for(int i =0; i < numberOfSigmaPoints; i++)
     {
         temp = predictedMeasurementSigmas.getCol(i) - predictedMeasurement;
-        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp();
+        // Innovation covariance
+        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp();//+ measurementNoise;
+        // Cross correlation matrix
         Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
     }
     Matrix K = Pxy * Invert22(Pyy);
@@ -147,40 +160,19 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
 
     debug << "K:" << endl << K;
 
-    Matrix S_Obs(2,2,false);
-    S_Obs[0][0]=1;
-    S_Obs[1][1]=1;
     m_mean  = m_mean + K * (measurement - predictedMeasurement);
 
     debug << "K*Pyy = " << endl << K*Pyy << endl;
     debug << "K*Pyy*K.transp() = " << endl << K*Pyy*K.transp() << endl;
-
+    debug << "m_covariance = " << endl << m_covariance << endl;
     //m_covariance = m_covariance - K*Pyy*K.transp();
+    //m_covariance = m_covariance - Pxy*Pyy*Pxy.transp();
+
+
 
     m_covariance = HT(horzcat(stateEstimateSigmas-m_mean*m_sigmaWeights - K*predictedMeasurementSigmas +
-                              K*predictedMeasurement*m_sigmaWeights,K*S_Obs));
+                              K*predictedMeasurement*m_sigmaWeights,K*measurementNoise));
 
     // Stolen from last years code... does not all seem right for this iplementation.
-/*
-  WORKING (Sort of)
-    temp = predictedObservationSigmas - predictedObservation*m_sigmaWeights;
-    Matrix Pyy = temp * temp.transp();
-    Matrix Pxy = (sigmaPoints - m_mean * m_sigmaWeights) * temp.transp();
-    Matrix K = Pxy * Invert22(Pyy);
-
-    debug << "Pyy:" << endl << Pyy;
-
-    debug << "Pxy:" << endl << Pxy;
-
-
-    debug << "K:" << endl << K;
-    Matrix S_Obs(2,2,false);
-    S_Obs[0][0]=1;
-    S_Obs[1][1]=1;
-    m_mean  = m_mean + K * (observation - predictedObservation);
-    m_mean[Angle][0] = mathGeneral::normaliseAngle(m_mean[Angle][0]);
-    m_covariance = HT(horzcat(sigmaPoints-m_mean*m_sigmaWeights - K*predictedObservationSigmas +
-                              K*predictedObservation*m_sigmaWeights,K*S_Obs));
-                              */
     return true;
 }
