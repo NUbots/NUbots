@@ -63,7 +63,7 @@ NUMotion::~NUMotion()
             delete m_head;
     #endif
     #ifdef USE_WALK
-        if (m_head != NULL)
+        if (m_walk != NULL)
             delete m_walk;                
     #endif
     #ifdef USE_KICK
