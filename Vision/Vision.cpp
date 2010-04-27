@@ -328,29 +328,33 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
 
-    #if DEBUG_VISION_VERBOSITY > 4
+    AllFieldObjects->postProcess(image->m_timestamp);
+
+
+    #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
     #endif
-    #if DEBUG_VISION_VERBOSITY > 5
+
+    #if DEBUG_VISION_VERBOSITY > 4
         //! Debug information for Frame:
         debug << "Time: " << m_timestamp << endl;
-        for(int i = 0; i < AllFieldObjects->stationaryFieldObjects.size();i++)
+        for(unsigned int i = 0; i < AllFieldObjects->stationaryFieldObjects.size();i++)
         {
             if(AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "Stationary Object: " << i << ":" << AllFieldObjects->stationaryFieldObjects[i].getName() << "Seen."<< endl;
+                debug << "Stationary Object: " << i << ":" << AllFieldObjects->stationaryFieldObjects[i].getName() << " Seen."<< endl;
             }
         }
-        for(int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
+        for(unsigned int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
         {
             if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "Mobile Object: " << i << ":" << AllFieldObjects->mobileFieldObjects[i].getName() << "Seen."<< endl;
+                debug << "Mobile Object: " << i << ":" << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen."<< endl;
             }
         }
 
-        for(int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
+        for(unsigned int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
         {
             if(AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
             {
@@ -358,7 +362,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             }
         }
     #endif
-    AllFieldObjects->postProcess(image->m_timestamp);
+
     return AllFieldObjects;
 }
 

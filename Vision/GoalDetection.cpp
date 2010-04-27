@@ -51,6 +51,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         SortObjectCandidates(FO_Candidates);
 
         //! Assign FieldObjects: if more then 2 the first 2 (largest 2 posts) will be assigned left and right post
+
         if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX())
         {
             if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
@@ -81,13 +82,18 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             }
         }
+
         for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
         {
             //! SKIP first 2 objects if greater then size is greater or equal then 2!
-            if(FO_Candidates.size() >= 2 && it == FO_Candidates.begin())
+            if(FO_Candidates.size() > 2 && it == FO_Candidates.begin())
             {
                 ++it;
                 ++it;
+            }
+            if(FO_Candidates.size() == 2)
+            {
+                break;
             }
             classifyGoalClosely(&(*it), vision);
 
