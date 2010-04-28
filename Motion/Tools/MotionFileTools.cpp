@@ -100,6 +100,28 @@ vector<float> MotionFileTools::toFloatVector(istream& input)
     return toFloatVector(buffer);
 }
 
+/*! @brief Reads the stream looking for comma separated list of strings. 
+    @param input the stream to read from
+    @return the list of strings
+ */
+vector<string> MotionFileTools::toStringVector(istream& input)
+{
+    vector<string> s;
+    
+    string line, token;
+    getline(input, line);
+    
+    stringstream ss(line);
+    while (getline(ss, token, ','))
+    {
+        token.replace(token.find('"'), 1, "", 0, 1);        // I don't like quotes around my joint labels
+        token.replace(token.find('"'), 1, "", 0, 1);
+        s.push_back(token);
+    }
+    
+    return s;
+}
+
 /*! @brief Reads a value and min-max pair from a string.
     @param data the string to get the value [min,max] tuple from
     @param value the value from the string

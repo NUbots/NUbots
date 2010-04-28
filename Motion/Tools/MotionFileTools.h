@@ -40,6 +40,8 @@ public:
     static vector<float> toFloatVector(const string& data);
     static vector<float> toFloatVector(istream& input);
     
+    static vector<string> toStringVector(istream& input);
+    
     static void toFloatWithRange(const string& data, float& value, vector<float>& range);
     static void toFloatWithRange(istream& input, float& value, vector<float>& range);
     
