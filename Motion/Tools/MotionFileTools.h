@@ -48,6 +48,8 @@ public:
     static vector<vector<float> > toFloatMatrix(istream& input);
     static unsigned int size(vector<vector<float> > data);
     
+    static void toFloatWithMatrix(istream& input, float& value, vector<vector<float> >& matrix);
+    
 private:
     MotionFileTools() {};
     ~MotionFileTools() {};
