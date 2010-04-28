@@ -58,6 +58,7 @@ private:
     vector<float> calculatePanLevels(float minpitch, float maxpitch);
     vector<vector<float> > calculatePanPoints(vector<float> levels);
     void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
+    vector<double> calculatePanTimes(vector<vector<float> > points);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
     
