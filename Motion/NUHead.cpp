@@ -68,6 +68,14 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
+    
+    if (m_move_end_time < m_data->CurrentTime)
+    {
+        if (m_is_panning)
+            calculatePan();
+        else if (m_is_nodding)
+            calculateNod();
+    }
 }
 
 /*! @brief Process a generic head job
@@ -120,24 +128,15 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     if (m_data == NULL || m_actions == NULL)
         return;
 
-    /*vector<float> sensorpositions;
+    vector<float> sensorpositions;
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
-    m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);*/
-    
-    
-    calculateBallPan();
+    m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
 }
-
-void NUHead::doHead()
-{
-	// at this stage there is nothing to do here
-}
-
 
 /*! @brief Calculates the minimum and maximum head pitch values given a range on the field to look over
     @param mindistance the minimum distance in centimetres to look
@@ -184,8 +183,6 @@ void NUHead::getSensorValues()
 
 void NUHead::calculateBallPan()
 {
-    getSensorValues();
-    
     float minpitch, maxpitch;
     calculateMinAndMaxPitch(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, minpitch, maxpitch);
     
@@ -196,7 +193,7 @@ void NUHead::calculateBallPan()
     /* TEST HACK */
     vector<double> times(scan_points.size(), 0);
     for (unsigned int i=0; i<times.size(); i++)
-        times[i] = i*1000 + m_data->CurrentTime;
+        times[i] = i*500 + m_data->CurrentTime;
     
     vector<float> sensorpositions;
     m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
@@ -206,6 +203,7 @@ void NUHead::calculateBallPan()
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, scan_points, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    m_move_end_time = times[times.size() -1];
     /* END TEST HACK */
 }
 
@@ -272,13 +270,10 @@ void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector
     static vector<float> a(2,0);        // holds the first of the scan line
     static vector<float> b(2,0);        // holds the second of the scan line
     
-    cout << "pitch: " << pitch << " previouspitch: " << previouspitch << endl;
-    
     int i = getPanLimitIndex(pitch);
     int p = getPanLimitIndex(previouspitch);
     if (i != p)
     {   // if the yaw limits change add the extra point to stop the head from hitting the shoulder
-        cout << "pitches have different yaw limits: " << getPanLimitIndex(pitch) << " " << getPanLimitIndex(previouspitch) << endl;
         if (i < p)
             s[0] = m_pan_limits_pitch[i];
         else
