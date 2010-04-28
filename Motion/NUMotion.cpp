@@ -29,6 +29,8 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 
+#include "Tools/MotionScript.h"
+
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
@@ -47,6 +49,8 @@ NUMotion::NUMotion()
     #ifdef USE_KICK
         m_kick = new NUKick();
     #endif
+    
+    MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
