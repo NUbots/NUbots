@@ -36,11 +36,16 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead()
+NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981), m_CAMERA_FOV_Y(0.6012)
 {
+    m_camera_height = 46;
+    m_body_pitch = 0;
+    m_sensor_pitch = 0;
+    m_sensor_yaw = 0;
+    
     m_is_panning = false;
     m_is_nodding = false;
-    m_next_add_time = 0;
+    m_move_end_time = 0;
     
     load();
 }
@@ -133,8 +138,22 @@ void NUHead::doHead()
 	// at this stage there is nothing to do here
 }
 
+
+/*! @brief Calculates the minimum and maximum head pitch values given a range on the field to look over
+    @param mindistance the minimum distance in centimetres to look
+    @param maxdistance the maximum distance in centimetres to look
+    @param minpitch the calculated minpitch is stored here
+    @param maxpitch the calculated maxpitch is stored here
+ */
+void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch)
+{
+    minpitch = std::min((float) (atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
+    maxpitch = std::max((float) (m_camera_height/maxdistance - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
+}
+
 void NUHead::calculatePan()
 {
+    getSensorValues();
     if (m_pan_type == HeadPanJob::Ball)
         calculateBallPan();
     else if (m_pan_type == HeadPanJob::BallAndLocalisation)
@@ -143,63 +162,36 @@ void NUHead::calculatePan()
         calculateLocalisationPan();
 }
 
-void NUHead::calculateBallPan()
+/*! @brief Gets relevant sensor data from the NUSensorsData; sets m_camera_height, m_body_pitch, and m_sensor_pitch, m_sensor_yaw
+ */
+void NUHead::getSensorValues()
 {
-    //!< @todo TODO: to calculate pans properly I need the ball size, camera offset, the camera field of view, and the field dimensions
-    const float ballsize = 6.5;
-    const float fieldwidth = 400;
-    const float fieldlength = 600;
-    
-    const float cameraoffset = 0.6981;
-    const float camerafov = 0.6012;
-    
     // get the camera height, orientation and current head position from the sensor data
     float cameraheight;
-    m_data->getCameraHeight(cameraheight);
+    if (m_data->getCameraHeight(cameraheight))
+        m_camera_height = cameraheight;
+    else
+        m_camera_height = 46;
     
     vector<float> orientation;
     m_data->getOrientation(orientation);
-    float orientation_pitch = 0;
     if (orientation.size() > 2)
-        orientation_pitch = orientation[1];
+        m_body_pitch = orientation[1];
     
-    float headpitch, headyaw;
-    m_data->getJointPosition(NUSensorsData::HeadPitch, headpitch);
-    m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+    m_data->getJointPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
+    m_data->getJointPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
+}
+
+void NUHead::calculateBallPan()
+{
+    getSensorValues();
     
-    // calculate the minimum and maximum scan lines
-    float minpitch = std::min((float) (atan2(cameraheight, ballsize) - cameraoffset - 0.5*camerafov - orientation_pitch), m_pitch_limits[1]);
-    float maxpitch = std::max((float) ((cameraheight - ballsize)/(1.1*sqrt(fieldwidth*fieldwidth + fieldlength*fieldlength)) - cameraoffset + 0.5*camerafov - orientation_pitch), m_pitch_limits[0]);
+    float minpitch, maxpitch;
+    calculateMinAndMaxPitch(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, minpitch, maxpitch);
     
-    // calculate scan lines required to scan the area between the min and max scan lines
-    int numscans = (minpitch - maxpitch)/camerafov + 2;
-    float spacing = (minpitch - maxpitch)/(numscans - 1);
-    vector<float> scan_levels;
-    if (fabs(headpitch - minpitch) < fabs(headpitch - maxpitch))
-    {   // if we are closer to the minpitch position then start from the minpitch
-        for (int i=0; i<numscans; i++)
-            scan_levels.push_back(minpitch - i*spacing);
-    }
-    else
-    {   // if we are closer to the maxpitch position then start from the maxpitch
-        for (int i=0; i<numscans; i++)
-            scan_levels.push_back(maxpitch + i*spacing);
-    }
-    for (unsigned int i=0; i<scan_levels.size(); i++)
-        cout << scan_levels[i] << " " << (cameraheight - ballsize)/tan(scan_levels[i] + cameraoffset - 0.5*camerafov + orientation_pitch) << ", ";
-    cout << endl;
+    vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
+    vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
     
-    // now calculate the point sequence
-    vector<vector<float> > scan_points;
-    bool onleft = headyaw >= 0;
-    vector<float> yawvalues;
-    generateScan(scan_levels[0], headpitch, onleft, scan_points);
-    for (unsigned int i=1; i<numscans; i++)
-        generateScan(scan_levels[i], scan_levels[i-1], onleft, scan_points);
-    
-    for (unsigned int i=0; i<scan_points.size(); i++)
-        cout << "[" << scan_points[i][0] << ", " << scan_points[i][1] << "], ";
-    cout << endl;
     
     /* TEST HACK */
     vector<double> times(scan_points.size(), 0);
@@ -217,6 +209,63 @@ void NUHead::calculateBallPan()
     /* END TEST HACK */
 }
 
+/*! @brief Calculates evenly spaced pitch values to pan at based on the camera field of view
+ 
+    This function will automatically put the levels in the correct order based on the current head pitch
+ 
+    @param minpitch the lowest pan level in radians
+    @param maxpitch the hight pan level in radians
+    @return a vector containing the ordered pan levels
+ */
+vector<float> NUHead::calculatePanLevels(float minpitch, float maxpitch)
+{
+    vector<float> levels;
+    // calculate scan lines required to scan the area between the min and max scan lines
+    int numscans = (minpitch - maxpitch)/m_CAMERA_FOV_Y + 2;
+    float spacing = (minpitch - maxpitch)/(numscans - 1);
+    
+    if (fabs(m_sensor_pitch - minpitch) < fabs(m_sensor_pitch - maxpitch))
+    {   // if we are closer to the minpitch position then start from the minpitch
+        for (int i=0; i<numscans; i++)
+            levels.push_back(minpitch - i*spacing);
+    }
+    else
+    {   // if we are closer to the maxpitch position then start from the maxpitch
+        for (int i=0; i<numscans; i++)
+            levels.push_back(maxpitch + i*spacing);
+    }
+    
+    /* REMOVE AFTER DEBUG */
+    for (unsigned int i=0; i<levels.size(); i++)
+        cout << levels[i] << " " << (m_camera_height - m_BALL_SIZE)/tan(levels[i] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch) << ", ";
+    cout << endl;   
+    /* END */
+    return levels;
+}
+
+/*! @brief Calculates an ordered list of pan way points 
+    @param levels the pan levels (in radians)
+    @return a matrix containing [[pitch0, yaw0], [pitch1, yaw1], ...]
+ */
+vector<vector<float> > NUHead::calculatePanPoints(vector<float> levels)
+{
+    vector<vector<float> > points;
+    bool onleft = m_sensor_yaw >= 0;
+    
+    generateScan(levels[0], m_sensor_pitch, onleft, points);
+    for (unsigned int i=1; i<levels.size(); i++)
+        generateScan(levels[i], levels[i-1], onleft, points);
+    
+    /* REMOVE AFTER DEBUG */
+    for (unsigned int i=0; i<points.size(); i++)
+        cout << "[" << points[i][0] << ", " << points[i][1] << "], ";
+    cout << endl;
+    /* END */
+    return points;
+}
+
+/*! @brief Calculates a single scan to the given pitch value
+ */
 void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan)
 {
     static vector<float> s(2,0);        // holds the special extra point when the yaw limits change

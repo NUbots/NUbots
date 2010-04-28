@@ -48,10 +48,15 @@ private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
     
+    void getSensorValues();
+    void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     void calculatePan();
     void calculateBallPan();
     void calculateBallAndLocalisationPan();
     void calculateLocalisationPan();
+    
+    vector<float> calculatePanLevels(float minpitch, float maxpitch);
+    vector<vector<float> > calculatePanPoints(vector<float> levels);
     void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
@@ -69,6 +74,16 @@ private:
     NUSensorsData* m_data;                      //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;               //!< local pointer to the next actionators data
     
+    float m_camera_height;                      //!< the camera height in cm
+    float m_body_pitch;                         //!< the forward-backward lean of the robot is rad
+    float m_sensor_pitch;                       //!< the sensor head pitch position
+    float m_sensor_yaw;                         //!< the sensor head yaw position
+    
+    const float m_BALL_SIZE;
+    const float m_FIELD_DIAGONAL;
+    const float m_CAMERA_OFFSET;
+    const float m_CAMERA_FOV_Y;
+    
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
     vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits
@@ -77,7 +92,7 @@ private:
     bool m_is_nodding;                          //!< true if we are currently nodding the head
     HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing
     
-    double m_next_add_time;                     //!< the time at which we need to resend the calculated curves to the actionators
+    double m_move_end_time;                     //!< the time at which we need to resend the calculated curves to the actionators
     vector<vector<double> > m_curve_times;      //!< the motion curve times in ms
     vector<vector<float> > m_curve_positions;   //!< the motion curve positions in radians
     vector<vector<float> > m_curve_velocities;  //!< the motion curve velocities in radians
