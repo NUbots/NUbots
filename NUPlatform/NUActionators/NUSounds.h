@@ -53,8 +53,10 @@ public:
     static string NUBOT9;
     static string NUBOT10;
     static string MY_IP_IS;
+    
     static string SEG_FAULT;
     static string UNHANDLED_EXCEPTION;
+    static string LOW_BATTERY;
     
     static string START_SAVING_IMAGES;
     static string STOP_SAVING_IMAGES;

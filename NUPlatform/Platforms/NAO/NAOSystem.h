@@ -37,6 +37,7 @@ public:
     
     // battery functions
     void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
+    void voiceLowBattery(NUActionatorsData* actions);
     // watchdog functions
     void displayVisionFrameDrop(NUActionatorsData* actions);
     void displayGamePacketReceived(NUActionatorsData* actions);

@@ -22,6 +22,7 @@
 #include "NAOSystem.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "debug.h"
 #include "debugverbositynusystem.h"
@@ -69,7 +70,7 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     float current = 0;
     if (battery.size() > 1)
         current = battery[1];
-    if (current >= 0 && numon < numleds)
+    if (current >= 0 and numon < numleds)
     {   // the battery is charging
         int loops = current/0.5 + 1;
         double timeperloop = period/loops;
@@ -85,7 +86,7 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
             }
         }
     }
-    else
+    else if (numon > 1)
     {   // the battery is discharging
         int loops = -current/1.0 + 1;
         double timeperloop = period/loops;
@@ -101,8 +102,20 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
             }
         }
     }
+    if (charge < 0.15 and current < 0)
+        voiceLowBattery(actions);
     
     m_battery_state_previous_time = data->CurrentTime;
+}
+
+/*! @brief Voices that the battery is low
+ */
+void NAOSystem::voiceLowBattery(NUActionatorsData* actions)
+{
+    static int runcount = 0;
+    if (runcount%8 == 0)
+        actions->addSound(0, NUSounds::LOW_BATTERY);
+    runcount++;
 }
 
 /*! @brief Display some sign that a vision frame has been dropped
