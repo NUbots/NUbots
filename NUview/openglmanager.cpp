@@ -563,7 +563,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         }
         else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
             glColor3ub(r,g,b);
         }
         else

@@ -13,8 +13,8 @@ public:
     Vector2<int> getBottomRight() const;
     void setTopLeft(Vector2<int> point);
     void setBottomRight(Vector2<int> point);
-    int width();
-    int height();
+    int width() const;
+    int height() const;
     int getCentreX();
     int getCentreY();
     float aspect();
@@ -22,11 +22,14 @@ public:
     void setColour(unsigned char c);
     std::vector<TransitionSegment> getSegments() const;
 
+
     ObjectCandidate();
     ObjectCandidate(int left, int top, int right, int bottom);
     ObjectCandidate(int left, int top, int right, int bottom, unsigned char colour);
     ObjectCandidate(int left, int top, int right, int bottom, unsigned char colour, std::vector<TransitionSegment> candidate_segments);
     ~ObjectCandidate();
+
+
 protected:
     Vector2<int> topLeft;
     Vector2<int> bottomRight;
