@@ -49,7 +49,7 @@ bool MotionScript::load()
     }
     else
     {
-        file.ignore(1024, '\n');
+        vector<string> labels = MotionFileTools::toStringVector(file);
         vector<float> times;
         vector<vector<vector<float> > > zomg;
         while (!file.eof())
@@ -63,6 +63,10 @@ bool MotionScript::load()
                 zomg.push_back(positions);
             }
         }
+        
+        for (unsigned int i=0; i<labels.size(); i++)
+            cout << labels[i] << ",";
+        cout << endl;
         
         for (unsigned int i=0; i<times.size(); i++)
             cout << times[i] << ":" << MotionFileTools::fromMatrix(zomg[i]) << endl;

@@ -26,6 +26,8 @@
 #define MOTIONSCRIPT_H
 
 #include <string>
+#include <vector>
+using namespace std;
 
 class MotionScript
 {
@@ -36,8 +38,19 @@ protected:
     bool load();
 private:
 protected:
-    std::string m_name;         //!< the name of the script
-    bool m_is_valid;            //!< true if the motion script file was loaded without error
+    std::string m_name;                 //!< the name of the script
+    bool m_is_valid;                    //!< true if the motion script file was loaded without error
+    
+    // original script data
+    vector<vector<double> > times;      //!< the times read in from the script file
+    vector<vector<float> > positions;   //!< the positions read in from the script file
+    vector<vector<float> > gains;       //!< the gains read in from the script file
+    
+    // smoothed script data
+    float m_motion_smoothness;
+    vector<vector<double> > curvetimes;
+    vector<vector<float> > curvepositions;
+    vector<vector<float> > curvevelocities;
 };
 
 #endif
