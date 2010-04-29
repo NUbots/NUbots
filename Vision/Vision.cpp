@@ -757,7 +757,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 2;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
     for (int i = 0; i < bufferSize; i++)
     {
