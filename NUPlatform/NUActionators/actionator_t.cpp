@@ -62,6 +62,8 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
         return;
     }
     actionator_point_t* point = new actionator_point_t();
+    if (point == NULL)
+        errorlog << "actionator_t<T>::addPoint. " << Name << "Created point is NULL! Segmentation fault..." << endl;
     point->Time = time;
     point->Data = data;
 
@@ -70,8 +72,10 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
         m_points.push_back(point);
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
-        static typename deque<actionator_point_t*>::iterator insertposition;
+        typename deque<actionator_point_t*>::iterator insertposition;
         insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+        if (insertposition - m_points.begin() < 0)
+            errorlog << "actionator_t<T>::addPoint. " << Name << "Attempting to resize m_points to less than 0! Unhandled exception" << endl;
         m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
         m_points.push_back(point);
     }
