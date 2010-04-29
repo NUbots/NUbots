@@ -339,6 +339,18 @@ void NUbot::periodicSleep(int period)
  */
 void NUbot::segFaultHandler(int value)
 {
+    #ifndef TARGET_OS_IS_WINDOWS
+        errorlog << "SEGMENTATION FAULT. " << endl;
+        debug << "SEGMENTATION FAULT. " << endl;
+        void *array[10];
+        size_t size;
+        char **strings;
+        size = backtrace(array, 10);
+        strings = backtrace_symbols(array, size);
+        for (size_t i=0; i<size; i++)
+            errorlog << strings[i] << endl;
+    #endif
+    
     vector<float> rgb(3,0);
     vector<vector<float> > allleds;
     allleds.push_back(rgb);
@@ -352,17 +364,6 @@ void NUbot::segFaultHandler(int value)
     vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
     NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
     NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-	#ifndef TARGET_OS_IS_WINDOWS
-	    errorlog << "SEGMENTATION FAULT. " << endl;
-        debug << "SEGMENTATION FAULT. " << endl;
-	    void *array[10];
-	    size_t size;
-	    char **strings;
-	    size = backtrace(array, 10);
-	    strings = backtrace_symbols(array, size);
-	    for (size_t i=0; i<size; i++)
-		errorlog << strings[i] << endl;
-	#endif
     sleep(3);
 }
 
