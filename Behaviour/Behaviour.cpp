@@ -78,8 +78,8 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
                 walkVector[0] = maxspeed*(balldistance/30);
             if (fabs(ballbearing) > 0.05)
                 walkVector[2] = 2*walkVector[0]*sin(ballbearing)/balldistance;
-            //WalkJob* walk = new WalkJob(walkVector);
-            //jobs.addMotionJob(walk);
+            WalkJob* walk = new WalkJob(walkVector);
+            jobs.addMotionJob(walk);
             //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
             
             float headpitch;

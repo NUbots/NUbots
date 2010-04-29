@@ -189,15 +189,9 @@ void NUHead::calculateBallPan()
     vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
     vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
     vector<double> times = calculatePanTimes(scan_points);
-
-    vector<float> sensorpositions;
-    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
     
-    vector<vector<double> > curvetimes;
-    vector<vector<float> > curvepositions;
-    vector<vector<float> > curvevelocities;
-    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, scan_points, 0.5, 10, curvetimes, curvepositions, curvevelocities);
-    m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    moveTo(times, scan_points);
+    
     m_move_end_time = times[times.size() -1];
 }
 
