@@ -55,5 +55,6 @@ WatchDogThread::~WatchDogThread()
 
 void WatchDogThread::periodicFunction()
 {
+    cout << "WatchDog: " << nusystem->getRealTime() << endl;
     nusystem->displayBatteryState(m_nubot->SensorData, m_nubot->Actions);
 }

@@ -63,19 +63,8 @@ void PeriodicThread::sleepThread()
     if (requiredsleeptime < 0)
         debug << "PeriodicThread::sleep() " << m_name << " the thread took too long to complete: no time to sleep." << endl;
     else
-    {
-        #ifdef __NU_PERIODIC_CLOCK_NANOSLEEP
-            struct timespec sleeptime;
-            sleeptime.tv_sec = static_cast<int> (requiredsleeptime/1000.0);
-            sleeptime.tv_nsec = 1e6*requiredsleeptime - sleeptime.tv_sec*1e9;
-            clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
-        #else
-            if (requiredsleeptime > 1000)
-                sleep(requiredsleeptime/1000.0);
-            else
-                usleep(requiredsleeptime*1000);
-        #endif
-    }
+        NUSystem::msleep(requiredsleeptime);
+    
     m_start_time = nusystem->getTime();
 }
 

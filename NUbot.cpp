@@ -319,19 +319,8 @@ void NUbot::periodicSleep(int period)
     double timenow = nusystem->getTime();
     double requiredsleeptime = period - (timenow - starttime);
     if (requiredsleeptime > 0)
-    {
-        #ifdef __USE_POSIX199309
-            struct timespec sleeptime;
-            sleeptime.tv_sec = static_cast<int> (requiredsleeptime/1000.0);
-            sleeptime.tv_nsec = 1e6*requiredsleeptime - sleeptime.tv_sec*1e9;
-            clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
-        #else
-            if (requiredsleeptime > 1000)
-                sleep(requiredsleeptime/1000.0);
-            else
-                usleep(requiredsleeptime*1000);
-        #endif
-    }
+        NUSystem::msleep(requiredsleeptime);
+    
     starttime = nusystem->getTime();
 }
 
