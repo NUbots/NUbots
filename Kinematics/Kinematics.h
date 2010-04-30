@@ -22,7 +22,7 @@ public:
 
     static double DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY);
 
-    static std::vector<float> TransformPosition(const std::vector<float>& cameraBasedPosition);
+    static std::vector<float> TransformPosition(const Matrix& Camera2GroundTransform, const std::vector<float>& cameraBasedPosition);
 
     static std::vector<float> LookToPoint(const std::vector<float>& pointFieldCoordinates);
 

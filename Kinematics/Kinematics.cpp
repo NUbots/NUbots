@@ -14,7 +14,7 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // Top camera
     const float cameraTopOffsetZ = 6.79;
     const float cameraTopOffsetX = 5.39;
-    const float cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
+    //const float cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
 
     // Bottom Camera
     const float cameraBottomOffsetZ = 2.381;
@@ -200,7 +200,7 @@ double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double 
     const double nearDistance = 10;     // 10 cm
     const double farDistance = 3000;   // 3,000 cm (30 metres)
 
-    std::vector<double> result(3);
+    std::vector<float> resultCartesian(3, 0.0f);
 
     // pre-calculate required trig values.
     double xcos = cos(angleFromCameraCentreX);
@@ -228,20 +228,15 @@ double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double 
 
     // Interpolate between near and far values to find the point at which z = 0 (the ground)
     double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
-    result[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
-    result[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
-    result[2] = 0.0;
+    resultCartesian[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
+    resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
+    resultCartesian[2] = 0.0;
 
     // Convert back to polar coodinates.
-    float x = result[0];
-    float y = result[1];
-    float z = result[2];
-    float distance = sqrt(x*x + y*y + z*z);
-    float bearing = atan2(y,x);
-    float elevation = asin(z/(distance));
+    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
 
     //! TODO: Get the right thing to output, what do we want from this function??
-    return distance;
+    return resultSpherical[0];
 }
 
 Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2CameraTransform)
@@ -251,10 +246,27 @@ Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportL
     return Translation(legOffsetX,legOffsetY,0)* InverseMatrix(origin2SupportLegTransform) * origin2CameraTransform;
 }
 
-std::vector<float> Kinematics::TransformPosition(const std::vector<float>& cameraBasedPosition)
+std::vector<float> Kinematics::TransformPosition(const Matrix& origin2SupportLegTransform, const std::vector<float>& cameraBasedPosition)
 {
-    std::vector<float> result;
-    return result;
+    const std::vector<float> cameraCartesian(mathGeneral::Spherical2Cartesian(cameraBasedPosition));
+
+    // Build the far measurement vector
+    Matrix cameraCoordCol(4,1);
+    cameraCoordCol[0][0] = cameraCartesian[0];
+    cameraCoordCol[1][0] = cameraCartesian[1];
+    cameraCoordCol[2][0] = cameraCartesian[2];
+    cameraCoordCol[3][0] = 1.0;
+
+    // Do the transform
+    Matrix resultMatrix = origin2SupportLegTransform * cameraCoordCol;
+
+    // Construct the result
+    std::vector<float> result(3,0.0f);
+    result[0] = resultMatrix[0][0];
+    result[1] = resultMatrix[1][0];
+    result[2] = resultMatrix[2][0];
+
+    return mathGeneral::Cartesian2Spherical(result);
 }
 
 std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
