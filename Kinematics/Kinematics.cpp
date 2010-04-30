@@ -214,7 +214,6 @@ double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double 
     nearCartCol[1][0] = nearDistance * xsin * ycos;
     nearCartCol[2][0] = nearDistance * ysin;
     nearCartCol[3][0] = 1.0;
-    debug << "nearCartCol:" << std::endl << nearCartCol << std::endl;
 
     // Build the far measurement vector
     Matrix farCartCol(4,1);
@@ -222,27 +221,16 @@ double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double 
     farCartCol[1][0] = farDistance * xsin * ycos;
     farCartCol[2][0] = farDistance * ysin;
     farCartCol[3][0] = 1.0;
-    debug << "farCartCol:" << std::endl << farCartCol << std::endl;
 
     // Caluculate The Transformed positions of both the near and far values.
     Matrix nearResult = Camera2GroundTransform * nearCartCol;
     Matrix farResult = Camera2GroundTransform * farCartCol;
-    debug << "close:" << std::endl << nearResult << std::endl;
-    debug << "far:" << std::endl << farResult << std::endl;
 
     // Interpolate between near and far values to find the point at which z = 0 (the ground)
     double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
     result[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
     result[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
     result[2] = 0.0;
-
-    debug << "point:" << std::endl;
-    for(int j=0; j<result.size(); j++)
-    {
-        debug<< "[ ";
-        debug << std::setw(12) << std::setprecision(4) << result[j];
-        debug << "]" << std::endl;
-    }
 
     // Convert back to polar coodinates.
     float x = result[0];
@@ -252,10 +240,8 @@ double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double 
     float bearing = atan2(y,x);
     float elevation = asin(z/(distance));
 
-    debug << "Distance: " << distance << std::endl;
-    debug << "Bearing: " << bearing << std::endl;
-    debug << "Elevation: " << elevation << std::endl;
-    return result[2];
+    //! TODO: Get the right thing to output, what do we want from this function??
+    return distance;
 }
 
 Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2CameraTransform)

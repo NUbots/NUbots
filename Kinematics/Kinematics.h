@@ -45,7 +45,6 @@ public:
         result[5] = joints[4];
         return result;
     };
-private:
     std::vector<EndEffector> m_endEffectors;
 };
 
