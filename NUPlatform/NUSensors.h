@@ -64,8 +64,8 @@ protected:
     void calculateFootForce();
     void calculateFootImpact();
     void calculateCoP();
-	void calculateSupportLeg();
-    
+
+    void calculateKinematics();
     void calculateOdometry();
     void calculateCameraHeight();
     

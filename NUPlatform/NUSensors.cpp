@@ -125,6 +125,7 @@ void NUSensors::calculateSoftSensors()
     if (m_data->JointAccelerations->IsValid == false || m_data->JointAccelerations->IsCalculated == true)
         calculateJointAcceleration();
     
+    calculateKinematics();
     calculateOrientation();
     calculateHorizon();
     calculateButtonTriggers();
@@ -544,46 +545,27 @@ void NUSensors::calculateOdometry()
     vector<float> leftFootPosition(3);
     vector<float> rightFootPosition(3);
     vector<float> odometeryData = m_data->Odometry->Data;
-    if(odometeryData.size() < 3) odometeryData.resize(3,0.0);
+    if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
     float hipYawPitch;
     m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
 
+    const int arrayWidth = 4;
+    const int translationCol = 3;
+
     // Get the left foot position relative to the origin
-    vector<float> leftLegJoints;
-    m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
-    Matrix leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
-    leftFootPosition[0] = leftLegTransform[0][3];
-    leftFootPosition[1] = leftLegTransform[1][3];
-    leftFootPosition[2] = leftLegTransform[2][3];
+    vector<float> leftFootTransform = m_data->LeftLegTransform->Data;
 
-    // Get the right foot position relative to the origin
-    vector<float> rightLegJoints;
-    m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
-    Matrix rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
-    rightFootPosition[0] = rightLegTransform[0][3];
-    rightFootPosition[1] = rightLegTransform[1][3];
-    rightFootPosition[2] = rightLegTransform[2][3];
+    leftFootPosition[0] = leftFootTransform[translationCol];
+    leftFootPosition[1] = leftFootTransform[translationCol+arrayWidth];
+    leftFootPosition[2] = leftFootTransform[translationCol+2*arrayWidth];
 
-/*    
-    // Get the left foots position in 3d space.
-    float leftHipPitch, leftHipRoll, leftKneePitch, leftAnkleRoll, leftAnklePitch;
-    m_data->getJointPosition(NUSensorsData::LHipPitch,leftHipPitch);
-    m_data->getJointPosition(NUSensorsData::LHipRoll,leftHipRoll);
-    m_data->getJointPosition(NUSensorsData::LKneePitch,leftKneePitch);
-    m_data->getJointPosition(NUSensorsData::LAnkleRoll,leftAnkleRoll);
-    m_data->getJointPosition(NUSensorsData::LAnklePitch,leftAnklePitch);
-    leftFootPosition = Kinematics::CalculateLeftFootPosition(hipYawPitch,leftHipRoll, leftHipPitch, leftKneePitch, leftAnklePitch, leftAnkleRoll);
+    // Get the right foot position
+    vector<float> rightFootTransform = m_data->RightLegTransform->Data;
+    rightFootPosition[0] = rightFootTransform[translationCol];
+    rightFootPosition[1] = rightFootTransform[translationCol+arrayWidth];
+    rightFootPosition[2] = rightFootTransform[translationCol+2*arrayWidth];
 
-    // Get the right foots position in 3d space.
-    float rightHipPitch, rightHipRoll, rightKneePitch, rightAnkleRoll, rightAnklePitch;
-    m_data->getJointPosition(NUSensorsData::RHipPitch,rightHipPitch);
-    m_data->getJointPosition(NUSensorsData::RHipRoll,rightHipRoll);
-    m_data->getJointPosition(NUSensorsData::RKneePitch,rightKneePitch);
-    m_data->getJointPosition(NUSensorsData::RAnkleRoll,rightAnkleRoll);
-    m_data->getJointPosition(NUSensorsData::RAnklePitch,rightAnklePitch);
-    rightFootPosition = Kinematics::CalculateRightFootPosition(hipYawPitch,rightHipRoll, rightHipPitch, rightKneePitch, rightAnklePitch, rightAnkleRoll);
-*/
     bool leftFootSupport = false;
     bool rightFootSupport = false;
 
@@ -634,14 +616,88 @@ void NUSensors::calculateOdometry()
     prevRightY = rightFootPosition[1];
 }
 
+void NUSensors::calculateKinematics()
+{
+    //! TODO: Need to get these values from somewhere else.
+    const bool leftLegSupport = true;
+    const bool rightLegSupport = true;
+    const int cameraNumber = 1;
+
+    vector<float> leftLegJoints;
+    bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
+    vector<float> rightLegJoints;
+    bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
+    vector<float> headJoints;
+    bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
+
+    Matrix rightLegTransform;
+    Matrix leftLegTransform;
+    Matrix bottomCameraTransform;
+    Matrix* supportLegTransform = 0;
+    Matrix* cameraTransform = 0;
+
+    // Calculate the transforms
+    if(rightLegJointsSuccess)
+    {
+        rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
+    }
+    if(leftLegJointsSuccess)
+    {
+        leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
+    }
+    if(headJointsSuccess)
+    {
+        bottomCameraTransform = m_kinematicModel->CalculateTransform(Kinematics::bottomCamera,headJoints);        
+    }
+
+    // Select the appropriate ones for further calculations.
+    // Choose camera.
+    if(headJointsSuccess && (cameraNumber == 1))
+    {
+        cameraTransform = &bottomCameraTransform;
+    }
+
+    // Choose support leg.
+    if((!leftLegSupport && rightLegSupport) && rightLegJointsSuccess)
+    {
+        supportLegTransform = &rightLegTransform;
+    }
+    else if((leftLegSupport && !rightLegSupport) && leftLegJointsSuccess)
+    {
+        supportLegTransform = &leftLegTransform;
+    }
+    else if((leftLegSupport && rightLegSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+    {
+        supportLegTransform = &leftLegTransform;
+    }
+    else
+    {
+        supportLegTransform = 0;
+    }
+
+    // Calculate transfrom matrix to convert camera centred coordinates to ground centred coordinates.
+    Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(*supportLegTransform, *cameraTransform);    
+
+    // Set all of the sensor values
+    double time = m_data->CurrentTime;
+    // Set the legs
+    m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
+    m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
+    m_data->SupportLegTransform->setData(time,supportLegTransform->asVector(),true);
+    // Set the cameras
+    m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
+    m_data->CameraToGroundTransform->setData(time, cameraToGroundTransform.asVector(), true);
+}
+
 void NUSensors::calculateCameraHeight()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCameraHeight()" << endl;
 #endif
-    //!< @todo Implement NUSensors::calculateCameraHeight
-    static vector<float> height(1, 46.0);       // at the moment the height is about 46cm.
-    m_data->CameraHeight->Data = height;
+    const int arrayLocation = 3 + 2*4; // collumn index is 3, number of collumns per row is 4.
+    float cameraHeight = m_data->CameraToGroundTransform->Data[arrayLocation];
+    m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraHeight));
+    cout << "CameraHeight = " << cameraHeight << endl;
 }
 
 
