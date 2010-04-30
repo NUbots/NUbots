@@ -283,8 +283,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             case ROBOTS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::red);
-                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::pink);
+                validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
@@ -295,7 +295,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::red_orange);
+                //validColours.push_back(ClassIndex::pink_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);

@@ -510,7 +510,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
                      (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
                      (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            ClassIndex::getColourIndexAsRGB(ClassIndex::pink,r,g,b);
             glColor3ub(r,g,b);
         }
 
@@ -553,7 +553,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
         else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::red,r,g,b);
+            ClassIndex::getColourIndexAsRGB(ClassIndex::pink,r,g,b);
             glColor3ub(r,g,b);
         }
         else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
