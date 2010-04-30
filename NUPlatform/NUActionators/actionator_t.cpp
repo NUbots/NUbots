@@ -112,8 +112,8 @@ bool actionator_t<T>::isEmpty()
 template <typename T>
 bool actionator_t<T>::comparePointTimes(const void* a, const void* b)
 {
-    static double timea = 0;
-    static double timeb = 0;
+    double timea = 0;
+    double timeb = 0;
     
     const typename actionator_t<T>::actionator_point_t* a_a = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (a);
     const typename actionator_t<T>::actionator_point_t* a_b = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (b);
