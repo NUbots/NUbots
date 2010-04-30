@@ -20,6 +20,7 @@ class QHBoxLayout;
 class QGridLayout;
 class QMdiSubWindow;
 class QPushButton;
+class QCheckBox;
 class QSignalMapper;
 class QToolButton;
 class QLineEdit;
@@ -117,6 +118,7 @@ private:
 
     QPushButton* StartSavingImagesButton;
     QPushButton* StopSavingImagesButton;
+    QCheckBox* StartSavingImagesWithSettingsCheckBox;
 
 
     int datasize;

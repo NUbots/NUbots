@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,30 +20,43 @@
  */
 
 #include "WalkParameters.h"
+#include "../Tools/MotionFileTools.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
+#include "nubotdataconfig.h"
 
 /*! @brief Construct a walk parameter set with no parameters
  */
 WalkParameters::WalkParameters()
 {
-    m_num_max_speeds = 0;      
-    m_num_max_accelerations = 0;  
-    m_num_parameters = 0;                      
-    m_num_arm_gains = 0;                       
-    m_num_torso_gains = 0;                     
+    m_name = "blank";
+    m_num_arm_gains = 0; 
+    m_num_torso_gains = 0;
+    m_num_leg_gains = 0;
+}
+
+/*! @brief Constructs a walk parameter set with only a name. Presumably the parameters will be set later using the set functions
+    @param name the name of this walk parameter set
+ */
+WalkParameters::WalkParameters(const string& name)
+{
+    m_name = name;
+    m_num_arm_gains = 0;
+    m_num_torso_gains = 0;
     m_num_leg_gains = 0;
 }
 
 /*! @brief Construct a walk parameter set with the given parameters
+    @param name the name of the walk parameter set
     @param armgains the gains: [first phase, second phase, third phase, etc] where each phase [shoulder roll, shouler pitch, shouler yaw, elbow roll, elbow pitch]
     @param torsogains the gains: [first phase, second phase, third phase, etc] where each phase [torso roll, torso pitch, torso yaw]
     @param leggains the gains: [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
-    @param parameters the walk engine parameters are stored as [first phase, second phase, etc] where each phase is a list of WalkParameter structs. However, only the walk engine knows the order they are saved in.
+    @param parameters the walk engine parameters
  */
-WalkParameters::WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds, const vector<float>& maxaccels)
+WalkParameters::WalkParameters(const string& name, const vector<float>& maxspeeds, const vector<float>& maxaccels, const vector<Parameter>& parameters, const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains)
 {
+    m_name = name;
     setMaxSpeeds(maxspeeds);
     setMaxAccelerations(maxaccels);
     setParameters(parameters);
@@ -64,52 +77,109 @@ WalkParameters::~WalkParameters()
     m_leg_gains.clear();
 }
 
-/*! @brief Gets the arm gains stored in this WalkParameter class
-    @param armgains the gains: [first phase, second phase, third phase, etc] where each phase [shoulder roll, shouler pitch, shouler yaw, elbow roll, elbow pitch]
+/*! @brief Returns the walk parameter set's name
+    @return the walk parameter name
  */
-void WalkParameters::getArmGains(vector<vector<float> >& armgains)
+string& WalkParameters::getName()
 {
-    armgains = m_arm_gains;
-}
-
-/*! @brief Gets the torso gains stored in this WalkParameter class
-    @param torsogains the gains: [first phase, second phase, third phase, etc] where each phase [torso roll, torso pitch, torso yaw]
- */
-void WalkParameters::getTorsoGains(vector<vector<float> >& torsogains)
-{
-    torsogains = m_torso_gains;
-}
-
-/*! @brief Gets the leg gains stored in this WalkParameter class
-    @param leggains the gains: [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
- */
-void WalkParameters::getLegGains(vector<vector<float> >& leggains)
-{
-    leggains = m_leg_gains;
-}
-
-/*! @brief Gets the walk engine parameters stored here
-    @param parameters the walk engine parameters are stored as [first phase, second phase, etc] where each phase is a list of WalkParameter structs. However, only the walk engine knows the order they are saved in.
- */
-void WalkParameters::getParameters(vector<vector<Parameter> >& parameters)
-{
-    parameters = m_parameters;
+    return m_name;
 }
 
 /*! @brief Gets the walk engine max speed values stored here
-    @param maxspeeds the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
+ @returns the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
  */
-void WalkParameters::getMaxSpeeds(vector<float>& maxspeeds)
+vector<float>& WalkParameters::getMaxSpeeds()
 {
-    maxspeeds = m_max_speeds;
+    return m_max_speeds;
 }
 
 /*! @brief Gets the walk engine max acceleration values stored here
-    @param maxaccels the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
+ @return the maximum accelerations as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
  */
-void WalkParameters::getMaxAccelerations(vector<float>& maxaccels)
+vector<float>& WalkParameters::getMaxAccelerations()
 {
-    maxaccels = m_max_accelerations;
+    return m_max_accelerations;
+}
+
+/*! @brief Gets the walk engine parameters stored here
+ @return the walk engine parameters stored in this object
+ */
+vector<WalkParameters::Parameter>& WalkParameters::getParameters()
+{
+    return m_parameters;
+}
+
+/*! @brief Gets the arm gains stored in this WalkParameter class
+    @return returns the armgains as: [first phase, second phase, third phase, etc] where each phase [shoulder roll, shouler pitch, shouler yaw, elbow roll, elbow pitch]
+ */
+vector<vector<float> >& WalkParameters::getArmGains()
+{
+    return m_arm_gains;
+}
+
+/*! @brief Gets the torso gains stored in this WalkParameter class
+    @return the torsogains as [first phase, second phase, third phase, etc] where each phase [torso roll, torso pitch, torso yaw]
+ */
+vector<vector<float> >& WalkParameters::getTorsoGains()
+{
+    return m_torso_gains;
+}
+
+/*! @brief Gets the leg gains stored in this WalkParameter class
+    @return the leggains as [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
+ */
+vector<vector<float> >& WalkParameters::getLegGains()
+{
+    return m_leg_gains;
+}
+
+/*! @brief Sets the walk parameter set's name
+    @param name the new name
+ */
+void WalkParameters::setName(const string& name)
+{
+    m_name = name;
+}
+
+/*! @brief Sets the walk engine max speeds stored here
+ @param maxspeeds the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
+ */
+void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
+{
+    vector<float> tempspeeds;
+    for (unsigned int i=0; i<maxspeeds.size(); i++)
+    {
+        if (maxspeeds[i] < 0)
+            tempspeeds.push_back(0);
+        else
+            tempspeeds.push_back(maxspeeds[i]);
+    }
+    m_max_speeds = tempspeeds;
+}
+
+/*! @brief Sets the walk engine max accelerations stored here
+ @param maxspeeds the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
+ */
+void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
+{
+    vector<float> tempaccels;
+    for (unsigned int i=0; i<maxaccels.size(); i++)
+    {
+        if (maxaccels[i] < 0)
+            tempaccels.push_back(0);
+        else
+            tempaccels.push_back(maxaccels[i]);
+    }
+    m_max_accelerations = tempaccels;
+}
+
+
+/*! @brief Sets the walk engine parameters stored here
+    @param parameters the walk engine parameters
+ */
+void WalkParameters::setParameters(const vector<Parameter>& parameters)
+{
+    m_parameters = parameters;
 }
 
 /*! @brief Sets the arm gains
@@ -117,11 +187,7 @@ void WalkParameters::getMaxAccelerations(vector<float>& maxaccels)
  */
 void WalkParameters::setArmGains(const vector<vector<float> >& armgains)
 {
-    m_arm_gains = armgains;
-    if (armgains.size() == 0)
-        m_num_arm_gains = 0;
-    else
-        m_num_arm_gains = armgains.size()*armgains[0].size();
+    setGains(m_arm_gains, m_num_arm_gains, armgains);
 }
 
 /*! @brief Sets the torso gains stored in this WalkParameter class
@@ -129,11 +195,7 @@ void WalkParameters::setArmGains(const vector<vector<float> >& armgains)
  */
 void WalkParameters::setTorsoGains(const vector<vector<float> >& torsogains)
 {
-    m_torso_gains = torsogains;
-    if (m_torso_gains.size() == 0)
-        m_num_torso_gains = 0;
-    else
-        m_num_torso_gains = m_torso_gains.size()*m_torso_gains[0].size();
+    setGains(m_torso_gains, m_num_torso_gains, torsogains);
 }
 
 /*! @brief Sets the leg gains stored in this WalkParameter class
@@ -141,41 +203,49 @@ void WalkParameters::setTorsoGains(const vector<vector<float> >& torsogains)
  */
 void WalkParameters::setLegGains(const vector<vector<float> >& leggains)
 {
-    m_leg_gains = leggains;
-    if (m_leg_gains.size() == 0)
-        m_num_leg_gains = 0;
+    setGains(m_leg_gains, m_num_torso_gains, leggains);
+}
+
+/*! @brief Sets the gains with the new gains being careful to clip to 0 and 100.
+    @param gains the data member to be updated
+    @param newgains the new gains to be saved to the class
+ */
+void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains)
+{
+    if (newgains.size() == 0)
+    {
+        gains = newgains;
+        numgains = 0;
+    }
     else
-        m_num_leg_gains = m_leg_gains.size()*m_leg_gains[0].size();
-}
-
-/*! @brief Sets the walk engine parameters stored here
-    @param parameters the walk engine parameters are stored as [first phase, second phase, etc] where each phase is a list of WalkParameter structs. However, only the walk engine knows the order they are saved in.
- */
-void WalkParameters::setParameters(const vector<vector<Parameter> >& parameters)
-{
-    m_parameters = parameters;
-    if (m_parameters.size() == 0)
-        m_num_parameters = 0;
-    else
-        m_num_parameters = m_parameters.size()*m_parameters[0].size();
-}
-
-/*! @brief Sets the walk engine max speeds stored here
-    @param maxspeeds the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
- */
-void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
-{
-    m_max_speeds = maxspeeds;
-    m_num_max_speeds = m_max_speeds.size();
-}
-
-/*! @brief Sets the walk engine max accelerations stored here
-    @param maxspeeds the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
- */
-void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
-{
-    m_max_accelerations = maxaccels;
-    m_num_max_accelerations = m_max_accelerations.size();
+    {
+        vector<vector<float> > tempgains;
+        // we need to make sure that the shape of the gains is rectangular (ie each row has the same length)
+        // so I pick the shortest row and use that length for all rows
+        unsigned int width = newgains[0].size();
+        for (unsigned int i=0; i<newgains.size(); i++)
+        {
+            if (newgains[i].size() < width)
+                width = newgains[i].size();
+        }
+        
+        // now copy and clip the gains to tempgains
+        for (unsigned int i=0; i<newgains.size(); i++)
+        {
+            tempgains.push_back(vector<float>());
+            for (unsigned int j=0; j<width; j++)
+            {
+                if (newgains[i][j] < 0)
+                    tempgains.back().push_back(0);
+                else if (newgains[i][j] > 100)
+                    tempgains.back().push_back(100);
+                else
+                    tempgains.back().push_back(newgains[i][j]);
+            }
+        }
+        gains = tempgains;
+        numgains = gains.size()*width;
+    }
 }
 
 /*! @brief Prints a human readable summary of the walk parameters
@@ -183,7 +253,7 @@ void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
  */
 void WalkParameters::summaryTo(ostream& output)
 {
-    output << "WalkParameters: ";
+    output << m_name << " WalkParameters: ";
     for (int i=0; i<size(); i++)
         output << (*this)[i] << " ";
     output << endl;
@@ -216,60 +286,25 @@ void WalkParameters::csvFrom(istream& input)
  */
 ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
 {
-    // m_num_max_speeds
-    output.write((char*) &p_walkparameters.m_num_max_speeds, sizeof(int));
-    // m_max_speeds
-    for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
-        output.write((char*) &p_walkparameters.m_max_speeds[i], sizeof(float));
-    // m_num_max_accelerations
-    output.write((char*) &p_walkparameters.m_num_max_accelerations, sizeof(int));
-    // m_max_accelerations
-    for (int i=0; i<p_walkparameters.m_num_max_accelerations; i++)
-        output.write((char*) &p_walkparameters.m_max_accelerations[i], sizeof(float));
-    // m_num_parameters, numperphase
-    output.write((char*) &p_walkparameters.m_num_parameters, sizeof(int));
-    if (p_walkparameters.m_num_parameters > 0)
-    {
-        int numperphase = p_walkparameters.m_parameters[0].size();
-        output.write((char*) &numperphase, sizeof(int));
-        // m_parameters
-        for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
-            for (int j=0; j<numperphase; j++)
-                output << p_walkparameters.m_parameters[i][j];
-    }
-    // m_num_arm_gains, numperphase
-    output.write((char*) &p_walkparameters.m_num_arm_gains, sizeof(int));
-    if (p_walkparameters.m_num_arm_gains > 0)
-    {
-        int numperphase = p_walkparameters.m_arm_gains[0].size();
-        output.write((char*) &numperphase, sizeof(int));
-        // m_arm_gains
-        for (int i=0; i<p_walkparameters.m_num_arm_gains/numperphase; i++)
-            for (int j=0; j<numperphase; j++)
-                output.write((char*) &p_walkparameters.m_arm_gains[i][j], sizeof(float));
-    }
-    // m_num_torso_gains, numperphase
-    output.write((char*) &p_walkparameters.m_num_torso_gains, sizeof(int));
-    if (p_walkparameters.m_num_torso_gains > 0)
-    {
-        int numperphase = p_walkparameters.m_torso_gains[0].size();
-        output.write((char*) &numperphase, sizeof(int));
-        // m_torso_gains
-        for (int i=0; i<p_walkparameters.m_num_torso_gains/numperphase; i++)
-            for (int j=0; j<numperphase; j++)
-                output.write((char*) &p_walkparameters.m_torso_gains[i][j], sizeof(float));
-    }
-    // m_num_leg_gains, numperphase
-    output.write((char*) &p_walkparameters.m_num_leg_gains, sizeof(int));
-    if (p_walkparameters.m_num_leg_gains > 0)
-    {
-        int numperphase = p_walkparameters.m_leg_gains[0].size();
-        output.write((char*) &numperphase, sizeof(int));
-        // m_leg_gains
-        for (int i=0; i<p_walkparameters.m_num_leg_gains/numperphase; i++)
-            for (int j=0; j<numperphase; j++)
-                output.write((char*) &p_walkparameters.m_leg_gains[i][j], sizeof(float));
-    }
+    output << p_walkparameters.m_name << endl;
+    output << "Max Speeds (x cm/s, y cm/s, yaw rad/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_speeds) << endl;
+    output << "Max Accelerations (x cm/s/s, y cm/s/s, yaw rad/s/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_accelerations) << endl;
+    
+    for (unsigned int i=0; i<p_walkparameters.m_parameters.size(); i++)
+        output << p_walkparameters.m_parameters[i] << endl;
+
+    output << "ArmGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_arm_gains) << endl;
+    output << "TorsoGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_torso_gains) << endl;
+    output << "LegGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_leg_gains) << endl;
+
+    return output;
+}
+
+/*! @brief Saves the entire contents of the WalkParameters class in the stream
+ */
+ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters)
+{
+    output << (*p_walkparameters);
     return output;
 }
 
@@ -277,115 +312,91 @@ ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
  */
 istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 {
-    int intBuffer;
-    float floatBuffer;
-    // m_num_max_speeds
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_max_speeds = intBuffer;
-    // m_max_speeds
-    p_walkparameters.m_max_speeds.resize(p_walkparameters.m_num_max_speeds, 0);
-    for (int i=0; i<p_walkparameters.m_num_max_speeds; i++)
+    input >> p_walkparameters.m_name;
+    p_walkparameters.m_max_speeds = MotionFileTools::toFloatVector(input);
+    p_walkparameters.m_max_accelerations = MotionFileTools::toFloatVector(input);
+    
+    WalkParameters::Parameter p;
+    p_walkparameters.m_parameters.clear();
+    
+    int beforepeek = input.tellg();
+    string label;
+    input >> label;
+    while (label.find("ArmGains") == string::npos && label.find("TorsoGains") == string::npos && label.find("LegGains") == string::npos)
     {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        p_walkparameters.m_max_speeds[i] = floatBuffer;
-    }
-    // m_num_max_accelerations
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_max_accelerations = intBuffer;
-    // m_max_accelerations
-    p_walkparameters.m_max_accelerations.resize(p_walkparameters.m_num_max_accelerations, 0);
-    for (int i=0; i<p_walkparameters.m_num_max_accelerations; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        p_walkparameters.m_max_accelerations[i] = floatBuffer;
+        input.seekg(beforepeek);
+        input >> p;
+        p_walkparameters.m_parameters.push_back(p);
+        beforepeek = input.tellg();
+        input >> label;
     }
     
-    // m_num_parameters, numperphase
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_parameters = intBuffer;
-    if (p_walkparameters.m_num_parameters > 0)
+    while (!input.eof())
     {
-        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-        int numperphase = intBuffer;
-        p_walkparameters.m_parameters.resize(p_walkparameters.m_num_parameters/numperphase);
-        // m_parameters
-        for (int i=0; i<p_walkparameters.m_num_parameters/numperphase; i++)
+        if (label.find("ArmGains") != string::npos)
         {
-            p_walkparameters.m_parameters[i].resize(numperphase);
-            for (int j=0; j<numperphase; j++)
-                input >> p_walkparameters.m_parameters[i][j];
+            p_walkparameters.m_arm_gains = MotionFileTools::toFloatMatrix(input);
+            p_walkparameters.m_num_arm_gains = MotionFileTools::size(p_walkparameters.m_arm_gains);
         }
-    }
-    else
-        p_walkparameters.m_parameters.clear();
-    
-    // m_num_arm_gains, numperphase
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_arm_gains = intBuffer;
-    if (p_walkparameters.m_num_arm_gains > 0)
-    {
-        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-        int numperphase = intBuffer;
-        p_walkparameters.m_arm_gains.resize(p_walkparameters.m_num_arm_gains/numperphase);
-        // m_arm_gains
-        for (int i=0; i<p_walkparameters.m_num_arm_gains/numperphase; i++)
+        else if (label.find("TorsoGains") != string::npos)
         {
-            p_walkparameters.m_arm_gains[i].resize(numperphase);
-            for (int j=0; j<numperphase; j++)
-            {
-                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-                p_walkparameters.m_arm_gains[i][j] = floatBuffer;
-            }
+            p_walkparameters.m_torso_gains = MotionFileTools::toFloatMatrix(input);
+            p_walkparameters.m_num_torso_gains = MotionFileTools::size(p_walkparameters.m_torso_gains);
         }
-    }
-    else
-        p_walkparameters.m_arm_gains.clear();
-    
-    // m_num_torso_gains, numperphase
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_torso_gains = intBuffer;
-    if (p_walkparameters.m_num_torso_gains > 0)
-    {
-        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-        int numperphase = intBuffer;
-        p_walkparameters.m_torso_gains.resize(p_walkparameters.m_num_torso_gains/numperphase);
-        // m_torso_gains
-        for (int i=0; i<p_walkparameters.m_num_torso_gains/numperphase; i++)
+        else if (label.find("LegGains") != string::npos)
         {
-            p_walkparameters.m_torso_gains[i].resize(numperphase);
-            for (int j=0; j<numperphase; j++)
-            {
-                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-                p_walkparameters.m_torso_gains[i][j] = floatBuffer;
-            }
+            p_walkparameters.m_leg_gains = MotionFileTools::toFloatMatrix(input);
+            p_walkparameters.m_num_leg_gains = MotionFileTools::size(p_walkparameters.m_leg_gains);
         }
+        input >> label;
     }
-    else
-        p_walkparameters.m_torso_gains.clear();
-    
-    // m_num_leg_gains, numperphase
-    input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-    p_walkparameters.m_num_leg_gains = intBuffer;
-    if (p_walkparameters.m_num_leg_gains > 0)
-    {
-        input.read(reinterpret_cast<char*>(&intBuffer), sizeof(int));
-        int numperphase = intBuffer;
-        p_walkparameters.m_leg_gains.resize(p_walkparameters.m_num_leg_gains/numperphase);
-        // m_leg_gains
-        for (int i=0; i<p_walkparameters.m_num_leg_gains/numperphase; i++)
-        {
-            p_walkparameters.m_leg_gains[i].resize(numperphase);
-            for (int j=0; j<numperphase; j++)
-            {
-                input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-                p_walkparameters.m_leg_gains[i][j] = floatBuffer;
-            }
-        }
-    }
-    else
-        p_walkparameters.m_leg_gains.clear();
-    
+        
     return input;
+}
+
+/*! @brief Loads the entire contents of the WalkParameters class from the stream
+ */
+istream& operator>> (istream& input, WalkParameters* p_walkparameters)
+{
+    input >> (*p_walkparameters);
+    return input;
+}
+
+/*! @brief Saves the walk parameters to a file
+ */
+void WalkParameters::save()
+{
+    saveAs(m_name);
+}
+
+/*! @brief Saves the walk parameters to a new file given by the name
+    @param name the new file will be name.cfg
+ */
+void WalkParameters::saveAs(const string& name)
+{
+    ofstream file((CONFIG_DIR + string("Motion/Walks/") + name + ".cfg").c_str());
+    if (file.is_open())
+    {
+        file << this;
+        file.close();
+    }
+    else
+        debug << "WalkParameters::save(): Failed to open file " << name + ".cfg" << endl;
+}
+
+/*! @brief Loads the walk parameters from a file
+    @param name the name of the file to load from
+ */
+void WalkParameters::load(const string& name)
+{
+    ifstream file((CONFIG_DIR + string("Motion/Walks/") + name + ".cfg").c_str());
+    if (file.is_open())
+    {
+        file >> this;
+        file.close();
+    }
+    else
+        debug << "WalkParameters::load(): Failed to load file " << name + ".cfg" << endl;
 }
 
 /*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
@@ -397,23 +408,24 @@ float& WalkParameters::operator[] (const int index)
     // Furthermore, that I only want to optimise the speed in the forward direction (for now)
     static int nummaxspeedsused = 1;
     static int nummaxaccelsused = 1;
-    if (m_num_max_speeds == 0)
+    if (m_max_speeds.size() == 0)
         nummaxspeedsused = 0;
     else
         nummaxspeedsused = 1;
-    if (m_num_max_accelerations == 0)
+    if (m_max_accelerations.size() == 0)
         nummaxaccelsused = 0;
     else
         nummaxaccelsused = 1;
     
+    int numwalkparameters = m_parameters.size();
     if (index < nummaxspeedsused)
         return m_max_speeds[index];
     else if (index < nummaxspeedsused + nummaxaccelsused)
         return m_max_accelerations[index - nummaxspeedsused];
-    else if (index < m_num_parameters + nummaxspeedsused + nummaxaccelsused)
-        return m_parameters[(index - nummaxspeedsused - nummaxaccelsused)/m_parameters[0].size()][(index - nummaxspeedsused - nummaxaccelsused)%m_parameters[0].size()].Value;
-    else if (index < m_num_parameters + nummaxspeedsused + nummaxaccelsused + m_num_leg_gains)
-        return m_leg_gains[(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - m_num_parameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
+    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused)
+        return m_parameters[index - nummaxspeedsused - nummaxaccelsused].Value;
+    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused + m_num_leg_gains)
+        return m_leg_gains[(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
     else
         return m_max_speeds[0];
 }
@@ -424,14 +436,14 @@ int WalkParameters::size() const
 {
     static int nummaxspeedsused = 1;
     static int nummaxaccelsused = 1;
-    if (m_num_max_speeds == 0)
+    if (m_max_speeds.size() == 0)
         nummaxspeedsused = 0;
     else
         nummaxspeedsused = 1;
-    if (m_num_max_accelerations == 0)
+    if (m_max_accelerations.size() == 0)
         nummaxaccelsused = 0;
     else
         nummaxaccelsused = 1;
 
-    return m_num_parameters + m_num_leg_gains + nummaxspeedsused + nummaxaccelsused;
+    return m_parameters.size() + m_num_leg_gains + nummaxspeedsused + nummaxaccelsused;
 }

@@ -144,7 +144,7 @@ void NUSensors::calculateJointVelocity()
     {
         for (unsigned i=0; i<m_data->JointPositions->Data.size(); i++)
         {
-            jointvelocities[i] = (m_data->JointPositions->Data[i] - previousjointpositions[i])/(m_current_time - m_previous_time);
+            jointvelocities[i] = 1000*(m_data->JointPositions->Data[i] - previousjointpositions[i])/(m_current_time - m_previous_time);
         }
     }
     m_data->JointVelocities->setData(m_current_time, jointvelocities, true);
@@ -162,7 +162,7 @@ void NUSensors::calculateJointAcceleration()
     {
         for (unsigned i=0; i<m_data->JointVelocities->Data.size(); i++)
         {
-            jointaccelerations[i] = (m_data->JointVelocities->Data[i] - previousjointvelocities[i])/(m_current_time - m_previous_time);
+            jointaccelerations[i] = 1000*(m_data->JointVelocities->Data[i] - previousjointvelocities[i])/(m_current_time - m_previous_time);
         }
     }
     m_data->JointAccelerations->setData(m_current_time, jointaccelerations, true);
@@ -620,7 +620,7 @@ void NUSensors::calculateCameraHeight()
 #endif
     //!< @todo Implement NUSensors::calculateCameraHeight
     static vector<float> height(1, 46.0);       // at the moment the height is about 46cm.
-    m_data->CameraHeight->Data = height;
+    m_data->CameraHeight->setData(m_data->CurrentTime, height);
 }
 
 

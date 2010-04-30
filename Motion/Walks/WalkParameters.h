@@ -33,7 +33,9 @@
 #define WALKPARAMETERS_H
 
 #include <vector>
+#include <string>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 class WalkParameters
@@ -43,80 +45,113 @@ public:
     {
     public:
         Parameter() {Value = 0; Min = 0; Max = 0;}
-        Parameter(float value, float min, float max) {Value = value; Min = min; Max = max;}
+        Parameter(float value, float min, float max) {Name = "Noname"; Description = "None"; Value = value; Min = min; Max = max;}
+        Parameter(string name, float value, float min, float max) {Name = name; Description = "None"; Value = value; Min = min; Max = max;}
+        Parameter(string name, float value, float min, float max, string desc) {Name = name; Description = desc; Value = value; Min = min; Max = max;}
         ~Parameter() {}
+        
+        string Name;
         float Value;
         float Min;
         float Max;
+        string Description;
+        void setName(const string& name) {Name = name;};
+        void setValue(float value)
+        {
+            if (value < Min) Value = Min;
+            else if (value > Max) Value = Max;
+            else Value = Max;
+        };
+        void setDescription(const string& desc) {Description = desc;};
         
         void summaryTo(ostream& output) {output << Value;}
         void csvTo(ostream& output) {output << Value << ", ";}
         
         friend ostream& operator<< (ostream& output, const Parameter& p) 
         {   
-            output.write((char*) &p.Value, sizeof(float)); 
-            output.write((char*) &p.Min, sizeof(float)); 
-            output.write((char*) &p.Max, sizeof(float));
+            output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
             return output;
         }
         friend istream& operator>> (istream& input, Parameter& p)
         {
-            float floatBuffer;
-            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
-            p.Value = floatBuffer;
-            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
-            p.Min = floatBuffer;
-            input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
-            p.Max = floatBuffer;
+            input >> p.Name;
+            if (p.Name[p.Name.size() - 1] == ':')
+                p.Name.resize(p.Name.size() - 1);
+            
+            input >> p.Value;
+            input.ignore(10, '[');
+            // we need to enclose the min and max in square brackets
+            input >> p.Min;
+            input.ignore(10, ',');
+            input >> p.Max;
+            input.ignore(10, ']');
+            
+            // read in the rest of the line and call it the description
+            char charbuffer[500];
+            input.getline(charbuffer, 500);
+            p.Description = string(charbuffer);
+
             return input;
         };
     };
 public:
     WalkParameters();
-    WalkParameters(const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains, const vector<vector<Parameter> >& parameters, const vector<float>& maxspeeds, const vector<float>& maxaccels);
+    WalkParameters(const string& name);
+    WalkParameters(const string& name, const vector<float>& maxspeeds, const vector<float>& maxaccels, const vector<Parameter>& parameters, const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains);
     ~WalkParameters();
     
     // get methods
-    void getArmGains(vector<vector<float> >& armgains);
-    void getTorsoGains(vector<vector<float> >& torsogains);
-    void getLegGains(vector<vector<float> >& leggains);
-    void getParameters(vector<vector<Parameter> >& parameters);
-    void getMaxSpeeds(vector<float>& maxspeeds);
-    void getMaxAccelerations(vector<float>& maxaccels);
+    string& getName();
+    vector<float>& getMaxSpeeds();
+    vector<float>& getMaxAccelerations();
+    vector<WalkParameters::Parameter>& getParameters();
+    vector<vector<float> >& getArmGains();
+    vector<vector<float> >& getTorsoGains();
+    vector<vector<float> >& getLegGains();
     
     // set methods
+    void setName(const string& name);
+    void setMaxSpeeds(const vector<float>& maxspeeds);
+    void setMaxAccelerations(const vector<float>& maxaccels);
+    void setParameters(const vector<Parameter>& parameters);
     void setArmGains(const vector<vector<float> >& armgains);
     void setTorsoGains(const vector<vector<float> >& torsogains);
     void setLegGains(const vector<vector<float> >& leggains);
-    void setParameters(const vector<vector<Parameter> >& parameters);
-    void setMaxSpeeds(const vector<float>& maxspeeds);
-    void setMaxAccelerations(const vector<float>& maxaccels);
     
+    // display methods
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
     void csvFrom(istream& input);
     
+    // serialisation
     friend ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters);
+    friend ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters);
     friend istream& operator>> (istream& input, WalkParameters& p_walkparameters);
+    friend istream& operator>> (istream& input, WalkParameters* p_walkparameters);
     
+    void save();
+    void saveAs(const string& name);
+    void load(const string& name);
+    
+    // operator overloading
     float& operator[] (const int index);
     int size() const;
-protected:
 private:
+    void setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains);
 public:
 private:
+    string m_name;                             //!< the name of the walk parameter set
     vector<float> m_max_speeds;                //!< stores the maximum speeds (x,y,theta) allowed by the walk engine
-    int m_num_max_speeds;                      //!< stores the number of speed directions in m_max_speeds
     vector<float> m_max_accelerations;         //!< stores the maximum accelerations (x,y,theta) allowed by the walk engine
-    int m_num_max_accelerations;               //!< stores the number of acceleration directions in m_max_accelerations
-    vector<vector<Parameter> > m_parameters;   //!< stores the parameters for the walk engine
-    int m_num_parameters;                      //!< stores the total number of parameters for the walk engine
+    
+    vector<Parameter> m_parameters;            //!< stores the parameters for the walk engine
+    
     vector<vector<float> > m_arm_gains;        //!< stores the arm gains for a walk
-    int m_num_arm_gains;                       //!< stores the total number of arm gains for the walk
+    unsigned int m_num_arm_gains;              //!< stores the total number of arm gains
     vector<vector<float> > m_torso_gains;      //!< stores the torso gains for a walk
-    int m_num_torso_gains;                     //!< stores the total number of torso gains for the walk
+    unsigned int m_num_torso_gains;            //!< stores the total number of torso gains
     vector<vector<float> > m_leg_gains;        //!< stores the leg gains for a walk
-    int m_num_leg_gains;
+    unsigned int m_num_leg_gains;              //!< stores the total number of leg gains
 };
 
 #endif

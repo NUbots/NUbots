@@ -60,8 +60,8 @@ class TeamInformation;
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     class SeeThinkThread;
 #endif
-
 class SenseMoveThread;
+class WatchDogThread;
 
 /*! @brief The top-level class
  */
@@ -121,6 +121,9 @@ private:
     #if defined(TARGET_IS_NAO)
         friend class NUNAO;
     #endif
+    
+    friend class WatchDogThread;
+    WatchDogThread* m_watchdog_thread;
 };
 
 #endif

@@ -1,9 +1,13 @@
-/*! @file PanHeadJob.h
-    @brief Declaration of PanHeadJob class.
+/*! @file HeadPanJob.h
+    @brief Declaration of HeadPanJob class.
  
-    @class PanHeadJob
-    @brief A class to encapsulate jobs issued for the head module. This particular job pans the head 
-           left and right at the given centre to the given limits
+    @class HeadPanJob
+    @brief A class to encapsulate pan jobs issued for the head module. 
+ 
+    There are three types of pans:
+        - Ball --- a pan to just look for the ball
+        - BallAndLocalisation --- a pan to both look for the ball and to passively localise
+        - Localisation -- a pan just for localisation
  
     @author Jason Kulk
  
@@ -30,26 +34,31 @@
 #include <vector>
 using namespace std;
 
-class PanHeadJob : public MotionJob
+class HeadPanJob : public MotionJob
 {
 public:
-    PanHeadJob(double period, const vector<float>& centre, const vector<float>& limits);
-    PanHeadJob(double time, istream& input);
-    ~PanHeadJob();
+    enum head_pan_t
+    {
+        Ball,
+        BallAndLocalisation,
+        Localisation
+    };
+public:
+    HeadPanJob(head_pan_t pantype);
+    HeadPanJob(istream& input);
+    ~HeadPanJob();
     
-    void setPan(double period, const vector<float>& centre, const vector<float>& limits);
-    void getPan(double& period, vector<float>& centre, vector<float>& limits);
+    head_pan_t getPanType();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const PanHeadJob& job);
-    friend ostream& operator<<(ostream& output, const PanHeadJob* job);
+    friend ostream& operator<<(ostream& output, const HeadPanJob& job);
+    friend ostream& operator<<(ostream& output, const HeadPanJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    vector<float> m_centre_position;                 //!< the centre position [yaw (rad), pitch (rad), roll (rad)]
-    vector<float> m_limit_positions;                 //!< the limit positions for the pan [lower (rad), upper(rad)]
+    head_pan_t m_pan_type;
 };
 
 #endif

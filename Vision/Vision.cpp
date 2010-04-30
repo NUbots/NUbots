@@ -41,9 +41,10 @@ Vision::Vision()
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
-    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
+    isSavingImagesWithVaryingSettings = false;
+    numSavedImages = 0;
     ImageFrameNumber = 0;
     return;
 }
@@ -112,25 +113,21 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
             {
                 if(job->saving() == true)
                 {
-                    
-                    currentSettings = m_camera->getSettings();
+                    if (!imagefile.is_open())
+                        imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
-                {
-                    
-                    m_camera->setSettings(currentSettings);
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
-                }
-                isSavingImages = job->saving();
             }
+            isSavingImages = job->saving();
+            isSavingImagesWithVaryingSettings = job->varyCameraSettings();
             it = jobs->removeVisionJob(it);
-         }
+        }
         else 
         {
             ++it;
         }
-
     }
 }
 
@@ -371,39 +368,43 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
-    //std::stringstream buffer;
-    //buffer << *currentImage;
-    NUimage buffer;
-    buffer.cloneExisting(*currentImage);
-    imagefile << buffer;
-
-    //Set NextCameraSetting:
-    CameraSettings tempCameraSettings = m_camera->getSettings();
-    if(ImageFrameNumber % 6 == 0 )
+    if (imagefile.is_open() and numSavedImages < 2500)
     {
-        tempCameraSettings.exposure = 100;
+        NUimage buffer;
+        buffer.cloneExisting(*currentImage);
+        imagefile << buffer;
+        numSavedImages++;
+        
+        if (isSavingImagesWithVaryingSettings)
+        {
+            CameraSettings tempCameraSettings = m_camera->getSettings();
+            if (numSavedImages % 6 == 0 )
+            {
+                tempCameraSettings.exposure = 100;
+            }
+            else if (numSavedImages % 6 == 1 )
+            {
+                tempCameraSettings.exposure = 150;
+            }
+            else if (numSavedImages % 6 == 2 )
+            {
+                tempCameraSettings.exposure = 200;
+            }
+            else if (numSavedImages % 6 == 3 )
+            {
+                tempCameraSettings.exposure = 250;
+            }
+            else if (numSavedImages % 6 == 4 )
+            {
+                tempCameraSettings.exposure = 300;
+            }
+            else if (numSavedImages % 6 == 5 )
+            {
+                tempCameraSettings.exposure = 400;
+            }
+            m_camera->setSettings(tempCameraSettings);
+        }
     }
-    else if(ImageFrameNumber % 6 == 1 )
-    {
-        tempCameraSettings.exposure = 150;
-    }
-    else if( ImageFrameNumber % 6 == 2 )
-    {
-        tempCameraSettings.exposure = 200;
-    }
-    else if( ImageFrameNumber % 6 == 3 )
-    {
-        tempCameraSettings.exposure = 250;
-    }
-    else if( ImageFrameNumber % 6 == 4 )
-    {
-        tempCameraSettings.exposure = 300;
-    }
-    else if( ImageFrameNumber % 6 == 5 )
-    {
-        tempCameraSettings.exposure = 400;
-    }
-    m_camera->setSettings(tempCameraSettings);
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
@@ -417,10 +418,11 @@ void Vision::setLUT(unsigned char* newLUT)
 
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
-    debug << fileName << endl;
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
-    setLUT(LUTBuffer);
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        setLUT(LUTBuffer);
+    else
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
 void Vision::setImage(const NUimage* newImage)

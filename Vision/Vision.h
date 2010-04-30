@@ -53,6 +53,8 @@ class Vision
 
     //! SavingImages:
     bool isSavingImages;
+    bool isSavingImagesWithVaryingSettings;
+    int numSavedImages;
     ofstream imagefile;
     int ImageFrameNumber;
     CameraSettings currentSettings;

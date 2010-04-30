@@ -43,8 +43,10 @@ string NUSounds::NUBOT8 = string("nubot8.wav");
 string NUSounds::NUBOT9 = string("nubot9.wav");
 string NUSounds::NUBOT10 = string("nubot10.wav");
 string NUSounds::MY_IP_IS = string("my_ip_is.wav");
+
 string NUSounds::SEG_FAULT = string("seg_fault.wav");
 string NUSounds::UNHANDLED_EXCEPTION = string("unhandled_exception.wav");
+string NUSounds::LOW_BATTERY = string("low_battery.wav");
 
 string NUSounds::START_SAVING_IMAGES = string("start_saving_images.wav");
 string NUSounds::STOP_SAVING_IMAGES = string("stop_saving_images.wav");
