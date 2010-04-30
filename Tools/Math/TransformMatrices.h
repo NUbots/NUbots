@@ -1,3 +1,6 @@
+#ifndef TRANSFORM_MATRICIES_H
+#define TRANSFORM_MATRICIES_H
+
 #include "Matrix.h"
 
 namespace TransformMatrices
@@ -19,3 +22,4 @@ Matrix ModifiedDH(double alpha, double a, double theta, double d);
 Matrix ModifiedDH(const DHParameters& paramteters, double theta);
 }
 
+#endif // TRANSFORM_MATRICIES_H
