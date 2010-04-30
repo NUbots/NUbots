@@ -94,7 +94,9 @@ HEADERS += ui_mainwindow.h \
     bonjour/bonjourservicebrowser.h \
     bonjour/bonjourrecord.h \
     ../Kinematics/Link.h \
-    ../Kinematics/EndEffector.h
+    ../Kinematics/EndEffector.h \
+    ../NUPlatform/NUSensors.h \
+    ../NUPlatform/NUSensors/NUSensorsData.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
