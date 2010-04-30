@@ -27,7 +27,7 @@
 #include "Kinematics/Kinematics.h"
 #include <math.h>
 #include <boost/circular_buffer.hpp>
-
+#include "Kinematics/Kinematics.h"
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -42,6 +42,8 @@ NUSensors::NUSensors()
     m_current_time = nusystem->getTime();
     m_previous_time = 0;
     m_data = new NUSensorsData();
+	m_kinematicModel = new Kinematics();
+	m_kinematicModel->LoadModel("None");
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -55,6 +57,8 @@ NUSensors::~NUSensors()
 #endif
     if (m_data != NULL)
         delete m_data;
+	delete m_kinematicModel;
+	m_kinematicModel = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -537,14 +541,31 @@ void NUSensors::calculateOdometry()
     static float prevLeftY = 0.0;
     static float prevRightY = 0.0;
 
-    vector<float> leftFootPosition;
-    vector<float> rightFootPosition;
+    vector<float> leftFootPosition(3);
+    vector<float> rightFootPosition(3);
     vector<float> odometeryData = m_data->Odometry->Data;
     if(odometeryData.size() < 3) odometeryData.resize(3,0.0);
 
     float hipYawPitch;
     m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
-    
+
+    // Get the left foot position relative to the origin
+    vector<float> leftLegJoints;
+    m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
+    Matrix leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
+    leftFootPosition[0] = leftLegTransform[0][3];
+    leftFootPosition[1] = leftLegTransform[1][3];
+    leftFootPosition[2] = leftLegTransform[2][3];
+
+    // Get the right foot position relative to the origin
+    vector<float> rightLegJoints;
+    m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
+    Matrix rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
+    rightFootPosition[0] = rightLegTransform[0][3];
+    rightFootPosition[1] = rightLegTransform[1][3];
+    rightFootPosition[2] = rightLegTransform[2][3];
+
+/*    
     // Get the left foots position in 3d space.
     float leftHipPitch, leftHipRoll, leftKneePitch, leftAnkleRoll, leftAnklePitch;
     m_data->getJointPosition(NUSensorsData::LHipPitch,leftHipPitch);
@@ -562,7 +583,7 @@ void NUSensors::calculateOdometry()
     m_data->getJointPosition(NUSensorsData::RAnkleRoll,rightAnkleRoll);
     m_data->getJointPosition(NUSensorsData::RAnklePitch,rightAnklePitch);
     rightFootPosition = Kinematics::CalculateRightFootPosition(hipYawPitch,rightHipRoll, rightHipPitch, rightKneePitch, rightAnklePitch, rightAnkleRoll);
-
+*/
     bool leftFootSupport = false;
     bool rightFootSupport = false;
 
