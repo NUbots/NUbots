@@ -50,7 +50,7 @@ NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 #endif
     
     m_image = new NUimage(m_width, m_height, false);
-    m_yuyv_buffer = new Pixel[m_totalpixels];
+    m_yuyv_buffer = new Pixel[m_totalpixels*2];
 }
 
 /*! @brief Destory the NAOWebotsCamera
@@ -62,6 +62,10 @@ NAOWebotsCamera::~NAOWebotsCamera()
         m_camera->disable();
         delete m_camera;
     }
+    if (m_image != NULL)
+        delete m_image;
+    if (m_yuyv_buffer != NULL)
+        delete m_yuyv_buffer;
 }
 
 /*! @brief Returns a pointer to a new image.
@@ -71,6 +75,7 @@ NAOWebotsCamera::~NAOWebotsCamera()
 NUimage* NAOWebotsCamera::grabNewImage()
 {
     const unsigned char* rgb_image = m_camera->getImage();              // grab the image from webots
+    Pixel buffer[m_totalpixels];
     
     unsigned char y, u, v;
     int j,k;
@@ -78,13 +83,19 @@ NUimage* NAOWebotsCamera::grabNewImage()
     {
         j = 3*i;
         ColorModelConversions::fromRGBToYCbCr(rgb_image[j], rgb_image[j + 1], rgb_image[j + 2], y, u, v);
-        // each rgb maps to a yuyv, which in Pixel.h is defined to be a single pixel ;)
-        m_yuyv_buffer[i].yCbCrPadding = y;
-        m_yuyv_buffer[i].cb = u;
-        m_yuyv_buffer[i].y = y;
-        m_yuyv_buffer[i].cr = v;
+        buffer[i].yCbCrPadding = y;
+        buffer[i].cb = u;
+        buffer[i].y = y;
+        buffer[i].cr = v;
     }
-
+    
+    // By the definitions in NUimage the above is actually 160x60 (even though it is actually 160x120)
+    // So I need to copy every line to double the height to 240, making the image 160x240.
+    for(int i=0; i<m_height; i++)
+    {
+        memcpy(&m_yuyv_buffer[2*i*m_width], &buffer[i*m_width], sizeof(buffer[i*m_width])*m_width);
+        memcpy(&m_yuyv_buffer[(2*i+1)*m_width], &buffer[i*m_width], sizeof(buffer[i*m_width])*m_width);
+    }
     m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
     
     return m_image;

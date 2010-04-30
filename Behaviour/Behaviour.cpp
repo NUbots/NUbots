@@ -72,12 +72,11 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
             float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
             vector<float> walkVector(3, 0);
-            if (balldistance > 30)
-                walkVector[0] = maxspeed;
-            else
-                walkVector[0] = maxspeed*(balldistance/30);
-            if (fabs(ballbearing) > 0.05)
-                walkVector[2] = 2*walkVector[0]*sin(ballbearing)/balldistance;
+            
+            walkVector[0] = 10*cos(ballbearing);
+            walkVector[1] = 2*sin(ballbearing);
+            walkVector[2] = ballbearing/3.0;
+            
             WalkJob* walk = new WalkJob(walkVector);
             jobs.addMotionJob(walk);
             //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
@@ -138,49 +137,8 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
 
 void Behaviour::Pan(JobList& jobs)
 {
-    static double lastpantime = 0;
-    if (nusystem->getTime() - lastpantime > 3200)
-    {
-        lastpantime = nusystem->getTime();
-        vector<double> times(8, 0);
-        vector<vector<float> > positions(8, vector<float> (2,0));
-        times[0] = nusystem->getTime() + 100;
-        positions[0][0] = 0.43;
-        positions[0][1] = 0.81;
-        
-        times[1] = nusystem->getTime() + 500;
-        positions[1][0] = 0.43;
-        positions[1][1] = -0.81;
-        
-        times[2] = nusystem->getTime() + 700;
-        positions[2][0] = 0.06;
-        positions[2][1] = -0.81;
-        
-        times[3] = nusystem->getTime() + 1200;
-        positions[3][0] = 0.06;
-        positions[3][1] = 0.81;
-        
-        times[4] = nusystem->getTime() + 1400;
-        positions[4][0] = -0.27;
-        positions[4][1] = 0.81;
-        
-        times[5] = nusystem->getTime() + 1600;
-        positions[5][0] = -0.50;
-        positions[5][1] = 1.3;
-        
-        times[6] = nusystem->getTime() + 3000;
-        positions[6][0] = -0.50;
-        positions[6][1] = -1.3;
-        
-        times[7] = nusystem->getTime() + 3200;
-        positions[7][0] = 0;
-        positions[7][1] = 0;
-        
-        HeadJob* head = new HeadJob(times, positions);
-
-        jobs.addMotionJob(head);
-    }
- 
-  return;
+    HeadPanJob* head = new HeadPanJob(HeadPanJob::Ball);
+    jobs.addMotionJob(head);
+    return;
 }
 

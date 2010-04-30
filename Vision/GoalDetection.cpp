@@ -5,6 +5,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "Tools/Math/General.h"
+//#include <QDebug>
 using namespace mathGeneral;
 
 
@@ -29,11 +30,11 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 	{
             if(!isObjectAPossibleGoal(*it))
             {
-                //qDebug() << "Erasing FO_CANDIDATE";
+                //debug << "Erasing FO_CANDIDATE";
                 it = FO_Candidates.erase(it);
                 continue;
             }
-            //qDebug() << "Crash Check: Before Extend with Horizontal Segments Detection:";
+            //debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
             ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
             ++it;
         }
@@ -143,7 +144,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 
             AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
 
-            //qDebug() << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
+            //debug << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
             ++it;
             //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
 
@@ -175,11 +176,11 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     int Colour = PossibleGoal->getColour();
     int min = TopLeft.x;
     int max = BottomRight.x;
-    int margin = 16;
+    int margin = 16*1.5;
     if((int)horizontalSegments.size() ==0 && (int)FO_AboveHorizonCandidates.size() ==0) return;
 
     vector < ObjectCandidate > ::iterator itAboveHorizon;
-    debug << "AboveHoriCands:" << endl;
+    //debug << "AboveHoriCands:" << endl;
     for (itAboveHorizon = FO_AboveHorizonCandidates.begin(); itAboveHorizon < FO_AboveHorizonCandidates.end(); )
     {
         if( itAboveHorizon->getTopLeft().x > TopLeft.x - margin &&
@@ -205,9 +206,9 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
             PossibleGoal->setTopLeft(TopLeft);
             PossibleGoal->setBottomRight(BottomRight);
             itAboveHorizon = FO_AboveHorizonCandidates.erase(itAboveHorizon);
-            debug << "OverLapping: Join Cand " << endl;
+            //debug << "OverLapping: Join Cand " << endl;
             //usedAbovehorizonCandidate[i] = true;
-            //qDebug() <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
+            //debug <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
         }
         else
         {
@@ -219,7 +220,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     std::vector<TransitionSegment>::reverse_iterator revIt = horizontalSegments.rbegin();
     for (; revIt != horizontalSegments.rend(); ++revIt)
     {
-        //qDebug() << "Crash Check: Access HZsegs: " << i;
+        //debug << "Crash Check: Access HZsegs: " << i;
         TransitionSegment tempSegment = *revIt;
         //! If     Candidate colour is a blue varient and Segment colour is a blue varient OR
         //!        Candidate colour is a yellow varient and Segment colour is a yellow varient
@@ -233,7 +234,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
         {
             if(tempSegment.getStartPoint().x > min-margin && tempSegment.getEndPoint().x < max+margin)
             {
-                //qDebug() << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
+                //debug << "Found Segment at " << tempSegment.getStartPoint().x << "," << tempSegment.getStartPoint().y;
                 if(tempSegment.getStartPoint().y < PossibleGoal->getTopLeft().y)
                 {
                     Vector2<int> tempPoint;
@@ -280,21 +281,21 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     SegEnd.x = BottomRight.x;
     SegEnd.y = y;
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleGoal->getColour(),ClassIndex::unclassified);
-    //qDebug() << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
+    //debug << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
     ScanLine tempLine;
 
     int spacings = 8;
     int direction = ClassifiedSection::RIGHT;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
-    //qDebug() << "segments found: " << tempLine->getNumberOfSegments();
+    //debug << "segments found: " << tempLine->getNumberOfSegments();
     //! Debug Output for small scans:
     int min = PossibleGoal->getTopLeft().y;
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
         TransitionSegment* tempSegment = tempLine.getSegment(i);
-        //qDebug() << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
-        //qDebug() << "segments (end): " << tempSeg->getEndPoint().x << "," << tempSeg->getEndPoint().y;
+        //debug << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
+        //debug << "segments (end): " << tempSeg->getEndPoint().x << "," << tempSeg->getEndPoint().y;
         if(tempSegment->getStartPoint().y < min)
         {
             min = tempSegment->getStartPoint().y;
@@ -304,7 +305,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     tempTopLeft.x = PossibleGoal->getTopLeft().x;
     tempTopLeft.y = min;
     PossibleGoal->setTopLeft(tempTopLeft);
-    //qDebug() << "Extending Top Of Goal: " << tempTopLeft.x << "," << tempTopLeft.y;
+    //debug << "Extending Top Of Goal: " << tempTopLeft.x << "," << tempTopLeft.y;
     return;
 
 }
@@ -350,7 +351,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                //qDebug() << "Found: Overlapping TopLeft Goal";
+                //debug << "Found: Overlapping TopLeft Goal";
             }
             //! CHECK INSIDE Object BOTTOMRIGHT is within outside Object
             else if ((  it->getTopLeft().x - boarder     <= itInside->getBottomRight().x     &&
@@ -383,7 +384,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                //qDebug() << "Found: Overlapping BottomRight Goal";
+                //debug << "Found: Overlapping BottomRight Goal";
             }
             //! CHECK OUTSIDE Object TOPLEFT is within inside Object
             else if((    itInside->getTopLeft().x-boarder      <= it->getTopLeft().x     &&
@@ -416,7 +417,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                //qDebug() << "Found: Overlapping TopLeft Goal OutSide";
+                //debug << "Found: Overlapping TopLeft Goal OutSide";
             }
             //! CHECK OUTSIDE Object BOTTOMRIGHT is within inside Object
             else if ((  itInside->getTopLeft().x - boarder     <= it->getBottomRight().x     &&
@@ -449,7 +450,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 it->setBottomRight(tempBottomRight);
                 FO_Candidates.erase(itInside);
                 itInside = FO_Candidates.begin();
-                //qDebug() << "Found: Overlapping BottomRight Goal OutSide";
+                //debug << "Found: Overlapping BottomRight Goal OutSide";
             }
         }
     }
@@ -473,7 +474,7 @@ void GoalDetection::CheckCandidateRatio(std::vector< ObjectCandidate >& FO_Candi
 
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
-    //qDebug() << "Checking Ratio: " << PossibleBall.aspect();
+    //debug << "Checking Ratio: " << PossibleBall.aspect();
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
     int boarder = 5; //! Boarder of pixels
@@ -492,13 +493,13 @@ bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,
         }
         else
         {
-            //qDebug() << "Thrown out due to incorrect ratio";
+            //debug << "Thrown out due to incorrect ratio";
             return false;
         }
     }
     else
     {
-        //qDebug() << "Returned True at edge of screen";
+        //debug << "Returned True at edge of screen";
         return true;
     }
 }
@@ -515,7 +516,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
     {\
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
-        //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
+        //debug << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
         //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
 
         int j = i+1;
@@ -544,7 +545,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         }
 
     }
-    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
+    //debug << "Number Of MidPoints: " <<(int) midpoints.size();
     if(midpoints.size() < 3 )
     {
         float FinalDistance;
@@ -594,9 +595,11 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
         rightWidth = rightWidth + DistanceLineToPoint(midPointLine, point);
     }
     rightWidth = rightWidth / (float)rightPoints.size();
-    //debug << "Distance from centre of Line to Right Points: " << rightWidth << endl;
+    //debug<<  "Distance from centre of Line to Right Points: " << rightWidth << endl;
     float totalwidth = rightWidth + leftWidth;
+    //debug << "Total MidPoint Width:" << totalwidth;
     distance = 80* vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((totalwidth)*8); //GOAL_HEIGHT * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+    //debug << "MidPoints Distance:" << distance;
     return distance;
 }
 
@@ -612,14 +615,14 @@ void GoalDetection::SortObjectCandidates(std::vector<ObjectCandidate>& FO_Candid
 {
     /*for(unsigned int i = 0; i < FO_Candidates.size(); i++)
     {
-        qDebug() << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
+        debug << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
     }*/
 
     std::sort(FO_Candidates.begin(), FO_Candidates.end(), ObjectCandidateSizeSortPredicate);
 
     /*for(unsigned int i = 0; i < FO_Candidates.size(); i++)
     {
-        qDebug() << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
+        debug << i <<":" << FO_Candidates[i].width()*FO_Candidates[i].height();
     }*/
     return;
 }

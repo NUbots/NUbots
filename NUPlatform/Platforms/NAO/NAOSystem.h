@@ -34,6 +34,17 @@ class NAOSystem : public NUSystem
 public:
     NAOSystem();
     ~NAOSystem();
+    
+    // battery functions
+    void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
+    void voiceLowBattery(NUActionatorsData* actions);
+    // watchdog functions
+    void displayVisionFrameDrop(NUActionatorsData* actions);
+    void displayGamePacketReceived(NUActionatorsData* actions);
+    void displayTeamPacketReceived(NUActionatorsData* actions);
+    
+private:
+    double m_battery_state_previous_time;          //!< the previous time displayBatteryState was called
 };
 
 #endif

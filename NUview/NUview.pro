@@ -116,6 +116,7 @@ SOURCES += mainwindow.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     NUviewIO/NUviewIO.cpp \

@@ -41,7 +41,6 @@ Vision::Vision()
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
-    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     ImageFrameNumber = 0;
@@ -114,6 +113,8 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                 {
                     
                     currentSettings = m_camera->getSettings();
+                    if (!imagefile.is_open())
+                        imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
@@ -375,7 +376,10 @@ void Vision::SaveAnImage()
     //buffer << *currentImage;
     NUimage buffer;
     buffer.cloneExisting(*currentImage);
-    imagefile << buffer;
+    if (imagefile.is_open())
+        imagefile << buffer;
+    else
+        debug << "Vision::SaveAnImage() Unable to saving images. Probably because the directory does not exist" << endl;
 
     //Set NextCameraSetting:
     CameraSettings tempCameraSettings = m_camera->getSettings();
@@ -417,10 +421,11 @@ void Vision::setLUT(unsigned char* newLUT)
 
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
-    debug << fileName << endl;
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
-    setLUT(LUTBuffer);
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        setLUT(LUTBuffer);
+    else
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
 void Vision::setImage(const NUimage* newImage)
@@ -752,7 +757,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 2;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
     for (int i = 0; i < bufferSize; i++)
     {
@@ -814,7 +819,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     continue;
                 }
 
-                while( ( checkIfBufferSame(colourBuff) && currentColour == afterColour) )
+                while( (currentColour == afterColour) )
                 {
 
                     if(direction == ClassifiedSection::DOWN)
@@ -1590,8 +1595,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 nextSegCounter--;
                 continue;
             }
-            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing/2
-               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing/2)
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing)
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
@@ -1622,8 +1627,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
             {
                 break;
             }
-            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/4
-               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/4)
+            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/2)
             {
                 if (horizontalsegments[j].getStartPoint().x < Xstart)
                 {
@@ -1644,7 +1649,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         }
         //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
         //Create Object Candidate if greater then the minimum number of segments
-        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/4)
+        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
 
