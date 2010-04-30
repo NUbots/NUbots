@@ -43,6 +43,8 @@ Vision::Vision()
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
+    isSavingImagesWithVaryingSettings = false;
+    numSavedImages = 0;
     ImageFrameNumber = 0;
     return;
 }
@@ -111,27 +113,21 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
             {
                 if(job->saving() == true)
                 {
-                    
-                    currentSettings = m_camera->getSettings();
                     if (!imagefile.is_open())
                         imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
-                {
-                    
-                    m_camera->setSettings(currentSettings);
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
-                }
-                isSavingImages = job->saving();
             }
+            isSavingImages = job->saving();
+            isSavingImagesWithVaryingSettings = job->varyCameraSettings();
             it = jobs->removeVisionJob(it);
-         }
+        }
         else 
         {
             ++it;
         }
-
     }
 }
 
@@ -372,42 +368,43 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
-    //std::stringstream buffer;
-    //buffer << *currentImage;
-    NUimage buffer;
-    buffer.cloneExisting(*currentImage);
-    if (imagefile.is_open())
+    if (imagefile.is_open() and numSavedImages < 2500)
+    {
+        NUimage buffer;
+        buffer.cloneExisting(*currentImage);
         imagefile << buffer;
-    else
-        debug << "Vision::SaveAnImage() Unable to saving images. Probably because the directory does not exist" << endl;
-
-    //Set NextCameraSetting:
-    CameraSettings tempCameraSettings = m_camera->getSettings();
-    if(ImageFrameNumber % 6 == 0 )
-    {
-        tempCameraSettings.exposure = 100;
+        numSavedImages++;
+        
+        if (isSavingImagesWithVaryingSettings)
+        {
+            CameraSettings tempCameraSettings = m_camera->getSettings();
+            if (numSavedImages % 6 == 0 )
+            {
+                tempCameraSettings.exposure = 100;
+            }
+            else if (numSavedImages % 6 == 1 )
+            {
+                tempCameraSettings.exposure = 150;
+            }
+            else if (numSavedImages % 6 == 2 )
+            {
+                tempCameraSettings.exposure = 200;
+            }
+            else if (numSavedImages % 6 == 3 )
+            {
+                tempCameraSettings.exposure = 250;
+            }
+            else if (numSavedImages % 6 == 4 )
+            {
+                tempCameraSettings.exposure = 300;
+            }
+            else if (numSavedImages % 6 == 5 )
+            {
+                tempCameraSettings.exposure = 400;
+            }
+            m_camera->setSettings(tempCameraSettings);
+        }
     }
-    else if(ImageFrameNumber % 6 == 1 )
-    {
-        tempCameraSettings.exposure = 150;
-    }
-    else if( ImageFrameNumber % 6 == 2 )
-    {
-        tempCameraSettings.exposure = 200;
-    }
-    else if( ImageFrameNumber % 6 == 3 )
-    {
-        tempCameraSettings.exposure = 250;
-    }
-    else if( ImageFrameNumber % 6 == 4 )
-    {
-        tempCameraSettings.exposure = 300;
-    }
-    else if( ImageFrameNumber % 6 == 5 )
-    {
-        tempCameraSettings.exposure = 400;
-    }
-    m_camera->setSettings(tempCameraSettings);
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
