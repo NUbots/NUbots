@@ -26,6 +26,7 @@
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
+#include "nubotconfig.h"
 
 #include <errno.h>
 
@@ -57,6 +58,8 @@ void WatchDogThread::periodicFunction()
 {
     cout << "WatchDog: " << nusystem->getRealTime() << endl;
     nusystem->displayBatteryState(m_nubot->SensorData, m_nubot->Actions);
-    if (m_nubot->m_vision->getNumFramesDropped() > 0)
-        nusystem->displayVisionFrameDrop(m_nubot->Actions);
+    #ifdef USE_VISION
+        if (m_nubot->m_vision->getNumFramesDropped() > 0)
+            nusystem->displayVisionFrameDrop(m_nubot->Actions);
+    #endif
 }
