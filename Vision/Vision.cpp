@@ -27,6 +27,7 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUPlatform/NUSystem.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -46,6 +47,7 @@ Vision::Vision()
     isSavingImagesWithVaryingSettings = false;
     numSavedImages = 0;
     ImageFrameNumber = 0;
+    numFramesDropped = 0;
     return;
 }
 
@@ -142,6 +144,9 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         return AllFieldObjects;
     m_sensor_data = data;
     m_actions = actions;
+    if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
+        numFramesDropped++;
+        
     setImage(image);
     AllFieldObjects->preProcess(image->m_timestamp);
 
@@ -359,7 +364,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             }
         }
     #endif
-
     return AllFieldObjects;
 }
 
@@ -1761,3 +1765,14 @@ double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
     double FOVx = deg2rad(45.0f); //Taken from Old Globals
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
+
+/*! @brief Returns the number of frames dropped since the last call to this function
+    @return the number of frames dropped
+ */
+int Vision::getNumFramesDropped()
+{
+    int framesdropped = numFramesDropped;
+    numFramesDropped = 0;
+    return framesdropped;
+}
+

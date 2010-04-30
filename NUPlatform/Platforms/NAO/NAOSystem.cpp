@@ -58,14 +58,16 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     if (battery.size() > 0)
         charge = battery[0];
     
+    vector<float> ledoff(3,0);
+    vector<float> ledon(3,1);
     // calculate the number of lights to turn on in the ears based on the battery charge
     int numleds = actions->getNumberOfLeds(NUActionatorsData::LeftEarLeds);
-    vector<vector<float> > leds(numleds, vector<float>(3,0));
+    m_ear_leds = vector<vector<float> >(numleds, ledoff);
     int numon = (int) (charge*numleds + 0.5);
     for (int i=0; i<numon; i++)
-        leds[i] = vector<float> (3, 1.0);
-    actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime, leds);
-    actions->addLeds(NUActionatorsData::RightEarLeds, currenttime, leds);
+        m_ear_leds[i] = ledon;
+    actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime, m_ear_leds);
+    actions->addLeds(NUActionatorsData::RightEarLeds, currenttime, m_ear_leds);
     
     float current = 0;
     if (battery.size() > 1)
@@ -79,8 +81,8 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
         {
             for (int i=numon; i<numleds; i++)
             {
-                vector<vector<float> > chargeleds = leds;
-                chargeleds[i] = vector<float> (3, 1.0);
+                vector<vector<float> > chargeleds = m_ear_leds;
+                chargeleds[i] = ledon;
                 actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
                 actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
             }
@@ -95,7 +97,7 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
         {
             for (int i=0; i<numon; i++)
             {
-                vector<vector<float> > chargeleds = leds;
+                vector<vector<float> > chargeleds = m_ear_leds;
                 chargeleds[(numon-1) - i] = vector<float> (3, 0.0);
                 actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
                 actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
@@ -123,7 +125,28 @@ void NAOSystem::voiceLowBattery(NUActionatorsData* actions)
  */
 void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
 {
-    // by default there is no way to display such information!
+    vector<float> ledoff(3,0);
+    vector<float> ledon(3,1);
+    vector<vector<float> > dropleds;
+    
+    for (unsigned int i=0; i<m_ear_leds.size(); i++)
+    {
+        if (m_ear_leds[i][0] < 0.5)
+            dropleds.push_back(ledon);
+        else
+            dropleds.push_back(ledoff);
+    }
+    
+    actions->addLeds(NUActionatorsData::LeftEarLeds, nusystem->getTime() + 100, dropleds);
+    actions->addLeds(NUActionatorsData::RightEarLeds, nusystem->getTime() + 100, dropleds);
+    //voiceFrameDrop(actions);
+}
+
+/*! @brief Voices that a frame has been dropped
+ */
+void NAOSystem::voiceFrameDrop(NUActionatorsData* actions)
+{
+    actions->addSound(0, "error1.wav");
 }
 
 
