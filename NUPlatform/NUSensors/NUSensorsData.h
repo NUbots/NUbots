@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <string>
+#include "Tools/Math/Matrix.h"
 using namespace std;
 
 class NUSensorsData
@@ -117,6 +118,12 @@ public:
     bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
     // Get methods for soft proprioception
+    bool getLeftLegTransform(Matrix& value);
+    bool getRightLegTransform(Matrix& value);
+    bool getSupportLegTransform(Matrix& value);
+    bool getCameraTransform(Matrix& value);
+    bool getCameraToGroundTransform(Matrix& value);
+
     bool getOdometry(float& time, vector<float>& values);
     bool getCameraHeight(float& height);
     
