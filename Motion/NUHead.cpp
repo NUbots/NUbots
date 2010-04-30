@@ -146,8 +146,8 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
  */
 void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch)
 {
-    minpitch = std::min((float) (atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
-    maxpitch = std::max((float) (atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
+    minpitch = std::min(static_cast<float>(atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
+    maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
 }
 
 void NUHead::calculatePan()
@@ -159,6 +159,43 @@ void NUHead::calculatePan()
         calculateBallAndLocalisationPan();
     else if (m_pan_type == HeadPanJob::Localisation)
         calculateLocalisationPan();
+}
+
+void NUHead::calculateBallPan()
+{
+    calculateGenericPan(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, m_pan_ball_speed);
+}
+
+void NUHead::calculateBallAndLocalisationPan()
+{
+    calculateGenericPan(m_BALL_SIZE, 1e10, min(m_pan_ball_speed, m_pan_localisation_speed));
+}
+
+void NUHead::calculateLocalisationPan()
+{
+    calculateGenericPan(120, 1e10, m_pan_localisation_speed);
+}
+
+void NUHead::calculateGenericPan(float mindistance, float maxdistance, float panspeed)
+{
+    float minpitch, maxpitch;
+    calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
+    
+    vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
+    vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
+    vector<double> times = calculatePanTimes(scan_points, panspeed);
+    
+    
+    for (unsigned int i=0; i<times.size(); i++)
+    {
+        cout << times[i] - times[0] << " " << MotionFileTools::fromVector(scan_points[i]) << endl;
+    }
+    moveTo(times, scan_points);
+    
+    if (times.size() > 0)
+        m_move_end_time = times[times.size() -1];
+    else
+        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Gets relevant sensor data from the NUSensorsData; sets m_camera_height, m_body_pitch, and m_sensor_pitch, m_sensor_yaw
@@ -179,20 +216,6 @@ void NUHead::getSensorValues()
     
     m_data->getJointPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
     m_data->getJointPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
-}
-
-void NUHead::calculateBallPan()
-{
-    float minpitch, maxpitch;
-    calculateMinAndMaxPitch(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, minpitch, maxpitch);
-    
-    vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
-    vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
-    vector<double> times = calculatePanTimes(scan_points);
-    
-    moveTo(times, scan_points);
-    
-    m_move_end_time = times[times.size() -1];
 }
 
 /*! @brief Calculates evenly spaced pitch values to pan at based on the camera field of view
@@ -282,10 +305,9 @@ void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector
 
 /*! @brief Calculates the pan times based on the distance to the top of the scan line on the field
  */
-vector<double> NUHead::calculatePanTimes(vector<vector<float> > points)
+vector<double> NUHead::calculatePanTimes(vector<vector<float> > points, float panspeed)
 {
     vector<double> times;
-    float panspeed = 1000;
     
     float distance, yawspeed, yawtime, pitchtime;
     if (points.size() > 0)
@@ -298,8 +320,13 @@ vector<double> NUHead::calculatePanTimes(vector<vector<float> > points)
     }
     for (unsigned int i=1; i<points.size(); i++)
     {
-        distance = m_camera_height/tan(points[i][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
-        yawspeed = min(panspeed/distance, m_max_speeds[1]);
+        if (i+1 < points.size()-1 and getPanLimitIndex(points[i][0]) != getPanLimitIndex(points[i+1][0]))       // hack to move at max speed when changing pan limits
+            yawspeed = m_max_speeds[1];
+        else
+        {
+            distance = m_camera_height/tan(points[i][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
+            yawspeed = min(panspeed/distance, m_max_speeds[1]);
+        }
         yawtime = fabs(points[i][1] - points[i-1][1])/yawspeed;
         pitchtime = fabs(points[i][0] - points[i-1][0])/m_max_speeds[0];
         times.push_back(1000*max(yawtime, pitchtime) + times[i-1]);
@@ -335,14 +362,6 @@ bool NUHead::panYawLimitsChange(float pitch_a, float pitch_b)
         return true;
     else
         return false;
-}
-
-void NUHead::calculateBallAndLocalisationPan()
-{
-}
-
-void NUHead::calculateLocalisationPan()
-{
 }
 
 void NUHead::calculateNod()
@@ -416,6 +435,8 @@ void NUHead::loadPanConfig()
         errorlog << "NUHead::loadPanConfig(). Unable to open head pan configuration file" << endl;
     else
     {
+        m_pan_ball_speed = MotionFileTools::toFloat(file);
+        m_pan_localisation_speed = MotionFileTools::toFloat(file);
         float value;
         vector<float> range;
         while (!file.eof())

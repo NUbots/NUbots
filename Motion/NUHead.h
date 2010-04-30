@@ -48,17 +48,18 @@ private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
     
-    void getSensorValues();
-    void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     void calculatePan();
     void calculateBallPan();
     void calculateBallAndLocalisationPan();
     void calculateLocalisationPan();
+    void calculateGenericPan(float mindistance, float maxdistance, float panspeed);
     
+    void getSensorValues();
+    void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     vector<float> calculatePanLevels(float minpitch, float maxpitch);
     vector<vector<float> > calculatePanPoints(vector<float> levels);
     void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
-    vector<double> calculatePanTimes(vector<vector<float> > points);
+    vector<double> calculatePanTimes(vector<vector<float> > points, float panspeed);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
     
@@ -66,6 +67,7 @@ private:
     void calculateBallNod();
     void calculateBallAndLocalisationNod();
     void calculateLocalisationNod();
+    void calculateGenericNod(float mindistance, float maxdistance, float nodspeed);
     
     void load();
     void loadConfig();
@@ -87,8 +89,8 @@ private:
     
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
-    float m_ball_pan_speed;                     //!< the speed of pans looking for the ball (Loaded from HeadPan.cfg)
-    float m_localisation_pan_speed;             //!< the speed of pans looking for field objects that aren't the ball (Loaded from HeadPan.cfg)
+    float m_pan_ball_speed;                     //!< the speed of pans looking for the ball (Loaded from HeadPan.cfg)
+    float m_pan_localisation_speed;             //!< the speed of pans looking for field objects that aren't the ball (Loaded from HeadPan.cfg)
     vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits (Loaded from HeadPan.cfg)
     vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (Loaded from HeadPan.cfg)
     
