@@ -697,7 +697,6 @@ void NUSensors::calculateCameraHeight()
     const int arrayLocation = 3 + 2*4; // collumn index is 3, number of collumns per row is 4.
     float cameraHeight = m_data->CameraToGroundTransform->Data[arrayLocation];
     m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraHeight));
-    cout << "CameraHeight = " << cameraHeight << endl;
 }
 
 
