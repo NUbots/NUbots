@@ -23,6 +23,7 @@
 #include "NUPlatform/NUSystem.h"
 #include "debug.h"
 #include "debugverbositythreading.h"
+#include <unistd.h>
     
 #include <time.h>
 #ifdef __USE_POSIX199309                // Check if clock_nanosleep is avaliable
@@ -64,7 +65,6 @@ void PeriodicThread::sleepThread()
         debug << "PeriodicThread::sleep() " << m_name << " the thread took too long to complete: no time to sleep." << endl;
     else
         NUSystem::msleep(requiredsleeptime);
-    
     m_start_time = nusystem->getTime();
 }
 

@@ -27,6 +27,12 @@
 #include "debugverbositynusystem.h"
 #include "targetconfig.h"
 
+#include <unistd.h>
+#ifdef TARGET_OS_IS_WINDOWS
+	#include <objbase.h>
+	#include <windows.h>
+#endif
+
 using namespace std;
 
 NUSystem* nusystem;
@@ -215,7 +221,6 @@ void NUSystem::msleep(double milliseconds)
         else
         {
             #ifdef TARGET_OS_IS_WINDOWS
-            #include <windows.h>
                 Sleep(milliseconds);
             #else
                 sleep(milliseconds/1e3);
