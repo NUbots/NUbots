@@ -19,6 +19,10 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
+#include "Kinematics/Kinematics.h"
+#include "Tools/Math/General.h"
+#include "Tools/Math/TransformMatrices.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -458,6 +462,7 @@ void MainWindow::shrinkToNativeAspectRatio()
 
 void MainWindow::BonjourTest()
 {
+    /*
     robotSelectDialog test(this, "_nuview._tcp");
     if(test.exec())
     {
@@ -474,6 +479,25 @@ void MainWindow::BonjourTest()
     {
         qDebug() << "Cancelled" << endl;
     }
+    */
+    Kinematics test;
+    test.LoadModel("test");
+    std::vector<float> testLegData(6,0.0f);
+    std::vector<float> testHeadData(2,0.0f);
+
+//    testData[3] = mathGeneral::PI/2;
+    Matrix legTransform = test.CalculateTransform(Kinematics::leftFoot, testLegData);
+    debug << "leg:" << std::endl << legTransform << std::endl;
+
+    Matrix cameraTransform = test.CalculateTransform(Kinematics::bottomCamera, testHeadData);
+    debug << "camera:" << std::endl <<cameraTransform << std::endl;
+
+    Matrix Camera2GroundTransform = Kinematics::CalculateCamera2GroundTransform(legTransform, cameraTransform);
+    //Matrix Camera2GroundTransform = TransformMatrices::Translation(legTransform[0][3],legTransform[1][3],0)* InverseMatrix(legTransform) * cameraTransform;
+    debug << "Camera2GroundTransform:" << std::endl << Camera2GroundTransform << std::endl;
+    double distance = Kinematics::DistanceToPoint(Camera2GroundTransform, 0,0);
+
+    //debug << test.m_endEffectors[2].Name() << endl << test.m_endEffectors[2].CalculateTransform(testData) << endl;
 }
 
 void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)

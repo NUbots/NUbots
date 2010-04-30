@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
+#include "Kinematics/Kinematics.h"
 
 #include <errno.h>
 
@@ -43,6 +44,8 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
     m_nubot = nubot;
+	m_kinematicModel = new Kinematics();
+	m_kinematicModel->LoadModel("None");
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -50,6 +53,8 @@ SeeThinkThread::~SeeThinkThread()
     #if DEBUG_VERBOSITY > 0
         debug << "SeeThinkThread::~SeeThinkThread()" << endl;
     #endif
+	delete m_kinematicModel;
+	m_kinematicModel = 0;
 }
 
 /*! @brief The sense->move main loop
@@ -128,6 +133,36 @@ void SeeThinkThread::run()
 		
             #endif
             
+				std::vector<float> headPos, lLegPos, rLegPos;
+
+				Matrix bottomCam, topCam, lLeg, rLeg, origin;
+				if(m_nubot->SensorData->getJointPositions(NUSensorsData::HeadJoints, headPos))
+				{
+					headPos = Kinematics::ReOrderKneckJoints(headPos);
+					bottomCam = m_kinematicModel->m_endEffectors[0].CalculateTransform(headPos);
+					topCam = m_kinematicModel->m_endEffectors[1].CalculateTransform(headPos);
+					cout << m_kinematicModel->m_endEffectors[0].Name() << endl << bottomCam;
+					cout << m_kinematicModel->m_endEffectors[1].Name() << endl << topCam;
+				}
+				if(m_nubot->SensorData->getJointPositions(NUSensorsData::LeftLegJoints, lLegPos))
+				{
+					lLegPos = Kinematics::ReOrderLegJoints(lLegPos);
+					lLeg = m_kinematicModel->m_endEffectors[2].CalculateTransform(lLegPos);
+					cout << m_kinematicModel->m_endEffectors[2].Name() << endl << lLeg;
+					origin = InverseMatrix(lLeg);
+					cout << m_kinematicModel->m_endEffectors[2].Name() << " Inverse" << endl << origin;
+
+					cout << "Total Bottom Camera" << endl << origin * bottomCam << endl;
+					cout << "Transform Pos Matrix" << endl << InverseMatrix(bottomCam) * lLeg<< endl;
+				}
+				if(m_nubot->SensorData->getJointPositions(NUSensorsData::RightLegJoints, rLegPos))
+				{
+					rLegPos = Kinematics::ReOrderLegJoints(rLegPos);
+					rLeg = m_kinematicModel->m_endEffectors[3].CalculateTransform(rLegPos);
+					cout << m_kinematicModel->m_endEffectors[3].Name() << endl << rLeg;
+				}
+
+
             #ifdef USE_LOCALISATION
                 //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #endif
