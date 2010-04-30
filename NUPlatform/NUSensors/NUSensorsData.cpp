@@ -68,6 +68,14 @@ NUSensorsData::NUSensorsData()
     addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
     addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
     addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+
+    // Kinematic sensors
+    addSoftSensor(LeftLegTransform, string("LeftLegTransform"), sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM);
+    addSoftSensor(RightLegTransform, string("RightLegTransform"), sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM);
+    addSoftSensor(SupportLegTransform, string("SupportLegTransform"), sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM);
+    addSoftSensor(CameraTransform, string("CameraTransform"), sensor_t::KINEMATICS_CAMERA_TRANSFORM);
+    addSoftSensor(CameraToGroundTransform, string("CameraToGroundTransform"), sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM);
+
     addSoftSensor(Odometry, string("Odometry"), sensor_t::JOINT_ODOMETRY);
     addSoftSensor(CameraHeight, string("CameraHeight"), sensor_t::JOINT_CAMERAHEIGHT);
     
