@@ -26,7 +26,6 @@
 #define SEETHINK_THREAD_H
 
 #include "Tools/Threading/ConditionalThread.h"
-#include "Kinematics/Kinematics.h"
 
 class NUbot;
 
@@ -42,7 +41,6 @@ protected:
     
 private:
     NUbot* m_nubot;
-	Kinematics *m_kinematicModel;
 };
 
 #endif
