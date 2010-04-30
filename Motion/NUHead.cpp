@@ -147,7 +147,7 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
 void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch)
 {
     minpitch = std::min((float) (atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
-    maxpitch = std::max((float) (m_camera_height/maxdistance - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
+    maxpitch = std::max((float) (atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
 }
 
 void NUHead::calculatePan()
@@ -232,7 +232,8 @@ vector<vector<float> > NUHead::calculatePanPoints(vector<float> levels)
     vector<vector<float> > points;
     bool onleft = m_sensor_yaw >= 0;
     
-    generateScan(levels[0], m_sensor_pitch, onleft, points);
+    if (levels.size() > 0)
+        generateScan(levels[0], m_sensor_pitch, onleft, points);
     for (unsigned int i=1; i<levels.size(); i++)
         generateScan(levels[i], levels[i-1], onleft, points);
 
@@ -286,12 +287,15 @@ vector<double> NUHead::calculatePanTimes(vector<vector<float> > points)
     vector<double> times;
     float panspeed = 1000;
     
-    float distance = m_camera_height/tan(points[0][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
-    float yawspeed = min(panspeed/distance, m_max_speeds[1]);
-    float yawtime = fabs(points[0][1] - m_sensor_yaw)/yawspeed;
-    float pitchtime = fabs(points[0][0] - m_sensor_pitch)/m_max_speeds[0];
-    
-    times.push_back(1000*max(yawtime, pitchtime) + m_data->CurrentTime);
+    float distance, yawspeed, yawtime, pitchtime;
+    if (points.size() > 0)
+    {
+        distance = m_camera_height/tan(points[0][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
+        yawspeed = min(panspeed/distance, m_max_speeds[1]);
+        yawtime = fabs(points[0][1] - m_sensor_yaw)/yawspeed;
+        pitchtime = fabs(points[0][0] - m_sensor_pitch)/m_max_speeds[0];
+        times.push_back(1000*max(yawtime, pitchtime) + m_data->CurrentTime);
+    }
     for (unsigned int i=1; i<points.size(); i++)
     {
         distance = m_camera_height/tan(points[i][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
