@@ -25,6 +25,7 @@
 
 #include "debug.h"
 #include "debugverbositynusystem.h"
+#include "targetconfig.h"
 
 using namespace std;
 
