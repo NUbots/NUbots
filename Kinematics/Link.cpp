@@ -1,7 +1,7 @@
 #include "Link.h"
 using namespace TransformMatrices;
-Link::Link(const TransformMatrices::DHParameters& linkParameters, const std::string& name):
-        linkName(name), parameters(linkParameters)
+Link::Link(const TransformMatrices::DHParameters& linkParameters, const std::string& linkName):
+        m_name(linkName), m_parameters(linkParameters)
 {
 }
 
@@ -13,10 +13,10 @@ Link::~Link()
 
 Matrix Link::calculateTransform(double angle)
 {
-    if(angle != bufferedAngle)
+    if(angle != m_bufferedAngle)
     {
-        bufferedTransform = ModifiedDH(parameters, angle);
-        bufferedAngle = angle;
+        m_bufferedTransform = ModifiedDH(m_parameters, angle);
+        m_bufferedAngle = angle;
     }
-    return bufferedTransform;
+    return m_bufferedTransform;
 }
