@@ -1549,7 +1549,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 {
     std::vector< ObjectCandidate > candidates;
     std::vector< TransitionSegment > tempSegments;
-    bool usedSegments[horizontalsegments.size()];
+    bool *usedSegments = new bool[horizontalsegments.size()];
 
     for (int i = 0; i < (int)horizontalsegments.size(); i++)
     {
@@ -1559,7 +1559,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     int Xstart, Xend, Ystart, Yend;
     //Work Backwards: As post width is acurrate at bottom (no crossbar)
     //ASSUMING EVERYTHING IS ALREADY ORDERED
-    for(int i = horizontalsegments.size(); i > 0; i--)
+    for(int i = horizontalsegments.size()-1; i >= 0; i--)
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
@@ -1665,6 +1665,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 
     }
     //qDebug() << "candidate size: " << candidates.size();
+    delete [] usedSegments;
     return candidates;
 }
 
@@ -1719,8 +1720,8 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[0] = distance;
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
-        sizeOnScreen.x = ball.radius*2;
-        sizeOnScreen.y = ball.radius*2;
+        sizeOnScreen.x = int(ball.radius*2);
+        sizeOnScreen.y = int(ball.radius*2);
 
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,
                                                                                       sphericalError,
