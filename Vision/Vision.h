@@ -53,8 +53,11 @@ class Vision
 
     //! SavingImages:
     bool isSavingImages;
+    bool isSavingImagesWithVaryingSettings;
+    int numSavedImages;
     ofstream imagefile;
     int ImageFrameNumber;
+    int numFramesDropped;
     CameraSettings currentSettings;
 
     void SaveAnImage();
@@ -86,6 +89,7 @@ class Vision
     void loadLUTFromFile(const std::string& fileName);
 
     void setImage(const NUimage* sourceImage);
+    int getNumFramesDropped();
 
 
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);

@@ -31,8 +31,8 @@
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
-
 #include "NUbot/SenseMoveThread.h"
+#include "NUbot/WatchDogThread.h"
 
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
@@ -163,6 +163,9 @@ void NUbot::createThreads()
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
+    m_watchdog_thread = new WatchDogThread(this);
+    m_watchdog_thread->start();
+    
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
     #endif
@@ -193,7 +196,7 @@ NUbot::~NUbot()
         vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
         NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
         NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-        //sleep(2);
+        NUSystem::msleep(2000);
     #endif
 
     // --------------------------------- delete threads
@@ -201,9 +204,11 @@ NUbot::~NUbot()
         if (m_seethink_thread != NULL)
             delete m_seethink_thread;
     #endif
-        
     if (m_sensemove_thread != NULL)
         delete m_sensemove_thread;
+    if (m_watchdog_thread != NULL)
+        delete m_watchdog_thread;
+    
     
     // --------------------------------- delete modules
     #if DEBUG_NUBOT_VERBOSITY > 0
@@ -274,7 +279,7 @@ void NUbot::run()
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
-    int timestep = webots->getBasicTimeStep();
+    int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
         previoussimtime = nusystem->getTime();
@@ -315,19 +320,7 @@ void NUbot::periodicSleep(int period)
     double timenow = nusystem->getTime();
     double requiredsleeptime = period - (timenow - starttime);
     if (requiredsleeptime > 0)
-    {
-        #ifdef __USE_POSIX199309
-            struct timespec sleeptime;
-            sleeptime.tv_sec = static_cast<int> (requiredsleeptime/1000.0);
-            sleeptime.tv_nsec = 1e6*requiredsleeptime - sleeptime.tv_sec*1e9;
-            clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
-        #else
-            if (requiredsleeptime > 1000)
-                ;//sleep(requiredsleeptime/1000.0);
-            else
-                usleep(requiredsleeptime*1000);
-        #endif
-    }
+        NUSystem::msleep(requiredsleeptime);
     starttime = nusystem->getTime();
 }
 
@@ -335,6 +328,18 @@ void NUbot::periodicSleep(int period)
  */
 void NUbot::segFaultHandler(int value)
 {
+    #ifndef TARGET_OS_IS_WINDOWS
+        errorlog << "SEGMENTATION FAULT. " << endl;
+        debug << "SEGMENTATION FAULT. " << endl;
+        void *array[10];
+        size_t size;
+        char **strings;
+        size = backtrace(array, 10);
+        strings = backtrace_symbols(array, size);
+        for (size_t i=0; i<size; i++)
+            errorlog << strings[i] << endl;
+    #endif
+    
     vector<float> rgb(3,0);
     vector<vector<float> > allleds;
     allleds.push_back(rgb);
@@ -348,18 +353,7 @@ void NUbot::segFaultHandler(int value)
     vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
     NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
     NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-	#ifndef TARGET_OS_IS_WINDOWS
-	    errorlog << "SEGMENTATION FAULT. " << endl;
-        debug << "SEGMENTATION FAULT. " << endl;
-	    void *array[10];
-	    size_t size;
-	    char **strings;
-	    size = backtrace(array, 10);
-	    strings = backtrace_symbols(array, size);
-	    for (size_t i=0; i<size; i++)
-		errorlog << strings[i] << endl;
-	#endif
-    //sleep(3);
+	NUSystem::msleep(3000);
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog

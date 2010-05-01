@@ -20,13 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  SeeThinkThread.cpp
-		SenseMoveThread.cpp
-		WatchDogThread.cpp
+SET (YOUR_SRCS  MotionCurves.cpp MotionCurves.h
+                MotionFileTools.cpp MotionFileTools.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS 
 )
 ####################################################################################
 

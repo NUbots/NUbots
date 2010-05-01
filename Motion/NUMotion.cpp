@@ -3,45 +3,7 @@
 
     @author Jason Kulk
  
- So what can Motion do?
-    - walk
-    - track points, pan, nod with the head
-    - do kicks
-    - play scripts (get-ups, and probably blocks)
- 
- So that looks like four sub modules.
- 
- NUMotion gets some jobs; BODY and HEAD. Now I need to convert those jobs into
- other jobs, or put the actions in the NUActionatorsData
- 
- WALK.
-    Input:
-        NUSensorsData
-        Current walk-related job
-    Output:
-        NUActionatorsData
- 
- HEAD.
-    Input: 
-        NUSensorsData (I think that you should proably try to stablise the head, and maybe use some smarter control)
-        Current head-related job
-    Output:
-        NUActionatorsData
- 
- KICK.
-    Input:
-        NUSensorsData (The kick should be closed loop)
-        Current kick-related job
-    Output:
-        NUActionatorsData
- 
- BLOCK.
- 
- SAVE.
- 
- GETUP.
- 
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -56,34 +18,58 @@
  You should have received a copy of the GNU General Public License
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "NUMotion.h"
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUMotion.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
 {
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::NUMotion" << endl;
-#endif
-#ifdef USE_HEAD
-    m_head = new NUHead();
-#endif
-#ifdef USE_WALK
-    m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
-#endif
-#ifdef USE_KICK
-    m_kick = new NUKick();
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::NUMotion" << endl;
+    #endif
+    m_current_time = 0;
+    m_previous_time = 0;
+    #ifdef USE_HEAD
+        m_head = new NUHead();
+    #endif
+    #ifdef USE_WALK
+        m_walk = NUWalk::getWalkEngine();
+    #endif
+    #ifdef USE_KICK
+        m_kick = new NUKick();
+    #endif
 }
 
 /*! @brief Destructor for motion module
  */
 NUMotion::~NUMotion()
 {
+    if (m_fall_protection != NULL)
+        delete m_fall_protection;
+    
+    if (m_getup != NULL)
+        delete m_getup;                   
+    #ifdef USE_HEAD
+        if (m_head != NULL)
+            delete m_head;
+    #endif
+    #ifdef USE_WALK
+        if (m_walk != NULL)
+            delete m_walk;                
+    #endif
+    #ifdef USE_KICK
+        if (m_kick != NULL)
+            delete m_kick;                   
+    #endif
 }
 
 /*! @brief Process new sensor data, and produce actionator commands.
@@ -103,6 +89,10 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 #endif
     if (data == NULL || actions == NULL)
         return;
+    m_data = data;
+    m_actions = actions;
+    m_current_time = m_data->CurrentTime;
+    calculateCycleTime();
     
     static vector<float> fallingvalues;
     static vector<float> fallenvalues;
@@ -132,121 +122,100 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             m_kick->process(data, actions);
         #endif
     }
+    m_previous_time = m_current_time;
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
- 
-    @attention There is a very rare segmentation fault in this function. This will need to be looked at eventually.
-               I think I might need to change things around so I don't remove jobs mid loop!
     
     @param jobs the current list of jobs
  */
 void NUMotion::process(JobList& jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::process():" << endl;
+    debug << "NUMotion::process(): Start" << endl;
 #endif
     
-    static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.motion_begin(); it != jobs.motion_end();)
+    list<Job*>::iterator it = jobs.motion_begin();     // the iterator over the motion jobs
+    while (it != jobs.motion_end())
     {
-        #ifdef USE_WALK         // ---------------------------------------------------------- WalkJob processing
-            if ((*it)->getID() == Job::MOTION_WALK)
-            {   // process a walk speed job
-                static vector<float> speed;
-                static WalkJob* job;
-                
-                job = (WalkJob*) (*it);
-                job->getSpeed(speed);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
-                #endif
-                
-                m_walk->walkSpeed(speed);
-                it = jobs.removeMotionJob(it);
-            }
-            else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
-            {   // process a walk to point job
-                static double time;
-                static vector<float> position;
-                static WalkToPointJob* job;
-                
-                job = (WalkToPointJob*) (*it);
-                job->getPosition(time, position);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a walkToPoint job." << endl;
-                #endif
-                
-                m_walk->walkToPoint(time, position);
-                it = jobs.removeMotionJob(it);
-            }
-            else if ((*it)->getID() == Job::MOTION_WALK_PARAMETERS)
-            {   // process a walk to point job
-                static double time;
+        Job::job_id_t id = (*it)->getID();
+        switch (id) 
+        {
+        #ifdef USE_WALK
+            case Job::MOTION_WALK:
+                    static vector<float> speed;
+                    static WalkJob* walkjob;
+                    
+                    walkjob = (WalkJob*) (*it);
+                    walkjob->getSpeed(speed);
+                    m_walk->walkSpeed(speed);
+                break;
+            case Job::MOTION_WALK_TO_POINT:
+                    static double time_a;
+                    static vector<float> position;
+                    static WalkToPointJob* walktopointjob;
+                    
+                    walktopointjob = (WalkToPointJob*) (*it);
+                    walktopointjob->getPosition(time_a, position);
+                    
+                    m_walk->walkToPoint(time_a, position);
+                break;
+            case Job::MOTION_WALK_PARAMETERS:
                 static WalkParameters parameters;
-                static WalkParametersJob* job;
+                static WalkParametersJob* parametersjob;
                 
-                job = (WalkParametersJob*) (*it);
-                job->getWalkParameters(parameters);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a walkparameter job." << endl;
-                    parameters.summaryTo(debug);
-                #endif
+                parametersjob = (WalkParametersJob*) (*it);
+                parametersjob->getWalkParameters(parameters);
                 
                 m_walk->setWalkParameters(parameters);
-                it = jobs.removeMotionJob(it);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a walkparameter job. After remove." << endl;
-                #endif
-            }
-        #else
-            if (false) {}       // need this here so it compiles when there is no walk
-        #endif
-        
-        #ifdef USE_KICK         // ---------------------------------------------------------- KickJob processing
-            else if ((*it)->getID() == Job::MOTION_KICK)
-            {   // process a kick job
-                static double time;
+                break;
+        #endif // USE_WALK
+        #ifdef USE_KICK
+            case Job::MOTION_KICK:
+                static double time_b;
                 static vector<float> kickposition;
                 static vector<float> kicktarget;
-                static KickJob* job;
+                static KickJob* kickjob;
                 
-                job = (KickJob*) (*it);
-                job->getKick(time, kickposition, kicktarget);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a kick job." << endl;
-                #endif
+                kickjob = (KickJob*) (*it);
+                kickjob->getKick(time_b, kickposition, kicktarget);
                 
                 m_kick->kickToPoint(kickposition, kicktarget);
-                it = jobs.removeMotionJob(it);
-            }
-        #endif
-        
-        #ifdef USE_HEAD         // ---------------------------------------------------------- HeadJob processing
-            else if ((*it)->getID() == Job::MOTION_HEAD)
-            {   // process a kick job
-                static vector<double> times;
-                static vector<vector<float> > headpositions;
-                static HeadJob* job;
-                
-                job = (HeadJob*) (*it);
-                job->getPositions(times, headpositions);
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "NUMotion::process(): Processing a head job." << endl;
-                #endif
-                
-                m_head->moveTo(times, headpositions);
-                it = jobs.removeMotionJob(it);
-            }
-        #endif
-            else 
-            {
-                ++it;
-            }
-
+                break;
+        #endif //USE_KICK
+        #ifdef USE_HEAD
+            case Job::MOTION_HEAD:
+                m_head->process(reinterpret_cast<HeadJob*> (*it));
+                break;
+            case Job:: MOTION_PAN:
+                m_head->process(reinterpret_cast<HeadPanJob*> (*it));
+                break;
+            case Job::MOTION_NOD:
+                m_head->process(reinterpret_cast<HeadNodJob*> (*it));
+                break;
+        #endif // USE_HEAD
+            default:
+                break;
+        }
+        it = jobs.removeMotionJob(it);
     }
+    
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::process(): Finished." << endl;
+        debug << "NUMotion::process(): Finished" << endl;
     #endif
 }
+
+/*! @brief Calculates the cycle time. 
+ 
+ To be platform independent I calculate the motion cycle time online by averaging the cycle times
+*/
+void NUMotion::calculateCycleTime()
+{
+    using namespace boost::accumulators;
+    static accumulator_set<float, stats<tag::mean> > cycle_time_accumulator;
+    
+    cycle_time_accumulator(m_current_time - m_previous_time);
+    m_cycle_time = static_cast<int> (mean(cycle_time_accumulator));
+}
+
 

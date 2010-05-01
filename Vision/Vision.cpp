@@ -27,6 +27,7 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUPlatform/NUSystem.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -41,10 +42,12 @@ Vision::Vision()
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
-    imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
+    isSavingImagesWithVaryingSettings = false;
+    numSavedImages = 0;
     ImageFrameNumber = 0;
+    numFramesDropped = 0;
     return;
 }
 
@@ -112,25 +115,21 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
             {
                 if(job->saving() == true)
                 {
-                    
-                    currentSettings = m_camera->getSettings();
+                    if (!imagefile.is_open())
+                        imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
-                {
-                    
-                    m_camera->setSettings(currentSettings);
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
-                }
-                isSavingImages = job->saving();
             }
+            isSavingImages = job->saving();
+            isSavingImagesWithVaryingSettings = job->varyCameraSettings();
             it = jobs->removeVisionJob(it);
-         }
+        }
         else 
         {
             ++it;
         }
-
     }
 }
 
@@ -145,6 +144,9 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         return AllFieldObjects;
     m_sensor_data = data;
     m_actions = actions;
+    if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
+        numFramesDropped++;
+        
     setImage(image);
     AllFieldObjects->preProcess(image->m_timestamp);
 
@@ -283,8 +285,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             case ROBOTS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::red);
-                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::pink);
+                validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
@@ -295,7 +297,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::red_orange);
+                //validColours.push_back(ClassIndex::pink_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
@@ -362,7 +364,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             }
         }
     #endif
-
     return AllFieldObjects;
 }
 
@@ -371,39 +372,43 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
-    //std::stringstream buffer;
-    //buffer << *currentImage;
-    NUimage buffer;
-    buffer.cloneExisting(*currentImage);
-    imagefile << buffer;
-
-    //Set NextCameraSetting:
-    CameraSettings tempCameraSettings = m_camera->getSettings();
-    if(ImageFrameNumber % 6 == 0 )
+    if (imagefile.is_open() and numSavedImages < 2500)
     {
-        tempCameraSettings.exposure = 100;
+        NUimage buffer;
+        buffer.cloneExisting(*currentImage);
+        imagefile << buffer;
+        numSavedImages++;
+        
+        if (isSavingImagesWithVaryingSettings)
+        {
+            CameraSettings tempCameraSettings = m_camera->getSettings();
+            if (numSavedImages % 6 == 0 )
+            {
+                tempCameraSettings.exposure = 100;
+            }
+            else if (numSavedImages % 6 == 1 )
+            {
+                tempCameraSettings.exposure = 150;
+            }
+            else if (numSavedImages % 6 == 2 )
+            {
+                tempCameraSettings.exposure = 200;
+            }
+            else if (numSavedImages % 6 == 3 )
+            {
+                tempCameraSettings.exposure = 250;
+            }
+            else if (numSavedImages % 6 == 4 )
+            {
+                tempCameraSettings.exposure = 300;
+            }
+            else if (numSavedImages % 6 == 5 )
+            {
+                tempCameraSettings.exposure = 400;
+            }
+            m_camera->setSettings(tempCameraSettings);
+        }
     }
-    else if(ImageFrameNumber % 6 == 1 )
-    {
-        tempCameraSettings.exposure = 150;
-    }
-    else if( ImageFrameNumber % 6 == 2 )
-    {
-        tempCameraSettings.exposure = 200;
-    }
-    else if( ImageFrameNumber % 6 == 3 )
-    {
-        tempCameraSettings.exposure = 250;
-    }
-    else if( ImageFrameNumber % 6 == 4 )
-    {
-        tempCameraSettings.exposure = 300;
-    }
-    else if( ImageFrameNumber % 6 == 5 )
-    {
-        tempCameraSettings.exposure = 400;
-    }
-    m_camera->setSettings(tempCameraSettings);
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
@@ -417,10 +422,11 @@ void Vision::setLUT(unsigned char* newLUT)
 
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
-    debug << fileName << endl;
     LUTTools lutLoader;
-    lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str() );
-    setLUT(LUTBuffer);
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        setLUT(LUTBuffer);
+    else
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
 void Vision::setImage(const NUimage* newImage)
@@ -752,7 +758,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     unsigned char afterColour = 0;  //!< Colour in the next Segment
     unsigned char currentColour = 0; //!< Colour in the current segment
     //! initialising circular buffer
-    int bufferSize = 2;
+    int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
     for (int i = 0; i < bufferSize; i++)
     {
@@ -814,7 +820,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     continue;
                 }
 
-                while( ( checkIfBufferSame(colourBuff) && currentColour == afterColour) )
+                while( (currentColour == afterColour) )
                 {
 
                     if(direction == ClassifiedSection::DOWN)
@@ -1553,7 +1559,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     int Xstart, Xend, Ystart, Yend;
     //Work Backwards: As post width is acurrate at bottom (no crossbar)
     //ASSUMING EVERYTHING IS ALREADY ORDERED
-    for(int i = horizontalsegments.size(); i > 0; i--)
+    for(int i = horizontalsegments.size()-1; i >= 0; i--)
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
@@ -1590,8 +1596,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 nextSegCounter--;
                 continue;
             }
-            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing/2
-               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing/2)
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing)
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
@@ -1622,8 +1628,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
             {
                 break;
             }
-            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/4
-               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/4)
+            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/2)
             {
                 if (horizontalsegments[j].getStartPoint().x < Xstart)
                 {
@@ -1644,7 +1650,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         }
         //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
         //Create Object Candidate if greater then the minimum number of segments
-        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/4)
+        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
 
@@ -1713,8 +1719,8 @@ Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
         sphericalPosition[0] = distance;
         sphericalPosition[1] = bearing;
         sphericalPosition[2] = elevation;
-        sizeOnScreen.x = ball.radius*2;
-        sizeOnScreen.y = ball.radius*2;
+        sizeOnScreen.x = int(ball.radius*2);
+        sizeOnScreen.y = int(ball.radius*2);
 
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,
                                                                                       sphericalError,
@@ -1759,3 +1765,14 @@ double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
     double FOVx = deg2rad(45.0f); //Taken from Old Globals
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
+
+/*! @brief Returns the number of frames dropped since the last call to this function
+    @return the number of frames dropped
+ */
+int Vision::getNumFramesDropped()
+{
+    int framesdropped = numFramesDropped;
+    numFramesDropped = 0;
+    return framesdropped;
+}
+

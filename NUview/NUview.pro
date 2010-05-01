@@ -15,6 +15,7 @@ win32 {
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
+    DEFINES += TARGET_OS_IS_WINDOWS
 }
 !macx:LIBS += -ldns_sd
 
@@ -125,6 +126,7 @@ SOURCES += mainwindow.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     NUviewIO/NUviewIO.cpp \
