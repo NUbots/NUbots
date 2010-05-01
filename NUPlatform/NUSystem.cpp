@@ -216,7 +216,7 @@ void NUSystem::msleep(double milliseconds)
         clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
     #else
         #ifdef TARGET_OS_IS_WINDOWS
-            Sleep(milliseconds);
+            Sleep(DWORD(milliseconds));
         #else
             if (milliseconds <= 1000)
                 usleep(static_cast<int> (milliseconds*1e3));

@@ -235,7 +235,7 @@ vector<float> NUHead::calculatePanLevels(float minpitch, float maxpitch)
     }
     else
     {
-        numscans = (minpitch - maxpitch)/m_CAMERA_FOV_Y + 2;
+        numscans = int((minpitch - maxpitch)/m_CAMERA_FOV_Y + 2);
         spacing = (minpitch - maxpitch)/(numscans - 1);
     }
     
