@@ -268,8 +268,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case ROBOTS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::red);
-                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::pink);
+                validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
@@ -281,7 +281,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::red_orange);
+                //validColours.push_back(ClassIndex::red_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
@@ -451,13 +451,13 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
     if(autoSoftColour == false) return requestedColour;
     switch(currentColour)
     {
-        case ClassIndex::red:
+        case ClassIndex::pink:
         {
             switch(requestedColour)
             {
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -465,14 +465,14 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
             }
             break;
         }
-        case ClassIndex::red_orange:
+        case ClassIndex::pink_orange:
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
+            case ClassIndex::pink:
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -484,9 +484,9 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink:
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             case ClassIndex::yellow:
             case ClassIndex::yellow_orange:

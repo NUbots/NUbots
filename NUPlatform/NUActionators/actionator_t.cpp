@@ -115,8 +115,15 @@ bool actionator_t<T>::comparePointTimes(const void* a, const void* b)
     double timea = 0;
     double timeb = 0;
     
+    if (a == NULL || b == NULL)
+        errorlog << "actionator_t<T>::comparePointTimes input arg is NULL. Seg fault..." << endl; 
+    
     const typename actionator_t<T>::actionator_point_t* a_a = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (a);
     const typename actionator_t<T>::actionator_point_t* a_b = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (b);
+    
+    if (a_a == NULL || a_b == NULL)
+        errorlog << "actionator_t<T>::comparePointTimes input args are NULL after cast. Seg fault..." << endl; 
+    
     timea = a_a->Time;
     timeb = a_b->Time;
     
