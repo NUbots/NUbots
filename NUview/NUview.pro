@@ -100,7 +100,8 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/EndEffector.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
-    ../Tools/Math/General.h
+    ../Tools/Math/General.h \
+    ../Kinematics/OrientationUKF.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -181,6 +182,7 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/AngleUKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
-    ../Kinematics/EndEffector.cpp
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/OrientationUKF.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
