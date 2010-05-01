@@ -1549,7 +1549,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 {
     std::vector< ObjectCandidate > candidates;
     std::vector< TransitionSegment > tempSegments;
-    bool *usedSegments = new bool[horizontalsegments.size()];
+    bool usedSegments[horizontalsegments.size()];
 
     for (int i = 0; i < (int)horizontalsegments.size(); i++)
     {
@@ -1665,7 +1665,6 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 
     }
     //qDebug() << "candidate size: " << candidates.size();
-    delete [] usedSegments;
     return candidates;
 }
 
