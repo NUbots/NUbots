@@ -45,6 +45,25 @@ public:
         result[5] = joints[4];
         return result;
     };
+
+    static std::vector<float> PositionFromTransform(const Matrix& transformMatrix)
+    {
+        std::vector<float> result(3,0.0f);
+        result[0] = transformMatrix[0][3];
+        result[1] = transformMatrix[1][3];
+        result[2] = transformMatrix[2][3];
+        return result;
+    }
+
+    static std::vector<float> OrientationFromTransform(const Matrix& transfromMatrix)
+    {
+        std::vector<float> result(3,0.0f);
+        result[0] = asin(-transfromMatrix[2][1]);
+        result[1] = atan2(transfromMatrix[2][0], transfromMatrix[2][2]);
+        result[2] = atan2(transfromMatrix[0][1], transfromMatrix[1][1]);
+        return result;
+    }
+
     std::vector<EndEffector> m_endEffectors;
 };
 

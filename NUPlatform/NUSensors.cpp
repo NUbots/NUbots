@@ -697,6 +697,7 @@ void NUSensors::calculateKinematics()
         m_data->SupportLegTransform->IsValid = false;
         m_data->CameraToGroundTransform->IsValid = false;
     }
+    return;
 }
 
 void NUSensors::calculateCameraHeight()
