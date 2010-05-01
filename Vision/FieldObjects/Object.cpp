@@ -34,14 +34,20 @@ void Object::preProcess(const float timestamp)
     @param newMeasured the measured visual relative position (distance, bearing, elevation)
     @param newMeasuredError the error in the measured visual relative position (distance, bearing, elevation)
     @param newImagePosition the position in the image the object was seen (x pixels, y pixels)
+    @param newSizeOnScreen is thesize of the object on the screen (pixels wide, pixels high)
     @param timestamp the current time that is used to set the last seen time
  */
-void Object::UpdateVisualObject(const Vector3<float>& newMeasured, const Vector3<float>& newMeasuredError, const Vector2<int>& newImagePosition, const float timestamp)
+void Object::UpdateVisualObject(const Vector3<float>& newMeasured,
+                                const Vector3<float>& newMeasuredError,
+                                const Vector2<int>& newImagePosition,
+                                const Vector2<int>& newSizeOnScreen,
+                                const float timestamp)
 {
     measuredRelativePosition = newMeasured;
     relativeMeasurementError = newMeasuredError;
     imagePosition = newImagePosition;
-    
+    sizeOnScreen = newSizeOnScreen;
+
     isVisible = true;
     timeLastSeen = timestamp;
     timeSinceLastSeen = 0;

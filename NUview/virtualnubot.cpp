@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
-
+#include <QDebug>
 #include <QStringList>
 #include <iostream>
 #include <fstream>
@@ -29,6 +29,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
+    //TEST:
 }
 
 virtualNUbot::~virtualNUbot()
@@ -137,7 +138,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 16;
+
 
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -155,6 +156,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
 
     vision.setImage(image);
+    vision.AllFieldObjects->preProcess(image->m_timestamp);
+    int spacings = (int)image->getWidth()/20;
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
@@ -228,9 +231,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    //fieldLines = vision.DetectLines(&vertScanArea,spacings);
+    fieldLines = vision.DetectLines(&vertScanArea,spacings);
     //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -279,7 +282,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 BallCandidates = tempCandidates;
@@ -318,39 +321,55 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     if(BallCandidates.size() > 0)
     {
         circ = vision.DetectBall(BallCandidates);
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-
-            //debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
-            //debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing() << endl;
-        }
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
-    qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    qDebug()<< (double)((double)vision.classifiedCounter/(double)(image->getHeight()*image->getWidth()))*100 << " percent of image classified";
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    //qDebug() << "Crash Check: Before Yellow Goals Detection:";
+
 
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
-    while (YellowGoalCandidates.size() > 0)
-    {
-        candidates.push_back(YellowGoalCandidates.back());
-        YellowGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before BLue Goals Detection:";
+    candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
+
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
-    while (BlueGoalCandidates.size() > 0)
-    {
-        candidates.push_back(BlueGoalCandidates.back());
-        BlueGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before Final Update:";
+    candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
 
-    //TESTING:
-
+    //POST PROCESS:
+    vision.AllFieldObjects->postProcess(image->m_timestamp);
+    //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+    emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
+
+
+    //SUMMARY:
+    qDebug() << "Time: " << vision.m_timestamp;
+
+    for(int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Stationary Object: " << i << ":" //<< vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
+                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY();
+        }
+    }
+    for(int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Mobile Object: " << i << ":" //<< vision.AllFieldObjects->mobileFieldObjects[i].getName()
+                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
+                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY();
+        }
+    }
+
+    for(int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
+                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
+                     <<","                  <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY();
+        }
+    }
+
     return;
 }
 

@@ -21,6 +21,7 @@
 
 #include "debugverbositynubot.h"
 #include "debug.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "NUbot.h"
 #include "Behaviour/Jobs.h"
@@ -52,6 +53,7 @@
 #include <signal.h>
 #include <string>
 #include <sstream>
+#include <unistd.h>
 
 #ifndef TARGET_OS_IS_WINDOWS
     #include <errno.h>
@@ -59,6 +61,8 @@
 #ifndef TARGET_OS_IS_WINDOWS
     #include <execinfo.h>
 #endif
+
+NUbot* NUbot::m_this = NULL;
 
 /*! @brief Constructor for the nubot
     
@@ -70,6 +74,7 @@
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+    NUbot::m_this = this;
     connectErrorHandling();
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
@@ -110,7 +115,6 @@ NUbot::NUbot(int argc, const char *argv[])
     // --------------------------------- construct each enabled module 
     #ifdef USE_VISION
         m_vision = new Vision();
-        m_vision->loadLUTFromFile("/home/nao/default.lut");
     #endif
     
     #ifdef USE_LOCALISATION
@@ -173,7 +177,23 @@ void NUbot::createThreads()
 NUbot::~NUbot()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Deleting Threads" << endl;
+        debug << "NUbot::~NUbot()." << endl;
+    #endif
+    
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.25; allleds[0][2] = 0.0;
+    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
+    
+    #ifdef USE_MOTION
+        float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
+        vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+        vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+        vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
+        NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
+        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        //sleep(2);
     #endif
 
     // --------------------------------- delete threads
@@ -250,7 +270,7 @@ NUbot::~NUbot()
  */
 void NUbot::run()
 {
-#ifdef TARGET_IS_NAOWEBOTS
+#if defined(TARGET_IS_NAOWEBOTS)
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
@@ -277,13 +297,57 @@ void NUbot::run()
         
         count++;
     };
+#else
+    #if !defined(USE_VISION)
+        while (true)
+        {
+            periodicSleep(33);
+            m_seethink_thread->startLoop();
+            m_seethink_thread->waitForLoopCompletion();
+        }
+    #endif
 #endif
+}
+
+void NUbot::periodicSleep(int period)
+{
+    static double starttime = nusystem->getTime();
+    double timenow = nusystem->getTime();
+    double requiredsleeptime = period - (timenow - starttime);
+    if (requiredsleeptime > 0)
+    {
+        #ifdef __USE_POSIX199309
+            struct timespec sleeptime;
+            sleeptime.tv_sec = static_cast<int> (requiredsleeptime/1000.0);
+            sleeptime.tv_nsec = 1e6*requiredsleeptime - sleeptime.tv_sec*1e9;
+            clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
+        #else
+            if (requiredsleeptime > 1000)
+                ;//sleep(requiredsleeptime/1000.0);
+            else
+                usleep(requiredsleeptime*1000);
+        #endif
+    }
+    starttime = nusystem->getTime();
 }
 
 /*! @brief 'Handles' a segmentation fault; logs the backtrace to errorlog
  */
 void NUbot::segFaultHandler(int value)
 {
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;
+    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
+    NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+    
+    float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
+    vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+    vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
+    vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
+    NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
+    NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
 	#ifndef TARGET_OS_IS_WINDOWS
 	    errorlog << "SEGMENTATION FAULT. " << endl;
         debug << "SEGMENTATION FAULT. " << endl;
@@ -294,8 +358,8 @@ void NUbot::segFaultHandler(int value)
 	    strings = backtrace_symbols(array, size);
 	    for (size_t i=0; i<size; i++)
 		errorlog << strings[i] << endl;
-		//!< @todo TODO: after a seg fault I should fail safely!
 	#endif
+    //sleep(3);
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
@@ -305,6 +369,7 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
+        NUbot::m_this->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
         void *array[10];

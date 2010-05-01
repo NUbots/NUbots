@@ -19,6 +19,8 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "nubotdataconfig.h"        // for initial camera settings location
+
 #include <cstring>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -239,7 +241,7 @@ storedTimeStamp(nusystem->getTime())
   	//READ CAMERA SETTINGS FROM FILE:
 
 	CameraSettings fileSettings;
-	fileSettings.LoadFromFile("/home/nao/data/Camera.cfg");
+	fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
 	setSettings(fileSettings);
 	
 }

@@ -63,7 +63,6 @@ vector<string> NAOActionators::m_chestled_names(temp_chestled_names, temp_chestl
 unsigned int NAOActionators::m_num_chestleds = NAOActionators::m_chestled_names.size();
 
 // init m_footled_names
-
 static string temp_footled_names[] = {  DN_LED_FOOT_LEFT_RED, DN_LED_FOOT_LEFT_GREEN, DN_LED_FOOT_LEFT_BLUE, \
                                         DN_LED_FOOT_RIGHT_RED, DN_LED_FOOT_RIGHT_GREEN, DN_LED_FOOT_RIGHT_BLUE};
 vector<string> NAOActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
@@ -71,6 +70,11 @@ unsigned int NAOActionators::m_num_footleds = NAOActionators::m_footled_names.si
 
 vector<string> NAOActionators::m_led_names;
 unsigned int NAOActionators::m_num_leds;
+
+// init m_other_names
+static string temp_other_names[] = {"Sound"};
+vector<string> NAOActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
+unsigned int NAOActionators::m_num_others = NAOActionators::m_other_names.size();
 
 vector<string> NAOActionators::m_actionator_names;
 unsigned int NAOActionators::m_num_actionators;
@@ -86,6 +90,7 @@ NAOActionators::NAOActionators()
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_position_names);
     m_data->setAvailableLeds(m_led_names);
+    m_data->setAvailableOtherActionators(m_other_names);
     
     double time = nusystem->getTime();
     vector<float> rgb(3,0);
@@ -137,8 +142,10 @@ void NAOActionators::getActionatorsFromAldebaran()
 #endif
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
     m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
+    
+    // Create actionator aliases
     ALValue param;
-    param.arraySetSize(2);
+    param.arraySetSize(2);      // an alias always has length two [aliasname, [device0, device1, device2, ..., deviceN]
 
     param[0] = ALIAS_POSITION;
     param[1] = m_servo_position_names;
@@ -178,6 +185,29 @@ void NAOActionators::getActionatorsFromAldebaran()
     #endif
     
     createALDCMCommands();
+    startUltrasonics();
+}
+
+/*! @brief Starts the ultrasonic sensors in periodic left and right mode
+ */
+void NAOActionators::startUltrasonics()
+{
+    // nowadays the ultrasonics need only be started in periodic mode:
+    // the distances are put in US/Sensor/Right/Value and US/Sensor/Left/Value
+    ALValue command;            // [actuatorname, "ClearAll", [[value, time]] ]
+    command.arraySetSize(3);
+    command[0] = "US/Actuator/Value";
+    command[1] = "ClearAll";
+    
+    ALValue params, param;
+    params.arraySetSize(1);
+    param.arraySetSize(2);
+    param[0] = 68.0;                    // left/right periodic mode = 64.0 + 4.0
+    param[1] = m_al_dcm->getTime(0);
+    params[0] = param;
+    command[2] = params;
+    
+    m_al_dcm->set(command);
 }
 
 void NAOActionators::createALDCMCommands()
@@ -339,6 +369,8 @@ void NAOActionators::copyToHardwareCommunications()
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << m_actionator_command.toString(VerbosityMini) << endl;
     #endif
+    
+    copyToSound();
     
     m_data->removeCompletedPoints(m_current_time);
 }

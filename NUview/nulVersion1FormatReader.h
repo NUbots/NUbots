@@ -18,13 +18,16 @@ public:
 
     bool isNextFrameAvailable();
     bool isFirstFrameAvailable();
+    bool isPreviousFrameAvailable();
 signals:
 
 public slots:
     int nextFrame();
     int firstFrame();
+    int previousFrame();
 protected:
     std::ifstream fileStream;
+    int m_frameLength;
 };
 
 #endif // NULVERSION1FORMATREADER_H

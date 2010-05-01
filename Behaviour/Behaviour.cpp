@@ -60,21 +60,31 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
     {
         if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
         {
-            float headYaw;
-            data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-            vector<float> walkVector;
-            walkVector.push_back(0);
-            walkVector.push_back(0);
-            walkVector.push_back(0);
+            static const float maxspeed = 10;
+            float headyaw;
+            data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+            float balldistance;
+            if (measureddistance < 46)
+                balldistance = 1;
+            else
+                balldistance = sqrt(pow(measureddistance,2) - 46*46);
+            float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+            
+            vector<float> walkVector(3, 0);
+            if (balldistance > 30)
+                walkVector[0] = maxspeed;
+            else
+                walkVector[0] = maxspeed*(balldistance/30);
+            if (fabs(ballbearing) > 0.05)
+                walkVector[2] = 2*walkVector[0]*sin(ballbearing)/balldistance;
             WalkJob* walk = new WalkJob(walkVector);
             jobs.addMotionJob(walk);
             //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
-
             
-            float headPitch;
-            data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-            data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
-            TrackPoint(jobs,headYaw, headPitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
+            float headpitch;
+            data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+            TrackPoint(jobs, headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
         }
         else
         {
@@ -119,7 +129,7 @@ void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x,
     vector<float> headVector;
     headVector.push_back(newTilt);
     headVector.push_back(newPan);
-    HeadJob* head = new HeadJob(0,headVector);
+    HeadJob * head = new HeadJob(0,headVector);
     
     jobs.addMotionJob(head);
  
@@ -167,7 +177,6 @@ void Behaviour::Pan(JobList& jobs)
         positions[7][1] = 0;
         
         HeadJob* head = new HeadJob(times, positions);
-        
 
         jobs.addMotionJob(head);
     }

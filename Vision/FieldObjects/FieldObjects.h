@@ -49,23 +49,24 @@ class FieldObjects{
             enum MobileFieldObjectsID{
 
                 // Ball and Teammates and Opponents
-                FO_BALL 				= 0,
-                FO_TEAM1 				= 1,
-                FO_TEAM2 				= 2,
-                FO_TEAM3 				= 3,
-                FO_OPPONENT_1 		= 4,
-                FO_OPPONENT_2 		= 5,
-                FO_OPPONENT_3 		= 6,
-                FO_OPPONENT_4 		= 7,
-                NUM_MOBILE_FIELD_OBJECTS = 8
+                FO_BALL 			= 0,
+                FO_BLUE_ROBOT_1 		= 1,
+                FO_BLUE_ROBOT_2 		= 2,
+                FO_BLUE_ROBOT_3			= 3,
+                FO_BLUE_ROBOT_4                 = 4,
+                FO_PINK_ROBOT_1 		= 5,
+                FO_PINK_ROBOT_2 		= 6,
+                FO_PINK_ROBOT_3 		= 7,
+                FO_PINK_ROBOT_4 		= 8,
+                NUM_MOBILE_FIELD_OBJECTS        = 9
             };
 
             enum AmbiguousObjectID{
 
                 //New unknown Robots
                 FO_ROBOT_UNKNOWN 		= 0,
-                FO_TEAM_UNKNOWN 		= 1,
-                FO_OPPONENT_UNKNOWN 	= 2,
+                FO_BLUE_ROBOT_UNKNOWN           = 1,
+                FO_PINK_ROBOT_UNKNOWN           = 2,
 
                 // New unknown goal posts
                 FO_BLUE_GOALPOST_UNKNOWN 	= 3,
