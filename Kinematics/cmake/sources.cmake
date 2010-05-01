@@ -23,6 +23,8 @@ ENDIF()
 SET (YOUR_SRCS
 Horizon.cpp
 Kinematics.cpp
+Link.cpp
+EndEffector.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

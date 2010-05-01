@@ -29,7 +29,6 @@
 
 #include <unistd.h>
 #ifdef TARGET_OS_IS_WINDOWS
-	#include <objbase.h>
 	#include <windows.h>
 #endif
 
@@ -216,16 +215,16 @@ void NUSystem::msleep(double milliseconds)
         sleeptime.tv_nsec = 1e6*milliseconds - sleeptime.tv_sec*1e9;
         clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
     #else
-        if (milliseconds <= 1000)
-            usleep(static_cast<int> (milliseconds*1e3));
-        else
-        {
-            #ifdef TARGET_OS_IS_WINDOWS
-                Sleep(milliseconds);
-            #else
+        #ifdef TARGET_OS_IS_WINDOWS
+            Sleep(DWORD(milliseconds));
+        #else
+            if (milliseconds <= 1000)
+                usleep(static_cast<int> (milliseconds*1e3));
+            else
+            {
                 sleep(milliseconds/1e3);
-            #endif
-        }
+            }
+        #endif
     #endif
 }
 

@@ -279,7 +279,7 @@ void NUbot::run()
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
-    int timestep = webots->getBasicTimeStep();
+    int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
         previoussimtime = nusystem->getTime();

@@ -34,6 +34,7 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 
+class Kinematics;
 
 /*! @brief Base sensor storage class
  */
@@ -63,7 +64,8 @@ protected:
     void calculateFootForce();
     void calculateFootImpact();
     void calculateCoP();
-    
+
+    void calculateKinematics();
     void calculateOdometry();
     void calculateCameraHeight();
     
@@ -72,7 +74,7 @@ protected:
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
-    
+    Kinematics* m_kinematicModel;
 private:
 };
 

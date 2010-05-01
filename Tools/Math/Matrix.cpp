@@ -268,6 +268,38 @@ void  Matrix::print()
      std::cout<<std::endl;
 }
 
+std::vector<float> Matrix::asVector()
+{
+    int rows, cols;
+    rows = getm();
+    cols = getn();
+    int length = rows * cols;
+    std::vector<float> result(length);
+    int row = 0, col = 0;
+    for(int i = 0; i < length; i++)
+    {
+        row = i / cols;
+        col = i % cols;
+        result[i] = (*this)[row][col];
+    }
+    return result;
+}
+
+Matrix Matrix4x4fromVector(const std::vector<float>& source)
+{
+    Matrix result(4,4,false);
+    if(source.size() != 16) return result;
+    int row, col, cols;
+    cols = result.getn();
+    for(int i = 0; i < 16; i++)
+    {
+        row = i / cols;
+        col = i % cols;
+        result[row][col] = source[i];
+    }
+    return result;
+}
+
 // 2x2 Matrix Inversion- t
 Matrix Invert22(const Matrix& a)
 {

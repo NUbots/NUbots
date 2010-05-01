@@ -29,7 +29,7 @@ using namespace std;
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
  */
-Thread::Thread(string name, unsigned char priority) : m_name(name), m_priority(priority), running(false)
+Thread::Thread(string name, unsigned char priority) : m_name(name), running(false), m_priority(priority)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
         debug << "Thread::Thread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
