@@ -49,8 +49,8 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
 {
     if (data == NULL || actions == NULL)
         return;
-    double currenttime = data->CurrentTime;
-    double period = currenttime - m_battery_state_previous_time;
+    m_current_time = data->CurrentTime;
+    m_period = m_current_time - m_battery_state_previous_time;
     // get the battery charge from the sensor data
     vector<float> battery;
     data->getBatteryValues(battery);
@@ -66,8 +66,8 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     int numon = (int) (charge*numleds + 0.5);
     for (int i=0; i<numon; i++)
         m_ear_leds[i] = ledon;
-    actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime, m_ear_leds);
-    actions->addLeds(NUActionatorsData::RightEarLeds, currenttime, m_ear_leds);
+    actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time, m_ear_leds);
+    actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time, m_ear_leds);
     
     float current = 0;
     if (battery.size() > 1)
@@ -75,7 +75,7 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     if (current >= 0 and numon < numleds)
     {   // the battery is charging
         int loops = current/0.5 + 1;
-        double timeperloop = period/loops;
+        double timeperloop = m_period/loops;
         double slope = timeperloop/(numleds - numon);
         for (int l=0; l<loops; l++)
         {
@@ -83,15 +83,15 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
             {
                 vector<vector<float> > chargeleds = m_ear_leds;
                 chargeleds[i] = ledon;
-                actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
-                actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*(i - numon) + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time + slope*(i - numon) + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time + slope*(i - numon) + l*timeperloop, chargeleds);
             }
         }
     }
     else if (numon > 1)
     {   // the battery is discharging
         int loops = -current/1.0 + 1;
-        double timeperloop = period/loops;
+        double timeperloop = m_period/loops;
         double slope = timeperloop/numon;
         for (int l=0; l<loops; l++)
         {
@@ -99,15 +99,15 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
             {
                 vector<vector<float> > chargeleds = m_ear_leds;
                 chargeleds[(numon-1) - i] = vector<float> (3, 0.0);
-                actions->addLeds(NUActionatorsData::LeftEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
-                actions->addLeds(NUActionatorsData::RightEarLeds, currenttime + slope*i + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time + slope*i + l*timeperloop, chargeleds);
+                actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time + slope*i + l*timeperloop, chargeleds);
             }
         }
     }
     if (charge < 0.15 and current < 0)
         voiceLowBattery(actions);
     
-    m_battery_state_previous_time = data->CurrentTime;
+    m_battery_state_previous_time = m_current_time;
 }
 
 /*! @brief Voices that the battery is low
@@ -116,7 +116,7 @@ void NAOSystem::voiceLowBattery(NUActionatorsData* actions)
 {
     static int runcount = 0;
     if (runcount%8 == 0)
-        actions->addSound(0, NUSounds::LOW_BATTERY);
+        actions->addSound(m_current_time, NUSounds::LOW_BATTERY);
     runcount++;
 }
 
@@ -137,8 +137,8 @@ void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
             dropleds.push_back(ledoff);
     }
     
-    actions->addLeds(NUActionatorsData::LeftEarLeds, nusystem->getTime() + 100, dropleds);
-    actions->addLeds(NUActionatorsData::RightEarLeds, nusystem->getTime() + 100, dropleds);
+    actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time + m_period - 100, dropleds);
+    actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time + m_period - 100, dropleds);
     //voiceFrameDrop(actions);
 }
 
