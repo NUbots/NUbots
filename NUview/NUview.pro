@@ -15,6 +15,7 @@ win32 {
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
+    DEFINES += TARGET_OS_IS_WINDOWS
 }
 !macx:LIBS += -ldns_sd
 
