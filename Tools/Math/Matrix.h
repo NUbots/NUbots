@@ -34,7 +34,7 @@ public:
 	inline double& operator() (int i, int j){return X[i*N+j];};
 	
 	void print(); // print values
-	
+        std::vector<float> asVector();
 };
 
 // Overloaded Operators
@@ -46,6 +46,8 @@ Matrix	operator *  (const double& a, const Matrix& b);
 Matrix	operator *  (const Matrix& a, const double& b);
 Matrix	operator /  (const Matrix& a, const double& b);
 
+// Create 4x4 matrix from float vector.
+Matrix Matrix4x4fromVector(const std::vector<float>& source);
 
 // 2x2 Matrix Inversion
 Matrix Invert22(const Matrix& a);

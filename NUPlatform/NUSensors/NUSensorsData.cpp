@@ -68,6 +68,14 @@ NUSensorsData::NUSensorsData()
     addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
     addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
     addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+
+    // Kinematic sensors
+    addSoftSensor(LeftLegTransform, string("LeftLegTransform"), sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM);
+    addSoftSensor(RightLegTransform, string("RightLegTransform"), sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM);
+    addSoftSensor(SupportLegTransform, string("SupportLegTransform"), sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM);
+    addSoftSensor(CameraTransform, string("CameraTransform"), sensor_t::KINEMATICS_CAMERA_TRANSFORM);
+    addSoftSensor(CameraToGroundTransform, string("CameraToGroundTransform"), sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM);
+
     addSoftSensor(Odometry, string("Odometry"), sensor_t::JOINT_ODOMETRY);
     addSoftSensor(CameraHeight, string("CameraHeight"), sensor_t::JOINT_CAMERAHEIGHT);
     
@@ -327,6 +335,76 @@ bool NUSensorsData::getJointTorques(bodypart_id_t bodypart, vector<float>& torqu
 bool NUSensorsData::getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures)
 {
     return getJointsData(JointTemperatures, bodypart, temperatures);
+}
+
+/* @brief Gets the transform matrix of the left leg
+   @param value will be updated with the left leg transform
+ */
+bool NUSensorsData::getLeftLegTransform(Matrix& value)
+{
+    if (LeftLegTransform == NULL || LeftLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(LeftLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the right leg
+   @param value will be updated with the right leg transform
+ */
+bool NUSensorsData::getRightLegTransform(Matrix& value)
+{
+    if (RightLegTransform == NULL || RightLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(RightLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the support leg
+   @param value will be updated with the support leg transform
+ */
+bool NUSensorsData::getSupportLegTransform(Matrix& value)
+{
+    if (SupportLegTransform == NULL || SupportLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(SupportLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the camera
+   @param value will be updated with the camera transform
+ */
+bool NUSensorsData::getCameraTransform(Matrix& value)
+{
+    if (CameraTransform == NULL || CameraTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(CameraTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix converting from the camera coordinates to ground based coordinates
+   @param value will be updated with the camera to ground transform
+ */
+bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
+{
+    if (CameraToGroundTransform == NULL || CameraToGroundTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(CameraToGroundTransform->Data);
+        return true;
+    }
 }
 
 /*! @brief Gets the odometry data since the last call

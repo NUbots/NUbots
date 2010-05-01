@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <string>
+#include "Tools/Math/Matrix.h"
 using namespace std;
 
 class NUSensorsData
@@ -117,6 +118,12 @@ public:
     bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
     // Get methods for soft proprioception
+    bool getLeftLegTransform(Matrix& value);
+    bool getRightLegTransform(Matrix& value);
+    bool getSupportLegTransform(Matrix& value);
+    bool getCameraTransform(Matrix& value);
+    bool getCameraToGroundTransform(Matrix& value);
+
     bool getOdometry(float& time, vector<float>& values);
     bool getCameraHeight(float& height);
     
@@ -195,6 +202,12 @@ public:
     sensor_t* JointTorques;                     //!< stores the joint torques (in Nm)
     sensor_t* JointTemperatures;                //!< stores the joint temperatures (in degrees C)
     
+    sensor_t* LeftLegTransform;                 //!< stores the transform matrix from origin to the left leg
+    sensor_t* RightLegTransform;                //!< stores the transform matrix from origin to the right leg
+    sensor_t* SupportLegTransform;              //!< stores the transform matrix from origin to the support leg
+    sensor_t* CameraTransform;                  //!< stores the transform matrix from origin to the camera
+    sensor_t* CameraToGroundTransform;          //!< stores the transform matrix from the camera to the ground
+
     sensor_t* Odometry;                         //!< stores the movement in the [x (cm), y (cm),yaw (rad)] calculated from proprioception
     sensor_t* CameraHeight;                     //!< stores the height of the camera from the ground (cm) calculate from proprioception
     
