@@ -184,7 +184,7 @@ void NUHead::calculateGenericPan(float mindistance, float maxdistance, float pan
     vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
     vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
     vector<double> times = calculatePanTimes(scan_points, panspeed);
-
+    
     moveTo(times, scan_points);
     
     if (times.size() > 0)
@@ -334,7 +334,7 @@ vector<double> NUHead::calculatePanTimes(vector<vector<float> > points, float pa
             yawspeed = m_max_speeds[1];
         else
         {
-            float ratio_hl = tan(points[0][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
+            float ratio_hl = tan(points[i][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
             if (ratio_hl < 0.05)        // need to be careful here to avoid divide by zero, and VERY slow pan when the distance is close to infinity
                 distance = 1.1*m_FIELD_DIAGONAL;
             else
