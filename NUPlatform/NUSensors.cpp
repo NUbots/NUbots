@@ -675,18 +675,28 @@ void NUSensors::calculateKinematics()
         supportLegTransform = 0;
     }
 
-    // Calculate transfrom matrix to convert camera centred coordinates to ground centred coordinates.
-    Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(*supportLegTransform, *cameraTransform);    
-
     // Set all of the sensor values
     double time = m_data->CurrentTime;
     // Set the legs
     m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
     m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
-    m_data->SupportLegTransform->setData(time,supportLegTransform->asVector(),true);
-    // Set the cameras
+
+    // Set the camera
     m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
-    m_data->CameraToGroundTransform->setData(time, cameraToGroundTransform.asVector(), true);
+
+    if(supportLegTransform)
+    {
+        m_data->SupportLegTransform->setData(time,supportLegTransform->asVector(),true);
+
+        // Calculate transfrom matrix to convert camera centred coordinates to ground centred coordinates.
+        Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(*supportLegTransform, *cameraTransform);
+        m_data->CameraToGroundTransform->setData(time, cameraToGroundTransform.asVector(), true);
+    }
+    else
+    {
+        m_data->SupportLegTransform->IsValid = false;
+        m_data->CameraToGroundTransform->IsValid = false;
+    }
 }
 
 void NUSensors::calculateCameraHeight()
