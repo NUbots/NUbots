@@ -66,7 +66,23 @@ string MotionFileTools::fromVector(vector<float> data)
 {
     stringstream ss;
     ss << "[";
-    for (unsigned int i=0; i<data.size()-1; i++)
+    for (size_t i=0; i<data.size()-1; i++)
+        ss << data[i] << ", ";
+    ss << data[data.size()-1] << "]";
+    return ss.str();
+}
+
+/*! @brief Converts a vector<float> to formatted string
+ 
+ The data is written as [a,b,c, ...., n]
+ @param data the data to convert
+ @return the string containing the serialised vector
+ */
+string MotionFileTools::fromVector(vector<double> data)
+{
+    stringstream ss;
+    ss << "[";
+    for (size_t i=0; i<data.size()-1; i++)
         ss << data[i] << ", ";
     ss << data[data.size()-1] << "]";
     return ss.str();
@@ -158,7 +174,21 @@ string MotionFileTools::fromMatrix(const vector<vector<float> >& data)
 {
     stringstream ss;
     ss << "[";
-    for (unsigned int i=0; i<data.size(); i++)
+    for (size_t i=0; i<data.size(); i++)
+        ss << fromVector(data[i]);
+    ss << "]";
+    return ss.str();
+}
+
+/*! @brief Converts a matrix into a nicely formatted string. The matrix will look like [[a,b,...][m,n,...]...[x,y,...]]
+ @param data the matrix to convert
+ @return the serialised matrix
+ */
+string MotionFileTools::fromMatrix(const vector<vector<double> >& data)
+{
+    stringstream ss;
+    ss << "[";
+    for (size_t i=0; i<data.size(); i++)
         ss << fromVector(data[i]);
     ss << "]";
     return ss.str();
@@ -211,10 +241,20 @@ void MotionFileTools::toFloatWithMatrix(istream& input, float& value, vector<vec
 
 /*! @brief Returns the size of a matrix
  */
-unsigned int MotionFileTools::size(vector<vector<float> > data)
+size_t MotionFileTools::size(vector<vector<float> > data)
 {
-    unsigned int size = 0;
-    for (unsigned int i=0; i<data.size(); i++)
+    size_t size = 0;
+    for (size_t i=0; i<data.size(); i++)
+        size += data[i].size();
+    return size;
+}
+
+/*! @brief Returns the size of a matrix
+ */
+size_t MotionFileTools::size(vector<vector<double> > data)
+{
+    size_t size = 0;
+    for (size_t i=0; i<data.size(); i++)
         size += data[i].size();
     return size;
 }
