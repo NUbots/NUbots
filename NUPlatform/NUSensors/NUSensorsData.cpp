@@ -135,13 +135,8 @@ NUSensorsData::~NUSensorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensorsData::~NUSensorsData" << endl;
 #endif
-    m_sensors.clear();
-    m_head_ids.clear();
-    m_larm_ids.clear();
-    m_rarm_ids.clear();
-    m_torso_ids.clear();
-    m_lleg_ids.clear();
-    m_rleg_ids.clear();
+    for (size_t i=0; i<m_sensors.size(); i++)
+        delete m_sensors[i];
 }
 
 /******************************************************************************************************************************************
