@@ -33,7 +33,6 @@ actionator_t<T>::actionator_t()
     Name = string("Undefined");
     ActionatorType = UNDEFINED;
     IsAvailable = false;
-    m_previous_point = NULL;
 }
 
 /*! @brief Constructor for an actionator_t with known name and type
@@ -46,12 +45,11 @@ actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionato
     Name = actionatorname;
     ActionatorType = actionatortype;
     IsAvailable = true;
-    m_previous_point = NULL;
 }
 
 /*! @brief Adds a point to the actionator
     @param time the time the point will be completed
-    @param data the data for the point (careful the data size is hardcoded in many places, if you get it wrong your data will be ignored!)
+    @param data the data for the point 
  */
 template <typename T>
 void actionator_t<T>::addPoint(double time, const vector<T>& data)
@@ -61,23 +59,21 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
         debug << "actionator_t<T>::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
         return;
     }
-    actionator_point_t* point = new actionator_point_t();
-    if (point == NULL)
-        errorlog << "actionator_t<T>::addPoint. " << Name << "Created point is NULL! Segmentation fault..." << endl;
-    point->Time = time;
-    point->Data = data;
+    actionator_point_t point;
+    point.Time = time;
+    point.Data = data;
 
     // I need to keep the actionator points sorted based on their time
     if (m_points.size() == 0)           // the common (walk engine) case will be fast
         m_points.push_back(point);
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
-        typename deque<actionator_point_t*>::iterator insertposition;
-        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
+        typename deque<actionator_point_t>::iterator insertposition;
+        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePoints);
         if (insertposition - m_points.begin() < 0)
         {
             errorlog << "actionator_t<T>::addPoint. " << Name << " Attempting to resize m_points to less than 0! Unhandled exception" << endl;
-            errorlog << "actionator_t<T>::addPoint. insertpositions: " << *insertposition << " m_points.begin(): " << *m_points.begin() << endl;
+            //errorlog << "actionator_t<T>::addPoint. insertpositions: " << *insertposition << " m_points.begin(): " << *m_points.begin() << endl;
         }
         m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
         m_points.push_back(point);
@@ -90,13 +86,8 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
 template <typename T>
 void actionator_t<T>::removeCompletedPoints(double currenttime)
 {
-    if (m_points.size() > 0 && m_points[0]->Time <= currenttime)
-        m_previous_point = m_points.front();            // I make the first point that is removed to previous point
-    
-    while (m_points.size() > 0 && m_points[0]->Time <= currenttime)
-    {
+    while (m_points.size() > 0 && m_points[0].Time <= currenttime)
         m_points.pop_front();
-    }
 }
 
 /*! @brief Returns true if there are no points in the queue, false if there are point to be applied
@@ -113,24 +104,9 @@ bool actionator_t<T>::isEmpty()
 /*! Returns true if a should go before b, false otherwise.
  */
 template <typename T>
-bool actionator_t<T>::comparePointTimes(const void* a, const void* b)
+bool actionator_t<T>::comparePoints(const actionator_point_t& a, const actionator_point_t& b)
 {
-    double timea = 0;
-    double timeb = 0;
-    
-    if (a == NULL || b == NULL)
-        errorlog << "actionator_t<T>::comparePointTimes input arg is NULL. Seg fault..." << endl; 
-    
-    const typename actionator_t<T>::actionator_point_t* a_a = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (a);
-    const typename actionator_t<T>::actionator_point_t* a_b = reinterpret_cast<const typename actionator_t<T>::actionator_point_t*> (b);
-    
-    if (a_a == NULL || a_b == NULL)
-        errorlog << "actionator_t<T>::comparePointTimes input args are NULL after cast. Seg fault..." << endl; 
-    
-    timea = a_a->Time;
-    timeb = a_b->Time;
-    
-    if (timea < timeb)
+    if (a.Time < b.Time)
         return true;
     else
         return false;
@@ -153,9 +129,9 @@ void actionator_t<T>::summaryTo(ostream& output)
         output << endl;
         for (unsigned int i=0; i<m_points.size(); i++)
         {
-            output << m_points[i]->Time << ": ";
-            for (unsigned int j=0; j<m_points[i]->Data.size(); j++)
-                output << m_points[i]->Data[j] << " ";
+            output << m_points[i].Time << ": ";
+            for (unsigned int j=0; j<m_points[i].Data.size(); j++)
+                output << m_points[i].Data[j] << " ";
             output << endl;
         }
     }

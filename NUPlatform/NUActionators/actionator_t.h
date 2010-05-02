@@ -49,7 +49,7 @@ public:
     struct actionator_point_t 
     {
         double Time;                //!< the time the actionator point will be completed in milliseconds since epoch or program start
-        vector<T> Data;         //!< the actual data to be given to the actionator, the contents depend on the actionator's type
+        vector<T> Data;             //!< the actual data to be given to the actionator, the contents depend on the actionator's type
     };
     
     /*! @brief A enum type to perform run time actionator type checking without using
@@ -81,14 +81,13 @@ public:
 public:
     string Name;                                //!< the name of the actionator
     actionator_type_t ActionatorType;           //!< the actionator type
-    deque<actionator_point_t*> m_points;        //!< the double-ended queue of actionator points
-    actionator_point_t* m_previous_point;       //!< the last actionator point that was applied
+    deque<actionator_point_t> m_points;         //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
     bool IsAvailable;                           //!< true if the actionator is avaliable, false if it is absent
 private:
-    static bool comparePointTimes(const void* a, const void* b);
+    static bool comparePoints(const actionator_point_t& a, const actionator_point_t& b);
 };
 
-#include "actionator_t.cpp"                     // this is the standard way to do template classes if when you separate declaration and implementation.
+#include "actionator_t.cpp"                     // this is the standard way to do template classes when you separate declaration and implementation.
                                                 // just make sure that you don't compile actionator_t.cpp separately
 
 #endif

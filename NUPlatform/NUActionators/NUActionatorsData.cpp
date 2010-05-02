@@ -547,14 +547,14 @@ int NUActionatorsData::getNumberOfLeds(ledgroup_id_t groupid)
  */
 bool NUActionatorsData::getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
 {
-    if (id == NUActionatorsData::ACTIONATOR_MISSING || PositionActionators[id]->isEmpty() || PositionActionators[id]->m_points[0]->Data.size() != 3)
+    if (id == NUActionatorsData::ACTIONATOR_MISSING || PositionActionators[id]->isEmpty() || PositionActionators[id]->m_points[0].Data.size() != 3)
         return false;
     else 
     {
-        time = PositionActionators[id]->m_points[0]->Time;
-        position = PositionActionators[id]->m_points[0]->Data[0];
-        velocity = PositionActionators[id]->m_points[0]->Data[1];
-        gain = PositionActionators[id]->m_points[0]->Data[2]; 
+        time = PositionActionators[id]->m_points[0].Time;
+        position = PositionActionators[id]->m_points[0].Data[0];
+        velocity = PositionActionators[id]->m_points[0].Data[1];
+        gain = PositionActionators[id]->m_points[0].Data[2]; 
         return true;
     }
 }
@@ -572,12 +572,12 @@ bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float&
     else
     {
         int lastindex = PositionActionators[id]->m_points.size() - 1;
-        if (lastindex >= 0 && PositionActionators[id]->m_points[lastindex]->Data.size() == 3)
+        if (lastindex >= 0 && PositionActionators[id]->m_points[lastindex].Data.size() == 3)
         {
-            time = PositionActionators[id]->m_points[lastindex]->Time;
-            position = PositionActionators[id]->m_points[lastindex]->Data[0];
-            velocity = PositionActionators[id]->m_points[lastindex]->Data[1];
-            gain = PositionActionators[id]->m_points[lastindex]->Data[2]; 
+            time = PositionActionators[id]->m_points[lastindex].Time;
+            position = PositionActionators[id]->m_points[lastindex].Data[0];
+            velocity = PositionActionators[id]->m_points[lastindex].Data[1];
+            gain = PositionActionators[id]->m_points[lastindex].Data[2]; 
             return true;
         }
         else
@@ -605,17 +605,17 @@ bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<doub
     // loop through each actionator in PostionActionators looking for non-empty actionators with the right datalength
     for (int i=0; i<l_num_joints; i++)
     {
-        if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0]->Data.size() != 3)
+        if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0].Data.size() != 3)
         {
             l_isvalid[i] = false;
         }
         else
         {
             l_isvalid[i] = true;
-            l_time[i] = PositionActionators[i]->m_points[0]->Time;
-            l_positions[i] = PositionActionators[i]->m_points[0]->Data[0];
-            l_velocities[i] = PositionActionators[i]->m_points[0]->Data[1];
-            l_gains[i] = PositionActionators[i]->m_points[0]->Data[2];
+            l_time[i] = PositionActionators[i]->m_points[0].Time;
+            l_positions[i] = PositionActionators[i]->m_points[0].Data[0];
+            l_velocities[i] = PositionActionators[i]->m_points[0].Data[1];
+            l_gains[i] = PositionActionators[i]->m_points[0].Data[2];
         }
     }
     
@@ -650,16 +650,16 @@ bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double
     // loop through each actionator in TorqueActionators looking for non-empty actionators with the right datalength
     for (int i=0; i<l_num_joints; i++)
     {
-        if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0]->Data.size() != 2)
+        if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0].Data.size() != 2)
         {
             l_isvalid[i] = false;
         }
         else
         {
             l_isvalid[i] = true;
-            l_time[i] = TorqueActionators[i]->m_points[0]->Time;
-            l_torques[i] = TorqueActionators[i]->m_points[0]->Data[0];
-            l_gains[i] = TorqueActionators[i]->m_points[0]->Data[1];
+            l_time[i] = TorqueActionators[i]->m_points[0].Time;
+            l_torques[i] = TorqueActionators[i]->m_points[0].Data[0];
+            l_gains[i] = TorqueActionators[i]->m_points[0].Data[1];
         }
     }
     
@@ -697,17 +697,17 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
     // loop through each actionator in LedActionators looking for non-empty actionators with the right datalength
     for (int i=0; i<l_num_leds; i++)
     {
-        if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0]->Data.size() != 3)
+        if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0].Data.size() != 3)
         {
             l_isvalid[i] = false;
         }
         else
         {
             l_isvalid[i] = true;
-            l_time[i] = LedActionators[i]->m_points[0]->Time;
-            l_redvalues[i] = LedActionators[i]->m_points[0]->Data[0];
-            l_greenvalues[i] = LedActionators[i]->m_points[0]->Data[1];
-            l_bluevalues[i] = LedActionators[i]->m_points[0]->Data[2];
+            l_time[i] = LedActionators[i]->m_points[0].Time;
+            l_redvalues[i] = LedActionators[i]->m_points[0].Data[0];
+            l_greenvalues[i] = LedActionators[i]->m_points[0].Data[1];
+            l_bluevalues[i] = LedActionators[i]->m_points[0].Data[2];
         }
     }
     
@@ -734,13 +734,13 @@ bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time,
  */
 bool NUActionatorsData::getNextSounds(bool& isvalid, double& time, vector<string>& sounds)
 {
-    if (Sound == NULL || Sound->isEmpty() || Sound->m_points[0]->Data.size() == 0)
+    if (Sound == NULL || Sound->isEmpty() || Sound->m_points[0].Data.size() == 0)
         return false;
     else 
     {
         isvalid = true;
-        time = Sound->m_points[0]->Time;
-        sounds = Sound->m_points[0]->Data;
+        time = Sound->m_points[0].Time;
+        sounds = Sound->m_points[0].Data;
         return true;
     }
 
@@ -755,13 +755,13 @@ bool NUActionatorsData::getNextSounds(bool& isvalid, double& time, vector<string
  */
 bool NUActionatorsData::getNextTeleportation(bool& isvalid, double& time, vector<float>& data)
 {
-    if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0]->Data.size() != 3)
+    if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0].Data.size() != 3)
         return false;
     else 
     {
         isvalid = true;
-        time = Teleporter->m_points[0]->Time;
-        data = Teleporter->m_points[0]->Data;
+        time = Teleporter->m_points[0].Time;
+        data = Teleporter->m_points[0].Data;
         return true;
     }
 }
