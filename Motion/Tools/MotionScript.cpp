@@ -21,6 +21,11 @@
 
 #include "MotionScript.h"
 #include "MotionFileTools.h"
+#include "MotionCurves.h"
+
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUSystem.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -28,14 +33,53 @@
 
 using namespace std;
 
+MotionScript::MotionScript()
+{
+    m_is_valid = false;
+}
+
 MotionScript::MotionScript(string filename)
 {
     m_name = filename;
     m_is_valid = load();
+    m_playspeed = 1;
+    if (m_is_valid)
+        calculateCurve();
 }
 
 MotionScript::~MotionScript()
 {
+    
+}
+
+void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
+{
+    /*vector<vector<float> > positions(m_positions.begin()+1, m_positions.end());
+    MotionCurves::calculate(0, m_times[0], data->, m_positions[1:], m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities);*/
+    
+    cout << "playing at " << NUSystem::getThreadTime() << endl;
+    /*cout << MotionFileTools::size(m_curvetimes) << endl;//" " << MotionFileTools::fromMatrix(m_curvetimes) << endl;
+    cout << MotionFileTools::size(m_curvepositions) << endl;//" " << MotionFileTools::fromMatrix(m_curvepositions) << endl;
+    cout << MotionFileTools::size(m_gains) << " " << MotionFileTools::fromMatrix(m_gains) << endl;*/
+    
+    vector<float> sensorpositions;
+    data->getJointPositions(NUSensorsData::AllJoints, sensorpositions);
+    vector<vector<double> > times = m_times;
+    for (size_t i=0; i<times.size(); i++)
+        for (size_t j=0; j<times[i].size(); j++)
+            times[i][j] += data->CurrentTime;
+    MotionCurves::calculate(data->CurrentTime, times, sensorpositions, m_positions, m_gains, m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities, m_curvegains);
+    actions->addJointPositions(NUActionatorsData::AllJoints, m_curvetimes, m_curvepositions, m_curvevelocities, m_curvegains);
+    cout << "finished at " << NUSystem::getThreadTime() << endl;
+    
+    for (size_t i=0; i<m_curvetimes.size(); i++)
+    {
+        cout << m_curvetimes[i].size() << " " << MotionFileTools::fromVector(m_curvetimes[i]) << endl;
+        cout << m_curvepositions[i].size() << " " << MotionFileTools::fromVector(m_curvepositions[i]) << endl;
+        cout << m_curvevelocities[i].size() << " " << MotionFileTools::fromVector(m_curvevelocities[i]) << endl;
+        cout << m_curvegains[i].size() << " " << MotionFileTools::fromVector(m_curvegains[i]) << endl;
+    }
+    
     
 }
 
@@ -49,26 +93,60 @@ bool MotionScript::load()
     }
     else
     {
-        vector<string> labels = MotionFileTools::toStringVector(file);
-        vector<float> times;
-        vector<vector<vector<float> > > zomg;
+        m_labels = MotionFileTools::toStringVector(file);
+        if (m_labels.empty())
+        {
+            errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << endl;
+            return false;
+        }
+        m_smoothness = 1.0;
+        
+        size_t numjoints = m_labels.size() - 1;
+        m_times = vector<vector<double> >(numjoints, vector<double>());
+        m_positions = vector<vector<float> >(numjoints, vector<float>());
+        m_gains = vector<vector<float> >(numjoints, vector<float>());
+        
+        float time;
+        vector<vector<float> > row;
+        
         while (!file.eof())
         {
-            float time;
-            vector<vector<float> > positions;
-            MotionFileTools::toFloatWithMatrix(file, time, positions);
-            if (positions.size() > 0)
-            {
-                times.push_back(time);
-                zomg.push_back(positions);
+            MotionFileTools::toFloatWithMatrix(file, time, row);
+            if (row.size() >= numjoints)
+            {   // discard rows that don't have enough joints
+                for (size_t i=0; i<numjoints; i++)
+                {
+                    if (row[i].size() > 0)
+                    {   // if there is an entry then the first must be a position
+                        m_times[i].push_back(1000*time);
+                        m_positions[i].push_back(row[i][0]);
+                        
+                        // because the way the joint actionators are designed we must also specify a gain
+                        if (row[i].size() > 1)
+                        {   // if there is a second entry then it is the gain
+                            m_gains[i].push_back(row[i][1]);
+                        }
+                        else
+                        {   // however if there is no second entry we reuse the previous entry or use 100% if this is the first one
+                            if (m_gains[i].empty())
+                                m_gains[i].push_back(100.0);
+                            else
+                                m_gains[i].push_back(m_gains[i].front());
+                        }
+                        
+                    }
+                }
             }
+            row.clear();
         }
-        
-        for (unsigned int i=0; i<labels.size(); i++)
-            cout << labels[i] << ",";
-        cout << endl;
-        
-        for (unsigned int i=0; i<times.size(); i++)
-            cout << times[i] << ":" << MotionFileTools::fromMatrix(zomg[i]) << endl;
+        return true;
     }
 }
+
+void MotionScript::calculateCurve()
+{
+    vector<float> zero(m_times.size(), 0);
+    MotionCurves::calculate(0, m_times, zero, m_positions, m_gains, m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities, m_curvegains);
+}
+
+

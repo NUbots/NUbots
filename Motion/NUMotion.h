@@ -45,6 +45,8 @@ class NUActionatorsData;
 #include "FallProtection.h"
 #include "Getup.h"
 
+#include "Tools/MotionScript.h"
+
 class NUMotion
 {
 public:
@@ -80,6 +82,8 @@ private:
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
     int m_cycle_time;                   //!< the cycle time in ms
+    
+    MotionScript m_block_left;
 };
 
 #endif

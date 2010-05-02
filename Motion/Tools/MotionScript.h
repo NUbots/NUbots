@@ -25,6 +25,9 @@
 #ifndef MOTIONSCRIPT_H
 #define MOTIONSCRIPT_H
 
+class NUActionatorsData;
+class NUSensorsData;
+
 #include <string>
 #include <vector>
 using namespace std;
@@ -32,25 +35,33 @@ using namespace std;
 class MotionScript
 {
 public:
+    MotionScript();
     MotionScript(std::string filename);
     ~MotionScript();
+    
+    void play(NUSensorsData* data, NUActionatorsData* actions);
 protected:
     bool load();
 private:
+    void calculateCurve();
 protected:
     std::string m_name;                 //!< the name of the script
     bool m_is_valid;                    //!< true if the motion script file was loaded without error
+
+    float m_playspeed;
     
     // original script data
-    vector<vector<double> > times;      //!< the times read in from the script file
-    vector<vector<float> > positions;   //!< the positions read in from the script file
-    vector<vector<float> > gains;       //!< the gains read in from the script file
+    vector<string> m_labels;             //!< the labels for each row
+    float m_smoothness;                  //!< the smoothness loaded from the script file
+    vector<vector<double> > m_times;     //!< the times read in from the script file
+    vector<vector<float> > m_positions;  //!< the positions read in from the script file
+    vector<vector<float> > m_gains;      //!< the gains read in from the script file
     
-    // smoothed script data
-    float m_motion_smoothness;
-    vector<vector<double> > curvetimes;
-    vector<vector<float> > curvepositions;
-    vector<vector<float> > curvevelocities;
+    // smoothed script data (these curves are only valid for a playspeed of 1)
+    vector<vector<double> > m_curvetimes;
+    vector<vector<float> > m_curvepositions;
+    vector<vector<float> > m_curvevelocities;
+    vector<vector<float> > m_curvegains;
 };
 
 #endif
