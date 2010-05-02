@@ -32,6 +32,8 @@ actionator_t<T>::actionator_t()
 {
     Name = string("Undefined");
     ActionatorType = UNDEFINED;
+    m_add_points_buffer.reserve(4096);
+    m_preprocess_buffer.reserve(4096);
     IsAvailable = false;
 }
 
@@ -44,6 +46,8 @@ actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionato
 {
     Name = actionatorname;
     ActionatorType = actionatortype;
+    m_add_points_buffer.reserve(4096);
+    m_preprocess_buffer.reserve(4096);
     IsAvailable = true;
 }
 
@@ -62,21 +66,43 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
     actionator_point_t point;
     point.Time = time;
     point.Data = data;
+    
+    m_add_points_buffer.push_back(point);
+}
 
-    // I need to keep the actionator points sorted based on their time
-    if (m_points.empty())           // the common (walk engine) case will be fast
-        m_points.push_back(point);
+/*! @brief
+ */
+template <typename T>
+void actionator_t<T>::preProcess()
+{
+    if (m_add_points_buffer.empty())
+        return;
     else
-    {   // so instead of just pushing it to the back, I need to put it in the right place :D
-        typename deque<actionator_point_t>::iterator insertposition;
-        insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePoints);
-        m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
-        m_points.push_back(point);
+    {
+        m_preprocess_buffer.swap(m_add_points_buffer);
+        // I need to keep the actionator points sorted based on their time.
+        //      (a) I need to sort the buffer before adding the points
+        //      (b) I need to search m_points for the correct place to add new point(s)
+        sort(m_preprocess_buffer.begin(), m_preprocess_buffer.end(), comparePoints);
+        
+        // because I did (a) and I choose to clear all existing points later in time
+        // I can simply find the location where the first point should be inserted, and then insert ALL new points after that
+        if (m_points.empty())
+        {
+            typename deque<actionator_point_t>::iterator insertposition;
+            insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front(), comparePoints);
+            m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
+        }
+        
+        m_points.insert(m_points.end(), m_preprocess_buffer.begin(), m_preprocess_buffer.end());
+
+        // clear the preprocess buffer after I have added all of the points
+        m_preprocess_buffer.clear();
     }
 }
 
 /*! @brief Remove all of the completed points
- @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
+     @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
  */
 template <typename T>
 void actionator_t<T>::removeCompletedPoints(double currenttime)

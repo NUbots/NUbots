@@ -70,6 +70,7 @@ public:
     actionator_t(string actionatorname, actionator_type_t actionatortype);
     
     void addPoint(double time, const vector<T>& data);
+    void preProcess();
     void removeCompletedPoints(double currenttime);
     bool isEmpty();
     
@@ -79,11 +80,13 @@ public:
     template <typename TT> friend ostream& operator<< (ostream& output, const actionator_t<TT>& p_actionator);
     template <typename TT> friend istream& operator>> (istream& input, actionator_t<TT>& p_actionator);
 public:
-    string Name;                                //!< the name of the actionator
-    actionator_type_t ActionatorType;           //!< the actionator type
-    deque<actionator_point_t> m_points;         //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
-    bool IsAvailable;                           //!< true if the actionator is avaliable, false if it is absent
+    string Name;                                        //!< the name of the actionator
+    actionator_type_t ActionatorType;                   //!< the actionator type
+    deque<actionator_point_t> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
+    bool IsAvailable;                                   //!< true if the actionator is avaliable, false if it is absent
 private:
+    vector<actionator_point_t> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
+    vector<actionator_point_t> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
     static bool comparePoints(const actionator_point_t& a, const actionator_point_t& b);
 };
 
