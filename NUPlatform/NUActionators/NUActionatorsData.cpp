@@ -72,16 +72,15 @@ NUActionatorsData::NUActionatorsData()
     m_num_joints = 0;
 }
 
+/*! @brief Destroys the NUActionatorsData storage class
+ */
 NUActionatorsData::~NUActionatorsData()
 {
-    m_all_actionators.clear();
-    m_all_string_actionators.clear();
-    m_head_ids.clear();
-    m_larm_ids.clear();
-    m_rarm_ids.clear();
-    m_torso_ids.clear();
-    m_lleg_ids.clear();
-    m_rleg_ids.clear();
+    for (size_t i=0; i<m_all_actionators.size(); i++)           // Note this will delete PositionActionators, TorqueActionators, LedActionators and Teleporter
+        delete m_all_actionators[i];
+    
+    for (size_t i=0; i<m_all_string_actionators.size(); i++)    // Note this will delete Sound
+        delete m_all_string_actionators[i];
 }
 
 /******************************************************************************************************************************************
