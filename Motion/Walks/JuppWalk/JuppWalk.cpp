@@ -174,15 +174,6 @@ void JuppWalk::getParameters()
  */
 JuppWalk::~JuppWalk()
 {
-    m_left_leg_angles.clear();
-    m_left_leg_gains.clear();
-    m_right_leg_angles.clear();
-    m_right_leg_gains.clear();
-    
-    m_left_arm_angles.clear();
-    m_left_arm_gains.clear();
-    m_right_arm_angles.clear();
-    m_right_arm_gains.clear();
 }
 
 void JuppWalk::doWalk()
