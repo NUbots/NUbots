@@ -122,18 +122,6 @@ void NAOWebotsSensors::enableSensorsInWebots()
  */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
-    m_servo_names.clear();
-    m_servos.clear();
-    delete m_accelerometer;
-    delete m_gyro;
-    m_distance_names.clear();
-    m_distance_sensors.clear();
-    m_foot_sole_names.clear();
-    m_foot_sole_sensors.clear();
-    m_foot_bumper_names.clear();
-    m_foot_bumper_sensors.clear();
-    if (m_gps != NULL)
-        delete m_gps;
 }
 
 /*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.
