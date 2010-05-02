@@ -371,8 +371,6 @@ void NAOActionators::copyToHardwareCommunications()
     #endif
     
     copyToSound();
-    
-    m_data->removeCompletedPoints(m_current_time);
 }
 
 

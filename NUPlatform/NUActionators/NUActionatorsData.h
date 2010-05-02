@@ -102,7 +102,8 @@ public:
     void setAvailableLeds(const vector<string>& lednames);
     void setAvailableOtherActionators(const vector<string>& actionatornames);
     
-    void removeCompletedPoints(double currenttime);
+    void preProcess();
+    void postProcess(double currenttime);
     
     // Misc. get methods
     int getNumberOfJoints(bodypart_id_t partid);
