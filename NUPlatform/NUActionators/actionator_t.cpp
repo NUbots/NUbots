@@ -54,7 +54,7 @@ actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionato
 template <typename T>
 void actionator_t<T>::addPoint(double time, const vector<T>& data)
 {
-    if (time < 0 || data.size() == 0)
+    if (data.size() == 0)
     {
         debug << "actionator_t<T>::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
         return;
@@ -64,18 +64,13 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
     point.Data = data;
 
     // I need to keep the actionator points sorted based on their time
-    if (m_points.size() == 0)           // the common (walk engine) case will be fast
+    if (m_points.empty())           // the common (walk engine) case will be fast
         m_points.push_back(point);
     else
     {   // so instead of just pushing it to the back, I need to put it in the right place :D
         typename deque<actionator_point_t>::iterator insertposition;
         insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePoints);
-        if (insertposition - m_points.begin() < 0)
-        {
-            errorlog << "actionator_t<T>::addPoint. " << Name << " Attempting to resize m_points to less than 0! Unhandled exception" << endl;
-            //errorlog << "actionator_t<T>::addPoint. insertpositions: " << *insertposition << " m_points.begin(): " << *m_points.begin() << endl;
-        }
-        m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
+        m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
         m_points.push_back(point);
     }
 }
@@ -86,7 +81,7 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
 template <typename T>
 void actionator_t<T>::removeCompletedPoints(double currenttime)
 {
-    while (m_points.size() > 0 && m_points[0].Time <= currenttime)
+    while (not m_points.empty() and m_points[0].Time <= currenttime)
         m_points.pop_front();
 }
 
@@ -95,10 +90,7 @@ void actionator_t<T>::removeCompletedPoints(double currenttime)
 template <typename T>
 bool actionator_t<T>::isEmpty()
 {
-    if (m_points.size() == 0)
-        return true;
-    else
-        return false;
+    return m_points.empty();
 }
 
 /*! Returns true if a should go before b, false otherwise.
@@ -106,10 +98,7 @@ bool actionator_t<T>::isEmpty()
 template <typename T>
 bool actionator_t<T>::comparePoints(const actionator_point_t& a, const actionator_point_t& b)
 {
-    if (a.Time < b.Time)
-        return true;
-    else
-        return false;
+    return a.Time < b.Time;
 }
 
 /*! @brief Provides a text summary of the contents of the actionator_t
