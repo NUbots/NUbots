@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
                 FallProtection.cpp FallProtection.h
                 Getup.cpp Getup.h
+                Walks/WalkParameters.cpp Walks/WalkParameters.h
 )
 
 SET (YOUR_DIRS 	Tools)
