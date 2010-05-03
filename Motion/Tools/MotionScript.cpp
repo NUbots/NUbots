@@ -80,7 +80,7 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
             filename << "joint" << i << ".csv";
             ofstream file(filename.str().c_str()); 
             for (size_t j=0; j<m_curvetimes[i].size(); j++)
-                file << m_curvetimes[i][j] << ", " << m_curvepositions[i][j] << ", " << m_curvevelocities[i][j] << endl;
+                file << m_curvetimes[i][j] << ", " << m_curvepositions[i][j] << ", " << 1000*m_curvevelocities[i][j] << endl;
         }
         cout << m_curvetimes[i].size() << " " << MotionFileTools::fromVector(m_curvetimes[i]) << endl;
         cout << m_curvepositions[i].size() << " " << MotionFileTools::fromVector(m_curvepositions[i]) << endl;
