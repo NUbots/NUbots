@@ -56,7 +56,9 @@ void MotionCurves::calculate(double starttime, double stoptime, float startposit
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities)
 {
-    if (times.size() == 0 || positions.size() < times.size())
+    if (times.empty())
+        return;
+    else if (positions.size() < times.size())
     {
         errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << endl;
         return;
@@ -92,7 +94,9 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, floa
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, const vector<float>& gains, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities, vector<float>& calculatedgains)
 {
-    if (times.size() == 0 || positions.size() < times.size())
+    if (times.empty())
+        return;
+    else if (positions.size() < times.size())
     {
         errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << endl;
         return;
@@ -142,7 +146,9 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, floa
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
-    if (times.size() == 0 || positions.size() < times.size())
+    if (times.empty())
+        return;
+    else if (positions.size() < times.size())
     {
         errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
         return;
@@ -192,7 +198,9 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, cons
 void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
     size_t numjoints = times.size();
-    if (numjoints == 0 || startpositions.size() < numjoints || positions.size() < numjoints)
+    if (numjoints == 0)
+        return;
+    else if (startpositions.size() < numjoints || positions.size() < numjoints)
     {
         errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
         return;
@@ -236,7 +244,9 @@ void MotionCurves::calculate(double starttime, const vector<vector<double> >& ti
 void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, const vector<vector<float> >& gains, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities, vector<vector<float> >& calculatedgains)
 {
     size_t numjoints = times.size();
-    if (numjoints == 0 || startpositions.size() < numjoints || positions.size() < numjoints)
+    if (numjoints == 0)
+        return;
+    if (startpositions.size() < numjoints || positions.size() < numjoints)
     {
         errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
         return;
