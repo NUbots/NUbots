@@ -24,7 +24,39 @@
 #include <sstream>
 #include <iostream>
 #include <stdlib.h>
+#include <algorithm>
+#include <cctype>
 using namespace std;
+
+/*! @brief Reads a boolean from a stream
+    @param input the stream to read from
+ */
+bool MotionFileTools::toBool(istream& input)
+{
+    input.ignore(128, ':');
+    string buffer;
+    getline(input, buffer);
+    buffer.erase(remove(buffer.begin(), buffer.end(), ' '), buffer.end());          // remove leading and trailing whitespace
+    if (buffer.empty())
+        return false;
+    
+    // Now there are two ways to specify a bool using 0 and non-zero or false and true
+    if (isalpha(buffer[0]))
+    {
+        if (buffer[0] == 't' or buffer[0] == 'T')
+            return true;
+        else
+            return false;
+    }
+    else
+    {
+        if (atof(buffer.c_str()) > 0)
+            return true;
+        else
+            return false;
+    }
+    
+}
 
 /*! @brief Converts a cstring to a float
     @param data the cstring with the float in it

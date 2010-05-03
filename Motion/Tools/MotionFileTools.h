@@ -32,6 +32,8 @@ using namespace std;
 class MotionFileTools
 {
 public:
+    static bool toBool(istream& input);
+    
     static float toFloat(const char* data);
     static float toFloat(const string& data);
     static float toFloat(istream& input);

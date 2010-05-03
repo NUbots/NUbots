@@ -93,13 +93,14 @@ bool MotionScript::load()
     }
     else
     {
+        m_smoothness = MotionFileTools::toFloat(file);
+        m_return_to_start = MotionFileTools::toBool(file);
         m_labels = MotionFileTools::toStringVector(file);
         if (m_labels.empty())
         {
             errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << endl;
             return false;
         }
-        m_smoothness = 1.0;
         
         size_t numjoints = m_labels.size() - 1;
         m_times = vector<vector<double> >(numjoints, vector<double>());
