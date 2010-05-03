@@ -41,6 +41,9 @@ private:
     MotionCurves() {};
     ~MotionCurves() {};
     static void calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities);
+    static float calculateFinalVelocity(float starttime, float stoptime, float nextstoptime, float startposition, float stopposition, float nextstopposition);
+    static float calculateAvgVelocity(float starttime, float stoptime, float startposition, float stopposition);
+    
 protected:
 public:
 };
