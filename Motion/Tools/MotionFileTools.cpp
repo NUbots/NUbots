@@ -98,9 +98,13 @@ string MotionFileTools::fromVector(vector<float> data)
 {
     stringstream ss;
     ss << "[";
-    for (size_t i=0; i<data.size()-1; i++)
-        ss << data[i] << ", ";
-    ss << data[data.size()-1] << "]";
+    if (not data.empty())
+    {
+        for (size_t i=0; i<data.size()-1; i++)
+            ss << data[i] << ", ";
+        ss << data[data.size()-1];
+    }
+    ss << "]";
     return ss.str();
 }
 
@@ -114,9 +118,13 @@ string MotionFileTools::fromVector(vector<double> data)
 {
     stringstream ss;
     ss << "[";
-    for (size_t i=0; i<data.size()-1; i++)
-        ss << data[i] << ", ";
-    ss << data[data.size()-1] << "]";
+    if (not data.empty())
+    {
+        for (size_t i=0; i<data.size()-1; i++)
+            ss << data[i] << ", ";
+        ss << data[data.size()-1];
+    }
+    ss << "]";
     return ss.str();
 }
 
