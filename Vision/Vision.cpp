@@ -1399,7 +1399,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-	    delete colourHistogram;
+	    delete [] colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
