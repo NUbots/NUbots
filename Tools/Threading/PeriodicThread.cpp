@@ -43,6 +43,7 @@ PeriodicThread::PeriodicThread(string name, int period, unsigned char priority) 
     #if DEBUG_THREADING_VERBOSITY > 1
         debug << "PeriodicThread::PeriodicThread(" << m_name << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << endl;
     #endif
+    m_start_time = 0;
 }
 
 /*! @brief Stops the thread
