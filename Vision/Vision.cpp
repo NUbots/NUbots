@@ -1559,7 +1559,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     int Xstart, Xend, Ystart, Yend;
     //Work Backwards: As post width is acurrate at bottom (no crossbar)
     //ASSUMING EVERYTHING IS ALREADY ORDERED
-    for(int i = horizontalsegments.size()-1; i >= 0; i--)
+    for(int i = horizontalsegments.size()-1; i > 0; i--)
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
@@ -1578,7 +1578,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         Xend = horizontalsegments[i].getEndPoint().x;
         tempSegments.push_back(horizontalsegments[i]);
         tempUsedSegments.push_back(i);
-        int nextSegCounter = i+1;
+        int nextSegCounter = i-1;
 
         //We want to stop searching when it leaves the line
         //Searching for a new Xend, close to this current Xstart
