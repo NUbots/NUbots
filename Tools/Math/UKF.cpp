@@ -31,12 +31,6 @@ Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
     //unsigned int numPoints = sigmaPoints.getn();
     Matrix mean(sigmaPoints.getm(),1,false);
     mean = sigmaPoints * m_sigmaWeights.transp();
-    /*
-    for(unsigned int i = 0; i < numPoints; i++)
-    {
-        mean = mean + m_sigmaWeights[0][i]*sigmaPoints.getCol(i);
-    }
-    */
     return mean;
 }
 
@@ -121,7 +115,7 @@ bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoi
 {
     m_mean = CalculateMeanFromSigmas(updatedSigmaPoints);
     m_covariance = CalculateCovarianceFromSigmas(updatedSigmaPoints, m_mean);
-    m_covariance=HT(horzcat(m_covariance, processNoise));
+    // TODO: Work out how to implement measurement noise.
     return true;
 }
 
@@ -129,12 +123,9 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
 {
     const int numMeasurements = measurement.getm();
     int numberOfSigmaPoints = stateEstimateSigmas.getn();
-//    debug << "Predicted measurement sigmas:" << endl << predictedMeasurementSigmas;
 
+    // Find mean of predicted measurement
     Matrix predictedMeasurement = CalculateMeanFromSigmas(predictedMeasurementSigmas);
-
-//    debug << "Predicted measurement (mean):" << endl << predictedMeasurement;
-//    debug << "Measurement:" << endl << measurement;
 
     Matrix Pyy(numMeasurements,numMeasurements,false);
     Matrix Pxy(stateEstimateSigmas.getm(),numMeasurements,false);
@@ -142,40 +133,23 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     Matrix temp;
     for(int i =0; i < numberOfSigmaPoints; i++)
     {
+        // store difference between prediction and measurment.
         temp = predictedMeasurementSigmas.getCol(i) - predictedMeasurement;
-        // Innovation covariance
+        // Innovation covariance - Add Measurement noise
         Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp() + measurementNoise;
         // Cross correlation matrix
         Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
-//        debug << "Pxy:" << endl << Pxy;
-//        debug << " m_sigmaWeights[0][i]:" << endl <<  m_sigmaWeights[0][i];
-//        debug << "(stateEstimateSigmas.getCol(i) - m_mean)" << endl << (stateEstimateSigmas.getCol(i) - m_mean);
-//        debug << "temp.transp()" << endl << temp.transp();
     }
     Matrix K = Pxy * Invert22(Pyy);
-
-//    debug << "Pyy:" << endl << Pyy;
-
-//    debug << "Pxy:" << endl << Pxy;
-
-
-//    debug << "K:" << endl << K;
-    debug << "Pxy:" << endl << Pxy << endl;
-    debug << "Pyy:" << endl << Pyy << endl;
-    debug << "K:" << endl << K << endl;
     m_mean  = m_mean + K * (measurement - predictedMeasurement);
-
-//    debug << "K*Pyy = " << endl << K*Pyy << endl;
-//    debug << "K*Pyy*K.transp() = " << endl << K*Pyy*K.transp() << endl;
-//    debug << "m_covariance = " << endl << m_covariance << endl;
     m_covariance = m_covariance - K*Pyy*K.transp();
+
+    // Alternate calculation
     //m_covariance = m_covariance - Pxy*Pyy*Pxy.transp();
-
-
-
+\
+    // Stolen from last years code... does not all seem right for this iplementation.
     //m_covariance = HT(horzcat(stateEstimateSigmas-m_mean*m_sigmaWeights - K*predictedMeasurementSigmas +
     //                          K*predictedMeasurement*m_sigmaWeights,K*measurementNoise));
 
-    // Stolen from last years code... does not all seem right for this iplementation.
     return true;
 }

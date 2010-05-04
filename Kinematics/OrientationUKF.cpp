@@ -17,7 +17,6 @@ void OrientationUKF::initialise(double timestamp, float pitchGyro, float rollGyr
     m_covariance[pitchGyroOffset][pitchGyroOffset] = 0.1f;
     m_covariance[rollGyroOffset][rollGyroOffset] = 0.1f;
 
-    debug << "Accel Values: [" << accX << ","  << accY << "," << accZ <<"]" << std::endl;
     // Assume there is little to no acceleration apart from gravity for initial estimation.
     m_mean[pitchAngle][0] = -atan2(-accX,-accZ);
     m_mean[rollAngle][0] = atan2(accY,-accZ);
@@ -26,24 +25,12 @@ void OrientationUKF::initialise(double timestamp, float pitchGyro, float rollGyr
     m_mean[yAcceleration][0] = 0.0;
     m_mean[zAcceleration][0] = 0.0;
 
-
-    debug << "Angles: [" << m_mean[pitchAngle][0] << "," << m_mean[rollAngle][0] <<"]" << std::endl;
-
-    // Determine starting covariance (error)
-    const float idealGravityAccelVectorLength = 981.0f;
-    const float accelVectorLength = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2));
-    const float accelVectorLengthError = accelVectorLength - idealGravityAccelVectorLength;
-    const float errorPercentage = fabs(accelVectorLengthError/idealGravityAccelVectorLength);
-    const float estAngleError = errorPercentage * mathGeneral::PI / 2;
     m_covariance[pitchAngle][pitchAngle] = 0.5;
     m_covariance[rollAngle][rollAngle] = 0.5;
 
     m_covariance[xAcceleration][xAcceleration] = 10.0f;
     m_covariance[yAcceleration][yAcceleration] = 10.0f;
     m_covariance[zAcceleration][zAcceleration] = 10.0f;
-
-    debug << "Orientation Filter Initialised" << std::endl;
-    debug << m_mean << std::endl;
     m_initialised = true;
 }
 
@@ -55,7 +42,7 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
     // Store the current time for reference during next update.
     m_timeOfLastUpdate = timestamp;
 
-    // Time Update Function is equation of the form:
+    // Time Update Function is equation of the form (emitting accelerations):
     // x' = Ax + By
     //    = [ 1 -dt 0  0  ] [ pitchAngle      ] + [ dt  0  ] [ pitchGyroReading ]
     //      [ 0  1  0  0  ] [ pitchGyroOffset ]   [  0  0  ] [ rollGyroReading  ]
@@ -81,9 +68,6 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
     sensorData[0][0] = pitchGyroReading;
     sensorData[1][0] = rollGyroReading;
 
-    debug << "Time Update: Time elapsed = " << dt << std::endl;
-    debug << "sensorData" << std::endl << sensorData;
-
     // Generate the sigma points and update using transfer function
     Matrix sigmaPoints = GenerateSigmaPoints();
     m_updateSigmaPoints = Matrix(sigmaPoints.getm(), sigmaPoints.getn(), false);
@@ -94,50 +78,33 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
         m_updateSigmaPoints.setCol(i,tempResult);
     }
 
-    Matrix processNoise(numStates,numStates,true);
-    processNoise = 0.1* processNoise;
-    processNoise[pitchGyroOffset][pitchGyroOffset] = 1.0;
-    processNoise[rollGyroOffset][rollGyroOffset] = 1.0;
-    processNoise[xAcceleration][xAcceleration] = 50.0;
-    processNoise[yAcceleration][yAcceleration] = 50.0;
-    processNoise[zAcceleration][zAcceleration] = 50.0;
-
     // Find the new mean
     m_mean = CalculateMeanFromSigmas(m_updateSigmaPoints);
-    // Normalise the angles.
+    // Normalise the angles so they lie between +pi and -pi.
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
+
     // Find the new covariance
     m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean);
-    //m_covariance=HT(horzcat(m_covariance, processNoise));
-
-    debug << "Time Update Complete." << std::endl << "Mean:" << std::endl << m_mean << std::endl;
-    //debug << "Covariance:" << endl << m_sqrtCovariance << endl;
-    //debug << "Covariance:" << endl << m_covariance << endl;
 }
 
 void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, float zAccel)
 {
     const int numMeasurements = 3;
-    const float gravityAccel = 981; // cm/s^2
+    const float gravityAccel = 981.0f; // cm/s^2
+
     // Generate sigma points from current state estimation.
     Matrix sigmaPoints = GenerateSigmaPoints();
     int numberOfSigmaPoints = sigmaPoints.getn();
 
-    //debug << "Sigma Points:" << endl << sigmaPoints;
-
     // List of predicted observation for each sigma point.
     Matrix predictedObservationSigmas(numMeasurements, numberOfSigmaPoints, false);
 
-    // Put observation into matrix form
+    // Put observation into matrix form so we can use if for doing math
     Matrix observation(numMeasurements,1,false);
     observation[0][0] = xAccel;
     observation[1][0] = yAccel;
     observation[2][0] = zAccel;
-
-    const float idealGravityAccelVectorLength = 981.0f;
-    const float accelVectorLength = sqrt(pow(xAccel,2) + pow(yAccel,2) + pow(zAccel,2));
-    const float accelVectorLengthError = accelVectorLength - idealGravityAccelVectorLength;
 
     Matrix S_Obs(numMeasurements,numMeasurements,true);
     S_Obs = 1.0*S_Obs;
@@ -156,26 +123,21 @@ void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, 
         accY = sigmaPoints[yAcceleration][i];
         accZ = sigmaPoints[zAcceleration][i];
 
-        // Calculate predicted x acceleration due to gravity.
+        // Calculate predicted x acceleration due to gravity + external acceleration.
         temp[0][0] = gravityAccel * sin(pitch) + accX;
 
-        // Calculate predicted y acceleration due to gravity.
+        // Calculate predicted y acceleration due to gravity + external acceleration.
         temp[1][0] = gravityAccel * cos(pitch) * sin(roll) + accY;
 
-        // Calculate predicted z acceleration due to gravity.
+        // Calculate predicted z acceleration due to gravity + external acceleration.
         temp[2][0] = -gravityAccel * cos(pitch) * cos(roll) + accZ;
 
         // Add to measurement sigma point list.
         predictedObservationSigmas.setCol(i,temp);
     }
-    debug << "observation" << std::endl << observation;
-    debug << "predictedObservationSigmas" << std::endl << predictedObservationSigmas;
-    debug << "covariance" << std::endl << m_covariance;
     measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
-
-    debug << "Accelerometer Update Complete." << std::endl << "Mean:" << std::endl << m_mean << std::endl;
 }
 
 void OrientationUKF::KinematicsMeasurementUpdate(float pitchAngle, float rollAngle)
