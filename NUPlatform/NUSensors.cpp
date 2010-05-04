@@ -28,6 +28,8 @@
 #include <math.h>
 #include <boost/circular_buffer.hpp>
 #include "Kinematics/Kinematics.h"
+
+#include "Kinematics/OrientationUKF.h"
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -42,8 +44,9 @@ NUSensors::NUSensors()
     m_current_time = nusystem->getTime();
     m_previous_time = 0;
     m_data = new NUSensorsData();
-	m_kinematicModel = new Kinematics();
-	m_kinematicModel->LoadModel("None");
+    m_kinematicModel = new Kinematics();
+    m_kinematicModel->LoadModel("None");
+    m_orientationFilter = new OrientationUKF();
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -59,6 +62,8 @@ NUSensors::~NUSensors()
         delete m_data;
 	delete m_kinematicModel;
 	m_kinematicModel = 0;
+        delete m_orientationFilter;
+        m_orientationFilter = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -184,8 +189,11 @@ void NUSensors::calculateOrientation()
 #endif
     static vector<float> orientation(3, 0);
     static vector<float> acceleration(3, 0);
+    static vector<float> gyros(2, 0);
+
     if (m_data->getAccelerometerValues(acceleration))
     {
+        // Old method
         float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
         if (fabs(accelsum - 981) < 0.1*981)
         {   // only update the orientation estimate if not under other accelerations!
@@ -194,6 +202,24 @@ void NUSensors::calculateOrientation()
             orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
         }
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+
+        // New method
+        if(m_data->getGyroValues(gyros))
+        {
+
+            if(!m_orientationFilter->Initialised())
+            {
+                if (fabs(accelsum - 981) < 0.2*981)
+                {
+                    m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
+                }
+            }
+            else
+            {
+                m_orientationFilter->TimeUpdate(gyros[1]+1, gyros[0]+2, m_current_time);
+                m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
+            }
+        }
     }
 }
 
@@ -623,11 +649,11 @@ void NUSensors::calculateKinematics()
     const bool rightLegSupport = true;
     const int cameraNumber = 1;
 
-    vector<float> leftLegJoints;
+    static vector<float> leftLegJoints;
     bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
-    vector<float> rightLegJoints;
+    static vector<float> rightLegJoints;
     bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
-    vector<float> headJoints;
+    static vector<float> headJoints;
     bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
 
     Matrix rightLegTransform;

@@ -35,6 +35,7 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 
 class Kinematics;
+class OrientationUKF;
 
 /*! @brief Base sensor storage class
  */
@@ -75,6 +76,7 @@ protected:
     double m_current_time;
     double m_previous_time;
     Kinematics* m_kinematicModel;
+    OrientationUKF* m_orientationFilter;
 private:
 };
 
