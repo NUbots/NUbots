@@ -603,7 +603,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
     int height = currentImage->getHeight();
 
     Vector2<int> temp;
-    for (; nextPoint != fieldBorders.end(); nextPoint++)
+    for (; nextPoint != fieldBorders.end(); ++nextPoint)
     {
         x = nextPoint->x;
         y = nextPoint->y;
@@ -617,7 +617,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         scanArea.addScanLine(tempScanLine);
 
         //!Create half ScanLine
-        midX = x-skip;
+        midX = x+skip;
         temp.x = midX;
         halfLineLength = int((height - y)/2);
         ScanLine tempMidScanLine(temp,halfLineLength);
@@ -632,22 +632,6 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         ScanLine tempRightQuarterLine(temp,quarterLineLength);
         scanArea.addScanLine(tempRightQuarterLine);
     }
-
-    //!Generate the last Lines:
-    midX = fieldBorders.back().x+skip;
-    y = fieldBorders.back().y;
-    temp.x = midX;
-    temp.y = y;
-    ScanLine tempMidScanLine(temp,halfLineLength);
-    scanArea.addScanLine(tempMidScanLine);
-    temp.x = midX-skip/2;
-    temp.y = y;
-    ScanLine tempLeftQuarterLine(temp,quarterLineLength);
-    scanArea.addScanLine(tempLeftQuarterLine);
-    temp.x = midX+skip/2;
-    temp.y = y;
-    ScanLine tempRightQuarterLine(temp,quarterLineLength);
-    scanArea.addScanLine(tempRightQuarterLine);
 
     return scanArea;
 }
@@ -764,6 +748,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     {
         colourBuff.push_back(0);
     }
+
     for (int i = 0; i < numOfLines; i++)
     {
         tempLine = scanArea->getScanLine(i);
@@ -801,6 +786,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
             }
+            
             //debug << currentPoint.x << " " << currentPoint.y;
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
@@ -878,10 +864,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     afterColour = classifyPixel(currentPoint.x,currentPoint.y);
                     colourBuff.push_back(afterColour);
                     j = j+skipPixel*3;
-                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
-                            "\t"<<currentColour<< "," << afterColour <<
-                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
-                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
+                    //qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                    //        "\t"<<currentColour<< "," << afterColour <<
+                    //        "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
+                    //        "\t"<< currentPoint.x+j << "," << currentImage->getWidth();
                 }
 
                 TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
