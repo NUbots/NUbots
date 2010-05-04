@@ -417,17 +417,17 @@ void NUSensors::calculateFootImpact()
     
     // The idea is to keep track of what is 'small' and what is 'large' for foot forces
     // And then define an impact to be a transisition from small to large foot force
-    if (m_previous_time != 0)
+    if (m_previous_time > 0)
     {
         // grab the current force readings
         float leftforce = (*(m_data->FootForce))[0];
         float rightforce = (*(m_data->FootForce))[1];
         float totalforce = (*(m_data->FootForce))[2];
         
-        const int numpastvalues = static_cast<int> (200.0/(m_current_time - m_previous_time));
+        const int numpastvalues = static_cast<int> (200.0/(m_current_time - m_previous_time)) + 1;
         static boost::circular_buffer<float> previousleftforces(numpastvalues, 0);      // forces on the left foot
         static boost::circular_buffer<float> previousrightforces(numpastvalues, 0);     // forces on the right foot
-        static boost::circular_buffer<float> previoustotalforces(numpastvalues, 0);     // forces on the right foot
+        static boost::circular_buffer<float> previoustotalforces(numpastvalues, 0);     // total forces
         static float leftforcemin = leftforce;
         static float leftforcemax = leftforce;
         static float rightforcemin = rightforce;
@@ -485,11 +485,6 @@ void NUSensors::calculateFootImpact()
             {
                 previousimpacttimes[0] = impacttimes[0];
                 impacttimes[0] = m_current_time;
-                for (unsigned int i=0; i<previousleftforces.size(); i++)
-                {
-                    debug << " " << previousleftforces[i];
-                }
-                debug << endl;
             }
         }
         if (rightforcemax > 3*rightforcemin)
@@ -506,11 +501,6 @@ void NUSensors::calculateFootImpact()
             {
                 previousimpacttimes[1] = impacttimes[1];
                 impacttimes[1] = m_current_time;
-                for (unsigned int i=0; i<previousrightforces.size(); i++)
-                {
-                    debug << " " << previousrightforces[i];
-                }
-                debug << endl;
             }
         }
     }
