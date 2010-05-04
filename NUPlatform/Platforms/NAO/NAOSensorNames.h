@@ -41,7 +41,7 @@ using namespace std;
 #define DN_L_KNEE_PITCH_POSITION      std::string("Device/SubDeviceList/LKneePitch/Position/Sensor/Value")
 #define DN_L_ANKLE_PITCH_POSITION     std::string("Device/SubDeviceList/LAnklePitch/Position/Sensor/Value") 
 #define DN_L_ANKLE_ROLL_POSITION      std::string("Device/SubDeviceList/LAnkleRoll/Position/Sensor/Value")
-#define DN_R_HIP_YAWPITCH_POSITION    std::string("Device/SubDeviceList/LHipYawPitch/Position/Sensor/Value")
+#define DN_R_HIP_YAWPITCH_POSITION    std::string("Device/SubDeviceList/RHipYawPitch/Position/Sensor/Value")
 #define DN_R_HIP_ROLL_POSITION        std::string("Device/SubDeviceList/RHipRoll/Position/Sensor/Value") 
 #define DN_R_HIP_PITCH_POSITION       std::string("Device/SubDeviceList/RHipPitch/Position/Sensor/Value")
 #define DN_R_KNEE_PITCH_POSITION      std::string("Device/SubDeviceList/RKneePitch/Position/Sensor/Value")
