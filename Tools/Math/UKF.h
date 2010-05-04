@@ -20,7 +20,7 @@ public:
     double getMean(int stateId) const;
     double calculateSd(int stateId) const;
     bool setState(Matrix mean, Matrix covariance);
-    bool  timeUpdate(const Matrix& updatedSigmaPoints);
+    bool  timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoise);
     bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas);
 
 protected:
