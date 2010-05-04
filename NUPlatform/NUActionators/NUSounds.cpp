@@ -44,7 +44,10 @@ string NUSounds::NUBOT9 = string("nubot9.wav");
 string NUSounds::NUBOT10 = string("nubot10.wav");
 string NUSounds::MY_IP_IS = string("my_ip_is.wav");
 
+string NUSounds::ILLEGAL_INSTRUCTION = string("illegal_instruction.wav");
 string NUSounds::SEG_FAULT = string("seg_fault.wav");
+string NUSounds::BUS_ERROR = string("bus_error.wav");
+string NUSounds::ABORT = string("abort.wav");
 string NUSounds::UNHANDLED_EXCEPTION = string("unhandled_exception.wav");
 string NUSounds::LOW_BATTERY = string("low_battery.wav");
 

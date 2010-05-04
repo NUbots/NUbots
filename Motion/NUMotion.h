@@ -55,6 +55,8 @@ public:
     void process(JobList& jobs);
     
     int getCycleTime() {return m_cycle_time;};
+    
+    void safeKill(NUSensorsData* data, NUActionatorsData* actions);
 protected:
 private:
     void calculateCycleTime();
