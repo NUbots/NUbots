@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "EndEffector.h"
+#include "debug.h"
 
 class Kinematics
 {
@@ -28,21 +29,39 @@ public:
 
     static std::vector<float> ReOrderKneckJoints(const std::vector<float>& joints)
     {
+        const int numRequiredJoints = 2;
         std::vector<float> result(joints.size());
-        result[0] = joints[1];
-        result[1] = joints[0];
+        if(joints.size() >= numRequiredJoints)
+        {
+            result[0] = joints[1];
+            result[1] = joints[0];
+        }
+        else
+        {
+            errorlog << "Kinematics::ReOrderKneckJoints - Wrong number of joint values: Expected ";
+            errorlog << numRequiredJoints << " Received " << joints.size() << "." << std::endl;
+        }
         return result;
     };
 
     static std::vector<float> ReOrderLegJoints(const std::vector<float>& joints)
     {
+        const int numRequiredJoints = 6;
         std::vector<float> result(joints.size());
-        result[0] = joints[2];
-        result[1] = joints[0];
-        result[2] = joints[1];
-        result[3] = joints[3];
-        result[4] = joints[5];
-        result[5] = joints[4];
+        if(joints.size() >= numRequiredJoints)
+        {
+            result[0] = joints[2];
+            result[1] = joints[0];
+            result[2] = joints[1];
+            result[3] = joints[3];
+            result[4] = joints[5];
+            result[5] = joints[4];
+        }
+        else
+        {
+            errorlog << "Kinematics::ReOrderLegJoints - Wrong number of joint values: Expected ";
+            errorlog << numRequiredJoints << " Received " << joints.size() << "." << std::endl;
+        }
         return result;
     };
 
