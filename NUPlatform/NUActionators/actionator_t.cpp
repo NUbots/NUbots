@@ -75,7 +75,10 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
         typename deque<actionator_point_t*>::iterator insertposition;
         insertposition = lower_bound(m_points.begin(), m_points.end(), point, comparePointTimes);
         if (insertposition - m_points.begin() < 0)
-            errorlog << "actionator_t<T>::addPoint. " << Name << "Attempting to resize m_points to less than 0! Unhandled exception" << endl;
+        {
+            errorlog << "actionator_t<T>::addPoint. " << Name << " Attempting to resize m_points to less than 0! Unhandled exception" << endl;
+            errorlog << "actionator_t<T>::addPoint. insertpositions: " << *insertposition << " m_points.begin(): " << *m_points.begin() << endl;
+        }
         m_points.resize((int) (insertposition - m_points.begin()));     // Clear all points after the new one 
         m_points.push_back(point);
     }
