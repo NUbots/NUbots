@@ -21,7 +21,7 @@ public:
     void initialise(double time, float pitchGyro, float rollGyro, float accX, float accY, float accZ);
     void TimeUpdate(float pitchGyroReading, float rollGyroReading, double timestamp);
     void AccelerometerMeasurementUpdate(float xAccel, float yAccel, float zAccel);
-    void KinematicsMeasurementUpdate(float pitchAngle, float rollAngle);
+    void KinematicsMeasurementUpdate(float pitchMeasurement, float rollMeasurement);
     bool Initialised(){return m_initialised;};
 
 private:
