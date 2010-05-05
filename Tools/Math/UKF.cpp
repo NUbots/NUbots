@@ -114,8 +114,8 @@ bool UKF::setState(Matrix mean, Matrix covariance)
 bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoise)
 {
     m_mean = CalculateMeanFromSigmas(updatedSigmaPoints);
-    m_covariance = CalculateCovarianceFromSigmas(updatedSigmaPoints, m_mean);
-    // TODO: Work out how to implement measurement noise.
+    // Update covariance assuming additive process noise.
+    m_covariance = CalculateCovarianceFromSigmas(updatedSigmaPoints, m_mean) + processNoise;
     return true;
 }
 
