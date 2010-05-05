@@ -140,7 +140,16 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
         // Cross correlation matrix
         Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
     }
-    Matrix K = Pxy * Invert22(Pyy);
+    Matrix K;
+    if(numMeasurements == 2)
+    {
+        K = Pxy * Invert22(Pyy);
+    }
+    else
+    {
+        K = Pxy * InverseMatrix(Pyy);
+    }
+
     m_mean  = m_mean + K * (measurement - predictedMeasurement);
     m_covariance = m_covariance - K*Pyy*K.transp();
 
