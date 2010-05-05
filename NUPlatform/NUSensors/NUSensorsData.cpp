@@ -59,6 +59,8 @@ NUSensorsData::NUSensorsData()
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
     
+    CurrentTime = 0;
+    
     // create the sensor_t's
     addSensor(JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
     addSensor(JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);

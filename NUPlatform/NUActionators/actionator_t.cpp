@@ -32,9 +32,13 @@ actionator_t<T>::actionator_t()
 {
     Name = string("Undefined");
     ActionatorType = UNDEFINED;
-    m_add_points_buffer.reserve(4096);
-    m_preprocess_buffer.reserve(4096);
+    m_add_points_buffer.reserve(1024);
+    m_preprocess_buffer.reserve(1024);
     IsAvailable = false;
+    int err;
+    err = pthread_mutex_init(&m_lock, NULL);
+    if (err != 0)
+        errorlog << "actionator_t<T>::actionator_t(" << Name << ") Failed to create m_lock." << endl;
 }
 
 /*! @brief Constructor for an actionator_t with known name and type
@@ -46,9 +50,16 @@ actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionato
 {
     Name = actionatorname;
     ActionatorType = actionatortype;
-    m_add_points_buffer.reserve(4096);
-    m_preprocess_buffer.reserve(4096);
+    m_add_points_buffer.reserve(1024);
+    m_preprocess_buffer.reserve(1024);
     IsAvailable = true;
+    int err;
+    err = pthread_mutex_init(&m_lock, NULL);
+    if (err != 0)
+    {
+        errorlog << "actionator_t<T>::actionator_t(" << Name << ") Failed to create m_lock." << endl;
+        IsAvailable = false;
+    }
 }
 
 /*! @brief Adds a point to the actionator
@@ -67,7 +78,9 @@ void actionator_t<T>::addPoint(double time, const vector<T>& data)
     point.Time = time;
     point.Data = data;
     
+    pthread_mutex_lock(&m_lock);
     m_add_points_buffer.push_back(point);
+    pthread_mutex_unlock(&m_lock);
 }
 
 /*! @brief
@@ -77,9 +90,12 @@ void actionator_t<T>::preProcess()
 {
     if (m_add_points_buffer.empty())
         return;
+    else if (pthread_mutex_trylock(&m_lock))
+        return;
     else
     {
         m_preprocess_buffer.swap(m_add_points_buffer);
+        pthread_mutex_unlock(&m_lock);
         // I need to keep the actionator points sorted based on their time.
         //      (a) I need to sort the buffer before adding the points
         //      (b) I need to search m_points for the correct place to add new point(s)

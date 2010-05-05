@@ -46,8 +46,12 @@ public:
      At this level you need to specify the entire control data, for example, if this is a joint position actionator then you need to
      specify (pos, vel, gain), or if it is an LED you need to specify (R, G, B). This behaviour is NOT negotiable. 
      */
-    struct actionator_point_t 
+    class actionator_point_t 
     {
+    public:
+        actionator_point_t() {};
+        ~actionator_point_t() {};
+        actionator_point_t(const actionator_point_t& point) {Time = point.Time; Data = point.Data;};
         double Time;                //!< the time the actionator point will be completed in milliseconds since epoch or program start
         vector<T> Data;             //!< the actual data to be given to the actionator, the contents depend on the actionator's type
     };
@@ -88,6 +92,8 @@ private:
     vector<actionator_point_t> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
     vector<actionator_point_t> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
     static bool comparePoints(const actionator_point_t& a, const actionator_point_t& b);
+    
+    pthread_mutex_t m_lock;                             //!< lock for m_add_points_buffer
 };
 
 #include "actionator_t.cpp"                     // this is the standard way to do template classes when you separate declaration and implementation.
