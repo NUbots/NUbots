@@ -95,7 +95,6 @@ HEADERS += ui_mainwindow.h \
     bonjour/bonjourservicebrowser.h \
     bonjour/bonjourrecord.h \
     ../Tools/Math/UKF.h \
-    ../Kinematics/AngleUKF.h \
     ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
     ../Kinematics/EndEffector.h \
@@ -181,7 +180,6 @@ SOURCES += mainwindow.cpp \
     bonjour/bonjourserviceresolver.cpp \
     bonjour/bonjourservicebrowser.cpp \
     ../Tools/Math/UKF.cpp \
-    ../Kinematics/AngleUKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
