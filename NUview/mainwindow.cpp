@@ -19,9 +19,6 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
-#include "Kinematics/AngleUKF.h"
-#include "Tools/Math/UKF.h"
-
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -127,6 +124,7 @@ MainWindow::~MainWindow()
     delete nativeAspectAction;
     delete newVisionDisplayAction;
     delete newLocWMDisplayAction;
+    delete doBonjourTestAction;
     
     delete m_nuview_io;
     return;
@@ -231,11 +229,6 @@ void MainWindow::createActions()
     doBonjourTestAction = new QAction(tr("&Bonjour Test..."), this);
     doBonjourTestAction->setStatusTip(tr("Test something."));
     connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
-
-    UKFTestAction = new QAction(tr("&UKF Test"), this);
-    connect(UKFTestAction, SIGNAL(triggered()), this, SLOT(UKFTest()));
-    AngleUKFTestAction = new QAction(tr("&Angle UKF Test"), this);
-    connect(AngleUKFTestAction, SIGNAL(triggered()), this, SLOT(AngleUKFTest()));
 }
 
 void MainWindow::createMenus()
@@ -263,8 +256,6 @@ void MainWindow::createMenus()
 
     testMenu = menuBar()->addMenu(tr("&Testing"));
     testMenu->addAction(doBonjourTestAction);
-    testMenu->addAction(UKFTestAction);
-    testMenu->addAction(AngleUKFTestAction);
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -462,76 +453,6 @@ void MainWindow::shrinkToNativeAspectRatio()
             sourceSize.scale(windowSize,Qt::KeepAspectRatio);
             activeSubWindow->resize(sourceSize);
         }
-    }
-}
-
-void MainWindow::UKFTest()
-{
-    int numStates = 7;
-    UKF test(numStates);
-    Matrix mean(numStates,1,false);
-    mean[0][0] = 10;
-    mean[1][0] = 5;
-    test.setMean(mean);
-    Matrix cov(numStates,numStates,true);
-    cov = 3*cov;
-    cov[0][0] += 5;
-    test.setCovariance(cov);
-
-    debug << "Original Data: " << endl << "Mean:" << endl << mean << "Covariance:" << endl << cov << endl;
-    Matrix sigmas = test.GenerateSigmaPoints();
-    debug << "Sigma Points:" << endl << sigmas << endl;
-    //debug << "Sigma Weights:" << endl << test.GenerateSigmaWeights() << endl;
-    Matrix testMean, testCov;
-    testMean = test.CalculateMeanFromSigmas(sigmas);
-    testCov = test.CalculateCovarianceFromSigmas(sigmas,testMean);
-    debug << "Converted Data: " << endl << "Mean:" << endl << testMean << "Covariance:" << endl << testCov << endl;
-
-    for (int i = 0; i < numStates; i++)
-    {
-        debug << endl << "State " << i << endl;
-        debug << "Mean: " << test.getMean(i) << endl;
-        debug << "Standard Deviation: " << test.calculateSd(i) << endl;
-    }
-}
-
-void MainWindow::AngleUKFTest()
-{
-    const int numUpdates = 50;
-    const float gravity = 980;
-    float haccel,vaccel;
-    AngleUKF test;
-
-    double timestamp = 0.0;
-    test.initialiseFilter(timestamp);
-    qDebug() << "Initial estimate" << endl;
-    qDebug() << "Angle: " << test.getMean(AngleUKF::Angle) << endl;
-    qDebug() << "GyroOffset: " << test.getMean(AngleUKF::GyroOffset) << endl;
-
-    float gyroOffset;
-    float velocity;
-    float gyroValue;
-    float deltaAngle = 0.01;
-    float deltaTime = 0.1;
-    float angle = 0.0;
-    for (int i = 0; i < numUpdates; i++)
-    {
-        gyroOffset = 10.0;
-        angle += deltaAngle;
-        timestamp += deltaTime;
-        velocity = deltaAngle / deltaTime;
-        gyroValue = gyroOffset + velocity;
-        haccel = gravity * sin(angle);
-        vaccel = gravity * cos(angle);
-
-        test.TimeUpdate(gyroValue, timestamp);
-        test.AccelerometerMeasurementUpdate(haccel,vaccel);
-
-        qDebug() << "Gyro value at time (" << timestamp << "): " << gyroValue;
-        qDebug() << "Angle: " << angle;
-        qDebug() << "Gyro offset:" << gyroOffset;
-        qDebug() << "Estimated angle: " << test.getMean(AngleUKF::Angle);
-        qDebug() << "Estimated gyro offset: " << test.getMean(AngleUKF::GyroOffset) << endl;
     }
 }
 

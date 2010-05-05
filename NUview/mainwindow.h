@@ -64,8 +64,6 @@ public slots:
     void fileClosed(); //!< File was closed.
 
     void BonjourTest();
-    void UKFTest();
-    void AngleUKFTest();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -173,8 +171,6 @@ private:
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
 
     QAction *doBonjourTestAction;    //!< Instance of the do test Action
-    QAction *UKFTestAction;          //!< Instance of the do test Action
-    QAction *AngleUKFTestAction;          //!< Instance of the do test Action
     BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
