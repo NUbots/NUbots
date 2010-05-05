@@ -67,6 +67,12 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     for (int i=0; i<numon; i++)
         m_ear_leds[i] = ledon;
     
+    if (m_current_time > 2000)
+    {
+        actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time, m_ear_leds);
+        actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time, m_ear_leds);
+    }
+    
     float current = 0;
     if (battery.size() > 1)
         current = battery[1];

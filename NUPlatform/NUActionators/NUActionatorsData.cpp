@@ -1234,7 +1234,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
     @param greenvalue the target red value (0 to 1, or 0 to 255)
     @param bluevalue the target red value (0 to 1, or 0 to 255)
  */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values)
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
 {
     vector<joint_id_t> selectedleds;
     if (LedActionators.size() == 0)
