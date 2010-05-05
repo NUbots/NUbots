@@ -526,7 +526,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
             {
                 tempEnd = tempSegments[j].getEndPoint();
                 j++;
-                if(j > (int)tempSegments.size())
+                if(j >= (int)tempSegments.size())
                 {
                     break;
                 }

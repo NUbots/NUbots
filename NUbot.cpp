@@ -141,10 +141,10 @@ NUbot::NUbot(int argc, const char *argv[])
 void NUbot::connectErrorHandling()
 {
     #ifndef TARGET_OS_IS_WINDOWS
-        struct sigaction newaction, oldaction;
-        newaction.sa_handler = segFaultHandler;
-        
-        sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+        signal(SIGILL, terminationHandler);
+        signal(SIGSEGV, terminationHandler);
+        signal(SIGBUS, terminationHandler); 
+        signal(SIGABRT, terminationHandler);
     #endif
 }
 
@@ -183,20 +183,10 @@ NUbot::~NUbot()
         debug << "NUbot::~NUbot()." << endl;
     #endif
     
-    vector<float> rgb(3,0);
-    vector<vector<float> > allleds;
-    allleds.push_back(rgb);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.25; allleds[0][2] = 0.0;
-    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
-    
     #ifdef USE_MOTION
-        float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
-        vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
-        vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
-        vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
-        NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
+        NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
         NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-        NUSystem::msleep(2000);
+        NUSystem::msleep(1500);
     #endif
 
     // --------------------------------- delete threads
@@ -324,13 +314,46 @@ void NUbot::periodicSleep(int period)
     starttime = nusystem->getTime();
 }
 
-/*! @brief 'Handles' a segmentation fault; logs the backtrace to errorlog
+/*! @brief Handles unexpected termination signals
  */
-void NUbot::segFaultHandler(int value)
+void NUbot::terminationHandler(int signum)
 {
+    errorlog << "TERMINATION HANDLER: ";
+    debug << "TERMINATION HANDLER: ";
+    cout << "TERMINATION HANDLER: ";
+    
     #ifndef TARGET_OS_IS_WINDOWS
-        errorlog << "SEGMENTATION FAULT. " << endl;
-        debug << "SEGMENTATION FAULT. " << endl;
+        if (signum == SIGILL)
+        {
+            errorlog << "SIGILL" << endl;
+            debug << "SIGILL" << endl;
+            cout << "SIGILL" << endl;
+        }
+        else if (signum == SIGSEGV)
+        {
+            errorlog << "SIGSEGV" << endl;
+            debug << "SIGSEGV" << endl;
+            cout << "SIGSEGV" << endl;
+        }
+        else if (signum == SIGBUS)
+        {
+            errorlog << "SIGBUS" << endl;
+            debug << "SIGBUS" << endl;
+            cout << "SIGBUS" << endl;
+        }
+        else if (signum == SIGABRT)
+        {
+            errorlog << "SIGABRT" << endl;
+            debug << "SIGABRT" << endl;
+            cout << "SIGABRT" << endl;
+        }
+    #else
+        errorlog << endl;
+        debug << endl;
+        cout << endl;
+    #endif
+    
+    #ifndef TARGET_OS_IS_WINDOWS
         void *array[10];
         size_t size;
         char **strings;
@@ -340,20 +363,34 @@ void NUbot::segFaultHandler(int value)
             errorlog << strings[i] << endl;
     #endif
     
-    vector<float> rgb(3,0);
-    vector<vector<float> > allleds;
-    allleds.push_back(rgb);
-    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;
-    NUbot::m_this->Actions->addLeds(NUActionatorsData::AllLeds, 0, allleds);
-    NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
-    
-    float l_positions[] = {0, 0, 0, 1.41, -1.1, -0.65, 0, 1.41, 1.1, 0.65, 0, -1.0, 0, 2.16, 0, -1.22, 0.0, -1, 0, 2.16, 0, -1.22};
-    vector<float> gains(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
-    vector<float> velocities(NUbot::m_this->Actions->getNumberOfJoints(NUActionatorsData::AllJoints), 50);
-    vector<float> positions(l_positions, l_positions + sizeof(l_positions)/sizeof(*l_positions));
-    NUbot::m_this->Actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 2000, positions, velocities, gains);
-    NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-	NUSystem::msleep(3000);
+    if (NUbot::m_this != NULL)
+    {
+        // safely kill motion
+        #ifdef USE_MOTION
+            NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
+            NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        #endif
+        
+        // play sound to indicate the error
+        #ifndef TARGET_OS_IS_WINDOWS
+            if (signum == SIGILL)
+                NUbot::m_this->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
+            else if (signum == SIGSEGV)
+                NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+            else if (signum == SIGBUS)
+                NUbot::m_this->Actions->addSound(0, NUSounds::BUS_ERROR);
+            else if (signum == SIGABRT)
+                NUbot::m_this->Actions->addSound(0, NUSounds::ABORT);
+        #endif
+        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        
+        // sleep for a little bit so that the above things finish executing
+        NUSystem::msleep(1500);
+    }
+    #ifndef TARGET_OS_IS_WINDOWS
+        signal(signum, SIG_DFL);
+        raise(signum);
+    #endif
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog

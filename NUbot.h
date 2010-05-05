@@ -74,7 +74,7 @@ public:
     
 private:
     void connectErrorHandling();
-    static void segFaultHandler(int value);
+    static void terminationHandler(int signum);
     void unhandledExceptionHandler(std::exception& e);
     
     void createThreads();
