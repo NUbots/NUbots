@@ -72,6 +72,40 @@ NUMotion::~NUMotion()
     #endif
 }
 
+/*! @brief Adds actions to bring the robot to rest quickly, and go into a safe-for-robot pose
+ */
+void NUMotion::safeKill(NUSensorsData* data, NUActionatorsData* actions)
+{
+    float safelegpositions[] = {0, -1.0, 0, 2.16, 0, -1.22};
+    float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
+    float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
+    vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
+    vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
+    vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
+    vector<float> legvelocities(legpositions.size(), 1.0);
+    vector<float> armvelocities(larmpositions.size(), 1.0);
+    
+    // check if there is a reason it is not safe or possible to go into the crouch position
+    if (actions == NULL)
+        return;
+    else if (data != NULL)
+    {
+        vector<float> orientation;
+        if (m_data->getOrientation(orientation))
+            if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
+                return;
+        /*bool leftsupport, rightsupport;
+        if (m_data->leftSupport(leftsupport) and m_data->rightSupport(rightsupport))
+            if (not (leftsupport and rightsupport)
+                return;*/
+    }
+    
+    actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 750, larmpositions, armvelocities, 30);
+    actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 750, rarmpositions, armvelocities, 30);
+}
+
 /*! @brief Process new sensor data, and produce actionator commands.
  
     This function basically calls all of the process functions of the submodules of motion. I have it setup
