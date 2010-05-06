@@ -46,10 +46,14 @@ public:
      At this level you need to specify the entire control data, for example, if this is a joint position actionator then you need to
      specify (pos, vel, gain), or if it is an LED you need to specify (R, G, B). This behaviour is NOT negotiable. 
      */
-    struct actionator_point_t 
+    class actionator_point_t 
     {
+    public:
+        actionator_point_t() {};
+        ~actionator_point_t() {};
+        actionator_point_t(const actionator_point_t& point) {Time = point.Time; Data = point.Data;};
         double Time;                //!< the time the actionator point will be completed in milliseconds since epoch or program start
-        vector<T> Data;         //!< the actual data to be given to the actionator, the contents depend on the actionator's type
+        vector<T> Data;             //!< the actual data to be given to the actionator, the contents depend on the actionator's type
     };
     
     /*! @brief A enum type to perform run time actionator type checking without using
@@ -70,6 +74,7 @@ public:
     actionator_t(string actionatorname, actionator_type_t actionatortype);
     
     void addPoint(double time, const vector<T>& data);
+    void preProcess();
     void removeCompletedPoints(double currenttime);
     bool isEmpty();
     
@@ -79,16 +84,19 @@ public:
     template <typename TT> friend ostream& operator<< (ostream& output, const actionator_t<TT>& p_actionator);
     template <typename TT> friend istream& operator>> (istream& input, actionator_t<TT>& p_actionator);
 public:
-    string Name;                                //!< the name of the actionator
-    actionator_type_t ActionatorType;           //!< the actionator type
-    deque<actionator_point_t*> m_points;        //!< the double-ended queue of actionator points
-    actionator_point_t* m_previous_point;       //!< the last actionator point that was applied
-    bool IsAvailable;                           //!< true if the actionator is avaliable, false if it is absent
+    string Name;                                        //!< the name of the actionator
+    actionator_type_t ActionatorType;                   //!< the actionator type
+    deque<actionator_point_t> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
+    bool IsAvailable;                                   //!< true if the actionator is avaliable, false if it is absent
 private:
-    static bool comparePointTimes(const void* a, const void* b);
+    vector<actionator_point_t> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
+    vector<actionator_point_t> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
+    static bool comparePoints(const actionator_point_t& a, const actionator_point_t& b);
+    
+    pthread_mutex_t m_lock;                             //!< lock for m_add_points_buffer
 };
 
-#include "actionator_t.cpp"                     // this is the standard way to do template classes if when you separate declaration and implementation.
+#include "actionator_t.cpp"                     // this is the standard way to do template classes when you separate declaration and implementation.
                                                 // just make sure that you don't compile actionator_t.cpp separately
 
 #endif

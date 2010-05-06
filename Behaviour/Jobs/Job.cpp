@@ -201,9 +201,6 @@ istream& operator>>(istream& input, Job** job)
         case Job::VISION_SAVE_IMAGES:
             *job = new SaveImagesJob(input);
             break;
-        case Job::SOUND_FILE:
-            *job = new SoundJob(jobtime, input);
-            break;
         default:
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
             break;

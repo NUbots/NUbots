@@ -312,8 +312,7 @@ void NAOActionators::copyToHardwareCommunications()
         }
         dcmoffset = actoffset = m_num_earleds;
         
-        // On the NAO the eyes are red, green and blue leds
-        // The left eye the blue is stuck on, on the right eye the blue and green are stuck on    
+        // On the NAO the eyes are red, green and blue leds 
         unsigned int num = m_num_eyeleds/3;
         for (unsigned int i=0; i<num; i++)
         {
@@ -371,8 +370,6 @@ void NAOActionators::copyToHardwareCommunications()
     #endif
     
     copyToSound();
-    
-    m_data->removeCompletedPoints(m_current_time);
 }
 
 

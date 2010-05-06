@@ -66,8 +66,12 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
     int numon = (int) (charge*numleds + 0.5);
     for (int i=0; i<numon; i++)
         m_ear_leds[i] = ledon;
-    actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time, m_ear_leds);
-    actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time, m_ear_leds);
+    
+    if (m_current_time > 2000)
+    {
+        actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time, m_ear_leds);
+        actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time, m_ear_leds);
+    }
     
     float current = 0;
     if (battery.size() > 1)
@@ -128,6 +132,7 @@ void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
     vector<float> ledoff(3,0);
     vector<float> ledon(3,1);
     vector<vector<float> > dropleds;
+    dropleds.reserve(m_ear_leds.size());
     
     for (unsigned int i=0; i<m_ear_leds.size(); i++)
     {

@@ -102,7 +102,8 @@ public:
     void setAvailableLeds(const vector<string>& lednames);
     void setAvailableOtherActionators(const vector<string>& actionatornames);
     
-    void removeCompletedPoints(double currenttime);
+    void preProcess();
+    void postProcess(double currenttime);
     
     // Misc. get methods
     int getNumberOfJoints(bodypart_id_t partid);
@@ -141,7 +142,7 @@ public:
     bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains);
     
         // add other commands
-    bool addLeds(ledgroup_id_t ledgroup, double time, vector<vector<float> > values);
+    bool addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values);
     bool addSound(double time, string sound);
     bool addSounds(double time, vector<string> sound);
         // add magic commands

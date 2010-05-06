@@ -44,16 +44,6 @@
 #include "Jobs/MotionJobs/WalkToPointJob.h"
 #include "Jobs/MotionJobs/WalkParametersJob.h"
 
-#include "Jobs/LightJob.h"
-#include "Jobs/LightJobs/ChestLedJob.h"
-#include "Jobs/LightJobs/LEarLedJob.h"
-#include "Jobs/LightJobs/LEyeLedJob.h"
-#include "Jobs/LightJobs/LFootLedJob.h"
-#include "Jobs/LightJobs/REarLedJob.h"
-#include "Jobs/LightJobs/REyeLedJob.h"
-#include "Jobs/LightJobs/RFootLedJob.h"
-
-#include "Jobs/SoundJob.h"
 #include "Jobs/SystemJob.h"
 #include "Jobs/OtherJob.h"
 

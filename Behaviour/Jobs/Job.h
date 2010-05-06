@@ -41,9 +41,7 @@ public:
         LOCALISATION,
         BEHAVIOUR,
         MOTION,
-        LIGHT,
         CAMERA,
-        SOUND,
         SYSTEM,
         OTHER,
         TYPE_UNDEFINED
@@ -68,19 +66,9 @@ public:
         MOTION_HEAD,
         MOTION_NOD,
         MOTION_PAN,
-        // Light job ids
-        LIGHT_L_EYE,
-        LIGHT_R_EYE,
-        LIGHT_L_EAR,
-        LIGHT_R_EAR,
-        LIGHT_CHEST,
-        LIGHT_L_FOOT,
-        LIGHT_R_FOOT,
         // Camera job ids
         CAMERA_CHANGE_SETTINGS,
         CAMERA_SELECT_CAMERA,
-        // Sound job ids
-        SOUND_FILE,
         // System jobs
         SYSTEM_SLEEP,
         SYSTEM_SHUTDOWN,

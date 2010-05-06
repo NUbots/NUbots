@@ -69,12 +69,6 @@ WalkParameters::WalkParameters(const string& name, const vector<float>& maxspeed
  */
 WalkParameters::~WalkParameters()
 {
-    m_max_speeds.clear();
-    m_max_accelerations.clear();
-    m_parameters.clear();
-    m_arm_gains.clear();
-    m_torso_gains.clear();
-    m_leg_gains.clear();
 }
 
 /*! @brief Returns the walk parameter set's name

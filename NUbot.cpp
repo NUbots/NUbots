@@ -24,6 +24,8 @@
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "NUbot.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Behaviour/Jobs.h"
 #include "GameController/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
@@ -293,7 +295,7 @@ void NUbot::run()
         count++;
     };
 #else
-    #if !defined(USE_VISION)
+    #if !defined(USE_VISION) and (defined(USE_BEHAVIOUR) or defined(USE_LOCALISATION) or defined(USE_MOTION))
         while (true)
         {
             periodicSleep(33);

@@ -59,7 +59,9 @@ void NUActionators::process(NUActionatorsData*& data)
     debug << "NUActionators::process" << endl;
 #endif
     m_current_time = nusystem->getTime();
+    m_data->preProcess();
     copyToHardwareCommunications();
+    m_data->postProcess(m_current_time);
 }
 
 /*! @brief Returns the actions storage class

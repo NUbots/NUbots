@@ -148,8 +148,6 @@ void NAOWebotsActionators::copyToHardwareCommunications()
     copyToLeds();
     copyToSound();
     copyToTeleporter();
-    
-    m_data->removeCompletedPoints(m_current_time);
 }
 
 /*! @brief Copies the joint positions and torques to the servos

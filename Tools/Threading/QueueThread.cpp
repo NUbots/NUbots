@@ -57,7 +57,6 @@ QueueThread<T>::~QueueThread()
         debug << "QueueThread::~QueueThread() " << m_name << endl;
     #endif
     this->stop();
-    m_queue.clear();
     pthread_cond_destroy(&m_condition);
     pthread_mutex_destroy(&m_condition_mutex);
 }
