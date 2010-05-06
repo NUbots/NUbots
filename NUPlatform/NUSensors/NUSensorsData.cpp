@@ -97,6 +97,7 @@ NUSensorsData::NUSensorsData()
     // Foot Pressure Sensors:
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSoftSensor(FootCoP, string("FootCoP"), sensor_t::FOOT_COP);
     addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
     addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_FORCE);
     addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
@@ -594,7 +595,7 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
     @param values will be updated with the current estimate of the gyro offset
     @return returns true if the values are valid false otherwise
  */
-bool getGyroOffsetValues(vector<float>& values)
+bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
 {
     if (BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
         return false;
@@ -736,6 +737,45 @@ bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
         else
         {
             debug << "NUSensorsData::getFootSoleValues(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the centre of pressure as measured by feet sensors
+ 
+    If a single foot is requested the x and y positions are relative to the position of the ankle on the foot.
+    If the CoP for both feet is requested the x and y positions are relative to the torso
+ 
+    @param footid LeftFoot, RightFoot, AllFeet
+    @param x the distance in cm forwards 
+    @param y the distance in cm backwards
+ */
+bool NUSensorsData::getFootCoP(foot_id_t footid, float& x, float& y)
+{
+    if (FootCoP == NULL || FootCoP->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+        {
+            x = (*FootCoP)[0];
+            y = (*FootCoP)[1];
+        }
+        else if (footid == RightFoot)
+        {
+            x = (*FootCoP)[2];
+            y = (*FootCoP)[3];
+        }
+        else if (footid == AllFeet)
+        {
+            x = (*FootCoP)[4];
+            y = (*FootCoP)[5];
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
             return false;
         }
         return true;

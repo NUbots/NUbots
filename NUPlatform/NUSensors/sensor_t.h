@@ -68,6 +68,7 @@ public:
         DISTANCE_VALUES,
         FOOT_SOLE_VALUES,
         FOOT_BUMPER_VALUES,
+        FOOT_COP,
         FOOT_FORCE,
         FOOT_SUPPORT,
         FOOT_IMPACT,

@@ -141,9 +141,10 @@ public:
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
     
-    // Get methods for other sensors that have logical groups
+    // Get methods for foot pressure sensors
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
+    bool getFootCoP(foot_id_t footid, float& x, float& y);
     bool getFootForce(foot_id_t footid, float& force);
     bool getFootSupport(foot_id_t footid, bool& support);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
@@ -229,8 +230,9 @@ public:
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
-    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons 
-    sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot
+    sensor_t* FootCoP;                          //!< stores the foot centre of pressure as [lx, ly, rx, ry, x, y]
+    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons  as [l, r, both]
+    sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot as [l, r, both]
     sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     
     // Buttons Sensors:
