@@ -203,9 +203,9 @@ void NUSensors::calculateOrientation()
             orientation[1] = atan2(acceleration[0],-acceleration[2]);
             orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
         }
-        //m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-
+        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
         // New method
+/*  TOO SLOW FOR NOW
         if(m_data->getGyroValues(gyros))
         {
             if(!m_orientationFilter->Initialised())
@@ -239,6 +239,7 @@ void NUSensors::calculateOrientation()
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
             gyroOffset[2] = 0.0f;
         }
+        */
     }
 }
 
