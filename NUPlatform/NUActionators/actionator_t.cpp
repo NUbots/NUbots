@@ -103,7 +103,7 @@ void actionator_t<T>::preProcess()
         
         // because I did (a) and I choose to clear all existing points later in time
         // I can simply find the location where the first point should be inserted, and then insert ALL new points after that
-        if (m_points.empty())
+        if (not m_points.empty())
         {
             typename deque<actionator_point_t>::iterator insertposition;
             insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front(), comparePoints);
