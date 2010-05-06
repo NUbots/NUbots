@@ -253,7 +253,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         }
     }
     //! Form Lines
-    //fieldLines = vision.DetectLines(vertScanArea,spacings);
+    //vision.DetectLines(vertScanArea,spacings);
     //! Extract Detected Line & Corners
     //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
@@ -437,8 +437,9 @@ void Vision::setImage(const NUimage* newImage)
     ImageFrameNumber++;
 }
 
-unsigned char Vision::classifyPixel(int x, int y)
+inline unsigned char Vision::classifyPixel(int x, int y)
 {
+
     classifiedCounter++;
     Pixel* temp = &currentImage->m_image[y][x];
     //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
@@ -959,15 +960,17 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     }
     return;
 }
-
+//! @brief  Pass a transition segment into this function, and will return a scanline which contains
+//!         many different at interval of "spacing" transition segments classified in the orthogonal to the "direction"
 void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
 {
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
+    int skipPixel = 2;
     if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 10;
+        int bufferSize = 2;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -994,12 +997,12 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
             while(checkIfBufferSame(colourBuff))
             {
-                if(tempsubPoint+1 > width)
+                if(tempsubPoint+skipPixel > width)
                 {
                     break;
                 }
 
-                tempsubPoint++;
+                tempsubPoint = tempsubPoint+skipPixel;
 
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
@@ -1025,8 +1028,8 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
             while(checkIfBufferSame(colourBuff))
             {
-                if(tempsubPoint-1 < 0) break;
-                tempsubPoint--;
+                if(tempsubPoint-skipPixel < 0) break;
+                tempsubPoint = tempsubPoint - skipPixel;
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
                 {
@@ -1039,7 +1042,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
             tempSubStartPoint.x = tempsubPoint;
-            subBeforeColour = tempTransition->getColour();
+            subBeforeColour = tempColour;
             //THEN ADD TO LINE
 
             TransitionSegment tempTransitionA(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
@@ -1559,7 +1562,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     int Xstart, Xend, Ystart, Yend;
     //Work Backwards: As post width is acurrate at bottom (no crossbar)
     //ASSUMING EVERYTHING IS ALREADY ORDERED
-    for(int i = horizontalsegments.size()-1; i >= 0; i--)
+    for(int i = horizontalsegments.size()-1; i > 0; i--)
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
@@ -1578,7 +1581,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         Xend = horizontalsegments[i].getEndPoint().x;
         tempSegments.push_back(horizontalsegments[i]);
         tempUsedSegments.push_back(i);
-        int nextSegCounter = i+1;
+        int nextSegCounter = i-1;
 
         //We want to stop searching when it leaves the line
         //Searching for a new Xend, close to this current Xstart
@@ -1668,17 +1671,17 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     return candidates;
 }
 
-std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
+LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
     //qDebug() << "Forming Lines:" << endl;
     LineDetection LineDetector;
     int image_width = currentImage->getWidth();
     int image_height = currentImage->getHeight();
-    LineDetector.FormLines(scanArea,image_width,image_height,spacing);
+    LineDetector.FormLines(scanArea,image_width,image_height,spacing, AllFieldObjects, this);
     std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
     //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
-    return fieldLines;
+    return LineDetector;
 }
 
 Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)

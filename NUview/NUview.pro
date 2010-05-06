@@ -98,7 +98,8 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/EndEffector.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
-    ../Tools/Math/General.h
+    ../Tools/Math/General.h \
+    ../Vision/CornerPoint.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

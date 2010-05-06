@@ -14,7 +14,7 @@ class Object
         Vector3<float> relativeMeasurementError;
         
         // Vision Parameters:
-        bool isVisible;                     // true if the object was seen in this image, false otherwise
+
         Vector2<int> imagePosition;         // Position on Screen (centre of object)
         Vector2<int> sizeOnScreen;          // (x,y) = (width, height) with ImagePosition at the center.
         float timeLastSeen;                 // The time in ms the object was last seen
@@ -22,8 +22,9 @@ class Object
         float timeSeen;                     // The consecutive time in ms the object has been seen
         float previousFrameTimestamp;       // The previous frame's timestamp (I use this to increment the timeSeen)
 
+    protected:
 
-
+        bool isVisible;                     // true if the object was seen in this image, false otherwise
 
     public:
         Object(int initID = -1, const std::string& initName = "Unknown");
