@@ -84,6 +84,7 @@ NUSensorsData::NUSensorsData()
     // Balance Sensors:
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSoftSensor(BalanceGyroOffset, string("BalanceGyroOffset"), sensor_t::BALANCE_GYRO_OFFSET);
     addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
     addSoftSensor(BalanceHorizon, string("BalanceHorzion"), sensor_t::BALANCE_HORIZON);
     addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
@@ -97,6 +98,7 @@ NUSensorsData::NUSensorsData()
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_FORCE);
     addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
@@ -588,6 +590,21 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the gyro offset values [offsetx, offsety, offsetz]
+    @param values will be updated with the current estimate of the gyro offset
+    @return returns true if the values are valid false otherwise
+ */
+bool getGyroOffsetValues(vector<float>& values)
+{
+    if (BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceGyroOffset->Data;
+        return true;
+    }
+}
+
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
     @param values will be updated with the current orientation estimate
  */
@@ -788,6 +805,32 @@ bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
         {
             debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
             force = 0;
+            return false;
+        }
+        return true;
+    }
+}
+
+/*! @brief Gets the total force on the foot in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param support will be updated to true if footid is supporting the robot.
+    @return true if support was updated, false if invalid
+ */
+bool NUSensorsData::getFootSupport(foot_id_t footid, bool& support)
+{
+    if (FootSupport == NULL || FootSupport->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+            support = static_cast<bool> ((*FootSupport)[0]);
+        else if (footid == RightFoot)
+            support = static_cast<bool> ((*FootSupport)[1]);
+        else if (footid == AllFeet)
+            support = static_cast<bool> ((*FootSupport)[0]) and static_cast<bool> ((*FootSupport)[1]);
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
             return false;
         }
         return true;

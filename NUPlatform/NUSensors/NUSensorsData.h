@@ -130,6 +130,7 @@ public:
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
+    bool getGyroOffsetValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
     bool getHorizon(vector<float>& values);
     bool getButtonTriggers(vector<float>& values);
@@ -144,6 +145,7 @@ public:
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
     bool getFootForce(foot_id_t footid, float& force);
+    bool getFootSupport(foot_id_t footid, bool& support);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
     
     // Common sub-get methods
@@ -214,6 +216,7 @@ public:
     // Balance Sensors:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
+    sensor_t* BalanceGyroOffset;                //!< stores the offsets for gyros
     sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
     sensor_t* BalanceHorizon;                   //!< stores the Horizon line (A,B,C) Ax+ By +C =0
     sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
@@ -226,7 +229,8 @@ public:
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
-    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons
+    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons 
+    sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot
     sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     
     // Buttons Sensors:
