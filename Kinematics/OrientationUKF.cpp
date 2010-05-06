@@ -1,5 +1,6 @@
 #include "OrientationUKF.h"
 #include "Tools/Math/General.h"
+#include "NUPlatform/NUSystem.h"
 #include "debug.h"
 OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)
 {
@@ -30,11 +31,22 @@ void OrientationUKF::initialise(double timestamp, float pitchGyro, float rollGyr
     m_covariance[xAcceleration][xAcceleration] = 10.0f*10.0f;
     m_covariance[yAcceleration][yAcceleration] = 10.0f*10.0f;
     m_covariance[zAcceleration][zAcceleration] = 10.0f*10.0f;
+
+    m_processNoise = Matrix(numStates,numStates,false);
+    m_processNoise[pitchAngle][pitchAngle] = 1e-6;
+    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-3;
+    m_processNoise[rollAngle][rollAngle] = 1e-6;
+    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-3;
+    m_processNoise[xAcceleration][xAcceleration] = 100.0f * 100.0f;
+    m_processNoise[yAcceleration][yAcceleration] = 100.0f * 100.0f;
+    m_processNoise[zAcceleration][zAcceleration] = 100.0f * 100.0f;
+
     m_initialised = true;
 }
 
 void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, double timestamp)
 {
+    double startTime = nusystem->getThreadTime();
     // Find delta 't', the time that has passed since the previous time update.
     const float dt = (timestamp - m_timeOfLastUpdate) / 1000.0f;
 
@@ -50,12 +62,8 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
 
     // A Matrix
     Matrix A(numStates,numStates,true);
-    A[0][0] = 1;
     A[0][1] = -dt;
-    A[1][1] = 1;
-    A[2][2] = 1;
     A[2][3] = -dt;
-    A[3][3] = 1;
 
     // B Matrix
     Matrix B(numStates,2,false);
@@ -66,16 +74,6 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
     Matrix sensorData(2,1,false);
     sensorData[0][0] = pitchGyroReading;
     sensorData[1][0] = rollGyroReading;
-
-    // Process noise
-    Matrix processNoise(numStates,numStates,false);
-    processNoise[pitchAngle][pitchAngle] = 1e-6;
-    processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-3;
-    processNoise[rollAngle][rollAngle] = 1e-6;
-    processNoise[rollGyroOffset][rollGyroOffset] = 1e-3;
-    processNoise[xAcceleration][xAcceleration] = 100.0f * 100.0f;
-    processNoise[yAcceleration][yAcceleration] = 100.0f * 100.0f;
-    processNoise[zAcceleration][zAcceleration] = 100.0f * 100.0f;
 
     // Generate the sigma points and update using transfer function
     Matrix sigmaPoints = GenerateSigmaPoints();
@@ -94,11 +92,14 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
 
     // Find the new covariance
-    m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean) + processNoise;
+    m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean) + m_processNoise;
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "TimeUpdate took: " << runTime << " ms" << std::endl;
 }
 
 void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, float zAccel)
 {
+    double startTime = nusystem->getThreadTime();
     const int numMeasurements = 3;
     const float gravityAccel = 981.0f; // cm/s^2
 
@@ -115,6 +116,7 @@ void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, 
     observation[1][0] = yAccel;
     observation[2][0] = zAccel;
 
+    // Observation noise
     Matrix S_Obs(numMeasurements,numMeasurements,true);
     S_Obs = 10.0*S_Obs;
 
@@ -146,10 +148,13 @@ void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, 
     measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Acceleration Measurement Update took: " << runTime << " ms" << std::endl;
 }
 
 void OrientationUKF::KinematicsMeasurementUpdate(float pitchMeasurement, float rollMeasurment)
 {
+    double startTime = nusystem->getThreadTime();
     const int numMeasurements = 2;
 
     // Generate sigma points from current state estimation.
@@ -190,4 +195,6 @@ void OrientationUKF::KinematicsMeasurementUpdate(float pitchMeasurement, float r
     measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Kinematic Measurement Update took: " << runTime << " ms" << std::endl;
 }

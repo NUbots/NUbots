@@ -27,6 +27,7 @@ public:
 private:
     double m_timeOfLastUpdate;
     Matrix m_updateSigmaPoints;
+    Matrix m_processNoise;
     bool m_initialised;
 };
 

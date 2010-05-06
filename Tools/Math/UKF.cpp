@@ -1,5 +1,6 @@
 #include "UKF.h"
 #include "debug.h"
+#include "NUPlatform/NUSystem.h"
 using namespace std;
 
 
@@ -28,22 +29,28 @@ UKF::~UKF()
 
 Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
 {
+    double startTime = nusystem->getThreadTime();
     //unsigned int numPoints = sigmaPoints.getn();
     Matrix mean(sigmaPoints.getm(),1,false);
     mean = sigmaPoints * m_sigmaWeights.transp();
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Mean calculation update took: " << runTime << " ms" << std::endl;
     return mean;
 }
 
 Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
 {
+    double startTime = nusystem->getThreadTime();
     unsigned int numPoints = sigmaPoints.getn();
     Matrix covariance(m_numStates,m_numStates, false);
     Matrix diff;
-    for(unsigned int i = 0; i < numPoints; i++)
+    for(unsigned int i = 0; i < numPoints; ++i)
     {
         diff = sigmaPoints.getCol(i) - mean;
         covariance = covariance + m_sigmaWeights[0][i]*diff*diff.transp();
     }
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Covariance calculation update took: " << runTime << " ms" << std::endl;
     return covariance;
 }
 
@@ -69,6 +76,7 @@ void UKF::CalculateSigmaWeights(float kappa)
 
 Matrix UKF::GenerateSigmaPoints() const
 {
+    double startTime = nusystem->getThreadTime();
     int numberOfSigmaPoints = 2*m_numStates+1;
     Matrix sigmaPoints(m_mean.getm(), numberOfSigmaPoints, false);
 
@@ -82,6 +90,8 @@ Matrix UKF::GenerateSigmaPoints() const
         sigmaPoints.setCol(i, (m_mean + deviation));                // Add mean + deviation
         sigmaPoints.setCol(negIndex, (m_mean - deviation));  // Add mean - deviation
     }
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Generating sigma points took: " << runTime << " ms" << std::endl;
     return sigmaPoints;
 }
 
@@ -121,13 +131,15 @@ bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoi
 
 bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
 {
+    double startTime = nusystem->getThreadTime();
     const int numMeasurements = measurement.getm();
-    int numberOfSigmaPoints = stateEstimateSigmas.getn();
+    const int numberOfSigmaPoints = stateEstimateSigmas.getn();
 
     // Find mean of predicted measurement
     Matrix predictedMeasurement = CalculateMeanFromSigmas(predictedMeasurementSigmas);
 
-    Matrix Pyy(numMeasurements,numMeasurements,false);
+    //Matrix Pyy(numMeasurements,numMeasurements,false);
+    Matrix Pyy(measurementNoise);
     Matrix Pxy(stateEstimateSigmas.getm(),numMeasurements,false);
 
     Matrix temp;
@@ -136,7 +148,7 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
         // store difference between prediction and measurment.
         temp = predictedMeasurementSigmas.getCol(i) - predictedMeasurement;
         // Innovation covariance - Add Measurement noise
-        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp() + measurementNoise;
+        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp();
         // Cross correlation matrix
         Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
     }
@@ -159,6 +171,7 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     // Stolen from last years code... does not all seem right for this iplementation.
     //m_covariance = HT(horzcat(stateEstimateSigmas-m_mean*m_sigmaWeights - K*predictedMeasurementSigmas +
     //                          K*predictedMeasurement*m_sigmaWeights,K*measurementNoise));
-
+    double runTime = nusystem->getThreadTime() - startTime;
+    debug << "Measurement update took: " << runTime << " ms" << std::endl;
     return true;
 }
