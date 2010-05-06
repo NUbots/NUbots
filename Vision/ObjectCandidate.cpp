@@ -69,14 +69,16 @@ Vector2<int> ObjectCandidate::getBottomRight() const
     return bottomRight;
 }
 
-int ObjectCandidate::width()
+int ObjectCandidate::width() const
 {
     return (bottomRight.x - topLeft.x);
 }
-int ObjectCandidate::height()
+
+int ObjectCandidate::height() const
 {
     return (bottomRight.y - topLeft.y);
 }
+
 float ObjectCandidate::aspect()
 {
     return (float)(bottomRight.x - topLeft.x) / (float)(bottomRight.y - topLeft.y);
@@ -110,3 +112,4 @@ int ObjectCandidate::getCentreY()
 {
     return (int)(round((bottomRight.y + topLeft.y)/2));
 }
+

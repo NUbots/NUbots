@@ -127,7 +127,7 @@ void SeeThinkThread::run()
                 #endif
 		
             #endif
-            
+
             #ifdef USE_LOCALISATION
                 //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #endif

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
-
+#include <QDebug>
 #include <QStringList>
 #include <iostream>
 #include <fstream>
@@ -268,8 +268,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case ROBOTS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::red);
-                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::pink);
+                validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
@@ -281,7 +281,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::red_orange);
+                //validColours.push_back(ClassIndex::red_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
@@ -337,6 +337,42 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
 
+
+    //SUMMARY:
+    qDebug() << "Time: " << vision.m_timestamp;
+
+    for(unsigned int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Stationary Object: " << i << ":" //<< vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
+                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
+                    << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
+        }
+    }
+    for(unsigned  int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Mobile Object: " << i << ":" //<< vision.AllFieldObjects->mobileFieldObjects[i].getName()
+                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
+                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
+                    << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
+        }
+    }
+
+    for(unsigned int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
+                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
+                     << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
+                     << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();
+
+        }
+    }
 
     return;
 }
@@ -415,13 +451,13 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
     if(autoSoftColour == false) return requestedColour;
     switch(currentColour)
     {
-        case ClassIndex::red:
+        case ClassIndex::pink:
         {
             switch(requestedColour)
             {
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -429,14 +465,14 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
             }
             break;
         }
-        case ClassIndex::red_orange:
+        case ClassIndex::pink_orange:
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
+            case ClassIndex::pink:
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -448,9 +484,9 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink:
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             case ClassIndex::yellow:
             case ClassIndex::yellow_orange:

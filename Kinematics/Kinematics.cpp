@@ -2,211 +2,275 @@
 #include <cmath>
 #include "Tools/Math/TransformMatrices.h"
 #include "Tools/Math/General.h"
+#include "debug.h"
 
 using namespace TransformMatrices;
 
-// Constant distances (in cm) From documentation
+//! TODO: Make this function load from a file.
+bool Kinematics::LoadModel(const std::string& fileName)
+{
+    // Constant distances (in cm) From documentation
 
-// Top camera
-const float Kinematics::cameraTopOffsetZ = 6.79;
-const float Kinematics::cameraTopOffsetX = 5.39;
-const float Kinematics::cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
+    // Top camera
+    const float cameraTopOffsetZ = 6.79;
+    const float cameraTopOffsetX = 5.39;
+    //const float cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
 
-// Bottom Camera
-const float Kinematics::cameraBottomOffsetZ = 2.381;
-const float Kinematics::cameraBottomOffsetX = 4.88;
-const float Kinematics::cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0);
+    // Bottom Camera
+    const float cameraBottomOffsetZ = 2.381;
+    const float cameraBottomOffsetX = 4.88;
+    const float cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0);
 
-// Neck
-const float Kinematics::neckOffsetZ = 12.65;
+    // Neck
+    const float neckOffsetZ = 12.65;
 
-// Hips 
-const float Kinematics::hipOffsetY = 5.0;
-const float Kinematics::hipOffsetZ = 8.5;
+    // Hips
+    const float hipOffsetY = 5.0;
+    const float hipOffsetZ = 8.5;
 
-// Legs
-const float Kinematics::thighLength = 10.0;
-const float Kinematics::tibiaLength = 10.0;
-const float Kinematics::footHeight = 4.6;
+    // Legs
+    const float thighLength = 10.0;
+    const float tibiaLength = 10.0;
+    const float footHeight = 4.6;
 
-/*
-void Kinematics::TransformPosition(double distance,double bearing,double elevation, double *transformedDistance,double *transformedBearing,double *transformedElevation){
-    std::vector<float> position3D = TransformPosition(distance,bearing,elevation);
-    double x,y,z;
-    x = position3D[0];
-    y = position3D[1];
-    z = position3D[2];
-    if(x == 0) x = 0.000001; // Prevent divide by zero.
+    DHParameters tempParam;
+    std::vector<Link> links;
+    Matrix startTrans;
+    Matrix endTrans;
 
-    *transformedDistance = sqrt(x*x + y*y + z*z);
-    *transformedBearing = atan2(y,x);
-    if(*transformedDistance == 0) *transformedDistance = 0.000001; // Prevent extremely unlikely divide by zero.
-    *transformedElevation = asin(z / *transformedDistance);
+    // ---------------
+    // BOTTOM CAMERA
+    // ---------------
+    startTrans = Translation( 0, 0, neckOffsetZ );
+    endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
+    endTrans = endTrans * Translation(cameraBottomOffsetX,0,cameraBottomOffsetZ) * RotY(cameraBottomOffsetAngle);
+
+    tempParam.alpha = 0.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"Head Yaw"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = -mathGeneral::PI/2.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"Head Pitch"));
+
+    m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Bottom Camera"));
+
+    // ---------------
+    // TOP CAMERA
+    // ---------------
+    startTrans = Translation( 0, 0, neckOffsetZ );
+    endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
+    endTrans = endTrans * Translation(cameraTopOffsetX,0,cameraTopOffsetZ);
+
+    links.clear();
+
+    tempParam.alpha = 0.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"Head Yaw"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = -mathGeneral::PI/2.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"Head Pitch"));
+
+    m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Top Camera"));
+
+    // ---------------
+    // LEFT FOOT
+    // ---------------
+    startTrans = Translation(0.0f, hipOffsetY, -hipOffsetZ);
+    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
+    links.clear();
+
+    tempParam.alpha = -3.0*mathGeneral::PI/4.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = -mathGeneral::PI/2.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"HipYawPitch"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = mathGeneral::PI/4.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"LeftHipRoll"));
+
+    tempParam.alpha = mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"LeftHipPitch"));
+
+    tempParam.alpha = 0;
+    tempParam.a = -thighLength;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"LeftKneePitch"));
+
+    tempParam.alpha = 0;
+    tempParam.a = -tibiaLength;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"LeftAnklePitch"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"LeftAnkleRoll"));
+
+    m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
+
+    // ---------------
+    // RIGHT FOOT
+    // ---------------
+    startTrans = Translation(0.0f, -hipOffsetY, -hipOffsetZ);
+    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
+    links.clear();
+
+    tempParam.alpha = -mathGeneral::PI/4.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = -mathGeneral::PI/2.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"HipYawPitch"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = -mathGeneral::PI/4.0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"RightHipRoll"));
+
+    tempParam.alpha = mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"RightHipPitch"));
+
+    tempParam.alpha = 0;
+    tempParam.a = -thighLength;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"RightKneePitch"));
+
+    tempParam.alpha = 0;
+    tempParam.a = -tibiaLength;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"RightAnklePitch"));
+
+    tempParam.alpha = -mathGeneral::PI/2.0;
+    tempParam.a = 0;
+    tempParam.thetaOffset = 0;
+    tempParam.d = 0;
+    links.push_back(Link(tempParam,"RightAnkleRoll"));
+
+    m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
+    return true;
 }
 
 
-
-std::vector<float> Kinematics::TransformPosition(double distance,double bearing,double elevation)
+Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<float>& jointValues)
 {
+    std::vector<float> modifiedJointValues;
 
-    // Definitions:
-    // - Angles in radians.
-    // - Distances in centimeters.
-    // - Elevation - -ve angle is down.
-    // - Bearing - +ve angle is left.
-    // - Yaw - +ve angle is left.
-    // - Pitch - +ve angle is down.
-    // - Roll - +ve angle is clockwise.
-
-    // Convert the spherical (radius, elevation, bearing) coordinates to Cartesian (x,y,z) 
-    //    => x axis - Horizontal from center forwards
-    //    => y axis - Horizontal from center to left
-    //    => z axis - Vertical from bottom to top
-
-    double x = distance * cos(bearing) * cos(elevation);
-    double y = distance * sin(bearing) * cos(elevation);
-    double z = distance * sin(elevation);
-
-    double tempX, tempY, tempZ;
-    
-    float cameraOffsetZ, cameraOffsetX, cameraAngleOffset;
-
-    if(cameraNumber == CAMERA_BOTTOM){
-      cameraAngleOffset = cameraBottomOffsetAngle;
-      cameraOffsetZ = cameraBottomOffsetZ;
-      cameraOffsetX = cameraBottomOffsetX;
-    } else {
-      cameraAngleOffset = cameraTopOffsetAngle;
-      cameraOffsetZ = cameraTopOffsetZ;
-      cameraOffsetX = cameraTopOffsetX;
+    switch(effectorId)
+    {
+        case bottomCamera:
+        case topCamera:
+            modifiedJointValues = ReOrderKneckJoints(jointValues);
+            break;
+        case leftFoot:
+        case rightFoot:
+            modifiedJointValues = ReOrderLegJoints(jointValues);
+            break;
+        default:
+            modifiedJointValues = jointValues;
     }
-    
-    // TODO:
-    // Note:  This angle offset should really be a rotation about the original value, as rotation is not really about the robots neck
-    //        but about the center of the head (?).
-    float tempHeadPitch = headPitch + cameraAngleOffset;
-
-    // Translate to base of neck.
-    x = x + cameraOffsetX;
-    z = z + cameraOffsetZ;
-
-    // Rotate for head pitch. (Rotate about y-axis)
-    tempX = x;
-    tempY = y;
-    tempZ = z;
-    x = tempX*cos(tempHeadPitch)+tempZ*sin(tempHeadPitch);
-    y = tempY;
-    z = -tempX*sin(tempHeadPitch)+tempZ*cos(tempHeadPitch);
-
-    // Rotate for Head yaw. (Rotate about z-axis)
-    tempX = x;
-    tempY = y;
-    tempZ = z;
-    x = tempX*cos(headYaw)-tempY*sin(headYaw);
-    y = tempX*sin(headYaw)+tempY*cos(headYaw);
-    z = tempZ;
-
-    
-
-    // Coordinate frame should now be sitting the base of the neck, aligned with the torso coords.
-    // Translate to base of torso.
-    x = x;
-    y = y;
-    z = z + neckOffsetZ + hipOffsetZ;
-    
-    // rotate for body pitch. (Rotate about y-axis)
-    tempX = x;
-    tempY = y;
-    tempZ = z;
-    x = tempX*cos(bodyPitch)+tempZ*sin(bodyPitch);
-    y = tempY;
-    z = -tempX*sin(bodyPitch)+tempZ*cos(bodyPitch);
-
-    // Rotate for body roll. (Rotate about x-axis)
-    tempX = x;
-    tempY = y;
-    tempZ = z;
-    x = x;
-    y = tempY*cos(bodyRoll)-tempZ*sin(bodyRoll);
-    z = tempY*sin(bodyRoll)+tempZ*cos(bodyRoll);
-    
-    
- 
-    // Pack results into vector to return
-    std::vector<float> position3D;
-    position3D.resize(3);
-    position3D[0] = x;
-    position3D[1] = y;
-    position3D[2] = z;
-
-    return position3D;
-}
-*/
-
-
-std::vector<float> Kinematics::CalculateLeftFootPosition(float thetaHipYawPitch, float thetaHipRoll, float thetaHipPitch, float thetaKneePitch, float thetaAnklePitch, float thetaAnkleRoll){
-  
-  Matrix temp;
-  std::vector<float> position3D;
-  position3D.resize(3);
-
-  temp = Translation(0.0f, hipOffsetY, -hipOffsetZ);                    // To top of leg
-  temp = temp * ModifiedDH(-3.0*mathGeneral::PI/4.0, 0, thetaHipYawPitch-mathGeneral::PI/2.0, 0); // Hip Yaw Pitch
-  temp = temp * ModifiedDH(-mathGeneral::PI/2.0, 0, thetaHipRoll+mathGeneral::PI/4.0, 0);         // Hip Roll
-  temp = temp * ModifiedDH(mathGeneral::PI/2.0, 0, thetaHipPitch, 0);                // Hip Pitch
-  temp = temp * ModifiedDH(0, -thighLength, thetaKneePitch, 0);         // Knee Pitch
-  temp = temp * ModifiedDH(0, -tibiaLength, thetaAnklePitch, 0);        // Ankle Pitch
-  temp = temp * ModifiedDH(-mathGeneral::PI/2.0, 0, thetaAnkleRoll, 0);              // Ankle Roll
-  temp = temp * RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
-
-  position3D[0] = (float)temp[0][3];
-  position3D[1] = (float)temp[1][3];
-  position3D[2] = (float)temp[2][3];
-
-  return position3D; 
+    return m_endEffectors[effectorId].CalculateTransform(modifiedJointValues);
 }
 
-std::vector<float> Kinematics::CalculateRightFootPosition(float thetaHipYawPitch, float thetaHipRoll, float thetaHipPitch, float thetaKneePitch, float thetaAnklePitch, float thetaAnkleRoll){
-
-  Matrix temp;
-  std::vector<float> position3D;
-  position3D.resize(3);
-  temp = Translation(0.0f, -hipOffsetY, -hipOffsetZ);                   // To top of leg
-  temp = temp * ModifiedDH(-mathGeneral::PI/4.0, 0, thetaHipYawPitch-mathGeneral::PI/2.0, 0);     // Hip Yaw Pitch
-  temp = temp * ModifiedDH(-mathGeneral::PI/2.0, 0, thetaHipRoll-mathGeneral::PI/4.0, 0);         // Hip Roll
-  temp = temp * ModifiedDH(mathGeneral::PI/2.0, 0, thetaHipPitch, 0);                // Hip Pitch
-  temp = temp * ModifiedDH(0, -thighLength, thetaKneePitch, 0);         // Knee Pitch
-  temp = temp * ModifiedDH(0, -tibiaLength, thetaAnklePitch, 0);        // Ankle Pitch
-  temp = temp * ModifiedDH(-mathGeneral::PI/2.0, 0, thetaAnkleRoll, 0);              // Ankle Roll
-  temp = temp * RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
-  position3D[0] = (float)temp[0][3];
-  position3D[1] = (float)temp[1][3];
-  position3D[2] = (float)temp[2][3];
-  return position3D; 
-}
-
-
-/*
-float Kinematics::CalculateHeightOfOrigin()
+double Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
 {
-  float originHeight;
-  if (touchLeftFootOnGround == true && touchRightFootOnGround == false){ 
-    // Left foot is support leg
-    std::vector<float> legPosition = GetLeftFootPosition();
-    originHeight = fabs(legPosition[2]);
-  } else if (touchLeftFootOnGround == false && touchRightFootOnGround == true) {
-    // Right foot is support leg
-    std::vector<float> legPosition = GetRightFootPosition();
-    originHeight = fabs(legPosition[2]);
-  } else if (touchLeftFootOnGround == true && touchRightFootOnGround == true) {
-    // Both feet are support legs, or can't decide
-    std::vector<float> leftLegPosition = GetLeftFootPosition();
-    std::vector<float> rightLegPosition = GetRightFootPosition();
-    originHeight = fabs( (leftLegPosition[2] + rightLegPosition[2]) / 2 );
-  } else {
-    // Robot is not stanging on its legs
-    originHeight = 0;    
-  }
-  return originHeight;
+    const double nearDistance = 10;     // 10 cm
+    const double farDistance = 3000;   // 3,000 cm (30 metres)
+
+    std::vector<float> resultCartesian(3, 0.0f);
+
+    // pre-calculate required trig values.
+    double xcos = cos(angleFromCameraCentreX);
+    double xsin = sin(angleFromCameraCentreX);
+    double ycos = cos(angleFromCameraCentreY);
+    double ysin = sin(angleFromCameraCentreY);
+
+    // Build the near measurement vector
+    Matrix nearCartCol(4,1);
+    nearCartCol[0][0] = nearDistance * xcos * ycos;
+    nearCartCol[1][0] = nearDistance * xsin * ycos;
+    nearCartCol[2][0] = nearDistance * ysin;
+    nearCartCol[3][0] = 1.0;
+
+    // Build the far measurement vector
+    Matrix farCartCol(4,1);
+    farCartCol[0][0] = farDistance * xcos * ycos;
+    farCartCol[1][0] = farDistance * xsin * ycos;
+    farCartCol[2][0] = farDistance * ysin;
+    farCartCol[3][0] = 1.0;
+
+    // Caluculate The Transformed positions of both the near and far values.
+    Matrix nearResult = Camera2GroundTransform * nearCartCol;
+    Matrix farResult = Camera2GroundTransform * farCartCol;
+
+    // Interpolate between near and far values to find the point at which z = 0 (the ground)
+    double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
+    resultCartesian[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
+    resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
+    resultCartesian[2] = 0.0;
+
+    // Convert back to polar coodinates.
+    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
+
+    //! TODO: Get the right thing to output, what do we want from this function??
+    return resultSpherical[0];
 }
-*/
+
+Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2CameraTransform)
+{
+    double legOffsetX = origin2SupportLegTransform[0][3];
+    double legOffsetY = origin2SupportLegTransform[1][3];
+    return Translation(legOffsetX,legOffsetY,0)* InverseMatrix(origin2SupportLegTransform) * origin2CameraTransform;
+}
+
+std::vector<float> Kinematics::TransformPosition(const Matrix& origin2SupportLegTransform, const std::vector<float>& cameraBasedPosition)
+{
+    const std::vector<float> cameraCartesian(mathGeneral::Spherical2Cartesian(cameraBasedPosition));
+
+    // Build the far measurement vector
+    Matrix cameraCoordCol(4,1);
+    cameraCoordCol[0][0] = cameraCartesian[0];
+    cameraCoordCol[1][0] = cameraCartesian[1];
+    cameraCoordCol[2][0] = cameraCartesian[2];
+    cameraCoordCol[3][0] = 1.0;
+
+    // Do the transform
+    Matrix resultMatrix = origin2SupportLegTransform * cameraCoordCol;
+
+    // Construct the result
+    std::vector<float> result(3,0.0f);
+    result[0] = resultMatrix[0][0];
+    result[1] = resultMatrix[1][0];
+    result[2] = resultMatrix[2][0];
+
+    return mathGeneral::Cartesian2Spherical(result);
+}
+
+std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
+{
+    std::vector<float> result;
+    return result;
+}

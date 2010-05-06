@@ -8,6 +8,7 @@
 #define MATH_GENERAL_H
 
 #include <cmath>
+#include <vector>
 
 namespace mathGeneral
 {
@@ -72,6 +73,35 @@ inline int roundNumberToInt(double d)
 {
   return static_cast<int>(floor(d+0.5));
 }
+
+inline std::vector<float> Spherical2Cartesian(const std::vector<float>& sphericalCoordinates)
+{
+    const float distance = sphericalCoordinates[0];
+    const float bearingcos = cos(sphericalCoordinates[1]);
+    const float bearingsin = sin(sphericalCoordinates[1]);
+    const float elevationcos = cos(sphericalCoordinates[2]);
+    const float elevationsin = sin(sphericalCoordinates[2]);
+
+    std::vector<float> result(3,0.0f);
+    result[0] = distance * bearingcos * elevationcos;
+    result[1] = distance * bearingsin * elevationcos;
+    result[2] = distance * elevationsin;
+    return result;
+}
+
+inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesianCoordinates)
+{
+    const float x = cartesianCoordinates[0];
+    const float y = cartesianCoordinates[1];
+    const float z = cartesianCoordinates[2];
+    std::vector<float> result(3,0.0f);
+
+    result[0] = sqrt(x*x + y*y + z*z);
+    result[1] = atan2(y,x);
+    result[2] = asin(z/(result[0]));
+    return result;
+}
+
 
 } // End namespace
 

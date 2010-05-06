@@ -48,17 +48,18 @@ private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
     
-    void getSensorValues();
-    void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     void calculatePan();
     void calculateBallPan();
     void calculateBallAndLocalisationPan();
     void calculateLocalisationPan();
+    void calculateGenericPan(float mindistance, float maxdistance, float panspeed);
     
+    void getSensorValues();
+    void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     vector<float> calculatePanLevels(float minpitch, float maxpitch);
     vector<vector<float> > calculatePanPoints(vector<float> levels);
     void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
-    vector<double> calculatePanTimes(vector<vector<float> > points);
+    vector<double> calculatePanTimes(vector<vector<float> > points, float panspeed);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
     
@@ -66,6 +67,7 @@ private:
     void calculateBallNod();
     void calculateBallAndLocalisationNod();
     void calculateLocalisationNod();
+    void calculateGenericNod(float mindistance, float maxdistance, float nodspeed);
     
     void load();
     void loadConfig();
@@ -87,8 +89,10 @@ private:
     
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
-    vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits
-    vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (loaded from platform specific file)
+    float m_pan_ball_speed;                     //!< the speed of pans looking for the ball (Loaded from HeadPan.cfg)
+    float m_pan_localisation_speed;             //!< the speed of pans looking for field objects that aren't the ball (Loaded from HeadPan.cfg)
+    vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits (Loaded from HeadPan.cfg)
+    vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (Loaded from HeadPan.cfg)
     
     bool m_is_nodding;                          //!< true if we are currently nodding the head
     HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing
@@ -98,11 +102,11 @@ private:
     vector<vector<float> > m_curve_positions;   //!< the motion curve positions in radians
     vector<vector<float> > m_curve_velocities;  //!< the motion curve velocities in radians
     
-    vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s
-    vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s
-    vector<float> m_default_gains;              //!< the default gains
-    vector<float> m_pitch_limits;               //!< the pitch min and max
-    vector<float> m_yaw_limits;                 //!< the yaw min and max
+    vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s (Loaded from Head.cfg. It is very important that head can move at these maximum speeds!
+    vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s (Loaded from Head.cfg)
+    vector<float> m_default_gains;              //!< the default gains (Loaded from Head.cfg)
+    vector<float> m_pitch_limits;               //!< the pitch min and max (Loaded from Head.cfg)
+    vector<float> m_yaw_limits;                 //!< the yaw min and max (Loaded from Head.cfg)
 };
 
 #endif

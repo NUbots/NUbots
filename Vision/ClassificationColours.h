@@ -32,8 +32,8 @@ public:
         white,          //!< Colour is in the White region.
         green,          //!< Colour is in the Green region.
         shadow_object,  //!< Colour is part of a shadowed area.
-        red,            //!< Colour is in the Red region.
-        red_orange,     //!< Colour is in the region of overlap between Red and Orange.
+        pink,            //!< Colour is in the Red region.
+        pink_orange,     //!< Colour is in the region of overlap between Red and Orange.
         orange,         //!< Colour is in the Orange region.
         yellow_orange,  //!< Colour is in the region of overlap between Yellow and Orange.
         yellow,         //!< Colour is in the Yellow region.
@@ -55,8 +55,8 @@ public:
             case 1:  return white;
             case 2:  return green;
             case 3:  return shadow_object;
-            case 4:  return red;
-            case 5:  return red_orange;
+            case 4:  return pink;
+            case 5:  return pink_orange;
             case 6:  return orange;
             case 7:  return yellow_orange;
             case 8:  return yellow;
@@ -89,8 +89,8 @@ public:
             case white:         return "white";
             case green:         return "green";
             case shadow_object: return "shadow object";
-            case red:           return "red";
-            case red_orange:    return "red - orange";
+            case pink:           return "pink";
+            case pink_orange:    return "pink - orange";
             case orange:        return "orange";
             case yellow_orange: return "yellow - orange";
             case yellow:        return "yellow";
@@ -128,8 +128,8 @@ public:
             case white:         RGB(255,255,255);
             case green:         RGB(0,255,0);
             case shadow_object: RGB(168,168,168);
-            case red:           RGB(255,0,0);
-            case red_orange:    RGB(255,69,0);
+            case pink:          RGB(255,20,127);
+            case pink_orange:   RGB(255,128,128);
             case orange:        RGB(255,165,0);
             case yellow_orange: RGB(238,219,83);
             case yellow:        RGB(255,255,0);

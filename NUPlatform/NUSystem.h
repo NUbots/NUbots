@@ -25,9 +25,10 @@
 #include <time.h>
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
     #define __NU_SYSTEM_CLOCK_GETTIME 
+    #define __NU_PERIODIC_CLOCK_NANOSLEEP
 #else                                   // otherwise use boost.
     #include <boost/date_time/posix_time/posix_time.hpp>
-    using namespace boost::posix_time;
+    #include <boost/thread/thread.hpp>
 #endif
 
 class NUSensorsData;
@@ -48,10 +49,13 @@ public:
     static double getRealTimeFast();
     static double getProcessTime();    
     static double getThreadTime();
+    
+    // sleep functions
+    static void msleep(double milliseconds);
+    
     // battery functions
     virtual void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
     // watchdog functions
-    virtual void displayRunning(NUActionatorsData* actions);
     virtual void displayVisionFrameDrop(NUActionatorsData* actions);
 private:
     // System time members
@@ -59,7 +63,7 @@ private:
         static struct timespec m_gettime_starttime;            //!< the program's start time according to gettime()
         static struct timespec m_gettimefast_starttime;        //!< the program's start time according to the fast verion of gettime()
     #else
-        static ptime m_microsec_starttime;                     //!< the program's start time according to boost::posix_time
+        static boost::posix_time::ptime m_microsec_starttime;  //!< the program's start time according to boost::posix_time
     #endif
     static long double m_time_offset;                          //!< an offset so that timesincestart = unixstamp - offset and unixstamp = timesincestart + offset
 };

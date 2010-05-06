@@ -55,7 +55,7 @@ vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */ 
-NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
+NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;

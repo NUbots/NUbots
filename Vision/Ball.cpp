@@ -64,7 +64,7 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
 bool Ball::isObjectAPossibleBall(ObjectCandidate PossibleBall)
 {
     if(PossibleBall.getColour()== ClassIndex::orange ||
-       PossibleBall.getColour()== ClassIndex::red_orange ||
+       PossibleBall.getColour()== ClassIndex::pink_orange ||
        PossibleBall.getColour() == ClassIndex::yellow_orange)
     {
         return true;

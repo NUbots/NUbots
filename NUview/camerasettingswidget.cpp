@@ -148,14 +148,14 @@ void cameraSettingsWidget::createWidgets()  //!< Create all of the child widgets
     streamCameraSettingsButton->setEnabled(false);
     stopStreamCameraSettingsButton->setEnabled(false);
 
+    // Save images
     StartSavingImagesButton = new QPushButton("Start Saving Images");
     StopSavingImagesButton = new QPushButton("Stop Saving Images");
+    StartSavingImagesWithSettingsCheckBox = new QCheckBox("Vary Camera Settings");
 
 }
 void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets.
 {
-
-
     // Shift Gain
     shiftGainLayout = new QHBoxLayout();                      //!< Layout for shift Gain
     shiftGainLayout->addWidget(shiftGainLabel);               //!< Label for shift Gain
@@ -217,6 +217,7 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     saveImagesButtonLayout = new QHBoxLayout();
     saveImagesButtonLayout->addWidget(StartSavingImagesButton);
     saveImagesButtonLayout->addWidget(StopSavingImagesButton);
+    saveImagesButtonLayout->addWidget(StartSavingImagesWithSettingsCheckBox);
 
     overallLayout = new QVBoxLayout();                 //!< Overall widget layout.
     overallLayout->addLayout(shiftGainLayout);
@@ -482,7 +483,7 @@ void cameraSettingsWidget::stopStreamCameraSetting()
 
 void cameraSettingsWidget::sendStartSavingImagesJob()
 {
-    SaveImagesJob* saveimagesjob = new SaveImagesJob(true);
+    SaveImagesJob* saveimagesjob = new SaveImagesJob(true, StartSavingImagesWithSettingsCheckBox->isChecked());
     m_job_list->addVisionJob(saveimagesjob);
     m_job_list->summaryTo(debug);
 

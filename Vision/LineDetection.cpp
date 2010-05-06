@@ -46,7 +46,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
         //qDebug() << "Line Points: " << linePoints.size();
         FindFieldLines(image_width,image_height);
         //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
-        for(int i = 0; i < fieldLines.size(); i++)
+        for(unsigned int i = 0; i < fieldLines.size(); i++)
         {
             if(fieldLines[i].valid)
             {

@@ -50,7 +50,7 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
-NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
+NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
