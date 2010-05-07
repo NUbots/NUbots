@@ -109,7 +109,7 @@ class Vision
       @param y The y coordinate of the pixel to be classified.
       @return Returns the classfied colour index for the given pixel.
       */
-    inline unsigned char classifyPixel(int x, int y);
+    unsigned char classifyPixel(int x, int y);
 
     enum tCLASSIFY_METHOD
     {

@@ -108,9 +108,10 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
     for(int i = 0; i< numberOfLines; i++)
     {
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
-        for(int j = 0; j < numberOfSegments; j++)
+        for(int j = 0; j < numberOfSegments ; j++)
         {
             //! Throw out short segments
+            if(linePoints.size() > MAX_LINEPOINTS) break;
             //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
             if(previouslyCloselyScanedSegment == NULL)
@@ -281,9 +282,9 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
 
     //Only bother searching if there is enough points to make part of a line..
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++)
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++)
     {   //for all line points recorded
-
+        if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
         for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){ 	//for remaining points recorded
@@ -348,7 +349,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
 
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++){
+        if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > HORZ_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
         //if(linePoints[SearchFrom].width < MIN_POINT_THICKNESS) continue;
@@ -580,6 +582,7 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
   
   //Now try and find where the lines intersect.
         for (unsigned int LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
+                 if(cornerPoints.size()> MAX_CORNERPOINTS) break;
 		if (!fieldLines[LineIDStart].valid) continue;
 		//See if this line intersects with any other ones...
                 for (unsigned int LineIDCheck = LineIDStart+1; LineIDCheck < fieldLines.size(); LineIDCheck++){

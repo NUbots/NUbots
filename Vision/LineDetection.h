@@ -11,9 +11,9 @@
 #include <iostream>
 class Vision;
 class FieldObjects;
-//#define MAX_LINEPOINTS 1000
-//#define MAX_FIELDLINES 200
-//#define MAX_CORNERPOINTS 50
+#define MAX_LINEPOINTS 100
+#define MAX_FIELDLINES 20
+#define MAX_CORNERPOINTS 10
 #define VERT_POINT_THICKNESS 36
 #define MIN_POINT_THICKNESS 2
 #define HORZ_POINT_THICKNESS 36
