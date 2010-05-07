@@ -24,6 +24,7 @@
 #include "Tools/Image/Pixel.h"
 #include "debug.h"
 #include "debugverbositynucamera.h"
+#include "NUPlatform/NUSystem.h"
 
 #include "webots/Robot.hpp"
 using namespace webots;
@@ -97,7 +98,7 @@ NUimage* NAOWebotsCamera::grabNewImage()
         memcpy(&m_yuyv_buffer[(2*i+1)*m_width], &buffer[i*m_width], sizeof(buffer[i*m_width])*m_width);
     }
     m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
-    
+    m_image->m_timestamp = nusystem->getTime();
     return m_image;
 }
 

@@ -32,7 +32,6 @@ sensor_t::sensor_t()
     SensorID = UNDEFINED;
     IsValid = false;
     IsCalculated = false;
-    TimeStamp = 0;
 }
     
 /*! @brief Constructor for a named sensor_t
@@ -45,9 +44,7 @@ sensor_t::sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated)
     SensorID = sensorid;
     IsValid = false;
     IsCalculated = iscalculated;
-    m_time_offset = NUSystem::getTimeOffset();
     Time = 0;
-    TimeStamp = Time + m_time_offset;
 }
 
 /*! @brief Updates the sensors data
@@ -55,10 +52,9 @@ sensor_t::sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated)
     @param newdata the vector of new sensor data
     @param iscalculated set this to true if the new sensor data was calculated from other sensor data
  */
-void sensor_t::setData(double time, vector<float> newdata, bool iscalculated)
+void sensor_t::setData(double time, const vector<float>& newdata, bool iscalculated)
 {
     Time = time;
-    TimeStamp = Time + m_time_offset;
     Data = newdata;
     IsValid = true;
     IsCalculated = iscalculated;
@@ -67,7 +63,7 @@ void sensor_t::setData(double time, vector<float> newdata, bool iscalculated)
 /*! @brief Sets/updates the sensor standard deviation
     @param newstddev the vector of standard deviations. It is assumed that the order of newstddevs matches the newdata
  */
-void sensor_t::setStdDev(vector<float> newstddev)
+void sensor_t::setStdDev(const vector<float>& newstddev)
 {
     StdDev = newstddev;
 }
@@ -135,8 +131,6 @@ ostream& operator<< (ostream& output, const sensor_t& p_sensor)
     
     // we save the time as binary data
     output.write((char*) &p_sensor.Time, sizeof(double));
-    // we also save the timestamp as binary data
-    output.write((char*) &p_sensor.TimeStamp, sizeof(long double));
     return output;
 }
 
@@ -154,7 +148,6 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
     char charBuffer;
     float floatBuffer;
     double doubleBuffer;
-    long double lDoubleBuffer;
 
     input >> p_sensor.Name;
     input >> id;
@@ -185,10 +178,6 @@ istream& operator>> (istream& input, sensor_t& p_sensor)
     input.read(&charBuffer, sizeof(char));         // skip over the single space after the iscalculated flag
     input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(double));
     p_sensor.Time = doubleBuffer;
-    // Read in TimeStamp
-    input.read(reinterpret_cast<char*>(&lDoubleBuffer), sizeof(long double));
-    p_sensor.TimeStamp = lDoubleBuffer;
-    p_sensor.m_time_offset = p_sensor.TimeStamp - p_sensor.Time;
     return input;
 }
 

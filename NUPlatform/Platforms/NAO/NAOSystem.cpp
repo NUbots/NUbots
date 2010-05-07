@@ -128,6 +128,7 @@ void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
     vector<float> ledoff(3,0);
     vector<float> ledon(3,1);
     vector<vector<float> > dropleds;
+    dropleds.reserve(m_ear_leds.size());
     
     for (unsigned int i=0; i<m_ear_leds.size(); i++)
     {

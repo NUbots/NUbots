@@ -54,7 +54,10 @@ public:
     static string NUBOT10;
     static string MY_IP_IS;
     
+    static string ILLEGAL_INSTRUCTION;
     static string SEG_FAULT;
+    static string BUS_ERROR;
+    static string ABORT;
     static string UNHANDLED_EXCEPTION;
     static string LOW_BATTERY;
     
