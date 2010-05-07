@@ -204,7 +204,8 @@ void NUSensors::calculateOrientation()
             orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
         }
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-        double startTime = nusystem->getThreadTime();
+       // double startTime = nusystem->getThreadTime();
+        /*
         // New method
         if(m_data->getGyroValues(gyros))
         {
@@ -218,15 +219,19 @@ void NUSensors::calculateOrientation()
             else
             {
                 m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
-                m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
+                //m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
                 Matrix supportLegTransform;
-                if(m_data->getSupportLegTransform(supportLegTransform))
+                bool validKinematics = m_data->getSupportLegTransform(supportLegTransform);
+                //if(m_data->getSupportLegTransform(supportLegTransform))
+                if(validKinematics)
                 {
-                    static vector<float> orientation(3,0.0f);
                     orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-                    m_orientationFilter->KinematicsMeasurementUpdate(orientation[1],orientation[0]);
-                    //m_orientationFilter->KinematicsMeasurementUpdate(0.0f,0.0f);
+//                    static vector<float> orientation(3,0.0f);
+//                    orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+//                    //m_orientationFilter->KinematicsMeasurementUpdate(orientation[1],orientation[0]);
+//                    //m_orientationFilter->KinematicsMeasurementUpdate(0.0f,0.0f);
                 }
+                m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
             }
 
             // Set orientation
@@ -239,8 +244,9 @@ void NUSensors::calculateOrientation()
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
             gyroOffset[2] = 0.0f;
         }
-        double runTime = nusystem->getThreadTime() - startTime;
-        debug << "Time taken to run UKF: " << runTime << endl;
+        //double runTime = nusystem->getThreadTime() - startTime;
+        //debug << "Time taken to run UKF: " << runTime << endl;
+        */
     }
 }
 
