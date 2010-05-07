@@ -35,6 +35,7 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <pthread.h>
 using namespace std;
 
 template <typename T = float>

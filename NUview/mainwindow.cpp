@@ -71,7 +71,6 @@ MainWindow::MainWindow(QWidget *parent)
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
     networkTabs->addTab(cameraSetting, cameraSetting->objectName());
 
-
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
     networkTabDock->setWidget(networkTabs);
@@ -125,6 +124,7 @@ MainWindow::~MainWindow()
     delete nativeAspectAction;
     delete newVisionDisplayAction;
     delete newLocWMDisplayAction;
+    delete doBonjourTestAction;
     
     delete m_nuview_io;
     return;

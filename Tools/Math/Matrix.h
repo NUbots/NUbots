@@ -24,9 +24,9 @@ public:
 	~Matrix();
 	Matrix(const Matrix& a);
 	
-	Matrix transp(); // Matrix Transpose
-	Matrix getRow(int index); // Get Row
-	Matrix getCol(int index); // Get Column
+        Matrix transp() const; // Matrix Transpose
+        Matrix getRow(int index) const; // Get Row
+        Matrix getCol(int index) const; // Get Column
 	void setRow(int index, Matrix in); // Set Row
 	void setCol(int index, Matrix in); // Set Column
 	Matrix&	operator =  (const Matrix& a); // Overloaded Operator

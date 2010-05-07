@@ -23,7 +23,7 @@
 #include "NUSystem.h"
 #include "../Kinematics/Horizon.h"
 #include "Kinematics/Kinematics.h"
-#include <math.h>
+#include "Kinematics/OrientationUKF.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"
@@ -31,6 +31,7 @@
 #include "nubotdataconfig.h"
 #include "Motion/Tools/MotionFileTools.h"
 
+#include <math.h>
 #include <boost/circular_buffer.hpp>
 using namespace std;
 
@@ -48,8 +49,8 @@ NUSensors::NUSensors()
     m_data = new NUSensorsData();
 	m_kinematicModel = new Kinematics();
 	m_kinematicModel->LoadModel("None");
+    m_orientationFilter = new OrientationUKF();
     
-// this should be loaded from a file!
     ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
     m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
     m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
@@ -68,6 +69,8 @@ NUSensors::~NUSensors()
         delete m_data;
 	delete m_kinematicModel;
 	m_kinematicModel = 0;
+        delete m_orientationFilter;
+        m_orientationFilter = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -194,8 +197,12 @@ void NUSensors::calculateOrientation()
 #endif
     static vector<float> orientation(3, 0);
     static vector<float> acceleration(3, 0);
+    static vector<float> gyros(3, 0);
+    static vector<float> gyroOffset(3, 0);
+
     if (m_data->getAccelerometerValues(acceleration))
     {
+        // Old method
         float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
         if (fabs(accelsum - 981) < 0.1*981)
         {   // only update the orientation estimate if not under other accelerations!
@@ -204,6 +211,42 @@ void NUSensors::calculateOrientation()
             orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
         }
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+        // New method
+/*  TOO SLOW FOR NOW
+        if(m_data->getGyroValues(gyros))
+        {
+            if(!m_orientationFilter->Initialised())
+            {
+                if (fabs(accelsum - 981) < 0.2*981)
+                {
+                    m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
+                }
+            }
+            else
+            {
+                m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
+                m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
+                Matrix supportLegTransform;
+                if(m_data->getSupportLegTransform(supportLegTransform))
+                {
+                    static vector<float> orientation(3,0.0f);
+                    orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+                    m_orientationFilter->KinematicsMeasurementUpdate(orientation[1],orientation[0]);
+                    //m_orientationFilter->KinematicsMeasurementUpdate(0.0f,0.0f);
+                }
+            }
+
+            // Set orientation
+            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+            orientation[2] = 0.0f;
+            m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+            // Set gyro offset values
+            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+            gyroOffset[2] = 0.0f;
+        }
+        */
     }
 }
 
@@ -684,11 +727,11 @@ void NUSensors::calculateKinematics()
     const bool rightLegSupport = true;
     const int cameraNumber = 1;
 
-    vector<float> leftLegJoints;
+    static vector<float> leftLegJoints;
     bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
-    vector<float> rightLegJoints;
+    static vector<float> rightLegJoints;
     bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
-    vector<float> headJoints;
+    static vector<float> headJoints;
     bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
 
     Matrix rightLegTransform;

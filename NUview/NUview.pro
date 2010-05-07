@@ -94,11 +94,14 @@ HEADERS += ui_mainwindow.h \
     bonjour/bonjourserviceresolver.h \
     bonjour/bonjourservicebrowser.h \
     bonjour/bonjourrecord.h \
+    ../Tools/Math/UKF.h \
+    ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
     ../Kinematics/EndEffector.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
-    ../Tools/Math/General.h
+    ../Tools/Math/General.h \
+    ../Kinematics/OrientationUKF.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -176,7 +179,10 @@ SOURCES += mainwindow.cpp \
     bonjour/robotSelectDialog.cpp \
     bonjour/bonjourserviceresolver.cpp \
     bonjour/bonjourservicebrowser.cpp \
+    ../Tools/Math/UKF.cpp \
+    ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
-    ../Kinematics/EndEffector.cpp
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/OrientationUKF.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

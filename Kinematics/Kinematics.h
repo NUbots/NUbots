@@ -29,7 +29,7 @@ public:
 
     static std::vector<float> ReOrderKneckJoints(const std::vector<float>& joints)
     {
-        const int numRequiredJoints = 2;
+        const unsigned int numRequiredJoints = 2;
         std::vector<float> result(joints.size());
         if(joints.size() >= numRequiredJoints)
         {
@@ -46,7 +46,7 @@ public:
 
     static std::vector<float> ReOrderLegJoints(const std::vector<float>& joints)
     {
-        const int numRequiredJoints = 6;
+        const unsigned int numRequiredJoints = 6;
         std::vector<float> result(joints.size());
         if(joints.size() >= numRequiredJoints)
         {
