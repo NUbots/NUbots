@@ -492,11 +492,11 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
 
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
-    debug << width << " , "<< height << endl;
+    //debug << width << " , "<< height << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < width; x+=scanSpacing)
@@ -598,7 +598,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
     int height = currentImage->getHeight();
 
     Vector2<int> temp;
-    for (; nextPoint != fieldBorders.end(); nextPoint++)
+    for (; nextPoint != fieldBorders.end(); ++nextPoint)
     {
         x = nextPoint->x;
         y = nextPoint->y;
@@ -612,7 +612,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         scanArea.addScanLine(tempScanLine);
 
         //!Create half ScanLine
-        midX = x-skip;
+        midX = x+skip;
         temp.x = midX;
         halfLineLength = int((height - y)/2);
         ScanLine tempMidScanLine(temp,halfLineLength);
@@ -627,22 +627,6 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         ScanLine tempRightQuarterLine(temp,quarterLineLength);
         scanArea.addScanLine(tempRightQuarterLine);
     }
-
-    //!Generate the last Lines:
-    midX = fieldBorders.back().x+skip;
-    y = fieldBorders.back().y;
-    temp.x = midX;
-    temp.y = y;
-    ScanLine tempMidScanLine(temp,halfLineLength);
-    scanArea.addScanLine(tempMidScanLine);
-    temp.x = midX-skip/2;
-    temp.y = y;
-    ScanLine tempLeftQuarterLine(temp,quarterLineLength);
-    scanArea.addScanLine(tempLeftQuarterLine);
-    temp.x = midX+skip/2;
-    temp.y = y;
-    ScanLine tempRightQuarterLine(temp,quarterLineLength);
-    scanArea.addScanLine(tempRightQuarterLine);
 
     return scanArea;
 }
@@ -1396,7 +1380,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-	    delete colourHistogram;
+	    delete [] colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
