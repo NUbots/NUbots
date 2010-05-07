@@ -342,7 +342,7 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     float vf = stopvelocity;
     
     // if the time is short or the movement is small or the smoothness is low, don't bother calculating a curve
-    if (fabs(tf - t0) < 4*cycletime || fabs(g0 - gf) < 0.05 || smoothness < 0.05)
+    if (tf - t0 < 8*cycletime || fabs(g0 - gf) < 0.05 || smoothness < 0.05)
     {
         calculatedtimes = vector<double> (1, tf);
         if (fabs(tf - t0) > 0.01)
