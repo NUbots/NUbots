@@ -56,21 +56,88 @@ void MotionCurves::calculate(double starttime, double stoptime, float startposit
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities)
 {
-    if (times.size() == 0 || positions.size() < times.size())
+    if (times.empty())
         return;
-    else
+    else if (positions.size() < times.size())
     {
+        errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << endl;
+        return;
+    }
+    else if (times.size() == 1)
         calculateTrapezoidalCurve(starttime, times[0], startposition, positions[0], 0, 0, smoothness, cycletime, calculatedtimes, calculatedpositions, calculatedvelocities);
+    else
+    {   // size is two or more, so I need to match the velocities between each pair
+        float finalvelocity;
+        finalvelocity = calculateFinalVelocity(starttime, times[0], times[1], startposition, positions[0], positions[1]); 
+        calculateTrapezoidalCurve(starttime, times[0], startposition, positions[0], 0, finalvelocity, smoothness, cycletime, calculatedtimes, calculatedpositions, calculatedvelocities);
         vector<double> temptimes;
         vector<float> temppositions;
         vector<float> tempvelocities;
-        for (unsigned int i=1; i<times.size(); i++)
+        for (unsigned int i=1; i<times.size()-1; i++)
         {
-            calculateTrapezoidalCurve(times[i-1], times[i], positions[i-1], positions[i], 0, 0, smoothness, cycletime, temptimes, temppositions, tempvelocities);
+            finalvelocity = calculateFinalVelocity(times[i-1], times[i], times[i+1], positions[i-1], positions[i], positions[i+1]);
+            calculateTrapezoidalCurve(times[i-1], times[i], positions[i-1], positions[i], calculatedvelocities.back(), finalvelocity, smoothness, cycletime, temptimes, temppositions, tempvelocities);
             calculatedtimes.insert(calculatedtimes.end(), temptimes.begin(), temptimes.end());
             calculatedpositions.insert(calculatedpositions.end(), temppositions.begin(), temppositions.end());
             calculatedvelocities.insert(calculatedvelocities.end(), tempvelocities.begin(), tempvelocities.end());
         }
+        calculateTrapezoidalCurve(calculatedtimes.back(), times.back(), calculatedpositions.back(), positions.back(), calculatedvelocities.back(), 0, smoothness, cycletime, temptimes, temppositions, tempvelocities);
+        calculatedtimes.insert(calculatedtimes.end(), temptimes.begin(), temptimes.end());
+        calculatedpositions.insert(calculatedpositions.end(), temppositions.begin(), temppositions.end());
+        calculatedvelocities.insert(calculatedvelocities.end(), tempvelocities.begin(), tempvelocities.end());
+    }
+}
+
+/*! @brief Calculates a smooth motion curve for a single joint
+    @param starttime the time in ms to start moving
+    @param times the times in ms to reach the given positions [time0, time1, ... , timeN]
+    @param startposition the start postion for the curve
+    @param positions the target positions for the curve [position0, position1, ... positionN]
+    @param gains the target gains for the curve [gain0, gain1, ... gainN]
+    @param smoothness a fraction indicating the smoothness of the motion: 0 means linear motion curve, 1 minimises the acceleration and jerk
+    @param cycletime the motion cycle time in ms. This is used to decide how many points to generate
+    @param calculatedtimes the calculated times for the curve. Do not assume the times will be evenly spaced!
+    @param calculatedpositions the calculated positions for the curve.
+    @param calculatedvelocities the calculated velocities for the curve
+    @param calculatedgains the calculated gains for the curve
+ */
+void MotionCurves::calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, const vector<float>& gains, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities, vector<float>& calculatedgains)
+{
+    if (times.empty())
+        return;
+    else if (positions.size() < times.size())
+    {
+        errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << endl;
+        return;
+    }
+    else if (times.size() == 1)
+        calculateTrapezoidalCurve(starttime, times[0], startposition, positions[0], 0, 0, smoothness, cycletime, calculatedtimes, calculatedpositions, calculatedvelocities);
+    else
+    {
+        float finalvelocity;
+        finalvelocity = calculateFinalVelocity(starttime, times[0], times[1], startposition, positions[0], positions[1]);
+        calculateTrapezoidalCurve(starttime, times[0], startposition, positions[0], 0, finalvelocity, smoothness, cycletime, calculatedtimes, calculatedpositions, calculatedvelocities);
+        calculatedgains = vector<float>(calculatedtimes.size(), gains[0]);
+        vector<double> temptimes;
+        vector<float> temppositions;
+        vector<float> tempvelocities;
+        vector<float> tempgains;
+        for (unsigned int i=1; i<times.size()-1; i++)
+        {
+            finalvelocity = calculateFinalVelocity(times[i-1], times[i], times[i+1], positions[i-1], positions[i], positions[i+1]);
+            calculateTrapezoidalCurve(times[i-1], times[i], positions[i-1], positions[i], calculatedvelocities.back(), finalvelocity, smoothness, cycletime, temptimes, temppositions, tempvelocities);
+            tempgains = vector<float> (temptimes.size(), gains[i]);
+            calculatedtimes.insert(calculatedtimes.end(), temptimes.begin(), temptimes.end());
+            calculatedpositions.insert(calculatedpositions.end(), temppositions.begin(), temppositions.end());
+            calculatedvelocities.insert(calculatedvelocities.end(), tempvelocities.begin(), tempvelocities.end());
+            calculatedgains.insert(calculatedgains.end(), tempgains.begin(), tempgains.end());
+        }
+        calculateTrapezoidalCurve(calculatedtimes.back(), times.back(), calculatedpositions.back(), positions.back(), calculatedvelocities.back(), 0, smoothness, cycletime, temptimes, temppositions, tempvelocities);
+        tempgains = vector<float> (temptimes.size(), gains.back());
+        calculatedtimes.insert(calculatedtimes.end(), temptimes.begin(), temptimes.end());
+        calculatedpositions.insert(calculatedpositions.end(), temppositions.begin(), temppositions.end());
+        calculatedvelocities.insert(calculatedvelocities.end(), tempvelocities.begin(), tempvelocities.end());
+        calculatedgains.insert(calculatedgains.end(), tempgains.begin(), tempgains.end());
     }
 }
 
@@ -99,8 +166,13 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, floa
  */
 void MotionCurves::calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
-    if (times.size() == 0 || positions.size() < times.size())
+    if (times.empty())
         return;
+    else if (positions.size() < times.size())
+    {
+        errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
+        return;
+    }
     
     // as discussed above I need to reorder the positions
     vector<vector<float> > reorderedpositions(positions[0].size(), vector<float>(positions.size(), 0));     // positions.size() = number of time points and positions[0].size() = number of joints
@@ -109,11 +181,13 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, cons
         for (unsigned int j=0; j<positions[i].size(); j++)
             reorderedpositions[j][i] = positions[i][j];
     }
-    
-    calculatedtimes = vector<vector<double> >();
-    calculatedpositions = vector<vector<float> >();
-    calculatedvelocities = vector<vector<float> >();
     unsigned int numjoints = startpositions.size();
+    calculatedtimes = vector<vector<double> >();
+    calculatedtimes.reserve(numjoints);
+    calculatedpositions = vector<vector<float> >();
+    calculatedpositions.reserve(numjoints);
+    calculatedvelocities = vector<vector<float> >();
+    calculatedvelocities.reserve(numjoints);
     for (unsigned int i=0; i<numjoints; i++)
     {
         vector<double> temptimes;
@@ -145,14 +219,22 @@ void MotionCurves::calculate(double starttime, const vector<double>& times, cons
  */
 void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities)
 {
-    unsigned int numjoints = times.size();
-    if (numjoints == 0 || startpositions.size() < numjoints || positions.size() < numjoints)
+    size_t numjoints = times.size();
+    if (numjoints == 0)
         return;
-    
+    else if (startpositions.size() < numjoints || positions.size() < numjoints)
+    {
+        errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
+        return;
+    }
+
     calculatedtimes = vector<vector<double> >();
+    calculatedtimes.reserve(numjoints);
     calculatedpositions = vector<vector<float> >();
+    calculatedpositions.reserve(numjoints);
     calculatedvelocities = vector<vector<float> >();
-    for (unsigned int i=0; i<numjoints; i++)
+    calculatedvelocities.reserve(numjoints);
+    for (size_t i=0; i<numjoints; i++)
     {
         vector<double> temptimes;
         vector<float> temppositions;
@@ -161,6 +243,59 @@ void MotionCurves::calculate(double starttime, const vector<vector<double> >& ti
         calculatedtimes.push_back(temptimes);
         calculatedpositions.push_back(temppositions);
         calculatedvelocities.push_back(tempvelocities);
+    }
+}
+
+/*! @brief Calculates a smooth motion curve for several joints with gains. Each joint has its own time vector
+ 
+ The data needs to be of the following format:
+ [[time0, time1, ..., timeI]_0, [time0, time1, ..., timeJ]_1, ... , [time0, time1, ..., posiZ]_N]
+ [[posi0, posi1, ..., posiI]_0, [posi0, posi1, ..., posiJ]_1, ... , [posi0, posi1, ..., posiZ]_N]
+ [[gain0, gain1, ..., gainI]_0, [gain0, gain1, ..., gainJ]_1, ... , [gain0, gain1, ..., gainZ]_N]
+ where each time-position-gain tuple has the same length, and there are N joints
+ 
+ @param starttime the time in ms to start moving
+ @param times the times in ms to reach the given positions
+ @param startpositions the start postion for each joint [start0, start1, ... , startM]
+ @param positions the target positions for the curve
+ @param gains the target gains for the curve
+ @param smoothness a fraction indicating the smoothness of the motion: 0 means linear motion curve, 1 minimises the acceleration and jerk
+ @param cycletime the motion cycle time in ms. This is used to decide how many points to generate
+ @param calculatedtimes the calculated times for the curve. Do not assume the times will be evenly spaced! [[time0, time1, ...]_0, [time0, time1, ...]_1, ..., [time0, time1, ...]]_M
+ @param calculatedpositions the calculated positions for the curve. [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ..., [posi0, posi1, ...]]_M
+ @param calculatedvelocities the calculated velocities for the curve. [[velo0, velo1, ...]_0, [velo0, velo1, ...]_1, ..., [velo0, velo1, ...]]_M
+ @param calculatedgains the calculated gains for the curve [[gain0, gain1, ...]_0, [gain0, gain1, ...]_1, ..., [gain0, gain1, ...]]_M
+ */
+void MotionCurves::calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, const vector<vector<float> >& gains, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities, vector<vector<float> >& calculatedgains)
+{
+    size_t numjoints = times.size();
+    if (numjoints == 0)
+        return;
+    if (startpositions.size() < numjoints || positions.size() < numjoints)
+    {
+        errorlog << "MotionCurves::calculate() failed because times.size(): " << times.size() << " positions.size(): " << positions.size() << " startpositions.size(): " << startpositions.size() << endl;
+        return;
+    }
+    
+    calculatedtimes = vector<vector<double> >();
+    calculatedtimes.reserve(numjoints);
+    calculatedpositions = vector<vector<float> >();
+    calculatedpositions.reserve(numjoints);
+    calculatedvelocities = vector<vector<float> >();
+    calculatedvelocities.reserve(numjoints);
+    calculatedgains = vector<vector<float> >();
+    calculatedgains.reserve(numjoints);
+    for (size_t i=0; i<numjoints; i++)
+    {
+        vector<double> temptimes;
+        vector<float> temppositions;
+        vector<float> tempvelocities;
+        vector<float> tempgains;
+        calculate(starttime, times[i], startpositions[i], positions[i], gains[i], smoothness, cycletime, temptimes, temppositions, tempvelocities, tempgains);
+        calculatedtimes.push_back(temptimes);
+        calculatedpositions.push_back(temppositions);
+        calculatedvelocities.push_back(tempvelocities);
+        calculatedgains.push_back(tempgains);
     }
 }
 
@@ -204,23 +339,27 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     float g0 = startposition;
     float gf = stopposition;
     float v0 = startvelocity;
-    float vf = startvelocity;
+    float vf = stopvelocity;
     
-    // if the time is short or the movement is small, don't bother calculating a curve
-    if (tf - t0 < 4*cycletime || fabs(g0 - gf) < 0.05)
+    // if the time is short or the movement is small or the smoothness is low, don't bother calculating a curve
+    if (fabs(tf - t0) < 4*cycletime || fabs(g0 - gf) < 0.05 || smoothness < 0.05)
     {
         calculatedtimes = vector<double> (1, tf);
-        calculatedvelocities = vector<float> (1, 0);
+        if (fabs(tf - t0) > 0.01)
+            calculatedvelocities = vector<float> (1, (gf-g0)/(tf-t0));
+        else
+            calculatedvelocities = vector<float> (1, (gf-g0)/0.01);
         calculatedpositions = vector<float> (1, gf);
         return;
     }
     
     // Calculate the required acceleration magnitudes
-    float Af = 2*(gf - g0 - vf*tf - v0*t0 + 0.5*(t1 + t0)*(vf - v0))/(t2*t2 - tf*tf - (t1+t0)*(t2 - tf));
+    float Af = 2*(gf - g0 - vf*tf + v0*t0 + 0.5*(t1 + t0)*(vf - v0))/(t2*t2 - tf*tf - (t1+t0)*(t2 - tf));
     float As = (vf - v0 - Af*tf + Af*t2)/(t1-t0);
     
     // Calculate the times to calculate the curve points at
     vector<double> times;
+    times.reserve(4096);
     for (float t = t0; t <= t1; t += cycletime)
         times.push_back(t);
     for (float t = t2; t < tf; t += cycletime)
@@ -229,24 +368,26 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     
     // Now calculate the curve itself
     vector<float> positions;
+    positions.reserve(times.size());
     vector<float> velocities;
+    velocities.reserve(times.size());
     for (unsigned int i=0; i<times.size(); i++)
     {
         float t = times[i];
         if (t <= t1)
         {
             velocities.push_back(As*(t - t0) + v0);
-            positions.push_back(0.5*As*t*t - As*t0*t + v0*t + 0.5*As*t0*t0 + g0 + v0*t0);
+            positions.push_back(0.5*As*t*t - As*t0*t + v0*t + 0.5*As*t0*t0 + g0 - v0*t0);
         }
         else if (t <= t2)
         {
             velocities.push_back(As*(t1 - t0) + v0);
-            positions.push_back(As*(t1 - t0)*t + v0*t - 0.5*As*t1*t1 + 0.5*As*t0*t0 + g0 + v0*t0);
+            positions.push_back(As*(t1 - t0)*t + v0*t - 0.5*As*t1*t1 + 0.5*As*t0*t0 + g0 - v0*t0);
         }
         else
         {
             velocities.push_back(Af*t + As*(t1 - t0) - Af*t2 + v0);
-            positions.push_back(0.5*Af*t*t + As*(t1 - t0)*t - Af*t2*t + v0*t + 0.5*Af*t2*t2 - 0.5*As*t1*t1 + 0.5*As*t0*t0 + g0 + v0*t0);
+            positions.push_back(0.5*Af*t*t + As*(t1 - t0)*t - Af*t2*t + v0*t + 0.5*Af*t2*t2 - 0.5*As*t1*t1 + 0.5*As*t0*t0 + g0 - v0*t0);
         }
     }
 
@@ -255,7 +396,24 @@ void MotionCurves::calculateTrapezoidalCurve(double starttime, double stoptime, 
     calculatedpositions = positions;
     calculatedvelocities = velocities;
 }
+                                  
+float MotionCurves::calculateFinalVelocity(float starttime, float stoptime, float nextstoptime, float startposition, float stopposition, float nextstopposition)
+{
+    return (calculateAvgVelocity(starttime, stoptime, startposition, stopposition) + calculateAvgVelocity(stoptime, nextstoptime, stopposition, nextstopposition))/2.0;
+}
 
-
+/*! @brief Calculates the average velocity in moving from startposition to stopposition over starttime to stoptime
+    @param startposition
+    @param stopposition
+    @param starttime the start time in ms
+    @param stoptime the stop time in ms
+ */
+float MotionCurves::calculateAvgVelocity(float starttime, float stoptime, float startposition, float stopposition)
+{
+    if (fabs(starttime - stoptime) > 0.01)
+        return (stopposition - startposition)/(stoptime - starttime);
+    else
+        return (stopposition - startposition)/0.01;
+}
 
 

@@ -29,6 +29,8 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 
+#include "Tools/MotionScript.h"
+
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
@@ -47,6 +49,8 @@ NUMotion::NUMotion()
     #ifdef USE_KICK
         m_kick = new NUKick();
     #endif
+    
+    m_block_left = MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -156,7 +160,15 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             m_kick->process(data, actions);
         #endif
     }
+    
     m_previous_time = m_current_time;
+    
+    static bool alreadyran = false;
+    if (m_current_time > 15500 and not alreadyran)
+    {
+        m_block_left.play(data, actions);
+        alreadyran = true;
+    }
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
