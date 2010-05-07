@@ -1,3 +1,8 @@
+
+#ifndef CORNERPOINT_H
+#define CORNERPOINT_H
+
+#include "../Tools/Math/LSFittedLine.h"
 class CornerPoint {
 	public:
 		  double PosX, PosY;
@@ -10,3 +15,4 @@ class CornerPoint {
 		  double visElevation;
 };
 
+#endif

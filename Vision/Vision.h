@@ -19,6 +19,7 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUCamera.h"
+#include "Tools/FileFormats/LUTTools.h"
 #include <iostream>
 #include <fstream>
 
@@ -109,7 +110,13 @@ class Vision
       @param y The y coordinate of the pixel to be classified.
       @return Returns the classfied colour index for the given pixel.
       */
-    inline unsigned char classifyPixel(int x, int y);
+    inline unsigned char classifyPixel(int x, int y)
+    {
+        classifiedCounter++;
+        Pixel* temp = &currentImage->m_image[y][x];
+        //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
+        return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+    }
 
     enum tCLASSIFY_METHOD
     {
@@ -163,7 +170,7 @@ class Vision
     ClassifiedSection verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
-    std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
+    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing);
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
                                                                       std::vector<unsigned char> validColours,

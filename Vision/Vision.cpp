@@ -16,7 +16,6 @@
 #include <algorithm>
 #include "debug.h"
 #include "debugverbosityvision.h"
-#include "Tools/FileFormats/LUTTools.h"
 #include "nubotdataconfig.h"
 
 #include "NUPlatform/NUCamera.h"
@@ -252,10 +251,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
-    //! Form Lines
-    //fieldLines = vision.DetectLines(vertScanArea,spacings);
-    //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
 
 
@@ -329,6 +324,11 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     }
     DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
+
+    //! Form Lines
+    DetectLines(&vertScanArea,spacings);
+    //! Extract Detected Line & Corners
+    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
 
     AllFieldObjects->postProcess(image->m_timestamp);
 
@@ -437,14 +437,8 @@ void Vision::setImage(const NUimage* newImage)
     ImageFrameNumber++;
 }
 
-unsigned char Vision::classifyPixel(int x, int y)
-{
-    classifiedCounter++;
-    Pixel* temp = &currentImage->m_image[y][x];
-    //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-    return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
-    //return  currentLookupTable[((temp->y >> 2)<<12) + ((temp->cb >> 2)<<6) + (temp->cr>>2)]; // 6bit LUT
-}
+
+
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {
     //qDebug() << "InVision CLASS Generation:";
@@ -498,16 +492,17 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
+    debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
-    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
-    //debug << width << " , "<< height << endl;
+    debug << width << " , "<< height << endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < width; x+=scanSpacing)
     {
         yStart = (int)horizonLine->findYFromX(x);
-        if(yStart > height) continue;
+        if(yStart >= height) continue;
         if(yStart < 0) yStart = 0;
         consecutiveGreenPixels = 0;
         for (int y = yStart; y < height; y++)
@@ -603,7 +598,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
     int height = currentImage->getHeight();
 
     Vector2<int> temp;
-    for (; nextPoint != fieldBorders.end(); ++nextPoint)
+    for (; nextPoint != fieldBorders.end(); nextPoint++)
     {
         x = nextPoint->x;
         y = nextPoint->y;
@@ -617,7 +612,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         scanArea.addScanLine(tempScanLine);
 
         //!Create half ScanLine
-        midX = x+skip;
+        midX = x-skip;
         temp.x = midX;
         halfLineLength = int((height - y)/2);
         ScanLine tempMidScanLine(temp,halfLineLength);
@@ -632,6 +627,22 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
         ScanLine tempRightQuarterLine(temp,quarterLineLength);
         scanArea.addScanLine(tempRightQuarterLine);
     }
+
+    //!Generate the last Lines:
+    midX = fieldBorders.back().x+skip;
+    y = fieldBorders.back().y;
+    temp.x = midX;
+    temp.y = y;
+    ScanLine tempMidScanLine(temp,halfLineLength);
+    scanArea.addScanLine(tempMidScanLine);
+    temp.x = midX-skip/2;
+    temp.y = y;
+    ScanLine tempLeftQuarterLine(temp,quarterLineLength);
+    scanArea.addScanLine(tempLeftQuarterLine);
+    temp.x = midX+skip/2;
+    temp.y = y;
+    ScanLine tempRightQuarterLine(temp,quarterLineLength);
+    scanArea.addScanLine(tempRightQuarterLine);
 
     return scanArea;
 }
@@ -748,7 +759,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     {
         colourBuff.push_back(0);
     }
-
     for (int i = 0; i < numOfLines; i++)
     {
         tempLine = scanArea->getScanLine(i);
@@ -786,7 +796,6 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
             }
-            
             //debug << currentPoint.x << " " << currentPoint.y;
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
@@ -864,10 +873,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     afterColour = classifyPixel(currentPoint.x,currentPoint.y);
                     colourBuff.push_back(afterColour);
                     j = j+skipPixel*3;
-                    //qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
-                    //        "\t"<<currentColour<< "," << afterColour <<
-                    //        "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
-                    //        "\t"<< currentPoint.x+j << "," << currentImage->getWidth();
+                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                            "\t"<<currentColour<< "," << afterColour <<
+                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
+                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
                 }
 
                 TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
@@ -945,15 +954,17 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     }
     return;
 }
-
+//! @brief  Pass a transition segment into this function, and will return a scanline which contains
+//!         many different at interval of "spacing" transition segments classified in the orthogonal to the "direction"
 void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
 {
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
+    int skipPixel = 2;
     if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 10;
+        int bufferSize = 2;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -980,12 +991,12 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
             while(checkIfBufferSame(colourBuff))
             {
-                if(tempsubPoint+1 > width)
+                if(tempsubPoint+skipPixel > width)
                 {
                     break;
                 }
 
-                tempsubPoint++;
+                tempsubPoint = tempsubPoint+skipPixel;
 
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
@@ -1011,8 +1022,8 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
             while(checkIfBufferSame(colourBuff))
             {
-                if(tempsubPoint-1 < 0) break;
-                tempsubPoint--;
+                if(tempsubPoint-skipPixel < 0) break;
+                tempsubPoint = tempsubPoint - skipPixel;
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
                 {
@@ -1025,7 +1036,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
             tempSubStartPoint.x = tempsubPoint;
-            subBeforeColour = tempTransition->getColour();
+            subBeforeColour = tempColour;
             //THEN ADD TO LINE
 
             TransitionSegment tempTransitionA(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
@@ -1385,7 +1396,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
             }
-	    delete [] colourHistogram;
+	    delete colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
@@ -1654,17 +1665,17 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     return candidates;
 }
 
-std::vector<LSFittedLine> Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
+LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
 {
     //qDebug() << "Forming Lines:" << endl;
     LineDetection LineDetector;
     int image_width = currentImage->getWidth();
     int image_height = currentImage->getHeight();
-    LineDetector.FormLines(scanArea,image_width,image_height,spacing);
+    LineDetector.FormLines(scanArea,image_width,image_height,spacing, AllFieldObjects, this);
     std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
     //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
-    return fieldLines;
+    return LineDetector;
 }
 
 Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
