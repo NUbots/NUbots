@@ -55,17 +55,20 @@ protected:
     void calculateJointVelocity();
     void calculateJointAcceleration();
     
+    void calculateKinematics();
+    
     void calculateOrientation();
     void calculateHorizon();
     void calculateButtonTriggers();
-    void calculateZMP();
-    void calculateFallSense();
     
     void calculateFootForce();
-    void calculateFootImpact();
     void calculateCoP();
+    void calculateFootSupport();
+    void calculateFootImpact();
+    
+    void calculateZMP();
+    void calculateFallSense();
 
-    void calculateKinematics();
     void calculateOdometry();
     void calculateCameraHeight();
     
@@ -75,6 +78,8 @@ protected:
     double m_current_time;
     double m_previous_time;
     Kinematics* m_kinematicModel;
+    vector<vector<float> > m_left_foot_hull;
+    vector<vector<float> > m_right_foot_hull;
 private:
 };
 
