@@ -16,7 +16,6 @@
 #include <algorithm>
 #include "debug.h"
 #include "debugverbosityvision.h"
-#include "Tools/FileFormats/LUTTools.h"
 #include "nubotdataconfig.h"
 
 #include "NUPlatform/NUCamera.h"
@@ -438,15 +437,7 @@ void Vision::setImage(const NUimage* newImage)
     ImageFrameNumber++;
 }
 
-unsigned char Vision::classifyPixel(int x, int y)
-{
 
-    classifiedCounter++;
-    Pixel* temp = &currentImage->m_image[y][x];
-    //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-    return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
-    //return  currentLookupTable[((temp->y >> 2)<<12) + ((temp->cb >> 2)<<6) + (temp->cr>>2)]; // 6bit LUT
-}
 
 void Vision::classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut)
 {

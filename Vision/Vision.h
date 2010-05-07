@@ -19,6 +19,7 @@
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUCamera.h"
+#include "Tools/FileFormats/LUTTools.h"
 #include <iostream>
 #include <fstream>
 
@@ -109,7 +110,13 @@ class Vision
       @param y The y coordinate of the pixel to be classified.
       @return Returns the classfied colour index for the given pixel.
       */
-    unsigned char classifyPixel(int x, int y);
+    inline unsigned char classifyPixel(int x, int y)
+    {
+        classifiedCounter++;
+        Pixel* temp = &currentImage->m_image[y][x];
+        //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
+        return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+    }
 
     enum tCLASSIFY_METHOD
     {
