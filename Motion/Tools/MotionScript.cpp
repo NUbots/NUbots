@@ -31,6 +31,7 @@
 #include "debugverbositynumotion.h"
 #include "nubotdataconfig.h"
 
+#include <sstream>
 using namespace std;
 
 MotionScript::MotionScript()

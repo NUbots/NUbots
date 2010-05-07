@@ -50,7 +50,7 @@ NUMotion::NUMotion()
         m_kick = new NUKick();
     #endif
     
-    m_block_left = MotionScript("BlockLeft");
+    //m_block_left = MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module

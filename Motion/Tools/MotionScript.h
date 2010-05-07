@@ -45,7 +45,7 @@ protected:
 private:
     void calculateCurve();
 protected:
-    std::string m_name;                 //!< the name of the script
+    string m_name;                      //!< the name of the script
     bool m_is_valid;                    //!< true if the motion script file was loaded without error
 
     float m_playspeed;
