@@ -101,7 +101,8 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
     ../Tools/Math/General.h \
-    ../Kinematics/OrientationUKF.h
+    ../Kinematics/OrientationUKF.h \
+    StreamFileReader.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -183,6 +184,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
-    ../Kinematics/OrientationUKF.cpp
+    ../Kinematics/OrientationUKF.cpp \
+    StreamFileReader.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
