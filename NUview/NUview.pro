@@ -101,7 +101,7 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
     ../Tools/Math/General.h \
-    ../Vision/CornerPoint.h
+    ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h
 
 SOURCES += mainwindow.cpp \
