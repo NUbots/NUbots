@@ -14,9 +14,9 @@ class FieldObjects;
 //#define MAX_LINEPOINTS 1000
 //#define MAX_FIELDLINES 200
 //#define MAX_CORNERPOINTS 50
-#define VERT_POINT_THICKNESS 54
-#define MIN_POINT_THICKNESS 1
-#define HORZ_POINT_THICKNESS 72
+#define VERT_POINT_THICKNESS 36
+#define MIN_POINT_THICKNESS 2
+#define HORZ_POINT_THICKNESS 36
 
 #define POST_T_LIMIT (320) // set as define at top later  ALSO  these values need to be a defined fraction of the IMAGE_WIDTH
 #define POST_L_LIMIT (320) // more thought needs to be given to these limits

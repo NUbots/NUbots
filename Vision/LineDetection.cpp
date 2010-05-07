@@ -863,7 +863,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
 					}
                                     }
                                     if( 	(AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true)
-                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
                                         && (tempUnknownCorner.isObjectVisible() == true)
                                         && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].ScreenX()- cornerPoints[x].PosX ) < POST_T_LIMIT )
                                         && (( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) > 0 )
@@ -871,6 +871,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
                                     {
                                         qDebug("\nTARGET ACQUIRED, BLUE left goal T      ..\n");
                                         //COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
+
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
                                         tempUnknownCorner.setVisibility(false);
                                     }
