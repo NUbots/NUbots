@@ -98,7 +98,7 @@ void NBWalk::sendWalkCommand()
     static WalkCommand* command = new WalkCommand(0, 0, 0);
     command->x_mms = m_speed_x*10;
     command->y_mms = m_speed_y*10;
-    command->theta_rads = m_speed_yaw;
+    command->theta_rads = m_speed_yaw*2;
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NBWalk::sendWalkCommand() command: " << *command << endl;
@@ -284,27 +284,19 @@ void NBWalk::updateNBSensors()
     // Now to the other sensors!
     static vector<float> accelvalues;
     static vector<float> gyrovalues;
+    static vector<float> orientation;
     static vector<float> footvalues;
     static vector<float> buttonvalues;
     m_data->getAccelerometerValues(accelvalues);
     m_data->getGyroValues(gyrovalues);
-    
-    // it is clear that the walk engine is very sensitive to a good measurement for orientation
-    /*anglex_buffer.push_front(atan2(-accelvalues[1],-accelvalues[2]));        // angleX is roll for NB. Right is positive
-    angley_buffer.push_front(atan2(accelvalues[0],-accelvalues[2]));         // angleY is the pitch for NB. Forwards is positive
-    if (anglex_buffer.size() > 2)
-    {
-        anglex_buffer.pop_back();
-        angley_buffer.pop_back();
-    }
-    float xsum = 0;
-    float ysum = 0;
-    for ( it=anglex_buffer.begin() ; it != anglex_buffer.end(); it++ )
-        xsum += *it;
-    for ( it=angley_buffer.begin() ; it != angley_buffer.end(); it++ )
-        ysum += *it;*/
-    float angleX = atan2(-accelvalues[1],-accelvalues[2]);//xsum/anglex_buffer.size();
-    float angleY = atan2(accelvalues[0],-accelvalues[2]);//ysum/angley_buffer.size();
+    m_data->getOrientation(orientation);
+
+    float angleX = 0;
+    if (orientation.size() > 0)
+        angleX = -orientation[0];           // NUbot convention has positive roll to the left, NB has positive roll to the right
+    float angleY = 0;
+    if (orientation.size() > 1)
+        angleY = orientation[1];
     
     m_data->getFootSoleValues(NUSensorsData::AllFeet, footvalues);
     m_data->getButtonValues(NUSensorsData::MainButton, buttonvalues);
@@ -382,19 +374,68 @@ void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujo
     nujoints[21] = nbjoints[16];    // RAnklePitch
 }
 
+void NBWalk::nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints)
+{
+    if (nbjoints.size() < 22 || nuleftlegjoints.size() < 6)
+        return;
+    nuleftlegjoints[0] = nbjoints[7];     // LHipRoll
+    nuleftlegjoints[1] = nbjoints[8];     // LHipPitch
+    nuleftlegjoints[2] = nbjoints[6];     // LHipYawPitch
+    nuleftlegjoints[3] = nbjoints[9];     // LKneePitch
+    nuleftlegjoints[4] = nbjoints[11];    // LAnkleRoll
+    nuleftlegjoints[5] = nbjoints[10];    // LAnklePitch
+}
+
+void NBWalk::nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints)
+{
+    if (nbjoints.size() < 22 || nurightlegjoints.size() < 6)
+        return;
+    nurightlegjoints[0] = nbjoints[13];    // RHipRoll
+    nurightlegjoints[1] = nbjoints[14];    // RHipPitch
+    nurightlegjoints[2] = nbjoints[12];     // RHipYawPitch
+    nurightlegjoints[3] = nbjoints[15];    // RKneePitch
+    nurightlegjoints[4] = nbjoints[17];    // RAnkleRoll
+    nurightlegjoints[5] = nbjoints[16];    // RAnklePitch
+}
+
+void NBWalk::nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints)
+{
+    if (nbjoints.size() < 22 || nuleftarmjoints.size() < 4)
+        return;
+    nuleftarmjoints[0] = nbjoints[3];      // LShoulderRoll
+    nuleftarmjoints[1] = nbjoints[2];      // LShoulderPitch
+    nuleftarmjoints[2] = nbjoints[5];      // LElbowRoll
+    nuleftarmjoints[3] = nbjoints[4];      // LElbowYaw       
+}
+
+void NBWalk::nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints)
+{
+    if (nbjoints.size() < 22 || nurightarmjoints.size() < 4)
+        return;
+    nurightarmjoints[0] = nbjoints[19];     // RShoulderRoll
+    nurightarmjoints[1] = nbjoints[18];     // RShoulderPitch
+    nurightarmjoints[2] = nbjoints[21];     // RElbowRoll
+    nurightarmjoints[3] = nbjoints[20];     // RElbowYaw
+}
+
 /*! @brief A function to nextJoints and nextStiffnesses to NUActionatorsData (m_actions)
  */
 void NBWalk::updateActionatorsData()
 {
     static vector<float> zerovel(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_nextJoints(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_nextStiffnesses(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 100);
-    nbToNUJointOrder(nextJoints, nu_nextJoints);
-    //nbToNUJointOrder(nextStiffnesses, nu_nextStiffnesses);
-    debug << "nu_nextStiffnesses: ";
-    for (unsigned int i=0; i<nu_nextStiffnesses.size(); i++)
-        debug << nu_nextStiffnesses[i] << ", ";
-    debug << endl;
-    m_actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 40, nu_nextJoints, zerovel, nu_nextStiffnesses);
+    static vector<float> nu_nextLeftLegJoints(m_data->getNumberOfJoints(NUSensorsData::LeftLegJoints), 0);
+    static vector<float> nu_nextRightLegJoints(m_data->getNumberOfJoints(NUSensorsData::RightLegJoints), 0);
+    static vector<float> nu_nextLeftArmJoints(m_data->getNumberOfJoints(NUSensorsData::LeftArmJoints), 0);
+    static vector<float> nu_nextRightArmJoints(m_data->getNumberOfJoints(NUSensorsData::RightArmJoints), 0);
+    
+    nbToNULeftLegJointOrder(nextJoints, nu_nextLeftLegJoints);
+    nbToNURightLegJointOrder(nextJoints, nu_nextRightLegJoints);
+    nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
+    nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, 75);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, 75);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, 35);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, 35);
 }
 

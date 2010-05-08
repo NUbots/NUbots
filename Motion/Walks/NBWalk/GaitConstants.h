@@ -290,7 +290,7 @@ namespace WP {
      0.1f};   // Time to transition to/from this stance
     
     static const float WEBOTS_STATIONARY_STEP_CONFIG[LEN_STEP_CONFIG] = 
-    {0.4, // step duration
+    {0.40, // step duration
      0.25,  // fraction in double support
      0.0,  // stepHeight
      0.0,  // step lift
@@ -304,13 +304,13 @@ namespace WP {
      NON_WALKING_GAIT};
     
     static const float WEBOTS_STEP_CONFIG[LEN_STEP_CONFIG] = 
-    {0.4f, // step duration
-    0.2f,  // fraction in double support
-    25.0f,  // stepHeight
-    0.0f,  // step lift
-    400.0f,  // max x speed
-    -60.0f,  // max x speed
-    200.0f,  // max y speed
+    {0.5f, // step duration
+    0.20f,  // fraction in double support
+    15.0f,  // stepHeight
+    -0.09f,  // step lift
+    150.0f,  // max x speed
+    -100.0f,  // max x speed
+    30.0f,  // max y speed
     0.5f,  // max theta speed()
     50.0f,  // max x acc
     50.0f,  // max y acc
@@ -319,14 +319,14 @@ namespace WP {
     
     static const float WEBOTS_ZMP_CONFIG[LEN_ZMP_CONFIG] = 
     {0.0f,  // footCenterLocX
-    0.4f,  // zmp static percentage
-    120.0f,  // left zmp offset
-    120.0f,  // right zmp offset
+    0.3f,  // zmp static percentage
+    50.0f,  // left zmp offset
+    50.0f,  // right zmp offset
     0.01f,  // strafe zmp offset (no units)
     6.6f};  // turn zmp off    ""
     static const float WEBOTS_HACK_CONFIG[LEN_HACK_CONFIG] = 
-    {0.0, // left swing hip roll addition
-    0.0}; // right swing hip roll addition
+    {0.05, // left swing hip roll addition
+    0.05}; // right swing hip roll addition
     
     static const float WEBOTS_SENSOR_CONFIG[LEN_SENSOR_CONFIG] = 
     {1.0,   // Feedback type (1.0 = spring, 0.0 = old)
