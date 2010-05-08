@@ -1,18 +1,26 @@
 #ifndef STREAMFILEREADER_H
 #define STREAMFILEREADER_H
+#include <string>
+#include <fstream>
+#include <map>
 
-#include <QObject>
-
-class StreamFileReader : public QObject
+template<class C>
+class StreamFileReader
 {
-Q_OBJECT
+    typedef std::map<double,unsigned int> FileIndex;
+    typedef FileIndex::value_type IndexEntry;
 public:
-    explicit StreamFileReader(QObject *parent = 0);
+    StreamFileReader();
+    StreamFileReader(const std::string& filename);
+    ~StreamFileReader();
+    void OpenFile(const std::string& filename);
+    void CloseFile();
 
-signals:
-
-public slots:
-
+private:
+    void GenerateIndex();
+    C* m_dataBuffer;
+    std::fstream m_file;
+    FileIndex m_index;
 };
 
 #endif // STREAMFILEREADER_H
