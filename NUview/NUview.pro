@@ -11,6 +11,7 @@ macx {
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
@@ -101,8 +102,10 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
     ../Tools/Math/General.h \
+    ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
     StreamFileReader.h
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

@@ -33,12 +33,17 @@ class MotionCurves
 public:
     static void calculate(double starttime, double stoptime, float startposition, float stopposition, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities);
     static void calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities); 
+    static void calculate(double starttime, const vector<double>& times, float startposition, const vector<float>& positions, const vector<float>& gains, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities, vector<float>& calculatedgains); 
     static void calculate(double starttime, const vector<double>& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities); 
     static void calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities); 
+    static void calculate(double starttime, const vector<vector<double> >& times, const vector<float>& startpositions, const vector<vector<float> >& positions, const vector<vector<float> >& gains, float smoothness, int cycletime, vector<vector<double> >& calculatedtimes, vector<vector<float> >& calculatedpositions, vector<vector<float> >& calculatedvelocities, vector<vector<float> >& calculatedgains); 
 private:
     MotionCurves() {};
     ~MotionCurves() {};
     static void calculateTrapezoidalCurve(double starttime, double stoptime, float startposition, float stopposition, float startvelocity, float stopvelocity, float smoothness, int cycletime, vector<double>& calculatedtimes, vector<float>& calculatedpositions, vector<float>& calculatedvelocities);
+    static float calculateFinalVelocity(float starttime, float stoptime, float nextstoptime, float startposition, float stopposition, float nextstopposition);
+    static float calculateAvgVelocity(float starttime, float stoptime, float startposition, float stopposition);
+    
 protected:
 public:
 };

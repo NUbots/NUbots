@@ -346,6 +346,9 @@ void MainWindow::createConnections()
     connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(fieldObjectsDisplayChanged(FieldObjects*,GLDisplay::display)),&glManager,SLOT(writeFieldObjectsToDisplay(FieldObjects*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< LinePoint >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< LinePoint >,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
+
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(selectionChanged()), this, SLOT(updateSelection()));

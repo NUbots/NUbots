@@ -77,7 +77,12 @@ void Object::CopyObject(const Object& sourceObject)
         relativeMeasurementError = sourceObject.getRelativeMeasurementError();
 
         imagePosition = sourceObject.getImagePosition();
+        sizeOnScreen.x = sourceObject.getObjectWidth();
+        sizeOnScreen.y = sourceObject.getObjectHeight();
         isVisible = sourceObject.isObjectVisible();
+        timeLastSeen = sourceObject.TimeSeen();
+        timeSeen += sourceObject.TimeSeen() - previousFrameTimestamp;
+        timeSinceLastSeen = 0;
 }
 /*
 void Object::setRelativeLocationVariables(float distance, float bearing, float elevation)

@@ -1377,9 +1377,15 @@ void NUActionatorsData::summaryTo(ostream& output)
     if (m_all_actionators.size() == 0 && m_all_string_actionators.size() == 0)
         output << "NONE!" << endl;
     for (unsigned int i=0; i<m_all_actionators.size(); i++)
-        m_all_actionators[i]->summaryTo(output);
+    {
+        if (not m_all_actionators[i]->isEmpty()) 
+            m_all_actionators[i]->summaryTo(output);
+    }
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
-        m_all_string_actionators[i]->summaryTo(output);
+    {
+        if (not m_all_string_actionators[i]->isEmpty())
+            m_all_string_actionators[i]->summaryTo(output);
+    }
 }
 
 void NUActionatorsData::csvTo(ostream& output)

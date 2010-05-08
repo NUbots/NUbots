@@ -9,12 +9,13 @@
 //#include "../Kinematics/Horizon.h"
 //#include "CircleFitting.h"
 #include <iostream>
-
-//#define MAX_LINEPOINTS 1000
-//#define MAX_FIELDLINES 200
-//#define MAX_CORNERPOINTS 50
+class Vision;
+class FieldObjects;
+#define MAX_LINEPOINTS 100
+#define MAX_FIELDLINES 20
+#define MAX_CORNERPOINTS 10
 #define VERT_POINT_THICKNESS 36
-#define MIN_POINT_THICKNESS 1
+#define MIN_POINT_THICKNESS 2
 #define HORZ_POINT_THICKNESS 36
 
 #define POST_T_LIMIT (320) // set as define at top later  ALSO  these values need to be a defined fraction of the IMAGE_WIDTH
@@ -48,17 +49,17 @@ class LineDetection{
 	//METHODS:
 	LineDetection();
     	~LineDetection();
-        void FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing);
+        void FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing,FieldObjects* AllObjects, Vision* vision);
 	
 	
 	private:
         int IMAGE_WIDTH;
 	int TotalValidLines;
         int LINE_SEARCH_GRID_SIZE;
-        void FindLinePoints(ClassifiedSection* scanArea);
+        void FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height);
         void FindFieldLines(int image_width,int image_height);
         void FindCornerPoints(int image_height);
-	void DecodeCorners();
+        void DecodeCorners(FieldObjects* AllObjects, float timestamp );
 	void GetDistanceToPoint(double,double,double*,double*,double*);
         void qsort(std::vector<LinePoint> array, int left, int right, int type);
         void swap(std::vector<LinePoint> array, int i, int j);

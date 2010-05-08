@@ -2,13 +2,14 @@
 #include "TransitionSegment.h"
 #include "ClassificationColours.h"
 #include <math.h>
-#define MIN_POINTS_ON_LINE_FINAL 5
+#define MIN_POINTS_ON_LINE_FINAL 4
 #define MIN_POINTS_ON_LINE 3
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
 //using namespace std;
 #include <vector>
+#include "Vision.h"
 //#include "../Kinematics/Kinematics.h"
 //#include <QDebug>
 
@@ -24,53 +25,75 @@ LineDetection::~LineDetection(){
 return;
 }
 
-void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing) {
-	//RESETING VARIABLES
-        LINE_SEARCH_GRID_SIZE = spacing;
-        for(unsigned int i =0; i < linePoints.size() ; i++ )
-	{
-		linePoints[i].x =0;
-		linePoints[i].y =0;
-	}
+void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision) {
+    LINE_SEARCH_GRID_SIZE = spacing;
+    //RESETING VARIABLES
+    for(unsigned int i =0; i < linePoints.size() ; i++ )
+    {
+            linePoints[i].x =0;
+            linePoints[i].y =0;
+    }
 
-        for(unsigned int i =0; i < fieldLines.size() ; i++ )
-	{
-		fieldLines[i].clearPoints();
-	}
-        //LinePointCounter = 0;
-        TotalValidLines = 0;
-        //FieldLinesCounter = 0;
-        //CornerPointCounter = 0;
-	//FIND LINE POINTS:
-        FindLinePoints(scanArea);
-        //qDebug() << "Line Points: " << linePoints.size();
-        FindFieldLines(image_width,image_height);
-        //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
-        for(unsigned int i = 0; i < fieldLines.size(); i++)
+    for(unsigned int i =0; i < fieldLines.size() ; i++ )
+    {
+            fieldLines[i].clearPoints();
+    }
+    //LinePointCounter = 0;
+    TotalValidLines = 0;
+    //FieldLinesCounter = 0;
+    //CornerPointCounter = 0;
+    //FIND LINE POINTS:
+    FindLinePoints(scanArea,vision,image_width,image_height);
+    //debug() << "Line Points: " << linePoints.size();
+    //for(unsigned int j = 0; j < linePoints.size(); j++)
+    //{
+    //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
+    //}
+    FindFieldLines(image_width,image_height);
+    //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
+    //for(unsigned int i = 0; i < fieldLines.size(); i++)
+    //{
+    //    if(fieldLines[i].valid)
+    //    {
+            ////qDebug()<<i << ": "<< fieldLines[i].leftPoint.x << "," << fieldLines[i].leftPoint.y << "\t"
+                    //<< fieldLines[i].rightPoint.x << "," << fieldLines[i].rightPoint.y
+                    //<< "\t Points: " << fieldLines[i].numPoints;
+    //        std::vector<LinePoint*> points = fieldLines[i].getPoints();
+    //        for( int j = 0; j < fieldLines[i].numPoints ; j++)
+    //        {
+
+                ////qDebug() << "Point " <<j << ":" << points[j]->x << "," << points[j]->y;
+    //        }
+
+    //    }
+    //}
+    FindCornerPoints(image_height);
+    //qDebug() << "Corners found: " << cornerPoints.size();
+    for (unsigned int i = 0; i < cornerPoints.size(); i ++)
+    {
+        if(cornerPoints[i].CornerType == 0) //L
         {
-            if(fieldLines[i].valid)
-            {
-                //qDebug()<<i << ": "<< fieldLines[i].leftPoint.x << "," << fieldLines[i].leftPoint.y << "\t"
-                        //<< fieldLines[i].rightPoint.x << "," << fieldLines[i].rightPoint.y
-                        //<< "\t Points: " << fieldLines[i].numPoints;
-                std::vector<LinePoint*> points = fieldLines[i].getPoints();
-                for( int j = 0; j < fieldLines[i].numPoints ; j++)
-                {
-
-                    //qDebug() << "Point " <<j << ":" << points[j]->x << "," << points[j]->y;
-                }
-
-            }
+            //qDebug() << "L Corner at " << cornerPoints[i].PosX << "," << cornerPoints[i].PosY <<
+            //        "\t Orientation, Direction: " << cornerPoints[i].Orientation << "," << cornerPoints[i].Direction;
         }
-        FindCornerPoints(image_height);
-        //qDebug() << "Corners found: " << cornerPoints.size();
-        //DecodeCorners();
+        else
+        {
+            //qDebug() << "T Corner at " << cornerPoints[i].PosX << "," << cornerPoints[i].PosY <<
+            //        "\t Orientation, Direction: " << cornerPoints[i].Orientation << "," << cornerPoints[i].Direction;
+        }
+    }
+
+
+    DecodeCorners(AllObjects, vision->m_timestamp);
+
+
 }
 
-void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
+void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height)
 {
     int numberOfLines = scanArea->getNumberOfScanLines();
     int maxLengthOfScanLine = 0;
+
 
     //! Find Length of Longest ScanLines as we want to only have longest scan lines.
     for(int i = 0; i < numberOfLines; i++)
@@ -81,38 +104,134 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
         }
     }
     //! Find the LinePoints:
+    TransitionSegment* previouslyCloselyScanedSegment = NULL;
     for(int i = 0; i< numberOfLines; i++)
     {
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
-        for(int j = 0; j < numberOfSegments; j++)
+        for(int j = 0; j < numberOfSegments ; j++)
         {
             //! Throw out short segments
+            if(linePoints.size() > MAX_LINEPOINTS) break;
             //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
+            if(previouslyCloselyScanedSegment == NULL)
+            {
+                //qDebug() << "Assigning First Previous SEgment";
+                previouslyCloselyScanedSegment = segment;
+            }
             //int segmentSize = segment->getSize();
             //! CHECK The Length of the segment
-            if(segment->getSize() < MIN_POINT_THICKNESS || segment->getSize() > VERT_POINT_THICKNESS ) continue;
+            if(segment->getSize() < MIN_POINT_THICKNESS) continue;
+
+            //! LOOKING FOR HORIZONTAL LINE POINTS:
+            if(segment->getSize() > VERT_POINT_THICKNESS*0.5 &&
+               fabs(previouslyCloselyScanedSegment->getStartPoint().x - segment->getStartPoint().x) >=LINE_SEARCH_GRID_SIZE*2)
+            {
+                //! CHECK the LEFT AND RIGHT Pixels
+                int MidX = (int) (segment->getStartPoint().x + segment->getEndPoint().x)/2;
+                int MidY = (int) (segment->getEndPoint().y+segment->getStartPoint().y)/2;
+                int LEFTX = 0;
+                int RIGHTX = 0;
+                if (MidX + VERT_POINT_THICKNESS *1.5> image_width)
+                {
+                    RIGHTX  = image_width;
+                }
+                else
+                {
+                    RIGHTX  = MidX + VERT_POINT_THICKNESS *1.5;
+                }
+                if (MidX - VERT_POINT_THICKNESS *1.5< 0)
+                {
+                    LEFTX = 0;
+                }
+                else
+                {
+                    LEFTX = MidX - VERT_POINT_THICKNESS *1.5;
+                }
+                unsigned char LeftColour = vision->classifyPixel(LEFTX, MidY);
+                unsigned char RightColour = vision->classifyPixel(RIGHTX, MidY);
+
+                if(LeftColour != ClassIndex::white && RightColour != ClassIndex::white
+                   //&& segment->getAfterColour() == ClassIndex::green
+                   //&& segment->getBeforeColour() == ClassIndex::green
+                   )
+                {
+                    ScanLine tempScanLine;
+                    previouslyCloselyScanedSegment = segment;
+                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ClassifiedSection::DOWN);
+                    ////qDebug()    << "After Closly Scan: "<<tempScanLine.getNumberOfSegments()
+                    //            << segment->getStartPoint().x << "," << segment->getStartPoint().y
+                    //            ;
+
+
+                    for (int k = 0; k < tempScanLine.getNumberOfSegments(); k++)
+                    {
+                        TransitionSegment* tempSeg = tempScanLine.getSegment(k);
+                        ////qDebug()<< k << ": \t" << tempSeg ->getBeforeColour() << "," << tempSeg ->getColour() << ","<<tempSeg ->getAfterColour()
+                        //        << "\t" << tempSeg->getSize() << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
+                        if(tempSeg->getSize() > HORZ_POINT_THICKNESS) continue;
+                        //! Check Colour Conditions of segment
+                        if (    /*(ClassIndex::green   ==  tempSeg->getBeforeColour()) &&
+                                (ClassIndex::white   ==  tempSeg->getColour()) &&
+                                (ClassIndex::green   ==  tempSeg->getAfterColour()) ||
+                                (ClassIndex::white   ==  tempSeg->getColour())
+                            &&  (tempSeg->getAfterColour() == ClassIndex::green && (tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object) )
+                            &&  (tempSeg->getBeforeColour() == ClassIndex::green &&(tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )*/
+                                (ClassIndex::white   ==  tempSeg->getColour())
+                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object)
+                                &&  (tempSeg->getAfterColour() == ClassIndex::green || tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )
+
+
+                        {
+                                //qDebug() << "Attempting to add point";
+                                Vector2<int> linepointposition= tempSeg->getMidPoint();
+                                //ADD A FIELD LINEPOINT!
+
+                                LinePoint tempLinePoint;
+                                tempLinePoint.width = tempSeg->getSize();
+                                tempLinePoint.x = linepointposition.x;
+                                tempLinePoint.y = linepointposition.y;
+                                tempLinePoint.inUse = false;
+                                //CUT CLOSE LINE POINTS OFF
+                                bool canNotAdd = false;
+                                for (unsigned int num =0; num <linePoints.size(); num++)
+                                {
+
+                                    if((fabs(tempLinePoint.x - linePoints[num].x) < 8) &&
+                                       (fabs(tempLinePoint.y - linePoints[num].y) < 8))
+                                    {
+                                        canNotAdd = true;
+                                    }
+                                }
+                                if(!canNotAdd)
+                                {
+                                    tempLinePoint.inUse = false;
+                                    linePoints.push_back(tempLinePoint);
+                                    //qDebug() << "Added LinePoint to list: "<< tempLinePoint.x <<"," <<tempLinePoint.y << tempLinePoint.width;
+                                }
+                            }
+                    }
+                }
+            }
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            if(     (ClassIndex::green   ==  segment->getBeforeColour()
-                &&  ClassIndex::white   ==  segment->getColour()
-                &&  ClassIndex::green   ==  segment->getAfterColour())
-                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getAfterColour())
-                //|| (ClassIndex::white   ==  segment->getColour() && ClassIndex::green   ==  segment->getBeforeColour())
-                ||  (ClassIndex::white   ==  segment->getColour() &&
-                    (segment->getAfterColour() == ClassIndex::unclassified || segment->getAfterColour() == ClassIndex::green || segment->getAfterColour() == ClassIndex::shadow_object )
-                &&  (segment->getBeforeColour() == ClassIndex::unclassified || segment->getBeforeColour() == ClassIndex::green || segment->getBeforeColour() == ClassIndex::shadow_object)))
+            else if(     ((ClassIndex::green   ==  segment->getBeforeColour()) &&
+                    (ClassIndex::white   ==  segment->getColour()) &&
+                    (ClassIndex::green   ==  segment->getAfterColour()))||
+                    ((ClassIndex::white   ==  segment->getColour())
+                &&  ((segment->getAfterColour() == ClassIndex::green) && (segment->getBeforeColour() == ClassIndex::unclassified || segment->getBeforeColour() == ClassIndex::shadow_object) )
+                &&  ((segment->getBeforeColour() == ClassIndex::green) &&(segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::shadow_object ) )  ))
 
             {
                 //ADD A FIELD LINEPOINT!
-                Vector2<int>start = segment->getStartPoint();
-                Vector2<int>end = segment->getEndPoint();
+                Vector2<int>linepointposition = segment->getMidPoint();
+
 
                 LinePoint tempLinePoint;
                 tempLinePoint.width = (int)segment->getSize();
-                tempLinePoint.x = round((start.x + end.x) / 2);
-                tempLinePoint.y = round((start.y + end.y) / 2);
+                tempLinePoint.x = linepointposition.x;
+                tempLinePoint.y = linepointposition.y;
                 tempLinePoint.inUse = false;
                 //CUT CLOSE LINE POINTS OFF
                 bool canNotAdd = false;
@@ -130,7 +249,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
-                 //qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
+                 ////qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
 
             }
@@ -142,10 +261,11 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea)
 
 void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
-    //printf("Start Find Lines..\n");
+    //qDebug("Start Find Lines..\n");
 
     //Try and make lines now...
     int DistanceStep;
+    int SearchMultiplier = 2; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
     double ColSlopeVal;
     int previousPointID;
 
@@ -158,13 +278,13 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }
     //SORT THE LINES BY Y then BY X:
 
-    //qsort(linePoints,0,linePoints.size()-1,2);
+    qsort(linePoints,0,linePoints.size()-1,2);
 
 
     //Only bother searching if there is enough points to make part of a line..
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++)
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++)
     {   //for all line points recorded
-
+        if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
         if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
         for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){ 	//for remaining points recorded
@@ -173,11 +293,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //if ((linePoints[EndCheck].x != linePoints[SearchFrom].x))continue;
 
                 // Skip all points on the same search line as this one or have already been removed..
-            if (linePoints[EndCheck].x <= linePoints[SearchFrom].x+LINE_SEARCH_GRID_SIZE*2)
+            if (linePoints[EndCheck].x <= linePoints[SearchFrom].x+LINE_SEARCH_GRID_SIZE*SearchMultiplier)
             {
-                DistanceStep = (int)(linePoints[EndCheck].x-linePoints[SearchFrom].x)/LINE_SEARCH_GRID_SIZE;  //number of grid units long
-                //// qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
-                if (fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) <= LINE_SEARCH_GRID_SIZE*2*DistanceStep)//fabs(LINE_SEARCH_GRID_SIZE*DistanceStep))
+                DistanceStep = (int)((linePoints[EndCheck].x-linePoints[SearchFrom].x)/LINE_SEARCH_GRID_SIZE);  //number of grid units long
+                //// //qDebug() << linePoints[SearchFrom].y << ","<<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE*DistanceStep << fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
+                if (fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) <= LINE_SEARCH_GRID_SIZE*SearchMultiplier*DistanceStep)//fabs(LINE_SEARCH_GRID_SIZE*DistanceStep))
                    // && fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y) < LINE_SEARCH_GRID_SIZE)
                 {
                     //We've found what might be a line, so lets see if we can find any more lines that match this one..
@@ -190,7 +310,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
                         if (linePoints[previousPointID].x == linePoints[PointID].x) continue;
                         if (linePoints[PointID].inUse == true) continue;
-                        if (fabs(linePoints[PointID].x - linePoints[previousPointID].x) < int(LINE_SEARCH_GRID_SIZE*2)){
+                        if (fabs(linePoints[PointID].x - linePoints[previousPointID].x) < int(LINE_SEARCH_GRID_SIZE*SearchMultiplier*SearchMultiplier)){
                             double DisMod = (linePoints[PointID].x - linePoints[previousPointID].x)/LINE_SEARCH_GRID_SIZE;
                             //Check if the slope is about right..
                             if (fabs(linePoints[PointID].y+(ColSlopeVal*DisMod) - linePoints[previousPointID].y) <= 1){
@@ -225,24 +345,25 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
 
     //SORT POINTS
-    //// qDebug() << "SORTING...";
-    //qsort(linePoints,0,linePoints.size()-1,2);
+    //// //qDebug() << "SORTING...";
+    qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
-    /*
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1; SearchFrom++){
+
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++){
+        if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
-        if(linePoints[SearchFrom].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
-        if(linePoints[SearchFrom].width < MIN_POINT_THICKNESS*3) continue;
+        if(linePoints[SearchFrom].width > HORZ_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
+        //if(linePoints[SearchFrom].width < MIN_POINT_THICKNESS) continue;
         for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size(); EndCheck++){
                 //std::cout << "Comparing.."<< SearchFrom << " with " << EndCheck <<std::endl;
                 //Skip all points on the same search line as this one or have already been removed..
             if (!((linePoints[EndCheck].inUse == false) && (linePoints[EndCheck].y != linePoints[SearchFrom].y)))continue;
-            if (linePoints[EndCheck].width > VERT_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
-            if (linePoints[EndCheck].width < MIN_POINT_THICKNESS*3) continue;
-            if (linePoints[EndCheck].y <= linePoints[SearchFrom].y+LINE_SEARCH_GRID_SIZE*4)
+            if (linePoints[EndCheck].width > HORZ_POINT_THICKNESS) continue;  //STOP if LINE is too THICK, but can use if in Vertical Line Search.
+            //if (linePoints[EndCheck].width < MIN_POINT_THICKNESS*3) continue;
+            if (linePoints[EndCheck].y <= linePoints[SearchFrom].y+LINE_SEARCH_GRID_SIZE* SearchMultiplier)
             {
                 DistanceStep = (int)(linePoints[EndCheck].y-linePoints[SearchFrom].y)/LINE_SEARCH_GRID_SIZE;
-                if (fabs(linePoints[SearchFrom].x - linePoints[EndCheck].x) < int(LINE_SEARCH_GRID_SIZE*4*DistanceStep))
+                if (fabs(linePoints[SearchFrom].x - linePoints[EndCheck].x) < int(LINE_SEARCH_GRID_SIZE* SearchMultiplier *DistanceStep))
                    // && fabs(linePoints[SearchFrom].x - linePoints[EndCheck].x) < LINE_SEARCH_GRID_SIZE)
                     {
                 //We've found what might be a line, so lets see if we can find any more lines that match this one..
@@ -254,8 +375,10 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     ColSlopeVal = linePoints[SearchFrom].x - linePoints[EndCheck].x;
 
                     for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++){
+                        if (linePoints[PointID].width > HORZ_POINT_THICKNESS) continue;
+                        if (linePoints[PointID].inUse == true) continue;
                         if (linePoints[previousPointID].y == linePoints[PointID].y) continue;
-                        if (fabs(linePoints[previousPointID].y - linePoints[PointID].y) < LINE_SEARCH_GRID_SIZE*4){
+                        if (!(fabs(linePoints[previousPointID].y - linePoints[PointID].y)) < LINE_SEARCH_GRID_SIZE* SearchMultiplier * SearchMultiplier){
                             double DisMod = (linePoints[PointID].y - linePoints[previousPointID].y)/LINE_SEARCH_GRID_SIZE;
                             //Check if the slope is about right..
                             if (fabs(linePoints[PointID].x+(ColSlopeVal*DisMod) - linePoints[previousPointID].x) <= 1){
@@ -284,7 +407,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //}
         }
     }
-*/
+
 
 
     //---------------------------------------------------
@@ -350,7 +473,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                                 ((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
                                 (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
                 L2sumCompXY = L2sumCompX * (Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept());
-            /*}
+            /*
             else{ //Switch the X and Ys around
                 L1sumCompX =    Line1.getGradient()*IMAGE_HEIGHT + 2*Line1.getXIntercept(); //IMAGE_WIDTH;
                 L1sumCompY =    IMAGE_HEIGHT;//Line1.getGradient()*IMAGE_WIDTH + 2*Line1.getYIntercept();
@@ -371,8 +494,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                                 //((Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept())*
                                 //(Line2.getGradient()*IMAGE_WIDTH + Line2.getYIntercept()));
                 L2sumCompXY = L2sumCompY * (Line2.getGradient()*IMAGE_HEIGHT+ Line2.getXIntercept());
-            }*/
-
+            }
+            */
             sxx = L2sumCompX2+L1sumCompX2 - (L2sumCompX+L1sumCompX)*(L2sumCompX+L1sumCompX)/4;
             syy = L2sumCompY2+L1sumCompY2 - (L2sumCompY+L1sumCompY)*(L2sumCompY+L1sumCompY)/4;
             sxy = L2sumCompXY+L1sumCompXY - (L2sumCompX+L1sumCompX)*(L2sumCompY+L1sumCompY)/4;
@@ -390,7 +513,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
             //Now make sure the slopes are both about the same degree angle....
             // Seems to have a problem with lines "within" other lines, so pick them out..
-            // qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
+            //qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
             if ((r2tls1 > .90 && r2tls2 > .90 && MSD1 < 40  && MSD2 < 40))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
             {
                 //They are the same line, so join them together...
@@ -416,7 +539,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
         else {
             TotalValidLines++;
-            //printf( "VaildLine Found: %i @ %i\n" ,TotalValidLines, LineIDStart);
+            //qDebug( "VaildLine Found: %i @ %i\n" ,TotalValidLines, LineIDStart);
         }
 
     }
@@ -425,7 +548,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        /*qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        /*//qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
                 << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
@@ -448,17 +571,18 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 	//std::cout<<"Starting to Look for Corners.."<< std::endl;
 	if (TotalValidLines <2)
 	{
-		//printf("%i Valid Lines... ABORT\n",TotalValidLines);
+                //qDebug("%i Valid Lines... ABORT\n",TotalValidLines);
 		return;
 	}
 	//else
-		//printf("TotalValidLines: %i\n",TotalValidLines);
+                //qDebug("TotalValidLines: %i\n",TotalValidLines);
   
 	int CommonX, CommonY;
 	unsigned short Top,Bottom,Left,Right,Type;
   
   //Now try and find where the lines intersect.
         for (unsigned int LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
+                 if(cornerPoints.size()> MAX_CORNERPOINTS) break;
 		if (!fieldLines[LineIDStart].valid) continue;
 		//See if this line intersects with any other ones...
                 for (unsigned int LineIDCheck = LineIDStart+1; LineIDCheck < fieldLines.size(); LineIDCheck++){
@@ -604,293 +728,441 @@ void LineDetection::FindCornerPoints(int IMAGE_HEIGHT){
 // Description: Assigns known corner poitns to field objects
 ------------------*/
 
-/*
 
-void LineDetection::DecodeCorners(){
+
+void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
+{
 	
-	double TempDist, TempBearing, TempElev;
+        double TempDist = 0.0;
+        double TempBearing = 0.0;
+        double TempElev = 0.0;
 	int TempID;
-	int x;
+        unsigned int x;
 	bool recheck = false;
 
-        if (CornerPointCounter>4)                  // ********  this filters out center circle. only a count 0f 2 is checked.
+        if (cornerPoints.size() > 5)                  // ********  this filters out center circle. only a count 0f 2 is checked.
 	{
 		//PERFORM ELIPSE FIT HERE!
 		return;  // identify cross here?  ALEX
 	}
+        //qDebug() << "Before Decoding Lines: ";
+        for(unsigned int i = 0; i < AllObjects->stationaryFieldObjects.size();i++)
+        {
+            if(AllObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+            {
+                //qDebug() << "Stationary Object: " << i << ":" //<<AllObjects->stationaryFieldObjects[i].getName()
+                         //<<"Seen at "<< AllObjects->stationaryFieldObjects[i].ScreenX()
+                         //<<","       << AllObjects->stationaryFieldObjects[i].ScreenY()
+                        //<< "\t Distance: " <<AllObjects->stationaryFieldObjects[i].measuredDistance();
+            }
+        }
+        for(unsigned  int i = 0; i <AllObjects->mobileFieldObjects.size();i++)
+        {
+            if(AllObjects->mobileFieldObjects[i].isObjectVisible() == true)
+            {
+                //qDebug() << "Mobile Object: " << i << ":" //<<AllObjects->mobileFieldObjects[i].getName()
+                         //<< "Seen at "   << AllObjects->mobileFieldObjects[i].ScreenX()
+                         //<<","           << AllObjects->mobileFieldObjects[i].ScreenY()
+                        //<< "\t Distance: " <<AllObjects->mobileFieldObjects[i].measuredDistance();
+            }
+        }
 
+        for(unsigned int i = 0; i <AllObjects->ambiguousFieldObjects.size();i++)
+        {
+            if(AllObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                //qDebug() << "Ambiguous Object: " << i << ":" <<AllObjects->ambiguousFieldObjects[i].getID()
+                //         << "Seen at "          << AllObjects->ambiguousFieldObjects[i].ScreenX()
+                //         << ","                 << AllObjects->ambiguousFieldObjects[i].ScreenY()
+                 //        << "\t Distance: " <<AllObjects->ambiguousFieldObjects[i].measuredDistance()
+                 //        << AllObjects->ambiguousFieldObjects[i].isObjectVisible();
+
+            }
+        }
+
+        bool CheckedCornerPoints[cornerPoints.size()];
+        for(unsigned int i = 0; i < cornerPoints.size(); i++)
+        {
+            CheckedCornerPoints[i] = false;
+        }
 	//CHECK EACH CORNER POINT:	
-	for (x = 0; x < CornerPointCounter; x++){
-		TempID = 0;
-		//printf("Checking CornerID: %i \n",x);
+        for (x = 0; x < cornerPoints.size(); x++){
+                if(CheckedCornerPoints[x] == true) continue;
+                TempID = 0;
+                //qDebug("Checking CornerID: %i \t",x);
 		//ASSIGNING T, L or X corner To TempID
 		if (cornerPoints[x].CornerType == 0)
-			TempID = FO_CORNER_UNKNOWN_L;
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                    //qDebug("FO_CORNER_UNKNOWN_L located \n");
+                }
 		else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
-     	     		TempID = FO_CORNER_UNKNOWN_T;
-		else if (cornerPoints[x].CornerType > 1)
-			//printf("FO_CORNER_UNKNOWN_X located \n");
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_T;
+                    //qDebug("FO_CORNER_UNKNOWN_T located \n");
+                }
+                else if (cornerPoints[x].CornerType > 1)
+                {
+                    //qDebug("FO_CORNER_UNKNOWN_X located \n");
+                    continue;
+                }
 		
 		//START DECODING T
 		if (TempID){
 			//Initialising Variables
-			GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
-			fieldObjects[TempID].seen = true;
-			fieldObjects[TempID].visionBearing = TempBearing;
-			fieldObjects[TempID].visionDistance = TempDist;
-			fieldObjects[TempID].visionElevation = TempElev;
-			fieldObjects[TempID].visionX = cornerPoints[x].PosX;
-			fieldObjects[TempID].visionY = cornerPoints[x].PosY;
+                        //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
+                        AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                        Vector3<float> measured(TempDist,TempBearing,TempElev);
+                        Vector3<float> measuredError(0,0,0);
+                        Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
+                        Vector2<int> sizeOnScreen(4,4);
+                        tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+
+                        //fieldObjects[TempID].visionBearing = TempBearing;
+                        //fieldObjects[TempID].visionDistance = TempDist;
+                        //fieldObjects[TempID].visionElevation = TempElev;
+                        //fieldObjects[TempID].visionX = cornerPoints[x].PosX;
+                        //fieldObjects[TempID].visionY = cornerPoints[x].PosY;
 
 			//--------------Goal T and goal post combo rule:----------------------------------------------------------------------------------
 			if (cornerPoints[x].CornerType == 1){  // must include a half field range limit because of false positives on center circle
 				if((cornerPoints[x].Orientation == 3) || (cornerPoints[x].Orientation == 4)){ // could divide limit by distance to get a range adjustment		
-					if( 	(fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen == true) 
-						&& ( (ABS((fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX) - (cornerPoints[x].PosX))) < POST_T_LIMIT )  
-						&& (fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionDistance < 350)){
+                                    for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++ )
+                                    {
+                                        if(AllObjects->ambiguousFieldObjects[FO_Counter].getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN
+                                           || AllObjects->ambiguousFieldObjects[FO_Counter].isObjectVisible() == false) continue;
+                                        if( 	( (fabs((AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()) - (cornerPoints[x].PosX))) < POST_T_LIMIT )
+                                                && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)
+                                                && (tempUnknownCorner.isObjectVisible() == true)){
 
-						if( ( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) > 0 ){ 
-							//printf("\nTARGET ACQUIRED, BLUEleft goal T       ..u\n");
+                                                if( ( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) > 0
+                                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == false
+                                                    || AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen())                                                     ){
+                                                        //qDebug("\nTARGET ACQUIRED, BLUE left goal T       ..u\n");
 							recheck = true;
 							//COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
-							fieldObjects[FO_CORNER_BLUE_T_LEFT].CopyVisionData(fieldObjects[TempID]);
-							fieldObjects[TempID].seen = false;
+                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
+                                                        tempUnknownCorner.setVisibility(false);
 							//COPY: fieldObjects[FO_BLUE_GOALPOST_UNKNOWN] TO fieldObjects[FO_BLUE_LEFT_GOALPOST]
-							fieldObjects[FO_BLUE_LEFT_GOALPOST].CopyVisionData(fieldObjects[FO_BLUE_GOALPOST_UNKNOWN]);
-							fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen = false;
+
+                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                                        //Remove Unknown GoalPost:
+                                                        AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+
 						}
-						else if( ( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < 0 ){ 
-							//printf("\nTARGET ACQUIRED, BLUE right goal T       ..u\n");
+                                                else if( ( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) < 0
+                                                         && ( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == false
+                                                         || AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen() ) )
+                                                {
+                                                        //qDebug("\nTARGET ACQUIRED, BLUE right goal T       ..u\n");
 							recheck = true;
 							////COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_RIGHT]
-							fieldObjects[FO_CORNER_BLUE_T_RIGHT].CopyVisionData(fieldObjects[TempID]);
-							fieldObjects[TempID].seen = false;
+                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
+                                                        tempUnknownCorner.setVisibility(false);
 							//COPY: fieldObjects[FO_BLUE_GOALPOST_UNKNOWN] TO fieldObjects[FO_BLUE_RIGHT_GOALPOST]
-							fieldObjects[FO_BLUE_RIGHT_GOALPOST].CopyVisionData(fieldObjects[FO_BLUE_GOALPOST_UNKNOWN]);
-							fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen = false;
+                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                                        AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
 						}
 					}
-					if( 	(fieldObjects[FO_BLUE_LEFT_GOALPOST].seen == true) 
-						&& (fieldObjects[TempID].seen == true)
-						&& (ABS( fieldObjects[FO_BLUE_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_T_LIMIT )
-						&& (( fieldObjects[FO_BLUE_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) > 0 ) 
-						&& (fieldObjects[FO_BLUE_LEFT_GOALPOST].visionDistance < 350)){
+                                    }
+                                    if( 	(AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].ScreenX()- cornerPoints[x].PosX ) < POST_T_LIMIT )
+                                        && (( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) > 0 )
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()< 350))
+                                    {
+                                        //qDebug("\nTARGET ACQUIRED, BLUE left goal T      ..\n");
+                                        //COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
 
-						//printf("\nTARGET ACQUIRED, BLUE left goal T      ..\n");
-						//COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
-						fieldObjects[FO_CORNER_BLUE_T_LEFT].CopyVisionData(fieldObjects[TempID]);
-						fieldObjects[TempID].seen = false;
-					}
-					if( 	(fieldObjects[FO_BLUE_RIGHT_GOALPOST].seen == true)
-						&& (fieldObjects[TempID].seen == true)
-						&& (ABS( fieldObjects[FO_BLUE_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_T_LIMIT )
-						&& (( fieldObjects[FO_BLUE_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < 0 )
-						&& (fieldObjects[FO_BLUE_RIGHT_GOALPOST].visionDistance < 350)){
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                    }
 
-						//printf("\nTARGET ACQUIRED,  BLUE right goal T       ..\n");
-						//GetDistanceToPoint2(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
-						//GetDistanceToPoint(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
-						fieldObjects[FO_CORNER_BLUE_T_RIGHT].CopyVisionData(fieldObjects[TempID]);
-						fieldObjects[TempID].seen = false;
-					}
+                                    else if( 	(AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < POST_T_LIMIT )
+                                        && (( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < 0 )
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() < 350))
+                                    {
+
+                                        //qDebug("\nTARGET ACQUIRED,  BLUE right goal T       ..\n");
+                                        //GetDistanceToPoint2(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
+                                        //GetDistanceToPoint(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                    }
+
 				}// end if((cornerPoints[x]->Orientation == 3)........
 			} // end if (cornerPoints[x]->CornerType == 1)
+
 			//-----------end Goal T and goal post combo rule ----------------------------------------------------------------------------------
 
 
 			//--------------penalty L and goal post combo rule:--------------------------------------------------------------------------------
 			// must include a half field range limit because of false positives on center circle
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& ((cornerPoints[x].Orientation == 4)||(cornerPoints[x].Orientation == 2))
-				&& (fieldObjects[FO_BLUE_LEFT_GOALPOST].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_BLUE_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (fieldObjects[FO_BLUE_LEFT_GOALPOST].visionDistance < 350)) {
+                        if ((cornerPoints[x].CornerType == 0))
+                        {
 
-				//printf("\nTARGET ACQUIRED, BLUE left penalty L       =\n");
-				fieldObjects[FO_CORNER_BLUE_PEN_LEFT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-			}
-		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& ((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
-				&& (fieldObjects[FO_BLUE_RIGHT_GOALPOST].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_BLUE_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (fieldObjects[FO_BLUE_RIGHT_GOALPOST].visionDistance < 350)) {
+                            if (    ((cornerPoints[x].Orientation == 4)||(cornerPoints[x].Orientation == 2))
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true)
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                    && (tempUnknownCorner.isObjectVisible() == true)
+                                    && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() < 350)) {
 
-				//printf("\nTARGET ACQUIRED, BLUE right penalty L       =\n");
-				fieldObjects[FO_CORNER_BLUE_PEN_RIGHT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-			}
-		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& (cornerPoints[x].Orientation == 4)
-				&& (fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) > 0)
-				&& (fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionDistance < 350)) {
+                                    //qDebug("\nTARGET ACQUIRED, BLUE left penalty L       =\n");
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+                            }
 
-				//printf("\nTARGET ACQUIRED, BLUE left penalty L       u=\n");
-				recheck = true;
-				fieldObjects[FO_CORNER_BLUE_PEN_LEFT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-				// blue left post should be populated with unknown data here.
-				fieldObjects[FO_BLUE_LEFT_GOALPOST].CopyVisionData(fieldObjects[FO_BLUE_GOALPOST_UNKNOWN]);
-				fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen = false;
-			}
-		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& (cornerPoints[x].Orientation == 3)
-				&& (fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (( fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < 0)
-				&& (fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].visionDistance < 350)) {
+                            else if (     ((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true)
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                    && (tempUnknownCorner.isObjectVisible() == true)
+                                    && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() < 350)) {
 
-				//printf("\nTARGET ACQUIRED, BLUE right penalty L      u=\n");
-				recheck = true;
-				fieldObjects[FO_CORNER_BLUE_PEN_RIGHT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-				
-				// blue right post should be populated with unknown data here.
-				fieldObjects[FO_BLUE_RIGHT_GOALPOST].CopyVisionData(fieldObjects[FO_BLUE_GOALPOST_UNKNOWN]);
-				fieldObjects[FO_BLUE_GOALPOST_UNKNOWN].seen = false;
-			}
-			//-------------- end penalty L and goal post combo rule ---------------------------------------------------------------------------
+                                    //qDebug("\nTARGET ACQUIRED, BLUE right penalty L       =\n");
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+                            }
+                            for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++ )
+                            {
+                                if(AllObjects->ambiguousFieldObjects[FO_Counter].getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN
+                                   || AllObjects->ambiguousFieldObjects[FO_Counter].isObjectVisible() == false) continue;
+
+                                if (    (cornerPoints[x].Orientation == 4)
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && ( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == false
+                                            || (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()) )
+                                        && (fabs( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()- cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                        && (( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()- cornerPoints[x].PosX ) > 0)
+                                        && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()< 350)) {
+
+                                        //qDebug("\nTARGET ACQUIRED, BLUE left penalty L       u=\n");
+                                        recheck = true;
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                        // blue left post should be populated with unknown data here.
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                        AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                }
+
+                                else if (    (cornerPoints[x].Orientation == 3)
+                                        && (tempUnknownCorner.isObjectVisible()== true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == false
+                                        || (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()) )
+                                        && (fabs( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                        && (( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) < 0)
+                                        && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
+
+                                    //qDebug("\nTARGET ACQUIRED, BLUE right penalty L      u=\n");
+                                    recheck = true;
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+
+                                    // blue right post should be populated with unknown data here.
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                    AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                }
+                            }
+                        }
+                                                //-------------- end penalty L and goal post combo rule ---------------------------------------------------------------------------
 			//////////////////////////////////////////////////// END BLUE Goal ////////////////////////////////////////////////////////////////
 
 			//--------------Goal T and goal post combo rule:----------------------------------------------------------------------------------
 			if (cornerPoints[x].CornerType == 1){  // should include a half field range limit because of false positives on center circle
-			
-				if((cornerPoints[x].Orientation == 3) || (cornerPoints[x].Orientation == 4)){// could divide limit by distance to get a range adjustment		
-			 
-					if( 	(fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true) 
-						&& (fieldObjects[TempID].seen == true)
-						&& ( (ABS((fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX) - (cornerPoints[x].PosX))) < POST_T_LIMIT )  
-						&& (fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance < 350)){
-						
-						if( ( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) > 0 ){ 
-							//printf("\nTARGET ACQUIRED, YELLOW left goal T       ..u\n");
-							fieldObjects[FO_CORNER_YELLOW_T_LEFT].CopyVisionData(fieldObjects[TempID]);
-							fieldObjects[TempID].seen = false;
-							recheck = true;
-							// yellow left post should be populated with unknown data here.
-							fieldObjects[FO_YELLOW_LEFT_GOALPOST].CopyVisionData(fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN]);
-							fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen = false;
-						}
-						else if( ( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < 0 ){ 
-							//printf("\nTARGET ACQUIRED, YELLOW right goal T       ..u\n");
-							fieldObjects[FO_CORNER_YELLOW_T_RIGHT].CopyVisionData(fieldObjects[TempID]);
-							fieldObjects[TempID].seen = false;
-							recheck = true;
-							// yellow left post should be populated with unknown data here.
-							fieldObjects[FO_YELLOW_RIGHT_GOALPOST].CopyVisionData(fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN]);
-							fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen = false;
-						}
-					}
-					if(        (fieldObjects[FO_YELLOW_LEFT_GOALPOST].seen == true) 
-						&& (fieldObjects[TempID].seen == true)
-						&& (ABS( fieldObjects[FO_YELLOW_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_T_LIMIT )
-						&& (( fieldObjects[FO_YELLOW_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) > 0 ) 
-						&& (fieldObjects[FO_YELLOW_LEFT_GOALPOST].visionDistance < 350)){
-						
-						//printf("\nTARGET ACQUIRED, YELLOW left goal T       ..\n");
+                            if((cornerPoints[x].Orientation == 3) || (cornerPoints[x].Orientation == 4)){// could divide limit by distance to get a range adjustment
+                                for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++)
+                                {
 
-						fieldObjects[FO_CORNER_YELLOW_T_LEFT].CopyVisionData(fieldObjects[TempID]);
-						fieldObjects[TempID].seen = false;
-					}
-					if( 	   (fieldObjects[FO_YELLOW_RIGHT_GOALPOST].seen == true) 
-						&& (fieldObjects[TempID].seen == true)
-						&& (ABS( fieldObjects[FO_YELLOW_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_T_LIMIT )
-						&& (( fieldObjects[FO_YELLOW_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < 0 ) 
-						&& (fieldObjects[FO_YELLOW_RIGHT_GOALPOST].visionDistance < 350)){		  
-						
-						//printf("\nTARGET ACQUIRED, YELLOW right goal T       ..\n");
-						fieldObjects[FO_CORNER_YELLOW_T_RIGHT].CopyVisionData(fieldObjects[TempID]);
-						fieldObjects[TempID].seen = false;
-					
-					}
-				}// end if((cornerPoints[x]->Orientation == 3)........
+                                    if(AllObjects->ambiguousFieldObjects[FO_Counter].getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN
+                                       || AllObjects->ambiguousFieldObjects[FO_Counter].isObjectVisible() == false) continue;
+
+                                    if( (tempUnknownCorner.isObjectVisible() == true)
+                                        && ( (fabs((AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()) - (cornerPoints[x].PosX))) < POST_T_LIMIT )
+                                        && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350))
+                                        {
+
+                                        if( ( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) > 0
+                                            && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == false
+                                                || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()))
+                                        {
+                                            //qDebug("\nTARGET ACQUIRED, YELLOW left goal T       ..u\n");
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_LEFT].CopyObject(tempUnknownCorner);
+                                            tempUnknownCorner.setVisibility(false);
+                                            recheck = true;
+                                            // yellow left post should be populated with unknown data here.
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                            AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                        }
+                                        else if( ( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) < 0
+                                                &&(AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == false
+                                                || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()))
+                                        {
+                                            //qDebug("\nTARGET ACQUIRED, YELLOW right goal T       ..u\n");
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_RIGHT].CopyObject(tempUnknownCorner);
+                                            tempUnknownCorner.setVisibility(false);
+                                            recheck = true;
+                                            // yellow left post should be populated with unknown data here.
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                            AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                        }
+                                    }
+                                }
+                                if(        (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].ScreenX()- cornerPoints[x].PosX ) < POST_T_LIMIT )
+                                        && (( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) > 0 )
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() < 350)){
+
+                                        //qDebug("\nTARGET ACQUIRED, YELLOW left goal T       ..\n");
+
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_LEFT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                }
+                                if( 	   (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < POST_T_LIMIT )
+                                        && (( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].ScreenX()- cornerPoints[x].PosX ) < 0 )
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() < 350)){
+
+                                        //qDebug("\nTARGET ACQUIRED, YELLOW right goal T       ..\n");
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_RIGHT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+
+                                }
+                            }// end if((cornerPoints[x]->Orientation == 3)........
 			} // end if (cornerPoints[x]->CornerType == 1)
 			//-----------end Goal T and goal post combo rule ----------------------------------------------------------------------------------
 		
 		
 			//--------------penalty L and goal post combo rule:--------------------------------------------------------------------------------
 			//  included a half field range limit because of false positives on center circle
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& ((cornerPoints[x].Orientation == 4)||(cornerPoints[x].Orientation == 2))
-				&& (fieldObjects[FO_YELLOW_LEFT_GOALPOST].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_YELLOW_LEFT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (fieldObjects[FO_YELLOW_LEFT_GOALPOST].visionDistance < 350)) {
+                        if (cornerPoints[x].CornerType == 0)
+                        {
+                            if( ((cornerPoints[x].Orientation == 4)||(cornerPoints[x].Orientation == 2))
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true)
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                && (tempUnknownCorner.isObjectVisible() == true)
+                                && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].ScreenX()- cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() < 350)) {
 
-				//printf("\nTARGET ACQUIRED, YELLOW left penalty L      =\n");
-				fieldObjects[FO_CORNER_YELLOW_PEN_LEFT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
+                                //qDebug("\nTARGET ACQUIRED, YELLOW left penalty L      =\n");
+                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                tempUnknownCorner.setVisibility(false);
 					
-			}
+                                }
 		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& ((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
-				&& (fieldObjects[FO_YELLOW_RIGHT_GOALPOST].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_YELLOW_RIGHT_GOALPOST].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (fieldObjects[FO_YELLOW_RIGHT_GOALPOST].visionDistance < 350)) {
+                            if ( 	((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true)
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
+                                && (tempUnknownCorner.isObjectVisible() == true)
+                                && (fabs( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].ScreenX() - cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() < 350)) {
 
-				//printf("\nTARGET ACQUIRED, YELLOW right penalty L      =\n");
-				fieldObjects[FO_CORNER_YELLOW_PEN_RIGHT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-			}
-		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& (cornerPoints[x].Orientation == 4)
-				&& (fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) > 0)
-				&& (fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance < 350)) {
+                                //qDebug("\nTARGET ACQUIRED, YELLOW right penalty L      =\n");
+                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                tempUnknownCorner.setVisibility(false);
+                            }
+                            for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++)
+                            {
 
-				//printf("\nTARGET ACQUIRED, YELLOW left penalty L      u=\n");
-				fieldObjects[FO_CORNER_YELLOW_PEN_LEFT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-				recheck = true;
-				// yellow left post should be populated with unknown data here.
-				fieldObjects[FO_YELLOW_LEFT_GOALPOST].CopyVisionData(fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN]);
-				fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen = false;
-			}
-		
-			if ( 	(cornerPoints[x].CornerType == 0)
-				&& (cornerPoints[x].Orientation == 3)
-				&& (fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true)
-				&& (fieldObjects[TempID].seen == true)
-				&& (ABS( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < POST_L_LIMIT)  
-				&& (( fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionX - cornerPoints[x].PosX ) < 0)
-				&& (fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance < 350)) {
+                                if(AllObjects->ambiguousFieldObjects[FO_Counter].getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN
+                                   || AllObjects->ambiguousFieldObjects[FO_Counter].isObjectVisible() == false) continue;
 
-				//printf("\nTARGET ACQUIRED, YELLOW right penalty L      u=\n");
-				fieldObjects[FO_CORNER_YELLOW_PEN_RIGHT].CopyVisionData(fieldObjects[TempID]);
-				fieldObjects[TempID].seen = false;
-				recheck = true;
-				// yellow left post should be populated with unknown data here.
-				fieldObjects[FO_YELLOW_RIGHT_GOALPOST].CopyVisionData(fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN]);
-				fieldObjects[FO_YELLOW_GOALPOST_UNKNOWN].seen = false;
-			}
-			
+                                if (    (cornerPoints[x].Orientation == 4)
+                                    && (tempUnknownCorner.isObjectVisible() == true)
+                                    && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == false
+                                            || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen())
+                                    && (fabs( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()- cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                    && (( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) > 0)
+                                    && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
+
+                                    //qDebug("\nTARGET ACQUIRED, YELLOW left penalty L      u=\n");
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+                                    recheck = true;
+                                    // yellow left post should be populated with unknown data here.
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                    AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                }
+
+                                else if (   (cornerPoints[x].Orientation == 3)
+                                        && (tempUnknownCorner.isObjectVisible() == true)
+                                        && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == false
+                                            || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen())
+                                        && (fabs(AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX() - cornerPoints[x].PosX ) < POST_L_LIMIT)
+                                        && (( AllObjects->ambiguousFieldObjects[FO_Counter].ScreenX()- cornerPoints[x].PosX ) < 0)
+                                        && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
+
+                                    //qDebug("\nTARGET ACQUIRED, YELLOW right penalty L      u=\n");
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+                                    recheck = true;
+                                    // yellow left post should be populated with unknown data here.
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                    AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                }
+                            }
+                        }
+                        if(tempUnknownCorner.isObjectVisible() == false)
+                        {
+                            CheckedCornerPoints[x] = true;
+                        }
 			if(recheck ==true)
 			{
 				recheck =false;
 				x = -1;
-				//printf("Resetting X to perform Recheck.... \n");
+                                //qDebug("Resetting X to perform Recheck.... \n");
 			}
 			//-------------- end penalty L and goal post combo rule ---------------------------------------------------------------------
 
 		//////////////////////////////////////////////////// END YELLOW Goal ////////////////////////////////////////////////////////////////
 		}
 	}
-}
 
+        //Assigning all unchecked corners to Ambiguous Objects
+        for (x = 0; x < cornerPoints.size(); x++){
+            if(CheckedCornerPoints[x] == true) continue;
+            TempID = 0;
+            //qDebug("Checking CornerID: %i \t",x);
+            //ASSIGNING T, L or X corner To TempID
+            if (cornerPoints[x].CornerType == 0)
+            {
+                TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                //qDebug("FO_CORNER_UNKNOWN_L located \n");
+            }
+            else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
+            {
+                TempID = FieldObjects::FO_CORNER_UNKNOWN_T;
+                //qDebug("FO_CORNER_UNKNOWN_T located \n");
+            }
+            else if (cornerPoints[x].CornerType > 1)
+            {
+                //qDebug("FO_CORNER_UNKNOWN_X located \n");
+                continue;
+            }
+
+            //START DECODING T
+            if (TempID){
+                    //Initialising Variables
+                    //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
+                    AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                    Vector3<float> measured(TempDist,TempBearing,TempElev);
+                    Vector3<float> measuredError(0,0,0);
+                    Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
+                    Vector2<int> sizeOnScreen(4,4);
+                    tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+                    AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
+                }
+        }
+    }
+/*
 void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation) {
  
   //robot_console_printf("GDTP2 called\n");
@@ -978,7 +1250,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 void LineDetection::swap(std::vector<LinePoint> array, int i, int j)
 {
         LinePoint temp;
-        //// qDebug() << "Swapping "<< i << "," <<j;
+        //// //qDebug() << "Swapping "<< i << "," <<j;
         temp     = array[i];
         array[i] = array[j];
         array[j] = temp;

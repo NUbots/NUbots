@@ -353,6 +353,32 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
     }
     glEnd();
 }
+void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId)
+{
+    
+    //glDisable(GL_TEXTURE_2D);
+    glLineWidth(1.0);
+    glColor3ub(255,255,0);
+    for(unsigned int i = 0; i < linepoints.size(); i++)
+    {
+        glBegin(GL_LINES);                              // Start Lines
+        glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y+2));                 // Starting point
+        glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y-2));               // Ending point
+        glEnd();  // End Lines
+        glBegin(GL_LINES);                              // Start Lines
+        glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y+2));                 // Starting point
+        glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y-2));               // Ending point
+        glEnd();  // End Lines
+
+    }
+    //glEnable(GL_TEXTURE_2D);
+    //glEndList();                                    // END OF LIST
+
+    //displayStored[displayId] = true;
+
+    //qDebug() << "Updating Linepoints:" << fieldLines.size();
+    //emit updatedDisplay(displayId, displays[displayId], width, height);
+}
 
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
@@ -367,12 +393,15 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
     glDisable(GL_TEXTURE_2D);
 
     glLineWidth(2.0);       // Line width
+    
 
     for(unsigned int i = 0 ; i < fieldLines.size(); i++)
     {
 
         if(fieldLines[i].valid == true)
         {
+            glLineWidth(3.0);       // Line width
+            glColor3ub(255,0,0);
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
             glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
@@ -386,29 +415,56 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             for (unsigned int j =0; j < linePoints.size(); j++)
             {
                 glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+2),0.0);
-                glVertex3f(int(linePoints[j]->x-1),int(linePoints[j]->y-2),0.0);
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y-1),0.0);
+                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
             }
             glEnd();
         }
         else
         {
-            //glBegin(GL_LINES);                              // Start Lines
-            //glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
-            //glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
-            //glEnd();  // End Lines
+            glLineWidth(2.0);       // Line width
+            glColor3ub(100,0,50);
+            glBegin(GL_LINES);                              // Start Lines
+            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
+            glEnd();  // End Lines
 
         }
     }
-        glEnable(GL_TEXTURE_2D);
-        glEndList();                                    // END OF LIST
+        //glEnable(GL_TEXTURE_2D);
+        //glEndList();                                    // END OF LIST
 
         displayStored[displayId] = true;
 
         //qDebug() << "Updating FieldLines:" << fieldLines.size();
-    emit updatedDisplay(displayId, displays[displayId], width, height);
+   // emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }
+void OpenglManager::writeCornersToDisplay(std::vector< CornerPoint > corners, GLDisplay::display displayId)
+{
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(4.0);
+    glColor3ub(255,0,255);
+    for(unsigned int i = 0; i < corners.size(); i++)
+    {
+        glBegin(GL_LINES);                              // Start Lines
+        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY+4));                 // Starting point
+        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY-4));               // Ending point
+        glEnd();  // End Lines
+        glBegin(GL_LINES);                              // Start Lines
+        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY+4));                 // Starting point
+        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY-4));               // Ending point
+        glEnd();  // End Lines
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    qDebug() << "Updating Corner:" << corners.size();
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+}
+
 void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId)
 {
     //! CLEAR DRAWING LIST
