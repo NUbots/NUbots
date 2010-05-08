@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <vector>
 #include "Tools/FileFormats/TimestampedData.h"
 #include <QDebug>
 
@@ -10,7 +11,10 @@ template<class C>
 class StreamFileReader
 {
     typedef std::map<double,std::fstream::pos_type> FileIndex;
+    typedef std::vector<double> TimeIndex;
+    typedef FileIndex::iterator IndexIterator;
     typedef FileIndex::value_type IndexEntry;
+    typedef std::fstream::pos_type Position;
 public:
     StreamFileReader(): m_fileEndLocation(0)
     {
@@ -48,7 +52,7 @@ public:
     void DisplayIndex()
     {
         qDebug() << m_index.size();
-        FileIndex::iterator indexEntry = m_index.begin();
+        IndexIterator indexEntry = m_index.begin();
         while(indexEntry != m_index.end())
         {
             qDebug() << "Time: " << (*indexEntry).first << "\tIndex: " << (*indexEntry).second;
@@ -58,25 +62,82 @@ public:
 
     bool HasTime(double time)
     {
-        FileIndex::iterator pos = m_index.find(floor(time));
+        IndexIterator pos = m_index.find(floor(time));
         return (pos != m_index.end());
     }
 
     C* ReadFrameAtTime(double time)
     {
-        std::fstream::pos_type position = GetPositionFromTime(time);
-        qDebug() << "Getting Frame at: " << position;
-        if(position != -1)
+        IndexIterator entry = GetIndexFromTime(time);
+        qDebug() << "Getting Frame at: " << (*entry).second;
+        if(entry != m_index.end())
         {
-            return ReadFrame(position);
+            return ReadFrame(entry);
+        }
+        else
+        {
+            return NULL;
         }
     }
 
     C* ReadFrameNumber(int frameNumber)
     {
-        if((frameNumber < m_index.size()) && (frameNumber >= 0))
+
+            float time = TimeAtPosition(frameNumber-1);
+            if(time)
+                return ReadFrame(m_index[time]);
+            else
+                return NULL;
+    }
+
+    C* ReadFirstFrame()
+    {
+        IndexIterator entry = m_index.begin();
+        if(entry != m_index.end())
         {
-            return ReadFrame(m_index[frameNumber]);
+            return ReadFrame(entry);
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    C* ReadNextFrame()
+    {
+        IndexIterator entry = m_selectedFrame;
+        ++entry;
+        if(entry != m_index.end())
+        {
+            return ReadFrame(entry);
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    C* ReadPrevFrame()
+    {
+        IndexIterator entry = m_selectedFrame;
+        if(entry != m_index.begin())
+        {
+            --entry;
+            return ReadFrame(entry);
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    C* ReadLastFrame()
+    {
+        IndexIterator entry = m_index.end();
+        if(entry != m_index.begin())
+        {
+            --entry;
+            return ReadFrame(entry);
         }
         else
         {
@@ -86,13 +147,9 @@ public:
 
     double FindClosestTime(double time)
     {
-        FileIndex::iterator pos = m_index.lower_bound(floor(time));
+        IndexIterator pos = GetIndexFromTime(time);
         if(pos != m_index.end())
         {
-            if(((*pos).first > time) && (pos != m_index.begin()))
-            {
-                --pos;
-            }
             return (*pos).first;
         }
         else
@@ -101,17 +158,45 @@ public:
         }
     }
 
-private:
-    C* ReadFrame(std::fstream::pos_type startingLocation)
+    int GetTotalFrames()
     {
+        if(m_file.is_open())
+        {
+            return m_index.size();
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    double TimeAtPosition(unsigned int position)
+    {
+        if((position <= m_index.size()) && (position > 0))
+        {
+            return m_timeIndex[position-1];
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+
+private:
+    C* ReadFrame(IndexIterator entry)
+    {
+        Position startingLocation = (*entry).second;
         if(m_file.is_open() && ValidStartingLocation(startingLocation))
         {
             m_file.seekg(startingLocation,std::ios_base::beg);
             try{
                 m_file >> (*m_dataBuffer);
-            }   catch(...){return NULL;}
+                m_selectedFrame = entry;
+                return m_dataBuffer;
+            }   catch(...){}
+
         }
-        return m_dataBuffer;
+        return NULL;
     }
 
     bool ValidStartingLocation(std::fstream::pos_type startingLocation)
@@ -119,21 +204,17 @@ private:
         return (startingLocation < m_fileEndLocation);
     }
 
-    std::fstream::pos_type GetPositionFromTime(double time)
+    IndexIterator GetIndexFromTime(double time)
     {
-        FileIndex::iterator pos = m_index.lower_bound(floor(time));
+        IndexIterator pos = m_index.lower_bound(floor(time));
         if(pos != m_index.end())
         {
             if(((*pos).first > time) && (pos != m_index.begin()))
             {
                 --pos;
             }
-            return (*pos).second;
         }
-        else
-        {
-            return -1;
-        }
+        return pos;
     }
 
     void GenerateIndex()
@@ -141,10 +222,11 @@ private:
         if (m_file.is_open())
         {
             double timestamp = 0.0;
-            std::fstream::pos_type origPos = m_file.tellg();
+            Position origPos = m_file.tellg();
             m_file.seekg(0,std::ios_base::beg);
             m_index.clear();
-            std::fstream::pos_type filePosition;
+            m_timeIndex.clear();
+            Position filePosition;
             while (m_file.good())
             {
                 filePosition = m_file.tellg();
@@ -152,7 +234,9 @@ private:
                     m_file >> (*m_dataBuffer);
                 }   catch(...){break;}
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
-                m_index.insert(IndexEntry(floor(timestamp),filePosition));
+                timestamp = floor(timestamp);
+                m_index.insert(IndexEntry(timestamp,filePosition));
+                m_timeIndex.push_back(timestamp);
             }
             m_file.clear();
             m_file.seekg(origPos,std::ios_base::beg);
@@ -161,9 +245,11 @@ private:
 
     // Member variables
     FileIndex m_index;
+    TimeIndex m_timeIndex;
     C* m_dataBuffer;
     std::fstream m_file;
-    std::fstream::pos_type m_fileEndLocation;
+    Position m_fileEndLocation;
+    IndexIterator m_selectedFrame;
 
 };
 
