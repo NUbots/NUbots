@@ -419,11 +419,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Drop out here if there isn't any point continuing.. DEBUG:
     if (fieldLines.size() < 1)
     {
-            printf("No Lines... ABORT!!!!");
+        //printf("No Lines... ABORT!!!!");
             return;
     }
     else{
-            printf("END FieldLinesCounter: %i\n", fieldLines.size());
+        //printf("END FieldLinesCounter: %i\n", fieldLines.size());
     }
 
     //for(int l = 0; l < FieldLinesCounter; l++)
