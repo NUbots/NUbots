@@ -23,14 +23,16 @@
 #include "NUKick.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "NUPlatform/NUSystem.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
 
-NUKick::NUKick()
+NUKick::NUKick(NUWalk* walk)
 {
+    m_walk = walk;
 	IKSys = new Legs();
 	poseData.resize(4);
 	pose = DO_NOTHING;

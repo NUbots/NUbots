@@ -22,13 +22,20 @@
 #ifdef USE_HEAD
     #include "NUHead.h"
 #endif
-
 #ifdef USE_WALK
     #include "NUWalk.h"
 #endif
-
 #ifdef USE_KICK
     #include "NUKick.h"
+#endif
+#ifdef USE_BLOCK
+    #include "NUBlock.h"
+#endif
+#ifdef USE_SAVE
+    #include "NUSave.h"
+#endif
+#ifdef USE_SCRIPT
+    #include "Script.h"
 #endif
 
 #include "Behaviour/Jobs.h"
@@ -57,11 +64,31 @@ NUMotion::NUMotion()
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
-    #ifdef USE_WALK
+    
+    #if defined(USE_WALK)
         m_walk = NUWalk::getWalkEngine();
+        #if defined (USE_KICK)
+            m_kick = new NUKick(m_walk);
+        #endif
+        #if defined (USE_BLOCK)
+            m_block = new NUBlock(m_walk);
+        #endif
+        #if defined (USE_SAVE)
+            m_save = new NUSave(m_walk);
+        #endif
+    #else
+        #if defined (USE_KICK)
+            m_kick = new NUKick(NULL);
+        #endif
+        #if defined (USE_BLOCK)
+            m_block = new NUBlock(NULL);
+        #endif
+        #if defined (USE_SAVE)
+            m_save = new NUSave(NULL);
+        #endif
     #endif
-    #ifdef USE_KICK
-        m_kick = new NUKick();
+    #if defined (USE_KICK)
+        m_script = new NUScript();
     #endif
     
     m_block_left = new MotionScript("BlockLeft");
@@ -87,6 +114,15 @@ NUMotion::~NUMotion()
     #ifdef USE_KICK
         if (m_kick != NULL)
             delete m_kick;                   
+    #endif
+    #ifdef USE_BLOCK
+        delete m_block;
+    #endif
+    #ifdef USE_SAVE
+        delete m_save;
+    #endif
+    #ifdef USE_SCRIPT
+        delete m_script;
     #endif
 }
 
@@ -147,7 +183,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (m_data->isFalling())
         m_fall_protection->process(data, actions);
-    else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
+    else if (m_data->isFallen())                        // If fallen you can only getup
     {
         m_getup->process(data, actions);
         if (m_getup->headReady())                       // And you can only use the head if the getup lets you

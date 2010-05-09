@@ -33,13 +33,20 @@ class JobList;
 #ifdef USE_HEAD
     class NUHead;
 #endif
-
 #ifdef USE_WALK
     class NUWalk;
 #endif
-
 #ifdef USE_KICK
     class NUKick;
+#endif
+#ifdef USE_BLOCK
+    class NUBlock;
+#endif
+#ifdef USE_SAVE
+    class NUSave;
+#endif
+#ifdef USE_SCRIPT
+    class Script;
 #endif
 class FallProtection;
 class Getup;
@@ -65,6 +72,7 @@ private:
     // essential motion components
     FallProtection* m_fall_protection;  //!< the fall protection module
     Getup* m_getup;                     //!< the getup module
+    // optional motion components
     #ifdef USE_HEAD
         NUHead* m_head;                     //!< the head module
     #endif
@@ -73,6 +81,15 @@ private:
     #endif
     #ifdef USE_KICK
         NUKick* m_kick;                     //!< the kick module
+    #endif
+    #ifdef USE_BLOCK
+        NUBlock* m_block;                   //!< the block module
+    #endif
+    #ifdef USE_SAVE
+        NUSave* m_save;                     //!< the save module
+    #endif
+    #ifdef USE_SCRIPT
+        Script* m_script;                    //!< the script module
     #endif
     
     double m_current_time;              //!< the current time (ms)

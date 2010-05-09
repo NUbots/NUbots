@@ -55,13 +55,7 @@ MotionScript::~MotionScript()
 
 void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
 {
-    /*vector<vector<float> > positions(m_positions.begin()+1, m_positions.end());
-    MotionCurves::calculate(0, m_times[0], data->, m_positions[1:], m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities);*/
-    
     cout << "playing at " << NUSystem::getThreadTime() << endl;
-    /*cout << MotionFileTools::size(m_curvetimes) << endl;//" " << MotionFileTools::fromMatrix(m_curvetimes) << endl;
-    cout << MotionFileTools::size(m_curvepositions) << endl;//" " << MotionFileTools::fromMatrix(m_curvepositions) << endl;
-    cout << MotionFileTools::size(m_gains) << " " << MotionFileTools::fromMatrix(m_gains) << endl;*/
     
     vector<float> sensorpositions;
     data->getJointPositions(NUSensorsData::AllJoints, sensorpositions);
@@ -88,8 +82,6 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
         cout << m_curvevelocities[i].size() << " " << MotionFileTools::fromVector(m_curvevelocities[i]) << endl;
         cout << m_curvegains[i].size() << " " << MotionFileTools::fromVector(m_curvegains[i]) << endl;
     }
-    
-    
 }
 
 bool MotionScript::load()
@@ -157,6 +149,27 @@ void MotionScript::calculateCurve()
 {
     vector<float> zero(m_times.size(), 0);
     MotionCurves::calculate(0, m_times, zero, m_positions, m_gains, m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities, m_curvegains);
+}
+
+
+ostream& operator<< (ostream& output, const MotionScript& p_script)
+{
+    return output;
+}
+
+ostream& operator<< (ostream& output, const MotionScript* p_script)
+{
+    return output;
+}
+
+istream& operator>> (istream& input, MotionScript& p_script)
+{
+    return input;
+}
+
+istream& operator>> (istream& input, MotionScript* p_script)
+{
+    return input;
 }
 
 

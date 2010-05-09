@@ -40,6 +40,11 @@ public:
     ~MotionScript();
     
     void play(NUSensorsData* data, NUActionatorsData* actions);
+    
+    friend ostream& operator<< (ostream& output, const MotionScript& p_script);
+    friend ostream& operator<< (ostream& output, const MotionScript* p_script);
+    friend istream& operator>> (istream& input, MotionScript& p_script);
+    friend istream& operator>> (istream& input, MotionScript* p_script);
 protected:
     bool load();
 private:
