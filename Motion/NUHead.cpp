@@ -54,7 +54,16 @@ NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.69
  */
 NUHead::~NUHead()
 {
+    kill();
+}
 
+/*! @brief Kills the head module
+ */
+void NUHead::kill()
+{
+    m_is_nodding = false;
+    m_is_panning = false;
+    m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
 }
 
 /*! @brief Process new sensor data, and produce actionator commands

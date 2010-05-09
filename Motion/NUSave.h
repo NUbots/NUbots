@@ -35,6 +35,7 @@ class NUSave
 public:
     NUSave(NUWalk* walk);
     ~NUSave();
+    void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:

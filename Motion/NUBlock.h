@@ -35,6 +35,7 @@ class NUBlock
 public:
     NUBlock(NUWalk* walk);
     ~NUBlock();
+    void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:

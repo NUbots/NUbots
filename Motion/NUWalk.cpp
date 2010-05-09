@@ -86,6 +86,10 @@ NUWalk::NUWalk()
     m_point_x = 0;                                //!< the current target point's x position in cm
     m_point_y = 0;                                //!< the current target point's y position in cm
     m_point_theta = 0;                            //!< the current target point's final orientation relative to the current in radians
+    
+    m_walk_enabled = false;
+    m_larm_enabled = true;
+    m_rarm_enabled = true;
 }
 
 /*! @brief Destructor for motion module
@@ -95,6 +99,14 @@ NUWalk::~NUWalk()
 #if DEBUG_NUMOTION_VERBOSITY > 0
     debug << "NUWalk::~NUWalk()" << endl;
 #endif  
+    kill();
+}
+
+/*! @brief Kills the walk engine
+ */
+void NUWalk::kill()
+{
+    m_walk_enabled = false;
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -111,8 +123,11 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
-    calculateCurrentSpeed();
-    doWalk();
+    if (m_walk_enabled)
+    {
+        calculateCurrentSpeed();
+        doWalk();
+    }
 }
 
 /*! @brief Process a walk speed job
@@ -122,6 +137,7 @@ void process(WalkJob* job)
 {
     vector<float> speed;
     job->getSpeed(speed);
+    m_walk_enabled = true;
     setTargetSpeed(speed);
 }
 
@@ -133,6 +149,7 @@ void process(WalkToPointJob* job)
     double time;
     vector<float> position;
     job->getPosition(time, position);
+    m_walk_enabled = true;
     setTargetPoint(time, position);
 }
 
@@ -282,4 +299,11 @@ WalkParameters& NUWalk::getWalkParameters()
     return m_walk_parameters;
 }
 
+/*! @brief Sets whether each of the arms can be used by the walk engine
+ */
+void NUWalk::setArmEnabled(bool leftarm, bool rightarm)
+{
+    m_larm_enabled = leftarm;
+    m_rarm_enabled = rightarm;
+}
 

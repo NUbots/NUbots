@@ -37,6 +37,8 @@ class ALWalk : public NUWalk
 public:
     ALWalk();
     ~ALWalk();
+    void kill();
+    void setArmEnabled(bool leftarm, bool rightarm);
 protected:
     void doWalk();
 private:

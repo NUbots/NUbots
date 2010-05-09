@@ -40,6 +40,7 @@ class NUKick
 public:
     NUKick(NUWalk* walk);
     ~NUKick();
+    void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(KickJob* job);

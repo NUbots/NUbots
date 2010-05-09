@@ -211,8 +211,10 @@ void VSCWalk::updateActionatorsData()
     static vector<float> m_right_leg_gains (m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 100);
     m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 40, m_left_leg_angles, zeroleg, m_left_leg_gains);
     m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 40, m_right_leg_angles, zeroleg, m_right_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 40, m_left_arm_angles, zeroarm, m_left_arm_gains);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 40, m_right_arm_angles, zeroarm, m_right_arm_gains);
+    if (m_larm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 40, m_left_arm_angles, zeroarm, m_left_arm_gains);
+    if (m_rarm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 40, m_right_arm_angles, zeroarm, m_right_arm_gains);
 }
 
 

@@ -61,7 +61,7 @@ public:
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList* jobs);
     
-    void safeKill(NUSensorsData* data, NUActionatorsData* actions);
+    void kill();
 private:
 public:
 protected:

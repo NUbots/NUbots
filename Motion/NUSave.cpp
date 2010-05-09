@@ -42,6 +42,13 @@ NUSave::NUSave(NUWalk* walk)
  */
 NUSave::~NUSave()
 {
+    kill();
+}
+
+/*! @brief Kills the save module
+ */
+void NUSave::kill()
+{
 }
 
 /*! @brief Produce actions from the data to move the robot into a standing position

@@ -42,6 +42,13 @@ NUBlock::NUBlock(NUWalk* walk)
  */
 NUBlock::~NUBlock()
 {
+    kill();
+}
+
+/*! @brief Kills the block module
+ */
+void NUBlock::kill()
+{
 }
 
 /*! @brief Produce actions from the data to move the robot into a standing position

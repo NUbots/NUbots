@@ -476,8 +476,10 @@ void JuppWalk::updateActionatorsData()
     {
         m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
         m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
+        if (m_larm_enabled)
+            m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
+        if (m_rarm_enabled)
+            m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
     }
 }
 

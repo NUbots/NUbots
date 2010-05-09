@@ -186,7 +186,7 @@ NUbot::~NUbot()
     #endif
     
     #ifdef USE_MOTION
-        NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
+        NUbot::m_this->m_motion->kill();
         NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
         NUSystem::msleep(1500);
     #endif
@@ -369,7 +369,7 @@ void NUbot::terminationHandler(int signum)
     {
         // safely kill motion
         #ifdef USE_MOTION
-            NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
+            NUbot::m_this->m_motion->kill();
             NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
         #endif
         

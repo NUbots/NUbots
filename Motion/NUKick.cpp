@@ -42,7 +42,15 @@ NUKick::NUKick(NUWalk* walk)
  */
 NUKick::~NUKick()
 {
+    kill();
     delete IKSys;
+}
+
+/*! @brief Kills the kick module
+ */
+void NUKick::kill()
+{
+    
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
