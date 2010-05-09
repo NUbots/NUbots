@@ -18,6 +18,7 @@
 #include "frameInformationWidget.h"
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
+#include "StreamFileReader.h"
 
 using namespace std;
 ofstream debug;
@@ -92,6 +93,14 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
+
+    StreamFileReader<NUimage> test("nubot6-lab100415.nul");
+    test.DisplayIndex();
+    qDebug() << test.HasTime(43177.0);
+    qDebug() << test.HasTime(43157.0);
+    test.ReadFrameAtTime(41390.0);
+    qDebug() << "Start Time: " << test.StartTime();
+    qDebug() << "End Time: " << test.EndTime();
 }
 
 MainWindow::~MainWindow()
