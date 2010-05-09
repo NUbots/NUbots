@@ -21,7 +21,10 @@
 
 
 #include "NUKick.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -52,6 +55,19 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     doKick();
+}
+
+/*! @brief Process a kick job
+    @param job the kick job
+ */
+void process(KickJob* job)
+{
+    double time;
+    vector<float> kickposition;
+    vector<float> kicktarget;
+
+    job->getKick(time, kickposition, kicktarget);
+    setKickPoint(kickposition, kicktarget);
 }
 
 

@@ -144,13 +144,8 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     m_current_time = m_data->CurrentTime;
-    calculateCycleTime();
     
-    static vector<float> fallingvalues;
-    static vector<float> fallenvalues;
-    data->getFalling(fallingvalues);
-    data->getFallen(fallenvalues);              //! @todo Put in a compile flag here or something because I need to walk while fallen atm
-    if (false && fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
+    if (m_data->isFalling())
         m_fall_protection->process(data, actions);
     else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
     {
@@ -189,60 +184,36 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     @param jobs the current list of jobs
  */
-void NUMotion::process(JobList& jobs)
+void NUMotion::process(JobList* jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
+    if (jobs == NULL)
+        return;
     
-    list<Job*>::iterator it = jobs.motion_begin();     // the iterator over the motion jobs
-    while (it != jobs.motion_end())
+    list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
+    while (it != jobs->motion_end())
     {
         Job::job_id_t id = (*it)->getID();
         switch (id) 
         {
         #ifdef USE_WALK
             case Job::MOTION_WALK:
-                    static vector<float> speed;
-                    static WalkJob* walkjob;
-                    
-                    walkjob = (WalkJob*) (*it);
-                    walkjob->getSpeed(speed);
-                    m_walk->walkSpeed(speed);
+                m_walk->process(reinterpret_cast<WalkJob*> (*it));
                 break;
             case Job::MOTION_WALK_TO_POINT:
-                    static double time_a;
-                    static vector<float> position;
-                    static WalkToPointJob* walktopointjob;
-                    
-                    walktopointjob = (WalkToPointJob*) (*it);
-                    walktopointjob->getPosition(time_a, position);
-                    
-                    m_walk->walkToPoint(time_a, position);
+                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
-                static WalkParameters parameters;
-                static WalkParametersJob* parametersjob;
-                
-                parametersjob = (WalkParametersJob*) (*it);
-                parametersjob->getWalkParameters(parameters);
-                
-                m_walk->setWalkParameters(parameters);
+                m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
                 break;
-        #endif // USE_WALK
+        #endif
         #ifdef USE_KICK
             case Job::MOTION_KICK:
-                static double time_b;
-                static vector<float> kickposition;
-                static vector<float> kicktarget;
-                static KickJob* kickjob;
-                
-                kickjob = (KickJob*) (*it);
-                kickjob->getKick(time_b, kickposition, kicktarget);
-                
-                m_kick->kickToPoint(kickposition, kicktarget);
+                m_kick->process(reinterpret_cast<KickJob*> (*it));
                 break;
-        #endif //USE_KICK
+        #endif
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
                 m_head->process(reinterpret_cast<HeadJob*> (*it));
@@ -253,29 +224,16 @@ void NUMotion::process(JobList& jobs)
             case Job::MOTION_NOD:
                 m_head->process(reinterpret_cast<HeadNodJob*> (*it));
                 break;
-        #endif // USE_HEAD
+        #endif
             default:
                 break;
         }
-        it = jobs.removeMotionJob(it);
+        it = jobs->removeMotionJob(it);
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::process(): Finished" << endl;
     #endif
-}
-
-/*! @brief Calculates the cycle time. 
- 
- To be platform independent I calculate the motion cycle time online by averaging the cycle times
-*/
-void NUMotion::calculateCycleTime()
-{
-    using namespace boost::accumulators;
-    static accumulator_set<float, stats<tag::mean> > cycle_time_accumulator;
-    
-    cycle_time_accumulator(m_current_time - m_previous_time);
-    m_cycle_time = static_cast<int> (mean(cycle_time_accumulator));
 }
 
 

@@ -45,7 +45,6 @@ public:
     void process(WalkToPointJob* job);
     void process(WalkParametersJob* job);
     
-    void walkSpeed(const vector<float>& speed);
     void walkToPoint(double time, const vector<float>& position);
     
     void setWalkParameters(const WalkParameters& walkparameters);
@@ -56,6 +55,7 @@ protected:
     virtual void doWalk() = 0;
 
     void setTargetSpeed(const vector<float>& speed);
+    void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
     
     inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};

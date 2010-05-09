@@ -115,16 +115,35 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
     doWalk();
 }
 
-/*! @brief Walk with the given speed vector
- 
-    Use this function to precisely control the locomotion direction of the robot. 
-    To instruct the robot to move as fast as possible, just put in a very large value, it will be clipped internally.
-    
-    @param speed the desired walk velocity [x (cm/s), y (cm/s), rotation (rad/s)]
+/*! @brief Process a walk speed job
+    @param job the walk job to be processed
  */
-void NUWalk::walkSpeed(const vector<float>& speed)
+void process(WalkJob* job)
 {
+    vector<float> speed;
+    job->getSpeed(speed);
     setTargetSpeed(speed);
+}
+
+/*! @brief Process a walk to point job
+    @param job the walk to point job to be processed
+ */
+void process(WalkToPointJob* job)
+{
+    double time;
+    vector<float> position;
+    job->getPosition(time, position);
+    setTargetPoint(time, position);
+}
+
+/*! @brief Process a walk parameters job
+    @param job the walk parameter job to be processed
+ */
+void process(WalkParametersJob* job)
+{
+    WalkParameters parameters;
+    job->getWalkParameters(parameters);                
+    setWalkParameters(parameters);
 }
 
 /*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw. The given speeds will be clipped if they are faster than the maximum possible speeds
@@ -230,7 +249,7 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
     @param time the desired time to reach the given point (ms)
     @param x the desired relative target [x (cm), y (cm), theta (rad)]
  */
-void NUWalk::walkToPoint(double time, const vector<float>& position)
+void NUWalk::setTargetPoint(double time, const vector<float>& position)
 {
     m_point_time = time;
     if (position.size() == 3)

@@ -25,8 +25,10 @@
 #ifndef NUKICK_H
 #define NUKICK_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
+class KickJob;
+
 #include "./Kicks/IK.h"
 #include <stack>
 
@@ -39,9 +41,10 @@ public:
     ~NUKick();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void kickToPoint(const vector<float>& position, const vector<float>& target);
+    void process(KickJob* job);
 
 private:
+    void setKickPoint(const vector<float>& position, const vector<float>& target);
     void doKick();
 	bool chooseLeg();
 	bool liftLeg();

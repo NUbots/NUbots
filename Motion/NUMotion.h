@@ -52,14 +52,10 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
-    
-    int getCycleTime() {return m_cycle_time;};
+    void process(JobList* jobs);
     
     void safeKill(NUSensorsData* data, NUActionatorsData* actions);
-protected:
 private:
-    void calculateCycleTime();
 public:
 protected:
 private:

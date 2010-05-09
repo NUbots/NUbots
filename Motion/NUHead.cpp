@@ -83,8 +83,8 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUHead::process(HeadJob* job)
 {
-    static vector<double> times;                // the times to reach each headposition tuple
-    static vector<vector<float> > positions;    // a vector of headposition tuples
+    vector<double> times;                // the times to reach each headposition tuple
+    vector<vector<float> > positions;    // a vector of headposition tuples
     
     m_is_panning = false;
     m_is_nodding = false;
