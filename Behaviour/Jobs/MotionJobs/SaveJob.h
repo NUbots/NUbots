@@ -2,7 +2,7 @@
     @brief Declaration of SaveJob class.
  
     @class SaveJob
-    @brief A class to encapsulate jobs issued for the walk module.
+    @brief A class to encapsulate jobs issued for the save module.
  
     @author Jason Kulk
  

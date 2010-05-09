@@ -114,7 +114,9 @@ void WalkJob::csvTo(ostream& output)
  */
 void WalkJob::toStream(ostream& output) const
 {
-    debug << "WalkJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 2
+        debug << "WalkJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
                                             // Then we write WalkJob specific data
@@ -132,7 +134,9 @@ void WalkJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const WalkJob& job)
 {
-    debug << "<<WalkJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<WalkJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -145,10 +149,10 @@ ostream& operator<<(ostream& output, const WalkJob& job)
  */
 ostream& operator<<(ostream& output, const WalkJob* job)
 {
-    debug << "<<WalkJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<WalkJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

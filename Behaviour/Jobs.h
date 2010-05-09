@@ -40,6 +40,7 @@
 #include "Jobs/MotionJobs/HeadNodJob.h"
 #include "Jobs/MotionJobs/HeadPanJob.h"
 #include "Jobs/MotionJobs/SaveJob.h"
+#include "Jobs/MotionJobs/ScriptJob.h"
 #include "Jobs/MotionJobs/WalkJob.h"
 #include "Jobs/MotionJobs/WalkToPointJob.h"
 #include "Jobs/MotionJobs/WalkParametersJob.h"
