@@ -66,4 +66,11 @@ void NUBlock::process(NUSensorsData* data, NUActionatorsData* actions)
 #endif
 }
 
+/*! @brief Process a block walk job
+ */
+void NUBlock::process(BlockJob* job)
+{
+    
+}
+
 

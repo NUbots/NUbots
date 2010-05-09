@@ -38,6 +38,7 @@ public:
     void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(BlockJob* job);
 private:
 public:
 private:

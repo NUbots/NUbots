@@ -67,3 +67,9 @@ void NUSave::process(NUSensorsData* data, NUActionatorsData* actions)
 }
 
 
+/*! @brief Process a save job
+ */
+void NUSave::process(SaveJob* job)
+{
+}
+

@@ -33,10 +33,11 @@ class NUWalk;
 class Script
 {
 public:
-    Script();
+    Script(NUWalk* walk);
     ~Script();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(ScriptJob* job);
 private:
 public:
 private:

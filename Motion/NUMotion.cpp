@@ -76,6 +76,9 @@ NUMotion::NUMotion()
         #if defined (USE_SAVE)
             m_save = new NUSave(m_walk);
         #endif
+        #if defined (USE_SCRIPT)
+            m_script = new Script(m_walk);
+        #endif
     #else
         #if defined (USE_KICK)
             m_kick = new NUKick(NULL);
@@ -86,9 +89,9 @@ NUMotion::NUMotion()
         #if defined (USE_SAVE)
             m_save = new NUSave(NULL);
         #endif
-    #endif
-    #if defined (USE_KICK)
-        m_script = new NUScript();
+        #if defined (USE_SCRIPT)
+            m_script = new Script(NULL);
+        #endif
     #endif
     
     m_block_left = new MotionScript("BlockLeft");
@@ -276,6 +279,20 @@ void NUMotion::process(JobList* jobs)
             case Job::MOTION_NOD:
                 m_head->process(reinterpret_cast<HeadNodJob*> (*it));
                 break;
+        #endif
+        #ifdef USE_BLOCK
+            case Job::MOTION_BLOCK:
+                m_block->process(reinterpret_cast<BlockJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_SAVE
+            case Job::MOTION_SAVE:
+                m_save->process(reinterpret_cast<SaveJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_SCRIPT
+            case Job::MOTION_SCRIPT:
+                m_script->process(reinterpret_cast<ScriptJob*> (*it));
         #endif
             default:
                 break;

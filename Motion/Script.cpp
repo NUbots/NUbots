@@ -30,11 +30,12 @@
 
 /*! @brief Constructor for Script module
  */
-Script::Script()
+Script::Script(NUWalk* walk)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Script::Script()" << endl;
 #endif
+    m_walk = walk;
 }
 
 /*! @brief Destructor for FallProtection module
@@ -56,6 +57,13 @@ void Script::process(NUSensorsData* data, NUActionatorsData* actions)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Script::process()" << endl;
 #endif
+}
+
+/*! @brief Processes a script job
+ */
+void Script::process(ScriptJob* job)
+{
+    
 }
 
 
