@@ -19,6 +19,22 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "NUMotion.h"
+#ifdef USE_HEAD
+    #include "NUHead.h"
+#endif
+
+#ifdef USE_WALK
+    #include "NUWalk.h"
+#endif
+
+#ifdef USE_KICK
+    #include "NUKick.h"
+#endif
+
+#include "Behaviour/Jobs.h"
+#include "FallProtection.h"
+#include "Getup.h"
+#include "Tools/MotionScript.h"
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -28,8 +44,6 @@
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
-
-#include "Tools/MotionScript.h"
 
 /*! @brief Constructor for motion module
  */
@@ -50,7 +64,7 @@ NUMotion::NUMotion()
         m_kick = new NUKick();
     #endif
     
-    //m_block_left = MotionScript("BlockLeft");
+    m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -166,7 +180,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     static bool alreadyran = false;
     if (m_current_time > 15500 and not alreadyran)
     {
-        m_block_left.play(data, actions);
+        m_block_left->play(data, actions);
         alreadyran = true;
     }
 }

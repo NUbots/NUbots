@@ -310,7 +310,7 @@ namespace WP {
     -0.09f,  // step lift
     150.0f,  // max x speed
     -100.0f,  // max x speed
-    30.0f,  // max y speed
+    50.0f,  // max y speed
     0.5f,  // max theta speed()
     50.0f,  // max x acc
     50.0f,  // max y acc

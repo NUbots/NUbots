@@ -27,25 +27,23 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class JobList;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
-    #include "NUHead.h"
+    class NUHead;
 #endif
 
 #ifdef USE_WALK
-#include "NUWalk.h"
+    class NUWalk;
 #endif
 
 #ifdef USE_KICK
-    #include "NUKick.h"
+    class NUKick;
 #endif
-
-#include "Behaviour/Jobs.h"
-#include "FallProtection.h"
-#include "Getup.h"
-
-#include "Tools/MotionScript.h"
+class FallProtection;
+class Getup;
+class MotionScript;
 
 class NUMotion
 {
@@ -85,7 +83,7 @@ private:
     double m_previous_time;             //!< the previous time (ms)
     int m_cycle_time;                   //!< the cycle time in ms
     
-    MotionScript m_block_left;
+    MotionScript* m_block_left;
 };
 
 #endif
