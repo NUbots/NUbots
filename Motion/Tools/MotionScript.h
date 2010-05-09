@@ -41,6 +41,8 @@ public:
     
     void play(NUSensorsData* data, NUActionatorsData* actions);
     
+    string& getName();
+    
     friend ostream& operator<< (ostream& output, const MotionScript& p_script);
     friend ostream& operator<< (ostream& output, const MotionScript* p_script);
     friend istream& operator>> (istream& input, MotionScript& p_script);

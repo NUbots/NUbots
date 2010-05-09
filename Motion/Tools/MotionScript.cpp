@@ -48,6 +48,11 @@ MotionScript::MotionScript(string filename)
         calculateCurve();
 }
 
+string& MotionScript::getName()
+{
+    return m_name;
+}
+
 MotionScript::~MotionScript()
 {
     

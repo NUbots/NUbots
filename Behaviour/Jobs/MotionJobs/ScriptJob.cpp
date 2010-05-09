@@ -31,6 +31,7 @@ ScriptJob::ScriptJob(double time, const MotionScript& script) : MotionJob(Job::M
 {
     m_job_time = time;     
     m_script = script;
+    m_name = m_script.getName();
 }
 
 
@@ -41,6 +42,7 @@ ScriptJob::ScriptJob(double time, const MotionScript& script) : MotionJob(Job::M
 ScriptJob::ScriptJob(double time, istream& input) : MotionJob(Job::MOTION_SCRIPT)
 {
     m_job_time = time;
+    input >> m_name; 
     input >> m_script;
 }
 
@@ -60,12 +62,19 @@ void ScriptJob::getScript(double& time, MotionScript& script)
     script = m_script;
 }
 
+/*! @brief Returns the name of the associated script
+ */
+string& ScriptJob::getName()
+{
+    return m_name;
+}
+
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
 void ScriptJob::summaryTo(ostream& output)
 {
-    output << "ScriptJob: " << m_job_time << endl;;
+    output << "ScriptJob: " << m_job_time << " " << m_name << endl;;
 }
 
 /*! @brief Prints a csv version to the stream
@@ -73,7 +82,7 @@ void ScriptJob::summaryTo(ostream& output)
  */
 void ScriptJob::csvTo(ostream& output)
 {
-    output << "ScriptJob, " << m_job_time << endl;
+    output << "ScriptJob, " << m_job_time << ", " << m_name << endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -91,6 +100,7 @@ void ScriptJob::toStream(ostream& output) const
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write ScriptJob specific data
+    output << m_name;
     output << m_script;
 }
 
