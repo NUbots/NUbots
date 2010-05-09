@@ -150,6 +150,7 @@ public:
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
     
     // Common sub-get methods
+    bool isFalling();
     bool isFallen();
     bool footImpact(foot_id_t footid, float& time);
     
