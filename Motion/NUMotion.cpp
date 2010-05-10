@@ -94,7 +94,7 @@ NUMotion::NUMotion()
         #endif
     #endif
     
-    m_block_left = new MotionScript("BlockLeft");
+    //m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -227,12 +227,12 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     m_previous_time = m_current_time;
     
-    static bool alreadyran = false;
+    /*static bool alreadyran = false;
     if (m_current_time > 15500 and not alreadyran)
     {
         m_block_left->play(data, actions);
         alreadyran = true;
-    }
+    }*/
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
