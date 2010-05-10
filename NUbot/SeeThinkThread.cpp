@@ -133,8 +133,7 @@ void SeeThinkThread::run()
             #endif
             
             #if defined(USE_VISION) and defined(USE_BEHAVIOUR)
-                //m_nubot->m_behaviour->process();
-                m_nubot->m_behaviour->processFieldObjects(*m_nubot->Jobs,AllObjects,m_nubot->SensorData, m_nubot->Image->getHeight(), m_nubot->Image->getWidth());
+                m_nubot->m_behaviour->processFieldObjects(m_nubot->Jobs, AllObjects, m_nubot->SensorData);
             #endif
             
             #ifdef USE_VISION

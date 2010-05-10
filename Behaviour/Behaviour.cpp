@@ -39,64 +39,50 @@ Behaviour::~Behaviour()
     
 }
 
-void Behaviour::process(JobList& jobs)
+void Behaviour::processFieldObjects(JobList* jobs, FieldObjects* AllObjects, NUSensorsData* data)
 {
-
-}
-void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width)
-{
-    static int runcount = 0;
-    if (runcount < 5)
+    m_jobs = jobs;
+    
+    if (data->CurrentTime < 500)
+        return;
+    
+    if(data->CurrentTime - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
     {
-        vector<float> walkVector;
-        walkVector.push_back(5);
-        walkVector.push_back(0);
-        walkVector.push_back(0);
+        static const float maxspeed = 10;
+        float headyaw, headpitch;
+        data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+        data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+        float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+        float balldistance;
+        if (measureddistance < 46)
+            balldistance = 1;
+        else
+            balldistance = sqrt(pow(measureddistance,2) - 46*46);
+        float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+        
+        vector<float> walkVector(3, 0);
+        
+        walkVector[0] = 10*cos(ballbearing);
+        walkVector[1] = 2*sin(ballbearing);
+        walkVector[2] = ballbearing/3.0;
+        
         WalkJob* walk = new WalkJob(walkVector);
-        jobs.addMotionJob(walk);
-        runcount++;
+        jobs->addMotionJob(walk);
+        TrackPoint(headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
     }
     else
     {
-        if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
-        {
-            static const float maxspeed = 10;
-            float headyaw, headpitch;
-            data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-            float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-            float balldistance;
-            if (measureddistance < 46)
-                balldistance = 1;
-            else
-                balldistance = sqrt(pow(measureddistance,2) - 46*46);
-            float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-            
-            vector<float> walkVector(3, 0);
-            
-            walkVector[0] = 10*cos(ballbearing);
-            walkVector[1] = 2*sin(ballbearing);
-            walkVector[2] = ballbearing/3.0;
-            
-            WalkJob* walk = new WalkJob(walkVector);
-            jobs.addMotionJob(walk);
-            TrackPoint(jobs, headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
-        }
-        else
-        {
-            vector<float> walkVector;
-            walkVector.push_back(0);
-            walkVector.push_back(0);
-            walkVector.push_back(0);
-            WalkJob* walk = new WalkJob(walkVector);
-            jobs.addMotionJob(walk);
-            //debug << "WalkJob not created: STOP WALKING " << endl;
-            Pan(jobs);
-        }
+        vector<float> walkVector;
+        walkVector.push_back(0);
+        walkVector.push_back(0);
+        walkVector.push_back(0);
+        WalkJob* walk = new WalkJob(walkVector);
+        jobs->addMotionJob(walk);
+        Pan();
     }
 }
 
-void Behaviour::TrackPoint(JobList& jobs, float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation, float centrebearing)
+void Behaviour::TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation, float centrebearing)
 {
     const float gain_pitch = 0.8;           // proportional gain in the pitch direction
     const float gain_yaw = 0.6;             // proportional gain in the yaw direction
@@ -114,15 +100,15 @@ void Behaviour::TrackPoint(JobList& jobs, float sensoryaw, float sensorpitch, fl
     headtarget[0] = new_pitch;
     headtarget[1] = new_yaw;
     HeadJob* head = new HeadJob(0, headtarget);
-    jobs.addMotionJob(head);
+    m_jobs->addMotionJob(head);
  
   return;
 }
 
-void Behaviour::Pan(JobList& jobs)
+void Behaviour::Pan()
 {
     HeadPanJob* head = new HeadPanJob(HeadPanJob::Ball);
-    jobs.addMotionJob(head);
+    m_jobs->addMotionJob(head);
     return;
 }
 

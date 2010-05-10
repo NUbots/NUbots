@@ -32,11 +32,12 @@ public:
     Behaviour();
     ~Behaviour();
     
-    void process(JobList& jobs);
-    void processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width);
-    void TrackPoint(JobList& jobs, float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0);
-    void Pan(JobList& jobs);
+    void processFieldObjects(JobList* jobs, FieldObjects* AllObjects, NUSensorsData* data);
+    void TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0);
+    void Pan();
 
+private:
+    JobList* m_jobs;
 };
 
 
