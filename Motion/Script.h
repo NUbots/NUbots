@@ -36,6 +36,8 @@ public:
     Script(NUWalk* walk);
     ~Script();
     
+    bool isActive();
+    bool isUsingLegs();
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(ScriptJob* job);
 private:

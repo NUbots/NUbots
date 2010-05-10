@@ -28,16 +28,47 @@
  */
 FallProtection::FallProtection()
 {
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "FallProtection::FallProtection()" << endl;
-#endif
-
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "FallProtection::FallProtection()" << endl;
+    #endif
+    #ifdef USE_FALL_PROTECTION
+        m_enabled = true;
+    #else
+        m_enabled = false;
+    #endif
 }
 
 /*! @brief Destructor for FallProtection module
  */
 FallProtection::~FallProtection()
 {
+}
+
+/*! @brief Enables the fall protection module
+ */
+void FallProtection::enable()
+{
+    #ifdef USE_FALL_PROTECTION
+        m_enabled = true;
+    #endif
+}
+
+/*! @brief Disables the fall protection module
+ */
+void FallProtection::disable()
+{
+    m_enabled = false;
+}
+
+/*! @brief Returns true if the fall protection is enabled, false otherwise
+ */
+bool FallProtection::enabled()
+{
+    #ifdef USE_FALL_PROTECTION
+        return m_enabled;
+    #else
+        return false;
+    #endif
 }
 
 /*! @brief Produce actions from the data to protect the robot from a fall
@@ -48,7 +79,7 @@ FallProtection::~FallProtection()
  */
 void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    if (actions == NULL)
+    if (data == NULL or actions == NULL or (not m_enabled))
         return;
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "FallProtection::process()" << endl;
