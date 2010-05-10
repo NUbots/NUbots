@@ -39,23 +39,24 @@ public:
     static NUWalk* getWalkEngine();
     NUWalk();
     virtual ~NUWalk();
+    virtual void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(WalkJob* job);
     void process(WalkToPointJob* job);
     void process(WalkParametersJob* job);
     
-    void walkSpeed(const vector<float>& speed);
-    void walkToPoint(double time, const vector<float>& position);
-    
     void setWalkParameters(const WalkParameters& walkparameters);
     WalkParameters& getWalkParameters();
+    
+    virtual void setArmEnabled(bool leftarm, bool rightarm);
     
     void getCurrentSpeed(vector<float>& currentspeed);
 protected:
     virtual void doWalk() = 0;
 
     void setTargetSpeed(const vector<float>& speed);
+    void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
     
     inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};
@@ -64,6 +65,10 @@ public:
 protected:
     NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
+    
+    bool m_walk_enabled;                            //!< true if the walk is enabled, false otherwise
+    bool m_larm_enabled;                            //!< true if the walk is allowed to move the left arm
+    bool m_rarm_enabled;                            //!< true if the walk is allowed to move the right arm
     
     // the target speeds before acceleration clipping
     float m_target_speed_x;                         //!< the current target x speed cm/s

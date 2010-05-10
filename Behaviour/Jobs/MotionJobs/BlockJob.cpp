@@ -118,7 +118,9 @@ void BlockJob::csvTo(ostream& output)
  */
 void BlockJob::toStream(ostream& output) const
 {
-    debug << "BlockJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 2
+        debug << "BlockJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write BlockJob specific data
@@ -136,7 +138,9 @@ void BlockJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const BlockJob& job)
 {
-    debug << "<<BlockJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<BlockJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -149,11 +153,11 @@ ostream& operator<<(ostream& output, const BlockJob& job)
  */
 ostream& operator<<(ostream& output, const BlockJob* job)
 {
-    debug << "<<BlockJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<BlockJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }
 

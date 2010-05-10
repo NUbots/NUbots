@@ -34,3 +34,7 @@ bool AmbiguousObject::isObjectAPossibility(int ID)
 	}
 	return isInVector;
 }
+void AmbiguousObject::setVisibility(bool newIsVisible)
+{
+    isVisible = newIsVisible;
+}

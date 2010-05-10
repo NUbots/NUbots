@@ -49,6 +49,13 @@ ALWalk::~ALWalk()
         delete m_al_motion;
 }
 
+/*! @brief Kill the aldebaran walk engine
+ */
+void ALWalk::kill()
+{
+    m_al_motion->killWalk();
+}
+
 void ALWalk::doWalk()
 {
     static unsigned int count = 0;
@@ -69,4 +76,9 @@ void ALWalk::doWalk()
     }
 }
 
-
+/*! @brief Sets whether the arms are allowed to be moved by the walk engine
+ */
+void ALWalk::setArmEnabled(bool leftarm, bool rightarm)
+{
+    m_al_motion->setWalkArmsEnable(leftarm, rightarm);
+}

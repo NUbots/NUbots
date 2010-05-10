@@ -13,4 +13,6 @@ class AmbiguousObject : public Object{
 		void addPossibleObjectID(int ID);
                 void setPossibleObjectIDs(vector<int> VectorOfIDs);
                 bool isObjectAPossibility(int ID);
+                void setVisibility(bool newIsVisible);
+
 };

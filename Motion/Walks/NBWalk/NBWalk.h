@@ -65,6 +65,10 @@ private:
     void updateNBSensors();
     void nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints);
     void nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints);
+    void nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints);
+    void nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints);
+    void nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints);
+    void nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints);
     void updateActionatorsData();
     
 public:

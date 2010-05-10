@@ -186,6 +186,9 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_SAVE:
             *job = new SaveJob(jobtime, input);
             break;
+        case Job::MOTION_SCRIPT:
+            *job = new ScriptJob(jobtime, input);
+            break;
         case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
             break;

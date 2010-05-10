@@ -26,7 +26,7 @@
 #define WALKPARAMETERJOB_H
 
 #include "../MotionJob.h"
-#include "Motion/NUWalk.h"
+#include "Motion/Walks/WalkParameters.h"
 
 #include <vector>
 using namespace std;

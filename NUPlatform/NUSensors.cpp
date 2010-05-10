@@ -21,16 +21,18 @@
 
 #include "NUSensors.h"
 #include "NUSystem.h"
-#include "debug.h"
-#include "debugverbositynusensors.h"
 #include "../Kinematics/Horizon.h"
 #include "Kinematics/Kinematics.h"
+#include "Kinematics/OrientationUKF.h"
+#include "Tools/Math/General.h"
+
+#include "debug.h"
+#include "debugverbositynusensors.h"
+#include "nubotdataconfig.h"
+#include "Motion/Tools/MotionFileTools.h"
+
 #include <math.h>
 #include <boost/circular_buffer.hpp>
-#include "Kinematics/Kinematics.h"
-#include "nubotdataconfig.h"
-
-#include "Kinematics/OrientationUKF.h"
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -45,9 +47,13 @@ NUSensors::NUSensors()
     m_current_time = nusystem->getTime();
     m_previous_time = 0;
     m_data = new NUSensorsData();
-    m_kinematicModel = new Kinematics();
-    m_kinematicModel->LoadModel("None");
+	m_kinematicModel = new Kinematics();
+	m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
+    
+    ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
+    m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
+    m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -136,6 +142,7 @@ void NUSensors::calculateSoftSensors()
     calculateHorizon();
     calculateButtonTriggers();
     calculateFootForce();
+    calculateFootSupport();
     calculateFootImpact();
     calculateCoP();
     calculateZMP();
@@ -204,9 +211,9 @@ void NUSensors::calculateOrientation()
             orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
         }
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-       // double startTime = nusystem->getThreadTime();
-        /*
+
         // New method
+/*  TOO SLOW FOR NOW
         if(m_data->getGyroValues(gyros))
         {
             if(!m_orientationFilter->Initialised())
@@ -244,8 +251,6 @@ void NUSensors::calculateOrientation()
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
             gyroOffset[2] = 0.0f;
         }
-        //double runTime = nusystem->getThreadTime() - startTime;
-        //debug << "Time taken to run UKF: " << runTime << endl;
         */
     }
 }
@@ -343,9 +348,6 @@ void NUSensors::calculateZMP()
     Except in special circumstances, a fall is always preceded by a falling. We transition into the falling state
     when no control action can prevent a fall. The falling is completed after the robot has impacted with the ground, 
     the impact is detected using the accelerometers, and once the robot has settled it is fallen and can start getting up.
- 
-    To handle the special cases where the robot is fallen without ever having fell, ie. on Initial, on Ready and on Playing
-    ......................................
  */
 void NUSensors::calculateFallSense()
 {
@@ -356,15 +358,6 @@ void NUSensors::calculateFallSense()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
-    // Can I ever be fallen, without falling?
-    // On initial. On ready. On playing. These are special cases where the fall happened outside the game.
-    // I could use the game state to trigger a special check, or I could just check if I have fallen over
-    // in every frame.
-    // Alas, in init we are not going to have any motors on. When we go to ready, I need to stand up.
-    // So I could check whether I am standing in each frame, to do this I would need to know the stance
-    // position, if the feet are on the ground, and if the orientation is upright. That is a probably because, 
-    // I don't have the stance position in the sensors.
-    //! @todo TODO: Finish this discussion on how to do the fall detection...
     // check if the robot has fallen over
     static vector<float> orientation(3,0);
     static vector<float> angularvelocity(3,0);
@@ -412,7 +405,7 @@ void NUSensors::calculateFootForce()
     debug << "NUSensors::calculateFootForce()" << endl;
 #endif
     static vector<float> forces(3,0);
-    const float MINIMUM_CONTACT_FORCE = 2;          // If we register a force less than 2N (approx. 200g)
+    const float MINIMUM_CONTACT_FORCE = 3;          // If we register a force less than 3N (approx. 300g)
     forces[0] = 0;
     // now I assume that the left foot values are stored first (because they are ;)) and that the left and right feet have the same number of sensors
     for (int i=0; i<m_data->FootSoleValues->size()/2; i++)
@@ -454,6 +447,75 @@ void NUSensors::calculateFootForce()
     // save the foot forces in the FootForce sensor
     forces[2] = forces[0] + forces[1];
     m_data->FootForce->setData(m_current_time, forces, true);
+}
+
+/*! @brief Calculates the centre of pressure underneath each foot.
+ */
+void NUSensors::calculateCoP()
+{
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "NUSensors::calculateCoP()" << endl;
+#endif
+    static vector<float> cop(6, 0);
+    
+    vector<float> fsr;
+    if (m_data->getFootSoleValues(NUSensorsData::AllFeet, fsr) and fsr.size() == 8 and m_left_foot_hull.size() >= 4 and m_right_foot_hull.size() >= 4)
+    {   
+        float leftfsr_sum = fsr[0] + fsr[1] + fsr[2] + fsr[3];
+        int offset = 4;
+        float rightfsr_sum = fsr[offset+0] + fsr[offset+1] + fsr[offset+2] + fsr[offset+3];
+        if (leftfsr_sum > 0)
+        {
+            cop[0] = (m_left_foot_hull[0][0]*fsr[0] + m_left_foot_hull[1][0]*fsr[1] + m_left_foot_hull[3][0]*fsr[2] + m_left_foot_hull[2][0]*fsr[3])/leftfsr_sum;
+            cop[1] = (m_left_foot_hull[0][1]*fsr[0] + m_left_foot_hull[1][1]*fsr[1] + m_left_foot_hull[3][1]*fsr[2] + m_left_foot_hull[2][1]*fsr[3])/leftfsr_sum;
+        }
+        if (rightfsr_sum > 0)
+        {
+            cop[2] = (m_right_foot_hull[0][0]*fsr[0+offset] + m_right_foot_hull[1][0]*fsr[1+offset] + m_right_foot_hull[3][0]*fsr[2+offset] + m_right_foot_hull[2][0]*fsr[3+offset])/rightfsr_sum;
+            cop[3] = (m_right_foot_hull[0][1]*fsr[0+offset] + m_right_foot_hull[1][1]*fsr[1+offset] + m_right_foot_hull[3][1]*fsr[2+offset] + m_right_foot_hull[2][1]*fsr[3+offset])/rightfsr_sum;
+        }
+        m_data->FootCoP->setData(m_current_time, cop, true);
+    }
+    else    
+        m_data->FootCoP->IsValid = false;
+}
+
+/*! @brief Determines whether each foot is supporting the robot, where support is defined as taking sufficent weight and having the CoP inside the convex hull of the foot.
+ */
+void NUSensors::calculateFootSupport()
+{
+    const float MINIMUM_CONTACT_FORCE = 3;
+    
+    static vector<float> support(3, 0);
+    
+    // a foot is supporting if there is sufficient weight on the foot
+    float force, copx, copy;
+    if (m_data->getFootForce(NUSensorsData::LeftFoot, force) and m_data->getFootCoP(NUSensorsData::LeftFoot, copx, copy))
+    {
+        if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_left_foot_hull, 0.2))
+            support[0] = 1.0;
+        else
+            support[0] = 0;
+    }
+    else
+    {
+        m_data->FootSupport->IsValid = false;
+        return;
+    }
+    
+    if (m_data->getFootForce(NUSensorsData::RightFoot, force) and m_data->getFootCoP(NUSensorsData::RightFoot, copx, copy))
+    {
+        if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_right_foot_hull, 0.2))
+            support[1] = 1.0;
+        else
+            support[1] = 0;
+    }
+    else
+    {
+        m_data->FootSupport->IsValid = false;
+        return;
+    }
+    m_data->FootSupport->setData(m_current_time, support, true);
 }
 
 /*! @brief Determines the time at which each foot last impacted with the ground
@@ -561,14 +623,6 @@ void NUSensors::calculateFootImpact()
     m_data->FootImpact->setData(m_data->CurrentTime, impacttimes, true);
 }
 
-void NUSensors::calculateCoP()
-{
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateCoP()" << endl;
-#endif
-    //!< @todo Implement NUSensors::calculateCoP
-}
-
 void NUSensors::calculateOdometry()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -662,9 +716,8 @@ void NUSensors::calculateOdometry()
 void NUSensors::calculateKinematics()
 {
     //! TODO: Need to get these values from somewhere else.
-    const bool leftLegSupport = true;
-    const bool rightLegSupport = true;
     const int cameraNumber = 1;
+    const double time = m_data->CurrentTime;
 
     static vector<float> leftLegJoints;
     bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
@@ -683,10 +736,20 @@ void NUSensors::calculateKinematics()
     if(rightLegJointsSuccess)
     {
         rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
+        m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->RightLegTransform->IsValid = false;
     }
     if(leftLegJointsSuccess)
     {
         leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
+        m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->LeftLegTransform->IsValid = false;
     }
     if(headJointsSuccess)
     {
@@ -698,18 +761,28 @@ void NUSensors::calculateKinematics()
     if(headJointsSuccess && (cameraNumber == 1))
     {
         cameraTransform = &bottomCameraTransform;
+        m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
+    }
+    else
+    {
+        m_data->CameraTransform->IsValid = false;
     }
 
+
+    bool leftFootSupport = false, rightFootSupport = false;
+    m_data->getFootSupport(NUSensorsData::LeftFoot,leftFootSupport);
+    m_data->getFootSupport(NUSensorsData::RightFoot,rightFootSupport);
+
     // Choose support leg.
-    if((!leftLegSupport && rightLegSupport) && rightLegJointsSuccess)
+    if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
     {
         supportLegTransform = &rightLegTransform;
     }
-    else if((leftLegSupport && !rightLegSupport) && leftLegJointsSuccess)
+    else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
-    else if((leftLegSupport && rightLegSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+    else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
@@ -717,15 +790,6 @@ void NUSensors::calculateKinematics()
     {
         supportLegTransform = 0;
     }
-
-    // Set all of the sensor values
-    double time = m_data->CurrentTime;
-    // Set the legs
-    m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
-    m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
-
-    // Set the camera
-    m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
 
     if(supportLegTransform)
     {

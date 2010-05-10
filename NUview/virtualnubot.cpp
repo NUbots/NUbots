@@ -231,9 +231,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    fieldLines = vision.DetectLines(&vertScanArea,spacings);
-    //! Extract Detected Line & Corners
-    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -331,6 +329,13 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
 
+    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings);
+    //! Extract Detected Line & Corners
+    emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
+    emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
+    qDebug() << "Updating Corners";
+    emit cornerPointsDisplayChanged(LineDetector.cornerPoints,GLDisplay::FieldLines);
+
     //POST PROCESS:
     vision.AllFieldObjects->postProcess(image->m_timestamp);
     //qDebug() << image->m_timestamp ;
@@ -340,7 +345,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     //SUMMARY:
     qDebug() << "Time: " << vision.m_timestamp;
-
+    qDebug() 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << vision.classifiedCounter
+                    << "\t Percent of Image: " << vision.classifiedCounter / float(image->getWidth() * image->getHeight()) * 100.00 << "%" << endl;
     for(unsigned int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
     {
         if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)

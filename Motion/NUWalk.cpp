@@ -22,6 +22,9 @@
 #include "NUWalk.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkToPointJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "walkconfig.h"
 #ifdef USE_JWALK
@@ -86,6 +89,10 @@ NUWalk::NUWalk()
     m_point_x = 0;                                //!< the current target point's x position in cm
     m_point_y = 0;                                //!< the current target point's y position in cm
     m_point_theta = 0;                            //!< the current target point's final orientation relative to the current in radians
+    
+    m_walk_enabled = false;
+    m_larm_enabled = true;
+    m_rarm_enabled = true;
 }
 
 /*! @brief Destructor for motion module
@@ -95,6 +102,14 @@ NUWalk::~NUWalk()
 #if DEBUG_NUMOTION_VERBOSITY > 0
     debug << "NUWalk::~NUWalk()" << endl;
 #endif  
+    kill();
+}
+
+/*! @brief Kills the walk engine
+ */
+void NUWalk::kill()
+{
+    m_walk_enabled = false;
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -111,20 +126,44 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
-    calculateCurrentSpeed();
-    doWalk();
+    if (m_walk_enabled)
+    {
+        calculateCurrentSpeed();
+        doWalk();
+    }
 }
 
-/*! @brief Walk with the given speed vector
- 
-    Use this function to precisely control the locomotion direction of the robot. 
-    To instruct the robot to move as fast as possible, just put in a very large value, it will be clipped internally.
-    
-    @param speed the desired walk velocity [x (cm/s), y (cm/s), rotation (rad/s)]
+/*! @brief Process a walk speed job
+    @param job the walk job to be processed
  */
-void NUWalk::walkSpeed(const vector<float>& speed)
+void NUWalk::process(WalkJob* job)
 {
+    vector<float> speed;
+    job->getSpeed(speed);
+    m_walk_enabled = true;
     setTargetSpeed(speed);
+}
+
+/*! @brief Process a walk to point job
+    @param job the walk to point job to be processed
+ */
+void NUWalk::process(WalkToPointJob* job)
+{
+    double time;
+    vector<float> position;
+    job->getPosition(time, position);
+    m_walk_enabled = true;
+    setTargetPoint(time, position);
+}
+
+/*! @brief Process a walk parameters job
+    @param job the walk parameter job to be processed
+ */
+void NUWalk::process(WalkParametersJob* job)
+{
+    WalkParameters parameters;
+    job->getWalkParameters(parameters);                
+    setWalkParameters(parameters);
 }
 
 /*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw. The given speeds will be clipped if they are faster than the maximum possible speeds
@@ -230,7 +269,7 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
     @param time the desired time to reach the given point (ms)
     @param x the desired relative target [x (cm), y (cm), theta (rad)]
  */
-void NUWalk::walkToPoint(double time, const vector<float>& position)
+void NUWalk::setTargetPoint(double time, const vector<float>& position)
 {
     m_point_time = time;
     if (position.size() == 3)
@@ -263,4 +302,11 @@ WalkParameters& NUWalk::getWalkParameters()
     return m_walk_parameters;
 }
 
+/*! @brief Sets whether each of the arms can be used by the walk engine
+ */
+void NUWalk::setArmEnabled(bool leftarm, bool rightarm)
+{
+    m_larm_enabled = leftarm;
+    m_rarm_enabled = rightarm;
+}
 

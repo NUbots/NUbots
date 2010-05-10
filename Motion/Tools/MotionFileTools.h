@@ -32,21 +32,30 @@ using namespace std;
 class MotionFileTools
 {
 public:
+    static bool toBool(istream& input);
+    
     static float toFloat(const char* data);
     static float toFloat(const string& data);
     static float toFloat(istream& input);
     
     static string fromVector(vector<float> data);
+    static string fromVector(vector<double> data);
     static vector<float> toFloatVector(const string& data);
     static vector<float> toFloatVector(istream& input);
+    
+    static vector<string> toStringVector(istream& input);
     
     static void toFloatWithRange(const string& data, float& value, vector<float>& range);
     static void toFloatWithRange(istream& input, float& value, vector<float>& range);
     
     static string fromMatrix(const vector<vector<float> >& data);
+    static string fromMatrix(const vector<vector<double> >& data);
     static vector<vector<float> > toFloatMatrix(const string& data);
     static vector<vector<float> > toFloatMatrix(istream& input);
-    static unsigned int size(vector<vector<float> > data);
+    static size_t size(vector<vector<float> > data);
+    static size_t size(vector<vector<double> > data);
+    
+    static void toFloatWithMatrix(istream& input, float& value, vector<vector<float> >& matrix);
     
 private:
     MotionFileTools() {};

@@ -22,15 +22,27 @@ STRING(REPLACE "/cmake/motionconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_
 SET( NUBOT_USE_MOTION_HEAD
 	ON
 	CACHE BOOL
-        "Set to ON to use head, set to OFF to not move the head")
+    "Set to ON to use head, set to OFF to not move the head")
 SET( NUBOT_USE_MOTION_WALK
 	ON
 	CACHE BOOL
-        "Set to ON to use walk, set to OFF to have no walk")
+    "Set to ON to use walk, set to OFF to have no walk")
 SET( NUBOT_USE_MOTION_KICK
 	OFF 
 	CACHE BOOL
-        "Set to ON to use kick, set to OFF to not have kick")
+    "Set to ON to use kick, set to OFF to not have kick")
+SET( NUBOT_USE_MOTION_BLOCK
+	OFF 
+	CACHE BOOL
+    "Set to ON to use block, set to OFF to not have any blocks")
+SET( NUBOT_USE_MOTION_SAVE
+	OFF 
+	CACHE BOOL
+    "Set to ON to use save, set to OFF to not have any saves")
+SET( NUBOT_USE_MOTION_SCRIPT
+	OFF 
+	CACHE BOOL
+    "Set to ON to use script, set to OFF to not have any scripts")
 SET( NUBOT_USE_MOTION_GETUP
 	OFF
 	CACHE BOOL
@@ -44,6 +56,9 @@ MARK_AS_ADVANCED(
 	NUBOT_USE_MOTION_HEAD
 	NUBOT_USE_MOTION_WALK
 	NUBOT_USE_MOTION_KICK
+    NUBOT_USE_MOTION_BLOCK
+    NUBOT_USE_MOTION_SAVE
+    NUBOT_USE_MOTION_SCRIPT
 	NUBOT_USE_MOTION_GETUP
 	NUBOT_USE_MOTION_FALL_PROTECTION
 )
