@@ -61,7 +61,8 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
         if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
         {
             static const float maxspeed = 10;
-            float headyaw;
+            float headyaw, headpitch;
+            data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
             data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance;
@@ -79,11 +80,7 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
             
             WalkJob* walk = new WalkJob(walkVector);
             jobs.addMotionJob(walk);
-            //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
-            
-            float headpitch;
-            data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            TrackPoint(jobs, headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
+            TrackPoint(jobs, headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
         }
         else
         {
@@ -99,37 +96,24 @@ void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSen
     }
 }
 
-void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x, float y, int IMAGE_HEIGHT, int IMAGE_WIDTH)
+void Behaviour::TrackPoint(JobList& jobs, float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation, float centrebearing)
 {
-
-    double FOVx = deg2rad(45.0f);
-    double FOVy = deg2rad(34.45f);
-    float radsPerPixelHoriz = FOVx/IMAGE_WIDTH;
-    float radsPerPixelVert = FOVy/IMAGE_HEIGHT;
-
-    float cx = (IMAGE_WIDTH/2); // Center X -> desired position
-    float cy = (IMAGE_HEIGHT/2); // Center Y -> desired position
-
-    float xError = cx - x;
-    float yError = cy - y;
-
-    float alphaX = 0.8; //0.33;
-    float alphaY = 0.8; //0.5;
-
-    float angErrX = alphaX*xError*radsPerPixelHoriz;
-    float angErrY = alphaY*yError*radsPerPixelVert;
-
-    float newPan = currPan + angErrX;
-    float newTilt = currTilt - angErrY;
-    //float newTilt = currTilt;
-
-    //const float CAMERA_BOTTOM_MIN_TILT = -0.2f;
-
-    vector<float> headVector;
-    headVector.push_back(newTilt);
-    headVector.push_back(newPan);
-    HeadJob * head = new HeadJob(0,headVector);
+    const float gain_pitch = 0.8;           // proportional gain in the pitch direction
+    const float gain_yaw = 0.6;             // proportional gain in the yaw direction
     
+    float c_pitch = -centreelevation;
+    float c_yaw = -centrebearing;
+
+    float e_pitch = c_pitch + elevation;    // the sign convention of the field objects is the opposite of the head pitch joint itself
+    float e_yaw = c_yaw - bearing;
+
+    float new_pitch = sensorpitch - gain_pitch*e_pitch;
+    float new_yaw = sensoryaw - gain_yaw*e_yaw;
+
+    static vector<float> headtarget(2,0);
+    headtarget[0] = new_pitch;
+    headtarget[1] = new_yaw;
+    HeadJob* head = new HeadJob(0, headtarget);
     jobs.addMotionJob(head);
  
   return;
