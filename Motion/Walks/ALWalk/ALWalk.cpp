@@ -51,7 +51,7 @@ ALWalk::~ALWalk()
 
 /*! @brief Kill the aldebaran walk engine
  */
-ALWalk::kill()
+void ALWalk::kill()
 {
     m_al_motion->killWalk();
 }

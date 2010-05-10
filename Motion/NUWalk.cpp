@@ -22,6 +22,9 @@
 #include "NUWalk.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkToPointJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "walkconfig.h"
 #ifdef USE_JWALK
@@ -133,7 +136,7 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 /*! @brief Process a walk speed job
     @param job the walk job to be processed
  */
-void process(WalkJob* job)
+void NUWalk::process(WalkJob* job)
 {
     vector<float> speed;
     job->getSpeed(speed);
@@ -144,7 +147,7 @@ void process(WalkJob* job)
 /*! @brief Process a walk to point job
     @param job the walk to point job to be processed
  */
-void process(WalkToPointJob* job)
+void NUWalk::process(WalkToPointJob* job)
 {
     double time;
     vector<float> position;
@@ -156,7 +159,7 @@ void process(WalkToPointJob* job)
 /*! @brief Process a walk parameters job
     @param job the walk parameter job to be processed
  */
-void process(WalkParametersJob* job)
+void NUWalk::process(WalkParametersJob* job)
 {
     WalkParameters parameters;
     job->getWalkParameters(parameters);                
