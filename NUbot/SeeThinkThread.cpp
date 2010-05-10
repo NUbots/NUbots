@@ -22,6 +22,30 @@
 #include "SeeThinkThread.h"
 #include "NUbot.h"
 
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
+
+#ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
+
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    //#include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"

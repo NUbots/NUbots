@@ -19,23 +19,48 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "debugverbositynubot.h"
-#include "debug.h"
-#include "NUPlatform/NUActionators/NUSounds.h"
-
 #include "NUbot.h"
+
+// ---------------------------------------------------------------- Compulsory header files
+#include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
 #include "Behaviour/Jobs.h"
 #include "GameController/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
+#include "debugverbositynubot.h"
+#include "debug.h"
+
+// --------------------------------------------------------------- Module header files
+#ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
+
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    //#include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
+// --------------------------------------------------------------- Thread header files
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
 #include "NUbot/SenseMoveThread.h"
 #include "NUbot/WatchDogThread.h"
 
+// --------------------------------------------------------------- NUPlatform header files
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsIO.h"
