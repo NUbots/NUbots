@@ -39,10 +39,12 @@
 #include <map>
 #include <vector>
 #include "Tools/FileFormats/TimestampedData.h"
+#include "NavigableFileReader.h"
+#include <cmath>
 #include <QDebug>
 
 template<class C>
-class StreamFileReader
+class StreamFileReader: public NavigableFileReader
 {
     typedef std::fstream::pos_type Position;
     struct FrameEntry
@@ -58,7 +60,7 @@ public:
     /**
       *     Default constructor. Initialises the StreamFileReader.
       */
-    StreamFileReader(): m_fileEndLocation(0)
+    StreamFileReader(QObject *parent = 0): NavigableFileReader(parent), m_fileEndLocation(0)
     {
         m_dataBuffer = new C();
         m_selectedFrame = m_index.end();
@@ -68,7 +70,7 @@ public:
       *     Open constructor. Initialises the StreamFileReader and opens and indexes the file described by the filename.
       *     @param filename name of the file to be opened and accessed by the StreamFileReader.
       */
-    StreamFileReader(const std::string& filename): m_fileEndLocation(0)
+    StreamFileReader(const std::string& filename, QObject *parent = 0): NavigableFileReader(parent), m_fileEndLocation(0)
     {
         m_dataBuffer = new C();
         OpenFile(filename);
@@ -98,7 +100,17 @@ public:
             m_fileEndLocation = m_file.tellg();
             GenerateIndex();
         }
-        return m_file.good();
+        return IsValid();
+    }
+
+    /**
+      *     Determine if the current log reader is valid. A log reader is valid if it has correctly opened
+      *     a file and created an index of the objects within the file.
+      *     @return True if the the log reader is valid. False if it is not.
+      */
+    bool IsValid()
+    {
+        return ((m_file.good()) && (m_index.size() > 0));
     }
 
     /**
@@ -133,7 +145,7 @@ public:
 
             float time = TimeAtSequenceNumber(frameSequenceNumber);
             if(time)
-                return ReadFrame(m_index[time]);
+                return ReadFrame(GetIndexFromTime(time));
             else
                 return NULL;
     }
@@ -219,7 +231,7 @@ public:
       *     Return the total number of objects found within the current file.
       *     @return The total number of objects in the file. This is the maximium sequence number that can be accessed.
       */
-    int TotalFrames()
+    unsigned int TotalFrames()
     {
         if(m_file.is_open())
         {
@@ -305,6 +317,26 @@ public:
         IndexIterator entry = GetIndexFromTime(time);
         qDebug() << "Getting Frame at: " << (*entry).second.position;
         return ReadFrame(entry);
+    }
+
+    void EmitControlAvailability()
+    {
+        if(IsValid() == false)
+        {
+            emit nextFrameAvailable(false);
+            emit previousFrameAvailable(false);
+            emit firstFrameAvailable(false);
+            emit lastFrameAvailable(false);
+            emit setFrameAvailable(false);
+        }
+        else
+        {
+            emit nextFrameAvailable(CurrentFrameSequenceNumber() < TotalFrames());
+            emit previousFrameAvailable(CurrentFrameSequenceNumber() > 0);
+            emit firstFrameAvailable(true);
+            emit lastFrameAvailable(true);
+            emit setFrameAvailable(true);
+        }
     }
 
 private:

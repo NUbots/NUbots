@@ -18,7 +18,7 @@
 #include "frameInformationWidget.h"
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
-#include "StreamFileReader.h"
+#include "FileAccess/StreamFileReader.h"
 
 using namespace std;
 ofstream debug;

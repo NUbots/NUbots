@@ -73,10 +73,10 @@ HEADERS += ui_mainwindow.h \
     localisationwidget.h \
     ../Vision/Ball.h \
     ../Vision/CircleFitting.h \
-    LogFileFormatReader.h \
-    nifVersion1FormatReader.h \
-    LogFileReader.h \
-    nulVersion1FormatReader.h \
+    FileAccess/LogFileFormatReader.h \
+    FileAccess/nifVersion1FormatReader.h \
+    FileAccess/LogFileReader.h \
+    FileAccess/nulVersion1FormatReader.h \
     visionstreamwidget.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
@@ -104,8 +104,10 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/General.h \
     ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
-    StreamFileReader.h \
-    ../Tools/FileFormats/TimestampedData.h
+    FileAccess/StreamFileReader.h \
+    ../Tools/FileFormats/TimestampedData.h \
+    FileAccess/NavigableFileReader.h \
+    FileAccess/ImageStreamFileReader.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -163,10 +165,10 @@ SOURCES += mainwindow.cpp \
     localisationwidget.cpp \
     ../Vision/Ball.cpp \
     ../Vision/CircleFitting.cpp \
-    LogFileFormatReader.cpp \
-    nifVersion1FormatReader.cpp \
-    LogFileReader.cpp \
-    nulVersion1FormatReader.cpp \
+    FileAccess/LogFileFormatReader.cpp \
+    FileAccess/nifVersion1FormatReader.cpp \
+    FileAccess/LogFileReader.cpp \
+    FileAccess/nulVersion1FormatReader.cpp \
     visionstreamwidget.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
