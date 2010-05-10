@@ -103,7 +103,6 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/General.h \
     ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h
-
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -185,6 +184,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
-    ../Kinematics/OrientationUKF.cpp
+    ../Kinematics/OrientationUKF.cpp \
+    ../Motion/Tools/MotionScript.cpp \
+    ../Motion/Tools/MotionCurves.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
