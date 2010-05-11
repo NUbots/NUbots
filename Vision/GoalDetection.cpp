@@ -289,7 +289,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     ScanLine tempLine;
 
     int spacings = 8;
-    int direction = ClassifiedSection::RIGHT;
+    int direction = ScanLine::RIGHT;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
     //debug << "segments found: " << tempLine->getNumberOfSegments();

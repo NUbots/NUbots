@@ -11,14 +11,7 @@ class ClassifiedSection
 {
 
 public:
-    enum ScanDirection
-    {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        num_directions,
-    };
+
 
     ClassifiedSection();
     ClassifiedSection(int direction);

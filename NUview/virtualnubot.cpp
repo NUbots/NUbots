@@ -195,7 +195,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(vertScanArea.getDirection() == ClassifiedSection::DOWN)
+        if(vertScanArea.getDirection() == ScanLine::DOWN)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -219,7 +219,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(horiScanArea.getDirection() == ClassifiedSection::RIGHT)
+        if(horiScanArea.getDirection() == ScanLine::RIGHT)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {

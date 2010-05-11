@@ -158,7 +158,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 {
                     ScanLine tempScanLine;
                     previouslyCloselyScanedSegment = segment;
-                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ClassifiedSection::DOWN);
+                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ScanLine::DOWN);
                     ////qDebug()    << "After Closly Scan: "<<tempScanLine.getNumberOfSegments()
                     //            << segment->getStartPoint().x << "," << segment->getStartPoint().y
                     //            ;
