@@ -20,7 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  Behaviour.cpp Behaviour.h
+SET (YOUR_SRCS  AbstractBehaviour.cpp AbstractBehaviour.h
+		Behaviour.cpp Behaviour.h
 		TeamInformation
 )
 ####################################################################################

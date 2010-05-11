@@ -20,17 +20,28 @@
  */
 
 #include "Behaviour.h"
-#include "NUPlatform/NUSystem.h"
-#include "Tools/Math/General.h"
+
+#include "Jobs/JobList.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+#include "GameController/GameInformation.h"
+#include "TeamInformation.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-
 using namespace std;
-using namespace mathGeneral;
+
+// Add avaliable behaviours to this list:
+static string temp_names[] = {"play_soccer", "chase_ball"};
+vector<string> Behaviour::m_avaliable_behaviours(temp_names, temp_names + sizeof(temp_names)/sizeof(*temp_names));
+
+
 
 Behaviour::Behaviour()
 {
-    
+    m_introduction_done = false;
+    m_selection_index = 0;
 }
 
 
@@ -39,76 +50,43 @@ Behaviour::~Behaviour()
     
 }
 
-void Behaviour::processFieldObjects(JobList* jobs, FieldObjects* AllObjects, NUSensorsData* data)
+void Behaviour::doBehaviour()
 {
-    m_jobs = jobs;
-    
-    if (data->CurrentTime < 500)
-        return;
-    
-    if(data->CurrentTime - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
-    {
-        static const float maxspeed = 10;
-        float headyaw, headpitch;
-        data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-        data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-        float balldistance;
-        if (measureddistance < 46)
-            balldistance = 1;
-        else
-            balldistance = sqrt(pow(measureddistance,2) - 46*46);
-        float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-        
-        vector<float> walkVector(3, 0);
-        
-        walkVector[0] = 10*cos(ballbearing);
-        walkVector[1] = 2*sin(ballbearing);
-        walkVector[2] = ballbearing/3.0;
-        
-        WalkJob* walk = new WalkJob(walkVector);
-        jobs->addMotionJob(walk);
-        TrackPoint(headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
-    }
+    cout << "Behaviour::doBehaviour()" << endl;
+    if (not m_introduction_done)
+        doIntroduction();
     else
     {
-        vector<float> walkVector;
-        walkVector.push_back(0);
-        walkVector.push_back(0);
-        walkVector.push_back(0);
-        WalkJob* walk = new WalkJob(walkVector);
-        jobs->addMotionJob(walk);
-        Pan();
+        vector<float> buttontriggers;
+        if (m_data->getButtonTriggers(buttontriggers))
+        {
+            if (buttontriggers[0] < 20)
+            {
+                voiceCurrentSelection();
+            }
+            else if (buttontriggers[1] < 20)
+            {
+                m_selection_index = (m_selection_index + 1)%(m_avaliable_behaviours.size());
+                voiceCurrentSelection();
+            }
+            else if (buttontriggers[2] < 20)
+            {
+                //m_selection_index = (m_selection_index - 1)%(m_avaliable_behaviours.size());
+                //voiceCurrentSelection();
+            }
+        }
     }
 }
 
-void Behaviour::TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation, float centrebearing)
+void Behaviour::doIntroduction()
 {
-    const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-    const float gain_yaw = 0.6;             // proportional gain in the yaw direction
-    
-    float c_pitch = -centreelevation;
-    float c_yaw = -centrebearing;
-
-    float e_pitch = c_pitch + elevation;    // the sign convention of the field objects is the opposite of the head pitch joint itself
-    float e_yaw = c_yaw - bearing;
-
-    float new_pitch = sensorpitch - gain_pitch*e_pitch;
-    float new_yaw = sensoryaw - gain_yaw*e_yaw;
-
-    static vector<float> headtarget(2,0);
-    headtarget[0] = new_pitch;
-    headtarget[1] = new_yaw;
-    HeadJob* head = new HeadJob(0, headtarget);
-    m_jobs->addMotionJob(head);
- 
-  return;
+    m_actions->addSound(m_current_time + 500, "select_behaviour.wav");
+    m_introduction_done = true;
 }
 
-void Behaviour::Pan()
+void Behaviour::voiceCurrentSelection()
 {
-    HeadPanJob* head = new HeadPanJob(HeadPanJob::Ball);
-    m_jobs->addMotionJob(head);
-    return;
+    cout << "voiceCurrentSelection" << endl;
+    m_actions->addSound(m_current_time, m_avaliable_behaviours[m_selection_index] + ".wav");
 }
 

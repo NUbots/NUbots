@@ -1,9 +1,12 @@
 /*! @file Behaviour.h
-    @brief Declaration of behaviour class
+    @brief Declaration of top-level behaviour class
+ 
+    @class Behaviour
+    @brief The top-level behaviour class
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,22 +25,33 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include "Behaviour/Jobs.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "AbstractBehaviour.h"
 
-class Behaviour
+class JobList;
+class NUSensorsData;
+class NUActionatorsData;
+class FieldObjects;
+class GameInformation;
+class TeamInformation;
+
+#include <vector>
+#include <string>
+
+class Behaviour : public AbstractBehaviour 
 {
 public:
     Behaviour();
     ~Behaviour();
     
-    void processFieldObjects(JobList* jobs, FieldObjects* AllObjects, NUSensorsData* data);
-    void TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0);
-    void Pan();
-
+protected:
+    void doBehaviour();
 private:
-    JobList* m_jobs;
+    void doIntroduction();
+    void voiceCurrentSelection();
+private:
+    bool m_introduction_done;
+    int m_selection_index;
+    static std::vector<std::string> m_avaliable_behaviours;
 };
 
 
