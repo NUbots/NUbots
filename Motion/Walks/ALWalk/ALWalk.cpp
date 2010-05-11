@@ -47,6 +47,7 @@ ALWalk::~ALWalk()
  */
 void ALWalk::kill()
 {
+    m_walk_enabled = false;
     m_al_motion->killWalk();
 }
 

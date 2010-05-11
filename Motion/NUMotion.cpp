@@ -58,6 +58,7 @@ NUMotion::NUMotion()
     #endif
     m_current_time = 0;
     m_previous_time = 0;
+    m_last_kill_time = m_current_time - 10000;
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
@@ -121,6 +122,7 @@ NUMotion::~NUMotion()
  */
 void NUMotion::kill()
 {
+    m_last_kill_time = m_current_time;
     #ifdef USE_HEAD
         m_head->kill();
     #endif
@@ -256,7 +258,7 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL)
+    if (jobs == NULL || m_current_time < m_last_kill_time + 5000)
         return;
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs

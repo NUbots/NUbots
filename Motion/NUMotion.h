@@ -88,7 +88,7 @@ private:
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
-    int m_cycle_time;                   //!< the cycle time in ms
+    double m_last_kill_time;            //!< the last time a kill was called in ms (a recent call disables ALL motion)
     
     MotionScript* m_block_left;
 };
