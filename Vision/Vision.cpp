@@ -1147,7 +1147,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
-    //! Overall runtime O( (K*(2*M^3 + M^2) + N*(LogN + 1) )
+    //! Overall runtime O( N^2 )
     std::vector<ObjectCandidate> candidateList;
 
     const int VERT_JOIN_LIMIT = 3;
@@ -1395,7 +1395,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< Trans
 {
     std::vector<ObjectCandidate> candidateList;
 
-
+    //unimplemented
 
     return candidateList;
 }
