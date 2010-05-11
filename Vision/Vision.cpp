@@ -153,8 +153,8 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     //std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horizontalsegments;
-    std::vector< TransitionSegment > allsegments;
-    std::vector< TransitionSegment > segments;
+    //std::vector< TransitionSegment > allsegments;
+    //std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
@@ -236,7 +236,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-            segments.push_back((*tempScanLine->getSegment(seg)));
+            //segments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
@@ -248,7 +248,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
-            allsegments.push_back((*tempScanLine->getSegment(seg)));
+            //allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
@@ -1530,7 +1530,12 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 {
     std::vector< ObjectCandidate > candidates;
     std::vector< TransitionSegment > tempSegments;
+    tempSegments.reserve(horizontalsegments.size());
+    candidates.reserve(horizontalsegments.size());
+
     bool usedSegments[horizontalsegments.size()];
+    //qDebug() << "Classify Above the horizon" << horizontalsegments.size();
+
 
     for (int i = 0; i < (int)horizontalsegments.size(); i++)
     {
@@ -1544,6 +1549,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
+        tempUsedSegments.reserve(horizontalsegments.size());
         if(!isValidColour(horizontalsegments[i].getColour(), validColours))
         {
             continue;
@@ -1622,7 +1628,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 }
                 if(horizontalsegments[j].getStartPoint().y < Ystart)
                 {
-                    Ystart = horizontalsegments[j].getEndPoint().y;
+                    Ystart = horizontalsegments[j].getStartPoint().y;
                 }
                 tempSegments.push_back(horizontalsegments[j]);
                 tempUsedSegments.push_back(j);
@@ -1634,7 +1640,10 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
-
+            //for(size_t i =0; i < tempSegments.size(); i++)
+            //{
+                //qDebug() << tempSegments[i].getStartPoint().x << "," <<tempSegments[i].getStartPoint().y << " " << tempSegments[i].getEndPoint().x << "," <<tempSegments[i].getEndPoint().y;
+            //}
             ObjectCandidate tempCandidate(Xstart, Ystart, Xend, Yend, validColours[0], tempSegments);
             candidates.push_back(tempCandidate);
             while (!tempUsedSegments.empty())

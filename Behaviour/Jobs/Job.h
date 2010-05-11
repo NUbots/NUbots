@@ -63,6 +63,7 @@ public:
         MOTION_KICK,
         MOTION_BLOCK,
         MOTION_SAVE,
+        MOTION_SCRIPT,
         MOTION_HEAD,
         MOTION_NOD,
         MOTION_PAN,

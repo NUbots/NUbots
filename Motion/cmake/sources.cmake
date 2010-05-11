@@ -19,6 +19,11 @@ IF(DEBUG)
     MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
 ENDIF()
 
+# I need to prefix each file and directory with the correct path
+STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
+
+INCLUDE("${THIS_SRC_DIR}/cmake/motionconfig.cmake")
+
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
                 FallProtection.cpp FallProtection.h
@@ -40,16 +45,19 @@ IF(NUBOT_USE_MOTION_KICK)
 	LIST(APPEND YOUR_SRCS NUKick.cpp NUKick.h)
 	LIST(APPEND YOUR_DIRS Kicks)
 ENDIF()
-IF(NUBOT_USE_MOTION_GETUP)
-	LIST(APPEND YOUR_SRCS Getup)
+IF(NUBOT_USE_MOTION_BLOCK)
+	LIST(APPEND YOUR_SRCS NUBlock.cpp NUBlock.h)
+	LIST(APPEND YOUR_DIRS )
+ENDIF()
+IF(NUBOT_USE_MOTION_SAVE)
+	LIST(APPEND YOUR_SRCS NUSave.cpp NUSave.h)
+	LIST(APPEND YOUR_DIRS )
+ENDIF()
+IF(NUBOT_USE_MOTION_SCRIPT)
+	LIST(APPEND YOUR_SRCS Script.cpp Script.h)
 	LIST(APPEND YOUR_DIRS )
 ENDIF()
 ####################################################################################
-
-# I need to prefix each file and directory with the correct path
-STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/motionconfig.cmake")
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 

@@ -27,25 +27,30 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class JobList;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
-    #include "NUHead.h"
+    class NUHead;
 #endif
-
 #ifdef USE_WALK
-#include "NUWalk.h"
+    class NUWalk;
 #endif
-
 #ifdef USE_KICK
-    #include "NUKick.h"
+    class NUKick;
 #endif
-
-#include "Behaviour/Jobs.h"
-#include "FallProtection.h"
-#include "Getup.h"
-
-#include "Tools/MotionScript.h"
+#ifdef USE_BLOCK
+    class NUBlock;
+#endif
+#ifdef USE_SAVE
+    class NUSave;
+#endif
+#ifdef USE_SCRIPT
+    class Script;
+#endif
+class FallProtection;
+class Getup;
+class MotionScript;
 
 class NUMotion
 {
@@ -54,14 +59,10 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
+    void process(JobList* jobs);
     
-    int getCycleTime() {return m_cycle_time;};
-    
-    void safeKill(NUSensorsData* data, NUActionatorsData* actions);
-protected:
+    void kill();
 private:
-    void calculateCycleTime();
 public:
 protected:
 private:
@@ -71,6 +72,7 @@ private:
     // essential motion components
     FallProtection* m_fall_protection;  //!< the fall protection module
     Getup* m_getup;                     //!< the getup module
+    // optional motion components
     #ifdef USE_HEAD
         NUHead* m_head;                     //!< the head module
     #endif
@@ -80,12 +82,21 @@ private:
     #ifdef USE_KICK
         NUKick* m_kick;                     //!< the kick module
     #endif
+    #ifdef USE_BLOCK
+        NUBlock* m_block;                   //!< the block module
+    #endif
+    #ifdef USE_SAVE
+        NUSave* m_save;                     //!< the save module
+    #endif
+    #ifdef USE_SCRIPT
+        Script* m_script;                    //!< the script module
+    #endif
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
     int m_cycle_time;                   //!< the cycle time in ms
     
-    MotionScript m_block_left;
+    MotionScript* m_block_left;
 };
 
 #endif

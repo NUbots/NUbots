@@ -128,7 +128,7 @@ void HeadNodJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const HeadNodJob& job)
 {
-    #if DEBUG_JOBS_VERBOSITY > 1
+    #if DEBUG_JOBS_VERBOSITY > 0
         debug << "HeadNodJob::operator<<" << endl;
     #endif
     job.toStream(output);
@@ -143,7 +143,7 @@ ostream& operator<<(ostream& output, const HeadNodJob& job)
  */
 ostream& operator<<(ostream& output, const HeadNodJob* job)
 {
-    #if DEBUG_JOBS_VERBOSITY > 1
+    #if DEBUG_JOBS_VERBOSITY > 0
         debug << "HeadNodJob::operator<<" << endl;
     #endif
     if (job != NULL)

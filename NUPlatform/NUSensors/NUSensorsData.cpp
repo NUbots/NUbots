@@ -911,16 +911,28 @@ bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
                                                                                                                  Convienent sub-get Methods
  ******************************************************************************************************************************************/
 
+/*! @brief Returns true if the robot is falling over, false if it is not falling (or it is impossble to tell)
+ */
+bool NUSensorsData::isFalling()
+{
+    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)       // if there is no balance sensor it is impossible to tell it is falling over
+        return false;       
+    else if (BalanceFalling->Data[0] > 0)
+        return true;
+    else
+        return false;
+}
+
 /*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
  */
 bool NUSensorsData::isFallen()
 {
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
         return false;       
-    else if (BalanceFallen->Data[0] <= 0)
-        return false;
-    else
+    else if (BalanceFallen->Data[0] > 0)
         return true;
+    else
+        return false;
 }
 
 /*! @brief Returns true has impacted in the ground in this cycle

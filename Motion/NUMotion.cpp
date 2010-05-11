@@ -19,6 +19,29 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "NUMotion.h"
+#ifdef USE_HEAD
+    #include "NUHead.h"
+#endif
+#ifdef USE_WALK
+    #include "NUWalk.h"
+#endif
+#ifdef USE_KICK
+    #include "NUKick.h"
+#endif
+#ifdef USE_BLOCK
+    #include "NUBlock.h"
+#endif
+#ifdef USE_SAVE
+    #include "NUSave.h"
+#endif
+#ifdef USE_SCRIPT
+    #include "Script.h"
+#endif
+
+#include "Behaviour/Jobs.h"
+#include "FallProtection.h"
+#include "Getup.h"
+#include "Tools/MotionScript.h"
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -28,8 +51,6 @@
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
-
-#include "Tools/MotionScript.h"
 
 /*! @brief Constructor for motion module
  */
@@ -43,14 +64,37 @@ NUMotion::NUMotion()
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
-    #ifdef USE_WALK
+    
+    #if defined(USE_WALK)
         m_walk = NUWalk::getWalkEngine();
-    #endif
-    #ifdef USE_KICK
-        m_kick = new NUKick();
+        #if defined (USE_KICK)
+            m_kick = new NUKick(m_walk);
+        #endif
+        #if defined (USE_BLOCK)
+            m_block = new NUBlock(m_walk);
+        #endif
+        #if defined (USE_SAVE)
+            m_save = new NUSave(m_walk);
+        #endif
+        #if defined (USE_SCRIPT)
+            m_script = new Script(m_walk);
+        #endif
+    #else
+        #if defined (USE_KICK)
+            m_kick = new NUKick(NULL);
+        #endif
+        #if defined (USE_BLOCK)
+            m_block = new NUBlock(NULL);
+        #endif
+        #if defined (USE_SAVE)
+            m_save = new NUSave(NULL);
+        #endif
+        #if defined (USE_SCRIPT)
+            m_script = new Script(NULL);
+        #endif
     #endif
     
-    //m_block_left = MotionScript("BlockLeft");
+    //m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -74,12 +118,37 @@ NUMotion::~NUMotion()
         if (m_kick != NULL)
             delete m_kick;                   
     #endif
+    #ifdef USE_BLOCK
+        delete m_block;
+    #endif
+    #ifdef USE_SAVE
+        delete m_save;
+    #endif
+    #ifdef USE_SCRIPT
+        delete m_script;
+    #endif
 }
 
 /*! @brief Adds actions to bring the robot to rest quickly, and go into a safe-for-robot pose
  */
-void NUMotion::safeKill(NUSensorsData* data, NUActionatorsData* actions)
+void NUMotion::kill()
 {
+    #ifdef USE_HEAD
+        m_head->kill();
+    #endif
+    #ifdef USE_WALK
+        m_walk->kill();                
+    #endif
+    #ifdef USE_KICK
+        m_kick->kill();                   
+    #endif
+    #ifdef USE_BLOCK
+        m_block->kill();
+    #endif
+    #ifdef USE_SAVE
+        m_save->kill();
+    #endif
+    
     float safelegpositions[] = {0, -1.0, 0, 2.16, 0, -1.22};
     float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
     float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
@@ -90,9 +159,9 @@ void NUMotion::safeKill(NUSensorsData* data, NUActionatorsData* actions)
     vector<float> armvelocities(larmpositions.size(), 1.0);
     
     // check if there is a reason it is not safe or possible to go into the crouch position
-    if (actions == NULL)
+    if (m_actions == NULL)
         return;
-    else if (data != NULL)
+    else if (m_data != NULL)
     {
         vector<float> orientation;
         if (m_data->getOrientation(orientation))
@@ -104,10 +173,15 @@ void NUMotion::safeKill(NUSensorsData* data, NUActionatorsData* actions)
                 return;*/
     }
     
-    actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 750, larmpositions, armvelocities, 30);
-    actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 750, rarmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 500, larmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 500, rarmpositions, armvelocities, 30);
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 2000, larmpositions, armvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 2000, rarmpositions, armvelocities, 0);
 }
 
 /*! @brief Process new sensor data, and produce actionator commands.
@@ -130,15 +204,10 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     m_current_time = m_data->CurrentTime;
-    calculateCycleTime();
     
-    static vector<float> fallingvalues;
-    static vector<float> fallenvalues;
-    data->getFalling(fallingvalues);
-    data->getFallen(fallenvalues);              //! @todo Put in a compile flag here or something because I need to walk while fallen atm
-    if (false && fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
+    if (m_data->isFalling())
         m_fall_protection->process(data, actions);
-    else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
+    else if (m_data->isFallen())                        // If fallen you can only getup
     {
         m_getup->process(data, actions);
         if (m_getup->headReady())                       // And you can only use the head if the getup lets you
@@ -163,72 +232,48 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     m_previous_time = m_current_time;
     
-    static bool alreadyran = false;
+    /*static bool alreadyran = false;
     if (m_current_time > 15500 and not alreadyran)
     {
-        m_block_left.play(data, actions);
+        m_block_left->play(data, actions);
         alreadyran = true;
-    }
+    }*/
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
     
     @param jobs the current list of jobs
  */
-void NUMotion::process(JobList& jobs)
+void NUMotion::process(JobList* jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
+    if (jobs == NULL)
+        return;
     
-    list<Job*>::iterator it = jobs.motion_begin();     // the iterator over the motion jobs
-    while (it != jobs.motion_end())
+    list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
+    while (it != jobs->motion_end())
     {
         Job::job_id_t id = (*it)->getID();
         switch (id) 
         {
         #ifdef USE_WALK
             case Job::MOTION_WALK:
-                    static vector<float> speed;
-                    static WalkJob* walkjob;
-                    
-                    walkjob = (WalkJob*) (*it);
-                    walkjob->getSpeed(speed);
-                    m_walk->walkSpeed(speed);
+                m_walk->process(reinterpret_cast<WalkJob*> (*it));
                 break;
             case Job::MOTION_WALK_TO_POINT:
-                    static double time_a;
-                    static vector<float> position;
-                    static WalkToPointJob* walktopointjob;
-                    
-                    walktopointjob = (WalkToPointJob*) (*it);
-                    walktopointjob->getPosition(time_a, position);
-                    
-                    m_walk->walkToPoint(time_a, position);
+                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
-                static WalkParameters parameters;
-                static WalkParametersJob* parametersjob;
-                
-                parametersjob = (WalkParametersJob*) (*it);
-                parametersjob->getWalkParameters(parameters);
-                
-                m_walk->setWalkParameters(parameters);
+                m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
                 break;
-        #endif // USE_WALK
+        #endif
         #ifdef USE_KICK
             case Job::MOTION_KICK:
-                static double time_b;
-                static vector<float> kickposition;
-                static vector<float> kicktarget;
-                static KickJob* kickjob;
-                
-                kickjob = (KickJob*) (*it);
-                kickjob->getKick(time_b, kickposition, kicktarget);
-                
-                m_kick->kickToPoint(kickposition, kicktarget);
+                m_kick->process(reinterpret_cast<KickJob*> (*it));
                 break;
-        #endif //USE_KICK
+        #endif
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
                 m_head->process(reinterpret_cast<HeadJob*> (*it));
@@ -239,29 +284,30 @@ void NUMotion::process(JobList& jobs)
             case Job::MOTION_NOD:
                 m_head->process(reinterpret_cast<HeadNodJob*> (*it));
                 break;
-        #endif // USE_HEAD
+        #endif
+        #ifdef USE_BLOCK
+            case Job::MOTION_BLOCK:
+                m_block->process(reinterpret_cast<BlockJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_SAVE
+            case Job::MOTION_SAVE:
+                m_save->process(reinterpret_cast<SaveJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_SCRIPT
+            case Job::MOTION_SCRIPT:
+                m_script->process(reinterpret_cast<ScriptJob*> (*it));
+        #endif
             default:
                 break;
         }
-        it = jobs.removeMotionJob(it);
+        it = jobs->removeMotionJob(it);
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::process(): Finished" << endl;
     #endif
-}
-
-/*! @brief Calculates the cycle time. 
- 
- To be platform independent I calculate the motion cycle time online by averaging the cycle times
-*/
-void NUMotion::calculateCycleTime()
-{
-    using namespace boost::accumulators;
-    static accumulator_set<float, stats<tag::mean> > cycle_time_accumulator;
-    
-    cycle_time_accumulator(m_current_time - m_previous_time);
-    m_cycle_time = static_cast<int> (mean(cycle_time_accumulator));
 }
 
 

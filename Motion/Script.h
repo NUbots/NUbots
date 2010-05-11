@@ -1,12 +1,12 @@
-/*! @file ALWalk.h
-    @brief Declaration of walk class to use Aldebaran's
+/*! @file Script.h
+    @brief Declaration of a ball blocking class
  
-    @class ALWalk
-    @brief A module to provide locomotion using Aldebaran's stuff
+    @class Script
+    @brief A module to block the ball using the legs (suitable for both goal keeper and field player)
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,30 +22,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ALWALK_H
-#define ALWALK_H
+#ifndef _SCRIPT_H_
+#define _SCRIPT_H_
 
-#include "Motion/NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
+class ScriptJob;
+class NUWalk;
 
-#include <almotionproxy.h>
-using namespace AL;
-
-class ALWalk : public NUWalk
+class Script
 {
 public:
-    ALWalk();
-    ~ALWalk();
-    void kill();
-    void setArmEnabled(bool leftarm, bool rightarm);
-protected:
-    void doWalk();
+    Script(NUWalk* walk);
+    ~Script();
+    
+    void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(ScriptJob* job);
 private:
 public:
-protected:
 private:
-    ALMotionProxy* m_al_motion;
+    NUWalk* m_walk;
 };
 
 #endif

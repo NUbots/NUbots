@@ -168,7 +168,9 @@ void HeadJob::csvTo(ostream& output)
  */
 void HeadJob::toStream(ostream& output) const
 {
-    debug << "HeadJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "HeadJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write HeadJob specific data (m_times and m_head_positions)
@@ -192,7 +194,9 @@ void HeadJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const HeadJob& job)
 {
-    debug << "<<HeadJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 0
+        debug << "<<HeadJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -205,10 +209,10 @@ ostream& operator<<(ostream& output, const HeadJob& job)
  */
 ostream& operator<<(ostream& output, const HeadJob* job)
 {
-    debug << "<<HeadJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 0
+        debug << "<<HeadJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

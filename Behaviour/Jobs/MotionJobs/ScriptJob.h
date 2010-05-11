@@ -1,12 +1,12 @@
-/*! @file WalkParameterJob.h
-    @brief Declaration of WalkParameterJob class.
+/*! @file ScriptJob.h
+    @brief Declaration of ScriptJob class.
  
-    @class WalkParameterJob
-    @brief A base class to encapsulate jobs issued to change parameters inside the walk module.
+    @class ScriptJob
+    @brief A class to encapsulate jobs issued for the save module.
  
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2009 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,34 +22,36 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef WALKPARAMETERJOB_H
-#define WALKPARAMETERJOB_H
+#ifndef SCRIPTJOB_H
+#define SCRIPTJOB_H
 
 #include "../MotionJob.h"
-#include "Motion/Walks/WalkParameters.h"
-
+#include "Motion/Tools/MotionScript.h"
 #include <vector>
+#include <string>
 using namespace std;
 
-class WalkParametersJob : public MotionJob
+class ScriptJob : public MotionJob
 {
 public:
-    WalkParametersJob(const WalkParameters& walkparameters);
-    WalkParametersJob(istream& input);
-    ~WalkParametersJob();
+    ScriptJob(double time, const MotionScript& script);
+    ScriptJob(double time, const string& name);
+    ScriptJob(double time, istream& input);
+    ~ScriptJob();
     
-    void setWalkParameters(const WalkParameters& walkparameters);
-    void getWalkParameters(WalkParameters& walkparameters);
+    void getScript(double& time, MotionScript& position);
+    string& getName();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const WalkParametersJob& job);
-    friend ostream& operator<<(ostream& output, const WalkParametersJob* job);
+    friend ostream& operator<<(ostream& output, const ScriptJob& job);
+    friend ostream& operator<<(ostream& output, const ScriptJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    WalkParameters m_walk_parameters;               //!< the walk parameters to give to the walk engine
+    string m_name;
+    MotionScript m_script;                  // the motion script attached to the job
 };
 
 #endif

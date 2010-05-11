@@ -36,6 +36,24 @@
     #else
         #undef USE_KICK
     #endif
+    #define USE_BLOCK_${NUBOT_USE_MOTION_BLOCK}
+    #ifdef USE_BLOCK_ON
+        #define USE_BLOCK
+    #else
+        #undef USE_BLOCK
+    #endif
+    #define USE_SAVE_${NUBOT_USE_MOTION_SAVE}
+    #ifdef USE_SAVE_ON
+        #define USE_SAVE
+    #else
+        #undef USE_SAVE
+    #endif
+    #define USE_SCRIPT_${NUBOT_USE_MOTION_SCRIPT}
+    #ifdef USE_SCRIPT_ON
+        #define USE_SCRIPT
+    #else
+        #undef USE_SCRIPT
+    #endif
     #define USE_GETUP_${NUBOT_USE_MOTION_GETUP}
     #ifdef USE_GETUP_ON
         #define USE_GETUP

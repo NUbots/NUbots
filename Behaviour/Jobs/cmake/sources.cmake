@@ -37,6 +37,7 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		MotionJobs/KickJob.cpp MotionJobs/KickJob.h
 		MotionJobs/BlockJob.cpp MotionJobs/BlockJob.h
 		MotionJobs/SaveJob.cpp MotionJobs/SaveJob.h
+        MotionJobs/ScriptJob.cpp MotionJobs/ScriptJob.h
 		MotionJobs/HeadJob.cpp MotionJobs/HeadJob.h
 		MotionJobs/HeadNodJob.cpp MotionJobs/HeadNodJob.h
 		MotionJobs/HeadPanJob.cpp MotionJobs/HeadPanJob.h

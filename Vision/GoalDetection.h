@@ -31,7 +31,7 @@ class GoalDetection
 
         void CombineOverlappingCandidates(std::vector<ObjectCandidate>& FO_Candidates);
 
-        void CheckCandidateRatio(std::vector<ObjectCandidate>& FO_Candidates,int height,int width);
+        void CheckCandidateSizeRatio(std::vector<ObjectCandidate>& FO_Candidates,int height,int width);
 
         bool isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,int width);
 

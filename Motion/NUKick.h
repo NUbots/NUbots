@@ -25,8 +25,11 @@
 #ifndef NUKICK_H
 #define NUKICK_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
+class KickJob;
+class NUWalk;
+
 #include "./Kicks/IK.h"
 #include <stack>
 
@@ -35,13 +38,15 @@ enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SE
 class NUKick
 {
 public:
-    NUKick();
+    NUKick(NUWalk* walk);
     ~NUKick();
+    void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void kickToPoint(const vector<float>& position, const vector<float>& target);
+    void process(KickJob* job);
 
 private:
+    void setKickPoint(const vector<float>& position, const vector<float>& target);
     void doKick();
 	bool chooseLeg();
 	bool liftLeg();
@@ -54,6 +59,7 @@ private:
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
+    NUWalk* m_walk;                     //!< local pointer to the walk engine
     
     float m_ball_x;                    //!< the current ball x position relative to robot in cm
     float m_ball_y;                    //!< the current ball y position relative to robot in cm
