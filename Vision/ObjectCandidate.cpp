@@ -53,7 +53,11 @@ std::vector<TransitionSegment> ObjectCandidate::getSegments() const
 {
     return segments;
 }
-
+void ObjectCandidate::addSegments(const std::vector<TransitionSegment> &new_segments)
+{
+    segments.insert(segments.end(), new_segments.begin(), new_segments.end());
+    return;
+}
 
 ObjectCandidate::~ObjectCandidate()
 {

@@ -21,6 +21,7 @@ public:
     unsigned char getColour()  const;
     void setColour(unsigned char c);
     std::vector<TransitionSegment> getSegments() const;
+    void addSegments(const std::vector<TransitionSegment> &new_segments);
 
 
     ObjectCandidate();

@@ -786,7 +786,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
             CheckedCornerPoints[i] = false;
         }
 	//CHECK EACH CORNER POINT:	
-        for (x = 0; x < cornerPoints.size(); x++){
+        for (x = 0; x < cornerPoints.size(); x++)
+        {
+                if(recheck ==true)
+                {
+                    recheck =false;
+                    x = 0;
+                    //qDebug("Resetting X to perform Recheck.... \n");
+                }
                 if(CheckedCornerPoints[x] == true) continue;
                 TempID = 0;
                 //qDebug("Checking CornerID: %i \t",x);
@@ -812,8 +819,8 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
 			//Initialising Variables
                         //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
                         AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
-                        Vector3<float> measured(TempDist,TempBearing,TempElev);
-                        Vector3<float> measuredError(0,0,0);
+                        Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+                        Vector3<float> measuredError(0.0,0.0,0.0);
                         Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
                         Vector2<int> sizeOnScreen(4,4);
                         tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
@@ -1114,12 +1121,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp)
                         {
                             CheckedCornerPoints[x] = true;
                         }
-			if(recheck ==true)
-			{
-				recheck =false;
-				x = -1;
-                                //qDebug("Resetting X to perform Recheck.... \n");
-			}
+
 			//-------------- end penalty L and goal post combo rule ---------------------------------------------------------------------
 
 		//////////////////////////////////////////////////// END YELLOW Goal ////////////////////////////////////////////////////////////////
