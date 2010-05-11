@@ -213,6 +213,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         ScanLine* tempScanLine = horiScanArea.getScanLine(i);
         int lengthOfLine = tempScanLine->getLength();
+        //qDebug() << "Amount of fill on scanline["<<i<<"] = "<< tempScanLine->getFill();
         Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
