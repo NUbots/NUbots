@@ -36,6 +36,7 @@
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
+    #include "Behaviour/Jobs.h"
 #endif
 
 #ifdef USE_LOCALISATION
@@ -157,7 +158,7 @@ void SeeThinkThread::run()
             #endif
             
             #if defined(USE_VISION) and defined(USE_BEHAVIOUR)
-                m_nubot->m_behaviour->processFieldObjects(m_nubot->Jobs, AllObjects, m_nubot->SensorData);
+                m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, AllObjects, m_nubot->GameInfo, m_nubot->TeamInfo);
             #endif
             
             #ifdef USE_VISION
