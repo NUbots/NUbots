@@ -280,49 +280,50 @@ void NUSensors::calculateHorizon()
 
 void NUSensors::calculateButtonTriggers()
 {
-        static float prevValueChest = 0.0f;
-        static float prevValueLeftBumper = 0.0f;
-        static float prevValueRightBumper = 0.0f;
+    static float prevValueChest = 0.0f;
+    static float prevValueLeftBumper = 0.0f;
+    static float prevValueRightBumper = 0.0f;
 
-        float pressTimeChest(0.0f);
-        float pressTimeLeftBumper(0.0f);
-        float pressTimeRightBumper(0.0f);
+    float pressTimeChest = 0;
+    float pressTimeLeftBumper = 0;
+    float pressTimeRightBumper = 0;
 
-        if (m_previous_time != 0)
-        {
-            pressTimeChest = (*(m_data->ButtonTriggers))[0];
-            pressTimeLeftBumper = (*(m_data->ButtonTriggers))[1];
-            pressTimeRightBumper = (*(m_data->ButtonTriggers))[2];
-        }
+    if (m_previous_time != 0)
+    {
+        pressTimeChest = (*(m_data->ButtonTriggers))[0];
+        pressTimeLeftBumper = (*(m_data->ButtonTriggers))[1];
+        pressTimeRightBumper = (*(m_data->ButtonTriggers))[2];
+    }
 
 	vector<float> tempData;
-        if(m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
-        {
-            if(tempData[0] != prevValueChest)
-                pressTimeChest = m_current_time;
-            prevValueChest = tempData[0];
-        }
+    if(m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
+    {
+        if(tempData[0] != prevValueChest and tempData[0] == 0)
+            pressTimeChest = 0;
+        prevValueChest = tempData[0];
+    }
 
-        if(m_data->getFootBumperValues(NUSensorsData::AllFeet,tempData) && tempData.size() >= 2)
-        {
-            // Left Bumper
-            if(tempData[0] != prevValueLeftBumper)
-                pressTimeLeftBumper = m_current_time;
-            prevValueLeftBumper = tempData[0];
+    if(m_data->getFootBumperValues(NUSensorsData::AllFeet,tempData) && tempData.size() >= 2)
+    {
+        // Left Bumper
+        if(tempData[0] != prevValueLeftBumper and tempData[0] == 0)
+            pressTimeLeftBumper = 0;
+        prevValueLeftBumper = tempData[0];
 
-            // Right Bumper
-            if(tempData[1] != prevValueLeftBumper)
-                pressTimeRightBumper = m_current_time;
-            prevValueRightBumper = tempData[1];
-        }
+        // Right Bumper
+        if(tempData[1] != prevValueLeftBumper and tempData[1] == 0)
+            pressTimeRightBumper = 0;
+        prevValueRightBumper = tempData[1];
+    }
 
-        // Now find the time since triggered and set to soft sensor value.
-        tempData.clear();
-        tempData.push_back(m_current_time - pressTimeChest);
-        tempData.push_back(m_current_time - pressTimeLeftBumper);
-        tempData.push_back(m_current_time - pressTimeRightBumper);
-        m_data->ButtonTriggers->setData(m_current_time, tempData, true);
-        return;
+    // Now find the time since triggered and set to soft sensor value.
+    tempData.clear();
+    
+    tempData.push_back(pressTimeChest + (m_current_time - m_previous_time));
+    tempData.push_back(pressTimeLeftBumper + (m_current_time - m_previous_time));
+    tempData.push_back(pressTimeRightBumper + (m_current_time - m_previous_time));
+    m_data->ButtonTriggers->setData(m_current_time, tempData, true);
+    return;
 }
 
 /*! @brief Updates the zero moment point estimate using the current sensor data
