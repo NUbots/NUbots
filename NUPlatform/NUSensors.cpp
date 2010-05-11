@@ -711,9 +711,8 @@ void NUSensors::calculateOdometry()
 void NUSensors::calculateKinematics()
 {
     //! TODO: Need to get these values from somewhere else.
-    const bool leftLegSupport = true;
-    const bool rightLegSupport = true;
     const int cameraNumber = 1;
+    const double time = m_data->CurrentTime;
 
     static vector<float> leftLegJoints;
     bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
@@ -732,10 +731,20 @@ void NUSensors::calculateKinematics()
     if(rightLegJointsSuccess)
     {
         rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
+        m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->RightLegTransform->IsValid = false;
     }
     if(leftLegJointsSuccess)
     {
         leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
+        m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->LeftLegTransform->IsValid = false;
     }
     if(headJointsSuccess)
     {
@@ -747,18 +756,28 @@ void NUSensors::calculateKinematics()
     if(headJointsSuccess && (cameraNumber == 1))
     {
         cameraTransform = &bottomCameraTransform;
+        m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
+    }
+    else
+    {
+        m_data->CameraTransform->IsValid = false;
     }
 
+
+    bool leftFootSupport = false, rightFootSupport = false;
+    m_data->getFootSupport(NUSensorsData::LeftFoot,leftFootSupport);
+    m_data->getFootSupport(NUSensorsData::RightFoot,rightFootSupport);
+
     // Choose support leg.
-    if((!leftLegSupport && rightLegSupport) && rightLegJointsSuccess)
+    if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
     {
         supportLegTransform = &rightLegTransform;
     }
-    else if((leftLegSupport && !rightLegSupport) && leftLegJointsSuccess)
+    else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
-    else if((leftLegSupport && rightLegSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+    else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
@@ -766,15 +785,6 @@ void NUSensors::calculateKinematics()
     {
         supportLegTransform = 0;
     }
-
-    // Set all of the sensor values
-    double time = m_data->CurrentTime;
-    // Set the legs
-    m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
-    m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
-
-    // Set the camera
-    m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
 
     if(supportLegTransform)
     {
