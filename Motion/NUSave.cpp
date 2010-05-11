@@ -51,6 +51,12 @@ void NUSave::kill()
 {
 }
 
+/*! @brief Returns true is a saveor block is currently being executed */
+bool NUSave::isActive()
+{
+    return false;
+}
+
 /*! @brief Produce actions from the data to move the robot into a standing position
  
     @param data a pointer to the most recent sensor data storage class
@@ -66,6 +72,12 @@ void NUSave::process(NUSensorsData* data, NUActionatorsData* actions)
 #endif
 }
 
+
+/*! @brief Process a block job
+ */
+void NUSave::process(BlockJob* job)
+{
+}
 
 /*! @brief Process a save job
  */

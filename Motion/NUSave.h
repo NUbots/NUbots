@@ -27,6 +27,7 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class BlockJob;
 class SaveJob;
 class NUWalk;
 
@@ -37,7 +38,9 @@ public:
     ~NUSave();
     void kill();
     
+    bool isActive();
     void process(NUSensorsData* data, NUActionatorsData* actions);
+    void process(BlockJob* job);
     void process(SaveJob* job);
 private:
 public:
