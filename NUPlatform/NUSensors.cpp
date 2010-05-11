@@ -213,7 +213,9 @@ void NUSensors::calculateOrientation()
         m_data->BalanceOrientation->setData(m_current_time, orientation, true);
 
         // New method
-/*  TOO SLOW FOR NOW
+///*  TOO SLOW FOR NOW
+        fstream file;
+        //file.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::app | ios_base::out);
         if(m_data->getGyroValues(gyros))
         {
             if(!m_orientationFilter->Initialised())
@@ -250,8 +252,11 @@ void NUSensors::calculateOrientation()
             gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
             gyroOffset[2] = 0.0f;
+
+            //file << gyroOffset[0] << "," << orientation[0] << "," << gyroOffset[1] <<","<< orientation[1] << std::endl;
         }
-        */
+//        */
+        //file.close();
     }
 }
 
