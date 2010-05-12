@@ -45,6 +45,8 @@
 #include "NBInclude/NBMatrixMath.h"
 #include "WalkController.h"
 
+#include "targetconfig.h"
+
 class Observer : public WalkController {
 public:
     Observer();
@@ -60,8 +62,16 @@ private:
     NBMath::ufvector3 stateVector;
 
 public: //Constants
-    static const unsigned int NUM_PREVIEW_FRAMES = 35;
-    static const unsigned int NUM_AVAIL_PREVIEW_FRAMES = 60;
+    #if defined(TARGET_IS_NAO)
+        static const unsigned int NUM_PREVIEW_FRAMES = 70;
+        static const unsigned int NUM_AVAIL_PREVIEW_FRAMES = 120;
+    #elif defined(TARGET_IS_NAOWEBOTS)
+        static const unsigned int NUM_PREVIEW_FRAMES = 14;
+        static const unsigned int NUM_AVAIL_PREVIEW_FRAMES = 30;
+    #else
+        #error The Northern Bites walk engine only works on the NAO and in NAOWebots for now
+    #endif
+    
 private:
     static const float weights[NUM_AVAIL_PREVIEW_FRAMES];
     static const float A_values[9];
