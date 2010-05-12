@@ -52,29 +52,64 @@ Behaviour::~Behaviour()
 
 void Behaviour::doBehaviour()
 {
-    cout << "Behaviour::doBehaviour()" << endl;
     if (not m_introduction_done)
         doIntroduction();
     else
     {
-        vector<float> buttontriggers;
-        if (m_data->getButtonTriggers(buttontriggers))
+        if (longChestClick())
         {
-            if (buttontriggers[0] < 20)
-            {
-                voiceCurrentSelection();
-            }
-            else if (buttontriggers[1] < 20)
-            {
-                m_selection_index = (m_selection_index + 1)%(m_avaliable_behaviours.size());
-                voiceCurrentSelection();
-            }
-            else if (buttontriggers[2] < 20)
-            {
-                //m_selection_index = (m_selection_index - 1)%(m_avaliable_behaviours.size());
-                //voiceCurrentSelection();
-            }
+            m_actions->addSound(m_current_time, "error4.wav");
         }
+        if (singleChestClick())
+        {
+            m_actions->addSound(m_current_time, "error1.wav");
+        }
+        if (doubleChestClick())
+        {
+            m_actions->addSound(m_current_time, "error1.wav");
+            m_actions->addSound(m_current_time + 200, "error1.wav");
+        }
+        if (tripleChestClick())
+        {
+            m_actions->addSound(m_current_time, "error1.wav");
+            m_actions->addSound(m_current_time + 200, "error1.wav");
+            m_actions->addSound(m_current_time + 400, "error1.wav");
+        }
+        if (quadChestClick())
+        {
+            m_actions->addSound(m_current_time, "error1.wav");
+            m_actions->addSound(m_current_time + 200, "error1.wav");
+            m_actions->addSound(m_current_time + 400, "error1.wav");
+            m_actions->addSound(m_current_time + 600, "error1.wav");
+        }
+        
+        if (longLeftBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error4.wav");
+        }
+        if (singleLeftBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error2.wav");
+        }
+        if (doubleLeftBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error2.wav");
+            m_actions->addSound(m_current_time + 200, "error2.wav");
+        }
+        if (longRightBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error4.wav");
+        }
+        if (singleRightBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error3.wav");
+        }
+        if (doubleRightBumperClick())
+        {
+            m_actions->addSound(m_current_time, "error3.wav");
+            m_actions->addSound(m_current_time + 200, "error3.wav");
+        }
+
     }
 }
 
@@ -86,7 +121,6 @@ void Behaviour::doIntroduction()
 
 void Behaviour::voiceCurrentSelection()
 {
-    cout << "voiceCurrentSelection" << endl;
     m_actions->addSound(m_current_time, m_avaliable_behaviours[m_selection_index] + ".wav");
 }
 

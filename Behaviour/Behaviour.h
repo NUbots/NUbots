@@ -48,10 +48,11 @@ protected:
 private:
     void doIntroduction();
     void voiceCurrentSelection();
+    
 private:
-    bool m_introduction_done;
-    int m_selection_index;
-    static std::vector<std::string> m_avaliable_behaviours;
+    bool m_introduction_done;               //!< true if the introduction has been played
+    int m_selection_index;                  //!< the index into m_available_behaviours for the currently 'selected' behaviour
+    static std::vector<std::string> m_avaliable_behaviours;     //!< a list containing the avaiable behaviours
 };
 
 
