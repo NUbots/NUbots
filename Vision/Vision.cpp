@@ -13,7 +13,7 @@
 #include "Tools/Math/General.h"
 #include <boost/circular_buffer.hpp>
 #include <queue>
-#include <algorithm>
+#include <algorithm>oooooooooooooooooooooooooooooooooo
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
@@ -583,7 +583,7 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
 ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
     //std::vector<Vector2<int> > scanPoints;
-    ClassifiedSection scanArea(ClassifiedSection::DOWN);
+    ClassifiedSection scanArea(ScanLine::DOWN);
     if(!fieldBorders.size()) return scanArea;
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     //std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++; //This iterator is unused
@@ -633,7 +633,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
 
 ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
-    ClassifiedSection scanArea(ClassifiedSection::RIGHT);
+    ClassifiedSection scanArea(ScanLine::RIGHT);
     if(!currentImage) return scanArea;
     Vector2<int> temp;
     int width = currentImage->getWidth();
@@ -760,22 +760,22 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
         for(int j = 0; j < lineLength; j = j+skipPixel)
         {
-            if(direction == ClassifiedSection::DOWN)
+            if(direction == ScanLine::DOWN)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y + j;
             }
-            else if (direction == ClassifiedSection::RIGHT)
+            else if (direction == ScanLine::RIGHT)
             {
                 currentPoint.x = startPoint.x + j;
                 currentPoint.y = startPoint.y;
             }
-            else if(direction == ClassifiedSection::UP)
+            else if(direction == ScanLine::UP)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y - j;
             }
-            else if(direction == ClassifiedSection::LEFT)
+            else if(direction == ScanLine::LEFT)
             {
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
@@ -802,7 +802,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 while( (currentColour == afterColour) )
                 {
 
-                    if(direction == ClassifiedSection::DOWN)
+                    if(direction == ScanLine::DOWN)
                     {
 
                         if(startPoint.y + j < currentImage->getHeight())
@@ -815,7 +815,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             break;
                         }
                     }
-                    else if (direction == ClassifiedSection::RIGHT)
+                    else if (direction == ScanLine::RIGHT)
                     {
                         if(startPoint.x + j < currentImage->getWidth())
                         {
@@ -828,7 +828,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         }
 
                     }
-                    else if(direction == ClassifiedSection::UP)
+                    else if(direction == ScanLine::UP)
                     {
 
                         if(startPoint.y - j > 0)
@@ -842,7 +842,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         }
 
                     }
-                    else if(direction == ClassifiedSection::LEFT)
+                    else if(direction == ScanLine::LEFT)
                     {
                         if(startPoint.x - j > 0)
                         {
@@ -885,7 +885,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                     {
                         //SHIFTING THE POINTS TO THE START OF BUFFER:
-                        if(direction == ClassifiedSection::DOWN)
+                        if(direction == ScanLine::DOWN)
                         {
                             currentPoint.x = startPoint.x;
                             currentPoint.y = startPoint.y + j - bufferSize * skipPixel/2;
@@ -894,7 +894,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.y = tempStartPoint.y - bufferSize * skipPixel/2;
                             }
                         }
-                        else if (direction == ClassifiedSection::RIGHT)
+                        else if (direction == ScanLine::RIGHT)
                         {
                             currentPoint.x = startPoint.x + j - bufferSize * skipPixel/2;
                             currentPoint.y = startPoint.y;
@@ -903,7 +903,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.x = tempStartPoint.x - bufferSize * skipPixel/2;
                             }
                         }
-                        else if(direction == ClassifiedSection::UP)
+                        else if(direction == ScanLine::UP)
                         {
                             currentPoint.x = startPoint.x;
                             currentPoint.y = startPoint.y - j + bufferSize * skipPixel/2;
@@ -912,7 +912,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.y = tempStartPoint.y + bufferSize * skipPixel/2;
                             }
                         }
-                        else if(direction == ClassifiedSection::LEFT)
+                        else if(direction == ScanLine::LEFT)
                         {
                             currentPoint.x = startPoint.x - j + bufferSize * skipPixel/2;
                             currentPoint.y = startPoint.y;
@@ -945,7 +945,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
     int skipPixel = 2;
-    if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
+    if((direction == ScanLine::DOWN || direction == ScanLine::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
         int bufferSize = 2;
@@ -1031,7 +1031,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
         }
     }
 
-    else if (direction == ClassifiedSection::RIGHT || direction == ClassifiedSection::LEFT)
+    else if (direction == ScanLine::RIGHT || direction == ScanLine::LEFT)
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
 
@@ -1147,7 +1147,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
-    //! Overall runtime O( (K*(2*M^3 + M^2) + N*(LogN + 1) )
+    //! Overall runtime O( N^2 )
     std::vector<ObjectCandidate> candidateList;
 
     const int VERT_JOIN_LIMIT = 3;
@@ -1395,7 +1395,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< Trans
 {
     std::vector<ObjectCandidate> candidateList;
 
-
+    //unimplemented
 
     return candidateList;
 }
