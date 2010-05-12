@@ -13,7 +13,7 @@
 #include "Tools/Math/General.h"
 #include <boost/circular_buffer.hpp>
 #include <queue>
-#include <algorithm>oooooooooooooooooooooooooooooooooo
+#include <algorithm>
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
