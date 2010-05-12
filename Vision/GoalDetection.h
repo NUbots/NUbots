@@ -2,6 +2,8 @@
 #include "ObjectCandidate.h"
 #include "Tools/Math/LSFittedLine.h"
 
+#define GOAL_WIDTH 11 //LAB = 11cm, OFFICIAL = 10cm
+#define GOAL_HEIGHT 80 //in cm
 
 
 class GoalDetection
@@ -44,5 +46,7 @@ class GoalDetection
 
         void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate& GoalPost ,  int ID);
 
+        float MINIMUM_GOAL_WIDTH_IN_PIXELS;
+        float MINIMUM_GOAL_HEIGHT_IN_PIXELS;
 };
 

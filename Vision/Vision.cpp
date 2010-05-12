@@ -159,7 +159,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
-    int spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
+    spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -304,7 +304,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
             case BLUE_GOALS:
@@ -312,7 +312,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
@@ -1583,13 +1583,13 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 nextSegCounter--;
                 continue;
             }
-            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing
-               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing)
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     <= Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  >= Xstart + spacing)
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
                 tempUsedSegments.push_back(nextSegCounter);
-                if (horizontalsegments[nextSegCounter].getStartPoint().x < Xstart)
+                if (horizontalsegments[nextSegCounter].getStartPoint().x <= Xstart)
                 {
                     Xstart = horizontalsegments[nextSegCounter].getStartPoint().x;
                 }
@@ -1615,8 +1615,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
             {
                 break;
             }
-            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/2
-               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/2)
+            if(horizontalsegments[j].getStartPoint().x   >= Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  <= Xend + spacing/2)
             {
                 if (horizontalsegments[j].getStartPoint().x < Xstart)
                 {
@@ -1637,7 +1637,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         }
         //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
         //Create Object Candidate if greater then the minimum number of segments
-        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
+        if((int)tempSegments.size() >= min_segments)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
             //for(size_t i =0; i < tempSegments.size(); i++)
@@ -1766,3 +1766,17 @@ int Vision::getNumFramesDropped()
     return framesdropped;
 }
 
+bool Vision::isPixelOnScreen(int x, int y)
+{
+    if(x < 0 || x > currentImage->getWidth())
+    {
+        return false;
+    }
+
+    if(y < 0 || x > currentImage->getWidth())
+    {
+        return false;
+    }
+    else
+        return true;
+}

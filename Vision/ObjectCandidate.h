@@ -22,7 +22,7 @@ public:
     void setColour(unsigned char c);
     std::vector<TransitionSegment> getSegments() const;
     void addSegments(const std::vector<TransitionSegment> &new_segments);
-
+    void addSegment(const TransitionSegment &new_segment);
 
     ObjectCandidate();
     ObjectCandidate(int left, int top, int right, int bottom);
