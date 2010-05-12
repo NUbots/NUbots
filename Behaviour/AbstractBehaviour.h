@@ -25,6 +25,8 @@
 #ifndef ABSTRACTBEHAVIOUR_H
 #define ABSTRACTBEHAVIOUR_H
 
+#include <boost/circular_buffer.hpp>
+
 class JobList;
 class NUSensorsData;
 class NUActionatorsData;
@@ -39,10 +41,29 @@ public:
     
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
 protected:
-    AbstractBehaviour() {m_behaviour = this;};
+    AbstractBehaviour();
     bool preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     virtual void doBehaviour() = 0;
     virtual void postProcess();
+    
+    bool longChestClick();
+    bool singleChestClick();
+    bool doubleChestClick();
+    bool tripleChestClick();
+    bool quadChestClick();
+    
+    bool longLeftBumperClick();
+    bool singleLeftBumperClick();
+    bool doubleLeftBumperClick();
+    
+    bool longRightBumperClick();
+    bool singleRightBumperClick();
+    bool doubleRightBumperClick();
+    
+private:
+    void updateButtonValues();
+    bool longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
+    bool nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
 
 protected:
     double m_current_time;
@@ -56,6 +77,38 @@ protected:
     TeamInformation* m_team_info;
     
     AbstractBehaviour* m_behaviour;
+
+private:
+    
+    // Private variables for button click detection
+    float m_chest_state;
+    float m_chest_previous_state;
+    boost::circular_buffer<float> m_chest_times;
+    boost::circular_buffer<float> m_chest_durations;
+    
+    float m_left_state;
+    float m_left_previous_state;
+    boost::circular_buffer<float> m_left_times;
+    boost::circular_buffer<float> m_left_durations;
+    
+    float m_right_state;
+    float m_right_previous_state;
+    boost::circular_buffer<float> m_right_times;
+    boost::circular_buffer<float> m_right_durations;
+    
+    float m_previous_long_chest_click;
+    float m_previous_single_chest_click;
+    float m_previous_double_chest_click;
+    float m_previous_triple_chest_click;
+    float m_previous_quad_chest_click;
+    
+    float m_previous_long_left_click;
+    float m_previous_single_left_click;
+    float m_previous_double_left_click;
+    
+    float m_previous_long_right_click;
+    float m_previous_single_right_click;
+    float m_previous_double_right_click;
 };
 
 

@@ -157,8 +157,12 @@ void SeeThinkThread::run()
                 //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #endif
             
-            #if defined(USE_VISION) and defined(USE_BEHAVIOUR)
-                m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, AllObjects, m_nubot->GameInfo, m_nubot->TeamInfo);
+            #if defined(USE_BEHAVIOUR)
+                #if defined(USE_VISION)
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, AllObjects, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #else
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, NULL, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #endif
             #endif
             
             #ifdef USE_VISION
