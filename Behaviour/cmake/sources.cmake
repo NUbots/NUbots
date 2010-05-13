@@ -22,7 +22,8 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  AbstractBehaviour.cpp AbstractBehaviour.h
 		Behaviour.cpp Behaviour.h
-		TeamInformation
+		ChaseBall/ChaseBallBehaviour.cpp ChaseBall/ChaseBallBehaviour.h
+		TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

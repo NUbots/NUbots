@@ -28,6 +28,8 @@
 #include "GameController/GameInformation.h"
 #include "TeamInformation.h"
 
+#include "ChaseBall/ChaseBallBehaviour.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 using namespace std;
@@ -56,58 +58,23 @@ void Behaviour::doBehaviour()
         doIntroduction();
     else
     {
-        if (longChestClick())
-        {
-            m_actions->addSound(m_current_time, "error4.wav");
-        }
-        if (singleChestClick())
-        {
-            m_actions->addSound(m_current_time, "error1.wav");
-        }
-        if (doubleChestClick())
-        {
-            m_actions->addSound(m_current_time, "error1.wav");
-            m_actions->addSound(m_current_time + 200, "error1.wav");
-        }
-        if (tripleChestClick())
-        {
-            m_actions->addSound(m_current_time, "error1.wav");
-            m_actions->addSound(m_current_time + 200, "error1.wav");
-            m_actions->addSound(m_current_time + 400, "error1.wav");
-        }
-        if (quadChestClick())
-        {
-            m_actions->addSound(m_current_time, "error1.wav");
-            m_actions->addSound(m_current_time + 200, "error1.wav");
-            m_actions->addSound(m_current_time + 400, "error1.wav");
-            m_actions->addSound(m_current_time + 600, "error1.wav");
-        }
-        
-        if (longLeftBumperClick())
-        {
-            m_actions->addSound(m_current_time, "error4.wav");
-        }
         if (singleLeftBumperClick())
         {
-            m_actions->addSound(m_current_time, "error2.wav");
+            m_selection_index = (m_selection_index + 1) % m_avaliable_behaviours.size();
+            voiceCurrentSelection();
         }
-        if (doubleLeftBumperClick())
-        {
-            m_actions->addSound(m_current_time, "error2.wav");
-            m_actions->addSound(m_current_time + 200, "error2.wav");
-        }
-        if (longRightBumperClick())
-        {
-            m_actions->addSound(m_current_time, "error4.wav");
-        }
+        
         if (singleRightBumperClick())
         {
-            m_actions->addSound(m_current_time, "error3.wav");
+            m_selection_index = (m_selection_index + m_avaliable_behaviours.size()-1) % m_avaliable_behaviours.size();
+            voiceCurrentSelection();
         }
-        if (doubleRightBumperClick())
+        
+        if (singleChestClick() or longChestClick())
         {
-            m_actions->addSound(m_current_time, "error3.wav");
-            m_actions->addSound(m_current_time + 200, "error3.wav");
+            voiceCurrentSelection();
+            if (m_selection_index == 1)
+                swapBehaviour(new ChaseBallBehaviour(this));
         }
 
     }
