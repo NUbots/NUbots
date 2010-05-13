@@ -57,6 +57,8 @@ public:
     virtual void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
     // watchdog functions
     virtual void displayVisionFrameDrop(NUActionatorsData* actions);
+    
+    virtual void restart() {};
 private:
     // System time members
     #ifdef __NU_SYSTEM_CLOCK_GETTIME
