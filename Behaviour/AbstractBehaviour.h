@@ -46,11 +46,11 @@ protected:
     virtual void doBehaviour() = 0;
     virtual void postProcess();
     
+    void swapBehaviour(AbstractBehaviour* newbehaviour);
+    
     bool longChestClick();
     bool singleChestClick();
     bool doubleChestClick();
-    bool tripleChestClick();
-    bool quadChestClick();
     
     bool longLeftBumperClick();
     bool singleLeftBumperClick();
@@ -61,6 +61,11 @@ protected:
     bool doubleRightBumperClick();
     
 private:
+    bool tripleChestClick();
+    void removeStiffness();
+    bool quadChestClick();
+    void restartSoftware();
+    
     void updateButtonValues();
     bool longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
     bool nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
@@ -76,7 +81,8 @@ protected:
     GameInformation* m_game_info;
     TeamInformation* m_team_info;
     
-    AbstractBehaviour* m_behaviour;
+    AbstractBehaviour* m_behaviour;         //!< a pointer to the current behaviour
+    AbstractBehaviour* m_parent_behaviour;  //!< a pointer to the this behaviour's parent behaviour (that will be returned to if 4 clicks are detected, or this behaviour finishes)
 
 private:
     

@@ -32,7 +32,9 @@
 
 AbstractBehaviour::AbstractBehaviour()
 {
+    cout << "AbstractBehaviour::AbstractBehaviour()" << endl;
     m_behaviour = this;
+    m_parent_behaviour = NULL;
     
     // Initialise the private variables for button press detection
     m_chest_state = 0;
@@ -94,14 +96,33 @@ void AbstractBehaviour::postProcess()
 {
 }
 
+/*! @brief Runs the current behaviour. Note that this may not be the current behaviour.
+    @param jobs the nubot job list
+    @param data the nubot sensor data
+    @param actions the nubot actionators data
+    @param fieldobjects the nubot world model
+    @param gameinfo the nubot game information
+    @param teaminfo the nubot team information
+ */
 void AbstractBehaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
-    if (preProcess(jobs, data, actions, fieldobjects, gameinfo, teaminfo))
+    if (m_behaviour != NULL and m_behaviour->preProcess(jobs, data, actions, fieldobjects, gameinfo, teaminfo))
     {
-        if (m_behaviour != NULL)
-            m_behaviour->doBehaviour();
-        postProcess();
+        m_behaviour->doBehaviour();
+        m_behaviour->postProcess();
     }
+}
+
+/*! @brief Replaces the current behaviour with the new one
+    @param newbehaviour the new behaviour to be executed
+ */
+void AbstractBehaviour::swapBehaviour(AbstractBehaviour* newbehaviour)
+{
+    if (newbehaviour == NULL)
+        return;
+    if (m_behaviour != this)
+        delete m_behaviour;
+    m_behaviour = newbehaviour;
 }
 
 
@@ -142,6 +163,12 @@ void AbstractBehaviour::updateButtonValues()
             m_right_durations.push_back(temp[2]);
         }
     }
+    
+    if (tripleChestClick())
+        removeStiffness();
+    
+    if (quadChestClick())
+        restartSoftware();
 }
 
 bool AbstractBehaviour::longChestClick()
@@ -164,9 +191,25 @@ bool AbstractBehaviour::tripleChestClick()
     return nClick(3, m_chest_times, m_chest_durations, m_previous_triple_chest_click);
 }
 
+void AbstractBehaviour::removeStiffness()
+{
+    vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::AllJoints), 0);
+    m_actions->addJointPositions(NUActionatorsData::AllJoints, m_current_time, zero, zero, 0);
+    m_actions->addSound(m_current_time, "remove_stiffness.wav");
+}
+
 bool AbstractBehaviour::quadChestClick()
 {
     return nClick(4, m_chest_times, m_chest_durations, m_previous_quad_chest_click);
+}
+
+void AbstractBehaviour::restartSoftware()
+{
+    if (m_parent_behaviour != NULL)
+    {
+        m_actions->addSound(m_current_time, "restart.wav");
+        m_parent_behaviour->m_behaviour = m_parent_behaviour;
+    }
 }
 
 bool AbstractBehaviour::longLeftBumperClick()
