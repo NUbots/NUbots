@@ -57,7 +57,7 @@ fprintf(fid, "%f, %f, %f, %f, %f, %f, %f, %f,\n", preview_frames)
 fprintf(fid, "};\n\n")
 
 fprintf(fid, "const float Observer::A_values[9] = \n{")
-fprintf(fid, "%f, %f, %f,\n", A)
+fprintf(fid, "%f, %f, %f,\n", A')
 fprintf(fid, "};\n\n")
               
 fprintf(fid, "const float Observer::b_values[3] = {")
