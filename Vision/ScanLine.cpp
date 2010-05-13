@@ -169,6 +169,6 @@ float ScanLine::getFill(float start, float end)
         else
             continue;
     }
-    return (float)fillCount / (float)length;
+    return (float)fillCount / (float)(ebound-sbound);
 }
 
