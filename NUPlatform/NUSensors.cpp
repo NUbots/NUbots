@@ -54,6 +54,11 @@ NUSensors::NUSensors()
     ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
     m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
     m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
+    
+    fstream orFile;
+    orFile.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::trunc | ios_base::out);
+    orFile << "Time, Gyro X,NU Gyro X Offset, Gyro Y, NU Gyro Y Offset, NU Angle X, NU Angle Y" << std::endl;
+    orFile.close();
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -214,8 +219,6 @@ void NUSensors::calculateOrientation()
 
         // New method
 ///*  TOO SLOW FOR NOW
-        fstream file;
-        //file.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::app | ios_base::out);
         if(m_data->getGyroValues(gyros))
         {
             if(!m_orientationFilter->Initialised())
@@ -253,10 +256,20 @@ void NUSensors::calculateOrientation()
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
             gyroOffset[2] = 0.0f;
 
-            //file << gyroOffset[0] << "," << orientation[0] << "," << gyroOffset[1] <<","<< orientation[1] << std::endl;
+
         }
 //        */
-        //file.close();
+
+    }
+    static double timeOfLastWrite = 0;
+    if(m_current_time-timeOfLastWrite > 1000)
+    {
+
+        fstream file;
+        file.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::app | ios_base::out);
+        file << m_current_time << "," << gyros[0] << "," << gyroOffset[0] << "," << gyros[1] << "," << gyroOffset[1]  << "," << orientation[0] << "," << orientation[1] << std::endl;
+        file.close();
+        timeOfLastWrite = m_current_time;
     }
 }
 
