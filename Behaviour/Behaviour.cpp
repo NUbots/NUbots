@@ -20,6 +20,11 @@
  */
 
 #include "Behaviour.h"
+#include "BehaviourProvider.h"
+
+#include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "MiscBehaviours/VisionCalibrationProvider.h"
+#include "DemoBehaviours/ChaseBallProvider.h"
 
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -28,66 +33,89 @@
 #include "GameController/GameInformation.h"
 #include "TeamInformation.h"
 
-#include "ChaseBall/ChaseBallBehaviour.h"
-
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+#include "targetconfig.h"
 using namespace std;
-
-// Add avaliable behaviours to this list:
-static string temp_names[] = {"play_soccer", "chase_ball"};
-vector<string> Behaviour::m_avaliable_behaviours(temp_names, temp_names + sizeof(temp_names)/sizeof(*temp_names));
-
-
 
 Behaviour::Behaviour()
 {
-    m_introduction_done = false;
-    m_selection_index = 0;
+    #ifndef TARGET_IS_NAOWEBOTS
+        m_behaviour = new SelectBehaviourProvider(this);
+    #else
+        // For Webots, create the behaviour you want to run here 
+        m_behaviour = new ChaseBallProvider(this, false);
+    #endif
+    m_next_behaviour = NULL;
 }
-
 
 Behaviour::~Behaviour()
 {
-    
+    delete m_behaviour;
+    if (m_next_behaviour != NULL)
+        delete m_next_behaviour;
 }
 
-void Behaviour::doBehaviour()
+/*! @brief The main behaviour process function.
+        
+    Calls the process function of the current behaviour provider and handles change of provider when there is a next one.
+
+    @param jobs the nubot job list
+    @param data the nubot sensor data
+    @param actions the nubot actionators data
+    @param fieldobjects the nubot world model
+    @param gameinfo the nubot game information
+    @param teaminfo the nubot team information
+*/
+void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
-    if (not m_introduction_done)
-        doIntroduction();
-    else
+    if (m_next_behaviour != NULL)
     {
-        if (singleLeftBumperClick())
-        {
-            m_selection_index = (m_selection_index + 1) % m_avaliable_behaviours.size();
-            voiceCurrentSelection();
-        }
-        
-        if (singleRightBumperClick())
-        {
-            m_selection_index = (m_selection_index + m_avaliable_behaviours.size()-1) % m_avaliable_behaviours.size();
-            voiceCurrentSelection();
-        }
-        
-        if (singleChestClick() or longChestClick())
-        {
-            voiceCurrentSelection();
-            if (m_selection_index == 1)
-                swapBehaviour(new ChaseBallBehaviour(this));
-        }
-
+        delete m_behaviour;
+        m_behaviour = m_next_behaviour;
+        m_next_behaviour = NULL;
     }
+    m_behaviour->process(jobs, data, actions, fieldobjects, gameinfo, teaminfo);
 }
 
-void Behaviour::doIntroduction()
+void Behaviour::setNextBehaviour(std::string name)
 {
-    m_actions->addSound(m_current_time + 500, "select_behaviour.wav");
-    m_introduction_done = true;
+    m_next_behaviour = nameToProvider(name);
 }
 
-void Behaviour::voiceCurrentSelection()
+void Behaviour::setNextBehaviour(BehaviourProvider* behaviour)
 {
-    m_actions->addSound(m_current_time, m_avaliable_behaviours[m_selection_index] + ".wav");
+    m_next_behaviour = behaviour;
 }
 
+
+BehaviourProvider* Behaviour::nameToProvider(std::string name)
+{
+    name = simplifyName(name);
+    if (name.compare("selectbehaviour") == 0)
+        return new SelectBehaviourProvider(this);
+    else if (name.compare("chaseball") == 0)
+        return new ChaseBallProvider(this);
+    else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)
+        return new VisionCalibrationProvider(this);
+    else
+        return NULL;
+}
+
+
+/*! @brief Simplifies a name. The name is converted to lowercase, and spaces, underscores, forward slash, backward slash and dots are removed from the name.
+    @param input the name to be simplified
+    @return the simplified string
+ */
+string Behaviour::simplifyName(const string& input)
+{
+    string namebuffer, currentletter;
+    // compare each letter to a space and an underscore and a forward slash
+    for (unsigned int j=0; j<input.size(); j++)
+    {
+        currentletter = input.substr(j, 1);
+        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+            namebuffer += tolower(currentletter[0]);            
+    }
+    return namebuffer;
+}

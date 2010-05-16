@@ -20,14 +20,15 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  AbstractBehaviour.cpp AbstractBehaviour.h
-		Behaviour.cpp Behaviour.h
-		ChaseBall/ChaseBallBehaviour.cpp ChaseBall/ChaseBallBehaviour.h
-		TeamInformation.cpp TeamInformation.h
+SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
+                Behaviour.cpp Behaviour.h
+                TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS Jobs
+SET (YOUR_DIRS  Jobs
+                DemoBehaviours
+                MiscBehaviours
 )
 ####################################################################################
 

@@ -1,8 +1,8 @@
-/*! @file AbstractBehaviour.h
-    @brief Declaration of an abstract behaviour class for other behaviours to inherit from
+/*! @file BehaviourProvider.h
+    @brief Declaration of an abstract behaviour provider class for other behaviours to inherit from
  
-    @class AbstractBehaviour
-    @brief Declaration of an abstract behaviour class
+    @class BehaviourProvider
+    @brief Declaration of an abstract behaviour provider class
 
     @author Jason Kulk
  
@@ -22,10 +22,10 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ABSTRACTBEHAVIOUR_H
-#define ABSTRACTBEHAVIOUR_H
+#ifndef BEHAVIOURPROVIDER_H
+#define BEHAVIOURPROVIDER_H
 
-#include <boost/circular_buffer.hpp>
+class Behaviour;
 
 class JobList;
 class NUSensorsData;
@@ -34,19 +34,19 @@ class FieldObjects;
 class GameInformation;
 class TeamInformation;
 
-class AbstractBehaviour
+#include <boost/circular_buffer.hpp>
+
+class BehaviourProvider
 {
 public:
-    virtual ~AbstractBehaviour();
+    virtual ~BehaviourProvider();
     
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
 protected:
-    AbstractBehaviour();
+    BehaviourProvider(Behaviour* manager);
     bool preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     virtual void doBehaviour() = 0;
     virtual void postProcess();
-    
-    void swapBehaviour(AbstractBehaviour* newbehaviour);
     
     bool longChestClick();
     bool singleChestClick();
@@ -64,7 +64,7 @@ private:
     bool tripleChestClick();
     void removeStiffness();
     bool quadChestClick();
-    void restartSoftware();
+    void restartBehaviour();
     
     void updateButtonValues();
     bool longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
@@ -74,18 +74,16 @@ protected:
     double m_current_time;
     double m_previous_time;
     
-    JobList* m_jobs;
-    NUSensorsData* m_data;
-    NUActionatorsData* m_actions;
-    FieldObjects* m_field_objects;
-    GameInformation* m_game_info;
-    TeamInformation* m_team_info;
+    Behaviour* m_manager;                   //!< a pointer to the behaviour manager
     
-    AbstractBehaviour* m_behaviour;         //!< a pointer to the current behaviour
-    AbstractBehaviour* m_parent_behaviour;  //!< a pointer to the this behaviour's parent behaviour (that will be returned to if 4 clicks are detected, or this behaviour finishes)
+    JobList* m_jobs;                        //!< a local copy of the pointer to the public JobList
+    NUSensorsData* m_data;                  //!< a local copy of the pointer to the public SensorData
+    NUActionatorsData* m_actions;           //!< a local copy of the pointer to the public ActionatorsData
+    FieldObjects* m_field_objects;          //!< a local copy of the pointer to the public world model
+    GameInformation* m_game_info;           //!< a local copy of the pointer to the public GameInfo
+    TeamInformation* m_team_info;           //!< a local copy of the pointer to the public TeamInfo
 
 private:
-    
     // Private variables for button click detection
     float m_chest_state;
     float m_chest_previous_state;

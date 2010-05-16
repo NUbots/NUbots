@@ -1,8 +1,11 @@
 /*! @file Behaviour.h
-    @brief Declaration of top-level behaviour class
+    @brief Declaration of the top-level behaviour class
  
     @class Behaviour
     @brief The top-level behaviour class
+ 
+    The Behaviour has a single BehaviourProvider. The BehaviourProvider can
+    be changed online.
 
     @author Jason Kulk
  
@@ -25,7 +28,7 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include "AbstractBehaviour.h"
+class BehaviourProvider;
 
 class JobList;
 class NUSensorsData;
@@ -37,22 +40,22 @@ class TeamInformation;
 #include <vector>
 #include <string>
 
-class Behaviour : public AbstractBehaviour 
+class Behaviour
 {
 public:
     Behaviour();
     ~Behaviour();
+    void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     
-protected:
-    void doBehaviour();
-private:
-    void doIntroduction();
-    void voiceCurrentSelection();
+    void setNextBehaviour(std::string name);
+    void setNextBehaviour(BehaviourProvider* behaviour);
     
 private:
-    bool m_introduction_done;               //!< true if the introduction has been played
-    int m_selection_index;                  //!< the index into m_available_behaviours for the currently 'selected' behaviour
-    static std::vector<std::string> m_avaliable_behaviours;     //!< a list containing the avaiable behaviours
+    BehaviourProvider* nameToProvider(std::string name);
+    std::string simplifyName(const std::string& input);
+private:
+    BehaviourProvider* m_behaviour;             //!< the current behaviour provider
+    BehaviourProvider* m_next_behaviour;        //!< the next behaviour provider. This will be NULL when we wish to continue to use m_behaviour (ie most of the time).
 };
 
 

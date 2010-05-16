@@ -1,4 +1,4 @@
-/*! @file Behaviour.cpp
+/*! @file BehaviourProvider.cpp
     @brief Implementation of behaviour class
 
     @author Jason Kulk
@@ -19,7 +19,9 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AbstractBehaviour.h"
+#include "BehaviourProvider.h"
+#include "Behaviour.h"
+
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
@@ -30,11 +32,11 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-AbstractBehaviour::AbstractBehaviour()
+/*! @brief Construct a behaviour provider with the given manager
+ */
+BehaviourProvider::BehaviourProvider(Behaviour* manager)
 {
-    cout << "AbstractBehaviour::AbstractBehaviour()" << endl;
-    m_behaviour = this;
-    m_parent_behaviour = NULL;
+    m_manager = manager;
     
     // Initialise the private variables for button press detection
     m_chest_state = 0;
@@ -67,11 +69,19 @@ AbstractBehaviour::AbstractBehaviour()
     m_previous_double_right_click = 0;
 }
 
-AbstractBehaviour::~AbstractBehaviour()
+BehaviourProvider::~BehaviourProvider()
 {
 }
 
-bool AbstractBehaviour::preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
+/*! @brief Preprocesses the data. Returns true if the data is valid
+    @param jobs the nubot job list
+    @param data the nubot sensor data
+    @param actions the nubot actionators data
+    @param fieldobjects the nubot world model
+    @param gameinfo the nubot game information
+    @param teaminfo the nubot team information
+ */
+bool BehaviourProvider::preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
     if (jobs == NULL or data == NULL or actions == NULL or /*fieldobjects == NULL or*/ gameinfo == NULL or teaminfo == NULL)
         return false;
@@ -92,7 +102,7 @@ bool AbstractBehaviour::preProcess(JobList* jobs, NUSensorsData* data, NUActiona
     }
 }
 
-void AbstractBehaviour::postProcess()
+void BehaviourProvider::postProcess()
 {
 }
 
@@ -104,29 +114,18 @@ void AbstractBehaviour::postProcess()
     @param gameinfo the nubot game information
     @param teaminfo the nubot team information
  */
-void AbstractBehaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
+void BehaviourProvider::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
-    if (m_behaviour != NULL and m_behaviour->preProcess(jobs, data, actions, fieldobjects, gameinfo, teaminfo))
+    if (preProcess(jobs, data, actions, fieldobjects, gameinfo, teaminfo))
     {
-        m_behaviour->doBehaviour();
-        m_behaviour->postProcess();
+        doBehaviour();
+        postProcess();
     }
 }
 
-/*! @brief Replaces the current behaviour with the new one
-    @param newbehaviour the new behaviour to be executed
+/*! @brief Updates the many button related variables
  */
-void AbstractBehaviour::swapBehaviour(AbstractBehaviour* newbehaviour)
-{
-    if (newbehaviour == NULL)
-        return;
-    if (m_behaviour != this)
-        delete m_behaviour;
-    m_behaviour = newbehaviour;
-}
-
-
-void AbstractBehaviour::updateButtonValues()
+void BehaviourProvider::updateButtonValues()
 {    
     m_chest_previous_state = m_chest_state;
     m_left_previous_state = m_left_state;
@@ -168,88 +167,94 @@ void AbstractBehaviour::updateButtonValues()
         removeStiffness();
     
     if (quadChestClick())
-        restartSoftware();
+        restartBehaviour();
 }
 
-bool AbstractBehaviour::longChestClick()
-{
-    return longClick(m_chest_times, m_chest_durations, m_previous_long_chest_click);
-}
-
-bool AbstractBehaviour::singleChestClick()
-{
-    return nClick(1, m_chest_times, m_chest_durations, m_previous_single_chest_click);
-}
-
-bool AbstractBehaviour::doubleChestClick()
-{
-    return nClick(2, m_chest_times, m_chest_durations, m_previous_double_chest_click);
-}
-
-bool AbstractBehaviour::tripleChestClick()
-{
-    return nClick(3, m_chest_times, m_chest_durations, m_previous_triple_chest_click);
-}
-
-void AbstractBehaviour::removeStiffness()
+/*! @brief Removes the stiffness
+ */
+void BehaviourProvider::removeStiffness()
 {
     vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::AllJoints), 0);
+    //m_jobs->addMotionJob(new MotionFreezeJob());
     m_actions->addJointPositions(NUActionatorsData::AllJoints, m_current_time, zero, zero, 0);
     m_actions->addSound(m_current_time, "remove_stiffness.wav");
 }
 
-bool AbstractBehaviour::quadChestClick()
+/*! @brief Sets the behaviour provider to be the "SelectBehaviour" provider
+ */
+void BehaviourProvider::restartBehaviour()
+{
+    m_manager->setNextBehaviour("select_behaviour");
+}
+
+
+bool BehaviourProvider::longChestClick()
+{
+    return longClick(m_chest_times, m_chest_durations, m_previous_long_chest_click);
+}
+
+bool BehaviourProvider::singleChestClick()
+{
+    return nClick(1, m_chest_times, m_chest_durations, m_previous_single_chest_click);
+}
+
+bool BehaviourProvider::doubleChestClick()
+{
+    return nClick(2, m_chest_times, m_chest_durations, m_previous_double_chest_click);
+}
+
+bool BehaviourProvider::tripleChestClick()
+{
+    return nClick(3, m_chest_times, m_chest_durations, m_previous_triple_chest_click);
+}
+
+bool BehaviourProvider::quadChestClick()
 {
     return nClick(4, m_chest_times, m_chest_durations, m_previous_quad_chest_click);
 }
 
-void AbstractBehaviour::restartSoftware()
-{
-    if (m_parent_behaviour != NULL)
-    {
-        m_actions->addSound(m_current_time, "restart.wav");
-        m_parent_behaviour->m_behaviour = m_parent_behaviour;
-    }
-}
-
-bool AbstractBehaviour::longLeftBumperClick()
+bool BehaviourProvider::longLeftBumperClick()
 {
     return longClick(m_left_times, m_left_durations, m_previous_long_left_click);
 }
 
-bool AbstractBehaviour::singleLeftBumperClick()
+bool BehaviourProvider::singleLeftBumperClick()
 {
     return nClick(1, m_left_times, m_left_durations, m_previous_single_left_click);
 }
 
-bool AbstractBehaviour::doubleLeftBumperClick()
+bool BehaviourProvider::doubleLeftBumperClick()
 {
     return nClick(2, m_left_times, m_left_durations, m_previous_double_left_click);
 }
 
-bool AbstractBehaviour::longRightBumperClick()
+bool BehaviourProvider::longRightBumperClick()
 {
     return longClick(m_right_times, m_right_durations, m_previous_long_right_click);
 }
 
-bool AbstractBehaviour::singleRightBumperClick()
+bool BehaviourProvider::singleRightBumperClick()
 {
     return nClick(1, m_right_times, m_right_durations, m_previous_single_right_click);
 }
 
-bool AbstractBehaviour::doubleRightBumperClick()
+bool BehaviourProvider::doubleRightBumperClick()
 {
     return nClick(2, m_right_times, m_right_durations, m_previous_double_right_click);
 }
 
-
-bool AbstractBehaviour::longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
+/*! @brief Returns true if the last press was a long one
+     @param times a circular buffer of the click times
+     @param durations a circular buffer of the click durations
+     @param previoustime the previous time that this event has occured
+ */
+bool BehaviourProvider::longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
 {
     if (times.empty())
         return false;
     else if (previoustime == times.back())
         return false;
-    else if (durations.back() < 800)
+    else if (durations.back() <= 800)
         return false;
     else
     {
@@ -258,28 +263,34 @@ bool AbstractBehaviour::longClick(boost::circular_buffer<float> times, boost::ci
     }
 }
 
-bool AbstractBehaviour::nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
+/*! @brief Returns true if an n click has occured in the given times and durations
+    @param n the number of 'quick' consecutive clicks
+    @param times a circular buffer of the click times
+    @param durations a circular buffer of the click durations (needed to throw out long clicks)
+    @param previoustime the previous time that this event has occured
+ */
+bool BehaviourProvider::nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
 {
     size_t buffersize = times.size();
     if (buffersize < n)                              // if there aren't enough values in the buffer return false
         return false;
     else if (previoustime == times.back())           // if previous time has not changed return false
         return false;
-    else if (m_current_time - times.back() < 400)    // need to wait 400 ms for a potential next click
+    else if (m_current_time - times.back() < 600)    // need to wait 500 ms for a potential next click
         return false;
     else
     {
         // n click if the last n presses are each less than 400ms apart
         for (size_t i = buffersize-1; i > buffersize-n; i--)
         {
-            if (times[i] - times[i-1] > 400 || durations[i] > 800)
+            if (times[i] - times[i-1] > 600 || durations[i] > 800)
                 return false;
         }
         
         // check the n+1 click was longer than 400ms
         if (buffersize-n > 0)
         {
-            if (times[buffersize-n] - times[buffersize-n-1] < 400 || durations[buffersize-n] > 800)
+            if (times[buffersize-n] - times[buffersize-n-1] < 600 || durations[buffersize-n] > 800)
                 return false;
         }
         
