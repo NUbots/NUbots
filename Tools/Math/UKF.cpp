@@ -1,5 +1,6 @@
 #include "UKF.h"
 #include "debug.h"
+#include "NUPlatform/NUSystem.h"
 using namespace std;
 
 
@@ -39,7 +40,7 @@ Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matri
     unsigned int numPoints = sigmaPoints.getn();
     Matrix covariance(m_numStates,m_numStates, false);
     Matrix diff;
-    for(unsigned int i = 0; i < numPoints; i++)
+    for(unsigned int i = 0; i < numPoints; ++i)
     {
         diff = sigmaPoints.getCol(i) - mean;
         covariance = covariance + m_sigmaWeights[0][i]*diff*diff.transp();
@@ -122,12 +123,13 @@ bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoi
 bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
 {
     const int numMeasurements = measurement.getm();
-    int numberOfSigmaPoints = stateEstimateSigmas.getn();
+    const int numberOfSigmaPoints = stateEstimateSigmas.getn();
 
     // Find mean of predicted measurement
     Matrix predictedMeasurement = CalculateMeanFromSigmas(predictedMeasurementSigmas);
 
-    Matrix Pyy(numMeasurements,numMeasurements,false);
+    //Matrix Pyy(numMeasurements,numMeasurements,false);
+    Matrix Pyy(measurementNoise);
     Matrix Pxy(stateEstimateSigmas.getm(),numMeasurements,false);
 
     Matrix temp;
@@ -136,7 +138,7 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
         // store difference between prediction and measurment.
         temp = predictedMeasurementSigmas.getCol(i) - predictedMeasurement;
         // Innovation covariance - Add Measurement noise
-        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp() + measurementNoise;
+        Pyy = Pyy + m_sigmaWeights[0][i]*temp * temp.transp();
         // Cross correlation matrix
         Pxy = Pxy + m_sigmaWeights[0][i]*(stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
     }
@@ -159,6 +161,5 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     // Stolen from last years code... does not all seem right for this iplementation.
     //m_covariance = HT(horzcat(stateEstimateSigmas-m_mean*m_sigmaWeights - K*predictedMeasurementSigmas +
     //                          K*predictedMeasurement*m_sigmaWeights,K*measurementNoise));
-
     return true;
 }

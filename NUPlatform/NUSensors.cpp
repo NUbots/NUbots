@@ -195,58 +195,43 @@ void NUSensors::calculateOrientation()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateOrientation()" << endl;
 #endif
-    static vector<float> orientation(3, 0);
-    static vector<float> acceleration(3, 0);
-    static vector<float> gyros(3, 0);
-    static vector<float> gyroOffset(3, 0);
+    static vector<float> orientation(3, 0.0f);
+    static vector<float> acceleration(3, 0.0f);
+    static vector<float> gyros(3, 0.0f);
+    static vector<float> gyroOffset(3, 0.0f);
 
-    if (m_data->getAccelerometerValues(acceleration))
+    if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
     {
-        // Old method
-        float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-        if (fabs(accelsum - 981) < 0.1*981)
-        {   // only update the orientation estimate if not under other accelerations!
-            orientation[0] = atan2(-acceleration[1],-acceleration[2]);
-            orientation[1] = atan2(acceleration[0],-acceleration[2]);
-            orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
-        }
-        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-        // New method
-/*  TOO SLOW FOR NOW
-        if(m_data->getGyroValues(gyros))
+        if(!m_orientationFilter->Initialised())
         {
-            if(!m_orientationFilter->Initialised())
+            float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
+            if (fabs(accelsum - 981) < 0.2*981)
             {
-                if (fabs(accelsum - 981) < 0.2*981)
-                {
-                    m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
-                }
+                m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
             }
-            else
-            {
-                m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
-                m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
-                Matrix supportLegTransform;
-                if(m_data->getSupportLegTransform(supportLegTransform))
-                {
-                    static vector<float> orientation(3,0.0f);
-                    orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-                    m_orientationFilter->KinematicsMeasurementUpdate(orientation[1],orientation[0]);
-                    //m_orientationFilter->KinematicsMeasurementUpdate(0.0f,0.0f);
-                }
-            }
-
-            // Set orientation
-            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
-            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
-            orientation[2] = 0.0f;
-            m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-            // Set gyro offset values
-            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
-            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
-            gyroOffset[2] = 0.0f;
         }
-        */
+        else
+        {
+            m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
+            Matrix supportLegTransform;
+            bool validKinematics = m_data->getSupportLegTransform(supportLegTransform);
+            if(validKinematics)
+            {
+                orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+            }
+            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
+        }
+
+        // Set orientation
+        orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+        orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+        orientation[2] = 0.0f;
+        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+        // Set gyro offset values
+        gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+        gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+        gyroOffset[2] = 0.0f;
+        m_data->BalanceGyroOffset->setData(m_current_time,gyroOffset,true);
     }
 }
 
@@ -635,8 +620,8 @@ void NUSensors::calculateOdometry()
     static float prevLeftY = 0.0;
     static float prevRightY = 0.0;
 
-    vector<float> leftFootPosition(3);
-    vector<float> rightFootPosition(3);
+    static vector<float> leftFootPosition(3,0.0f);
+    static vector<float> rightFootPosition(3,0.0f);
     vector<float> odometeryData = m_data->Odometry->Data;
     if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
@@ -647,17 +632,34 @@ void NUSensors::calculateOdometry()
     const int translationCol = 3;
 
     // Get the left foot position relative to the origin
-    vector<float> leftFootTransform = m_data->LeftLegTransform->Data;
-
-    leftFootPosition[0] = leftFootTransform[translationCol];
-    leftFootPosition[1] = leftFootTransform[translationCol+arrayWidth];
-    leftFootPosition[2] = leftFootTransform[translationCol+2*arrayWidth];
+    bool leftPositionOk = false;
+    if(m_data->LeftLegTransform->IsValid)
+    {
+        vector<float> leftFootTransform = m_data->LeftLegTransform->Data;
+        if(leftFootTransform.size() >= 16)
+        {
+            leftFootPosition[0] = leftFootTransform[translationCol];
+            leftFootPosition[1] = leftFootTransform[translationCol+arrayWidth];
+            leftFootPosition[2] = leftFootTransform[translationCol+2*arrayWidth];
+            leftPositionOk = true;
+        }
+    }
 
     // Get the right foot position
-    vector<float> rightFootTransform = m_data->RightLegTransform->Data;
-    rightFootPosition[0] = rightFootTransform[translationCol];
-    rightFootPosition[1] = rightFootTransform[translationCol+arrayWidth];
-    rightFootPosition[2] = rightFootTransform[translationCol+2*arrayWidth];
+    bool rightPositionOk = false;
+    if(m_data->RightLegTransform->IsValid)
+    {
+        vector<float> rightFootTransform = m_data->RightLegTransform->Data;
+        if(rightFootTransform.size() >= 16)
+        {
+            rightFootPosition[0] = rightFootTransform[translationCol];
+            rightFootPosition[1] = rightFootTransform[translationCol+arrayWidth];
+            rightFootPosition[2] = rightFootTransform[translationCol+2*arrayWidth];
+            rightPositionOk = true;
+        }
+    }
+
+    if(!rightPositionOk || !leftPositionOk) return;
 
     bool leftFootSupport = false;
     bool rightFootSupport = false;
@@ -712,15 +714,14 @@ void NUSensors::calculateOdometry()
 void NUSensors::calculateKinematics()
 {
     //! TODO: Need to get these values from somewhere else.
-    const bool leftLegSupport = true;
-    const bool rightLegSupport = true;
     const int cameraNumber = 1;
+    const double time = m_data->CurrentTime;
 
-    static vector<float> leftLegJoints;
+    static vector<float> leftLegJoints(6,0.0f);
     bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
-    static vector<float> rightLegJoints;
+    static vector<float> rightLegJoints(6,0.0f);
     bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
-    static vector<float> headJoints;
+    static vector<float> headJoints(2,0.0f);
     bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
 
     Matrix rightLegTransform;
@@ -733,10 +734,20 @@ void NUSensors::calculateKinematics()
     if(rightLegJointsSuccess)
     {
         rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
+        m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->RightLegTransform->IsValid = false;
     }
     if(leftLegJointsSuccess)
     {
         leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
+        m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
+    }
+    else
+    {
+        m_data->LeftLegTransform->IsValid = false;
     }
     if(headJointsSuccess)
     {
@@ -748,18 +759,28 @@ void NUSensors::calculateKinematics()
     if(headJointsSuccess && (cameraNumber == 1))
     {
         cameraTransform = &bottomCameraTransform;
+        m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
+    }
+    else
+    {
+        m_data->CameraTransform->IsValid = false;
     }
 
+
+    bool leftFootSupport = false, rightFootSupport = false;
+    m_data->getFootSupport(NUSensorsData::LeftFoot,leftFootSupport);
+    m_data->getFootSupport(NUSensorsData::RightFoot,rightFootSupport);
+
     // Choose support leg.
-    if((!leftLegSupport && rightLegSupport) && rightLegJointsSuccess)
+    if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
     {
         supportLegTransform = &rightLegTransform;
     }
-    else if((leftLegSupport && !rightLegSupport) && leftLegJointsSuccess)
+    else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
-    else if((leftLegSupport && rightLegSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+    else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
     {
         supportLegTransform = &leftLegTransform;
     }
@@ -767,15 +788,6 @@ void NUSensors::calculateKinematics()
     {
         supportLegTransform = 0;
     }
-
-    // Set all of the sensor values
-    double time = m_data->CurrentTime;
-    // Set the legs
-    m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
-    m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
-
-    // Set the camera
-    m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
 
     if(supportLegTransform)
     {
@@ -798,9 +810,15 @@ void NUSensors::calculateCameraHeight()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCameraHeight()" << endl;
 #endif
-    const int arrayLocation = 3 + 2*4; // collumn index is 3, number of collumns per row is 4.
-    float cameraHeight = m_data->CameraToGroundTransform->Data[arrayLocation];
-    m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraHeight));
+    Matrix cameraGroundTransform;
+    if(m_data->getCameraToGroundTransform(cameraGroundTransform))
+    {
+        m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraGroundTransform[3][4]));
+    }
+    else
+    {
+        m_data->CameraHeight->IsValid = false;
+    }
 }
 
 
