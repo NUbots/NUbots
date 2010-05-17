@@ -54,11 +54,6 @@ NUSensors::NUSensors()
     ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
     m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
     m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
-    
-    fstream orFile;
-    orFile.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::trunc | ios_base::out);
-    orFile << "Time, Gyro X,NU Gyro X Offset, Gyro Y, NU Gyro Y Offset, NU Angle X, NU Angle Y" << std::endl;
-    orFile.close();
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -200,76 +195,41 @@ void NUSensors::calculateOrientation()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateOrientation()" << endl;
 #endif
-    static vector<float> orientation(3, 0);
-    static vector<float> acceleration(3, 0);
-    static vector<float> gyros(3, 0);
-    static vector<float> gyroOffset(3, 0);
+    static vector<float> orientation(3, 0.0f);
+    static vector<float> acceleration(3, 0.0f);
+    static vector<float> gyros(3, 0.0f);
+    static vector<float> gyroOffset(3, 0.0f);
 
-    if (m_data->getAccelerometerValues(acceleration))
+    if (m_data->getAccelerometerValues(acceleration) && m_data->getGyroValues(gyros))
     {
-        // Old method
-        float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-        if (fabs(accelsum - 981) < 0.1*981)
-        {   // only update the orientation estimate if not under other accelerations!
-            orientation[0] = atan2(-acceleration[1],-acceleration[2]);
-            orientation[1] = atan2(acceleration[0],-acceleration[2]);
-            orientation[2] = atan2(acceleration[1],acceleration[0]);            // this calculation is pretty non-sensical
-        }
-        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-
-        // New method
-///*  TOO SLOW FOR NOW
-        if(m_data->getGyroValues(gyros))
+        if(!m_orientationFilter->Initialised())
         {
-            if(!m_orientationFilter->Initialised())
+            if (fabs(accelsum - 981) < 0.2*981)
             {
-                if (fabs(accelsum - 981) < 0.2*981)
-                {
-                    m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
-                }
+                m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
             }
-            else
-            {
-                m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
-                //m_orientationFilter->AccelerometerMeasurementUpdate(acceleration[0],acceleration[1], acceleration[2]);
-                Matrix supportLegTransform;
-                bool validKinematics = m_data->getSupportLegTransform(supportLegTransform);
-                //if(m_data->getSupportLegTransform(supportLegTransform))
-                if(validKinematics)
-                {
-                    orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-//                    static vector<float> orientation(3,0.0f);
-//                    orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-//                    //m_orientationFilter->KinematicsMeasurementUpdate(orientation[1],orientation[0]);
-//                    //m_orientationFilter->KinematicsMeasurementUpdate(0.0f,0.0f);
-                }
-                m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
-            }
-
-            // Set orientation
-            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
-            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
-            orientation[2] = 0.0f;
-            m_data->BalanceOrientation->setData(m_current_time, orientation, true);
-            // Set gyro offset values
-            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
-            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
-            gyroOffset[2] = 0.0f;
-
-
         }
-//        */
+        else
+        {
+            m_orientationFilter->TimeUpdate(gyros[1], gyros[0], m_current_time);
+            Matrix supportLegTransform;
+            bool validKinematics = m_data->getSupportLegTransform(supportLegTransform);
+            if(validKinematics)
+            {
+                orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+            }
+            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
+        }
 
-    }
-    static double timeOfLastWrite = 0;
-    if(m_current_time-timeOfLastWrite > 1000)
-    {
-
-        fstream file;
-        file.open((std::string(DATA_DIR) + std::string("orientation.csv")).c_str(),ios_base::app | ios_base::out);
-        file << m_current_time << "," << gyros[0] << "," << gyroOffset[0] << "," << gyros[1] << "," << gyroOffset[1]  << "," << orientation[0] << "," << orientation[1] << std::endl;
-        file.close();
-        timeOfLastWrite = m_current_time;
+        // Set orientation
+        orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+        orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+        orientation[2] = 0.0f;
+        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+        // Set gyro offset values
+        gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+        gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+        gyroOffset[2] = 0.0f;
     }
 }
 
