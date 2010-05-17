@@ -103,6 +103,49 @@ inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesia
     result[2] = asin(z/(result[0]));
     return result;
 }
+    
+/*! @brief Returns true if all of the values
+    @param values the data to compare to zero
+ */
+template <typename T>
+inline bool allZeros(const vector<T>& values) 
+{
+    bool result = true;
+    for (size_t i=0; i<values.size(); i++)
+        if (values[i] != 0)
+            return false;
+    return result;
+}
+    
+/*! @brief Returns true if every element in left is within eps of every element in right
+    @param left the left operand
+    @param right the right operand
+    @param eps the maximum difference allowed before elements are not equal
+ */
+template <typename T>
+inline bool allEqual(const vector<T>& left, const vector<T>& right, T eps = 0.01)
+{
+    size_t n = min(left.size(), right.size());
+    for (size_t i=0; i<n; i++)
+        if (fabs(left[i] - right[i]) > eps)
+            return false;
+    return true;
+}
+    
+/*! @brief Returns the magnitude of the maximum difference between elements in left and right
+    @param left
+    @param right
+ */
+template <typename T>
+inline float maxDifference(const vector<T>& left, const vector<T>& right)
+{
+    size_t n = min(left.size(), right.size());
+    float max = 0;
+    for (size_t i=0; i<n; i++)
+        if (fabs(left[i] - right[i]) > max)
+            max = fabs(left[i] - right[i]);
+    return max;
+}
 
 /*! @brief Determines whether the point is inside the convex hull specifed by vertices.
     @param x the x value of the point to test

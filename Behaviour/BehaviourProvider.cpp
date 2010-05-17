@@ -29,6 +29,9 @@
 #include "GameController/GameInformation.h"
 #include "TeamInformation.h"
 
+#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
+#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
@@ -175,7 +178,7 @@ void BehaviourProvider::updateButtonValues()
 void BehaviourProvider::removeStiffness()
 {
     vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::AllJoints), 0);
-    //m_jobs->addMotionJob(new MotionFreezeJob());
+    m_jobs->addMotionJob(new MotionFreezeJob());
     m_actions->addJointPositions(NUActionatorsData::AllJoints, m_current_time, zero, zero, 0);
     m_actions->addSound(m_current_time, "remove_stiffness.wav");
 }
@@ -185,6 +188,7 @@ void BehaviourProvider::removeStiffness()
 void BehaviourProvider::restartBehaviour()
 {
     m_manager->setNextBehaviour("select_behaviour");
+    m_jobs->addMotionJob(new MotionKillJob());
 }
 
 

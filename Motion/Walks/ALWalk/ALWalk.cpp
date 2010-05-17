@@ -30,8 +30,7 @@
 #include <time.h>
 
 ALWalk::ALWalk()
-{
-    debug << "ALWalk::ALWalk()" << endl;
+{   
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
 }
 

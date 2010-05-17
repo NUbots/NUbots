@@ -198,6 +198,12 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_PAN:
             *job = new HeadPanJob(input);
             break;
+        case Job::MOTION_FREEZE:
+            *job = new MotionFreezeJob();
+            break;
+        case Job::MOTION_KILL:
+            *job = new MotionKillJob();
+            break;
         case Job::CAMERA_CHANGE_SETTINGS:
             *job = new ChangeCameraSettingsJob(input);
             break;
