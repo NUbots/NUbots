@@ -200,10 +200,11 @@ void NUSensors::calculateOrientation()
     static vector<float> gyros(3, 0.0f);
     static vector<float> gyroOffset(3, 0.0f);
 
-    if (m_data->getAccelerometerValues(acceleration) && m_data->getGyroValues(gyros))
+    if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
     {
         if(!m_orientationFilter->Initialised())
         {
+            float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
             if (fabs(accelsum - 981) < 0.2*981)
             {
                 m_orientationFilter->initialise(m_current_time,gyros[1],gyros[0],acceleration[0],acceleration[1],acceleration[2]);
@@ -230,6 +231,7 @@ void NUSensors::calculateOrientation()
         gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
         gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
         gyroOffset[2] = 0.0f;
+        m_data->BalanceGyroOffset->setData(m_current_time,gyroOffset,true);
     }
 }
 
