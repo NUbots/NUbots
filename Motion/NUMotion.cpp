@@ -118,9 +118,9 @@ NUMotion::~NUMotion()
     #endif
 }
 
-/*! @brief Adds actions to bring the robot to rest quickly, and go into a safe-for-robot pose
+/*! @brief Freezes all motion modules
  */
-void NUMotion::kill()
+void NUMotion::freeze()
 {
     m_last_kill_time = m_current_time;
     #ifdef USE_HEAD
@@ -135,7 +135,13 @@ void NUMotion::kill()
     #if defined(USE_BLOCK) or defined(USE_SAVE)
         m_save->kill();
     #endif
-    
+}
+
+/*! @brief Adds actions to bring the robot to rest quickly, and go into a safe-for-robot pose
+ */
+void NUMotion::kill()
+{
+    freeze();
     float safelegpositions[] = {0, -0.85, -0.15, 2.16, 0, -1.22};
     float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
     float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
@@ -305,7 +311,14 @@ void NUMotion::process(JobList* jobs)
         #ifdef USE_SCRIPT
             case Job::MOTION_SCRIPT:
                 m_script->process(reinterpret_cast<ScriptJob*> (*it));
+                break;
         #endif
+            case Job::MOTION_KILL:
+                process(reinterpret_cast<MotionKillJob*> (*it));
+                break;
+            case Job::MOTION_FREEZE:
+                process(reinterpret_cast<MotionFreezeJob*> (*it));
+                break;
             default:
                 break;
         }
@@ -317,4 +330,13 @@ void NUMotion::process(JobList* jobs)
     #endif
 }
 
+void NUMotion::process(MotionKillJob* job)
+{
+    kill();
+}
+
+void NUMotion::process(MotionFreezeJob* job)
+{
+    freeze();
+}
 
