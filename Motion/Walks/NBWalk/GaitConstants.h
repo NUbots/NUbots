@@ -320,8 +320,8 @@ namespace WP {
     static const float WEBOTS_ZMP_CONFIG[LEN_ZMP_CONFIG] = 
     {0.0f,  // footCenterLocX
     0.3f,  // zmp static percentage
-    50.0f,  // left zmp offset
-    50.0f,  // right zmp offset
+    4.5f,  // left zmp offset
+    4.5f,  // right zmp offset
     0.01f,  // strafe zmp offset (no units)
     6.6f};  // turn zmp off    ""
     static const float WEBOTS_HACK_CONFIG[LEN_HACK_CONFIG] = 

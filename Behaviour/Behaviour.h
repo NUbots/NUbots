@@ -1,9 +1,15 @@
 /*! @file Behaviour.h
-    @brief Declaration of behaviour class
+    @brief Declaration of the top-level behaviour class
+ 
+    @class Behaviour
+    @brief The top-level behaviour class
+ 
+    The Behaviour has a single BehaviourProvider. The BehaviourProvider can
+    be changed online.
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,21 +28,34 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include "Behaviour/Jobs.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+class BehaviourProvider;
+
+class JobList;
+class NUSensorsData;
+class NUActionatorsData;
+class FieldObjects;
+class GameInformation;
+class TeamInformation;
+
+#include <vector>
+#include <string>
 
 class Behaviour
 {
 public:
     Behaviour();
     ~Behaviour();
+    void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     
-    void process(JobList& jobs);
-    void processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width);
-    void TrackPoint(JobList& jobs,float currPan, float currTilt, float x, float y, int IMAGE_HEIGHT, int IMAGE_WIDTH);
-    void Pan(JobList& jobs);
-
+    void setNextBehaviour(std::string name);
+    void setNextBehaviour(BehaviourProvider* behaviour);
+    
+private:
+    BehaviourProvider* nameToProvider(std::string name);
+    std::string simplifyName(const std::string& input);
+private:
+    BehaviourProvider* m_behaviour;             //!< the current behaviour provider
+    BehaviourProvider* m_next_behaviour;        //!< the next behaviour provider. This will be NULL when we wish to continue to use m_behaviour (ie most of the time).
 };
 
 

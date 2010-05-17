@@ -20,125 +20,102 @@
  */
 
 #include "Behaviour.h"
-#include "NUPlatform/NUSystem.h"
-#include "Tools/Math/General.h"
+#include "BehaviourProvider.h"
+
+#include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "MiscBehaviours/VisionCalibrationProvider.h"
+#include "DemoBehaviours/ChaseBallProvider.h"
+
+#include "Jobs/JobList.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+#include "GameController/GameInformation.h"
+#include "TeamInformation.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-
+#include "targetconfig.h"
 using namespace std;
-using namespace mathGeneral;
 
 Behaviour::Behaviour()
 {
-    
+    #ifndef TARGET_IS_NAOWEBOTS
+        m_behaviour = new SelectBehaviourProvider(this);
+    #else
+        // For Webots, create the behaviour you want to run here 
+        m_behaviour = new ChaseBallProvider(this, false);
+    #endif
+    m_next_behaviour = NULL;
 }
-
 
 Behaviour::~Behaviour()
 {
-    
+    delete m_behaviour;
+    if (m_next_behaviour != NULL)
+        delete m_next_behaviour;
 }
 
-void Behaviour::process(JobList& jobs)
-{
+/*! @brief The main behaviour process function.
+        
+    Calls the process function of the current behaviour provider and handles change of provider when there is a next one.
 
-}
-void Behaviour::processFieldObjects(JobList& jobs,FieldObjects* AllObjects,NUSensorsData* data, int height, int width)
+    @param jobs the nubot job list
+    @param data the nubot sensor data
+    @param actions the nubot actionators data
+    @param fieldobjects the nubot world model
+    @param gameinfo the nubot game information
+    @param teaminfo the nubot team information
+*/
+void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
-    static int runcount = 0;
-    if (runcount < 5)
+    if (m_next_behaviour != NULL)
     {
-        vector<float> walkVector;
-        walkVector.push_back(5);
-        walkVector.push_back(0);
-        walkVector.push_back(0);
-        WalkJob* walk = new WalkJob(walkVector);
-        jobs.addMotionJob(walk);
-        runcount++;
+        delete m_behaviour;
+        m_behaviour = m_next_behaviour;
+        m_next_behaviour = NULL;
     }
+    m_behaviour->process(jobs, data, actions, fieldobjects, gameinfo, teaminfo);
+}
+
+void Behaviour::setNextBehaviour(std::string name)
+{
+    m_next_behaviour = nameToProvider(name);
+}
+
+void Behaviour::setNextBehaviour(BehaviourProvider* behaviour)
+{
+    m_next_behaviour = behaviour;
+}
+
+
+BehaviourProvider* Behaviour::nameToProvider(std::string name)
+{
+    name = simplifyName(name);
+    if (name.compare("selectbehaviour") == 0)
+        return new SelectBehaviourProvider(this);
+    else if (name.compare("chaseball") == 0)
+        return new ChaseBallProvider(this);
+    else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)
+        return new VisionCalibrationProvider(this);
     else
+        return NULL;
+}
+
+
+/*! @brief Simplifies a name. The name is converted to lowercase, and spaces, underscores, forward slash, backward slash and dots are removed from the name.
+    @param input the name to be simplified
+    @return the simplified string
+ */
+string Behaviour::simplifyName(const string& input)
+{
+    string namebuffer, currentletter;
+    // compare each letter to a space and an underscore and a forward slash
+    for (unsigned int j=0; j<input.size(); j++)
     {
-        if(nusystem->getTime() - AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() < 500)
-        {
-            static const float maxspeed = 10;
-            float headyaw;
-            data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-            float measureddistance = AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-            float balldistance;
-            if (measureddistance < 46)
-                balldistance = 1;
-            else
-                balldistance = sqrt(pow(measureddistance,2) - 46*46);
-            float ballbearing = headyaw + AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-            
-            vector<float> walkVector(3, 0);
-            
-            walkVector[0] = 10*cos(ballbearing);
-            walkVector[1] = 2*sin(ballbearing);
-            walkVector[2] = ballbearing/3.0;
-            
-            WalkJob* walk = new WalkJob(walkVector);
-            jobs.addMotionJob(walk);
-            //debug << "WalkJob created: Walk to BALL: "<< walkVector[0] << ","<<walkVector[1] <<"," << headYaw/2 << endl;
-            
-            float headpitch;
-            data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            TrackPoint(jobs, headyaw, headpitch, AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenX(), AllObjects->mobileFieldObjects[FieldObjects::FO_BALL].ScreenY(), height, width);
-        }
-        else
-        {
-            vector<float> walkVector;
-            walkVector.push_back(0);
-            walkVector.push_back(0);
-            walkVector.push_back(0);
-            WalkJob* walk = new WalkJob(walkVector);
-            jobs.addMotionJob(walk);
-            //debug << "WalkJob not created: STOP WALKING " << endl;
-            Pan(jobs);
-        }
+        currentletter = input.substr(j, 1);
+        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+            namebuffer += tolower(currentletter[0]);            
     }
+    return namebuffer;
 }
-
-void Behaviour::TrackPoint(JobList& jobs,float currPan, float currTilt, float x, float y, int IMAGE_HEIGHT, int IMAGE_WIDTH)
-{
-
-    double FOVx = deg2rad(45.0f);
-    double FOVy = deg2rad(34.45f);
-    float radsPerPixelHoriz = FOVx/IMAGE_WIDTH;
-    float radsPerPixelVert = FOVy/IMAGE_HEIGHT;
-
-    float cx = (IMAGE_WIDTH/2); // Center X -> desired position
-    float cy = (IMAGE_HEIGHT/2); // Center Y -> desired position
-
-    float xError = cx - x;
-    float yError = cy - y;
-
-    float alphaX = 0.8; //0.33;
-    float alphaY = 0.8; //0.5;
-
-    float angErrX = alphaX*xError*radsPerPixelHoriz;
-    float angErrY = alphaY*yError*radsPerPixelVert;
-
-    float newPan = currPan + angErrX;
-    float newTilt = currTilt - angErrY;
-    //float newTilt = currTilt;
-
-    //const float CAMERA_BOTTOM_MIN_TILT = -0.2f;
-
-    vector<float> headVector;
-    headVector.push_back(newTilt);
-    headVector.push_back(newPan);
-    HeadJob * head = new HeadJob(0,headVector);
-    
-    jobs.addMotionJob(head);
- 
-  return;
-}
-
-void Behaviour::Pan(JobList& jobs)
-{
-    HeadPanJob* head = new HeadPanJob(HeadPanJob::Ball);
-    jobs.addMotionJob(head);
-    return;
-}
-

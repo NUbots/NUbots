@@ -28,10 +28,7 @@
 #ifdef USE_KICK
     #include "NUKick.h"
 #endif
-#ifdef USE_BLOCK
-    #include "NUBlock.h"
-#endif
-#ifdef USE_SAVE
+#if defined(USE_BLOCK) or defined(USE_SAVE)
     #include "NUSave.h"
 #endif
 #ifdef USE_SCRIPT
@@ -61,35 +58,30 @@ NUMotion::NUMotion()
     #endif
     m_current_time = 0;
     m_previous_time = 0;
+    m_last_kill_time = m_current_time - 10000;
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
     
     #if defined(USE_WALK)
         m_walk = NUWalk::getWalkEngine();
-        #if defined (USE_KICK)
+        #if defined(USE_KICK)
             m_kick = new NUKick(m_walk);
         #endif
-        #if defined (USE_BLOCK)
-            m_block = new NUBlock(m_walk);
-        #endif
-        #if defined (USE_SAVE)
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
             m_save = new NUSave(m_walk);
         #endif
-        #if defined (USE_SCRIPT)
+        #if defined(USE_SCRIPT)
             m_script = new Script(m_walk);
         #endif
     #else
-        #if defined (USE_KICK)
+        #if defined(USE_KICK)
             m_kick = new NUKick(NULL);
         #endif
-        #if defined (USE_BLOCK)
-            m_block = new NUBlock(NULL);
-        #endif
-        #if defined (USE_SAVE)
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
             m_save = new NUSave(NULL);
         #endif
-        #if defined (USE_SCRIPT)
+        #if defined(USE_SCRIPT)
             m_script = new Script(NULL);
         #endif
     #endif
@@ -118,10 +110,7 @@ NUMotion::~NUMotion()
         if (m_kick != NULL)
             delete m_kick;                   
     #endif
-    #ifdef USE_BLOCK
-        delete m_block;
-    #endif
-    #ifdef USE_SAVE
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
         delete m_save;
     #endif
     #ifdef USE_SCRIPT
@@ -133,6 +122,7 @@ NUMotion::~NUMotion()
  */
 void NUMotion::kill()
 {
+    m_last_kill_time = m_current_time;
     #ifdef USE_HEAD
         m_head->kill();
     #endif
@@ -142,10 +132,7 @@ void NUMotion::kill()
     #ifdef USE_KICK
         m_kick->kill();                   
     #endif
-    #ifdef USE_BLOCK
-        m_block->kill();
-    #endif
-    #ifdef USE_SAVE
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
         m_save->kill();
     #endif
     
@@ -205,28 +192,50 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     m_actions = actions;
     m_current_time = m_data->CurrentTime;
     
-    if (m_data->isFalling())
+    if (m_fall_protection->enabled() and m_data->isFalling())
+    {   // if falling no other motion module can run
         m_fall_protection->process(data, actions);
-    else if (m_data->isFallen())                        // If fallen you can only getup
-    {
+    }
+    else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
+    {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
         m_getup->process(data, actions);
-        if (m_getup->headReady())                       // And you can only use the head if the getup lets you
+        if (not m_getup->isUsingHead())
         {
             #ifdef USE_HEAD
                 m_head->process(data, actions);
             #endif
         }
     }
-    else                                                // If not falling and not fallen I can do kicks, walks, saves and blocks
-    {
+    else
+    {   // if we aren't falling, fallen or getting up then we can run some of the other motion modules
         #ifdef USE_HEAD
             m_head->process(data, actions);
         #endif
-        #ifdef USE_WALK
-            m_walk->process(data, actions);
-        #endif
+        
+        // if kick or save are running then they must run until completion (unless interrupted by fall protection or getup)
         #ifdef USE_KICK
+        if (m_kick->isActive())
             m_kick->process(data, actions);
+        else
+        #endif
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
+            if (m_save->isActive())
+                m_save->process(data, actions);
+            else {
+        #endif
+            // if kick and save aren't running then we can run scripts and walk
+            #ifdef USE_SCRIPT
+            if (m_script->isActive())
+                m_script->process(data, actions);
+            if (not m_script->isUsingLegs())
+            #endif
+                #ifdef USE_WALK
+                    m_walk->process(data, actions);
+                #else
+                    ;
+                #endif
+        #if defined(USE_KICK) or defined(USE_BLOCK) or defined(USE_SAVE)
+            }
         #endif
     }
     
@@ -249,7 +258,7 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL)
+    if (jobs == NULL || m_current_time < m_last_kill_time + 5000)
         return;
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
@@ -285,12 +294,10 @@ void NUMotion::process(JobList* jobs)
                 m_head->process(reinterpret_cast<HeadNodJob*> (*it));
                 break;
         #endif
-        #ifdef USE_BLOCK
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
             case Job::MOTION_BLOCK:
-                m_block->process(reinterpret_cast<BlockJob*> (*it));
+                m_save->process(reinterpret_cast<BlockJob*> (*it));
                 break;
-        #endif
-        #ifdef USE_SAVE
             case Job::MOTION_SAVE:
                 m_save->process(reinterpret_cast<SaveJob*> (*it));
                 break;

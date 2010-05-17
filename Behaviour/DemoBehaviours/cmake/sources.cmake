@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -19,41 +19,17 @@ IF(DEBUG)
     MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
 ENDIF()
 
+########## List your source files here! ############################################
+SET (YOUR_SRCS ChaseBallProvider.cpp ChaseBallProvider.h
+)
+####################################################################################
+########## List your subdirectories here! ##########################################
+SET (YOUR_DIRS 
+)
+####################################################################################
+
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/motionconfig.cmake")
-
-########## List your source files here! ############################################
-SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
-                FallProtection.cpp FallProtection.h
-                Getup.cpp Getup.h
-                Walks/WalkParameters.cpp Walks/WalkParameters.h
-)
-
-SET (YOUR_DIRS 	Tools)
-
-IF(NUBOT_USE_MOTION_HEAD)
-	LIST(APPEND YOUR_SRCS NUHead.cpp NUHead.h)
-	LIST(APPEND YOUR_DIRS Head)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK)
-	LIST(APPEND YOUR_SRCS NUWalk.cpp NUWalk.h)
-	LIST(APPEND YOUR_DIRS Walks)
-ENDIF()
-IF(NUBOT_USE_MOTION_KICK)
-	LIST(APPEND YOUR_SRCS NUKick.cpp NUKick.h)
-	LIST(APPEND YOUR_DIRS Kicks)
-ENDIF()
-IF(NUBOT_USE_MOTION_BLOCK OR NUBOT_USE_MOTION_SAVE)
-	LIST(APPEND YOUR_SRCS NUSave.cpp NUSave.h)
-	LIST(APPEND YOUR_DIRS )
-ENDIF()
-IF(NUBOT_USE_MOTION_SCRIPT)
-	LIST(APPEND YOUR_SRCS Script.cpp Script.h)
-	LIST(APPEND YOUR_DIRS )
-ENDIF()
-####################################################################################
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 

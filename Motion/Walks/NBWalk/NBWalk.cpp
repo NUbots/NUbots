@@ -433,11 +433,11 @@ void NBWalk::updateActionatorsData()
     nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
     nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
     
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, 75);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, 75);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, 50);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, 50);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, 35);
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, 30);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, 35);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, 30);
 }
 

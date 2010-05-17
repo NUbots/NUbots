@@ -42,6 +42,7 @@ class Vision
     const unsigned char* currentLookupTable;    //!< Storage of the current colour lookup table.
     unsigned char* LUTBuffer;                   //!< Storage of the current colour lookup table.
     unsigned char* testLUTBuffer;
+    int spacings;
     
     NUCamera* m_camera;                         //!< pointer to the camera 
     NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
@@ -183,8 +184,11 @@ class Vision
                      std::vector< TransitionSegment > horizontalSegments);
 
 
+    bool isPixelOnScreen(int x, int y);
+    int getImageHeight(){ return currentImage->getHeight();}
+    int getImageWidth(){return currentImage->getWidth();}
 
-
+    int getScanSpacings(){return spacings;}
 
 };
 #endif // VISION_H

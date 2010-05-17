@@ -102,7 +102,9 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors/NUSensorsData.h \
     ../Tools/Math/General.h \
     ../Vision/CornerPoint.h \
-    ../Kinematics/OrientationUKF.h
+    ../Kinematics/OrientationUKF.h \
+    ../Motion/Tools/MotionScript.h \
+    ../Motion/Tools/MotionCurves.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \

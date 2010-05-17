@@ -262,52 +262,53 @@ void NUSensors::calculateHorizon()
     m_data->BalanceHorizon->setData(m_current_time, line, true );
 }
 
-
+/*! @brief Calculates the duration of the last press on each of the buttons and bumpers
+ */
 void NUSensors::calculateButtonTriggers()
 {
-        static float prevValueChest = 0.0f;
-        static float prevValueLeftBumper = 0.0f;
-        static float prevValueRightBumper = 0.0f;
-
-        float pressTimeChest(0.0f);
-        float pressTimeLeftBumper(0.0f);
-        float pressTimeRightBumper(0.0f);
-
-        if (m_previous_time != 0)
-        {
-            pressTimeChest = (*(m_data->ButtonTriggers))[0];
-            pressTimeLeftBumper = (*(m_data->ButtonTriggers))[1];
-            pressTimeRightBumper = (*(m_data->ButtonTriggers))[2];
-        }
+    static float nextChestDuration = 0;
+    static float nextLeftDuration = 0;
+    static float nextRightDuration = 0;
+    static vector<float> durations(3,0);
+    
+    static float prevChestState = 0;
+    static float prevLeftState = 0;
+    static float prevRightState = 0;
 
 	vector<float> tempData;
-        if(m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
-        {
-            if(tempData[0] != prevValueChest)
-                pressTimeChest = m_current_time;
-            prevValueChest = tempData[0];
+    if (m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
+    {
+        if (tempData[0] > 0.5)
+            nextChestDuration += (m_current_time - m_previous_time);
+        else if (prevChestState > 0.5)
+        {   // if this is a negative edge update the last press duration
+            durations[0] = nextChestDuration;
+            nextChestDuration = 0;
         }
+        prevChestState = tempData[0];
+    }
 
-        if(m_data->getFootBumperValues(NUSensorsData::AllFeet,tempData) && tempData.size() >= 2)
-        {
-            // Left Bumper
-            if(tempData[0] != prevValueLeftBumper)
-                pressTimeLeftBumper = m_current_time;
-            prevValueLeftBumper = tempData[0];
-
-            // Right Bumper
-            if(tempData[1] != prevValueLeftBumper)
-                pressTimeRightBumper = m_current_time;
-            prevValueRightBumper = tempData[1];
+    if(m_data->getFootBumperValues(NUSensorsData::AllFeet, tempData) && tempData.size() >= 2)
+    {
+        if (tempData[0] > 0.5)
+            nextLeftDuration += (m_current_time - m_previous_time);
+        else if (prevLeftState > 0.5)
+        {   // if this is a negative edge update the last press duration
+            durations[1] = nextLeftDuration;
+            nextLeftDuration = 0;
         }
-
-        // Now find the time since triggered and set to soft sensor value.
-        tempData.clear();
-        tempData.push_back(m_current_time - pressTimeChest);
-        tempData.push_back(m_current_time - pressTimeLeftBumper);
-        tempData.push_back(m_current_time - pressTimeRightBumper);
-        m_data->ButtonTriggers->setData(m_current_time, tempData, true);
-        return;
+        prevLeftState = tempData[0];
+        
+        if (tempData[1] > 0.5)
+            nextRightDuration += (m_current_time - m_previous_time);
+        else if (prevRightState > 0.5)
+        {   // if this is a negative edge update the last press duration
+            durations[2] = nextRightDuration;
+            nextRightDuration = 0;
+        }
+        prevRightState = tempData[1];
+    }
+    m_data->ButtonTriggers->setData(m_current_time, durations, true);
 }
 
 /*! @brief Updates the zero moment point estimate using the current sensor data

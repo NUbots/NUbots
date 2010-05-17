@@ -24,6 +24,21 @@
 #include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkJob
+    @param x the x speed in cm/s
+    @param y the y speed in cm/s
+    @param yaw the yaw speed in cm/s
+*/
+WalkJob::WalkJob(float x, float y, float yaw) : MotionJob(Job::MOTION_WALK)
+{
+    m_job_time = 0;
+    vector<float> speed(3,0);
+    speed[0] = x;
+    speed[1] = y;
+    speed[2] = yaw;
+    m_walk_speed = speed;
+}
+
+/*! @brief Constructs a WalkJob
 
     @param speed the speed for the walk job [x (cm/s), y (cm/s), theta (rad/s)]
  */

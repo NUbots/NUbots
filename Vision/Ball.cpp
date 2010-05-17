@@ -93,7 +93,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
         spacings = 2;
     }
     //qDebug() << spacings ;
-    int direction = ClassifiedSection::DOWN;
+    int direction = ScanLine::DOWN;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
     std::vector< Vector2<int> > BallPoints;

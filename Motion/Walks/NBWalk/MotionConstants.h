@@ -22,10 +22,15 @@
 #ifndef _MotionConstants_h_DEFINED
 #define _MotionConstants_h_DEFINED
 #include "NBInclude/Kinematics.h"
+#include "targetconfig.h"
 
 namespace MotionConstants {
 
-    const static float MOTION_FRAME_LENGTH_S = 0.02f;
+    #if defined(TARGET_IS_NAO)
+        const static float MOTION_FRAME_LENGTH_S = 0.01f;
+    #elif defined(TARGET_IS_NAOWEBOTS)
+        const static float MOTION_FRAME_LENGTH_S = 0.04f;
+    #endif
 
 	enum MotionType {
 		WALK = 0,
