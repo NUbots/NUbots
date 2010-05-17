@@ -3,45 +3,7 @@
 
     @author Jason Kulk
  
- So what can Motion do?
-    - walk
-    - track points, pan, nod with the head
-    - do kicks
-    - play scripts (get-ups, and probably blocks)
- 
- So that looks like four sub modules.
- 
- NUMotion gets some jobs; BODY and HEAD. Now I need to convert those jobs into
- other jobs, or put the actions in the NUActionatorsData
- 
- WALK.
-    Input:
-        NUSensorsData
-        Current walk-related job
-    Output:
-        NUActionatorsData
- 
- HEAD.
-    Input: 
-        NUSensorsData (I think that you should proably try to stablise the head, and maybe use some smarter control)
-        Current head-related job
-    Output:
-        NUActionatorsData
- 
- KICK.
-    Input:
-        NUSensorsData (The kick should be closed loop)
-        Current kick-related job
-    Output:
-        NUActionatorsData
- 
- BLOCK.
- 
- SAVE.
- 
- GETUP.
- 
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -56,34 +18,157 @@
  You should have received a copy of the GNU General Public License
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "NUMotion.h"
+#ifdef USE_HEAD
+    #include "NUHead.h"
+#endif
+#ifdef USE_WALK
+    #include "NUWalk.h"
+#endif
+#ifdef USE_KICK
+    #include "NUKick.h"
+#endif
+#if defined(USE_BLOCK) or defined(USE_SAVE)
+    #include "NUSave.h"
+#endif
+#ifdef USE_SCRIPT
+    #include "Script.h"
+#endif
+
+#include "Behaviour/Jobs.h"
+#include "FallProtection.h"
+#include "Getup.h"
+#include "Tools/MotionScript.h"
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUMotion.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion()
 {
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::NUMotion" << endl;
-#endif
-#ifdef USE_HEAD
-    m_head = new NUHead();
-#endif
-#ifdef USE_WALK
-    m_walk = NUWalk::getWalkEngine();       // I'd really like the switching between walk engines to be done at another level!
-#endif
-#ifdef USE_KICK
-    m_kick = new NUKick();
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::NUMotion" << endl;
+    #endif
+    m_current_time = 0;
+    m_previous_time = 0;
+    m_last_kill_time = m_current_time - 10000;
+    #ifdef USE_HEAD
+        m_head = new NUHead();
+    #endif
+    
+    #if defined(USE_WALK)
+        m_walk = NUWalk::getWalkEngine();
+        #if defined(USE_KICK)
+            m_kick = new NUKick(m_walk);
+        #endif
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
+            m_save = new NUSave(m_walk);
+        #endif
+        #if defined(USE_SCRIPT)
+            m_script = new Script(m_walk);
+        #endif
+    #else
+        #if defined(USE_KICK)
+            m_kick = new NUKick(NULL);
+        #endif
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
+            m_save = new NUSave(NULL);
+        #endif
+        #if defined(USE_SCRIPT)
+            m_script = new Script(NULL);
+        #endif
+    #endif
+    
+    //m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
  */
 NUMotion::~NUMotion()
 {
+    if (m_fall_protection != NULL)
+        delete m_fall_protection;
+    
+    if (m_getup != NULL)
+        delete m_getup;                   
+    #ifdef USE_HEAD
+        if (m_head != NULL)
+            delete m_head;
+    #endif
+    #ifdef USE_WALK
+        if (m_walk != NULL)
+            delete m_walk;                
+    #endif
+    #ifdef USE_KICK
+        if (m_kick != NULL)
+            delete m_kick;                   
+    #endif
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+        delete m_save;
+    #endif
+    #ifdef USE_SCRIPT
+        delete m_script;
+    #endif
+}
+
+/*! @brief Adds actions to bring the robot to rest quickly, and go into a safe-for-robot pose
+ */
+void NUMotion::kill()
+{
+    m_last_kill_time = m_current_time;
+    #ifdef USE_HEAD
+        m_head->kill();
+    #endif
+    #ifdef USE_WALK
+        m_walk->kill();                
+    #endif
+    #ifdef USE_KICK
+        m_kick->kill();                   
+    #endif
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+        m_save->kill();
+    #endif
+    
+    float safelegpositions[] = {0, -1.0, 0, 2.16, 0, -1.22};
+    float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
+    float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
+    vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
+    vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
+    vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
+    vector<float> legvelocities(legpositions.size(), 1.0);
+    vector<float> armvelocities(larmpositions.size(), 1.0);
+    
+    // check if there is a reason it is not safe or possible to go into the crouch position
+    if (m_actions == NULL)
+        return;
+    else if (m_data != NULL)
+    {
+        vector<float> orientation;
+        if (m_data->getOrientation(orientation))
+            if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
+                return;
+        /*bool leftsupport, rightsupport;
+        if (m_data->leftSupport(leftsupport) and m_data->rightSupport(rightsupport))
+            if (not (leftsupport and rightsupport)
+                return;*/
+    }
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 500, larmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 500, rarmpositions, armvelocities, 30);
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 2000, larmpositions, armvelocities, 0);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 2000, rarmpositions, armvelocities, 0);
 }
 
 /*! @brief Process new sensor data, and produce actionator commands.
@@ -103,147 +188,133 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 #endif
     if (data == NULL || actions == NULL)
         return;
+    m_data = data;
+    m_actions = actions;
+    m_current_time = m_data->CurrentTime;
     
-    static vector<float> fallingvalues;
-    static vector<float> fallenvalues;
-    data->getFalling(fallingvalues);
-    data->getFallen(fallenvalues);              //! @todo Put in a compile flag here or something because I need to walk while fallen atm
-    if (false && fallingvalues[0] > 0)                           // If falling you can't do ANY motion except the fall protection.
+    if (m_fall_protection->enabled() and m_data->isFalling())
+    {   // if falling no other motion module can run
         m_fall_protection->process(data, actions);
-    else if (false && fallenvalues[0] > 0)                       // If fallen you can only getup
-    {
+    }
+    else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
+    {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
         m_getup->process(data, actions);
-        if (m_getup->headReady())                       // And you can only use the head if the getup lets you
+        if (not m_getup->isUsingHead())
         {
             #ifdef USE_HEAD
                 m_head->process(data, actions);
             #endif
         }
     }
-    else                                                // If not falling and not fallen I can do kicks, walks, saves and blocks
-    {
+    else
+    {   // if we aren't falling, fallen or getting up then we can run some of the other motion modules
         #ifdef USE_HEAD
             m_head->process(data, actions);
         #endif
-        #ifdef USE_WALK
-            m_walk->process(data, actions);
-        #endif
+        
+        // if kick or save are running then they must run until completion (unless interrupted by fall protection or getup)
         #ifdef USE_KICK
+        if (m_kick->isActive())
             m_kick->process(data, actions);
+        else
+        #endif
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
+            if (m_save->isActive())
+                m_save->process(data, actions);
+            else {
+        #endif
+            // if kick and save aren't running then we can run scripts and walk
+            #ifdef USE_SCRIPT
+            if (m_script->isActive())
+                m_script->process(data, actions);
+            if (not m_script->isUsingLegs())
+            #endif
+                #ifdef USE_WALK
+                    m_walk->process(data, actions);
+                #else
+                    ;
+                #endif
+        #if defined(USE_KICK) or defined(USE_BLOCK) or defined(USE_SAVE)
+            }
         #endif
     }
+    
+    m_previous_time = m_current_time;
+    
+    /*static bool alreadyran = false;
+    if (m_current_time > 15500 and not alreadyran)
+    {
+        m_block_left->play(data, actions);
+        alreadyran = true;
+    }*/
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
- 
-    @attention There is a very rare segmentation fault in this function. This will need to be looked at eventually.
-               I think I might need to change things around so I don't remove jobs mid loop!
     
     @param jobs the current list of jobs
  */
-void NUMotion::process(JobList& jobs)
+void NUMotion::process(JobList* jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::process():" << endl;
+    debug << "NUMotion::process(): Start" << endl;
 #endif
+    if (jobs == NULL || m_current_time < m_last_kill_time + 5000)
+        return;
     
-    static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs.motion_begin(); it != jobs.motion_end(); ++it)
+    list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
+    while (it != jobs->motion_end())
     {
-#ifdef USE_WALK
-        if ((*it)->getID() == Job::MOTION_WALK)
-        {   // process a walk speed job
-            static vector<float> speed;
-            static WalkJob* job;
-            
-            job = (WalkJob*) (*it);
-            job->getSpeed(speed);
-            #if DEBUG_NUMOTION_VERBOSITY > 4
-                debug << "NUMotion::process(): Processing a walkSpeed job." << endl;
-            #endif
-            
-            m_walk->walkSpeed(speed);
-            //jobs.removeMotionJob(job);
-        }
-        else if ((*it)->getID() == Job::MOTION_WALK_TO_POINT)
-        {   // process a walk to point job
-            static double time;
-            static vector<float> position;
-            static WalkToPointJob* job;
-            
-            job = (WalkToPointJob*) (*it);
-            job->getPosition(time, position);
-            #if DEBUG_NUMOTION_VERBOSITY > 4
-                debug << "NUMotion::process(): Processing a walkToPoint job." << endl;
-            #endif
-            
-            m_walk->walkToPoint(time, position);
-            //jobs.removeMotionJob(job);
-        }
-        else if ((*it)->getID() == Job::MOTION_WALK_PARAMETERS)
-        {   // process a walk to point job
-            static double time;
-            static WalkParameters parameters;
-            static WalkParametersJob* job;
-            
-            job = (WalkParametersJob*) (*it);
-            job->getWalkParameters(parameters);
-            #if DEBUG_NUMOTION_VERBOSITY > 4
-                debug << "NUMotion::process(): Processing a walkparameter job." << endl;
-                parameters.summaryTo(debug);
-            #endif
-            
-            m_walk->setWalkParameters(parameters);
-            //jobs.removeMotionJob(job);
-            #if DEBUG_NUMOTION_VERBOSITY > 4
-                debug << "NUMotion::process(): Processing a walkparameter job. After remove." << endl;
-            #endif
-        }
-#else
-        if (false)
+        Job::job_id_t id = (*it)->getID();
+        switch (id) 
         {
+        #ifdef USE_WALK
+            case Job::MOTION_WALK:
+                m_walk->process(reinterpret_cast<WalkJob*> (*it));
+                break;
+            case Job::MOTION_WALK_TO_POINT:
+                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it));
+                break;
+            case Job::MOTION_WALK_PARAMETERS:
+                m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_KICK
+            case Job::MOTION_KICK:
+                m_kick->process(reinterpret_cast<KickJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_HEAD
+            case Job::MOTION_HEAD:
+                m_head->process(reinterpret_cast<HeadJob*> (*it));
+                break;
+            case Job:: MOTION_PAN:
+                m_head->process(reinterpret_cast<HeadPanJob*> (*it));
+                break;
+            case Job::MOTION_NOD:
+                m_head->process(reinterpret_cast<HeadNodJob*> (*it));
+                break;
+        #endif
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
+            case Job::MOTION_BLOCK:
+                m_save->process(reinterpret_cast<BlockJob*> (*it));
+                break;
+            case Job::MOTION_SAVE:
+                m_save->process(reinterpret_cast<SaveJob*> (*it));
+                break;
+        #endif
+        #ifdef USE_SCRIPT
+            case Job::MOTION_SCRIPT:
+                m_script->process(reinterpret_cast<ScriptJob*> (*it));
+        #endif
+            default:
+                break;
         }
-#endif  // USE_WALK
-        
-#ifdef USE_KICK
-        else if ((*it)->getID() == Job::MOTION_KICK)
-        {   // process a kick job
-            static double time;
-            static vector<float> kickposition;
-            static vector<float> kicktarget;
-            static KickJob* job;
-            
-            job = (KickJob*) (*it);
-            job->getKick(time, kickposition, kicktarget);
-#if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NUMotion::process(): Processing a kick job." << endl;
-#endif
-            
-            m_kick->kickToPoint(kickposition, kicktarget);
-            //jobs.removeMotionJob(job);
-        }
-#endif  // USE_KICK 
-#ifdef USE_HEAD
-        else if ((*it)->getID() == Job::MOTION_HEAD)
-        {   // process a kick job
-            static double time;
-            static vector<float> headposition;
-            static HeadJob* job;
-            
-            job = (HeadJob*) (*it);
-            job->getPosition(time, headposition);
-#if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NUMotion::process(): Processing a head job." << endl;
-#endif
-            
-            m_head->process(headposition);
-            //jobs.removeMotionJob(job);
-        }
-#endif  // USE_HEAD 
+        it = jobs->removeMotionJob(it);
     }
-    jobs.clear();
+    
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::process(): Finished." << endl;
+        debug << "NUMotion::process(): Finished" << endl;
     #endif
 }
+
 

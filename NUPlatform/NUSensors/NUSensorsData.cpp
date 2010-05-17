@@ -59,6 +59,8 @@ NUSensorsData::NUSensorsData()
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
     
+    CurrentTime = 0;
+    
     // create the sensor_t's
     addSensor(JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
     addSensor(JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
@@ -68,10 +70,21 @@ NUSensorsData::NUSensorsData()
     addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
     addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
     addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
+
+    // Kinematic sensors
+    addSoftSensor(LeftLegTransform, string("LeftLegTransform"), sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM);
+    addSoftSensor(RightLegTransform, string("RightLegTransform"), sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM);
+    addSoftSensor(SupportLegTransform, string("SupportLegTransform"), sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM);
+    addSoftSensor(CameraTransform, string("CameraTransform"), sensor_t::KINEMATICS_CAMERA_TRANSFORM);
+    addSoftSensor(CameraToGroundTransform, string("CameraToGroundTransform"), sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM);
+
+    addSoftSensor(Odometry, string("Odometry"), sensor_t::JOINT_ODOMETRY);
+    addSoftSensor(CameraHeight, string("CameraHeight"), sensor_t::JOINT_CAMERAHEIGHT);
     
     // Balance Sensors:
     addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
+    addSoftSensor(BalanceGyroOffset, string("BalanceGyroOffset"), sensor_t::BALANCE_GYRO_OFFSET);
     addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
     addSoftSensor(BalanceHorizon, string("BalanceHorzion"), sensor_t::BALANCE_HORIZON);
     addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
@@ -84,7 +97,9 @@ NUSensorsData::NUSensorsData()
     // Foot Pressure Sensors:
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
+    addSoftSensor(FootCoP, string("FootCoP"), sensor_t::FOOT_COP);
     addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_FORCE);
     addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
@@ -125,13 +140,8 @@ NUSensorsData::~NUSensorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensorsData::~NUSensorsData" << endl;
 #endif
-    m_sensors.clear();
-    m_head_ids.clear();
-    m_larm_ids.clear();
-    m_rarm_ids.clear();
-    m_torso_ids.clear();
-    m_lleg_ids.clear();
-    m_rleg_ids.clear();
+    for (size_t i=0; i<m_sensors.size(); i++)
+        delete m_sensors[i];
 }
 
 /******************************************************************************************************************************************
@@ -327,6 +337,109 @@ bool NUSensorsData::getJointTemperatures(bodypart_id_t bodypart, vector<float>& 
     return getJointsData(JointTemperatures, bodypart, temperatures);
 }
 
+/* @brief Gets the transform matrix of the left leg
+   @param value will be updated with the left leg transform
+ */
+bool NUSensorsData::getLeftLegTransform(Matrix& value)
+{
+    if (LeftLegTransform == NULL || LeftLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(LeftLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the right leg
+   @param value will be updated with the right leg transform
+ */
+bool NUSensorsData::getRightLegTransform(Matrix& value)
+{
+    if (RightLegTransform == NULL || RightLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(RightLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the support leg
+   @param value will be updated with the support leg transform
+ */
+bool NUSensorsData::getSupportLegTransform(Matrix& value)
+{
+    if (SupportLegTransform == NULL || SupportLegTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(SupportLegTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix of the camera
+   @param value will be updated with the camera transform
+ */
+bool NUSensorsData::getCameraTransform(Matrix& value)
+{
+    if (CameraTransform == NULL || CameraTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(CameraTransform->Data);
+        return true;
+    }
+}
+
+/* @brief Gets the transform matrix converting from the camera coordinates to ground based coordinates
+   @param value will be updated with the camera to ground transform
+ */
+bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
+{
+    if (CameraToGroundTransform == NULL || CameraToGroundTransform->IsValid == false)
+        return false;
+    else
+    {
+        value = Matrix4x4fromVector(CameraToGroundTransform->Data);
+        return true;
+    }
+}
+
+/*! @brief Gets the odometry data since the last call
+    @param time the time of the last call
+    @param values will be updated with the odometry [x (cm), y(cm), yaw(rad)] since time
+ */
+bool NUSensorsData::getOdometry(float& time, vector<float>& values)
+{
+    static double timeoflastcall = 0;
+    if (Odometry == NULL || Odometry->IsValid == false)
+        return false;
+    else
+    {
+        time = timeoflastcall;
+        values = Odometry->Data;
+        timeoflastcall = CurrentTime;
+        Odometry->Data = vector<float> (Odometry->size(),0);
+        return true;
+    }
+}
+
+/* @brief Gets the height of the camera off the ground in cm
+   @param height will be updated with the height of the camera from the ground
+ */
+bool NUSensorsData::getCameraHeight(float& height)
+{
+    if (CameraHeight == NULL || CameraHeight->IsValid == false)
+        return false;
+    else
+    {
+        height = CameraHeight->Data[0];
+        return true;
+    }
+}
+
 /*! @brief Gets the names of the joints in a particular body part.
     @param partid the id of the body part 
     @param names will be updated to contain the names of the joints in that body part
@@ -478,6 +591,21 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the gyro offset values [offsetx, offsety, offsetz]
+    @param values will be updated with the current estimate of the gyro offset
+    @return returns true if the values are valid false otherwise
+ */
+bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
+{
+    if (BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
+        return false;
+    else
+    {
+        values = BalanceGyroOffset->Data;
+        return true;
+    }
+}
+
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
     @param values will be updated with the current orientation estimate
  */
@@ -615,6 +743,45 @@ bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
     }
 }
 
+/*! @brief Gets the centre of pressure as measured by feet sensors
+ 
+    If a single foot is requested the x and y positions are relative to the position of the ankle on the foot.
+    If the CoP for both feet is requested the x and y positions are relative to the torso
+ 
+    @param footid LeftFoot, RightFoot, AllFeet
+    @param x the distance in cm forwards 
+    @param y the distance in cm backwards
+ */
+bool NUSensorsData::getFootCoP(foot_id_t footid, float& x, float& y)
+{
+    if (FootCoP == NULL || FootCoP->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+        {
+            x = (*FootCoP)[0];
+            y = (*FootCoP)[1];
+        }
+        else if (footid == RightFoot)
+        {
+            x = (*FootCoP)[2];
+            y = (*FootCoP)[3];
+        }
+        else if (footid == AllFeet)
+        {
+            x = (*FootCoP)[4];
+            y = (*FootCoP)[5];
+        }
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
 /*! @brief Gets the foot bumper sensor values (order: left to right) in binary (0=off 1=on)
     @param footid the id of the part of the foot you want the readings for
     @param values will be updated with the current readings for the selected foot
@@ -684,6 +851,32 @@ bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
     }
 }
 
+/*! @brief Gets the total force on the foot in Newtons
+    @param footid the id of the part of the foot you want the readings for
+    @param support will be updated to true if footid is supporting the robot.
+    @return true if support was updated, false if invalid
+ */
+bool NUSensorsData::getFootSupport(foot_id_t footid, bool& support)
+{
+    if (FootSupport == NULL || FootSupport->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+            support = static_cast<bool> ((*FootSupport)[0]);
+        else if (footid == RightFoot)
+            support = static_cast<bool> ((*FootSupport)[1]);
+        else if (footid == AllFeet)
+            support = static_cast<bool> ((*FootSupport)[0]) and static_cast<bool> ((*FootSupport)[1]);
+        else
+        {
+            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
 /*! @brief Gets the button values (order: importance) in binary (0=off 1=on)
     @param buttonid the id of the button(s) you want the readings for
     @param values will be updated with the current readings for the selected button(s)
@@ -718,16 +911,28 @@ bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
                                                                                                                  Convienent sub-get Methods
  ******************************************************************************************************************************************/
 
+/*! @brief Returns true if the robot is falling over, false if it is not falling (or it is impossble to tell)
+ */
+bool NUSensorsData::isFalling()
+{
+    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)       // if there is no balance sensor it is impossible to tell it is falling over
+        return false;       
+    else if (BalanceFalling->Data[0] > 0)
+        return true;
+    else
+        return false;
+}
+
 /*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
  */
 bool NUSensorsData::isFallen()
 {
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
         return false;       
-    else if (BalanceFallen->Data[0] <= 0)
-        return false;
-    else
+    else if (BalanceFallen->Data[0] > 0)
         return true;
+    else
+        return false;
 }
 
 /*! @brief Returns true has impacted in the ground in this cycle
@@ -844,14 +1049,14 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("lhipyaw") != string::npos)
-        {
-            LHipYaw = i;
-            m_lleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
+        {
+            LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("lhippitch") != string::npos)
@@ -879,14 +1084,14 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("rhipyaw") != string::npos)
-        {
-            RHipYaw = i;
-            m_rleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
+            m_rleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
+        {
+            RHipYaw = i;
             m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhippitch") != string::npos)

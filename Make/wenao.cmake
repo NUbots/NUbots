@@ -14,7 +14,6 @@
 #   - On Darwin we need to make sure that we target i386 and not x86_64, because at this time weboots does not support x86_64
 #   - print debug information if desired
 
-SET(TARGET_ROBOT_DIR ${TARGET_ROBOT_DIR}/NAOWebots)
 INCLUDE(${TARGET_ROBOT_DIR}/cmake/sources.cmake)
 
 ############################ CMAKE PACKAGE DIRECTORY

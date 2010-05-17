@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <string>
+#include "Tools/Math/Matrix.h"
 using namespace std;
 
 class NUSensorsData
@@ -89,6 +90,7 @@ public:
         SecondaryButton,
         AllButtons
     };
+    // sensor group ids
 public:
     NUSensorsData();
     ~NUSensorsData();
@@ -115,9 +117,20 @@ public:
     bool getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures);
     bool getJointNames(bodypart_id_t bodypart, vector<string>& names);
     
+    // Get methods for soft proprioception
+    bool getLeftLegTransform(Matrix& value);
+    bool getRightLegTransform(Matrix& value);
+    bool getSupportLegTransform(Matrix& value);
+    bool getCameraTransform(Matrix& value);
+    bool getCameraToGroundTransform(Matrix& value);
+
+    bool getOdometry(float& time, vector<float>& values);
+    bool getCameraHeight(float& height);
+    
     // Get methods for the other sensors
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
+    bool getGyroOffsetValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
     bool getHorizon(vector<float>& values);
     bool getButtonTriggers(vector<float>& values);
@@ -128,13 +141,16 @@ public:
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
     
-    // Get methods for other sensors that have logical groups
+    // Get methods for foot pressure sensors
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
+    bool getFootCoP(foot_id_t footid, float& x, float& y);
     bool getFootForce(foot_id_t footid, float& force);
+    bool getFootSupport(foot_id_t footid, bool& support);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
     
     // Common sub-get methods
+    bool isFalling();
     bool isFallen();
     bool footImpact(foot_id_t footid, float& time);
     
@@ -187,12 +203,22 @@ public:
     sensor_t* JointTargets;                     //!< stores the joint position targets (in radians)
     sensor_t* JointStiffnesses;                 //!< stores the joint stiffness values (as a percent)
     sensor_t* JointCurrents;                    //!< stores the joint motor current sensors (in A)
-    sensor_t* JointTorques;                     //!< stores the joint temperatures (in degrees C)
-    sensor_t* JointTemperatures;
+    sensor_t* JointTorques;                     //!< stores the joint torques (in Nm)
+    sensor_t* JointTemperatures;                //!< stores the joint temperatures (in degrees C)
+    
+    sensor_t* LeftLegTransform;                 //!< stores the transform matrix from origin to the left leg
+    sensor_t* RightLegTransform;                //!< stores the transform matrix from origin to the right leg
+    sensor_t* SupportLegTransform;              //!< stores the transform matrix from origin to the support leg
+    sensor_t* CameraTransform;                  //!< stores the transform matrix from origin to the camera
+    sensor_t* CameraToGroundTransform;          //!< stores the transform matrix from the camera to the ground
+
+    sensor_t* Odometry;                         //!< stores the movement in the [x (cm), y (cm),yaw (rad)] calculated from proprioception
+    sensor_t* CameraHeight;                     //!< stores the height of the camera from the ground (cm) calculate from proprioception
     
     // Balance Sensors:
     sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
     sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
+    sensor_t* BalanceGyroOffset;                //!< stores the offsets for gyros
     sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
     sensor_t* BalanceHorizon;                   //!< stores the Horizon line (A,B,C) Ax+ By +C =0
     sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
@@ -205,7 +231,9 @@ public:
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
-    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons
+    sensor_t* FootCoP;                          //!< stores the foot centre of pressure as [lx, ly, rx, ry, x, y]
+    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons  as [l, r, both]
+    sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot as [l, r, both]
     sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     
     // Buttons Sensors:

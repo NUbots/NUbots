@@ -41,12 +41,15 @@
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
 #include "Tools/Math/LSFittedLine.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 #include "localisationwidget.h"
 #include "Vision/ObjectCandidate.h"
+#include "Vision/CornerPoint.h"
 
 class NUimage;
 class ClassifiedImage;
 class Line;
+class LinePoint;
 class Horizon;
 
 class OpenglManager : public QGLWidget
@@ -146,6 +149,27 @@ public:
           @param displayId The id of the display layer to write to.
           */
         void writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts new linepoint vector and maps it to display instructions.
+          @param linepoints The new LinePoints to display.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts new Corner vector and maps it to display instructions.
+          @param corners The new Corner to display.
+          @param displayId The id of the display layer to write to.
+        */
+        void writeCornersToDisplay(std::vector< CornerPoint > Corners, GLDisplay::display displayId);
+        /*!
+          @brief Accepts Field Objects and maps it to display instructions.
+          @param FieldObjects The new fieldObjects to display.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId);
+
 
         /*!
         @brief Removes all of the previous display instructions so old display data is not reused.

@@ -22,7 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  SeeThinkThread.cpp
 		SenseMoveThread.cpp
-		NetworkThread.cpp
+		WatchDogThread.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

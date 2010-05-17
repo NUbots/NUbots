@@ -119,7 +119,7 @@ void NAOSensors::copyFromHardwareCommunications()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOSensors::copyFromHardwareCommunications()" << endl;
 #endif
-    static vector<float> temp;
+    vector<float> temp;
     
     // This takes 0.13ms to complete
     m_al_positions_access->GetValues(temp);
@@ -139,19 +139,31 @@ void NAOSensors::copyFromHardwareCommunications()
     
     m_al_accel_access->GetValues(temp);
     for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to cm/s/s
-        temp[i] = temp[i]*100;
+        temp[i] = temp[i]*15.571;                   // 63 units is approx equal to 981 cm/s/s; (981/63) = 15.571
     m_data->setBalanceAccelerometer(m_current_time, temp);
     
     m_al_gyro_access->GetValues(temp);
-    m_data->setBalanceGyro(m_current_time, temp);
+    for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to rad/s
+        temp[i] = temp[i]/154.7;                    // scaling factor: Alderbaran say it is 2.7 deg/s (PI/(2.7*180) = 1/154.7
+    m_data->setBalanceGyro(m_current_time, temp);   
     
     m_al_footsole_access->GetValues(temp);
     for (unsigned int i=0; i<temp.size(); i++)
         temp[i] = temp[i]*9.81;
     m_data->setFootSoleValues(m_current_time, temp);
     
+    vector<float> bumpers;
+    bumpers.reserve(2);
     m_al_footbumper_access->GetValues(temp);
-    m_data->setFootBumperValues(m_current_time, temp);
+    if (temp[0] + temp[1] > 0.5)      // combine the two left bumpers into one
+        bumpers.push_back(1.0);
+    else
+        bumpers.push_back(0);
+    if (temp[2] + temp[3] > 0.5)      // combine the two right bumpers into one
+        bumpers.push_back(1.0);
+    else
+        bumpers.push_back(0);
+    m_data->setFootBumperValues(m_current_time, bumpers);
     
     m_al_button_access->GetValues(temp);
     m_data->setButtonValues(m_current_time, temp);

@@ -25,27 +25,27 @@ STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE}
 INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  WalkParameters
+SET (YOUR_SRCS  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS )
-IF(USE_WALK_JWALK)
+IF(NUBOT_USE_MOTION_WALK_JWALK)
 	LIST(APPEND YOUR_DIRS JWalk)
 ENDIF()
-IF(USE_WALK_JUPPWALK)
+IF(NUBOT_USE_MOTION_WALK_JUPPWALK)
 	LIST(APPEND YOUR_DIRS JuppWalk)
 ENDIF()
-IF(USE_WALK_NBWALK)
+IF(NUBOT_USE_MOTION_WALK_NBWALK)
 	LIST(APPEND YOUR_DIRS NBWalk)
 ENDIF()
-IF(USE_WALK_VSCWALK)
+IF(NUBOT_USE_MOTION_WALK_VSCWALK)
 	LIST(APPEND YOUR_DIRS VSCWalk)
 ENDIF()
-IF(USE_WALK_ALWALK)
+IF(NUBOT_USE_MOTION_WALK_ALWALK)
 	LIST(APPEND YOUR_DIRS ALWalk)
 ENDIF()
-IF(USE_WALKOPTIMISER)
+IF(NUBOT_USE_MOTION_WALK_WALKOPTIMISER)
 	LIST(APPEND YOUR_DIRS Optimisation)
 ENDIF()
 ####################################################################################

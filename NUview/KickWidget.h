@@ -24,7 +24,6 @@ class QToolButton;
 class GLDisplay;
 
 class JobList;
-class NUIO;
 
 
 class KickWidget : public QWidget
@@ -74,7 +73,6 @@ private:
     void createConnections();   //!< Connect all of the child widgets.
     bool disableWriting;        //!< Flag used to disable the writing of settings back to the layers when updating the displays.
     
-    NUIO* m_io;
     JobList* m_job_list; 
 
     public:

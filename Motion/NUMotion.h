@@ -25,25 +25,29 @@
 #ifndef NUMOTION_H
 #define NUMOTION_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
+class JobList;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
-    #include "NUHead.h"
+    class NUHead;
 #endif
-
 #ifdef USE_WALK
-#include "NUWalk.h"
+    class NUWalk;
 #endif
-
 #ifdef USE_KICK
-    #include "NUKick.h"
+    class NUKick;
 #endif
-
-#include "Behaviour/Jobs.h"
-#include "FallProtection.h"
-#include "Getup.h"
+#if defined(USE_BLOCK) or defined(USE_SAVE)
+    class NUSave;
+#endif
+#ifdef USE_SCRIPT
+    class Script;
+#endif
+class FallProtection;
+class Getup;
+class MotionScript;
 
 class NUMotion
 {
@@ -52,24 +56,41 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
-protected:
+    void process(JobList* jobs);
+    
+    void kill();
 private:
 public:
 protected:
-public:         //! @todo TODO: Fix this. Jason needs a backdoor to the walk engine NOW!
+private:
+    NUSensorsData* m_data;              //!< pointer to shared sensors data object
+    NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
+    
     // essential motion components
-    FallProtection* m_fall_protection;
-    Getup* m_getup;
-#ifdef USE_HEAD
-    NUHead* m_head;
-#endif
-#ifdef USE_WALK
-    NUWalk* m_walk;
-#endif
-#ifdef USE_KICK
-    NUKick* m_kick;
-#endif
+    FallProtection* m_fall_protection;  //!< the fall protection module
+    Getup* m_getup;                     //!< the getup module
+    // optional motion components
+    #ifdef USE_HEAD
+        NUHead* m_head;                     //!< the head module
+    #endif
+    #ifdef USE_WALK
+        NUWalk* m_walk;                     //!< the walk module
+    #endif
+    #ifdef USE_KICK
+        NUKick* m_kick;                     //!< the kick module
+    #endif
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+        NUSave* m_save;                     //!< the save module
+    #endif
+    #ifdef USE_SCRIPT
+        Script* m_script;                   //!< the script module
+    #endif
+    
+    double m_current_time;              //!< the current time (ms)
+    double m_previous_time;             //!< the previous time (ms)
+    double m_last_kill_time;            //!< the last time a kill was called in ms (a recent call disables ALL motion)
+    
+    MotionScript* m_block_left;
 };
 
 #endif

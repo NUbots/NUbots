@@ -5,7 +5,7 @@
 */
 #ifndef LUTTOOLS_H_DEFINED
 #define LUTTOOLS_H_DEFINED
-
+#include "Tools/Image/Pixel.h"
 /*!
   @brief Class contains functions used to load a colour lookup table from a file and also save a colour
          lookup table to a file.
@@ -13,7 +13,17 @@
 class LUTTools
 {
 public:
-    static const int LUT_SIZE = 256*256*256; //!< The size of a lookup table in bytes.
+    static const int LUT_SIZE = 128*128*128; //!< The size of a lookup table in bytes.
+
+    /*!
+      @brief Calculate the Index of a given Colour
+      @param colour 
+      @return index of colour.
+      */
+    static inline unsigned int  getLUTIndex(const Pixel& colour)
+    {
+        return (((colour.y >> 1) <<14) + ((colour.cb >> 1) <<7) + (colour.cr >> 1));
+    }
 
     /*!
       @brief Load a lookup table from a default file into a supplied buffer.

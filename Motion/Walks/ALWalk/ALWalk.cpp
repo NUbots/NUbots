@@ -33,9 +33,6 @@ ALWalk::ALWalk()
 {
     debug << "ALWalk::ALWalk()" << endl;
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
-
-    m_al_motion->setStiffnesses(string("Body"), 1.0f);
-    m_al_motion->setWalkTargetVelocity(0.0, 0, 0, 0);
 }
 
 /*! @brief Destructor for motion module
@@ -46,20 +43,46 @@ ALWalk::~ALWalk()
         delete m_al_motion;
 }
 
+/*! @brief Kill the aldebaran walk engine
+ */
+void ALWalk::kill()
+{
+    m_walk_enabled = false;
+    m_al_motion->killWalk();
+}
+
 void ALWalk::doWalk()
 {
     static unsigned int count = 0;
+    static float max_x = 10.0;
+    static float max_y = 2.0;
+    static float max_yaw = 0.5;
+    
     if (count%4 == 0)
     {   // this is a very simple hack to get almotion to use alot less CPU. It is perfectly reasonable to do this because almotion isn't going to respond that quickly anyway.
-        if (fabs(m_speed_x) > 10)
-            m_speed_x = (m_speed_x/fabs(m_speed_x))*10;
-        if (fabs(m_speed_y) > 10)
-            m_speed_y = (m_speed_y/fabs(m_speed_y))*10;
-        if (fabs(m_speed_yaw) > 1)
-            m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw));
+        if (fabs(m_speed_x) > max_x)
+            m_speed_x = (m_speed_x/fabs(m_speed_x))*max_x;
+        if (fabs(m_speed_y) > max_y)
+            m_speed_y = (m_speed_y/fabs(m_speed_y))*max_y;
+        if (fabs(m_speed_yaw) > max_yaw)
+            m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw))*max_yaw;
         
-        m_al_motion->setWalkTargetVelocity(m_speed_x/10.0, m_speed_y/10.0, m_speed_yaw, 1);
+        m_al_motion->setWalkTargetVelocity(m_speed_x/max_x, m_speed_y/max_y, m_speed_yaw/max_yaw, 1);
     }
+    
+    static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
+    static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, 75);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, 75);
+    if (m_larm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, 30);
+    if (m_rarm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_data->CurrentTime, armnan, armnan, 30);
 }
 
-
+/*! @brief Sets whether the arms are allowed to be moved by the walk engine
+ */
+void ALWalk::setArmEnabled(bool leftarm, bool rightarm)
+{
+    m_al_motion->setWalkArmsEnable(leftarm, rightarm);
+}

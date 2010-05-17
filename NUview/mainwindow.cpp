@@ -13,14 +13,23 @@
 #include <iostream>
 #include <QTabWidget>
 #include <typeinfo>
+#include "NUviewIO/NUviewIO.h"
+
+#include "frameInformationWidget.h"
+#include "bonjour/robotSelectDialog.h"
+#include "bonjour/bonjourserviceresolver.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), bonjourResolver(0)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
+    debug.open("debug.log");
+    errorlog.open("error.log");
+    m_nuview_io = new NUviewIO();
 
     // create mdi workspace
     mdiArea = new QMdiArea(this);
@@ -54,14 +63,13 @@ MainWindow::MainWindow(QWidget *parent)
     connection = new ConnectionWidget(this);
     networkTabs->addTab(connection, connection->objectName());
     walkParameter = new WalkParameterWidget(mdiArea, this);
-    //kick = new KickWidget(mdiArea, this);
-    kick = 0;
+    kick = new KickWidget(mdiArea, this);
     networkTabs->addTab(walkParameter, walkParameter->objectName());
+    networkTabs->addTab(kick, kick->objectName());
     VisionStreamer = new visionStreamWidget(mdiArea, this);
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
     networkTabs->addTab(cameraSetting, cameraSetting->objectName());
-
 
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");
@@ -69,11 +77,19 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabDock->setObjectName(tr("networkTab"));
     addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
 
+    frameInfo = new frameInformationWidget(this);
+    QDockWidget* temp = new QDockWidget(this);
+    temp->setWidget(frameInfo);
+    temp->setObjectName("Frame Information Dock");
+    temp->setWindowTitle(frameInfo->windowTitle());
+    addDockWidget(Qt::RightDockWidgetArea,temp);
+
     createConnections();
     setCentralWidget(mdiArea);
-
+    qDebug() << "Main Window Starting";
     setWindowTitle(QString("NUview"));
     glManager.clearAllDisplays();
+    qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
 }
@@ -87,10 +103,11 @@ MainWindow::~MainWindow()
     delete localisation;
     delete layerSelection;
     delete walkParameter;
-    //delete kick;
+    delete kick;
     delete mdiArea;
     delete visionTabs;
     delete networkTabs;
+    delete frameInfo;
 
 // Delete Actions
     delete openAction;
@@ -107,6 +124,9 @@ MainWindow::~MainWindow()
     delete nativeAspectAction;
     delete newVisionDisplayAction;
     delete newLocWMDisplayAction;
+    delete doBonjourTestAction;
+    
+    delete m_nuview_io;
     return;
 }
 
@@ -205,6 +225,10 @@ void MainWindow::createActions()
     newLocWMDisplayAction = new QAction(tr("&New display"), this);
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
     connect(newLocWMDisplayAction, SIGNAL(triggered()), this, SLOT(createLocWmGlDisplay()));
+
+    doBonjourTestAction = new QAction(tr("&Bonjour Test..."), this);
+    doBonjourTestAction->setStatusTip(tr("Test something."));
+    connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
 }
 
 void MainWindow::createMenus()
@@ -229,6 +253,9 @@ void MainWindow::createMenus()
     navigationMenu->addAction(selectFrameAction);
     navigationMenu->addAction(nextFrameAction);
     navigationMenu->addAction(lastFrameAction);
+
+    testMenu = menuBar()->addMenu(tr("&Testing"));
+    testMenu->addAction(doBonjourTestAction);
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -278,12 +305,15 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createConnections()
 {
+    qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), frameInfo, SLOT(setRawImage(const NUimage*)));
 
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
+    connect(&LogReader,SIGNAL(fileOpened(QString)),frameInfo, SLOT(setFrameSource(QString)));
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
     connect(&LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));
@@ -315,7 +345,10 @@ void MainWindow::createConnections()
     //connect(&virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(drawFO_Ball(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display) ));
+    connect(&virtualRobot,SIGNAL(fieldObjectsDisplayChanged(FieldObjects*,GLDisplay::display)),&glManager,SLOT(writeFieldObjectsToDisplay(FieldObjects*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< LinePoint >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< LinePoint >,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
+
     // Connect the virtual robot to the incoming packets.
     connect(connection, SIGNAL(PacketReady(QByteArray*)), &virtualRobot, SLOT(ProcessPacket(QByteArray*)));
     connect(classification,SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
@@ -332,6 +365,7 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
+    qDebug() <<"Finnished Connecting Widgets";
 }
 
 void MainWindow::openLog()
@@ -425,6 +459,42 @@ void MainWindow::shrinkToNativeAspectRatio()
     }
 }
 
+void MainWindow::BonjourTest()
+{
+    robotSelectDialog test(this, "_nuview._tcp");
+    if(test.exec())
+    {
+        BonjourRecord bonjourHost = test.getBonjourHost();
+        if (!bonjourResolver)
+        {
+                bonjourResolver = new BonjourServiceResolver(this);
+                connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)),
+                        this, SLOT(PrintConnectionInfo(const QHostInfo &, int)));
+        }
+        bonjourResolver->resolveBonjourRecord(bonjourHost);
+    }
+    else
+    {
+        qDebug() << "Cancelled" << endl;
+    }
+}
+
+void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
+{
+    const QList<QHostAddress> &addresses = hostInfo.addresses();
+
+    if (hostInfo.error() != QHostInfo::NoError) {
+        qWarning(QString("Lookup failed: %1").arg(hostInfo.errorString()).toAscii());
+        return;
+    }
+
+    if (!addresses.isEmpty())
+    {
+        QHostAddress address = addresses.first();
+        qDebug() << "Connect: " << address.toString() << " Port: " << port << endl;
+    }
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //mdiArea->closeAllSubWindows();
@@ -440,7 +510,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::readSettings()
 {
     QSettings settings("NUbots", "NUview");
-
+    qDebug() <<"Start Reading Settings";
     // Restore the main window.
     settings.beginGroup("mainWindow");
     restoreGeometry(settings.value("geometry").toByteArray());  // Set previous position/size

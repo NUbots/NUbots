@@ -42,7 +42,7 @@ public:
 private:
   enum 
   {
-    frameBufferCount = 3, //!< Number of available frame buffers.
+    frameBufferCount = 20, //!< Number of available frame buffers.
     WIDTH = 640,
     HEIGHT = 480,
     SIZE = WIDTH * HEIGHT * 2

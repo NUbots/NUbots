@@ -41,24 +41,29 @@ NUPlatform::~NUPlatform()
         delete actionators;
 }
 
-void NUPlatform::getName(string& name)
+string NUPlatform::getName()
 {
-    name = m_name;
+    return m_name;
 }
 
-void NUPlatform::getNumber(int& number)
+int NUPlatform::getRobotNumber()
 {
-    number = m_number;
+    return m_robot_number;
 }
 
-void NUPlatform::getTeamColour(string& name)
+int NUPlatform::getPlayerNumber()
 {
-    name = m_team_colour;
+    return m_player_number;
 }
 
-void NUPlatform::getTeamNumber(int& number)
+string NUPlatform::getTeamColour()
 {
-    number = m_team_number;
+    return m_team_colour;
+}
+
+int NUPlatform::getTeamNumber()
+{
+    return m_team_number;
 }
 
 

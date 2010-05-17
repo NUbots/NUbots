@@ -20,8 +20,13 @@
  */
 
 #include "NAOWebotsActionators.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+
+#include "webots/Robot.hpp"
+using namespace webots;
+
 #include <string.h>
 
 
@@ -37,24 +42,20 @@ static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
                                     string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
 vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
-// init m_camera_setting_names:
-static string temp_setting_names[] = {string("SelectCamera")};
-vector<string> NAOWebotsActionators::m_camera_setting_names(temp_setting_names, temp_setting_names + sizeof(temp_setting_names)/sizeof(*temp_setting_names));
-
 // init m_led_names:
 static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
                                   string("ChestBoard/Led"), \
                                   string("LFoot/Led"), string("RFoot/Led")};
 vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
 // init m_other_names:
-static string temp_other_names[] = {string("Teleporter")};
+static string temp_other_names[] = {string("Teleporter"), string("Sound")};
 vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
 
 /*! @brief Constructs a nubot actionator class with a Webots backend
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */ 
-NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
+NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
@@ -66,14 +67,41 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     
     m_data->setAvailableJointControlMethods(m_servo_control_names);
     m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableCameraSettings(m_camera_setting_names);
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableOtherActionators(m_other_names);
     
-    // I am temporarily enabling the camera here because it doesn't appear in the simulation unless it is enabled!
-    //Camera* camera = m_platform->getCamera("camera");
-    //camera->enable(80);         // the timestep for the camera has to be a multiple of 40ms, so the possible frame rates are 25, 12.5, 8.33 etc
+    double time = nusystem->getTime();
+    vector<float> rgb(3,0);
+    vector<vector<float> > allleds;
+    allleds.push_back(rgb);
     
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, allleds);
+    
+    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, allleds);
+    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, allleds);
+    
+    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -88,8 +116,6 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     // Get the servos
     for (int i=0; i<m_servo_names.size(); i++)
         m_servos.push_back(platform->getServo(m_servo_names[i]));
-    // Get the camera
-    m_camera_select = platform->getServo("CameraSelect");
     // Get the leds
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
@@ -119,12 +145,9 @@ void NAOWebotsActionators::copyToHardwareCommunications()
 #endif
     
     copyToServos();
-    copyToCamera();
     copyToLeds();
     copyToSound();
     copyToTeleporter();
-    
-    m_data->removeCompletedPoints(m_current_time);
 }
 
 /*! @brief Copies the joint positions and torques to the servos
@@ -193,33 +216,6 @@ void NAOWebotsActionators::copyToServos()
     }
 }
 
-/*! @brief Copies the camera settings to the camera
- */
-void NAOWebotsActionators::copyToCamera()
-{
-    static vector<bool> isvalid;
-    static vector<double> times;
-    static vector<vector<float> > data;
-    
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToCamera()" << endl;
-#endif
-    
-    if (m_data->getNextCameraSettings(isvalid, times, data))
-    {
-        if (isvalid[0] == true)
-        {
-            if (data[0].size() > 0)
-            {
-                if (data[0][0] == 0)
-                    m_camera_select->setPosition(0);
-                else
-                    m_camera_select->setPosition(0.6981);       // offset between top and bottom camera is 40 degrees = 0.6981
-            }
-        }
-    }
-}
-
 /*! @brief Copies the led values to the leds
  */
 void NAOWebotsActionators::copyToLeds()
@@ -242,7 +238,11 @@ void NAOWebotsActionators::copyToLeds()
             {
                 if (isvalid[i] == true)
                 {
-                    int ledvalue = (255*((int) redvalues[i]) << 4) + (255*((int) greenvalues[i]) << 2) + (255*((int) bluevalues[i]));       // convert to hex: RRGGBB
+                    unsigned char rgb[3];
+                    rgb[0] = static_cast<unsigned char> (255*redvalues[i]);
+                    rgb[1] = static_cast<unsigned char> (255*greenvalues[i]);
+                    rgb[2] = static_cast<unsigned char> (255*bluevalues[i]);
+                    int ledvalue = *reinterpret_cast<int*> (&rgb);
                     m_leds[i]->set(ledvalue);
                 }
             }
@@ -250,15 +250,6 @@ void NAOWebotsActionators::copyToLeds()
         else
             debug << "NAOWebotsActionators::copyToLeds(). The input does not have the correct length, all data will be ignored!" << endl;
     }
-}
-
-/*! @brief Copies the sound to the sound driver
- */
-void NAOWebotsActionators::copyToSound()
-{
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToSound()" << endl;
-#endif
 }
 
 /*! @brief Copies the teleportation data to the teleporter (super_emitter)
@@ -281,11 +272,11 @@ void NAOWebotsActionators::copyToTeleporter()
             static int id;             // webots id = id - 1
             static string colour;
             // get the player id
-            m_platform->getNumber(id);
+            id = m_platform->getRobotNumber();
             id--;
             
             // get the player's colour
-            m_platform->getTeamColour(colour);
+            colour = m_platform->getTeamColour();
             char* team;
             if (colour.compare("red") == 0)
                 team = teamred;

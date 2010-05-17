@@ -16,7 +16,7 @@ class MobileObject : public Object{
                 Vector3<float> estimatedRelativeLocationError;
 	public:
 		~MobileObject();
-                MobileObject(float x = 0, float y = 0, int initID = -1, const std::string& initName = "Unknown");
+                MobileObject(int initID = -1, const std::string& initName = "Unknown");
                 MobileObject(const Vector2<float>& newAbsoluteLocation, int initID = -1, const std::string& initName = "Unknown");
                 MobileObject(const MobileObject& srcObj);
                 void updateAbsoluteLocation(const Vector2<float>& newAbsoluteLocation);

@@ -31,12 +31,6 @@
 #include "NUNAO.h"
 
 #include "nubotconfig.h"
-#ifdef USE_MOTION
-    #include "walkconfig.h"
-    #ifdef USE_ALWALK
-        #include <almotionproxy.h>
-    #endif
-#endif
 #include <dcmproxy.h>
 
 class NAOActionators : public NUActionators
@@ -44,11 +38,13 @@ class NAOActionators : public NUActionators
 #define ALIAS_POSITION "PositionActionators"
 #define ALIAS_STIFFNESS "StiffnessActionators"
 #define ALIAS_LED "LedActionators"
+#define ALIAS_ALL "AllActionators"
 public:
     NAOActionators();
     ~NAOActionators();
 private:
     void getActionatorsFromAldebaran();
+    void startUltrasonics();
     void createALDCMCommands();
     void createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators);
     void copyToHardwareCommunications();
@@ -60,17 +56,27 @@ private:
     static unsigned int m_num_servo_positions;
     static vector<string> m_servo_stiffness_names;
     static unsigned int m_num_servo_stiffnesses;
+    
+    static vector<string> m_earled_names;
+    static unsigned int m_num_earleds;
+    static vector<string> m_eyeled_names;
+    static unsigned int m_num_eyeleds;
+    static vector<string> m_chestled_names;
+    static unsigned int m_num_chestleds;
+    static vector<string> m_footled_names;
+    static unsigned int m_num_footleds;
     static vector<string> m_led_names;
     static unsigned int m_num_leds;
+    
+    static vector<string> m_other_names;
+    static unsigned int m_num_others;
+    
     static vector<string> m_actionator_names;
     static unsigned int m_num_actionators;
     
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
-#ifdef USE_ALWALK
-    ALMotionProxy* m_al_motion;
-#endif
-    ALValue m_position_command, m_stiffness_command, m_led_command;
+    ALValue m_position_command, m_stiffness_command, m_led_command, m_actionator_command;
 };
 
 #endif

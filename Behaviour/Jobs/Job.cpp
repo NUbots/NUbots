@@ -79,7 +79,9 @@ double Job::getTime()
  */
 void Job::toStream(ostream& output) const
 {
-    debug << "Job::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "Job::toStream()" << endl;
+    #endif
     
     output << static_cast<unsigned int>(m_job_type) << " " << static_cast<unsigned int>(m_job_id) << " ";
     output.write((char*) &m_job_time, sizeof(m_job_time));
@@ -98,10 +100,7 @@ void Job::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const Job& job)
 {
-    debug << "<<Job" << endl;
-    
     job.toStream(output);
-    
     return output;
 }
 
@@ -116,12 +115,8 @@ ostream& operator<<(ostream& output, const Job& job)
  */
 ostream& operator<<(ostream& output, const Job* job)
 {
-    debug << "<<Job*" << endl;
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
-    
     return output;
 }
 
@@ -134,7 +129,7 @@ ostream& operator<<(ostream& output, const Job* job)
     @param job a pointer to the pointer to the job to store the job extracted from the stream
            (it is done this way to avoid using the assignment operator which I haven't written yet)
  
-    @attention This operator needs to be updated when to want to stream a new type of Job.
+    @attention This operator needs to be updated when you want to stream a new type of Job.
                You need to add a
                     @code
                     case Job::_JOB_ID_:
@@ -145,7 +140,7 @@ ostream& operator<<(ostream& output, const Job* job)
  */
 istream& operator>>(istream& input, Job** job)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     debug << ">>Job**" << endl;
 #endif
     
@@ -191,14 +186,17 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_SAVE:
             *job = new SaveJob(jobtime, input);
             break;
+        case Job::MOTION_SCRIPT:
+            *job = new ScriptJob(jobtime, input);
+            break;
         case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
             break;
         case Job::MOTION_NOD:
-            *job = new NodHeadJob(jobtime, input);
+            *job = new HeadNodJob(input);
             break;
         case Job::MOTION_PAN:
-            *job = new PanHeadJob(jobtime, input);
+            *job = new HeadPanJob(input);
             break;
         case Job::CAMERA_CHANGE_SETTINGS:
             *job = new ChangeCameraSettingsJob(input);
@@ -210,7 +208,7 @@ istream& operator>>(istream& input, Job** job)
             errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
             break;
     }    
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     if (*job != NULL)
         (*job)->summaryTo(debug);
 #endif

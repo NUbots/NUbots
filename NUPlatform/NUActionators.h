@@ -22,7 +22,8 @@
 #ifndef NUACTIONATORS_H
 #define NUACTIONATORS_H
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUActionatorsData;
+class NUSoundThread;
 
 #include <vector>
 #include <string>
@@ -37,10 +38,12 @@ public:
     void process(NUActionatorsData*& data);
     NUActionatorsData* getActions();
 protected:
-    virtual void copyToHardwareCommunications();
+    virtual void copyToHardwareCommunications() = 0;
+    virtual void copyToSound();
 protected:
     double m_current_time;
     NUActionatorsData* m_data;
+    NUSoundThread* m_sound_thread;
 };
 
 #endif

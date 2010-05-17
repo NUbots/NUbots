@@ -50,7 +50,7 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
-NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(platform->getBasicTimeStep())
+NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
@@ -122,18 +122,6 @@ void NAOWebotsSensors::enableSensorsInWebots()
  */
 NAOWebotsSensors::~NAOWebotsSensors()
 {
-    m_servo_names.clear();
-    m_servos.clear();
-    delete m_accelerometer;
-    delete m_gyro;
-    m_distance_names.clear();
-    m_distance_sensors.clear();
-    m_foot_sole_names.clear();
-    m_foot_sole_sensors.clear();
-    m_foot_bumper_names.clear();
-    m_foot_bumper_sensors.clear();
-    if (m_gps != NULL)
-        delete m_gps;
 }
 
 /*! @brief Gets the sensor data using the Webots API and puts it in the NUSensorsData data member.

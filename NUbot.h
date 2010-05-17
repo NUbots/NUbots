@@ -29,38 +29,39 @@
 #include "targetconfig.h"
 #include "nubotconfig.h"
 
-#include "NUPlatform/NUPlatform.h"
+class NUPlatform;
+class NUIO;
 
 #ifdef USE_VISION
-    #include "Vision/FieldObjects/FieldObjects.h"
-    #include "Tools/Image/NUimage.h"
-    #include "Vision/Vision.h"
+    class NUimage;
+    class Vision;
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    class Localisation;
 #endif
 
 #ifdef USE_BEHAVIOUR
-    #include "GameController/GameInformation.h"
-    #include "Behaviour/Behaviour.h"
+    class Behaviour;
 #endif
 
 #ifdef USE_MOTION
-    #include "Motion/NUMotion.h"
+    class NUMotion;
 #endif
-
-#include "NUPlatform/NUIO.h"
 
 class NUSensorsData;
 class NUActionatorsData;
 class JobList;
+class GameInformation;
+class TeamInformation;
 
-#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
+#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     class SeeThinkThread;
 #endif
-
 class SenseMoveThread;
+class WatchDogThread;
+
+#include <exception>
 
 /*! @brief The top-level class
  */
@@ -73,10 +74,11 @@ public:
     
 private:
     void connectErrorHandling();
-    static void segFaultHandler(int value);
+    static void terminationHandler(int signum);
     void unhandledExceptionHandler(std::exception& e);
     
     void createThreads();
+    void periodicSleep(int period);
     
 public:
     #ifdef USE_VISION
@@ -85,8 +87,11 @@ public:
     NUSensorsData* SensorData;
     NUActionatorsData* Actions;
     JobList* Jobs;
+    GameInformation* GameInfo;
+    TeamInformation* TeamInfo;
     
 private:
+    static NUbot* m_this;                 //!< a pointer to the last instance of a NUbot
     NUPlatform* m_platform;               //!< interface to robot platform
     #ifdef USE_VISION
         Vision* m_vision;                 //!< vision module
@@ -97,7 +102,6 @@ private:
     #endif
     
     #ifdef USE_BEHAVIOUR
-		GameInformation* m_gameInfo;
         Behaviour* m_behaviour;           //!< behaviour module
     #endif
     
@@ -107,8 +111,8 @@ private:
     
     NUIO* m_io;                           //!< io module
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR)
-        friend class SeeThinkThread;
+    friend class SeeThinkThread;
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         SeeThinkThread* m_seethink_thread;
     #endif
 
@@ -117,6 +121,9 @@ private:
     #if defined(TARGET_IS_NAO)
         friend class NUNAO;
     #endif
+    
+    friend class WatchDogThread;
+    WatchDogThread* m_watchdog_thread;
 };
 
 #endif

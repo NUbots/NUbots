@@ -27,9 +27,10 @@
 
     @param saveimages true if you want to start saving images, false if you want to stop saving images
  */
-SaveImagesJob::SaveImagesJob(bool saveimages) : VisionJob(Job::VISION_SAVE_IMAGES)
+SaveImagesJob::SaveImagesJob(bool saveimages, bool varycamerasettings) : VisionJob(Job::VISION_SAVE_IMAGES)
 {
     m_save_images = saveimages;
+    m_vary_settings = varycamerasettings;
 }
 
 /*! @brief Constructs a SaveImagesJob from stream data
@@ -46,6 +47,8 @@ SaveImagesJob::SaveImagesJob(istream& input) : VisionJob(Job::VISION_SAVE_IMAGES
     // read in the m_save_images bool
     input.read(reinterpret_cast<char*>(&boolbuffer), sizeof(boolbuffer));
     m_save_images = boolbuffer;
+    input.read(reinterpret_cast<char*>(&boolbuffer), sizeof(boolbuffer));
+    m_vary_settings = boolbuffer;
 }
 
 /*! @brief SaveImagesJob destructor
@@ -61,6 +64,13 @@ bool SaveImagesJob::saving()
     return m_save_images;
 }
 
+/*! @brief Returns true if the job is to also vary/rotate the camera settings
+ */
+bool SaveImagesJob::varyCameraSettings()
+{
+    return m_vary_settings;
+}
+
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
@@ -68,6 +78,10 @@ void SaveImagesJob::summaryTo(ostream& output)
 {
     output << "SaveImagesJob: " << m_job_time << " ";
     if (m_save_images == true)
+        output << "true";
+    else
+        output << "false";
+    if (m_vary_settings == true)
         output << "true";
     else
         output << "false";
@@ -84,6 +98,10 @@ void SaveImagesJob::csvTo(ostream& output)
         output << "true, ";
     else
         output << "false, ";
+    if (m_vary_settings == true)
+        output << "true, ";
+    else
+        output << "false, ";
     output << endl;
 }
 
@@ -96,11 +114,11 @@ void SaveImagesJob::csvTo(ostream& output)
  */
 void SaveImagesJob::toStream(ostream& output) const
 {
-    debug << "SaveImagesJob::toStream" << endl;
     Job::toStream(output);                  // This writes data introduced at the base level
     VisionJob::toStream(output);            // This writes data introduced at the vision level
                                             // Then we write SaveImagesJob specific data
     output.write((char*) &m_save_images, sizeof(m_save_images));
+    output.write((char*) &m_vary_settings, sizeof(m_vary_settings));
 }
 
 /*! @relates SaveImagesJob
@@ -111,7 +129,6 @@ void SaveImagesJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const SaveImagesJob& job)
 {
-    debug << "<<SaveImagesJob" << endl;
     job.toStream(output);
     return output;
 }
@@ -124,10 +141,7 @@ ostream& operator<<(ostream& output, const SaveImagesJob& job)
  */
 ostream& operator<<(ostream& output, const SaveImagesJob* job)
 {
-    debug << "<<SaveImagesJob" << endl;
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

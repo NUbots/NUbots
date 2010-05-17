@@ -34,6 +34,8 @@ using namespace boost::numeric;
 using namespace Kinematics;
 using namespace NBMath;
 
+#include "MotionConstants.h"
+
 //#define DEBUG_STEPGENERATOR
 
 StepGenerator::StepGenerator(shared_ptr<Sensors> s, const MetaGait * _gait)
@@ -1144,7 +1146,7 @@ void StepGenerator::debugLogging(){
             leftFoot.frontLeft,leftFoot.frontRight,leftFoot.rearLeft,leftFoot.rearRight,
             rightFoot.frontLeft,rightFoot.frontRight,rightFoot.rearLeft,rightFoot.rearRight,
             leftLeg.getSupportMode());
-    ttime += 0.02f;
+    ttime += MotionConstants::MOTION_FRAME_LENGTH_S;
 #endif
 
 
@@ -1170,6 +1172,6 @@ void StepGenerator::debugLogging(){
     fprintf(zmp_log,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
             stime,preX,preY,comX,comY,comPX,comPY,accX,accY,accZ,
             acc.angleX,acc.angleY);
-    stime+= .02;
+    stime += MotionConstants::MOTION_FRAME_LENGTH_S;
 #endif
 }

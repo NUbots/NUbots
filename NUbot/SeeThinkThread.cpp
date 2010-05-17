@@ -22,6 +22,31 @@
 #include "SeeThinkThread.h"
 #include "NUbot.h"
 
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
+
+#ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
+
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+    #include "Behaviour/Jobs.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    //#include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
@@ -74,6 +99,11 @@ void SeeThinkThread::run()
         double realendtime, processendtime, threadendtime;
     #endif
     
+    #if defined (THREAD_SEETHINK_MONITOR_TIME) and defined(USE_VISION)
+        double visionrealstarttime, visionprocessstarttime, visionthreadstarttime; 
+        double visionrealendtime, visionprocessendtime, visionthreadendtime;
+    #endif
+    
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
@@ -88,7 +118,14 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
+                 #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+                    visionrealstarttime = NUSystem::getRealTime();
+                    visionprocessstarttime = NUSystem::getProcessTime();
+                    visionthreadstarttime = NUSystem::getThreadTime();
+                #endif
+		
                 m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
+                *(m_nubot->m_io) << m_nubot->Image;  //<! Raw IMAGE STREAMING (TCP)
             #endif
 
             #ifdef THREAD_SEETHINK_MONITOR_TIME
@@ -103,19 +140,36 @@ void SeeThinkThread::run()
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData);
+                FieldObjects* AllObjects= m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData, m_nubot->Actions);
+		
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+                    visionrealendtime = NUSystem::getRealTime();
+                            visionprocessendtime = NUSystem::getProcessTime();
+                            visionthreadendtime = NUSystem::getThreadTime();
+                    debug 	<< "SeeThinkThread. Vision Timing: " 
+                            << (visionthreadendtime - visionthreadstarttime) << "ms, in this process: " << (visionprocessendtime - visionprocessstarttime) 
+                            << "ms, in realtime: " << visionrealendtime - visionrealstarttime << "ms." << endl;
+                #endif
+		
             #endif
-            
+
             #ifdef USE_LOCALISATION
                 //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #endif
             
-            #ifdef USE_BEHAVIOUR
-                //m_nubot->m_behaviour->process();
+            #if defined(USE_BEHAVIOUR)
+                #if defined(USE_VISION)
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, AllObjects, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #else
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, NULL, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #endif
             #endif
             
+            #ifdef USE_VISION
+                m_nubot->m_vision->process(m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
+            #endif
             #ifdef USE_MOTION
-                m_nubot->m_motion->process(*m_nubot->Jobs);
+                m_nubot->m_motion->process(m_nubot->Jobs);
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -130,15 +184,14 @@ void SeeThinkThread::run()
                 if (threadendtime - threadstarttime > 7)
                     debug << "SeeThinkThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
             #endif
-            
-            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-                onLoopCompleted();
-            #endif
         }
         catch (std::exception& e)
         {
             m_nubot->unhandledExceptionHandler(e);
         }
+        #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+            onLoopCompleted();
+        #endif
     } 
     errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
 }

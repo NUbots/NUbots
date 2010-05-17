@@ -5,12 +5,12 @@
     @class sensor_t
     @brief A single set of sensors class to store sensor data in a platform independent way
  
-    A sensor_t is a container for a set of similar sensors that share a common timestamp.
-    For example, all of the JoinPositions are encapsulated in a single sensor_t.
+    A sensor_t is a container for a set of similar sensors that share a common time.
+    For example, all of the JointPositions are encapsulated in a single sensor_t.
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,8 +50,16 @@ public:
         JOINT_CURRENTS,
         JOINT_TORQUES,
         JOINT_TEMPERATURES,
+        KINEMATICS_LEFT_LEG_TRANSFORM,
+        KINEMATICS_RIGHT_LEG_TRANSFORM,
+        KINEMATICS_SUPPORT_LEG_TRANSFORM,
+        KINEMATICS_CAMERA_TRANSFORM,
+        KINEMATICS_CAMERA_TO_GROUND_TRANSFORM,
+        JOINT_ODOMETRY,
+        JOINT_CAMERAHEIGHT,
         BALANCE_ACCELEROMETER,
         BALANCE_GYRO,
+        BALANCE_GYRO_OFFSET,
         BALANCE_ORIENTATION,
         BALANCE_HORIZON,
         BALANCE_ZMP,
@@ -60,7 +68,9 @@ public:
         DISTANCE_VALUES,
         FOOT_SOLE_VALUES,
         FOOT_BUMPER_VALUES,
+        FOOT_COP,
         FOOT_FORCE,
+        FOOT_SUPPORT,
         FOOT_IMPACT,
         BUTTON_VALUES,
         BUTTON_TRIGGERS,
@@ -71,8 +81,8 @@ public:
 public:
     sensor_t();
     sensor_t(string sensorname, sensor_id_t sensorid, bool iscalculated = false);
-    void setData(double time, vector<float> newdata, bool iscalculated = false);
-    void setStdDev(vector<float> newstddev);
+    void setData(double time, const vector<float>& newdata, bool iscalculated = false);
+    void setStdDev(const vector<float>& newstddev);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -89,9 +99,6 @@ public:
     bool IsValid;               //!< true, if data is valid, false if not
     bool IsCalculated;          //!< true, if data has been calculated, false if the data is direct from a sensor
     double Time;                //!< the sensor's time
-    long double TimeStamp;      //!< the unix timestamp of the data
-private:
-    long double m_time_offset;  //!< a time offset so that unixtimestamp = timesincestart + offset
 };
 
 #endif

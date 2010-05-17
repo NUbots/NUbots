@@ -1,10 +1,15 @@
 #include "AmbiguousObject.h"
 
-AmbiguousObject::AmbiguousObject(): Object()
+//AMBIGUOUS FIELD OBJECT ID: Automatically set up the possible IDS
+
+AmbiguousObject::AmbiguousObject(int id, const std::string& initName): Object(id, initName)
 {
+
 }
+
 AmbiguousObject::~AmbiguousObject()
 {
+
 }
 
 void AmbiguousObject::addPossibleObjectID(int ID)
@@ -28,4 +33,8 @@ bool AmbiguousObject::isObjectAPossibility(int ID)
 		}
 	}
 	return isInVector;
+}
+void AmbiguousObject::setVisibility(bool newIsVisible)
+{
+    isVisible = newIsVisible;
 }

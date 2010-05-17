@@ -191,12 +191,11 @@ void visionStreamWidget::readPendingData()
         //QTextStream *stream = new QTextStream(&netdata, QIODevice::ReadOnly);
         //stream->setByteOrder(QDataStream::LittleEndian);
         int height,width;
-        buffer >> width;
-
-        buffer >> height;
+        buffer.read(reinterpret_cast<char*>(&width), sizeof(width));
+        buffer.read(reinterpret_cast<char*>(&height), sizeof(height));
         //qDebug() << height << ", " << width;
 
-        datasize = height*width*4+buffer.tellg()+1;
+        datasize = height*width*4+buffer.tellg()+sizeof(double);
     }
     else
     {
@@ -210,7 +209,6 @@ void visionStreamWidget::readPendingData()
         netdata.append(tcpSocket->readAll());
     //}
 
-
         //emit PacketReady(&datagram);
         if(datasize == netdata.size())
         {
@@ -219,6 +217,7 @@ void visionStreamWidget::readPendingData()
             buffer >> image;
             emit rawImageChanged(&image);
             int mstime = timeToRecievePacket.elapsed();
+            time.setInterval(0);
             float frameRate = (float)(1000.00/mstime);
             QString text = QString("Recieved Total Size: ");
             //datasize = datasize +netdata.size();

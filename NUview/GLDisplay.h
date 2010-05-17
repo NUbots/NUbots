@@ -100,6 +100,7 @@ public:
         TransitionSegments,
         FieldLines,
         ObjectCandidates,
+        FieldObjects,
         wmRightLeg,
         wmLeftLeg,
         wmBall,
@@ -154,6 +155,8 @@ public:
                 return QString("Field Lines");
             case ObjectCandidates:
                 return QString("Field Object Candidates");
+            case FieldObjects:
+                return QString("Field Objects");
             case wmLeftLeg:
                 return QString("World Model: Left Leg");
             case wmRightLeg:

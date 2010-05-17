@@ -19,24 +19,59 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "NUbot.h"
+
+// ---------------------------------------------------------------- Compulsory header files
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
+#include "Behaviour/Jobs.h"
+#include "GameController/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
+
 #include "debugverbositynubot.h"
 #include "debug.h"
 
-#include "NUbot.h"
-#include "Behaviour/Jobs.h"
+// --------------------------------------------------------------- Module header files
+#ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
 
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    //#include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
+// --------------------------------------------------------------- Thread header files
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
-
 #include "NUbot/SenseMoveThread.h"
+#include "NUbot/WatchDogThread.h"
 
+// --------------------------------------------------------------- NUPlatform header files
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
+    #include "NUPlatform/Platforms/NAOWebots/NAOWebotsIO.h"
 #elif defined(TARGET_IS_NAO)
     #include "NUPlatform/Platforms/NAO/NAOPlatform.h"
+    #include "NUPlatform/Platforms/NAO/NAOIO.h"
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
+    #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_NUVIEW)
+    #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
     #error There is no platform (TARGET_IS_${}) defined
 #endif
@@ -45,6 +80,7 @@
 #include <signal.h>
 #include <string>
 #include <sstream>
+#include <unistd.h>
 
 #ifndef TARGET_OS_IS_WINDOWS
     #include <errno.h>
@@ -52,6 +88,8 @@
 #ifndef TARGET_OS_IS_WINDOWS
     #include <execinfo.h>
 #endif
+
+NUbot* NUbot::m_this = NULL;
 
 /*! @brief Constructor for the nubot
     
@@ -63,6 +101,7 @@
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+    NUbot::m_this = this;
     connectErrorHandling();
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
@@ -76,31 +115,6 @@ NUbot::NUbot(int argc, const char *argv[])
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
     #endif
-
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Constructing modules." << endl;
-    #endif
-    
-    // --------------------------------- construct each enabled module 
-    #ifdef USE_VISION
-        m_vision = new Vision();
-        m_vision->loadLUTFromFile("/home/nao/default.lut");
-    #endif
-    
-    #ifdef USE_LOCALISATION
-        //m_localisation = new Localisation();
-    #endif
-    
-    #ifdef USE_BEHAVIOUR
-		m_gameInfo = new GameInformation(1,2);
-        m_behaviour = new Behaviour();
-    #endif
-    
-    #ifdef USE_MOTION
-        m_motion = new NUMotion();
-    #endif
-    
-    m_io = new NUIO(0, this);         //<! @todo TODO pass nuio the player number!
     
     // --------------------------------- construct the public storage
     #ifdef USE_VISION
@@ -109,6 +123,38 @@ NUbot::NUbot(int argc, const char *argv[])
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();
     Jobs = new JobList();
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    TeamInfo = new TeamInformation();
+
+    // --------------------------------- construct the io
+    #if defined(TARGET_IS_NAOWEBOTS)
+        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
+    #elif defined(TARGET_IS_NAO)
+        m_io = new NAOIO(this);
+    #elif defined(TARGET_IS_CYCLOID)
+        m_io = new CycloidIO(this);
+    #endif
+    
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::NUbot(). Constructing modules." << endl;
+    #endif
+    
+    // --------------------------------- construct each enabled module 
+    #ifdef USE_VISION
+        m_vision = new Vision();
+    #endif
+    
+    #ifdef USE_LOCALISATION
+        //m_localisation = new Localisation();
+    #endif
+    
+    #ifdef USE_BEHAVIOUR
+        m_behaviour = new Behaviour();
+    #endif
+    
+    #ifdef USE_MOTION
+        m_motion = new NUMotion();
+    #endif
     
     createThreads();
     
@@ -122,10 +168,10 @@ NUbot::NUbot(int argc, const char *argv[])
 void NUbot::connectErrorHandling()
 {
     #ifndef TARGET_OS_IS_WINDOWS
-        struct sigaction newaction, oldaction;
-        newaction.sa_handler = segFaultHandler;
-        
-        sigaction(SIGSEGV, &newaction, &oldaction);     //!< @todo TODO. On my computer the segfault is not escalated. It should be....
+        signal(SIGILL, terminationHandler);
+        signal(SIGSEGV, terminationHandler);
+        signal(SIGBUS, terminationHandler); 
+        signal(SIGABRT, terminationHandler);
     #endif
 }
 
@@ -144,6 +190,9 @@ void NUbot::createThreads()
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
+    m_watchdog_thread = new WatchDogThread(this);
+    m_watchdog_thread->start();
+    
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
     #endif
@@ -158,7 +207,13 @@ void NUbot::createThreads()
 NUbot::~NUbot()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Deleting Threads" << endl;
+        debug << "NUbot::~NUbot()." << endl;
+    #endif
+    
+    #ifdef USE_MOTION
+        NUbot::m_this->m_motion->kill();
+        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        NUSystem::msleep(1500);
     #endif
 
     // --------------------------------- delete threads
@@ -166,9 +221,11 @@ NUbot::~NUbot()
         if (m_seethink_thread != NULL)
             delete m_seethink_thread;
     #endif
-        
     if (m_sensemove_thread != NULL)
         delete m_sensemove_thread;
+    if (m_watchdog_thread != NULL)
+        delete m_watchdog_thread;
+    
     
     // --------------------------------- delete modules
     #if DEBUG_NUBOT_VERBOSITY > 0
@@ -188,8 +245,6 @@ NUbot::~NUbot()
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
             delete m_behaviour;
-		if (m_gameInfo != NULL)
-            delete m_gameInfo;
     #endif
     #ifdef USE_MOTION
         if (m_motion != NULL)
@@ -213,6 +268,10 @@ NUbot::~NUbot()
         delete Actions;
     if (Jobs != NULL)
         delete Jobs;
+    if (GameInfo != NULL)
+        delete GameInfo;
+    if (TeamInfo != NULL)
+        delete TeamInfo;
     
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::~NUbot(). Finished!" << endl;
@@ -233,16 +292,15 @@ NUbot::~NUbot()
  */
 void NUbot::run()
 {
-#ifdef TARGET_IS_NAOWEBOTS
+#if defined(TARGET_IS_NAOWEBOTS)
     int count = 0;
     double previoussimtime;
     NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
+    int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
         previoussimtime = nusystem->getTime();
-        webots->step(40);           // stepping the simulator generates new data to run motion, and vision data
-        if (nusystem->getTime() - previoussimtime > 81)
-            debug << "NUbot::run(): simulationskip: " << (nusystem->getTime() - previoussimtime) << endl;
+        webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
             m_sensemove_thread->startLoop();
         #endif
@@ -261,25 +319,105 @@ void NUbot::run()
         
         count++;
     };
+#else
+    #if !defined(USE_VISION) and (defined(USE_BEHAVIOUR) or defined(USE_LOCALISATION) or defined(USE_MOTION))
+        while (true)
+        {
+            periodicSleep(33);
+            m_seethink_thread->startLoop();
+            m_seethink_thread->waitForLoopCompletion();
+        }
+    #endif
 #endif
 }
 
-/*! @brief 'Handles' a segmentation fault; logs the backtrace to errorlog
- */
-void NUbot::segFaultHandler(int value)
+void NUbot::periodicSleep(int period)
 {
-	#ifndef TARGET_OS_IS_WINDOWS
-	    errorlog << "SEGMENTATION FAULT. " << endl;
-        debug << "SEGMENTATION FAULT. " << endl;
-	    void *array[10];
-	    size_t size;
-	    char **strings;
-	    size = backtrace(array, 10);
-	    strings = backtrace_symbols(array, size);
-	    for (size_t i=0; i<size; i++)
-		errorlog << strings[i] << endl;
-		//!< @todo TODO: after a seg fault I should fail safely!
-	#endif
+    static double starttime = nusystem->getTime();
+    double timenow = nusystem->getTime();
+    double requiredsleeptime = period - (timenow - starttime);
+    if (requiredsleeptime > 0)
+        NUSystem::msleep(requiredsleeptime);
+    starttime = nusystem->getTime();
+}
+
+/*! @brief Handles unexpected termination signals
+ */
+void NUbot::terminationHandler(int signum)
+{
+    errorlog << "TERMINATION HANDLER: ";
+    debug << "TERMINATION HANDLER: ";
+    cout << "TERMINATION HANDLER: ";
+    
+    #ifndef TARGET_OS_IS_WINDOWS
+        if (signum == SIGILL)
+        {
+            errorlog << "SIGILL" << endl;
+            debug << "SIGILL" << endl;
+            cout << "SIGILL" << endl;
+        }
+        else if (signum == SIGSEGV)
+        {
+            errorlog << "SIGSEGV" << endl;
+            debug << "SIGSEGV" << endl;
+            cout << "SIGSEGV" << endl;
+        }
+        else if (signum == SIGBUS)
+        {
+            errorlog << "SIGBUS" << endl;
+            debug << "SIGBUS" << endl;
+            cout << "SIGBUS" << endl;
+        }
+        else if (signum == SIGABRT)
+        {
+            errorlog << "SIGABRT" << endl;
+            debug << "SIGABRT" << endl;
+            cout << "SIGABRT" << endl;
+        }
+    #else
+        errorlog << endl;
+        debug << endl;
+        cout << endl;
+    #endif
+    
+    #ifndef TARGET_OS_IS_WINDOWS
+        void *array[10];
+        size_t size;
+        char **strings;
+        size = backtrace(array, 10);
+        strings = backtrace_symbols(array, size);
+        for (size_t i=0; i<size; i++)
+            errorlog << strings[i] << endl;
+    #endif
+    
+    if (NUbot::m_this != NULL)
+    {
+        // safely kill motion
+        #ifdef USE_MOTION
+            NUbot::m_this->m_motion->kill();
+            NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        #endif
+        
+        // play sound to indicate the error
+        #ifndef TARGET_OS_IS_WINDOWS
+            if (signum == SIGILL)
+                NUbot::m_this->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
+            else if (signum == SIGSEGV)
+                NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+            else if (signum == SIGBUS)
+                NUbot::m_this->Actions->addSound(0, NUSounds::BUS_ERROR);
+            else if (signum == SIGABRT)
+                NUbot::m_this->Actions->addSound(0, NUSounds::ABORT);
+        #endif
+        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        
+        // sleep for a little bit so that the above things finish executing
+        NUSystem::msleep(1500);
+    }
+    #ifndef TARGET_OS_IS_WINDOWS
+        signal(signum, SIG_DFL);
+        raise(signum);
+    #endif
 }
 
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
@@ -289,6 +427,7 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
+        NUbot::m_this->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
         void *array[10];

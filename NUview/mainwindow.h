@@ -13,6 +13,8 @@
 #include "localisationwidget.h"
 #include "LogFileReader.h"
 #include "visionstreamwidget.h"
+#include <QHostInfo>
+
 class QMdiArea;
 class QMdiSubWindow;
 class LayerSelectionWidget;
@@ -20,6 +22,11 @@ class WalkParameterWidget;
 class KickWidget;
 class QTabsWidget;
 class cameraSettingsWidget;
+class frameInformationWidget;
+
+class NUviewIO;
+class BonjourServiceResolver;
+
 
 namespace Ui
 {
@@ -56,6 +63,8 @@ public slots:
     void filenameChanged(QString filename); //!< New filename
     void fileClosed(); //!< File was closed.
 
+    void BonjourTest();
+
     /*!
       @brief Used to select the colour at a given position in the image and
       set it as the selected colour in the classification widget.
@@ -85,10 +94,12 @@ protected slots:
 //    locWmGlDisplay* createLocWmGlDisplay();
     QMdiSubWindow* createGLDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
+    void PrintConnectionInfo(const QHostInfo &hostInfo, int);
 
 private:
     //! Virtual robot, does data storage and robot based processing.
     virtualNUbot virtualRobot;
+    NUviewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
 
@@ -119,6 +130,7 @@ private:
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
     KickWidget* kick;
     cameraSettingsWidget* cameraSetting;
+    frameInformationWidget* frameInfo;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
@@ -130,6 +142,7 @@ private:
     QMenu *editMenu;                //!< Instance of the edit menu
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
     QMenu *windowMenu;              //!< Instance of the window menu
+    QMenu *testMenu;                //!< Instance of the test menu
     QMenu *visionWindowMenu;        //!< Instance of the vision window menu
     QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
     QMenu *networkWindowMenu;        //!< Instance of the network window menu
@@ -156,6 +169,9 @@ private:
     QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
+
+    QAction *doBonjourTestAction;    //!< Instance of the do test Action
+    BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
 

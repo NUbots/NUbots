@@ -21,9 +21,9 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
-#include "../Motion/NUWalk.h"
-#include "../Behaviour/Jobs.h"
-#include "../NUPlatform/NUIO.h"
+#include "Motion/NUWalk.h"
+#include "Behaviour/Jobs.h"
+#include "NUviewIO/NUviewIO.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -37,16 +37,9 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     this->setEnabled(true);
     disableWriting = false;
     
-    debug.open("debug.log");
-    errorlog.open("error.log");
-    
     m_job_list = new JobList();
-    m_io = new NUIO(0, NULL);
     m_walk_parameters = new WalkParameters();
-    
-    ifstream testparafile("jupptestparameters.wp");
-    if (testparafile.is_open())
-        testparafile >> *m_walk_parameters;
+    m_walk_parameters->load("JuppWalkDefault");
 }
 
 void WalkParameterWidget::createWidgets()
@@ -92,7 +85,7 @@ void WalkParameterWidget::createWidgets()
     phaseResetSpinBox->setMaximum(phaseResetSlider->maximum());
     
     // X Speed
-    xSpeedLabel = new QLabel("x (cm/s)");
+    xSpeedLabel = new QLabel("x (mm/s)");
     xSpeedSlider = new QSlider(Qt::Horizontal);
     xSpeedSlider->setMinimum(-300);
     xSpeedSlider->setMaximum(300);
@@ -102,7 +95,7 @@ void WalkParameterWidget::createWidgets()
     xSpeedSpinBox->setMaximum(xSpeedSlider->maximum());
     
     // Y Speed
-    ySpeedLabel = new QLabel("y (cm/s)");
+    ySpeedLabel = new QLabel("y (mm/s)");
     ySpeedSlider = new QSlider(Qt::Horizontal);
     ySpeedSlider->setMinimum(-300);
     ySpeedSlider->setMaximum(300);
@@ -114,8 +107,8 @@ void WalkParameterWidget::createWidgets()
     // Yaw Speed
     yawSpeedLabel = new QLabel("yaw (crad/s)");
     yawSpeedSlider = new QSlider(Qt::Horizontal);
-    yawSpeedSlider->setMinimum(-30);
-    yawSpeedSlider->setMaximum(30);
+    yawSpeedSlider->setMinimum(-100);
+    yawSpeedSlider->setMaximum(100);
     
     yawSpeedSpinBox = new QSpinBox();
     yawSpeedSpinBox->setMinimum(yawSpeedSlider->minimum());
@@ -261,6 +254,7 @@ WalkParameterWidget::~WalkParameterWidget()
     delete yawSpeedLayout; 
     
     delete overallLayout;
+    delete m_job_list;
 }
 
 void WalkParameterWidget::walkParameterChanged()
@@ -268,19 +262,18 @@ void WalkParameterWidget::walkParameterChanged()
     static WalkParametersJob* parametersjob = new WalkParametersJob(*m_walk_parameters);
     static vector<float> speed(3,0);
     static WalkJob* walkjob = new WalkJob(speed);
-    static vector< vector<WalkParameters::Parameter> > params;
 
-    m_walk_parameters->getParameters(params);
+    vector<WalkParameters::Parameter> params = m_walk_parameters->getParameters();
     
     // params[0] is shift frequency
     // params[2] is shift amplitude
 
     shiftAmplitudeSlider->value();
 
-    params[0][0].Value = shiftFrequencySlider->value()/10.0;
-    params[0][1].Value = phaseOffsetSlider->value()/100.0;
-    params[0][2].Value = shiftAmplitudeSlider->value()/100.0;
-    params[0][13].Value = phaseResetSlider->value()/100.0;
+    params[0].Value = shiftFrequencySlider->value()/10.0;
+    params[1].Value = phaseOffsetSlider->value()/100.0;
+    params[2].Value = shiftAmplitudeSlider->value()/100.0;
+    params[13].Value = phaseResetSlider->value()/100.0;
     speed[0] = xSpeedSlider->value()/10.0;
     speed[1] = ySpeedSlider->value()/10.0;
     speed[2] = yawSpeedSlider->value()/100.0;
@@ -293,10 +286,9 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(parametersjob);
     m_job_list->summaryTo(debug);
 
-    (*m_io) << m_job_list;
+    (*nuio) << m_job_list;
     
-    m_job_list->removeMotionJob(parametersjob);
-    m_job_list->removeMotionJob(walkjob);
+    m_job_list->clear();
 }
 
 

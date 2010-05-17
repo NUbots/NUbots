@@ -27,10 +27,8 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		LocalisationJob.h
 		BehaviourJob.h
 		MotionJob.cpp MotionJob.h
-		LightJob.h
 		CameraJob.h
 		CameraJobs/ChangeCameraSettingsJob.h CameraJobs/ChangeCameraSettingsJob.cpp
-		SoundJob.h
 		SystemJob.h
 		OtherJob.h
 		MotionJobs/WalkToPointJob.cpp MotionJobs/WalkToPointJob.h
@@ -39,10 +37,10 @@ SET (YOUR_SRCS  JobList.cpp JobList.h
 		MotionJobs/KickJob.cpp MotionJobs/KickJob.h
 		MotionJobs/BlockJob.cpp MotionJobs/BlockJob.h
 		MotionJobs/SaveJob.cpp MotionJobs/SaveJob.h
+        MotionJobs/ScriptJob.cpp MotionJobs/ScriptJob.h
 		MotionJobs/HeadJob.cpp MotionJobs/HeadJob.h
-		MotionJobs/NodHeadJob.cpp MotionJobs/NodHeadJob.h
-		MotionJobs/PanHeadJob.cpp MotionJobs/PanHeadJob.h
-		LightJobs/ChestLedJob.h		LightJobs/LEarLedJob.h		LightJobs/LEyeLedJob.h		LightJobs/LFootLedJob.h		LightJobs/REarLedJob.h		LightJobs/REyeLedJob.h		LightJobs/RFootLedJob.h
+		MotionJobs/HeadNodJob.cpp MotionJobs/HeadNodJob.h
+		MotionJobs/HeadPanJob.cpp MotionJobs/HeadPanJob.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

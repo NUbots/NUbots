@@ -206,7 +206,7 @@ Matrix& Matrix::operator =  (const Matrix& a)
 }
 
 // Matrix Transpose
-Matrix	Matrix::transp()
+Matrix	Matrix::transp() const
 {
 	Matrix transpAns(getn(),getm());
 	int i=0,j=0;
@@ -220,7 +220,7 @@ Matrix	Matrix::transp()
 	return transpAns;
 }
 
-Matrix  Matrix::getRow(int index)
+Matrix  Matrix::getRow(int index) const
 {
     Matrix Row (1,getn());
     int i=0;
@@ -230,7 +230,7 @@ Matrix  Matrix::getRow(int index)
     return Row;
 }
 
-Matrix  Matrix::getCol(int index)
+Matrix  Matrix::getCol(int index) const
 {
     Matrix Col (getm(),1);
     int i=0;
@@ -266,6 +266,38 @@ void  Matrix::print()
               std::cout<<std::endl;
               }
      std::cout<<std::endl;
+}
+
+std::vector<float> Matrix::asVector()
+{
+    int rows, cols;
+    rows = getm();
+    cols = getn();
+    int length = rows * cols;
+    std::vector<float> result(length);
+    int row = 0, col = 0;
+    for(int i = 0; i < length; i++)
+    {
+        row = i / cols;
+        col = i % cols;
+        result[i] = (*this)[row][col];
+    }
+    return result;
+}
+
+Matrix Matrix4x4fromVector(const std::vector<float>& source)
+{
+    Matrix result(4,4,false);
+    if(source.size() != 16) return result;
+    int row, col, cols;
+    cols = result.getn();
+    for(int i = 0; i < 16; i++)
+    {
+        row = i / cols;
+        col = i % cols;
+        result[row][col] = source[i];
+    }
+    return result;
 }
 
 // 2x2 Matrix Inversion- t

@@ -4,15 +4,20 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework CoreFoundation -L /usr/lib/libz.dylib
+    LIBS += -framework \
+        CoreFoundation \
+        -L \
+        /usr/lib/libz.dylib
 }
-win32 {
+win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
     LIBS += -lpthread
+    DEFINES += TARGET_OS_IS_WINDOWS
 }
+!macx:LIBS += -ldns_sd
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -56,6 +61,7 @@ HEADERS += ui_mainwindow.h \
     ../Vision/FieldObjects/MobileObject.h \
     ../Vision/FieldObjects/AmbiguousObject.h \
     ../Vision/FieldObjects/FieldObjects.h \
+    ../Vision/Threads/SaveImagesThread.h \
     ../Vision/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
     ../Localisation/WMLine.h \
@@ -78,8 +84,27 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/KF.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
     ../GameController/GameInformation.h \
-    ../Tools/Threading/Thread.h
-
+    ../Tools/Threading/Thread.h \
+    ../Tools/Threading/ConditionalThread.h \
+    NUviewIO/NUviewIO.h \
+    ../Kinematics/Kinematics.h \
+    ../Tools/Math/TransformMatrices.h \
+    frameInformationWidget.h \
+    bonjour/robotSelectDialog.h \
+    bonjour/bonjourserviceresolver.h \
+    bonjour/bonjourservicebrowser.h \
+    bonjour/bonjourrecord.h \
+    ../Tools/Math/UKF.h \
+    ../Tools/Math/SRUKF.h \
+    ../Kinematics/Link.h \
+    ../Kinematics/EndEffector.h \
+    ../NUPlatform/NUSensors.h \
+    ../NUPlatform/NUSensors/NUSensorsData.h \
+    ../Tools/Math/General.h \
+    ../Vision/CornerPoint.h \
+    ../Kinematics/OrientationUKF.h \
+    ../Motion/Tools/MotionScript.h \
+    ../Motion/Tools/MotionCurves.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -103,11 +128,16 @@ SOURCES += mainwindow.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
+    NUviewIO/NUviewIO.cpp \
     ../NUPlatform/NUSensors.cpp \
     ../NUPlatform/NUSensors/*.cpp \
+    ../NUPlatform/NUActionators.cpp \
+    ../NUPlatform/NUActionators/*.cpp \
     ../NUPlatform/NUSystem.cpp \
+    ../Behaviour/TeamInformation.cpp \
     ../Behaviour/Jobs/*.cpp \
     ../Behaviour/Jobs/CameraJobs/*.cpp \
     ../Behaviour/Jobs/VisionJobs/*.cpp \
@@ -122,6 +152,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/FieldObjects/MobileObject.cpp \
     ../Vision/FieldObjects/AmbiguousObject.cpp \
     ../Vision/FieldObjects/FieldObjects.cpp \
+    ../Vision/Threads/SaveImagesThread.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
@@ -143,7 +174,20 @@ SOURCES += mainwindow.cpp \
     ../Localisation/KF.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
     ../GameController/GameInformation.cpp \
-    ../Tools/Threading/Thread.cpp
-
+    ../Tools/Threading/Thread.cpp \
+    ../Tools/Threading/ConditionalThread.cpp \
+    ../Kinematics/Kinematics.cpp \
+    ../Tools/Math/TransformMatrices.cpp \
+    frameInformationWidget.cpp \
+    bonjour/robotSelectDialog.cpp \
+    bonjour/bonjourserviceresolver.cpp \
+    bonjour/bonjourservicebrowser.cpp \
+    ../Tools/Math/UKF.cpp \
+    ../Tools/Math/SRUKF.cpp \
+    ../Kinematics/Link.cpp \
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/OrientationUKF.cpp \
+    ../Motion/Tools/MotionScript.cpp \
+    ../Motion/Tools/MotionCurves.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

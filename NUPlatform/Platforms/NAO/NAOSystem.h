@@ -29,11 +29,30 @@
 
 #include "NUPlatform/NUSystem.h"
 
+#include <vector>
+
 class NAOSystem : public NUSystem
 {
 public:
     NAOSystem();
     ~NAOSystem();
+    
+    // battery functions
+    void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
+    void voiceLowBattery(NUActionatorsData* actions);
+    // watchdog functions
+    void displayVisionFrameDrop(NUActionatorsData* actions);
+    void voiceFrameDrop(NUActionatorsData* actions);
+    void displayGamePacketReceived(NUActionatorsData* actions);
+    void displayTeamPacketReceived(NUActionatorsData* actions);
+    
+    void restart();
+    void powerOff();
+private:
+    double m_current_time;
+    double m_battery_state_previous_time;                    //!< the previous time displayBatteryState was called
+    double m_period;                                         //!< period between ear led updates
+    std::vector<std::vector<float> > m_ear_leds;             //!< the current battery level ear led values
 };
 
 #endif

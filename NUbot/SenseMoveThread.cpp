@@ -22,11 +22,23 @@
 #include "SenseMoveThread.h"
 #include "NUbot.h"
 
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
 
+#include <string>
 #include <errno.h>
+using namespace std;
 
 #if DEBUG_NUBOT_VERBOSITY > DEBUG_THREADING_VERBOSITY
     #define DEBUG_VERBOSITY DEBUG_NUBOT_VERBOSITY
@@ -109,12 +121,12 @@ void SenseMoveThread::run()
                 if (threadendtime - threadstarttime > 7)
                     debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
             #endif
-            onLoopCompleted();
         }
         catch (std::exception& e) 
         {
             m_nubot->unhandledExceptionHandler(e);
         }
+        onLoopCompleted();
     }
     errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << endl;
 }

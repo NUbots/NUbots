@@ -24,6 +24,8 @@ SET (YOUR_SRCS
 Line.cpp
 LSFittedLine.cpp
 Matrix.cpp  
+TransformMatrices.cpp
+UKF.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

@@ -21,9 +21,11 @@
 
 #include "TcpPort.h"
 #include "NUPlatform/NUSystem.h"
+#include "Tools/Image/NUimage.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include <string.h>
+#include <errno.h>
 
 /*! @brief Constructs a tcp port on the specified port
  
@@ -47,9 +49,14 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
     if ((m_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
         errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to create socket file descriptor." << endl;
 
-    //char broadcastflag = 1;
-    //if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof broadcastflag) == -1)
-    //    errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to set socket options." << endl;
+    // Set the reuse address flag
+    #ifdef WIN32
+        char reuseflag = 1;
+    #else
+        int reuseflag = 1;
+    #endif
+    if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
+        errorlog << "TcpPort::TcpPort(). Failed to set reuseaddr socket options, errno: " << errno << endl;
         
     m_address.sin_family = AF_INET;                             // host byte order
     m_address.sin_port = htons(m_port_number);                  // short, network byte order
@@ -159,7 +166,9 @@ network_data_t TcpPort::receiveData()
         m_has_data = false;
     }
     pthread_mutex_unlock(&m_socket_mutex);
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "TCP Recieved: " << netdata.size;
+    #endif
     return netdata;
 }
 
@@ -175,32 +184,47 @@ void TcpPort::sendData(network_data_t netdata)
         #endif
         return;
     }
-    if (true || nusystem->getTime() - m_time_last_receive < 3000)
-    {
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
 
-            //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
-        #endif
-        #ifdef WIN32
-            int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
-        #else
-            int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
-        #endif
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
-            if(localnumBytes < 0)
-                debug << "TcpPort::sendData(). Sending Error "<< endl;
-        #endif
-        
-    }
+        //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
+    #endif
+    #ifdef WIN32
+        int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
+    #else
+        int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
+    #endif
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        if(localnumBytes < 0)
+            debug << "TcpPort::sendData(). Sending Error "<< endl;
+    #endif
     pthread_mutex_unlock(&m_socket_mutex);
     return;
 }
 
-void TcpPort::sendData(const stringstream& stream)
+void TcpPort::sendData(const NUimage& p_image)
 {
-    static network_data_t netdata;
-    netdata.size = stream.str().size();
-    netdata.data = (char*) stream.str().c_str();
+    network_data_t netdata;
+    stringstream buffer;
+    
+    int imagewidth = p_image.getWidth();
+    int imageheight = p_image.getHeight();
+    double timeStamp = p_image.m_timestamp;
+    buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
+    buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
+    buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
+    
+    string s = buffer.str();
+    netdata.data = (char*) s.c_str();
+    netdata.size = s.size();
+    
     sendData(netdata);
+    
+    for(int y = 0; y < imageheight; y++)
+    {
+        network_data_t linedata;
+        linedata.data = (char*) &p_image.m_image[y][0];
+        linedata.size = sizeof(p_image.m_image[y][0])*imagewidth;
+        sendData(linedata);
+    }
 }

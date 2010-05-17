@@ -33,73 +33,20 @@ JobList::JobList()
     m_job_lists.push_back(&m_localisation_jobs);
     m_job_lists.push_back(&m_behaviour_jobs);
     m_job_lists.push_back(&m_motion_jobs);
-    m_job_lists.push_back(&m_light_jobs);
     m_job_lists.push_back(&m_camera_jobs);
-    m_job_lists.push_back(&m_sound_jobs);
     m_job_lists.push_back(&m_system_jobs);
     m_job_lists.push_back(&m_other_jobs);
-    
-    
-    // Test Save Job
-    /*vector<float> saveposition(3, 0);
-    saveposition[0] = 10;
-    saveposition[1] = -25;
-    saveposition[2] = 1.57;
-    SaveJob* savejob = new SaveJob(300.1, saveposition);
-    BlockJob* blockjob = new BlockJob(69, saveposition);
-    HeadJob* headjob = new HeadJob(9000, saveposition);
-    WalkToPointJob* pointjob = new WalkToPointJob(33, saveposition);
-    // Test Kick Job
-    vector<float> kickposition(2, 0);
-    vector<float> kicktarget(2, 0);
-    kickposition[0] = 0;
-    kickposition[1] = -5.7;
-    kicktarget[0] = 330.33;
-    kicktarget[1] = 55.5;
-    KickJob* kickjob = new KickJob(1010.19, kickposition, kicktarget);
-    NodHeadJob* nodjob = new NodHeadJob(123, kicktarget, kickposition);
-    PanHeadJob* panjob = new PanHeadJob(0.0000123, kicktarget, kickposition);
-    // Test Walk Job
-    vector<float> walkspeed(3, 0);
-    walkspeed[0] = 10;
-    walkspeed[1] = -25;
-    walkspeed[2] = 0.0;
-    WalkJob* walkjob = new WalkJob(walkspeed);
-    WalkParameters parameters = WalkParameters();
-
-    ifstream testparafile("/home/root/jupptestparameters.wp");
-    if (testparafile.is_open())
-        testparafile >> parameters;
-
-    WalkParametersJob* parametersjob = new WalkParametersJob(parameters);
-    
-    // Test Light Job
-    vector<float> colour(3,0);
-    colour[0] = 1;
-    colour[1] = 0;
-    colour[2] = 0;
-    ChestLedJob ledjob = ChestLedJob(0, colour);
-    
-    addMotionJob(savejob);
-    addMotionJob(blockjob);
-    addMotionJob(headjob);
-    addMotionJob(kickjob);
-    addMotionJob(nodjob);
-    addMotionJob(panjob);
-    addMotionJob(walkjob);
-    addMotionJob(pointjob);
-    addMotionJob(parametersjob);*/
-    
-    /*ofstream tempjoblog;
-    tempjoblog.open("testjobs.txt");
-    tempjoblog << (*this);
-    tempjoblog.close();*/
 }
 
 /*! @brief Job destructor
  */
 JobList::~JobList()
 {
+    for (JobListIterator it = begin(); it != end(); ++it)
+    {
+        if (*it != NULL)
+            delete *it;
+    }
 }
 
 /*! @brief Add a job to the job list. The type inside the job will be used to determine what type it is ;)
@@ -118,12 +65,8 @@ void JobList::addJob(Job* job)
         addLocalisationJob(job);
     else if (jobtype == Job::BEHAVIOUR)
         addBehaviourJob(job);
-    else if (jobtype == Job::LIGHT)
-        addLightJob(job);
     else if (jobtype == Job::CAMERA)
         addCameraJob(job);
-    else if (jobtype == Job::SOUND)
-        addSoundJob(job);
     else if (jobtype == Job::SYSTEM)
         addSystemJob(job);
     else if (jobtype == Job::OTHER)
@@ -164,28 +107,12 @@ void JobList::addMotionJob(Job* job)
     addJob(job, m_motion_jobs);
 }
 
-/*! @brief Add a light job to the list
-    @param job the job to be added
- */
-void JobList::addLightJob(Job* job)
-{
-    addJob(job, m_light_jobs);
-}
-
 /*! @brief Add a camera job to the list
     @param job the job to be added
  */
 void JobList::addCameraJob(Job* job)
 {
     addJob(job, m_camera_jobs);
-}
-
-/*! @brief Add a sound job to the list
-    @param job the job to be added
- */
-void JobList::addSoundJob(Job* job)
-{
-    addJob(job, m_sound_jobs);
 }
 
 /*! @brief Add a system job to the list
@@ -213,121 +140,109 @@ void JobList::addJob(Job* job, list<Job*>& joblist)
     joblist.push_back(job);
 }
 
-/*! @brief Remove a job from the list
-    @param job the job to be removed
+/*! @brief Remove a job from the list based on its an iterator's position
+    @param iter the position of the job you want to remove
+    @return the new iterator position post job-removal
  */
-void JobList::removeJob(Job* job)
+list<Job*>::iterator JobList::removeJob(list<Job*>::iterator iter)
 {
+    Job* job = *iter;
     if (job == NULL)
-        return;
+        return iter;
     Job::job_type_t jobtype = job->getType();
     if (jobtype == Job::MOTION)
-        removeMotionJob(job);
+        return removeMotionJob(iter);
     else if (jobtype == Job::VISION)
-        removeVisionJob(job);
+        return removeVisionJob(iter);
     else if (jobtype == Job::LOCALISATION)
-        removeLocalisationJob(job);
+        return removeLocalisationJob(iter);
     else if (jobtype == Job::BEHAVIOUR)
-        removeBehaviourJob(job);
-    else if (jobtype == Job::LIGHT)
-        removeLightJob(job);
+        return removeBehaviourJob(iter);
     else if (jobtype == Job::CAMERA)
-        removeCameraJob(job);
-    else if (jobtype == Job::SOUND)
-        removeSoundJob(job);
+        return removeCameraJob(iter);
     else if (jobtype == Job::SYSTEM)
-        removeSystemJob(job);
+        return removeSystemJob(iter);
     else if (jobtype == Job::OTHER)
-        removeOtherJob(job);
+        return removeOtherJob(iter);
     else
-        debug << "JobList::removeJob. Unknown job type. Your job was never added to begin with." << endl;
+    {
+        errorlog << "JobList::removeJob. Unknown job type. Your job was never added to begin with." << endl;
+        return iter;
+    }
 }
 
 /*! @brief Remove a vision job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeVisionJob(Job* job)
+list<Job*>::iterator JobList::removeVisionJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_vision_jobs);
+    return removeJob(m_vision_jobs, iter);
 }
 
 /*! @brief Remove a localisation job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeLocalisationJob(Job* job)
+list<Job*>::iterator JobList::removeLocalisationJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_localisation_jobs);
+    return removeJob(m_localisation_jobs, iter);
 }
 
 /*! @brief Remove a behaviour job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeBehaviourJob(Job* job)
+list<Job*>::iterator JobList::removeBehaviourJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_behaviour_jobs);
+    return removeJob(m_behaviour_jobs, iter);
 }
 
 /*! @brief Remove a motion job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeMotionJob(Job* job)
+list<Job*>::iterator JobList::removeMotionJob(list<Job*>::iterator iter)
 {
-    debug << "JobList::removeMotionJob" << endl;
-    removeJob(job, m_motion_jobs);
-    debug << "JobList::removeMotionJob. Finished" << endl;
-}
-
-/*! @brief Remove a light job from the list
-    @param job the job to be removed
- */
-void JobList::removeLightJob(Job* job)
-{
-    removeJob(job, m_light_jobs);
+    return removeJob(m_motion_jobs, iter);
 }
 
 /*! @brief Remove a camera job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeCameraJob(Job* job)
+list<Job*>::iterator JobList::removeCameraJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_camera_jobs);
-}
-
-/*! @brief Remove a sound job from the list
-    @param job the job to be removed
- */
-void JobList::removeSoundJob(Job* job)
-{
-    removeJob(job, m_sound_jobs);
+    return removeJob(m_camera_jobs, iter);
 }
 
 /*! @brief Remove a system job from the list
-    @param job the job to be removed
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeSystemJob(Job* job)
+list<Job*>::iterator JobList::removeSystemJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_system_jobs);
+    return removeJob(m_system_jobs, iter);
 }
 
-/*! @brief Remove a other job from the list
-    @param job the job to be removed
+/*! @brief Remove an other job from the list
+    @param iter the position of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeOtherJob(Job* job)
+list<Job*>::iterator JobList::removeOtherJob(list<Job*>::iterator iter)
 {
-    removeJob(job, m_other_jobs);
+    return removeJob(m_other_jobs, iter);
 }
 
 /*! @brief Remove a job from the passed in list
-    @param job the job to be removed
     @param joblist the list from which the job will be removed
+    @param iter the position in the list of the job to be removed
+    @return the new iterator position post job-removal
  */
-void JobList::removeJob(Job* job, list<Job*>& joblist)
+list<Job*>::iterator JobList::removeJob(list<Job*>& joblist, list<Job*>::iterator iter)
 {
-    debug << "JobList::removeJob." << endl;
-    debug << "job:" << (void*) job << " " << job << endl;
-    debug << "joblist:" << (void*) &joblist << endl;
-    joblist.remove(job);
-    debug << "JobList::removeJob. Finished." << endl;
+    delete *iter;
+    return joblist.erase(iter);
 }
 
 /*! @brief Returns an iterator at the beginning of the job list. This iterator goes over the
@@ -410,20 +325,6 @@ list<Job*>::iterator JobList::motion_end()
     return m_motion_jobs.end();
 }
 
-/*! @brief Returns an iterator at the beginning of the light jobs.
- */
-list<Job*>::iterator JobList::light_begin()
-{
-    return m_light_jobs.begin();
-}
-
-/*! @brief Returns an iterator at the end of the light jobs.
- */
-list<Job*>::iterator JobList::light_end()
-{
-    return m_light_jobs.end();
-}
-
 /*! @brief Returns an iterator at the beginning of the camera jobs.
  */
 list<Job*>::iterator JobList::camera_begin()
@@ -436,20 +337,6 @@ list<Job*>::iterator JobList::camera_begin()
 list<Job*>::iterator JobList::camera_end()
 {
     return m_camera_jobs.end();
-}
-
-/*! @brief Returns an iterator at the beginning of the sound jobs.
- */
-list<Job*>::iterator JobList::sound_begin()
-{
-    return m_sound_jobs.begin();
-}
-
-/*! @brief Returns an iterator at the end of the sound jobs.
- */
-list<Job*>::iterator JobList::sound_end()
-{
-    return m_sound_jobs.end();
 }
 
 /*! @brief Returns an iterator at the beginning of the system jobs.
@@ -522,7 +409,7 @@ void JobList::csvTo(ostream& output)
 
 ostream& operator<<(ostream& output, JobList& joblist)
 {
-#if DEBUG_BEHAVIOUR_VERBOSITY > 4
+#if DEBUG_JOBS_VERBOSITY > 4
     debug << "ostream << JobList. " << joblist.size() << " jobs." << endl;
 #endif
     output << joblist.size() << " ";
@@ -535,14 +422,14 @@ ostream& operator<<(ostream& output, JobList& joblist)
 
 istream& operator>>(istream& input, JobList& joblist)
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    #if DEBUG_JOBS_VERBOSITY > 4
         debug << "istream >> JobList" << endl;
     #endif
     char buffer[8];
     unsigned int numnewjobs = 0;
     input >> numnewjobs;
     input.read(buffer, sizeof(char));       // skip over the white space
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 4
+    #if DEBUG_JOBS_VERBOSITY > 4
         debug << "istream >> JobList. Adding " << numnewjobs << endl;
     #endif
     Job* tempjob = NULL;
@@ -573,7 +460,7 @@ JobListIterator::JobListIterator()
 JobListIterator::JobListIterator(JobList* joblist, bool end)
 {
     m_joblist = joblist;
-#if DEBUG_BEHAVIOUR_VERBOSITY > 5
+#if DEBUG_JOBS_VERBOSITY > 5
     debug << "JobListIterator::JobListIterator. Contents of JobList:" << endl;
     list<list<Job*>*>::iterator it;
     list<Job*>::iterator sit;

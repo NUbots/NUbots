@@ -19,6 +19,8 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "nubotdataconfig.h"        // for initial camera settings location
+
 #include <cstring>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -235,6 +237,13 @@ storedTimeStamp(nusystem->getTime())
   // enable streaming
   int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   VERIFY(ioctl(fd, VIDIOC_STREAMON, &type) != -1);
+  
+  	//READ CAMERA SETTINGS FROM FILE:
+
+	CameraSettings fileSettings;
+	fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
+	setSettings(fileSettings);
+	
 }
 
 NAOCamera::~NAOCamera()
@@ -287,7 +296,7 @@ NUimage* NAOCamera::grabNewImage()
 {
     while(!capturedNew());
     currentBufferedImage.MapYUV422BufferToImage(getImage(), WIDTH, HEIGHT);
-    currentBufferedImage.timestamp = getTimeStamp();
+    currentBufferedImage.m_timestamp = getTimeStamp();
     return &currentBufferedImage;
 }
 

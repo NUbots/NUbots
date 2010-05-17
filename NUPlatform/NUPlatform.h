@@ -36,10 +36,11 @@ class NUPlatform
 public:
     virtual ~NUPlatform();
     
-    virtual void getName(string& name);
-    virtual void getNumber(int& number);
-    virtual void getTeamColour(string& colour);
-    virtual void getTeamNumber(int& number);
+    string getName();
+    int getRobotNumber();
+    int getPlayerNumber();
+    string getTeamColour();
+    int getTeamNumber();
     
 protected:
 private:
@@ -52,7 +53,8 @@ public:
     NUActionators* actionators;
 protected:
     string m_name;
-    int m_number;
+    int m_robot_number;
+    int m_player_number;
     string m_team_colour;
     int m_team_number;
 private:

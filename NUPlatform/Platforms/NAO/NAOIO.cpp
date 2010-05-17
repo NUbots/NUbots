@@ -23,10 +23,12 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-NAOIO::NAOIO(int probotnumber, NUbot* nubot): NUIO(probotnumber, nubot)
+using namespace std;
+
+NAOIO::NAOIO(NUbot* nubot): NUIO(nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOIO::NAOIO(" << probotnumber << ")" << endl;
+    debug << "NAOIO::NAOIO(" << nubot << ")" << endl;
 #endif
 }
 

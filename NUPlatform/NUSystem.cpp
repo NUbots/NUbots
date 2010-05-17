@@ -20,8 +20,19 @@
  */
 
 #include "NUSystem.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 #include "debug.h"
 #include "debugverbositynusystem.h"
+#include "targetconfig.h"
+
+#include <unistd.h>
+#ifdef TARGET_OS_IS_WINDOWS
+	#include <windows.h>
+#endif
+
+using namespace std;
 
 NUSystem* nusystem;
 
@@ -33,6 +44,7 @@ NUSystem* nusystem;
         #define CLOCK_REALTIME_FAST CLOCK_REALTIME
     #endif
 #else
+    using namespace boost::posix_time;
     ptime NUSystem::m_microsec_starttime = microsec_clock::local_time();
 #endif
 long double NUSystem::m_time_offset = 0;
@@ -42,7 +54,9 @@ NUSystem::NUSystem()
 #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "NUSystem::NUSystem()" << endl;
 #endif 
-    nusystem = this;
+    if (nusystem == NULL)
+        nusystem = this;
+        
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
@@ -72,11 +86,10 @@ long double NUSystem::getPosixTimeStamp()
 {
     static long double timeinmilliseconds;
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
-    static struct timespec timenow, timeafter;
+    static struct timespec timenow;
     clock_gettime(CLOCK_REALTIME_FAST, &timenow);
     timeinmilliseconds = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
 #else
-    static ptime ptimenow, ptimeafter;
     timeinmilliseconds = (microsec_clock::universal_time() - from_time_t(0)).total_nanoseconds()/1e6;
 #endif
     return timeinmilliseconds;
@@ -194,6 +207,42 @@ double NUSystem::getThreadTime()
     return timeinmilliseconds;
 }
 
+void NUSystem::msleep(double milliseconds)
+{
+    #ifdef __NU_PERIODIC_CLOCK_NANOSLEEP
+        struct timespec sleeptime;
+        sleeptime.tv_sec = static_cast<int> (milliseconds/1e3);
+        sleeptime.tv_nsec = 1e6*milliseconds - sleeptime.tv_sec*1e9;
+        clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);  
+    #else
+        #ifdef TARGET_OS_IS_WINDOWS
+            Sleep(DWORD(milliseconds));
+        #else
+            if (milliseconds <= 1000)
+                usleep(static_cast<int> (milliseconds*1e3));
+            else
+            {
+                sleep(milliseconds/1e3);
+            }
+        #endif
+    #endif
+}
 
+/*! @brief Display the current state of the battery
+    @param data a pointer to the shared sensor data object (it contains the battery values)
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
+/*! @brief Display some sign that a vision frame has been dropped
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayVisionFrameDrop(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
 
 

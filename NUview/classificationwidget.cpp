@@ -67,7 +67,7 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     allValuesSlider = new QSlider(Qt::Horizontal);
     allValuesSlider->setMinimum(0);
     allValuesSlider->setMaximum(20);
-    allValuesSlider->setValue(10);
+    allValuesSlider->setValue(5);
     boundaryGroupBox = new QGroupBox(tr("Selection Boundaries"));
     boundaryLayout = new QGridLayout;
     boundaryLayout->setColumnStretch(1,1);
@@ -85,10 +85,10 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
         channelLabels[channel] = new QLabel(tr(""));
         channelMinSelectors[channel] = new QSpinBox;
         channelMinSelectors[channel]->setRange(-255, 0);
-        channelMinSelectors[channel]->setValue(-10);
+        channelMinSelectors[channel]->setValue(-5);
         channelMaxSelectors[channel] = new QSpinBox;
         channelMaxSelectors[channel]->setRange(0, 255);
-        channelMaxSelectors[channel]->setValue(10);
+        channelMaxSelectors[channel]->setValue(5);
         boundaryLayout->addWidget(channelLabels[channel],channel+2,0);
         boundaryLayout->addWidget(channelMinSelectors[channel],channel+2,1);
         boundaryLayout->addWidget(channelMaxSelectors[channel],channel+2,2);

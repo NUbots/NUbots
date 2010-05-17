@@ -18,26 +18,51 @@
 #include "LineDetection.h"
 #include "FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUCamera.h"
+#include "Tools/FileFormats/LUTTools.h"
+#include <iostream>
+#include <fstream>
 
-
+class NUSensorsData;
+class NUActionatorsData;
+class SaveImagesThread;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
 class Circle;
 class NUimage;
-
+class JobList;
+class NUIO;
 //! Contains vision processing tools and functions.
 class Vision
 {
 
     private:
-    static const unsigned int c_LUTLength = 256*256*256;
-    const NUimage* currentImage; //!< Storage of a pointer to the raw colour image.
-    const unsigned char* currentLookupTable; //!< Storage of the current colour lookup table.
-    unsigned char* LUTBuffer; //!< Storage of the current colour lookup table.
+    const NUimage* currentImage;                //!< Storage of a pointer to the raw colour image.
+    const unsigned char* currentLookupTable;    //!< Storage of the current colour lookup table.
+    unsigned char* LUTBuffer;                   //!< Storage of the current colour lookup table.
+    unsigned char* testLUTBuffer;
+    int spacings;
+    
+    NUCamera* m_camera;                         //!< pointer to the camera 
+    NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
+    NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
+    friend class SaveImagesThread;
+    SaveImagesThread* m_saveimages_thread;      //!< an external thread to do saving images in parallel with vision processing
+    
     int findYFromX(std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
+
+    //! SavingImages:
+    bool isSavingImages;
+    bool isSavingImagesWithVaryingSettings;
+    int numSavedImages;
+    ofstream imagefile;
+    int ImageFrameNumber;
+    int numFramesDropped;
+    CameraSettings currentSettings;
+
+    void SaveAnImage();
 
     public:
     //! FieldObjects Container
@@ -47,6 +72,7 @@ class Vision
     Vision();
     //! Destructor.
     ~Vision();
+    double m_timestamp;
 
 
     double CalculateBearing(double cx);
@@ -55,8 +81,9 @@ class Vision
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
 
-    //void ProcessFrame(NUimage& image, Horizon horizonLine);
-    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data);
+    void process (JobList* jobs, NUCamera* camera, NUIO* m_io);
+
+    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions);
 
 
 
@@ -64,6 +91,7 @@ class Vision
     void loadLUTFromFile(const std::string& fileName);
 
     void setImage(const NUimage* sourceImage);
+    int getNumFramesDropped();
 
 
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);
@@ -83,7 +111,13 @@ class Vision
       @param y The y coordinate of the pixel to be classified.
       @return Returns the classfied colour index for the given pixel.
       */
-    inline unsigned char classifyPixel(int x, int y);
+    inline unsigned char classifyPixel(int x, int y)
+    {
+        classifiedCounter++;
+        Pixel* temp = &currentImage->m_image[y][x];
+        //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
+        return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+    }
 
     enum tCLASSIFY_METHOD
     {
@@ -137,20 +171,24 @@ class Vision
     ClassifiedSection verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
-    std::vector<LSFittedLine> DetectLines(ClassifiedSection* scanArea, int spacing);
+    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing);
 
-    /* std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
-                                                                      std::vector<Vector2<int> >&fieldBorders,
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
                                                                       std::vector<unsigned char> validColours,
-                                                                      int spacing,
-                                                                      float min_aspect, float max_aspect, int min_segments);*/
+                                                                      int spacing, int min_segments);
 
     Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
-    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector< TransitionSegment > horizontalSegments);
+
+    void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,
+                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
+                     std::vector< TransitionSegment > horizontalSegments);
 
 
+    bool isPixelOnScreen(int x, int y);
+    int getImageHeight(){ return currentImage->getHeight();}
+    int getImageWidth(){return currentImage->getWidth();}
 
-
+    int getScanSpacings(){return spacings;}
 
 };
 #endif // VISION_H

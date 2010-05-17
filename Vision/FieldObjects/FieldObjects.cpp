@@ -11,6 +11,35 @@ FieldObjects::~FieldObjects()
 	
 }
 
+/*! @brief Preprocesses each field object
+    @param timestamp the current timestamp in ms
+ 
+    This calls preprocess on each object, and clears all of the ambiguous objects
+ */
+void FieldObjects::preProcess(const float timestamp)
+{
+    for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
+        stationaryFieldObjects[i].preProcess(timestamp);
+    for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
+        mobileFieldObjects[i].preProcess(timestamp);
+    ambiguousFieldObjects.clear();
+}
+
+/*! @brief Postprocesses each field object
+    @brief timestamp the current timestamp in ms
+ 
+    This calls the postprocess on each object, including the ambiguous objects
+ */
+void FieldObjects::postProcess(const float timestamp)
+{
+    for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
+        stationaryFieldObjects[i].postProcess(timestamp);
+    for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
+        mobileFieldObjects[i].postProcess(timestamp);
+    for (unsigned int i=0; i<ambiguousFieldObjects.size(); i++)
+        ambiguousFieldObjects[i].postProcess(timestamp);
+}
+
 void FieldObjects::InitStationaryFieldObjects()
 {
         float x,y;
@@ -141,8 +170,42 @@ void FieldObjects::InitMobileFieldObjects()
 {
         for(int ID =0; ID < NUM_MOBILE_FIELD_OBJECTS; ID++)
 	{
-                MobileObject mobileObject = MobileObject();
+                std::string objectName;
+                switch (ID)
+                {
+                case FO_BALL:
+                    objectName = "Ball";
+                    break;
+                case FO_BLUE_ROBOT_1:
+                    objectName = "Blue Robot 1";
+                    break;
+                case FO_BLUE_ROBOT_2:
+                    objectName = "Blue Robot 2";
+                    break;
+                case FO_BLUE_ROBOT_3:
+                    objectName = "Blue Robot 3";
+                    break;
+                case FO_BLUE_ROBOT_4:
+                    objectName = "Blue Robot 4";
+                    break;
+                case FO_PINK_ROBOT_1:
+                    objectName = "Pink Robot 1";
+                    break;
+                case FO_PINK_ROBOT_2:
+                    objectName = "Pink Robot 2";
+                    break;
+                case FO_PINK_ROBOT_3:
+                    objectName = "Pink Robot 3";
+                    break;
+                case FO_PINK_ROBOT_4:
+                    objectName = "Pink Robot 4";
+                    break;
+                default:
+                    objectName = "Unknown Mobile Object";
+                    break;
+                }
+
+                MobileObject mobileObject = MobileObject(ID, objectName);
                 mobileFieldObjects.push_back(mobileObject);
 	}
 }
-

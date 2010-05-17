@@ -176,7 +176,9 @@ void KickJob::csvTo(ostream& output)
  */
 void KickJob::toStream(ostream& output) const
 {
-    debug << "KickJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 2
+        debug << "KickJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write KickJob specific data
@@ -198,7 +200,9 @@ void KickJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const KickJob& job)
 {
-    debug << "<<KickJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<KickJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -211,10 +215,10 @@ ostream& operator<<(ostream& output, const KickJob& job)
  */
 ostream& operator<<(ostream& output, const KickJob* job)
 {
-    debug << "<<KickJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<KickJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

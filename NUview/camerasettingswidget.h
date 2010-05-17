@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QString>
 #include <QDockWidget>
-#include "NUPlatform/NUCamera/CameraSettings.h"
+
 #include <QByteArray>
 #include <stdio.h>
 #include <iostream>
@@ -20,10 +20,14 @@ class QHBoxLayout;
 class QGridLayout;
 class QMdiSubWindow;
 class QPushButton;
+class QCheckBox;
 class QSignalMapper;
 class QToolButton;
 class QLineEdit;
 class QTcpSocket;
+
+class CameraSettings;
+class JobList;
 
 
 class cameraSettingsWidget: public QWidget
@@ -46,6 +50,10 @@ private slots:
     void stopStreamCameraSetting();
     void readPendingData();
     void sendSettingsToRobot();
+    void sendDataToRobot();\
+
+    void sendStartSavingImagesJob();
+    void sendStopSavingImagesJob();
 
 private:
     QVBoxLayout* overallLayout;                 //!< Overall widget layout.
@@ -101,14 +109,24 @@ private:
     QPushButton* getCameraSettingsButton;
     QPushButton* streamCameraSettingsButton;
     QPushButton* stopStreamCameraSettingsButton;
+
+
     QHBoxLayout* robotNameInputLayout;
     QHBoxLayout* pushButtonLayout;
+    QHBoxLayout* saveImagesButtonLayout;
     QString robotName;
+
+    QPushButton* StartSavingImagesButton;
+    QPushButton* StopSavingImagesButton;
+    QCheckBox* StartSavingImagesWithSettingsCheckBox;
+
+
     int datasize;
     QLabel* nameLabel;
     QLineEdit* nameLineEdit;
 
-    CameraSettings settings;
+    CameraSettings* settings;
+    JobList* m_job_list;
 
     void connectToRobot();
     void disconnectFromRobot();
@@ -120,6 +138,8 @@ private:
     QTcpSocket* tcpSocket;
     QByteArray netdata;
     QTimer timer;
+    QTimer readPacketTimer;
+    bool dostream;
 
 };
 

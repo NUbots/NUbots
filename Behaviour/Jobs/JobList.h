@@ -49,23 +49,19 @@ public:
     void addLocalisationJob(Job* job);
     void addBehaviourJob(Job* job);
     void addMotionJob(Job* job);
-    void addLightJob(Job* job);
     void addCameraJob(Job* job);
-    void addSoundJob(Job* job);
     void addSystemJob(Job* job);
     void addOtherJob(Job* job);
     
     // Remove job interface
-    void removeJob(Job* job);
-    void removeVisionJob(Job* job);
-    void removeLocalisationJob(Job* job);
-    void removeBehaviourJob(Job* job);
-    void removeMotionJob(Job* job);
-    void removeLightJob(Job* job);
-    void removeCameraJob(Job* job);
-    void removeSoundJob(Job* job);
-    void removeSystemJob(Job* job);
-    void removeOtherJob(Job* job);
+    list<Job*>::iterator removeJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeVisionJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeLocalisationJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeBehaviourJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeMotionJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeCameraJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeSystemJob(list<Job*>::iterator iter);
+    list<Job*>::iterator removeOtherJob(list<Job*>::iterator iter);
     
     // Iterators over the jobs
     iterator begin();
@@ -78,12 +74,8 @@ public:
     list<Job*>::iterator behaviour_end();
     list<Job*>::iterator motion_begin();
     list<Job*>::iterator motion_end();
-    list<Job*>::iterator light_begin();
-    list<Job*>::iterator light_end();
     list<Job*>::iterator camera_begin();
     list<Job*>::iterator camera_end();
-    list<Job*>::iterator sound_begin();
-    list<Job*>::iterator sound_end();
     list<Job*>::iterator system_begin();
     list<Job*>::iterator system_end();
     list<Job*>::iterator other_begin();
@@ -100,16 +92,14 @@ public:
     
 private:
     void addJob(Job* job, list<Job*>& joblist);
-    void removeJob(Job* job, list<Job*>& joblist);
+    list<Job*>::iterator removeJob(list<Job*>& joblist, list<Job*>::iterator iter);
 
 private:
     list<Job*> m_vision_jobs;               //!< a list of all the current vision jobs
     list<Job*> m_localisation_jobs;         //!< a list of all the current localisation jobs
     list<Job*> m_behaviour_jobs;            //!< a list of all the behaviour jobs
     list<Job*> m_motion_jobs;               //!< a list of all the current motion jobs
-    list<Job*> m_light_jobs;                //!< a list of all the current light jobs
     list<Job*> m_camera_jobs;               //!< a list of all the current camera jobs
-    list<Job*> m_sound_jobs;                //!< a list of all the current jobs for the sound system
     list<Job*> m_system_jobs;               //!< a list of all the current system/os jobs
     list<Job*> m_other_jobs;                //!< a list of all other jobs
     list<list<Job*>*> m_job_lists;          //!< a list of all the lists of jobs

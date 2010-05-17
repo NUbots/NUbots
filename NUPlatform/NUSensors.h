@@ -34,6 +34,8 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 
+class Kinematics;
+class OrientationUKF;
 
 /*! @brief Base sensor storage class
  */
@@ -54,22 +56,32 @@ protected:
     void calculateJointVelocity();
     void calculateJointAcceleration();
     
+    void calculateKinematics();
+    
     void calculateOrientation();
     void calculateHorizon();
     void calculateButtonTriggers();
-    void calculateZMP();
-    void calculateFallSense();
     
     void calculateFootForce();
-    void calculateFootImpact();
     void calculateCoP();
+    void calculateFootSupport();
+    void calculateFootImpact();
+    
+    void calculateZMP();
+    void calculateFallSense();
+
+    void calculateOdometry();
+    void calculateCameraHeight();
     
 private:
 protected:
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
-    
+    Kinematics* m_kinematicModel;
+    OrientationUKF* m_orientationFilter;
+    vector<vector<float> > m_left_foot_hull;
+    vector<vector<float> > m_right_foot_hull;
 private:
 };
 

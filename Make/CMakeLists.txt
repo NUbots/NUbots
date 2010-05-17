@@ -18,11 +18,11 @@
 
 
 
-############################ PROJECT NAME
+######################################################## PROJECT NAME ########################################################
 PROJECT( NUBOT )
 MESSAGE( STATUS "...:::: NUBOT ::::..." )
 
-########### Target Robot: NAOWebots, NAO, Cycloid, etc
+###################### Target Robot: NAOWebots, NAO, Cycloid, etc
 IF(x$ENV{TARGET_ROBOT}x STREQUAL xx)
 	MESSAGE(STATUS "TARGET_ROBOT was not found in the environment. Assuming NAOWEBOTS")
 	SET(TARGET_ROBOT NAOWEBOTS)
@@ -39,9 +39,36 @@ IF(DEBUG)
     MESSAGE(STATUS "Debugging cmake process")
 ENDIF (DEBUG)
 
-########## The location of target specific files 
+######################################################## The location of target specific files 
 # this is used by target specific cmake files to locate appropriate sources
-SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms)
+#	- we have TARGET_ROBOT_NAME for a case sensitive name of the platform.
+# 	- we have target specific sources in TARGET_ROBOT_DIR
+# 	- we have target specific home environment variable in HOME_ENV_VAR
+# 	- we have target specific location for data files NUBOT_DATA_DIR. This is the location on the actual platform that data files are placed.
+IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
+    SET(TARGET_ROBOT_NAME NAOWebots)
+ELSEIF(${TARGET_ROBOT} STREQUAL NAO)
+    SET(TARGET_ROBOT_NAME NAO)
+ELSEIF(${TARGET_ROBOT} STREQUAL CYCLOID)
+    SET(TARGET_ROBOT_NAME Cycloid)
+ELSEIF(${TARGET_ROBOT} STREQUAL NUVIEW)
+    SET(TARGET_ROBOT_NAME NUview)
+ENDIF()
+
+IF(${TARGET_ROBOT} STREQUAL NUVIEW)
+    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../${TARGET_ROBOT_NAME})
+ELSE()
+    SET(TARGET_ROBOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../NUPlatform/Platforms/${TARGET_ROBOT_NAME})
+ENDIF()
+
+SET(NUBOT_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../Config/${TARGET_ROBOT_NAME} CACHE STRING "Directory for nubot configuration files, i.e. where the Config directory for the target platform is on your computer")
+
+SET(HOME_ENV_VAR "HOME") 
+IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS OR ${TARGET_ROBOT} STREQUAL NUVIEW)
+    IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+	SET(HOME_ENV_VAR "HOMEPATH") 
+    ENDIF()
+ENDIF()
 
 INCLUDE(sources.cmake)
 
@@ -92,6 +119,9 @@ CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
                 ESCAPE_QUOTES)
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/nubotconfig.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/nubotconfig.h"
+                ESCAPE_QUOTES)
+CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/nubotdataconfig.in"
+                "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/nubotdataconfig.h"
                 ESCAPE_QUOTES)
 
 ############################ debug.h GENERATION

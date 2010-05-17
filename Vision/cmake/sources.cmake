@@ -36,6 +36,7 @@ CircleFitting.cpp
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 FieldObjects
+Threads
 )
 ####################################################################################
 

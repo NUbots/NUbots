@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <zlib.h>
 #include "../Vision/LineDetection.h"
-
+#include <QDebug>
 #include <QStringList>
 #include <iostream>
 #include <fstream>
@@ -29,6 +29,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
+    //TEST:
 }
 
 virtualNUbot::~virtualNUbot()
@@ -67,9 +68,9 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 
 Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
-    if(x < rawImage->width() && y < rawImage->height() && imageAvailable())
+    if(x < rawImage->getWidth() && y < rawImage->getHeight() && imageAvailable())
     {
-        return rawImage->image[y][x];
+        return rawImage->m_image[y][x];
     }
     else
     {
@@ -137,7 +138,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     std::vector< Vector2<int> > horizontalPoints;
     std::vector<LSFittedLine> fieldLines;
-    int spacings = 16;
+
 
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -155,6 +156,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
 
     vision.setImage(image);
+    vision.AllFieldObjects->preProcess(image->m_timestamp);
+    int spacings = (int)image->getWidth()/20;
     vision.setLUT(classificationTable);
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
@@ -192,7 +195,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(vertScanArea.getDirection() == ClassifiedSection::DOWN)
+        if(vertScanArea.getDirection() == ScanLine::DOWN)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -210,13 +213,15 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         ScanLine* tempScanLine = horiScanArea.getScanLine(i);
         int lengthOfLine = tempScanLine->getLength();
+        //qDebug() << "Amount of fill on scanline["<<i<<"] = "<< tempScanLine->getFill();
         Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
+            if(tempScanLine->getSegment(seg)->getColour() == ClassIndex::white) continue;
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(horiScanArea.getDirection() == ClassifiedSection::RIGHT)
+        if(horiScanArea.getDirection() == ScanLine::RIGHT)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -228,9 +233,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //! Form Lines
-    fieldLines = vision.DetectLines(&vertScanArea,spacings);
-    //! Extract Detected Line & Corners
-    emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+
 
     emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
     emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
@@ -253,7 +256,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
     std::vector< ObjectCandidate > YellowGoalCandidates;
-
+    std::vector< ObjectCandidate > BlueGoalAboveHorizonCandidates;
+    std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
     mode = ROBOTS;
     method = Vision::PRIMS;
    for (int i = 0; i < 4; i++)
@@ -264,8 +268,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case ROBOTS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::red);
-                validColours.push_back(ClassIndex::red_orange);
+                validColours.push_back(ClassIndex::pink);
+                validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
@@ -277,8 +281,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::red_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::red_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
                 BallCandidates = tempCandidates;
@@ -290,6 +294,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS" << tempCandidates.size();
                 break;
@@ -299,63 +304,84 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
                 tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
+                BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS";
                 break;
         }
         while (tempCandidates.size() > 0)
         {
-            candidates.push_back(tempCandidates.back());
+            //candidates.push_back(tempCandidates.back());
             tempCandidates.pop_back();
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-        //qDebug() << "POSTclassifyCandidates";
+    qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
         circ = vision.DetectBall(BallCandidates);
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-            //debug << "Ball Found(cx,cy):" << circ.centreX <<","<< circ.centreY << circ.radius<<endl;
-            //debug << "Ball Detected at(Distance,Bearing): " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Distance() << ","<< AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].Bearing() << endl;
-        }
-        else
-        {
-            //emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-        }
+        candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
-    //qDebug() << "Ball Detected:" << vision.AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-    /*
-        if(circ.isDefined)
-        {
-            //! Draw Ball:
-            //emit drawFO_Ball((float)circ.centreX,(float)circ.centreY,(float)circ.radius,GLDisplay::TransitionSegments);
-        }
-        else
-        {
-            emit drawFO_Ball((float)0,(float)0,(float)0,GLDisplay::TransitionSegments);
-        }*/
-    //qDebug()<< (double)((double)vision.classifiedCounter/(double)(image.height()*image.width()))*100 << " percent of image classified";
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    //qDebug() << "Crash Check: Before Yellow Goals Detection:";
-    vision.DetectGoals(YellowGoalCandidates, horizontalsegments);
-    while (YellowGoalCandidates.size() > 0)
-    {
-        candidates.push_back(YellowGoalCandidates.back());
-        YellowGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before BLue Goals Detection:";
-    vision.DetectGoals(BlueGoalCandidates,horizontalsegments);
-    while (BlueGoalCandidates.size() > 0)
-    {
-        candidates.push_back(BlueGoalCandidates.back());
-        BlueGoalCandidates.pop_back();
-    }
-    //qDebug() << "Crash Check: Before Final Update:";
+
+
+    vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
+    candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
+
+    vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
+    candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
+
+    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings);
+    //! Extract Detected Line & Corners
+    emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
+    emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
+    qDebug() << "Updating Corners";
+    emit cornerPointsDisplayChanged(LineDetector.cornerPoints,GLDisplay::FieldLines);
+
+    //POST PROCESS:
+    vision.AllFieldObjects->postProcess(image->m_timestamp);
+    //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+    emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
+
+
+    //SUMMARY:
+    qDebug() << "Time: " << vision.m_timestamp;
+    qDebug() 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << vision.classifiedCounter
+                    << "\t Percent of Image: " << vision.classifiedCounter / float(image->getWidth() * image->getHeight()) * 100.00 << "%" << endl;
+    for(unsigned int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Stationary Object: " << i << ":" //<< vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
+                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
+                    << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
+        }
+    }
+    for(unsigned  int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Mobile Object: " << i << ":" //<< vision.AllFieldObjects->mobileFieldObjects[i].getName()
+                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
+                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
+                    << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
+        }
+    }
+
+    for(unsigned int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
+    {
+        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+        {
+            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
+                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
+                     << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
+                     << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();
+
+        }
+    }
+
     return;
 }
 
@@ -373,7 +399,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         tempLut[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
     }
 
@@ -384,7 +410,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         tempLut[index] = ClassIndex::unclassified;
     }
     emit classifiedDisplayChanged(&previewClassImage, GLDisplay::classificationSelection);
@@ -414,7 +440,7 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> index
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
-        unsigned int index = ((temp.y<<16) + (temp.cb<<8) + temp.cr);
+        unsigned int index = LUTTools::getLUTIndex(temp);
         if(classificationTable[index] != colour)
         {
             undoHistory[nextUndoIndex].push_back(classEntry(index,classificationTable[index])); // Save index and colour
@@ -433,13 +459,13 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
     if(autoSoftColour == false) return requestedColour;
     switch(currentColour)
     {
-        case ClassIndex::red:
+        case ClassIndex::pink:
         {
             switch(requestedColour)
             {
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -447,14 +473,14 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
             }
             break;
         }
-        case ClassIndex::red_orange:
+        case ClassIndex::pink_orange:
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
+            case ClassIndex::pink:
             case ClassIndex::orange:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             default:
                 return requestedColour;
@@ -466,9 +492,9 @@ ClassIndex::Colour virtualNUbot::getUpdateColour(ClassIndex::Colour currentColou
         {
             switch(requestedColour)
             {
-            case ClassIndex::red:
-            case ClassIndex::red_orange:
-                return ClassIndex::red_orange;
+            case ClassIndex::pink:
+            case ClassIndex::pink_orange:
+                return ClassIndex::pink_orange;
                 break;
             case ClassIndex::yellow:
             case ClassIndex::yellow_orange:

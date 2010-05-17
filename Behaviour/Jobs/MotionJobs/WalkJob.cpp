@@ -24,6 +24,21 @@
 #include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkJob
+    @param x the x speed in cm/s
+    @param y the y speed in cm/s
+    @param yaw the yaw speed in cm/s
+*/
+WalkJob::WalkJob(float x, float y, float yaw) : MotionJob(Job::MOTION_WALK)
+{
+    m_job_time = 0;
+    vector<float> speed(3,0);
+    speed[0] = x;
+    speed[1] = y;
+    speed[2] = yaw;
+    m_walk_speed = speed;
+}
+
+/*! @brief Constructs a WalkJob
 
     @param speed the speed for the walk job [x (cm/s), y (cm/s), theta (rad/s)]
  */
@@ -114,7 +129,9 @@ void WalkJob::csvTo(ostream& output)
  */
 void WalkJob::toStream(ostream& output) const
 {
-    debug << "WalkJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 2
+        debug << "WalkJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
                                             // Then we write WalkJob specific data
@@ -132,7 +149,9 @@ void WalkJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const WalkJob& job)
 {
-    debug << "<<WalkJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<WalkJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -145,10 +164,10 @@ ostream& operator<<(ostream& output, const WalkJob& job)
  */
 ostream& operator<<(ostream& output, const WalkJob* job)
 {
-    debug << "<<WalkJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<WalkJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }

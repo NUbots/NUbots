@@ -22,6 +22,10 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
 Horizon.cpp
+Kinematics.cpp
+Link.cpp
+EndEffector.cpp
+OrientationUKF.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
