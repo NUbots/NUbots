@@ -49,6 +49,8 @@ protected:
 
     void addState(BehaviourState* state);
     virtual void doBehaviour();
+    virtual void doBehaviourCommons();
+    virtual BehaviourState* nextStateCommons();
 
 protected:
     BehaviourState* m_state;

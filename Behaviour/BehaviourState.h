@@ -30,12 +30,10 @@ class BehaviourProvider;
 class BehaviourState
 {
 public:
-    BehaviourState(BehaviourProvider* provider);
+    BehaviourState();
     virtual ~BehaviourState();
     virtual BehaviourState* nextState() = 0;
     virtual void doState() = 0;
-protected:
-    BehaviourProvider* m_provider;
 };
 
 

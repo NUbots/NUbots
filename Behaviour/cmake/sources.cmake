@@ -29,7 +29,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  Jobs
-                DemoBehaviours
+                ChaseBall
                 MiscBehaviours
 )
 ####################################################################################

@@ -73,8 +73,15 @@ void BehaviourFSMProvider::process(JobList* jobs, NUSensorsData* data, NUActiona
  */
 void BehaviourFSMProvider::doBehaviour()
 {
-    // check for state changes
-    BehaviourState* nextstate = m_state->nextState();
+    // do behaviour common to all states
+    doBehaviourCommons();
+    
+    // check for state changes common to all states
+    BehaviourState* nextstate = nextStateCommons();
+    if (nextstate == m_state)       // then check for state change specific to this state
+        nextstate = m_state->nextState();
+    
+    // do state transition
     if (nextstate != m_state)
     {
         m_previous_state = m_state;
@@ -86,6 +93,20 @@ void BehaviourFSMProvider::doBehaviour()
     
     // perform state behaviour
     m_state->doState();
+}
+
+/*! @brief Performs behaviour that is common to all states in this behaviour provider
+ */
+void BehaviourFSMProvider::doBehaviourCommons()
+{
+    return;
+}
+
+/*! @brief Checks for state transitions that are common to all states in this behaviour provider
+ */
+BehaviourState* BehaviourFSMProvider::nextStateCommons()
+{
+    return m_state;
 }
 
 /*! @brief Adds a state to the list of states

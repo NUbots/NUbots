@@ -26,9 +26,8 @@ using namespace std;
 
 /*! @brief Construct a behaviour state
  */
-BehaviourState::BehaviourState(BehaviourProvider* provider)
+BehaviourState::BehaviourState()
 {
-    m_provider = provider;
 }
 
 /*! @brief Destroys the behaviour state

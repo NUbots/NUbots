@@ -77,6 +77,9 @@ BehaviourProvider::~BehaviourProvider()
 }
 
 /*! @brief Preprocesses the data. Returns true if the data is valid
+    
+    At this level in the hierarchy we perform preprocessing relevant to ALL behaviour providers.
+ 
     @param jobs the nubot job list
     @param data the nubot sensor data
     @param actions the nubot actionators data
