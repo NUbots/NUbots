@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@
 
 #include <math.h>
 using namespace std;
+#include "Tools/Math/General.h"
+using namespace mathGeneral;
 
 NUWalk* NUWalk::getWalkEngine()
 {
@@ -77,6 +79,9 @@ NUWalk* NUWalk::getWalkEngine()
 
 NUWalk::NUWalk()
 {
+    m_current_time = 0;
+    m_previous_time = 0;
+    
     m_target_speed_x = 0;                         //!< the current target x speed cm/s
     m_target_speed_y = 0;                         //!< the current target y speed cm/s
     m_target_speed_yaw = 0;                       //!< the current target yaw speed rad/s
@@ -105,6 +110,16 @@ NUWalk::~NUWalk()
     kill();
 }
 
+/*! @brief Enables the walk
+ */
+void NUWalk::enableWalk()
+{
+    if (not inInitialPosition())
+        moveToInitialPosition();
+    else
+        m_walk_enabled = true;
+}
+
 /*! @brief Kills the walk engine
  */
 void NUWalk::kill()
@@ -126,11 +141,13 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
+    m_current_time = m_data->CurrentTime;
     if (m_walk_enabled)
     {
         calculateCurrentSpeed();
         doWalk();
     }
+    m_previous_time = m_current_time;
 }
 
 /*! @brief Process a walk speed job
@@ -140,17 +157,8 @@ void NUWalk::process(WalkJob* job)
 {
     vector<float> speed;
     job->getSpeed(speed);
-    bool allzero = true;
-    for (size_t i=0; i<speed.size(); i++)
-    {
-        if (speed[i] != 0)
-        {
-            allzero = false;
-            break;
-        }
-    }
-    if (not allzero)
-        m_walk_enabled = true;
+    if (not m_walk_enabled and not allZeros(speed))
+        enableWalk();
     setTargetSpeed(speed);
 }
 
@@ -162,17 +170,8 @@ void NUWalk::process(WalkToPointJob* job)
     double time;
     vector<float> position;
     job->getPosition(time, position);
-    bool allzero = true;
-    for (size_t i=0; i<position.size(); i++)
-    {
-        if (position[i] != 0)
-        {
-            allzero = false;
-            break;
-        }
-    }
-    if (not allzero)
-        m_walk_enabled = true;
+    if (not m_walk_enabled and not allZeros(position))
+        enableWalk();
     setTargetPoint(time, position);
 }
 
@@ -225,8 +224,7 @@ void NUWalk::calculateCurrentSpeed()
 {
     if (m_data == NULL)
         return;
-    static double previoustime = m_data->CurrentTime;
-    float timestep = (m_data->CurrentTime - previoustime)/1000.0;
+    float timestep = (m_current_time - m_previous_time)/1000.0;
     float x, y, yaw;
     
     // calculate the accelerations required to go to the target speed in the next timestep
@@ -258,8 +256,6 @@ void NUWalk::calculateCurrentSpeed()
     m_speed_x = m_speed_x + x*timestep;
     m_speed_y = m_speed_y + y*timestep;
     m_speed_yaw = m_speed_yaw + yaw*timestep;
-    
-    previoustime = m_data->CurrentTime;
 }
 
 /*! @brief Updates currentspeed with the current speed of the walk engine
@@ -328,5 +324,71 @@ void NUWalk::setArmEnabled(bool leftarm, bool rightarm)
 {
     m_larm_enabled = leftarm;
     m_rarm_enabled = rightarm;
+}
+
+/*! @brief Returns true if the robot is in the walk engine's initial position
+ */
+bool NUWalk::inInitialPosition()
+{
+    // get the current joint positions
+    vector<float> sensor_larm, sensor_rarm;
+    vector<float> sensor_lleg, sensor_rleg;
+    m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
+    m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
+    m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
+    m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+    
+    // compare the sensor positions to the initial positions
+    return allEqual(sensor_larm, m_initial_larm, 0.15f) and allEqual(sensor_rarm, m_initial_rarm, 0.15f) and allEqual(sensor_lleg, m_initial_lleg, 0.05f) and allEqual(sensor_rleg, m_initial_rleg, 0.05f);
+}
+
+/*! @brief Moves the robot into the initial position
+ */
+void NUWalk::moveToInitialPosition()
+{
+    static const float movespeed = 0.7;
+    static double movecompletiontime = -100;
+    if (movecompletiontime >= m_current_time)                // if there is already a move happening let it finish
+        return; 
+    else if (movecompletiontime >= m_current_time - 100)     // if a move has just finished don't start another one, just enable the walk (to avoid infinite loop)
+    {
+        m_walk_enabled = true;
+        return;
+    }
+    else
+    {
+        vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), movespeed);
+        vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), movespeed);
+        vector<float> velocity_lleg(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), movespeed);
+        vector<float> velocity_rleg(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), movespeed);
+        
+        // get the current joint positions
+        vector<float> sensor_larm, sensor_rarm;
+        vector<float> sensor_lleg, sensor_rleg;
+        m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
+        m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
+        m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
+        m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+        
+        // compute the time required to move into the initial pose for each limb
+        double time_larm = 1000*(maxDifference(sensor_larm, m_initial_larm)/movespeed);
+        double time_rarm = 1000*(maxDifference(sensor_rarm, m_initial_rarm)/movespeed);
+        double time_lleg = 1000*(maxDifference(sensor_lleg, m_initial_lleg)/movespeed);
+        double time_rleg = 1000*(maxDifference(sensor_rleg, m_initial_rleg)/movespeed);
+        
+        // set the move complettion to be the maximum of each limb
+        movecompletiontime = m_current_time + std::max(std::max(time_larm, time_rarm), std::max(time_lleg, time_rleg));
+        
+        // give the command to the actionators
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + 100, sensor_larm, velocity_larm, 40);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + 100, sensor_rarm, velocity_rarm, 40);
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + 100, sensor_lleg, velocity_lleg, 60);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + 100, sensor_rleg, velocity_rleg, 60);
+        
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + time_larm, m_initial_larm, velocity_larm, 40);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + time_rarm, m_initial_rarm, velocity_rarm, 40);
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + time_lleg, m_initial_lleg, velocity_lleg, 60);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + time_rleg, m_initial_rleg, velocity_rleg, 60);
+    }
 }
 

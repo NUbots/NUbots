@@ -136,7 +136,7 @@ void NUMotion::kill()
         m_save->kill();
     #endif
     
-    float safelegpositions[] = {0, -1.0, 0, 2.16, 0, -1.22};
+    float safelegpositions[] = {0, -0.85, -0.15, 2.16, 0, -1.22};
     float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
     float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
     vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
