@@ -142,6 +142,10 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     m_current_time = m_data->CurrentTime;
+    
+    if (m_current_time - m_previous_time > 200)
+        m_walk_enabled = false;
+    
     if (m_walk_enabled)
     {
         calculateCurrentSpeed();
