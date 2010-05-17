@@ -67,8 +67,7 @@ void SelectBehaviourProvider::doBehaviour()
         if (singleChestClick() or longChestClick())
         {
             voiceCurrentSelection();
-            if (m_selection_index == 1)
-                m_manager->setNextBehaviour(m_available_behaviours[m_selection_index]);
+            m_manager->setNextBehaviour(m_available_behaviours[m_selection_index]);
         }
     }
 }
@@ -76,6 +75,7 @@ void SelectBehaviourProvider::doBehaviour()
 void SelectBehaviourProvider::doIntroduction()
 {
     m_actions->addSound(m_current_time, "select_behaviour.wav");
+    m_introduction_done = true;
 }
 
 void SelectBehaviourProvider::voiceCurrentSelection()

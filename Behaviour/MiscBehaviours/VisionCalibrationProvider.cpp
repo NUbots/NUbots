@@ -37,7 +37,7 @@ using namespace std;
 VisionCalibrationProvider::VisionCalibrationProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
     m_selection_index = 0;
-    m_num_motions = 4;
+    m_num_motions = 5;
     m_saving_images = false;
     m_chase_ball = NULL;
 }
@@ -79,11 +79,12 @@ void VisionCalibrationProvider::doSelectedMotion()
         vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
         m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
+        //! @todo TODO: If we are not standing up, then we should stand up (probably need a stand-up job, or set the walk speed non-zero for a little bit)
     }
     else if (m_selection_index == 1)
     {
         vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, zero);
+        m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, -100);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
     }
     else if (m_selection_index == 2)
