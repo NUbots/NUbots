@@ -10,45 +10,34 @@ OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)
 //    file.close();
 }
 
-void OrientationUKF::initialise(double timestamp, float pitchGyro, float rollGyro, float accX, float accY, float accZ)
+void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations)
 {
-    m_timeOfLastUpdate = timestamp;
+    m_timeOfLastUpdate = time;
 
     // Assume there is little or no motion to start for best intial estimate.
-    m_mean[pitchGyroOffset][0] = pitchGyro;
-    m_mean[rollGyroOffset][0] = rollGyro;
+    m_mean[pitchGyroOffset][0] = gyroReadings[1];
+    m_mean[rollGyroOffset][0] = gyroReadings[0];
 
     m_covariance[pitchGyroOffset][pitchGyroOffset] = 0.1f * 0.1f;
     m_covariance[rollGyroOffset][rollGyroOffset] = 0.1f * 0.1f;
 
     // Assume there is little to no acceleration apart from gravity for initial estimation.
-    m_mean[pitchAngle][0] = -atan2(-accX,-accZ);
-    m_mean[rollAngle][0] = atan2(accY,-accZ);
-
-    //m_mean[xAcceleration][0] = 0.0;
-    //m_mean[yAcceleration][0] = 0.0;
-    //m_mean[zAcceleration][0] = 0.0;
+    m_mean[pitchAngle][0] = -atan2(-accelerations[0],-accelerations[2]);
+    m_mean[rollAngle][0] = atan2(accelerations[1],-accelerations[2]);
 
     m_covariance[pitchAngle][pitchAngle] = 0.5f*0.5f;
     m_covariance[rollAngle][rollAngle] = 0.5f * 0.5f;
-
-    //m_covariance[xAcceleration][xAcceleration] = 10.0f*10.0f;
-    //m_covariance[yAcceleration][yAcceleration] = 10.0f*10.0f;
-    //m_covariance[zAcceleration][zAcceleration] = 10.0f*10.0f;
 
     m_processNoise = Matrix(numStates,numStates,false);
     m_processNoise[pitchAngle][pitchAngle] = 1e-3;
     m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-4;
     m_processNoise[rollAngle][rollAngle] = 1e-3;
     m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-4;
-    //m_processNoise[xAcceleration][xAcceleration] = 100.0f * 100.0f;
-    ///m_processNoise[yAcceleration][yAcceleration] = 100.0f * 100.0f;
-    //m_processNoise[zAcceleration][zAcceleration] = 100.0f * 100.0f;
 
     m_initialised = true;
 }
 
-void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, double timestamp)
+void OrientationUKF::TimeUpdate(const std::vector<float>& gyroReadings, double timestamp)
 {
 //    std::fstream file;
 //    file.open((std::string(DATA_DIR) + std::string("OrientationUKF.log")).c_str(),ios_base::app | ios_base::out);
@@ -81,8 +70,8 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
 
     // Sensor value matrix
     Matrix sensorData(2,1,false);
-    sensorData[0][0] = pitchGyroReading;
-    sensorData[1][0] = rollGyroReading;
+    sensorData[0][0] = gyroReadings[1];
+    sensorData[1][0] = gyroReadings[0];
 
     // Generate the sigma points and update using transfer function
     Matrix sigmaPoints = GenerateSigmaPoints();
@@ -110,106 +99,7 @@ void OrientationUKF::TimeUpdate(float pitchGyroReading, float rollGyroReading, d
 //    file.close();
 }
 
-void OrientationUKF::AccelerometerMeasurementUpdate(float xAccel, float yAccel, float zAccel)
-{
-    //double startTime = nusystem->getThreadTime();
-    const int numMeasurements = 3;
-    const float gravityAccel = 981.0f; // cm/s^2
-
-    // Generate sigma points from current state estimation.
-    Matrix sigmaPoints = GenerateSigmaPoints();
-    int numberOfSigmaPoints = sigmaPoints.getn();
-
-    // List of predicted observation for each sigma point.
-    Matrix predictedObservationSigmas(numMeasurements, numberOfSigmaPoints, false);
-
-    // Put observation into matrix form so we can use if for doing math
-    Matrix observation(numMeasurements,1,false);
-    observation[0][0] = xAccel;
-    observation[1][0] = yAccel;
-    observation[2][0] = zAccel;
-
-    // Observation noise
-    Matrix S_Obs(numMeasurements,numMeasurements,true);
-    S_Obs = 200.0*200.0*S_Obs;
-
-    // Temp working variables
-    Matrix temp(3,1,false);
-    double pitch, roll;
-
-    // Convert estimated state sigma points to estimates observation sigma points.
-    for(int i = 0; i < numberOfSigmaPoints; i++)
-    {
-        pitch = mathGeneral::normaliseAngle(sigmaPoints[pitchAngle][i]);
-        roll = mathGeneral::normaliseAngle(sigmaPoints[rollAngle][i]);
-
-        // Calculate predicted x acceleration due to gravity + external acceleration.
-        temp[0][0] = gravityAccel * sin(pitch);
-
-        // Calculate predicted y acceleration due to gravity + external acceleration.
-        temp[1][0] = -gravityAccel * cos(pitch) * sin(roll);
-
-        // Calculate predicted z acceleration due to gravity + external acceleration.
-        temp[2][0] = -gravityAccel * cos(pitch) * cos(roll);
-
-        // Add to measurement sigma point list.
-        predictedObservationSigmas.setCol(i,temp);
-    }
-    measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
-    m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
-    m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
-    //double runTime = nusystem->getThreadTime() - startTime;
-    //debug << "Acceleration Measurement Update took: " << runTime << " ms" << std::endl;
-}
-
-void OrientationUKF::KinematicsMeasurementUpdate(float pitchMeasurement, float rollMeasurment)
-{
-    //double startTime = nusystem->getThreadTime();
-    const int numMeasurements = 2;
-
-    // Generate sigma points from current state estimation.
-    Matrix sigmaPoints = GenerateSigmaPoints();
-    int numberOfSigmaPoints = sigmaPoints.getn();
-
-    // List of predicted observation for each sigma point.
-    Matrix predictedObservationSigmas(numMeasurements, numberOfSigmaPoints, false);
-
-    // Put observation into matrix form so we can use if for doing math
-    Matrix observation(numMeasurements,1,false);
-    observation[0][0] = rollMeasurment;
-    observation[1][0] = pitchMeasurement;
-
-    Matrix S_Obs(numMeasurements,numMeasurements,true);
-    S_Obs = 1e-6*S_Obs;
-
-    // Temp working variables
-    Matrix temp(2,1,false);
-    double pitch, roll;
-
-    // Convert estimated state sigma points to estimates observation sigma points.
-    for(int i = 0; i < numberOfSigmaPoints; i++)
-    {
-        pitch = mathGeneral::normaliseAngle(sigmaPoints[pitchAngle][i]);
-        roll = mathGeneral::normaliseAngle(sigmaPoints[rollAngle][i]);
-
-        // Predicted Roll
-        temp[0][0] = roll;
-
-        // Predicted Pitch
-        temp[1][0] = pitch;
-
-
-        // Add to measurement sigma point list.
-        predictedObservationSigmas.setCol(i,temp);
-    }
-    measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
-    m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
-    m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
-    //double runTime = nusystem->getThreadTime() - startTime;
-    //debug << "Kinematic Measurement Update took: " << runTime << " ms" << std::endl;
-}
-
-void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, bool validKinematics, const std::vector<float> kinematicsOrientation)
+void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, bool validKinematics, const std::vector<float>& kinematicsOrientation)
 {
 //    std::fstream file;
 //    file.open((std::string(DATA_DIR) + std::string("OrientationUKF.log")).c_str(),ios_base::app | ios_base::out);
