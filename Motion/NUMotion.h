@@ -39,10 +39,7 @@ class JobList;
 #ifdef USE_KICK
     class NUKick;
 #endif
-#ifdef USE_BLOCK
-    class NUBlock;
-#endif
-#ifdef USE_SAVE
+#if defined(USE_BLOCK) or defined(USE_SAVE)
     class NUSave;
 #endif
 #ifdef USE_SCRIPT
@@ -82,19 +79,16 @@ private:
     #ifdef USE_KICK
         NUKick* m_kick;                     //!< the kick module
     #endif
-    #ifdef USE_BLOCK
-        NUBlock* m_block;                   //!< the block module
-    #endif
-    #ifdef USE_SAVE
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
         NUSave* m_save;                     //!< the save module
     #endif
     #ifdef USE_SCRIPT
-        Script* m_script;                    //!< the script module
+        Script* m_script;                   //!< the script module
     #endif
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
-    int m_cycle_time;                   //!< the cycle time in ms
+    double m_last_kill_time;            //!< the last time a kill was called in ms (a recent call disables ALL motion)
     
     MotionScript* m_block_left;
 };

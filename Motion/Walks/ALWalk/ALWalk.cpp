@@ -33,12 +33,6 @@ ALWalk::ALWalk()
 {
     debug << "ALWalk::ALWalk()" << endl;
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
-
-    m_al_motion->setStiffnesses(string("LLeg"), 0.7f);
-    m_al_motion->setStiffnesses(string("RLeg"), 0.7f);
-    m_al_motion->setStiffnesses(string("LArm"), 0.3f);
-    m_al_motion->setStiffnesses(string("RArm"), 0.3f);
-    m_al_motion->setWalkTargetVelocity(0.0, 0, 0, 0);
 }
 
 /*! @brief Destructor for motion module
@@ -53,6 +47,7 @@ ALWalk::~ALWalk()
  */
 void ALWalk::kill()
 {
+    m_walk_enabled = false;
     m_al_motion->killWalk();
 }
 
@@ -74,6 +69,15 @@ void ALWalk::doWalk()
         
         m_al_motion->setWalkTargetVelocity(m_speed_x/max_x, m_speed_y/max_y, m_speed_yaw/max_yaw, 1);
     }
+    
+    static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
+    static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, 75);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, 75);
+    if (m_larm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, 30);
+    if (m_rarm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_data->CurrentTime, armnan, armnan, 30);
 }
 
 /*! @brief Sets whether the arms are allowed to be moved by the walk engine

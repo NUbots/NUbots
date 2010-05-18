@@ -140,7 +140,17 @@ void NUWalk::process(WalkJob* job)
 {
     vector<float> speed;
     job->getSpeed(speed);
-    m_walk_enabled = true;
+    bool allzero = true;
+    for (size_t i=0; i<speed.size(); i++)
+    {
+        if (speed[i] != 0)
+        {
+            allzero = false;
+            break;
+        }
+    }
+    if (not allzero)
+        m_walk_enabled = true;
     setTargetSpeed(speed);
 }
 
@@ -152,7 +162,17 @@ void NUWalk::process(WalkToPointJob* job)
     double time;
     vector<float> position;
     job->getPosition(time, position);
-    m_walk_enabled = true;
+    bool allzero = true;
+    for (size_t i=0; i<position.size(); i++)
+    {
+        if (position[i] != 0)
+        {
+            allzero = false;
+            break;
+        }
+    }
+    if (not allzero)
+        m_walk_enabled = true;
     setTargetPoint(time, position);
 }
 

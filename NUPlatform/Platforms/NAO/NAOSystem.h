@@ -46,6 +46,8 @@ public:
     void displayGamePacketReceived(NUActionatorsData* actions);
     void displayTeamPacketReceived(NUActionatorsData* actions);
     
+    void restart();
+    void powerOff();
 private:
     double m_current_time;
     double m_battery_state_previous_time;                    //!< the previous time displayBatteryState was called

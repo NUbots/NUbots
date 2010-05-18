@@ -1049,14 +1049,14 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
             RElbowRoll = i;
             m_rarm_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("lhipyaw") != string::npos)
-        {
-            LHipYaw = i;
-            m_lleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
         {
             LHipYawPitch = i;
+            m_lleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("lhipyaw") != string::npos)
+        {
+            LHipYaw = i;
             m_lleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("lhippitch") != string::npos)
@@ -1084,14 +1084,14 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
             LAnkleRoll = i;
             m_lleg_ids.push_back(i);
         }
-        else if (simplejointnames[i].find("rhipyaw") != string::npos)
-        {
-            RHipYaw = i;
-            m_rleg_ids.push_back(i);
-        }
         else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
         {
             RHipYawPitch = i;
+            m_rleg_ids.push_back(i);
+        }
+        else if (simplejointnames[i].find("rhipyaw") != string::npos)
+        {
+            RHipYaw = i;
             m_rleg_ids.push_back(i);
         }
         else if (simplejointnames[i].find("rhippitch") != string::npos)

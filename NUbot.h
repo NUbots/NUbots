@@ -29,27 +29,25 @@
 #include "targetconfig.h"
 #include "nubotconfig.h"
 
-#include "NUPlatform/NUPlatform.h"
+class NUPlatform;
+class NUIO;
 
 #ifdef USE_VISION
-    #include "Vision/FieldObjects/FieldObjects.h"
-    #include "Tools/Image/NUimage.h"
-    #include "Vision/Vision.h"
+    class NUimage;
+    class Vision;
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    class Localisation;
 #endif
 
 #ifdef USE_BEHAVIOUR
-    #include "Behaviour/Behaviour.h"
+    class Behaviour;
 #endif
 
 #ifdef USE_MOTION
-    #include "Motion/NUMotion.h"
+    class NUMotion;
 #endif
-
-#include "NUPlatform/NUIO.h"
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -62,6 +60,8 @@ class TeamInformation;
 #endif
 class SenseMoveThread;
 class WatchDogThread;
+
+#include <exception>
 
 /*! @brief The top-level class
  */

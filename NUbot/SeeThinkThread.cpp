@@ -22,6 +22,31 @@
 #include "SeeThinkThread.h"
 #include "NUbot.h"
 
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
+
+#ifdef USE_VISION
+    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
+
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+    #include "Behaviour/Jobs.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    //#include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
@@ -132,9 +157,12 @@ void SeeThinkThread::run()
                 //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
             #endif
             
-            #if defined(USE_VISION) and defined(USE_BEHAVIOUR)
-                //m_nubot->m_behaviour->process();
-                m_nubot->m_behaviour->processFieldObjects(*m_nubot->Jobs,AllObjects,m_nubot->SensorData, m_nubot->Image->getHeight(), m_nubot->Image->getWidth());
+            #if defined(USE_BEHAVIOUR)
+                #if defined(USE_VISION)
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, AllObjects, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #else
+                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, NULL, m_nubot->GameInfo, m_nubot->TeamInfo);
+                #endif
             #endif
             
             #ifdef USE_VISION

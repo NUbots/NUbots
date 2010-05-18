@@ -205,7 +205,7 @@ std::vector<BodyJointCommand *> WalkProvider::getGaitTransitionCommand(){
 
     vector<BodyJointCommand *> commands;
 
-    if(time <= 0.02f)
+    if(time <= MotionConstants::MOTION_FRAME_LENGTH_S)
         return commands;
 
     //larm: (0.,90.,0.,0.)

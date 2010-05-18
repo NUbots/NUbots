@@ -27,6 +27,8 @@
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 using namespace std;
 
 NAOSystem::NAOSystem()
@@ -150,7 +152,10 @@ void NAOSystem::voiceFrameDrop(NUActionatorsData* actions)
     actions->addSound(0, "error1.wav");
 }
 
-
+void NAOSystem::restart()
+{
+    system("/etc/init.d/naoqi restart");        // this doesn't work
+}
 
 
 

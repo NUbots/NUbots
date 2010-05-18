@@ -44,6 +44,18 @@ Script::~Script()
 {
 }
 
+/*! @brief Returns true is a script is currently being executed */
+bool Script::isActive()
+{
+    return false;
+}
+
+/*! @brief Returns true if a script uses the legs */
+bool Script::isUsingLegs()
+{
+    return true;
+}
+
 /*! @brief Produce actions from the data to move the robot into a standing position
  
     @param data a pointer to the most recent sensor data storage class

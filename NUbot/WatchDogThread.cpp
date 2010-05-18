@@ -21,7 +21,14 @@
 
 #include "WatchDogThread.h"
 #include "NUbot.h"
+
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUSystem.h"
+
+#ifdef USE_VISION
+    #include "Vision/Vision.h"
+#endif
 
 #include "debug.h"
 #include "debugverbositynubot.h"
