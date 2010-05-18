@@ -11,7 +11,7 @@
 #include <iostream>
 class Vision;
 class FieldObjects;
-#define MAX_LINEPOINTS 100
+#define MAX_LINEPOINTS 150
 #define MAX_FIELDLINES 20
 #define MAX_CORNERPOINTS 10
 #define VERT_POINT_THICKNESS 36
@@ -53,17 +53,22 @@ class LineDetection{
 	
 	
 	private:
-        int IMAGE_WIDTH;
 	int TotalValidLines;
         int LINE_SEARCH_GRID_SIZE;
+        int PenaltySpotLineNumber;
         void FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height);
         void FindFieldLines(int image_width,int image_height);
-        void FindCornerPoints(int image_height);
-        void DecodeCorners(FieldObjects* AllObjects, float timestamp );
+        void FindCornerPoints(int image_width,int image_height);
+        void DecodeCorners(FieldObjects* AllObjects, float timestamp,  int image_width, int image_height);
 	void GetDistanceToPoint(double,double,double*,double*,double*);
+
+        //! Line Point Sorting
         void qsort(std::vector<LinePoint> array, int left, int right, int type);
         void swap(std::vector<LinePoint> array, int i, int j);
 
+        //! Lines Sorting
+        void qsort(std::vector<LSFittedLine> array, int left, int right);
+        void swap(std::vector<LSFittedLine> array, int i, int j);
 }
 ;
 

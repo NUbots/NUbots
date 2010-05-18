@@ -104,7 +104,34 @@ HEADERS += ui_mainwindow.h \
     ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
     ../Motion/Tools/MotionScript.h \
-    ../Motion/Tools/MotionCurves.h
+    ../Motion/Tools/MotionCurves.h \
+    ../Vision/EllipseFit.h \
+    ../Vision/EllipseFitting/tnt_version.h \
+    ../Vision/EllipseFitting/tnt_vec.h \
+    ../Vision/EllipseFitting/tnt_subscript.h \
+    ../Vision/EllipseFitting/tnt_stopwatch.h \
+    ../Vision/EllipseFitting/tnt_sparse_matrix_csr.h \
+    ../Vision/EllipseFitting/tnt_math_utils.h \
+    ../Vision/EllipseFitting/tnt_i_refvec.h \
+    ../Vision/EllipseFitting/tnt_fortran_array3d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array3d.h \
+    ../Vision/EllipseFitting/tnt_fortran_array2d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array2d.h \
+    ../Vision/EllipseFitting/tnt_fortran_array1d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array1d.h \
+    ../Vision/EllipseFitting/tnt_cmat.h \
+    ../Vision/EllipseFitting/tnt_array3d_utils.h \
+    ../Vision/EllipseFitting/tnt_array3d.h \
+    ../Vision/EllipseFitting/tnt_array2d_utils.h \
+    ../Vision/EllipseFitting/tnt_array2d.h \
+    ../Vision/EllipseFitting/tnt_array1d_utils.h \
+    ../Vision/EllipseFitting/tnt_array1d.h \
+    ../Vision/EllipseFitting/tnt.h \
+    ../Vision/EllipseFitting/jama_svd.h \
+    ../Vision/EllipseFitting/jama_qr.h \
+    ../Vision/EllipseFitting/jama_lu.h \
+    ../Vision/EllipseFitting/jama_eig.h \
+    ../Vision/EllipseFitting/jama_cholesky.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -188,6 +215,7 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/EndEffector.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
-    ../Motion/Tools/MotionCurves.cpp
+    ../Motion/Tools/MotionCurves.cpp \
+    ../Vision/EllipseFit.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
