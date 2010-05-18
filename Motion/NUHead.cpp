@@ -423,16 +423,15 @@ void NUHead::calculateLocalisationNod()
     calculateGenericNod(100, 1e10, m_pan_localisation_speed);
 }
 
+/*! @brief Calculates a nod between mindistance and maxdistance (cm) at nodspeed (cm/s). 
+           In fact, m_nod_centre is used to control the speed in most cases.
+ */
 void NUHead::calculateGenericNod(float mindistance, float maxdistance, float nodspeed)
 {
     float minpitch, maxpitch;
     calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
     vector<vector<float> > points = calculateNodPoints(minpitch, maxpitch);
     vector<double> times = calculateNodTimes(points, nodspeed);
-    
-    cout << "calculateGenericNod()" << endl;
-    cout << MotionFileTools::fromMatrix(points) << endl;
-    cout << MotionFileTools::fromVector(times) << endl;
     
     moveTo(times, points);
     
@@ -442,6 +441,7 @@ void NUHead::calculateGenericNod(float mindistance, float maxdistance, float nod
         m_move_end_time = m_data->CurrentTime;
 }
 
+/*! @brief Orders the min and max pitch values */
 vector<vector<float> > NUHead::calculateNodPoints(float minpitch, float maxpitch)
 {
     vector<vector<float> > points;
@@ -464,6 +464,7 @@ vector<vector<float> > NUHead::calculateNodPoints(float minpitch, float maxpitch
     return points;
 }
 
+/*! @brief Calculates the times for each point in the nod */
 vector<double> NUHead::calculateNodTimes(const vector<vector<float> >& points, float nodspeed)
 {
     vector<double> times;
