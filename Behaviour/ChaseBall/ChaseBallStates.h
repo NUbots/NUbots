@@ -33,6 +33,7 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 
 class ChaseBallState : public BehaviourState
 {
@@ -89,7 +90,7 @@ public:
         
         walkVector[0] = 10*cos(ballbearing);
         walkVector[1] = 2*sin(ballbearing);
-        walkVector[2] = ballbearing/3.0;
+        walkVector[2] = ballbearing/2.0;
         
         WalkJob* walk = new WalkJob(walkVector);
         m_provider->m_jobs->addMotionJob(walk);
@@ -125,7 +126,7 @@ public:
     SearchState(ChaseBallProvider* provider) : ChaseBallState(provider) {};
     BehaviourState* nextState()
     {
-        if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 100)
+        if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
             return m_provider->m_chase_state;
         else
             return m_provider->m_state;
@@ -133,7 +134,7 @@ public:
     void doState()
     {
         m_provider->m_jobs->addMotionJob(new WalkJob(0,0,0.3));
-        m_provider->m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
+        m_provider->m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Ball, 0.3));
     };
 };
 
