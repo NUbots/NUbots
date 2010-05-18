@@ -132,7 +132,7 @@ public:
     };
     void doState()
     {
-        m_provider->m_jobs->addMotionJob(new WalkJob(0,0,0.2));
+        m_provider->m_jobs->addMotionJob(new WalkJob(0,0,0.3));
         m_provider->m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
     };
 };
