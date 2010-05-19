@@ -91,6 +91,8 @@ public:
     static joint_id_t RKneePitch;
     static joint_id_t RAnkleRoll;
     static joint_id_t RAnklePitch;
+    
+    double CurrentTime;
 public:
     NUActionatorsData();
     ~NUActionatorsData();
@@ -143,6 +145,7 @@ public:
     
         // add other commands
     bool addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values);
+    bool addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values);
     bool addSound(double time, string sound);
     bool addSounds(double time, vector<string> sound);
         // add magic commands

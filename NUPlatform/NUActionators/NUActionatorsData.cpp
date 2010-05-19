@@ -59,6 +59,7 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
+    CurrentTime = 0;
     Sound = NULL;
     Teleporter = NULL;
     m_positionactionation = false;
@@ -483,6 +484,7 @@ void NUActionatorsData::preProcess()
  */
 void NUActionatorsData::postProcess(double currenttime)
 {
+    CurrentTime = currenttime;
     for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
@@ -1236,7 +1238,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
  */
 bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
 {
-    vector<joint_id_t> selectedleds;
+    vector<int> selectedleds;
     if (LedActionators.size() == 0)
         return false;                       
     
@@ -1303,6 +1305,86 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vecto
                 data[2] = values[i][2];
             }
             LedActionators[selectedleds[i]]->addPoint(time, data);
+        }
+    }
+    return true;
+}
+
+/*! @brief Adds led control points for several leds in the given group
+    @param ledgroup the id of the led group you want to control
+    @param indices the indices of the leds within the group you want to change
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param values [[red, green, blue], ...] or [[intensity], ...]
+ */
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values)
+{
+    if (LedActionators.size() == 0)
+        return false;                       
+    
+    int groupoffset = 0;
+    if (ledgroup == AllLeds)
+        groupoffset = m_all_led_ids[0];
+    else if (not m_lear_ids.empty() and ledgroup == LeftEarLeds)
+        groupoffset = m_lear_ids[0];
+    else if (not m_rear_ids.empty() and ledgroup == RightEarLeds)
+        groupoffset = m_rear_ids[0];
+    else if (not m_leye_ids.empty() and ledgroup == LeftEyeLeds)
+        groupoffset = m_leye_ids[0];
+    else if (not m_reye_ids.empty() and ledgroup == RightEyeLeds)
+        groupoffset = m_reye_ids[0];
+    else if (not m_chest_ids.empty() and ledgroup == ChestLeds)
+        groupoffset = m_chest_ids[0];
+    else if (not m_lfoot_ids.empty() and ledgroup == LeftFootLeds)
+        groupoffset = m_lfoot_ids[0];
+    else if (not m_rfoot_ids.empty() and ledgroup == RightFootLeds)
+        groupoffset = m_rfoot_ids[0];
+    else
+    {
+        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
+        return false;
+    }
+    
+    if (values.size() == 1)
+    {   // if the size of the values is one, then set that value to all in the group
+        static vector<float> data(3,0);
+        if (values[0].size() < 3)
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][0];
+            data[2] = values[0][0];
+        }
+        else 
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][1];
+            data[2] = values[0][2];
+        }
+        
+        for (unsigned int i=0; i<indices.size(); i++)
+        {
+            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
+        }
+    }
+    else
+    {   // otherwise set each led individually.
+        int numpoints = std::min(indices.size(), values.size());
+        
+        static vector<float> data (3, 0);
+        for (int i=0; i<numpoints; i++)
+        {
+            if (values[i].size() < 3)
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][0];
+                data[2] = values[i][0];
+            }
+            else
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][1];
+                data[2] = values[i][2];
+            }
+            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
         }
     }
     return true;
