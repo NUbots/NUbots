@@ -607,6 +607,23 @@ bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the gyro values after the offset and filtering is applied [gx, gy, gz]
+    @param values will be updated with the current estimate of the gyro
+    @return returns true if the values are valid false otherwise
+ */
+bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
+{
+    if (BalanceGyro == NULL || BalanceGyro->IsValid == false || BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
+        return false;
+    else
+    {
+        values = vector<float>(3,0);
+        for (size_t i=0; i<values.size(); i++)
+            values[i] = BalanceGyro->Data[i] - BalanceGyroOffset->Data[i];
+        return true;
+    }
+}
+
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
     @param values will be updated with the current orientation estimate
  */

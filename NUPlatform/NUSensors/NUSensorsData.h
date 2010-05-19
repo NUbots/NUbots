@@ -131,6 +131,7 @@ public:
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
     bool getGyroOffsetValues(vector<float>& values);
+    bool getGyroFilteredValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
     bool getHorizon(vector<float>& values);
     bool getButtonTriggers(vector<float>& values);
