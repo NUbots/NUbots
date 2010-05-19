@@ -4,10 +4,7 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -L \
-        /usr/lib/libz.dylib
+    LIBS += -framework CoreFoundation -lz
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'

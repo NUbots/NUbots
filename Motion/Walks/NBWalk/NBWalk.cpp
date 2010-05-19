@@ -56,9 +56,14 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
     pthread_mutex_init(&next_provider_mutex, NULL);
     pthread_mutex_init(&stiffness_mutex, NULL);
     
-    // Initialise the body to be frozen
-    //boost::shared_ptr<FreezeCommand> paralyze = boost::shared_ptr<FreezeCommand>(new FreezeCommand());
-    //nullBodyProvider.setCommand(paralyze);
+    float larm[] = {0.23, 1.55, 0, 0};
+    float rarm[] = {-0.23, 1.55, 0, 0};
+    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    
+    float lleg[] = {0, -0.44, 0, 0.92, 0, -0.52};
+    m_initial_lleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
+    m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
     boost::shared_ptr<Gait>  defaultGait(new Gait(WEBOTS_GAIT));

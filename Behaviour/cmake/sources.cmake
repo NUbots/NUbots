@@ -21,13 +21,15 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
+                BehaviourFSMProvider.cpp BehaviourFSMProvider.h
+                BehaviourState.cpp BehaviourState.h
                 Behaviour.cpp Behaviour.h
                 TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  Jobs
-                DemoBehaviours
+                ChaseBall
                 MiscBehaviours
 )
 ####################################################################################

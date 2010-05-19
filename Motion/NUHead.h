@@ -58,9 +58,9 @@ private:
     void getSensorValues();
     void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     vector<float> calculatePanLevels(float minpitch, float maxpitch);
-    vector<vector<float> > calculatePanPoints(vector<float> levels);
+    vector<vector<float> > calculatePanPoints(const vector<float>& levels);
     void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
-    vector<double> calculatePanTimes(vector<vector<float> > points, float panspeed);
+    vector<double> calculatePanTimes(const vector<vector<float> >& points, float panspeed);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
     
@@ -69,6 +69,8 @@ private:
     void calculateBallAndLocalisationNod();
     void calculateLocalisationNod();
     void calculateGenericNod(float mindistance, float maxdistance, float nodspeed);
+    vector<vector<float> > calculateNodPoints(float minpitch, float maxpitch);
+    vector<double> calculateNodTimes(const vector<vector<float> >& points, float nodspeed);
     
     void load();
     void loadConfig();
@@ -86,6 +88,7 @@ private:
     const float m_BALL_SIZE;
     const float m_FIELD_DIAGONAL;
     const float m_CAMERA_OFFSET;
+    const float m_CAMERA_FOV_X;
     const float m_CAMERA_FOV_Y;
     
     bool m_is_panning;                          //!< true if we are currently panning the head
@@ -97,6 +100,7 @@ private:
     
     bool m_is_nodding;                          //!< true if we are currently nodding the head
     HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing
+    float m_nod_centre;                         //!< the centre yaw angle for the nod
     
     double m_move_end_time;                     //!< the time at which we need to resend the calculated curves to the actionators
     vector<vector<double> > m_curve_times;      //!< the motion curve times in ms

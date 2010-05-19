@@ -1,17 +1,14 @@
-/*! @file HeadNodJob.h
-    @brief Declaration of HeadNodJob class.
+/*! @file MotionKillJob.h
+    @brief Declaration of MotionKillJob class.
  
-    @class HeadNodJob
-    @brief A class to encapsulate jobs head nods.
- 
-    There are three types of nods
-        - Ball
-        - BallAndLocalisation
-        - Localisation
+    @class MotionKillJob
+    @brief Kills all motion for at least 5 seconds. Each motion module will
+           be unkilled when they each receive a new job. A kill is stronger than 
+           a freeze; it will put the robot into the safe position and turn off the stiffnesses
  
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,40 +24,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NODHEADJOB_H
-#define NODHEADJOB_H
+#ifndef MOTIONKILLJOB_H
+#define MOTIONKILLJOB_H
 
 #include "../MotionJob.h"
 #include <vector>
 using namespace std;
 
-class HeadNodJob : public MotionJob
+class MotionKillJob : public MotionJob
 {
 public:
-    enum head_nod_t
-    {
-        Ball,
-        BallAndLocalisation,
-        Localisation
-    };
-public:
-    HeadNodJob(head_nod_t nodtype, float centreangle = 0);
-    HeadNodJob(istream& input);
-    ~HeadNodJob();
-    
-    head_nod_t getNodType();
-    float getCentreAngle();
+    MotionKillJob();
+    ~MotionKillJob();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadNodJob& job);
-    friend ostream& operator<<(ostream& output, const HeadNodJob* job);
+    friend ostream& operator<<(ostream& output, const MotionKillJob& job);
+    friend ostream& operator<<(ostream& output, const MotionKillJob* job);
 protected:
     virtual void toStream(ostream& output) const;
-private:
-    head_nod_t m_nod_type;
-    float m_centre_angle;
 };
 
 #endif

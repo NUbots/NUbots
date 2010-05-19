@@ -24,7 +24,7 @@
 
 #include "MiscBehaviours/SelectBehaviourProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
-#include "DemoBehaviours/ChaseBallProvider.h"
+#include "ChaseBall/ChaseBallProvider.h"
 
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"

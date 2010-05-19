@@ -29,6 +29,9 @@
 #include "GameController/GameInformation.h"
 #include "TeamInformation.h"
 
+#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
+#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
@@ -74,6 +77,9 @@ BehaviourProvider::~BehaviourProvider()
 }
 
 /*! @brief Preprocesses the data. Returns true if the data is valid
+    
+    At this level in the hierarchy we perform preprocessing relevant to ALL behaviour providers.
+ 
     @param jobs the nubot job list
     @param data the nubot sensor data
     @param actions the nubot actionators data
@@ -175,7 +181,7 @@ void BehaviourProvider::updateButtonValues()
 void BehaviourProvider::removeStiffness()
 {
     vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::AllJoints), 0);
-    //m_jobs->addMotionJob(new MotionFreezeJob());
+    m_jobs->addMotionJob(new MotionFreezeJob());
     m_actions->addJointPositions(NUActionatorsData::AllJoints, m_current_time, zero, zero, 0);
     m_actions->addSound(m_current_time, "remove_stiffness.wav");
 }
@@ -185,6 +191,7 @@ void BehaviourProvider::removeStiffness()
 void BehaviourProvider::restartBehaviour()
 {
     m_manager->setNextBehaviour("select_behaviour");
+    m_jobs->addMotionJob(new MotionKillJob());
 }
 
 

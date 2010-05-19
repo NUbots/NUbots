@@ -28,6 +28,8 @@
 class NUSensorsData;
 class NUActionatorsData;
 class JobList;
+class MotionKillJob;
+class MotionFreezeJob;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
@@ -58,10 +60,11 @@ public:
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList* jobs);
     
+    void freeze();
     void kill();
 private:
-public:
-protected:
+    void process(MotionKillJob* job);
+    void process(MotionFreezeJob* job);
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object

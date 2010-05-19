@@ -27,7 +27,7 @@
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/DemoBehaviours/ChaseBallProvider.h"
+#include "Behaviour/ChaseBall/ChaseBallProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

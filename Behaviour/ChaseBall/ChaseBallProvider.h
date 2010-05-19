@@ -25,32 +25,31 @@
 #ifndef CHASEBALLBEHAVIOUR_H
 #define CHASEBALLBEHAVIOUR_H
 
-#include "../BehaviourProvider.h"
+#include "Behaviour/BehaviourFSMProvider.h"
 
-class JobList;
-class NUSensorsData;
-class NUActionatorsData;
-class FieldObjects;
-class GameInformation;
-class TeamInformation;
+class ChaseState;
+class SearchState;
+class PausedState;
 
 #include <vector>
 #include <string>
 
-class ChaseBallProvider : public BehaviourProvider
+class ChaseBallProvider : public BehaviourFSMProvider
 {
 public:
     ChaseBallProvider(Behaviour* manager, bool pauseable = true);
     ~ChaseBallProvider();
-    
 protected:
-    void doBehaviour();
+    BehaviourState* nextStateCommons();
 private:
-    void TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0);
-    void Pan();
-    
     bool m_pauseable;
-    bool m_paused;
+    
+    friend class ChaseState;
+    BehaviourState* m_chase_state;
+    friend class SearchState;
+    BehaviourState* m_search_state;
+    friend class PausedState;
+    BehaviourState* m_paused_state;
 };
 
 
