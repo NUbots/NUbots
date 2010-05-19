@@ -82,6 +82,7 @@ public:
     list<Job*>::iterator other_end();
     
     void clear();
+    bool empty();
     unsigned int size();
     
     void summaryTo(ostream& output);
