@@ -68,13 +68,18 @@ void GameInformation::process()
     m_hasUnprocessedKickoffTrigger = false;
     updateData();
 
-    if( (getPlayer(m_myTeamNumber,m_myPlayerNumber)->penalty != PENALTY_NONE) && isGameState(m_myCurrentState) )
+    if(getPlayer(m_myTeamNumber,m_myPlayerNumber)->penalty != PENALTY_NONE)
     {
-        if(m_myCurrentState != m_currentControlData->state)
+        if(m_myCurrentState != state_penalised)
         {
             m_myPreviousState = m_myCurrentState;
-            m_myCurrentState = robotState(m_currentControlData->state);
+            m_myCurrentState = state_penalised;
         }
+    }
+    else if(m_myCurrentState != m_currentControlData->state)
+    {
+        m_myPreviousState = m_myCurrentState;
+        m_myCurrentState = robotState(m_currentControlData->state);
     }
     return;
 }
@@ -140,17 +145,44 @@ void GameInformation::updateData()
 
 void GameInformation::doManualStateChange()
 {
-
+    m_myPreviousState = m_myCurrentState;
+    m_myCurrentState = getNextState(m_myCurrentState);
+    if(m_myCurrentState = state_penalised)
+    {
+        if(m_unprocessedControlData->teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
+        {
+            m_unprocessedControlData->teams[TEAM_BLUE].players[m_myPlayerNumber].penalty = PENALTY_MANUAL;
+        }
+        else if(m_unprocessedControlData->teams[TEAM_RED].teamNumber == m_myTeamNumber)
+        {
+            m_unprocessedControlData->teams[TEAM_RED].players[m_myPlayerNumber].penalty = PENALTY_MANUAL;
+        }
+    }
 }
 
 void GameInformation::doManualTeamChange()
 {
+    rawSwapTeams(m_unprocessedControlData);
+    m_unprocessedControlData->teams[TEAM_RED].teamColour = TEAM_BLUE;
+    m_unprocessedControlData->teams[TEAM_BLUE].teamColour = TEAM_RED;
+}
 
+void GameInformation::rawSwapTeams(RoboCupGameControlData* data) {
+    size_t    teamSize = sizeof(TeamInfo);
+    TeamInfo* blueTeam = &(data->teams[TEAM_BLUE]);
+    TeamInfo* redTeam  = &(data->teams[TEAM_RED]);
+
+    TeamInfo tempTeam;
+    memcpy(&tempTeam, blueTeam, teamSize);
+
+    // swap the teams
+    memcpy(blueTeam, redTeam, teamSize);
+    memcpy(redTeam, &tempTeam, teamSize);
 }
 
 void GameInformation::doManualKickoffChange()
 {
-
+    m_unprocessedControlData->kickOffTeam = !m_unprocessedControlData->kickOffTeam;
 }
 
 bool GameInformation::isGameState(robotState theState)

@@ -298,6 +298,8 @@ private:
       */
     void doManualKickoffChange();
 
+    void rawSwapTeams(RoboCupGameControlData* data);
+
     // My information
     int m_myPlayerNumber;           //!< Player number.
     int m_myTeamNumber;             //!< Team number.
