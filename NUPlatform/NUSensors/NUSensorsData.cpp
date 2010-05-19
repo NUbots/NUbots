@@ -1435,11 +1435,50 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::JOINT_TEMPERATURES:
             JointTemperatures = p_sensor;
             break;
+        case sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM:
+            LeftLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM:
+            RightLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM:
+            SupportLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_CAMERA_TRANSFORM:
+            CameraTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM:
+            CameraToGroundTransform = p_sensor;
+            break;
+        case sensor_t::JOINT_ODOMETRY:
+            Odometry = p_sensor;
+            break;
+        case sensor_t::JOINT_CAMERAHEIGHT:
+            CameraHeight = p_sensor;
+            break;
         case sensor_t::BALANCE_ACCELEROMETER:
             BalanceAccelerometer = p_sensor;
             break;
         case sensor_t::BALANCE_GYRO:
             BalanceGyro = p_sensor;
+            break;
+        case sensor_t::BALANCE_GYRO_OFFSET:
+            BalanceGyroOffset = p_sensor;
+            break;
+        case sensor_t::BALANCE_ORIENTATION:
+            BalanceOrientation = p_sensor;
+            break;
+        case sensor_t::BALANCE_HORIZON:
+            BalanceHorizon = p_sensor;
+            break;
+        case sensor_t::BALANCE_ZMP:
+            BalanceZMP = p_sensor;
+            break;
+        case sensor_t::BALANCE_FALLING:
+            BalanceFalling = p_sensor;
+            break;
+        case sensor_t::BALANCE_FALLEN:
+            BalanceFallen = p_sensor;
             break;
         case sensor_t::DISTANCE_VALUES:
             DistanceValues = p_sensor;
@@ -1450,11 +1489,32 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::FOOT_BUMPER_VALUES:
             FootBumperValues = p_sensor;
             break;
+        case sensor_t::FOOT_COP:
+            FootCoP = p_sensor;
+            break;
+        case sensor_t::FOOT_FORCE:
+            FootForce = p_sensor;
+            break;
+        case sensor_t::FOOT_CONTACT:
+            FootContact = p_sensor;
+            break;
+        case sensor_t::FOOT_SUPPORT:
+            FootSupport = p_sensor;
+            break;
+        case sensor_t::FOOT_IMPACT:
+            FootImpact = p_sensor;
+            break;
         case sensor_t::BUTTON_VALUES:
             ButtonValues = p_sensor;
             break;
+        case sensor_t::BUTTON_TRIGGERS:
+            ButtonTriggers = p_sensor;
+            break;
         case sensor_t::BATTERY_VALUES:
             BatteryValues = p_sensor;
+            break;
+        case sensor_t::GPS_VALUES:
+            GPS = p_sensor;
             break;
         default:
             break;
