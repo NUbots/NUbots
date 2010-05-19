@@ -12,7 +12,7 @@
 #include "Vision.h"
 #include "EllipseFit.h"
 //#include "../Kinematics/Kinematics.h"
-#include <QDebug>
+//#include <QDebug>
 
 LineDetection::LineDetection(){
 
@@ -764,7 +764,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
     if (cornerPoints.size() >6)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
-        qDebug() << "Trying EllipseFit: too many corners";
+        //qDebug() << "Trying EllipseFit: too many corners";
         //Method:
         //	1. Box all small lines:
         //	2. find the most left line: use right point
@@ -849,7 +849,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             }
         }
 
-        qDebug() << "Total pointSize: "<< points.size() << endl;
+        //qDebug() << "Total pointSize: "<< points.size() << endl;
         if(points.size() < 5) return;
         Array2D<double> x(points.size(),1,0.0);
         Array2D<double> y(points.size(),1,0.0);
@@ -878,7 +878,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
         minY = cy-r2;
         maxY = cy+r2;
 
-        qDebug() << "Center Circle: " << cx << "," << cy <<endl;
+        //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
         TempDist = 2000;
         //GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev);
 

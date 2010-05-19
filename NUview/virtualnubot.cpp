@@ -9,8 +9,10 @@
 #include <fstream>
 #include <qmessagebox.h>
 
+
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
+
     //! TODO: Load LUT from filename.
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
@@ -30,6 +32,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
     //TEST:
+
 }
 
 virtualNUbot::~virtualNUbot()
