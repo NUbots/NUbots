@@ -1,6 +1,7 @@
 #include "GameInformation.h"
 #include "NUPlatform/NUSensors.h"
 #include <vector>
+#include <memory.h>
 #include "debug.h"
 
 GameInformation::GameInformation(int playerNumber, int teamNumber):
@@ -147,7 +148,7 @@ void GameInformation::doManualStateChange()
 {
     m_myPreviousState = m_myCurrentState;
     m_myCurrentState = getNextState(m_myCurrentState);
-    if(m_myCurrentState = state_penalised)
+    if(m_myCurrentState == state_penalised)
     {
         if(m_unprocessedControlData->teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
         {
