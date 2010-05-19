@@ -41,7 +41,7 @@
 class UdpPort : public Thread
 {
 public:
-    UdpPort(std::string name, int portnumber);
+    UdpPort(std::string name, int portnumber, bool ignoreself = false);
     virtual ~UdpPort();
 protected:
     void sendData(const std::stringstream& stream);
@@ -52,13 +52,14 @@ private:
 protected:
     std::string m_port_name;            //!< the name of this port
     std::string m_host_name;            //!< the name of the host machine
-    in_addr m_local_address;            //!< the machine's local address
+    sockaddr_in m_local_address;        //!< the machine's local address
     sockaddr_in m_target_address;       //!< the socket target address
     
     double m_time_last_receive;         //!< the time in milliseconds the last packet was received
 private:
     int m_sockfd;                       //!< the socket
     int m_port_number;                  //!< the port number of the socket
+    bool m_ignore_self;                 //!< true if you want to ignore your own transmissions
     
     sockaddr_in m_address;              //!< the socket address
 
