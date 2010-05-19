@@ -163,8 +163,8 @@ void GameInformation::doManualStateChange()
 void GameInformation::doManualTeamChange()
 {
     rawSwapTeams(m_unprocessedControlData);
-    m_unprocessedControlData->teams[TEAM_RED].teamColour = TEAM_BLUE;
-    m_unprocessedControlData->teams[TEAM_BLUE].teamColour = TEAM_RED;
+    m_unprocessedControlData->teams[TEAM_RED].teamColour = TEAM_RED;
+    m_unprocessedControlData->teams[TEAM_BLUE].teamColour = TEAM_BLUE;
 }
 
 void GameInformation::rawSwapTeams(RoboCupGameControlData* data) {
