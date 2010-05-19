@@ -99,7 +99,8 @@ NUSensorsData::NUSensorsData()
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     addSoftSensor(FootCoP, string("FootCoP"), sensor_t::FOOT_COP);
     addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
-    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_SUPPORT);
+    addSoftSensor(FootContact, string("FootContact"), sensor_t::FOOT_CONTACT);
     addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
@@ -851,6 +852,31 @@ bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
     }
 }
 
+/*! @brief Gets the whether footid is in contact with the ground
+    @param footid the id of the foot
+    @param contact will be updated to true if the foot is on the ground, false if it is not on the ground
+ */
+bool NUSensorsData::getFootContact(foot_id_t footid, bool& contact)
+{
+    if (FootContact == NULL || FootContact->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+            contact = (*FootContact)[0];
+        else if (footid == RightFoot)
+            contact = (*FootContact)[1];
+        else if (footid == AllFeet)
+            contact = (*FootContact)[2];
+        else
+        {
+            debug << "NUSensorsData::getFootContact(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
 /*! @brief Gets the total force on the foot in Newtons
     @param footid the id of the part of the foot you want the readings for
     @param support will be updated to true if footid is supporting the robot.
@@ -930,6 +956,18 @@ bool NUSensorsData::isFallen()
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
         return false;       
     else if (BalanceFallen->Data[0] > 0)
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Returns true if the robot is on the ground, false otherwise
+ */
+bool NUSensorsData::isOnGround()
+{
+    if (FootContact == NULL || FootContact->IsValid == false)
+        return true;
+    else if (FootContact->Data[2] > 0)
         return true;
     else
         return false;
@@ -1328,7 +1366,6 @@ void NUSensorsData::summaryTo(ostream& output)
  */
 void NUSensorsData::csvTo(ostream& output)
 {
-    //! @todo TODO: implement this somewhere somehow!
 }
 
 /*! @brief Returns the number of sensors in the NUSensorsData

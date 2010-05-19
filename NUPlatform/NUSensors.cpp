@@ -188,7 +188,6 @@ void NUSensors::calculateJointAcceleration()
 }
 
 /*! @brief Updates the orientation estimate using the current sensor data
-    @todo TODO: Implement this function properly with EKF etc. This will also update gyro and accel readings
  */
 void NUSensors::calculateOrientation()
 {
@@ -427,6 +426,15 @@ void NUSensors::calculateFootForce()
     // save the foot forces in the FootForce sensor
     forces[2] = forces[0] + forces[1];
     m_data->FootForce->setData(m_current_time, forces, true);
+    
+    // also save the foot contact in the FootContact sensor
+    vector<float> contact(3,0);
+    if (forces[0] > MINIMUM_CONTACT_FORCE)
+        contact[0] = 1;
+    if (forces[1] > MINIMUM_CONTACT_FORCE)
+        contact[1] = 1;
+    contact[2] = contact[0] + contact[1];
+    m_data->FootContact->setData(m_current_time, contact, true);
 }
 
 /*! @brief Calculates the centre of pressure underneath each foot.
