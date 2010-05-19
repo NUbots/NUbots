@@ -26,16 +26,16 @@
 /*! @brief Constructs a HeadNodJob
  
     @param period the new nod period in milliseconds
-    @param centre the centre head position about which we will nod [yaw (rad), pitch (rad), roll (rad)]
-    @param limits the lower and upper angle limits for the nod (rad)
+    @param centre the centre head yaw position about which we will nod
  */
-HeadNodJob::HeadNodJob(head_nod_t nodtype) : MotionJob(Job::MOTION_NOD)
+HeadNodJob::HeadNodJob(head_nod_t nodtype, float centreangle) : MotionJob(Job::MOTION_NOD)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
         debug << "HeadNodJob::HeadNodJob()" << endl;
     #endif
         m_job_time = 0;
         m_nod_type = nodtype;
+        m_centre_angle = centreangle;
     #if DEBUG_JOBS_VERBOSITY > 0
         summaryTo(debug);
     #endif
@@ -49,10 +49,15 @@ HeadNodJob::HeadNodJob(istream& input) : MotionJob(Job::MOTION_NOD)
     m_job_time = 0;
     // Temporary read buffers
     head_nod_t hntBuffer;
+    float floatBuffer;
     
     // read in the pan type
     input.read(reinterpret_cast<char*>(&hntBuffer), sizeof(hntBuffer));
     m_nod_type = hntBuffer;
+    
+    // read in the centre angle
+    input.read(reinterpret_cast<char*> (&floatBuffer), sizeof(floatBuffer));
+    m_centre_angle = floatBuffer;
     
 #if DEBUG_JOBS_VERBOSITY > 0
     summaryTo(debug);
@@ -65,11 +70,18 @@ HeadNodJob::~HeadNodJob()
 {
 }
 
-/* @ brief Returns the type of nod
+/*! @brief Returns the type of nod
  */
 HeadNodJob::head_nod_t HeadNodJob::getNodType()
 {
     return m_nod_type;
+}
+
+/*! @brief Returns the centre head yaw position for the nod
+ */
+float HeadNodJob::getCentreAngle()
+{
+    return m_centre_angle;
 }
 
 /*! @brief Prints a human-readable summary to the stream
@@ -118,6 +130,7 @@ void HeadNodJob::toStream(ostream& output) const
     MotionJob::toStream(output);            // This writes data introduced at the motion level
                                             // Then we write HeadPanJob specific data
     output.write((char*) &m_nod_type, sizeof(m_nod_type));
+    output.write((char*) &m_centre_angle, sizeof(m_centre_angle));
 }
 
 /*! @relates HeadNodJob

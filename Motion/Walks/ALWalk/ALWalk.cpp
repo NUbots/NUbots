@@ -30,8 +30,7 @@
 #include <time.h>
 
 ALWalk::ALWalk()
-{
-    debug << "ALWalk::ALWalk()" << endl;
+{   
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
 }
 
@@ -56,7 +55,7 @@ void ALWalk::doWalk()
     static unsigned int count = 0;
     static float max_x = 10.0;
     static float max_y = 2.0;
-    static float max_yaw = 0.5;
+    static float max_yaw = 1.0;
     
     if (count%4 == 0)
     {   // this is a very simple hack to get almotion to use alot less CPU. It is perfectly reasonable to do this because almotion isn't going to respond that quickly anyway.
@@ -84,5 +83,7 @@ void ALWalk::doWalk()
  */
 void ALWalk::setArmEnabled(bool leftarm, bool rightarm)
 {
+    m_larm_enabled = leftarm;
+    m_rarm_enabled = rightarm;
     m_al_motion->setWalkArmsEnable(leftarm, rightarm);
 }

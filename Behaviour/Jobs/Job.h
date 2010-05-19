@@ -67,6 +67,8 @@ public:
         MOTION_HEAD,
         MOTION_NOD,
         MOTION_PAN,
+        MOTION_FREEZE,
+        MOTION_KILL,
         // Camera job ids
         CAMERA_CHANGE_SETTINGS,
         CAMERA_SELECT_CAMERA,

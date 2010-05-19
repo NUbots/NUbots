@@ -54,17 +54,23 @@ public:
     void getCurrentSpeed(vector<float>& currentspeed);
 protected:
     virtual void doWalk() = 0;
+    
+    void enableWalk();
+    bool inInitialPosition();
+    void moveToInitialPosition();
 
     void setTargetSpeed(const vector<float>& speed);
     void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
-    
-    inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};
+
 private:
 public:
 protected:
     NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
+    
+    double m_current_time;                          //!< the current time
+    double m_previous_time;                         //!< the previous time doWalk was called
     
     bool m_walk_enabled;                            //!< true if the walk is enabled, false otherwise
     bool m_larm_enabled;                            //!< true if the walk is allowed to move the left arm
@@ -86,6 +92,11 @@ protected:
     float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
     
     WalkParameters m_walk_parameters;               //!< the current set of walk parameters
+    
+    vector<float> m_initial_larm;
+    vector<float> m_initial_rarm;
+    vector<float> m_initial_lleg;
+    vector<float> m_initial_rleg;
 
 private:
 };

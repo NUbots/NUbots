@@ -812,7 +812,7 @@ void NUSensors::calculateCameraHeight()
     Matrix cameraGroundTransform;
     if(m_data->getCameraToGroundTransform(cameraGroundTransform))
     {
-        m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraGroundTransform[3][4]));
+        m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraGroundTransform[2][3]));
     }
     else
     {

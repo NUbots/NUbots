@@ -36,7 +36,7 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981), m_CAMERA_FOV_Y(0.6012)
+NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
 {
     m_camera_height = 46;
     m_body_pitch = 0;
@@ -127,11 +127,15 @@ void NUHead::process(HeadNodJob* job)
         m_is_nodding = true;
         m_is_panning = false;
         m_nod_type = nodtype;
+        m_nod_centre = job->getCentreAngle();
         calculateNod();
     }
 }
 
-
+/*! @brief Calculates a motion curve for the given times and positions, then gives the curves to the actionators
+    @param times the times in ms for each point on the motion sequence
+    @param positions the motion sequence [[roll,pitch,yaw], [roll,pitch,yaw], ...[roll,pitch,yaw]]
+ */
 void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& positions)
 {
     if (m_data == NULL || m_actions == NULL)
@@ -159,6 +163,8 @@ void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float
     maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
 }
 
+/*! @brief Calculates the a new motion sequence for the current pan type, and sends it to the actionators
+ */
 void NUHead::calculatePan()
 {
     getSensorValues();
@@ -185,6 +191,8 @@ void NUHead::calculateLocalisationPan()
     calculateGenericPan(250, 1e10, m_pan_localisation_speed);
 }
 
+/*! @brief Calculates a pan between mindistance (cm) and maxdistance (cm) at panspeed (cm/s)
+ */
 void NUHead::calculateGenericPan(float mindistance, float maxdistance, float panspeed)
 {
     float minpitch, maxpitch;
@@ -265,7 +273,7 @@ vector<float> NUHead::calculatePanLevels(float minpitch, float maxpitch)
     @param levels the pan levels (in radians)
     @return a matrix containing [[pitch0, yaw0], [pitch1, yaw1], ...]
  */
-vector<vector<float> > NUHead::calculatePanPoints(vector<float> levels)
+vector<vector<float> > NUHead::calculatePanPoints(const vector<float>& levels)
 {
     vector<vector<float> > points;
     bool onleft = m_sensor_yaw >= 0;
@@ -320,7 +328,7 @@ void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector
 
 /*! @brief Calculates the pan times based on the distance to the top of the scan line on the field
  */
-vector<double> NUHead::calculatePanTimes(vector<vector<float> > points, float panspeed)
+vector<double> NUHead::calculatePanTimes(const vector<vector<float> >& points, float panspeed)
 {
     vector<double> times;
     
@@ -387,8 +395,11 @@ bool NUHead::panYawLimitsChange(float pitch_a, float pitch_b)
         return false;
 }
 
+/*! @brief Calculates a new motion curve for the currently selected nod type
+ */
 void NUHead::calculateNod()
 {
+    getSensorValues();
     if (m_nod_type == HeadNodJob::Ball)
         calculateBallNod();
     else if (m_nod_type == HeadNodJob::BallAndLocalisation)
@@ -399,14 +410,88 @@ void NUHead::calculateNod()
 
 void NUHead::calculateBallNod()
 {
+    calculateGenericNod(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, m_pan_ball_speed);
 }
 
 void NUHead::calculateBallAndLocalisationNod()
 {
+    calculateGenericNod(m_BALL_SIZE, 1e10, std::min(m_pan_ball_speed, m_pan_localisation_speed));
 }
 
 void NUHead::calculateLocalisationNod()
 {
+    calculateGenericNod(100, 1e10, m_pan_localisation_speed);
+}
+
+/*! @brief Calculates a nod between mindistance and maxdistance (cm) at nodspeed (cm/s). 
+           In fact, m_nod_centre is used to control the speed in most cases.
+ */
+void NUHead::calculateGenericNod(float mindistance, float maxdistance, float nodspeed)
+{
+    float minpitch, maxpitch;
+    calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
+    vector<vector<float> > points = calculateNodPoints(minpitch, maxpitch);
+    vector<double> times = calculateNodTimes(points, nodspeed);
+    
+    moveTo(times, points);
+    
+    if (times.size() > 0)
+        m_move_end_time = times.back();
+    else
+        m_move_end_time = m_data->CurrentTime;
+}
+
+/*! @brief Orders the min and max pitch values */
+vector<vector<float> > NUHead::calculateNodPoints(float minpitch, float maxpitch)
+{
+    vector<vector<float> > points;
+    points.reserve(2);
+    vector<float> point(2,m_nod_centre);
+    if (fabs(m_sensor_pitch - minpitch) < fabs(m_sensor_pitch - maxpitch))
+    {   // if we are closer to the minpitch position then start from the minpitch
+        point[0] = minpitch;
+        points.push_back(point);
+        point[0] = maxpitch;
+        points.push_back(point);
+    }
+    else
+    {
+        point[0] = maxpitch;
+        points.push_back(point);
+        point[0] = minpitch;
+        points.push_back(point);
+    }
+    return points;
+}
+
+/*! @brief Calculates the times for each point in the nod */
+vector<double> NUHead::calculateNodTimes(const vector<vector<float> >& points, float nodspeed)
+{
+    vector<double> times;
+    
+    if (points.size() >= 2)
+    {
+        // we use the usual formula to determine the speed to the first point
+        float ratio_hl = tan(points[0][0] + m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y + m_body_pitch);
+        float distance = 1.1*m_FIELD_DIAGONAL;
+        if (ratio_hl > 0.05)            // need to be careful here to avoid divide by zero, and VERY slow pan when the distance is close to infinity
+            distance = m_camera_height/ratio_hl;
+        
+        float yawspeed = min(nodspeed/distance, m_max_speeds[1]);
+        float yawtime = fabs(points[0][1] - m_sensor_yaw)/yawspeed;
+        float pitchspeed = std::min(nodspeed/distance, m_max_speeds[0]);                       // the same pitch speed is used for both points
+        float pitchtime = fabs(points[0][0] - m_sensor_pitch)/pitchspeed;
+        
+        times.push_back(1000*max(yawtime, pitchtime) + m_data->CurrentTime); 
+        
+        // however, for the second point we assume that m_nod_centre is also the yaw speed of the robot itself
+        float nodtime = 10;
+        if (fabs(m_nod_centre) > 0.05)
+            nodtime = (m_CAMERA_FOV_X/3.0)/m_nod_centre;
+        
+        times.push_back(1000*nodtime + times.back());
+    }
+    return times;
 }
 
 void NUHead::load()

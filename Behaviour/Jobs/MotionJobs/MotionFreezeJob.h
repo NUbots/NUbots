@@ -1,17 +1,13 @@
-/*! @file HeadNodJob.h
-    @brief Declaration of HeadNodJob class.
+/*! @file MotionFreezeJob.h
+    @brief Declaration of MotionFreezeJob class.
  
-    @class HeadNodJob
-    @brief A class to encapsulate jobs head nods.
- 
-    There are three types of nods
-        - Ball
-        - BallAndLocalisation
-        - Localisation
+    @class MotionFreezeJob
+    @brief Freezes all motion for at least 5 seconds. Each motion module will
+           be unfrozen when they each receive a new job.
  
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,40 +23,26 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NODHEADJOB_H
-#define NODHEADJOB_H
+#ifndef MOTIONFREEZEJOB_H
+#define MOTIONFREEZEJOB_H
 
 #include "../MotionJob.h"
 #include <vector>
 using namespace std;
 
-class HeadNodJob : public MotionJob
+class MotionFreezeJob : public MotionJob
 {
 public:
-    enum head_nod_t
-    {
-        Ball,
-        BallAndLocalisation,
-        Localisation
-    };
-public:
-    HeadNodJob(head_nod_t nodtype, float centreangle = 0);
-    HeadNodJob(istream& input);
-    ~HeadNodJob();
-    
-    head_nod_t getNodType();
-    float getCentreAngle();
+    MotionFreezeJob();
+    ~MotionFreezeJob();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadNodJob& job);
-    friend ostream& operator<<(ostream& output, const HeadNodJob* job);
+    friend ostream& operator<<(ostream& output, const MotionFreezeJob& job);
+    friend ostream& operator<<(ostream& output, const MotionFreezeJob* job);
 protected:
     virtual void toStream(ostream& output) const;
-private:
-    head_nod_t m_nod_type;
-    float m_centre_angle;
 };
 
 #endif
