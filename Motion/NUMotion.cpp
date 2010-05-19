@@ -160,12 +160,11 @@ void NUMotion::kill()
         if (m_data->getOrientation(orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
                 return;
-        /*bool leftsupport, rightsupport;
-        if (m_data->leftSupport(leftsupport) and m_data->rightSupport(rightsupport))
-            if (not (leftsupport and rightsupport)
-                return;*/
+        if (not m_data->isOnGround())
+                return;
     }
     
+    // go into safe mode
     m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
     m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
     m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 500, larmpositions, armvelocities, 30);
