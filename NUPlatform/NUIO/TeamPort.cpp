@@ -35,7 +35,7 @@
 TeamPort::TeamPort(TeamInformation* nubotteaminformation, int portnumber, bool ignoreself): UdpPort(std::string("TeamPort"), portnumber, ignoreself)
 {
     m_team_information = nubotteaminformation;
-    m_team_transmission_thread = new TeamTransmissionThread(this, 500);
+    m_team_transmission_thread = new TeamTransmissionThread(this, 250);
     
     m_team_transmission_thread->start();
 }

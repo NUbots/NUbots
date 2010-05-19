@@ -270,18 +270,17 @@ void NAOWebotsActionators::copyToTeleporter()
             static char teamred[] = "RED";
             static char teamblue[] = "BLUE";
             static int id;             // webots id = id - 1
-            static string colour;
             // get the player id
-            id = m_platform->getRobotNumber();
+            id = m_platform->getPlayerNumber();
             id--;
             
             // get the player's colour
-            colour = m_platform->getTeamColour();
+            int teamid = m_platform->getTeamNumber();
             char* team;
-            if (colour.compare("red") == 0)
-                team = teamred;
-            else
+            if (teamid == 0)
                 team = teamblue;
+            else
+                team = teamred;
             
             // convert from our standard coordinates to webots teleporter coords (I can do the conversion in-line cause it is simple)
             // x is toward yellow goal, y is up and z is right

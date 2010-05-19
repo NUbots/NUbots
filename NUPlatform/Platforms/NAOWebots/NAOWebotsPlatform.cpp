@@ -56,10 +56,9 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     }
     
     if (port == -1) {
-        debug << "Error: could not find port number in controllerArgs" << endl;
+        errorlog << "Error: could not find port number in controllerArgs" << endl;
     }
-    m_robot_number = (port % 10) + 1;
-    m_player_number = m_robot_number;
+    m_player_number = (port % 10) + 1;
     setNameFromNumber();
     setTeam(Robot::getName());
     
@@ -80,7 +79,7 @@ NAOWebotsPlatform::~NAOWebotsPlatform()
  */
 void NAOWebotsPlatform::setNameFromNumber()
 {
-    switch (m_robot_number) {
+    switch (m_player_number) {
         case 1:
             m_name = string("Susannah");
             break;
@@ -105,15 +104,9 @@ void NAOWebotsPlatform::setNameFromNumber()
 void NAOWebotsPlatform::setTeam(const string& name)
 {
     if (name.find("red") != string::npos)
-    {
-        m_team_colour = string("red");
         m_team_number = 1;
-    }
     else 
-    {
-        m_team_colour = string("blue");
         m_team_number = 0;
-    }
 }
 
 
