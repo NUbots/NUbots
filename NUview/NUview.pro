@@ -83,6 +83,7 @@ HEADERS += ui_mainwindow.h \
     ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
+    ../Tools/Threading/PeriodicThread.h \
     NUviewIO/NUviewIO.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
@@ -173,6 +174,7 @@ SOURCES += mainwindow.cpp \
     ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
+    ../Tools/Threading/PeriodicThread.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \

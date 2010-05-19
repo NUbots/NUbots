@@ -62,9 +62,7 @@ void PeriodicThread::sleepThread()
 {
     double timenow = nusystem->getTime();
     double requiredsleeptime = m_period - (timenow - m_start_time);
-    if (requiredsleeptime < 0)
-        debug << "PeriodicThread::sleep() " << m_name << " the thread took too long to complete: no time to sleep." << endl;
-    else
+    if (requiredsleeptime > 0)
         NUSystem::msleep(requiredsleeptime);
     m_start_time = nusystem->getTime();
 }

@@ -20,8 +20,8 @@
  */
 
 #include "TeamPort.h"
-#include "RoboCupGameControlData.h"
-#include "GameController/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
+#include "TeamTransmissionThread.h"
 
 #include "debug.h"
 #include "debugverbositynetwork.h"
@@ -29,37 +29,23 @@
 #include <string>
 
 /*! @brief Constructs a TeamPort
-    @param nubotjobs the public nubot job list
+    @param nubotteaminformation the public nubot team information class
+    @param portnumber the port number to broadcast on, and listen on
  */
-TeamPort::TeamPort(TeamInformation* nubotteaminformation, int portnumber): UdpPort(std::string("TeamPort"), portnumber)
+TeamPort::TeamPort(TeamInformation* nubotteaminformation, int portnumber, bool ignoreself): UdpPort(std::string("TeamPort"), portnumber, ignoreself)
 {
     m_team_information = nubotteaminformation;
+    m_team_transmission_thread = new TeamTransmissionThread(this, 500);
+    
+    m_team_transmission_thread->start();
 }
 
 /*! @brief Closes the job port
  */
 TeamPort::~TeamPort()
 {
-}
-
-/*! @brief Sends this robot's team packet over the network
- */
-TeamPort& operator<<(TeamPort& port, TeamInformation& teaminfo)
-{
-    // tp = m_game_information.getTeamPacket()
-    // buffer << tp;
-    // port.sendData(buffer)
-    return port;
-}
-
-/*! @brief Sends this robot's team packet over the network
- */
-TeamPort& operator<<(TeamPort& port, TeamInformation* teaminfo)
-{
-    // tp = m_game_information->getTeamPacket()
-    // buffer << tp;
-    // port.sendData(buffer)
-    return port;
+    m_team_transmission_thread->stop();
+    delete m_team_transmission_thread;
 }
 
 /*! @brief Copies the received data into the public nubot joblist
@@ -67,5 +53,6 @@ TeamPort& operator<<(TeamPort& port, TeamInformation* teaminfo)
 */
 void TeamPort::handleNewData(std::stringstream& buffer)
 {
-    //m_game_information->newTeamPacket(buffer);
+    buffer >> m_team_information;
 }
+

@@ -25,11 +25,28 @@
 #ifndef TEAMINFORMATION_H
 #define TEAMINFORMATION_H
 
+class NUSensorsData;
+class NUActionatorsData;
+
+#include <iostream>
+using namespace std;
+
 class TeamInformation
 {
 public:
-    TeamInformation();
+    TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions);
     ~TeamInformation();
+    
+    friend ostream& operator<< (ostream& output, const TeamInformation& info);
+    friend ostream& operator<< (ostream& output, const TeamInformation* info);
+    friend istream& operator>> (istream& input, TeamInformation& info);
+    friend istream& operator>> (istream& input, TeamInformation* info);
+private:
+    int m_player_number;
+    int m_team_number;
+    
+    NUSensorsData* m_data;
+    NUActionatorsData* m_actions;
 };
 
 
