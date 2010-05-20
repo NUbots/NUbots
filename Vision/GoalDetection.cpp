@@ -42,7 +42,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 it = FO_Candidates.erase(it);
                 continue;
             }
-            debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
+            //debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
             ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
             ++it;
         }

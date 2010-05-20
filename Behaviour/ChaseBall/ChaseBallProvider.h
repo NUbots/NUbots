@@ -29,6 +29,7 @@
 
 class ChaseState;
 class SearchState;
+class PositionState;
 class PausedState;
 
 #include <vector>
@@ -48,6 +49,8 @@ private:
     BehaviourState* m_chase_state;
     friend class SearchState;
     BehaviourState* m_search_state;
+    friend class PositionState;
+    BehaviourState* m_position_state;
     friend class PausedState;
     BehaviourState* m_paused_state;
 };

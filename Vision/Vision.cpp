@@ -35,8 +35,6 @@
 using namespace mathGeneral;
 Vision::Vision()
 {
-
-    AllFieldObjects = new FieldObjects();
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
@@ -133,16 +131,17 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 }
 
 
-FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions)
+void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
 
-    if (image == NULL || data == NULL || actions == NULL)
-        return AllFieldObjects;
+    if (image == NULL || data == NULL || actions == NULL || fieldobjects == NULL)
+        return;
     m_sensor_data = data;
     m_actions = actions;
+    AllFieldObjects = fieldobjects;
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
         numFramesDropped++;
         
@@ -184,7 +183,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     else
     {
         //debug << "No Horizon Data" << endl;
-        return AllFieldObjects;
+        return;
     }
     //debug << "Generating Horizon Line: Finnished" <<endl;
     //debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
@@ -364,7 +363,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             }
         }
     #endif
-    return AllFieldObjects;
 }
 
 void Vision::SaveAnImage()

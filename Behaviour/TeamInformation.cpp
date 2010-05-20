@@ -20,16 +20,23 @@
  */
 
 #include "TeamInformation.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUSystem.h"
 
 #include "debug.h"
 
-TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions)
+TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
     m_player_number = playernum;
     m_team_number = teamnum;
     m_data = data;
     m_actions = actions;
+    m_objects = fieldobjects;
+    
+    initTeamPacket();
+    m_received_packets = vector<boost::circular_buffer<TeamPacket> >(13, boost::circular_buffer<TeamPacket>(3));
 }
 
 
@@ -37,15 +44,120 @@ TeamInformation::~TeamInformation()
 {
 }
 
-ostream& operator<< (ostream& output, const TeamInformation& info)
+bool TeamInformation::amIClosestToBall()
 {
-    output.write((char*) &info.m_player_number, sizeof(info.m_player_number));
-    output.write((char*) &info.m_team_number, sizeof(info.m_team_number));
+    for (size_t i=0; i<m_received_packets.size(); i++)
+    {
+        if (not m_received_packets[i].empty())
+        {
+            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < 2000) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
+            {
+                debug << i << " is closer " << m_received_packets[i].back().TimeToBall << " < " << m_packet.TimeToBall << " based on packet received " << m_data->CurrentTime - m_received_packets[i].back().ReceivedTime << " ago." << endl;
+                return false;
+            }
+        }
+    }
+    debug << "I am closest" << endl;
+    return true;
+}
+
+/*! @brief Initialises my team packet to send to my team mates
+ */
+void TeamInformation::initTeamPacket()
+{   
+    m_packet.ID = 0;
+    // we initialise everything that never changes here
+    m_packet.PlayerNumber = static_cast<char>(m_player_number);
+    m_packet.TeamNumber = static_cast<char>(m_team_number);
+}
+
+/*! @brief Updates my team packet with the latest information
+ */
+void TeamInformation::updateTeamPacket()
+{
+    if (m_data == NULL or m_objects == NULL)
+        return;
+    m_packet.ID = m_packet.ID + 1;
+    m_packet.SentTime = m_data->CurrentTime;
+    m_packet.TimeToBall = getTimeToBall();
+}
+
+float TeamInformation::getTimeToBall()
+{
+    float time = 600;
+    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+    {
+        float headyaw, headpitch;
+        m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+        m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+        float measureddistance = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+        float balldistance;
+        if (measureddistance < 46)
+            balldistance = 1;
+        else
+            balldistance = sqrt(pow(measureddistance,2) - 46*46);
+        float ballbearing = headyaw + m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+        time = balldistance/10.0 + fabs(ballbearing)/0.5;
+    }
+    return time;
+}
+
+void TeamPacket::summaryTo(ostream& output)
+{
+    output << "ID: " << ID;
+    output << " Player: " << (int)PlayerNumber;
+    output << " TimeToBall: " << TimeToBall;
+    output << endl;
+}
+
+
+ostream& operator<< (ostream& output, const TeamPacket& packet)
+{
+    output.write((char*) &packet.ID, sizeof(packet.ID));
+    output.write((char*) &packet.SentTime, sizeof(packet.SentTime));
+    output.write((char*) &packet.PlayerNumber, sizeof(packet.PlayerNumber));
+    output.write((char*) &packet.TeamNumber, sizeof(packet.TeamNumber));
+    output.write((char*) &packet.TimeToBall, sizeof(packet.TimeToBall));
+    
+    return output;
+}
+
+istream& operator>> (istream& input, TeamPacket& packet)
+{
+    char charBuffer;
+    unsigned long uLongBuffer;
+    float floatBuffer;
+    double doubleBuffer;
+    
+    // Packet header
+    input.read(reinterpret_cast<char*>(&uLongBuffer), sizeof(uLongBuffer));
+    packet.ID = uLongBuffer;
+    input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(doubleBuffer));
+    packet.SentTime = doubleBuffer;
+    input.read(reinterpret_cast<char*>(&charBuffer), sizeof(charBuffer));
+    packet.PlayerNumber = charBuffer;
+    input.read(reinterpret_cast<char*>(&charBuffer), sizeof(charBuffer));
+    packet.TeamNumber = charBuffer;
+    
+    // Localisaton information
+    
+    
+    // Behaviour state information
+    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+    packet.TimeToBall = floatBuffer;
+    
+    return input;
+}
+
+ostream& operator<< (ostream& output, TeamInformation& info)
+{
+    info.updateTeamPacket();
+    output << info.m_packet;
     nusystem->displayTeamPacketSent(info.m_actions);
     return output;
 }
 
-ostream& operator<< (ostream& output, const TeamInformation* info)
+ostream& operator<< (ostream& output, TeamInformation* info)
 {
     if (info != NULL)
         output << (*info);
@@ -54,7 +166,32 @@ ostream& operator<< (ostream& output, const TeamInformation* info)
 
 istream& operator>> (istream& input, TeamInformation& info)
 {
-    nusystem->displayTeamPacketReceived(info.m_actions);
+    TeamPacket temp;
+    input >> temp;
+    temp.ReceivedTime = info.m_data->CurrentTime;
+    
+    if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number)
+    {   // only accept packets from valid player numbers
+        if (info.m_received_packets[temp.PlayerNumber].empty())
+        {   // if there have been no previous packets from this player always accept the packet
+            info.m_received_packets[temp.PlayerNumber].push_back(temp);
+            nusystem->displayTeamPacketReceived(info.m_actions);
+        }
+        else
+        {
+            TeamPacket lastpacket = info.m_received_packets[temp.PlayerNumber].back();
+            if (info.m_data->CurrentTime - lastpacket.ReceivedTime > 2000)
+            {   // if there have been no packets recently from this player always accept the packet
+                info.m_received_packets[temp.PlayerNumber].push_back(temp);
+                nusystem->displayTeamPacketReceived(info.m_actions);
+            }
+            else if (temp.ID > lastpacket.ID)
+            {   // avoid out of order packets by only adding recent packets that have a higher ID
+                info.m_received_packets[temp.PlayerNumber].push_back(temp);
+                nusystem->displayTeamPacketReceived(info.m_actions);
+            }
+        }
+    }
     return input;
 }
 

@@ -83,7 +83,7 @@ class Vision
 
     void process (JobList* jobs, NUCamera* camera, NUIO* m_io);
 
-    FieldObjects* ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions);
+    void ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
 
 
 

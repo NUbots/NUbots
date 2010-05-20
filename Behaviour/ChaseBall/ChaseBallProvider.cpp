@@ -46,6 +46,8 @@ ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : Behav
     addState(m_chase_state);
     m_search_state = new SearchState(this);
     addState(m_search_state);
+    m_position_state = new PositionState(this);
+    addState(m_position_state);
     m_paused_state = new PausedState(this);
     addState(m_paused_state);
     
