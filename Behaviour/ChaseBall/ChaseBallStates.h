@@ -29,11 +29,14 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+
+#include "debug.h"
 
 class ChaseBallState : public BehaviourState
 {
@@ -68,7 +71,15 @@ public:
     BehaviourState* nextState()
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
+        {
+            debug << "Chase -> Search" << endl;
             return m_provider->m_search_state;
+        }
+        else if (not m_provider->m_team_info->amIClosestToBall())
+        {
+            debug << "Chase -> Position" << endl;
+            return m_provider->m_position_state;
+        }
         else
             return m_provider->m_state;
     };
@@ -119,6 +130,58 @@ public:
     };
 };
 
+// ----------------------------------------------------------------------------------------------------------------------- PositonState
+class PositionState : public ChaseState
+{
+public:
+    PositionState(ChaseBallProvider* provider) : ChaseState(provider) {};
+    BehaviourState* nextState()
+    {
+        if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
+        {
+            debug << "Position -> Search" << endl;
+            return m_provider->m_search_state;
+        }
+        else if (m_provider->m_team_info->amIClosestToBall())
+        {
+            debug << "Position -> Chase" << endl;
+            return m_provider->m_chase_state;
+        }
+        else
+            return m_provider->m_state;
+    };
+    
+    void doState()
+    {
+        float headyaw, headpitch;
+        m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+        m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+        TrackPoint(headyaw, headpitch, m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
+        
+        float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+        float balldistance;
+        if (measureddistance < 46)
+            balldistance = 1;
+        else
+            balldistance = sqrt(pow(measureddistance,2) - 46*46);
+        float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+        
+        vector<float> walkVector(3, 0);
+        walkVector[1] = 2*sin(ballbearing);
+        walkVector[2] = ballbearing/2.0;
+        if (balldistance > 100)
+        {
+            walkVector[0] = 10*cos(ballbearing);
+        }
+        else
+        {
+            walkVector[0] = -3*cos(ballbearing);
+        }
+        WalkJob* walk = new WalkJob(walkVector);
+        m_provider->m_jobs->addMotionJob(walk);
+    };
+};
+
 // ----------------------------------------------------------------------------------------------------------------------- SearchState
 class SearchState : public ChaseBallState
 {
@@ -127,7 +190,10 @@ public:
     BehaviourState* nextState()
     {
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+        {
+            debug << "Search -> Chase" << endl;
             return m_provider->m_chase_state;
+        }
         else
             return m_provider->m_state;
     };

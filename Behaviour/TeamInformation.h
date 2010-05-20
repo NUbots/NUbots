@@ -27,26 +27,54 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class FieldObjects;
 
+#include <boost/circular_buffer.hpp>
+#include <vector>
 #include <iostream>
 using namespace std;
+
+class TeamPacket
+{
+public:
+    unsigned long ID;
+    double SentTime;
+    double ReceivedTime;
+    char PlayerNumber;
+    char TeamNumber;
+    float TimeToBall;
+    
+    void summaryTo(ostream& output);
+    friend ostream& operator<< (ostream& output, const TeamPacket& packet);
+    friend istream& operator>> (istream& input, TeamPacket& packet);
+};
 
 class TeamInformation
 {
 public:
-    TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions);
+    TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
     ~TeamInformation();
     
-    friend ostream& operator<< (ostream& output, const TeamInformation& info);
-    friend ostream& operator<< (ostream& output, const TeamInformation* info);
+    bool amIClosestToBall();
+    
+    friend ostream& operator<< (ostream& output, TeamInformation& info);
+    friend ostream& operator<< (ostream& output, TeamInformation* info);
     friend istream& operator>> (istream& input, TeamInformation& info);
     friend istream& operator>> (istream& input, TeamInformation* info);
+private:
+    void initTeamPacket();
+    void updateTeamPacket();
+    float getTimeToBall();
 private:
     int m_player_number;
     int m_team_number;
     
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
+    FieldObjects* m_objects;
+    
+    TeamPacket m_packet;                                                //!< team packet to send
+    vector<boost::circular_buffer<TeamPacket> > m_received_packets;     //!< team packets received from other robots
 };
 
 
