@@ -76,19 +76,13 @@ private:
 public:
 protected:
 private:
-    
-    // The following variables are taken straight from NB's MotionSwitchboard.
     boost::shared_ptr<Sensors> nb_sensors;
     WalkProvider walkProvider;
     
     std::vector <float> nextJoints;
-    
-	mutable bool newJoints; // Way to track if we ever use the same joints twice
-    
-    bool readyToSend;
     mutable pthread_mutex_t next_joints_mutex;
     
-    bool noWalkTransitionCommand;
+    boost::shared_ptr<Gait> m_gait;
 };
 
 #endif

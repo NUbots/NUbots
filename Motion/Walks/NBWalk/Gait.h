@@ -34,13 +34,4 @@ static const Gait DEFAULT_GAIT = Gait(WP::STANCE_DEFAULT,
                                       WP::ODO_DEFAULT,
                                       WP::ARM_DEFAULT);
 
-static const Gait WEBOTS_GAIT =  Gait(WP::WEBOTS_STANCE_CONFIG,
-                                      WP::WEBOTS_STEP_CONFIG,
-                                      WP::WEBOTS_ZMP_CONFIG,
-                                      WP::WEBOTS_HACK_CONFIG,
-                                      WP::WEBOTS_SENSOR_CONFIG,
-                                      WP::WEBOTS_STIFFNESS_CONFIG,
-                                      WP::ODO_DEFAULT,
-                                      WP::ARM_DEFAULT);
-
 #endif

@@ -42,10 +42,7 @@ inline T NORMALISE(T theta){
  */
 NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
                     walkProvider(nb_sensors),
-                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f)),
-                    newJoints(false),
-                    readyToSend(false),
-                    noWalkTransitionCommand(true)
+                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
 {
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);
@@ -60,8 +57,8 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
     m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
-    boost::shared_ptr<Gait>  defaultGait(new Gait(WEBOTS_GAIT));
-    walkProvider.setCommand(defaultGait);
+    m_gait = boost::shared_ptr<Gait>(new Gait(DEFAULT_GAIT));
+    walkProvider.setCommand(m_gait);
 }
 
 /*! @brief Destructor for walk module
