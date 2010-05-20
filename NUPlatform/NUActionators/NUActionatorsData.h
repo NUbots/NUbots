@@ -109,6 +109,7 @@ public:
     
     // Misc. get methods
     int getNumberOfJoints(bodypart_id_t partid);
+    vector<joint_id_t>& getJointIndices(bodypart_id_t partid);
     int getNumberOfLeds(ledgroup_id_t groupid);
     
     // Get methods for NUActionators
@@ -163,7 +164,8 @@ private:
     template <typename T> void addActionator(vector<actionator_t<T>*>& actionatorgroup, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
     template <typename T> void addActionator(actionator_t<T>*& p_actionator, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
     
-    vector<joint_id_t> getSelectedJoints(bodypart_id_t partid);
+    vector<joint_id_t>& getSelectedJoints(bodypart_id_t partid);
+    vector<int>& getSelectedLeds(ledgroup_id_t groupid);
     
     string simplifyName(const string& input);
     void simplifyNames(const vector<string>& input, vector<string>& output);
