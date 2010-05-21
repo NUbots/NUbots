@@ -168,7 +168,12 @@ istream& operator>> (istream& input, TeamInformation& info)
 {
     TeamPacket temp;
     input >> temp;
-    temp.ReceivedTime = info.m_data->CurrentTime;
+    double timenow;
+    if (info.m_data != NULL)
+        timenow = info.m_data->CurrentTime;
+    else
+        timenow = nusystem->getTime();
+    temp.ReceivedTime = timenow;
     
     if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number)
     {   // only accept packets from valid player numbers
@@ -180,7 +185,7 @@ istream& operator>> (istream& input, TeamInformation& info)
         else
         {
             TeamPacket lastpacket = info.m_received_packets[temp.PlayerNumber].back();
-            if (info.m_data->CurrentTime - lastpacket.ReceivedTime > 2000)
+            if (timenow - lastpacket.ReceivedTime > 2000)
             {   // if there have been no packets recently from this player always accept the packet
                 info.m_received_packets[temp.PlayerNumber].push_back(temp);
                 nusystem->displayTeamPacketReceived(info.m_actions);
