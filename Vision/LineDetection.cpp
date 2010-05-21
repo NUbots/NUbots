@@ -13,7 +13,7 @@
 #include "EllipseFit.h"
 //#include "../Kinematics/Kinematics.h"
 //#include <QDebug>
-#include "debug.h"
+//#include "debug.h"
 #include <ctime>
 
 LineDetection::LineDetection(){
@@ -295,7 +295,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         return;
     }
     //SORT THE LINES BY Y then BY X:
-    clock_t startSort = clock();
+    //clock_t startSort = clock();
     //qsort(linePoints,0,linePoints.size()-1,2);
     for (size_t i = 0; i < linePoints.size() ; i++)
     {
@@ -303,8 +303,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     }
     //HORIZONTAL Line Search:
-    clock_t startHorizontalSearch = clock();
-    debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //clock_t startHorizontalSearch = clock();
+    //debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     //Only bother searching if there is enough points to make part of a line..
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++)
     {   //for all line points recorded
@@ -378,13 +378,13 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //SORT POINTS
     //// //qDebug() << "SORTING...";
-    clock_t startSortAgain = clock();
-    debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //clock_t startSortAgain = clock();
+    //debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
 
-    clock_t startVerticalSearch = clock();
-    debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //clock_t startVerticalSearch = clock();
+    //debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++){
         if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
@@ -452,8 +452,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
     }
 
-    clock_t startJoining = clock();
-    debug << "Line Detection: Field Lines  : Vertical Search: " << (double)(startJoining - startVerticalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //clock_t startJoining = clock();
+    //debug << "Line Detection: Field Lines  : Vertical Search: " << (double)(startJoining - startVerticalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
 
     //---------------------------------------------------
     // START OF JOINING LINES
@@ -601,8 +601,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     }
 
-    clock_t end = clock();
-    debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //clock_t end = clock();
+    //debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
 
 }
 
