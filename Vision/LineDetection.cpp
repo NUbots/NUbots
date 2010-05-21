@@ -12,7 +12,7 @@
 #include "Vision.h"
 #include "EllipseFit.h"
 //#include "../Kinematics/Kinematics.h"
-#include <QDebug>
+//#include <QDebug>
 #include "debug.h"
 #include <ctime>
 
@@ -49,7 +49,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
     //}
 
-    clock_t startLineForm = clock();
+    //clock_t startLineForm = clock();
     FindFieldLines(image_width,image_height);
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -68,9 +68,9 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
 
     //    }
     //}
-    qDebug() << "Finding Penalty Spots:";
+    //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
-    qDebug() << "Finnished Finding Penalty Spots:";
+    //qDebug() << "Finnished Finding Penalty Spots:";
     FindCornerPoints(vision->getImageWidth(),vision->getImageHeight());
     //qDebug() << "Corners found: " << cornerPoints.size();
     for (unsigned int i = 0; i < cornerPoints.size(); i ++)
@@ -87,19 +87,19 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
         }
     }
 
-    clock_t startCorner = clock();
+    //clock_t startCorner = clock();
     DecodeCorners(AllObjects, vision->m_timestamp, vision->getImageWidth(), vision->getImageHeight());
 
-    qDebug() << "Decode Penalty Spots:";
+    //qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
-    qDebug() << "Finnished Decoding Penalty Spots:";
+    //qDebug() << "Finnished Decoding Penalty Spots:";
 
     end = clock();
 
-    debug << "Line Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "Line Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "Line Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "Line Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    //debug << "Line Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    //debug << "Line Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    //debug << "Line Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    //debug << "Line Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
 
 }
 
@@ -628,7 +628,7 @@ void LineDetection::FindPenaltySpot(Vision* vision)
         mx = 0;
         my = 0;
         lineLength = 0.0;
-        qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
+        //qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
         for (unsigned int i = 0; i < fieldLines.size(); i++)
         {
         //CHECK ALL LINES (EVEN IF NOT A LINE!)
@@ -714,12 +714,12 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         if(whitePixelFound)
                                 continue;
 
-                        qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+                        //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
                         double TempDist = 0;
                         double TempBearing = 0;
                         double TempElev = 0;
                         //GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev);
-                        qDebug() << "Distance:\t\t"<< TempDist<< endl;
+                        //qDebug() << "Distance:\t\t"<< TempDist<< endl;
 
                         int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
                         AmbiguousObject tempUnknownPenalty(TempID, "Unknown Penalty");
