@@ -15,9 +15,9 @@ public:
     void setBottomRight(Vector2<int> point);
     int width() const;
     int height() const;
-    int getCentreX();
-    int getCentreY();
-    float aspect();
+    int getCentreX() const;
+    int getCentreY() const;
+    float aspect() const;
     unsigned char getColour()  const;
     void setColour(unsigned char c);
     std::vector<TransitionSegment> getSegments() const;

@@ -525,7 +525,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 
 #define LEFT_OF(x0, x1, x2) ((x1.x-x0.x)*(-x2.y+x0.y)-(x2.x-x0.x)*(-x1.y+x0.y) > 0)
 
-std::vector<Vector2<int> > Vision::getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders)
+std::vector<Vector2<int> > Vision::getConvexFieldBorders(const std::vector<Vector2<int> >& fieldBorders)
 {
   //Andrew's Monotone Chain Algorithm to compute the upper hull
   std::vector<Vector2<int> > hull;
@@ -551,7 +551,7 @@ std::vector<Vector2<int> > Vision::getConvexFieldBorders(std::vector<Vector2<int
   return hull;
 }
 
-std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing)
+std::vector<Vector2<int> > Vision::interpolateBorders(const std::vector<Vector2<int> >& fieldBorders, int scanSpacing)
 {
     std::vector<Vector2<int> > interpolatedBorders;
     if(!fieldBorders.size()) return interpolatedBorders;
@@ -578,7 +578,7 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
     return interpolatedBorders;
 }
 
-ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::verticalScan(const std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
     //std::vector<Vector2<int> > scanPoints;
     ClassifiedSection scanArea(ScanLine::DOWN);
@@ -629,7 +629,7 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
     return scanArea;
 }
 
-ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
     ClassifiedSection scanArea(ScanLine::RIGHT);
     if(!currentImage) return scanArea;
@@ -1117,9 +1117,9 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
 }
 
 std::vector<ObjectCandidate> Vision::classifyCandidates(
-                                        std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+                                        std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments,
                                         tCLASSIFY_METHOD method)
@@ -1139,9 +1139,9 @@ std::vector<ObjectCandidate> Vision::classifyCandidates(
 
 }
 
-std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
@@ -1385,9 +1385,9 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
     return candidateList;
 }
 
-std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
@@ -1398,7 +1398,7 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< Trans
     return candidateList;
 }
 
-bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colourList)
+bool Vision::isValidColour(unsigned char colour, const std::vector<unsigned char> &colourList)
 {
     bool result = false;
     if (colourList.size())
@@ -1416,7 +1416,7 @@ bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colo
     return result;
 }
 
-int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
+int Vision::findYFromX(const std::vector<Vector2<int> >&points, int x)
 {
 
     int y = 0;
@@ -1453,7 +1453,7 @@ int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
     return y;
 }
 
-int Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
+int Vision::findInterceptFromPerspectiveFrustum(const std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
 {
     int height = currentImage->getHeight();
 
@@ -1521,8 +1521,8 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 
 }
 
-std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std::vector< TransitionSegment > horizontalsegments,
-                                                                            std::vector<unsigned char> validColours,
+std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   const std::vector< TransitionSegment > &horizontalsegments,
+                                                                            const std::vector<unsigned char> &validColours,
                                                                             int spacing,
                                                                             int min_segments)
 {
@@ -1669,7 +1669,7 @@ LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
     return LineDetector;
 }
 
-Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
+Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
 {
     //debug<< "Vision::DetectBall" << endl;
 
