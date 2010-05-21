@@ -147,7 +147,7 @@ void GameInformation::doManualStateChange()
 {
     m_myPreviousState = m_myCurrentState;
     m_myCurrentState = getNextState(m_myCurrentState);
-    if(m_myCurrentState = state_penalised)
+    if(m_myCurrentState == state_penalised)
     {
         if(m_unprocessedControlData->teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
         {

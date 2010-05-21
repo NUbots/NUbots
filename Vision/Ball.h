@@ -8,16 +8,16 @@ class Ball
 	Ball();
         ~Ball();
 
-        Circle FindBall(std::vector<ObjectCandidate> FO_Candidates,
+        Circle FindBall(const std::vector<ObjectCandidate> FO_Candidates,
 			FieldObjects* AllObjects,
                         Vision* vision,
                         int height,
                         int width);
   private:
-  	bool isObjectAPossibleBall(ObjectCandidate PossibleBall);
-        std::vector < Vector2<int> > classifyBallClosely(ObjectCandidate PossibleBall,Vision* vision,int height,int width);
-        bool isCorrectCheckRatio(ObjectCandidate PossibleBall,int height,int width);
-        Circle isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandidate PossibleBall);
+        bool isObjectAPossibleBall(const ObjectCandidate &PossibleBall);
+        std::vector < Vector2<int> > classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height,int width);
+        bool isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height,int width);
+        Circle isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall);
 	
 };
 

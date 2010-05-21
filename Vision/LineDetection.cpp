@@ -12,14 +12,18 @@
 #include "Vision.h"
 #include "EllipseFit.h"
 //#include "../Kinematics/Kinematics.h"
-//#include <QDebug>
+#include <QDebug>
+#include "debug.h"
+#include <ctime>
 
 LineDetection::LineDetection(){
 
-        //LinePointCounter = 0;
-        //FieldLinesCounter = 0;
-        //CornerPointCounter = 0;
-	TotalValidLines = 0;
+    //Reserving Space for Vector Elements
+    linePoints.reserve(MAX_LINEPOINTS);
+    fieldLines.reserve(MAX_FIELDLINES);
+    cornerPoints.reserve(MAX_CORNERPOINTS);
+
+    TotalValidLines = 0;
 }
 
 LineDetection::~LineDetection(){
@@ -28,30 +32,24 @@ return;
 
 void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision) {
     LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
-    //RESETING VARIABLES
-    for(unsigned int i =0; i < linePoints.size() ; i++ )
-    {
-            linePoints[i].x =0;
-            linePoints[i].y =0;
-    }
 
-    for(unsigned int i =0; i < fieldLines.size() ; i++ )
-    {
-            fieldLines[i].clearPoints();
-    }
+    clock_t start, end;
     //LinePointCounter = 0;
     TotalValidLines = 0;
     //FieldLinesCounter = 0;
     //CornerPointCounter = 0;
     //FIND LINE POINTS:
+    start = clock();
     FindLinePoints(scanArea,vision,image_width,image_height);
-    //debug() << "Line Points: " << linePoints.size();
+
+
+    //qDebug() << "Line Points: " << linePoints.size();
     //for(unsigned int j = 0; j < linePoints.size(); j++)
     //{
     //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
     //}
 
-
+    clock_t startLineForm = clock();
     FindFieldLines(image_width,image_height);
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -70,8 +68,10 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
 
     //    }
     //}
-
-    //FindCornerPoints(vision->getImageWidth(),vision->getImageHeight());
+    qDebug() << "Finding Penalty Spots:";
+    FindPenaltySpot(vision);
+    qDebug() << "Finnished Finding Penalty Spots:";
+    FindCornerPoints(vision->getImageWidth(),vision->getImageHeight());
     //qDebug() << "Corners found: " << cornerPoints.size();
     for (unsigned int i = 0; i < cornerPoints.size(); i ++)
     {
@@ -87,9 +87,19 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
         }
     }
 
-
+    clock_t startCorner = clock();
     DecodeCorners(AllObjects, vision->m_timestamp, vision->getImageWidth(), vision->getImageHeight());
 
+    qDebug() << "Decode Penalty Spots:";
+    DecodePenaltySpot(AllObjects, vision->m_timestamp);
+    qDebug() << "Finnished Decoding Penalty Spots:";
+
+    end = clock();
+
+    debug << "Line Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "Line Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "Line Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "Line Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
 
 }
 
@@ -205,6 +215,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                                        (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE))
                                     {
                                         canNotAdd = true;
+                                        break;
                                     }
                                 }
                                 if(!canNotAdd)
@@ -220,7 +231,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            else if(     ((ClassIndex::green   ==  segment->getBeforeColour()) &&
+            if(     ((ClassIndex::green   ==  segment->getBeforeColour()) &&
                     (ClassIndex::white   ==  segment->getColour()) &&
                     (ClassIndex::green   ==  segment->getAfterColour()))||
                     ((ClassIndex::white   ==  segment->getColour())
@@ -246,6 +257,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                        (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE))
                     {
                         canNotAdd = true;
+                        break;
                     }
                 }
                 if(!canNotAdd)
@@ -269,10 +281,12 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //Try and make lines now...
     //int DistanceStep;
-    int SearchMultiplier = 6; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
+    int SearchMultiplier = 2; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
     double ColSlopeVal;
     int previousPointID;
-    int GRID = LINE_SEARCH_GRID_SIZE * SearchMultiplier;
+
+    int MAX_SCAN_SPACING = LINE_SEARCH_GRID_SIZE * 4; //ORIGINAL SCANLINE SPACINGS were 4x the
+    int GRID = MAX_SCAN_SPACING * SearchMultiplier;
     //Lines 'should' have a point on the same search pattern that maches them, which should also be close to them..
     //First look for horz lines (from the vert search grid..)
     // ***********************************************************************************************************************
@@ -281,11 +295,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         return;
     }
     //SORT THE LINES BY Y then BY X:
+    clock_t startSort = clock();
+    //qsort(linePoints,0,linePoints.size()-1,2);
+    for (size_t i = 0; i < linePoints.size() ; i++)
+    {
+        //qDebug() << i << ": "<< linePoints[i].x << "," << linePoints[i].y;
 
-    qsort(linePoints,0,linePoints.size()-1,2);
-
+    }
     //HORIZONTAL Line Search:
-
+    clock_t startHorizontalSearch = clock();
+    debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     //Only bother searching if there is enough points to make part of a line..
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++)
     {   //for all line points recorded
@@ -300,11 +319,11 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
             if (linePoints[EndCheck].x <= linePoints[SearchFrom].x + GRID)
             {
-                //DistanceStep = fabs(linePoints[EndCheck].x-linePoints[SearchFrom].x)/LINE_SEARCH_GRID_SIZE;  //number of grid units long
+                int DistanceStep = fabs(linePoints[EndCheck].x-linePoints[SearchFrom].x)/(MAX_SCAN_SPACING);  //number of grid units long
 
-                if (linePoints[EndCheck].y <= linePoints[SearchFrom].y + GRID)//(LINE_SEARCH_GRID_SIZE*SearchMultiplier* DistanceStep))
+                if (linePoints[EndCheck].y <= linePoints[SearchFrom].y + GRID * DistanceStep)
                 {
-                    //qDebug() << linePoints[SearchFrom].x<< linePoints[SearchFrom].y << linePoints[EndCheck].x <<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE << DistanceStep<< fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
+                    //qDebug() << linePoints[SearchFrom].x<< linePoints[SearchFrom].y << linePoints[EndCheck].x <<linePoints[EndCheck].y << GRID <<  fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
 
                     //We've found what might be a line, so lets see if we can find any more lines that match this one..
                     LSFittedLine tempFieldLine;
@@ -319,18 +338,19 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                         {
                             break;
                         }
-                        //if (linePoints[previousPointID].y == linePoints[PointID].y) continue; //Vertical Line
+                        if (linePoints[previousPointID].x == linePoints[PointID].x) continue; //Vertical Line
                         if (linePoints[PointID].inUse == true) continue;
 
                         if (    linePoints[PointID].x <= linePoints[previousPointID].x + GRID
                             &&  linePoints[PointID].y <= linePoints[previousPointID].y + GRID )
                         {
-                            double DisMod = (linePoints[PointID].x - linePoints[previousPointID].x)/(double)LINE_SEARCH_GRID_SIZE;
+                            double DisMod = (linePoints[PointID].x - linePoints[previousPointID].x)/(double)(MAX_SCAN_SPACING);
+                            //qDebug() << "\tCheck Point : " << fabs(linePoints[PointID].y+(ColSlopeVal*DisMod) - linePoints[previousPointID].y) << DisMod << linePoints[previousPointID].x<< linePoints[previousPointID].y << linePoints[PointID].x <<linePoints[PointID].y;
                             //Check if the slope is about right..
                             if (fabs(linePoints[PointID].y+(ColSlopeVal*DisMod) - linePoints[previousPointID].y) <= 1)
                             {
                                 //This is another point on the line..
-                                //qDebug() << "\tPoint Added: " <<linePoints[previousPointID].x<< linePoints[previousPointID].y << linePoints[PointID].x <<linePoints[PointID].y;
+                                //qDebug() << "\t   Point Added: " <<linePoints[previousPointID].x<< linePoints[previousPointID].y << linePoints[PointID].x <<linePoints[PointID].y;
                                 tempFieldLine.addPoint(linePoints[PointID]);
                                 previousPointID = PointID;
                             }
@@ -358,9 +378,13 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //SORT POINTS
     //// //qDebug() << "SORTING...";
+    clock_t startSortAgain = clock();
+    debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     qsort(linePoints,0,linePoints.size()-1,2);
     //qDebug() << "Finnished...";
 
+    clock_t startVerticalSearch = clock();
+    debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++){
         if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
@@ -375,10 +399,10 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //if (linePoints[EndCheck].width < MIN_POINT_THICKNESS*3) continue;
             if (linePoints[EndCheck].y <= linePoints[SearchFrom].y + GRID)
             {
-                //DistanceStep = fabs(linePoints[EndCheck].y-linePoints[SearchFrom].y)/LINE_SEARCH_GRID_SIZE;
+                int DistanceStep = fabs(linePoints[EndCheck].y-linePoints[SearchFrom].y)/MAX_SCAN_SPACING;
                 //qDebug() << linePoints[SearchFrom].x<< linePoints[SearchFrom].y << linePoints[EndCheck].x <<linePoints[EndCheck].y << LINE_SEARCH_GRID_SIZE << DistanceStep<< fabs(linePoints[SearchFrom].y - linePoints[EndCheck].y);
 
-                if (linePoints[EndCheck].x <= linePoints[SearchFrom].x + GRID)//LINE_SEARCH_GRID_SIZE* SearchMultiplier *DistanceStep)
+                if (linePoints[EndCheck].x <= linePoints[SearchFrom].x + GRID * DistanceStep)
                 {
                 //We've found what might be a line, so lets see if we can find any more lines that match this one..
                     //std::cout << "Starting New vertical Line" << std::endl;
@@ -397,12 +421,12 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                         }
                         if (linePoints[PointID].width > HORZ_POINT_THICKNESS) continue;
                         if (linePoints[PointID].inUse == true) continue;
-                        //if (linePoints[previousPointID].x == linePoints[PointID].x) continue; //Horizontal Line
+                        if (linePoints[previousPointID].y == linePoints[PointID].y) continue; //Horizontal Line
 
                         if (    linePoints[PointID].y <= linePoints[previousPointID].y + GRID
                              && linePoints[PointID].x <= linePoints[previousPointID].x + GRID )
                         {
-                            double DisMod = (linePoints[PointID].y - linePoints[previousPointID].y)/(double)LINE_SEARCH_GRID_SIZE;
+                            double DisMod = (linePoints[PointID].y - linePoints[previousPointID].y)/MAX_SCAN_SPACING;
                             //Check if the slope is about right..
                             if (fabs(linePoints[PointID].x+(ColSlopeVal*DisMod) - linePoints[previousPointID].x) <= 1){
                                 //This is another point on the line..
@@ -428,7 +452,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
         }
     }
 
-
+    clock_t startJoining = clock();
+    debug << "Line Detection: Field Lines  : Vertical Search: " << (double)(startJoining - startVerticalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
 
     //---------------------------------------------------
     // START OF JOINING LINES
@@ -576,6 +601,172 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     }
 
+    clock_t end = clock();
+    debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+
+}
+
+/**-------------
+//Penalty spot: a small line in the middle of the field with no surrounding lines
+        //1. For each line less then 1/4 of image:
+                //2. find scan points about line
+                //3. perform scan for whites on classified image
+                        //3a. 3x3 pixel search about point
+                //4. If no white found then we have penalty spot
+-------------**/
+
+void LineDetection::FindPenaltySpot(Vision* vision)
+{
+        int IMAGE_WIDTH = vision->getImageWidth();
+
+        int lx,ly,rx,ry, mx, my;
+        double lineLength;
+        lx = 0;
+        ly = 0;
+        rx = 0;
+        ry = 0;
+        mx = 0;
+        my = 0;
+        lineLength = 0.0;
+        qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
+        for (unsigned int i = 0; i < fieldLines.size(); i++)
+        {
+        //CHECK ALL LINES (EVEN IF NOT A LINE!)
+                lx = fieldLines[i].leftPoint.x;
+                ly = fieldLines[i].leftPoint.y;
+                rx = fieldLines[i].rightPoint.x;
+                ry = fieldLines[i].rightPoint.y;
+                mx = (int)((lx+rx)/2.0);
+                my = (int)((ly+ry)/2.0);
+                lineLength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
+
+                if (lineLength < (int)(IMAGE_WIDTH/4))
+                {
+
+                        //CHECK FOR WHITES!
+                        //Left Point is Lower X, Right Point is Higher X
+                        //Perform checks on:
+                        //	Left Point:	(lx-0.5length,ly), (lx, ly+3/4length), (lx, ly-3/4length),
+                        //	MidPoint:	(mx, my-3/4length), (mx, my-3/4length)
+                        //	Right Point:	(rx+0.5length,ry), (rx, ry+3/4length), (lx, ry-3/4length),
+                        int checkX, checkY;
+                        int searchRadius = (int)(lineLength/16);
+                        if (searchRadius < 3)
+                        {
+                                searchRadius =3;
+                        }
+
+                        bool whitePixelFound;
+
+                        //Left Point 1: (lx-0.5length,ly)
+                        checkX = lx - (int)(lineLength/2);
+                        checkY = ly;
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Left Point 2: (lx, ly+3/4length)
+                        checkX = lx ;
+                        checkY = ly + (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Left Point3: (lx, ly-3/4length)
+                        checkX = lx ;
+                        checkY = ly - (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Mid Point1: (mx, my-3/4length)
+                        checkX = mx ;
+                        checkY = my - (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Mid Point2: (mx, my+3/4length)
+                        checkX = mx ;
+                        checkY = my + (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Right Point1: (rx+0.5length,ry)
+                        checkX = rx + (int)(lineLength/2);
+                        checkY = ry;
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Right Point2: (rx, ry+3/4length)
+                        checkX = rx;
+                        checkY = ry+ (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        //Right Point2: (rx, ry-3/4length)
+                        checkX = rx;
+                        checkY = ry - (int)(3*lineLength/4);
+                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+                        if(whitePixelFound)
+                                continue;
+
+                        qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+                        double TempDist = 0;
+                        double TempBearing = 0;
+                        double TempElev = 0;
+                        //GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev);
+                        qDebug() << "Distance:\t\t"<< TempDist<< endl;
+
+                        int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
+                        AmbiguousObject tempUnknownPenalty(TempID, "Unknown Penalty");
+                        tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_YELLOW);
+                        tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_BLUE);
+                        Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+                        Vector3<float> measuredError(0.0,0.0,0.0);
+                        Vector2<int> screenPosition(mx, my);
+                        Vector2<int> sizeOnScreen(8,2);
+                        tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,vision->m_timestamp);
+                        possiblePenaltySpots.push_back(tempUnknownPenalty);
+                }
+                else
+                {
+                        //cout << "Line["<< i<< "] too long."<< endl;
+                        continue;
+                }
+        }
+
+
+}
+
+bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision)
+{
+        //Search -searchRadius  to +searchRadius
+        bool whitePixelFound = false;
+        for (int i = checkX - searchRadius; i < checkX + searchRadius; i++)
+        {
+                for (int j =checkY - searchRadius; j< checkY + searchRadius; j++)
+                {
+                    if((i > 0 && i < vision->getImageWidth()) && (j >0 && j < vision->getImageHeight()))
+                    {
+                        if(vision->classifyPixel(i,j) == ClassIndex::white)
+                        {
+                                whitePixelFound = true;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        whitePixelFound = true;
+                    }
+                }
+                if(whitePixelFound)
+                        break;
+        }
+        return whitePixelFound;
 }
 
 
@@ -761,7 +952,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
     unsigned int x;
     bool recheck = false;
 
-    if (cornerPoints.size() >6)                  //********  this filters out center circle. only a count 0f 2 is checked.
+    if (cornerPoints.size() > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
         //qDebug() << "Trying EllipseFit: too many corners";
@@ -811,103 +1002,114 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             if ( i == (unsigned int) PenaltySpotLineNumber)	continue;
             if ( i == (unsigned int) longestLine )		continue;
             if (fieldLines[i].valid == false)	continue;
-            //cout << "Checking Line: " << i << endl;
-            points = fieldLines[i].getPoints();
+            //qDebug() << "Checking Line: " << i << "( "<< fieldLines[i].rightPoint.x <<"," << fieldLines[i].rightPoint.y<< ")";
+            //std::vector<LinePoint*> minpoints = fieldLines[i].getPoints();
+
             //Find another line thats close to it
             int lrX = fieldLines[i].rightPoint.x;
             int lrY = fieldLines[i].rightPoint.y;
             bool hasJoinedLines = false;
-            for(unsigned int j = 0; j < fieldLines.size(); j++)
+            for(unsigned int j = i; j < fieldLines.size(); j++)
             {
                 if ( j == (unsigned int) PenaltySpotLineNumber)	continue;
                 if ( j == (unsigned int) longestLine )			continue;
                 if (fieldLines[j].valid == false)	continue;
                 if (i == j)				continue;
-                 //cout << "\t Against Line: " << j << endl;
+                //qDebug() << "\t Against Line: " << j << "( "<< fieldLines[j].leftPoint.x <<"," << fieldLines[j].leftPoint.y<< ")";
                 //Calculate distance from 2 points
                 int rrX = fieldLines[j].leftPoint.x;
                 int rrY = fieldLines[j].leftPoint.y;
                 double distance = sqrt((rrX-lrX)*(rrX-lrX) + (rrY-lrY)*(rrY-lrY));
-                if(distance < 2 && distance > 0 && rrX > lrX)
+                if(distance < 10 && distance >= 0 && rrX > lrX)
                 {
-                    //cout << "Adjacent Line found" << j <<"with " << fieldLines[j].numPoints << " points."<<endl;
+                    //qDebug() << "Adjacent Line found" << j <<"with " << fieldLines[j].numPoints << " points.";
                     hasJoinedLines = true;
-                    std::vector<LinePoint*> tempPoints = fieldLines[j].getPoints();
-                    for(int k = 0; k < fieldLines[j].numPoints; k++)
+                    std::vector <LinePoint*> linePts = fieldLines[j].getPoints();
+                    for(int k = 0; k <  fieldLines[j].numPoints ; k++)
                     {
-                            LinePoint* tempPoint = tempPoints.at(k);
-                            //cout << tempPoint->x << ","<< tempPoint->y <<endl;
-                            points.push_back(tempPoint);
+                        LinePoint* tempPoint = linePts.at(k);
+                        points.push_back(tempPoint);
                     }
                     lrX = fieldLines[j].rightPoint.x;
                     lrY = fieldLines[j].rightPoint.y;
+                    break;
                 }
             }
-            if(points.size() > 15 && hasJoinedLines)
+            if(hasJoinedLines == true)
             {
-                //break;
+                std::vector  <LinePoint*> linePts = fieldLines[i].getPoints();
+                for(int k = 0; k <  fieldLines[i].numPoints ; k++)
+                {
+                    LinePoint* tempPoint = linePts.at(k);
+                    points.push_back(tempPoint);
+                }
+            }
+            if(points.size() > 50)
+            {
+                break;
             }
         }
 
         //qDebug() << "Total pointSize: "<< points.size() << endl;
-        if(points.size() < 5) return;
-        Array2D<double> x(points.size(),1,0.0);
-        Array2D<double> y(points.size(),1,0.0);
-        for(unsigned int i = 0; i < points.size(); i++)
+        if(points.size() > 5)
         {
-                LinePoint* tempPoint = points.at(i);
-                //cout << "Point " << i << ": \t"<< tempPoint->x << ",\t"<< tempPoint->y <<endl;
-                x[i][0] =  tempPoint->x;
-                y[i][0] =  tempPoint->y;
-        }
-
-
-        EllipseFit* e = new EllipseFit;
-
-        e->Fit_Ellipse(x,y);
-        //e->PrintFinal();
-
-        double cx = e->GetX();
-        double cy = e->GetY();
-        double r1 = e->GetR1();
-        double r2 = e->GetR2();
-
-        //int minX,minY,maxX,maxY;
-        minX = cx-r1;
-        maxX = cx+r1;
-        minY = cy-r2;
-        maxY = cy+r2;
-
-        //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
-        TempDist = 2000;
-        //GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev);
-
-        if (TempDist > 100.0) {
-
-            Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
-            Vector3<float> measuredError(0.0,0.0,0.0);
-            Vector2<int> screenPosition(cx, cy);
-            Vector2<int> sizeOnScreen;
-            if(r2 > r1)
+            Array2D<double> x(points.size(),1,0.0);
+            Array2D<double> y(points.size(),1,0.0);
+            for(unsigned int i = 0; i < points.size(); i++)
             {
-               sizeOnScreen.x = r2*2;
-               sizeOnScreen.y = r1*2;
-            }
-            else
-            {
-                sizeOnScreen.x = r1*2;
-                sizeOnScreen.y = r2*2;
+                    LinePoint* tempPoint = points.at(i);
+                    //cout << "Point " << i << ": \t"<< tempPoint->x << ",\t"<< tempPoint->y <<endl;
+                    x[i][0] =  tempPoint->x;
+                    y[i][0] =  tempPoint->y;
             }
 
-            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+
+            EllipseFit* e = new EllipseFit;
+
+            e->Fit_Ellipse(x,y);
+            //e->PrintFinal();
+
+            double cx = e->GetX();
+            double cy = e->GetY();
+            double r1 = e->GetR1();
+            double r2 = e->GetR2();
+
+            //int minX,minY,maxX,maxY;
+            minX = cx-r1;
+            maxX = cx+r1;
+            minY = cy-r2;
+            maxY = cy+r2;
+
+            //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
+            TempDist = 2000;
+            //GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev);
+
+            if (TempDist > 100.0) {
+
+                Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+                Vector3<float> measuredError(0.0,0.0,0.0);
+                Vector2<int> screenPosition(cx, cy);
+                Vector2<int> sizeOnScreen;
+                if(r2 > r1)
+                {
+                   sizeOnScreen.x = r2*2;
+                   sizeOnScreen.y = r1*2;
+                }
+                else
+                {
+                    sizeOnScreen.x = r1*2;
+                    sizeOnScreen.y = r2*2;
+                }
+
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+                return;
+            }
         }
-
-        return;  // identify cross here?  ALEX
-
 
     }
 
         //qDebug() << "Before Decoding Lines: ";
+        /*
         for(unsigned int i = 0; i < AllObjects->stationaryFieldObjects.size();i++)
         {
             if(AllObjects->stationaryFieldObjects[i].isObjectVisible() == true)
@@ -941,7 +1143,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
 
             }
         }
-
+        */
         bool CheckedCornerPoints[cornerPoints.size()];
         for(unsigned int i = 0; i < cornerPoints.size(); i++)
         {
@@ -1326,6 +1528,133 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
                 }
         }
     }
+
+
+/**----------------------
+// Method: 	DecodePenaltySpot
+// Arguments: 	void
+// Returns: 	Void
+// Description: 4 scenarios of penalty spots using Goals/Posts and Centrecircle
+------------------**/
+
+void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
+{
+    bool blueGoalSeen = false;
+    bool yellowGoalSeen = false;
+    double yDist = 0.0;
+    double bDist = 0.0;
+    double cDist = 0.0;
+    double pDist = 0.0;
+
+    //Search for Posts or Unknown Posts:
+    for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+    {
+        if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        {
+                blueGoalSeen = true;
+                bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+        }
+        else if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        {
+                blueGoalSeen = true;
+                bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+        }
+    }
+    for(int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <= FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)
+    {
+        if(AllObjects->stationaryFieldObjects[i].TimeLastSeen() == timestamp)
+        {
+            if( i == FieldObjects::FO_BLUE_LEFT_GOALPOST || i == FieldObjects::FO_BLUE_RIGHT_GOALPOST)
+            {
+                    blueGoalSeen = true;
+                    bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+            }
+            else
+            {
+                    yellowGoalSeen = true;
+                    yDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+            }
+        }
+    }
+
+
+    for(unsigned int i = 0; i < possiblePenaltySpots.size(); i++)
+    {
+        if(possiblePenaltySpots[i].getID() == FieldObjects::FO_PENALTY_UNKNOWN)
+            {
+                pDist = possiblePenaltySpots[i].measuredDistance();
+            }
+            else
+            {
+                continue;
+            }
+
+
+        if(yellowGoalSeen && blueGoalSeen)
+        {
+                //cout<< "Cannot see both yellow and blue Goals at once." << endl;
+                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                return;
+        }
+        if(yellowGoalSeen==false && blueGoalSeen==false)
+        {
+                //cout<< "No Goals or Posts seen." << endl;
+                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                return;
+        }
+        if(AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].TimeLastSeen() == timestamp)
+        {
+                cDist = AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].measuredDistance();
+        }
+        else
+        {
+                //cout << "No CentreCircle Visible" << endl;
+                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                return;
+        }
+
+        //Scenarios: Spot is:
+        //1. in between Blue Goals & CentreCircle -> BluePenaltySpot
+        //2. in between Yellow Goals & CentreCircle -> YellowPenaltySpot
+        //3. in front of Centre Circle & BlueGoals -> YellowPenaltySpot
+        //4. in front of CentreCircle & YellowGoals -> BluePenaltySpot
+
+        //Sort by vision Distance to work out the position of PenaltySpot
+        if(bDist > pDist && cDist < pDist)
+        {
+            //BluePenaltySpot
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
+            //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }
+        else if(yDist > pDist && cDist < pDist)
+        {
+            //yellowPenaltySpot
+             AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
+            //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }
+        else if(bDist > pDist && cDist > pDist)
+        {
+            //yellowPenaltySpot
+             AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
+            //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }
+        else if(yDist > pDist && cDist > pDist)
+        {
+            //bluePenaltySpot
+             AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
+            //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }
+        else
+        {
+            AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+        }
+        return;
+    }
+}
 /*
 void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation) {
  
@@ -1411,7 +1740,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 
 
 
-void LineDetection::swap(std::vector<LinePoint> array, int i, int j)
+void LineDetection::swap(std::vector<LinePoint> &array, int i, int j)
 {
         LinePoint temp;
         //// //qDebug() << "Swapping "<< i << "," <<j;
@@ -1424,7 +1753,7 @@ void LineDetection::swap(std::vector<LinePoint> array, int i, int j)
 1 Y - Smallest to Largest Y
 2 X - Smallest to Largest X
 */
-void LineDetection::qsort(std::vector<LinePoint> array, int left, int right, int type)
+void LineDetection::qsort(std::vector<LinePoint> &array, int left, int right, int type)
 {
 
         int current;
@@ -1488,7 +1817,7 @@ void LineDetection::qsort(std::vector<LinePoint> array, int left, int right, int
 }
 
 
-void LineDetection::swap(std::vector<LSFittedLine> array, int i, int j)
+void LineDetection::swap(std::vector<LSFittedLine> &array, int i, int j)
 {
         LSFittedLine temp;
 
@@ -1497,7 +1826,7 @@ void LineDetection::swap(std::vector<LSFittedLine> array, int i, int j)
         array[j] = temp;
 }
 
-void LineDetection::qsort(std::vector<LSFittedLine> array, int left, int right)
+void LineDetection::qsort(std::vector<LSFittedLine> &array, int left, int right)
 {
 
         int current;

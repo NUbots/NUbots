@@ -157,6 +157,16 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 150.0f;
                     objectName = "Right Blue Penalty Box Corner";
                     break;
+                case FO_PENALTY_BLUE:
+                    x = -120.0f;
+                    y = 0.0f;
+                    objectName = "Blue Penalty Spot";
+                    break;
+                case FO_PENALTY_YELLOW:
+                    x = 120.0f;
+                    y = 0.0f;
+                    objectName = "Yellow Penalty Spot";
+                    break;
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";

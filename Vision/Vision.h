@@ -50,7 +50,7 @@ class Vision
     friend class SaveImagesThread;
     SaveImagesThread* m_saveimages_thread;      //!< an external thread to do saving images in parallel with vision processing
     
-    int findYFromX(std::vector<Vector2<int> >&points, int x);
+    int findYFromX(const std::vector<Vector2<int> >&points, int x);
     bool checkIfBufferSame(boost::circular_buffer<unsigned char> cb);
 
     //! SavingImages:
@@ -131,22 +131,22 @@ class Vision
       @returns A list of ObjectCanidates
     */
 
-    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
-                                                    std::vector<Vector2<int> >&fieldBorders,
-                                                    std::vector<unsigned char> validColours,
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > &segments,
+                                                    const std::vector<Vector2<int> >&fieldBorders,
+                                                    const std::vector<unsigned char> &validColours,
                                                     int spacing,
                                                     float min_aspect, float max_aspect, int min_segments,
                                                     tCLASSIFY_METHOD method);
 
-    std::vector<ObjectCandidate> classifyCandidatesPrims(std::vector< TransitionSegment > segments,
-                                                         std::vector<Vector2<int> >&fieldBorders,
-                                                         std::vector<unsigned char> validColours,
+    std::vector<ObjectCandidate> classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
+                                                         const std::vector<Vector2<int> >&fieldBorders,
+                                                         const std::vector<unsigned char> &validColours,
                                                          int spacing,
                                                          float min_aspect, float max_aspect, int min_segments);
 
-    std::vector<ObjectCandidate> classifyCandidatesDBSCAN(std::vector< TransitionSegment > segments,
-                                                          std::vector<Vector2<int> >&fieldBorders,
-                                                          std::vector<unsigned char> validColours,
+    std::vector<ObjectCandidate> classifyCandidatesDBSCAN(std::vector< TransitionSegment > &segments,
+                                                          const std::vector<Vector2<int> >&fieldBorders,
+                                                          const std::vector<unsigned char> &validColours,
                                                           int spacing,
                                                           float min_aspect, float max_aspect, int min_segments);
 
@@ -157,31 +157,31 @@ class Vision
       @param colourList The vector of valid colours to match against
       @return bool True when the colour passed in is an assigned robot colour
     */
-    bool isValidColour(unsigned char colour, std::vector<unsigned char> colourList);
+    bool isValidColour(unsigned char colour, const std::vector<unsigned char> &colourList);
 
-    int findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
+    int findInterceptFromPerspectiveFrustum(const std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing);
     static bool sortTransitionSegments(TransitionSegment a, TransitionSegment b);
 
     std::vector<Vector2<int> > findGreenBorderPoints(int scanSpacing, Horizon* horizonLine);
-    std::vector<Vector2<int> > getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders);
-    std::vector<Vector2<int> > interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
+    std::vector<Vector2<int> > getConvexFieldBorders(const std::vector<Vector2<int> >& fieldBorders);
+    std::vector<Vector2<int> > interpolateBorders(const std::vector<Vector2<int> >& fieldBorders, int scanSpacing);
 
 
-    ClassifiedSection horizontalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
-    ClassifiedSection verticalScan(std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection horizontalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
+    ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
     LineDetection DetectLines(ClassifiedSection* scanArea, int spacing);
 
-     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > segments,
-                                                                      std::vector<unsigned char> validColours,
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(const std::vector< TransitionSegment > &segments,
+                                                                      const std::vector<unsigned char> &validColours,
                                                                       int spacing, int min_segments);
 
-    Circle DetectBall(std::vector<ObjectCandidate> FO_Candidates);
+    Circle DetectBall(const std::vector<ObjectCandidate> &FO_Candidates);
 
     void DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,
                      std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
-                     std::vector< TransitionSegment > horizontalSegments);
+                     const std::vector< TransitionSegment > horizontalSegments);
 
 
     bool isPixelOnScreen(int x, int y);

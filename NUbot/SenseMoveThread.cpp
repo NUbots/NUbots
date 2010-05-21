@@ -118,7 +118,7 @@ void SenseMoveThread::run()
                 realendtime = NUSystem::getRealTime();
                 processendtime = NUSystem::getProcessTime();
                 threadendtime = NUSystem::getThreadTime();
-                if (threadendtime - threadstarttime > 7)
+                if (threadendtime - threadstarttime > 0)
                     debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
             #endif
         }

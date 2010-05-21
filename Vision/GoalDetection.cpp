@@ -23,7 +23,7 @@ GoalDetection::~GoalDetection()
 ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candidates,
                                         std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                                         FieldObjects* AllObjects,
-                                        std::vector< TransitionSegment > horizontalSegments,
+                                        const std::vector< TransitionSegment > &horizontalSegments,
                                         Vision* vision,int height,int width)
 {
         //! Set the Minimum goal width in pixels as a function of screen width
@@ -42,7 +42,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 it = FO_Candidates.erase(it);
                 continue;
             }
-            debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
+            //debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
             ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
             ++it;
         }
@@ -66,14 +66,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
                (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
             {
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
             }
             else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
                      (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
             {
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             }
         }
         else if (FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() > FO_Candidates[1].getCentreX())
@@ -81,14 +81,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
                (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
             {
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST);
             }
             else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
                      (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
             {
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             }
         }
 
@@ -162,7 +162,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         return result;
 }
 
-bool GoalDetection::isObjectAPossibleGoal(ObjectCandidate PossibleGoal)
+bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
 {
     if( PossibleGoal.getColour() == 	ClassIndex::blue ||
         PossibleGoal.getColour() == 	ClassIndex::shadow_blue ||
@@ -177,7 +177,7 @@ bool GoalDetection::isObjectAPossibleGoal(ObjectCandidate PossibleGoal)
 }
 void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
-                                           std::vector < TransitionSegment > horizontalSegments)
+                                           const std::vector < TransitionSegment > &horizontalSegments)
 {
     Vector2<int> TopLeft = PossibleGoal->getTopLeft();
     Vector2<int> BottomRight = PossibleGoal->getBottomRight();
@@ -303,7 +303,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     //debug << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
     ScanLine tempLine;
 
-    int spacings = 8;
+    int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
@@ -533,7 +533,7 @@ bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,
         return true;
     }
 }
-float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* vision)
+float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Vision* vision)
 {
     float distance = 0.0;
     std::vector < TransitionSegment > tempSegments = PossibleGoal.getSegments();
@@ -761,7 +761,7 @@ float GoalDetection::FindGoalDistance(ObjectCandidate PossibleGoal, Vision* visi
     return distance;
 }
 
-float GoalDetection::DistanceLineToPoint(LSFittedLine midPointLine, Vector2<int>  point)
+float GoalDetection::DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> & point)
 {
     float distance = fabs( point.x * midPointLine.getA() + point.y *  midPointLine.getB() - midPointLine.getC())
                    / sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB());
@@ -791,22 +791,22 @@ bool GoalDetection::ObjectCandidateSizeSortPredicate(const ObjectCandidate& goal
     return goal1.width()*goal1.height() > goal2.width()*goal2.height();
 }
 
-void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,ObjectCandidate& GoalPost , int ID)
+void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision, ObjectCandidate* GoalPost , int ID)
 {
-    classifyGoalClosely(&GoalPost, vision);
+    classifyGoalClosely(GoalPost, vision);
     Vector2<int> viewPosition;
     Vector2<int> sizeOnScreen;
     Vector3<float> sphericalError;
     Vector3<float> sphericalPosition;
-    viewPosition.x = GoalPost.getCentreX();
-    viewPosition.y = GoalPost.getCentreY();
+    viewPosition.x = GoalPost->getCentreX();
+    viewPosition.y = GoalPost->getCentreY();
     float bearing = (float)vision->CalculateBearing(viewPosition.x);
     float elevation = (float)vision->CalculateElevation(viewPosition.y);
-    sphericalPosition[0] = cos(elevation)*FindGoalDistance(GoalPost,vision);
+    sphericalPosition[0] = cos(elevation)*FindGoalDistance((*GoalPost),vision);
     sphericalPosition[1] = bearing;
     sphericalPosition[2] = elevation;
-    sizeOnScreen.x = GoalPost.width();
-    sizeOnScreen.y = GoalPost.height();
+    sizeOnScreen.x = GoalPost->width();
+    sizeOnScreen.y = GoalPost->height();
 
     AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      sphericalPosition,
                                                                     sphericalError,

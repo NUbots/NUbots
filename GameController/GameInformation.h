@@ -29,6 +29,7 @@
 
 #include "RoboCupGameControlData.h"
 #include <string>
+#include <cstring>
 
 enum robotState
 {
