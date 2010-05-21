@@ -255,7 +255,7 @@ bool BehaviourProvider::doubleRightBumperClick()
      @param durations a circular buffer of the click durations
      @param previoustime the previous time that this event has occured
  */
-bool BehaviourProvider::longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
+bool BehaviourProvider::longClick(const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime)
 {
     if (times.empty())
         return false;
@@ -276,32 +276,32 @@ bool BehaviourProvider::longClick(boost::circular_buffer<float> times, boost::ci
     @param durations a circular buffer of the click durations (needed to throw out long clicks)
     @param previoustime the previous time that this event has occured
  */
-bool BehaviourProvider::nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime)
+bool BehaviourProvider::nClick(unsigned int n, const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime)
 {
     size_t buffersize = times.size();
     if (buffersize < n)                              // if there aren't enough values in the buffer return false
         return false;
     else if (previoustime == times.back())           // if previous time has not changed return false
         return false;
-    else if (m_current_time - times.back() < 600)    // need to wait 500 ms for a potential next click
+    else if (m_current_time - times.back() < 500)    // need to wait 500 ms for a potential next click
         return false;
     else
     {
         // n click if the last n presses are each less than 400ms apart
         for (size_t i = buffersize-1; i > buffersize-n; i--)
         {
-            if (times[i] - times[i-1] > 600 || durations[i] > 800)
+            if (times[i] - times[i-1] > 500 || durations[i] > 800)
                 return false;
         }
         
         // check the n+1 click was longer than 400ms
         if (buffersize-n > 0)
         {
-            if (times[buffersize-n] - times[buffersize-n-1] < 600 || durations[buffersize-n] > 800)
+            if (times[buffersize-n] - times[buffersize-n-1] < 500 || durations[buffersize-n] > 800)
                 return false;
         }
         
-        previoustime = times[buffersize-1];
+        previoustime = times.back();
         return true;
     }
 }
