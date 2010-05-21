@@ -29,6 +29,7 @@ class NUSensorsData;
 class NUActionatorsData;
 
 class HeadJob;
+class HeadTrackJob;
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 
@@ -43,11 +44,14 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(HeadJob* job);
+    void process(HeadTrackJob* job);
     void process(HeadPanJob* job);
     void process(HeadNodJob* job);
 private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
+    
+    void calculateHeadTarget(float elevation, float bearing, float centreelevation, float centrebearing, vector<double>& times, vector<vector<float> >& positions);
     
     void calculatePan();
     void calculateBallPan();

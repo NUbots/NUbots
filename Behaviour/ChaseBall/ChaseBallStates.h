@@ -33,6 +33,7 @@
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 
@@ -105,27 +106,8 @@ public:
         
         WalkJob* walk = new WalkJob(walkVector);
         m_provider->m_jobs->addMotionJob(walk);
-        TrackPoint(headyaw, headpitch, m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
-    };
-    
-    void TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0)
-    {
-        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
         
-        float c_pitch = -centreelevation;
-        float c_yaw = -centrebearing;
-        
-        float e_pitch = c_pitch + elevation;    // the sign convention of the field objects is the opposite of the head pitch joint itself
-        float e_yaw = c_yaw - bearing;
-        
-        float new_pitch = sensorpitch - gain_pitch*e_pitch;
-        float new_yaw = sensoryaw - gain_yaw*e_yaw;
-        
-        static vector<float> headtarget(2,0);
-        headtarget[0] = new_pitch;
-        headtarget[1] = new_yaw;
-        HeadJob* head = new HeadJob(0, headtarget);
+        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
         m_provider->m_jobs->addMotionJob(head);
     };
 };
@@ -156,7 +138,6 @@ public:
         float headyaw, headpitch;
         m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
         m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        TrackPoint(headyaw, headpitch, m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
         
         float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
         float balldistance;
@@ -169,16 +150,12 @@ public:
         vector<float> walkVector(3, 0);
         walkVector[1] = 2*sin(ballbearing);
         walkVector[2] = ballbearing/2.0;
-        if (balldistance > 100)
-        {
-            walkVector[0] = 10*cos(ballbearing);
-        }
-        else
-        {
-            walkVector[0] = -3*cos(ballbearing);
-        }
+        walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
         WalkJob* walk = new WalkJob(walkVector);
         m_provider->m_jobs->addMotionJob(walk);
+        
+        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+        m_provider->m_jobs->addMotionJob(head);
     };
 };
 

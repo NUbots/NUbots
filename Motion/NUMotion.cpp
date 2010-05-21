@@ -292,6 +292,9 @@ void NUMotion::process(JobList* jobs)
             case Job::MOTION_HEAD:
                 m_head->process(reinterpret_cast<HeadJob*> (*it));
                 break;
+            case Job::MOTION_TRACK:
+                m_head->process(reinterpret_cast<HeadTrackJob*> (*it));
+                break;
             case Job:: MOTION_PAN:
                 m_head->process(reinterpret_cast<HeadPanJob*> (*it));
                 break;

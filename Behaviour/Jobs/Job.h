@@ -65,6 +65,7 @@ public:
         MOTION_SAVE,
         MOTION_SCRIPT,
         MOTION_HEAD,
+        MOTION_TRACK,
         MOTION_NOD,
         MOTION_PAN,
         MOTION_FREEZE,
