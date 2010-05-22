@@ -99,7 +99,8 @@ NUSensorsData::NUSensorsData()
     addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
     addSoftSensor(FootCoP, string("FootCoP"), sensor_t::FOOT_COP);
     addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
-    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_FORCE);
+    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_SUPPORT);
+    addSoftSensor(FootContact, string("FootContact"), sensor_t::FOOT_CONTACT);
     addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
     
     // Buttons Sensors:
@@ -606,6 +607,23 @@ bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
     }
 }
 
+/*! @brief Gets the gyro values after the offset and filtering is applied [gx, gy, gz]
+    @param values will be updated with the current estimate of the gyro
+    @return returns true if the values are valid false otherwise
+ */
+bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
+{
+    if (BalanceGyro == NULL || BalanceGyro->IsValid == false || BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
+        return false;
+    else
+    {
+        values = vector<float>(3,0);
+        for (size_t i=0; i<values.size(); i++)
+            values[i] = BalanceGyro->Data[i] - BalanceGyroOffset->Data[i];
+        return true;
+    }
+}
+
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
     @param values will be updated with the current orientation estimate
  */
@@ -851,6 +869,31 @@ bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
     }
 }
 
+/*! @brief Gets the whether footid is in contact with the ground
+    @param footid the id of the foot
+    @param contact will be updated to true if the foot is on the ground, false if it is not on the ground
+ */
+bool NUSensorsData::getFootContact(foot_id_t footid, bool& contact)
+{
+    if (FootContact == NULL || FootContact->IsValid == false)
+        return false;
+    else
+    {
+        if (footid == LeftFoot)
+            contact = (*FootContact)[0];
+        else if (footid == RightFoot)
+            contact = (*FootContact)[1];
+        else if (footid == AllFeet)
+            contact = (*FootContact)[2];
+        else
+        {
+            debug << "NUSensorsData::getFootContact(). Unknown foot id." << endl;
+            return false;
+        }
+        return true;
+    }
+}
+
 /*! @brief Gets the total force on the foot in Newtons
     @param footid the id of the part of the foot you want the readings for
     @param support will be updated to true if footid is supporting the robot.
@@ -930,6 +973,18 @@ bool NUSensorsData::isFallen()
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
         return false;       
     else if (BalanceFallen->Data[0] > 0)
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Returns true if the robot is on the ground, false otherwise
+ */
+bool NUSensorsData::isOnGround()
+{
+    if (FootContact == NULL || FootContact->IsValid == false)
+        return true;
+    else if (FootContact->Data[2] > 0)
         return true;
     else
         return false;
@@ -1328,7 +1383,6 @@ void NUSensorsData::summaryTo(ostream& output)
  */
 void NUSensorsData::csvTo(ostream& output)
 {
-    //! @todo TODO: implement this somewhere somehow!
 }
 
 /*! @brief Returns the number of sensors in the NUSensorsData
@@ -1398,11 +1452,50 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::JOINT_TEMPERATURES:
             JointTemperatures = p_sensor;
             break;
+        case sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM:
+            LeftLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM:
+            RightLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM:
+            SupportLegTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_CAMERA_TRANSFORM:
+            CameraTransform = p_sensor;
+            break;
+        case sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM:
+            CameraToGroundTransform = p_sensor;
+            break;
+        case sensor_t::JOINT_ODOMETRY:
+            Odometry = p_sensor;
+            break;
+        case sensor_t::JOINT_CAMERAHEIGHT:
+            CameraHeight = p_sensor;
+            break;
         case sensor_t::BALANCE_ACCELEROMETER:
             BalanceAccelerometer = p_sensor;
             break;
         case sensor_t::BALANCE_GYRO:
             BalanceGyro = p_sensor;
+            break;
+        case sensor_t::BALANCE_GYRO_OFFSET:
+            BalanceGyroOffset = p_sensor;
+            break;
+        case sensor_t::BALANCE_ORIENTATION:
+            BalanceOrientation = p_sensor;
+            break;
+        case sensor_t::BALANCE_HORIZON:
+            BalanceHorizon = p_sensor;
+            break;
+        case sensor_t::BALANCE_ZMP:
+            BalanceZMP = p_sensor;
+            break;
+        case sensor_t::BALANCE_FALLING:
+            BalanceFalling = p_sensor;
+            break;
+        case sensor_t::BALANCE_FALLEN:
+            BalanceFallen = p_sensor;
             break;
         case sensor_t::DISTANCE_VALUES:
             DistanceValues = p_sensor;
@@ -1413,11 +1506,32 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::FOOT_BUMPER_VALUES:
             FootBumperValues = p_sensor;
             break;
+        case sensor_t::FOOT_COP:
+            FootCoP = p_sensor;
+            break;
+        case sensor_t::FOOT_FORCE:
+            FootForce = p_sensor;
+            break;
+        case sensor_t::FOOT_CONTACT:
+            FootContact = p_sensor;
+            break;
+        case sensor_t::FOOT_SUPPORT:
+            FootSupport = p_sensor;
+            break;
+        case sensor_t::FOOT_IMPACT:
+            FootImpact = p_sensor;
+            break;
         case sensor_t::BUTTON_VALUES:
             ButtonValues = p_sensor;
             break;
+        case sensor_t::BUTTON_TRIGGERS:
+            ButtonTriggers = p_sensor;
+            break;
         case sensor_t::BATTERY_VALUES:
             BatteryValues = p_sensor;
+            break;
+        case sensor_t::GPS_VALUES:
+            GPS = p_sensor;
             break;
         default:
             break;

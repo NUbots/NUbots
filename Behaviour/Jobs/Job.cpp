@@ -192,6 +192,9 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
             break;
+        case Job::MOTION_TRACK:
+            *job = new HeadTrackJob(input);
+            break;
         case Job::MOTION_NOD:
             *job = new HeadNodJob(input);
             break;

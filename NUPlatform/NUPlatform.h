@@ -37,9 +37,7 @@ public:
     virtual ~NUPlatform();
     
     string getName();
-    int getRobotNumber();
     int getPlayerNumber();
-    string getTeamColour();
     int getTeamNumber();
     
 protected:
@@ -53,9 +51,7 @@ public:
     NUActionators* actionators;
 protected:
     string m_name;
-    int m_robot_number;
     int m_player_number;
-    string m_team_colour;
     int m_team_number;
 private:
     

@@ -48,5 +48,5 @@ GameControllerPort::~GameControllerPort()
 void GameControllerPort::handleNewData(std::stringstream& buffer)
 {
     RoboCupGameControlData* gcpacket = (RoboCupGameControlData*) buffer.str().c_str();
-    //m_game_information->updateNetworkData(*gcpacket);
+    m_game_information->addNewNetworkData(*gcpacket);
 }

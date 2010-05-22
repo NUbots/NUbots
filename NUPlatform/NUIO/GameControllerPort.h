@@ -25,7 +25,6 @@
 #define GAMECONTROLLERPORT_H
 
 #include "UdpPort.h"
-
 class GameInformation;
 
 class GameControllerPort : public UdpPort

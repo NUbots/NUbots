@@ -27,20 +27,21 @@
 #include "UdpPort.h"
 
 class TeamInformation;
+class TeamTransmissionThread;
 
 class TeamPort : public UdpPort
 {
 public:
-    TeamPort(TeamInformation* nubotteaminformation, int portnumber);
+    TeamPort(TeamInformation* nubotteaminformation, int portnumber, bool ignoreself = true);
     ~TeamPort();
     
-    friend TeamPort& operator<<(TeamPort& port, TeamInformation& teaminfo);
-    friend TeamPort& operator<<(TeamPort& port, TeamInformation* teaminfo);
 private:
     void handleNewData(std::stringstream& buffer);
 public:
 private:
     TeamInformation* m_team_information;
+    friend class TeamTransmissionThread;
+    TeamTransmissionThread* m_team_transmission_thread;
 };
 
 #endif

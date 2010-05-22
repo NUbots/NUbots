@@ -67,8 +67,8 @@ private:
     void restartBehaviour();
     
     void updateButtonValues();
-    bool longClick(boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
-    bool nClick(unsigned int n, boost::circular_buffer<float> times, boost::circular_buffer<float> durations, float& previoustime);
+    bool longClick(const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
+    bool nClick(unsigned int n, const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
 
 protected:
     double m_current_time;

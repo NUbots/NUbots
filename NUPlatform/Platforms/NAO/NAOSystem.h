@@ -39,20 +39,27 @@ public:
     
     // battery functions
     void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
-    void voiceLowBattery(NUActionatorsData* actions);
+    // network functions
+    void displayTeamPacketReceived(NUActionatorsData* actions);
+    void displayTeamPacketSent(NUActionatorsData* actions);
+    void displayGamePacketReceived(NUActionatorsData* actions);
+    void displayOtherPacketReceived(NUActionatorsData* actions);
     // watchdog functions
     void displayVisionFrameDrop(NUActionatorsData* actions);
-    void voiceFrameDrop(NUActionatorsData* actions);
-    void displayGamePacketReceived(NUActionatorsData* actions);
-    void displayTeamPacketReceived(NUActionatorsData* actions);
     
     void restart();
-    void powerOff();
+private:
+    void voiceLowBattery(NUActionatorsData* actions);
 private:
     double m_current_time;
     double m_battery_state_previous_time;                    //!< the previous time displayBatteryState was called
     double m_period;                                         //!< period between ear led updates
     std::vector<std::vector<float> > m_ear_leds;             //!< the current battery level ear led values
+    
+    std::vector<std::vector<float> > m_team_received_leds;  //!< the current state of the team packet received leds
+    std::vector<std::vector<float> > m_team_sent_leds;      //!< the current state of the team packet sent leds
+    std::vector<std::vector<float> > m_game_received_leds;  //!< the current state of the game packet received leds
+    std::vector<std::vector<float> > m_other_received_leds; //!< the current state of the other packet received leds
 };
 
 #endif

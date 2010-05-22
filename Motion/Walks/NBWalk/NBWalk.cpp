@@ -42,19 +42,10 @@ inline T NORMALISE(T theta){
  */
 NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
                     walkProvider(nb_sensors),
-                    nullBodyProvider(nb_sensors),
-                    curProvider(&nullBodyProvider),
-                    nextProvider(&nullBodyProvider),
-                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f)),
-                    nextStiffnesses(vector<float>(Kinematics::NUM_JOINTS,0.0f)),
-                    newJoints(false),
-                    readyToSend(false),
-                    noWalkTransitionCommand(true)
+                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
 {
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);
-    pthread_mutex_init(&next_provider_mutex, NULL);
-    pthread_mutex_init(&stiffness_mutex, NULL);
     
     float larm[] = {0.23, 1.55, 0, 0};
     float rarm[] = {-0.23, 1.55, 0, 0};
@@ -66,8 +57,8 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
     m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
-    boost::shared_ptr<Gait>  defaultGait(new Gait(WEBOTS_GAIT));
-    walkProvider.setCommand(defaultGait);
+    m_gait = boost::shared_ptr<Gait>(new Gait(DEFAULT_GAIT));
+    walkProvider.setCommand(m_gait);
 }
 
 /*! @brief Destructor for walk module
@@ -75,8 +66,6 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
 NBWalk::~NBWalk()
 {
     pthread_mutex_destroy(&next_joints_mutex);
-    pthread_mutex_destroy(&next_provider_mutex);
-    pthread_mutex_destroy(&stiffness_mutex);
 }
 
 void NBWalk::doWalk()
@@ -87,13 +76,7 @@ void NBWalk::doWalk()
     updateNBSensors();
     sendWalkCommand();
     
-    preProcess();
     processJoints();
-    processStiffness();
-    bool active  = postProcess();
-
-    if(active)
-        readyToSend = true;
     
     updateActionatorsData();
 }
@@ -109,33 +92,7 @@ void NBWalk::sendWalkCommand()
         debug << "NBWalk::sendWalkCommand() command: " << *command << endl;
     #endif
     
-    pthread_mutex_lock(&next_provider_mutex);
-    nextProvider = &walkProvider;
     walkProvider.setCommand(command);
-    pthread_mutex_unlock(&next_provider_mutex);
-}
-
-void NBWalk::preProcess()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::preProcess()" << endl;
-#endif
-    pthread_mutex_lock(&next_provider_mutex);
-    
-    if (curProvider != &nullBodyProvider && nextProvider == &nullBodyProvider)
-        walkProvider.hardReset();
-    
-    // determine the curProvider, and do any necessary swapping
-	if (curProvider != nextProvider && !curProvider->isActive())
-        swapBodyProvider();
-
-	if (curProvider != nextProvider && !curProvider->isStopping())
-    {
-		debug << "Requesting stop on "<< *curProvider <<endl;
-        curProvider->requestStop();
-    }
-
-    pthread_mutex_unlock(&next_provider_mutex);
 }
 
 void NBWalk::processJoints()
@@ -143,15 +100,15 @@ void NBWalk::processJoints()
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NBWalk::processJoints()" << endl;
 #endif
-    if (curProvider->isActive())
+    if (walkProvider.isActive())
     {
 		// Request new joints
-		curProvider->calculateNextJointsAndStiffnesses();
-		const vector <float > llegJoints = curProvider->getChainJoints(LLEG_CHAIN);
-		const vector <float > rlegJoints = curProvider->getChainJoints(RLEG_CHAIN);
-		const vector <float > rarmJoints = curProvider->getChainJoints(RARM_CHAIN);
+		walkProvider.calculateNextJointsAndStiffnesses();
+		const vector <float > llegJoints = walkProvider.getChainJoints(LLEG_CHAIN);
+		const vector <float > rlegJoints = walkProvider.getChainJoints(RLEG_CHAIN);
+		const vector <float > rarmJoints = walkProvider.getChainJoints(RARM_CHAIN);
         
-		const vector <float > larmJoints = curProvider->getChainJoints(LARM_CHAIN);
+		const vector <float > larmJoints = walkProvider.getChainJoints(LARM_CHAIN);
         
 		// Copy the new values into place, and wait to be signaled.
 		pthread_mutex_lock(&next_joints_mutex);
@@ -173,92 +130,6 @@ void NBWalk::processJoints()
     }
 }
 
-/*! @brief Method to process remaining stiffness requests
-    Technically this could be handled by another provider, but there isn't
-    too much too it:
- */ 
-void NBWalk::processStiffness()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::processStiffness()" << endl;
-#endif
-    try
-    {
-        if(curProvider->isActive())
-        {
-            const vector <float > llegStiffnesses = curProvider->getChainStiffnesses(LLEG_CHAIN);
-            const vector <float > rlegStiffnesses = curProvider->getChainStiffnesses(RLEG_CHAIN);
-            const vector <float > rarmStiffnesses = curProvider->getChainStiffnesses(RARM_CHAIN);
-            const vector <float > larmStiffnesses = curProvider->getChainStiffnesses(LARM_CHAIN);
-            
-            pthread_mutex_lock(&stiffness_mutex);
-            for(unsigned int i = 0; i < LEG_JOINTS; i ++){
-                nextStiffnesses[L_HIP_YAW_PITCH + i] = 100*llegStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < LEG_JOINTS; i ++){
-                nextStiffnesses[R_HIP_YAW_PITCH + i] = 100*rlegStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < ARM_JOINTS; i ++){
-                nextStiffnesses[L_SHOULDER_PITCH + i] = 100*larmStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < ARM_JOINTS; i ++){
-                nextStiffnesses[R_SHOULDER_PITCH + i] = 100*rarmStiffnesses.at(i);
-            }
-            pthread_mutex_unlock(&stiffness_mutex);
-        }
-    }
-    catch(std::out_of_range & e)
-    {
-        cout << "Out of range exception caught in processStiffness"<< e.what() <<endl;
-        exit(0);
-    }
-}
-
-bool NBWalk::postProcess()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::postProcess()" << endl;
-#endif
-    pthread_mutex_lock(&next_provider_mutex);
-    
-    newJoints = true;
-    
-    //Make sure that if the current provider just became inactive,
-    //and we have the next provider ready, then we want to swap to ensure
-    //that we never have an inactive provider when an active one is potentially
-    //ready to take over:
-	if (curProvider != nextProvider && !curProvider->isActive()) 
-        swapBodyProvider();
-    
-    pthread_mutex_unlock(&next_provider_mutex);
-    
-    return curProvider->isActive();
-}
-
-/*! @brief Method handles switching providers. Also handles any special action
-    required when switching between providers
- */
-void NBWalk::swapBodyProvider()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::swapBodyProvider()" << endl;
-#endif
-    std::vector<BodyJointCommand *> gaitSwitches;
-    std::string old_provider = curProvider->getName();
-    
-    switch(nextProvider->getType()){
-        case WALK_PROVIDER:
-            curProvider = nextProvider;
-            break;
-        case NULL_PROVIDER:
-        case SCRIPTED_PROVIDER:
-        case HEAD_PROVIDER:
-        default:
-            noWalkTransitionCommand = true;
-            curProvider = nextProvider;
-    }
-}
-
 /*! @brief A function to copy necessary data from NUSensorsData (m_data) to nb_sensors
  */
 void NBWalk::updateNBSensors()
@@ -267,10 +138,6 @@ void NBWalk::updateNBSensors()
     static vector<float> nu_jointtemperatures(nu_jointpositions.size(), 0);
     static vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
     static vector<float> nb_jointtemperatures(nb_jointtemperatures.size(), 0);
-    
-    static list<float> anglex_buffer;
-    static list<float> angley_buffer;
-    static list<float>::iterator it;
     
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NBWalk::updateNBSensors()" << endl;

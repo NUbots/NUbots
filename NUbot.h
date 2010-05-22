@@ -51,6 +51,7 @@ class NUIO;
 
 class NUSensorsData;
 class NUActionatorsData;
+class FieldObjects;
 class JobList;
 class GameInformation;
 class TeamInformation;
@@ -86,6 +87,7 @@ public:
     #endif
     NUSensorsData* SensorData;
     NUActionatorsData* Actions;
+    FieldObjects* Objects;
     JobList* Jobs;
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;

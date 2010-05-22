@@ -29,11 +29,15 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+
+#include "debug.h"
 
 class ChaseBallState : public BehaviourState
 {
@@ -68,7 +72,15 @@ public:
     BehaviourState* nextState()
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
+        {
+            debug << "Chase -> Search" << endl;
             return m_provider->m_search_state;
+        }
+        else if (not m_provider->m_team_info->amIClosestToBall())
+        {
+            debug << "Chase -> Position" << endl;
+            return m_provider->m_position_state;
+        }
         else
             return m_provider->m_state;
     };
@@ -94,27 +106,55 @@ public:
         
         WalkJob* walk = new WalkJob(walkVector);
         m_provider->m_jobs->addMotionJob(walk);
-        TrackPoint(headyaw, headpitch, m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation(), m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing());
+        
+        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+        m_provider->m_jobs->addMotionJob(head);
+    };
+};
+
+// ----------------------------------------------------------------------------------------------------------------------- PositonState
+class PositionState : public ChaseState
+{
+public:
+    PositionState(ChaseBallProvider* provider) : ChaseState(provider) {};
+    BehaviourState* nextState()
+    {
+        if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
+        {
+            debug << "Position -> Search" << endl;
+            return m_provider->m_search_state;
+        }
+        else if (m_provider->m_team_info->amIClosestToBall())
+        {
+            debug << "Position -> Chase" << endl;
+            return m_provider->m_chase_state;
+        }
+        else
+            return m_provider->m_state;
     };
     
-    void TrackPoint(float sensoryaw, float sensorpitch, float elevation, float bearing, float centreelevation = 0, float centrebearing = 0)
+    void doState()
     {
-        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
+        float headyaw, headpitch;
+        m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+        m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
         
-        float c_pitch = -centreelevation;
-        float c_yaw = -centrebearing;
+        float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+        float balldistance;
+        if (measureddistance < 46)
+            balldistance = 1;
+        else
+            balldistance = sqrt(pow(measureddistance,2) - 46*46);
+        float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
         
-        float e_pitch = c_pitch + elevation;    // the sign convention of the field objects is the opposite of the head pitch joint itself
-        float e_yaw = c_yaw - bearing;
+        vector<float> walkVector(3, 0);
+        walkVector[1] = 2*sin(ballbearing);
+        walkVector[2] = ballbearing/2.0;
+        walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
+        WalkJob* walk = new WalkJob(walkVector);
+        m_provider->m_jobs->addMotionJob(walk);
         
-        float new_pitch = sensorpitch - gain_pitch*e_pitch;
-        float new_yaw = sensoryaw - gain_yaw*e_yaw;
-        
-        static vector<float> headtarget(2,0);
-        headtarget[0] = new_pitch;
-        headtarget[1] = new_yaw;
-        HeadJob* head = new HeadJob(0, headtarget);
+        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
         m_provider->m_jobs->addMotionJob(head);
     };
 };
@@ -127,7 +167,10 @@ public:
     BehaviourState* nextState()
     {
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+        {
+            debug << "Search -> Chase" << endl;
             return m_provider->m_chase_state;
+        }
         else
             return m_provider->m_state;
     };

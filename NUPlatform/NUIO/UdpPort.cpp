@@ -24,8 +24,12 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
+#include "targetconfig.h"
+
 #ifndef WIN32
+    #include <sys/ioctl.h>
     #include <netdb.h>
+    #include <net/if.h>
 #endif
 #include <errno.h>
 #include <cstring>
@@ -37,8 +41,9 @@ using namespace std;
 
     @param name the name of the network used for debug purposes eg. TeamPort, GameController, Jobs, etc
     @param portnumber the port number the data will be sent and received on
+    @param ignoreself set this to true if you want to ignore your own transmissions on this port
  */
-UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
+UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
         debug << "UdpPort::UdpPort(" << name << ", " << portnumber << ")" << endl;
@@ -54,23 +59,9 @@ UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
     
     m_port_name = name;
     m_port_number = portnumber;
+    m_ignore_self = ignoreself;
     
-    // We need to get the machine's local ip address.
-    // We use gethostname followed by gethostbyname, and save the in_addr in m_local_address
-    char hostname[255];
-    gethostname(hostname, 255);
-    m_host_name = string(hostname);
-    struct hostent* host_entry;
-    host_entry = gethostbyname(hostname);
-    if (false  && host_entry != NULL)
-        m_local_address = *((struct in_addr*) host_entry->h_addr);
-    else
-    {
-        m_local_address.s_addr = INADDR_BROADCAST;
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to get the ip address, defaulting to 255.255.255.255." << endl;
-    }
-    
-    // On the socket as UDP
+    // Set the socket as UDP
     if ((m_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
         errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to create socket file descriptor, errno: " << errno << endl;
     
@@ -98,10 +89,45 @@ UdpPort::UdpPort(string name, int portnumber): Thread(name, 0)
     m_address.sin_addr.s_addr = INADDR_ANY;                             // automatically fill with my IP
     memset(m_address.sin_zero, '\0', sizeof m_address.sin_zero);
     
+    // Construct this local address
+    m_local_address.sin_family = AF_INET;
+    m_local_address.sin_port = htons(m_port_number);
+    m_local_address.sin_addr.s_addr = INADDR_BROADCAST;
+    memset(m_local_address.sin_zero, '\0', sizeof m_local_address.sin_zero);
+    #ifndef TARGET_OS_IS_WINDOWS
+        struct ifreq ifr;
+        struct sockaddr_in* sin = (struct sockaddr_in*) &ifr.ifr_addr;
+        // first check for wireless (wlan0, en1)
+        memset(&ifr, 0, sizeof(ifr));
+        #ifdef TARGET_OS_IS_DARWIN
+            strcpy(ifr.ifr_name, "en1");
+        #else
+            strcpy(ifr.ifr_name, "wlan0");
+        #endif
+        sin->sin_family = AF_INET;
+        sin->sin_port = htons(m_port_number);
+        if (ioctl(m_sockfd, SIOCGIFADDR, &ifr) != -1)
+            m_local_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+        else
+        {
+            // second check for wired
+            memset(&ifr, 0, sizeof(ifr));
+            #ifdef TARGET_OS_IS_DARWIN
+                strcpy(ifr.ifr_name, "en0");
+            #else
+                strcpy(ifr.ifr_name, "eth0");
+            #endif
+            sin->sin_family = AF_INET;
+            sin->sin_port = htons(m_port_number);
+            if (ioctl(m_sockfd, SIOCGIFADDR, &ifr) != -1)
+                m_local_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+        }
+    #endif
+    
     // Construct the target address (we set the address to broadcast on the local subnet by default)
     m_target_address.sin_family = AF_INET;                              // host byte order
     m_target_address.sin_port = htons(m_port_number);                   // short, network byte order
-    m_target_address.sin_addr.s_addr = m_local_address.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
+    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
     memset(m_target_address.sin_zero, '\0', sizeof m_target_address.sin_zero);
     
     // Bind the socket to this address
@@ -143,7 +169,7 @@ void UdpPort::run()
     while(1)
     {
         localnumBytes = recvfrom(m_sockfd, localdata, 10*1024 , 0, (struct sockaddr *)&local_their_addr, &local_addr_len);
-        if (localnumBytes != -1)// && local_their_addr.sin_addr.s_addr != m_local_address.s_addr)
+        if (localnumBytes != -1 and ((not m_ignore_self) or (local_their_addr.sin_addr.s_addr != m_local_address.sin_addr.s_addr)))
         {
             #if DEBUG_NETWORK_VERBOSITY > 0
                 debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;

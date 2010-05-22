@@ -143,17 +143,13 @@ void JuppWalk::initWalkParameters()
     
     m_walk_parameters = WalkParameters("JuppWalkDefault", maxspeeds, maxaccels, parameters, armgains, torsogains, leggains);
     m_walk_parameters.save();
-    
-    WalkParameters test;
-    test.load("JuppWalkTest");
-    test.summaryTo(cout);
 }
 
 /*! @brief Gets the current walk parameters from the m_gait_walk_parameters array
  */
 void JuppWalk::getParameters()
 {
-    vector<WalkParameters::Parameter> parameters = m_walk_parameters.getParameters();
+    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
     m_step_frequency = parameters[0].Value; 
     m_param_phase_offset = parameters[1].Value;
     m_param_shift_c = parameters[2].Value;
@@ -379,7 +375,7 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> > leggains = m_walk_parameters.getLegGains();
+    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
     gains = leggains[0];
 }
 
@@ -417,7 +413,7 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
  */
 void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> > armgains = m_walk_parameters.getArmGains();
+    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
     gains = armgains[0];
 }
 

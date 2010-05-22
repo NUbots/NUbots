@@ -26,17 +26,13 @@
 
 class NAOPlatform : public NUPlatform
 {
-// Functions:
 public:
     NAOPlatform();
     ~NAOPlatform();
     
-    void test();
-    
 protected:
 private:
     
-// Members:
 public:
 protected:
 private:

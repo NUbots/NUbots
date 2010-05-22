@@ -31,12 +31,14 @@ TransitionSegment.cpp
 Vision.cpp
 Ball.cpp
 CircleFitting.cpp
+EllipseFit.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 FieldObjects
 Threads
+EllipseFitting
 )
 ####################################################################################
 

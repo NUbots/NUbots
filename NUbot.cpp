@@ -28,6 +28,7 @@
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 #include "Behaviour/Jobs.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 #include "GameController/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
@@ -36,7 +37,6 @@
 
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
-    #include "Vision/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
 #endif
@@ -122,9 +122,10 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();
+    Objects = new FieldObjects();
     Jobs = new JobList();
     GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
-    TeamInfo = new TeamInformation();
+    TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)

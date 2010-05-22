@@ -46,19 +46,9 @@ string NUPlatform::getName()
     return m_name;
 }
 
-int NUPlatform::getRobotNumber()
-{
-    return m_robot_number;
-}
-
 int NUPlatform::getPlayerNumber()
 {
     return m_player_number;
-}
-
-string NUPlatform::getTeamColour()
-{
-    return m_team_colour;
 }
 
 int NUPlatform::getTeamNumber()

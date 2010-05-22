@@ -507,6 +507,13 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glColor3ub(r,g,b);
         }
 
+        if((*statFOit).getID() == FieldObjects::FO_CORNER_CENTRE_CIRCLE)
+        {
+            drawEllipse((*statFOit).ScreenX(),(*statFOit).ScreenY(), (*statFOit).getObjectWidth()/2, (*statFOit).getObjectHeight()/2);
+            ++statFOit;
+            continue;
+        }
+
         int X = (*statFOit).ScreenX();
         int Y = (*statFOit).ScreenY();
         int ObjectWidth = (*statFOit).getObjectWidth();
@@ -628,6 +635,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glColor3ub(r,g,b);
 
         }
+
         int X = (*ambigFOit).ScreenX();
         int Y = (*ambigFOit).ScreenY();
         int ObjectWidth = (*ambigFOit).getObjectWidth();
@@ -653,4 +661,27 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     displayStored[displayId] = true;
 
     emit updatedDisplay(displayId, displays[displayId], width, height);
+}
+
+
+void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradius)
+{
+    glBegin(GL_LINE_STRIP);                              // Start Lines
+        glVertex2i( cx-2, cy-2);
+        glVertex2i( cx-2, cy+2);
+        glVertex2i( cx+2, cy+2);
+        glVertex2i( cx+2, cy-2);
+        glVertex2i( cx-2, cy-2);
+    glEnd();
+
+   glBegin(GL_LINE_LOOP);
+
+   for (int i=0; i < 360; i++)
+   {
+      //convert degrees into radians
+      float degInRad = 3.14159/180 * i;
+      glVertex2f(cx + cos(degInRad)*xradius, cy + sin(degInRad)*yradius);
+   }
+
+   glEnd();
 }

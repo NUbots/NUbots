@@ -42,8 +42,10 @@ JobList::JobList()
  */
 JobList::~JobList()
 {
+    debug << "JobList::~JobList()" << endl;
     for (JobListIterator it = begin(); it != end(); ++it)
     {
+        debug << "deleting something" << endl;
         if (*it != NULL)
             delete *it;
     }
@@ -376,6 +378,19 @@ void JobList::clear()
         (*it)->clear();
 }
 
+/*! @brief Returns true if the JobList is empty
+ */
+bool JobList::empty()
+{
+    list<list<Job*>*>::iterator it;
+    for (it = m_job_lists.begin(); it != m_job_lists.end(); it++)
+    {
+        if (not (*it)->empty())
+            return false;
+    }
+    return true;
+}
+
 /*! @brief Returns the size of the job list
     @return Returns the size of the job list 
  */
@@ -472,30 +487,38 @@ JobListIterator::JobListIterator(JobList* joblist, bool end)
     debug << endl;
 #endif
     
-    if (end == false)
-    {   // make the iterator point to the beginning of the JobList
-        // find the first non-empty list, but iterating over joblist->m_job_lists
-        for (m_job_lists_iterator = m_joblist->m_job_lists.begin(); m_job_lists_iterator!=m_joblist->m_job_lists.end(); ++m_job_lists_iterator)
-        {
-            if (!(*m_job_lists_iterator)->empty())
-            {
-                m_list_iterator = (*m_job_lists_iterator)->begin();
-                m_job = *m_list_iterator;
-                break;
-            }
-        }
+    if (m_joblist->empty())
+    {
+        m_list_iterator = (*m_joblist->m_job_lists.begin())->begin();
+        m_job = *m_list_iterator;
     }
     else
-    {   // make the iterator point to the end of the JobList
-        // find the last non-empty list, by iterating over joblist->m_job_lists backwards
-        list<list<Job*>*>::reverse_iterator reverseit;
-        for (reverseit = joblist->m_job_lists.rbegin(); reverseit != joblist->m_job_lists.rend(); ++reverseit)
-        {
-            if (!(*reverseit)->empty())
+    {
+        if (end == false)
+        {   // make the iterator point to the beginning of the JobList
+            // find the first non-empty list, but iterating over joblist->m_job_lists
+            for (m_job_lists_iterator = m_joblist->m_job_lists.begin(); m_job_lists_iterator!=m_joblist->m_job_lists.end(); ++m_job_lists_iterator)
             {
-                m_list_iterator = (*reverseit)->end();
-                m_job = *m_list_iterator;
-                break;
+                if (!(*m_job_lists_iterator)->empty())
+                {
+                    m_list_iterator = (*m_job_lists_iterator)->begin();
+                    m_job = *m_list_iterator;
+                    break;
+                }
+            }
+        }
+        else
+        {   // make the iterator point to the end of the JobList
+            // find the last non-empty list, by iterating over joblist->m_job_lists backwards
+            list<list<Job*>*>::reverse_iterator reverseit;
+            for (reverseit = joblist->m_job_lists.rbegin(); reverseit != joblist->m_job_lists.rend(); ++reverseit)
+            {
+                if (!(*reverseit)->empty())
+                {
+                    m_list_iterator = (*reverseit)->end();
+                    m_job = *m_list_iterator;
+                    break;
+                }
             }
         }
     }

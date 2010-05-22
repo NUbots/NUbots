@@ -31,6 +31,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
 SET (YOUR_DIRS  Jobs
                 ChaseBall
                 MiscBehaviours
+		WalkOptimisation
 )
 ####################################################################################
 

@@ -15,7 +15,7 @@ class GoalDetection
         ObjectCandidate FindGoal(std::vector<ObjectCandidate>& FO_Candidates,
                                  std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
 			FieldObjects* AllObjects,
-                        std::vector < TransitionSegment > horizontalSegments,
+                        const std::vector < TransitionSegment > &horizontalSegments,
                         Vision* vision,
                         int height,
                         int width);
@@ -25,9 +25,9 @@ class GoalDetection
 
         void ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
-                                    std::vector < TransitionSegment > horizontalSegments);
+                                    const std::vector < TransitionSegment > &horizontalSegments);
 
-  	bool isObjectAPossibleGoal(ObjectCandidate PossibleGoal);
+        bool isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal);
 
         void classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vision);
 
@@ -37,14 +37,14 @@ class GoalDetection
 
         bool isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,int width);
 
-        float FindGoalDistance(ObjectCandidate PossibleGoal, Vision* vision);
-        float DistanceLineToPoint(LSFittedLine midPointLine, Vector2<int> point);
+        float FindGoalDistance(const ObjectCandidate &PossibleGoal, Vision* vision);
+        float DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> &point);
 
         //! SORTING: BIGGEST TO SMALLEST
         void SortObjectCandidates(std::vector<ObjectCandidate>& FO_Candidates);
         static bool ObjectCandidateSizeSortPredicate(const ObjectCandidate& goal1, const ObjectCandidate& goal2);
 
-        void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate& GoalPost ,  int ID);
+        void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate* GoalPost ,  int ID);
 
         float MINIMUM_GOAL_WIDTH_IN_PIXELS;
         float MINIMUM_GOAL_HEIGHT_IN_PIXELS;

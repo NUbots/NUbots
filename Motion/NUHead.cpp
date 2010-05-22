@@ -27,6 +27,7 @@
 #include "Tools/MotionFileTools.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -101,6 +102,24 @@ void NUHead::process(HeadJob* job)
     moveTo(times, positions);
 }
 
+/*! @brief Process a generic head job
+ @param job the head job
+ */
+void NUHead::process(HeadTrackJob* job)
+{
+    vector<double> times;                // the times to reach each headposition tuple
+    vector<vector<float> > positions;    // a vector of headposition tuples
+    
+    m_is_panning = false;
+    m_is_nodding = false;
+    
+    float elevation, bearing, centreelevation, centrebearing;
+    job->getData(elevation, bearing, centreelevation, centrebearing);    
+    calculateHeadTarget(elevation, bearing, centreelevation, centrebearing, times, positions);
+
+    moveTo(times, positions);
+}
+
 /*! @brief Process a head pan job
     @param job the head pan job
  */
@@ -149,6 +168,37 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+}
+
+/*! @brief Calculates the head target from the image elevation and image bearing
+    @param elevation the image elevation
+    @param bearing the image bearing
+    @param centreelevation the desired elevation in the image
+    @param centrebearing the desired bearing in the image
+    @param times will be updated
+    @param positions will be updated
+ */
+void NUHead::calculateHeadTarget(float elevation, float bearing, float centreelevation, float centrebearing, vector<double>& times, vector<vector<float> >& positions)
+{
+    getSensorValues();
+    const float gain_pitch = 0.8;           // proportional gain in the pitch direction
+    const float gain_yaw = 0.6;             // proportional gain in the yaw direction
+    
+    float c_pitch = -centreelevation;
+    float c_yaw = -centrebearing;
+    
+    float e_pitch = c_pitch - elevation;
+    float e_yaw = c_yaw - bearing;
+    
+    float new_pitch = m_sensor_pitch - gain_pitch*e_pitch;
+    float new_yaw = m_sensor_yaw - gain_yaw*e_yaw;
+    
+    times.push_back(m_data->CurrentTime);
+    
+    vector<float> target(2,0);
+    target[0] = new_pitch;
+    target[1] = new_yaw;
+    positions.push_back(target);
 }
 
 /*! @brief Calculates the minimum and maximum head pitch values given a range on the field to look over

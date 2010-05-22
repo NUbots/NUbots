@@ -25,6 +25,7 @@
 #include "MiscBehaviours/SelectBehaviourProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
+#include "WalkOptimisation/WalkOptimisationProvider.h"
 
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -98,6 +99,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new ChaseBallProvider(this);
     else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)
         return new VisionCalibrationProvider(this);
+    else if (name.find("walkoptimis") != string::npos)
+        return new WalkOptimisationProvider(this);
     else
         return NULL;
 }

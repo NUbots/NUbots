@@ -61,7 +61,7 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
     return result;
 }
 
-bool Ball::isObjectAPossibleBall(ObjectCandidate PossibleBall)
+bool Ball::isObjectAPossibleBall(const ObjectCandidate &PossibleBall)
 {
     if(PossibleBall.getColour()== ClassIndex::orange ||
        PossibleBall.getColour()== ClassIndex::pink_orange ||
@@ -73,7 +73,7 @@ bool Ball::isObjectAPossibleBall(ObjectCandidate PossibleBall)
         return false;
     }
 }
-std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleBall,Vision* vision,int heigth, int width)
+std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int heigth, int width)
 {
     Vector2<int> TopLeft = PossibleBall.getTopLeft();
     Vector2<int> BottomRight = PossibleBall.getBottomRight();
@@ -122,7 +122,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(ObjectCandidate PossibleB
     return BallPoints;
 
 }
-bool Ball::isCorrectCheckRatio(ObjectCandidate PossibleBall,int height, int width)
+bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, int width)
 {
     //debug << "Checking Ratio: " << PossibleBall.aspect();
 
@@ -153,7 +153,7 @@ bool Ball::isCorrectCheckRatio(ObjectCandidate PossibleBall,int height, int widt
         return true;
     }
 }
-Circle Ball::isCorrectFit(std::vector < Vector2<int> > ballPoints, ObjectCandidate PossibleBall)
+Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall)
 {
     Circle circ;
     circ.radius = 0.0;

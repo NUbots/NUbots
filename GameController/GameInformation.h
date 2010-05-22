@@ -30,6 +30,7 @@
 #include "RoboCupGameControlData.h"
 #include <string>
 #include <cstring>
+
 enum robotState
 {
     state_initial,
