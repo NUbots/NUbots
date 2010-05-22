@@ -19,14 +19,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SeeThinkThread.h"
-#include "NUbot.h"
+
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUbot.h"
+#include "SeeThinkThread.h"
+
 
 #ifdef USE_VISION
     #include "Vision/FieldObjects/FieldObjects.h"
@@ -40,7 +42,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    #include "Localisation/Localisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -68,6 +70,16 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
     m_nubot = nubot;
+    odometry.resize(3);
+    
+    #if defined(TARGET_IS_NAOWEBOTS)
+	platform = (NAOWebotsPlatform*)m_nubot->m_platform;
+	roboPos = new double[3];
+	roboPos[0] = 0;
+	roboPos[1] = 0;
+	roboPos[2] = 0;
+	incOdometry.resize(3);
+    #endif    
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -113,8 +125,25 @@ void SeeThinkThread::run()
                 entrytime = NUSystem::getRealTime();
             #endif
             
+	    #ifdef USE_LOCALISATION
+		m_nubot->SensorData->getOdometry(odometryTime, odometry); 
+//  		cout<<"odometry        : [ "<<odometry[0]<<", "<<odometry[1]<<", "<<odometry[2]<<"]"<<endl;	
+		
+
+	    #endif
+		
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
                 waitForCondition();
+		
+		if( NUSystem::getRealTime() > 15000 )
+		{	
+			incOdometry[0] = roboPos[0];
+			incOdometry[1] = roboPos[1];
+			incOdometry[2] = roboPos[2];
+			platform->getRobotPosition(roboPos);
+// 			cout<<"feedback        : [ "<<roboPos[0]-incOdometry[0]<<", "<<roboPos[1]-incOdometry[1]<<", "<<roboPos[2]-incOdometry[2]<<"]"<<endl;
+		}
+
             #endif
             
             #ifdef USE_VISION
@@ -154,7 +183,12 @@ void SeeThinkThread::run()
             #endif
 
             #ifdef USE_LOCALISATION
-                //wm = nubot->localisation->process(fieldobj, teaminfo, odometry, gamectrl, actions)
+		    //m_nubot->m_localisation->process(AllObjects, odometry[0],odometry[1],odometry[2]);
+		    //teaminfo, odometry, gamectrl, actions)
+		#if defined(TARGET_IS_NAOWEBOTS) 
+		    if( NUSystem::getRealTime() > 15000 )
+			    m_nubot->m_localisation->process(AllObjects, odometry[0],odometry[1],odometry[2]);
+		#endif    
             #endif
             
             #if defined(USE_BEHAVIOUR)

@@ -26,6 +26,10 @@
 #define SEETHINK_THREAD_H
 
 #include "Tools/Threading/ConditionalThread.h"
+#include <vector>
+#if defined(TARGET_IS_NAOWEBOTS)
+	#include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
+#endif
 
 class NUbot;
 
@@ -36,9 +40,15 @@ class SeeThinkThread : public ConditionalThread
 public:
     SeeThinkThread(NUbot* nubot);
     ~SeeThinkThread();
+    double *roboPos;
+    std::vector<float>odometry;
+    std::vector<float>incOdometry;
+    float odometryTime;
 protected:
     void run();
-    
+#if defined(TARGET_IS_NAOWEBOTS)    
+    NAOWebotsPlatform *platform;
+#endif    
 private:
     NUbot* m_nubot;
 };

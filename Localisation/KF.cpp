@@ -13,6 +13,21 @@ Xhat[6][0]=ballVeocityY
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/General.h"
 #include <iostream>
+#include "odometryMotionModel.h"
+#include "pose2d.h"
+
+template <class T>
+inline T CROP(T num, T low, T high){
+  if (num < low) num = low;
+  else if (num > high) num = high;
+  return num;
+}
+
+template <class T>
+ inline T NORMALISE(T theta){
+ return atan2(sin(theta), cos(theta));
+}
+
 
 using namespace mathGeneral;
 
@@ -21,13 +36,21 @@ const float KF::c_Kappa = 1.0f; // weight used in w matrix. (Constant)
 const float KF::c_ballDecayRate=0.975f; // Ball weighting. (Constant)
 const float KF::c_threshold2 = 15.0f; // Threshold for outlier rejection. Magic Number. (Constant)
 
+// const float KF::sb_alpha1 = 0.05;
+// const float KF::sb_alpha2 = 0.0005;
+// const float KF::sb_alpha3 = 0.005;
+// const float KF::sb_alpha4 = 0.0005;
+// const float KF::sb_alpha5 = 0.0005;
+
+
 // Ball distance measurement error weightings (Constant)
 const float KF::c_R_ball_theta = 0.0001f;
 const float KF::c_R_ball_range_offset = 25.0f; // (5cm)^2
 const float KF::c_R_ball_range_relative = 0.0025f; // 5% of range added.
 
-
-KF::KF(){
+// odom_Model(0.0005,0.0001,0.000005,0.0008)
+KF::KF():odom_Model(0.0005,0.0001,0.000005,0.0008)
+{
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/
   //frameRate = g_fps;
@@ -48,8 +71,8 @@ KF::KF(){
 
 // Process Noise - Matrix Square Root of Q
   sqrtOfProcessNoise = Matrix(7,7,true);
-  sqrtOfProcessNoise[0][0] = 2.0; // Robot X coord.
-  sqrtOfProcessNoise[1][1] = 2.0; // Robot Y coord.
+  sqrtOfProcessNoise[0][0] = 0.1; // Robot X coord.
+  sqrtOfProcessNoise[1][1] = 0.1; // Robot Y coord.
   sqrtOfProcessNoise[2][2] = 0.0316228; // Robot Theta.
   sqrtOfProcessNoise[3][3] = 4.0; // Ball X.
   sqrtOfProcessNoise[4][4] = 4.0; // Ball Y.
@@ -76,6 +99,9 @@ KF::KF(){
 
 
   nStates = stateEstimates.getm(); // number of states.
+// Create Sigma Points matrix
+ 
+  sigmaPoints = Matrix (nStates,2*nStates+1,false);
 
 // Create square root of W matrix
   sqrtOfTestWeightings = Matrix(1,2*nStates+1,false);
@@ -84,6 +110,12 @@ KF::KF(){
   for(int i=1; i <= 2*nStates; i++){
     sqrtOfTestWeightings[0][i] = (outerWeighting);
   }
+  
+  
+  Matrix srukfCovX = Matrix(7,7,false);  // Original covariance mat
+  Matrix srukfSq = Matrix(7,7,false);    // State noise square root covariance
+  Matrix srukfSr = Matrix(7,7,false);    // Measurement noise square root cov
+  Matrix srukfSx = Matrix(7,7,false);    
   return;
 }
 
@@ -102,11 +134,132 @@ void KF::init(){
     stateStandardDeviations[4][4] = 100; // 150 cm
     stateStandardDeviations[5][5] = 10;  // 10 cm/s
     stateStandardDeviations[6][6] = 10;  // 10 cm/s
+    
+    
+    srukfCovX = stateStandardDeviations*stateStandardDeviations.transp();
+    srukfSx = cholesky(srukfCovX);
 }
 
 
+
+void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
+{
+	
+	
+// 	cout<<"Cov Matrix : " <<srukfCovX<<endl;
+	// Step 1 : Calculate sqaure root of Covariance
+	
+	//-----------------------------------------------------------------------------------------------
+	
+	
+	
+	
+	// Step 2 : Calculate new sigma points based on previous covariance
+	double sigmaAngleMax = 2.5;               // required for normalising Angle
+	
+	sigmaPoints.setCol(0, stateEstimates);    // First sigma point is the mean itself
+			
+	for(int i=1;i<nStates+1;i++)
+	{
+		// Eqn 17
+		sigmaPoints.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i-1)  );  
+
+		// Crop angle
+		sigmaPoints[2][i] = crop(sigmaPoints[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0])); 
+
+		// Eqn 18
+		sigmaPoints.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i-1) );
+
+		// Crop angle again for the negative equation
+	  	sigmaPoints[2][nStates + i] = crop(sigmaPoints[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+	}
+	//-----------------------------------------------------------------------------------------------
+	
+	
+	
+	// Step 3: Update the state estimate - Pass all sigma points through motion model
+	
+	Pose2D oldPose, diffOdom;
+	double *newPose;
+
+	for (int i = 0 ; i < 2 * nStates + 1; i++)
+	{
+		oldPose.X = sigmaPoints[0][i];
+		oldPose.Y = sigmaPoints[1][i];
+		oldPose.Theta = sigmaPoints[2][i];
+   
+		diffOdom.X = odom_X;
+		diffOdom.Y = odom_Y;
+		diffOdom.Theta = odom_Theta;
+   
+		newPose = odom_Model.getNextSigma(diffOdom,oldPose);
+
+		sigmaPoints[0][i] = *newPose;
+		sigmaPoints[1][i] = *(newPose+1);
+		sigmaPoints[2][i] = *(newPose+2);
+//  		   cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+ 
+	}
+	//-----------------------------------------------------------------------------------------------
+	
+	
+	
+	
+	// Step 4: Calculate new state based on propagated sigma points and the weightings of the sigmaPoints
+	Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
+	
+	for(int i=0; i <= 2*nStates; i++)
+	{
+		// Eqn 20
+		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
+	}
+	//-----------------------------------------------------------------------------------------------
+	cout<<"esti position   : [ "<<newStateEstimates[0][0]<<", "<<newStateEstimates[0][1]<<", "<<newStateEstimates[0][2]<<endl;
+	
+	// Step 5: Calculate measurement error and then find new srukfSx
+	Matrix newSrukfSx(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+	Matrix Mx(sigmaPoints.getm(),sigmaPoints.getn(), false);
+  	
+  	for(int i=0; i <= 2*nStates; i++)
+	{
+		// Eqn 21 part
+		Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newStateEstimates));      // Error matrix
+		
+ 	}
+	
+	// Eqn 23 originally it should be a Mx*Mz
+	stateStandardDeviations = HT(Mx);
+	stateEstimates = newStateEstimates;  
+/*	return KF_OK;*/
+}
+
+
+
 void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odometeryTurn){
-   	//-----------------------Update for locomotion
+	
+	odometeryUpdate(odometeryForward, odometeryLeft, odometeryTurn,0,0,0);
+	
+   	//-----------------------Update for ball velocity	
+	stateEstimates[3][0] = stateEstimates[3][0] + stateEstimates[5][0]/frameRate; // Update ball x position by ball x velocity.
+	stateEstimates[4][0] = stateEstimates[4][0] + stateEstimates[6][0]/frameRate; // Update ball y position by ball y velocity.
+	stateEstimates[5][0] = c_ballDecayRate*stateEstimates[5][0]; // Reduce ball x velocity assuming deceleration
+	stateEstimates[6][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
+
+  // Householder transform. Unscented KF algorithm. Takes a while.
+	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
+	
+	stateEstimates[2][0] = NORMALISE(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+	return;
+	
+	
+//_______________________________________________________________________________________________________________________
+	
+	
+/*//----------------- Update Odometry
+	odometeryUpdate(odometeryForward,odometeryLeft,odometeryTurn,0,0,0);   	
+
+//-----------------------Update for locomotion
+<<<<<<< HEAD:Localisation/KF.cpp
 	updateUncertainties[0][2] = -odometeryForward*sin(stateEstimates[2][0]) - odometeryLeft*cos(stateEstimates[2][0]); //??
 	updateUncertainties[1][2] = odometeryForward*cos(stateEstimates[2][0]) - odometeryLeft*sin(stateEstimates[2][0]); //??
 
@@ -127,7 +280,31 @@ void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odomet
 	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
 	
         stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+	return;*/
+
+// 	updateUncertainties[0][2] = -odometeryForward*sin(stateEstimates[2][0]) - odometeryLeft*cos(stateEstimates[2][0]); //??
+// 	updateUncertainties[1][2] = odometeryForward*cos(stateEstimates[2][0]) - odometeryLeft*sin(stateEstimates[2][0]); //??
+// 
+// //   // Movement along X-axis from odometry.
+// // 	stateEstimates[0][0] = stateEstimates[0][0] + odometeryForward*cos(stateEstimates[2][0]) - odometeryLeft*sin(stateEstimates[2][0]);
+// //   // Movement along Y-axis from odometry.
+// // 	stateEstimates[1][0] = stateEstimates[1][0] + odometeryForward*sin(stateEstimates[2][0]) + odometeryLeft*cos(stateEstimates[2][0]);
+// //   // Rotational movement in theta (turn) from odometry.
+// // 	stateEstimates[2][0] = stateEstimates[2][0] + odometeryTurn;
+// 
+//    	//-----------------------Update for ball velocity	
+// 	stateEstimates[3][0] = stateEstimates[3][0] + stateEstimates[5][0]/frameRate; // Update ball x position by ball x velocity.
+// 	stateEstimates[4][0] = stateEstimates[4][0] + stateEstimates[6][0]/frameRate; // Update ball y position by ball y velocity.
+// 	stateEstimates[5][0] = c_ballDecayRate*stateEstimates[5][0]; // Reduce ball x velocity assuming deceleration
+// 	stateEstimates[6][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
+// 
+//   // Householder transform. Unscented KF algorithm. Takes a while.
+// 	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
+// 	
+//         stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+// // 	cout<<"Localized Pos [ "<<stateEstimates[0][0]<<", "<<stateEstimates[1][0]<<", "<<stateEstimates[2][0]<<" ]"<<endl;
 	return;
+
 }
 
 
@@ -139,16 +316,198 @@ void KF::Reset(){
 }
 
 
+
+KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta)
+{
+	
+// 	std::cout << "Calculating sigma points." << std::endl;
+  // Unscented KF Stuff.
+	Matrix yBar;                                  	//reset
+	Matrix Py;
+	Matrix Pxy=Matrix(7, 2, false);                    //Pxy=[0;0;0];
+	Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
+	scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;                  
+    
+  //----------------Saturate ScriptX angle sigma points to not wrap
+	double sigmaAngleMax = 2.5;
+	for(int i=1;i<nStates+1;i++){//hack to make test points distributed
+    // Addition Portion.
+		scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+	// Crop heading
+		scriptX[2][i] = CROP(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    // Subtraction Portion.
+		scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+	// Crop heading
+		scriptX[2][nStates + i] = CROP(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+	}
+	//----------------------------------------------------------------
+// 	std::cout << "Running motion model." << std::endl;
+	Pose2D oldPose, diffOdom;
+	double *newPose;
+
+	sigmaPoints = scriptX;
+
+	for (int i = 0 ; i < 2 * nStates + 1; i++)
+	{
+		oldPose.X = scriptX[0][i];
+		oldPose.Y = scriptX[1][i];
+		oldPose.Theta = scriptX[2][i];
+   
+		diffOdom.X = odom_X;
+		diffOdom.Y = odom_Y;
+		diffOdom.Theta = odom_Theta;
+   
+		newPose = odom_Model.getNextSigma(diffOdom,oldPose);
+
+		sigmaPoints[0][i] = *newPose;
+		sigmaPoints[1][i] = *(newPose+1);
+		sigmaPoints[2][i] = *(newPose+2);
+// 		cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+   
+   
+	}
+
+  // RUN MOTION MODEL HERE -> motionModel(MX,lambda)
+//   std::cout << "Calculating new mean and variance." << std::endl;
+    
+  // Update Mean
+	Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
+	Matrix newCovariance(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+
+//   std::cout << "Calculating Mean." << std::endl;
+	for(int i=0; i <= 2*nStates; i++){
+		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
+	}
+	cout<<"New Mean    = ["<<newStateEstimates[0][0]<<", "<<newStateEstimates[1][0]<<", "<<newStateEstimates[1][0]<<" ]"<<endl;
+// std::cout << "Calculating Covariance." << std::endl;
+	Matrix temp;
+  // Update Covariance
+	for(int i=0; i <= 2*nStates; i++){
+		temp = sigmaPoints.getCol(i) - newStateEstimates;
+		newCovariance = newCovariance + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
+	}
+//   std::cout << "Updating current state." << std::endl;
+	stateEstimates = newStateEstimates;
+//   newCovariance.print();
+	stateStandardDeviations = cholesky(newCovariance);
+//   cout<<"\nNew current State = ["<<stateStandardDeviations[0][0]<<", "<<stateStandardDeviations[1][0]<<", "<<stateStandardDeviations[1][0]<<" ]";
+	return KF_OK; 
+	
+	
+	
+	
+	//_______________________________________________________________________________________________________________________
+	
+	/*
+=======
+
 KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta){
+>>>>>>> master:Localisation/KF.cpp
 
-  // Calculate relative update Standard Deviation and Variance matricies.
-  Matrix S_odom_rel = Matrix(3,3,false);
-  S_odom_rel[0][0] = sqrt(R_X);
-  S_odom_rel[1][1] = sqrt(R_Y);
-  S_odom_rel[2][2] = sqrt(R_Theta);
+ 
+//   // Unscented KF Stuff.
+// 	Matrix scriptX = Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
+// 	scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;                  
+//     
+// 	
+// 	
+// 	Matrix Mt(nStates,nStates,false); // Initialize an empty matrix for motion noise
+// 	
+// 	// This matrix is a diagonal matrix, with a measure of amount of motion and constants alpha1,2... alpha4
+// 	Mt[0][0] = (sb_alpha1 * odometeryForward) + (sb_alpha2 * odometeryTurn);
+// 	Mt[1][1] = (sb_alpha3 * odometeryLeft ) + (sb_alpha4 * odometeryTurn);
+// 	Mt[2][2] = (sb_alpha5 * odometeryTurn ) ;
+// 	
+// 	stateStandardDeviations = HT(horzcat(stateStandardDeviations ,Mt));
+// 	
+// 	
+//   //----------------Saturate ScriptX angle sigma points to not wrap
+// 	double sigmaAngleMax = 2.5;
+// 	for(int i=1;i<nStates+1;i++){//hack to make test points distributed
+//     // Addition Portion.
+// 		scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+// 	// Crop heading
+// 		scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+//     // Subtraction Portion.
+// 		scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+// 	// Crop heading
+// 		scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+// 	}
+// 	//----------------------------------------------------------------
+//  
+// //------------ Motion Model Code
+// 	Pose2D oldPose, diffOdom;
+// 	double *newPose;
+// 
+// 	for (int i = 0 ; i < 2 * nStates + 1; i++)
+// 	{
+// 		oldPose.X = scriptX[0][i];
+// 		oldPose.Y = scriptX[1][i];
+// 		oldPose.Theta = scriptX[2][i];
+//    
+// 		diffOdom.X = odom_X;
+// 		diffOdom.Y = odom_Y;
+// 		diffOdom.Theta = odom_Theta;
+//    
+// 		newPose = odom_Model.getNextSigma(diffOdom,oldPose);
+// 
+// 		sigmaPoints[0][i] = *newPose;
+// 		sigmaPoints[1][i] = *(newPose+1);
+// 		sigmaPoints[2][i] = *(newPose+2);
+// // //    cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+//  
+// 	}
+// 
+// 
+// 
+// // Changed from Mx to sigmaPoints
+// 	
+//     
+//   // Update Mean
+// 	Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
+// //  Matrix newStandardDeviations(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+// 	Matrix newCovariance(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+// 
+// // Changed from i=1 to i=0 so that it also includes the first point which is the mean and holds maximum weight
+// 	for(int i=0; i <= 2*nStates; i++){
+// 		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
+// 	}
+// 
+// 	Matrix temp(stateEstimates.getm(),stateEstimates.getn(), false);
+//  	 
+// // 	// Update Covariance
+// // 	for(int i=1; i <= 2*nStates; i++){
+// // 		temp = sigmaPoints.getCol(i) - newStateEstimates;
+// // 		// Changed one line, the old line in 2 lines below this line      
+// // 		newCovariance = newCovariance + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();    
+// // 		//newStandardDeviations = sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
+// // 	}
+//   
+// 	
+// 	Matrix weightedError(2*nStates+1, nStates, false);
+// 	
+// 	
+// 	
+// 	for(int i=0; i <= 2*nStates; i++)
+// 	{
+// 		weightedError.setCol(i, (sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newStateEstimates) ) );
+// 	}
+// 	
+// 	
+// 	stateStandardDeviations = HT(horzcat(weightedError, sqrtOfProcessNoise));
+// 	
+// 	
+// 	
+// 	stateEstimates = newStateEstimates;
+//   // Changed one line, the old line in 2 lines below this line      
+// 	stateStandardDeviations = cholesky(newCovariance);
+//   //stateStandardDeviations = newStandardDeviations;
+// 	return KF_OK;   
+}
 
-  Matrix R_odom_rel = S_odom_rel * S_odom_rel.transp(); // R = S^2
 
+
+<<<<<<< HEAD:Localisation/KF.cpp
   // Unscented KF Stuff.
   Matrix yBar;                                  	//reset
   Matrix Py;
@@ -170,33 +529,162 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
   }
 	//----------------------------------------------------------------
  
+//------------ Motion Model Code
+Pose2D oldPose, diffOdom;
+double *newPose;
+
+sigmaPoints = scriptX;
+
+ for (int i = 0 ; i < 2 * nStates + 1; i++)
+ {
+   oldPose.X = scriptX[0][i];
+   oldPose.Y = scriptX[1][i];
+   oldPose.Theta = scriptX[2][i];
+   
+   diffOdom.X = odom_X;
+   diffOdom.Y = odom_Y;
+   diffOdom.Theta = odom_Theta;
+   
+   newPose = odom_Model.getNextSigma(diffOdom,oldPose);
+
+   sigmaPoints[0][i] = *newPose;
+   sigmaPoints[1][i] = *(newPose+1);
+   sigmaPoints[2][i] = *(newPose+2);
+//    cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+ 
+ }
+//-------------- Motion Model Code End
+
+
+//------------ Why is this code ?
   Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
   for(int i = 0; i < 2 * nStates + 1; i++){
     Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
   }
+//------------ Why is this code ?  - End
+=======
+>>>>>>> master:Localisation/KF.cpp
 
-  // RUN MOTION MODEL HERE -> motionModel(MX,lambda)
-  Matrix updatedSigmaPoints = Mx;
-    
-  // Update Mean
-  Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
-  Matrix newStandardDeviations(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
 
-  for(int i=1; i <= 2*nStates; i++){
-    newStateEstimates = sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*updatedSigmaPoints.getCol(i);
-  }
 
+<<<<<<< HEAD:Localisation/KF.cpp
   Matrix temp(stateEstimates.getm(),stateEstimates.getn(), false);
   // Update Covariance
   for(int i=1; i <= 2*nStates; i++){
 	temp = updatedSigmaPoints.getCol(i) - newStateEstimates;
-    newStandardDeviations = sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
+// Changed one line, the old line in 2 lines below this line      
+  newCovariance = newCovariance + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();    
+//newStandardDeviations = sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
   }
   
   stateEstimates = newStateEstimates;
-  stateStandardDeviations = newStandardDeviations;
-  return KF_OK;   
+  
+//   cout<<"Localized Pose: ["<<stateEstimates[0][0]<<", "<<stateEstimates[1][0]<<", "<<stateEstimates[2][0]<<"]"<<endl;
+    
+  // Changed one line, the old line in 2 lines below this line      
+  stateStandardDeviations = cholesky(newCovariance);
+  //stateStandardDeviations = newStandardDeviations;
+  return KF_OK;   */
 }
+
+
+
+
+// KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta){
+// 
+//   // Calculate relative update Standard Deviation and Variance matricies.
+//   Matrix S_odom_rel = Matrix(3,3,false);
+//   S_odom_rel[0][0] = sqrt(R_X);
+//   S_odom_rel[1][1] = sqrt(R_Y);
+//   S_odom_rel[2][2] = sqrt(R_Theta);
+// 
+//   Matrix R_odom_rel = S_odom_rel * S_odom_rel.transp(); // R = S^2
+// 
+//   // Unscented KF Stuff.
+//   Matrix yBar;                                  	//reset
+//   Matrix Py;
+//   Matrix Pxy=Matrix(7, 2, false);                    //Pxy=[0;0;0];
+//   Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
+//   scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;                  
+//     
+//   //----------------Saturate ScriptX angle sigma points to not wrap
+//   double sigmaAngleMax = 2.5;
+//   for(int i=1;i<nStates+1;i++){//hack to make test points distributed
+//     // Addition Portion.
+//     scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+// 	// Crop heading
+//     scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+//     // Subtraction Portion.
+//     scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+// 	// Crop heading
+//     scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+//   }
+// 	//----------------------------------------------------------------
+//  
+// //------------ Motion Model Code
+// Pose2D oldPose, diffOdom;
+// double *newPose;
+// 
+// //sigmaPoints = scriptX;
+// 
+//  for (int i = 0 ; i < 2 * nStates + 1; i++)
+//  {
+//    oldPose.X = scriptX[0][i];
+//    oldPose.Y = scriptX[1][i];
+//    oldPose.Theta = scriptX[2][i];
+//    
+//    diffOdom.X = odom_X;
+//    diffOdom.Y = odom_Y;
+//    diffOdom.Theta = odom_Theta;
+//    
+//    newPose = odom_Model.getNextSigma(diffOdom,oldPose);
+// 
+//    sigmaPoints[0][i] = *newPose;
+//    sigmaPoints[1][i] = *(newPose+1);
+//    sigmaPoints[2][i] = *(newPose+2);
+// // //    cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+//  
+//  }
+// //-------------- Motion Model Code End
+// 
+// 
+// //------------ Why is this code ?
+//   Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
+//   for(int i = 0; i < 2 * nStates + 1; i++){
+//     Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+//   }
+// //------------ Why is this code ?  - End
+// 
+// 
+// // Changed from Mx to sigmaPoints
+//   Matrix updatedSigmaPoints = sigmaPoints;
+//     
+//   // Update Mean
+//   Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
+// //  Matrix newStandardDeviations(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+//   Matrix newCovariance(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
+// 
+// // Changed from i=1 to i=0 so that it also includes the first point which is the mean and holds maximum weight
+//   for(int i=0; i <= 2*nStates; i++){
+//     newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*updatedSigmaPoints.getCol(i);
+//   }
+// 
+//   Matrix temp(stateEstimates.getm(),stateEstimates.getn(), false);
+//   // Update Covariance
+//   for(int i=1; i <= 2*nStates; i++){
+// 	temp = updatedSigmaPoints.getCol(i) - newStateEstimates;
+// // Changed one line, the old line in 2 lines below this line      
+//   newCovariance = newCovariance + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();    
+// //newStandardDeviations = sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
+//   }
+//   
+//   stateEstimates = newStateEstimates;
+//   // Changed one line, the old line in 2 lines below this line      
+//   stateStandardDeviations = cholesky(newCovariance);
+//   //stateStandardDeviations = newStandardDeviations;
+//   return KF_OK;   
+// }
+
 
 
 KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
@@ -514,4 +1002,10 @@ bool KF::clipState(int stateIndex, double minValue, double maxValue){
 	}
         stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]);
     return clipped;
+}
+
+void KF::measureLocalization(double x,double y,double theta)
+{
+// 	cout<<stateEstimates
+// 	cout<<x<<", "<<stateEstimates[0][0]<<", "<<y<<", "<<stateEstimates[1][0]<<", "<<theta<<", "<<stateEstimates[2][0]<<endl;
 }

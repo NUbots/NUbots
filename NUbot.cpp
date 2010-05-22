@@ -46,7 +46,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    #include "Localisation/Localisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -145,7 +145,8 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_LOCALISATION
-        //m_localisation = new Localisation();
+        m_localisation = new Localisation();
+	m_localisation->doPlayerReset();
     #endif
     
     #ifdef USE_BEHAVIOUR
@@ -239,8 +240,8 @@ NUbot::~NUbot()
             delete m_vision;
     #endif
     #ifdef USE_LOCALISATION
-        //if (m_localisation != NULL)
-            //delete m_localisation;
+        if (m_localisation != NULL)
+            delete m_localisation;
     #endif
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)

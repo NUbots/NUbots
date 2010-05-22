@@ -98,7 +98,7 @@ private:
     #endif
     
     #ifdef USE_LOCALISATION
-        //Localisation* m_localisation;     //!< localisation module
+        Localisation* m_localisation;     //!< localisation module
     #endif
     
     #ifdef USE_BEHAVIOUR
