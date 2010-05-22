@@ -167,6 +167,11 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 0.0f;
                     objectName = "Yellow Penalty Spot";
                     break;
+		case FO_CORNER_CENTRE_CIRCLE:
+		    x = 0.0f;
+                    y = 0.0f;
+                    objectName = "Centre Circle";
+                    break;
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";

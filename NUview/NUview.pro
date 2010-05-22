@@ -4,7 +4,9 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework CoreFoundation -lz
+    LIBS += -framework \
+        CoreFoundation \
+        -lz
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
@@ -129,7 +131,9 @@ HEADERS += ui_mainwindow.h \
     ../Vision/EllipseFitting/jama_qr.h \
     ../Vision/EllipseFitting/jama_lu.h \
     ../Vision/EllipseFitting/jama_eig.h \
-    ../Vision/EllipseFitting/jama_cholesky.h
+    ../Vision/EllipseFitting/jama_cholesky.h \
+    ../Localisation/odometryMotionModel.h \
+    ../Localisation/probabilityUtils.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -215,6 +219,8 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
-    ../Vision/EllipseFit.cpp
+    ../Vision/EllipseFit.cpp \
+    ../Localisation/odometryMotionModel.cpp \
+    ../Localisation/probabilityUtils.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

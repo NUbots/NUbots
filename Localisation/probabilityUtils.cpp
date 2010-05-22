@@ -17,7 +17,7 @@ References:	Numerical Recipies in C ( MIT )
 
 ProbabilityUtils::ProbabilityUtils()
 {
-	srand((int)((time(NULL) +lrand48())));
+        srand((int)((time(NULL) +rand())));
 }
 
 
