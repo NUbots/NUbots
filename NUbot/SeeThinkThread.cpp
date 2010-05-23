@@ -127,7 +127,7 @@ void SeeThinkThread::run()
             
 	    #ifdef USE_LOCALISATION
 		m_nubot->SensorData->getOdometry(odometryTime, odometry); 
-//  		cout<<"odometry        : [ "<<odometry[0]<<", "<<odometry[1]<<", "<<odometry[2]<<"]"<<endl;	
+ 		debug<<"odometry        : [ "<<odometry[0]<<", "<<odometry[1]<<", "<<odometry[2]<<"]"<<endl;	
 		
 
 	    #endif
@@ -183,11 +183,11 @@ void SeeThinkThread::run()
             #endif
 
             #ifdef USE_LOCALISATION
-		    //m_nubot->m_localisation->process(AllObjects, odometry[0],odometry[1],odometry[2]);
+		    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
 		    //teaminfo, odometry, gamectrl, actions)
 		#if defined(TARGET_IS_NAOWEBOTS) 
 		    if( NUSystem::getRealTime() > 15000 )
-			    m_nubot->m_localisation->process(AllObjects, odometry[0],odometry[1],odometry[2]);
+			    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
 		#endif    
             #endif
             

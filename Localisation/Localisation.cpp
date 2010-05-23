@@ -6,9 +6,9 @@
 #include <fstream>
 
 //#define debug_out cout
-#if LOCWM_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 0
 #define debug_out debug_file
-#endif // LOCWM_VERBOSITY > 0
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
 using namespace mathGeneral;
 
@@ -59,13 +59,13 @@ Localisation::Localisation()
         for (int i=0; i< c_numOutlierTrackedObjects; i++) modelObjectErrors[m][i] = 0.0;
     }
 
-    #if LOCWM_VERBOSITY > 0
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
     #ifdef WIN32
     debug_file.open("Localisation.log", ios::out | ios::trunc);
     #else
-    debug_file.open("/var/log/Localisation.log", ios::out | ios::trunc);
+    debug_file.open("/var/volatile/Localisation.log", ios::out | ios::trunc);
     #endif // WIN32
-    #endif // LOCWM_VERBOSITY > 0
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     return;
 }
@@ -74,9 +74,9 @@ Localisation::Localisation()
 
 Localisation::~Localisation()
 {
-    #if LOCWM_VERBOSITY > 0
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
-    #endif // LOCWM_VERBOSITY > 0
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 }
 
 
@@ -109,8 +109,8 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 
 	CheckGameState();
     //if(balanceFallen) return;
-
-	#if LOCWM_VERBOSITY > 2
+// 	debug_out  << "Dont put anything "<<endl;
+	#if DEBUG_LOCALISATION_VERBOSITY > 2
 		if(numUpdates == 0 )
 		{ 
 			debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << endl;
@@ -123,25 +123,25 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 				debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
 			}
 		}
-	#endif // LOCWM_VERBOSITY > 2
+	#endif // DEBUG_LOCALISATION_VERBOSITY > 2
 	
 	
 	// Correct orientation to face a goal if you can see it and are unsure which way you are facing.
-	varianceCheckAll(); 
+ 	varianceCheckAll(); 
 	
 	// perform odometry update and change the variance of the model
-	doTimeUpdate(odomForward, odomLeft, odomTurn);
+	doTimeUpdate(fabs(odomForward), odomLeft, odomTurn);
+// 	doTimeUpdate(0,0,0);
 	
-	
-	#if LOCWM_VERBOSITY > 2
+	#if DEBUG_LOCALISATION_VERBOSITY > 2
     		debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward 
 			<< " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
-	#endif // LOCWM_VERBOSITY > 2
+	#endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
     
        
-	if(objects != NULL)
-	{
+ 	if(objects != NULL)
+  	{
 		// Proccess the Stationary Known Field Objects
 		StationaryObjectsIt currStat(objects->stationaryFieldObjects.begin());
 		StationaryObjectsConstIt endStat(objects->stationaryFieldObjects.end());
@@ -149,145 +149,173 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 		for(; currStat != endStat; ++currStat)
 		{
 			if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
-			updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
-			numUpdates++;
+			//TODO: Remove this if condition once we are sure of distance and bearing of all FOs
+			if(currStat->getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST || currStat->getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST
+						|| currStat->getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST 
+						|| currStat->getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
+			{
+				updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
+				numUpdates++;
+			}
 		}
-	
-	
-		
-		// Proccess the Moving Known Field Objects
-		MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
-		MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
-		
-		for (; currMob != endMob; ++currMob)
-		{
-			if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
-			updateResult = doBallMeasurementUpdate((*currMob));
-			numUpdates++;
-		}
-		
-				
+// 	
+// 	
+// 		
+// 		// Proccess the Moving Known Field Objects
+// 		MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
+// 		MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
+// 		
+// 		for (; currMob != endMob; ++currMob)
+// 		{
+// 			if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
+// 			updateResult = doBallMeasurementUpdate((*currMob));
+// 			numUpdates++;
+// 		}
+// 		
+// 				
 		NormaliseAlphas();
-
-		#if SHARED_BALL_ON
-		/*
-		// Check the game packets.
-		// We only want to do the shared ball updates if we can't see the ball ourselves.
-		// there have been probems where the team will keep sharing the previous position of their ball
-		// and updates in vision do not supercede the shared data.
-				int myPlayerNumber = GameController::getInstance().getPlayerNumber();
-				if(ourfieldObjects[FO_BALL].framesSinceLastSeen > 3){ // TODO: Change to a SD value
-				for(int robotNum = 0; robotNum < NUM_ROBOTS; robotNum++){
-				if(myPlayerNumber == (robotNum+1)) continue;
-				if(mostRecentPackets[robotNum].processedWM == false){
-				if(mostRecentPackets[robotNum].packet.ball.seen == true){
-		#if LOCWM_VERBOSITY > 2
-				debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
-		#endif
-				doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
-			}
-				else {
-		#if LOCWM_VERBOSITY > 2
-				debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
-		#endif
-			}
-				mostRecentPackets[robotNum].processedWM = true;
-			}
-			}
-			}
-		*/
-		#endif // SHARED_BALL_ON
-		
-		NormaliseAlphas();
-		
-		
+// 
+// 		#if SHARED_BALL_ON
+// 		/*
+// 		// Check the game packets.
+// 		// We only want to do the shared ball updates if we can't see the ball ourselves.
+// 		// there have been probems where the team will keep sharing the previous position of their ball
+// 		// and updates in vision do not supercede the shared data.
+// 				int myPlayerNumber = GameController::getInstance().getPlayerNumber();
+// 				if(ourfieldObjects[FO_BALL].framesSinceLastSeen > 3){ // TODO: Change to a SD value
+// 				for(int robotNum = 0; robotNum < NUM_ROBOTS; robotNum++){
+// 				if(myPlayerNumber == (robotNum+1)) continue;
+// 				if(mostRecentPackets[robotNum].processedWM == false){
+// 				if(mostRecentPackets[robotNum].packet.ball.seen == true){
+// 		#if DEBUG_LOCALISATION_VERBOSITY > 2
+// 				debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
+// 		#endif
+// 				doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
+// 			}
+// 				else {
+// 		#if DEBUG_LOCALISATION_VERBOSITY > 2
+// 				debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
+// 		#endif
+// 			}
+// 				mostRecentPackets[robotNum].processedWM = true;
+// 			}
+// 			}
+// 			}
+// 		*/
+// 		#endif // SHARED_BALL_ON
+// 		
+// 		NormaliseAlphas();
+// 		
+// 		
 		#if MULTIPLE_MODELS_ON
     		// Do Ambiguous objects.
 		AmbiguousObjectsIt currAmb(objects->ambiguousFieldObjects.begin());
 		AmbiguousObjectsConstIt endAmb(objects->ambiguousFieldObjects.end());
 		for(; currAmb != endAmb; ++currAmb){
 			if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-			updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
-			NormaliseAlphas();
-			numUpdates++;
+			if(currStat->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || currStat->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+			{
+				updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
+				NormaliseAlphas();
+				numUpdates++;
+			}
 		}
 
 		MergeModels(c_MAX_MODELS_AFTER_MERGE);
 		#endif // MULTIPLE_MODELS_ON
-		
-		
-		
-		// Check for model reset. -> with multiple models just remove if not last one??
-		// Need to re-do reset to be model specific.
-		//int numReset = CheckForOutlierResets();
-		CheckForOutlierResets();
-		
-		// clip models back on to field.
-		clipActiveModelsToField();
-		
-		// Store WM Data in Field Objects.
-		int bestModelID = getBestModelID(); 
-		// Get the best model to use.
-	
-		/*
-		for(int objID = 0; objID < NUM_FIELD_OBJECTS; objID++)
-		{
-			if(ourfieldObjects[objID].isFixed())
-			{
-				ourfieldObjects[objID].wmDistance = models[bestModelID].getDistanceToPosition(ourfieldObjects[objID].wmX,
-		 							ourfieldObjects[objID].wmY);
-				ourfieldObjects[objID].wmBearing = models[bestModelID].getBearingToPosition(ourfieldObjects[objID].wmX,
-		 							ourfieldObjects[objID].wmY);
-			}
-			else if(objID == FO_BALL)
-			{
-				ourfieldObjects[objID].wmX = models[bestModelID].getState(3);
-				ourfieldObjects[objID].sdx = models[bestModelID].sd(3);
-				ourfieldObjects[objID].wmY = models[bestModelID].getState(4);
-				ourfieldObjects[objID].sdy = models[bestModelID].sd(4);
-				ourfieldObjects[objID].vX = models[bestModelID].getState(5);
-				ourfieldObjects[objID].vY = models[bestModelID].getState(6);
-				ourfieldObjects[objID].wmDistance = models[bestModelID].getDistanceToPosition(ourfieldObjects[objID].wmX,
-		 							ourfieldObjects[objID].wmY);
-				ourfieldObjects[objID].wmBearing = models[bestModelID].getBearingToPosition(ourfieldObjects[objID].wmX, 
-									ourfieldObjects[objID].wmY);
-			}
-			else if(objID == FO_TEAM1)
-			{
-				ourfieldObjects[objID].wmX = models[bestModelID].getState(0);
-				ourfieldObjects[objID].sdx = models[bestModelID].sd(0);
-				ourfieldObjects[objID].wmY = models[bestModelID].getState(1);
-				ourfieldObjects[objID].sdy = models[bestModelID].sd(1);
-				ourfieldObjects[objID].wmOrientation = models[bestModelID].getState(2);
-				ourfieldObjects[objID].sdtheta = models[bestModelID].sd(2);
-			}
-		}
-		*/
-		
-		
-		#if LOCWM_VERBOSITY > 2
-			if(numUpdates > 0)
-			{
-				for (int i = 0; i < c_MAX_MODELS; i++){
-					if(models[i].isActive == false) continue;
-					debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
-					debug_out  << " [alpha = " << models[i].alpha << "]";
-					debug_out  << " Robot X: " << models[i].getState(0);
-					debug_out  << " Robot Y: " << models[i].getState(1);
-					debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
-				}
-				debug_out  << "[" << currentFrameNumber << "]: Best Model";
-				debug_out  << " [alpha = " << models[bestModelID].alpha << "]";
-				debug_out  << " Robot X: " << models[bestModelID].getState(0);
-				debug_out  << " Robot Y: " << models[bestModelID].getState(1);
-				debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << endl;
-			}
-		#endif // LOCWM_VERBOSITY > 2
 
 		
 		
-	
-	}
+		
+		
+		///****************************************
+		
+		for (int currID = 0; currID < c_MAX_MODELS; currID++){
+			if(models[currID].isActive )
+			{
+				debug_out<<"Model : "<<currID<<" Pos  : "<<models[currID].stateEstimates[0][0]<<", "
+					<<models[currID].stateEstimates[0][1]<<","<<
+						models[currID].stateEstimates[0][2]<<endl;
+			}
+		}
+		
+		
+		///****************************************
+		
+		
+		
+		
+// 		// Check for model reset. -> with multiple models just remove if not last one??
+// 		// Need to re-do reset to be model specific.
+// 		//int numReset = CheckForOutlierResets();
+// 		CheckForOutlierResets();
+// 		
+// 		// clip models back on to field.
+// 		clipActiveModelsToField();
+// 		
+// 		// Store WM Data in Field Objects.
+// 		int bestModelID = getBestModelID(); 
+// 		// Get the best model to use.
+// 	
+// 		/*
+// 		for(int objID = 0; objID < NUM_FIELD_OBJECTS; objID++)
+// 		{
+// 			if(ourfieldObjects[objID].isFixed())
+// 			{
+// 				ourfieldObjects[objID].wmDistance = models[bestModelID].getDistanceToPosition(ourfieldObjects[objID].wmX,
+// 		 							ourfieldObjects[objID].wmY);
+// 				ourfieldObjects[objID].wmBearing = models[bestModelID].getBearingToPosition(ourfieldObjects[objID].wmX,
+// 		 							ourfieldObjects[objID].wmY);
+// 			}
+// 			else if(objID == FO_BALL)
+// 			{
+// 				ourfieldObjects[objID].wmX = models[bestModelID].getState(3);
+// 				ourfieldObjects[objID].sdx = models[bestModelID].sd(3);
+// 				ourfieldObjects[objID].wmY = models[bestModelID].getState(4);
+// 				ourfieldObjects[objID].sdy = models[bestModelID].sd(4);
+// 				ourfieldObjects[objID].vX = models[bestModelID].getState(5);
+// 				ourfieldObjects[objID].vY = models[bestModelID].getState(6);
+// 				ourfieldObjects[objID].wmDistance = models[bestModelID].getDistanceToPosition(ourfieldObjects[objID].wmX,
+// 		 							ourfieldObjects[objID].wmY);
+// 				ourfieldObjects[objID].wmBearing = models[bestModelID].getBearingToPosition(ourfieldObjects[objID].wmX, 
+// 									ourfieldObjects[objID].wmY);
+// 			}
+// 			else if(objID == FO_TEAM1)
+// 			{
+// 				ourfieldObjects[objID].wmX = models[bestModelID].getState(0);
+// 				ourfieldObjects[objID].sdx = models[bestModelID].sd(0);
+// 				ourfieldObjects[objID].wmY = models[bestModelID].getState(1);
+// 				ourfieldObjects[objID].sdy = models[bestModelID].sd(1);
+// 				ourfieldObjects[objID].wmOrientation = models[bestModelID].getState(2);
+// 				ourfieldObjects[objID].sdtheta = models[bestModelID].sd(2);
+// 			}
+// 		}
+// 		*/
+// 		
+// 		
+// 		#if DEBUG_LOCALISATION_VERBOSITY > 2
+// 			if(numUpdates > 0)
+// 			{
+// 				for (int i = 0; i < c_MAX_MODELS; i++){
+// 					if(models[i].isActive == false) continue;
+// 					debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
+// 					debug_out  << " [alpha = " << models[i].alpha << "]";
+// 					debug_out  << " Robot X: " << models[i].getState(0);
+// 					debug_out  << " Robot Y: " << models[i].getState(1);
+// 					debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
+// 				}
+// 				debug_out  << "[" << currentFrameNumber << "]: Best Model";
+// 				debug_out  << " [alpha = " << models[bestModelID].alpha << "]";
+// 				debug_out  << " Robot X: " << models[bestModelID].getState(0);
+// 				debug_out  << " Robot Y: " << models[bestModelID].getState(1);
+// 				debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << endl;
+// 			}
+// 		#endif // DEBUG_LOCALISATION_VERBOSITY > 2
+ 
+ 		
+ 		
+ 	
+ 	}
 	
 }
 
@@ -339,9 +367,9 @@ void Localisation::CheckGameState()
 
 void Localisation::doPenaltyReset()
 {
-#if LOCWM_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "[" << currentFrameNumber << "] Performing penalty reset." << endl;
-#endif // LOCWM_VERBOSITY > 0
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     // Reset all of the models
     for(int m = 0; m < c_MAX_MODELS; m++){
@@ -390,9 +418,9 @@ void Localisation::doPenaltyReset()
 
 void Localisation::doPlayerReset()
 {
-    #if LOCWM_VERBOSITY > 0
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "[" << currentFrameNumber << "] Performing player reset." << endl;
-    #endif // LOCWM_VERBOSITY > 0
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     // Reset all of the models
     for(int m = 0; m < c_MAX_MODELS; m++)
@@ -512,7 +540,7 @@ bool Localisation::clipModelToField(int modelID)
     prevTheta = models[modelID].getState(2);
 
     clipped = models[modelID].clipState(0, fieldXMin, fieldXMax);		// Clipping for robot's X
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -520,7 +548,7 @@ bool Localisation::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
 
     prevX = models[modelID].getState(0);
@@ -529,7 +557,7 @@ bool Localisation::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(1, fieldYMin, fieldYMax);		// Clipping for robot's Y
 
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -537,7 +565,7 @@ bool Localisation::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     wasClipped = wasClipped || clipped;
     prevX = models[modelID].getState(0);
@@ -546,7 +574,7 @@ bool Localisation::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(3, fieldXMin, fieldXMax);		// Clipping for ball's X
 
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -554,7 +582,7 @@ bool Localisation::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
     wasClipped = wasClipped || clipped;
 
@@ -564,7 +592,7 @@ bool Localisation::clipModelToField(int modelID)
 
     clipped = models[modelID].clipState(4, fieldYMin, fieldYMax);		// Clipping for ball's Y
 
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
@@ -572,7 +600,7 @@ bool Localisation::clipModelToField(int modelID)
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
         debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
     }
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
     wasClipped = wasClipped || clipped;
 
@@ -620,7 +648,7 @@ int Localisation::doSharedBallUpdate(WirelessFieldObj &sharedBall)
     double SRXY = sharedBall.SRXY;
     double SRYY = sharedBall.SRYY;
 
-#if LOCWM_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 1
     debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
 #endif
 
@@ -640,9 +668,9 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
     int kf_return;
     int numSuccessfulUpdates = 0;
 
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     double flatBallDistance = ball.measuredDistance() * cos(ball.measuredElevation());
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -659,49 +687,57 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
     int kf_return;
     int numSuccessfulUpdates = 0;
     int objID = landmark.getID();
-    double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
+    //double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
+    double flatObjectDistance = landmark.measuredDistance();
 
 	double distanceOffsetError = R_obj_range_offset;
 	double distanceRelativeError = R_obj_range_relative;
 	double bearingError = R_obj_theta;
 
-	switch(objID){
-        case FieldObjects::FO_CORNER_CENTRE_CIRCLE:
+	switch(objID)
+	{
+        	case FieldObjects::FO_CORNER_CENTRE_CIRCLE:
 			bearingError = centreCircleBearingError;
 			break;
 		default:
 			break;
 	}
 
-    for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
+    for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
 
-        #if LOCWM_VERBOSITY > 1
+        #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
         //debug_out  << "Object = " << landmark.name();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
         debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
-        #endif // LOCWM_VERBOSITY > 1
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
-        if(landmark.measuredBearing() != landmark.measuredBearing()){
+        if(landmark.measuredBearing() != landmark.measuredBearing())
+	{
 
-            #if LOCWM_VERBOSITY > 0
+            #if DEBUG_LOCALISATION_VERBOSITY > 0
             debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
-            #endif // LOCWM_VERBOSITY > 0
+            #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
             continue;
         }
-        kf_return = KF_OK;
-        kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.measuredBearing(),landmark.X(), landmark.Y(), distanceOffsetError, distanceRelativeError, bearingError);
+	kf_return = KF_OK;
+        kf_return = models[modelID].fieldObjectmeas(flatObjectDistance, landmark.measuredBearing(),landmark.X(), landmark.Y(),
+			distanceOffsetError, distanceRelativeError, bearingError);
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
-        #if LOCWM_VERBOSITY > 1
-        if(kf_return == KF_OK) debug_out  << "OK" << endl;
-        else debug_out  << "OUTLIER" << endl;
-        #endif // LOCWM_VERBOSITY > 1
+        #if DEBUG_LOCALISATION_VERBOSITY > 1
+       		 if(kf_return == KF_OK) 
+			 debug_out  << "OK" << endl;
+        	else 
+			debug_out  << "OUTLIER" << endl;
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
-        if(kf_return == KF_OK) numSuccessfulUpdates++;
+        if(kf_return == KF_OK) 
+		numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
 }
@@ -715,9 +751,9 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     /*
     #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FO_YELLOW_GOALPOST_UNKNOWN)){
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: ingored unkown object " << ambigousObject.name() << std::endl;
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
     #endif // AMBIGUOUS_CORNERS_ON <= 0
@@ -733,32 +769,32 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     if(numFreeModels < numRequiredModels){
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
 
-        #if LOCWM_VERBOSITY > 2
+        #if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
         debug_out  <<"[" << currentFrameNumber << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
-        #endif // LOCWM_VERBOSITY > 2
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         MergeModels(maxActiveAfterMerge);
 
-        #if LOCWM_VERBOSITY > 2
+        #if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << endl;
-        #endif // LOCWM_VERBOSITY > 2
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 
-            #if LOCWM_VERBOSITY > 0
+            #if DEBUG_LOCALISATION_VERBOSITY > 0
             debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << endl;
-            #endif // LOCWM_VERBOSITY > 0
+            #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
             return KF_OUTLIER;
         }
     }
 
-    #if LOCWM_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
     debug_out << " Distance = " << ambigousObject.measuredDistance();
     debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
-    #endif // LOCWM_VERBOSITY > 1
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip inactive models.
@@ -781,9 +817,9 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             // If an invalid modelID has been returned, something has gone horribly wrong, so stop here.
             if(newModelID < 0){ 
 
-                #if LOCWM_VERBOSITY > 0
+                #if DEBUG_LOCALISATION_VERBOSITY > 0
                 debug_out  <<"[" << currentFrameNumber << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
-                #endif // LOCWM_VERBOSITY > 0
+                #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
                 for(int m = 0; m < c_MAX_MODELS; m++) models[m].toBeActivated = false;
                 return -1;
@@ -799,11 +835,11 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             // Do the update.
             kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.measuredDistance(), ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
-            #if LOCWM_VERBOSITY > 2
+            #if DEBUG_LOCALISATION_VERBOSITY > 2
             debug_out  <<"[" << currentFrameNumber << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
             //debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
             debug_out  << "\tLocation = (" << possibleObjects[possibleObjectID].X() << "," << possibleObjects[possibleObjectID].Y() << ")...";
-            #endif // LOCWM_VERBOSITY > 2
+            #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
             // If the update reult was an outlier rejection, the model need not be kept as the
             // information is already contained in the designated outlier model created earlier
@@ -819,7 +855,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 		*/
             }
 
-#if LOCWM_VERBOSITY > 2
+#if DEBUG_LOCALISATION_VERBOSITY > 2
             if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << models[newModelID].alpha << endl;
             else debug_out  << "OUTLIER" << "  Resulting alpha = " << models[newModelID].alpha << endl;
 #endif
@@ -847,9 +883,9 @@ bool Localisation::MergeTwoModels(int index1, int index2)
 //    if((model[index1].active == false) || (model[index2].active == false)) success = false; // Both models must be active.
     if(success == false){
 
-#if LOCWM_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 0
         debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
-#endif // LOCWM_VERBOSITY > 0
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
         return success;
     }
@@ -959,9 +995,9 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
         reset = true;
         models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
-        #if LOCWM_VERBOSITY > 1
+        #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
-        #endif // LOCWM_VERBOSITY > 1
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
         for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
     }
@@ -986,7 +1022,10 @@ int Localisation::varianceCheckAll()
     int numModelsChanged = 0;
     bool changed;
     for (int currID = 0; currID < c_MAX_MODELS; currID++){
-        if(models[currID].isActive == false) continue; // Skip inactive models.
+        if(models[currID].isActive == false)
+	{
+		continue; // Skip inactive models.
+	}
         changed = varianceCheck(currID);
         if(changed) 
 	{
@@ -1008,7 +1047,7 @@ bool Localisation::varianceCheck(int modelID)
     bool   largeVariance = (var > (c_LargeAngleSD * c_LargeAngleSD));
     
     // If we think we know where we are facing don't change anything
-    if(largeVariance == false) return changed;
+//    if(largeVariance == false) return changed;
 
      // Otherwise try to adjust to fit a goal we can see.
      // Blue Goal - From center at PI radians bearing.
@@ -1018,15 +1057,21 @@ bool Localisation::varianceCheck(int modelID)
     }
      if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() > 100) )
      {	
-	
-	     cout<<"Saw left blue goal"<<endl;
+  	  #if DEBUG_LOCALISATION_VERBOSITY > 0
+	     debug_out<<"Localisation : Saw left blue goal , and distance is : "
+			    <<objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()<<endl;
+	  #endif
           models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredBearing());
               changed = true;
      }
  
      else if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() > 100) )
      {
-	     cout<<"Saw right blue goal"<<endl;
+	#if DEBUG_LOCALISATION_VERBOSITY > 0
+	     debug_out<<"Localisation : Saw right blue goal , and distance is : "
+			    <<objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()<<endl;
+	#endif
+
          models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredBearing());
          changed = true;
      }
@@ -1041,8 +1086,11 @@ bool Localisation::varianceCheck(int modelID)
      if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) &&
 	  (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() > 100) )
      {
-	     cout<<"Saw left yellow goal, and distance is : "
-			     <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<endl;
+	#if DEBUG_LOCALISATION_VERBOSITY > 0
+	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
+			    <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<endl;
+	#endif
+			     
          models[modelID].stateEstimates[2][0]=(yellowDirection -
 			 objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredBearing());
          changed = true;
@@ -1051,8 +1099,11 @@ bool Localisation::varianceCheck(int modelID)
 	       (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() > 100) )
      {
 	     
-	     cout<<"Saw right yellow goal, and distance is : "
-			     <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<endl;
+	#if DEBUG_LOCALISATION_VERBOSITY > 0
+	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
+			    <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<endl;
+	#endif
+			     
          models[modelID].stateEstimates[2][0]=(yellowDirection -
 			 objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredBearing());
          changed = true;
@@ -1066,7 +1117,7 @@ bool Localisation::varianceCheck(int modelID)
      }
      */
  
-	#if LOCWM_VERBOSITY > 1
+	#if DEBUG_LOCALISATION_VERBOSITY > 1
    	  if(changed)
 	  {
 		  
@@ -1113,7 +1164,7 @@ int Localisation::FindNextFreeModel()
 void Localisation::ResetAll()
 {
 
-#if LOCWM_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 1
     debug_out  <<"[" << currentFrameNumber << "]: Resetting All Models." << endl;
 #endif
 
@@ -1147,7 +1198,7 @@ void Localisation::MergeModels(int maxAfterMerge) {
 
 void Localisation::PrintModelStatus(int modelID)
 {
-#if LOCWM_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 1
   debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "]";
   debug_out  << "[alpha=" << models[modelID].alpha << "]";
   debug_out  << " active = " << models[modelID].isActive;
@@ -1167,7 +1218,7 @@ void Localisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             if (!models[i].isActive || !models[j].isActive ) continue;
             mergeM = abs( MergeMetric(i,j) );
             if (mergeM < MergeMetricThreshold) { //0.5
-#if LOCWM_VERBOSITY > 2
+#if DEBUG_LOCALISATION_VERBOSITY > 2
                 debug_out  <<"[" << currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << models[j].alpha << "]";
                 debug_out  << " into Model[" << i << "][alpha=" << models[i].alpha << "] " << " Merge Metric = " << mergeM << endl  ;
 #endif

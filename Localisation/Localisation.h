@@ -3,7 +3,7 @@
 #include "KF.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 #include <fstream>
-
+#include "debugverbositylocalisation.h"
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
@@ -13,7 +13,7 @@
 // 1 - Error messages
 // 2 - Update messages
 // 3 - All messages
-#define LOCWM_VERBOSITY 3
+// #define  DEBUG_LOCALISATION_VERBOSITY 3
 
 class Localisation
 {
@@ -66,7 +66,7 @@ class Localisation
         KF models[c_MAX_MODELS];
         FieldObjects *objects;
 
-        #if LOCWM_VERBOSITY > 0
+	#if DEBUG_LOCALISATION_VERBOSITY > 0
         fstream debug_file; // Logging file
         #endif // LOCWM_VERBOSITY > 0
 
