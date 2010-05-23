@@ -116,6 +116,11 @@ void SeeThinkThread::run()
         double visionrealendtime, visionprocessendtime, visionthreadendtime;
     #endif
     
+     #if defined (THREAD_SEETHINK_MONITOR_TIME) and defined(USE_LOCALISATION)
+        double localisationrealstarttime, localisationprocessstarttime, localisationthreadstarttime; 
+        double localisationrealendtime, localisationprocessendtime, localisationthreadendtime;
+    #endif
+	
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
@@ -183,13 +188,29 @@ void SeeThinkThread::run()
             #endif
 
             #ifdef USE_LOCALISATION
+		   
+		#if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+			    localisationrealstarttime = NUSystem::getRealTime();
+			    localisationprocessstarttime = NUSystem::getProcessTime();
+			    localisationthreadstarttime = NUSystem::getThreadTime();
+		#endif
 		    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
 		    //teaminfo, odometry, gamectrl, actions)
 		#if defined(TARGET_IS_NAOWEBOTS) 
 		    if( NUSystem::getRealTime() > 15000 )
 			    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
-		#endif    
-            #endif
+		#endif
+		
+		#if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+			localisationrealendtime = NUSystem::getRealTime();
+			localisationprocessendtime = NUSystem::getProcessTime();
+			localisationthreadendtime = NUSystem::getThreadTime();
+			debug 	<< "SeeThinkThread. Localisation Timing: " 
+			    << (localisationthreadendtime -localisationthreadstarttime) << "ms, in this process: " << (localisationprocessendtime - localisationprocessstarttime) 
+			    << "ms, in realtime: " << localisationrealendtime - localisationrealstarttime << "ms." << endl;
+		#endif		    
+            
+	   #endif
             
             #if defined(USE_BEHAVIOUR)
                 #if defined(USE_VISION)
