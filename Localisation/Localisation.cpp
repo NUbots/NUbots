@@ -229,16 +229,17 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 		
 		
 		///****************************************
-		
+		#if DEBUG_LOCALISATION_VERBOSITY > 0
 		for (int currID = 0; currID < c_MAX_MODELS; currID++){
 			if(models[currID].isActive )
 			{
+				
 				debug_out<<"Model : "<<currID<<" Pos  : "<<models[currID].stateEstimates[0][0]<<", "
 					<<models[currID].stateEstimates[0][1]<<","<<
 						models[currID].stateEstimates[0][2]<<endl;
 			}
 		}
-		
+		#endif
 		
 		///****************************************
 		
