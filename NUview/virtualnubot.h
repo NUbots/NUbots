@@ -98,6 +98,7 @@ private:
     const NUimage* rawImage;
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
+    FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;
     //TODO: these should change later..

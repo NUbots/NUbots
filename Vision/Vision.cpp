@@ -35,7 +35,7 @@
 using namespace mathGeneral;
 Vision::Vision()
 {
-    AllFieldObjects = new FieldObjects();
+    //AllFieldObjects = new FieldObjects();
 
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
@@ -53,7 +53,7 @@ Vision::Vision()
 
 Vision::~Vision()
 {
-    delete AllFieldObjects;
+    // delete AllFieldObjects;
     delete [] LUTBuffer;
     return;
 }
@@ -144,7 +144,9 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         return;
     m_sensor_data = data;
     m_actions = actions;
-    AllFieldObjects = fieldobjects;
+
+    setFieldObjects(fieldobjects);
+
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
         numFramesDropped++;
         
@@ -413,6 +415,12 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
+}
+
+void Vision::setFieldObjects(FieldObjects* fieldObjects)
+{
+    AllFieldObjects = fieldObjects;
+    return;
 }
 
 void Vision::setLUT(unsigned char* newLUT)

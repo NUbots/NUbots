@@ -14,6 +14,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
 
     //! TODO: Load LUT from filename.
+    AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
     for (int i = 0; i < LUTTools::LUT_SIZE; i++)
@@ -156,7 +157,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     int mode  = ROBOTS;
     Circle circ;
 
-
+    vision.setFieldObjects(AllObjects);
     vision.setImage(image);
     //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
     vision.AllFieldObjects->preProcess(image->m_timestamp);

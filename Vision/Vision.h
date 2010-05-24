@@ -85,7 +85,7 @@ class Vision
 
     void ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
 
-
+    void setFieldObjects(FieldObjects* fieldobjects);
 
     void setLUT(unsigned char* newLUT);
     void loadLUTFromFile(const std::string& fileName);
