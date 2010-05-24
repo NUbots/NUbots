@@ -27,10 +27,11 @@
 
 #include "Behaviour/Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 
 #include "debug.h"
 
@@ -44,9 +45,9 @@ public:
     {
         if (m_parent->m_state_changed)
         {
-            m_parent->m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_parent->m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-            m_parent->m_jobs->addMotionJob(new HeadJob(m_parent->m_current_time + 500, zero));
+            m_jobs->addMotionJob(new WalkJob(0,0,0));
+            vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+            m_jobs->addMotionJob(new HeadJob(m_parent->m_current_time + 500, zero));
         }
     };
 };

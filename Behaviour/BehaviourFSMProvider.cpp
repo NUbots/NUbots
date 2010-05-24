@@ -26,9 +26,6 @@
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "TeamInformation.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -48,8 +45,6 @@ BehaviourFSMProvider::BehaviourFSMProvider(Behaviour* manager) : BehaviourProvid
  */
 BehaviourFSMProvider::~BehaviourFSMProvider()
 {
-    for (vector<BehaviourState*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        delete (*it);
 }
 
 /*! @brief Runs the current behaviour. Note that this may not be the current behaviour.
@@ -92,7 +87,7 @@ void BehaviourFSMProvider::doBehaviour()
         m_state_changed = false;
     
     // perform state behaviour
-    m_state->doState();
+    m_state->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
 }
 
 /*! @brief Performs behaviour that is common to all states in this behaviour provider
@@ -107,13 +102,6 @@ void BehaviourFSMProvider::doBehaviourCommons()
 BehaviourState* BehaviourFSMProvider::nextStateCommons()
 {
     return m_state;
-}
-
-/*! @brief Adds a state to the list of states
- */
-void BehaviourFSMProvider::addState(BehaviourState* state)
-{
-    m_states.push_back(state);
 }
 
 

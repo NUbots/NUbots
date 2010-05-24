@@ -42,7 +42,7 @@
 class ChaseBallState : public BehaviourState
 {
 public:
-    ChaseBallState(ChaseBallProvider* provider) {m_provider = provider;};
+    ChaseBallState(ChaseBallProvider* provider){m_provider = provider;};
 protected:
     ChaseBallProvider* m_provider;
 };

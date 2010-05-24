@@ -22,12 +22,21 @@
 #include "BehaviourState.h"
 #include "BehaviourProvider.h"
 
+#include "debug.h"
+#include "debugverbositybehaviour.h"
+
 using namespace std;
 
-/*! @brief Construct a behaviour state
- */
-BehaviourState::BehaviourState()
+void BehaviourState::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
+    m_data = data;
+    m_actions = actions;
+    m_jobs = jobs;
+    m_field_objects = fieldobjects;
+    m_game_info = gameinfo;
+    m_team_info = teaminfo;
+    
+    doState();
 }
 
 /*! @brief Destroys the behaviour state

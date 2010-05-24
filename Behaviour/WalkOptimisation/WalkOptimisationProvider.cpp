@@ -30,8 +30,6 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
@@ -46,22 +44,21 @@ using namespace std;
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
     m_chase_blue_goal = new ChaseBlueGoal(this);
-    addState(m_chase_blue_goal);
     m_chase_yellow_goal = new ChaseYellowGoal(this);
-    addState(m_chase_yellow_goal);
     m_search_blue_goal = new SearchForBlueGoal(this);
-    addState(m_search_blue_goal);
     m_search_yellow_goal = new SearchForYellowGoal(this);
-    addState(m_search_yellow_goal);
     m_paused = new Paused(this);
-    addState(m_paused);
     
     m_state = m_search_blue_goal;
 }
 
-
 WalkOptimisationProvider::~WalkOptimisationProvider()
 {
+    delete m_chase_blue_goal;
+    delete m_chase_yellow_goal;
+    delete m_search_blue_goal;
+    delete m_search_yellow_goal;
+    delete m_paused;
 }
 
 BehaviourState* WalkOptimisationProvider::nextStateCommons()

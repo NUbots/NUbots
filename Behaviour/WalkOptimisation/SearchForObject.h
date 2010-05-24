@@ -22,7 +22,6 @@
 #ifndef SEARCHFOROBJECT_H
 #define SEARCHFOROBJECT_H
 
-#include "Behaviour/BehaviourState.h"
 #include "WalkOptimisationProvider.h"
 #include "WalkOptimisationState.h"
 
@@ -47,21 +46,25 @@ public:
     virtual BehaviourState* nextState() = 0;
     virtual void doState()
     {
-        m_parent->m_jobs->addMotionJob(new WalkJob(0,0,0.3));
-        m_parent->m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Localisation, 0.3));
+        m_jobs->addMotionJob(new WalkJob(0,0,0.3));
+        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Localisation, 0.3));
     };
 protected:
     bool isTargetVisible()
     {
-        if (m_id >= 0 and m_parent->m_field_objects->stationaryFieldObjects[m_id].isObjectVisible())
+        if (m_field_objects == NULL)
+        {   // if there are no field objects then we definitely cant see the target
+            return false;
+        }
+        else if (m_id >= 0 and m_field_objects->stationaryFieldObjects[m_id].isObjectVisible())
         {   // if the non-ambiguous field object is seen
             return true;
         }
-        else if (m_ambiguous_id >= 0 and (not m_parent->m_field_objects->ambiguousFieldObjects.empty()))
+        else if (m_ambiguous_id >= 0 and (not m_field_objects->ambiguousFieldObjects.empty()))
         {   // if there are ambiguous objects, check if one of them is the ambiguous version of this object 
-            for (size_t i=0; i<m_parent->m_field_objects->ambiguousFieldObjects.size(); i++)
+            for (size_t i=0; i<m_field_objects->ambiguousFieldObjects.size(); i++)
             {
-                int ambig_id = m_parent->m_field_objects->ambiguousFieldObjects[i].getID();
+                int ambig_id = m_field_objects->ambiguousFieldObjects[i].getID();
                 if (ambig_id == m_ambiguous_id)
                     return true;
             }

@@ -47,7 +47,6 @@ public:
 protected:
     BehaviourFSMProvider(Behaviour* manager);
 
-    void addState(BehaviourState* state);
     virtual void doBehaviour();
     virtual void doBehaviourCommons();
     virtual BehaviourState* nextStateCommons();
@@ -56,7 +55,6 @@ protected:
     BehaviourState* m_state;
     BehaviourState* m_previous_state;
     bool m_state_changed;
-    std::vector<BehaviourState*> m_states;
 };
 
 

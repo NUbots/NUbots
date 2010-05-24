@@ -48,28 +48,30 @@ public:
     {
         // track the object
         HeadTrackJob* job = new HeadTrackJob(m_target);
-        m_parent->m_jobs->addMotionJob(job);
+        m_jobs->addMotionJob(job);
         
         // walk torward the object
         float headyaw;
-        m_parent->m_data->getJointPosition(NUActionatorsData::HeadYaw, headyaw);
+        m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
         WalkJob* walkjob;
         walkjob = new WalkJob(100, 0, (m_target.measuredBearing() + headyaw)/2.0);
-        m_parent->m_jobs->addMotionJob(walkjob);
+        m_jobs->addMotionJob(walkjob);
     };
 protected:
     void updateTarget()
     {
-        if (m_id >= 0 and m_parent->m_field_objects->stationaryFieldObjects[m_id].isObjectVisible())
-            m_target = m_parent->m_field_objects->stationaryFieldObjects[m_id];
-        else if (not m_parent->m_field_objects->ambiguousFieldObjects.empty())
+        if (m_field_objects == NULL)
+            return;
+        else if (m_id >= 0 and m_field_objects->stationaryFieldObjects[m_id].isObjectVisible())
+            m_target = m_field_objects->stationaryFieldObjects[m_id];
+        else if (not m_field_objects->ambiguousFieldObjects.empty())
         {
-            for (size_t i=0; i<m_parent->m_field_objects->ambiguousFieldObjects.size(); i++)
+            for (size_t i=0; i<m_field_objects->ambiguousFieldObjects.size(); i++)
             {
-                int ambig_id = m_parent->m_field_objects->ambiguousFieldObjects[i].getID();
+                int ambig_id = m_field_objects->ambiguousFieldObjects[i].getID();
                 if (ambig_id == m_ambiguous_id)
                 {
-                    m_target = m_parent->m_field_objects->ambiguousFieldObjects[i];
+                    m_target = m_field_objects->ambiguousFieldObjects[i];
                     break;
                 }
             }

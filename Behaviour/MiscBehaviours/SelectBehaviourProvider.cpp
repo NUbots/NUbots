@@ -22,12 +22,8 @@
 #include "SelectBehaviourProvider.h"
 #include "../Behaviour.h"
 
-#include "Behaviour/Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
