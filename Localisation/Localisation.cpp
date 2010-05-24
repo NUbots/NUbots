@@ -89,10 +89,24 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs)
 {
     float odo_time;
     vector<float> odo;
-    data->getOdometry(odo_time, odo);
-	odomForward = odo[0];
-	odomLeft = odo[1];
-	odomTurn = odo[2];
+    if (data->getOdometry(odo_time, odo))
+    {
+        odomForward = odo[0];
+        odomLeft = odo[1];
+        odomTurn = odo[2];
+    }
+    
+    vector<float> gps;
+    if (data->getGPSValues(gps))
+    {   // have GPS use it to check localisation performance
+        // x = gps[0]; y = gps[1]; z = gps[2];
+    }
+    
+    vector<float> compass;
+    if (data->getCompassValues(compass))
+    {   // have Compass use it to check localisation performance
+        // heading = compass[0];
+    }
     
 	ProcessObjects(0,fobs,NULL);
 //	doTimeUpdate(odomForward,odomLeft,odomTurn);

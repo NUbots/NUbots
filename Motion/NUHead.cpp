@@ -537,7 +537,7 @@ vector<double> NUHead::calculateNodTimes(const vector<vector<float> >& points, f
         // however, for the second point we assume that m_nod_centre is also the yaw speed of the robot itself
         float nodtime = 10;
         if (fabs(m_nod_centre) > 0.05)
-            nodtime = (m_CAMERA_FOV_X/3.0)/m_nod_centre;
+            nodtime = (m_CAMERA_FOV_X/3.0)/fabs(m_nod_centre);
         
         times.push_back(1000*nodtime + times.back());
     }
