@@ -147,7 +147,7 @@ NUbot::NUbot(int argc, const char *argv[])
     
     #ifdef USE_LOCALISATION
         m_localisation = new Localisation();
-	m_localisation->doPlayerReset();
+        m_localisation->doPlayerReset();
     #endif
     
     #ifdef USE_BEHAVIOUR

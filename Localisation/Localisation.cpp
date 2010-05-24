@@ -1,4 +1,6 @@
 #include "Localisation.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+
 #include "Tools/Math/General.h"
 #include <string>
 #include <stdlib.h>
@@ -83,13 +85,15 @@ Localisation::~Localisation()
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
 
-void Localisation::process(FieldObjects* fobs, float forward,float left,float turn)
+void Localisation::process(NUSensorsData* data, FieldObjects* fobs)
 {
-
-	
-	odomForward = forward;
-	odomLeft = left;
-	odomTurn = turn;
+    float odo_time;
+    vector<float> odo;
+    data->getOdometry(odo_time, odo);
+	odomForward = odo[0];
+	odomLeft = odo[1];
+	odomTurn = odo[2];
+    
 	ProcessObjects(0,fobs,NULL);
 //	doTimeUpdate(odomForward,odomLeft,odomTurn);
 }
@@ -100,8 +104,6 @@ void Localisation::process(FieldObjects* fobs, float forward,float left,float tu
 
 void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets)
 {
-
-	
 	int numUpdates = 0;
 	int updateResult;  
 	currentFrameNumber = frameNumber;

@@ -112,6 +112,7 @@ NUSensorsData::NUSensorsData()
     
     // GPS Sensor
     addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
+    addSensor(Compass, string("Compass"), sensor_t::COMPASS_VALUES);
 }
 
 /*! @brief Adds a sensor to the class
@@ -709,9 +710,6 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
 }
 
 /*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
- 
-    Note orientation is not measured by the GPS :(.
- 
     @param values will be updated with the gps coordinates of the robot [x (cm), y (cm), z (cm)]
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
@@ -721,6 +719,20 @@ bool NUSensorsData::getGPSValues(vector<float>& values)
     else
     {
         values = GPS->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the compass reading [heading]
+    @param values will be updated with the compass reading
+ */
+bool NUSensorsData::getCompassValues(vector<float>& values)
+{
+    if (Compass == NULL || Compass->IsValid == false)
+        return false;
+    else
+    {
+        values = Compass->Data;
         return true;
     }
 }
@@ -1352,6 +1364,16 @@ void NUSensorsData::setBatteryValues(double time, const vector<float>& data, boo
 void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool iscalculated)
 {
     setData(GPS, time, data, iscalculated);
+}
+
+/*! @brief Sets the compass coordinates to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the Compass values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setCompassValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(Compass, time, data, iscalculated);
 }
 
 /* @brief Sets the data of the given sensor to the given data
