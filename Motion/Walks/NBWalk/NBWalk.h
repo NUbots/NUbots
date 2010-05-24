@@ -55,6 +55,8 @@ public:
 protected:
     void doWalk();
 private:
+    void initWalkParameters();
+    
     void sendWalkCommand();
     void preProcess();
     void processJoints();
@@ -65,38 +67,22 @@ private:
     void updateNBSensors();
     void nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints);
     void nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints);
+    void nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints);
+    void nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints);
+    void nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints);
+    void nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints);
     void updateActionatorsData();
     
 public:
 protected:
 private:
-    
-    // Pattern generation debugging
-    ofstream m_pattern_debug;
-    
-    // The following variables are taken straight from NB's MotionSwitchboard.
     boost::shared_ptr<Sensors> nb_sensors;
     WalkProvider walkProvider;
-    NullBodyProvider nullBodyProvider;
-    
-	MotionProvider * curProvider;
-	MotionProvider * nextProvider;
-    
-	MotionProvider * curHeadProvider;
-	MotionProvider * nextHeadProvider;
     
     std::vector <float> nextJoints;
-    std::vector <float> nextStiffnesses;
-    
-	mutable bool newJoints; // Way to track if we ever use the same joints twice
-    
-    bool readyToSend;
-    
-    mutable pthread_mutex_t next_provider_mutex;
     mutable pthread_mutex_t next_joints_mutex;
-    mutable pthread_mutex_t stiffness_mutex;
     
-    bool noWalkTransitionCommand;
+    boost::shared_ptr<Gait> m_gait;
 };
 
 #endif

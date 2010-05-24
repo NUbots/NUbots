@@ -43,12 +43,13 @@ public:
     FallProtection();
     ~FallProtection();
     
+    bool enabled();
+    void enable();
+    void disable();
+    
     void process(NUSensorsData* data, NUActionatorsData* actions);
-protected:
 private:
-public:
-protected:
-private:
+    bool m_enabled;
 };
 
 #endif

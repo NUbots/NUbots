@@ -27,6 +27,8 @@
 #include "debug.h"
 #include "debugverbositynusystem.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 using namespace std;
 
 NAOSystem::NAOSystem()
@@ -35,6 +37,11 @@ NAOSystem::NAOSystem()
     debug << "NAOSystem::NAOSystem()" << endl;
 #endif
     m_battery_state_previous_time = 0;
+    
+    m_team_received_leds = vector<vector<float> >(1, vector<float>(3,0));
+    m_team_sent_leds = vector<vector<float> >(1, vector<float>(3,0));
+    m_game_received_leds = vector<vector<float> >(1, vector<float>(3,0));
+    m_other_received_leds = vector<vector<float> >(1, vector<float>(3,0));
 }
 
 NAOSystem::~NAOSystem()
@@ -120,6 +127,69 @@ void NAOSystem::voiceLowBattery(NUActionatorsData* actions)
     runcount++;
 }
 
+/*! @brief Displays that a team packet has been successfully received
+ 
+    The first quarter of the left eye will toggle each time a packet is received.
+ 
+    @param actions a pointer to the shared actionator object
+ */
+void NAOSystem::displayTeamPacketReceived(NUActionatorsData* actions)
+{
+    if (actions == NULL)
+        return;
+    
+    int numleds = actions->getNumberOfLeds(NUActionatorsData::LeftEyeLeds)/4;
+    
+    vector<int> indices;
+    indices.reserve(numleds);
+    for (int i=0; i<numleds; i++)
+        indices.push_back(i);
+    
+    if (m_team_received_leds[0][0] == 1)
+        m_team_received_leds[0][0] = 0;
+    else
+        m_team_received_leds[0][0] = 1;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_team_received_leds);
+}
+
+/*! @brief Displays that a team packet has been successfully sent
+ @param actions a pointer to the shared actionator object
+ */
+void NAOSystem::displayTeamPacketSent(NUActionatorsData* actions)
+{
+    if (actions == NULL)
+        return;
+    
+    int numleds = actions->getNumberOfLeds(NUActionatorsData::LeftEyeLeds)/4;
+    
+    vector<int> indices;
+    indices.reserve(numleds);
+    for (int i=(numleds); i<(numleds*2); i++)
+        indices.push_back(i);
+    
+    if (m_team_sent_leds[0][1] == 1)
+        m_team_sent_leds[0][1] = 0;
+    else
+        m_team_sent_leds[0][1] = 1;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_team_sent_leds);
+}
+
+/*! @brief Displays that a game packet has been successfully received
+ @param actions a pointer to the shared actionator object
+ */
+void NAOSystem::displayGamePacketReceived(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
+/*! @brief Displays that a packet has been successfully received
+ @param actions a pointer to the shared actionator object
+ */
+void NAOSystem::displayOtherPacketReceived(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
 /*! @brief Display some sign that a vision frame has been dropped
     @param actions a pointer to the shared actionator object
  */
@@ -143,14 +213,10 @@ void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
     //voiceFrameDrop(actions);
 }
 
-/*! @brief Voices that a frame has been dropped
- */
-void NAOSystem::voiceFrameDrop(NUActionatorsData* actions)
+void NAOSystem::restart()
 {
-    actions->addSound(0, "error1.wav");
+    system("/etc/init.d/naoqi restart");        // this doesn't work
 }
-
-
 
 
 

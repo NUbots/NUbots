@@ -6,8 +6,7 @@ macx {
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
     LIBS += -framework \
         CoreFoundation \
-        -L \
-        /usr/lib/libz.dylib
+        -lz
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
@@ -87,6 +86,7 @@ HEADERS += ui_mainwindow.h \
     ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
+    ../Tools/Threading/PeriodicThread.h \
     NUviewIO/NUviewIO.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
@@ -107,7 +107,38 @@ HEADERS += ui_mainwindow.h \
     FileAccess/StreamFileReader.h \
     ../Tools/FileFormats/TimestampedData.h \
     FileAccess/NavigableFileReader.h \
-    FileAccess/ImageStreamFileReader.h
+    FileAccess/ImageStreamFileReader.h \
+    ../Motion/Tools/MotionScript.h \
+    ../Motion/Tools/MotionCurves.h \
+    ../Vision/EllipseFit.h \
+    ../Vision/EllipseFitting/tnt_version.h \
+    ../Vision/EllipseFitting/tnt_vec.h \
+    ../Vision/EllipseFitting/tnt_subscript.h \
+    ../Vision/EllipseFitting/tnt_stopwatch.h \
+    ../Vision/EllipseFitting/tnt_sparse_matrix_csr.h \
+    ../Vision/EllipseFitting/tnt_math_utils.h \
+    ../Vision/EllipseFitting/tnt_i_refvec.h \
+    ../Vision/EllipseFitting/tnt_fortran_array3d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array3d.h \
+    ../Vision/EllipseFitting/tnt_fortran_array2d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array2d.h \
+    ../Vision/EllipseFitting/tnt_fortran_array1d_utils.h \
+    ../Vision/EllipseFitting/tnt_fortran_array1d.h \
+    ../Vision/EllipseFitting/tnt_cmat.h \
+    ../Vision/EllipseFitting/tnt_array3d_utils.h \
+    ../Vision/EllipseFitting/tnt_array3d.h \
+    ../Vision/EllipseFitting/tnt_array2d_utils.h \
+    ../Vision/EllipseFitting/tnt_array2d.h \
+    ../Vision/EllipseFitting/tnt_array1d_utils.h \
+    ../Vision/EllipseFitting/tnt_array1d.h \
+    ../Vision/EllipseFitting/tnt.h \
+    ../Vision/EllipseFitting/jama_svd.h \
+    ../Vision/EllipseFitting/jama_qr.h \
+    ../Vision/EllipseFitting/jama_lu.h \
+    ../Vision/EllipseFitting/jama_eig.h \
+    ../Vision/EllipseFitting/jama_cholesky.h \
+    ../Localisation/odometryMotionModel.h \
+    ../Localisation/probabilityUtils.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -179,6 +210,7 @@ SOURCES += mainwindow.cpp \
     ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
+    ../Tools/Threading/PeriodicThread.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \
@@ -189,6 +221,11 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
-    ../Kinematics/OrientationUKF.cpp
+    ../Kinematics/OrientationUKF.cpp \
+    ../Motion/Tools/MotionScript.cpp \
+    ../Motion/Tools/MotionCurves.cpp \
+    ../Vision/EllipseFit.cpp \
+    ../Localisation/odometryMotionModel.cpp \
+    ../Localisation/probabilityUtils.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

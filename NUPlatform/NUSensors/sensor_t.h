@@ -70,6 +70,7 @@ public:
         FOOT_BUMPER_VALUES,
         FOOT_COP,
         FOOT_FORCE,
+        FOOT_CONTACT,
         FOOT_SUPPORT,
         FOOT_IMPACT,
         BUTTON_VALUES,

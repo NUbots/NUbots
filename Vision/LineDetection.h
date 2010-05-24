@@ -9,14 +9,16 @@
 //#include "../Kinematics/Horizon.h"
 //#include "CircleFitting.h"
 #include <iostream>
+#include "FieldObjects/FieldObjects.h"
 class Vision;
-class FieldObjects;
+
+
 #define MAX_LINEPOINTS 100
-#define MAX_FIELDLINES 20
+#define MAX_FIELDLINES 15
 #define MAX_CORNERPOINTS 10
-#define VERT_POINT_THICKNESS 36
+#define VERT_POINT_THICKNESS 40
 #define MIN_POINT_THICKNESS 2
-#define HORZ_POINT_THICKNESS 36
+#define HORZ_POINT_THICKNESS 40
 
 #define POST_T_LIMIT (320) // set as define at top later  ALSO  these values need to be a defined fraction of the IMAGE_WIDTH
 #define POST_L_LIMIT (320) // more thought needs to be given to these limits
@@ -40,7 +42,7 @@ class LineDetection{
         std::vector<LinePoint> linePoints;
         std::vector<LSFittedLine> fieldLines;
         std::vector<CornerPoint> cornerPoints;
-
+        std::vector<AmbiguousObject> possiblePenaltySpots;
         //int LinePointCounter;
         //int FieldLinesCounter;
         //int CornerPointCounter;
@@ -49,21 +51,31 @@ class LineDetection{
 	//METHODS:
 	LineDetection();
     	~LineDetection();
-        void FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing,FieldObjects* AllObjects, Vision* vision);
+        void FormLines(ClassifiedSection* scanArea, int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision);
 	
 	
 	private:
-        int IMAGE_WIDTH;
 	int TotalValidLines;
         int LINE_SEARCH_GRID_SIZE;
+        int PenaltySpotLineNumber;
         void FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height);
         void FindFieldLines(int image_width,int image_height);
-        void FindCornerPoints(int image_height);
-        void DecodeCorners(FieldObjects* AllObjects, float timestamp );
-	void GetDistanceToPoint(double,double,double*,double*,double*);
-        void qsort(std::vector<LinePoint> array, int left, int right, int type);
-        void swap(std::vector<LinePoint> array, int i, int j);
 
+        bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
+        void FindPenaltySpot(Vision* vision);
+        void DecodePenaltySpot(FieldObjects* AllObjects, float timestamp);
+
+        void FindCornerPoints(int image_width,int image_height);
+        void DecodeCorners(FieldObjects* AllObjects, float timestamp,  int image_width, int image_height);
+	void GetDistanceToPoint(double,double,double*,double*,double*);
+
+        //! Line Point Sorting
+        void qsort(std::vector<LinePoint> &array, int left, int right, int type);
+        void swap(std::vector<LinePoint> &array, int i, int j);
+
+        //! Lines Sorting
+        void qsort(std::vector<LSFittedLine> &array, int left, int right);
+        void swap(std::vector<LSFittedLine> &array, int i, int j);
 }
 ;
 

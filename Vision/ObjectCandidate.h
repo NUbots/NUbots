@@ -15,13 +15,14 @@ public:
     void setBottomRight(Vector2<int> point);
     int width() const;
     int height() const;
-    int getCentreX();
-    int getCentreY();
-    float aspect();
+    int getCentreX() const;
+    int getCentreY() const;
+    float aspect() const;
     unsigned char getColour()  const;
     void setColour(unsigned char c);
     std::vector<TransitionSegment> getSegments() const;
-
+    void addSegments(const std::vector<TransitionSegment> &new_segments);
+    void addSegment(const TransitionSegment &new_segment);
 
     ObjectCandidate();
     ObjectCandidate(int left, int top, int right, int bottom);

@@ -55,8 +55,15 @@ public:
     
     // battery functions
     virtual void displayBatteryState(NUSensorsData* data, NUActionatorsData* actions);
+    // network functions
+    virtual void displayTeamPacketReceived(NUActionatorsData* actions);
+    virtual void displayTeamPacketSent(NUActionatorsData* actions);
+    virtual void displayGamePacketReceived(NUActionatorsData* actions);
+    virtual void displayOtherPacketReceived(NUActionatorsData* actions);
     // watchdog functions
     virtual void displayVisionFrameDrop(NUActionatorsData* actions);
+    
+    virtual void restart() {};
 private:
     // System time members
     #ifdef __NU_SYSTEM_CLOCK_GETTIME

@@ -63,9 +63,13 @@ public:
         MOTION_KICK,
         MOTION_BLOCK,
         MOTION_SAVE,
+        MOTION_SCRIPT,
         MOTION_HEAD,
+        MOTION_TRACK,
         MOTION_NOD,
         MOTION_PAN,
+        MOTION_FREEZE,
+        MOTION_KILL,
         // Camera job ids
         CAMERA_CHANGE_SETTINGS,
         CAMERA_SELECT_CAMERA,

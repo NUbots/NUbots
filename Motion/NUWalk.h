@@ -39,31 +39,42 @@ public:
     static NUWalk* getWalkEngine();
     NUWalk();
     virtual ~NUWalk();
+    virtual void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(WalkJob* job);
     void process(WalkToPointJob* job);
     void process(WalkParametersJob* job);
     
-    void walkSpeed(const vector<float>& speed);
-    void walkToPoint(double time, const vector<float>& position);
-    
     void setWalkParameters(const WalkParameters& walkparameters);
     WalkParameters& getWalkParameters();
+    
+    virtual void setArmEnabled(bool leftarm, bool rightarm);
     
     void getCurrentSpeed(vector<float>& currentspeed);
 protected:
     virtual void doWalk() = 0;
+    
+    void enableWalk();
+    bool inInitialPosition();
+    void moveToInitialPosition();
 
     void setTargetSpeed(const vector<float>& speed);
+    void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
-    
-    inline float sign(float value) {if (value >= 0) return 1.0; else return -1.0;};
+
 private:
 public:
 protected:
     NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
+    
+    double m_current_time;                          //!< the current time
+    double m_previous_time;                         //!< the previous time doWalk was called
+    
+    bool m_walk_enabled;                            //!< true if the walk is enabled, false otherwise
+    bool m_larm_enabled;                            //!< true if the walk is allowed to move the left arm
+    bool m_rarm_enabled;                            //!< true if the walk is allowed to move the right arm
     
     // the target speeds before acceleration clipping
     float m_target_speed_x;                         //!< the current target x speed cm/s
@@ -81,6 +92,11 @@ protected:
     float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
     
     WalkParameters m_walk_parameters;               //!< the current set of walk parameters
+    
+    vector<float> m_initial_larm;
+    vector<float> m_initial_rarm;
+    vector<float> m_initial_lleg;
+    vector<float> m_initial_rleg;
 
 private:
 };

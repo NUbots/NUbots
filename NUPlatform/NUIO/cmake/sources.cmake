@@ -24,6 +24,7 @@ SET (YOUR_SRCS  UdpPort
 		GameControllerPort
 		JobPort
 		TeamPort
+		TeamTransmissionThread.cpp TeamTransmissionThread.h
                 TcpPort
         
 )

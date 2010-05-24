@@ -229,6 +229,8 @@ public:
           */
         void drawSolidCircle(float cx, float cy, float r, int num_segments);
 
+        void  drawEllipse(float cx, float cy, float xradius, float yradius);
+
 };
 
 #endif // OPENGLMANAGER_H

@@ -34,13 +34,15 @@ public:
     Getup();
     ~Getup();
     
+    void enable();
+    void disable();
+    bool enabled();
+    bool isActive();
+    bool isUsingHead();
+    
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    bool headReady();
-protected:
 private:
-public:
-protected:
-private:
+    bool m_enabled;
 };
 
 #endif

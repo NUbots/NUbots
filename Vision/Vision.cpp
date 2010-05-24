@@ -35,8 +35,8 @@
 using namespace mathGeneral;
 Vision::Vision()
 {
-
     AllFieldObjects = new FieldObjects();
+
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
@@ -47,6 +47,7 @@ Vision::Vision()
     numSavedImages = 0;
     ImageFrameNumber = 0;
     numFramesDropped = 0;
+
     return;
 }
 
@@ -133,16 +134,17 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 }
 
 
-FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions)
+void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
 
-    if (image == NULL || data == NULL || actions == NULL)
-        return AllFieldObjects;
+    if (image == NULL || data == NULL || actions == NULL || fieldobjects == NULL)
+        return;
     m_sensor_data = data;
     m_actions = actions;
+    AllFieldObjects = fieldobjects;
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
         numFramesDropped++;
         
@@ -153,13 +155,13 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     //std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horizontalsegments;
-    std::vector< TransitionSegment > allsegments;
-    std::vector< TransitionSegment > segments;
+    //std::vector< TransitionSegment > allsegments;
+    //std::vector< TransitionSegment > segments;
     std::vector< ObjectCandidate > candidates;
     std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
-    int spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
+    spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
     int robotClassifiedPoints = 0;
@@ -184,7 +186,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
     else
     {
         //debug << "No Horizon Data" << endl;
-        return AllFieldObjects;
+        return;
     }
     //debug << "Generating Horizon Line: Finnished" <<endl;
     //debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
@@ -236,7 +238,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-            segments.push_back((*tempScanLine->getSegment(seg)));
+            //segments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
@@ -248,7 +250,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
-            allsegments.push_back((*tempScanLine->getSegment(seg)));
+            //allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
@@ -304,7 +306,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
             case BLUE_GOALS:
@@ -312,7 +314,7 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 //qDebug() << "POST-GOALS";
                 break;
@@ -364,7 +366,6 @@ FieldObjects* Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUAction
             }
         }
     #endif
-    return AllFieldObjects;
 }
 
 void Vision::SaveAnImage()
@@ -527,7 +528,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 
 #define LEFT_OF(x0, x1, x2) ((x1.x-x0.x)*(-x2.y+x0.y)-(x2.x-x0.x)*(-x1.y+x0.y) > 0)
 
-std::vector<Vector2<int> > Vision::getConvexFieldBorders(std::vector<Vector2<int> >& fieldBorders)
+std::vector<Vector2<int> > Vision::getConvexFieldBorders(const std::vector<Vector2<int> >& fieldBorders)
 {
   //Andrew's Monotone Chain Algorithm to compute the upper hull
   std::vector<Vector2<int> > hull;
@@ -553,7 +554,7 @@ std::vector<Vector2<int> > Vision::getConvexFieldBorders(std::vector<Vector2<int
   return hull;
 }
 
-std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >& fieldBorders, int scanSpacing)
+std::vector<Vector2<int> > Vision::interpolateBorders(const std::vector<Vector2<int> >& fieldBorders, int scanSpacing)
 {
     std::vector<Vector2<int> > interpolatedBorders;
     if(!fieldBorders.size()) return interpolatedBorders;
@@ -580,10 +581,10 @@ std::vector<Vector2<int> > Vision::interpolateBorders(std::vector<Vector2<int> >
     return interpolatedBorders;
 }
 
-ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::verticalScan(const std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
     //std::vector<Vector2<int> > scanPoints;
-    ClassifiedSection scanArea(ClassifiedSection::DOWN);
+    ClassifiedSection scanArea(ScanLine::DOWN);
     if(!fieldBorders.size()) return scanArea;
     std::vector<Vector2<int> >::const_iterator nextPoint = fieldBorders.begin();
     //std::vector<Vector2<int> >::const_iterator prevPoint = nextPoint++; //This iterator is unused
@@ -631,9 +632,9 @@ ClassifiedSection Vision::verticalScan(std::vector<Vector2<int> >&fieldBorders,i
     return scanArea;
 }
 
-ClassifiedSection Vision::horizontalScan(std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
+ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldBorders,int scanSpacing)
 {
-    ClassifiedSection scanArea(ClassifiedSection::RIGHT);
+    ClassifiedSection scanArea(ScanLine::RIGHT);
     if(!currentImage) return scanArea;
     Vector2<int> temp;
     int width = currentImage->getWidth();
@@ -760,22 +761,22 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
         for(int j = 0; j < lineLength; j = j+skipPixel)
         {
-            if(direction == ClassifiedSection::DOWN)
+            if(direction == ScanLine::DOWN)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y + j;
             }
-            else if (direction == ClassifiedSection::RIGHT)
+            else if (direction == ScanLine::RIGHT)
             {
                 currentPoint.x = startPoint.x + j;
                 currentPoint.y = startPoint.y;
             }
-            else if(direction == ClassifiedSection::UP)
+            else if(direction == ScanLine::UP)
             {
                 currentPoint.x = startPoint.x;
                 currentPoint.y = startPoint.y - j;
             }
-            else if(direction == ClassifiedSection::LEFT)
+            else if(direction == ScanLine::LEFT)
             {
                 currentPoint.x = startPoint.x - j;
                 currentPoint.y = startPoint.y;
@@ -802,7 +803,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 while( (currentColour == afterColour) )
                 {
 
-                    if(direction == ClassifiedSection::DOWN)
+                    if(direction == ScanLine::DOWN)
                     {
 
                         if(startPoint.y + j < currentImage->getHeight())
@@ -815,7 +816,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             break;
                         }
                     }
-                    else if (direction == ClassifiedSection::RIGHT)
+                    else if (direction == ScanLine::RIGHT)
                     {
                         if(startPoint.x + j < currentImage->getWidth())
                         {
@@ -828,7 +829,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         }
 
                     }
-                    else if(direction == ClassifiedSection::UP)
+                    else if(direction == ScanLine::UP)
                     {
 
                         if(startPoint.y - j > 0)
@@ -842,7 +843,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                         }
 
                     }
-                    else if(direction == ClassifiedSection::LEFT)
+                    else if(direction == ScanLine::LEFT)
                     {
                         if(startPoint.x - j > 0)
                         {
@@ -885,7 +886,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     if(!(currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                     {
                         //SHIFTING THE POINTS TO THE START OF BUFFER:
-                        if(direction == ClassifiedSection::DOWN)
+                        if(direction == ScanLine::DOWN)
                         {
                             currentPoint.x = startPoint.x;
                             currentPoint.y = startPoint.y + j - bufferSize * skipPixel/2;
@@ -894,7 +895,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.y = tempStartPoint.y - bufferSize * skipPixel/2;
                             }
                         }
-                        else if (direction == ClassifiedSection::RIGHT)
+                        else if (direction == ScanLine::RIGHT)
                         {
                             currentPoint.x = startPoint.x + j - bufferSize * skipPixel/2;
                             currentPoint.y = startPoint.y;
@@ -903,7 +904,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.x = tempStartPoint.x - bufferSize * skipPixel/2;
                             }
                         }
-                        else if(direction == ClassifiedSection::UP)
+                        else if(direction == ScanLine::UP)
                         {
                             currentPoint.x = startPoint.x;
                             currentPoint.y = startPoint.y - j + bufferSize * skipPixel/2;
@@ -912,7 +913,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.y = tempStartPoint.y + bufferSize * skipPixel/2;
                             }
                         }
-                        else if(direction == ClassifiedSection::LEFT)
+                        else if(direction == ScanLine::LEFT)
                         {
                             currentPoint.x = startPoint.x - j + bufferSize * skipPixel/2;
                             currentPoint.y = startPoint.y;
@@ -945,7 +946,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
     int skipPixel = 2;
-    if((direction == ClassifiedSection::DOWN || direction == ClassifiedSection::UP))
+    if((direction == ScanLine::DOWN || direction == ScanLine::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
         int bufferSize = 2;
@@ -1031,7 +1032,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
         }
     }
 
-    else if (direction == ClassifiedSection::RIGHT || direction == ClassifiedSection::LEFT)
+    else if (direction == ScanLine::RIGHT || direction == ScanLine::LEFT)
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
 
@@ -1119,9 +1120,9 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
 }
 
 std::vector<ObjectCandidate> Vision::classifyCandidates(
-                                        std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+                                        std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments,
                                         tCLASSIFY_METHOD method)
@@ -1141,13 +1142,13 @@ std::vector<ObjectCandidate> Vision::classifyCandidates(
 
 }
 
-std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
-    //! Overall runtime O( (K*(2*M^3 + M^2) + N*(LogN + 1) )
+    //! Overall runtime O( N^2 )
     std::vector<ObjectCandidate> candidateList;
 
     const int VERT_JOIN_LIMIT = 3;
@@ -1387,20 +1388,20 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
     return candidateList;
 }
 
-std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< TransitionSegment > segments,
-                                        std::vector<Vector2<int> >&fieldBorders,
-                                        std::vector<unsigned char> validColours,
+std::vector<ObjectCandidate> Vision::classifyCandidatesDBSCAN(std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
                                         int spacing,
                                         float min_aspect, float max_aspect, int min_segments)
 {
     std::vector<ObjectCandidate> candidateList;
 
-
+    //unimplemented
 
     return candidateList;
 }
 
-bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colourList)
+bool Vision::isValidColour(unsigned char colour, const std::vector<unsigned char> &colourList)
 {
     bool result = false;
     if (colourList.size())
@@ -1418,7 +1419,7 @@ bool Vision::isValidColour(unsigned char colour, std::vector<unsigned char> colo
     return result;
 }
 
-int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
+int Vision::findYFromX(const std::vector<Vector2<int> >&points, int x)
 {
 
     int y = 0;
@@ -1455,7 +1456,7 @@ int Vision::findYFromX(std::vector<Vector2<int> >&points, int x)
     return y;
 }
 
-int Vision::findInterceptFromPerspectiveFrustum(std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
+int Vision::findInterceptFromPerspectiveFrustum(const std::vector<Vector2<int> >&points, int current_x, int target_x, int spacing)
 {
     int height = currentImage->getHeight();
 
@@ -1523,14 +1524,19 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 
 }
 
-std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std::vector< TransitionSegment > horizontalsegments,
-                                                                            std::vector<unsigned char> validColours,
+std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   const std::vector< TransitionSegment > &horizontalsegments,
+                                                                            const std::vector<unsigned char> &validColours,
                                                                             int spacing,
                                                                             int min_segments)
 {
     std::vector< ObjectCandidate > candidates;
     std::vector< TransitionSegment > tempSegments;
+    tempSegments.reserve(horizontalsegments.size());
+    candidates.reserve(horizontalsegments.size());
+
     bool usedSegments[horizontalsegments.size()];
+    //qDebug() << "Classify Above the horizon" << horizontalsegments.size();
+
 
     for (int i = 0; i < (int)horizontalsegments.size(); i++)
     {
@@ -1544,6 +1550,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     {
         tempSegments.clear();
         std::vector<int> tempUsedSegments;
+        tempUsedSegments.reserve(horizontalsegments.size());
         if(!isValidColour(horizontalsegments[i].getColour(), validColours))
         {
             continue;
@@ -1577,13 +1584,13 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 nextSegCounter--;
                 continue;
             }
-            if(horizontalsegments[nextSegCounter].getEndPoint().x     < Xstart - spacing
-               && horizontalsegments[nextSegCounter].getEndPoint().x  > Xstart + spacing)
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     <= Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  >= Xstart + spacing)
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
                 tempUsedSegments.push_back(nextSegCounter);
-                if (horizontalsegments[nextSegCounter].getStartPoint().x < Xstart)
+                if (horizontalsegments[nextSegCounter].getStartPoint().x <= Xstart)
                 {
                     Xstart = horizontalsegments[nextSegCounter].getStartPoint().x;
                 }
@@ -1609,8 +1616,8 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
             {
                 break;
             }
-            if(horizontalsegments[j].getStartPoint().x   > Xstart - spacing/2
-               && horizontalsegments[j].getEndPoint().x  < Xend + spacing/2)
+            if(horizontalsegments[j].getStartPoint().x   >= Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  <= Xend + spacing/2)
             {
                 if (horizontalsegments[j].getStartPoint().x < Xstart)
                 {
@@ -1622,7 +1629,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
                 }
                 if(horizontalsegments[j].getStartPoint().y < Ystart)
                 {
-                    Ystart = horizontalsegments[j].getEndPoint().y;
+                    Ystart = horizontalsegments[j].getStartPoint().y;
                 }
                 tempSegments.push_back(horizontalsegments[j]);
                 tempUsedSegments.push_back(j);
@@ -1631,10 +1638,13 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
         }
         //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
         //Create Object Candidate if greater then the minimum number of segments
-        if((int)tempSegments.size() >= min_segments && Yend - Ystart > spacing && Xend - Xstart > spacing/2)
+        if((int)tempSegments.size() >= min_segments)
         {
             //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
-
+            //for(size_t i =0; i < tempSegments.size(); i++)
+            //{
+                //qDebug() << tempSegments[i].getStartPoint().x << "," <<tempSegments[i].getStartPoint().y << " " << tempSegments[i].getEndPoint().x << "," <<tempSegments[i].getEndPoint().y;
+            //}
             ObjectCandidate tempCandidate(Xstart, Ystart, Xend, Yend, validColours[0], tempSegments);
             candidates.push_back(tempCandidate);
             while (!tempUsedSegments.empty())
@@ -1662,7 +1672,7 @@ LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
     return LineDetector;
 }
 
-Circle Vision::DetectBall(std::vector<ObjectCandidate> FO_Candidates)
+Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
 {
     //debug<< "Vision::DetectBall" << endl;
 
@@ -1757,3 +1767,17 @@ int Vision::getNumFramesDropped()
     return framesdropped;
 }
 
+bool Vision::isPixelOnScreen(int x, int y)
+{
+    if(x < 0 || x > currentImage->getWidth())
+    {
+        return false;
+    }
+
+    if(y < 0 || x > currentImage->getWidth())
+    {
+        return false;
+    }
+    else
+        return true;
+}

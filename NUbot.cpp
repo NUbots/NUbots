@@ -19,23 +19,48 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "debugverbositynubot.h"
-#include "debug.h"
-#include "NUPlatform/NUActionators/NUSounds.h"
-
 #include "NUbot.h"
+
+// ---------------------------------------------------------------- Compulsory header files
+#include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "NUPlatform/NUIO.h"
 #include "Behaviour/Jobs.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 #include "GameController/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
+#include "debugverbositynubot.h"
+#include "debug.h"
+
+// --------------------------------------------------------------- Module header files
+#ifdef USE_VISION
+    #include "Tools/Image/NUimage.h"
+    #include "Vision/Vision.h"
+#endif
+
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+#endif
+
+#ifdef USE_LOCALISATION
+    #include "Localisation/Localisation.h"
+#endif
+
+#ifdef USE_MOTION
+    #include "Motion/NUMotion.h"
+#endif
+
+// --------------------------------------------------------------- Thread header files
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     #include "NUbot/SeeThinkThread.h"
 #endif
 #include "NUbot/SenseMoveThread.h"
 #include "NUbot/WatchDogThread.h"
 
+// --------------------------------------------------------------- NUPlatform header files
 #if defined(TARGET_IS_NAOWEBOTS)
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsPlatform.h"
     #include "NUPlatform/Platforms/NAOWebots/NAOWebotsIO.h"
@@ -97,9 +122,10 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();
+    Objects = new FieldObjects();
     Jobs = new JobList();
     GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
-    TeamInfo = new TeamInformation();
+    TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)
@@ -120,7 +146,8 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_LOCALISATION
-        //m_localisation = new Localisation();
+        m_localisation = new Localisation();
+	m_localisation->doPlayerReset();
     #endif
     
     #ifdef USE_BEHAVIOUR
@@ -186,7 +213,7 @@ NUbot::~NUbot()
     #endif
     
     #ifdef USE_MOTION
-        NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
+        NUbot::m_this->m_motion->kill();
         NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
         NUSystem::msleep(1500);
     #endif
@@ -214,8 +241,8 @@ NUbot::~NUbot()
             delete m_vision;
     #endif
     #ifdef USE_LOCALISATION
-        //if (m_localisation != NULL)
-            //delete m_localisation;
+        if (m_localisation != NULL)
+            delete m_localisation;
     #endif
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)
@@ -369,7 +396,7 @@ void NUbot::terminationHandler(int signum)
     {
         // safely kill motion
         #ifdef USE_MOTION
-            NUbot::m_this->m_motion->safeKill(NUbot::m_this->SensorData, NUbot::m_this->Actions);
+            NUbot::m_this->m_motion->kill();
             NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
         #endif
         

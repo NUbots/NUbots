@@ -27,25 +27,29 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class JobList;
+class MotionKillJob;
+class MotionFreezeJob;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
-    #include "NUHead.h"
+    class NUHead;
 #endif
-
 #ifdef USE_WALK
-#include "NUWalk.h"
+    class NUWalk;
 #endif
-
 #ifdef USE_KICK
-    #include "NUKick.h"
+    class NUKick;
 #endif
-
-#include "Behaviour/Jobs.h"
-#include "FallProtection.h"
-#include "Getup.h"
-
-#include "Tools/MotionScript.h"
+#if defined(USE_BLOCK) or defined(USE_SAVE)
+    class NUSave;
+#endif
+#ifdef USE_SCRIPT
+    class Script;
+#endif
+class FallProtection;
+class Getup;
+class MotionScript;
 
 class NUMotion
 {
@@ -54,16 +58,13 @@ public:
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(JobList& jobs);
+    void process(JobList* jobs);
     
-    int getCycleTime() {return m_cycle_time;};
-    
-    void safeKill(NUSensorsData* data, NUActionatorsData* actions);
-protected:
+    void freeze();
+    void kill();
 private:
-    void calculateCycleTime();
-public:
-protected:
+    void process(MotionKillJob* job);
+    void process(MotionFreezeJob* job);
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
@@ -71,6 +72,7 @@ private:
     // essential motion components
     FallProtection* m_fall_protection;  //!< the fall protection module
     Getup* m_getup;                     //!< the getup module
+    // optional motion components
     #ifdef USE_HEAD
         NUHead* m_head;                     //!< the head module
     #endif
@@ -80,12 +82,18 @@ private:
     #ifdef USE_KICK
         NUKick* m_kick;                     //!< the kick module
     #endif
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+        NUSave* m_save;                     //!< the save module
+    #endif
+    #ifdef USE_SCRIPT
+        Script* m_script;                   //!< the script module
+    #endif
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
-    int m_cycle_time;                   //!< the cycle time in ms
+    double m_last_kill_time;            //!< the last time a kill was called in ms (a recent call disables ALL motion)
     
-    MotionScript m_block_left;
+    MotionScript* m_block_left;
 };
 
 #endif

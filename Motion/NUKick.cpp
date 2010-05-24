@@ -21,13 +21,18 @@
 
 
 #include "NUKick.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
 
-NUKick::NUKick()
+NUKick::NUKick(NUWalk* walk)
 {
+    m_walk = walk;
 	IKSys = new Legs();
 	poseData.resize(4);
 	pose = DO_NOTHING;
@@ -37,7 +42,15 @@ NUKick::NUKick()
  */
 NUKick::~NUKick()
 {
+    kill();
     delete IKSys;
+}
+
+/*! @brief Kills the kick module
+ */
+void NUKick::kill()
+{
+    
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -52,6 +65,19 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     doKick();
+}
+
+/*! @brief Process a kick job
+    @param job the kick job
+ */
+void process(KickJob* job)
+{
+    double time;
+    vector<float> kickposition;
+    vector<float> kicktarget;
+
+    job->getKick(time, kickposition, kicktarget);
+    setKickPoint(kickposition, kicktarget);
 }
 
 

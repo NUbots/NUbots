@@ -13,20 +13,17 @@ public:
         pitchGyroOffset,
         rollAngle,
         rollGyroOffset,
-        xAcceleration,
-        yAcceleration,
-        zAcceleration,
         numStates
     };
-    void initialise(double time, float pitchGyro, float rollGyro, float accX, float accY, float accZ);
-    void TimeUpdate(float pitchGyroReading, float rollGyroReading, double timestamp);
-    void AccelerometerMeasurementUpdate(float xAccel, float yAccel, float zAccel);
-    void KinematicsMeasurementUpdate(float pitchMeasurement, float rollMeasurement);
+    void initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations);
+    void TimeUpdate(const std::vector<float>& gyroReadings, double timestamp);
+    void MeasurementUpdate(const std::vector<float>& accelerations, bool validKinematics, const std::vector<float>& kinematicsOrientation);
     bool Initialised(){return m_initialised;};
 
 private:
     double m_timeOfLastUpdate;
     Matrix m_updateSigmaPoints;
+    Matrix m_processNoise;
     bool m_initialised;
 };
 

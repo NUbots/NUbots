@@ -119,7 +119,9 @@ void SaveJob::csvTo(ostream& output)
  */
 void SaveJob::toStream(ostream& output) const
 {
-    debug << "SaveJob::toStream" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 2
+        debug << "SaveJob::toStream" << endl;
+    #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write SaveJob specific data
@@ -137,7 +139,9 @@ void SaveJob::toStream(ostream& output) const
  */
 ostream& operator<<(ostream& output, const SaveJob& job)
 {
-    debug << "<<SaveJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<SaveJob" << endl;
+    #endif
     job.toStream(output);
     return output;
 }
@@ -150,11 +154,11 @@ ostream& operator<<(ostream& output, const SaveJob& job)
  */
 ostream& operator<<(ostream& output, const SaveJob* job)
 {
-    debug << "<<SaveJob" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "<<SaveJob" << endl;
+    #endif
     if (job != NULL)
         job->toStream(output);
-    else
-        output << "NULL";
     return output;
 }
 

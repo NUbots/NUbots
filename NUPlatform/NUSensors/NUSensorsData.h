@@ -131,6 +131,7 @@ public:
     bool getAccelerometerValues(vector<float>& values);
     bool getGyroValues(vector<float>& values);
     bool getGyroOffsetValues(vector<float>& values);
+    bool getGyroFilteredValues(vector<float>& values);
     bool getOrientation(vector<float>& values);
     bool getHorizon(vector<float>& values);
     bool getButtonTriggers(vector<float>& values);
@@ -146,11 +147,14 @@ public:
     bool getFootBumperValues(foot_id_t footid, vector<float>& values);
     bool getFootCoP(foot_id_t footid, float& x, float& y);
     bool getFootForce(foot_id_t footid, float& force);
+    bool getFootContact(foot_id_t footid, bool& contact);
     bool getFootSupport(foot_id_t footid, bool& support);
     bool getButtonValues(button_id_t buttonid, vector<float>& values);
     
     // Common sub-get methods
+    bool isFalling();
     bool isFallen();
+    bool isOnGround();
     bool footImpact(foot_id_t footid, float& time);
     
     void setAvailableJoints(const vector<string>& joints);
@@ -232,6 +236,7 @@ public:
     sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
     sensor_t* FootCoP;                          //!< stores the foot centre of pressure as [lx, ly, rx, ry, x, y]
     sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons  as [l, r, both]
+    sensor_t* FootContact;                      //!< stores whether each foot has contact with something (presumably the ground)
     sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot as [l, r, both]
     sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
     

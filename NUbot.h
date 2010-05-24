@@ -29,30 +29,29 @@
 #include "targetconfig.h"
 #include "nubotconfig.h"
 
-#include "NUPlatform/NUPlatform.h"
+class NUPlatform;
+class NUIO;
 
 #ifdef USE_VISION
-    #include "Vision/FieldObjects/FieldObjects.h"
-    #include "Tools/Image/NUimage.h"
-    #include "Vision/Vision.h"
+    class NUimage;
+    class Vision;
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    class Localisation;
 #endif
 
 #ifdef USE_BEHAVIOUR
-    #include "Behaviour/Behaviour.h"
+    class Behaviour;
 #endif
 
 #ifdef USE_MOTION
-    #include "Motion/NUMotion.h"
+    class NUMotion;
 #endif
-
-#include "NUPlatform/NUIO.h"
 
 class NUSensorsData;
 class NUActionatorsData;
+class FieldObjects;
 class JobList;
 class GameInformation;
 class TeamInformation;
@@ -62,6 +61,8 @@ class TeamInformation;
 #endif
 class SenseMoveThread;
 class WatchDogThread;
+
+#include <exception>
 
 /*! @brief The top-level class
  */
@@ -86,6 +87,7 @@ public:
     #endif
     NUSensorsData* SensorData;
     NUActionatorsData* Actions;
+    FieldObjects* Objects;
     JobList* Jobs;
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;
@@ -98,7 +100,7 @@ private:
     #endif
     
     #ifdef USE_LOCALISATION
-        //Localisation* m_localisation;     //!< localisation module
+        Localisation* m_localisation;     //!< localisation module
     #endif
     
     #ifdef USE_BEHAVIOUR

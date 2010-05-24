@@ -56,10 +56,9 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     }
     
     if (port == -1) {
-        debug << "Error: could not find port number in controllerArgs" << endl;
+        errorlog << "Error: could not find port number in controllerArgs" << endl;
     }
-    m_robot_number = (port % 10) + 1;
-    m_player_number = m_robot_number;
+    m_player_number = (port % 10) + 1;
     setNameFromNumber();
     setTeam(Robot::getName());
     
@@ -67,6 +66,10 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     camera = new NAOWebotsCamera(this);
     sensors = new NAOWebotsSensors(this);
     actionators = new NAOWebotsActionators(this);
+    gps = getGPS("gps");
+    gps->enable(40); 
+    compass = getCompass("compass");
+    compass->enable(40);
 }
 
 NAOWebotsPlatform::~NAOWebotsPlatform()
@@ -80,7 +83,7 @@ NAOWebotsPlatform::~NAOWebotsPlatform()
  */
 void NAOWebotsPlatform::setNameFromNumber()
 {
-    switch (m_robot_number) {
+    switch (m_player_number) {
         case 1:
             m_name = string("Susannah");
             break;
@@ -105,16 +108,23 @@ void NAOWebotsPlatform::setNameFromNumber()
 void NAOWebotsPlatform::setTeam(const string& name)
 {
     if (name.find("red") != string::npos)
-    {
-        m_team_colour = string("red");
         m_team_number = 1;
-    }
     else 
-    {
-        m_team_colour = string("blue");
         m_team_number = 0;
-    }
 }
 
 
+/*! @brief A function which obtains the real position of the robot in the field
+    @param retVals a double array with the x,y,and theta information
+ */
+void  NAOWebotsPlatform::getRobotPosition(double* retVals)
+{
+	const double *pos = gps->getValues();
+	const double *north = compass->getValues();
+	double rad = atan2( north[0],north[2]);
+	double bearing = (rad ) / M_PI * 180.0;
+	retVals[0]= 100*pos[0];
+	retVals[1]= -100*pos[2];
+	retVals[2]= -1*bearing;
+}
 

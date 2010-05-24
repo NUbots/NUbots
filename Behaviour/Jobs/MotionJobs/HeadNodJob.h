@@ -44,11 +44,12 @@ public:
         Localisation
     };
 public:
-    HeadNodJob(head_nod_t nodtype);
+    HeadNodJob(head_nod_t nodtype, float centreangle = 0);
     HeadNodJob(istream& input);
     ~HeadNodJob();
     
     head_nod_t getNodType();
+    float getCentreAngle();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
@@ -59,6 +60,7 @@ protected:
     virtual void toStream(ostream& output) const;
 private:
     head_nod_t m_nod_type;
+    float m_centre_angle;
 };
 
 #endif

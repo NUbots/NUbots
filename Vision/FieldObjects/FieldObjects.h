@@ -17,15 +17,15 @@ class FieldObjects{
                 // Left/Right post is the side when viewing the goals from the front. i.e. on the field.
 
                 FO_BLUE_LEFT_GOALPOST 		= 0,
-                FO_BLUE_RIGHT_GOALPOST 	= 1,
+                FO_BLUE_RIGHT_GOALPOST          = 1,
                 FO_YELLOW_LEFT_GOALPOST 	= 2,
                 FO_YELLOW_RIGHT_GOALPOST 	= 3,
 
                 // Field Corners
-                FO_CORNER_YELLOW_FIELD_LEFT = 4,
+                FO_CORNER_YELLOW_FIELD_LEFT     = 4,
                 FO_CORNER_YELLOW_T_LEFT 	= 5,
                 FO_CORNER_YELLOW_T_RIGHT 	= 6,
-                FO_CORNER_YELLOW_FIELD_RIGHT = 7,
+                FO_CORNER_YELLOW_FIELD_RIGHT    = 7,
                 FO_CORNER_YELLOW_PEN_LEFT 	= 8,
                 FO_CORNER_YELLOW_PEN_RIGHT 	= 9,
                 FO_CORNER_CENTRE_T_LEFT 	= 10,
@@ -35,14 +35,18 @@ class FieldObjects{
                 FO_CORNER_BLUE_PEN_RIGHT 	= 14,
                 FO_CORNER_BLUE_FIELD_LEFT 	= 15,
                 FO_CORNER_BLUE_T_LEFT 		= 16,
-                FO_CORNER_BLUE_T_RIGHT 	= 17,
+                FO_CORNER_BLUE_T_RIGHT          = 17,
                 FO_CORNER_BLUE_FIELD_RIGHT 	= 18,
 
-                // Goal Gaps
-                FO_YELLOW_GOAL_GAP 		= 19,
-                FO_BLUE_GOAL_GAP 			= 20,
+                //Penalty Spots
+                FO_PENALTY_YELLOW               = 19,
+                FO_PENALTY_BLUE                 = 20,
 
-                NUM_STAT_FIELD_OBJECTS 			= 21
+                // Goal Gaps
+                FO_YELLOW_GOAL_GAP 		= 21,
+                FO_BLUE_GOAL_GAP 		= 22,
+
+                NUM_STAT_FIELD_OBJECTS 		= 23
 
             };
 
@@ -76,7 +80,10 @@ class FieldObjects{
                 FO_CORNER_UNKNOWN_L 	= 5,
                 FO_CORNER_UNKNOWN_T 	= 6,
 
-                NUM_AMBIGUOUS_FIELD_OBJECTS = 7
+                //New Unknown Penalty Spots
+                FO_PENALTY_UNKNOWN = 7,
+
+                NUM_AMBIGUOUS_FIELD_OBJECTS = 8
             };
 
             Self self;

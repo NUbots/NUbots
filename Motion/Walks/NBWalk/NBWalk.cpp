@@ -42,27 +42,23 @@ inline T NORMALISE(T theta){
  */
 NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
                     walkProvider(nb_sensors),
-                    nullBodyProvider(nb_sensors),
-                    curProvider(&nullBodyProvider),
-                    nextProvider(&nullBodyProvider),
-                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f)),
-                    nextStiffnesses(vector<float>(Kinematics::NUM_JOINTS,0.0f)),
-                    newJoints(false),
-                    readyToSend(false),
-                    noWalkTransitionCommand(true)
+                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
 {
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);
-    pthread_mutex_init(&next_provider_mutex, NULL);
-    pthread_mutex_init(&stiffness_mutex, NULL);
     
-    // Initialise the body to be frozen
-    //boost::shared_ptr<FreezeCommand> paralyze = boost::shared_ptr<FreezeCommand>(new FreezeCommand());
-    //nullBodyProvider.setCommand(paralyze);
+    float larm[] = {0.23, 1.55, 0, 0};
+    float rarm[] = {-0.23, 1.55, 0, 0};
+    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    
+    float lleg[] = {0, -0.44, 0, 0.92, 0, -0.52};
+    m_initial_lleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
+    m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
-    boost::shared_ptr<Gait>  defaultGait(new Gait(WEBOTS_GAIT));
-    walkProvider.setCommand(defaultGait);
+    m_gait = boost::shared_ptr<Gait>(new Gait(DEFAULT_GAIT));
+    walkProvider.setCommand(m_gait);
 }
 
 /*! @brief Destructor for walk module
@@ -70,8 +66,6 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
 NBWalk::~NBWalk()
 {
     pthread_mutex_destroy(&next_joints_mutex);
-    pthread_mutex_destroy(&next_provider_mutex);
-    pthread_mutex_destroy(&stiffness_mutex);
 }
 
 void NBWalk::doWalk()
@@ -82,13 +76,7 @@ void NBWalk::doWalk()
     updateNBSensors();
     sendWalkCommand();
     
-    preProcess();
     processJoints();
-    processStiffness();
-    bool active  = postProcess();
-
-    if(active)
-        readyToSend = true;
     
     updateActionatorsData();
 }
@@ -98,39 +86,13 @@ void NBWalk::sendWalkCommand()
     static WalkCommand* command = new WalkCommand(0, 0, 0);
     command->x_mms = m_speed_x*10;
     command->y_mms = m_speed_y*10;
-    command->theta_rads = m_speed_yaw;
+    command->theta_rads = m_speed_yaw*2;
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NBWalk::sendWalkCommand() command: " << *command << endl;
     #endif
     
-    pthread_mutex_lock(&next_provider_mutex);
-    nextProvider = &walkProvider;
     walkProvider.setCommand(command);
-    pthread_mutex_unlock(&next_provider_mutex);
-}
-
-void NBWalk::preProcess()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::preProcess()" << endl;
-#endif
-    pthread_mutex_lock(&next_provider_mutex);
-    
-    if (curProvider != &nullBodyProvider && nextProvider == &nullBodyProvider)
-        walkProvider.hardReset();
-    
-    // determine the curProvider, and do any necessary swapping
-	if (curProvider != nextProvider && !curProvider->isActive())
-        swapBodyProvider();
-
-	if (curProvider != nextProvider && !curProvider->isStopping())
-    {
-		debug << "Requesting stop on "<< *curProvider <<endl;
-        curProvider->requestStop();
-    }
-
-    pthread_mutex_unlock(&next_provider_mutex);
 }
 
 void NBWalk::processJoints()
@@ -138,15 +100,15 @@ void NBWalk::processJoints()
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NBWalk::processJoints()" << endl;
 #endif
-    if (curProvider->isActive())
+    if (walkProvider.isActive())
     {
 		// Request new joints
-		curProvider->calculateNextJointsAndStiffnesses();
-		const vector <float > llegJoints = curProvider->getChainJoints(LLEG_CHAIN);
-		const vector <float > rlegJoints = curProvider->getChainJoints(RLEG_CHAIN);
-		const vector <float > rarmJoints = curProvider->getChainJoints(RARM_CHAIN);
+		walkProvider.calculateNextJointsAndStiffnesses();
+		const vector <float > llegJoints = walkProvider.getChainJoints(LLEG_CHAIN);
+		const vector <float > rlegJoints = walkProvider.getChainJoints(RLEG_CHAIN);
+		const vector <float > rarmJoints = walkProvider.getChainJoints(RARM_CHAIN);
         
-		const vector <float > larmJoints = curProvider->getChainJoints(LARM_CHAIN);
+		const vector <float > larmJoints = walkProvider.getChainJoints(LARM_CHAIN);
         
 		// Copy the new values into place, and wait to be signaled.
 		pthread_mutex_lock(&next_joints_mutex);
@@ -168,92 +130,6 @@ void NBWalk::processJoints()
     }
 }
 
-/*! @brief Method to process remaining stiffness requests
-    Technically this could be handled by another provider, but there isn't
-    too much too it:
- */ 
-void NBWalk::processStiffness()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::processStiffness()" << endl;
-#endif
-    try
-    {
-        if(curProvider->isActive())
-        {
-            const vector <float > llegStiffnesses = curProvider->getChainStiffnesses(LLEG_CHAIN);
-            const vector <float > rlegStiffnesses = curProvider->getChainStiffnesses(RLEG_CHAIN);
-            const vector <float > rarmStiffnesses = curProvider->getChainStiffnesses(RARM_CHAIN);
-            const vector <float > larmStiffnesses = curProvider->getChainStiffnesses(LARM_CHAIN);
-            
-            pthread_mutex_lock(&stiffness_mutex);
-            for(unsigned int i = 0; i < LEG_JOINTS; i ++){
-                nextStiffnesses[L_HIP_YAW_PITCH + i] = 100*llegStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < LEG_JOINTS; i ++){
-                nextStiffnesses[R_HIP_YAW_PITCH + i] = 100*rlegStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < ARM_JOINTS; i ++){
-                nextStiffnesses[L_SHOULDER_PITCH + i] = 100*larmStiffnesses.at(i);
-            }
-            for(unsigned int i = 0; i < ARM_JOINTS; i ++){
-                nextStiffnesses[R_SHOULDER_PITCH + i] = 100*rarmStiffnesses.at(i);
-            }
-            pthread_mutex_unlock(&stiffness_mutex);
-        }
-    }
-    catch(std::out_of_range & e)
-    {
-        cout << "Out of range exception caught in processStiffness"<< e.what() <<endl;
-        exit(0);
-    }
-}
-
-bool NBWalk::postProcess()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::postProcess()" << endl;
-#endif
-    pthread_mutex_lock(&next_provider_mutex);
-    
-    newJoints = true;
-    
-    //Make sure that if the current provider just became inactive,
-    //and we have the next provider ready, then we want to swap to ensure
-    //that we never have an inactive provider when an active one is potentially
-    //ready to take over:
-	if (curProvider != nextProvider && !curProvider->isActive()) 
-        swapBodyProvider();
-    
-    pthread_mutex_unlock(&next_provider_mutex);
-    
-    return curProvider->isActive();
-}
-
-/*! @brief Method handles switching providers. Also handles any special action
-    required when switching between providers
- */
-void NBWalk::swapBodyProvider()
-{
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::swapBodyProvider()" << endl;
-#endif
-    std::vector<BodyJointCommand *> gaitSwitches;
-    std::string old_provider = curProvider->getName();
-    
-    switch(nextProvider->getType()){
-        case WALK_PROVIDER:
-            curProvider = nextProvider;
-            break;
-        case NULL_PROVIDER:
-        case SCRIPTED_PROVIDER:
-        case HEAD_PROVIDER:
-        default:
-            noWalkTransitionCommand = true;
-            curProvider = nextProvider;
-    }
-}
-
 /*! @brief A function to copy necessary data from NUSensorsData (m_data) to nb_sensors
  */
 void NBWalk::updateNBSensors()
@@ -262,10 +138,6 @@ void NBWalk::updateNBSensors()
     static vector<float> nu_jointtemperatures(nu_jointpositions.size(), 0);
     static vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
     static vector<float> nb_jointtemperatures(nb_jointtemperatures.size(), 0);
-    
-    static list<float> anglex_buffer;
-    static list<float> angley_buffer;
-    static list<float>::iterator it;
     
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NBWalk::updateNBSensors()" << endl;
@@ -284,27 +156,19 @@ void NBWalk::updateNBSensors()
     // Now to the other sensors!
     static vector<float> accelvalues;
     static vector<float> gyrovalues;
+    static vector<float> orientation;
     static vector<float> footvalues;
     static vector<float> buttonvalues;
     m_data->getAccelerometerValues(accelvalues);
     m_data->getGyroValues(gyrovalues);
-    
-    // it is clear that the walk engine is very sensitive to a good measurement for orientation
-    /*anglex_buffer.push_front(atan2(-accelvalues[1],-accelvalues[2]));        // angleX is roll for NB. Right is positive
-    angley_buffer.push_front(atan2(accelvalues[0],-accelvalues[2]));         // angleY is the pitch for NB. Forwards is positive
-    if (anglex_buffer.size() > 2)
-    {
-        anglex_buffer.pop_back();
-        angley_buffer.pop_back();
-    }
-    float xsum = 0;
-    float ysum = 0;
-    for ( it=anglex_buffer.begin() ; it != anglex_buffer.end(); it++ )
-        xsum += *it;
-    for ( it=angley_buffer.begin() ; it != angley_buffer.end(); it++ )
-        ysum += *it;*/
-    float angleX = atan2(-accelvalues[1],-accelvalues[2]);//xsum/anglex_buffer.size();
-    float angleY = atan2(accelvalues[0],-accelvalues[2]);//ysum/angley_buffer.size();
+    m_data->getOrientation(orientation);
+
+    float angleX = 0;
+    if (orientation.size() > 0)
+        angleX = -orientation[0];           // NUbot convention has positive roll to the left, NB has positive roll to the right
+    float angleY = 0;
+    if (orientation.size() > 1)
+        angleY = orientation[1];
     
     m_data->getFootSoleValues(NUSensorsData::AllFeet, footvalues);
     m_data->getButtonValues(NUSensorsData::MainButton, buttonvalues);
@@ -382,19 +246,70 @@ void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujo
     nujoints[21] = nbjoints[16];    // RAnklePitch
 }
 
+void NBWalk::nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints)
+{
+    if (nbjoints.size() < 22 || nuleftlegjoints.size() < 6)
+        return;
+    nuleftlegjoints[0] = nbjoints[7];     // LHipRoll
+    nuleftlegjoints[1] = nbjoints[8];     // LHipPitch
+    nuleftlegjoints[2] = nbjoints[6];     // LHipYawPitch
+    nuleftlegjoints[3] = nbjoints[9];     // LKneePitch
+    nuleftlegjoints[4] = nbjoints[11];    // LAnkleRoll
+    nuleftlegjoints[5] = nbjoints[10];    // LAnklePitch
+}
+
+void NBWalk::nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints)
+{
+    if (nbjoints.size() < 22 || nurightlegjoints.size() < 6)
+        return;
+    nurightlegjoints[0] = nbjoints[13];    // RHipRoll
+    nurightlegjoints[1] = nbjoints[14];    // RHipPitch
+    nurightlegjoints[2] = nbjoints[12];     // RHipYawPitch
+    nurightlegjoints[3] = nbjoints[15];    // RKneePitch
+    nurightlegjoints[4] = nbjoints[17];    // RAnkleRoll
+    nurightlegjoints[5] = nbjoints[16];    // RAnklePitch
+}
+
+void NBWalk::nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints)
+{
+    if (nbjoints.size() < 22 || nuleftarmjoints.size() < 4)
+        return;
+    nuleftarmjoints[0] = nbjoints[3];      // LShoulderRoll
+    nuleftarmjoints[1] = nbjoints[2];      // LShoulderPitch
+    nuleftarmjoints[2] = nbjoints[5];      // LElbowRoll
+    nuleftarmjoints[3] = nbjoints[4];      // LElbowYaw       
+}
+
+void NBWalk::nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints)
+{
+    if (nbjoints.size() < 22 || nurightarmjoints.size() < 4)
+        return;
+    nurightarmjoints[0] = nbjoints[19];     // RShoulderRoll
+    nurightarmjoints[1] = nbjoints[18];     // RShoulderPitch
+    nurightarmjoints[2] = nbjoints[21];     // RElbowRoll
+    nurightarmjoints[3] = nbjoints[20];     // RElbowYaw
+}
+
 /*! @brief A function to nextJoints and nextStiffnesses to NUActionatorsData (m_actions)
  */
 void NBWalk::updateActionatorsData()
 {
     static vector<float> zerovel(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_nextJoints(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_nextStiffnesses(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 100);
-    nbToNUJointOrder(nextJoints, nu_nextJoints);
-    //nbToNUJointOrder(nextStiffnesses, nu_nextStiffnesses);
-    debug << "nu_nextStiffnesses: ";
-    for (unsigned int i=0; i<nu_nextStiffnesses.size(); i++)
-        debug << nu_nextStiffnesses[i] << ", ";
-    debug << endl;
-    m_actions->addJointPositions(NUActionatorsData::AllJoints, nusystem->getTime() + 40, nu_nextJoints, zerovel, nu_nextStiffnesses);
+    static vector<float> nu_nextLeftLegJoints(m_data->getNumberOfJoints(NUSensorsData::LeftLegJoints), 0);
+    static vector<float> nu_nextRightLegJoints(m_data->getNumberOfJoints(NUSensorsData::RightLegJoints), 0);
+    static vector<float> nu_nextLeftArmJoints(m_data->getNumberOfJoints(NUSensorsData::LeftArmJoints), 0);
+    static vector<float> nu_nextRightArmJoints(m_data->getNumberOfJoints(NUSensorsData::RightArmJoints), 0);
+    
+    nbToNULeftLegJointOrder(nextJoints, nu_nextLeftLegJoints);
+    nbToNURightLegJointOrder(nextJoints, nu_nextRightLegJoints);
+    nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
+    nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, 50);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, 50);
+    if (m_larm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, 30);
+    if (m_rarm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, 30);
 }
 

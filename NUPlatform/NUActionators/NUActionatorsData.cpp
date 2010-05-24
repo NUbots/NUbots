@@ -59,6 +59,7 @@ NUActionatorsData::NUActionatorsData()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
+    CurrentTime = 0;
     Sound = NULL;
     Teleporter = NULL;
     m_positionactionation = false;
@@ -483,6 +484,7 @@ void NUActionatorsData::preProcess()
  */
 void NUActionatorsData::postProcess(double currenttime)
 {
+    CurrentTime = currenttime;
     for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->removeCompletedPoints(currenttime);
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
@@ -516,6 +518,15 @@ int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
         debug << "NUActionatorsData::getNumberOfJoints. UNDEFINED Body part.";
         return 0;
     }
+}
+
+/*! @brief Returns the ids of the joints in the given body part. This is for internal use (I use it when given an entry for AllJoints to pick out sub-groups).
+    @param partid the id of the part you want indices for
+    @return a vector containing the joint_id_t's
+ */
+vector<NUActionatorsData::joint_id_t>& NUActionatorsData::getJointIndices(bodypart_id_t partid)
+{
+    return getSelectedJoints(partid);
 }
 
 /*! @brief Returns the number of joints in the specified led group
@@ -935,31 +946,32 @@ bool NUActionatorsData::addJointTorques(joint_id_t jointid, const vector<double>
     @param partid the body part id you want the joint ids for
     @return a vector of the joint_id_t's in the body part
  */
-vector<NUActionatorsData::joint_id_t> NUActionatorsData::getSelectedJoints(bodypart_id_t partid)
+vector<NUActionatorsData::joint_id_t>& NUActionatorsData::getSelectedJoints(bodypart_id_t partid)
 {
-    vector<joint_id_t> selectedjoints;
     if (partid != ACTIONATOR_MISSING)
     {
         if (partid == AllJoints)
-            selectedjoints = m_all_joint_ids;
+            return m_all_joint_ids;
         else if (partid == BodyJoints)
-            selectedjoints = m_body_ids;
+            return m_body_ids;
         else if (partid == HeadJoints)
-            selectedjoints = m_head_ids;
+            return m_head_ids;
         else if (partid == LeftArmJoints)
-            selectedjoints = m_larm_ids;
+            return m_larm_ids;
         else if (partid == RightArmJoints)
-            selectedjoints = m_rarm_ids;
+            return m_rarm_ids;
         else if (partid == TorsoJoints)
-            selectedjoints = m_torso_ids;
+            return m_torso_ids;
         else if (partid == LeftLegJoints)
-            selectedjoints = m_lleg_ids;
+            return m_lleg_ids;
         else if (partid == RightLegJoints)
-            selectedjoints = m_rleg_ids;
+            return m_rleg_ids;
         else
+        {
             debug << "NUActionatorsData::getSelectedJoints(). UNDEFINED Body part.";
+            return m_all_joint_ids;
+        }
     }
-    return selectedjoints;
 }
 
 /*! @brief Adds a single joint position control point for each joint in the selected body part (the body part could be 'All' to set all joints at once)
@@ -971,7 +983,7 @@ vector<NUActionatorsData::joint_id_t> NUActionatorsData::getSelectedJoints(bodyp
  */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, float gain)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     if (selectedjoints.size() < positions.size())
     {
@@ -995,7 +1007,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
  */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     if (selectedjoints.size() < positions.size())
     {
@@ -1018,7 +1030,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, con
  */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, float gain)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     if (selectedjoints.size() < torques.size())
     {
@@ -1041,7 +1053,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
  */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     if (selectedjoints.size() < torques.size())
     {
@@ -1070,7 +1082,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const
  */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, float gain)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1099,7 +1111,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vec
  */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<float>& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1128,7 +1140,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vec
  */
 bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<vector<float> >& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1156,7 +1168,7 @@ bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vec
  */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, float gain)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1184,7 +1196,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
  */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<float>& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1212,7 +1224,7 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
  */
 bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains)
 {
-    vector<joint_id_t> selectedjoints = getSelectedJoints(partid);
+    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
     
     // check that there is enough joint data in the given vectors
     unsigned int numjoints = selectedjoints.size();
@@ -1236,31 +1248,10 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
  */
 bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
 {
-    vector<joint_id_t> selectedleds;
     if (LedActionators.size() == 0)
         return false;                       
     
-    if (ledgroup == AllLeds)
-        selectedleds = m_all_led_ids;
-    else if (ledgroup == LeftEarLeds)
-        selectedleds = m_lear_ids;
-    else if (ledgroup == RightEarLeds)
-        selectedleds = m_rear_ids;
-    else if (ledgroup == LeftEyeLeds)
-        selectedleds = m_leye_ids;
-    else if (ledgroup == RightEyeLeds)
-        selectedleds = m_reye_ids;
-    else if (ledgroup == ChestLeds)
-        selectedleds = m_chest_ids;
-    else if (ledgroup == LeftFootLeds)
-        selectedleds = m_lfoot_ids;
-    else if (ledgroup == RightFootLeds)
-        selectedleds = m_rfoot_ids;
-    else
-    {
-        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
-        return false;
-    }
+    vector<int>& selectedleds = getSelectedLeds(ledgroup);
     
     if (values.size() == 1)
     {   // if the size of the values is one, then set that value to all in the group
@@ -1303,6 +1294,115 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vecto
                 data[2] = values[i][2];
             }
             LedActionators[selectedleds[i]]->addPoint(time, data);
+        }
+    }
+    return true;
+}
+
+/*! @brief Returns the selected leds ids in the given group
+    @param ledgroup the group you want ids for
+    @return a vector of the ids in the led group
+ */
+vector<int>& NUActionatorsData::getSelectedLeds(ledgroup_id_t ledgroup)
+{
+    if (ledgroup == AllLeds)
+        return m_all_led_ids;
+    else if (ledgroup == LeftEarLeds)
+        return m_lear_ids;
+    else if (ledgroup == RightEarLeds)
+        return m_rear_ids;
+    else if (ledgroup == LeftEyeLeds)
+        return m_leye_ids;
+    else if (ledgroup == RightEyeLeds)
+        return m_reye_ids;
+    else if (ledgroup == ChestLeds)
+        return m_chest_ids;
+    else if (ledgroup == LeftFootLeds)
+        return m_lfoot_ids;
+    else if (ledgroup == RightFootLeds)
+        return m_rfoot_ids;
+    else
+    {
+        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
+        return m_all_led_ids;
+    }    
+}
+
+/*! @brief Adds led control points for several leds in the given group
+    @param ledgroup the id of the led group you want to control
+    @param indices the indices of the leds within the group you want to change
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param values [[red, green, blue], ...] or [[intensity], ...]
+ */
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values)
+{
+    if (LedActionators.size() == 0)
+        return false;                       
+    
+    int groupoffset = 0;
+    if (ledgroup == AllLeds)
+        groupoffset = m_all_led_ids[0];
+    else if (not m_lear_ids.empty() and ledgroup == LeftEarLeds)
+        groupoffset = m_lear_ids[0];
+    else if (not m_rear_ids.empty() and ledgroup == RightEarLeds)
+        groupoffset = m_rear_ids[0];
+    else if (not m_leye_ids.empty() and ledgroup == LeftEyeLeds)
+        groupoffset = m_leye_ids[0];
+    else if (not m_reye_ids.empty() and ledgroup == RightEyeLeds)
+        groupoffset = m_reye_ids[0];
+    else if (not m_chest_ids.empty() and ledgroup == ChestLeds)
+        groupoffset = m_chest_ids[0];
+    else if (not m_lfoot_ids.empty() and ledgroup == LeftFootLeds)
+        groupoffset = m_lfoot_ids[0];
+    else if (not m_rfoot_ids.empty() and ledgroup == RightFootLeds)
+        groupoffset = m_rfoot_ids[0];
+    else
+    {
+        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
+        return false;
+    }
+    
+    if (values.size() == 1)
+    {   // if the size of the values is one, then set that value to all in the group
+        static vector<float> data(3,0);
+        if (values[0].size() < 3)
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][0];
+            data[2] = values[0][0];
+        }
+        else 
+        {
+            data[0] = values[0][0];
+            data[1] = values[0][1];
+            data[2] = values[0][2];
+        }
+        
+        for (unsigned int i=0; i<indices.size(); i++)
+        {
+            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
+        }
+    }
+    else
+    {   // otherwise set each led individually.
+        int numpoints = std::min(indices.size(), values.size());
+        
+        static vector<float> data (3, 0);
+        for (int i=0; i<numpoints; i++)
+        {
+            if (values[i].size() < 3)
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][0];
+                data[2] = values[i][0];
+            }
+            else
+            {
+                data[0] = values[i][0];
+                data[1] = values[i][1];
+                data[2] = values[i][2];
+            }
+            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
         }
     }
     return true;

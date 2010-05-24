@@ -237,6 +237,38 @@ void NUSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* actio
     // by default there is no way to display such information!
 }
 
+/*! @brief Displays that a team packet has been successfully received
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayTeamPacketReceived(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!    
+}
+
+/*! @brief Displays that a team packet has been successfully sent
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayTeamPacketSent(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
+/*! @brief Displays that a game packet has been successfully received
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayGamePacketReceived(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
+/*! @brief Displays that a packet has been successfully received
+    @param actions a pointer to the shared actionator object
+ */
+void NUSystem::displayOtherPacketReceived(NUActionatorsData* actions)
+{
+    // by default there is no way to display such information!
+}
+
 /*! @brief Display some sign that a vision frame has been dropped
     @param actions a pointer to the shared actionator object
  */

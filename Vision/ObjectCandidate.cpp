@@ -53,7 +53,16 @@ std::vector<TransitionSegment> ObjectCandidate::getSegments() const
 {
     return segments;
 }
-
+void ObjectCandidate::addSegments(const std::vector<TransitionSegment> &new_segments)
+{
+    segments.insert(segments.end(), new_segments.begin(), new_segments.end());
+    return;
+}
+void ObjectCandidate::addSegment(const TransitionSegment &new_segment)
+{
+    segments.push_back(new_segment);
+    return;
+}
 
 ObjectCandidate::~ObjectCandidate()
 {
@@ -79,7 +88,7 @@ int ObjectCandidate::height() const
     return (bottomRight.y - topLeft.y);
 }
 
-float ObjectCandidate::aspect()
+float ObjectCandidate::aspect() const
 {
     return (float)(bottomRight.x - topLeft.x) / (float)(bottomRight.y - topLeft.y);
 }
@@ -104,11 +113,11 @@ void ObjectCandidate::setBottomRight(Vector2<int> point)
     bottomRight.x = point.x;
     bottomRight.y = point.y;
 }
-int ObjectCandidate::getCentreX()
+int ObjectCandidate::getCentreX() const
 {
     return (int)(round((bottomRight.x + topLeft.x)/2));
 }
-int ObjectCandidate::getCentreY()
+int ObjectCandidate::getCentreY() const
 {
     return (int)(round((bottomRight.y + topLeft.y)/2));
 }

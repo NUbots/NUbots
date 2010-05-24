@@ -20,7 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS  pose2d.h
+               probabilityUtils.cpp probabilityUtils.h
+               odometryMotionModel.cpp odometryMotionModel.h
+               KF.cpp KF.h
+               Localisation.cpp Localisation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

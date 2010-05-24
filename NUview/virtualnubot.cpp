@@ -9,8 +9,10 @@
 #include <fstream>
 #include <qmessagebox.h>
 
+
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
+
     //! TODO: Load LUT from filename.
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
@@ -30,6 +32,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     autoSoftColour = false;
     //debug<<"VirtualNUBot started";
     //TEST:
+
 }
 
 virtualNUbot::~virtualNUbot()
@@ -127,7 +130,7 @@ void virtualNUbot::processVisionFrame()
 void virtualNUbot::processVisionFrame(const NUimage* image)
 {
     if(!imageAvailable()) return;
-    //qDebug() << "Begin Process Frame";
+    qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -137,7 +140,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     std::vector< ObjectCandidate > tempCandidates;
 
     std::vector< Vector2<int> > horizontalPoints;
-    std::vector<LSFittedLine> fieldLines;
+    //std::vector<LSFittedLine> fieldLines;
 
 
     int tempNumScanLines = 0;
@@ -152,29 +155,32 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     int mode  = ROBOTS;
     Circle circ;
-    //qDebug() << "Start switch";
 
 
     vision.setImage(image);
+    //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
     vision.AllFieldObjects->preProcess(image->m_timestamp);
+    //qDebug() << "Image Pre-processed";
     int spacings = (int)image->getWidth()/20;
+    //qDebug() << "Scan Spacing calculated";
     vision.setLUT(classificationTable);
+    //qDebug() << "LUT set";
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
 
     //! Find the green edges
-    points = vision.findGreenBorderPoints(spacings,&horizonLine);
+    std::vector< Vector2<int> > greenPoints = vision.findGreenBorderPoints(spacings,&horizonLine);
     emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
     //qDebug() << "Find Edges: finnished";
     //! Find the Field border
-    points = vision.getConvexFieldBorders(points);
-    points = vision.interpolateBorders(points,spacings);
-    emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
+    std::vector< Vector2<int> > boarderPoints = vision.getConvexFieldBorders(greenPoints);
+    std::vector< Vector2<int> > interpolatedBoarderPoints = vision.interpolateBorders(boarderPoints,spacings);
+    emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
-    ClassifiedSection vertScanArea = vision.verticalScan(points,spacings);
+    ClassifiedSection vertScanArea = vision.verticalScan(interpolatedBoarderPoints,spacings);
     //! Scan Above the Horizon
-    ClassifiedSection horiScanArea = vision.horizontalScan(points,spacings);
+    ClassifiedSection horiScanArea = vision.horizontalScan(interpolatedBoarderPoints,spacings);
     //qDebug() << "Generate Scanlines: finnished";
     //! Classify Line Segments
 
@@ -195,7 +201,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(vertScanArea.getDirection() == ClassifiedSection::DOWN)
+        if(vertScanArea.getDirection() == ScanLine::DOWN)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -213,13 +219,15 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         ScanLine* tempScanLine = horiScanArea.getScanLine(i);
         int lengthOfLine = tempScanLine->getLength();
+        //qDebug() << "Amount of fill on scanline["<<i<<"] = "<< tempScanLine->getFill();
         Vector2<int> startPoint = tempScanLine->getStart();
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
+            if(tempScanLine->getSegment(seg)->getColour() == ClassIndex::white) continue;
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
-        if(horiScanArea.getDirection() == ClassifiedSection::RIGHT)
+        if(horiScanArea.getDirection() == ScanLine::RIGHT)
         {
             for(int j = 0;  j < lengthOfLine; j++)
             {
@@ -242,14 +250,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
-    /*
-    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
-                                                    std::vector<Vector2<int> >&fieldBorders,
-                                                    std::vector<unsigned char> validColours,
-                                                    int spacing,
-                                                    float min_aspect, float max_aspect, int min_segments,
-                                                    tCLASSIFY_METHOD method);
-    */
+
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
@@ -271,7 +272,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-ROBOT";
 
-                tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.2, 2.0, 12, method);
+                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
                 RobotCandidates = tempCandidates;
                 //qDebug() << "POST-ROBOT";
                 robotClassifiedPoints = 0;
@@ -282,7 +283,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 //validColours.push_back(ClassIndex::red_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-BALL";
-                tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
+                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0, 3.0, 1, method);
                 BallCandidates = tempCandidates;
                 //qDebug() << "POST-BALL";
                 break;
@@ -291,8 +292,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::yellow);
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
-                YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
+                YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS" << tempCandidates.size();
                 break;
@@ -301,8 +302,8 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 1, method);
-                BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings,3);
+                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
+                BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS";
                 break;
@@ -314,7 +315,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    qDebug() << "POSTclassifyCandidates";
+    //qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
@@ -341,7 +342,6 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
-
 
     //SUMMARY:
     qDebug() << "Time: " << vision.m_timestamp;

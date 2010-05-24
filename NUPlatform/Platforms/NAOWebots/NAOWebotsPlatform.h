@@ -31,7 +31,9 @@ class NAOWebotsPlatform : public NUPlatform, public JRobot
 public:
     NAOWebotsPlatform(int argc, const char *argv[]);
     ~NAOWebotsPlatform();
-    
+    void getRobotPosition(double*);
+    GPS *gps;
+    Compass *compass;
 protected:
 private:
     void setNameFromNumber();

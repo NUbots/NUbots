@@ -186,14 +186,26 @@ istream& operator>>(istream& input, Job** job)
         case Job::MOTION_SAVE:
             *job = new SaveJob(jobtime, input);
             break;
+        case Job::MOTION_SCRIPT:
+            *job = new ScriptJob(jobtime, input);
+            break;
         case Job::MOTION_HEAD:
             *job = new HeadJob(jobtime, input);
+            break;
+        case Job::MOTION_TRACK:
+            *job = new HeadTrackJob(input);
             break;
         case Job::MOTION_NOD:
             *job = new HeadNodJob(input);
             break;
         case Job::MOTION_PAN:
             *job = new HeadPanJob(input);
+            break;
+        case Job::MOTION_FREEZE:
+            *job = new MotionFreezeJob();
+            break;
+        case Job::MOTION_KILL:
+            *job = new MotionKillJob();
             break;
         case Job::CAMERA_CHANGE_SETTINGS:
             *job = new ChangeCameraSettingsJob(input);
