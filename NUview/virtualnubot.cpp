@@ -130,7 +130,7 @@ void virtualNUbot::processVisionFrame()
 void virtualNUbot::processVisionFrame(const NUimage* image)
 {
     if(!imageAvailable()) return;
-    //qDebug() << "Begin Process Frame";
+    qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -155,13 +155,16 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     int mode  = ROBOTS;
     Circle circ;
-    //qDebug() << "Start switch";
 
 
     vision.setImage(image);
+    //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
     vision.AllFieldObjects->preProcess(image->m_timestamp);
+    //qDebug() << "Image Pre-processed";
     int spacings = (int)image->getWidth()/20;
+    //qDebug() << "Scan Spacing calculated";
     vision.setLUT(classificationTable);
+    //qDebug() << "LUT set";
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
 
@@ -247,14 +250,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
-    /*
-    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
-                                                    std::vector<Vector2<int> >&fieldBorders,
-                                                    std::vector<unsigned char> validColours,
-                                                    int spacing,
-                                                    float min_aspect, float max_aspect, int min_segments,
-                                                    tCLASSIFY_METHOD method);
-    */
+
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
@@ -319,7 +315,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    qDebug() << "POSTclassifyCandidates";
+    //qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
@@ -346,7 +342,6 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
-
 
     //SUMMARY:
     qDebug() << "Time: " << vision.m_timestamp;

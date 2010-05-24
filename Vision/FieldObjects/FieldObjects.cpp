@@ -19,9 +19,13 @@ FieldObjects::~FieldObjects()
 void FieldObjects::preProcess(const float timestamp)
 {
     for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
+    {
         stationaryFieldObjects[i].preProcess(timestamp);
+    }
     for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
+    {
         mobileFieldObjects[i].preProcess(timestamp);
+    }
     ambiguousFieldObjects.clear();
 }
 

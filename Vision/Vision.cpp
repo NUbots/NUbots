@@ -35,6 +35,8 @@
 using namespace mathGeneral;
 Vision::Vision()
 {
+    AllFieldObjects = new FieldObjects();
+
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
@@ -45,6 +47,7 @@ Vision::Vision()
     numSavedImages = 0;
     ImageFrameNumber = 0;
     numFramesDropped = 0;
+
     return;
 }
 
