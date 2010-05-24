@@ -29,7 +29,7 @@
 #include "NUPlatform/NUIO.h"
 #include "Behaviour/Jobs.h"
 #include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
+#include "Behaviour/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
 #include "debugverbositynubot.h"

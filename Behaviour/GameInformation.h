@@ -27,7 +27,7 @@
 #ifndef GAME_INFORMATION_H
 #define GAME_INFORMATION_H
 
-#include "RoboCupGameControlData.h"
+#include "NUPlatform/NUIO/RoboCupGameControlData.h"
 #include <string>
 #include <cstring>
 

@@ -24,6 +24,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
                 BehaviourFSMProvider.cpp BehaviourFSMProvider.h
                 BehaviourState.cpp BehaviourState.h
                 Behaviour.cpp Behaviour.h
+                GameInformation.cpp GameInformation.h
                 TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
@@ -31,7 +32,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
 SET (YOUR_DIRS  Jobs
                 ChaseBall
                 MiscBehaviours
-		WalkOptimisation
+                WalkOptimisation
 )
 ####################################################################################
 
