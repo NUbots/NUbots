@@ -281,7 +281,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //Try and make lines now...
     //int DistanceStep;
-    int SearchMultiplier = 2; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
+    int SearchMultiplier = 1.5; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
     double ColSlopeVal;
     int previousPointID;
 
@@ -578,7 +578,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Remove any lines that are still too small (or really badly fitted)..
     for (LineIDStart = 0; LineIDStart < fieldLines.size(); LineIDStart++){
         if (!fieldLines[LineIDStart].valid) continue;
-        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .80){// alex ADJUST CAN HELP TO DELETE CIRCLE LINES
+        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .80)
+        {// alex ADJUST CAN HELP TO DELETE CIRCLE LINES
             fieldLines[LineIDStart].valid = false;
 
             //std::cout<<"Line " << LineIDStart << " was Removed." << std::endl;
@@ -592,14 +593,14 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
 
 
-    for (unsigned int i = 0; i < fieldLines.size(); i++)
+    /*for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        /*//qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        //qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
-                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
+                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
 
-    }
+    }*/
 
     //clock_t end = clock();
     //debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
@@ -1020,7 +1021,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
                 int rrX = fieldLines[j].leftPoint.x;
                 int rrY = fieldLines[j].leftPoint.y;
                 double distance = sqrt((rrX-lrX)*(rrX-lrX) + (rrY-lrY)*(rrY-lrY));
-                if(distance < 10 && distance >= 0 && rrX > lrX)
+                if(distance < 32 && distance >= 0 && rrX > lrX)
                 {
                     //qDebug() << "Adjacent Line found" << j <<"with " << fieldLines[j].numPoints << " points.";
                     hasJoinedLines = true;
@@ -1743,7 +1744,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 void LineDetection::swap(std::vector<LinePoint> &array, int i, int j)
 {
         LinePoint temp;
-        //// //qDebug() << "Swapping "<< i << "," <<j;
+        //qDebug() << "Swapping "<< i << "," <<j;
         temp     = array[i];
         array[i] = array[j];
         array[j] = temp;
