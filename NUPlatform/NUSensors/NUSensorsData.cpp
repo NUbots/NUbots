@@ -1373,7 +1373,7 @@ void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>
 /*! @brief Puts a user readable summary of the contents of the NUSensorsData class
     @param output the stream in which to put the summary
  */
-void NUSensorsData::summaryTo(ostream& output)
+void NUSensorsData::summaryTo(ostream& output) const
 {
     for (unsigned int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
@@ -1411,13 +1411,17 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     sensor_t insensor;
     sensor_t* sensor;
     input >> numsensors;
+    double lastUpdateTime = 0;
     for (int i=0; i<numsensors; i++)
     {
+        if(!input.good()) throw exception();
         input >> insensor;
         sensor = new sensor_t(insensor);
         p_data.m_sensors.push_back(sensor);
         p_data.updateNamedSensorPointer(sensor);
+        if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
     }
+    p_data.CurrentTime = lastUpdateTime;
     return input;
 }
 

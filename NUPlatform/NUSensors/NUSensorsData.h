@@ -31,9 +31,10 @@
 #include <vector>
 #include <string>
 #include "Tools/Math/Matrix.h"
+#include "Tools/FileFormats/TimestampedData.h"
 using namespace std;
 
-class NUSensorsData
+class NUSensorsData: public TimestampedData
 {
 public:
     typedef int joint_id_t;
@@ -179,13 +180,14 @@ public:
     void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
     void setGPSValues(double time, const vector<float>& data, bool iscalculated = false);
     
-    void summaryTo(ostream& output);
+    void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
     
     friend ostream& operator<< (ostream& output, const NUSensorsData& p_sensor);
     friend istream& operator>> (istream& input, NUSensorsData& p_sensor);
     
     int size() const;
+    double GetTimestamp() const {return CurrentTime;};
 private:
     void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     void addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
