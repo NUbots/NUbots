@@ -162,30 +162,26 @@ void SeeThinkThread::run()
 
             #ifdef USE_LOCALISATION
 		   
-		#if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
-			    localisationrealstarttime = NUSystem::getRealTime();
-			    localisationprocessstarttime = NUSystem::getProcessTime();
-			    localisationthreadstarttime = NUSystem::getThreadTime();
-		#endif
-		    m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects);
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+                        localisationrealstarttime = NUSystem::getRealTime();
+                        localisationprocessstarttime = NUSystem::getProcessTime();
+                        localisationthreadstarttime = NUSystem::getThreadTime();
+                #endif
+                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects);
 		
-		#if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
-			localisationrealendtime = NUSystem::getRealTime();
-			localisationprocessendtime = NUSystem::getProcessTime();
-			localisationthreadendtime = NUSystem::getThreadTime();
-			debug 	<< "SeeThinkThread. Localisation Timing: " 
-			    << (localisationthreadendtime -localisationthreadstarttime) << "ms, in this process: " << (localisationprocessendtime - localisationprocessstarttime) 
-			    << "ms, in realtime: " << localisationrealendtime - localisationrealstarttime << "ms." << endl;
-		#endif		    
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+                    localisationrealendtime = NUSystem::getRealTime();
+                    localisationprocessendtime = NUSystem::getProcessTime();
+                    localisationthreadendtime = NUSystem::getThreadTime();
+                    debug 	<< "SeeThinkThread. Localisation Timing: " 
+                        << (localisationthreadendtime -localisationthreadstarttime) << "ms, in this process: " << (localisationprocessendtime - localisationprocessstarttime) 
+                        << "ms, in realtime: " << localisationrealendtime - localisationrealstarttime << "ms." << endl;
+                #endif		    
             
-	   #endif
+            #endif
             
             #if defined(USE_BEHAVIOUR)
-                #if defined(USE_VISION)
-                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
-                #else
-                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, NULL, m_nubot->GameInfo, m_nubot->TeamInfo);
-                #endif
+                m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
             #endif
             
             #ifdef USE_VISION
