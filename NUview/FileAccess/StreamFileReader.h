@@ -39,12 +39,10 @@
 #include <map>
 #include <vector>
 #include "Tools/FileFormats/TimestampedData.h"
-#include "NavigableFileReader.h"
 #include <cmath>
 #include <QDebug>
-
 template<class C>
-class StreamFileReader: public NavigableFileReader
+class StreamFileReader
 {
     typedef std::fstream::pos_type Position;
     struct FrameEntry
@@ -60,7 +58,7 @@ public:
     /**
       *     Default constructor. Initialises the StreamFileReader.
       */
-    StreamFileReader(QObject *parent = 0): NavigableFileReader(parent), m_fileEndLocation(0)
+    StreamFileReader(): m_fileEndLocation(0)
     {
         m_dataBuffer = new C();
         m_selectedFrame = m_index.end();
@@ -70,7 +68,7 @@ public:
       *     Open constructor. Initialises the StreamFileReader and opens and indexes the file described by the filename.
       *     @param filename name of the file to be opened and accessed by the StreamFileReader.
       */
-    StreamFileReader(const std::string& filename, QObject *parent = 0): NavigableFileReader(parent), m_fileEndLocation(0)
+    StreamFileReader(const std::string& filename): m_fileEndLocation(0)
     {
         m_dataBuffer = new C();
         OpenFile(filename);
@@ -129,7 +127,6 @@ public:
         IndexIterator indexEntry = m_index.begin();
         while(indexEntry != m_index.end())
         {
-            qDebug() << "Sequence Number: "<< (*indexEntry).second.frameSequenceNumber << "\tTime: " << (*indexEntry).first << "\tIndex: " << (*indexEntry).second.position;
             ++indexEntry;
         }
     }
@@ -315,28 +312,7 @@ public:
     C* ReadFrameAtTime(double time)
     {
         IndexIterator entry = GetIndexFromTime(time);
-        qDebug() << "Getting Frame at: " << (*entry).second.position;
         return ReadFrame(entry);
-    }
-
-    void EmitControlAvailability()
-    {
-        if(IsValid() == false)
-        {
-            emit nextFrameAvailable(false);
-            emit previousFrameAvailable(false);
-            emit firstFrameAvailable(false);
-            emit lastFrameAvailable(false);
-            emit setFrameAvailable(false);
-        }
-        else
-        {
-            emit nextFrameAvailable(CurrentFrameSequenceNumber() < TotalFrames());
-            emit previousFrameAvailable(CurrentFrameSequenceNumber() > 0);
-            emit firstFrameAvailable(true);
-            emit lastFrameAvailable(true);
-            emit setFrameAvailable(true);
-        }
     }
 
 private:
@@ -417,15 +393,16 @@ private:
             m_index.clear();
             m_timeIndex.clear();
             temp.frameSequenceNumber = 0;
-            while (m_file.good())
+            while (m_file.good() && (m_file.tellg() != m_fileEndLocation))
             {
                 temp.position = m_file.tellg();
                 temp.frameSequenceNumber++;
                 try{
                     m_file >> (*m_dataBuffer);
-                }   catch(...){break;}
+                }   catch(...){qDebug() << "Bad frame found"; break;}
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
                 timestamp = floor(timestamp);
+                //qDebug() << "New frame: " << timestamp;
                 m_index.insert(IndexEntry(timestamp,temp));
                 m_timeIndex.push_back(timestamp);
             }
