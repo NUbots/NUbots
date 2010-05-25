@@ -1,12 +1,12 @@
 
-#include "EllipseFitting/tnt.h"
-#include "EllipseFitting/jama_eig.h"
+#include "../Tools/Math/LSFittedLine.h"
+#include <vector>
 
 class EllipseFit{
     public:
         EllipseFit();
         ~EllipseFit();
-        void Fit_Ellipse(Array2D<double> x, Array2D<double> y);
+        void Fit_Ellipse( std::vector < LinePoint* > centreCirclePoints);
         double GetX();
         double GetY();
         double GetR1();
@@ -20,11 +20,5 @@ class EllipseFit{
         double r2;
         double theta;
 
-        Array2D<double> Inverse33(Array2D<double> A);
-        Array2D<double> Inverse22(Array2D<double> a);
-        Array2D<double> Eig(Array2D<double> a);
-        Array2D<double> transp(Array2D<double> a);
-        void SolveEllipse(Array1D<double> a);
-        void Print(Array2D<double> a);
         
 };

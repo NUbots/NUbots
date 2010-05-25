@@ -10,7 +10,7 @@
 //using namespace std;
 #include <vector>
 #include "Vision.h"
-//#include "EllipseFit.h"
+#include "EllipseFit.h"
 
 //For distance to Point:
 #include "../Kinematics/Kinematics.h"
@@ -961,11 +961,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
     int TempID;
     unsigned int x;
     bool recheck = false;
-/*
+
     if (cornerPoints.size() > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
-        //qDebug() << "Trying EllipseFit: too many corners";
+
         //Method:
         //	1. Box all small lines:
         //	2. find the most left line: use right point
@@ -974,15 +974,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
         //	5. Repeat until no more further right
 
         //TRY BOX around all small Lines and compute centre of box
-        int maxX=0;
-        int minX=IMAGE_WIDTH;
-        int maxY = 0;
-        int minY = IMAGE_HEIGHT;
+
         // Find shortest Lines
         //int cutOff = IMAGE_WIDTH/2;
         int longestLine = 0;
         double longestLineLength = 0.0;
-        //cout << "Lines to Search: " << FieldLinesCounter << "\t Valid: " << TotalValidLines << endl;
+
 
         //Sort Lines by most Left:
         qsort(fieldLines, 0, fieldLines.size()-1);
@@ -996,7 +993,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             ly = fieldLines[i].leftPoint.y;
             rx = fieldLines[i].rightPoint.x;
             ry = fieldLines[i].rightPoint.y;
-            //cout << lx << ", \t" << ly<< ", \t" << rx << ", \t" << ry << endl;
+
             double linelength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
             if(linelength > longestLineLength)
             {
@@ -1012,7 +1009,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             if ( i == (unsigned int) PenaltySpotLineNumber)	continue;
             if ( i == (unsigned int) longestLine )		continue;
             if (fieldLines[i].valid == false)	continue;
-            //qDebug() << "Checking Line: " << i << "( "<< fieldLines[i].rightPoint.x <<"," << fieldLines[i].rightPoint.y<< ")";
+
             //std::vector<LinePoint*> minpoints = fieldLines[i].getPoints();
 
             //Find another line thats close to it
@@ -1025,14 +1022,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 if ( j == (unsigned int) longestLine )			continue;
                 if (fieldLines[j].valid == false)	continue;
                 if (i == j)				continue;
-                //qDebug() << "\t Against Line: " << j << "( "<< fieldLines[j].leftPoint.x <<"," << fieldLines[j].leftPoint.y<< ")";
+
                 //Calculate distance from 2 points
                 int rrX = fieldLines[j].leftPoint.x;
                 int rrY = fieldLines[j].leftPoint.y;
                 double distance = sqrt((rrX-lrX)*(rrX-lrX) + (rrY-lrY)*(rrY-lrY));
                 if(distance < 32 && distance >= 0 && rrX > lrX)
                 {
-                    //qDebug() << "Adjacent Line found" << j <<"with " << fieldLines[j].numPoints << " points.";
+
                     hasJoinedLines = true;
                     std::vector <LinePoint*> linePts = fieldLines[j].getPoints();
                     for(int k = 0; k <  fieldLines[j].numPoints ; k++)
@@ -1060,23 +1057,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             }
         }
 
-        //qDebug() << "Total pointSize: "<< points.size() << endl;
         if(points.size() > 5)
         {
-            Array2D<double> x(points.size(),1,0.0);
-            Array2D<double> y(points.size(),1,0.0);
-            for(unsigned int i = 0; i < points.size(); i++)
-            {
-                    LinePoint* tempPoint = points.at(i);
-                    //cout << "Point " << i << ": \t"<< tempPoint->x << ",\t"<< tempPoint->y <<endl;
-                    x[i][0] =  tempPoint->x;
-                    y[i][0] =  tempPoint->y;
-            }
+
 
 
             EllipseFit* e = new EllipseFit;
 
-            e->Fit_Ellipse(x,y);
+            e->Fit_Ellipse(points);
             //e->PrintFinal();
 
             double cx = e->GetX();
@@ -1084,17 +1072,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             double r1 = e->GetR1();
             double r2 = e->GetR2();
 
-            //int minX,minY,maxX,maxY;
-            minX = cx-r1;
-            maxX = cx+r1;
-            minY = cy-r2;
-            maxY = cy+r2;
-
             //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
-            TempDist = 2000;
-            //GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev);
+            TempDist = 0.0;
+            GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
 
-            if (TempDist > 100.0) {
+            if (TempDist > 100.0  || TempDist == 0.0) {
 
                 Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                 Vector3<float> measuredError(0.0,0.0,0.0);
@@ -1118,7 +1100,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 
     }
 
-    */
+
         //qDebug() << "Before Decoding Lines: ";
         /*
         for(unsigned int i = 0; i < AllObjects->stationaryFieldObjects.size();i++)
