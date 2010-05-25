@@ -18,7 +18,6 @@
 #include "frameInformationWidget.h"
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
-#include "FileAccess/StreamFileReader.h"
 
 using namespace std;
 ofstream debug;
@@ -42,6 +41,13 @@ MainWindow::MainWindow(QWidget *parent)
     createContextMenu();
     createToolBars();
     createStatusBar();
+
+    sensorDisplay = new SensorDisplayWidget(this);
+    QDockWidget* sensorDock = new QDockWidget("Sensor Values");
+    sensorDock->setObjectName("Sensor Values");
+    sensorDock->setWidget(sensorDisplay);
+    sensorDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,sensorDock);
 
     // Add localisation widget
     localisation = new LocalisationWidget(this);
@@ -93,14 +99,6 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
-
-    StreamFileReader<NUimage> test("nubot6-lab100415.nul");
-    test.DisplayIndex();
-    qDebug() << test.HasTime(43177.0);
-    qDebug() << test.HasTime(43157.0);
-    test.ReadFrameAtTime(41390.0);
-    qDebug() << "Start Time: " << test.StartTime();
-    qDebug() << "End Time: " << test.EndTime();
 }
 
 MainWindow::~MainWindow()
@@ -316,6 +314,8 @@ void MainWindow::createConnections()
 {
     qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
+    connect(&LogReader,SIGNAL(sensorDataChanged(const NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(const NUSensorsData*)));
+
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
@@ -382,7 +382,7 @@ void MainWindow::openLog()
 
     QString fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), ".",
-                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;All Files(*.*)"));
+                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
     openLog(fileName);
 
 }
