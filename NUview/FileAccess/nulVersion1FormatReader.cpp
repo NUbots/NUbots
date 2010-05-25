@@ -20,7 +20,7 @@ nulVersion1FormatReader::~nulVersion1FormatReader()
 
 int nulVersion1FormatReader::openFile(const QString& filename)
 {
-    fileInformation.setFile(filename);
+    m_fileInformation.setFile(filename);
     closeFile();
     fileStream.open(filename.toStdString().c_str(),std::ios_base::in|std::ios_base::binary);
     if(fileGood())
@@ -31,7 +31,7 @@ int nulVersion1FormatReader::openFile(const QString& filename)
         fileStream.read(reinterpret_cast<char*>(&y), sizeof(y));
         fileStream.seekg(0,std::ios_base::beg);
         m_frameLength = (2*sizeof(x) + x*y*sizeof(int) + sizeof(double));
-        totalFrames = fileInformation.size() / m_frameLength;
+        m_totalFrames = m_fileInformation.size() / m_frameLength;
     }
     return numFrames();
 }
@@ -62,7 +62,7 @@ int nulVersion1FormatReader::nextFrame()
     if(isNextFrameAvailable())
     {
 
-        currentFrameIndex++;
+        m_currentFrameIndex++;
         fileStream >> rawImageBuffer;
         qDebug() << fileStream.tellg();
         emit rawImageChanged(&rawImageBuffer);
@@ -74,7 +74,7 @@ int nulVersion1FormatReader::nextFrame()
 
 int nulVersion1FormatReader::firstFrame()
 {
-    currentFrameIndex = 0;
+    m_currentFrameIndex = 0;
     fileStream.seekg(0,std::ios_base::beg);
     nextFrame();
     return currentFrame();
@@ -84,9 +84,9 @@ int nulVersion1FormatReader::previousFrame()
 {
     if(isPreviousFrameAvailable())
     {
-        --currentFrameIndex;
-        qDebug() << "Frame: " << currentFrameIndex << " Seeking to:" << currentFrameIndex*m_frameLength << endl;
-        fileStream.seekg((currentFrameIndex-1)*m_frameLength,std::ios_base::beg);
+        --m_currentFrameIndex;
+        qDebug() << "Frame: " << m_currentFrameIndex << " Seeking to:" << m_currentFrameIndex*m_frameLength << endl;
+        fileStream.seekg((m_currentFrameIndex-1)*m_frameLength,std::ios_base::beg);
         qDebug() << fileStream.tellg();
         fileStream >> rawImageBuffer;
         emit rawImageChanged(&rawImageBuffer);

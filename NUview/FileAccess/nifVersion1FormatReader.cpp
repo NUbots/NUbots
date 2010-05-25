@@ -19,10 +19,10 @@ nifVersion1FormatReader::~nifVersion1FormatReader()
 
 int nifVersion1FormatReader::openFile(const QString& filename)
 {
-    fileInformation.setFile(filename);
+    m_fileInformation.setFile(filename);
     closeFile();
-    totalFrames = nifFileReader.openFile(filename.toAscii().data(), false);
-    return totalFrames;
+    m_totalFrames = nifFileReader.openFile(filename.toAscii().data(), false);
+    return m_totalFrames;
 }
 
 bool nifVersion1FormatReader::closeFile()
@@ -57,13 +57,13 @@ bool nifVersion1FormatReader::isSetFrameAvailable()
 
 int nifVersion1FormatReader::nextFrame()
 {
-    int nextFrame = currentFrameIndex + 1;
+    int nextFrame = m_currentFrameIndex + 1;
     return setFrame(nextFrame);
 }
 
 int nifVersion1FormatReader::previousFrame()
 {
-    int prevFrame = currentFrameIndex - 1;
+    int prevFrame = m_currentFrameIndex - 1;
     return setFrame(prevFrame);
 }
 
@@ -81,7 +81,7 @@ int nifVersion1FormatReader::setFrame(int frameNumber)
 {
     if( (frameNumber > 0) && (frameNumber <= numFrames()) && fileGood())
     {
-        currentFrameIndex = frameNumber;
+        m_currentFrameIndex = frameNumber;
         uint8 imgbuffer[320*240*2];
         int robotFrameNumber;
         NaoCamera camera;
