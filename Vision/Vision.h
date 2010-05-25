@@ -183,6 +183,7 @@ class Vision
                      std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                      const std::vector< TransitionSegment > horizontalSegments);
 
+    void DetectRobots(std::vector<ObjectCandidate> &RobotCandidates);
 
     bool isPixelOnScreen(int x, int y);
     int getImageHeight(){ return currentImage->getHeight();}

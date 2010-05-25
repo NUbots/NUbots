@@ -52,7 +52,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     FindLinePoints(scanArea,vision,image_width,image_height);
 
 
-    //qDebug() << "Line Points: " << linePoints.size();
+    //qDebug() << "Robot Segments: " << robotSegments.size();
     //for(unsigned int j = 0; j < linePoints.size(); j++)
     //{
     //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
@@ -133,10 +133,16 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
         for(int j = 0; j < numberOfSegments ; j++)
         {
-            //! Throw out short segments
+
             if(linePoints.size() > MAX_LINEPOINTS) break;
             //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
+            if(segment->getColour() == ClassIndex::pink || segment->getColour() == ClassIndex::shadow_blue || segment->getColour() == ClassIndex::pink_orange || segment->getColour() == ClassIndex::blue)
+            {
+                robotSegments.push_back(*segment);
+            }
+            if(segment->getColour() != ClassIndex::white) continue;
+            bool segmentisused = false;
             if(previouslyCloselyScanedSegment == NULL)
             {
                 //qDebug() << "Assigning First Previous SEgment";
@@ -145,6 +151,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
             //int segmentSize = segment->getSize();
             //! CHECK The Length of the segment
             if(segment->getSize() < MIN_POINT_THICKNESS) continue;
+
 
             //! LOOKING FOR HORIZONTAL LINE POINTS:
             if(segment->getSize() > VERT_POINT_THICKNESS*0.5 &&
@@ -173,7 +180,10 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 }
                 unsigned char LeftColour = vision->classifyPixel(LEFTX, MidY);
                 unsigned char RightColour = vision->classifyPixel(RIGHTX, MidY);
-
+                if(LeftColour == ClassIndex::white || RightColour  == ClassIndex::white)
+                {
+                    robotSegments.push_back(*segment);
+                }
                 if(LeftColour != ClassIndex::white && RightColour != ClassIndex::white
                    //&& segment->getAfterColour() == ClassIndex::green
                    //&& segment->getBeforeColour() == ClassIndex::green
@@ -224,11 +234,13 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                                        (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE))
                                     {
                                         canNotAdd = true;
+
                                         break;
                                     }
                                 }
                                 if(!canNotAdd)
                                 {
+                                    segmentisused = true;
                                     tempLinePoint.inUse = false;
                                     linePoints.push_back(tempLinePoint);
                                     //qDebug() << "Added LinePoint to list: "<< tempLinePoint.x <<"," <<tempLinePoint.y << tempLinePoint.width;
@@ -271,6 +283,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 }
                 if(!canNotAdd)
                 {
+                    segmentisused = true;
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
@@ -278,6 +291,13 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 //LinePointCounter++;
 
             }
+
+            if(segmentisused == false)
+            {
+                robotSegments.push_back(*segment);
+            }
+
+
         }
 
     }

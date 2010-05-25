@@ -4,12 +4,10 @@
 #include "../Tools/Math/LSFittedLine.h"
 #include "CornerPoint.h"
 #include "ClassifiedSection.h"
-//#include "../Globals.h"
-//#include "../FieldObject.h"
-//#include "../Kinematics/Horizon.h"
-//#include "CircleFitting.h"
-#include <iostream>
+#include "TransitionSegment.h"
 #include "FieldObjects/FieldObjects.h"
+#include <iostream>
+
 class Vision;
 class NUSensorsData;
 class Kinematics;
@@ -44,6 +42,7 @@ class LineDetection{
         std::vector<LSFittedLine> fieldLines;
         std::vector<CornerPoint> cornerPoints;
         std::vector<AmbiguousObject> possiblePenaltySpots;
+        std::vector<TransitionSegment> robotSegments;
         //int LinePointCounter;
         //int FieldLinesCounter;
         //int CornerPointCounter;

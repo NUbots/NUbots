@@ -150,13 +150,13 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 		{
 			if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
 			//TODO: Remove this if condition once we are sure of distance and bearing of all FOs
-			if(currStat->getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST || currStat->getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST
+			/*if(currStat->getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST || currStat->getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST
 						|| currStat->getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST 
 						|| currStat->getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
-			{
+			{*/
 				updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
 				numUpdates++;
-			}
+			//}
 		}
 // 	
 // 	

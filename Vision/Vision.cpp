@@ -18,6 +18,7 @@
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
+#include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -164,7 +165,6 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
-    int robotClassifiedPoints = 0;
     //debug << "Setting Image: " <<endl;
 
     if(isSavingImages)
@@ -297,29 +297,12 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-   for (int i = 0; i < 4; i++)
+   for (int i = 1; i < 4; i++)
     {
 
         switch (i)
         {
-            case ROBOTS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::pink);
-                validColours.push_back(ClassIndex::pink_orange);
-                validColours.push_back(ClassIndex::shadow_blue);
 
-                #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-ROBOT" << endl;
-                #endif
-
-                RobotCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.2, 2.0, 12, method);
-
-                #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-ROBOT" << endl;
-                #endif
-                robotClassifiedPoints = 0;
-                break;
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
@@ -406,10 +389,29 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tPre-Line Formation: " <<endl;
     #endif
-    DetectLines(&vertScanArea,spacings, data);
+
+    LineDetection LineDetector = DetectLines(&vertScanArea,spacings, data);
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tPost-Line Formation: " <<endl;
+    #endif
+
+    //! Find Robots:
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-Robot Formation: " <<endl;
+    #endif
+    validColours.clear();
+    validColours.push_back(ClassIndex::white);
+    validColours.push_back(ClassIndex::pink);
+    validColours.push_back(ClassIndex::pink_orange);
+    validColours.push_back(ClassIndex::shadow_blue);
+    validColours.push_back(ClassIndex::blue);
+
+    RobotCandidates = classifyCandidates(LineDetector.robotSegments, points ,validColours, spacings, 0.2, 2.0, 12, method);
+
+    DetectRobots(RobotCandidates);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-Robot Formation: " <<endl;
     #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
@@ -1830,6 +1832,98 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
     GoalDetection goalDetector;
     goalDetector.FindGoal(FO_Candidates, FO_AboveHorizonCandidates, AllFieldObjects, horizontalSegments, this,height,width);
     return;
+}
+
+void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
+{
+    Kinematics kin;
+
+    for(unsigned int i = 0; i < RobotCandidates.size(); i++)
+    {
+        std::vector <TransitionSegment > segments = RobotCandidates[i].getSegments();
+        int pinkSize = 0;
+        int blueSize = 0;
+        int whiteSize = 0;
+        for(unsigned int j = 0; j < segments.size(); j++)
+        {
+            if(segments[j].getColour() == ClassIndex::pink || segments[j].getColour() == ClassIndex::pink_orange)
+            {
+                pinkSize = pinkSize + segments[j].getSize();
+            }
+            else if(segments[j].getColour() == ClassIndex::shadow_blue || segments[j].getColour() == ClassIndex::blue)
+            {
+                blueSize = blueSize + segments[j].getSize();
+            }
+            else if(segments[j].getColour() == ClassIndex::white )
+            {
+                whiteSize = whiteSize + segments[j].getSize();
+                //qDebug() << "White Segments: " << segments[j].getSize() << segments[j].getStartPoint().x << segments[j].getStartPoint().y << segments[j].getEndPoint().x << segments[j].getEndPoint().y;
+            }
+
+        }
+        //qDebug() << "Segments: " << segments.size()<< "White: " <<  whiteSize << "  Blue: " << blueSize;
+        if( (blueSize > pinkSize && whiteSize > blueSize))// || RobotCandidates[i].getColour() == ClassIndex::blue || RobotCandidates[i].getColour() == ClassIndex::shadow_blue)
+        {
+            RobotCandidates[i].setColour(ClassIndex::shadow_blue);
+            //MAKE a Mobile_FIELDOBJECT: BLUE ROBOT
+            AmbiguousObject tempRobotObject(FieldObjects::FO_BLUE_ROBOT_UNKNOWN, "UNKNOWN BLUE ROBOT");
+
+            Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
+            float cx = RobotCandidates[i].getCentreX();
+            float cy = bottomRight.y;
+            float bearing = CalculateBearing(cx);
+            float elevation = CalculateElevation(cy);
+            float distance = 0;
+
+            Matrix camera2groundTransform;
+            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            if(isOK == true)
+            {
+                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                #if DEBUG_VISION_VERBOSITY > 6
+                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                #endif
+            }
+            Vector3<float> measured(distance,bearing,elevation);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
+            Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+        }
+        else if( (blueSize < pinkSize && whiteSize > pinkSize) ) //|| RobotCandidates[i].getColour() == ClassIndex::pink || RobotCandidates[i].getColour() == ClassIndex::pink_orange)
+        {
+            RobotCandidates[i].setColour(ClassIndex::pink);
+            AmbiguousObject tempRobotObject(FieldObjects::FO_PINK_ROBOT_UNKNOWN, "UNKNOWN PINK ROBOT");
+
+            Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
+            float cx = RobotCandidates[i].getCentreX();
+            float cy = bottomRight.y;
+            float bearing = CalculateBearing(cx);
+            float elevation = CalculateElevation(cy);
+            float distance = 0;
+
+            Matrix camera2groundTransform;
+            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            if(isOK == true)
+            {
+                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                #if DEBUG_VISION_VERBOSITY > 6
+                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                #endif
+            }
+            Vector3<float> measured(distance,bearing,elevation);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
+            Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+        }
+    }
+
+
 }
 
 double Vision::CalculateBearing(double cx){
