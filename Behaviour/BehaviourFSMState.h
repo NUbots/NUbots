@@ -1,8 +1,8 @@
-/*! @file BehaviourFSMProvider.h
-    @brief Declaration of an abstract behaviour provider class for other behaviours to inherit from
+/*! @file BehaviourFSMState.h
+    @brief Declaration of an abstract behaviour state class for other states to inherit from
  
-    @class BehaviourFSMProvider
-    @brief Declaration of an abstract behaviour provider class
+    @class BehaviourFSMState
+    @brief Declaration of an abstract behaviour state class for other states to inherit from
 
     @author Jason Kulk
  
@@ -22,34 +22,37 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BEHAVIOURFSMPROVIDER_H
-#define BEHAVIOURFSMPROVIDER_H
+#ifndef BEHAVIOURFSMSTATE_H
+#define BEHAVIOURFSMSTATE_H
 
-class Behaviour;
-#include "Behaviour/BehaviourProvider.h"
-class BehaviourState;
-
-class JobList;
 class NUSensorsData;
 class NUActionatorsData;
+class JobList;
 class FieldObjects;
 class GameInformation;
 class TeamInformation;
 
-#include <vector>
+#include "BehaviourState.h"
 
-class BehaviourFSMProvider : public BehaviourProvider
+class BehaviourFSMState : public BehaviourState
 {
 public:
-    virtual ~BehaviourFSMProvider();
-    
+    virtual ~BehaviourFSMState() {};
+    virtual BehaviourFSMState* nextState() = 0;
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
 protected:
-    BehaviourFSMProvider(Behaviour* manager);
-
-    void doBehaviour();
-    virtual void doBehaviourCommons();
-    virtual BehaviourState* nextStateCommons();
+    BehaviourFSMState()
+    {
+        m_state = 0;
+        m_previous_state = 0;
+        m_state_changed = false;
+    };
+    void doState();
+    virtual void doStateCommons() {};
+    virtual BehaviourState* nextStateCommons()
+    {  
+        return m_state;
+    };
 
 protected:
     BehaviourState* m_state;

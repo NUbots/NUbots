@@ -42,7 +42,6 @@ public:
     virtual ~SearchForBlueGoal() {};
     virtual BehaviourState* nextState()
     {
-        debug << "nextState::this:" << this << endl;
         if (isTargetVisible())
         {
             debug << "SearchForBlueGoal -> ChaseBlueGoal" << endl;

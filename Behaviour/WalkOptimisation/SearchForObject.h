@@ -68,7 +68,7 @@ protected:
                 if (ambig_id == m_ambiguous_id)
                     return true;
             }
-            // if non were the ambiguous version
+            // if none were the ambiguous version
             return false;
         }
         else
