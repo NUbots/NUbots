@@ -55,6 +55,8 @@ public:
     TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
     ~TeamInformation();
     
+    int getPlayerNumber() {return m_player_number;};
+    int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
     friend ostream& operator<< (ostream& output, TeamInformation& info);
