@@ -124,7 +124,7 @@ NUbot::NUbot(int argc, const char *argv[])
     Actions = m_platform->actionators->getActions();
     Objects = new FieldObjects();
     Jobs = new JobList();
-    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions);
     TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
 
     // --------------------------------- construct the io

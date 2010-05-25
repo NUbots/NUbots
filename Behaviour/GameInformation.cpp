@@ -1,236 +1,260 @@
 #include "GameInformation.h"
-#include "NUPlatform/NUSensors.h"
-#include <vector>
+
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUSystem.h"
+
 #include <memory.h>
 #include "debug.h"
 
-GameInformation::GameInformation(int playerNumber, int teamNumber):
-        m_myPlayerNumber(playerNumber),
-        m_myTeamNumber(teamNumber)
+GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData* data, NUActionatorsData* actions)
 {
-    m_myStateChanged = true;
-    // Setup initial state
-    // If  a player number, set to initial state.
-    if((playerNumber >= 1) && (playerNumber <= 3))
-    {
-        m_myCurrentState = state_initial;
-        m_myPreviousState = state_initial;
-    }
-    // If a non-player number, set to sustitute state.
-    else
-    {
-        m_myCurrentState = state_substitute;
-        m_myPreviousState = state_substitute;
-    }
-    for (int i = 0; i < numPacketBuffers; i++)
-    {
-        m_gamePacketBuffers[i] = new RoboCupGameControlData;
-    }
-    m_currentControlData = m_gamePacketBuffers[0];
-    m_previousControlData = m_gamePacketBuffers[1];
-    m_unprocessedControlData = m_gamePacketBuffers[2];
+    m_data = data;
+    m_actions = actions;
+    
+    m_player_number = playerNumber;
+    m_team_number = teamNumber;
+    m_state = InitialState;
+    
+    m_currentControlData = new RoboCupGameControlData();
+    m_last_packet_time = 0;
+    
+    m_currentReturnData = new RoboCupGameControlReturnData();
+    memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, 4);
+    m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
 }
 
 GameInformation::~GameInformation()
 {
-    for (int i = 0; i < numPacketBuffers; i++)
-    {
-        delete m_gamePacketBuffers[i];
-    }
-    m_currentControlData = 0;
-    m_previousControlData = 0;
-    m_unprocessedControlData = 0;
+    delete m_currentControlData;
 }
 
-void GameInformation::process()
+/*! @brief Returns the player number */
+int GameInformation::getPlayerNumber() const 
 {
-    // Check if there is a new network packet
-    if(!m_hasUnprocessedControlData)
-    {
-        // Start current update with the most current data.
-        memcpy(m_unprocessedControlData, m_currentControlData, sizeof(RoboCupGameControlData));
-        if(m_hasUnprocessedStateTrigger)
-        {
-            doManualStateChange();
-        }
-        if(m_hasUnprocessedTeamTrigger)
-        {
-            doManualTeamChange();
-        }
-        if(m_hasUnprocessedKickoffTrigger)
-        {
-            doManualKickoffChange();
-        }
-    }
-
-    m_hasUnprocessedControlData = false;
-    m_hasUnprocessedStateTrigger = false;
-    m_hasUnprocessedTeamTrigger = false;
-    m_hasUnprocessedKickoffTrigger = false;
-    updateData();
-
-    if(getPlayer(m_myTeamNumber,m_myPlayerNumber)->penalty != PENALTY_NONE)
-    {
-        if(m_myCurrentState != state_penalised)
-        {
-            m_myPreviousState = m_myCurrentState;
-            m_myCurrentState = state_penalised;
-        }
-    }
-    else if(m_myCurrentState != m_currentControlData->state)
-    {
-        m_myPreviousState = m_myCurrentState;
-        m_myCurrentState = robotState(m_currentControlData->state);
-    }
-    return;
+    return m_player_number;
 }
 
-void GameInformation::addNewNetworkData(const RoboCupGameControlData& gameControllerPacket)
+/*! @brief Returns the team number */
+int GameInformation::getTeamNumber() const 
 {
-    // Copy the new data
-    memcpy(m_unprocessedControlData, &gameControllerPacket, sizeof(RoboCupGameControlData));
-    m_hasUnprocessedControlData = true;
+    return m_team_number;
 }
 
-/*
-void GameInformation::updateSensorData(NUSensorsData* sensorData)
+/*! @brief Returns the team colour */
+GameInformation::TeamColour GameInformation::getTeamColour() const
 {
-    std::vector<float> tempButtonValues;
-    std::vector<float> tempButtonTriggers;
-    bool chestPressed = false;
-    bool leftFootPressed = false;
-    bool rightFootPressed = false;
-    bool stateChangeTriggered = false;
-    m_myStateChanged = false;
+    const TeamInfo* team = getMyTeamInfo();
+    if (team)
+        return static_cast<TeamColour>(team->teamColour);
+    else
+        return BlueTeam;
+}
 
-    if(sensorData->getButtonValues(NUSensorsData::MainButton, tempButtonValues) && tempButtonValues.size() >= 1)
-    {
-        chestPressed = (tempButtonValues[0] > 0.0f);
+/*! @brief Returns the current state */
+GameInformation::RobotState GameInformation::getCurrentState() const 
+{
+    return m_state;
+}
+
+/*! @brief Returns true if the game controller is working */
+bool GameInformation::gameControllerWorking() const
+{
+    if (m_data)
+        return (m_data->CurrentTime - m_last_packet_time) > 10000;
+    else
+        return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0);
+}
+
+/*! @brief Returns the number of players per team */
+int GameInformation::getNumberOfPlayers() const 
+{
+    return (int)m_currentControlData->playersPerTeam;
+}
+
+/*! @brief Returns true if it is the first half */
+bool GameInformation::isFirstHalf() const 
+{
+    return (bool)m_currentControlData->firstHalf;
+}
+
+/*! @brief Returns true if it is the second half */
+bool GameInformation::isSecondHalf() const 
+{
+    return not isFirstHalf();
+}
+    
+/*! @brief Returns true if we have the kick off */
+bool GameInformation::haveKickoff() const 
+{
+    return (m_currentControlData->kickOffTeam == m_team_number);
+}
+
+/*! @brief Returns the number of seconds remaining in the half */
+int GameInformation::secondsRemaining() const 
+{
+    return m_currentControlData->secsRemaining;
+}                          
+
+/*! @brief Returns the number of goals we have scored */
+int GameInformation::ourScore() const                                
+{
+    const TeamInfo* team = getMyTeamInfo();
+    if (team)
+        return team->score;
+    else
+        return 0;
+}                         
+
+/*! @brief Returns the number of goals they have scored */
+int GameInformation::opponentScore() const                           
+{
+    const TeamInfo* team = getOpponentTeamInfo();
+    if (team)
+        return team->score;
+    else
+        return 0;
+}
+
+/*! @brief Updates the GameInformation based on the m_currentControlData (ie. sets m_state)
+ */
+void GameInformation::doGameControllerUpdate()
+{
+    if (m_state == SubstituteState)
+    {   // we don't listen to game controller if we are a subsitute player
+        return;
     }
-
-    if(sensorData->getFootBumperValues(NUSensorsData::AllFeet,tempButtonValues) && tempButtonValues.size() >= 2)
-    {
-        leftFootPressed = (tempButtonValues[0] > 0.0f);
-        rightFootPressed = (tempButtonValues[1] > 0.0f);
-    }
-
-    if(sensorData->getButtonTriggers(tempButtonTriggers) && tempButtonTriggers.size() >= 3)
-    {
-       // Trigger if the button has been pressed for less than a full frame.
-        if(chestPressed && (tempButtonTriggers[0] < 33.0f ))
+    else if (m_state == RequiresSubstitutionState)
+    {   // if we are in the requires substitution state we are do penalty, finish, initial
+        const RobotInfo* info = getMyRobotInfo();
+        if (info and info->penalty != PENALTY_NONE)
+            m_state = PenalisedState;
+        else if (m_currentControlData->state == InitialState || m_currentControlData->state == FinishedState)
         {
-            stateChangeTriggered = true;
+            m_state = static_cast<RobotState>(m_currentControlData->state); 
         }
     }
-
-    if(stateChangeTriggered)
-    {
-        m_myPreviousState = m_myCurrentState;
-        m_myCurrentState = getNextState(m_myCurrentState);
-        debug << "State Changed: " << stateName(m_myPreviousState) << " -> " << stateName(m_myCurrentState) << endl;
-        m_myStateChanged = true;
+    else
+    {   // in other states we always do what the game controller says
+        const RobotInfo* info = getMyRobotInfo();
+        if (info and info->penalty != PENALTY_NONE)
+            m_state = PenalisedState;
+        else
+            m_state = static_cast<RobotState>(m_currentControlData->state);
     }
 }
-*/
 
-void GameInformation::updateData()
-{
-    RoboCupGameControlData* temp;
-    temp = m_previousControlData;
-    m_previousControlData = m_currentControlData;
-    m_currentControlData = m_unprocessedControlData;
-    m_unprocessedControlData = temp;
-    return;
-
-}
-
+/*! @brief Does a manual state change. The logic is simple if not in penalised then penalise, otherwise go to playing
+ */
 void GameInformation::doManualStateChange()
 {
-    m_myPreviousState = m_myCurrentState;
-    m_myCurrentState = getNextState(m_myCurrentState);
-    if(m_myCurrentState == state_penalised)
+    if (m_state != PenalisedState)
     {
-        if(m_unprocessedControlData->teams[TEAM_BLUE].teamNumber == m_myTeamNumber)
-        {
-            m_unprocessedControlData->teams[TEAM_BLUE].players[m_myPlayerNumber].penalty = PENALTY_MANUAL;
-        }
-        else if(m_unprocessedControlData->teams[TEAM_RED].teamNumber == m_myTeamNumber)
-        {
-            m_unprocessedControlData->teams[TEAM_RED].players[m_myPlayerNumber].penalty = PENALTY_MANUAL;
-        }
+        m_state = PenalisedState;
+        //! @todo send game controller return packet
     }
+    else
+        m_state = PlayingState;
 }
 
+/*! @brief Does a manual team change
+ */
 void GameInformation::doManualTeamChange()
 {
-    rawSwapTeams(m_unprocessedControlData);
-    m_unprocessedControlData->teams[TEAM_RED].teamColour = TEAM_RED;
-    m_unprocessedControlData->teams[TEAM_BLUE].teamColour = TEAM_BLUE;
-}
-
-void GameInformation::rawSwapTeams(RoboCupGameControlData* data) {
-    size_t    teamSize = sizeof(TeamInfo);
-    TeamInfo* blueTeam = &(data->teams[TEAM_BLUE]);
-    TeamInfo* redTeam  = &(data->teams[TEAM_RED]);
-
+    size_t teamSize = sizeof(TeamInfo);
+    TeamInfo* blueTeam = &(m_currentControlData->teams[TEAM_BLUE]);
+    TeamInfo* redTeam  = &(m_currentControlData->teams[TEAM_RED]);
+    
     TeamInfo tempTeam;
     memcpy(&tempTeam, blueTeam, teamSize);
-
-    // swap the teams
     memcpy(blueTeam, redTeam, teamSize);
     memcpy(redTeam, &tempTeam, teamSize);
+    
+    m_currentControlData->teams[TEAM_RED].teamColour = TEAM_RED;
+    m_currentControlData->teams[TEAM_BLUE].teamColour = TEAM_BLUE;
 }
 
-void GameInformation::doManualKickoffChange()
+/*! @brief Returns the RobotInfo structure for the robot with teamNumber and playerNumber. If there is no robot with those numbers NULL is returned */
+const RobotInfo* GameInformation::getRobotInfo(int teamNumber, int playerNumber) const
 {
-    m_unprocessedControlData->kickOffTeam = !m_unprocessedControlData->kickOffTeam;
-}
-
-bool GameInformation::isGameState(robotState theState)
-{
-    bool result = false;
-    switch(theState)
+    const TeamInfo* team = getTeamInfo(teamNumber);
+    if(team)
     {
-        case state_initial:
-        case state_ready:
-        case state_set:
-        case state_playing:
-        case state_finished:
-            result = true;
-        default:
-            result = false;
+        if((playerNumber > getNumberOfPlayers()) || (playerNumber <= 0))
+            return 0;
+        else
+            return &team->players[playerNumber-1];
     }
-    return result;
-
+    else
+        return 0;
 }
 
-std::string GameInformation::stateName(robotState theState)
+/*! @brief Returns the RoboInfo structure for this robot. If this robot is configured incorrectly NULL will be returned */
+const RobotInfo* GameInformation::getMyRobotInfo() const
+{
+    return getRobotInfo(m_team_number, m_player_number);
+}
+
+/*! @brief Returns the TeamInfo structure for teamNumber. If teamNumber is not in last packet then NULL is returned */
+const TeamInfo* GameInformation::getTeamInfo(int teamNumber) const
+{
+    if(m_currentControlData->teams[TEAM_BLUE].teamNumber == teamNumber)
+        return &m_currentControlData->teams[TEAM_BLUE];
+    else if (m_currentControlData->teams[TEAM_RED].teamNumber == teamNumber)
+        return &m_currentControlData->teams[TEAM_RED];
+    else
+    {
+        errorlog << "GameInformation::getTeamInfo(" << teamNumber << "). This team number is not in the current RoboCupGameControlData." << endl;
+        return 0;
+    }
+}
+
+/*! @brief Returns the TeamInfo structure for my team */
+const TeamInfo* GameInformation::getMyTeamInfo() const
+{
+    return getTeamInfo(m_team_number);
+}
+
+/*! @brief Returns the TeamInfo structure for my opponent */
+const TeamInfo* GameInformation::getOpponentTeamInfo() const
+{
+    if (m_currentControlData->teams[TEAM_BLUE].teamNumber == m_team_number)
+        return &m_currentControlData->teams[TEAM_RED];
+    else
+        return &m_currentControlData->teams[TEAM_BLUE];
+}
+
+/*! @brief Find the name of a given state.
+    @param theState The robot/game state.
+    @return A string of the name of the state.
+ */
+std::string GameInformation::stateName(RobotState theState)
 {
     std::string stateName;
     switch(theState)
     {
-        case state_initial:
+        case InitialState:
             stateName = "Initial";
             break;
-        case state_ready:
+        case ReadyState:
             stateName = "Ready";
             break;
-        case state_set:
+        case SetState:
             stateName = "Set";
             break;
-        case state_playing:
+        case PlayingState:
             stateName = "Playing";
             break;
-        case state_finished:
+        case FinishedState:
             stateName = "Finished";
             break;
-        case state_penalised:
+        case PenalisedState:
             stateName = "Penalised";
             break;
-        case state_substitute:
+        case SubstituteState:
             stateName = "Sustitute";
             break;
-        case state_requires_substitution:
+        case RequiresSubstitutionState:
             stateName = "Requires Substitution";
             break;
         default:
@@ -240,38 +264,26 @@ std::string GameInformation::stateName(robotState theState)
     return stateName;
 }
 
-robotState GameInformation::getNextState(robotState currentState)
+GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data)
 {
-    robotState nextState(currentState);
-    switch(currentState)
-    {
-        case state_initial:
-            nextState = state_ready;
-            break;
-        case state_ready:
-            nextState = state_set;
-            break;
-        case state_set:
-            nextState = state_playing;
-            break;
-        case state_playing:
-            nextState = state_penalised;
-            break;
-        case state_finished:
-            nextState = state_finished;
-            break;
-        case state_penalised:
-            nextState = state_playing;
-            break;
-        case state_substitute:
-            nextState = state_substitute;
-            break;
-        case state_requires_substitution:
-            nextState = state_requires_substitution;
-            break;
-        default:
-            nextState = currentState;
-            break;
-    }
-    return nextState;
+    info.process(data);
+    return info;
 }
+
+void GameInformation::process(RoboCupGameControlData* data)
+{
+    if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0)
+    {
+        if (m_data)
+            m_last_packet_time = m_data->CurrentTime;
+        memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
+        doGameControllerUpdate();
+        nusystem->displayGamePacketReceived(m_actions);
+    }
+}
+
+GameInformation& operator>> (GameInformation& info, RoboCupGameControlReturnData& data)
+{
+    return info;
+}
+
