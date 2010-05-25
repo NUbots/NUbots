@@ -138,7 +138,9 @@ HEADERS += ui_mainwindow.h \
     ../Vision/EllipseFitting/jama_eig.h \
     ../Vision/EllipseFitting/jama_cholesky.h \
     ../Localisation/odometryMotionModel.h \
-    ../Localisation/probabilityUtils.h
+    ../Localisation/probabilityUtils.h \
+    FileAccess/SplitStreamFileFormatReader.h \
+    SensorDisplayWidget.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -226,6 +228,8 @@ SOURCES += mainwindow.cpp \
     ../Motion/Tools/MotionCurves.cpp \
     ../Vision/EllipseFit.cpp \
     ../Localisation/odometryMotionModel.cpp \
-    ../Localisation/probabilityUtils.cpp
+    ../Localisation/probabilityUtils.cpp \
+    FileAccess/SplitStreamFileFormatReader.cpp \
+    SensorDisplayWidget.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
