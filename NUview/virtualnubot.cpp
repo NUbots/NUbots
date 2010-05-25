@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <qmessagebox.h>
-
+#include "../NUPlatform/NUSensors/NUSensorsData.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
@@ -31,6 +31,8 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     touchSensors = 0;
 
     autoSoftColour = false;
+
+    sensorsData = new NUSensorsData();
     //debug<<"VirtualNUBot started";
     //TEST:
 
@@ -331,7 +333,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
 
-    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings);
+    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings,sensorsData);
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
     emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);

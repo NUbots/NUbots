@@ -10,8 +10,12 @@
 //using namespace std;
 #include <vector>
 #include "Vision.h"
-#include "EllipseFit.h"
-//#include "../Kinematics/Kinematics.h"
+//#include "EllipseFit.h"
+
+//For distance to Point:
+#include "../Kinematics/Kinematics.h"
+#include "../NUPlatform/NUSensors/NUSensorsData.h"
+
 //#include <QDebug>
 //#include "debug.h"
 #include <ctime>
@@ -22,6 +26,7 @@ LineDetection::LineDetection(){
     linePoints.reserve(MAX_LINEPOINTS);
     fieldLines.reserve(MAX_FIELDLINES);
     cornerPoints.reserve(MAX_CORNERPOINTS);
+    kin = new Kinematics();
 
     TotalValidLines = 0;
 }
@@ -30,7 +35,7 @@ LineDetection::~LineDetection(){
 return;
 }
 
-void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision) {
+void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision, NUSensorsData* data) {
     LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
 
     clock_t start, end;
@@ -40,6 +45,10 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     //CornerPointCounter = 0;
     //FIND LINE POINTS:
     start = clock();
+
+    //update local pointer to sensors data:
+    sensorsData = data;
+
     FindLinePoints(scanArea,vision,image_width,image_height);
 
 
@@ -88,7 +97,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     }
 
     //clock_t startCorner = clock();
-    DecodeCorners(AllObjects, vision->m_timestamp, vision->getImageWidth(), vision->getImageHeight());
+    DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
@@ -719,7 +728,7 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         double TempDist = 0;
                         double TempBearing = 0;
                         double TempElev = 0;
-                        //GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev);
+                        GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
                         //qDebug() << "Distance:\t\t"<< TempDist<< endl;
 
                         int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
@@ -943,7 +952,7 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 
 
 
-void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int IMAGE_HEIGHT, int IMAGE_WIDTH)
+void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vision* vision)
 {
 	
     double TempDist = 0.0;
@@ -952,7 +961,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
     int TempID;
     unsigned int x;
     bool recheck = false;
-
+/*
     if (cornerPoints.size() > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
@@ -1109,6 +1118,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
 
     }
 
+    */
         //qDebug() << "Before Decoding Lines: ";
         /*
         for(unsigned int i = 0; i < AllObjects->stationaryFieldObjects.size();i++)
@@ -1182,7 +1192,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
 		//START DECODING T
 		if (TempID){
 			//Initialising Variables
-                        //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
+                        GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
                         AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
@@ -1260,8 +1270,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
                                     {
 
                                         //qDebug("\nTARGET ACQUIRED,  BLUE right goal T       ..\n");
-                                        //GetDistanceToPoint2(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
-                                        //GetDistanceToPoint(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
+
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
                                         tempUnknownCorner.setVisibility(false);
                                     }
@@ -1518,8 +1527,15 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             //START DECODING T
             if (TempID){
                     //Initialising Variables
-                    //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
-                    AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                    GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
+                    AmbiguousObject tempUnknownCorner;
+                    if(TempID == FieldObjects::FO_CORNER_UNKNOWN_L){
+                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown L");
+                    }
+                    else
+                    {
+                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
+                    }
                     Vector3<float> measured(TempDist,TempBearing,TempElev);
                     Vector3<float> measuredError(0,0,0);
                     Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
@@ -1656,6 +1672,25 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         return;
     }
 }
+
+void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation, Vision* vision)
+{
+    *bearing = vision->CalculateBearing(cx);
+    *elevation = vision->CalculateElevation(cy);
+
+    Matrix camera2groundTransform;
+    bool isOK = sensorsData->getCameraToGroundTransform(camera2groundTransform);
+    if(isOK == true)
+    {
+        *distance = kin->DistanceToPoint(camera2groundTransform, *bearing, *elevation);
+
+        #if DEBUG_VISION_VERBOSITY > 6
+            debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        #endif
+    }
+    return;
+}
+
 /*
 void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation) {
  

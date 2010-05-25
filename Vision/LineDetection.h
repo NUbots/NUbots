@@ -11,7 +11,8 @@
 #include <iostream>
 #include "FieldObjects/FieldObjects.h"
 class Vision;
-
+class NUSensorsData;
+class Kinematics;
 
 #define MAX_LINEPOINTS 100
 #define MAX_FIELDLINES 15
@@ -51,13 +52,17 @@ class LineDetection{
 	//METHODS:
 	LineDetection();
     	~LineDetection();
-        void FormLines(ClassifiedSection* scanArea, int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision);
+        void FormLines(ClassifiedSection* scanArea, int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
 	
 	
 	private:
-	int TotalValidLines;
+
+        int TotalValidLines;
         int LINE_SEARCH_GRID_SIZE;
         int PenaltySpotLineNumber;
+        NUSensorsData* sensorsData;
+        Kinematics* kin;
+
         void FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height);
         void FindFieldLines(int image_width,int image_height);
 
@@ -66,8 +71,8 @@ class LineDetection{
         void DecodePenaltySpot(FieldObjects* AllObjects, float timestamp);
 
         void FindCornerPoints(int image_width,int image_height);
-        void DecodeCorners(FieldObjects* AllObjects, float timestamp,  int image_width, int image_height);
-	void GetDistanceToPoint(double,double,double*,double*,double*);
+        void DecodeCorners(FieldObjects* AllObjects, float timestamp,  Vision* vision);
+        void GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
 
         //! Line Point Sorting
         void qsort(std::vector<LinePoint> &array, int left, int right, int type);

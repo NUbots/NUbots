@@ -101,6 +101,7 @@ private:
     FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;
+    NUSensorsData* sensorsData;
     //TODO: these should change later..
     //float jointSensors[100];
     //float balanceSensors[100];
