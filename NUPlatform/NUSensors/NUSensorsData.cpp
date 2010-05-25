@@ -500,7 +500,9 @@ bool NUSensorsData::getJointData(sensor_t* p_sensor, joint_id_t jointid, float& 
  */
 bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vector<float>& data)
 {
-    if (partid == AllJoints)
+    if (p_sensor == NULL || p_sensor->IsValid == false)
+        return false;
+    else if (partid == AllJoints)
     {   // if we want all joints then it is easy
         data = p_sensor->Data;
         return true;
@@ -527,8 +529,9 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
             debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
             return false;
         }
-        
+
         data.clear();
+        data.reserve(selectedjoints.size());
         for (unsigned int i=0; i<selectedjoints.size(); i++)
             data.push_back(p_sensor->Data[selectedjoints[i]]);
         return true;

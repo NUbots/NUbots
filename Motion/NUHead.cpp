@@ -39,6 +39,8 @@ using namespace std;
 
 NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
 {
+    m_data = NULL;
+    m_actions = NULL;
     m_camera_height = 46;
     m_body_pitch = 0;
     m_sensor_pitch = 0;
@@ -217,13 +219,16 @@ void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float
  */
 void NUHead::calculatePan()
 {
-    getSensorValues();
-    if (m_pan_type == HeadPanJob::Ball)
-        calculateBallPan();
-    else if (m_pan_type == HeadPanJob::BallAndLocalisation)
-        calculateBallAndLocalisationPan();
-    else if (m_pan_type == HeadPanJob::Localisation)
-        calculateLocalisationPan();
+    if (m_data and m_actions)
+    {
+        getSensorValues();
+        if (m_pan_type == HeadPanJob::Ball)
+            calculateBallPan();
+        else if (m_pan_type == HeadPanJob::BallAndLocalisation)
+            calculateBallAndLocalisationPan();
+        else if (m_pan_type == HeadPanJob::Localisation)
+            calculateLocalisationPan();
+    }
 }
 
 void NUHead::calculateBallPan()
@@ -449,13 +454,16 @@ bool NUHead::panYawLimitsChange(float pitch_a, float pitch_b)
  */
 void NUHead::calculateNod()
 {
-    getSensorValues();
-    if (m_nod_type == HeadNodJob::Ball)
-        calculateBallNod();
-    else if (m_nod_type == HeadNodJob::BallAndLocalisation)
-        calculateBallAndLocalisationNod();
-    else if (m_nod_type == HeadNodJob::Localisation)
-        calculateLocalisationNod();
+    if (m_data and m_actions)
+    {
+        getSensorValues();
+        if (m_nod_type == HeadNodJob::Ball)
+            calculateBallNod();
+        else if (m_nod_type == HeadNodJob::BallAndLocalisation)
+            calculateBallAndLocalisationNod();
+        else if (m_nod_type == HeadNodJob::Localisation)
+            calculateLocalisationNod();
+    }
 }
 
 void NUHead::calculateBallNod()
