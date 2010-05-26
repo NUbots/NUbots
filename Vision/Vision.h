@@ -60,7 +60,8 @@ class Vision
     ofstream imagefile;
     ofstream sensorfile;
     int ImageFrameNumber;
-    int numFramesDropped;
+    int numFramesDropped;               //!< the number of frames dropped since the last call to getNumFramesDropped()
+    int numFramesProcessed;             //!< the number of frames processed since the last call to getNumFramesProcessed()
     CameraSettings currentSettings;
 
     void SaveAnImage();
@@ -93,6 +94,7 @@ class Vision
 
     void setImage(const NUimage* sourceImage);
     int getNumFramesDropped();
+    int getNumFramesProcessed();
 
 
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);

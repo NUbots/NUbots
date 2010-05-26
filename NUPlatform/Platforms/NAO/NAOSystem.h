@@ -59,7 +59,7 @@ private:
     std::vector<std::vector<float> > m_team_received_leds;  //!< the current state of the team packet received leds
     std::vector<std::vector<float> > m_team_sent_leds;      //!< the current state of the team packet sent leds
     std::vector<std::vector<float> > m_game_received_leds;  //!< the current state of the game packet received leds
-    std::vector<std::vector<float> > m_other_received_leds; //!< the current state of the other packet received leds
+    std::vector<std::vector<float> > m_frame_drop_leds;     //!< the current state of the other packet received leds
 };
 
 #endif
