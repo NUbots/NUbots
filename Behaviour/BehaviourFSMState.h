@@ -46,7 +46,7 @@ protected:
     {
         m_state = 0;
         m_previous_state = 0;
-        m_state_changed = false;
+        m_state_changed = true;
     };
     void doState();
     virtual void doStateCommons() {};

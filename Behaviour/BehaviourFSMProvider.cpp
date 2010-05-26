@@ -38,7 +38,7 @@ BehaviourFSMProvider::BehaviourFSMProvider(Behaviour* manager) : BehaviourProvid
 {
     m_state = NULL;
     m_previous_state = NULL;
-    m_state_changed = false;
+    m_state_changed = true;
 }
 
 /*! @brief Destroys the behaviour provider as well as all of the associated states

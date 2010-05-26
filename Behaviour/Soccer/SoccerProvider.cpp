@@ -89,28 +89,28 @@ BehaviourState* SoccerProvider::nextStateCommons()
     switch (game_state) 
     {
         case GameInformation::InitialState:
-            m_state = m_initial;
+            return m_initial;
             break;
         /*case GameInformation::ReadyState:
-            m_state = m_ready;
+            return m_ready;
             break;
         case GameInformation::SetState:
-            m_state = m_set;
+            return m_set;
             break;
         case GameInformation::PlayingState:
-            m_state = m_playing;
+            return m_playing;
             break;
         case GameInformation::FinishedState:
-            m_state = m_finished;
+            return m_finished;
             break;*/
         case GameInformation::PenalisedState:
-            m_state = m_penalised;
+            return m_penalised;
             break;/*
         case GameInformation::SubstituteState:
-            m_state = m_substitute;
+            return m_substitute;
             break;
         case GameInformation::RequiresSubstitutionState:
-            m_state = m_requires_substitution;
+            return m_requires_substitution;
             break;*/
         default:
             break;
