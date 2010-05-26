@@ -52,8 +52,9 @@ class Localisation
         void ClearAllModels();
         bool CheckModelForOutlierReset(int modelID);
         int  CheckForOutlierResets();
-        KF &getBestModel();
-        int getBestModelID();
+        const KF& getBestModel() const;
+        const KF& getModel(int modelNumber) const;
+        int getBestModelID() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
         bool MergeTwoModels(int index1, int index2);

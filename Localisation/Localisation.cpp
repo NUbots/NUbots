@@ -42,22 +42,13 @@ const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad
 
 Localisation::Localisation()
 {
-    for(int m = 0; m < c_MAX_MODELS; m++)
-    {
-        models[m].isActive = true; // Start with just the first model model
-        models[m].toBeActivated = false;
-    }
+    doPlayerReset();
 
     wasPreviouslyPenalised = false;
 
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
     feedbackPosition[2] = 0;
-    
-    // RHM 7/7/08: Extra array for resetting algorithm
-    for(int m = 0; m < c_MAX_MODELS; m++){
-        for (int i=0; i< c_numOutlierTrackedObjects; i++) modelObjectErrors[m][i] = 0.0;
-    }
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     #ifdef WIN32
@@ -243,7 +234,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 
         WriteModelToObjects(getBestModel(), ourfieldObjects);
 
-        KF* bestModel = &(getBestModel());
+        const KF* bestModel = &(getBestModel());
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
         if(numUpdates > 0)
@@ -352,7 +343,7 @@ void Localisation::doPenaltyReset()
 
     ClearAllModels();
 
-    // setup model 0 as one 'T'
+    // setup model 0 as top 'T'
     models[0].isActive = true;
     models[0].alpha = 0.5;
 
@@ -368,7 +359,7 @@ void Localisation::doPenaltyReset()
     // Set the uncertainties
     resetSdMatrix(0);
     
-    // setup model 1 as the other 'T'
+    // setup model 1 as bottom 'T'
     models[1].isActive = true;  
     models[1].alpha = 0.5;
 
@@ -398,13 +389,13 @@ void Localisation::doPlayerReset()
     models[0].isActive = true;
     models[0].alpha = 0.25;
 
-    models[0].stateEstimates[0][0] = -300.0;         // Robot x
+    models[0].stateEstimates[0][0] = 300.0;         // Robot x
     models[0].stateEstimates[1][0] = 0.0;           // Robot y
-    models[0].stateEstimates[2][0] = 0.0;           // Robot heading
-    models[0].stateEstimates[3][0] = 0.0;       // Ball x 
-    models[0].stateEstimates[4][0] = 0.0;       // Ball y
-    models[0].stateEstimates[5][0] = 0.0;       // Ball vx
-    models[0].stateEstimates[6][0] = 0.0;       // Ball vy
+    models[0].stateEstimates[2][0] = PI;        // Robot heading
+    models[0].stateEstimates[3][0] = 0.0;           // Ball x
+    models[0].stateEstimates[4][0] = 0.0;           // Ball y
+    models[0].stateEstimates[5][0] = 0.0;           // Ball vx
+    models[0].stateEstimates[6][0] = 0.0;           // Ball vy
 
     // Set the uncertainties
     resetSdMatrix(0);
@@ -424,13 +415,13 @@ void Localisation::doPlayerReset()
     // Set the uncertainties
     resetSdMatrix(1);
 
-    // setup model 2 as one half way 'T'
+    // setup model 2 as top half way 'T'
     models[2].isActive = true;
     models[2].alpha = 0.25;
 
-    models[2].stateEstimates[0][0] = -300.0;        // Robot x
-    models[2].stateEstimates[1][0] = 0.0;           // Robot y
-    models[2].stateEstimates[2][0] = 0.0;           // Robot heading
+    models[2].stateEstimates[0][0] = 0.0;        // Robot x
+    models[2].stateEstimates[1][0] = 200.0;           // Robot y
+    models[2].stateEstimates[2][0] = -PI/2.0;           // Robot heading
     models[2].stateEstimates[3][0] = 0.0;       // Ball x 
     models[2].stateEstimates[4][0] = 0.0;       // Ball y
     models[2].stateEstimates[5][0] = 0.0;       // Ball vx
@@ -443,9 +434,9 @@ void Localisation::doPlayerReset()
     models[3].isActive = true;
     models[3].alpha = 0.25;
 
-    models[3].stateEstimates[0][0] = -300.0;        // Robot x
-    models[3].stateEstimates[1][0] = 0.0;           // Robot y
-    models[3].stateEstimates[2][0] = 0.0;           // Robot heading
+    models[3].stateEstimates[0][0] = 0.0;        // Robot x
+    models[3].stateEstimates[1][0] = -200.0;           // Robot y
+    models[3].stateEstimates[2][0] = PI/2.0;           // Robot heading
     models[3].stateEstimates[3][0] = 0.0;       // Ball x 
     models[3].stateEstimates[4][0] = 0.0;       // Ball y
     models[3].stateEstimates[5][0] = 0.0;       // Ball vx
@@ -911,13 +902,17 @@ int Localisation::getNumFreeModels()
 }
 
 
+const KF& Localisation::getModel(int modelNumber) const
+{
+    return models[modelNumber];
+}
 
-KF &Localisation::getBestModel()
+const KF& Localisation::getBestModel() const
 {
     return models[getBestModelID()];
 }
 
-int Localisation::getBestModelID()
+int Localisation::getBestModelID() const
 {
     // Return model with highest alpha value.
     int bestID = 0;
