@@ -20,7 +20,7 @@ GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData
     m_last_packet_time = 0;
     
     m_currentReturnData = new RoboCupGameControlReturnData();
-    memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, 4);
+    memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, sizeof(m_currentReturnData->header));
     m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
 }
 
@@ -63,7 +63,7 @@ bool GameInformation::gameControllerWorking() const
     if (m_data)
         return (m_data->CurrentTime - m_last_packet_time) > 10000;
     else
-        return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0);
+        return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, sizeof(m_currentControlData->header)) == 0);
 }
 
 /*! @brief Returns the number of players per team */
@@ -152,13 +152,20 @@ void GameInformation::doGameControllerUpdate()
  */
 void GameInformation::doManualStateChange()
 {
+    m_currentReturnData->team = m_team_number;
+    m_currentReturnData->player = m_player_number;
     if (m_state != PenalisedState)
     {
         m_state = PenalisedState;
-        //! @todo send game controller return packet
+        m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_MAN_PENALISE;
     }
     else
+    {
         m_state = PlayingState;
+        m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_MAN_UNPENALISE;
+    }
+    
+    //! @todo send game controller return packet
 }
 
 /*! @brief Does a manual team change
@@ -284,10 +291,5 @@ void GameInformation::process(RoboCupGameControlData* data)
             nusystem->displayGamePacketReceived(m_actions);
         }
     }
-}
-
-GameInformation& operator>> (GameInformation& info, RoboCupGameControlReturnData& data)
-{
-    return info;
 }
 

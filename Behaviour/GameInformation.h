@@ -76,7 +76,7 @@ public:
     // GameController packets
     friend GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data);
     void process(RoboCupGameControlData* data);
-    friend GameInformation& operator>> (GameInformation& input, RoboCupGameControlReturnData& data);
+
     // Manual game control
     void doManualStateChange();
     void doManualTeamChange();
