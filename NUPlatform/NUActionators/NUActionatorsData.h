@@ -145,6 +145,8 @@ public:
     bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains);
     
         // add other commands
+    bool addLeds(ledgroup_id_t ledgroup, double time, float red, float blue, float green);
+    bool addLeds(ledgroup_id_t ledgroup, double time, const vector<float>& values);
     bool addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values);
     bool addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values);
     bool addSound(double time, string sound);
