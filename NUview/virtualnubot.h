@@ -15,7 +15,7 @@
 #include "Vision/Circle.h"
 #include <vector>
 #include <fstream>
-#include "LogFileReader.h"
+#include "FileAccess/LogFileReader.h"
 
 #define uint8 unsigned char
 
@@ -101,6 +101,7 @@ private:
     FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;
+    NUSensorsData* sensorsData;
     //TODO: these should change later..
     //float jointSensors[100];
     //float balanceSensors[100];

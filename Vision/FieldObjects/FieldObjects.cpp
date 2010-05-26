@@ -1,9 +1,9 @@
 #include "FieldObjects.h"
 #include <string>
-
+#include <debug.h>
 FieldObjects::FieldObjects()
 {
-	InitStationaryFieldObjects();
+        InitStationaryFieldObjects();
 	InitMobileFieldObjects();
 }
 FieldObjects::~FieldObjects()

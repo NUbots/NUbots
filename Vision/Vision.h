@@ -58,6 +58,7 @@ class Vision
     bool isSavingImagesWithVaryingSettings;
     int numSavedImages;
     ofstream imagefile;
+    ofstream sensorfile;
     int ImageFrameNumber;
     int numFramesDropped;
     CameraSettings currentSettings;
@@ -171,7 +172,7 @@ class Vision
     ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
-    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing);
+    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing, NUSensorsData* data);
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(const std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,
@@ -183,6 +184,7 @@ class Vision
                      std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                      const std::vector< TransitionSegment > horizontalSegments);
 
+    void DetectRobots(std::vector<ObjectCandidate> &RobotCandidates);
 
     bool isPixelOnScreen(int x, int y);
     int getImageHeight(){ return currentImage->getHeight();}
