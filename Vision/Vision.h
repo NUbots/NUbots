@@ -86,7 +86,7 @@ class Vision
 
     void ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
 
-
+    void setFieldObjects(FieldObjects* fieldobjects);
 
     void setLUT(unsigned char* newLUT);
     void loadLUTFromFile(const std::string& fileName);
@@ -172,7 +172,7 @@ class Vision
     ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
-    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing);
+    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing, NUSensorsData* data);
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(const std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,
@@ -184,6 +184,7 @@ class Vision
                      std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                      const std::vector< TransitionSegment > horizontalSegments);
 
+    void DetectRobots(std::vector<ObjectCandidate> &RobotCandidates);
 
     bool isPixelOnScreen(int x, int y);
     int getImageHeight(){ return currentImage->getHeight();}

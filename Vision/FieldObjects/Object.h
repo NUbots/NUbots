@@ -10,8 +10,11 @@ class Object
     private:
         int ID;
         std::string name;
+        //For Vision to update
         Vector3<float> measuredRelativePosition;
         Vector3<float> relativeMeasurementError;
+        //For Localisation to update
+        Vector3<float> estimatedRelativeLocation;
         
         // Vision Parameters:
 
@@ -68,6 +71,13 @@ class Object
         int ScreenY() const {return imagePosition.y;}
         int getObjectWidth() const {return sizeOnScreen.x;}
         int getObjectHeight() const {return sizeOnScreen.y;}
+
+        //Localisation to update:
+        void updateEstimatedRelativeLocation(const Vector3<float>& newWMRelLoc);
+        void updateEstimatedRelativeVariables(float distance, float bearing, float elevation);
+        float estimatedDistance() const {return estimatedRelativeLocation.x;}
+        float estimatedBearing() const {return estimatedRelativeLocation.y;}
+        float estimatedElevation() const {return estimatedRelativeLocation.z;}
 
 };
 

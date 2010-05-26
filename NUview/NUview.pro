@@ -140,7 +140,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/odometryMotionModel.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
-    SensorDisplayWidget.h
+    SensorDisplayWidget.h \
+    ../Vision/EllipseFitting/FittingCalculations.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -230,6 +231,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/odometryMotionModel.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
-    SensorDisplayWidget.cpp
+    SensorDisplayWidget.cpp \
+    ../Vision/EllipseFitting/FittingCalculations.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

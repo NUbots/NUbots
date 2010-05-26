@@ -11,7 +11,11 @@
 #include <vector>
 #include "Vision.h"
 #include "EllipseFit.h"
-//#include "../Kinematics/Kinematics.h"
+
+//For distance to Point:
+#include "../Kinematics/Kinematics.h"
+#include "../NUPlatform/NUSensors/NUSensorsData.h"
+
 //#include <QDebug>
 //#include "debug.h"
 #include <ctime>
@@ -22,6 +26,7 @@ LineDetection::LineDetection(){
     linePoints.reserve(MAX_LINEPOINTS);
     fieldLines.reserve(MAX_FIELDLINES);
     cornerPoints.reserve(MAX_CORNERPOINTS);
+    kin = new Kinematics();
 
     TotalValidLines = 0;
 }
@@ -30,7 +35,7 @@ LineDetection::~LineDetection(){
 return;
 }
 
-void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision) {
+void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision, NUSensorsData* data) {
     LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
 
     clock_t start, end;
@@ -40,10 +45,14 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     //CornerPointCounter = 0;
     //FIND LINE POINTS:
     start = clock();
+
+    //update local pointer to sensors data:
+    sensorsData = data;
+
     FindLinePoints(scanArea,vision,image_width,image_height);
 
 
-    //qDebug() << "Line Points: " << linePoints.size();
+    //qDebug() << "Robot Segments: " << robotSegments.size();
     //for(unsigned int j = 0; j < linePoints.size(); j++)
     //{
     //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
@@ -88,7 +97,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     }
 
     //clock_t startCorner = clock();
-    DecodeCorners(AllObjects, vision->m_timestamp, vision->getImageWidth(), vision->getImageHeight());
+    DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
@@ -124,10 +133,16 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
         for(int j = 0; j < numberOfSegments ; j++)
         {
-            //! Throw out short segments
+
             if(linePoints.size() > MAX_LINEPOINTS) break;
             //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
+            if(segment->getColour() == ClassIndex::pink || segment->getColour() == ClassIndex::shadow_blue || segment->getColour() == ClassIndex::pink_orange || segment->getColour() == ClassIndex::blue)
+            {
+                robotSegments.push_back(*segment);
+            }
+            if(segment->getColour() != ClassIndex::white) continue;
+            bool segmentisused = false;
             if(previouslyCloselyScanedSegment == NULL)
             {
                 //qDebug() << "Assigning First Previous SEgment";
@@ -136,6 +151,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
             //int segmentSize = segment->getSize();
             //! CHECK The Length of the segment
             if(segment->getSize() < MIN_POINT_THICKNESS) continue;
+
 
             //! LOOKING FOR HORIZONTAL LINE POINTS:
             if(segment->getSize() > VERT_POINT_THICKNESS*0.5 &&
@@ -164,7 +180,10 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 }
                 unsigned char LeftColour = vision->classifyPixel(LEFTX, MidY);
                 unsigned char RightColour = vision->classifyPixel(RIGHTX, MidY);
-
+                if(LeftColour == ClassIndex::white || RightColour  == ClassIndex::white)
+                {
+                    robotSegments.push_back(*segment);
+                }
                 if(LeftColour != ClassIndex::white && RightColour != ClassIndex::white
                    //&& segment->getAfterColour() == ClassIndex::green
                    //&& segment->getBeforeColour() == ClassIndex::green
@@ -215,11 +234,13 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                                        (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE))
                                     {
                                         canNotAdd = true;
+
                                         break;
                                     }
                                 }
                                 if(!canNotAdd)
                                 {
+                                    segmentisused = true;
                                     tempLinePoint.inUse = false;
                                     linePoints.push_back(tempLinePoint);
                                     //qDebug() << "Added LinePoint to list: "<< tempLinePoint.x <<"," <<tempLinePoint.y << tempLinePoint.width;
@@ -262,6 +283,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 }
                 if(!canNotAdd)
                 {
+                    segmentisused = true;
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
                 }
@@ -269,6 +291,13 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 //LinePointCounter++;
 
             }
+
+            if(segmentisused == false)
+            {
+                robotSegments.push_back(*segment);
+            }
+
+
         }
 
     }
@@ -281,7 +310,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //Try and make lines now...
     //int DistanceStep;
-    int SearchMultiplier = 2; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
+    int SearchMultiplier = 1.5; // Increases GRID SEARCH SIZE via a multiple of SearchMultiplier
     double ColSlopeVal;
     int previousPointID;
 
@@ -578,7 +607,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Remove any lines that are still too small (or really badly fitted)..
     for (LineIDStart = 0; LineIDStart < fieldLines.size(); LineIDStart++){
         if (!fieldLines[LineIDStart].valid) continue;
-        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .80){// alex ADJUST CAN HELP TO DELETE CIRCLE LINES
+        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .80)
+        {// alex ADJUST CAN HELP TO DELETE CIRCLE LINES
             fieldLines[LineIDStart].valid = false;
 
             //std::cout<<"Line " << LineIDStart << " was Removed." << std::endl;
@@ -592,14 +622,14 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
 
 
-    for (unsigned int i = 0; i < fieldLines.size(); i++)
+    /*for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        /*//qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        //qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
-                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;*/
+                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
 
-    }
+    }*/
 
     //clock_t end = clock();
     //debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
@@ -718,7 +748,7 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         double TempDist = 0;
                         double TempBearing = 0;
                         double TempElev = 0;
-                        //GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev);
+                        GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
                         //qDebug() << "Distance:\t\t"<< TempDist<< endl;
 
                         int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
@@ -942,7 +972,7 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 
 
 
-void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int IMAGE_HEIGHT, int IMAGE_WIDTH)
+void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vision* vision)
 {
 	
     double TempDist = 0.0;
@@ -955,7 +985,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
     if (cornerPoints.size() > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
-        //qDebug() << "Trying EllipseFit: too many corners";
+
         //Method:
         //	1. Box all small lines:
         //	2. find the most left line: use right point
@@ -964,15 +994,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
         //	5. Repeat until no more further right
 
         //TRY BOX around all small Lines and compute centre of box
-        int maxX=0;
-        int minX=IMAGE_WIDTH;
-        int maxY = 0;
-        int minY = IMAGE_HEIGHT;
+
         // Find shortest Lines
         //int cutOff = IMAGE_WIDTH/2;
         int longestLine = 0;
         double longestLineLength = 0.0;
-        //cout << "Lines to Search: " << FieldLinesCounter << "\t Valid: " << TotalValidLines << endl;
+
 
         //Sort Lines by most Left:
         qsort(fieldLines, 0, fieldLines.size()-1);
@@ -986,7 +1013,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             ly = fieldLines[i].leftPoint.y;
             rx = fieldLines[i].rightPoint.x;
             ry = fieldLines[i].rightPoint.y;
-            //cout << lx << ", \t" << ly<< ", \t" << rx << ", \t" << ry << endl;
+
             double linelength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
             if(linelength > longestLineLength)
             {
@@ -1002,7 +1029,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             if ( i == (unsigned int) PenaltySpotLineNumber)	continue;
             if ( i == (unsigned int) longestLine )		continue;
             if (fieldLines[i].valid == false)	continue;
-            //qDebug() << "Checking Line: " << i << "( "<< fieldLines[i].rightPoint.x <<"," << fieldLines[i].rightPoint.y<< ")";
+
             //std::vector<LinePoint*> minpoints = fieldLines[i].getPoints();
 
             //Find another line thats close to it
@@ -1015,14 +1042,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
                 if ( j == (unsigned int) longestLine )			continue;
                 if (fieldLines[j].valid == false)	continue;
                 if (i == j)				continue;
-                //qDebug() << "\t Against Line: " << j << "( "<< fieldLines[j].leftPoint.x <<"," << fieldLines[j].leftPoint.y<< ")";
+
                 //Calculate distance from 2 points
                 int rrX = fieldLines[j].leftPoint.x;
                 int rrY = fieldLines[j].leftPoint.y;
                 double distance = sqrt((rrX-lrX)*(rrX-lrX) + (rrY-lrY)*(rrY-lrY));
-                if(distance < 10 && distance >= 0 && rrX > lrX)
+                if(distance < 32 && distance >= 0 && rrX > lrX)
                 {
-                    //qDebug() << "Adjacent Line found" << j <<"with " << fieldLines[j].numPoints << " points.";
+
                     hasJoinedLines = true;
                     std::vector <LinePoint*> linePts = fieldLines[j].getPoints();
                     for(int k = 0; k <  fieldLines[j].numPoints ; k++)
@@ -1050,23 +1077,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             }
         }
 
-        //qDebug() << "Total pointSize: "<< points.size() << endl;
         if(points.size() > 5)
         {
-            Array2D<double> x(points.size(),1,0.0);
-            Array2D<double> y(points.size(),1,0.0);
-            for(unsigned int i = 0; i < points.size(); i++)
-            {
-                    LinePoint* tempPoint = points.at(i);
-                    //cout << "Point " << i << ": \t"<< tempPoint->x << ",\t"<< tempPoint->y <<endl;
-                    x[i][0] =  tempPoint->x;
-                    y[i][0] =  tempPoint->y;
-            }
+
 
 
             EllipseFit* e = new EllipseFit;
 
-            e->Fit_Ellipse(x,y);
+            e->Fit_Ellipse(points);
             //e->PrintFinal();
 
             double cx = e->GetX();
@@ -1074,17 +1092,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             double r1 = e->GetR1();
             double r2 = e->GetR2();
 
-            //int minX,minY,maxX,maxY;
-            minX = cx-r1;
-            maxX = cx+r1;
-            minY = cy-r2;
-            maxY = cy+r2;
-
             //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
-            TempDist = 2000;
-            //GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev);
+            TempDist = 0.0;
+            GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
 
-            if (TempDist > 100.0) {
+            if (TempDist > 100.0  || TempDist == 0.0) {
 
                 Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                 Vector3<float> measuredError(0.0,0.0,0.0);
@@ -1107,6 +1119,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
         }
 
     }
+
 
         //qDebug() << "Before Decoding Lines: ";
         /*
@@ -1181,7 +1194,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
 		//START DECODING T
 		if (TempID){
 			//Initialising Variables
-                        //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
+                        GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
                         AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
@@ -1259,8 +1272,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
                                     {
 
                                         //qDebug("\nTARGET ACQUIRED,  BLUE right goal T       ..\n");
-                                        //GetDistanceToPoint2(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
-                                        //GetDistanceToPoint(cornerPoints[x]->PosX, cornerPoints[x]->PosY, &TempDist, &TempBearing, &TempElev);
+
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
                                         tempUnknownCorner.setVisibility(false);
                                     }
@@ -1517,8 +1529,15 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, int
             //START DECODING T
             if (TempID){
                     //Initialising Variables
-                    //GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev);
-                    AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                    GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
+                    AmbiguousObject tempUnknownCorner;
+                    if(TempID == FieldObjects::FO_CORNER_UNKNOWN_L){
+                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown L");
+                    }
+                    else
+                    {
+                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
+                    }
                     Vector3<float> measured(TempDist,TempBearing,TempElev);
                     Vector3<float> measuredError(0,0,0);
                     Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
@@ -1655,6 +1674,25 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         return;
     }
 }
+
+void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation, Vision* vision)
+{
+    *bearing = vision->CalculateBearing(cx);
+    *elevation = vision->CalculateElevation(cy);
+
+    Matrix camera2groundTransform;
+    bool isOK = sensorsData->getCameraToGroundTransform(camera2groundTransform);
+    if(isOK == true)
+    {
+        *distance = kin->DistanceToPoint(camera2groundTransform, *bearing, *elevation);
+
+        #if DEBUG_VISION_VERBOSITY > 6
+            debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        #endif
+    }
+    return;
+}
+
 /*
 void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation) {
  
@@ -1743,7 +1781,7 @@ IF the screen resolution is 640x480, this means from centre to corner is 29degre
 void LineDetection::swap(std::vector<LinePoint> &array, int i, int j)
 {
         LinePoint temp;
-        //// //qDebug() << "Swapping "<< i << "," <<j;
+        //qDebug() << "Swapping "<< i << "," <<j;
         temp     = array[i];
         array[i] = array[j];
         array[j] = temp;

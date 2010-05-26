@@ -18,6 +18,7 @@
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
+#include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUCamera.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -35,8 +36,6 @@
 using namespace mathGeneral;
 Vision::Vision()
 {
-    AllFieldObjects = new FieldObjects();
-
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
@@ -53,7 +52,7 @@ Vision::Vision()
 
 Vision::~Vision()
 {
-    delete AllFieldObjects;
+    // delete AllFieldObjects;
     delete [] LUTBuffer;
     imagefile.close();
     sensorfile.close();
@@ -152,7 +151,9 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         return;
     m_sensor_data = data;
     m_actions = actions;
-    AllFieldObjects = fieldobjects;
+
+    setFieldObjects(fieldobjects);
+
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
         numFramesDropped++;
         
@@ -165,14 +166,13 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     std::vector< TransitionSegment > horizontalsegments;
     //std::vector< TransitionSegment > allsegments;
     //std::vector< TransitionSegment > segments;
-    std::vector< ObjectCandidate > candidates;
-    std::vector< ObjectCandidate > tempCandidates;
+    //std::vector< ObjectCandidate > candidates;
+    //std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
     spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
-    int robotClassifiedPoints = 0;
     //debug << "Setting Image: " <<endl;
 
     if(isSavingImages)
@@ -182,7 +182,9 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         #endif
         m_saveimages_thread->startLoop();
     }
-    //debug << "Generating Horizon Line: " <<endl;
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Generating Horizon Line: " <<endl;
+    #endif
     //Generate HorizonLine:
     vector <float> horizonInfo;
     Horizon horizonLine;
@@ -193,11 +195,17 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     }
     else
     {
-        //debug << "No Horizon Data" << endl;
+        #if DEBUG_VISION_VERBOSITY > 5
+            debug << "No Horizon Data" << endl;
+        #endif
         return;
     }
-    //debug << "Generating Horizon Line: Finnished" <<endl;
-    //debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Generating Horizon Line: Finnished" <<endl;
+        debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
+    #endif
+
     std::vector<unsigned char> validColours;
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
@@ -215,28 +223,49 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     //qDebug() << "Generate Classified Image: finnished";
     //setImage(&image);
     //! Find the green edges
+    #if DEBUG_VISION_VERBOSITY > 5
+    debug << "Begin Scanning: " << endl;
+    #endif
 
     points = findGreenBorderPoints(spacings,&horizonLine);
-    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
-    //qDebug() << "Find Edges: finnished";
-    //! Find the Field border
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tFind Edges: finnished" << endl;
+    #endif
+
+
+    //! Find the Field border:
     points = getConvexFieldBorders(points);
     points = interpolateBorders(points,spacings);
-    //debug << "Generating Green Boarder: Finnished" <<endl;
-    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonPoints);
-    //qDebug() << "Find Field border: finnished";
-    //! Scan Below Horizon Image
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tGenerating Green Boarder: Finnished" <<endl;
+    #endif
+
+
+    //! Scan Below Horizon Image:
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
-    //debug << "Vert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tVert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
+    #endif
+
+
     //! Scan Above the Horizon
     ClassifiedSection horiScanArea = horizontalScan(points,spacings);
-    //debug << "Horizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
-    //qDebug() << "Generate Scanlines: finnished";
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tHorizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
+    #endif
     
+
     //! Classify Line Segments
     ClassifyScanArea(&vertScanArea);
     ClassifyScanArea(&horiScanArea);
-    //debug << "Classify ScanPaths : Finnished" <<endl;
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tClassify ScanPaths : Finnished" <<endl;
+    #endif
 
     //! Extract and Display Vertical Scan Points:
     tempNumScanLines = vertScanArea.getNumberOfScanLines();
@@ -246,7 +275,6 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-            //segments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
@@ -258,21 +286,16 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
             horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
-            //allsegments.push_back((*tempScanLine->getSegment(seg)));
         }
     }
 
 
-
-    //emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
-    //emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-    //qDebug() << "disaplay scanPaths: finnished";
-
-    //emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
     //! Identify Field Objects
 
-    //qDebug() << "PREclassifyCandidates";
+    #if DEBUG_VISION_VERBOSITY > 5
+    debug << "Begin Classify Candidates: " << endl;
+    #endif
+
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
@@ -282,64 +305,126 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-   for (int i = 0; i < 4; i++)
+   for (int i = 1; i < 4; i++)
     {
 
         switch (i)
         {
-            case ROBOTS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::pink);
-                validColours.push_back(ClassIndex::pink_orange);
-                validColours.push_back(ClassIndex::shadow_blue);
-                //qDebug() << "PRE-ROBOT";
 
-                RobotCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.2, 2.0, 12, method);
-                //qDebug() << "POST-ROBOT";
-                robotClassifiedPoints = 0;
-                break;
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 //validColours.push_back(ClassIndex::pink_orange);
                 //validColours.push_back(ClassIndex::yellow_orange);
-                //qDebug() << "PRE-BALL";
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPRE-BALL" << endl;
+                #endif
                 BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
-                //qDebug() << "POST-BALL";
+
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPOST-BALL" << endl;
+                #endif
+
                 break;
             case YELLOW_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::yellow);
                 validColours.push_back(ClassIndex::yellow_orange);
-                //qDebug() << "PRE-GOALS";
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPRE-YELLOW-GOALS" << endl;
+                #endif
+
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                //qDebug() << "POST-GOALS";
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPOST-YELLOW-GOALS" << endl;
+                #endif
+
+                break;
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
-                //qDebug() << "PRE-GOALS";
+
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPRE-BLUE-GOALS" << endl;
+                #endif
+
                 BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
-                //qDebug() << "POST-GOALS";
+
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug << "\tPOST-BLUE-GOALS" <<endl;
+                #endif
+
                 break;
         }
     }
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Finnished Classify Candidates" <<endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Begin Object Recognition: " <<endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-Ball Recognition: " <<endl;
+    #endif
     if(BallCandidates.size() > 0)
     {
         circ = DetectBall(BallCandidates);
     }
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-Ball Recognition: " <<endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-GOALPost Recognition: " <<endl;
+    #endif
     DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
 
-    //! Form Lines
-    DetectLines(&vertScanArea,spacings);
-    //! Extract Detected Line & Corners
-    //emit lineDetectionDisplayChanged(fieldLines,GLDisplay::FieldLines);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-GOALPost Recognition: " <<endl;
+    #endif
 
+
+    //! Form Lines
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-Line Formation: " <<endl;
+    #endif
+
+    LineDetection LineDetector = DetectLines(&vertScanArea,spacings, data);
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-Line Formation: " <<endl;
+    #endif
+
+    //! Find Robots:
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-Robot Formation: " <<endl;
+    #endif
+    validColours.clear();
+    validColours.push_back(ClassIndex::white);
+    validColours.push_back(ClassIndex::pink);
+    validColours.push_back(ClassIndex::pink_orange);
+    validColours.push_back(ClassIndex::shadow_blue);
+    validColours.push_back(ClassIndex::blue);
+
+    RobotCandidates = classifyCandidates(LineDetector.robotSegments, points ,validColours, spacings, 0.2, 2.0, 12, method);
+
+    DetectRobots(RobotCandidates);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-Robot Formation: " <<endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Finished Object Recognition: " <<endl;
+    #endif
     AllFieldObjects->postProcess(image->m_timestamp);
 
 
@@ -355,14 +440,16 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         {
             if(AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "Stationary Object: " << i << ":" << AllFieldObjects->stationaryFieldObjects[i].getName() << " Seen."<< endl;
+                debug << " \tStationary Object: " << i << ": " << AllFieldObjects->stationaryFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->stationaryFieldObjects[i].measuredDistance() << "cm away."
+                        << "\tBearing: "<< AllFieldObjects->stationaryFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->stationaryFieldObjects[i].measuredElevation()<<endl;
             }
         }
         for(unsigned int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
         {
             if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "Mobile Object: " << i << ":" << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen."<< endl;
+                debug << "\tMobile Object: " << i << ": " << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->mobileFieldObjects[i].measuredDistance() << "cm away."
+                        << "\tBearing: "<< AllFieldObjects->mobileFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->mobileFieldObjects[i].measuredElevation()<<endl;
             }
         }
 
@@ -370,7 +457,8 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         {
             if(AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "Ambiguous Object: " << i << ":" << AllFieldObjects->ambiguousFieldObjects[i].getName() << "Seen."<< endl;
+                debug << "\tAmbiguous Object: " << i << ": " << AllFieldObjects->ambiguousFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->ambiguousFieldObjects[i].measuredDistance() << "cm away."
+                        << "\tBearing: "<< AllFieldObjects->ambiguousFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->ambiguousFieldObjects[i].measuredElevation()<<endl;
             }
         }
     #endif
@@ -427,6 +515,12 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Finished" << endl;
     #endif
+}
+
+void Vision::setFieldObjects(FieldObjects* fieldObjects)
+{
+    AllFieldObjects = fieldObjects;
+    return;
 }
 
 void Vision::setLUT(unsigned char* newLUT)
@@ -1673,13 +1767,13 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   cons
     return candidates;
 }
 
-LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing)
+LineDetection Vision::DetectLines(ClassifiedSection* scanArea,int spacing,NUSensorsData* data)
 {
     //qDebug() << "Forming Lines:" << endl;
     LineDetection LineDetector;
     int image_width = currentImage->getWidth();
     int image_height = currentImage->getHeight();
-    LineDetector.FormLines(scanArea,image_width,image_height,spacing, AllFieldObjects, this);
+    LineDetector.FormLines(scanArea,image_width,image_height,spacing, AllFieldObjects, this, data);
     std::vector<CornerPoint> cornerPoints= LineDetector.cornerPoints;
     std::vector<LSFittedLine> fieldLines= LineDetector.fieldLines;
     //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
@@ -1752,6 +1846,98 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
     GoalDetection goalDetector;
     goalDetector.FindGoal(FO_Candidates, FO_AboveHorizonCandidates, AllFieldObjects, horizontalSegments, this,height,width);
     return;
+}
+
+void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
+{
+    Kinematics kin;
+
+    for(unsigned int i = 0; i < RobotCandidates.size(); i++)
+    {
+        std::vector <TransitionSegment > segments = RobotCandidates[i].getSegments();
+        int pinkSize = 0;
+        int blueSize = 0;
+        int whiteSize = 0;
+        for(unsigned int j = 0; j < segments.size(); j++)
+        {
+            if(segments[j].getColour() == ClassIndex::pink || segments[j].getColour() == ClassIndex::pink_orange)
+            {
+                pinkSize = pinkSize + segments[j].getSize();
+            }
+            else if(segments[j].getColour() == ClassIndex::shadow_blue || segments[j].getColour() == ClassIndex::blue)
+            {
+                blueSize = blueSize + segments[j].getSize();
+            }
+            else if(segments[j].getColour() == ClassIndex::white )
+            {
+                whiteSize = whiteSize + segments[j].getSize();
+                //qDebug() << "White Segments: " << segments[j].getSize() << segments[j].getStartPoint().x << segments[j].getStartPoint().y << segments[j].getEndPoint().x << segments[j].getEndPoint().y;
+            }
+
+        }
+        //qDebug() << "Segments: " << segments.size()<< "White: " <<  whiteSize << "  Blue: " << blueSize;
+        if( (blueSize > pinkSize && whiteSize > blueSize))// || RobotCandidates[i].getColour() == ClassIndex::blue || RobotCandidates[i].getColour() == ClassIndex::shadow_blue)
+        {
+            RobotCandidates[i].setColour(ClassIndex::shadow_blue);
+            //MAKE a Mobile_FIELDOBJECT: BLUE ROBOT
+            AmbiguousObject tempRobotObject(FieldObjects::FO_BLUE_ROBOT_UNKNOWN, "UNKNOWN BLUE ROBOT");
+
+            Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
+            float cx = RobotCandidates[i].getCentreX();
+            float cy = bottomRight.y;
+            float bearing = CalculateBearing(cx);
+            float elevation = CalculateElevation(cy);
+            float distance = 0;
+
+            Matrix camera2groundTransform;
+            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            if(isOK == true)
+            {
+                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                #if DEBUG_VISION_VERBOSITY > 6
+                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                #endif
+            }
+            Vector3<float> measured(distance,bearing,elevation);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
+            Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+        }
+        else if( (blueSize < pinkSize && whiteSize > pinkSize) ) //|| RobotCandidates[i].getColour() == ClassIndex::pink || RobotCandidates[i].getColour() == ClassIndex::pink_orange)
+        {
+            RobotCandidates[i].setColour(ClassIndex::pink);
+            AmbiguousObject tempRobotObject(FieldObjects::FO_PINK_ROBOT_UNKNOWN, "UNKNOWN PINK ROBOT");
+
+            Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
+            float cx = RobotCandidates[i].getCentreX();
+            float cy = bottomRight.y;
+            float bearing = CalculateBearing(cx);
+            float elevation = CalculateElevation(cy);
+            float distance = 0;
+
+            Matrix camera2groundTransform;
+            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            if(isOK == true)
+            {
+                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                #if DEBUG_VISION_VERBOSITY > 6
+                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                #endif
+            }
+            Vector3<float> measured(distance,bearing,elevation);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
+            Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+        }
+    }
+
+
 }
 
 double Vision::CalculateBearing(double cx){
