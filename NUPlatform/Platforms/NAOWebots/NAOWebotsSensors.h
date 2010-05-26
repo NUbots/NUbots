@@ -57,6 +57,7 @@ private:
     void copyFromFootSole();
     void copyFromFootBumper();
     void copyFromGPS();
+    void copyFromCompass();
     
 private:
     const int m_simulation_step;                        //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
@@ -74,6 +75,7 @@ private:
     static vector<string> m_foot_bumper_names;          //!< a vector of the foot bumper names
     vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
     GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
+    Compass* m_compass;                                 //!< a pointer to the compass module of the robot available for testing (only in PRO)
 };
 
 #endif

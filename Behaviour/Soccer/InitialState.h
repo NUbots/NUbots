@@ -1,5 +1,8 @@
-/*! @file WalkOptimisationState.h
-    @brief Walk Optimisation State
+/*! @file InitialState.h
+    @brief Declaration of the initial soccer state
+ 
+    @class InitialState
+    @brief The initial soccer state
 
     @author Jason Kulk
  
@@ -19,25 +22,22 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef WALKOPTIMISATIONSTATE_H
-#define WALKOPTIMISATIONSTATE_H
+#ifndef INITIAL_STATE_H
+#define INITIAL_STATE_H
 
-#include "Behaviour/BehaviourState.h"
-class WalkOptimisationProvider;
+class SoccerProvider;
+#include "Behaviour/SoccerState.h"
 
-#include "debug.h"
-
-class WalkOptimisationState : public BehaviourState
+class InitialState : public SoccerState
 {
 public:
-    WalkOptimisationState(WalkOptimisationProvider* parent) : m_parent(parent) {};
-    virtual ~WalkOptimisationState() {};
-    virtual BehaviourState* nextState() = 0;
-    virtual void doState() = 0;
-    
+    IntialState(SoccerProvider* provider);
+    ~InitialState();
+    BehaviourState* nextState();
 protected:
-    WalkOptimisationProvider* m_parent;
+    void doState();
 };
+
 
 #endif
 

@@ -53,6 +53,7 @@ NAOPlatform::NAOPlatform()
         errorlog << "NAOPlatform::NAOPlatform(). Unable to load Team.cfg" << endl;
         m_team_number = 0;
     }
+    teamfile.close();
     system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules! 
     camera = new NAOCamera();
     sensors = new NAOSensors();

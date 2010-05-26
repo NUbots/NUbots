@@ -27,13 +27,6 @@
 #include "ChaseBall/ChaseBallProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
 
-#include "Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "TeamInformation.h"
-
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 #include "targetconfig.h"
@@ -45,7 +38,7 @@ Behaviour::Behaviour()
         m_behaviour = new SelectBehaviourProvider(this);
     #else
         // For Webots, create the behaviour you want to run here 
-        m_behaviour = new ChaseBallProvider(this, false);
+        m_behaviour = new WalkOptimisationProvider(this);
     #endif
     m_next_behaviour = NULL;
 }

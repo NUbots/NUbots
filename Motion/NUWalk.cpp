@@ -79,6 +79,9 @@ NUWalk* NUWalk::getWalkEngine()
 
 NUWalk::NUWalk()
 {
+    m_data = NULL;
+    m_actions = NULL;
+    
     m_current_time = 0;
     m_previous_time = 0;
     
@@ -114,7 +117,9 @@ NUWalk::~NUWalk()
  */
 void NUWalk::enableWalk()
 {
-    if (not inInitialPosition())
+    if (m_data == NULL || m_actions == NULL)
+        m_walk_enabled = false;
+    else if (not inInitialPosition())
         moveToInitialPosition();
     else
         m_walk_enabled = true;

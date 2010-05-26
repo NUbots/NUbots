@@ -69,17 +69,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     #if DEBUG_VERBOSITY > 0
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
-    m_nubot = nubot;
-    odometry.resize(3);
-    
-    #if defined(TARGET_IS_NAOWEBOTS)
-	platform = (NAOWebotsPlatform*)m_nubot->m_platform;
-	roboPos = new double[3];
-	roboPos[0] = 0;
-	roboPos[1] = 0;
-	roboPos[2] = 0;
-	incOdometry.resize(3);
-    #endif    
+    m_nubot = nubot; 
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -129,24 +119,9 @@ void SeeThinkThread::run()
             #ifdef THREAD_SEETHINK_MONITOR_TIME
                 entrytime = NUSystem::getRealTime();
             #endif
-            
-	    #ifdef USE_LOCALISATION
-		m_nubot->SensorData->getOdometry(odometryTime, odometry); 
- 		//debug<<"odometry        : [ "<<odometry[0]<<", "<<odometry[1]<<", "<<odometry[2]<<"]"<<endl;	
-	    #endif
 		
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
                 waitForCondition();
-		
-		if( NUSystem::getRealTime() > 15000 )
-		{	
-			incOdometry[0] = roboPos[0];
-			incOdometry[1] = roboPos[1];
-			incOdometry[2] = roboPos[2];
-			platform->getRobotPosition(roboPos);
-// 			cout<<"feedback        : [ "<<roboPos[0]-incOdometry[0]<<", "<<roboPos[1]-incOdometry[1]<<", "<<roboPos[2]-incOdometry[2]<<"]"<<endl;
-		}
-
             #endif
             
             #ifdef USE_VISION
@@ -187,35 +162,26 @@ void SeeThinkThread::run()
 
             #ifdef USE_LOCALISATION
 		   
-		#if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
-			    localisationrealstarttime = NUSystem::getRealTime();
-			    localisationprocessstarttime = NUSystem::getProcessTime();
-			    localisationthreadstarttime = NUSystem::getThreadTime();
-		#endif
-		    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
-		    //teaminfo, odometry, gamectrl, actions)
-		#if defined(TARGET_IS_NAOWEBOTS) 
-		    if( NUSystem::getRealTime() > 15000 )
-			    m_nubot->m_localisation->process(m_nubot->Objects, odometry[0],odometry[1],odometry[2]);
-		#endif
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //START TIMER FOR VISION PROCESS FRAME
+                        localisationrealstarttime = NUSystem::getRealTime();
+                        localisationprocessstarttime = NUSystem::getProcessTime();
+                        localisationthreadstarttime = NUSystem::getThreadTime();
+                #endif
+                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects);
 		
-		#if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
-			localisationrealendtime = NUSystem::getRealTime();
-			localisationprocessendtime = NUSystem::getProcessTime();
-			localisationthreadendtime = NUSystem::getThreadTime();
-			debug 	<< "SeeThinkThread. Localisation Timing: " 
-			    << (localisationthreadendtime -localisationthreadstarttime) << "ms, in this process: " << (localisationprocessendtime - localisationprocessstarttime) 
-			    << "ms, in realtime: " << localisationrealendtime - localisationrealstarttime << "ms." << endl;
-		#endif		    
+                #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
+                    localisationrealendtime = NUSystem::getRealTime();
+                    localisationprocessendtime = NUSystem::getProcessTime();
+                    localisationthreadendtime = NUSystem::getThreadTime();
+                    debug 	<< "SeeThinkThread. Localisation Timing: " 
+                        << (localisationthreadendtime -localisationthreadstarttime) << "ms, in this process: " << (localisationprocessendtime - localisationprocessstarttime) 
+                        << "ms, in realtime: " << localisationrealendtime - localisationrealstarttime << "ms." << endl;
+                #endif		    
             
-	   #endif
+            #endif
             
             #if defined(USE_BEHAVIOUR)
-                #if defined(USE_VISION)
-                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
-                #else
-                    m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, NULL, m_nubot->GameInfo, m_nubot->TeamInfo);
-                #endif
+                m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
             #endif
             
             #ifdef USE_VISION

@@ -1,9 +1,9 @@
-/*! @file BehaviourState.cpp
-    @brief Implementation of behaviour state class
+/*! @file InitialState.cpp
+    @brief Implementation of the initial soccer state
 
     @author Jason Kulk
  
- Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,32 +17,28 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-#include "BehaviourState.h"
-#include "BehaviourProvider.h"
+#include "IntialState.h"
+#include "SoccerState.h"
 
-#include "debug.h"
-#include "debugverbositybehaviour.h"
-
-using namespace std;
-
-void BehaviourState::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
+IntialState::IntialState(SoccerProvider* provider) : SoccerState(provider)
 {
-    m_data = data;
-    m_actions = actions;
-    m_jobs = jobs;
-    m_field_objects = fieldobjects;
-    m_game_info = gameinfo;
-    m_team_info = teaminfo;
+}
+
+InitialState::~InitialState()
+{
+}
+
+BehaviourState* nextState()
+{
+    return this;
+}
+
+void doState()
+{
+    if (m_state_changed)
+        addSound();
     
-    doState();
 }
-
-/*! @brief Destroys the behaviour state
- */
-BehaviourState::~BehaviourState()
-{
-}
-
 

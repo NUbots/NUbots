@@ -142,6 +142,7 @@ public:
     bool getDistanceValues(vector<float>& values);
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
+    bool getCompassValues(vector<float>& values);
     
     // Get methods for foot pressure sensors
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
@@ -179,6 +180,7 @@ public:
     void setButtonValues(double time, const vector<float>& data, bool iscalculated = false);
     void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
     void setGPSValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setCompassValues(double time, const vector<float>& data, bool iscalculated = false);
     
     void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
@@ -251,6 +253,7 @@ public:
     
     // GPS Sensors
     sensor_t* GPS;                              //!< stores the gps position of the robot
+    sensor_t* Compass;                          //!< stores the bearing of the robot
     
 private:
     vector<sensor_t*> m_sensors;                //!< a vector of all of the sensors

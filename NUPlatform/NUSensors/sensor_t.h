@@ -77,6 +77,7 @@ public:
         BUTTON_TRIGGERS,
         BATTERY_VALUES,
         GPS_VALUES,
+        COMPASS_VALUES,
         UNDEFINED
     };
 public:
