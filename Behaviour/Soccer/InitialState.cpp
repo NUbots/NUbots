@@ -59,7 +59,7 @@ void InitialState::doState()
     
     // In initial if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 1);
+        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
     else
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
 }

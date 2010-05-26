@@ -87,7 +87,11 @@ bool GameInformation::isSecondHalf() const
 /*! @brief Returns true if we have the kick off */
 bool GameInformation::haveKickoff() const 
 {
-    return (m_currentControlData->kickOffTeam == m_team_number);
+    const TeamInfo* my_info = getMyTeamInfo();
+    if (my_info and my_info->teamColour == m_currentControlData->kickOffTeam)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Returns the number of seconds remaining in the half */
