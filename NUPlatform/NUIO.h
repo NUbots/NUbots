@@ -43,6 +43,7 @@ class NUIO
 {
 // Functions:
 public:
+    NUIO() {};
     NUIO(NUbot* nubot);
     NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs);
     virtual ~NUIO();
@@ -57,15 +58,7 @@ public:
     // Raw Image streaming 
     friend NUIO& operator<<(NUIO& io, NUimage& p_image);
     friend NUIO& operator<<(NUIO& io, NUimage* p_image);
-    
 protected:
-    virtual void createTeamPort(TeamInformation* teaminfo);
-private:
-    
-// Members:
-public:
-protected:
-private:
     NUbot* m_nubot;
     
     GameControllerPort* m_gamecontroller_port;

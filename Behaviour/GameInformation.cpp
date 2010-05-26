@@ -280,7 +280,7 @@ GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data
 
 void GameInformation::process(RoboCupGameControlData* data)
 {
-    if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0)
+    if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, sizeof(data->header)) == 0)
     {
         if (data->teams[0].teamNumber == m_team_number || data->teams[1].teamNumber == m_team_number)
         {
