@@ -40,6 +40,7 @@ class Localisation
         void ResetAll();
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
+        void WriteModelToObjects(const KF &model, FieldObjects* fobs);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
@@ -48,6 +49,7 @@ class Localisation
         int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
         int getNumActiveModels();
         int getNumFreeModels();
+        void ClearAllModels();
         bool CheckModelForOutlierReset(int modelID);
         int  CheckForOutlierResets();
         KF &getBestModel();
