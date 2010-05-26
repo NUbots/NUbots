@@ -129,7 +129,7 @@ NUbot::NUbot(int argc, const char *argv[])
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)
-        m_io = new NAOWebotsIO(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), this);
+        m_io = new NAOWebotsIO(this, dynamic_cast<NAOWebotsPlatform*>(m_platform));
     #elif defined(TARGET_IS_NAO)
         m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)

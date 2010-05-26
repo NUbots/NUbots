@@ -28,12 +28,14 @@
 #include "NUPlatform/NUIO.h"
 
 class NUbot;
+class NAOWebotsPlatform;
+class NAOWebotsNetworkThread;
 
 class NAOWebotsIO: public NUIO
 {
 // Functions:
 public:
-    NAOWebotsIO(int probotnumber, int pteamnumber, NUbot* nubot);
+    NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform);
     ~NAOWebotsIO();
     
 protected:
@@ -43,8 +45,7 @@ private:
 public:
 protected:
 private:
-    int m_robot_number;         //!< the robot number
-    int m_team_number;          //!< the team number
+    NAOWebotsNetworkThread* m_network;      //!< the simulated network
     
 };
 

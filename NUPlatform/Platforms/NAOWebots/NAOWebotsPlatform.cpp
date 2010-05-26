@@ -30,6 +30,7 @@
 
 #include <string.h>
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 using namespace std;
 
@@ -51,8 +52,9 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     
     m_player_number = atoi(argv[1]) + 1;
     m_team_number = atoi(argv[2]);
-    
-    setNameFromNumber();
+    stringstream ss;
+    ss << "nubot" << m_player_number;
+    m_name = ss.str();
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
     camera = new NAOWebotsCamera(this);
@@ -62,31 +64,5 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
 
 NAOWebotsPlatform::~NAOWebotsPlatform()
 {
-}
-
-
-/*! @brief A function which generates a Robot's name based on a number
-    @param number the robot's number
-    @param name the string to be updated with the robot's name
- */
-void NAOWebotsPlatform::setNameFromNumber()
-{
-    switch (m_player_number) {
-        case 1:
-            m_name = string("Susannah");
-            break;
-        case 2:
-            m_name = string("Daisy");
-            break;
-        case 3:
-            m_name = string("Lisbeth");
-            break;
-        case 4:
-            m_name = string("Poppy");
-            break;
-        default:
-            m_name = string("Valerie");
-            break;
-    }
 }
 
