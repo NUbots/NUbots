@@ -22,18 +22,10 @@ ofstream errorlog;
 
 int getPlayerNumber(int argc, const char *argv[])
 {
-    int port = -1;
-    for (int i = 1; i < argc; i++) 
-    {
-        if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
-            port = atoi(argv[i + 1]);
-            break;
-        }
-    }
+    if (argc < 3)
+        errorlog << "nao_soccer_player_blue::getPlayerNumber(). Could not find team id and player id in controllerArgs" << endl;
     
-    if (port == -1) 
-        cout << "Error: could not find port number in controllerArgs" << endl;
-    return (port % 10) + 1;
+    return atoi(argv[1]) + 1;
 }
 
 int main(int argc, const char *argv[]) 

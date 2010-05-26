@@ -20,11 +20,14 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  GameInformation.cpp
+SET (YOUR_SRCS  SoccerProvider.cpp SoccerProvider.h
+                SoccerState.h
+                InitialState.cpp InitialState.h
+                PenalisedState.cpp PenalisedState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS  
 )
 ####################################################################################
 

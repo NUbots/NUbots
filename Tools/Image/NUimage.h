@@ -9,6 +9,7 @@
 
 #include "Pixel.h"
 #include <iostream>
+#include "Tools/FileFormats/TimestampedData.h"
 
 /*!
 @brief Class used to store an image and its relevant information.
@@ -19,7 +20,7 @@ to this standard image format we are able to have our software support multiple 
 platforms.
 */
 
-class NUimage
+class NUimage: public TimestampedData
 {
 public:
     /*!
@@ -133,6 +134,11 @@ public:
     bool getLocallyBuffered() const
     {
         return m_usingInternalBuffer;
+    }
+
+    double GetTimestamp() const
+    {
+        return m_timestamp;
     }
 
     Pixel **m_image;                    //!< Pointer to the image array.

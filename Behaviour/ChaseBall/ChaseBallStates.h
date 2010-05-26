@@ -42,7 +42,7 @@
 class ChaseBallState : public BehaviourState
 {
 public:
-    ChaseBallState(ChaseBallProvider* provider) {m_provider = provider;};
+    ChaseBallState(ChaseBallProvider* provider){m_provider = provider;};
 protected:
     ChaseBallProvider* m_provider;
 };
@@ -87,28 +87,31 @@ public:
     
     void doState()
     {
-        float headyaw, headpitch;
-        m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-        m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-        float balldistance;
-        if (measureddistance < 46)
-            balldistance = 1;
-        else
-            balldistance = sqrt(pow(measureddistance,2) - 46*46);
-        float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-        
-        vector<float> walkVector(3, 0);
-        
-        walkVector[0] = 10*cos(ballbearing);
-        walkVector[1] = 2*sin(ballbearing);
-        walkVector[2] = ballbearing/2.0;
-        
-        WalkJob* walk = new WalkJob(walkVector);
-        m_provider->m_jobs->addMotionJob(walk);
-        
-        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
-        m_provider->m_jobs->addMotionJob(head);
+        if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        {
+            float headyaw, headpitch;
+            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+            float balldistance;
+            if (measureddistance < 46)
+                balldistance = 1;
+            else
+                balldistance = sqrt(pow(measureddistance,2) - 46*46);
+            float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+            
+            vector<float> walkVector(3, 0);
+            
+            walkVector[0] = 10*cos(ballbearing);
+            walkVector[1] = 2*sin(ballbearing);
+            walkVector[2] = ballbearing/2.0;
+            
+            WalkJob* walk = new WalkJob(walkVector);
+            m_provider->m_jobs->addMotionJob(walk);
+            
+            HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+            m_provider->m_jobs->addMotionJob(head);
+        }
     };
 };
 
@@ -135,27 +138,30 @@ public:
     
     void doState()
     {
-        float headyaw, headpitch;
-        m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-        m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        
-        float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-        float balldistance;
-        if (measureddistance < 46)
-            balldistance = 1;
-        else
-            balldistance = sqrt(pow(measureddistance,2) - 46*46);
-        float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-        
-        vector<float> walkVector(3, 0);
-        walkVector[1] = 2*sin(ballbearing);
-        walkVector[2] = ballbearing/2.0;
-        walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
-        WalkJob* walk = new WalkJob(walkVector);
-        m_provider->m_jobs->addMotionJob(walk);
-        
-        HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
-        m_provider->m_jobs->addMotionJob(head);
+        if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        {
+            float headyaw, headpitch;
+            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            
+            float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
+            float balldistance;
+            if (measureddistance < 46)
+                balldistance = 1;
+            else
+                balldistance = sqrt(pow(measureddistance,2) - 46*46);
+            float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+            
+            vector<float> walkVector(3, 0);
+            walkVector[1] = 2*sin(ballbearing);
+            walkVector[2] = ballbearing/2.0;
+            walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
+            WalkJob* walk = new WalkJob(walkVector);
+            m_provider->m_jobs->addMotionJob(walk);
+            
+            HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+            m_provider->m_jobs->addMotionJob(head);
+        }
     };
 };
 
@@ -176,8 +182,13 @@ public:
     };
     void doState()
     {
-        m_provider->m_jobs->addMotionJob(new WalkJob(0,0,0.3));
-        m_provider->m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Ball, 0.3));
+        float spin = 0;
+        if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing() < 0)
+            spin = -0.4;
+        else
+            spin = 0.4;
+        m_provider->m_jobs->addMotionJob(new WalkJob(0,0,spin));
+        m_provider->m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Ball,spin));
     };
 };
 

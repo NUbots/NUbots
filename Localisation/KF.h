@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include "Tools/Math/Matrix.h"
-
+#include "odometryMotionModel.h"
 enum KfUpdateResult
 {
     KF_OUTLIER = 0,
@@ -21,7 +21,6 @@ class KF {
 
         // Update functions
         void timeUpdate(double odometeryForward, double odometeryLeft, double odometeryTurn);
-        //! TODO: Add motion model code to odometery update.
         KfUpdateResult odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta);
         KfUpdateResult ballmeas(double Ballmeas, double theta_Ballmeas);
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);
@@ -56,8 +55,19 @@ class KF {
         Matrix sqrtOfTestWeightings; // Square root of W (Constant)
         Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
         Matrix sqrtOfProcessNoiseReset; // Square root of Q when resetting. (Conastant) 
-        double frameRate; // Constant from init on.
+	Matrix sigmaPoints;
+	
+	
+	Matrix srukfCovX;  // Original covariance mat
+	Matrix srukfSx;    // Square root of Covariance
+	Matrix srukfSq;    // State noise square root covariance
+	Matrix srukfSr;    // Measurement noise square root covariance
+	
+	
 
+        double frameRate; // Constant from init on.
+	// Motion Model
+	OdometryMotionModel odom_Model;
         // Tuning Values (Constants) -- Values assigned in KF.cpp
         static const float c_Kappa;
         static const float c_ballDecayRate;
@@ -67,6 +77,9 @@ class KF {
         static const float c_R_ball_theta;
         static const float c_R_ball_range_offset;
         static const float c_R_ball_range_relative;
+	
+	void measureLocalization(double x,double y,double theta);
+	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);
 };
 
 #endif

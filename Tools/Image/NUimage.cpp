@@ -1,5 +1,6 @@
 #include "NUimage.h"
 #include <cstring>
+#include <string>
 /*!
 @file NUimage.h
 @brief Declaration of NUbots NUimage class. Storage class for images.
@@ -232,6 +233,7 @@ std::istream& operator>> (std::istream& input, NUimage& p_image)
 
     for(int y = 0; y < height; y++)
     {
+        if(!input.good()) throw std::exception();
         input.read((char*) p_image.m_image[y], sizeof(p_image.m_image[y][0])*width);
     }
     return input;

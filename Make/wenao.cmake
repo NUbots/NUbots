@@ -27,8 +27,13 @@ FIND_PACKAGE(WEBOTS REQUIRED)
 SET(NUBOT_IS_REMOTE ON)
 
 ######### Set the output path so it goes nicely into the webots file structure
-SET( OUTPUT_ROOT_DIR_EXE "${WEBOTS_DIR}/projects/contests/nao_robocup/controllers/nao_soccer_player_blue/nao_soccer_player_blue" )
-SET( OUTPUT_ROOT_DIR_LIB "${WEBOTS_DIR}/projects/contests/nao_robocup/controllers/nao_soccer_player_blue/nao_soccer_player_blue" )
+IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    SET( OUTPUT_ROOT_DIR_0 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_0/nao_team_0.exe" )
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1.exe" )
+ELSE()
+    SET( OUTPUT_ROOT_DIR_0 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_0/nao_team_0" )
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1" )
+ENDIF()
 
 ######### ADD_DEFINITIONS used by this target
 ADD_DEFINITIONS(${WEBOTS_DEFINITIONS})

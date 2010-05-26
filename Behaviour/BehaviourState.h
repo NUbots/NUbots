@@ -25,15 +25,31 @@
 #ifndef BEHAVIOURSTATE_H
 #define BEHAVIOURSTATE_H
 
+class NUSensorsData;
+class NUActionatorsData;
+class JobList;
+class FieldObjects;
+class GameInformation;
+class TeamInformation;
+
 class BehaviourProvider;
 
 class BehaviourState
 {
 public:
-    BehaviourState();
     virtual ~BehaviourState();
     virtual BehaviourState* nextState() = 0;
+    void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
+protected:
+    BehaviourState() {};
     virtual void doState() = 0;
+protected:
+    NUSensorsData* m_data;
+    NUActionatorsData* m_actions;
+    JobList* m_jobs;
+    FieldObjects* m_field_objects;
+    GameInformation* m_game_info;
+    TeamInformation* m_team_info;
 };
 
 

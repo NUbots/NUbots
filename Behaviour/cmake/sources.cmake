@@ -23,15 +23,18 @@ ENDIF()
 SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
                 BehaviourFSMProvider.cpp BehaviourFSMProvider.h
                 BehaviourState.cpp BehaviourState.h
+                BehaviourFSMState.cpp BehaviourFSMState.h
                 Behaviour.cpp Behaviour.h
+                GameInformation.cpp GameInformation.h
                 TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  Jobs
+                Soccer
                 ChaseBall
                 MiscBehaviours
-		WalkOptimisation
+                WalkOptimisation
 )
 ####################################################################################
 

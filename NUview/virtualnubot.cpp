@@ -8,12 +8,13 @@
 #include <iostream>
 #include <fstream>
 #include <qmessagebox.h>
-
+#include "../NUPlatform/NUSensors/NUSensorsData.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
 
     //! TODO: Load LUT from filename.
+    AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
     tempLut = new unsigned char[LUTTools::LUT_SIZE];
     for (int i = 0; i < LUTTools::LUT_SIZE; i++)
@@ -30,6 +31,8 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     touchSensors = 0;
 
     autoSoftColour = false;
+
+    sensorsData = new NUSensorsData();
     //debug<<"VirtualNUBot started";
     //TEST:
 
@@ -130,7 +133,7 @@ void virtualNUbot::processVisionFrame()
 void virtualNUbot::processVisionFrame(const NUimage* image)
 {
     if(!imageAvailable()) return;
-    //qDebug() << "Begin Process Frame";
+    qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
@@ -155,13 +158,16 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     int mode  = ROBOTS;
     Circle circ;
-    //qDebug() << "Start switch";
 
-
+    vision.setFieldObjects(AllObjects);
     vision.setImage(image);
+    //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
     vision.AllFieldObjects->preProcess(image->m_timestamp);
+    //qDebug() << "Image Pre-processed";
     int spacings = (int)image->getWidth()/20;
+    //qDebug() << "Scan Spacing calculated";
     vision.setLUT(classificationTable);
+    //qDebug() << "LUT set";
     generateClassifiedImage(image);
     //qDebug() << "Generate Classified Image: finnished";
 
@@ -247,40 +253,20 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
-    /*
-    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > segments,
-                                                    std::vector<Vector2<int> >&fieldBorders,
-                                                    std::vector<unsigned char> validColours,
-                                                    int spacing,
-                                                    float min_aspect, float max_aspect, int min_segments,
-                                                    tCLASSIFY_METHOD method);
-    */
+
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
     std::vector< ObjectCandidate > BlueGoalCandidates;
     std::vector< ObjectCandidate > YellowGoalCandidates;
     std::vector< ObjectCandidate > BlueGoalAboveHorizonCandidates;
     std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
-    mode = ROBOTS;
+    mode = BALL;
     method = Vision::PRIMS;
-   for (int i = 0; i < 4; i++)
+   for (int i = 1; i < 4; i++)
     {
 
         switch (i)
         {
-            case ROBOTS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::pink);
-                validColours.push_back(ClassIndex::pink_orange);
-                validColours.push_back(ClassIndex::shadow_blue);
-                //qDebug() << "PRE-ROBOT";
-
-                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
-                RobotCandidates = tempCandidates;
-                //qDebug() << "POST-ROBOT";
-                robotClassifiedPoints = 0;
-                break;
             case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
@@ -319,7 +305,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    qDebug() << "POSTclassifyCandidates";
+    //qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
@@ -334,19 +320,37 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
 
-    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings);
+    LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings,sensorsData);
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
     emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
     qDebug() << "Updating Corners";
     emit cornerPointsDisplayChanged(LineDetector.cornerPoints,GLDisplay::FieldLines);
 
+    //! Find Robots:
+
+    validColours.clear();
+    validColours.push_back(ClassIndex::white);
+    validColours.push_back(ClassIndex::pink);
+    validColours.push_back(ClassIndex::pink_orange);
+    validColours.push_back(ClassIndex::shadow_blue);
+    validColours.push_back(ClassIndex::blue);
+    //qDebug() << "PRE-ROBOT";
+
+    tempCandidates = vision.classifyCandidates(LineDetector.robotSegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
+    RobotCandidates = tempCandidates;
+
+    qDebug() << "Number of Robots: "<<RobotCandidates.size();
+    vision.DetectRobots(RobotCandidates);
+    //qDebug() << "POST-ROBOT";
+    robotClassifiedPoints = 0;
+    candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
+
     //POST PROCESS:
     vision.AllFieldObjects->postProcess(image->m_timestamp);
     //qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
-
 
     //SUMMARY:
     qDebug() << "Time: " << vision.m_timestamp;
@@ -356,7 +360,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
         {
-            qDebug() << "Stationary Object: " << i << ":" //<< vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+            qDebug() << "Stationary Object: " << i << ":" //<< (char*) &vision.AllFieldObjects->stationaryFieldObjects[i].getName()
                      <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
                      <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
                     << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
@@ -366,7 +370,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
         {
-            qDebug() << "Mobile Object: " << i << ":" //<< vision.AllFieldObjects->mobileFieldObjects[i].getName()
+            qDebug() << "Mobile Object: " << i << ":"// << (char*)&vision.AllFieldObjects->mobileFieldObjects[i].getName()
                      << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
                      <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
                     << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
@@ -378,6 +382,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
         {
             qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
+                        //<<  (char*)&vision.AllFieldObjects->ambiguousFieldObjects[i].getName()
                      << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
                      << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
                      << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();

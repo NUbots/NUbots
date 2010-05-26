@@ -26,6 +26,7 @@
 #define SEETHINK_THREAD_H
 
 #include "Tools/Threading/ConditionalThread.h"
+#include <vector>
 
 class NUbot;
 
@@ -37,8 +38,7 @@ public:
     SeeThinkThread(NUbot* nubot);
     ~SeeThinkThread();
 protected:
-    void run();
-    
+    void run();  
 private:
     NUbot* m_nubot;
 };

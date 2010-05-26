@@ -23,16 +23,10 @@
 #include "BehaviourProvider.h"
 
 #include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "Soccer/SoccerProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
-
-#include "Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "TeamInformation.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -45,7 +39,7 @@ Behaviour::Behaviour()
         m_behaviour = new SelectBehaviourProvider(this);
     #else
         // For Webots, create the behaviour you want to run here 
-        m_behaviour = new ChaseBallProvider(this, false);
+        m_behaviour = new WalkOptimisationProvider(this);
     #endif
     m_next_behaviour = NULL;
 }
@@ -95,6 +89,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
     name = simplifyName(name);
     if (name.compare("selectbehaviour") == 0)
         return new SelectBehaviourProvider(this);
+    else if (name.find("soccer") != string::npos)
+        return new SoccerProvider(this);
     else if (name.compare("chaseball") == 0)
         return new ChaseBallProvider(this);
     else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)

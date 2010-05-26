@@ -44,11 +44,11 @@ public:
     virtual ~BehaviourFSMProvider();
     
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
+    bool stateChanged();
 protected:
     BehaviourFSMProvider(Behaviour* manager);
 
-    void addState(BehaviourState* state);
-    virtual void doBehaviour();
+    void doBehaviour();
     virtual void doBehaviourCommons();
     virtual BehaviourState* nextStateCommons();
 
@@ -56,7 +56,6 @@ protected:
     BehaviourState* m_state;
     BehaviourState* m_previous_state;
     bool m_state_changed;
-    std::vector<BehaviourState*> m_states;
 };
 
 

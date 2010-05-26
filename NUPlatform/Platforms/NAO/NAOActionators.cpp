@@ -92,7 +92,7 @@ NAOActionators::NAOActionators()
     m_data->setAvailableLeds(m_led_names);
     m_data->setAvailableOtherActionators(m_other_names);
     
-    double time = nusystem->getTime();
+    /*double time = nusystem->getTime();
     vector<float> rgb(3,0);
     vector<vector<float> > allleds;
     allleds.push_back(rgb);
@@ -123,7 +123,7 @@ NAOActionators::NAOActionators()
     m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, allleds);
     
     allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);
+    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);*/
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
     debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;

@@ -112,6 +112,7 @@ NUSensorsData::NUSensorsData()
     
     // GPS Sensor
     addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
+    addSensor(Compass, string("Compass"), sensor_t::COMPASS_VALUES);
 }
 
 /*! @brief Adds a sensor to the class
@@ -499,7 +500,9 @@ bool NUSensorsData::getJointData(sensor_t* p_sensor, joint_id_t jointid, float& 
  */
 bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vector<float>& data)
 {
-    if (partid == AllJoints)
+    if (p_sensor == NULL || p_sensor->IsValid == false)
+        return false;
+    else if (partid == AllJoints)
     {   // if we want all joints then it is easy
         data = p_sensor->Data;
         return true;
@@ -526,8 +529,9 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
             debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
             return false;
         }
-        
+
         data.clear();
+        data.reserve(selectedjoints.size());
         for (unsigned int i=0; i<selectedjoints.size(); i++)
             data.push_back(p_sensor->Data[selectedjoints[i]]);
         return true;
@@ -709,9 +713,6 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
 }
 
 /*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
- 
-    Note orientation is not measured by the GPS :(.
- 
     @param values will be updated with the gps coordinates of the robot [x (cm), y (cm), z (cm)]
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
@@ -721,6 +722,20 @@ bool NUSensorsData::getGPSValues(vector<float>& values)
     else
     {
         values = GPS->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the compass reading [heading]
+    @param values will be updated with the compass reading
+ */
+bool NUSensorsData::getCompassValues(vector<float>& values)
+{
+    if (Compass == NULL || Compass->IsValid == false)
+        return false;
+    else
+    {
+        values = Compass->Data;
         return true;
     }
 }
@@ -1354,6 +1369,16 @@ void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool is
     setData(GPS, time, data, iscalculated);
 }
 
+/*! @brief Sets the compass coordinates to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the Compass values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setCompassValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(Compass, time, data, iscalculated);
+}
+
 /* @brief Sets the data of the given sensor to the given data
    @param p_sensor a pointer to the sensor to be updated
    @param time the time the data was collected
@@ -1373,7 +1398,7 @@ void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>
 /*! @brief Puts a user readable summary of the contents of the NUSensorsData class
     @param output the stream in which to put the summary
  */
-void NUSensorsData::summaryTo(ostream& output)
+void NUSensorsData::summaryTo(ostream& output) const
 {
     for (unsigned int i=0; i<m_sensors.size(); i++)
         m_sensors[i]->summaryTo(output);
@@ -1411,13 +1436,17 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     sensor_t insensor;
     sensor_t* sensor;
     input >> numsensors;
+    double lastUpdateTime = 0;
     for (int i=0; i<numsensors; i++)
     {
+        if(!input.good()) throw exception();
         input >> insensor;
         sensor = new sensor_t(insensor);
         p_data.m_sensors.push_back(sensor);
         p_data.updateNamedSensorPointer(sensor);
+        if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
     }
+    p_data.CurrentTime = lastUpdateTime;
     return input;
 }
 

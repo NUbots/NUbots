@@ -11,8 +11,9 @@
 #include "openglmanager.h"
 #include "locWmGlDisplay.h"
 #include "localisationwidget.h"
-#include "LogFileReader.h"
+#include "FileAccess/LogFileReader.h"
 #include "visionstreamwidget.h"
+#include "SensorDisplayWidget.h"
 #include <QHostInfo>
 
 class QMdiArea;
@@ -131,6 +132,7 @@ private:
     KickWidget* kick;
     cameraSettingsWidget* cameraSetting;
     frameInformationWidget* frameInfo;
+    SensorDisplayWidget* sensorDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

@@ -14,20 +14,26 @@
 
 # list the project's subdirectories here:
 SET(NUBOT_DIRS  NUPlatform
-		NUbot
+                NUbot
                 Tools
                 Kinematics
-		GameController
 )
 IF(NUBOT_USE_VISION)
 	LIST(APPEND NUBOT_DIRS Vision)
+ELSE()
+    LIST(APPEND NUBOT_DIRS Vision/FieldObjects)
 ENDIF()
+
 IF(NUBOT_USE_LOCALISATION)
 	LIST(APPEND NUBOT_DIRS Localisation)
 ENDIF()
+
 LIST(APPEND NUBOT_DIRS Behaviour)
+
 IF(NUBOT_USE_MOTION)
 	LIST(APPEND NUBOT_DIRS Motion)
+ELSE()
+    LIST(APPEND NUBOT_SRCS ../Motion/Walks/WalkParameters.cpp ../Motion/Walks/WalkParameters.h)
 ENDIF()
 
 # list the top-level files here

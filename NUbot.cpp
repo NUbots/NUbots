@@ -29,7 +29,7 @@
 #include "NUPlatform/NUIO.h"
 #include "Behaviour/Jobs.h"
 #include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
+#include "Behaviour/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
 #include "debugverbositynubot.h"
@@ -46,7 +46,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    //#include "Localisation/Localisation.h"
+    #include "Localisation/Localisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -124,7 +124,7 @@ NUbot::NUbot(int argc, const char *argv[])
     Actions = m_platform->actionators->getActions();
     Objects = new FieldObjects();
     Jobs = new JobList();
-    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber());
+    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions);
     TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
 
     // --------------------------------- construct the io
@@ -146,7 +146,8 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_LOCALISATION
-        //m_localisation = new Localisation();
+        m_localisation = new Localisation();
+        m_localisation->doPlayerReset();
     #endif
     
     #ifdef USE_BEHAVIOUR
@@ -240,8 +241,8 @@ NUbot::~NUbot()
             delete m_vision;
     #endif
     #ifdef USE_LOCALISATION
-        //if (m_localisation != NULL)
-            //delete m_localisation;
+        if (m_localisation != NULL)
+            delete m_localisation;
     #endif
     #ifdef USE_BEHAVIOUR
         if (m_behaviour != NULL)

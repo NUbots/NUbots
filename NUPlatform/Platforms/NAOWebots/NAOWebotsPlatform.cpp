@@ -46,21 +46,13 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "NAOWebotsPlatform::NAOWebotsPlatform" << endl;
 #endif
-    // find URBI port number (e.g. -p 54001) in controllerArgs
-    int port = -1;
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
-            port = atoi(argv[i + 1]);
-            break;
-        }
-    }
+    if (argc < 3)
+        errorlog << "NAOWebotsPlatform::NAOWebotsPlatform(). Could not find team id and player id in controllerArgs" << endl;
     
-    if (port == -1) {
-        errorlog << "Error: could not find port number in controllerArgs" << endl;
-    }
-    m_player_number = (port % 10) + 1;
+    m_player_number = atoi(argv[1]) + 1;
+    m_team_number = atoi(argv[2]);
+    
     setNameFromNumber();
-    setTeam(Robot::getName());
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
     camera = new NAOWebotsCamera(this);
@@ -97,17 +89,4 @@ void NAOWebotsPlatform::setNameFromNumber()
             break;
     }
 }
-
-/*! @brief A function which sets m_team_colour and m_team_number
-    @param name the name webots gives the robot
- */
-void NAOWebotsPlatform::setTeam(const string& name)
-{
-    if (name.find("red") != string::npos)
-        m_team_number = 1;
-    else 
-        m_team_number = 0;
-}
-
-
 

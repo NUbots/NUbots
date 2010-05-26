@@ -31,9 +31,10 @@
 #include <vector>
 #include <string>
 #include "Tools/Math/Matrix.h"
+#include "Tools/FileFormats/TimestampedData.h"
 using namespace std;
 
-class NUSensorsData
+class NUSensorsData: public TimestampedData
 {
 public:
     typedef int joint_id_t;
@@ -141,6 +142,7 @@ public:
     bool getDistanceValues(vector<float>& values);
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
+    bool getCompassValues(vector<float>& values);
     
     // Get methods for foot pressure sensors
     bool getFootSoleValues(foot_id_t footid, vector<float>& values);
@@ -178,14 +180,16 @@ public:
     void setButtonValues(double time, const vector<float>& data, bool iscalculated = false);
     void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
     void setGPSValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setCompassValues(double time, const vector<float>& data, bool iscalculated = false);
     
-    void summaryTo(ostream& output);
+    void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
     
     friend ostream& operator<< (ostream& output, const NUSensorsData& p_sensor);
     friend istream& operator>> (istream& input, NUSensorsData& p_sensor);
     
     int size() const;
+    double GetTimestamp() const {return CurrentTime;};
 private:
     void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
     void addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
@@ -249,6 +253,7 @@ public:
     
     // GPS Sensors
     sensor_t* GPS;                              //!< stores the gps position of the robot
+    sensor_t* Compass;                          //!< stores the bearing of the robot
     
 private:
     vector<sensor_t*> m_sensors;                //!< a vector of all of the sensors

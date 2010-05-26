@@ -5,13 +5,19 @@ Object::Object(int initID, const std::string& initName):
         ID(initID),
         name(initName)
 {
+
     measuredRelativePosition[0] = 0;
     measuredRelativePosition[1] = 0;
     measuredRelativePosition[2] = 0;
     relativeMeasurementError[0] = 0;
     relativeMeasurementError[1] = 0;
     relativeMeasurementError[2] = 0;
-	isVisible = false;
+
+    estimatedRelativeLocation[0] = 0;
+    estimatedRelativeLocation[1] = 0;
+    estimatedRelativeLocation[2] = 0;
+
+    isVisible = false;
     imagePosition[0] = 0;
     imagePosition[1] = 0;
     timeLastSeen = 0;  
@@ -98,3 +104,15 @@ void Object::setViewPositionVariables(int screenX, int screenY)
 	this.viewPosition[1] = screenY;
 	
 }*/
+
+//! Functions for Localisationt to update the object
+void Object::updateEstimatedRelativeLocation(const Vector3<float>& newWMRelLoc)
+{
+        estimatedRelativeLocation = newWMRelLoc;
+}
+void Object::updateEstimatedRelativeVariables(float distance, float bearing, float elevation)
+{
+        estimatedRelativeLocation[0] = distance;
+        estimatedRelativeLocation[1] = bearing;
+        estimatedRelativeLocation[2] = elevation;
+}

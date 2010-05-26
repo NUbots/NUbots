@@ -4,10 +4,13 @@ DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework CoreFoundation -lz
+    LIBS += -framework \
+        CoreFoundation \
+        -lz
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     LIBS += -lwsock32
@@ -69,10 +72,10 @@ HEADERS += ui_mainwindow.h \
     localisationwidget.h \
     ../Vision/Ball.h \
     ../Vision/CircleFitting.h \
-    LogFileFormatReader.h \
-    nifVersion1FormatReader.h \
-    LogFileReader.h \
-    nulVersion1FormatReader.h \
+    FileAccess/LogFileFormatReader.h \
+    FileAccess/nifVersion1FormatReader.h \
+    FileAccess/LogFileReader.h \
+    FileAccess/nulVersion1FormatReader.h \
     visionstreamwidget.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
@@ -101,6 +104,10 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/General.h \
     ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
+    FileAccess/StreamFileReader.h \
+    ../Tools/FileFormats/TimestampedData.h \
+    FileAccess/NavigableFileReader.h \
+    FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
     ../Vision/EllipseFit.h \
@@ -129,7 +136,12 @@ HEADERS += ui_mainwindow.h \
     ../Vision/EllipseFitting/jama_qr.h \
     ../Vision/EllipseFitting/jama_lu.h \
     ../Vision/EllipseFitting/jama_eig.h \
-    ../Vision/EllipseFitting/jama_cholesky.h
+    ../Vision/EllipseFitting/jama_cholesky.h \
+    ../Localisation/odometryMotionModel.h \
+    ../Localisation/probabilityUtils.h \
+    FileAccess/SplitStreamFileFormatReader.h \
+    SensorDisplayWidget.h \
+    ../Vision/EllipseFitting/FittingCalculations.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -187,10 +199,10 @@ SOURCES += mainwindow.cpp \
     localisationwidget.cpp \
     ../Vision/Ball.cpp \
     ../Vision/CircleFitting.cpp \
-    LogFileFormatReader.cpp \
-    nifVersion1FormatReader.cpp \
-    LogFileReader.cpp \
-    nulVersion1FormatReader.cpp \
+    FileAccess/LogFileFormatReader.cpp \
+    FileAccess/nifVersion1FormatReader.cpp \
+    FileAccess/LogFileReader.cpp \
+    FileAccess/nulVersion1FormatReader.cpp \
     visionstreamwidget.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
@@ -215,6 +227,11 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
-    ../Vision/EllipseFit.cpp
+    ../Vision/EllipseFit.cpp \
+    ../Localisation/odometryMotionModel.cpp \
+    ../Localisation/probabilityUtils.cpp \
+    FileAccess/SplitStreamFileFormatReader.cpp \
+    SensorDisplayWidget.cpp \
+    ../Vision/EllipseFitting/FittingCalculations.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
