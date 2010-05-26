@@ -80,8 +80,8 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
-    ../Localisation/LocWM.h \
     ../Localisation/KF.h \
+    ../Localisation/Localisation.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
     ../Behaviour/GameInformation.h \
     ../Tools/Threading/Thread.h \
@@ -206,8 +206,8 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
-    ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
+    ../Localisation/Localisation.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
     ../Behaviour/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
