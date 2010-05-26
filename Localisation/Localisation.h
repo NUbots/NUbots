@@ -1,9 +1,15 @@
 #ifndef LOCWM_H_DEFINED
 #define LOCWM_H_DEFINED
 #include "KF.h"
+
 #include "Vision/FieldObjects/FieldObjects.h"
-#include <fstream>
+class NUSensorsData;
+
+#include "debug.h"
 #include "debugverbositylocalisation.h"
+
+#include <fstream>
+
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
@@ -20,11 +26,13 @@ class Localisation
 	public:
         Localisation();
         ~Localisation();
+    
+        void process(NUSensorsData* data, FieldObjects* objects);
         //! TODO: Require robots state to be sent to enable smart model resetting.
         //! TODO: Need to add shared packets.
 	
-	void feedback(double*);
-	double feedbackPosition[3];
+        void feedback(double*);
+        double feedbackPosition[3];
         void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets);
         void CheckGameState();
         bool varianceCheck(int modelID);
@@ -51,7 +59,6 @@ class Localisation
         void MergeModels(int maxAfterMerge);
 	    void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
-	void process(FieldObjects* , float,float,float);
 
         // Model Reset Functions
         void doPenaltyReset();

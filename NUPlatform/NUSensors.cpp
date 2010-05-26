@@ -52,8 +52,14 @@ NUSensors::NUSensors()
     m_orientationFilter = new OrientationUKF();
     
     ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
-    m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
-    m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
+    if (file.is_open())
+    {
+        m_left_foot_hull = MotionFileTools::toFloatMatrix(file);
+        m_right_foot_hull = MotionFileTools::toFloatMatrix(file);
+    }
+    else
+        errorlog << "NUSensors::NUSensors(). Unable to load SupportHull.cfg" << endl;
+    file.close();
 }
 
 /*! @brief Destructor for parent NUSensors class.

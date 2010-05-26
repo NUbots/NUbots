@@ -1,5 +1,8 @@
-/*! @file WalkOptimisationState.h
-    @brief Walk Optimisation State
+/*! @file SoccerState.h
+    @brief Declaration of an abstract behaviour state class for other states to inherit from
+ 
+    @class SoccerState
+    @brief Declaration of an abstract behaviour state class for other states to inherit from
 
     @author Jason Kulk
  
@@ -19,25 +22,21 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef WALKOPTIMISATIONSTATE_H
-#define WALKOPTIMISATIONSTATE_H
+#ifndef SOCCER_STATE_H
+#define SOCCER_STATE_H
 
+class SoccerProvider;
 #include "Behaviour/BehaviourState.h"
-class WalkOptimisationProvider;
 
-#include "debug.h"
-
-class WalkOptimisationState : public BehaviourState
+class SoccerState : public BehaviourState
 {
 public:
-    WalkOptimisationState(WalkOptimisationProvider* parent) : m_parent(parent) {};
-    virtual ~WalkOptimisationState() {};
-    virtual BehaviourState* nextState() = 0;
-    virtual void doState() = 0;
-    
+    virtual ~SoccerState();
 protected:
-    WalkOptimisationProvider* m_parent;
+    SoccerState(SoccerProvider* provider) {m_provider = provider};
+    SoccerProvider* m_provider;
 };
+
 
 #endif
 

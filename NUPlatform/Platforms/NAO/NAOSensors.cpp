@@ -136,6 +136,7 @@ void NAOSensors::copyFromHardwareCommunications()
     debug << "NAOSensors::copyFromHardwareCommunications()" << endl;
 #endif
     vector<float> temp;
+    temp.reserve(1024);
     
     // This takes 0.13ms to complete
     m_al_positions_access->GetValues(temp);

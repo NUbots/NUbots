@@ -87,6 +87,12 @@ void NAOWebotsSensors::getSensorsFromWebots()
         m_gps = m_platform->getGPS("gps");
     else
         m_gps = NULL;
+    
+    // Get the compass if avaliable
+    if (Compass::exists("compass"))
+        m_compass = m_platform->getCompass("compass");
+    else
+        m_compass = NULL;
 }
 
 /* @brief Enables the sensor feedback in the simulated NAO (in webots this must be done, otherwise the readings are never updated)
@@ -116,6 +122,10 @@ void NAOWebotsSensors::enableSensorsInWebots()
     // Enable the the gps if avaliable
     if (m_gps != NULL)
         m_gps->enable(m_simulation_step);
+    
+    // Enable the compass if avaliable
+    if (m_compass != NULL)
+        m_compass->enable(m_simulation_step);
 }
 
 /*! @brief Destructor for NAOWebotsSensors
@@ -137,6 +147,7 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
     copyFromFootSole();
     copyFromFootBumper();
     copyFromGPS();
+    copyFromCompass();
 }
 
 /*! @brief Copies the joint data into m_data
@@ -270,6 +281,24 @@ void NAOWebotsSensors::copyFromGPS()
     }
 }
 
+/*! @brief Copies the compass data into m_data
+ */
+void NAOWebotsSensors::copyFromCompass()
+{
+    if (m_compass != NULL)
+    {
+        static vector<float> compassdata(1, 0);
+        static const double *buffer;
+        
+        #if DEBUG_NUSENSORS_VERBOSITY > 4
+            debug << "NAOWebotsSensors::copyFromCompass()" << endl;
+        #endif
+        
+        buffer = m_compass->getValues();
+        compassdata[0] = atan2(buffer[0], buffer[1]);
+        m_data->setCompassValues(m_current_time, compassdata);
+    }
+}
 
 
 

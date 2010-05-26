@@ -51,13 +51,9 @@ bool TeamInformation::amIClosestToBall()
         if (not m_received_packets[i].empty())
         {
             if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < 2000) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
-            {
-                debug << i << " is closer " << m_received_packets[i].back().TimeToBall << " < " << m_packet.TimeToBall << " based on packet received " << m_data->CurrentTime - m_received_packets[i].back().ReceivedTime << " ago." << endl;
                 return false;
-            }
         }
     }
-    debug << "I am closest" << endl;
     return true;
 }
 

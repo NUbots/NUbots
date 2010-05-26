@@ -1,4 +1,4 @@
-/*! @file BehaviourState.cpp
+/*! @file BehaviourFSMState.cpp
     @brief Implementation of behaviour state class
 
     @author Jason Kulk
@@ -19,7 +19,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BehaviourState.h"
+#include "BehaviourFSMState.h"
 #include "BehaviourProvider.h"
 
 #include "debug.h"
@@ -27,22 +27,28 @@
 
 using namespace std;
 
-void BehaviourState::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
+void BehaviourFSMState::doState()
 {
-    m_data = data;
-    m_actions = actions;
-    m_jobs = jobs;
-    m_field_objects = fieldobjects;
-    m_game_info = gameinfo;
-    m_team_info = teaminfo;
+    // do the behaviour common to all child states
+    doStateCommons();
     
-    doState();
-}
-
-/*! @brief Destroys the behaviour state
- */
-BehaviourState::~BehaviourState()
-{
+    // check for state changes common to all child states
+    BehaviourState* nextstate = nextStateCommons();
+    if (nextstate == m_state)               // then check if the current state wants to change the state
+        nextstate = m_state->nextState();
+    
+    // do state transition
+    if (nextstate != m_state)
+    {
+        m_previous_state = m_state;
+        m_state = nextstate;
+        m_state_changed = true;
+    }
+    else
+        m_state_changed = false;
+    
+    // perform the current state's behaviour
+    m_state->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
 }
 
 

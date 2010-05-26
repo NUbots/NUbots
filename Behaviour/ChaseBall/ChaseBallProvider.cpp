@@ -26,7 +26,6 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
@@ -41,15 +40,10 @@ using namespace std;
 
 ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : BehaviourFSMProvider(manager)
 {
-    m_pauseable = pauseable;
     m_chase_state = new ChaseState(this);
-    addState(m_chase_state);
     m_search_state = new SearchState(this);
-    addState(m_search_state);
     m_position_state = new PositionState(this);
-    addState(m_position_state);
     m_paused_state = new PausedState(this);
-    addState(m_paused_state);
     
     if (m_pauseable)
         m_state = m_paused_state;
@@ -60,6 +54,10 @@ ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : Behav
 
 ChaseBallProvider::~ChaseBallProvider()
 {
+    delete m_chase_state;
+    delete m_search_state;
+    delete m_position_state;
+    delete m_paused_state;
 }
 
 BehaviourState* ChaseBallProvider::nextStateCommons()

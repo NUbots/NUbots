@@ -21,7 +21,7 @@
 
 #include "GameControllerPort.h"
 #include "RoboCupGameControlData.h"
-#include "GameController/GameInformation.h"
+#include "Behaviour/GameInformation.h"
 
 #include "debug.h"
 #include "debugverbositynetwork.h"
@@ -48,5 +48,5 @@ GameControllerPort::~GameControllerPort()
 void GameControllerPort::handleNewData(std::stringstream& buffer)
 {
     RoboCupGameControlData* gcpacket = (RoboCupGameControlData*) buffer.str().c_str();
-    m_game_information->addNewNetworkData(*gcpacket);
+    (*m_game_information) << gcpacket;
 }

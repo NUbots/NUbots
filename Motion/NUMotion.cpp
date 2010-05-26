@@ -59,6 +59,9 @@ NUMotion::NUMotion()
     m_current_time = 0;
     m_previous_time = 0;
     m_last_kill_time = m_current_time - 10000;
+    
+    m_data = NULL;
+    m_actions = NULL;
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif

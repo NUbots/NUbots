@@ -25,9 +25,6 @@
 #include "Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "GameController/GameInformation.h"
-#include "TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
 #include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
