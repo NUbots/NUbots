@@ -59,6 +59,17 @@ vector<string> NAOSensors::m_button_names(temp_button_names, temp_button_names +
 static string temp_battery_names[] = {DN_CHARGE, DN_CURRENT, DN_VOLTAGE_MIN, DN_VOLTAGE_MAX, DN_TEMPERATURE};
 vector<string> NAOSensors::m_battery_names(temp_battery_names, temp_battery_names + sizeof(temp_battery_names)/sizeof(*temp_battery_names));
 
+static string temp_ulstrasonic_left_distance[] = {	DN_US_DISTANCE_LEFT_VALUE0, DN_US_DISTANCE_LEFT_VALUE1, DN_US_DISTANCE_LEFT_VALUE2, 
+									DN_US_DISTANCE_LEFT_VALUE3, DN_US_DISTANCE_LEFT_VALUE4, DN_US_DISTANCE_LEFT_VALUE5, 
+									DN_US_DISTANCE_LEFT_VALUE6, DN_US_DISTANCE_LEFT_VALUE7, DN_US_DISTANCE_LEFT_VALUE8, 
+									DN_US_DISTANCE_LEFT_VALUE9 	};
+static string temp_ulstrasonic_right_distance[] = {	DN_US_DISTANCE_RIGHT_VALUE0, DN_US_DISTANCE_RIGHT_VALUE1, DN_US_DISTANCE_RIGHT_VALUE2, 
+									DN_US_DISTANCE_RIGHT_VALUE3, DN_US_DISTANCE_RIGHT_VALUE4, DN_US_DISTANCE_RIGHT_VALUE5, 
+									DN_US_DISTANCE_RIGHT_VALUE6, DN_US_DISTANCE_RIGHT_VALUE7, DN_US_DISTANCE_RIGHT_VALUE8, 
+									DN_US_DISTANCE_RIGHT_VALUE9	};
+vector<string> NAOSensors::m_ultrasonic_left_distances(temp_ulstrasonic_left_distance, temp_ulstrasonic_left_distance + sizeof(temp_ulstrasonic_left_distance)/sizeof(*temp_ulstrasonic_left_distance));
+vector<string> NAOSensors::m_ultrasonic_right_distances(temp_ulstrasonic_right_distance, temp_ulstrasonic_right_distance + sizeof(temp_ulstrasonic_right_distance)/sizeof(*temp_ulstrasonic_right_distance));
+
 /*! @brief Constructs a NUSensors for NAO class
  */
 NAOSensors::NAOSensors()
@@ -110,6 +121,11 @@ void NAOSensors::getSensorsFromALMemory()
     m_al_button_access->ConnectToVariables(NUNAO::m_broker, m_button_names);
     m_al_battery_access = new ALMemoryFastAccess();
     m_al_battery_access->ConnectToVariables(NUNAO::m_broker, m_battery_names);
+    
+    m_al_ultrasonic_left_distances = new ALMemoryFastAccess();
+    m_al_ultrasonic_left_distances->ConnectToVariables(NUNAO::m_broker, m_ultrasonic_left_distances);
+    m_al_ultrasonic_right_distances = new ALMemoryFastAccess();
+    m_al_ultrasonic_right_distances->ConnectToVariables(NUNAO::m_broker, m_ultrasonic_right_distances);
 }
 
 /*! @brief Copies the sensor data from almemory to NUSensorsData
@@ -170,6 +186,14 @@ void NAOSensors::copyFromHardwareCommunications()
     
     m_al_battery_access->GetValues(temp);
     m_data->setBatteryValues(m_current_time, temp);    
+    
+    //Set Ultrasonic Distances:
+    m_al_ultrasonic_left_distances->GetValues(temp);
+    m_data->setDistanceLeftValues(m_current_time, temp);    
+    
+    m_al_ultrasonic_right_distances->GetValues(temp);
+    m_data->setDistanceRightValues(m_current_time, temp);    
+
 }
 
 

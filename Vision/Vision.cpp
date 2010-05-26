@@ -424,7 +424,24 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
     #endif
-
+    
+	/*For Testing Ultrasonic Distances:
+	debug << "US Distances: " ;
+	vector<float> leftDistances, rightDistances;
+	m_sensor_data->getDistanceLeftValues(leftDistances);
+	m_sensor_data->getDistanceRightValues(rightDistances);
+	debug << "US Left Distances: " ;
+	for(unsigned int i = 0 ; i < leftDistances.size() ; i++)
+	{
+		debug << "\t " << leftDistances[i];
+	}
+	debug << "\t\tUS Right Distances: " ;
+	for(unsigned int i = 0 ; i < rightDistances.size() ; i++)
+	{
+		debug << "\t " << rightDistances[i];
+	}
+	debug << endl;*/
+	
     #if DEBUG_VISION_VERBOSITY > 4
         //! Debug information for Frame:
         debug << "Time: " << m_timestamp << endl;
