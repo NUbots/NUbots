@@ -274,11 +274,15 @@ void GameInformation::process(RoboCupGameControlData* data)
 {
     if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0)
     {
-        if (m_data)
-            m_last_packet_time = m_data->CurrentTime;
-        memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
-        doGameControllerUpdate();
-        nusystem->displayGamePacketReceived(m_actions);
+        if (data->teams[0].teamNumber == m_team_number || data->teams[1].teamNumber == m_team_number)
+        {
+            if (m_data)
+                m_last_packet_time = m_data->CurrentTime;
+            memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
+            doGameControllerUpdate();
+            nusystem->displayGamePacketReceived(m_actions);
+            debug << "GameInformation::process(RoboCupGameControlData* data). Received valid gamecontroller packet" << endl;
+        }
     }
 }
 
