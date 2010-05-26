@@ -21,7 +21,7 @@
 
 #include "NUviewIO.h"
 #include "NUPlatform/NUSystem.h"
-#include "GameController/GameInformation.h"
+#include "Behaviour/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "debug.h"

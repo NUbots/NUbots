@@ -83,7 +83,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocWM.h \
     ../Localisation/KF.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
-    ../GameController/GameInformation.h \
+    ../Behaviour/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
     ../Tools/Threading/PeriodicThread.h \
@@ -106,7 +106,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/OrientationUKF.h \
     FileAccess/StreamFileReader.h \
     ../Tools/FileFormats/TimestampedData.h \
-    FileAccess/NavigableFileReader.h \
     FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
@@ -210,7 +209,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
-    ../GameController/GameInformation.cpp \
+    ../Behaviour/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Tools/Threading/PeriodicThread.cpp \
