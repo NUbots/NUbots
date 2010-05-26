@@ -17,6 +17,18 @@ class KF {
   	    // Constructor
         KF();
     
+        enum State
+        {
+            selfX,
+            selfY,
+            selfTheta,
+            ballX,
+            ballY,
+            ballXVelocity,
+            ballYVelocity,
+            numStates
+        };
+
         // Functions
 
         // Update functions
@@ -27,12 +39,12 @@ class KF {
 	    void linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12, double SR22, int index1, int index2);
 
         // Data retrieval
-        double sd(int Xi);
-        double variance(int Xi);
-        double getState(int stateID);
-        Matrix GetBallSR();
-        double getDistanceToPosition(double posX, double posY);
-        double getBearingToPosition(double posX, double posY);
+        double sd(int Xi) const;
+        double variance(int Xi) const;
+        double getState(int stateID) const;
+        Matrix GetBallSR() const;
+        double getDistanceToPosition(double posX, double posY) const;
+        double getBearingToPosition(double posX, double posY) const;
 
         // Utility
         void init();

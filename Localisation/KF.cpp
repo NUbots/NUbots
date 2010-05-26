@@ -16,19 +16,6 @@ Xhat[6][0]=ballVeocityY
 #include "odometryMotionModel.h"
 #include "pose2d.h"
 
-template <class T>
-inline T CROP(T num, T low, T high){
-  if (num < low) num = low;
-  else if (num > high) num = high;
-  return num;
-}
-
-template <class T>
- inline T NORMALISE(T theta){
- return atan2(sin(theta), cos(theta));
-}
-
-
 using namespace mathGeneral;
 
 // Tuning Values (Constants)
@@ -248,7 +235,7 @@ void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odomet
   // Householder transform. Unscented KF algorithm. Takes a while.
 	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
 	
-	stateEstimates[2][0] = NORMALISE(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+        stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
 	return;
 	
 	
@@ -334,11 +321,11 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
     // Addition Portion.
 		scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading
-		scriptX[2][i] = CROP(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+                scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
     // Subtraction Portion.
 		scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
 	// Crop heading
-		scriptX[2][nStates + i] = CROP(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+                scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
 	}
 	//----------------------------------------------------------------
 // 	std::cout << "Running motion model." << std::endl;
@@ -929,31 +916,36 @@ void KF::linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12,
 
 
 
-double KF::variance(int Xi){
+double KF::variance(int Xi) const
+{
 	return convDble(stateStandardDeviations.getRow(Xi)*stateStandardDeviations.getRow(Xi).transp());
 }
 
 
 
-double KF::sd(int Xi){
+double KF::sd(int Xi) const
+{
 	return sqrt(variance(Xi));
 }
 
 
 
-double KF::getState(int stateID){
+double KF::getState(int stateID) const
+{
   return stateEstimates[stateID][0];
 }
 
 
 
-Matrix KF::GetBallSR(){
+Matrix KF::GetBallSR() const
+{
   return HT(vertcat(stateStandardDeviations.getRow(3), stateStandardDeviations.getRow(4)));
 }
 
 
 
-double KF::getDistanceToPosition(double posX, double posY){
+double KF::getDistanceToPosition(double posX, double posY) const
+{
   double selfX = stateEstimates[0][0];
   double selfY = stateEstimates[1][0];
   double diffX = selfX - posX;
@@ -964,7 +956,8 @@ double KF::getDistanceToPosition(double posX, double posY){
 
 
 
-double KF::getBearingToPosition(double posX, double posY){
+double KF::getBearingToPosition(double posX, double posY) const
+{
   double selfX = stateEstimates[0][0];
   double selfY = stateEstimates[1][0];
   double selfHeading = stateEstimates[2][0];
