@@ -19,10 +19,20 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "IntialState.h"
+#include "InitialState.h"
 #include "SoccerState.h"
+#include "SoccerProvider.h"
 
-IntialState::IntialState(SoccerProvider* provider) : SoccerState(provider)
+#include "Behaviour/Jobs/JobList.h"
+#include "Behaviour/GameInformation.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+
+InitialState::InitialState(SoccerProvider* provider) : SoccerState(provider)
 {
 }
 
@@ -30,15 +40,27 @@ InitialState::~InitialState()
 {
 }
 
-BehaviourState* nextState()
+BehaviourState* InitialState::nextState()
 {
     return this;
 }
 
-void doState()
+void InitialState::doState()
 {
-    if (m_state_changed)
-        addSound();
+    if (m_provider->stateChanged())
+    {   // play a sound, and stop moving
+        m_actions->addSound(m_data->CurrentTime, NUSounds::INITIAL);
+        m_jobs->addMotionJob(new WalkJob(0,0,0));
+        vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime, zero));
+    }
+    // In inital the chest led should be off
+    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0, 0, 0);
     
+    // In initial if we have kick off the led should be on, and off when we don't have kick off
+    if (m_game_info->haveKickoff())
+        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 1);
+    else
+        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
 }
 

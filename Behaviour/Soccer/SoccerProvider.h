@@ -39,11 +39,10 @@ class RequiresSubstituteState;
 class SoccerProvider : public BehaviourFSMProvider
 {
 public:
+    SoccerProvider(Behaviour* manager);
     virtual ~SoccerProvider();
     
 protected:
-    SoccerProvider(Behaviour* manager);
-
     void doBehaviourCommons();
     BehaviourState* nextStateCommons();
 private:

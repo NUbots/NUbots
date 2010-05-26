@@ -203,10 +203,7 @@ const TeamInfo* GameInformation::getTeamInfo(int teamNumber) const
     else if (m_currentControlData->teams[TEAM_RED].teamNumber == teamNumber)
         return &m_currentControlData->teams[TEAM_RED];
     else
-    {
-        errorlog << "GameInformation::getTeamInfo(" << teamNumber << "). This team number is not in the current RoboCupGameControlData." << endl;
         return 0;
-    }
 }
 
 /*! @brief Returns the TeamInfo structure for my team */
@@ -281,7 +278,6 @@ void GameInformation::process(RoboCupGameControlData* data)
             memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
             doGameControllerUpdate();
             nusystem->displayGamePacketReceived(m_actions);
-            debug << "GameInformation::process(RoboCupGameControlData* data). Received valid gamecontroller packet" << endl;
         }
     }
 }

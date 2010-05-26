@@ -64,6 +64,12 @@ void BehaviourFSMProvider::process(JobList* jobs, NUSensorsData* data, NUActiona
     }
 }
 
+/*! @brief Returns true if the state has changed */
+bool BehaviourFSMProvider::stateChanged()
+{
+    return m_state_changed;
+}
+
 /*! @brief 
  */
 void BehaviourFSMProvider::doBehaviour()

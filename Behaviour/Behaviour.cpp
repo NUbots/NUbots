@@ -23,6 +23,7 @@
 #include "BehaviourProvider.h"
 
 #include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "Soccer/SoccerProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
@@ -88,6 +89,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
     name = simplifyName(name);
     if (name.compare("selectbehaviour") == 0)
         return new SelectBehaviourProvider(this);
+    else if (name.find("soccer") != string::npos)
+        return new SoccerProvider(this);
     else if (name.compare("chaseball") == 0)
         return new ChaseBallProvider(this);
     else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)

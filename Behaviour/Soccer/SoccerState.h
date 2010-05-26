@@ -31,9 +31,9 @@ class SoccerProvider;
 class SoccerState : public BehaviourState
 {
 public:
-    virtual ~SoccerState();
+    virtual ~SoccerState() {};
 protected:
-    SoccerState(SoccerProvider* provider) {m_provider = provider};
+    SoccerState(SoccerProvider* provider) {m_provider = provider;};
     SoccerProvider* m_provider;
 };
 
