@@ -20,16 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  SoccerProvider.cpp SoccerProvider.h
-                SoccerState.h
-                SoccerFSMState.h
-                InitialState.cpp InitialState.h
-                ReadyState.cpp ReadyState.h
-                PenalisedState.cpp PenalisedState.h
+SET (YOUR_SRCS  ReadyMoveState.cpp ReadyMoveState.h
+                ReadyMarkState.cpp ReadyMarkState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Ready
+SET (YOUR_DIRS  
 )
 ####################################################################################
 

@@ -1,8 +1,5 @@
-/*! @file SoccerState.h
-    @brief Declaration of an abstract behaviour state class for other states to inherit from
- 
-    @class SoccerState
-    @brief Declaration of an abstract behaviour state class for other states to inherit from
+/*! @file ReadyMoveState.cpp
+    @brief Implementation of the initial soccer state
 
     @author Jason Kulk
  
@@ -22,24 +19,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SOCCER_STATE_H
-#define SOCCER_STATE_H
+#include "ReadyMoveState.h"
 
-class SoccerProvider;
-class SoccerFSMState;
-#include "Behaviour/BehaviourState.h"
+#include "Behaviour/Jobs/JobList.h"
 
-class SoccerState : public BehaviourState
+ReadyMoveState::ReadyMoveState(SoccerFSMState* parent) : SoccerState(parent)
 {
-public:
-    virtual ~SoccerState() {};
-protected:
-    SoccerState(SoccerProvider* provider) {m_provider = provider; m_parent = 0;};
-    SoccerState(SoccerFSMState* parent) {m_parent = parent; m_provider = 0;};
-    SoccerProvider* m_provider;
-    SoccerFSMState* m_parent;
-};
+}
 
+ReadyMoveState::~ReadyMoveState()
+{
+}
 
-#endif
+BehaviourState* ReadyMoveState::nextState()
+{
+    return this;
+}
+
+void ReadyMoveState::doState()
+{
+}
 

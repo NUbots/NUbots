@@ -1,8 +1,8 @@
-/*! @file SoccerState.h
-    @brief Declaration of an abstract behaviour state class for other states to inherit from
+/*! @file SetState.h
+    @brief Declaration of the set soccer state
  
-    @class SoccerState
-    @brief Declaration of an abstract behaviour state class for other states to inherit from
+    @class SetState
+    @brief The initial soccer state
 
     @author Jason Kulk
  
@@ -22,21 +22,20 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SOCCER_FSM_STATE_H
-#define SOCCER_FSM_STATE_H
+#ifndef SET_STATE_H
+#define SET_STATE_H
 
 class SoccerProvider;
-#include "Behaviour/BehaviourFSMState.h"
+#include "SoccerState.h"
 
-class SoccerFSMState : public BehaviourFSMState
+class SetState : public SoccerState
 {
 public:
-    virtual ~SoccerFSMState() {};
+    SetState(SoccerProvider* provider);
+    ~SetState();
+    BehaviourState* nextState();
 protected:
-    SoccerFSMState(SoccerProvider* provider) {m_provider = provider; m_parent = 0;};
-    SoccerFSMState(SoccerFSMState* parent) {m_parent = parent; m_provider = parent->m_provider;};
-    SoccerProvider* m_provider;
-    SoccerFSMState* m_parent;
+    void doState();
 };
 
 

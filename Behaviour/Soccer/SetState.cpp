@@ -1,5 +1,5 @@
-/*! @file InitialState.cpp
-    @brief Implementation of the initial soccer state
+/*! @file SetState.cpp
+    @brief Implementation of the set soccer state
 
     @author Jason Kulk
  
@@ -19,7 +19,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "InitialState.h"
+#include "SetState.h"
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
@@ -32,30 +32,29 @@
 #include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 
-InitialState::InitialState(SoccerProvider* provider) : SoccerState(provider)
+SetState::SetState(SoccerProvider* provider) : SoccerState(provider)
 {
 }
 
-InitialState::~InitialState()
+SetState::~SetState()
 {
 }
 
-BehaviourState* InitialState::nextState()
+BehaviourState* SetState::nextState()
 {
     return this;
 }
 
-void InitialState::doState()
+void SetState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::INITIAL);
-        m_jobs->addMotionJob(new MotionKillJob());
+        m_actions->addSound(m_data->CurrentTime, NUSounds::SET);
     }
-    // In inital the chest led should be off
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0, 0, 0);
+    // In set the chest led should be yellow
+    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 1, 0);
     
-    // In initial if we have kick off the led should be on, and off when we don't have kick off
+    // In set if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
     else
