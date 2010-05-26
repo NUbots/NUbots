@@ -6,7 +6,7 @@
 #include "debugverbositylocalisation.h"
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
-#define SHARED_BALL_ON 1
+#define SHARED_BALL_ON 0
 
 // Debug output level
 // 0 - No messages

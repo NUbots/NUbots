@@ -158,55 +158,53 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 				numUpdates++;
 			//}
 		}
-// 	
-// 	
-// 		
-// 		// Proccess the Moving Known Field Objects
-// 		MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
-// 		MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
-// 		
-// 		for (; currMob != endMob; ++currMob)
-// 		{
-// 			if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
-// 			updateResult = doBallMeasurementUpdate((*currMob));
-// 			numUpdates++;
-// 		}
-// 		
-// 				
+
+
+
+                // Proccess the Moving Known Field Objects
+                MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
+                MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
+
+                for (; currMob != endMob; ++currMob)
+                {
+                        if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
+                        updateResult = doBallMeasurementUpdate((*currMob));
+                        numUpdates++;
+                }
+
+
 		NormaliseAlphas();
-// 
-// 		#if SHARED_BALL_ON
-// 		/*
-// 		// Check the game packets.
-// 		// We only want to do the shared ball updates if we can't see the ball ourselves.
-// 		// there have been probems where the team will keep sharing the previous position of their ball
-// 		// and updates in vision do not supercede the shared data.
-// 				int myPlayerNumber = GameController::getInstance().getPlayerNumber();
-// 				if(ourfieldObjects[FO_BALL].framesSinceLastSeen > 3){ // TODO: Change to a SD value
-// 				for(int robotNum = 0; robotNum < NUM_ROBOTS; robotNum++){
-// 				if(myPlayerNumber == (robotNum+1)) continue;
-// 				if(mostRecentPackets[robotNum].processedWM == false){
-// 				if(mostRecentPackets[robotNum].packet.ball.seen == true){
-// 		#if DEBUG_LOCALISATION_VERBOSITY > 2
-// 				debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
-// 		#endif
-// 				doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
-// 			}
-// 				else {
-// 		#if DEBUG_LOCALISATION_VERBOSITY > 2
-// 				debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
-// 		#endif
-// 			}
-// 				mostRecentPackets[robotNum].processedWM = true;
-// 			}
-// 			}
-// 			}
-// 		*/
-// 		#endif // SHARED_BALL_ON
-// 		
-// 		NormaliseAlphas();
-// 		
-// 		
+
+                #if SHARED_BALL_ON
+                // Check the game packets.
+                // We only want to do the shared ball updates if we can't see the ball ourselves.
+                // there have been probems where the team will keep sharing the previous position of their ball
+                // and updates in vision do not supercede the shared data.
+                                int myPlayerNumber = GameController::getInstance().getPlayerNumber();
+                                if(ourfieldObjects[FO_BALL].framesSinceLastSeen > 3){ // TODO: Change to a SD value
+                                for(int robotNum = 0; robotNum < NUM_ROBOTS; robotNum++){
+                                if(myPlayerNumber == (robotNum+1)) continue;
+                                if(mostRecentPackets[robotNum].processedWM == false){
+                                if(mostRecentPackets[robotNum].packet.ball.seen == true){
+                #if DEBUG_LOCALISATION_VERBOSITY > 2
+                                debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
+                #endif
+                                doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
+                        }
+                                else {
+                #if DEBUG_LOCALISATION_VERBOSITY > 2
+                                debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
+                #endif
+                        }
+                                mostRecentPackets[robotNum].processedWM = true;
+                        }
+                        }
+                        }
+                #endif // SHARED_BALL_ON
+
+                NormaliseAlphas();
+
+
 		#if MULTIPLE_MODELS_ON
     		// Do Ambiguous objects.
 		AmbiguousObjectsIt currAmb(objects->ambiguousFieldObjects.begin());
@@ -242,10 +240,6 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 		#endif
 		
 		///****************************************
-		
-		
-		
-		
 // 		// Check for model reset. -> with multiple models just remove if not last one??
 // 		// Need to re-do reset to be model specific.
 // 		//int numReset = CheckForOutlierResets();
@@ -311,24 +305,10 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 // 				debug_out  << " Robot Y: " << models[bestModelID].getState(1);
 // 				debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << endl;
 // 			}
-// 		#endif // DEBUG_LOCALISATION_VERBOSITY > 2
- 
- 		
- 		
- 	
+// 		#endif // DEBUG_LOCALISATION_VERBOSITY > 2 	
  	}
 	
 }
-
-
-
-
-
-
-
-
-
-
 
 void Localisation::CheckGameState()
 {
@@ -364,6 +344,7 @@ void Localisation::CheckGameState()
     }
     wasPreviouslyPenalised = isPenalised;
     previousGameState = currentState;
+    */
 }
 
 void Localisation::doPenaltyReset()
@@ -413,7 +394,6 @@ void Localisation::doPenaltyReset()
 
     // Set the uncertainties
     resetSdMatrix(1);
-*/
     return;
 }
 
