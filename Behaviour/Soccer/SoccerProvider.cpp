@@ -24,9 +24,9 @@
 #include "InitialState.h"
 /*#include "ReadyState.h"
 #include "SetState.h"
-#include "PlayingState.h"
+#include "PlayingState.h"*/
 #include "PenalisedState.h"
-#include "SubstituteState.h"
+/*#include "SubstituteState.h"
 #include "RequiresSubstituteState.h"*/
 
 #include "Behaviour/Jobs/JobList.h"
@@ -46,9 +46,9 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     m_initial = new InitialState(this);
     /*m_ready = new ReadyState(this);
     m_set = new SetState(this);
-    m_playing = new PlayingState(this);
+    m_playing = new PlayingState(this);*/
     m_penalised = new PenalisedState(this);
-    m_substitute = new SubstituteState(this);
+    /*m_substitute = new SubstituteState(this);
     m_requires_substitution = new RequiresSubstituteState(this);*/
     
     m_state = m_initial;
@@ -102,10 +102,10 @@ BehaviourState* SoccerProvider::nextStateCommons()
             break;
         case GameInformation::FinishedState:
             m_state = m_finished;
-            break;
+            break;*/
         case GameInformation::PenalisedState:
             m_state = m_penalised;
-            break;
+            break;/*
         case GameInformation::SubstituteState:
             m_state = m_substitute;
             break;

@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS  SoccerProvider.cpp SoccerProvider.h
                 SoccerState.h
                 InitialState.cpp InitialState.h
+                PenalisedState.cpp PenalisedState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
