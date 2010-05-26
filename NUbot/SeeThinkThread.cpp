@@ -133,8 +133,6 @@ void SeeThinkThread::run()
 	    #ifdef USE_LOCALISATION
 		m_nubot->SensorData->getOdometry(odometryTime, odometry); 
  		//debug<<"odometry        : [ "<<odometry[0]<<", "<<odometry[1]<<", "<<odometry[2]<<"]"<<endl;	
-		
-
 	    #endif
 		
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))

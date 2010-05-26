@@ -42,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     createToolBars();
     createStatusBar();
 
+    sensorDisplay = new SensorDisplayWidget(this);
+    QDockWidget* sensorDock = new QDockWidget("Sensor Values");
+    sensorDock->setObjectName("Sensor Values");
+    sensorDock->setWidget(sensorDisplay);
+    sensorDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,sensorDock);
+
     // Add localisation widget
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);
@@ -307,6 +314,8 @@ void MainWindow::createConnections()
 {
     qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
+    connect(&LogReader,SIGNAL(sensorDataChanged(const NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(const NUSensorsData*)));
+
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
@@ -373,7 +382,7 @@ void MainWindow::openLog()
 
     QString fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), ".",
-                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;All Files(*.*)"));
+                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
     openLog(fileName);
 
 }

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QString>
 #include "LogFileFormatReader.h"
-
+class NUSensorsData;
 
 class LogFileReader : public QObject
 {
@@ -14,14 +14,8 @@ public:
     ~LogFileReader();
     int openFile(QString fileName);
     bool closeFile();
-    const NUimage* getImage(){if(currentFileReader){return currentFileReader->getImage();}return 0;};
     int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;};
     int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;};
-    // Fetching information
-    //const QString& fileName() const {return currentFileName;};
-    //const QString& fileType() const {return currentFileExtension;};
-    //int numFrames() const {return totalFrames;};
-    //int currentFrame() const {return currentFrameIndex;};
 
 signals:
     // Signals to trigger available controls
@@ -33,6 +27,7 @@ signals:
 
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*, const float*, const float*);
+    void sensorDataChanged(const NUSensorsData*);
     void frameChanged(int,int);
     void cameraChanged(int);
 

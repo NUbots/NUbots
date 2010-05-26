@@ -1,6 +1,7 @@
 #include "LogFileReader.h"
 #include "nifVersion1FormatReader.h"
 #include "nulVersion1FormatReader.h"
+#include "SplitStreamFileFormatReader.h"
 #include <QFileInfo>
 #include <QDebug>
 #include "debug.h"
@@ -33,6 +34,10 @@ int LogFileReader::openFile(QString fileName)
         {
            currentFileReader = new nulVersion1FormatReader(fileName);
         }
+        else
+        {
+            currentFileReader = new SplitStreamFileFormatReader(fileName);
+        }
     }
     catch(exception &e)
     {
@@ -47,6 +52,7 @@ int LogFileReader::openFile(QString fileName)
             connect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
             connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
                     this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
+            connect(currentFileReader,SIGNAL(sensorDataChanged(const NUSensorsData*)), this, SIGNAL(sensorDataChanged(const NUSensorsData*)));
             connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
         }

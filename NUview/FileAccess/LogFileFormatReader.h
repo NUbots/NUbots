@@ -5,6 +5,7 @@
 #include <QString>
 #include <QFileInfo>
 #include "Tools/Image/NUimage.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 
 class LogFileFormatReader : public QObject
 {
@@ -16,14 +17,13 @@ public:
     virtual bool closeFile() = 0;                       // Must be implemented by derived classes.
 
     // Fetching information
-    QString fileName() const {return fileInformation.fileName();};
-    QString filePath() const {return fileInformation.absoluteFilePath();};
-    QString fileType() const {return fileInformation.suffix();};
-    int fileLengthInBytes() const {return fileInformation.size();};
-    int numFrames() const {return totalFrames;};
-    int currentFrame() const {return currentFrameIndex;};
+    QString fileName() const {return m_fileInformation.fileName();};
+    QString filePath() const {return m_fileInformation.absoluteFilePath();};
+    QString fileType() const {return m_fileInformation.suffix();};
+    int fileLengthInBytes() const {return m_fileInformation.size();};
+    int numFrames() const {return m_totalFrames;};
+    int currentFrame() const {return m_currentFrameIndex;};
     virtual bool fileGood() = 0;
-    const NUimage* getImage(){return &rawImageBuffer;};
 
     virtual bool isNextFrameAvailable(){return false;};
     virtual bool isPreviousFrameAvailable(){return false;};
@@ -34,6 +34,7 @@ public:
 signals:
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*,const float*,const float*);
+    void sensorDataChanged(const NUSensorsData*);
     void frameChanged(int,int);
     void cameraChanged(int);
 
@@ -46,16 +47,9 @@ public slots:
 
 protected:
     // File Information
-    QFileInfo fileInformation;
-    int totalFrames;
-    int currentFrameIndex;
-
-    // Data Buffers
-    NUimage rawImageBuffer;
-    //!TODO: sensor data must be updated
-    float jointSensorsBuffer[100];
-    float balanceSensorsBuffer[100];
-    float touchSensorsBuffer[100];
+    QFileInfo m_fileInformation;
+    int m_totalFrames;
+    int m_currentFrameIndex;
 
 private:
     static void displayControlError(const QString& controlName);

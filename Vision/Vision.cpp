@@ -54,6 +54,8 @@ Vision::~Vision()
 {
     // delete AllFieldObjects;
     delete [] LUTBuffer;
+    imagefile.close();
+    sensorfile.close();
     return;
 }
 
@@ -115,11 +117,17 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                 if(job->saving() == true)
                 {
                     if (!imagefile.is_open())
-                        imagefile.open((string(DATA_DIR) + string("images.nul")).c_str());
+                        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+                    if (!sensorfile.is_open())
+                        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
+                {
+                    imagefile.flush();
+                    sensorfile.flush();
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
+                }
             }
             isSavingImages = job->saving();
             isSavingImagesWithVaryingSettings = job->varyCameraSettings();
@@ -478,8 +486,14 @@ void Vision::SaveAnImage()
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
+
+
     if (imagefile.is_open() and numSavedImages < 2500)
     {
+        if(sensorfile.is_open())
+        {
+            sensorfile << (*m_sensor_data) << flush;
+        }
         NUimage buffer;
         buffer.cloneExisting(*currentImage);
         imagefile << buffer;

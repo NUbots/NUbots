@@ -18,6 +18,8 @@ public:
     bool closeFile();
     bool fileGood(){return (nifFileReader.currentFile.good() && nifFileReader.currentFile.is_open());};
 
+    const NUimage* getImage(){return &rawImageBuffer;};
+
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
     bool isFirstFrameAvailable();
@@ -35,6 +37,13 @@ public slots:
 
 protected:
     NUbotImage nifFileReader;
+
+    // Data Buffers
+    NUimage rawImageBuffer;
+    //!TODO: sensor data must be updated
+    float jointSensorsBuffer[100];
+    float balanceSensorsBuffer[100];
+    float touchSensorsBuffer[100];
 };
 
 #endif // NIFVERSION1FORMATREADER_H

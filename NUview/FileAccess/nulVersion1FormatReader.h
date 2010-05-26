@@ -15,6 +15,8 @@ public:
     int openFile(const QString& filename);
     bool closeFile();
     bool fileGood(){return (fileStream.good() && fileStream.is_open());};
+    const NUimage* getImage(){return &rawImageBuffer;};
+
 
     bool isNextFrameAvailable();
     bool isFirstFrameAvailable();
@@ -28,6 +30,13 @@ public slots:
 protected:
     std::ifstream fileStream;
     int m_frameLength;
+
+    // Data Buffers
+    NUimage rawImageBuffer;
+    //!TODO: sensor data must be updated
+    float jointSensorsBuffer[100];
+    float balanceSensorsBuffer[100];
+    float touchSensorsBuffer[100];
 };
 
 #endif // NULVERSION1FORMATREADER_H

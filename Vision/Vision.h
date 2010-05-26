@@ -58,6 +58,7 @@ class Vision
     bool isSavingImagesWithVaryingSettings;
     int numSavedImages;
     ofstream imagefile;
+    ofstream sensorfile;
     int ImageFrameNumber;
     int numFramesDropped;
     CameraSettings currentSettings;
