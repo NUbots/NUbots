@@ -1003,6 +1003,26 @@ void KF::measureLocalization(double x,double y,double theta)
 // 	cout<<x<<", "<<stateEstimates[0][0]<<", "<<y<<", "<<stateEstimates[1][0]<<", "<<theta<<", "<<stateEstimates[2][0]<<endl;
 }
 
+Matrix KF::CalculateSigmaPoints() const
+{
+    Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
+    scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
+
+//----------------Saturate ScriptX angle sigma points to not wrap
+    double sigmaAngleMax = 2.5;
+    for(int i=1;i<nStates+1;i++){//hack to make test points distributed
+// Addition Portion.
+            scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+    // Crop heading
+            scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+// Subtraction Portion.
+            scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+    // Crop heading
+            scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+    }
+    return scriptX;
+}
+
 std::ostream& operator<< (std::ostream& output, const KF& p_kf)
 {
     output.write(reinterpret_cast<const char*>(&p_kf.isActive), sizeof(p_kf.isActive));
