@@ -83,7 +83,6 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocWM.h \
     ../Localisation/KF.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
-    ../GameController/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
     ../Tools/Threading/PeriodicThread.h \
@@ -106,7 +105,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/OrientationUKF.h \
     FileAccess/StreamFileReader.h \
     ../Tools/FileFormats/TimestampedData.h \
-    FileAccess/NavigableFileReader.h \
     FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
@@ -141,7 +139,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
-    ../Vision/EllipseFitting/FittingCalculations.h
+    ../Vision/EllipseFitting/FittingCalculations.h \
+    ../Behaviour/GameInformation.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -210,7 +209,6 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
-    ../GameController/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Tools/Threading/PeriodicThread.cpp \
@@ -232,6 +230,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
-    ../Vision/EllipseFitting/FittingCalculations.cpp
+    ../Vision/EllipseFitting/FittingCalculations.cpp \
+    ../Behaviour/GameInformation.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

@@ -22,6 +22,7 @@
 #include "TcpPort.h"
 #include "NUPlatform/NUSystem.h"
 #include "Tools/Image/NUimage.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include <string.h>
@@ -202,14 +203,22 @@ void TcpPort::sendData(network_data_t netdata)
     return;
 }
 
-void TcpPort::sendData(const NUimage& p_image)
+void TcpPort::sendData(const NUimage& p_image, const NUSensorsData &p_sensors)
 {
     network_data_t netdata;
     stringstream buffer;
+    network_data_t sensordata;
+    stringstream sensorsbuffer;
+    sensorsbuffer << p_sensors;
+    string sensorsString = sensorsbuffer.str();
+    sensordata.data = (char*) sensorsString.c_str();
+    sensordata.size = sensorsString.size();
     
+    int sensorsSize = sensordata.size;
     int imagewidth = p_image.getWidth();
     int imageheight = p_image.getHeight();
     double timeStamp = p_image.m_timestamp;
+    buffer.write(reinterpret_cast<char*>(&sensorsSize), sizeof(sensorsSize));
     buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
     buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
     buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
@@ -227,4 +236,6 @@ void TcpPort::sendData(const NUimage& p_image)
         linedata.size = sizeof(p_image.m_image[y][0])*imagewidth;
         sendData(linedata);
     }
+    sendData(sensordata);
+    
 }

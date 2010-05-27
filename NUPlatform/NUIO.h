@@ -56,11 +56,11 @@ public:
     
 
     // Raw Image streaming 
-    friend NUIO& operator<<(NUIO& io, NUimage& p_image);
-    friend NUIO& operator<<(NUIO& io, NUimage* p_image);
+    friend NUIO& operator<<(NUIO& io, NUbot& p_nubot);
+    friend NUIO& operator<<(NUIO& io, NUbot* p_nubot);
+    
 protected:
     NUbot* m_nubot;
-    
     GameControllerPort* m_gamecontroller_port;
     TeamPort* m_team_port;
     TcpPort* m_vision_port;

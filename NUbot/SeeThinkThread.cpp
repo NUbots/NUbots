@@ -132,7 +132,7 @@ void SeeThinkThread::run()
                 #endif
 		
                 m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
-                *(m_nubot->m_io) << m_nubot->Image;  //<! Raw IMAGE STREAMING (TCP)
+                *(m_nubot->m_io) << m_nubot;  //<! Raw IMAGE STREAMING (TCP)
             #endif
 
             #ifdef THREAD_SEETHINK_MONITOR_TIME
