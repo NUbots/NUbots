@@ -22,9 +22,10 @@
 #include "SoccerProvider.h"
 
 #include "InitialState.h"
-#include "ReadyState.h"/*
+#include "ReadyState.h"
 #include "SetState.h"
-#include "PlayingState.h"*/
+/*#include "PlayingState.h"*/
+#include "FinishedState.h"
 #include "PenalisedState.h"
 /*#include "SubstituteState.h"
 #include "RequiresSubstituteState.h"*/
@@ -45,8 +46,9 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
 {
     m_initial = new InitialState(this);
     m_ready = new ReadyState(this);
-    /*m_set = new SetState(this);
-    m_playing = new PlayingState(this);*/
+    m_set = new SetState(this);
+    /*m_playing = new PlayingState(this);*/
+    m_finished = new FinishedState(this);
     m_penalised = new PenalisedState(this);
     /*m_substitute = new SubstituteState(this);
     m_requires_substitution = new RequiresSubstituteState(this);*/
@@ -59,11 +61,12 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
 SoccerProvider::~SoccerProvider()
 {
     delete m_initial;
-    /*delete m_ready;
+    delete m_ready;
     delete m_set;
-    delete m_playing;
+    //delete m_playing;
+    delete m_finished;
     delete m_penalised;
-    delete m_substitute;
+    /*delete m_substitute;
     delete m_requires_substitution;*/
 }
 
@@ -93,16 +96,16 @@ BehaviourState* SoccerProvider::nextStateCommons()
             break;
         case GameInformation::ReadyState:
             return m_ready;
-            break;/*
+            break;
         case GameInformation::SetState:
             return m_set;
             break;
-        case GameInformation::PlayingState:
+        /*case GameInformation::PlayingState:
             return m_playing;
-            break;
+            break;*/
         case GameInformation::FinishedState:
             return m_finished;
-            break;*/
+            break;
         case GameInformation::PenalisedState:
             return m_penalised;
             break;/*

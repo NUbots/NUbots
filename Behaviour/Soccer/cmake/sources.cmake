@@ -25,6 +25,8 @@ SET (YOUR_SRCS  SoccerProvider.cpp SoccerProvider.h
                 SoccerFSMState.h
                 InitialState.cpp InitialState.h
                 ReadyState.cpp ReadyState.h
+                SetState.cpp SetState.h
+                FinishedState.cpp FinishedState.h
                 PenalisedState.cpp PenalisedState.h
 )
 ####################################################################################

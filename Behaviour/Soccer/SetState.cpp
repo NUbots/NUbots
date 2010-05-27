@@ -29,8 +29,7 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 
 SetState::SetState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -59,5 +58,7 @@ void SetState::doState()
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
     else
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
+    
+    m_jobs->addMotionJob(new WalkJob(0,0,0));
 }
 

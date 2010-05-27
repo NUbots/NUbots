@@ -42,11 +42,6 @@ public:
     virtual ~BehaviourProvider();
     
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
-protected:
-    BehaviourProvider(Behaviour* manager);
-    virtual bool preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
-    virtual void doBehaviour() = 0;
-    virtual void postProcess();
     
     bool longChestClick();
     bool singleChestClick();
@@ -60,6 +55,13 @@ protected:
     bool singleRightBumperClick();
     bool doubleRightBumperClick();
     
+    bool longClick(const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
+    bool nClick(unsigned int n, const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
+protected:
+    BehaviourProvider(Behaviour* manager);
+    virtual bool preProcess(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
+    virtual void doBehaviour() = 0;
+    virtual void postProcess();
 private:
     bool tripleChestClick();
     void removeStiffness();
@@ -67,8 +69,6 @@ private:
     void restartBehaviour();
     
     void updateButtonValues();
-    bool longClick(const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
-    bool nClick(unsigned int n, const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
 
 protected:
     double m_current_time;
