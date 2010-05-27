@@ -16,6 +16,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     viewOrientation[2] = 0.0f;
     setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
     light = true;
+    perspective = true;
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -47,6 +48,33 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             {
                 glEnable(GL_LIGHTING);		// Enable Lighting
             }
+            update();
+            break;
+        case Qt::Key_P:
+            perspective = !perspective;
+            glPushMatrix();
+            glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
+            glLoadIdentity();							// Reset The Projection Matrix
+            if(perspective)
+            {
+                gluPerspective(45.0f,(GLfloat)this->width()/(GLfloat)this->height(),0.1f,10000.0f);
+            }
+            else
+            {
+                glOrtho(-370.0,  370.0, 270.0, -270.0,0.1,10000.0);
+            }
+            glMatrixMode(GL_MODELVIEW);						// Select The Modelview Matrix
+            glLoadIdentity();							// Reset The Modelview Matrix
+            glPopMatrix();
+            update();
+            break;
+        case Qt::Key_R:
+            viewTranslation[0] = 0.0f;
+            viewTranslation[1] = 0.0f;
+            viewTranslation[2] = -700.0f;
+            viewOrientation[0] = 0.0f;
+            viewOrientation[1] = 0.0f;
+            viewOrientation[2] = 0.0f;
             update();
             break;
         default:
@@ -354,9 +382,16 @@ void locWmGlDisplay::resizeGL(int width, int height)
         glViewport(0, 0, width, height);
         glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
         glLoadIdentity();							// Reset The Projection Matrix
-
+        if(perspective)
+        {
+            gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,10000.0f);
+        }
+        else
+        {
+            glOrtho(-370.0,  370.0, 270.0, -270.0,0.1,10000.0);
+        }
         // Calculate The Aspect Ratio Of The Window
-        gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,10000.0f);
+
 
         glMatrixMode(GL_MODELVIEW);						// Select The Modelview Matrix
         glLoadIdentity();							// Reset The Modelview Matrix

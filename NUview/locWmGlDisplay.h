@@ -59,6 +59,7 @@ protected:
         Localisation* currentLocalisation;
 
         bool light;
+        bool perspective;
 
 };
 
