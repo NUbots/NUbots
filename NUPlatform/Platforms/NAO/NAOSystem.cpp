@@ -38,10 +38,10 @@ NAOSystem::NAOSystem()
 #endif
     m_battery_state_previous_time = 0;
     
-    m_team_received_leds = vector<vector<float> >(1, vector<float>(3,0));
-    m_team_sent_leds = vector<vector<float> >(1, vector<float>(3,0));
-    m_game_received_leds = vector<vector<float> >(1, vector<float>(3,0));
-    m_other_received_leds = vector<vector<float> >(1, vector<float>(3,0));
+    m_team_received_leds = vector<vector<float> >(1, vector<float>(3,0.0f));
+    m_team_sent_leds = vector<vector<float> >(1, vector<float>(3,0.0f));
+    m_game_received_leds = vector<vector<float> >(1, vector<float>(3,0.0f));
+    m_frame_drop_leds = vector<vector<float> >(1, vector<float>(3,0.0f));
 }
 
 NAOSystem::~NAOSystem()
@@ -142,14 +142,14 @@ void NAOSystem::displayTeamPacketReceived(NUActionatorsData* actions)
     
     vector<int> indices;
     indices.reserve(numleds);
-    for (int i=0; i<numleds; i++)
+    for (int i=1; i<numleds+1; i++)         // 1,2
         indices.push_back(i);
     
-    if (m_team_received_leds[0][0] == 1)
-        m_team_received_leds[0][0] = 0;
+    if (m_team_received_leds[0][1] == 1)
+        m_team_received_leds[0][1] = 0;
     else
-        m_team_received_leds[0][0] = 1;
-    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_team_received_leds);
+        m_team_received_leds[0][1] = 1;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, 0, m_team_received_leds);
 }
 
 /*! @brief Displays that a team packet has been successfully sent
@@ -164,22 +164,36 @@ void NAOSystem::displayTeamPacketSent(NUActionatorsData* actions)
     
     vector<int> indices;
     indices.reserve(numleds);
-    for (int i=(numleds); i<(numleds*2); i++)
+    for (int i=numleds*2+1; i<(numleds*3 +1); i++)    // 5,6
         indices.push_back(i);
     
     if (m_team_sent_leds[0][1] == 1)
         m_team_sent_leds[0][1] = 0;
     else
         m_team_sent_leds[0][1] = 1;
-    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_team_sent_leds);
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, 0, m_team_sent_leds);
 }
 
 /*! @brief Displays that a game packet has been successfully received
- @param actions a pointer to the shared actionator object
+    @param actions a pointer to the shared actionator object
  */
 void NAOSystem::displayGamePacketReceived(NUActionatorsData* actions)
 {
-    // by default there is no way to display such information!
+    if (actions == NULL)
+        return;
+    
+    int numleds = actions->getNumberOfLeds(NUActionatorsData::LeftEyeLeds)/4;
+    
+    vector<int> indices;
+    indices.reserve(numleds);
+    for (int i=(numleds +1); i<(numleds*2 +1); i++)     // 3,4
+        indices.push_back(i);
+    
+    if (m_game_received_leds[0][0] == 1)
+        m_game_received_leds[0][0] = 0;
+    else
+        m_game_received_leds[0][0] = 1;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_game_received_leds);
 }
 
 /*! @brief Displays that a packet has been successfully received
@@ -195,22 +209,15 @@ void NAOSystem::displayOtherPacketReceived(NUActionatorsData* actions)
  */
 void NAOSystem::displayVisionFrameDrop(NUActionatorsData* actions)
 {
-    vector<float> ledoff(3,0);
-    vector<float> ledon(3,1);
-    vector<vector<float> > dropleds;
-    dropleds.reserve(m_ear_leds.size());
+    if (actions == NULL)
+        return;
     
-    for (unsigned int i=0; i<m_ear_leds.size(); i++)
-    {
-        if (m_ear_leds[i][0] < 0.5)
-            dropleds.push_back(ledon);
-        else
-            dropleds.push_back(ledoff);
-    }
-    
-    actions->addLeds(NUActionatorsData::LeftEarLeds, m_current_time + m_period - 100, dropleds);
-    actions->addLeds(NUActionatorsData::RightEarLeds, m_current_time + m_period - 100, dropleds);
-    //voiceFrameDrop(actions);
+    static vector<int> indices(2,0);
+    indices[1] = 7;
+    m_frame_drop_leds[0][0] = 1;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime, m_frame_drop_leds);
+    m_frame_drop_leds[0][0] = 0;
+    actions->addLeds(NUActionatorsData::LeftEyeLeds, indices, actions->CurrentTime + 200, m_frame_drop_leds);
 }
 
 void NAOSystem::restart()

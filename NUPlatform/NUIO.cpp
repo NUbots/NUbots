@@ -58,7 +58,7 @@ NUIO::NUIO(NUbot* nubot)
         m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
     #endif
     #ifdef USE_NETWORK_TEAMINFO
-        createTeamPort(m_nubot->TeamInfo);
+        m_team_port = new TeamPort(m_nubot->TeamInfo, TEAM_PORT);
     #endif
     #ifdef USE_NETWORK_JOBS
         m_jobs_port = new JobPort(m_nubot->Jobs);
@@ -84,7 +84,7 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
         m_gamecontroller_port = new GameControllerPort(gameinfo);
     #endif
     #ifdef USE_NETWORK_TEAMINFO
-        createTeamPort(teaminfo);
+        m_team_port = new TeamPort(teaminfo, TEAM_PORT);
     #endif
     #ifdef USE_NETWORK_JOBS
         m_jobs_port = new JobPort(jobs);
@@ -92,15 +92,6 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
     #endif
-}
-
-/*! @brief Creates the team communications port
-    
- This function is virtual because simulators will need to implement this differently.
- */
-void NUIO::createTeamPort(TeamInformation* teaminfo)
-{
-    m_team_port = new TeamPort(teaminfo, TEAM_PORT);
 }
 
 NUIO::~NUIO()

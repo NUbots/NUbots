@@ -1,7 +1,7 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
+/*! @file SetState.h
+    @brief Declaration of the set soccer state
  
-    @class InitialState
+    @class SetState
     @brief The initial soccer state
 
     @author Jason Kulk
@@ -22,17 +22,17 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef SET_STATE_H
+#define SET_STATE_H
 
 class SoccerProvider;
 #include "SoccerState.h"
 
-class InitialState : public SoccerState
+class SetState : public SoccerState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
+    SetState(SoccerProvider* provider);
+    ~SetState();
     BehaviourState* nextState();
 protected:
     void doState();

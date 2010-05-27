@@ -31,15 +31,6 @@ class NAOWebotsPlatform : public NUPlatform, public JRobot
 public:
     NAOWebotsPlatform(int argc, const char *argv[]);
     ~NAOWebotsPlatform();
-protected:
-private:
-    void setNameFromNumber();
-    
-// Members:
-public:
-protected:
-private:
-    
 };
 
 #endif

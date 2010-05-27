@@ -1,7 +1,7 @@
-/*! @file InitialState.h
+/*! @file ReadyMoveState.h
     @brief Declaration of the initial soccer state
  
-    @class InitialState
+    @class ReadyMoveState
     @brief The initial soccer state
 
     @author Jason Kulk
@@ -22,17 +22,17 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef READY_MOVE_STATE_H
+#define READY_MOVE_STATE_H
 
-class SoccerProvider;
-#include "SoccerState.h"
+class SoccerFSMState;
+#include "../SoccerState.h"
 
-class InitialState : public SoccerState
+class ReadyMoveState : public SoccerState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
+    ReadyMoveState(SoccerFSMState* parent);
+    ~ReadyMoveState();
     BehaviourState* nextState();
 protected:
     void doState();

@@ -1,4 +1,4 @@
-/*! @file InitialState.cpp
+/*! @file PenalisedState.cpp
     @brief Implementation of the initial soccer state
 
     @author Jason Kulk
@@ -19,7 +19,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "InitialState.h"
+#include "PenalisedState.h"
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
@@ -29,40 +29,29 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
 
-InitialState::InitialState(SoccerProvider* provider) : SoccerState(provider)
+PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {
 }
 
-InitialState::~InitialState()
+PenalisedState::~PenalisedState()
 {
 }
 
-BehaviourState* InitialState::nextState()
+BehaviourState* PenalisedState::nextState()
 {
     return this;
 }
 
-void InitialState::doState()
+void PenalisedState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::INITIAL);
-        m_jobs->addMotionJob(new MotionKillJob());
+        m_actions->addSound(m_data->CurrentTime, NUSounds::PENALISED);
+        m_jobs->addMotionJob(new MotionFreezeJob());
     }
-    // In inital the chest led should be off
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0, 0, 0);
-    
-    // In initial if we have kick off the led should be on, and off when we don't have kick off
-    if (m_game_info->haveKickoff())
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
-    else
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
-    
-    // In initial if the left foot is pressed then we should swap teams
-    if (m_provider->singleLeftBumperClick() or m_provider->longLeftBumperClick())
-        m_game_info->doManualTeamChange();
+    // In penalty the chest led should be red
+    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 0, 0);
 }
 

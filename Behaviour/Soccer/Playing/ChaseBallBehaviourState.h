@@ -1,8 +1,8 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
+/*! @file ChaseBallBehaviourState.h
+    @brief Declaration of a wrapper state for the chase ball provider (ie the field-less demo behaviour)
  
-    @class InitialState
-    @brief The initial soccer state
+    @class ChaseBallBehaviourState
+    @brief A wrapper state for the chase ball provider (ie the field-less demo behaviour)
 
     @author Jason Kulk
  
@@ -22,20 +22,23 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef CHASE_BALL_BEHAVIOUR_STATE_H
+#define CHASE_BALL_BEHAVIOUR_STATE_H
 
-class SoccerProvider;
-#include "SoccerState.h"
+class SoccerFSMState;
+#include "../SoccerState.h"
+class ChaseBallProvider;
 
-class InitialState : public SoccerState
+class ChaseBallBehaviourState : public SoccerState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
+    ChaseBallBehaviourState(SoccerFSMState* parent);
+    ~ChaseBallBehaviourState();
     BehaviourState* nextState();
 protected:
     void doState();
+private:
+    ChaseBallProvider* m_chase_provider;
 };
 
 

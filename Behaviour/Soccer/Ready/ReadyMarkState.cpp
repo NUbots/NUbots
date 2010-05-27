@@ -1,8 +1,5 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
- 
-    @class InitialState
-    @brief The initial soccer state
+/*! @file ReadyMarkState.cpp
+    @brief Implementation of the initial soccer state
 
     @author Jason Kulk
  
@@ -22,22 +19,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#include "ReadyMarkState.h"
 
-class SoccerProvider;
-#include "SoccerState.h"
+#include "Behaviour/Jobs/JobList.h"
 
-class InitialState : public SoccerState
+ReadyMarkState::ReadyMarkState(SoccerFSMState* parent) : SoccerState(parent)
 {
-public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
-    BehaviourState* nextState();
-protected:
-    void doState();
-};
+}
 
+ReadyMarkState::~ReadyMarkState()
+{
+}
 
-#endif
+BehaviourState* ReadyMarkState::nextState()
+{
+    return this;
+}
+
+void ReadyMarkState::doState()
+{
+}
 

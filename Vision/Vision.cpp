@@ -46,6 +46,7 @@ Vision::Vision()
     numSavedImages = 0;
     ImageFrameNumber = 0;
     numFramesDropped = 0;
+    numFramesProcessed = 0;
 
     return;
 }
@@ -156,6 +157,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
         numFramesDropped++;
+    numFramesProcessed++;
         
     setImage(image);
     AllFieldObjects->preProcess(image->m_timestamp);
@@ -2027,6 +2029,16 @@ int Vision::getNumFramesDropped()
     int framesdropped = numFramesDropped;
     numFramesDropped = 0;
     return framesdropped;
+}
+
+/*! @brief Returns the number of frames processed since the last call to this function
+    @return the number of frames processed
+ */
+int Vision::getNumFramesProcessed()
+{
+    int framesprocessed = numFramesProcessed;
+    numFramesProcessed = 0;
+    return framesprocessed;
 }
 
 bool Vision::isPixelOnScreen(int x, int y)

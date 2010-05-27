@@ -1,7 +1,7 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
+/*! @file PenalisedState.h
+    @brief Declaration of the penalised soccer state
  
-    @class InitialState
+    @class PenalisedState
     @brief The initial soccer state
 
     @author Jason Kulk
@@ -22,17 +22,17 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef PENALISED_STATE_H
+#define PENALISED_STATE_H
 
 class SoccerProvider;
 #include "SoccerState.h"
 
-class InitialState : public SoccerState
+class PenalisedState : public SoccerState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
+    PenalisedState(SoccerProvider* provider);
+    ~PenalisedState();
     BehaviourState* nextState();
 protected:
     void doState();

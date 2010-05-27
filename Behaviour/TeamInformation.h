@@ -34,9 +34,12 @@ class FieldObjects;
 #include <iostream>
 using namespace std;
 
+#define TEAM_PACKET_STRUCT_HEADER "NUtm"
+
 class TeamPacket
 {
 public:
+    char Header[4];
     unsigned long ID;
     double SentTime;
     double ReceivedTime;

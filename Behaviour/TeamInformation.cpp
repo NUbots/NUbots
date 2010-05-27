@@ -25,6 +25,8 @@
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUSystem.h"
 
+#include <memory.h>
+
 #include "debug.h"
 
 TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
@@ -61,6 +63,7 @@ bool TeamInformation::amIClosestToBall()
  */
 void TeamInformation::initTeamPacket()
 {   
+    memcpy(m_packet.Header, TEAM_PACKET_STRUCT_HEADER, sizeof(m_packet.Header));
     m_packet.ID = 0;
     // we initialise everything that never changes here
     m_packet.PlayerNumber = static_cast<char>(m_player_number);
@@ -109,38 +112,15 @@ void TeamPacket::summaryTo(ostream& output)
 
 ostream& operator<< (ostream& output, const TeamPacket& packet)
 {
-    output.write((char*) &packet.ID, sizeof(packet.ID));
-    output.write((char*) &packet.SentTime, sizeof(packet.SentTime));
-    output.write((char*) &packet.PlayerNumber, sizeof(packet.PlayerNumber));
-    output.write((char*) &packet.TeamNumber, sizeof(packet.TeamNumber));
-    output.write((char*) &packet.TimeToBall, sizeof(packet.TimeToBall));
-    
+    output.write((char*) &packet, sizeof(packet));
     return output;
 }
 
 istream& operator>> (istream& input, TeamPacket& packet)
 {
-    char charBuffer;
-    unsigned long uLongBuffer;
-    float floatBuffer;
-    double doubleBuffer;
-    
-    // Packet header
-    input.read(reinterpret_cast<char*>(&uLongBuffer), sizeof(uLongBuffer));
-    packet.ID = uLongBuffer;
-    input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(doubleBuffer));
-    packet.SentTime = doubleBuffer;
-    input.read(reinterpret_cast<char*>(&charBuffer), sizeof(charBuffer));
-    packet.PlayerNumber = charBuffer;
-    input.read(reinterpret_cast<char*>(&charBuffer), sizeof(charBuffer));
-    packet.TeamNumber = charBuffer;
-    
-    // Localisaton information
-    
-    
-    // Behaviour state information
-    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
-    packet.TimeToBall = floatBuffer;
+    TeamPacket packetBuffer;
+    input.read(reinterpret_cast<char*>(&packetBuffer), sizeof(packetBuffer));
+    packet = packetBuffer;
     
     return input;
 }
@@ -171,7 +151,7 @@ istream& operator>> (istream& input, TeamInformation& info)
         timenow = nusystem->getTime();
     temp.ReceivedTime = timenow;
     
-    if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number)
+    if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number and temp.TeamNumber == info.m_team_number)
     {   // only accept packets from valid player numbers
         if (info.m_received_packets[temp.PlayerNumber].empty())
         {   // if there have been no previous packets from this player always accept the packet

@@ -18,12 +18,13 @@
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  nao_soccer_player_blue.cpp
-		NAOWebotsPlatform.cpp NAOWebotsPlatform.h
+                NAOWebotsPlatform.cpp NAOWebotsPlatform.h
                 NAOWebotsCamera.cpp NAOWebotsCamera.h
                 NAOWebotsSensors.cpp NAOWebotsSensors.h
                 NAOWebotsActionators.cpp NAOWebotsActionators.h
                 NAOWebotsSystem.cpp NAOWebotsSystem.h
-		NAOWebotsIO.cpp )
+                NAOWebotsIO.cpp NAOWebotsIO.h
+                NAOWebotsNetworkThread.cpp NAOWebotsNetworkThread.h)
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  JWebots
