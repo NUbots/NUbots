@@ -17,8 +17,9 @@ Ball::~Ball()
 //! Finds the ball segments and groups updates the ball in fieldObjects (Vision is used to further classify the object)
 Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects* AllObjects, Vision* vision,int height,int width)
 {
+    ObjectCandidate largestCandidate;
+    int sizeOfLargestCandidate = 0;
     Circle result;
-    Circle tempresult;
     result.centreX = 0;
     result.centreY = 0;
     result.radius = 0;
@@ -36,28 +37,30 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         //! Check if the ratio is correct: Height and Width ratio should be 1 as it is a circle,
         //! through can be skewed (camera moving), so we better put some threshold on it.
         if(!isCorrectCheckRatio(PossibleBall, height, width)) continue;
+        if(isObjectInRobot(PossibleBall, AllObjects)) continue;
         //debug << "BALL::FindBall  Possible Ball Found ";
 
-        //! Closely Classify the candidate: to obtain more information about the object (using closely classify function in vision)
-        std::vector < Vector2<int> > ballPoints = classifyBallClosely(PossibleBall, vision,height, width);
+        int sizeOfCandidate = (PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y); //Uses the height of the candidate, as width can be 0
+
+        if(sizeOfCandidate > sizeOfLargestCandidate)
+        {
+
+            sizeOfLargestCandidate = sizeOfCandidate;
+            largestCandidate = PossibleBall;
+        }
+
+    }
+    //! Closely Classify the candidate: to obtain more information about the object (using closely classify function in vision)
+    if(sizeOfLargestCandidate > 0)
+    {
+        largestCandidate.setColour(ClassIndex::orange);
+        std::vector < Vector2<int> > ballPoints = classifyBallClosely(largestCandidate, vision,height, width);
 
         //! Perform Circle Fit: Must pass a threshold on fit to become a circle!
         //debug << "BALL::FindBall  Circle Fit ";
 
-        tempresult = isCorrectFit(ballPoints,PossibleBall);
-
-        //debug << "BALL::FindBall  Circle Fit finnsihed";
-        if (tempresult.radius  > result.radius)
-        {
-            //debug << "BALL::FindBall  Updated with larger circle"<< endl;
-            result = tempresult;
-        }
-        //! Use Circle Fit information to update the FieldObjects
-
-        //debug << "BALL::FindBall  Circle Fit finnsihed"<<endl;
-        //! check if current object is larger then object before.
+        result = isCorrectFit(ballPoints,largestCandidate);
     }
-
     return result;
 }
 
@@ -72,7 +75,37 @@ bool Ball::isObjectAPossibleBall(const ObjectCandidate &PossibleBall)
     else{
         return false;
     }
+
 }
+bool Ball::isObjectInRobot(const ObjectCandidate &PossibleBall, FieldObjects *AllObjects)
+{
+    Vector2<int> topLeft = PossibleBall.getTopLeft();
+    Vector2<int> bottomRight = PossibleBall.getBottomRight();
+    bool isInRobot = false;
+    //! Check the Ambiguous Objects: for robots:
+    for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+    {
+        if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
+        {
+            Vector2<int> robotTopLeft, robotBottomLeft;
+            robotTopLeft.x = AllObjects->ambiguousFieldObjects[i].ScreenX() -  AllObjects->ambiguousFieldObjects[i].getObjectWidth()/2;
+            robotTopLeft.y = AllObjects->ambiguousFieldObjects[i].ScreenY() -  AllObjects->ambiguousFieldObjects[i].getObjectHeight()/2;
+            robotBottomLeft.x = AllObjects->ambiguousFieldObjects[i].ScreenX() +  AllObjects->ambiguousFieldObjects[i].getObjectWidth()/2;
+            robotBottomLeft.y = AllObjects->ambiguousFieldObjects[i].ScreenY() +  AllObjects->ambiguousFieldObjects[i].getObjectHeight()/2;
+
+            if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomLeft.x &&  bottomRight.y <= robotBottomLeft.y)
+            {
+                if( (bottomRight.y - topLeft.y)  <  (robotBottomLeft.y - robotTopLeft.y)/10)
+                {
+                    isInRobot = true;
+                    return isInRobot;
+                }
+            }
+        }
+    }
+    return isInRobot;
+}
+
 std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int heigth, int width)
 {
     Vector2<int> TopLeft = PossibleBall.getTopLeft();
@@ -87,7 +120,8 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     ScanLine tempLine;
 
-    int spacings = (int)(BottomRight.y - TopLeft.y)/6;
+    //! Maximum ball points = 4*2 = 8;
+    int spacings = (int)(BottomRight.y - TopLeft.y)/4;
     if(spacings < 2)
     {
         spacings = 2;

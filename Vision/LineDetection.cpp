@@ -184,7 +184,8 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 {
                     robotSegments.push_back(*segment);
                 }
-                if(LeftColour != ClassIndex::white && RightColour != ClassIndex::white
+                if( (LeftColour == ClassIndex::green && RightColour != ClassIndex::white)
+                   || (LeftColour != ClassIndex::white && RightColour == ClassIndex::green)
                    //&& segment->getAfterColour() == ClassIndex::green
                    //&& segment->getBeforeColour() == ClassIndex::green
                    )
