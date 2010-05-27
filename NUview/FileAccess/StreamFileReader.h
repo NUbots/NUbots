@@ -141,7 +141,7 @@ public:
     {
 
             float time = TimeAtSequenceNumber(frameSequenceNumber);
-            if(time)
+            if(time>=0.0)
                 return ReadFrame(GetIndexFromTime(time));
             else
                 return NULL;
@@ -289,7 +289,7 @@ public:
         }
         else
         {
-            return 0.0;
+            return -1.0;
         }
     }
 
@@ -396,12 +396,13 @@ private:
             while (m_file.good() && (m_file.tellg() != m_fileEndLocation))
             {
                 temp.position = m_file.tellg();
-                temp.frameSequenceNumber++;
                 try{
                     m_file >> (*m_dataBuffer);
                 }   catch(...){qDebug() << "Bad frame found"; break;}
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
                 timestamp = floor(timestamp);
+                if(HasTime(timestamp)) continue;
+                temp.frameSequenceNumber++;
                 //qDebug() << "New frame: " << timestamp;
                 m_index.insert(IndexEntry(timestamp,temp));
                 m_timeIndex.push_back(timestamp);
