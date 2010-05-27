@@ -9,9 +9,6 @@ MobileObject::MobileObject(int initID, const std::string& initName):
     estimatedVelocity[1] = 0;
     estimatedVelocityError[0] = 0;
     estimatedVelocityError[1] = 0;
-    estimatedRelativeLocation[0] = 0;
-    estimatedRelativeLocation[1] = 0;
-    estimatedRelativeLocation[2] = 0;
 }
 
 MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
@@ -23,11 +20,7 @@ MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initI
         estimatedVelocity[0] = 0;
         estimatedVelocity[1] = 0;
         estimatedVelocityError[0] = 0;
-        estimatedVelocityError[1] = 0;
-        estimatedRelativeLocation[0] = 0;
-        estimatedRelativeLocation[1] = 0;
-        estimatedRelativeLocation[2] = 0;
-	
+        estimatedVelocityError[1] = 0;	
 }
 
 MobileObject::MobileObject(const MobileObject& srcObj):
@@ -35,8 +28,7 @@ MobileObject::MobileObject(const MobileObject& srcObj):
         estimatedFieldLocation(srcObj.getEstimatedFieldLocation()),
         estimatedFieldLocationError(srcObj.getEstimatedFieldLocationError()),
         estimatedVelocity(srcObj.getEstimatedVelocity()),
-        estimatedVelocityError(srcObj.getEstimatedVelocityError()),
-        estimatedRelativeLocation(srcObj.getEstimatedRelativeLocation())
+        estimatedVelocityError(srcObj.getEstimatedVelocityError())
 {
 }
 
@@ -75,22 +67,4 @@ void MobileObject::updateObjectVelocities(float velX, float velY, float sdVelX, 
         estimatedVelocity[1] = velY;
         estimatedVelocityError[0] = sdVelX;
         estimatedVelocityError[1] = sdVelY;
-}
-
-void MobileObject::updateWorldModelRelativeLocation(const Vector3<float>& newWMRelLoc)
-{
-        estimatedRelativeLocation = newWMRelLoc;
-}
-void MobileObject::updateWorldModelRelativeLocationError(const Vector3<float>& newWMRelLocError)
-{
-        estimatedRelativeLocationError = newWMRelLocError;
-}
-void MobileObject::updateWorldModelRelativeVaribles(float wmDistance, float wmBearing, float wmElevation, float sdWmDistance, float sdWmBearing, float sdWmElevation )
-{
-        estimatedRelativeLocation[0] = wmDistance;
-        estimatedRelativeLocation[1] = wmBearing;
-        estimatedRelativeLocation[2] = wmElevation;
-        estimatedRelativeLocationError[0] = sdWmDistance;
-        estimatedRelativeLocationError[1] = sdWmBearing;
-        estimatedRelativeLocationError[2] = sdWmElevation;
 }

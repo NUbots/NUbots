@@ -2,6 +2,9 @@
 #define SPLITSTREAMFILEFORMATREADER_H
 #include "LogFileFormatReader.h"
 #include "StreamFileReader.h"
+#include "Tools/Image/NUimage.h"
+#include "Localisation/Localisation.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include <QDir>
 
 class SplitStreamFileFormatReader: public LogFileFormatReader
@@ -40,6 +43,7 @@ protected:
     void setKnownDataTypes();
     StreamFileReader<NUimage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
+    StreamFileReader<Localisation> locwmReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;

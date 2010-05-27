@@ -204,6 +204,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //qDebug() << "Classify Scanlines: finnished";
 
 
+    std::vector< TransitionSegment > GoalBlueSegments;
+    std::vector< TransitionSegment > GoalYellowSegments;
+    std::vector< TransitionSegment > BallSegments;
+
     //! Extract and Display Vertical Scan Points:
     tempNumScanLines = vertScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
@@ -215,6 +219,20 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         {
             verticalsegments.push_back((*tempScanLine->getSegment(seg)));
             allsegments.push_back((*tempScanLine->getSegment(seg)));
+
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            {
+                GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            {
+                GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::orange || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange
+                ||  tempScanLine->getSegment(seg)->getColour() == ClassIndex::pink_orange)
+            {
+                BallSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
         }
         if(vertScanArea.getDirection() == ScanLine::DOWN)
         {
@@ -274,27 +292,18 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
     mode = BALL;
     method = Vision::PRIMS;
-   for (int i = 1; i < 4; i++)
+   for (int i = 2; i < 4; i++)
     {
 
         switch (i)
         {
-            case BALL:
-                validColours.clear();
-                validColours.push_back(ClassIndex::orange);
-                //validColours.push_back(ClassIndex::red_orange);
-                //validColours.push_back(ClassIndex::yellow_orange);
-                //qDebug() << "PRE-BALL";
-                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0, 3.0, 1, method);
-                BallCandidates = tempCandidates;
-                //qDebug() << "POST-BALL";
-                break;
+
             case YELLOW_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::yellow);
                 validColours.push_back(ClassIndex::yellow_orange);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = vision.classifyCandidates(GoalBlueSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
                 YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS" << tempCandidates.size();
@@ -304,7 +313,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::blue);
                 validColours.push_back(ClassIndex::shadow_blue);
                 //qDebug() << "PRE-GOALS";
-                tempCandidates = vision.classifyCandidates(verticalsegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
+                tempCandidates = vision.classifyCandidates(GoalYellowSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
                 BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = tempCandidates;
                 //qDebug() << "POST-GOALS";
@@ -319,11 +328,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
-    if(BallCandidates.size() > 0)
-    {
-        circ = vision.DetectBall(BallCandidates);
-        candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
-    }
+
 
     qDebug() << "Finding YELLOW Goals";
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
@@ -357,6 +362,21 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     qDebug() << "POST-ROBOT";
     robotClassifiedPoints = 0;
     candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
+
+
+    validColours.clear();
+    validColours.push_back(ClassIndex::orange);
+    validColours.push_back(ClassIndex::pink_orange);
+    validColours.push_back(ClassIndex::yellow_orange);
+    //qDebug() << "PRE-BALL";
+    tempCandidates = vision.classifyCandidates(BallSegments, interpolatedBoarderPoints, validColours, spacings, 0, 3.0, 1, method);
+    BallCandidates = tempCandidates;
+    //qDebug() << "POST-BALL";
+    if(BallCandidates.size() > 0)
+    {
+        circ = vision.DetectBall(BallCandidates);
+        candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
+    }
 
     //POST PROCESS:
     vision.AllFieldObjects->postProcess(image->m_timestamp);

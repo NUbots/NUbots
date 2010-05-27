@@ -7,12 +7,12 @@ class NUSensorsData;
 
 #include "debug.h"
 #include "debugverbositylocalisation.h"
-
+#include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
 
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
-#define SHARED_BALL_ON 1
+#define SHARED_BALL_ON 0
 
 // Debug output level
 // 0 - No messages
@@ -21,7 +21,7 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-class Localisation
+class Localisation: public TimestampedData
 {
 	public:
         Localisation();
@@ -40,6 +40,7 @@ class Localisation
         void ResetAll();
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
+        void WriteModelToObjects(const KF &model, FieldObjects* fobs);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
@@ -48,10 +49,12 @@ class Localisation
         int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
         int getNumActiveModels();
         int getNumFreeModels();
+        void ClearAllModels();
         bool CheckModelForOutlierReset(int modelID);
         int  CheckForOutlierResets();
-        KF &getBestModel();
-        int getBestModelID();
+        const KF& getBestModel() const;
+        const KF& getModel(int modelNumber) const;
+        int getBestModelID() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
         bool MergeTwoModels(int index1, int index2);
@@ -65,6 +68,20 @@ class Localisation
         void doPlayerReset();
         void resetSdMatrix(int modelNumber);
 
+        /*!
+        @brief Output streaming operation.
+        @param output The output stream.
+        @param p_loc The source localisation data to be streamed.
+        */
+        friend std::ostream& operator<< (std::ostream& output, const Localisation& p_loc);
+
+        /*!
+        @brief Input streaming operation.
+        @param input The input stream.
+        @param p_kf The destination localisation data to be streamed to.
+        */
+        friend std::istream& operator>> (std::istream& input, Localisation& p_loc);
+
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 4; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
@@ -77,6 +94,8 @@ class Localisation
         fstream debug_file; // Logging file
         #endif // LOCWM_VERBOSITY > 0
 
+        double m_timestamp;
+        double GetTimestamp() const {return m_timestamp;};
         int currentFrameNumber;
         float modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
 

@@ -3,6 +3,9 @@
 
 #include <QGLWidget>
 
+class KF;
+class Localisation;
+
 class locWmGlDisplay : public QGLWidget
 {
 Q_OBJECT
@@ -16,6 +19,13 @@ public:
     QSize sizeHint() const;
     void restoreState(const QByteArray & state);
     QByteArray saveState() const;
+
+public slots:
+    void SetLocalisation(const Localisation* newLocalisation)
+    {
+        currentLocalisation = newLocalisation;
+        update();
+    };
 
 protected:
         void keyPressEvent ( QKeyEvent * e );
@@ -32,7 +42,12 @@ protected:
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
         void drawRobot(QColor colour, float x, float y, float theta);
+        void DrawSigmaPoint(QColor colour, float x, float y, float theta);
 
+        void DrawModel(const KF& model);
+        void DrawLocalisation(const Localisation& localisation);
+
+        GLuint robotAuraTexture;
         GLuint fieldLineTexture;
         GLuint grassTexture;
         GLuint robotTexture;
@@ -43,7 +58,11 @@ protected:
         QPoint dragStartPosition;
         QPoint prevDragPos;
 
+        const Localisation* currentLocalisation;
+
         bool light;
+        bool perspective;
+        bool drawRobotModel;
 
 };
 

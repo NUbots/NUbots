@@ -80,9 +80,10 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
-    ../Localisation/LocWM.h \
     ../Localisation/KF.h \
+    ../Localisation/Localisation.h \
     ../Vision/FieldObjects/WorldModelShareObject.h \
+    ../Behaviour/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
     ../Tools/Threading/PeriodicThread.h \
@@ -139,8 +140,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
-    ../Vision/EllipseFitting/FittingCalculations.h \
-    ../Behaviour/GameInformation.h
+    ../Vision/EllipseFitting/FittingCalculations.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -206,9 +206,10 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
-    ../Localisation/LocWM.cpp \
     ../Localisation/KF.cpp \
+    ../Localisation/Localisation.cpp \
     ../Vision/FieldObjects/WorldModelShareObject.cpp \
+    ../Behaviour/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Tools/Threading/PeriodicThread.cpp \
@@ -230,7 +231,6 @@ SOURCES += mainwindow.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
-    ../Vision/EllipseFitting/FittingCalculations.cpp \
-    ../Behaviour/GameInformation.cpp
+    ../Vision/EllipseFitting/FittingCalculations.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

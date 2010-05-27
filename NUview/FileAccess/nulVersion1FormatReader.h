@@ -3,6 +3,7 @@
 
 #include "LogFileFormatReader.h"
 #include <fstream>
+#include "Tools/Image/NUimage.h"
 
 class nulVersion1FormatReader : public LogFileFormatReader
 {

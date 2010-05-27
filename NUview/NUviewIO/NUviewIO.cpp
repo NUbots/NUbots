@@ -31,7 +31,7 @@ using namespace std;
 
 NUviewIO* nuio;
 NUSystem* NUviewIO::m_nusystem = new NUSystem();
-GameInformation* NUviewIO::m_gameinfo = new GameInformation(0, 0, NULL, NULL);
+GameInformation* NUviewIO::m_gameinfo = new GameInformation(0,0, NULL, NULL);
 TeamInformation* NUviewIO::m_teaminfo = new TeamInformation(0, 0, NULL, NULL, NULL);
 JobList* NUviewIO::m_jobs = new JobList();
 

@@ -52,7 +52,8 @@ int LogFileReader::openFile(QString fileName)
             connect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
             connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
                     this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
-            connect(currentFileReader,SIGNAL(sensorDataChanged(NUSensorsData*)), this, SIGNAL(sensorDataChanged(NUSensorsData*)));
+            connect(currentFileReader,SIGNAL(sensorDataChanged(const NUSensorsData*)), this, SIGNAL(sensorDataChanged(const NUSensorsData*)));
+            connect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
             connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
         }

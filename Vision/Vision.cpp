@@ -164,8 +164,6 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     std::vector< Vector2<int> > points;
     //std::vector< Vector2<int> > verticalPoints;
-    std::vector< TransitionSegment > verticalsegments;
-    std::vector< TransitionSegment > horizontalsegments;
     //std::vector< TransitionSegment > allsegments;
     //std::vector< TransitionSegment > segments;
     //std::vector< ObjectCandidate > candidates;
@@ -211,7 +209,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     std::vector<unsigned char> validColours;
     Vision::tCLASSIFY_METHOD method;
     const int ROBOTS = 0;
-    const int BALL   = 1;
+    //const int BALL   = 1;
     const int YELLOW_GOALS  = 2;
     const int BLUE_GOALS  = 3;
     int mode  = ROBOTS;
@@ -269,6 +267,15 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         debug << "\tClassify ScanPaths : Finnished" <<endl;
     #endif
 
+    //! Different Segments for Different possible objects:
+
+    //std::vector< TransitionSegment > verticalsegments;
+    std::vector< TransitionSegment > GoalBlueSegments;
+    std::vector< TransitionSegment > GoalYellowSegments;
+    std::vector< TransitionSegment > BallSegments;
+    //std::vector< TransitionSegment > RobotOrLineSegments;
+    std::vector< TransitionSegment > horizontalsegments;
+
     //! Extract and Display Vertical Scan Points:
     tempNumScanLines = vertScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
@@ -276,7 +283,25 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            verticalsegments.push_back((*tempScanLine->getSegment(seg)));
+            /*if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::white || tempScanLine->getSegment(seg)->getColour() == ClassIndex::pink
+               ||   tempScanLine->getSegment(seg)->getColour() == ClassIndex::pink_orange || tempScanLine->getSegment(seg)->getColour() == ClassIndex::orange
+               ||   tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue)
+            {
+                RobotOrLineSegments.push_back((*tempScanLine->getSegment(seg)));
+            }*/
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            {
+                GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            {
+                GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::orange || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange
+                ||  tempScanLine->getSegment(seg)->getColour() == ClassIndex::pink_orange)
+            {
+                BallSegments.push_back((*tempScanLine->getSegment(seg)));
+            }
         }
     }
 
@@ -307,27 +332,13 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-   for (int i = 1; i < 4; i++)
+   for (int i = 2; i < 4; i++)
     {
 
         switch (i)
         {
 
-            case BALL:
-                validColours.clear();
-                validColours.push_back(ClassIndex::orange);
-                //validColours.push_back(ClassIndex::pink_orange);
-                //validColours.push_back(ClassIndex::yellow_orange);
-                #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-BALL" << endl;
-                #endif
-                BallCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0, 3.0, 1, method);
 
-                #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-BALL" << endl;
-                #endif
-
-                break;
             case YELLOW_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::yellow);
@@ -338,7 +349,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
-                YellowGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
+                YellowGoalCandidates = classifyCandidates(GoalYellowSegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPOST-YELLOW-GOALS" << endl;
                 #endif
@@ -354,7 +365,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
                 #endif
 
                 BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
-                BlueGoalCandidates = classifyCandidates(verticalsegments, points, validColours, spacings, 0.1, 4.0, 2, method);
+                BlueGoalCandidates = classifyCandidates(GoalBlueSegments, points, validColours, spacings, 0.1, 4.0, 2, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPOST-BLUE-GOALS" <<endl;
@@ -372,16 +383,6 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         debug << "Begin Object Recognition: " <<endl;
     #endif
 
-    #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tPre-Ball Recognition: " <<endl;
-    #endif
-    if(BallCandidates.size() > 0)
-    {
-        circ = DetectBall(BallCandidates);
-    }
-    #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tPost-Ball Recognition: " <<endl;
-    #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tPre-GOALPost Recognition: " <<endl;
@@ -422,6 +423,32 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     DetectRobots(RobotCandidates);
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tPost-Robot Formation: " <<endl;
+    #endif
+
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPre-Ball Recognition: " <<endl;
+    #endif
+
+    validColours.clear();
+    validColours.push_back(ClassIndex::orange);
+    validColours.push_back(ClassIndex::pink_orange);
+    validColours.push_back(ClassIndex::yellow_orange);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPRE-BALL" << endl;
+    #endif
+    BallCandidates = classifyCandidates(BallSegments, points, validColours, spacings, 0, 3.0, 1, method);
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPOST-BALL" << endl;
+    #endif
+
+    if(BallCandidates.size() > 0)
+    {
+        circ = DetectBall(BallCandidates);
+    }
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tPost-Ball Recognition: " <<endl;
     #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
