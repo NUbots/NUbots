@@ -189,10 +189,22 @@ void NAOSensors::copyFromHardwareCommunications()
     m_data->setBatteryValues(m_current_time, temp);    
     
     //Set Ultrasonic Distances:
+    //! Get Left Distance Values:
     m_al_ultrasonic_left_distances->GetValues(temp);
+    //Convert from Metres to CM;
+    for(unsigned int i=0 ; i <temp.size(); i++)
+    {
+	temp[i] = temp[i]*100;    
+    }
     m_data->setDistanceLeftValues(m_current_time, temp);    
     
+    //! Get Left Distance Values:
     m_al_ultrasonic_right_distances->GetValues(temp);
+    //Convert from Metres to CM;
+    for(unsigned int i=0 ; i <temp.size(); i++)
+    {
+	temp[i] = temp[i]*100;    
+    }
     m_data->setDistanceRightValues(m_current_time, temp);    
 
 }
