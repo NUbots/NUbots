@@ -49,7 +49,7 @@ TeamTransmissionThread::~TeamTransmissionThread()
 
 void TeamTransmissionThread::periodicFunction()
 {
-    if (m_port->m_team_information->getPlayerNumber() <= 0)
+    if (m_port->m_team_information->getPlayerNumber() > 0)
     {
         stringstream buffer;
         buffer << m_port->m_team_information;

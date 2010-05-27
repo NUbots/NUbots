@@ -170,7 +170,7 @@ void visionStreamWidget::updateRobotName(const QString name)
 
 void visionStreamWidget::readPendingData()
 {
-
+    int height,width, sizeOfSensors;
     if(netdata.isEmpty())
     {
         timeToRecievePacket = QTime();
@@ -190,12 +190,15 @@ void visionStreamWidget::readPendingData()
 
         //QTextStream *stream = new QTextStream(&netdata, QIODevice::ReadOnly);
         //stream->setByteOrder(QDataStream::LittleEndian);
-        int height,width;
+
+        buffer.read(reinterpret_cast<char*>(&sizeOfSensors), sizeof(sizeOfSensors));
         buffer.read(reinterpret_cast<char*>(&width), sizeof(width));
         buffer.read(reinterpret_cast<char*>(&height), sizeof(height));
-        //qDebug() << height << ", " << width;
 
-        datasize = height*width*4+buffer.tellg()+sizeof(double);
+        //qDebug() << height << ", " << width;
+        imageSize = height*width*4+buffer.tellg()+sizeof(double);
+        sensorsSize = sizeOfSensors;
+        datasize = imageSize + sensorsSize; // height*width*4+buffer.tellg()+sizeof(double)+ sizeof(NUSensorsData);
     }
     else
     {
@@ -213,9 +216,14 @@ void visionStreamWidget::readPendingData()
         if(datasize == netdata.size())
         {
             std::stringstream buffer;
-            buffer.write(reinterpret_cast<char*>(netdata.data()), netdata.size());
+            buffer.write(reinterpret_cast<char*>(netdata.data()+ sizeof(sizeOfSensors)), imageSize);
             buffer >> image;
             emit rawImageChanged(&image);
+            buffer.write(reinterpret_cast<char*>(netdata.data()+ sizeof(sizeOfSensors) + imageSize), sensorsSize);
+            buffer >> sensors;
+            qDebug() << "Size of Data:" << sensorsSize;
+            emit sensorsDataChanged(&sensors);
+
             int mstime = timeToRecievePacket.elapsed();
             time.setInterval(0);
             float frameRate = (float)(1000.00/mstime);

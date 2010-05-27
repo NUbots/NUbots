@@ -92,7 +92,8 @@ NUSensorsData::NUSensorsData()
     addSoftSensor(BalanceFallen, string("BalanceFallen"), sensor_t::BALANCE_FALLEN);
     
     // Distance Sensors:
-    addSensor(DistanceValues, string("DistanceValues"), sensor_t::DISTANCE_VALUES);
+    addSensor(DistanceLeftValues, string("DistanceLeftValues"), sensor_t::DISTANCE_LEFT_VALUES);
+    addSensor(DistanceRightValues, string("DistanceRightValues"), sensor_t::DISTANCE_RIGHT_VALUES);
     
     // Foot Pressure Sensors:
     addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
@@ -687,13 +688,24 @@ bool NUSensorsData::getFallen(vector<float>& values)
 /*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
     @param values will be updated with the current distance readings
  */
-bool NUSensorsData::getDistanceValues(vector<float>& values)
+bool NUSensorsData::getDistanceLeftValues(vector<float>& values)
 {
-    if (DistanceValues == NULL || DistanceValues->IsValid == false)
+    if (DistanceLeftValues == NULL || DistanceLeftValues->IsValid == false)
         return false;
     else
     {
-        values = DistanceValues->Data;
+        values = DistanceLeftValues->Data;
+        return true;
+    }
+}
+
+bool NUSensorsData::getDistanceRightValues(vector<float>& values)
+{
+    if (DistanceRightValues == NULL || DistanceRightValues->IsValid == false)
+        return false;
+    else
+    {
+        values = DistanceRightValues->Data;
         return true;
     }
 }
@@ -1309,14 +1321,23 @@ void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool 
     setData(BalanceGyro, time, data, iscalculated);
 }
 
-/*! @brief Sets the distance values to the given values
+/*! @brief Sets the left distance values to the given values
     @param time the time the data was collected in milliseconds
     @param data the new distance values
     @param iscalculated set this to true if the data has been calculated, false otherwise
  */
-void NUSensorsData::setDistanceValues(double time, const vector<float>& data, bool iscalculated)
+void NUSensorsData::setDistanceLeftValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(DistanceValues, time, data, iscalculated);
+    setData(DistanceLeftValues, time, data, iscalculated);
+}
+/*! @brief Sets the right distance values to the given values
+    @param time the time the data was collected in milliseconds
+    @param data the new distance values
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setDistanceRightValues(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(DistanceRightValues, time, data, iscalculated);
 }
 
 /*! @brief Sets the foot sole values to the given values
@@ -1526,8 +1547,11 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::BALANCE_FALLEN:
             BalanceFallen = p_sensor;
             break;
-        case sensor_t::DISTANCE_VALUES:
-            DistanceValues = p_sensor;
+        case sensor_t::DISTANCE_LEFT_VALUES:
+            DistanceLeftValues = p_sensor;
+            break;
+	case sensor_t::DISTANCE_RIGHT_VALUES:
+            DistanceRightValues = p_sensor;
             break;
         case sensor_t::FOOT_SOLE_VALUES:
             FootSoleValues = p_sensor;

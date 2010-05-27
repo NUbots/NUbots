@@ -38,7 +38,7 @@ BehaviourFSMProvider::BehaviourFSMProvider(Behaviour* manager) : BehaviourProvid
 {
     m_state = NULL;
     m_previous_state = NULL;
-    m_state_changed = false;
+    m_state_changed = true;
 }
 
 /*! @brief Destroys the behaviour provider as well as all of the associated states
@@ -62,6 +62,12 @@ void BehaviourFSMProvider::process(JobList* jobs, NUSensorsData* data, NUActiona
         doBehaviour();
         postProcess();
     }
+}
+
+/*! @brief Returns true if the state has changed */
+bool BehaviourFSMProvider::stateChanged()
+{
+    return m_state_changed;
 }
 
 /*! @brief 

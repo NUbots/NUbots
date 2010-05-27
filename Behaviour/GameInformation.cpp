@@ -20,7 +20,7 @@ GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData
     m_last_packet_time = 0;
     
     m_currentReturnData = new RoboCupGameControlReturnData();
-    memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, 4);
+    memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, sizeof(m_currentReturnData->header));
     m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
 }
 
@@ -63,7 +63,7 @@ bool GameInformation::gameControllerWorking() const
     if (m_data)
         return (m_data->CurrentTime - m_last_packet_time) > 10000;
     else
-        return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0);
+        return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, sizeof(m_currentControlData->header)) == 0);
 }
 
 /*! @brief Returns the number of players per team */
@@ -87,7 +87,11 @@ bool GameInformation::isSecondHalf() const
 /*! @brief Returns true if we have the kick off */
 bool GameInformation::haveKickoff() const 
 {
-    return (m_currentControlData->kickOffTeam == m_team_number);
+    const TeamInfo* my_info = getMyTeamInfo();
+    if (my_info and my_info->teamColour == m_currentControlData->kickOffTeam)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Returns the number of seconds remaining in the half */
@@ -148,13 +152,20 @@ void GameInformation::doGameControllerUpdate()
  */
 void GameInformation::doManualStateChange()
 {
+    m_currentReturnData->team = m_team_number;
+    m_currentReturnData->player = m_player_number;
     if (m_state != PenalisedState)
     {
         m_state = PenalisedState;
-        //! @todo send game controller return packet
+        m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_MAN_PENALISE;
     }
     else
+    {
         m_state = PlayingState;
+        m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_MAN_UNPENALISE;
+    }
+    
+    //! @todo send game controller return packet
 }
 
 /*! @brief Does a manual team change
@@ -203,10 +214,7 @@ const TeamInfo* GameInformation::getTeamInfo(int teamNumber) const
     else if (m_currentControlData->teams[TEAM_RED].teamNumber == teamNumber)
         return &m_currentControlData->teams[TEAM_RED];
     else
-    {
-        errorlog << "GameInformation::getTeamInfo(" << teamNumber << "). This team number is not in the current RoboCupGameControlData." << endl;
         return 0;
-    }
 }
 
 /*! @brief Returns the TeamInfo structure for my team */
@@ -272,18 +280,16 @@ GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data
 
 void GameInformation::process(RoboCupGameControlData* data)
 {
-    if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, 4) == 0)
+    if (data and memcmp(data->header, GAMECONTROLLER_STRUCT_HEADER, sizeof(data->header)) == 0)
     {
-        if (m_data)
-            m_last_packet_time = m_data->CurrentTime;
-        memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
-        doGameControllerUpdate();
-        nusystem->displayGamePacketReceived(m_actions);
+        if (data->teams[0].teamNumber == m_team_number || data->teams[1].teamNumber == m_team_number)
+        {
+            if (m_data)
+                m_last_packet_time = m_data->CurrentTime;
+            memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
+            doGameControllerUpdate();
+            nusystem->displayGamePacketReceived(m_actions);
+        }
     }
-}
-
-GameInformation& operator>> (GameInformation& info, RoboCupGameControlReturnData& data)
-{
-    return info;
 }
 

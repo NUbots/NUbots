@@ -60,7 +60,8 @@ class Vision
     ofstream imagefile;
     ofstream sensorfile;
     int ImageFrameNumber;
-    int numFramesDropped;
+    int numFramesDropped;               //!< the number of frames dropped since the last call to getNumFramesDropped()
+    int numFramesProcessed;             //!< the number of frames processed since the last call to getNumFramesProcessed()
     CameraSettings currentSettings;
 
     void SaveAnImage();
@@ -88,11 +89,16 @@ class Vision
 
     void setFieldObjects(FieldObjects* fieldobjects);
 
+    void setSensorsData(NUSensorsData* data);
+
+    void setActionatorsData(NUActionatorsData* actions);
+
     void setLUT(unsigned char* newLUT);
     void loadLUTFromFile(const std::string& fileName);
 
     void setImage(const NUimage* sourceImage);
     int getNumFramesDropped();
+    int getNumFramesProcessed();
 
 
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);

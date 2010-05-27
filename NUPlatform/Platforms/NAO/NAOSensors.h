@@ -53,6 +53,9 @@ private:
     static vector<string> m_button_names;                   //!< a list of device names for the buttons
     static vector<string> m_battery_names;                  //!< a list of device names for the battery
 
+    static vector<string> m_ultrasonic_left_distances;                  //!< a list of device names for the ultrasonic distances
+    static vector<string> m_ultrasonic_right_distances;                  //!< a list of device names for the ultrasonic distances
+
     ALMemoryFastAccess* m_al_positions_access;              //!< fast access to almemory position access
     ALMemoryFastAccess* m_al_targets_access;                //!< fast access to almemory target access
     ALMemoryFastAccess* m_al_stiffness_access;              //!< fast access to almemory stiffness access
@@ -65,6 +68,8 @@ private:
     ALMemoryFastAccess* m_al_button_access;                 //!< fast access to almemory button access
     ALMemoryFastAccess* m_al_battery_access;                //!< fast access to almemory battery access
     
+     ALMemoryFastAccess* m_al_ultrasonic_left_distances;                 //!< a list of device names for the ultrasonic left distances
+     ALMemoryFastAccess* m_al_ultrasonic_right_distances;                 //!< a list of device names for the ultrasonic right distances
 };
 
 #endif

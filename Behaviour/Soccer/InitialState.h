@@ -26,12 +26,12 @@
 #define INITIAL_STATE_H
 
 class SoccerProvider;
-#include "Behaviour/SoccerState.h"
+#include "SoccerState.h"
 
 class InitialState : public SoccerState
 {
 public:
-    IntialState(SoccerProvider* provider);
+    InitialState(SoccerProvider* provider);
     ~InitialState();
     BehaviourState* nextState();
 protected:

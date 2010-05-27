@@ -140,7 +140,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
-    ../Vision/EllipseFitting/FittingCalculations.h
+    ../Vision/EllipseFitting/FittingCalculations.h \
+    ../Behaviour/GameInformation.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -231,6 +232,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
-    ../Vision/EllipseFitting/FittingCalculations.cpp
+    ../Vision/EllipseFitting/FittingCalculations.cpp \
+    ../Behaviour/GameInformation.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

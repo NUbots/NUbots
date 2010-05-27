@@ -32,6 +32,7 @@ class InitialState;
 class ReadyState;
 class SetState;
 class PlayingState;
+class FinishedState;
 class PenalisedState;
 class SubstituteState;
 class RequiresSubstituteState;
@@ -39,18 +40,18 @@ class RequiresSubstituteState;
 class SoccerProvider : public BehaviourFSMProvider
 {
 public:
+    SoccerProvider(Behaviour* manager);
     virtual ~SoccerProvider();
     
 protected:
-    SoccerProvider(Behaviour* manager);
-
     void doBehaviourCommons();
     BehaviourState* nextStateCommons();
-private:
+public:
     InitialState* m_initial;
     ReadyState* m_ready;
     SetState* m_set;
     PlayingState* m_playing;
+    FinishedState* m_finished;
     PenalisedState* m_penalised;
     SubstituteState* m_substitute;
     RequiresSubstituteState* m_requires_substitution;

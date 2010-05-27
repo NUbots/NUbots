@@ -972,6 +972,8 @@ vector<NUActionatorsData::joint_id_t>& NUActionatorsData::getSelectedJoints(body
             return m_all_joint_ids;
         }
     }
+    else
+        return m_all_joint_ids;
 }
 
 /*! @brief Adds a single joint position control point for each joint in the selected body part (the body part could be 'All' to set all joints at once)
@@ -1240,42 +1242,71 @@ bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vecto
 }
 
 /*! @brief Adds a single led control point
-    @param ledid the id of the led you want to control
-    @param time the time at which you want the led to reach its target (in milliseconds)
-    @param redvalue the target red value (0 to 1, or 0 to 255)
-    @param greenvalue the target red value (0 to 1, or 0 to 255)
-    @param bluevalue the target red value (0 to 1, or 0 to 255)
+     @param ledid the id of the led you want to control
+     @param time the time at which you want the led to reach its target (in milliseconds)
+     @param values the [r,g,b]
  */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<float>& values)
 {
-    if (LedActionators.size() == 0)
+    if (LedActionators.empty())
         return false;                       
     
     vector<int>& selectedleds = getSelectedLeds(ledgroup);
     
+    static vector<float> data(3,0);
+    if (values.size() < 3)
+    {
+        data[0] = values[0];
+        data[1] = values[0];
+        data[2] = values[0];
+    }
+    else 
+    {
+        data[0] = values[0];
+        data[1] = values[1];
+        data[2] = values[2];
+    }
+    
+    for (unsigned int i=0; i<selectedleds.size(); i++)
+    {
+        LedActionators[selectedleds[i]]->addPoint(time, data);
+    }
+    return true;
+}
+
+/*! @brief Adds a single led control point
+    @param ledid the id of the led you want to control
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param red red led value
+    @param green green led value
+    @param blue blue led value
+ */
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, float red, float green, float blue)
+{
+    static vector<float> values(3,0);
+    values[0] = red;
+    values[1] = green;
+    values[2] = blue;
+    return addLeds(ledgroup, time, values);
+}
+
+/*! @brief Adds a single led control point
+    @param ledid the id of the led you want to control
+    @param time the time at which you want the led to reach its target (in milliseconds)
+    @param values the [[r,g,b], [r,g,b] ...]
+ */
+bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
+{
+    if (LedActionators.empty())
+        return false;                       
+    
     if (values.size() == 1)
     {   // if the size of the values is one, then set that value to all in the group
-        static vector<float> data(3,0);
-        if (values[0].size() < 3)
-        {
-            data[0] = values[0][0];
-            data[1] = values[0][0];
-            data[2] = values[0][0];
-        }
-        else 
-        {
-            data[0] = values[0][0];
-            data[1] = values[0][1];
-            data[2] = values[0][2];
-        }
-
-        for (unsigned int i=0; i<selectedleds.size(); i++)
-        {
-            LedActionators[selectedleds[i]]->addPoint(time, data);
-        }
+        return addLeds(ledgroup, time, values[0]);
     }
     else
     {   // otherwise set each led individually.
+        vector<int>& selectedleds = getSelectedLeds(ledgroup);
         int numpoints = std::min(selectedleds.size(), values.size());
         
         static vector<float> data (3, 0);

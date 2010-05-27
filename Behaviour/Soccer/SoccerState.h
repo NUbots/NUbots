@@ -26,15 +26,18 @@
 #define SOCCER_STATE_H
 
 class SoccerProvider;
+class SoccerFSMState;
 #include "Behaviour/BehaviourState.h"
 
 class SoccerState : public BehaviourState
 {
 public:
-    virtual ~SoccerState();
+    virtual ~SoccerState() {};
 protected:
-    SoccerState(SoccerProvider* provider) {m_provider = provider};
+    SoccerState(SoccerProvider* provider) {m_provider = provider; m_parent = 0;};
+    SoccerState(SoccerFSMState* parent) {m_parent = parent; m_provider = 0;};
     SoccerProvider* m_provider;
+    SoccerFSMState* m_parent;
 };
 
 

@@ -16,6 +16,7 @@
 #include <vector>
 #include <fstream>
 #include "FileAccess/LogFileReader.h"
+#include "debugverbositynetwork.h"
 
 #define uint8 unsigned char
 
@@ -58,6 +59,7 @@ public slots:
 
     void setRawImage(const NUimage* image);
     void setSensorData(const float* joint, const float* balance, const float* touch);
+    void setSensorData(NUSensorsData* NUSensorsData);
     void setCamera(int newCamera){cameraNumber = newCamera;};
     void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;};
     void processVisionFrame();
@@ -96,6 +98,7 @@ private:
     bool autoSoftColour;
     // Data Storage
     const NUimage* rawImage;
+
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
     FieldObjects* AllObjects;

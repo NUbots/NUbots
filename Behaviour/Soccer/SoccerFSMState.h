@@ -31,10 +31,12 @@ class SoccerProvider;
 class SoccerFSMState : public BehaviourFSMState
 {
 public:
-    virtual ~SoccerFSMState();
+    virtual ~SoccerFSMState() {};
 protected:
-    SoccerFSMState(SoccerProvider* provider) {m_provider = provider};
+    SoccerFSMState(SoccerProvider* provider) {m_provider = provider; m_parent = 0;};
+    SoccerFSMState(SoccerFSMState* parent) {m_parent = parent; m_provider = parent->m_provider;};
     SoccerProvider* m_provider;
+    SoccerFSMState* m_parent;
 };
 
 

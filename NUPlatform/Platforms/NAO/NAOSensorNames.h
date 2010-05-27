@@ -179,6 +179,27 @@ using namespace std;
 #define DN_TEMPERATURE              std::string("Device/SubDeviceList/Battery/Temperature/Sensor/Value")
 
 // Distance (ultrasonic and infrared sensors)
-#define DN_US_DISTANCE              std::string("Device/SubDeviceList/US/Sensor/Value")
+#define DN_US_DISTANCE_LEFT_VALUE0              std::string("Device/SubDeviceList/US/Left/Sensor/Value")
+#define DN_US_DISTANCE_LEFT_VALUE1              std::string("Device/SubDeviceList/US/Left/Sensor/Value1")
+#define DN_US_DISTANCE_LEFT_VALUE2              std::string("Device/SubDeviceList/US/Left/Sensor/Value2")
+#define DN_US_DISTANCE_LEFT_VALUE3              std::string("Device/SubDeviceList/US/Left/Sensor/Value3")
+#define DN_US_DISTANCE_LEFT_VALUE4              std::string("Device/SubDeviceList/US/Left/Sensor/Value4")
+#define DN_US_DISTANCE_LEFT_VALUE5              std::string("Device/SubDeviceList/US/Left/Sensor/Value5")
+#define DN_US_DISTANCE_LEFT_VALUE6              std::string("Device/SubDeviceList/US/Left/Sensor/Value6")
+#define DN_US_DISTANCE_LEFT_VALUE7              std::string("Device/SubDeviceList/US/Left/Sensor/Value7")
+#define DN_US_DISTANCE_LEFT_VALUE8              std::string("Device/SubDeviceList/US/Left/Sensor/Value8")
+#define DN_US_DISTANCE_LEFT_VALUE9              std::string("Device/SubDeviceList/US/Left/Sensor/Value9")
+
+#define DN_US_DISTANCE_RIGHT_VALUE0              std::string("Device/SubDeviceList/US/Right/Sensor/Value")
+#define DN_US_DISTANCE_RIGHT_VALUE1              std::string("Device/SubDeviceList/US/Right/Sensor/Value1")
+#define DN_US_DISTANCE_RIGHT_VALUE2              std::string("Device/SubDeviceList/US/Right/Sensor/Value2")
+#define DN_US_DISTANCE_RIGHT_VALUE3              std::string("Device/SubDeviceList/US/Right/Sensor/Value3")
+#define DN_US_DISTANCE_RIGHT_VALUE4              std::string("Device/SubDeviceList/US/Right/Sensor/Value4")
+#define DN_US_DISTANCE_RIGHT_VALUE5              std::string("Device/SubDeviceList/US/Right/Sensor/Value5")
+#define DN_US_DISTANCE_RIGHT_VALUE6              std::string("Device/SubDeviceList/US/Right/Sensor/Value6")
+#define DN_US_DISTANCE_RIGHT_VALUE7              std::string("Device/SubDeviceList/US/Right/Sensor/Value7")
+#define DN_US_DISTANCE_RIGHT_VALUE8              std::string("Device/SubDeviceList/US/Right/Sensor/Value8")
+#define DN_US_DISTANCE_RIGHT_VALUE9              std::string("Device/SubDeviceList/US/Right/Sensor/Value9")
+
 
 #endif

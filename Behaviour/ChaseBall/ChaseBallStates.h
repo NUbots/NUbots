@@ -36,6 +36,7 @@
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
 
 #include "debug.h"
 
@@ -56,11 +57,7 @@ public:
     void doState() 
     {
         if (m_provider->m_state_changed)
-        {
-            m_provider->m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_provider->m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-            m_provider->m_jobs->addMotionJob(new HeadJob(m_provider->m_current_time + 500, zero));
-        }
+            m_provider->m_jobs->addMotionJob(new MotionFreezeJob());
     };
 };
 
@@ -105,6 +102,31 @@ public:
             walkVector[0] = 10*cos(ballbearing);
             walkVector[1] = 2*sin(ballbearing);
             walkVector[2] = ballbearing/2.0;
+            
+            vector<float> temp;
+            float leftobstacle = 255;
+            float rightobstacle = 255;
+            
+            if (balldistance > 15)
+            {
+                if (m_data->getDistanceLeftValues(temp))
+                    leftobstacle = temp[0];
+                if (m_data->getDistanceRightValues(temp))
+                    rightobstacle = temp[0];
+                
+                if (leftobstacle < 50)
+                {
+                    walkVector[0] = walkVector[0] + 0.5*(leftobstacle - 50);
+                    walkVector[1] = -2;
+                    walkVector[2] = walkVector[2] - 0.015*(leftobstacle - 50);
+                }
+                else if (rightobstacle < 50)
+                {
+                    walkVector[0] = walkVector[0] + 0.5*(rightobstacle - 50);
+                    walkVector[1] = 2;
+                    walkVector[2] = walkVector[2] + 0.015*(rightobstacle - 50);
+                }
+            }
             
             WalkJob* walk = new WalkJob(walkVector);
             m_provider->m_jobs->addMotionJob(walk);
@@ -156,6 +178,29 @@ public:
             walkVector[1] = 2*sin(ballbearing);
             walkVector[2] = ballbearing/2.0;
             walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
+            
+            vector<float> temp;
+            float leftobstacle = 255;
+            float rightobstacle = 255;
+            
+            if (m_data->getDistanceLeftValues(temp))
+                leftobstacle = temp[0];
+            if (m_data->getDistanceRightValues(temp))
+                rightobstacle = temp[0];
+            
+            if (leftobstacle < 50)
+            {
+                walkVector[0] = walkVector[0] + 0.5*(leftobstacle - 50);
+                walkVector[1] = -2;
+                walkVector[2] = walkVector[2] + 0.015*(leftobstacle - 50);
+            }
+            else if (rightobstacle < 50)
+            {
+                walkVector[0] = walkVector[0] + 0.5*(rightobstacle - 50);
+                walkVector[1] = 2;
+                walkVector[2] = walkVector[2] - 0.015*(rightobstacle - 50);
+            }
+            
             WalkJob* walk = new WalkJob(walkVector);
             m_provider->m_jobs->addMotionJob(walk);
             

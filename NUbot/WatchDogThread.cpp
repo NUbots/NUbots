@@ -66,10 +66,11 @@ void WatchDogThread::periodicFunction()
     nusystem->displayBatteryState(m_nubot->SensorData, m_nubot->Actions);
     #ifdef USE_VISION
         int framesdropped = m_nubot->m_vision->getNumFramesDropped();
-        if (framesdropped > 0)
+        int framesprocessed = m_nubot->m_vision->getNumFramesProcessed();
+        if (framesprocessed < 29 || framesdropped > 9)
         {
             nusystem->displayVisionFrameDrop(m_nubot->Actions);
-            debug << "WatchDogThread: Frames dropped in second " << m_nubot->SensorData->CurrentTime << " is " << framesdropped << endl;
+            debug << "WatchDogThread: Vision processed " << framesprocessed << " and 'dropped' " << framesdropped << endl;
         }
     #endif
 }

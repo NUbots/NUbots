@@ -139,7 +139,8 @@ public:
     bool getZMP(vector<float>& values);
     bool getFalling(vector<float>& values);
     bool getFallen(vector<float>& values);
-    bool getDistanceValues(vector<float>& values);
+    bool getDistanceLeftValues(vector<float>& values);
+    bool getDistanceRightValues(vector<float>& values);
     bool getBatteryValues(vector<float>& values);
     bool getGPSValues(vector<float>& values);
     bool getCompassValues(vector<float>& values);
@@ -174,7 +175,8 @@ public:
     // Set methods for other sensors
     void setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated = false);
     void setBalanceGyro(double time, const vector<float>& data, bool iscalculated = false);
-    void setDistanceValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setDistanceLeftValues(double time, const vector<float>& data, bool iscalculated = false);
+    void setDistanceRightValues(double time, const vector<float>& data, bool iscalculated = false);
     void setFootSoleValues(double time, const vector<float>& data, bool iscalculated = false);
     void setFootBumperValues(double time, const vector<float>& data, bool iscalculated = false);
     void setButtonValues(double time, const vector<float>& data, bool iscalculated = false);
@@ -233,7 +235,8 @@ public:
     sensor_t* BalanceFallen;                    //!< stores whether the robot has fallen (sum, left, right, forward, backward)
     
     // Distance Sensors:
-    sensor_t* DistanceValues;                   //!< stores the distance to obstacle measurements in cm
+    sensor_t* DistanceLeftValues;                   //!< stores the ultrasonic left distance to obstacle measurements in cm
+    sensor_t* DistanceRightValues;                   //!< stores the ultrasonic left distance to obstacle measurements in cm
     
     // Foot Pressure Sensors:
     sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons

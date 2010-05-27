@@ -76,7 +76,10 @@ public:
     // GameController packets
     friend GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data);
     void process(RoboCupGameControlData* data);
-    friend GameInformation& operator>> (GameInformation& input, RoboCupGameControlReturnData& data);
+
+    // Manual game control
+    void doManualStateChange();
+    void doManualTeamChange();
 
 private:
     const RobotInfo* getRobotInfo(int teamNumber, int playerNumber) const;
@@ -88,8 +91,6 @@ private:
     static std::string stateName(RobotState theState);
 
     void doGameControllerUpdate();
-    void doManualStateChange();
-    void doManualTeamChange();
 
     NUSensorsData* m_data;          
     NUActionatorsData* m_actions;  //!< local copy of pointer to actions 

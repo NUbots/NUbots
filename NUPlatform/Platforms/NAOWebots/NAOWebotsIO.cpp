@@ -20,25 +20,41 @@
  */
 
 #include "NAOWebotsIO.h"
+#include "NAOWebotsPlatform.h"
+#include "NAOWebotsNetworkThread.h"
+
+#include "NUPlatform/NUIO/NetworkPortNumbers.h"
+#include "NUPlatform/NUIO/JobPort.h"
+#include "NUPlatform/NUIO/TcpPort.h"
+
 #include "debug.h"
 #include "debugverbositynetwork.h"
+#include "ioconfig.h"
 
 using namespace std;
 
 #include "NUbot.h"
 
 /*! @brief Construct a NAOWebotsIO object
-    @param probotnumber the robot number, we need this to calculate the team port
-    @param pteamnumber the team number, we need this to calculate the team port
     @param nubot a pointer to the NUbot, we need this to gain access to the public store
  */
-NAOWebotsIO::NAOWebotsIO(int probotnumber, int pteamnumber, NUbot* nubot) : NUIO(nubot)
+NAOWebotsIO::NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::NAOWebotsIO()" << endl;
 #endif
-    m_robot_number = probotnumber;
-    m_team_number = pteamnumber;
+    m_nubot = nubot;
+    #if defined(USE_NETWORK_GAMECONTROLLER) or defined(USE_NETWORK_TEAMINFO)
+        m_network = new NAOWebotsNetworkThread(nubot->GameInfo, nubot->TeamInfo, platform, 250);
+        m_network->start();
+    #endif
+    
+    #ifdef USE_NETWORK_JOBS
+        m_jobs_port = new JobPort(nubot->Jobs);
+    #endif
+    #ifdef USE_NETWORK_DEBUGSTREAM
+        m_vision_port = new TcpPort(VISION_PORT);
+    #endif
 }
 
 NAOWebotsIO::~NAOWebotsIO()
@@ -46,5 +62,6 @@ NAOWebotsIO::~NAOWebotsIO()
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NAOWebotsIO::~NAOWebotsIO()" << endl;
 #endif
+    delete m_network;
 }
 

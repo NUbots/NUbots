@@ -201,7 +201,6 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
 	}
 	//-----------------------------------------------------------------------------------------------
-	cout<<"esti position   : [ "<<newStateEstimates[0][0]<<", "<<newStateEstimates[0][1]<<", "<<newStateEstimates[0][2]<<endl;
 	
 	// Step 5: Calculate measurement error and then find new srukfSx
 	Matrix newSrukfSx(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
