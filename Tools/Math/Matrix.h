@@ -72,6 +72,8 @@ std::ostream& operator <<(std::ostream& out, const Matrix &mat);
 
 double dot(const Matrix& mat1, const Matrix& mat2);
 
+void WriteMatrix(std::ostream& out, const Matrix &mat);
+Matrix ReadMatrix(std::istream& in);
 
 #endif
 

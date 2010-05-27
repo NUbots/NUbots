@@ -526,5 +526,38 @@ double dot(const Matrix& mat1, const Matrix& mat2)
           
 }
 
+void WriteMatrix(std::ostream& out, const Matrix &mat)
+{
+    int m = mat.getm(), n = mat.getn();
+    double element;
+    out.write(reinterpret_cast<const char*>(&m),sizeof(m));
+    out.write(reinterpret_cast<const char*>(&n),sizeof(n));
+    for(int i=0; i<m; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            element = mat[i][j];
+            out.write(reinterpret_cast<const char*>(&element),sizeof(element));
+        }
+    }
+    return;
+}
 
+Matrix ReadMatrix(std::istream& in)
+{
+    int m, n;
+    double element;
+    in.read(reinterpret_cast<char*>(&m),sizeof(m));
+    in.read(reinterpret_cast<char*>(&n),sizeof(n));
+    Matrix result(m,n,false);
+    for(int i=0; i<m; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            in.read(reinterpret_cast<char*>(&element),sizeof(element));
+            result[i][j] = element;
+        }
+    }
+    return result;
+}
 
