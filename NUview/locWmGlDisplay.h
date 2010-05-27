@@ -21,9 +21,10 @@ public:
     QByteArray saveState() const;
 
 public slots:
-    void SetLocalisation(Localisation* newLocalisation)
+    void SetLocalisation(const Localisation* newLocalisation)
     {
         currentLocalisation = newLocalisation;
+        update();
     };
 
 protected:
@@ -41,6 +42,7 @@ protected:
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
         void drawRobot(QColor colour, float x, float y, float theta);
+        void DrawSigmaPoint(QColor colour, float x, float y, float theta);
 
         void DrawModel(const KF& model);
         void DrawLocalisation(const Localisation& localisation);
@@ -56,7 +58,7 @@ protected:
         QPoint dragStartPosition;
         QPoint prevDragPos;
 
-        Localisation* currentLocalisation;
+        const Localisation* currentLocalisation;
 
         bool light;
         bool perspective;

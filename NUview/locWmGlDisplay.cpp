@@ -61,7 +61,7 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             }
             else
             {
-                glOrtho(-370.0,  370.0, 270.0, -270.0,0.1,10000.0);
+                glOrtho(-370.0,  370.0, -270.0, 270.0,0.1,10000.0);
             }
             glMatrixMode(GL_MODELVIEW);						// Select The Modelview Matrix
             glLoadIdentity();							// Reset The Modelview Matrix
@@ -361,9 +361,42 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     glPopMatrix();
 }
 
+void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta)
+{
+    const float robotWidth = 15.0f;
+    glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glTranslatef(x,y,0);    // Move to centre of robot.
+    glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
+
+    // Draw Aura
+    glColor4ub(0,0,255,255);
+    glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-robotWidth/2.0f,  -robotWidth/2.0f*1.2,  0.5);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(+robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  0.5);       // Top Left Of The Texture and Quad
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glDisable(GL_BLEND);		// Turn Blending On
+    glPopMatrix();
+}
+
 void locWmGlDisplay::DrawModel(const KF& model)
 {
+    Matrix sigmaPoints = model.CalculateSigmaPoints();
     drawRobot(QColor(255,255,255,model.alpha*255), model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
+    for (int i=1; i < sigmaPoints.getn(); i++)
+    {
+        DrawSigmaPoint(QColor(255,255,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+    }
     drawBall(QColor(255,165,0,255), model.getState(KF::ballX), model.getState(KF::ballY));
 }
 
