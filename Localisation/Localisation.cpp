@@ -278,6 +278,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     */
 
     // Set the balls location.
+    float distance,bearing;
     distance = model.getDistanceToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
     bearing = model.getBearingToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.getState(KF::ballX),model.getState(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
@@ -454,23 +455,23 @@ void Localisation::doPlayerReset()
 
 void Localisation::resetSdMatrix(int modelNumber)
 {
-    // Set the uncertainties
-//     models[modelNumber].stateStandardDeviations[0][0] = 150.0; // 100 cm
-//     models[modelNumber].stateStandardDeviations[1][1] = 100.0; // 150 cm
-//     models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
-//     models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 100 cm
-//     models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 150 cm
-//     models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
-//     models[modelNumber].stateStandardDeviations[6][6] = 10.0;   // 10 cm/s
-//     
+     // Set the uncertainties
+     models[modelNumber].stateStandardDeviations[0][0] = 150.0; // 150 cm
+     models[modelNumber].stateStandardDeviations[1][1] = 100.0; // 100 cm
+     models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
+     models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 150 cm
+     models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 100 cm
+     models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
+     models[modelNumber].stateStandardDeviations[6][6] = 10.0;   // 10 cm/s
+
     
-    models[modelNumber].stateStandardDeviations[0][0] = 10.0; // 100 cm
-    models[modelNumber].stateStandardDeviations[1][1] = 10.0; // 150 cm
-    models[modelNumber].stateStandardDeviations[2][2] = 0.2;   // 2 radians
-    models[modelNumber].stateStandardDeviations[3][3] = 10.0; // 100 cm
-    models[modelNumber].stateStandardDeviations[4][4] = 10.0; // 150 cm
-    models[modelNumber].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-    models[modelNumber].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
+//    models[modelNumber].stateStandardDeviations[0][0] = 10.0; // 100 cm
+//    models[modelNumber].stateStandardDeviations[1][1] = 10.0; // 150 cm
+//    models[modelNumber].stateStandardDeviations[2][2] = 0.2;   // 2 radians
+//    models[modelNumber].stateStandardDeviations[3][3] = 10.0; // 100 cm
+//    models[modelNumber].stateStandardDeviations[4][4] = 10.0; // 150 cm
+//    models[modelNumber].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
+//    models[modelNumber].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
     
     
     return;  
