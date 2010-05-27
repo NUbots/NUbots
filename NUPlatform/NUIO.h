@@ -55,8 +55,8 @@ public:
     
 
     // Raw Image streaming 
-    friend NUIO& operator<<(NUIO& io, NUimage& p_image);
-    friend NUIO& operator<<(NUIO& io, NUimage* p_image);
+    friend NUIO& operator<<(NUIO& io, NUbot& p_nubot);
+    friend NUIO& operator<<(NUIO& io, NUbot* p_nubot);
     
 protected:
     virtual void createTeamPort(TeamInformation* teaminfo);
@@ -64,10 +64,12 @@ private:
     
 // Members:
 public:
+	
 protected:
+	
 private:
-    NUbot* m_nubot;
     
+    NUbot* m_nubot;
     GameControllerPort* m_gamecontroller_port;
     TeamPort* m_team_port;
     TcpPort* m_vision_port;

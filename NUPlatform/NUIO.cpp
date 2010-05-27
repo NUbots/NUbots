@@ -167,13 +167,14 @@ void NUIO::setJobPortToBroadcast()
     @param io the nuio stream object
     @param sensors the NUimage data to stream
  */
-NUIO& operator<<(NUIO& io, NUimage& p_image)
+NUIO& operator<<(NUIO& io, NUbot& p_nubot)
 {
     #ifdef USE_NETWORK_DEBUGSTREAM
         network_data_t netdata = io.m_vision_port->receiveData();
         if(netdata.size > 0)
         {
-            io.m_vision_port->sendData(p_image);
+	   
+            io.m_vision_port->sendData(*(p_nubot.Image), *(p_nubot.SensorData));
         }
     #endif
     return io;
@@ -183,9 +184,9 @@ NUIO& operator<<(NUIO& io, NUimage& p_image)
     @param io the nuio stream object
     @param sensors the pointer to the NUimage data to put in the stream
  */
-NUIO& operator<<(NUIO& io, NUimage* p_image)
+NUIO& operator<<(NUIO& io, NUbot* p_nubot)
 {
-    io << *p_image;
+    io << *p_nubot;
     return io;
 }
 

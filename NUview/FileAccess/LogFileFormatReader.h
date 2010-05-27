@@ -34,7 +34,7 @@ public:
 signals:
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*,const float*,const float*);
-    void sensorDataChanged(const NUSensorsData*);
+    void sensorDataChanged(NUSensorsData*);
     void frameChanged(int,int);
     void cameraChanged(int);
 

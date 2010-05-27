@@ -60,6 +60,18 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
 }
+void virtualNUbot::setSensorData(NUSensorsData* newensorsData)
+{
+    sensorsData = newensorsData;
+    vector<float> horizondata;
+    bool isOK = sensorsData->getHorizon(horizondata);
+    if(isOK)
+    {
+        horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
+    }
+    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+
+}
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
 {
@@ -158,7 +170,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     int mode  = ROBOTS;
     Circle circ;
-
+    vision.setSensorsData(sensorsData);
     vision.setFieldObjects(AllObjects);
     vision.setImage(image);
     //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
@@ -305,7 +317,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    //qDebug() << "POSTclassifyCandidates";
+    qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
     if(BallCandidates.size() > 0)
     {
@@ -313,13 +325,13 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
 
-
+    qDebug() << "Finding YELLOW Goals";
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
-
+    qDebug() << "Finding BLUE Goals";
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
-
+     qDebug() << "Finding Lines";
     LineDetection LineDetector = vision.DetectLines(&vertScanArea,spacings,sensorsData);
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
@@ -335,20 +347,20 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     validColours.push_back(ClassIndex::pink_orange);
     validColours.push_back(ClassIndex::shadow_blue);
     validColours.push_back(ClassIndex::blue);
-    //qDebug() << "PRE-ROBOT";
+    qDebug() << "PRE-ROBOT";
 
     tempCandidates = vision.classifyCandidates(LineDetector.robotSegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
     RobotCandidates = tempCandidates;
 
     qDebug() << "Number of Robots: "<<RobotCandidates.size();
     vision.DetectRobots(RobotCandidates);
-    //qDebug() << "POST-ROBOT";
+    qDebug() << "POST-ROBOT";
     robotClassifiedPoints = 0;
     candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
 
     //POST PROCESS:
     vision.AllFieldObjects->postProcess(image->m_timestamp);
-    //qDebug() << image->m_timestamp ;
+    qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
 

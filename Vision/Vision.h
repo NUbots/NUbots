@@ -88,6 +88,10 @@ class Vision
 
     void setFieldObjects(FieldObjects* fieldobjects);
 
+    void setSensorsData(NUSensorsData* data);
+
+    void setActionatorsData(NUActionatorsData* actions);
+
     void setLUT(unsigned char* newLUT);
     void loadLUTFromFile(const std::string& fileName);
 

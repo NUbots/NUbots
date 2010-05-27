@@ -60,18 +60,20 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         SortObjectCandidates(FO_Candidates);
 
         //! Assign FieldObjects: if more then 2 the first 2 (largest 2 posts) will be assigned left and right post
-
+        //qDebug()<< "Candidate SORT: " <<FO_Candidates.size();
         if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX())
         {
             if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
                (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
             {
+                //qDebug()<< "Updating FO: Posts A";
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST);
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
             }
             else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
                      (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
             {
+                //qDebug()<< "Updating FO: Posts B";
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             }
@@ -81,17 +83,19 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
                (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
             {
+                //qDebug()<< "Updating FO: Posts C";
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST);
             }
             else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
                      (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
             {
+                //qDebug()<< "Updating FO: Posts D";
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             }
         }
-
+        //qDebug()<< "Finisihed Updating FO: Posts";
         for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
         {
             //! SKIP first 2 objects if greater then size is greater or equal then 2!
@@ -300,21 +304,21 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     SegEnd.x = BottomRight.x;
     SegEnd.y = y;
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleGoal->getColour(),ClassIndex::unclassified);
-    //debug << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
+    //qDebug() << "segments (start): " << tempSeg.getStartPoint().x << "," << tempSeg.getStartPoint().y ;
     ScanLine tempLine;
 
     int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
 
-    //debug << "segments found: " << tempLine->getNumberOfSegments();
+    //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
     //! Debug Output for small scans:
     int min = PossibleGoal->getTopLeft().y;
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
         TransitionSegment* tempSegment = tempLine.getSegment(i);
-        //debug << "segments (start): " << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
-        //debug << "segments (end): " << tempSeg->getEndPoint().x << "," << tempSeg->getEndPoint().y;
+        //qDebug() << "segments (start): " << tempSeg.getStartPoint().x << "," << tempSeg.getStartPoint().y;
+        //qDebug() << "segments (end): " << tempSeg.getEndPoint().x << "," << tempSeg.getEndPoint().y;
         if(tempSegment->getStartPoint().y < min)
         {
             min = tempSegment->getStartPoint().y;
@@ -324,7 +328,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     tempTopLeft.x = PossibleGoal->getTopLeft().x;
     tempTopLeft.y = min;
     PossibleGoal->setTopLeft(tempTopLeft);
-    //debug << "Extending Top Of Goal: " << tempTopLeft.x << "," << tempTopLeft.y;
+    //qDebug() << "Extending Top Of Goal: " << tempTopLeft.x << "," << tempTopLeft.y;
     return;
 
 }
@@ -807,7 +811,6 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sphericalPosition[2] = elevation;
     sizeOnScreen.x = GoalPost->width();
     sizeOnScreen.y = GoalPost->height();
-
     AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      sphericalPosition,
                                                                     sphericalError,
                                                                     viewPosition,

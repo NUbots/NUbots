@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "Tools/Image/NUimage.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include <QTimer>
 #include <QTime>
 class QLabel;
@@ -61,10 +62,14 @@ signals:
       */
     void PacketReady(QByteArray* datagram);
     void rawImageChanged(const NUimage*);
+    void sensorsDataChanged(NUSensorsData*);
+    void sensorsDataChanged(const float* joint, const float* balance, const float* touch);
 
 private:
     QString robotName;
     int datasize;
+    int imageSize;
+    int sensorsSize;
     QByteArray netdata;
     QLabel* nameLabel;
     QLineEdit* nameLineEdit;
@@ -88,6 +93,7 @@ private:
     QTcpSocket* tcpSocket;
     QTimer time;
     NUimage image;
+    NUSensorsData sensors;
     QTime timeToRecievePacket;
 
 };

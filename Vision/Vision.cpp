@@ -170,7 +170,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     //std::vector< ObjectCandidate > tempCandidates;
     //std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
-    spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
+    //spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
     //debug << "Setting Image: " <<endl;
@@ -534,6 +534,16 @@ void Vision::SaveAnImage()
     #endif
 }
 
+void Vision::setSensorsData(NUSensorsData* data)
+{
+    m_sensor_data = data;
+}
+
+void Vision::setActionatorsData(NUActionatorsData* actions)
+{
+    m_actions = actions;
+}
+
 void Vision::setFieldObjects(FieldObjects* fieldObjects)
 {
     AllFieldObjects = fieldObjects;
@@ -560,6 +570,7 @@ void Vision::setImage(const NUimage* newImage)
 
     currentImage = newImage;
     m_timestamp = currentImage->m_timestamp;
+    spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     ImageFrameNumber++;
 }
 
@@ -1892,20 +1903,21 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             }
 
         }
-        //qDebug() << "Segments: " << segments.size()<< "White: " <<  whiteSize << "  Blue: " << blueSize;
+        //qDebug() << i <<": Segments: " << segments.size()<< "White: " <<  whiteSize << "  Blue: " << blueSize;
         if( (blueSize > pinkSize && whiteSize > blueSize))// || RobotCandidates[i].getColour() == ClassIndex::blue || RobotCandidates[i].getColour() == ClassIndex::shadow_blue)
         {
+            //qDebug() << i <<": Blue Robot: ";
             RobotCandidates[i].setColour(ClassIndex::shadow_blue);
             //MAKE a Mobile_FIELDOBJECT: BLUE ROBOT
             AmbiguousObject tempRobotObject(FieldObjects::FO_BLUE_ROBOT_UNKNOWN, "UNKNOWN BLUE ROBOT");
-
+            //qDebug() << i <<": Blue Robot: make object";
             Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
             float cx = RobotCandidates[i].getCentreX();
             float cy = bottomRight.y;
             float bearing = CalculateBearing(cx);
             float elevation = CalculateElevation(cy);
             float distance = 0;
-
+            //qDebug() << i <<": Blue Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
             if(isOK == true)
@@ -1916,25 +1928,29 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
                     debug << "\t\tCalculated Distance to Point: " << distance<<endl;
                 #endif
             }
+            //qDebug() << i <<": Blue Robot: get things in order";
             Vector3<float> measured(distance,bearing,elevation);
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
+            //qDebug() << i <<": Blue Robot: update object with vision data";
             tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
             AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+            //qDebug() << i <<": Blue Robot: object push to FO";
         }
         else if( (blueSize < pinkSize && whiteSize > pinkSize) ) //|| RobotCandidates[i].getColour() == ClassIndex::pink || RobotCandidates[i].getColour() == ClassIndex::pink_orange)
         {
+            //qDebug() << i <<": Pink Robot: ";
             RobotCandidates[i].setColour(ClassIndex::pink);
             AmbiguousObject tempRobotObject(FieldObjects::FO_PINK_ROBOT_UNKNOWN, "UNKNOWN PINK ROBOT");
-
+            //qDebug() << i <<": Pink Robot: make object";
             Vector2<int> bottomRight = RobotCandidates[i].getBottomRight();
             float cx = RobotCandidates[i].getCentreX();
             float cy = bottomRight.y;
             float bearing = CalculateBearing(cx);
             float elevation = CalculateElevation(cy);
             float distance = 0;
-
+            //qDebug() << i <<": pink Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
             if(isOK == true)
@@ -1949,8 +1965,10 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());
+            //qDebug() << i <<": pink Robot: update object with vision data";
             tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
             AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
+            //qDebug() << i <<": pink Robot: object push to FO";
         }
     }
 
