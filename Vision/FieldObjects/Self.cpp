@@ -26,7 +26,7 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading)
         WorldModelLocation[2] = heading;
 }
 
-std::vector<float> Self::GetDifferenceFromState(const std::vector<float> targetState)
+std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<float> targetState)
 {
     float selfX = WorldModelLocation[0];
     float selfY = WorldModelLocation[1];

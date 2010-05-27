@@ -15,7 +15,7 @@ class Self {
 		float wmX(){return WorldModelLocation[0];}
 		float wmY(){return WorldModelLocation[1];}
 		float Heading(){return WorldModelLocation[2];}
-                std::vector<float> GetDifferenceFromFieldState(const std::vector<float> desiredState);
+                std::vector<float> CalculateDifferenceFromFieldState(const std::vector<float> desiredState);
                 float CalculateDistanceToStationaryObject(const StationaryObject& theObject);
                 float CalculateBearingToStationaryObject(const StationaryObject& theObject);
 		
