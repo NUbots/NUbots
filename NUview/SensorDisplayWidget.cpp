@@ -7,7 +7,7 @@ SensorDisplayWidget::SensorDisplayWidget(QWidget *parent) :
 {
 }
 
-void SensorDisplayWidget::SetSensorData(NUSensorsData* newSensorData)
+void SensorDisplayWidget::SetSensorData(const NUSensorsData* newSensorData)
 {
     std::stringstream data;
     newSensorData->summaryTo(data);

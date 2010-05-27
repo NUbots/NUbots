@@ -314,7 +314,7 @@ void MainWindow::createConnections()
 {
     qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
-    connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
+    connect(&LogReader,SIGNAL(sensorDataChanged(const NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(const NUSensorsData*)));
 
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
@@ -331,14 +331,12 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
-    connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)), &virtualRobot, SLOT(setSensorData(NUSensorsData*)));
 
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(processVisionFrame()));
-    connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
-    connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
+
 
     // Setup navigation control enabling/disabling
     connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
