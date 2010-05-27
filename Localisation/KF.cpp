@@ -1002,3 +1002,27 @@ void KF::measureLocalization(double x,double y,double theta)
 // 	cout<<stateEstimates
 // 	cout<<x<<", "<<stateEstimates[0][0]<<", "<<y<<", "<<stateEstimates[1][0]<<", "<<theta<<", "<<stateEstimates[2][0]<<endl;
 }
+
+std::ostream& operator<< (std::ostream& output, const KF& p_kf)
+{
+    output.write(reinterpret_cast<const char*>(&p_kf.isActive), sizeof(p_kf.isActive));
+    if(p_kf.isActive)
+    {
+        output.write(reinterpret_cast<const char*>(&p_kf.alpha), sizeof(p_kf.alpha));
+        WriteMatrix(output,p_kf.stateEstimates);
+        WriteMatrix(output,p_kf.stateStandardDeviations);
+    }
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, KF& p_kf)
+{
+    input.read(reinterpret_cast<char*>(&p_kf.isActive), sizeof(p_kf.isActive));
+    if(p_kf.isActive)
+    {
+        input.read(reinterpret_cast<char*>(&p_kf.alpha), sizeof(p_kf.alpha));
+        p_kf.stateEstimates  = ReadMatrix(input);
+        p_kf.stateStandardDeviations = ReadMatrix(input);
+    }
+    return input;
+}
