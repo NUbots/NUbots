@@ -3,7 +3,7 @@
 
 #include "LogFileFormatReader.h"
 #include "Tools/FileFormats/NUbotImage.h"
-
+#include "Tools/Image/NUimage.h"
 
 
 class nifVersion1FormatReader : public LogFileFormatReader
