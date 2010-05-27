@@ -22,7 +22,7 @@
 #include "SoccerProvider.h"
 
 #include "InitialState.h"
-/*#include "ReadyState.h"
+#include "ReadyState.h"/*
 #include "SetState.h"
 #include "PlayingState.h"*/
 #include "PenalisedState.h"
@@ -44,8 +44,8 @@ using namespace std;
 SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
     m_initial = new InitialState(this);
-    /*m_ready = new ReadyState(this);
-    m_set = new SetState(this);
+    m_ready = new ReadyState(this);
+    /*m_set = new SetState(this);
     m_playing = new PlayingState(this);*/
     m_penalised = new PenalisedState(this);
     /*m_substitute = new SubstituteState(this);
@@ -91,9 +91,9 @@ BehaviourState* SoccerProvider::nextStateCommons()
         case GameInformation::InitialState:
             return m_initial;
             break;
-        /*case GameInformation::ReadyState:
+        case GameInformation::ReadyState:
             return m_ready;
-            break;
+            break;/*
         case GameInformation::SetState:
             return m_set;
             break;

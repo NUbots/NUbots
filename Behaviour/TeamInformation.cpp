@@ -25,6 +25,8 @@
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUSystem.h"
 
+#include <memory.h>
+
 #include "debug.h"
 
 TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
