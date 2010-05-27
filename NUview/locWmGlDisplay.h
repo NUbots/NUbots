@@ -62,6 +62,7 @@ protected:
 
         bool light;
         bool perspective;
+        bool drawRobotModel;
 
 };
 

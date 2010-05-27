@@ -17,6 +17,8 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
     light = true;
     perspective = true;
+    drawRobotModel = true;
+    setFont(QFont("Helvetica",8,QFont::Bold,false));
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -75,6 +77,10 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             viewOrientation[0] = 0.0f;
             viewOrientation[1] = 0.0f;
             viewOrientation[2] = 0.0f;
+            update();
+            break;
+        case Qt::Key_K:
+            drawRobotModel = !drawRobotModel;
             update();
             break;
         default:
@@ -316,6 +322,8 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     glTranslatef(x,y,0);    // Move to centre of robot.
     glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glDisable(GL_LIGHTING);      // Disable Global Lighting
     // Draw Aura
     glColor4ub(0,0,255,255);
     glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
@@ -323,41 +331,46 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glBegin(GL_QUADS);
         glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-robotWidth/2.0f,  -robotWidth/2.0f*1.2,  0.5);      // Bottom Left Of The Texture and Quad
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);    // Bottom Right Of The Texture and Quad
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(+robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);     // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  0.5);       // Top Left Of The Texture and Quad
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-robotWidth/2.0f,  -robotWidth/2.0f*1.2,  1.5);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-robotWidth/2.0f, robotWidth/2.0f*1.2,  1.5);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(+robotWidth/2.0f, robotWidth/2.0f*1.2,  1.5);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  1.5);       // Top Left Of The Texture and Quad
     glEnd();
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
 
     glColor4ub(255,255,255,colour.alpha());
-    glTranslatef(0,0,robotHeight/2.0);    // Move to centre of robot.
+    if(drawRobotModel)
+    {
+        glTranslatef(0,0,robotHeight/2.0);    // Move to centre of robot.
 
-    // Draw Front
-    glBindTexture(GL_TEXTURE_2D, robotTexture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
-        glBegin(GL_QUADS);
-            glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f,  -robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
-            glTexCoord2f(1.0f, 0.0f); glVertex3f(0.0f, robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
-            glTexCoord2f(1.0f, 1.0f); glVertex3f(0.0f, robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
-            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f, -robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
-        glEnd();
+        // Draw Front
+        glBindTexture(GL_TEXTURE_2D, robotTexture);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
+            glBegin(GL_QUADS);
+                glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+                glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f,  -robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
+                glTexCoord2f(1.0f, 0.0f); glVertex3f(0.0f, robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
+                glTexCoord2f(1.0f, 1.0f); glVertex3f(0.0f, robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
+                glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f, -robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
+            glEnd();
 
-    // Draw back
-    glBindTexture(GL_TEXTURE_2D, robotBackTexture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
-        glBegin(GL_QUADS);
-            glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-            glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f,  robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
-            glTexCoord2f(1.0f, 0.0f); glVertex3f(-0.5f, -robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
-            glTexCoord2f(1.0f, 1.0f); glVertex3f(-0.5f, -robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
-            glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
-        glEnd();
+        // Draw back
+        glBindTexture(GL_TEXTURE_2D, robotBackTexture);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
+            glBegin(GL_QUADS);
+                glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+                glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f,  robotWidth/2.0f,  -robotHeight/2.0);      // Bottom Left Of The Texture and Quad
+                glTexCoord2f(1.0f, 0.0f); glVertex3f(-0.5f, -robotWidth/2.0f,  -robotHeight/2.0);    // Bottom Right Of The Texture and Quad
+                glTexCoord2f(1.0f, 1.0f); glVertex3f(-0.5f, -robotWidth/2.0f,  robotHeight/2.0);     // Top Right Of The Texture and Quad
+                glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, robotWidth/2.0f,  robotHeight/2.0);       // Top Left Of The Texture and Quad
+            glEnd();
+    }
 
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
-    glDisable(GL_BLEND);		// Turn Blending On
+    glDisable(GL_BLEND);		// Turn Blending Off
     glPopMatrix();
 }
 
@@ -373,19 +386,22 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
 
     // Draw Aura
     glColor4ub(0,0,255,255);
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glDisable(GL_LIGHTING);      // Disable Global Lighting
     glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glBegin(GL_QUADS);
         glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-robotWidth/2.0f,  -robotWidth/2.0f*1.2,  0.5);      // Bottom Left Of The Texture and Quad
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);    // Bottom Right Of The Texture and Quad
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(+robotWidth/2.0f, robotWidth/2.0f*1.2,  0.5);     // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  0.5);       // Top Left Of The Texture and Quad
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-robotWidth/2.0f,  -robotWidth/2.0f*1.2,  1.5);      // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-robotWidth/2.0f, robotWidth/2.0f*1.2,  1.5);    // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(+robotWidth/2.0f, robotWidth/2.0f*1.2,  1.5);     // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  1.5);       // Top Left Of The Texture and Quad
     glEnd();
-
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
-    glDisable(GL_BLEND);		// Turn Blending On
+    glDisable(GL_BLEND);		// Turn Blending Off
     glPopMatrix();
 }
 
@@ -402,10 +418,18 @@ void locWmGlDisplay::DrawModel(const KF& model)
 
 void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
 {
+    QString displayString("Model %1 (%2%)");
     for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
     {
         const KF model = localisation.getModel(modelID);
-        if(model.isActive) DrawModel(model);
+        if(model.isActive)
+        {
+            DrawModel(model);
+            glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+            glColor4ub(255,255,255,255);
+            renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
+            glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+        }
     }
 
 }
