@@ -677,6 +677,7 @@ QMdiSubWindow* MainWindow::createGLDisplay()
 QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
+    connect(&LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;

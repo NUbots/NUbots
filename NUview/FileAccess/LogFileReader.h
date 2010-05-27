@@ -24,7 +24,7 @@ signals:
     void firstFrameAvailable(bool);
     void lastFrameAvailable(bool);
     void setFrameAvailable(bool);
-
+    void LocalisationDataChanged(const Localisation*);
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*, const float*, const float*);
     void sensorDataChanged(const NUSensorsData*);
