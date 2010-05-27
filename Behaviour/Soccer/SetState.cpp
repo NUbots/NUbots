@@ -51,7 +51,7 @@ void SetState::doState()
         m_actions->addSound(m_data->CurrentTime, NUSounds::SET);
     }
     // In set the chest led should be yellow
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 1, 0);
+    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0.9, 1, 0.1);
     
     // In set if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())

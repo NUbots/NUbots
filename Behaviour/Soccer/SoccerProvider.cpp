@@ -24,7 +24,7 @@
 #include "InitialState.h"
 #include "ReadyState.h"
 #include "SetState.h"
-/*#include "PlayingState.h"*/
+#include "PlayingState.h"
 #include "FinishedState.h"
 #include "PenalisedState.h"
 /*#include "SubstituteState.h"
@@ -47,7 +47,7 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     m_initial = new InitialState(this);
     m_ready = new ReadyState(this);
     m_set = new SetState(this);
-    /*m_playing = new PlayingState(this);*/
+    m_playing = new PlayingState(this);
     m_finished = new FinishedState(this);
     m_penalised = new PenalisedState(this);
     /*m_substitute = new SubstituteState(this);
@@ -63,7 +63,7 @@ SoccerProvider::~SoccerProvider()
     delete m_initial;
     delete m_ready;
     delete m_set;
-    //delete m_playing;
+    delete m_playing;
     delete m_finished;
     delete m_penalised;
     /*delete m_substitute;
@@ -76,7 +76,7 @@ void SoccerProvider::doBehaviourCommons()
 {
     // In every state the left foot led must display the team colour
     if (m_game_info->getTeamColour() == GameInformation::BlueTeam)
-        m_actions->addLeds(NUActionatorsData::LeftFootLeds, m_current_time, 0, 0, 1);
+        m_actions->addLeds(NUActionatorsData::LeftFootLeds, m_current_time, 0, 1, 1);
     else
         m_actions->addLeds(NUActionatorsData::LeftFootLeds, m_current_time, 1, 0, 1);
 }
@@ -100,9 +100,9 @@ BehaviourState* SoccerProvider::nextStateCommons()
         case GameInformation::SetState:
             return m_set;
             break;
-        /*case GameInformation::PlayingState:
+        case GameInformation::PlayingState:
             return m_playing;
-            break;*/
+            break;
         case GameInformation::FinishedState:
             return m_finished;
             break;
