@@ -40,7 +40,7 @@ const float Localisation::R_obj_range_relative = 0.02f; // 10% of range added. (
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
-Localisation::Localisation()
+Localisation::Localisation(): m_timestamp(0)
 {
     doPlayerReset();
 
@@ -98,6 +98,7 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs)
     }
     
     ProcessObjects(0,fobs,NULL);
+    m_timestamp = data->CurrentTime;
 }
 
 void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets)
@@ -1210,4 +1211,32 @@ void Localisation::measureLocalization(double x,double y,double theta)
 	
 	models[0].measureLocalization(x,y,theta);
 
+}
+
+std::ostream& operator<< (std::ostream& output, const Localisation& p_loc)
+{
+    int numodels = p_loc.c_MAX_MODELS;
+    output.write(reinterpret_cast<const char*>(&p_loc.m_timestamp), sizeof(p_loc.m_timestamp));
+    output.write(reinterpret_cast<const char*>(&numodels), sizeof(numodels));
+    for (int i = 0; i < numodels; ++i)
+    {
+        output << p_loc.models[i];
+        for (int j = 0; j < p_loc.c_numOutlierTrackedObjects; ++j)
+            output.write(reinterpret_cast<const char*>(&p_loc.modelObjectErrors[i][j]), sizeof(p_loc.modelObjectErrors[i][j]));
+    }
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, Localisation& p_loc)
+{
+    int numModels;
+    input.read(reinterpret_cast<char*>(&p_loc.m_timestamp), sizeof(p_loc.m_timestamp));
+    input.read(reinterpret_cast<char*>(&numModels), sizeof(numModels));
+    for (int i = 0; i < numModels; ++i)
+    {
+        input >> p_loc.models[i];
+        for (int j = 0; j < p_loc.c_numOutlierTrackedObjects; ++j)
+            input.read(reinterpret_cast<char*>(&p_loc.modelObjectErrors[i][j]), sizeof(p_loc.modelObjectErrors[i][j]));
+    }
+    return input;
 }
