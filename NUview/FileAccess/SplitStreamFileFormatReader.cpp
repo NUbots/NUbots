@@ -108,11 +108,28 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
                     qDebug() << sensorReader.TotalFrames() << "sensor frames found.";
                 }
             }
+            if(temp.compare(QString("locwm"),Qt::CaseInsensitive) == 0)
+            {
+                qDebug() << "Opening " << (*fileIt).filePath();
+                successIndicator = locwmReader.OpenFile((*fileIt).filePath().toStdString());
+                qDebug() << successIndicator;
+                if(successIndicator)
+                {
+                    qDebug() << locwmReader.TotalFrames() << "locwm frames found.";
+                }
+            }
         }
 
         m_directory = openDir;
     }
-    m_totalFrames = imageReader.TotalFrames();
+    if(imageReader.IsValid())
+    {
+        m_totalFrames = imageReader.TotalFrames();
+    }
+    else if(locwmReader.IsValid())
+    {
+        m_totalFrames = locwmReader.TotalFrames();
+    }
     return m_totalFrames;
 }
 
@@ -161,7 +178,6 @@ int SplitStreamFileFormatReader::previousFrame()
 
 int SplitStreamFileFormatReader::firstFrame()
 {
-
     return setFrame(1);
 }
 
@@ -174,9 +190,23 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
 {
     if(m_dataIsSynced)
     {
-        if(imageReader.IsValid()) emit rawImageChanged(imageReader.ReadFrameNumber(frameNumber));
-        if(sensorReader.IsValid()) emit sensorDataChanged(sensorReader.ReadFrameNumber(frameNumber));
-        m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();
+        if(imageReader.IsValid())
+        {
+            emit rawImageChanged(imageReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();
+        }
+        if(sensorReader.IsValid())
+        {
+            emit sensorDataChanged(sensorReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = sensorReader.CurrentFrameSequenceNumber();
+        }
+        if(locwmReader.IsValid())
+        {
+            emit LocalisationDataChanged(locwmReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = locwmReader.CurrentFrameSequenceNumber();
+        }
+        //qDebug() << "Set Frame " << frameNumber << "at" << m_currentFrameIndex;
+        //m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();
         emit frameChanged(m_currentFrameIndex, m_totalFrames);
     }
     return m_currentFrameIndex;
