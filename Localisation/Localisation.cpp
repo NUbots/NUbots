@@ -259,7 +259,9 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 
 void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjects)
 {
+
     // Write stationary objects.
+    /*
     StationaryObjectsIt currStat = fieldObjects->stationaryFieldObjects.begin();
     StationaryObjectsConstIt endStat = fieldObjects->stationaryFieldObjects.end();
     float x,y;
@@ -273,6 +275,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
         (*currStat).updateEstimatedRelativeVariables(distance, bearing, 0.0f);
         ++currStat;
     }
+    */
 
     // Set the balls location.
     distance = model.getDistanceToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
