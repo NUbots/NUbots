@@ -39,6 +39,7 @@ public:
     static NUWalk* getWalkEngine();
     NUWalk();
     virtual ~NUWalk();
+    virtual void freeze();
     virtual void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
@@ -55,7 +56,7 @@ public:
 protected:
     virtual void doWalk() = 0;
     
-    void enableWalk();
+    virtual void enableWalk();
     bool inInitialPosition();
     void moveToInitialPosition();
 

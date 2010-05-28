@@ -130,7 +130,7 @@ void NUMotion::freeze()
         m_head->kill();
     #endif
     #ifdef USE_WALK
-        m_walk->kill();                
+        m_walk->freeze();                
     #endif
     #ifdef USE_KICK
         m_kick->kill();                   
@@ -144,7 +144,20 @@ void NUMotion::freeze()
  */
 void NUMotion::kill()
 {
-    freeze();
+    m_last_kill_time = m_current_time;
+    #ifdef USE_HEAD
+        m_head->kill();
+    #endif
+    #ifdef USE_WALK
+        m_walk->kill();                
+    #endif
+    #ifdef USE_KICK
+        m_kick->kill();                   
+    #endif
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+        m_save->kill();
+    #endif
+    
     float safelegpositions[] = {0, -0.85, -0.15, 2.16, 0, -1.22};
     float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
     float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
