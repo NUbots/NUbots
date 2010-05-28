@@ -30,8 +30,8 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 5.0f; // 3 // then 8.0 (home)
-const int Localisation::c_RESET_NUM_THRESHOLD = 2;
+const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
+const int Localisation::c_RESET_NUM_THRESHOLD = 3;
 
 // Object distance measurement error weightings (Constant)
 const float Localisation::R_obj_theta = 0.001f; // (0.01 rad)^2
@@ -74,7 +74,7 @@ Localisation::~Localisation()
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
 
-void Localisation::process(NUSensorsData* data, FieldObjects* fobs)
+void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo)
 {
     float odo_time;
     vector<float> odo;
@@ -131,7 +131,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     varianceCheckAll();
 	
     // perform odometry update and change the variance of the model
-    doTimeUpdate(fabs(odomForward), odomLeft, odomTurn);
+    doTimeUpdate((-odomForward), odomLeft, odomTurn);
 // 	doTimeUpdate(0,0,0);
 	
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -224,7 +224,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
         // Check for model reset. -> with multiple models just remove if not last one??
         // Need to re-do reset to be model specific.
         //int numReset = CheckForOutlierResets();
-        CheckForOutlierResets();
+        //CheckForOutlierResets();
 
         // clip models back on to field.
         clipActiveModelsToField();

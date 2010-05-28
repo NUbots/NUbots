@@ -9,6 +9,7 @@ class NUSensorsData;
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
+#include "Behaviour/GameInformation.h"
 
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
@@ -27,7 +28,7 @@ class Localisation: public TimestampedData
         Localisation();
         ~Localisation();
     
-        void process(NUSensorsData* data, FieldObjects* objects);
+        void process(NUSensorsData* data, FieldObjects* objects, GameInformation* gameInfo);
         //! TODO: Require robots state to be sent to enable smart model resetting.
         //! TODO: Need to add shared packets.
 	
@@ -64,6 +65,7 @@ class Localisation: public TimestampedData
         void PrintModelStatus(int modelID);
 
         // Model Reset Functions
+        bool ShouldRunInState(GameInformation::RobotState theState);
         void doPenaltyReset();
         void doPlayerReset();
         void resetSdMatrix(int modelNumber);
