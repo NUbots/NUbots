@@ -125,11 +125,18 @@ void NUWalk::enableWalk()
         m_walk_enabled = true;
 }
 
+/*! @brief Freezes the walk engine
+ */
+void NUWalk::freeze()
+{
+    m_walk_enabled = false;
+}
+
 /*! @brief Kills the walk engine
  */
 void NUWalk::kill()
 {
-    m_walk_enabled = false;
+    freeze();
 }
 
 /*! @brief Process new sensor data, and produce actionator commands

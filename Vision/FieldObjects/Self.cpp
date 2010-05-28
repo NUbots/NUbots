@@ -47,8 +47,8 @@ std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<flo
 
     std::vector<float> result(3,0.0f);
     result[0] = distance;
-    result[0] = bearing;
-    result[0] = headingDifference;
+    result[1] = bearing;
+    result[2] = headingDifference;
 
     return result;
 }

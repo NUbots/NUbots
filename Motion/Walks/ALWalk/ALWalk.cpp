@@ -42,12 +42,26 @@ ALWalk::~ALWalk()
         delete m_al_motion;
 }
 
+/*! @brief Freezes the aldebaran walk engine
+ */
+void ALWalk::freeze()
+{
+    NUWalk::freeze();
+    m_al_motion->killWalk();
+}
+
 /*! @brief Kill the aldebaran walk engine
  */
 void ALWalk::kill()
 {
-    m_walk_enabled = false;
-    m_al_motion->killWalk();
+    freeze();
+    m_al_motion->setStiffnesses(string("Body"), 0.0f);
+}
+
+void ALWalk::enableWalk()
+{
+    m_al_motion->setStiffnesses(string("Body"), 0.5f);
+    NUWalk::enableWalk();
 }
 
 void ALWalk::doWalk()
