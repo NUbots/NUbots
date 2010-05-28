@@ -30,8 +30,8 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
-const int Localisation::c_RESET_NUM_THRESHOLD = 3;
+const float Localisation::c_RESET_SUM_THRESHOLD = 5.0f; // 3 // then 8.0 (home)
+const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
 const float Localisation::R_obj_theta = 0.001f; // (0.01 rad)^2
@@ -224,7 +224,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
         // Check for model reset. -> with multiple models just remove if not last one??
         // Need to re-do reset to be model specific.
         //int numReset = CheckForOutlierResets();
-        //CheckForOutlierResets();
+        CheckForOutlierResets();
 
         // clip models back on to field.
         clipActiveModelsToField();
@@ -587,6 +587,7 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     {
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
         result = true;
+        models[modelID].timeUpdate(0);
 	models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     return result;
@@ -944,7 +945,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
     // Check if enough recent 'outliers' that we should reset ?
     if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
         reset = true;
-        models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
+        //models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
         #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
@@ -961,7 +962,15 @@ int  Localisation::CheckForOutlierResets()
 {
     bool numResets = 0;
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
-        if(CheckModelForOutlierReset(modelID)) numResets++;
+        if(CheckModelForOutlierReset(modelID))
+        {
+            models[modelID].isActive = false;
+            numResets++;
+        }
+    }
+    if(getNumActiveModels() < 1)
+    {
+        this->doPlayerReset();
     }
     return numResets;
 }
