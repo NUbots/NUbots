@@ -51,7 +51,9 @@ class LineDetection{
 	//METHODS:
 	LineDetection();
     	~LineDetection();
-        void FormLines(ClassifiedSection* scanArea, int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
+
+        void FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision);
+        void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
 	
 	
 	private:
@@ -62,7 +64,7 @@ class LineDetection{
         NUSensorsData* sensorsData;
         Kinematics* kin;
 
-        void FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height);
+
         void FindFieldLines(int image_width,int image_height);
 
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);

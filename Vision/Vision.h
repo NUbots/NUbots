@@ -178,7 +178,11 @@ class Vision
     ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
     void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
-    LineDetection DetectLines(ClassifiedSection* scanArea, int spacing, NUSensorsData* data);
+
+    void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
+
+    void DetectLines(LineDetection* LineDetector);
+
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(const std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,

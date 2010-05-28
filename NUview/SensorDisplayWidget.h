@@ -14,7 +14,7 @@ public:
 signals:
 
 public slots:
-    void SetSensorData(const NUSensorsData* newSensorData);
+    void SetSensorData(NUSensorsData* newSensorData);
 };
 
 #endif // SENSORDISPLAYWIDGET_H
