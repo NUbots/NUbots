@@ -35,6 +35,8 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
+#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
@@ -87,6 +89,13 @@ BehaviourState* SoccerProvider::nextStateCommons()
 {
     if (singleChestClick() or longChestClick())
         m_game_info->doManualStateChange();
+    
+    static bool saving_images = false;
+    if (doubleChestClick())
+    {
+        saving_images = not saving_images;
+        m_jobs->addVisionJob(new SaveImagesJob(saving_images, false));
+    }
     
     GameInformation::RobotState game_state = m_game_info->getCurrentState();
     switch (game_state) 
