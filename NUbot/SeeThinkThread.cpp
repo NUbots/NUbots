@@ -167,7 +167,7 @@ void SeeThinkThread::run()
                         localisationprocessstarttime = NUSystem::getProcessTime();
                         localisationthreadstarttime = NUSystem::getThreadTime();
                 #endif
-                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects);
+                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects, m_nubot->GameInfo);
 		
                 #if defined (THREAD_SEETHINK_MONITOR_TIME) //END TIMER FOR VISION PROCESS FRAME
                     localisationrealendtime = NUSystem::getRealTime();
