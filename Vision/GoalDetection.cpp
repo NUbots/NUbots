@@ -50,12 +50,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         FO_Candidates.insert(FO_Candidates.end(), FO_AboveHorizonCandidates.begin(), FO_AboveHorizonCandidates.end());
         FO_AboveHorizonCandidates.clear();
         //qDebug()<< "Candidate Size[Before CombineOverlapping]: " <<FO_Candidates.size();
-        //! Combine Any "OverLapping Candidates:
+        //! Combine Any "OverLapping" Candidates:
         CombineOverlappingCandidates(FO_Candidates);
         //qDebug()<< "Candidate Size[Before Ratio Size Checks]: " <<FO_Candidates.size();
         //! Check if the ratio of the object candidate is OK
         CheckCandidateSizeRatio(FO_Candidates, height, width);
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
+        //! Check if the Goal is in a Robot:
+        CheckCandidateIsInRobot(FO_Candidates, AllObjects);
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
 
@@ -185,11 +187,11 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 {
     Vector2<int> TopLeft = PossibleGoal->getTopLeft();
     Vector2<int> BottomRight = PossibleGoal->getBottomRight();
-    int Colour = PossibleGoal->getColour();
+    unsigned char Colour = PossibleGoal->getColour();
     //int min = TopLeft.x;
     //int max = BottomRight.x;
     int margin = 16*1.5;
-    if((int)horizontalSegments.size() ==0 && (int)FO_AboveHorizonCandidates.size() ==0) return;
+    if((int)FO_AboveHorizonCandidates.size() ==0) return;
 
     vector < ObjectCandidate > ::iterator itAboveHorizon;
     //debug << "AboveHoriCands:" << endl;
@@ -200,19 +202,19 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
             itAboveHorizon->getBottomRight().x < BottomRight.x + margin &&
             Colour == itAboveHorizon->getColour())
         {
-            if(itAboveHorizon->getTopLeft().x < TopLeft.x)
+            if(itAboveHorizon->getTopLeft().x <= TopLeft.x)
             {
                 TopLeft.x = itAboveHorizon->getTopLeft().x;
             }
-            if(itAboveHorizon->getTopLeft().y < TopLeft.y)
+            if(itAboveHorizon->getTopLeft().y <= TopLeft.y)
             {
                 TopLeft.y = itAboveHorizon->getTopLeft().y;
             }
-            if(itAboveHorizon->getBottomRight().x > BottomRight.x)
+            if(itAboveHorizon->getBottomRight().x >= BottomRight.x)
             {
                 BottomRight.x = itAboveHorizon->getBottomRight().x;
             }
-            if(itAboveHorizon->getBottomRight().y > BottomRight.y)
+            if(itAboveHorizon->getBottomRight().y >= BottomRight.y)
             {
                 BottomRight.y = itAboveHorizon->getBottomRight().y;
             }
@@ -506,6 +508,8 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     return;
 }
 
+
+
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
     //debug << "Checking Ratio: " << PossibleBall.aspect();
@@ -537,6 +541,52 @@ bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,
         return true;
     }
 }
+
+void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Candidates, FieldObjects* AllObjects)
+{
+    vector < ObjectCandidate > ::iterator it;
+    bool objectRemoved;
+       //! Go through all the candidates: to find a possible goal
+    for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
+        objectRemoved = false;
+        if(it->getColour() != ClassIndex::blue || it->getColour() != ClassIndex::shadow_blue )
+        {
+            ++it;
+            continue;
+        }
+        Vector2<int> topLeft = it->getTopLeft();
+        Vector2<int> bottomRight = it->getBottomRight();
+        vector < AmbiguousObject > ::iterator FO_it;
+        for (FO_it = AllObjects->ambiguousFieldObjects.begin();  it  < FO_Candidates.end(); FO_it++)
+        {
+            if(FO_it->getID() != FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
+            Vector2<int> robotTopLeft, robotBottomLeft;
+            robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2;
+            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2;
+            robotBottomLeft.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2;
+            robotBottomLeft.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
+
+            if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomLeft.x &&  bottomRight.y <= robotBottomLeft.y)
+            {
+                objectRemoved = true;
+                it = FO_Candidates.erase(it);
+                break;
+            }
+        }
+        if(objectRemoved)
+        {
+            continue;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    return;
+}
+
+
 float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Vision* vision)
 {
     float distance = 0.0;
