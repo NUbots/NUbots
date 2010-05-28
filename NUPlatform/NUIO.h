@@ -65,6 +65,7 @@ protected:
     TeamPort* m_team_port;
     TcpPort* m_vision_port;
     JobPort* m_jobs_port;
+    TcpPort* m_localisation_port;
 };
 
 #endif
