@@ -26,6 +26,47 @@
 #include "debugverbositynumotion.h"
 #include "nubotdataconfig.h"
 
+/*! @brief Prints a human-readble version of the walk parameter */
+void WalkParameters::Parameter::summaryTo(ostream& output) 
+{
+    output << Value;
+}
+
+/*! @brief Prints comma separated parameter */
+void WalkParameters::Parameter::csvTo(ostream& output)
+{   // Caution. Changing this function may break the walk optimiser
+    output << Value << ", ";
+}
+
+ostream& operator<< (ostream& output, const WalkParameters::Parameter& p) 
+{   
+    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
+    return output;
+}
+
+istream& operator>> (istream& input, WalkParameters::Parameter& p)
+{
+    // read in the parameter name
+    getline(input, p.Name, ':');
+    if (p.Name[p.Name.size() - 1] == ':')
+        p.Name.resize(p.Name.size() - 1);
+    
+    // read in the value [min, max]
+    input >> p.Value;
+    input.ignore(10, '[');
+    input >> p.Min;
+    input.ignore(10, ',');
+    input >> p.Max;
+    input.ignore(10, ']');
+    
+    // read in the rest of the line and call it the description
+    char charbuffer[500];
+    input.getline(charbuffer, 500);
+    p.Description = string(charbuffer);
+    
+    return input;
+};
+
 /*! @brief Construct a walk parameter set with no parameters
  */
 WalkParameters::WalkParameters()
@@ -310,6 +351,8 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
     p_walkparameters.m_max_speeds = MotionFileTools::toFloatVector(input);
     p_walkparameters.m_max_accelerations = MotionFileTools::toFloatVector(input);
     
+    input.ignore(10,'\n');
+    
     WalkParameters::Parameter p;
     p_walkparameters.m_parameters.clear();
     
@@ -322,6 +365,8 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
         input >> p;
         p_walkparameters.m_parameters.push_back(p);
         beforepeek = input.tellg();
+        if (beforepeek < 0)
+            return input;
         input >> label;
     }
     
@@ -376,6 +421,7 @@ void WalkParameters::saveAs(const string& name)
     }
     else
         debug << "WalkParameters::save(): Failed to open file " << name + ".cfg" << endl;
+    file.close();
 }
 
 /*! @brief Loads the walk parameters from a file
@@ -391,6 +437,7 @@ void WalkParameters::load(const string& name)
     }
     else
         debug << "WalkParameters::load(): Failed to load file " << name + ".cfg" << endl;
+    file.close();
 }
 
 /*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
