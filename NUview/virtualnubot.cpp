@@ -306,7 +306,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::pink);
                 validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
-                validColours.push_back(ClassIndex::blue);
+                //validColours.push_back(ClassIndex::blue);
 
                 qDebug() << "PRE-ROBOT";
                 RobotCandidates = vision.classifyCandidates(LineDetector.robotSegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
@@ -338,7 +338,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
-                validColours.push_back(ClassIndex::shadow_blue);
+                //validColours.push_back(ClassIndex::shadow_blue);
 
                 //qDebug() << "PRE-GOALS";
                 BlueGoalCandidates = vision.classifyCandidates(GoalBlueSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);

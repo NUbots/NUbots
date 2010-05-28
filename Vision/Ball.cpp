@@ -70,7 +70,29 @@ bool Ball::isObjectAPossibleBall(const ObjectCandidate &PossibleBall)
        PossibleBall.getColour()== ClassIndex::pink_orange ||
        PossibleBall.getColour() == ClassIndex::yellow_orange)
     {
-        return true;
+        std::vector<TransitionSegment >segments = PossibleBall.getSegments();
+        int orangeSize = 0;
+        //int pinkSize = 0;
+        for(unsigned int i = 0; i <segments.size(); i++)
+        {
+            /*if(segments[i].getColour() == ClassIndex::pink || segments[i].getColour() == ClassIndex::pink_orange)
+            {
+                pinkSize = pinkSize + segments[j].getSize();
+            }*/
+            if(segments[i].getColour() == ClassIndex::orange)
+            {
+                orangeSize = orangeSize + segments[i].getSize();
+            }
+
+        }
+        if(orangeSize > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     else{
         return false;
