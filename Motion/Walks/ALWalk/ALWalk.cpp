@@ -42,12 +42,26 @@ ALWalk::~ALWalk()
         delete m_al_motion;
 }
 
+/*! @brief Freezes the aldebaran walk engine
+ */
+void ALWalk::freeze()
+{
+    NUWalk::freeze();
+    m_al_motion->killWalk();
+}
+
 /*! @brief Kill the aldebaran walk engine
  */
 void ALWalk::kill()
 {
-    m_walk_enabled = false;
-    m_al_motion->killWalk();
+    freeze();
+    m_al_motion->setStiffnesses(string("Body"), 0.0f);
+}
+
+void ALWalk::enableWalk()
+{
+    m_al_motion->setStiffnesses(string("Body"), 0.5f);
+    NUWalk::enableWalk();
 }
 
 void ALWalk::doWalk()
@@ -67,7 +81,9 @@ void ALWalk::doWalk()
             m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw))*max_yaw;
         
         m_al_motion->setWalkTargetVelocity(m_speed_x/max_x, m_speed_y/max_y, m_speed_yaw/max_yaw, 1);
+        count = 0;
     }
+    count++;
     
     static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
     static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);

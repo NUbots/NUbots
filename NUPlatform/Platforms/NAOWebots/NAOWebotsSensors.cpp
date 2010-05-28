@@ -215,16 +215,32 @@ void NAOWebotsSensors::copyFromAccelerometerAndGyro()
  */
 void NAOWebotsSensors::copyFromDistance()
 {
-    static vector<float> distancedata(m_distance_sensors.size(), 0);
+    static vector<float> leftdistance(1,0);
+    static vector<float> rightdistance(1,0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromDistance()" << endl;
 #endif
     
-    // Copy distance readings
-    for (int i=0; i<m_distance_sensors.size(); i++)
-        distancedata[i] = 100*m_distance_sensors[i]->getValue();        // convert from metres to centimetres
-    m_data->setDistanceValues(m_current_time, distancedata);
+    // Copy left distance readings
+    leftdistance[0] = 255;
+    for (int i=0; i<m_distance_sensors.size()/2; i++)
+    {
+        float d = 100*m_distance_sensors[i]->getValue();
+        if (d < 70 and d < leftdistance[0])
+            leftdistance[0] = d;
+    }
+    // Copy right distance readings
+    rightdistance[0] = 255;
+    for (int i=m_distance_sensors.size()/2; i<m_distance_sensors.size(); i++)
+    {
+        float d = 100*m_distance_sensors[i]->getValue();
+        if (d < 70 and d < rightdistance[0])
+            rightdistance[0] = d;
+    }
+    
+    m_data->setDistanceLeftValues(m_current_time, leftdistance);
+    m_data->setDistanceRightValues(m_current_time, rightdistance);
 }
 
 /*! @brief Copies the foot sole pressure data into m_data

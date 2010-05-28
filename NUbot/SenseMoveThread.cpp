@@ -35,6 +35,9 @@
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
+#ifdef THREAD_SENSEMOVE_PROFILE
+    #include "Tools/Profiling/Profiler.h"
+#endif
 
 #include <string>
 #include <errno.h>
@@ -80,10 +83,8 @@ void SenseMoveThread::run()
         debug << "SenseMoveThread::run()" << endl;
     #endif
     
-    #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-        double entrytime;
-        double realstarttime, processstarttime, threadstarttime; 
-        double realendtime, processendtime, threadendtime;
+    #ifdef THREAD_SENSEMOVE_PROFILE
+        Profiler prof = Profiler("SenseMoveThread");
     #endif
     
     int err = 0;
@@ -91,36 +92,28 @@ void SenseMoveThread::run()
     {
         try 
         {
-            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-                entrytime = NUSystem::getRealTime();
-            #endif
             waitForCondition();
-
-            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-                realstarttime = NUSystem::getRealTime();
-                #ifndef TARGET_IS_NAOWEBOTS         // there is no point monitoring wait times in webots
-                if (realstarttime - entrytime > 15)
-                    debug << "SenseMoveThread. Warning. Waittime " << realstarttime - entrytime << "ms."<< endl;
-                #endif
-                processstarttime = NUSystem::getProcessTime();
-                threadstarttime = NUSystem::getThreadTime();
-            #endif
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #ifdef THREAD_SENSEMOVE_PROFILE
+                prof.start();
+            #endif
             m_nubot->SensorData = m_nubot->m_platform->sensors->update();
+            #ifdef THREAD_SENSEMOVE_PROFILE
+                prof.split("sensors");
+            #endif
             #ifdef USE_MOTION
                 m_nubot->m_motion->process(m_nubot->SensorData, m_nubot->Actions);
+                #ifdef THREAD_SENSEMOVE_PROFILE
+                    prof.split("motion");
+                #endif
             #endif
             m_nubot->m_platform->actionators->process(m_nubot->Actions);
-            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-            #ifdef THREAD_SENSEMOVE_MONITOR_TIME
-                realendtime = NUSystem::getRealTime();
-                processendtime = NUSystem::getProcessTime();
-                threadendtime = NUSystem::getThreadTime();
-                if (threadendtime - threadstarttime > 0)
-                    debug << "SenseMoveThread. Warning. Thread took a long time to complete. Time spent in this thread: " << (threadendtime - threadstarttime) << "ms, in this process: " << (processendtime - processstarttime) << "ms, in realtime: " << realendtime - realstarttime << "ms." << endl;
+            #ifdef THREAD_SENSEMOVE_PROFILE
+                prof.split("actionators");
+                debug << prof;
             #endif
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch (std::exception& e) 
         {

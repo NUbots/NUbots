@@ -35,21 +35,28 @@ LineDetection::~LineDetection(){
 return;
 }
 
-void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int image_height, int spacing, FieldObjects* AllObjects, Vision* vision, NUSensorsData* data) {
+void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data) {
+
+    //Setting up the variables:
+    int spacing = vision->getScanSpacings();
     LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
 
-    clock_t start, end;
+    int image_height = vision->getImageHeight();
+    int image_width = vision->getImageWidth();
+    sensorsData = data;
+
+    //clock_t start, end;
     //LinePointCounter = 0;
     TotalValidLines = 0;
     //FieldLinesCounter = 0;
     //CornerPointCounter = 0;
     //FIND LINE POINTS:
-    start = clock();
+    //start = clock();
 
     //update local pointer to sensors data:
-    sensorsData = data;
 
-    FindLinePoints(scanArea,vision,image_width,image_height);
+
+    //FindLinePoints(scanArea,vision);
 
 
     //qDebug() << "Robot Segments: " << robotSegments.size();
@@ -80,21 +87,21 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
     //qDebug() << "Finnished Finding Penalty Spots:";
-    FindCornerPoints(vision->getImageWidth(),vision->getImageHeight());
+    FindCornerPoints(image_width,image_height);
     //qDebug() << "Corners found: " << cornerPoints.size();
-    for (unsigned int i = 0; i < cornerPoints.size(); i ++)
-    {
-        if(cornerPoints[i].CornerType == 0) //L
-        {
+    //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
+    //{
+    //    if(cornerPoints[i].CornerType == 0) //L
+    //    {
             //qDebug() << "L Corner at " << cornerPoints[i].PosX << "," << cornerPoints[i].PosY <<
             //        "\t Orientation, Direction: " << cornerPoints[i].Orientation << "," << cornerPoints[i].Direction;
-        }
-        else
-        {
+    //    }
+    //    else
+    //    {
             //qDebug() << "T Corner at " << cornerPoints[i].PosX << "," << cornerPoints[i].PosY <<
             //        "\t Orientation, Direction: " << cornerPoints[i].Orientation << "," << cornerPoints[i].Direction;
-        }
-    }
+    //    }
+    //}
 
     //clock_t startCorner = clock();
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
@@ -103,7 +110,7 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
-    end = clock();
+    //end = clock();
 
     //debug << "Line Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     //debug << "Line Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
@@ -112,10 +119,17 @@ void LineDetection::FormLines(ClassifiedSection* scanArea,int image_width, int i
 
 }
 
-void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,int image_width, int image_height)
+void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision)
 {
+    //int image_height = vision->getImageHeight();
+    int image_width = vision->getImageWidth();
+
+    int spacing = vision->getScanSpacings();
+    LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
+
     int numberOfLines = scanArea->getNumberOfScanLines();
     int maxLengthOfScanLine = 0;
+    bool robotSegmentIsUsed;
 
 
     //! Find Length of Longest ScanLines as we want to only have longest scan lines.
@@ -130,15 +144,17 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
     TransitionSegment* previouslyCloselyScanedSegment = NULL;
     for(int i = 0; i< numberOfLines; i++)
     {
+
         int numberOfSegments = scanArea->getScanLine(i)->getNumberOfSegments();
         for(int j = 0; j < numberOfSegments ; j++)
         {
-
+            robotSegmentIsUsed = false;
             if(linePoints.size() > MAX_LINEPOINTS) break;
             //if(scanArea->getScanLine(i)->getLength() < maxLengthOfScanLine/1.5) continue;
             TransitionSegment* segment = scanArea->getScanLine(i)->getSegment(j);
             if(segment->getColour() == ClassIndex::pink || segment->getColour() == ClassIndex::shadow_blue || segment->getColour() == ClassIndex::pink_orange || segment->getColour() == ClassIndex::blue)
             {
+                robotSegmentIsUsed = true;
                 robotSegments.push_back(*segment);
             }
             if(segment->getColour() != ClassIndex::white) continue;
@@ -162,26 +178,27 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
                 int MidY = (int) (segment->getEndPoint().y+segment->getStartPoint().y)/2;
                 int LEFTX = 0;
                 int RIGHTX = 0;
-                if (MidX + VERT_POINT_THICKNESS *1.5> image_width)
+                if (MidX + VERT_POINT_THICKNESS *1.2> image_width)
                 {
                     RIGHTX  = image_width;
                 }
                 else
                 {
-                    RIGHTX  = MidX + VERT_POINT_THICKNESS *1.5;
+                    RIGHTX  = MidX + VERT_POINT_THICKNESS *1.2;
                 }
-                if (MidX - VERT_POINT_THICKNESS *1.5< 0)
+                if (MidX - VERT_POINT_THICKNESS *1.2< 0)
                 {
                     LEFTX = 0;
                 }
                 else
                 {
-                    LEFTX = MidX - VERT_POINT_THICKNESS *1.5;
+                    LEFTX = MidX - VERT_POINT_THICKNESS *1.2;
                 }
                 unsigned char LeftColour = vision->classifyPixel(LEFTX, MidY);
                 unsigned char RightColour = vision->classifyPixel(RIGHTX, MidY);
                 if(LeftColour == ClassIndex::white || RightColour  == ClassIndex::white)
                 {
+                    robotSegmentIsUsed = true;
                     robotSegments.push_back(*segment);
                 }
                 if( (LeftColour == ClassIndex::green && RightColour != ClassIndex::white)
@@ -293,7 +310,7 @@ void LineDetection::FindLinePoints(ClassifiedSection* scanArea,Vision* vision,in
 
             }
 
-            if(segmentisused == false)
+            if(segmentisused == false && robotSegmentIsUsed == false)
             {
                 robotSegments.push_back(*segment);
             }

@@ -37,6 +37,8 @@ class GoalDetection
 
         bool isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,int width);
 
+        void CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Candidates, FieldObjects* AllObjects);
+
         float FindGoalDistance(const ObjectCandidate &PossibleGoal, Vision* vision);
         float DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> &point);
 
