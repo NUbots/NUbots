@@ -140,6 +140,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
+    locwmstreamwidget.h \
     ../Vision/EllipseFitting/FittingCalculations.h
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -231,6 +232,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
+    locwmstreamwidget.cpp \
     ../Vision/EllipseFitting/FittingCalculations.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

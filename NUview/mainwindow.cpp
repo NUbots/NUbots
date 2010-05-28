@@ -74,7 +74,9 @@ MainWindow::MainWindow(QWidget *parent)
     networkTabs->addTab(walkParameter, walkParameter->objectName());
     networkTabs->addTab(kick, kick->objectName());
     VisionStreamer = new visionStreamWidget(mdiArea, this);
+    LocWmStreamer = new locwmStreamWidget(mdiArea, this);
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
+    networkTabs->addTab(LocWmStreamer, LocWmStreamer->objectName());
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
     networkTabs->addTab(cameraSetting, cameraSetting->objectName());
 
@@ -678,6 +680,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
     connect(&LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
+    connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;
