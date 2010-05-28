@@ -36,7 +36,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "debug.h"
 using namespace std;
 
 class WalkParameters
