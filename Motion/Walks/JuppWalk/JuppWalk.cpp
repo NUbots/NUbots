@@ -58,14 +58,21 @@ JuppWalk::JuppWalk()
     // Initialise the leg values
     //! @todo Get the lengths of these angles and gains from m_actions
     m_left_leg_angles = vector<float> (6, 0);
+    m_initial_lleg = m_left_leg_angles;
     m_left_leg_gains = vector<float> (6, 0);
     m_right_leg_angles = vector<float> (6, 0);
+    m_initial_rleg = m_right_leg_angles;
     m_right_leg_gains = vector<float> (6, 0);
     
     // Initialise the arm values
-    m_left_arm_angles = vector<float> (4, 0);
+    float larm[] = {0.1, 1.57, 0.15, -1.57};
+    float rarm[] = {-0.1, 1.57, 0.15, 1.57};
+    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    
+    m_left_arm_angles = m_initial_larm;
     m_left_arm_gains = vector<float> (4, 0);
-    m_right_arm_angles = vector<float> (4, 0);
+    m_right_arm_angles = m_initial_rarm;
     m_right_arm_gains = vector<float> (4, 0);
     
     m_pattern_debug.open("patternDebug.csv");
@@ -456,27 +463,14 @@ void JuppWalk::calculateGyroFeedback()
 
 void JuppWalk::updateActionatorsData()
 {
-    static bool firstrun = true;
-    static double firstruntime = m_current_time;
-    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
     static vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-    if (firstrun == true)
-    {
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, firstruntime + 3000, zeroleg, zeroleg, m_left_leg_gains);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, firstruntime + 3000, zeroleg, zeroleg, m_right_leg_gains);
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, firstruntime + 3000, zeroarm, zeroarm, m_left_arm_gains);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, firstruntime + 3000, zeroarm, zeroarm, m_right_arm_gains);
-        firstrun = false;
-    }
-    else if (m_current_time - firstruntime > 3500)
-    {
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);
-        if (m_larm_enabled)
-            m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
-        if (m_rarm_enabled)
-            m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
-    }
+    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);
+    if (m_larm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
+    if (m_rarm_enabled)
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
 }
 
 

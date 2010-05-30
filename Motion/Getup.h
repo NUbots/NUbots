@@ -27,11 +27,13 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUWalk;
+class MotionScript;
 
 class Getup
 {
 public:
-    Getup();
+    Getup(NUWalk* walk);
     ~Getup();
     
     void enable();
@@ -42,7 +44,20 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:
+    void playGetup();
+private:
+    NUWalk* m_walk;
+    NUSensorsData* m_data;
+    NUActionatorsData* m_actions;
+    
     bool m_enabled;
+    MotionScript* m_on_back;
+    MotionScript* m_on_front;
+    MotionScript* m_on_left;
+    MotionScript* m_on_right;
+
+    double m_head_completion_time;
+    double m_completion_time;
 };
 
 #endif

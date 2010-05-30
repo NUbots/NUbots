@@ -64,12 +64,15 @@ NUMotion::NUMotion()
     
     m_data = NULL;
     m_actions = NULL;
+    
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
     
     #if defined(USE_WALK)
         m_walk = NUWalk::getWalkEngine();
+        m_getup = new Getup(m_walk);
+        m_fall_protection = new FallProtection(m_walk);
         #if defined(USE_KICK)
             m_kick = new NUKick(m_walk);
         #endif
@@ -80,6 +83,8 @@ NUMotion::NUMotion()
             m_script = new Script(m_walk);
         #endif
     #else
+        m_getup = new Getup(NULL);
+        m_fall_protection = new FallProtection(NULL);
         #if defined(USE_KICK)
             m_kick = new NUKick(NULL);
         #endif
@@ -225,11 +230,11 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (m_fall_protection->enabled() and m_data->isFalling())
     {   // if falling no other motion module can run
-        m_fall_protection->process(data, actions);
+        //m_fall_protection->process(data, actions);
     }
     else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
     {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
-        m_getup->process(data, actions);
+        //m_getup->process(data, actions);
         if (not m_getup->isUsingHead())
         {
             #ifdef USE_HEAD

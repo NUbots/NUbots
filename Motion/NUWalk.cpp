@@ -218,8 +218,6 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     else if (trans_speed > 1)
         trans_speed = 1;
     
-    cout << "NUWalk::setTargetSpeed: t:" << trans_speed << " d:" << trans_direction << " y:" << rot_speed << endl;
-    
     // clip the rotation first
     if (fabs(rot_speed) > maxspeeds[2])
         rot_speed = sign(rot_speed)*maxspeeds[2];
@@ -232,8 +230,6 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
         trans_speed = trans_speed*(1 + ((min_trans - 1)/(1 - clip_threshold))*(rot_frac - clip_threshold));
     }
     
-    cout << "NUWalk::setTargetSpeed: after rotation clip t:" << trans_speed << endl;
-    
     float x = trans_speed*maxspeeds[0]*cos(trans_direction);               // compute desired x
     float y = trans_speed*maxspeeds[0]*sin(trans_direction);               // compute desired y
     
@@ -242,8 +238,6 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
         y = sign(y)*maxspeeds[1];
         x = y*tan(trans_direction);
     }
-    
-    cout << "NUWalk::setTargetSpeed: x:" << x << " y:" << y << " yaw:" << rot_speed << endl;
     
     m_target_speed_x = x;
     m_target_speed_y = y;
