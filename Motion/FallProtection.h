@@ -36,11 +36,12 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUWalk;
 
 class FallProtection
 {
 public:
-    FallProtection();
+    FallProtection(NUWalk* walk);
     ~FallProtection();
     
     bool enabled();
@@ -49,6 +50,7 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:
+    NUWalk* m_walk;
     bool m_enabled;
 };
 

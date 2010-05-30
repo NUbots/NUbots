@@ -20,28 +20,43 @@
  */
 
 #include "Getup.h"
+#include "NUWalk.h"
+#include "Tools/MotionScript.h"
+
 #include "motionconfig.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
 /*! @brief Constructor for Getup module
  */
-Getup::Getup()
+Getup::Getup(NUWalk* walk)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "Getup::Getup()" << endl;
     #endif
+    m_walk = walk;
+    m_data = NULL;
+    m_actions = NULL;
+    
     #ifdef USE_GETUP
         m_enabled = true;
     #else
         m_enabled = false;
     #endif
+    m_completion_time = 0;
+    m_head_completion_time = 0;
+    m_on_back = new MotionScript("StandUpBack");
+    m_on_front = new MotionScript("StandUpFront");
 }
 
 /*! @brief Destructor for FallProtection module
  */
 Getup::~Getup()
 {
+    delete m_on_back;
+    delete m_on_front;
+    delete m_on_left;
+    delete m_on_right;
 }
 
 /*! @brief Enable the getup */
@@ -71,8 +86,10 @@ bool Getup::enabled()
 /*! @brief Returns true if the getup is executing, false otherwise */
 bool Getup::isActive()
 {
-    if (not m_enabled)
+    if (not m_enabled or m_data == NULL)
         return false;
+    else if (m_data->CurrentTime <= m_completion_time)
+        return true;
     else
         return false;
 }
@@ -82,8 +99,10 @@ bool Getup::isUsingHead()
 {
     if (not isActive())
         return false;
-    else
+    else if (m_data->CurrentTime <= m_head_completion_time)
         return true;
+    else
+        return false;
 }
 
 /*! @brief Produce actions from the data to move the robot into a standing position
@@ -96,9 +115,37 @@ void Getup::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (data == NULL || actions == NULL)
         return;
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "Getup::process()" << endl;
-#endif
+    m_data = data;
+    m_actions = actions;
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "Getup::process()" << endl;
+    #endif
+    if (not isActive())
+        playGetup();
+}
+
+void Getup::playGetup()
+{
+    if (m_walk)
+        m_walk->kill();
+    
+    vector<float> fallen;
+    if (m_data->getFallen(fallen))
+    {
+        MotionScript* getup;
+        if (fallen[1])
+            getup = m_on_left;
+        else if (fallen[2])
+            getup = m_on_right;
+        else if (fallen[3])
+            getup = m_on_front;
+        else if (fallen[4])
+            getup = m_on_back;
+        getup->play(m_data, m_actions);
+        m_completion_time = getup->timeFinished();
+        m_head_completion_time = getup->timeFinishedWithHead();
+    }
 }
 
 

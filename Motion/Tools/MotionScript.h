@@ -55,6 +55,7 @@ public:
     
     string& getName();
     
+    double timeFinished();
     bool usesHead();
     double timeFinishedWithHead();
     bool usesLArm();
@@ -84,6 +85,7 @@ protected:
     bool m_is_valid;                    //!< true if the motion script file was loaded without error
     
     bool m_uses_set;                    //!< true if the m_uses_* have been set
+    double m_uses_last;                 //!< the time in ms from the begining of the script that the script stops using all joints
     bool m_uses_head;                   //!< true if the script uses any of the head joints
     double m_uses_last_head;            //!< the time in ms from the begining of the script that the script uses the head
     bool m_uses_larm;                   //!< true if the script uses any of the left arm joints
