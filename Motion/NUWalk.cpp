@@ -171,11 +171,13 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUWalk::process(WalkJob* job)
 {
-    vector<float> speed;
-    job->getSpeed(speed);
-    if (not m_walk_enabled and not allZeros(speed))
+    float t,d,y;
+    t = job->getTranslationSpeed();
+    d = job->getDirection();
+    y = job->getRotationSpeed();
+    if (not m_walk_enabled and (t != 0 or y != 0))
         enableWalk();
-    setTargetSpeed(speed);
+    setTargetSpeed(t, d, y);
 }
 
 /*! @brief Process a walk to point job
@@ -201,37 +203,51 @@ void NUWalk::process(WalkParametersJob* job)
     setWalkParameters(parameters);
 }
 
-/*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw. The given speeds will be clipped if they are faster than the maximum possible speeds
-    @param speed the desired speeds (x,y,theta)
+/*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw.
+    @param trans_speed the translation speed factor
+    @param trans_direction the translation direction in rad
+    @param rot_speed the rotation speed in radians per second
  */
-void NUWalk::setTargetSpeed(const vector<float>& speed)
+void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_speed)
 {
-    float x = 0;
-    float y = 0;
-    float yaw = 0;
-    vector<float> maxspeeds = m_walk_parameters.getMaxSpeeds();
+    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
-    if (speed.size() > 0)
-    {
-        x = speed[0];
-        if (maxspeeds.size() > 0 && fabs(x) > fabs(maxspeeds[0]))      // if clipping is available, and the input is greater than the limit, then clip it
-            x = sign(x)*maxspeeds[0];
+    // clip translational speed to be a fraction
+    if (trans_speed < -1)
+        trans_speed = -1;
+    else if (trans_speed > 1)
+        trans_speed = 1;
+    
+    cout << "NUWalk::setTargetSpeed: t:" << trans_speed << " d:" << trans_direction << " y:" << rot_speed << endl;
+    
+    // clip the rotation first
+    if (fabs(rot_speed) > maxspeeds[2])
+        rot_speed = sign(rot_speed)*maxspeeds[2];
+    
+    float rot_frac = fabs(rot_speed)/maxspeeds[2];
+    const float clip_threshold = 0.25;
+    const float min_trans = 0.1;
+    if (rot_frac > clip_threshold)
+    {   // if the rotation speed is high then clip the trans_speed
+        trans_speed = trans_speed*(1 + ((min_trans - 1)/(1 - clip_threshold))*(rot_frac - clip_threshold));
     }
-    if (speed.size() > 1)
-    {
-        y = speed[1];
-        if (maxspeeds.size() > 1 && fabs(y) > fabs(maxspeeds[1]))      // if clipping is available, and the input is greater than the limit, then clip it
-            y = sign(y)*maxspeeds[1];
+    
+    cout << "NUWalk::setTargetSpeed: after rotation clip t:" << trans_speed << endl;
+    
+    float x = trans_speed*maxspeeds[0]*cos(trans_direction);               // compute desired x
+    float y = trans_speed*maxspeeds[0]*sin(trans_direction);               // compute desired y
+    
+    if (fabs(y) > maxspeeds[1])
+    {   // we assume the sidewards direction is always the slowest, if it needs clipping, clip the x to achieve the desired direction
+        y = sign(y)*maxspeeds[1];
+        x = y*tan(trans_direction);
     }
-    if (speed.size() > 2)
-    {
-        yaw = speed[2];
-        if (maxspeeds.size() > 2 && fabs(yaw) > fabs(maxspeeds[2]))    // if clipping is available, and the input is greater than the limit, then clip it
-            yaw = sign(yaw)*maxspeeds[2];
-    }
+    
+    cout << "NUWalk::setTargetSpeed: x:" << x << " y:" << y << " yaw:" << rot_speed << endl;
+    
     m_target_speed_x = x;
     m_target_speed_y = y;
-    m_target_speed_yaw = yaw;
+    m_target_speed_yaw = rot_speed;
 }
 
 /*! @brief Sets m_speed_x, m_speed_y and m_speed_yaw; they are smoothed to satisify acceleration constraints
@@ -258,7 +274,7 @@ void NUWalk::calculateCurrentSpeed()
     }
     
     // clip the accelerations to the max values (if the max values exist)
-    vector<float> maxaccels = m_walk_parameters.getMaxAccelerations();
+    vector<float>& maxaccels = m_walk_parameters.getMaxAccelerations();
     if (maxaccels.size() > 0 && fabs(x) > fabs(maxaccels[0]))      // if clipping is available, and the input is greater than the limit, then clip it
         x = sign(x)*maxaccels[0];
     

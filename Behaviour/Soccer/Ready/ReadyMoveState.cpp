@@ -57,11 +57,7 @@ void ReadyMoveState::doState()
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
     
     vector<float> result = m_field_objects->self.CalculateDifferenceFromFieldState(vector<float>(3,0));
-    float speed = 0.5*result[0];
-    float x = (speed/5)*cos(result[1]);
-    float y = speed*sin(result[1]);
-    float yaw = result[2]/4.0;
     
-    m_jobs->addMotionJob(new WalkJob(x,y,yaw));
+    m_jobs->addMotionJob(new WalkJob(0.5*result[0], result[1], result[2]/2.0));
 }
 

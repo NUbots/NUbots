@@ -37,8 +37,9 @@ public:
     WalkJob(istream& input);
     ~WalkJob();
     
-    void setSpeed(const vector<float>& newspeed);
-    void getSpeed(vector<float>& speed);
+    float getTranslationSpeed();
+    float getDirection();
+    float getRotationSpeed();
     
     virtual void summaryTo(ostream& output);
     virtual void csvTo(ostream& output);
@@ -48,7 +49,9 @@ public:
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    vector<float> m_walk_speed;                 //!< the walk speed x (cm/s), y (cm/s) and theta (rad/s)
+    float m_translation_speed;          //!< the translational speed between 0 and 1
+    float m_direction;                  //!< the translational direction of the walk    
+    float m_rotation_speed;             //!< the rotational speed in rad/s
 };
 
 #endif

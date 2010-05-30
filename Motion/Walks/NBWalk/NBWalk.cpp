@@ -86,7 +86,7 @@ void NBWalk::sendWalkCommand()
 {
     static WalkCommand* command = new WalkCommand(0, 0, 0);
     command->x_mms = m_speed_x*10;
-    command->y_mms = m_speed_y*10;
+    command->y_mms = m_speed_y*20;
     command->theta_rads = m_speed_yaw*2;
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
@@ -210,8 +210,8 @@ void NBWalk::setGait()
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];
     m_gait->step[5] = -10*maxspeeds[0];
-    m_gait->step[6] = 10*maxspeeds[1];
-    m_gait->step[7] = maxspeeds[2];
+    m_gait->step[6] = 20*maxspeeds[1];
+    m_gait->step[7] = 2*maxspeeds[2];
     
     vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
     m_gait->step[8] = 10*maxaccelerations[0];

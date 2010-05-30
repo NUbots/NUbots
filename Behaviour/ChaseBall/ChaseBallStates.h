@@ -97,18 +97,15 @@ public:
                 balldistance = sqrt(pow(measureddistance,2) - 46*46);
             float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
-            vector<float> walkVector(3, 0);
+            float trans_speed = 1;
+            float trans_direction = ballbearing;
+            float yaw = ballbearing/2;
             
-            walkVector[0] = 10*cos(ballbearing);
-            walkVector[1] = 2*sin(ballbearing);
-            walkVector[2] = ballbearing/2.0;
-            
-            vector<float> temp;
-            float leftobstacle = 255;
-            float rightobstacle = 255;
-            
-            if (balldistance > 15)
+            if (true or balldistance > 15)
             {
+                vector<float> temp;
+                float leftobstacle = 255;
+                float rightobstacle = 255;
                 if (m_data->getDistanceLeftValues(temp))
                     leftobstacle = temp[0];
                 if (m_data->getDistanceRightValues(temp))
@@ -116,19 +113,26 @@ public:
                 
                 if (leftobstacle < 50)
                 {
-                    walkVector[0] = walkVector[0] + 0.5*(leftobstacle - 50);
-                    walkVector[1] = -2;
-                    walkVector[2] = walkVector[2] - 0.015*(leftobstacle - 50);
+                    trans_speed = trans_speed + 0.01*(leftobstacle - 50);
+                    if (trans_speed > 0)
+                        trans_direction = trans_direction - atan2(20, leftobstacle);
+                    else
+                        trans_direction = trans_direction + atan2(20, leftobstacle);
+
+                    yaw = yaw - 0.015*(leftobstacle - 50);
                 }
                 else if (rightobstacle < 50)
                 {
-                    walkVector[0] = walkVector[0] + 0.5*(rightobstacle - 50);
-                    walkVector[1] = 2;
-                    walkVector[2] = walkVector[2] + 0.015*(rightobstacle - 50);
+                    trans_speed = trans_speed + 0.01*(rightobstacle - 50);
+                    if (trans_speed > 0)
+                        trans_direction = trans_direction + atan2(20, leftobstacle);
+                    else
+                        trans_direction = trans_direction - atan2(20, leftobstacle);
+                    yaw = yaw + 0.015*(rightobstacle - 50);
                 }
             }
             
-            WalkJob* walk = new WalkJob(walkVector);
+            WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
             m_provider->m_jobs->addMotionJob(walk);
             
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
@@ -201,7 +205,7 @@ public:
                 walkVector[2] = walkVector[2] - 0.015*(rightobstacle - 50);
             }
             
-            WalkJob* walk = new WalkJob(walkVector);
+            WalkJob* walk = new WalkJob(0.5*(balldistance - 100), ballbearing, ballbearing/2.0);
             m_provider->m_jobs->addMotionJob(walk);
             
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);

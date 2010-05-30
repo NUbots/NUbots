@@ -58,7 +58,7 @@ BlockJob::BlockJob(double time, istream& input) : MotionJob(Job::MOTION_BLOCK)
     }
 }
 
-/*! @brief WalkJob destructor
+/*! @brief BlockJob destructor
  */
 BlockJob::~BlockJob()
 {

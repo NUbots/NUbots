@@ -24,28 +24,16 @@
 #include "debugverbosityjobs.h"
 
 /*! @brief Constructs a WalkJob
-    @param x the x speed in cm/s
-    @param y the y speed in cm/s
-    @param yaw the yaw speed in cm/s
+    @param trans_speed the translational fraction
+    @param trans_direction the translational direction in radians
+    @param rot_speed the rotational speed in rad/s
 */
-WalkJob::WalkJob(float x, float y, float yaw) : MotionJob(Job::MOTION_WALK)
+WalkJob::WalkJob(float trans_speed, float trans_direction, float rot_speed) : MotionJob(Job::MOTION_WALK)
 {
     m_job_time = 0;
-    vector<float> speed(3,0);
-    speed[0] = x;
-    speed[1] = y;
-    speed[2] = yaw;
-    m_walk_speed = speed;
-}
-
-/*! @brief Constructs a WalkJob
-
-    @param speed the speed for the walk job [x (cm/s), y (cm/s), theta (rad/s)]
- */
-WalkJob::WalkJob(const vector<float>& speed) : MotionJob(Job::MOTION_WALK)
-{
-    m_walk_speed = speed;
-    m_job_time = 0;         // we always want the walk speed to change *now*
+    m_translation_speed = trans_speed;
+    m_direction = trans_direction;
+    m_rotation_speed = rot_speed;
 }
 
 /*! @brief Constructs a WalkJob from stream data
@@ -54,48 +42,43 @@ WalkJob::WalkJob(const vector<float>& speed) : MotionJob(Job::MOTION_WALK)
 WalkJob::WalkJob(istream& input) : MotionJob(Job::MOTION_WALK)
 {
     m_job_time = 0;
-    // Temporary read buffers
-    unsigned int uintBuffer;
     float floatBuffer;
-
-    // read in the head_position size
-    input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
-    unsigned int m_walk_speed_size = uintBuffer;
-    
-    // read in the head_position vector
-    m_walk_speed = vector<float>(m_walk_speed_size, 0);
-    for (unsigned int i=0; i<m_walk_speed_size; i++)
-    {
-        input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
-        m_walk_speed[i] = floatBuffer;
-    }
+    input.read(reinterpret_cast<char*> (&floatBuffer), sizeof(floatBuffer));
+    m_translation_speed = floatBuffer;
+    input.read(reinterpret_cast<char*> (&floatBuffer), sizeof(floatBuffer));
+    m_direction = floatBuffer;
+    input.read(reinterpret_cast<char*> (&floatBuffer), sizeof(floatBuffer));
+    m_rotation_speed = floatBuffer;
 }
 
 /*! @brief WalkJob destructor
  */
 WalkJob::~WalkJob()
 {
-    m_walk_speed.clear();
 }
 
-/*! @brief Sets the speed of the walk job.
- 
-    You should only need to use this function if you are recycling the one job 
-    (ie. I provide this function if you are worried about creating a new job every time)
-    
-    @param newspeed the new speed for the walk job
+/*! @brief Returns the translation speed fraction (-1 to 1)
+    @return the fraction of maximum translation speed
  */
-void WalkJob::setSpeed(const vector<float>& newspeed)
+float WalkJob::getTranslationSpeed()
 {
-    m_walk_speed = newspeed;
+    return m_translation_speed;
 }
 
-/*! @brief Gets the speed of the walk job
-    @param speed parameter that will be updated with the walk speed
+/*! @brief Returns the translation direction of the walk job
+    @return the direction in radians
  */
-void WalkJob::getSpeed(vector<float>& speed)
+float WalkJob::getDirection()
 {
-    speed = m_walk_speed;
+    return m_direction;
+}
+
+/*! @brief Returns the rotation speed of the walk job
+    @return the rotational speed in radians per second
+ */
+float WalkJob::getRotationSpeed()
+{
+    return m_rotation_speed;
 }
 
 /*! @brief Prints a human-readable summary to the stream
@@ -103,10 +86,7 @@ void WalkJob::getSpeed(vector<float>& speed)
  */
 void WalkJob::summaryTo(ostream& output)
 {
-    output << "WalkJob: " << m_job_time << " ";
-    for (unsigned int i=0; i<m_walk_speed.size(); i++)
-        output << m_walk_speed[i] << ",";
-    output << endl;
+    output << "WalkJob: " << m_job_time << " " << m_translation_speed << " " << m_direction << " " << m_rotation_speed << endl;
 }
 
 /*! @brief Prints a csv version to the stream
@@ -114,10 +94,7 @@ void WalkJob::summaryTo(ostream& output)
  */
 void WalkJob::csvTo(ostream& output)
 {
-    output << "WalkJob, " << m_job_time << ", ";
-    for (unsigned int i=0; i<m_walk_speed.size(); i++)
-        output << m_walk_speed[i] << ", ";
-    output << endl;
+    output << "WalkJob: " << m_job_time << ", " << m_translation_speed << ", " << m_direction << ", " << m_rotation_speed << endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -134,11 +111,10 @@ void WalkJob::toStream(ostream& output) const
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
-                                            // Then we write WalkJob specific data
-    unsigned int m_walk_speed_size = m_walk_speed.size();
-    output.write((char*) &m_walk_speed_size, sizeof(m_walk_speed_size));
-    for (unsigned int i=0; i<m_walk_speed_size; i++)
-        output.write((char*) &m_walk_speed[i], sizeof(m_walk_speed[i]));
+    // Then we write WalkJob specific data
+    output.write((char*) &m_translation_speed, sizeof(m_translation_speed));
+    output.write((char*) &m_direction, sizeof(m_direction));
+    output.write((char*) &m_rotation_speed, sizeof(m_rotation_speed));
 }
 
 /*! @relates WalkJob

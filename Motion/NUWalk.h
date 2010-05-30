@@ -60,7 +60,7 @@ protected:
     bool inInitialPosition();
     void moveToInitialPosition();
 
-    void setTargetSpeed(const vector<float>& speed);
+    void setTargetSpeed(float trans_speed, float trans_direction, float rot_speed);
     void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
 
