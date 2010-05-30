@@ -45,7 +45,6 @@ public:
     
     bool longChestClick();
     bool singleChestClick();
-    bool doubleChestClick();
     
     bool longLeftBumperClick();
     bool singleLeftBumperClick();
@@ -63,6 +62,7 @@ protected:
     virtual void doBehaviour() = 0;
     virtual void postProcess();
 private:
+    bool doubleChestClick();
     bool tripleChestClick();
     void removeStiffness();
     bool quadChestClick();
@@ -84,6 +84,7 @@ protected:
     TeamInformation* m_team_info;           //!< a local copy of the pointer to the public TeamInfo
 
 private:
+    bool m_saving_images;
     // Private variables for button click detection
     float m_chest_state;
     float m_chest_previous_state;

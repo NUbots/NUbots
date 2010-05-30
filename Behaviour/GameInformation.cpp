@@ -16,9 +16,12 @@ GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData
     m_team_number = teamNumber;
     m_state = InitialState;
     
+    // Initialise the game controller packet (this will only be used if no game control packet is actually received)
     m_currentControlData = new RoboCupGameControlData();
+    m_currentControlData->teams[TEAM_BLUE].teamNumber = m_team_number;
     m_last_packet_time = 0;
     
+    // Initialise the game controller return packet (this tells the game controller of manual penalties)
     m_currentReturnData = new RoboCupGameControlReturnData();
     memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, sizeof(m_currentReturnData->header));
     m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
@@ -61,7 +64,7 @@ GameInformation::RobotState GameInformation::getCurrentState() const
 bool GameInformation::gameControllerWorking() const
 {
     if (m_data)
-        return (m_data->CurrentTime - m_last_packet_time) > 10000;
+        return (m_data->CurrentTime - m_last_packet_time) < 10000;
     else
         return (memcmp(m_currentControlData->header, GAMECONTROLLER_STRUCT_HEADER, sizeof(m_currentControlData->header)) == 0);
 }

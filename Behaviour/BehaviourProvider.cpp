@@ -28,6 +28,7 @@
 
 #include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
 #include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -38,6 +39,7 @@ BehaviourProvider::BehaviourProvider(Behaviour* manager)
 {
     m_manager = manager;
     
+    m_saving_images = false;
     // Initialise the private variables for button press detection
     m_chest_state = 0;
     m_chest_previous_state = 0;
@@ -166,9 +168,18 @@ void BehaviourProvider::updateButtonValues()
         }
     }
     
+    // A double chest click always starts saving images not matter which behaviour
+    if (doubleChestClick())
+    {
+        m_saving_images = not m_saving_images;
+        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, false));
+    }
+    
+    // A triple chest click always removes the stiffness
     if (tripleChestClick())
         removeStiffness();
     
+    // A quad chect click always restarts behaviour
     if (quadChestClick())
         restartBehaviour();
 }
@@ -177,9 +188,7 @@ void BehaviourProvider::updateButtonValues()
  */
 void BehaviourProvider::removeStiffness()
 {
-    vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::AllJoints), 0);
-    m_jobs->addMotionJob(new MotionFreezeJob());
-    m_actions->addJointPositions(NUActionatorsData::AllJoints, m_current_time, zero, zero, 0);
+    m_jobs->addMotionJob(new MotionKillJob());
     m_actions->addSound(m_current_time, "remove_stiffness.wav");
 }
 
