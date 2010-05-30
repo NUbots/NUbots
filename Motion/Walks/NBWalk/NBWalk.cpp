@@ -47,8 +47,8 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);
     
-    float larm[] = {0.23, 1.55, 0, 0};
-    float rarm[] = {-0.23, 1.55, 0, 0};
+    float larm[] = {0.1, 1.57, 0.15, -1.57};
+    float rarm[] = {-0.1, 1.57, 0.15, 1.57};
     m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
     m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
     
@@ -57,8 +57,9 @@ NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own wa
     m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
+    m_walk_parameters.load("NBWalkDefault");
     m_gait = boost::shared_ptr<Gait>(new Gait(DEFAULT_GAIT));
-    walkProvider.setCommand(m_gait);
+    setGait();
 }
 
 /*! @brief Destructor for walk module
@@ -182,6 +183,42 @@ void NBWalk::updateNBSensors()
                                           gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY));
     
     nb_sensors->setMotionBodyAngles(nb_sensors->getBodyAngles());
+}
+
+void NBWalk::setWalkParameters(const WalkParameters& walkparameters)
+{
+    NUWalk::setWalkParameters(walkparameters);
+    setGait();
+}
+
+void NBWalk::setGait()
+{
+    // copy the parameters from m_walk_parameters into m_gait
+    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    m_gait->step[0] = 1/parameters[0].Value;        // step frequency
+    m_gait->step[2] = 10*parameters[1].Value;       // step height
+    m_gait->zmp[1] = parameters[2].Value;           // zmp static fraction
+    m_gait->zmp[2] = 10*parameters[3].Value;        // zmp offset
+    m_gait->zmp[3] = 10*parameters[3].Value;        // zmp offset
+    m_gait->step[1] = parameters[4].Value;          // double support time
+    m_gait->hack[0] = parameters[5].Value;          // hip roll hack
+    m_gait->hack[1] = parameters[5].Value;          // hip roll hack
+    m_gait->step[3] = parameters[6].Value;          // foot lift angle
+    m_gait->stance[3] = parameters[7].Value;        // forward lean
+    m_gait->stance[0] = 10*parameters[8].Value;     // torso height
+    
+    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    m_gait->step[4] = 10*maxspeeds[0];
+    m_gait->step[5] = -10*maxspeeds[0];
+    m_gait->step[6] = 10*maxspeeds[1];
+    m_gait->step[7] = maxspeeds[2];
+    
+    vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
+    m_gait->step[8] = 10*maxaccelerations[0];
+    m_gait->step[9] = 10*maxaccelerations[1];
+    m_gait->step[10] = maxaccelerations[2];
+    
+    walkProvider.setCommand(m_gait);
 }
 
 void NBWalk::nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints)

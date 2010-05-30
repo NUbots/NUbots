@@ -47,7 +47,7 @@ public:
     void process(WalkToPointJob* job);
     void process(WalkParametersJob* job);
     
-    void setWalkParameters(const WalkParameters& walkparameters);
+    virtual void setWalkParameters(const WalkParameters& walkparameters);
     WalkParameters& getWalkParameters();
     
     virtual void setArmEnabled(bool leftarm, bool rightarm);

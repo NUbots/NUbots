@@ -37,9 +37,9 @@ enum SupportMode{
 };
 
 static const float LARM_WALK_ANGLES[Kinematics::ARM_JOINTS] =
-{M_PI_FLOAT/2.0f ,.26f,0.0f,0.0f};
+{M_PI_FLOAT/2.0f, .15f, -M_PI_FLOAT/2.0f, 0.2f};
 static const float RARM_WALK_ANGLES[Kinematics::ARM_JOINTS] =
-{M_PI_FLOAT/2.0f,-.26f,0.0f,0.0f};
+{M_PI_FLOAT/2.0f, -.15f, M_PI_FLOAT/2.0f, 0.2f};
 
 
 //Sensitivity to new walk vectors -- currently 0, giving maximum sensitivity
