@@ -65,8 +65,8 @@ NUIO::NUIO(NUbot* nubot)
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
-    #endif
         m_localisation_port = new TcpPort(LOCWM_PORT);
+    #endif
 }
 
 /*! @brief Create a new NUIO interface to network and log files. Use this version in NUview
@@ -92,6 +92,7 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
+        m_localisation_port = new TcpPort(LOCWM_PORT);
     #endif
 }
 
@@ -170,13 +171,15 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
 	   
             io.m_vision_port->sendData(*(p_nubot.Image), *(p_nubot.SensorData));
         }
-
-    #endif
-        network_data_t locnetdata = io.m_localisation_port->receiveData();
-        if(locnetdata.size > 0)
+        if(io.m_localisation_port)
         {
-            io.m_localisation_port->sendData(*(p_nubot.GetLocWm()));
+            network_data_t locnetdata = io.m_localisation_port->receiveData();
+            if(locnetdata.size > 0)
+            {
+                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()));
+            }
         }
+    #endif
     return io;
 }
 
