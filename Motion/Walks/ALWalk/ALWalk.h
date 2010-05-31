@@ -38,6 +38,9 @@ class ALWalk : public NUWalk
 public:
     ALWalk();
     ~ALWalk();
+    
+    void setWalkParameters(const WalkParameters& walkparameters);
+    
     void freeze();
     void kill();
     void enableWalk();
