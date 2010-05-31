@@ -146,7 +146,11 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_LOCALISATION
-        m_localisation = new Localisation();
+        #if defined(TARGET_IS_NAOWEBOTS)
+            m_localisation = new Localisation(m_platform->getPlayerNumber());
+        #else
+            m_localisation = new Localisation();
+        #endif // defined(TARGET_IS_NAOWEBOTS)
         m_localisation->doPlayerReset();
     #endif
     

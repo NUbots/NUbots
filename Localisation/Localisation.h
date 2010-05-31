@@ -25,7 +25,7 @@ class NUSensorsData;
 class Localisation: public TimestampedData
 {
 	public:
-        Localisation();
+        Localisation(int playerNumber = 0);
         ~Localisation();
     
         void process(NUSensorsData* data, FieldObjects* objects, GameInformation* gameInfo);
@@ -93,7 +93,7 @@ class Localisation: public TimestampedData
         FieldObjects *objects;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
-        fstream debug_file; // Logging file
+        ofstream debug_file; // Logging file
         #endif // LOCWM_VERBOSITY > 0
 
         double m_timestamp;

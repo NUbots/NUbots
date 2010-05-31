@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include "nubotdataconfig.h"
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -40,7 +42,7 @@ const float Localisation::R_obj_range_relative = 0.02f; // 10% of range added. (
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
-Localisation::Localisation(): m_timestamp(0)
+Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
     doPlayerReset();
 
@@ -51,13 +53,14 @@ Localisation::Localisation(): m_timestamp(0)
     feedbackPosition[2] = 0;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    #ifdef WIN32
-    debug_file.open("Localisation.log", ios::out | ios::trunc);
-    #else
-    debug_file.open("/var/volatile/Localisation.log", ios::out | ios::trunc);
-    #endif // WIN32
+        std::stringstream debugLogName;
+        debugLogName << DATA_DIR;
+        if(playerNumber) debugLogName << playerNumber;
+        debugLogName << "Localisation.log";
+        debug_file.open(debugLogName.str().c_str());
+        debug_file.clear();
+        debug_file << "Localisation" << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-
     return;
 }
 
