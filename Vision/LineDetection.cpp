@@ -1702,7 +1702,11 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
     bool isOK = sensorsData->getCameraToGroundTransform(camera2groundTransform);
     if(isOK == true)
     {
-        *distance = kin->DistanceToPoint(camera2groundTransform, *bearing, *elevation);
+        Vector3<float> result;
+        result = kin->DistanceToPoint(camera2groundTransform, *bearing, *elevation);
+        *distance = result[0];
+        *bearing = result[1];
+        *elevation = result[2];
 
         #if DEBUG_VISION_VERBOSITY > 6
             debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
