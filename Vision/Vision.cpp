@@ -696,7 +696,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
             {
                 consecutiveGreenPixels = 0;
             }
-            if(consecutiveGreenPixels >= 6)
+            if(consecutiveGreenPixels >= 10)
             {
                 results.push_back(Vector2<int>(x,y-consecutiveGreenPixels+1));
                 break;
@@ -1129,7 +1129,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     if((direction == ScanLine::DOWN || direction == ScanLine::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 2;
+        int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -1154,7 +1154,8 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             {
                 colourBuff.push_back(tempTransition->getColour());
             }
-            while(checkIfBufferSame(colourBuff))
+            //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempsubPoint+skipPixel > width)
                 {
@@ -1162,7 +1163,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
 
                 tempsubPoint = tempsubPoint+skipPixel;
-
+                //qDebug() << "Checking Point: " << tempsubPoint << StartPoint.y+k;
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
                 {
@@ -1176,7 +1177,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
 
-            tempSubEndPoint.x = tempsubPoint;
+            tempSubEndPoint.x = tempsubPoint - bufferSize*skipPixel;
             subAfterColour = tempColour;
             tempsubPoint = StartPoint.x;
             tempColour = tempTransition->getColour();
@@ -1185,10 +1186,16 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             {
                 colourBuff.push_back(tempTransition->getColour());
             }
-            while(checkIfBufferSame(colourBuff))
+            //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
-                if(tempsubPoint-skipPixel < 0) break;
+                if(tempsubPoint-skipPixel < 0)
+                {
+                    //tempSubStartPoint.x = 0;
+                    break;
+                }
                 tempsubPoint = tempsubPoint - skipPixel;
+                //qDebug() << "Checking Point: " << tempsubPoint << StartPoint.y+k;
                 if(StartPoint.y+k < height && StartPoint.y+k > 0
                    && tempsubPoint < width && tempsubPoint > 0)
                 {
@@ -1197,13 +1204,14 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
                 else
                 {
+                    //tempSubStartPoint.x = = tempsubPoint + bufferSize;
                     break;
                 }
             }
-            tempSubStartPoint.x = tempsubPoint;
+            tempSubStartPoint.x = tempsubPoint + bufferSize*skipPixel;
             subBeforeColour = tempColour;
             //THEN ADD TO LINE
-
+            //qDebug() << "Adding Line: " << tempSubStartPoint.x << tempSubStartPoint.y << tempSubEndPoint.x << tempSubEndPoint.y;
             TransitionSegment tempTransitionA(tempSubStartPoint, tempSubEndPoint, subBeforeColour , tempTransition->getColour(), subAfterColour);
             if(tempTransitionA.getSize() >1)
             {
@@ -1238,7 +1246,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //Search for End of Perpendicular Segment
-            while(checkIfBufferSame(colourBuff))
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempY+1 > height) break;
                 tempY++;
@@ -1255,7 +1263,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
 
-            tempSubEndPoint.y = tempY;
+            tempSubEndPoint.y = tempY - bufferSize*skipPixel;
             subAfterColour = tempColour;
             tempY = StartPoint.y;
             tempColour = tempTransition->getColour();
@@ -1266,7 +1274,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
 
             //Search for Start of Perpendicular Segment
-            while(checkIfBufferSame(colourBuff))
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempY-1 < 0)
                 {
@@ -1285,7 +1293,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                     break;
                 }
             }
-            tempSubStartPoint.y = tempY;
+            tempSubStartPoint.y = tempY + bufferSize*skipPixel;
             subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
@@ -1297,6 +1305,18 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
         }
     }
+}
+
+bool Vision::checkIfBufferContains(boost::circular_buffer<unsigned char> cb, unsigned char colour)
+{
+    for(unsigned int i = 0; i < cb.size(); i++)
+    {
+        if(cb[i] == colour)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<ObjectCandidate> Vision::classifyCandidates(
@@ -1887,7 +1907,8 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         Vector2<int> viewPosition;
         Vector2<int> sizeOnScreen;
         Vector3<float> sphericalError;
-        Vector3<float> sphericalPosition;
+        Vector3<float> visualSphericalPosition;
+        Vector3<float> transformedSphericalPosition;
         viewPosition.x = (int)round(ball.centreX);
         viewPosition.y = (int)round(ball.centreY);
         double ballDistanceFactor=EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()*ORANGE_BALL_DIAMETER;
@@ -1895,13 +1916,21 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         float distance = (float)(ballDistanceFactor/(2*ball.radius)+BALL_OFFSET);
         float bearing = (float)CalculateBearing(viewPosition.x);
         float elevation = (float)CalculateElevation(viewPosition.y);
-        sphericalPosition[0] = distance;
-        sphericalPosition[1] = bearing;
-        sphericalPosition[2] = elevation;
+        visualSphericalPosition[0] = distance;
+        visualSphericalPosition[1] = bearing;
+        visualSphericalPosition[2] = elevation;
+        Matrix cameraTransform;
+        bool isOK = getSensorsData()->getCameraTransform(cameraTransform);
+        if(isOK == true)
+        {
+            transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
+
+        }
+
         sizeOnScreen.x = int(ball.radius*2);
         sizeOnScreen.y = int(ball.radius*2);
 
-        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,
+        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(transformedSphericalPosition,
                                                                                       sphericalError,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,
@@ -1930,8 +1959,6 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
 
 void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 {
-    Kinematics kin;
-
     for(unsigned int i = 0; i < RobotCandidates.size(); i++)
     {
         std::vector <TransitionSegment > segments = RobotCandidates[i].getSegments();
@@ -1972,16 +1999,17 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             //qDebug() << i <<": Blue Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            Vector3<float> measured(distance,bearing,elevation);
             if(isOK == true)
             {
-                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
                     debug << "\t\tCalculated Distance to Point: " << distance<<endl;
                 #endif
             }
             //qDebug() << i <<": Blue Robot: get things in order";
-            Vector3<float> measured(distance,bearing,elevation);
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
@@ -2005,15 +2033,15 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             //qDebug() << i <<": pink Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            Vector3<float> measured(distance,bearing,elevation);
             if(isOK == true)
             {
-                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
                     debug << "\t\tCalculated Distance to Point: " << distance<<endl;
                 #endif
             }
-            Vector3<float> measured(distance,bearing,elevation);
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());

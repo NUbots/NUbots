@@ -5,6 +5,8 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "Tools/Math/General.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Kinematics/Kinematics.h"
 //#include <QDebug>
 using namespace mathGeneral;
 
@@ -147,10 +149,18 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             sphericalPosition[0] = FindGoalDistance(*it,vision);
             sphericalPosition[1] = bearing;
             sphericalPosition[2] = elevation;
+            Vector3 <float> transformedSphericalPosition;
+            Matrix cameraTransform;
+            bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
+            if(isOK == true)
+            {
+                transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
+            }
+
             sizeOnScreen.x = (*it).width();
             sizeOnScreen.y = (*it).height();
 
-            newAmbObj.UpdateVisualObject(   sphericalPosition,
+            newAmbObj.UpdateVisualObject(   transformedSphericalPosition,
                                             sphericalError,
                                             viewPosition,
                                             sizeOnScreen,
@@ -856,12 +866,21 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     viewPosition.y = GoalPost->getCentreY();
     float bearing = (float)vision->CalculateBearing(viewPosition.x);
     float elevation = (float)vision->CalculateElevation(viewPosition.y);
-    sphericalPosition[0] = cos(elevation)*FindGoalDistance((*GoalPost),vision);
+    sphericalPosition[0] = FindGoalDistance((*GoalPost),vision);
     sphericalPosition[1] = bearing;
     sphericalPosition[2] = elevation;
+
+    Vector3 <float> transformedSphericalPosition;
+    Matrix cameraTransform;
+    bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
+    if(isOK == true)
+    {
+        transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
+    }
+
     sizeOnScreen.x = GoalPost->width();
     sizeOnScreen.y = GoalPost->height();
-    AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      sphericalPosition,
+    AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      transformedSphericalPosition,
                                                                     sphericalError,
                                                                     viewPosition,
                                                                     sizeOnScreen,

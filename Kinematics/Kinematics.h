@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "EndEffector.h"
+#include "Tools/Math/Vector3.h"
 #include "debug.h"
 
 class Kinematics
@@ -21,9 +22,11 @@ public:
 
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
-    static double DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY);
+    static Vector3<float> DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY);
 
     static std::vector<float> TransformPosition(const Matrix& Camera2GroundTransform, const std::vector<float>& cameraBasedPosition);
+    static Vector3<float> TransformPosition(const Matrix& Camera2GroundTransform, const Vector3<float>& cameraBasedPosition);
+    static Matrix TransformPosition(const Matrix& Camera2GroundTransform, const Matrix& cameraBasedPosition);
 
     static std::vector<float> LookToPoint(const std::vector<float>& pointFieldCoordinates);
 

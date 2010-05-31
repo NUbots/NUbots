@@ -221,10 +221,8 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 
 
 
-void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odometeryTurn){
-	
-	odometeryUpdate(odometeryForward, odometeryLeft, odometeryTurn,0,0,0);
-	
+void KF::timeUpdate(double deltaTime){
+		
    	//-----------------------Update for ball velocity	
 	stateEstimates[3][0] = stateEstimates[3][0] + stateEstimates[5][0]/frameRate; // Update ball x position by ball x velocity.
 	stateEstimates[4][0] = stateEstimates[4][0] + stateEstimates[6][0]/frameRate; // Update ball y position by ball y velocity.
@@ -232,8 +230,7 @@ void KF::timeUpdate(double odometeryForward, double odometeryLeft, double odomet
 	stateEstimates[6][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
 
   // Householder transform. Unscented KF algorithm. Takes a while.
-	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
-	
+	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));	
         stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
 	return;
 	
