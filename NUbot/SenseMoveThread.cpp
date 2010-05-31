@@ -65,6 +65,7 @@ SenseMoveThread::~SenseMoveThread()
     #if DEBUG_VERBOSITY > 0
         debug << "SenseMoveThread::~SenseMoveThread()" << endl;
     #endif
+    stop();
 }
 
 /*! @brief The sense->move main loop

@@ -81,6 +81,7 @@ SeeThinkThread::~SeeThinkThread()
     #if DEBUG_VERBOSITY > 0
         debug << "SeeThinkThread::~SeeThinkThread()" << endl;
     #endif
+    stop();
 }
 
 /*! @brief The sense->move main loop

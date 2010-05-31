@@ -53,7 +53,7 @@ PeriodicThread::~PeriodicThread()
     #if DEBUG_THREADING_VERBOSITY > 1
         debug << "PeriodicThread::~PeriodicThread() " << m_name << endl;
     #endif
-    this->stop();
+    stop();
 }
 
 /*! @brief Sleeps for the required amount of time
@@ -62,8 +62,10 @@ void PeriodicThread::sleepThread()
 {
     double timenow = nusystem->getTime();
     double requiredsleeptime = m_period - (timenow - m_start_time);
+    pthread_testcancel();
     if (requiredsleeptime > 0)
         NUSystem::msleep(requiredsleeptime);
+    pthread_testcancel();
     m_start_time = nusystem->getTime();
 }
 

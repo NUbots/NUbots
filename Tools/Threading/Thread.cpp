@@ -43,7 +43,7 @@ Thread::~Thread()
     #if DEBUG_THREADING_VERBOSITY > 2
         debug << "Thread::~Thread(): " << m_name << endl;
     #endif
-    this->stop();
+    stop();
 }
 
 /*! @brief Starts the thread
