@@ -226,7 +226,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            if(circ.sd > 5)
+            if(circ.sd > 3.5)
             {
                 circ.isDefined = false;
             }

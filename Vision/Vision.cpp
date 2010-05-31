@@ -1129,7 +1129,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     if((direction == ScanLine::DOWN || direction == ScanLine::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 20;
+        int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -1155,7 +1155,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
-            while(!(checkIfBufferSame(colourBuff) &&  colourBuff[0] != tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempsubPoint+skipPixel > width)
                 {
@@ -1177,7 +1177,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
 
-            tempSubEndPoint.x = tempsubPoint - bufferSize;
+            tempSubEndPoint.x = tempsubPoint - bufferSize*skipPixel;
             subAfterColour = tempColour;
             tempsubPoint = StartPoint.x;
             tempColour = tempTransition->getColour();
@@ -1187,7 +1187,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
-            while(!(checkIfBufferSame(colourBuff) &&  colourBuff[0] != tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempsubPoint-skipPixel < 0)
                 {
@@ -1208,7 +1208,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                     break;
                 }
             }
-            tempSubStartPoint.x = tempsubPoint + bufferSize;
+            tempSubStartPoint.x = tempsubPoint + bufferSize*skipPixel;
             subBeforeColour = tempColour;
             //THEN ADD TO LINE
             //qDebug() << "Adding Line: " << tempSubStartPoint.x << tempSubStartPoint.y << tempSubEndPoint.x << tempSubEndPoint.y;
@@ -1246,7 +1246,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //Search for End of Perpendicular Segment
-            while(!(checkIfBufferSame(colourBuff) &&  colourBuff[0] != tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempY+1 > height) break;
                 tempY++;
@@ -1263,7 +1263,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
 
-            tempSubEndPoint.y = tempY - bufferSize;
+            tempSubEndPoint.y = tempY - bufferSize*skipPixel;
             subAfterColour = tempColour;
             tempY = StartPoint.y;
             tempColour = tempTransition->getColour();
@@ -1274,7 +1274,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
 
             //Search for Start of Perpendicular Segment
-            while(checkIfBufferSame(colourBuff) &&  colourBuff[0] == tempTransition->getColour())
+            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
             {
                 if(tempY-1 < 0)
                 {
@@ -1293,7 +1293,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                     break;
                 }
             }
-            tempSubStartPoint.y = tempY + bufferSize;
+            tempSubStartPoint.y = tempY + bufferSize*skipPixel;
             subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
@@ -1305,6 +1305,18 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
         }
     }
+}
+
+bool Vision::checkIfBufferContains(boost::circular_buffer<unsigned char> cb, unsigned char colour)
+{
+    for(unsigned int i = 0; i < cb.size(); i++)
+    {
+        if(cb[i] == colour)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<ObjectCandidate> Vision::classifyCandidates(
