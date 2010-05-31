@@ -2,7 +2,6 @@
 #include <cmath>
 #include "Tools/Math/TransformMatrices.h"
 #include "Tools/Math/General.h"
-#include "../../Tools/Math/Vector3.h"
 #include "debug.h"
 
 
