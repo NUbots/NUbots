@@ -1895,7 +1895,8 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         Vector2<int> viewPosition;
         Vector2<int> sizeOnScreen;
         Vector3<float> sphericalError;
-        Vector3<float> sphericalPosition;
+        Vector3<float> visualSphericalPosition;
+        Vector3<float> transformedSphericalPosition;
         viewPosition.x = (int)round(ball.centreX);
         viewPosition.y = (int)round(ball.centreY);
         double ballDistanceFactor=EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()*ORANGE_BALL_DIAMETER;
@@ -1903,13 +1904,21 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         float distance = (float)(ballDistanceFactor/(2*ball.radius)+BALL_OFFSET);
         float bearing = (float)CalculateBearing(viewPosition.x);
         float elevation = (float)CalculateElevation(viewPosition.y);
-        sphericalPosition[0] = distance;
-        sphericalPosition[1] = bearing;
-        sphericalPosition[2] = elevation;
+        visualSphericalPosition[0] = distance;
+        visualSphericalPosition[1] = bearing;
+        visualSphericalPosition[2] = elevation;
+        Matrix camera2groundTransform;
+        bool isOK = getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+        if(isOK == true)
+        {
+            transformedSphericalPosition = Kinematics::TransformPosition(camera2groundTransform,visualSphericalPosition);
+
+        }
+
         sizeOnScreen.x = int(ball.radius*2);
         sizeOnScreen.y = int(ball.radius*2);
 
-        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(sphericalPosition,
+        AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(transformedSphericalPosition,
                                                                                       sphericalError,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,

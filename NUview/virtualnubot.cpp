@@ -394,7 +394,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
         {
-            qDebug() << "Stationary Object: " << i << ":" //<< (char*) &vision.AllFieldObjects->stationaryFieldObjects[i].getName()
+            qDebug() << "Stationary Object: " << i << ":" << QString(vision.AllFieldObjects->stationaryFieldObjects[i].getName().c_str())
                      <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
                      <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
                     << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
@@ -404,7 +404,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     {
         if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
         {
-            qDebug() << "Mobile Object: " << i << ":"// << (char*)&vision.AllFieldObjects->mobileFieldObjects[i].getName()
+            qDebug() << "Mobile Object: " << i << ":" << QString(vision.AllFieldObjects->mobileFieldObjects[i].getName().c_str())
                      << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
                      <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
                     << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
@@ -416,7 +416,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
         {
             qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
-                        //<<  (char*)&vision.AllFieldObjects->ambiguousFieldObjects[i].getName()
+                     <<  QString(vision.AllFieldObjects->ambiguousFieldObjects[i].getName().c_str())
                      << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
                      << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
                      << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();

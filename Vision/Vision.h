@@ -202,5 +202,7 @@ class Vision
 
     int getScanSpacings(){return spacings;}
 
+    NUSensorsData* getSensorsData() {return m_sensor_data;}
+
 };
 #endif // VISION_H
