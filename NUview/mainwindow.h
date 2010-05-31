@@ -13,6 +13,7 @@
 #include "localisationwidget.h"
 #include "FileAccess/LogFileReader.h"
 #include "visionstreamwidget.h"
+#include "locwmstreamwidget.h"
 #include "SensorDisplayWidget.h"
 #include <QHostInfo>
 
@@ -124,6 +125,7 @@ private:
 
     LayerSelectionWidget* layerSelection;
     visionStreamWidget* VisionStreamer;         //!< Instance of VisionStreamWidget
+    locwmStreamWidget* LocWmStreamer;
 
     //QDockWidget* layerSelectionDock;
     QDockWidget* visionTabDock;

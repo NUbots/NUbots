@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include "nubotdataconfig.h"
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -40,7 +42,7 @@ const float Localisation::R_obj_range_relative = 0.02f; // 10% of range added. (
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
-Localisation::Localisation(): m_timestamp(0)
+Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
     doPlayerReset();
 
@@ -51,13 +53,14 @@ Localisation::Localisation(): m_timestamp(0)
     feedbackPosition[2] = 0;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    #ifdef WIN32
-    debug_file.open("Localisation.log", ios::out | ios::trunc);
-    #else
-    debug_file.open("/var/volatile/Localisation.log", ios::out | ios::trunc);
-    #endif // WIN32
+        std::stringstream debugLogName;
+        debugLogName << DATA_DIR;
+        if(playerNumber) debugLogName << playerNumber;
+        debugLogName << "Localisation.log";
+        debug_file.open(debugLogName.str().c_str());
+        debug_file.clear();
+        debug_file << "Localisation" << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-
     return;
 }
 
@@ -74,7 +77,7 @@ Localisation::~Localisation()
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
 
-void Localisation::process(NUSensorsData* data, FieldObjects* fobs)
+void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo)
 {
     float odo_time;
     vector<float> odo;
@@ -131,7 +134,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     varianceCheckAll();
 	
     // perform odometry update and change the variance of the model
-    doTimeUpdate(fabs(odomForward), odomLeft, odomTurn);
+    doTimeUpdate((-odomForward), odomLeft, odomTurn);
 // 	doTimeUpdate(0,0,0);
 	
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -587,6 +590,7 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     {
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
         result = true;
+        models[modelID].timeUpdate(0);
 	models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     return result;
@@ -944,7 +948,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
     // Check if enough recent 'outliers' that we should reset ?
     if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
         reset = true;
-        models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
+        //models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
         #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
@@ -961,7 +965,15 @@ int  Localisation::CheckForOutlierResets()
 {
     bool numResets = 0;
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
-        if(CheckModelForOutlierReset(modelID)) numResets++;
+        if(CheckModelForOutlierReset(modelID))
+        {
+            models[modelID].isActive = false;
+            numResets++;
+        }
+    }
+    if(getNumActiveModels() < 1)
+    {
+        this->doPlayerReset();
     }
     return numResets;
 }

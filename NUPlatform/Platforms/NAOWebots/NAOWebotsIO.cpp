@@ -54,6 +54,7 @@ NAOWebotsIO::NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform)
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
+        m_localisation_port = new TcpPort(LOCWM_PORT);
     #endif
 }
 

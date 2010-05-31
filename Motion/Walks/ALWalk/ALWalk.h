@@ -30,6 +30,7 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
 #include <almotionproxy.h>
+#include <string>
 using namespace AL;
 
 class ALWalk : public NUWalk
@@ -43,11 +44,15 @@ public:
     void setArmEnabled(bool leftarm, bool rightarm);
 protected:
     void doWalk();
+    void initALConfig();
+    void setALConfig();
 private:
 public:
 protected:
 private:
     ALMotionProxy* m_al_motion;
+    ALValue m_al_config;
+    ALValue m_al_param;
 };
 
 #endif

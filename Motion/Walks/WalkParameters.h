@@ -63,36 +63,10 @@ public:
             else Value = Max;
         };
         void setDescription(const string& desc) {Description = desc;};
-        
-        void summaryTo(ostream& output) {output << Value;}
-        void csvTo(ostream& output) {output << Value << ", ";}
-        
-        friend ostream& operator<< (ostream& output, const Parameter& p) 
-        {   
-            output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
-            return output;
-        }
-        friend istream& operator>> (istream& input, Parameter& p)
-        {
-            input >> p.Name;
-            if (p.Name[p.Name.size() - 1] == ':')
-                p.Name.resize(p.Name.size() - 1);
-            
-            input >> p.Value;
-            input.ignore(10, '[');
-            // we need to enclose the min and max in square brackets
-            input >> p.Min;
-            input.ignore(10, ',');
-            input >> p.Max;
-            input.ignore(10, ']');
-            
-            // read in the rest of the line and call it the description
-            char charbuffer[500];
-            input.getline(charbuffer, 500);
-            p.Description = string(charbuffer);
-
-            return input;
-        };
+        void summaryTo(ostream& output);
+        void csvTo(ostream& output);
+        friend ostream& operator<< (ostream& output, const Parameter& p);
+        friend istream& operator>> (istream& input, Parameter& p);
     };
 public:
     WalkParameters();

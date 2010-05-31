@@ -1938,8 +1938,6 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
 
 void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 {
-    Kinematics kin;
-
     for(unsigned int i = 0; i < RobotCandidates.size(); i++)
     {
         std::vector <TransitionSegment > segments = RobotCandidates[i].getSegments();
@@ -1980,16 +1978,17 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             //qDebug() << i <<": Blue Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            Vector3<float> measured(distance,bearing,elevation);
             if(isOK == true)
             {
-                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
                     debug << "\t\tCalculated Distance to Point: " << distance<<endl;
                 #endif
             }
             //qDebug() << i <<": Blue Robot: get things in order";
-            Vector3<float> measured(distance,bearing,elevation);
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
@@ -2013,15 +2012,15 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             //qDebug() << i <<": pink Robot: get transform";
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            Vector3<float> measured(distance,bearing,elevation);
             if(isOK == true)
             {
-                distance = kin.DistanceToPoint(camera2groundTransform, bearing, elevation);
+                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
                     debug << "\t\tCalculated Distance to Point: " << distance<<endl;
                 #endif
             }
-            Vector3<float> measured(distance,bearing,elevation);
             Vector3<float> measuredError(0,0,0);
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());

@@ -72,6 +72,9 @@ public:
     NUbot(int argc, const char *argv[]);
     ~NUbot();
     void run();
+#ifdef USE_LOCALISATION
+    const Localisation* GetLocWm(){return m_localisation;};
+#endif
     
 private:
     void connectErrorHandling();
