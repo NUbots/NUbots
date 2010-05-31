@@ -125,7 +125,7 @@ inline Matrix Cartesian2Spherical(const Matrix& cartesianCoordinates)
     const float x = cartesianCoordinates[0][0];
     const float y = cartesianCoordinates[1][0];
     const float z = cartesianCoordinates[2][0];
-    Matrix result(3,0.0f);
+    Matrix result(3,1);
 
     result[0][0] = sqrt(x*x + y*y + z*z);
     result[1][0] = atan2(y,x);
