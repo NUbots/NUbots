@@ -26,8 +26,6 @@ LineDetection::LineDetection(){
     linePoints.reserve(MAX_LINEPOINTS);
     fieldLines.reserve(MAX_FIELDLINES);
     cornerPoints.reserve(MAX_CORNERPOINTS);
-    kin = new Kinematics();
-
     TotalValidLines = 0;
 }
 
@@ -1703,7 +1701,7 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
     if(isOK == true)
     {
         Vector3<float> result;
-        result = kin->DistanceToPoint(camera2groundTransform, *bearing, *elevation);
+        result = Kinematics::DistanceToPoint(camera2groundTransform, *bearing, *elevation);
         *distance = result[0];
         *bearing = result[1];
         *elevation = result[2];

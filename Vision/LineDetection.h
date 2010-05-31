@@ -62,8 +62,6 @@ class LineDetection{
         int LINE_SEARCH_GRID_SIZE;
         int PenaltySpotLineNumber;
         NUSensorsData* sensorsData;
-        Kinematics* kin;
-
 
         void FindFieldLines(int image_width,int image_height);
 
