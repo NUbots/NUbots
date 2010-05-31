@@ -54,8 +54,10 @@ public:
 protected:
 private:
     ALMotionProxy* m_al_motion;
-    ALValue m_al_config;
-    ALValue m_al_param;
+    ALValue m_al_config;            //!< Walk Parameter config for m_al_motion->setMotionConfig()
+    ALValue m_al_param;             //!< A single parameter of m_al_config
+    
+    ALValue m_al_stiffness_protection;
 };
 
 #endif

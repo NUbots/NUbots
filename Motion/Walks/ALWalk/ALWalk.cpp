@@ -35,13 +35,15 @@ ALWalk::ALWalk()
     m_al_config.arrayReserve(10);
     m_al_param.arraySetSize(2);
     
-    // turn the foot protection on
-    m_al_param[0] = "ENABLE_FOOT_CONTACT_PROTECTION";
-    m_al_param[1] = true;
-    m_al_config.arrayPush(m_al_param);
     // turn the low stiffness protection off
     m_al_param[0] = "ENABLE_STIFFNESS_PROTECTION";
     m_al_param[1] = false;
+    m_al_stiffness_protection.arrayPush(m_al_param);
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
+    
+    // turn the foot contact protection on
+    m_al_param[0] = "ENABLE_FOOT_CONTACT_PROTECTION";
+    m_al_param[1] = true;
     m_al_config.arrayPush(m_al_param);
     m_al_motion->setMotionConfig(m_al_config);
     
@@ -71,12 +73,20 @@ void ALWalk::freeze()
 void ALWalk::kill()
 {
     freeze();
+    
+    // when we kill aldebaran's walk we need to turn on stiffness protection and set the stiffness to zero
+    m_al_stiffness_protection[0][1] = true;
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
     m_al_motion->setStiffnesses(string("Body"), 0.0f);
 }
 
 void ALWalk::enableWalk()
 {
-    m_al_motion->setStiffnesses(string("Body"), 0.5f);
+    // when we un-kill aldebaran's walk we turn on the stiffness then turn off the stiffness protection ;)
+    // this is a hack to get the walk engine to check it is in initial position and then move to that position
+    m_al_motion->setStiffnesses(string("Body"), 0.65f);
+    m_al_stiffness_protection[0][1] = false;
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
     NUWalk::enableWalk();
 }
 
