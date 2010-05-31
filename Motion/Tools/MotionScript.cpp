@@ -184,7 +184,7 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
             debug << "LLeg until " << timeFinishedWithLLeg() << ", ";
         if (m_uses_rleg)
             debug << "RLeg until " << timeFinishedWithRLeg() << ", ";
-        debug << " and completes at " << timeFinished() << endl;
+        debug << "runs from " << m_play_start_time << " to " << timeFinished() << endl;
     #endif
 }
 
@@ -206,7 +206,7 @@ bool MotionScript::load()
             errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << endl;
             return false;
         }
-        m_playspeed = 0.5;
+        m_playspeed = 1.0;
         
         size_t numjoints = m_labels.size() - 1;
         m_times = vector<vector<double> >(numjoints, vector<double>());
@@ -248,14 +248,16 @@ bool MotionScript::load()
         }
         file.close();
         
-        // Now a bit of hackery. When we want to return to start we need to add the initial sensor position
-        for (size_t i=0; i<m_times.size(); i++)
-        {
-            if (not m_times[i].empty())
-            {   // only add the placeholders if the joint is non empty
-                m_times[i].push_back(m_times[i].back());
-                m_positions[i].push_back(m_positions[i].back());
-                m_gains[i].push_back(m_gains[i].back());
+        if (m_return_to_start)
+        {   // Now a bit of hackery. When we want to return to start we need to add the placeholders for the return move
+            for (size_t i=0; i<m_times.size(); i++)
+            {
+                if (not m_times[i].empty())
+                {   // only add the placeholders if the joint is non empty
+                    m_times[i].push_back(m_times[i].back());
+                    m_positions[i].push_back(m_positions[i].back());
+                    m_gains[i].push_back(m_gains[i].back());
+                }
             }
         }
         return true;
