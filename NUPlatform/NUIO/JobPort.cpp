@@ -94,8 +94,10 @@ JobPort& operator<<(JobPort& port, JobList* jobs)
 void JobPort::handleNewData(std::stringstream& buffer)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "JobPort::handleNewData(" << buffer.str().c_str() << ")" << endl;
+        debug << "JobPort::handleNewData()" << endl;
     #endif
     buffer >> *m_jobs;
-    debug << m_jobs->size()<< endl;
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        m_jobs->summaryTo(debug);
+    #endif
 }

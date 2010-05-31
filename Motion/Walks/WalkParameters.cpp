@@ -347,7 +347,7 @@ ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters)
  */
 istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 {
-    input >> p_walkparameters.m_name;
+    getline(input, p_walkparameters.m_name);
     p_walkparameters.m_max_speeds = MotionFileTools::toFloatVector(input);
     p_walkparameters.m_max_accelerations = MotionFileTools::toFloatVector(input);
     
@@ -429,14 +429,15 @@ void WalkParameters::saveAs(const string& name)
  */
 void WalkParameters::load(const string& name)
 {
-    ifstream file((CONFIG_DIR + string("Motion/Walks/") + name + ".cfg").c_str());
+    string filepath = CONFIG_DIR + string("Motion/Walks/") + name + ".cfg";
+    ifstream file(filepath.c_str());
     if (file.is_open())
     {
         file >> this;
         file.close();
     }
     else
-        debug << "WalkParameters::load(): Failed to load file " << name + ".cfg" << endl;
+        debug << "WalkParameters::load(): Failed to load file " << filepath << endl;
     file.close();
 }
 
