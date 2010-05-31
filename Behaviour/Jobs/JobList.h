@@ -59,6 +59,7 @@ public:
     list<Job*>::iterator removeLocalisationJob(list<Job*>::iterator iter);
     list<Job*>::iterator removeBehaviourJob(list<Job*>::iterator iter);
     list<Job*>::iterator removeMotionJob(list<Job*>::iterator iter);
+    void clearMotionJobs();
     list<Job*>::iterator removeCameraJob(list<Job*>::iterator iter);
     list<Job*>::iterator removeSystemJob(list<Job*>::iterator iter);
     list<Job*>::iterator removeOtherJob(list<Job*>::iterator iter);

@@ -196,10 +196,10 @@ void NUMotion::kill()
     }
     
     // go into safe mode
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 500, larmpositions, armvelocities, 30);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 500, rarmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 750, larmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 750, rarmpositions, armvelocities, 30);
     
     m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
     m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
@@ -294,8 +294,13 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL || m_current_time < m_last_kill_time + 5000)
+    if (jobs == NULL)
         return;
+    if (m_current_time < m_last_kill_time + 3000)
+    {   // don't let the jobs queue up when in the killed state
+        jobs->clearMotionJobs();
+        return;
+    }
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
     while (it != jobs->motion_end())
