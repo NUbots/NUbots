@@ -236,7 +236,7 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     if (fabs(y) > maxspeeds[1])
     {   // we assume the sidewards direction is always the slowest, if it needs clipping, clip the x to achieve the desired direction
         y = sign(y)*maxspeeds[1];
-        x = y*tan(trans_direction);
+        x = y/tan(trans_direction);
     }
     
     m_target_speed_x = x;
