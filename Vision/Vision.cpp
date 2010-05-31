@@ -339,7 +339,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
                 validColours.push_back(ClassIndex::pink);
                 validColours.push_back(ClassIndex::pink_orange);
                 validColours.push_back(ClassIndex::shadow_blue);
-                validColours.push_back(ClassIndex::blue);
+                //validColours.push_back(ClassIndex::blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPRE-ROBOT" << endl;
@@ -388,7 +388,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
-                validColours.push_back(ClassIndex::shadow_blue);
+                //validColours.push_back(ClassIndex::shadow_blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPRE-BLUE-GOALS" << endl;

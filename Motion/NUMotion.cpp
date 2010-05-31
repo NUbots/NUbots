@@ -39,10 +39,12 @@
 #include "FallProtection.h"
 #include "Getup.h"
 #include "Tools/MotionScript.h"
+#include "Tools/Math/General.h"
 
 #include "NUPlatform/NUPlatform.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -172,11 +174,19 @@ void NUMotion::kill()
         return;
     else if (m_data != NULL)
     {
+        // check the orientation
         vector<float> orientation;
         if (m_data->getOrientation(orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
                 return;
+        // check the feet are on the ground
         if (not m_data->isOnGround())
+                return;
+        
+        // check the stiffness is on
+        vector<float> leftstiffnesses, rightstiffnesses;
+        if (m_data->getJointStiffnesses(NUSensorsData::LeftLegJoints, leftstiffnesses) and m_data->getJointStiffnesses(NUSensorsData::RightLegJoints, rightstiffnesses))
+            if (mathGeneral::allZeros(leftstiffnesses) and mathGeneral::allZeros(rightstiffnesses))
                 return;
     }
     
