@@ -150,11 +150,11 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             sphericalPosition[1] = bearing;
             sphericalPosition[2] = elevation;
             Vector3 <float> transformedSphericalPosition;
-            Matrix camera2groundTransform;
-            bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+            Matrix cameraTransform;
+            bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
             if(isOK == true)
             {
-                transformedSphericalPosition = Kinematics::TransformPosition(camera2groundTransform,sphericalPosition);
+                transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
             }
 
             sizeOnScreen.x = (*it).width();
@@ -871,11 +871,11 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sphericalPosition[2] = elevation;
 
     Vector3 <float> transformedSphericalPosition;
-    Matrix camera2groundTransform;
-    bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+    Matrix cameraTransform;
+    bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
     if(isOK == true)
     {
-        transformedSphericalPosition = Kinematics::TransformPosition(camera2groundTransform,sphericalPosition);
+        transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
     }
 
     sizeOnScreen.x = GoalPost->width();
