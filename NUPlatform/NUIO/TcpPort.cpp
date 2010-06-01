@@ -27,6 +27,7 @@
 #include "debugverbositynetwork.h"
 #include <string.h>
 #include <errno.h>
+#include "Localisation/Localisation.h"
 
 /*! @brief Constructs a tcp port on the specified port
  
@@ -238,4 +239,22 @@ void TcpPort::sendData(const NUimage& p_image, const NUSensorsData &p_sensors)
     }
     sendData(sensordata);
     
+}
+
+
+void TcpPort::sendData(const Localisation& p_locwm)
+{
+    network_data_t netdata;
+    network_data_t sizedata;
+    stringstream buffer;
+    buffer << p_locwm;
+    netdata.data = (char*) buffer.str().c_str();
+    netdata.size = buffer.str().size();
+
+    int totalsize = netdata.size;
+    sizedata.data = reinterpret_cast<char*>(&totalsize);
+    sizedata.size = sizeof(totalsize);
+
+    sendData(sizedata);
+    sendData(netdata);
 }

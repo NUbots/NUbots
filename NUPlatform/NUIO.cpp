@@ -65,6 +65,7 @@ NUIO::NUIO(NUbot* nubot)
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
+        m_localisation_port = new TcpPort(LOCWM_PORT);
     #endif
 }
 
@@ -91,6 +92,7 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
+        m_localisation_port = new TcpPort(LOCWM_PORT);
     #endif
 }
 
@@ -107,6 +109,8 @@ NUIO::~NUIO()
         delete m_vision_port;
     if (m_jobs_port != NULL)
         delete m_jobs_port;
+    if(m_localisation_port != NULL)
+        delete m_localisation_port;
 }
 
 /*! @brief Stream insertion operator for a JobList
@@ -166,6 +170,14 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
         {
 	   
             io.m_vision_port->sendData(*(p_nubot.Image), *(p_nubot.SensorData));
+        }
+        if(io.m_localisation_port)
+        {
+            network_data_t locnetdata = io.m_localisation_port->receiveData();
+            if(locnetdata.size > 0)
+            {
+                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()));
+            }
         }
     #endif
     return io;

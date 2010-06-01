@@ -38,6 +38,7 @@
 #include "Tools/Threading/Thread.h"
 class NUimage;
 class NUSensorsData;
+class Localisation;
 
 #include <sstream>
 using namespace std;
@@ -59,6 +60,7 @@ public:
     virtual ~TcpPort();
     void sendData(network_data_t netData);
     void sendData(const NUimage& p_image, const NUSensorsData& p_sensors);
+    void sendData(const Localisation& p_locwm);
     network_data_t receiveData();
 private:
     void run();

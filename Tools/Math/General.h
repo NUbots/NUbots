@@ -10,6 +10,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include "Matrix.h"
 using namespace std;
 
 namespace mathGeneral
@@ -103,7 +104,35 @@ inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesia
     result[2] = asin(z/(result[0]));
     return result;
 }
-    
+
+inline Matrix Spherical2Cartesian(const Matrix& sphericalCoordinates)
+{
+    const float distance = sphericalCoordinates[0][0];
+    const float bearingcos = cos(sphericalCoordinates[1][0]);
+    const float bearingsin = sin(sphericalCoordinates[1][0]);
+    const float elevationcos = cos(sphericalCoordinates[2][0]);
+    const float elevationsin = sin(sphericalCoordinates[2][0]);
+
+    Matrix result(3,1);
+    result[0][0] = distance * bearingcos * elevationcos;
+    result[1][0] = distance * bearingsin * elevationcos;
+    result[2][0] = distance * elevationsin;
+    return result;
+}
+
+inline Matrix Cartesian2Spherical(const Matrix& cartesianCoordinates)
+{
+    const float x = cartesianCoordinates[0][0];
+    const float y = cartesianCoordinates[1][0];
+    const float z = cartesianCoordinates[2][0];
+    Matrix result(3,1);
+
+    result[0][0] = sqrt(x*x + y*y + z*z);
+    result[1][0] = atan2(y,x);
+    result[2][0] = asin(z/(result[0][0]));
+    return result;
+}
+
 /*! @brief Returns true if all of the values
     @param values the data to compare to zero
  */

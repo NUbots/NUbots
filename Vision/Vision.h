@@ -202,5 +202,8 @@ class Vision
 
     int getScanSpacings(){return spacings;}
 
+    NUSensorsData* getSensorsData() {return m_sensor_data;}
+    bool checkIfBufferContains(boost::circular_buffer<unsigned char> cb, unsigned char colour);
+
 };
 #endif // VISION_H

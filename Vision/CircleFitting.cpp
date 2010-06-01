@@ -14,6 +14,7 @@
 #include "../Tools/Math/General.h"
 #include <stdlib.h>
 
+
 using namespace mathGeneral;
 
 
@@ -31,7 +32,7 @@ const int MAX_POINTS = 40;
 
 CircleFitting::CircleFitting() { 
 
-
+    fittedPoints.reserve(20); //RESERVE 20 SPOTs of MEMORY for ballPoints.
 }
 
 
@@ -69,9 +70,13 @@ Circle CircleFitting::FitCircleLMA(std::vector < Vector2<int> > points)
   if (numFittedPoints > 5) {
     Circle algebraicCircle = AlgebraicCircleFit(); //! Generates an approximate centre using an algebraic approximation to the centre of the circle
     /*if (algebraicCircle.isDefined) {
-      Circle geometricCircle = GeometricCircleFitLMA(algebraicCircle); //! Uses the algebraic approximation to generate a more accurate centre and radius using geometric fitting
-      return geometricCircle;
-    } */
+        Circle geometricCircle = GeometricCircleFitLMA(algebraicCircle); //! Uses the algebraic approximation to generate a more accurate centre and radius using geometric fitting
+        qDebug() << "Tried Geometric Fit Result: "<< "Circle found " << geometricCircle.isDefined<<": (" << geometricCircle.centreX << "," << geometricCircle.centreY << ") Radius: "<< geometricCircle.radius << " Fitting: " << geometricCircle.sd<< endl;;
+        if(geometricCircle.isDefined == true)
+        {
+            return geometricCircle;
+        }
+    }*/
     return algebraicCircle;
   }
   // If we make it to this point we cannot return a circle
@@ -145,6 +150,8 @@ Circle CircleFitting::AlgebraicCircleFit() {
 
     meanX = meanY = 0; // The mean values represent the offset from the original postion in the image
 
+    std::vector<point> centredPoints;
+    centredPoints.reserve(fittedPoints.size());
 
 
   // Sum all the elements in the array
@@ -171,10 +178,13 @@ Circle CircleFitting::AlgebraicCircleFit() {
 
 	for (int j=0; j < numFittedPoints; j++) {
 
-		fittedPoints[j].x -= meanX;
+                point tempPoint;
 
-		fittedPoints[j].y -= meanY;
+                tempPoint.x = fittedPoints[j].x - meanX;
 
+                tempPoint.y =fittedPoints[j].y - meanY;
+
+                centredPoints.push_back(tempPoint);
 	}
 
 
@@ -189,9 +199,9 @@ Circle CircleFitting::AlgebraicCircleFit() {
 
   for (int k=0; k < numFittedPoints; k++) {
 
-    Xi = fittedPoints[k].x;
+                Xi = centredPoints[k].x;
 
-		Yi = fittedPoints[k].y;
+                Yi = centredPoints[k].y;
 
 		Zi = Xi*Xi + Yi*Yi;
 
@@ -230,11 +240,11 @@ Circle CircleFitting::AlgebraicCircleFit() {
 
 
   // Check that we have not generated an infinity error
-
+/*
 	if ((G11 < DBL_MIN) || (G11 > DBL_MAX))
 
     return InvalidCircle();    
-
+*/
   
 
   G12 = meanXY/G11;
@@ -254,11 +264,11 @@ Circle CircleFitting::AlgebraicCircleFit() {
 
 
   // Checking that we have not generated an infinity error
-
+/*
   if ((G22 < DBL_MIN) || (G22 > DBL_MAX))
 
     return InvalidCircle();    
-
+*/
   
 
 
@@ -313,7 +323,7 @@ Circle CircleFitting::GeometricCircleFitLMA(Circle initialCircle) {
 
 //     "FIXME:  Need to return an undefined circle and make sure its not updated at a later stage"
 
-
+    //qDebug() << "Failed to Initialise";
 
   }
 
@@ -327,6 +337,8 @@ Circle CircleFitting::GeometricCircleFitLMA(Circle initialCircle) {
 
   while(true) {
 
+    //qDebug() << "Geometric Itteration: " << iteration << "\t Defined: " << newCircle.isDefined << "\t(" << newCircle.centreX << "," << newCircle.centreY <<")"
+    //         << "\t Radius:" << newCircle.radius << "\tRMSE: " << newCircle.sd;
     oldA = newA;
 
     oldF = newF;
@@ -496,25 +508,26 @@ bool CircleFitting::Initalise(Circle initialCircle) {
   
 
   newA = 1.0/(initialCircle.radius + initialCircle.radius);
-
+  //qDebug() << "Setting newA: " << newA;
   centreSquared = initialCircle.centreX*initialCircle.centreX + initialCircle.centreY*initialCircle.centreY;
 
   newF = (centreSquared - initialCircle.radius*initialCircle.radius)*newA;
-
+  //qDebug() << "Setting newF: " << newF;
   
 
   // Check that the value that we're using is valid
 
-  double temp = -initialCircle.centreX/sqrt(centreSquared); 
-
+  //double temp = -initialCircle.centreX/sqrt(centreSquared);
+  /*
+  qDebug() << "Setting temp: " << temp << DBL_MIN << DBL_MAX;
   if ((temp < DBL_MIN) || (temp > DBL_MAX))
 
     return false;
-
+    */
 
 
   // Check that we are not generating a divide by zero error
-
+  //qDebug() << "Setting centreSquared: " << centreSquared;
   if (sqrt(centreSquared) <= 0) 
 
     return false;
@@ -1173,10 +1186,14 @@ double CircleFitting::Sigma (Circle circle) {
 
 		di = sqrt(dx*dx+dy*dy) - circle.radius;
 
+                //qDebug() << "Checking (circ): " << fittedPoints[i].x <<", " <<circle.centreX << ", \t "
+                //        << fittedPoints[i].y <<", " <<circle.centreY << ", \t "
+                //        << sqrt(dx*dx+dy*dy) << ", "<< circle.radius << di ;
+
 		sum += di*di;
 
 	}
-
+        //qDebug() << "SUM ERROR (circ): " << sum << " Points: "  << numFittedPoints  << "\tMSE:" << sqrt(sum/numFittedPoints) ;
 	return sqrt(sum/numFittedPoints);
 
 }

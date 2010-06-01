@@ -5,7 +5,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
-
+//#include <QDebug>
 Ball::Ball()
 {
     //debug<< "Vision::DetectBall : Ball Class created" << endl;
@@ -154,7 +154,8 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
 
     std::vector< Vector2<int> > BallPoints;
 
-
+    BallPoints.push_back(SegStart);
+    BallPoints.push_back(SegEnd);
     //! Debug Output for small scans:
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
@@ -184,7 +185,7 @@ bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, i
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
     int boarder = 10; //! Boarder of pixels
-
+    if (( PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y) <= 3) return false;
     if (PossibleBall.getBottomRight().x <= width-boarder &&
         PossibleBall.getBottomRight().y <= height-boarder &&
         PossibleBall.getTopLeft().x >=0+boarder  &&
@@ -225,10 +226,14 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            //debug << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
+            if(circ.sd > 3.5)
+            {
+                circ.isDefined = false;
+            }
+            //qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
 
     }
-    else
+    else if ((ballPoints.size() <= 5))
     {
         Vector2<int> bottomRight = PossibleBall.getBottomRight();
         Vector2<int> topLeft = PossibleBall.getTopLeft();
