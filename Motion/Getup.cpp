@@ -46,9 +46,13 @@ Getup::Getup(NUWalk* walk)
     m_completion_time = 0;
     m_head_completion_time = 0;
     m_on_back = new MotionScript("StandUpBack");
+    m_on_back->setPlaySpeed(0.1);
     m_on_front = new MotionScript("StandUpFront");
+    //m_on_front->setPlaySpeed(0.5);
     m_on_left = new MotionScript("OnLeftRoll");
+    //m_on_left->setPlaySpeed(0.5);
     m_on_right = new MotionScript("OnRightRoll");
+    //m_on_right->setPlaySpeed(0.5);
 }
 
 /*! @brief Destructor for FallProtection module

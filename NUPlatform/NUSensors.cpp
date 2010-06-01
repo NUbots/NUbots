@@ -356,12 +356,12 @@ void NUSensors::calculateFallSense()
     m_data->getGyroFilteredValues(angularvelocity);
     
     // check if fallen left
-    if (orientation[0] > RollFallenThreshold)
+    if (orientation[0] < -RollFallenThreshold)
         fallen[1] = Fallen;
     else
         fallen[1] = 0.0;
     // check if fallen right
-    if (orientation[0] < -RollFallenThreshold)
+    if (orientation[0] > RollFallenThreshold)
         fallen[2] = Fallen;
     else
         fallen[2] = 0.0;
