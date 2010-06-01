@@ -36,9 +36,9 @@ const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.001f; // (0.01 rad)^2
+const float Localisation::R_obj_theta = 0.0025f; // (0.05 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f; // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.02f; // 10% of range added. (0.1)^2
+const float Localisation::R_obj_range_relative = 0.04f; // 20% of range added. (0.2)^2
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
 
@@ -132,7 +132,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
 	
 	
     // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
-    varianceCheckAll();
+    //varianceCheckAll();
 	
 // 	doTimeUpdate(0,0,0);
 	
@@ -462,7 +462,7 @@ void Localisation::resetSdMatrix(int modelNumber)
      // Set the uncertainties
      models[modelNumber].stateStandardDeviations[0][0] = 150.0; // 150 cm
      models[modelNumber].stateStandardDeviations[1][1] = 100.0; // 100 cm
-     models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
+     models[modelNumber].stateStandardDeviations[2][2] = PI;   // 2 radians
      models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 150 cm
      models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 100 cm
      models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
