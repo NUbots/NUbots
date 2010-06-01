@@ -234,8 +234,8 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     }
     else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
     {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
-        //m_getup->process(data, actions);
-        if (not m_getup->isUsingHead())
+        m_getup->process(data, actions);
+        if (not m_data->isFallen() and not m_getup->isUsingHead())
         {
             #ifdef USE_HEAD
                 m_head->process(data, actions);
