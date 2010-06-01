@@ -32,7 +32,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 5.0f; // 3 // then 8.0 (home)
+const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
@@ -79,6 +79,8 @@ Localisation::~Localisation()
 
 void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo)
 {
+    bool doProcessing = CheckGameState();
+    if(doProcessing == false) return;
     float odo_time;
     vector<float> odo;
     if (data->getOdometry(odo_time, odo))
@@ -99,7 +101,8 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     {   // have Compass use it to check localisation performance
         // heading = compass[0];
     }
-    
+    // perform odometry update and change the variance of the model
+    doTimeUpdate((-odomForward), odomLeft, odomTurn);
     ProcessObjects(0,fobs,NULL);
     m_timestamp = data->CurrentTime;
 }
@@ -110,8 +113,6 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     int updateResult;
     currentFrameNumber = frameNumber;
     objects = ourfieldObjects;
-
-    CheckGameState();
     //if(balanceFallen) return;
 // 	debug_out  << "Dont put anything "<<endl;
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -133,8 +134,6 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
     varianceCheckAll();
 	
-    // perform odometry update and change the variance of the model
-    doTimeUpdate((-odomForward), odomLeft, odomTurn);
 // 	doTimeUpdate(0,0,0);
 	
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -292,8 +291,10 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX),model.getState(KF::selfY),model.getState(KF::selfTheta));
 }
 
-void Localisation::CheckGameState()
+bool Localisation::CheckGameState()
 {
+
+    return true;
     /*
     GameController* gc = &GameController::getInstance();
     bool isPenalised = gc->isPenalised();
