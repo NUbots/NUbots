@@ -31,7 +31,7 @@ ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
 SOURCE_EXT_DIR = naoqi/projects/robocup
 
 .PHONY: default_target all 
-.PHONY: NAO NAOConfig NAOClean NAOVeryClean
+.PHONY: NAO NAOConfig NAOConfigInstall NAOClean NAOVeryClean
 .PHONY: NAOExternal
 .PHONY: NAOWebots NAOWebotsConfig NAOWebotsClean NAOWebotsVeryClean
 .PHONY: Cycloid CycloidConfig CycloidClean CycloidVeryClean
@@ -100,9 +100,7 @@ ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use th
         endif
 		@echo $(ROBOT_IP)
         ifneq ($(ROBOT_IP),)
-			@ssh nao@$(ROBOT_IP) /etc/init.d/naoqi stop
-			@scp -pC ./$(NAO_BUILD_DIR)/sdk/lib/naoqi/libnubot.so nao@$(ROBOT_IP):/home/nao/naoqi/lib/naoqi/
-			@ssh nao@$(ROBOT_IP) /etc/init.d/naoqi start
+			@./Make/scripts/naoSendLib $(ROBOT_IP);
         endif
     else
 		@echo "Cannot cross-compile on this machine"
@@ -134,6 +132,9 @@ ifeq ($(VM_IP), )
 else
 	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(SOURCE_EXT_DIR); make NAOConfig;"
 endif
+
+NAOConfigInstall:
+	@./Make/scripts/naoSendConfig $(ROBOT_IP);
 
 
 NAOClean:
