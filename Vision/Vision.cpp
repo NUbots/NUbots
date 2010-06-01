@@ -2010,7 +2010,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
 
         }
-
+        //qDebug() << "Vision::DetectBall : Update FO_Ball" << (ball.radius*2);
         sizeOnScreen.x = int(ball.radius*2);
         sizeOnScreen.y = int(ball.radius*2);
 

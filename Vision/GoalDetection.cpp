@@ -187,7 +187,48 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
         PossibleGoal.getColour() == 	ClassIndex::yellow ||
         PossibleGoal.getColour() == 	ClassIndex::yellow_orange)
     {
-        return true;
+
+        if(PossibleGoal.getColour() == ClassIndex::shadow_blue || PossibleGoal.getColour() == ClassIndex::blue)
+        {
+            int blueSize = 0;
+            std::vector<TransitionSegment> segments = PossibleGoal.getSegments();
+            for(unsigned int i = 0; i <segments.size(); i++ )
+            {
+                if(segments[i].getColour() == ClassIndex::blue)
+                {
+                    blueSize = blueSize + segments[i].getSize();
+                }
+            }
+            if(blueSize > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if(PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+        {
+            int yellowSize = 0;
+            std::vector<TransitionSegment> segments = PossibleGoal.getSegments();
+            for(unsigned int i = 0; i <segments.size(); i++ )
+            {
+                if(segments[i].getColour() == ClassIndex::yellow)
+                {
+                    yellowSize = yellowSize + segments[i].getSize();
+                }
+            }
+            if(yellowSize > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
     else{
         return false;
