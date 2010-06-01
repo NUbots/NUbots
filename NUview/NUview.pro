@@ -1,6 +1,5 @@
 QT += network \
     opengl
-DEFINES += TARGET_IS_NUVIEW
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/

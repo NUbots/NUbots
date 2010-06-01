@@ -261,6 +261,7 @@ void NUSensors::calculateHorizon()
 
     HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)-headYaw,(double)headPitch,camera);
     vector<float> line;
+    line.reserve(3);
     line.push_back(HorizonLine.getA());
     line.push_back(HorizonLine.getB());
     line.push_back(HorizonLine.getC());
