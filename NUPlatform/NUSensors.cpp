@@ -259,7 +259,7 @@ void NUSensors::calculateHorizon()
     m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
     int camera = 1;
 
-    HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)-headYaw,(double)headPitch,camera);
+    HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
     vector<float> line;
     line.reserve(3);
     line.push_back(HorizonLine.getA());
