@@ -64,6 +64,8 @@ class Localisation: public TimestampedData
 	    void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
 
+        bool IsValidObject(const Object& theObject);
+
         // Model Reset Functions
         bool ShouldRunInState(GameInformation::RobotState theState);
         void doPenaltyReset();

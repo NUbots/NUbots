@@ -628,6 +628,11 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
     int kf_return;
     int numSuccessfulUpdates = 0;
 
+    if(IsValidObject(ball) == false)
+    {
+
+    }
+
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
@@ -930,6 +935,16 @@ int Localisation::getBestModelID() const
         if(models[currID].alpha > models[bestID].alpha) bestID = currID;
     }
     return bestID;
+}
+
+bool Localisation::IsValidObject(const Object& theObject)
+{
+    bool isValid = true;
+    if(theObject.measuredDistance() == 0.0) isValid = false;
+    if(theObject.measuredDistance() != theObject.measuredDistance()) isValid = false;
+    if(theObject.measuredBearing() != theObject.measuredBearing()) isValid = false;
+    if(theObject.measuredElevation() != theObject.measuredElevation()) isValid = false;
+    return isValid;
 }
 
 bool Localisation::CheckModelForOutlierReset(int modelID)
