@@ -1904,6 +1904,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
     if(ball.isDefined)
     {
         //debug<< "Vision::DetectBall : Update FO_Ball" << endl;
+        Vector2<float> positionAngle;
         Vector2<int> viewPosition;
         Vector2<int> sizeOnScreen;
         Vector3<float> sphericalError;
@@ -1916,6 +1917,8 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         float distance = (float)(ballDistanceFactor/(2*ball.radius)+BALL_OFFSET);
         float bearing = (float)CalculateBearing(viewPosition.x);
         float elevation = (float)CalculateElevation(viewPosition.y);
+        positionAngle.x = bearing;
+        positionAngle.y = elevation;
         visualSphericalPosition[0] = distance;
         visualSphericalPosition[1] = bearing;
         visualSphericalPosition[2] = elevation;
@@ -1932,6 +1935,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
 
         AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(transformedSphericalPosition,
                                                                                       sphericalError,
+                                                                                      positionAngle,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,
                                                                                       currentImage->m_timestamp);
@@ -2000,6 +2004,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
             Vector3<float> measured(distance,bearing,elevation);
+            Vector2<float> screenPositionAngle(bearing,elevation);
             if(isOK == true)
             {
 
@@ -2014,7 +2019,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(), RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen(RobotCandidates[i].width(), RobotCandidates[i].height());
             //qDebug() << i <<": Blue Robot: update object with vision data";
-            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,m_timestamp);
             AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
             //qDebug() << i <<": Blue Robot: object push to FO";
         }
@@ -2034,6 +2039,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             Matrix camera2groundTransform;
             bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
             Vector3<float> measured(distance,bearing,elevation);
+            Vector2<float> screenPositionAngle(bearing,elevation);
             if(isOK == true)
             {
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
@@ -2046,7 +2052,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             Vector2<int> screenPosition(RobotCandidates[i].getCentreX(),RobotCandidates[i].getCentreY());
             Vector2<int> sizeOnScreen( RobotCandidates[i].width(), RobotCandidates[i].height());
             //qDebug() << i <<": pink Robot: update object with vision data";
-            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,m_timestamp);
+            tempRobotObject.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,m_timestamp);
             AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
             //qDebug() << i <<": pink Robot: object push to FO";
         }

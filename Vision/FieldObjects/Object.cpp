@@ -45,12 +45,14 @@ void Object::preProcess(const float timestamp)
  */
 void Object::UpdateVisualObject(const Vector3<float>& newMeasured,
                                 const Vector3<float>& newMeasuredError,
+                                const Vector2<float>& newImagePositionAngle,
                                 const Vector2<int>& newImagePosition,
                                 const Vector2<int>& newSizeOnScreen,
                                 const float timestamp)
 {
     measuredRelativePosition = newMeasured;
     relativeMeasurementError = newMeasuredError;
+    imagePositionAngle = newImagePositionAngle;
     imagePosition = newImagePosition;
     sizeOnScreen = newSizeOnScreen;
 

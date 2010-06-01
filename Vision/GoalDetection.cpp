@@ -150,6 +150,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             sphericalPosition[1] = bearing;
             sphericalPosition[2] = elevation;
             Vector3 <float> transformedSphericalPosition;
+            Vector2<float> screenPositionAngle(bearing, elevation);
             Matrix cameraTransform;
             bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
             if(isOK == true)
@@ -162,6 +163,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 
             newAmbObj.UpdateVisualObject(   transformedSphericalPosition,
                                             sphericalError,
+                                            screenPositionAngle,
                                             viewPosition,
                                             sizeOnScreen,
                                             vision->m_timestamp);
@@ -871,6 +873,7 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sphericalPosition[2] = elevation;
 
     Vector3 <float> transformedSphericalPosition;
+    Vector2<float> screenPositionAngle(bearing, elevation);
     Matrix cameraTransform;
     bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
     if(isOK == true)
@@ -882,6 +885,7 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sizeOnScreen.y = GoalPost->height();
     AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      transformedSphericalPosition,
                                                                     sphericalError,
+                                                                    screenPositionAngle,
                                                                     viewPosition,
                                                                     sizeOnScreen,
                                                                     vision->m_timestamp);

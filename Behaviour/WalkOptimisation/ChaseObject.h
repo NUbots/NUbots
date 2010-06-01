@@ -54,7 +54,7 @@ public:
         float headyaw;
         m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
         WalkJob* walkjob;
-        walkjob = new WalkJob(1, m_target.measuredBearing(), (m_target.measuredBearing() + headyaw)/2.0);
+        walkjob = new WalkJob(1, m_target.measuredBearing(), (m_target.measuredBearing())/2.0);
         m_jobs->addMotionJob(walkjob);
     };
 protected:
