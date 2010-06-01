@@ -121,14 +121,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             //Assign Possible IDs: Yellow or Blue, Left or Right Posts
             if((*it).getColour() == ClassIndex::blue || (*it).getColour() == ClassIndex::shadow_blue)
             {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN);
+                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
 
             }
             else if((*it).getColour() == ClassIndex::yellow || (*it).getColour() == ClassIndex::yellow_orange)
             {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN);
+                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
 
@@ -321,7 +321,19 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
 
     int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
+    std::vector<unsigned char> colourlist;
+    colourlist.reserve(2);
+    if(PossibleGoal->getColour() == ClassIndex::yellow ||PossibleGoal->getColour() == ClassIndex::yellow_orange )
+    {
+        colourlist.push_back(ClassIndex::yellow);
+        colourlist.push_back(ClassIndex::yellow_orange);
+    }
+    else if(PossibleGoal->getColour() == ClassIndex::blue ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
+    {
+        colourlist.push_back(ClassIndex::blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
+    }
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
 
     //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
     //! Debug Output for small scans:

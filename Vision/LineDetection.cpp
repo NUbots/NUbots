@@ -207,7 +207,10 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                 {
                     ScanLine tempScanLine;
                     previouslyCloselyScanedSegment = segment;
-                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ScanLine::DOWN);
+                    std::vector<unsigned char> colourlist;
+                    colourlist.reserve(1);
+                    colourlist.push_back(ClassIndex::white);
+                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ScanLine::DOWN,colourlist);
                     ////qDebug()    << "After Closly Scan: "<<tempScanLine.getNumberOfSegments()
                     //            << segment->getStartPoint().x << "," << segment->getStartPoint().y
                     //            ;

@@ -150,8 +150,14 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
         spacings = 2;
     }
     //qDebug() << spacings ;
+    std::vector<unsigned char> colourlist;
+    colourlist.reserve(3);
+    colourlist.push_back(ClassIndex::orange);
+    colourlist.push_back(ClassIndex::pink_orange);
+    colourlist.push_back(ClassIndex::yellow_orange);
     int direction = ScanLine::DOWN;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
+    //qDebug() << "Horizontal Scan : ";
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction,colourlist);
 
     std::vector< Vector2<int> > BallPoints;
 
@@ -171,7 +177,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
-        /*qDebug() << "At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+        /*qDebug() << "Horizontal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
                 <<","<< tempSegement->getEndPoint().y << ")";*/
 
@@ -193,9 +199,9 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     {
         spacings = 2;
     }
-    //qDebug() << spacings ;
+    //qDebug() << "Vertical Scan : ";
     direction = ScanLine::LEFT;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
         TransitionSegment* tempSegement = tempLine.getSegment(i);
@@ -209,7 +215,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
-        /*qDebug() << "At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+        /*qDebug() << "Veritcal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
                 <<","<< tempSegement->getEndPoint().y << ")";*/
 
