@@ -74,7 +74,7 @@ void WalkParametersJob::getWalkParameters(WalkParameters& walkparameters)
 void WalkParametersJob::summaryTo(ostream& output)
 {
     output << "WalkParametersJob: ";
-    //m_walk_parameters.summaryTo(output);
+    m_walk_parameters.summaryTo(output);
 }
 
 /*! @brief Prints a csv version to the stream
@@ -82,7 +82,7 @@ void WalkParametersJob::summaryTo(ostream& output)
  */
 void WalkParametersJob::csvTo(ostream& output)
 {
-    output << "WalkJob, " << m_job_time << ", ";
+    output << "WalkParametersJob, " << m_job_time << ", ";
     m_walk_parameters.csvTo(output);
     output << endl;
 }

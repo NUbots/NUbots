@@ -35,13 +35,15 @@ ALWalk::ALWalk()
     m_al_config.arrayReserve(10);
     m_al_param.arraySetSize(2);
     
-    // turn the foot protection on
-    m_al_param[0] = "ENABLE_FOOT_CONTACT_PROTECTION";
-    m_al_param[1] = true;
-    m_al_config.arrayPush(m_al_param);
     // turn the low stiffness protection off
     m_al_param[0] = "ENABLE_STIFFNESS_PROTECTION";
     m_al_param[1] = false;
+    m_al_stiffness_protection.arrayPush(m_al_param);
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
+    
+    // turn the foot contact protection on
+    m_al_param[0] = "ENABLE_FOOT_CONTACT_PROTECTION";
+    m_al_param[1] = true;
     m_al_config.arrayPush(m_al_param);
     m_al_motion->setMotionConfig(m_al_config);
     
@@ -71,32 +73,28 @@ void ALWalk::freeze()
 void ALWalk::kill()
 {
     freeze();
+    
+    // when we kill aldebaran's walk we need to turn on stiffness protection and set the stiffness to zero
+    m_al_stiffness_protection[0][1] = true;
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
     m_al_motion->setStiffnesses(string("Body"), 0.0f);
 }
 
 void ALWalk::enableWalk()
 {
-    m_al_motion->setStiffnesses(string("Body"), 0.5f);
+    // when we un-kill aldebaran's walk we turn on the stiffness then turn off the stiffness protection ;)
+    // this is a hack to get the walk engine to check it is in initial position and then move to that position
+    m_al_motion->setStiffnesses(string("Body"), 0.65f);
+    m_al_stiffness_protection[0][1] = false;
+    m_al_motion->setMotionConfig(m_al_stiffness_protection);
     NUWalk::enableWalk();
 }
 
 void ALWalk::doWalk()
 {      
-    // give the current walk parameters to the engine
-    m_al_motion->setMotionConfig(m_al_config);
-    
-    // give the target speed to the walk engine.
-    static float max_x = 10.0;
-    static float max_y = 2.0;
-    static float max_yaw = 1.0;
-    if (fabs(m_speed_x) > max_x)
-        m_speed_x = (m_speed_x/fabs(m_speed_x))*max_x;
-    if (fabs(m_speed_y) > max_y)
-        m_speed_y = (m_speed_y/fabs(m_speed_y))*max_y;
-    if (fabs(m_speed_yaw) > max_yaw)
-        m_speed_yaw = (m_speed_yaw/fabs(m_speed_yaw))*max_yaw;
-
-    m_al_motion->setWalkTargetVelocity(m_speed_x/max_x, m_speed_y/max_y, m_speed_yaw/max_yaw, 1);
+    // give the target speed to the walk engine
+    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
     
     // handle the joint stiffnesses
     static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
@@ -143,22 +141,32 @@ void ALWalk::initALConfig()
     m_al_config.arrayPush(m_al_param);
     
     vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
-    if (m_al_config.getSize() != parameters.size())
+    if (m_al_config.getSize() != parameters.size() + 3)
         errorlog << "ALConfig and WalkParameter size mismatch detected. ALConfig: " << m_al_config.getSize() << " parameters: " << parameters.size() << endl;
-    setALConfig();
+    setWalkParameters(m_walk_parameters);
 }
 
 void ALWalk::setALConfig()
 {
     vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].Value));      // "WALK_STEP_MIN_PERIOD";
-    m_al_config[1][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_X";
-    m_al_config[2][1] = parameters[2].Value/100.0;                            // "WALK_MAX_STEP_Y";
-    m_al_config[3][1] = 180*parameters[3].Value/3.141;                        // "WALK_MAX_STEP_THETA";
-    m_al_config[4][1] = parameters[4].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";
-    m_al_config[5][1] = 180*parameters[5].Value/3.141;                        // "WALK_MIN_TRAPEZOID";
-    m_al_config[6][1] = 180*parameters[6].Value/3.141;                        // "WALK_FOOT_ORIENTATION";
-    m_al_config[7][1] = 180*parameters[7].Value/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
-    m_al_config[8][1] = parameters[8].Value/100;                              // "WALK_TORSO_HEIGHT";
+    
+    m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].Value);               // "WALK_MAX_STEP_X";
+    m_al_config[2][1] = maxspeeds[1]/(100*parameters[0].Value);               // "WALK_MAX_STEP_Y";
+    m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].Value);         // "WALK_MAX_STEP_THETA";
+    
+    m_al_config[4][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";
+    m_al_config[5][1] = 180*parameters[2].Value/3.141;                        // "WALK_MIN_TRAPEZOID";
+    m_al_config[6][1] = 180*parameters[3].Value/3.141;                        // "WALK_FOOT_ORIENTATION";
+    m_al_config[7][1] = 180*parameters[4].Value/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
+    m_al_config[8][1] = parameters[5].Value/100;                              // "WALK_TORSO_HEIGHT";
+}
+
+void ALWalk::setWalkParameters(const WalkParameters& walkparameters)
+{
+    NUWalk::setWalkParameters(walkparameters);
+    setALConfig();
+    m_al_motion->setMotionConfig(m_al_config);
 }

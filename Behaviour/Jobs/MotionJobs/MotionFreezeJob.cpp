@@ -29,7 +29,7 @@ MotionFreezeJob::MotionFreezeJob() : MotionJob(Job::MOTION_FREEZE)
 {
 }
 
-/*! @brief WalkJob destructor
+/*! @brief MotionFreezeJob destructor
  */
 MotionFreezeJob::~MotionFreezeJob()
 {

@@ -55,20 +55,27 @@ void VisionCalibrationProvider::doBehaviour()
     
     // handle the selection of motions
     if (singleLeftBumperClick())
+    {
         m_selection_index = (m_selection_index + 1) % m_num_motions;
+        if (m_selection_index == 4)
+            m_actions->addSound(m_current_time, "chase_ball.wav");
+        else
+            m_actions->addSound(m_current_time, "error1.wav");
+    }
     if (singleRightBumperClick())
+    {
         m_selection_index = (m_selection_index + m_num_motions-1) % m_num_motions;
+        if (m_selection_index == 4)
+            m_actions->addSound(m_current_time, "chase_ball.wav");
+        else
+            m_actions->addSound(m_current_time, "error1.wav");
+    }
     
     // handle the starting and stopping of saving images
     if (singleChestClick())
     {
         m_saving_images = not m_saving_images;
         m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
-    }
-    if (longChestClick())
-    {
-        m_saving_images = not m_saving_images;
-        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, false));
     }
 }
 

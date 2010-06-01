@@ -58,7 +58,7 @@ ConditionalThread::~ConditionalThread()
     #if DEBUG_THREADING_VERBOSITY > 1
         debug << "ConditionalThread::~ConditionalThread() " << m_name << endl;
     #endif
-    this->stop();
+    stop();
     pthread_cond_destroy(&m_condition);
     pthread_mutex_destroy(&m_condition_mutex);
     pthread_mutex_destroy(&m_running_mutex);

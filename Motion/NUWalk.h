@@ -47,7 +47,7 @@ public:
     void process(WalkToPointJob* job);
     void process(WalkParametersJob* job);
     
-    void setWalkParameters(const WalkParameters& walkparameters);
+    virtual void setWalkParameters(const WalkParameters& walkparameters);
     WalkParameters& getWalkParameters();
     
     virtual void setArmEnabled(bool leftarm, bool rightarm);
@@ -60,7 +60,7 @@ protected:
     bool inInitialPosition();
     void moveToInitialPosition();
 
-    void setTargetSpeed(const vector<float>& speed);
+    void setTargetSpeed(float trans_speed, float trans_direction, float rot_speed);
     void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
 

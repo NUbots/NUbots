@@ -56,7 +56,7 @@ QueueThread<T>::~QueueThread()
     #if DEBUG_THREADING_VERBOSITY > 1
         debug << "QueueThread::~QueueThread() " << m_name << endl;
     #endif
-    this->stop();
+    stop();
     pthread_cond_destroy(&m_condition);
     pthread_mutex_destroy(&m_condition_mutex);
 }

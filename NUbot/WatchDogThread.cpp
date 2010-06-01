@@ -59,6 +59,7 @@ WatchDogThread::~WatchDogThread()
     #if DEBUG_VERBOSITY > 0
         debug << "WatchDogThread::~WatchDogThread()" << endl;
     #endif
+    stop();
 }
 
 void WatchDogThread::periodicFunction()

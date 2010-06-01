@@ -24,8 +24,7 @@ class QToolButton;
 class GLDisplay;
 
 class JobList;
-class WalkParameters;
-
+#include "Motion/Walks/WalkParameters.h"
 
 class WalkParameterWidget : public QWidget
 {
@@ -103,7 +102,7 @@ private:
     bool disableWriting;        //!< Flag used to disable the writing of settings back to the layers when updating the displays.
     
     JobList* m_job_list; 
-    WalkParameters* m_walk_parameters;
+    WalkParameters m_walk_parameters;
 
     public:
 

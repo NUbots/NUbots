@@ -77,7 +77,7 @@ HeadJob::HeadJob(double time, istream& input) : MotionJob(Job::MOTION_HEAD)
     }
 }
 
-/*! @brief WalkJob destructor
+/*! @brief HeadJob destructor
  */
 HeadJob::~HeadJob()
 {

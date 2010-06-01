@@ -20,17 +20,20 @@
  */
 
 #include "FallProtection.h"
+#include "NUWalk.h"
+
 #include "motionconfig.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
 /*! @brief Constructor for FallProtection module
  */
-FallProtection::FallProtection()
+FallProtection::FallProtection(NUWalk* walk)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "FallProtection::FallProtection()" << endl;
     #endif
+    m_walk = walk;
     #ifdef USE_FALL_PROTECTION
         m_enabled = true;
     #else

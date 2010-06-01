@@ -56,11 +56,19 @@ MotionScript::~MotionScript()
     
 }
 
+/*! @brief Returns the time when the script will be completed */
+double MotionScript::timeFinished()
+{
+    return m_uses_last;
+}
+
+/*! @brief Returns true if the script uses the head */
 bool MotionScript::usesHead()
 {
     return m_uses_head;
 }
 
+/*! @brief Returns the time when the script finishes with the head */
 double MotionScript::timeFinishedWithHead()
 {
     if (not m_uses_head)
@@ -69,11 +77,13 @@ double MotionScript::timeFinishedWithHead()
         return m_uses_last_head;
 }
 
+/*! @brief Returns true if the script uses the left arm */
 bool MotionScript::usesLArm()
 {
     return m_uses_larm;
 }
 
+/*! @brief Returns the time when the script finishes with the left arm */
 double MotionScript::timeFinishedWithLArm()
 {
     if (not m_uses_larm)
@@ -82,11 +92,13 @@ double MotionScript::timeFinishedWithLArm()
         return m_uses_last_larm;
 }
 
+/*! @brief Returns true if the script uses the right arm */
 bool MotionScript::usesRArm()
 {
     return m_uses_rarm;
 }
 
+/*! @brief Returns the time when the script finishes with the right arm */
 double MotionScript::timeFinishedWithRArm()
 {
     if (not m_uses_rarm)
@@ -95,11 +107,13 @@ double MotionScript::timeFinishedWithRArm()
         return m_uses_last_rarm;
 }
 
+/*! @brief Returns true if the script ueses the left leg */
 bool MotionScript::usesLLeg()
 {
     return m_uses_lleg;
 }
 
+/*! @brief Returns the time the script finishes with the left leg */
 double MotionScript::timeFinishedWithLLeg()
 {
     if (not m_uses_lleg)
@@ -108,11 +122,13 @@ double MotionScript::timeFinishedWithLLeg()
         return m_uses_last_lleg;
 }
 
+/*! @brief Returns true if script uses the right leg */
 bool MotionScript::usesRLeg()
 {
     return m_uses_rleg;
 }
 
+/*! @brief Returns the time the script finishes with the right leg */
 double MotionScript::timeFinishedWithRLeg()
 {
     if (not m_uses_rleg)
@@ -168,7 +184,7 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
             debug << "LLeg until " << timeFinishedWithLLeg() << ", ";
         if (m_uses_rleg)
             debug << "RLeg until " << timeFinishedWithRLeg() << ", ";
-        debug << endl;
+        debug << "runs from " << m_play_start_time << " to " << timeFinished() << endl;
     #endif
 }
 
@@ -190,7 +206,7 @@ bool MotionScript::load()
             errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << endl;
             return false;
         }
-        m_playspeed = 0.5;
+        m_playspeed = 1.0;
         
         size_t numjoints = m_labels.size() - 1;
         m_times = vector<vector<double> >(numjoints, vector<double>());
@@ -232,14 +248,16 @@ bool MotionScript::load()
         }
         file.close();
         
-        // Now a bit of hackery. When we want to return to start we need to add the initial sensor position
-        for (size_t i=0; i<m_times.size(); i++)
-        {
-            if (not m_times[i].empty())
-            {   // only add the placeholders if the joint is non empty
-                m_times[i].push_back(m_times[i].back());
-                m_positions[i].push_back(m_positions[i].back());
-                m_gains[i].push_back(m_gains[i].back());
+        if (m_return_to_start)
+        {   // Now a bit of hackery. When we want to return to start we need to add the placeholders for the return move
+            for (size_t i=0; i<m_times.size(); i++)
+            {
+                if (not m_times[i].empty())
+                {   // only add the placeholders if the joint is non empty
+                    m_times[i].push_back(m_times[i].back());
+                    m_positions[i].push_back(m_positions[i].back());
+                    m_gains[i].push_back(m_gains[i].back());
+                }
             }
         }
         return true;
@@ -288,6 +306,16 @@ void MotionScript::updateLastUses(NUActionatorsData* actions, const vector<vecto
     m_uses_last_rarm = findLastUse(actions->getJointIndices(NUActionatorsData::RightArmJoints), times);
     m_uses_last_lleg = findLastUse(actions->getJointIndices(NUActionatorsData::LeftLegJoints), times);
     m_uses_last_rleg = findLastUse(actions->getJointIndices(NUActionatorsData::RightLegJoints), times);
+    
+    m_uses_last = m_uses_last_head;
+    if (m_uses_last_larm > m_uses_last)
+        m_uses_last = m_uses_last_larm;
+    if (m_uses_last_rarm > m_uses_last)
+        m_uses_last = m_uses_last_rarm;
+    if (m_uses_last_lleg > m_uses_last)
+        m_uses_last = m_uses_last_lleg;
+    if (m_uses_last_rleg > m_uses_last)
+        m_uses_last = m_uses_last_rleg;
 }
 
 

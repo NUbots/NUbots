@@ -64,12 +64,15 @@ NUMotion::NUMotion()
     
     m_data = NULL;
     m_actions = NULL;
+    
     #ifdef USE_HEAD
         m_head = new NUHead();
     #endif
     
     #if defined(USE_WALK)
         m_walk = NUWalk::getWalkEngine();
+        m_getup = new Getup(m_walk);
+        m_fall_protection = new FallProtection(m_walk);
         #if defined(USE_KICK)
             m_kick = new NUKick(m_walk);
         #endif
@@ -80,6 +83,8 @@ NUMotion::NUMotion()
             m_script = new Script(m_walk);
         #endif
     #else
+        m_getup = new Getup(NULL);
+        m_fall_protection = new FallProtection(NULL);
         #if defined(USE_KICK)
             m_kick = new NUKick(NULL);
         #endif
@@ -191,10 +196,10 @@ void NUMotion::kill()
     }
     
     // go into safe mode
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1250, legpositions, legvelocities, 50);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 500, larmpositions, armvelocities, 30);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 500, rarmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
+    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 750, larmpositions, armvelocities, 30);
+    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 750, rarmpositions, armvelocities, 30);
     
     m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
     m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
@@ -225,12 +230,12 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (m_fall_protection->enabled() and m_data->isFalling())
     {   // if falling no other motion module can run
-        m_fall_protection->process(data, actions);
+        //m_fall_protection->process(data, actions);
     }
     else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
     {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
         m_getup->process(data, actions);
-        if (not m_getup->isUsingHead())
+        if (not m_data->isFallen() and not m_getup->isUsingHead())
         {
             #ifdef USE_HEAD
                 m_head->process(data, actions);
@@ -289,8 +294,13 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL || m_current_time < m_last_kill_time + 5000)
+    if (jobs == NULL)
         return;
+    if (m_current_time < m_last_kill_time + 3000)
+    {   // don't let the jobs queue up when in the killed state
+        jobs->clearMotionJobs();
+        return;
+    }
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
     while (it != jobs->motion_end())

@@ -58,7 +58,7 @@ WalkToPointJob::WalkToPointJob(double time, istream& input) : MotionJob(Job::MOT
     }
 }
 
-/*! @brief WalkJob destructor
+/*! @brief WalkToPointJob destructor
  */
 WalkToPointJob::~WalkToPointJob()
 {

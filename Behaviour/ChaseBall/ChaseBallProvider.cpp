@@ -45,6 +45,7 @@ ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : Behav
     m_position_state = new PositionState(this);
     m_paused_state = new PausedState(this);
     
+    m_pauseable = pauseable;
     if (m_pauseable)
         m_state = m_paused_state;
     else

@@ -39,9 +39,7 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
-#include "MotionProvider.h"
 #include "WalkProvider.h"
-#include "NullBodyProvider.h"
 
 #include <vector>
 #include <fstream>
@@ -52,19 +50,16 @@ class NBWalk : public NUWalk
 public:
     NBWalk();
     ~NBWalk();
+
+    void setWalkParameters(const WalkParameters& walkparameters);
 protected:
     void doWalk();
 private:
-    void initWalkParameters();
-    
     void sendWalkCommand();
-    void preProcess();
     void processJoints();
-    void processStiffness();
-    bool postProcess();
-    void swapBodyProvider();    
     
     void updateNBSensors();
+    void setGait();
     void nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints);
     void nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints);
     void nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints);
@@ -83,6 +78,7 @@ private:
     mutable pthread_mutex_t next_joints_mutex;
     
     boost::shared_ptr<Gait> m_gait;
+    
 };
 
 #endif

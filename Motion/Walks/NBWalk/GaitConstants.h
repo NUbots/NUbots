@@ -168,13 +168,13 @@ namespace WP {
      0.0f,          // yaw foot angle (rad)
      0.1f};         // transition time (s)
     static const float STEP_DEFAULT[LEN_STEP_CONFIG]=
-    {0.8f,          // step time (s)                                ---> Walk Parameter
+    {0.4f,          // step time (s)                                ---> Walk Parameter
      0.25f,         // fraction of time spent in double support     ---> Walk Parameter
      15.0f,         // the step height (mm)                         ---> Walk Parameter
      0.0f,          // angle of the foot while lifted (rad)         ---> Walk Parameter
-     050.0f,        // max forward vel x (cm/s)                     ---> All of the velocities and accelerations are Walk Parameters
-     -50.0f,        // max backward vel x (cm/s)
-     050.0f,        // max vel y (cm/s)
+     70.0f,        // max forward vel x (cm/s)                      ---> All of the velocities and accelerations are Walk Parameters
+     -70.0f,        // max backward vel x (cm/s)
+     70.0f,        // max vel y (cm/s)
      0.35f,         // max vel yaw (rad/s) 
      70.0f,         // max acc x (cm/s/s)
      70.0f,         // max acc y (cm/s/s)
@@ -185,11 +185,11 @@ namespace WP {
      0.4f,          // zmp static perc                              ---> Walk Parameter
      10.0f,          // l zmp off                                   ---> Walk Parameter
      10.0f,          // r zmp off                                   ---> Walk Parameter 
-     0.01f,         // strafe zmp off                               ---> Walk Parameter
-     6.6f,};        // turn zmp off                                 ---> Walk Parameter
+     0.01f,         // strafe zmp off
+     0.0f,};        // turn zmp off  
     static const float HACK_DEFAULT[LEN_HACK_CONFIG]=
-    {0.2f,          // hip hack l                                   ---> Walk Parameter
-     0.2f};         // hip hack r                                   ---> Walk Parameter
+    {0.1f,          // hip hack l                                   ---> Walk Parameter
+     0.1f};         // hip hack r                                   ---> Walk Parameter
     static const float SENSOR_DEFAULT[LEN_SENSOR_CONFIG]=
     {1.0,   // Feedback type (1.0 = spring, 0.0 = old)
      0.06,  // angle X scale (gamma)
@@ -211,7 +211,7 @@ namespace WP {
      1.0f,//yodoscale
      1.0f};//thetaodoscale
     static const float ARM_DEFAULT[LEN_ARM_CONFIG]=
-    {0.5f};//arm amplitude
+    {0.0f};//arm amplitude
 
 };//End namespace WP
 #endif

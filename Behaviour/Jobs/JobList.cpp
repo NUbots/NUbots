@@ -209,6 +209,13 @@ list<Job*>::iterator JobList::removeMotionJob(list<Job*>::iterator iter)
     return removeJob(m_motion_jobs, iter);
 }
 
+/*! @brief Removes all motion jobs from the list
+ */
+void JobList::clearMotionJobs()
+{
+    m_motion_jobs.clear();
+}
+
 /*! @brief Remove a camera job from the list
     @param iter the position of the job to be removed
     @return the new iterator position post job-removal
