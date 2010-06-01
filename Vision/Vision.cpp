@@ -1919,11 +1919,11 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         visualSphericalPosition[0] = distance;
         visualSphericalPosition[1] = bearing;
         visualSphericalPosition[2] = elevation;
-        Matrix camera2groundTransform;
-        bool isOK = getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+        Matrix cameraTransform;
+        bool isOK = getSensorsData()->getCameraTransform(cameraTransform);
         if(isOK == true)
         {
-            transformedSphericalPosition = Kinematics::TransformPosition(camera2groundTransform,visualSphericalPosition);
+            transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
 
         }
 
