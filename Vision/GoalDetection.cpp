@@ -121,14 +121,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             //Assign Possible IDs: Yellow or Blue, Left or Right Posts
             if((*it).getColour() == ClassIndex::blue || (*it).getColour() == ClassIndex::shadow_blue)
             {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN);
+                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
 
             }
             else if((*it).getColour() == ClassIndex::yellow || (*it).getColour() == ClassIndex::yellow_orange)
             {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN);
+                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
                 newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
 
@@ -150,6 +150,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
             sphericalPosition[1] = bearing;
             sphericalPosition[2] = elevation;
             Vector3 <float> transformedSphericalPosition;
+            Vector2<float> screenPositionAngle(bearing, elevation);
             Matrix cameraTransform;
             bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
             if(isOK == true)
@@ -162,6 +163,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 
             newAmbObj.UpdateVisualObject(   transformedSphericalPosition,
                                             sphericalError,
+                                            screenPositionAngle,
                                             viewPosition,
                                             sizeOnScreen,
                                             vision->m_timestamp);
@@ -185,7 +187,48 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
         PossibleGoal.getColour() == 	ClassIndex::yellow ||
         PossibleGoal.getColour() == 	ClassIndex::yellow_orange)
     {
-        return true;
+
+        if(PossibleGoal.getColour() == ClassIndex::shadow_blue || PossibleGoal.getColour() == ClassIndex::blue)
+        {
+            int blueSize = 0;
+            std::vector<TransitionSegment> segments = PossibleGoal.getSegments();
+            for(unsigned int i = 0; i <segments.size(); i++ )
+            {
+                if(segments[i].getColour() == ClassIndex::blue)
+                {
+                    blueSize = blueSize + segments[i].getSize();
+                }
+            }
+            if(blueSize > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if(PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+        {
+            int yellowSize = 0;
+            std::vector<TransitionSegment> segments = PossibleGoal.getSegments();
+            for(unsigned int i = 0; i <segments.size(); i++ )
+            {
+                if(segments[i].getColour() == ClassIndex::yellow)
+                {
+                    yellowSize = yellowSize + segments[i].getSize();
+                }
+            }
+            if(yellowSize > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
     else{
         return false;
@@ -321,7 +364,19 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
 
     int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
+    std::vector<unsigned char> colourlist;
+    colourlist.reserve(2);
+    if(PossibleGoal->getColour() == ClassIndex::yellow ||PossibleGoal->getColour() == ClassIndex::yellow_orange )
+    {
+        colourlist.push_back(ClassIndex::yellow);
+        colourlist.push_back(ClassIndex::yellow_orange);
+    }
+    else if(PossibleGoal->getColour() == ClassIndex::blue ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
+    {
+        colourlist.push_back(ClassIndex::blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
+    }
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
 
     //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
     //! Debug Output for small scans:
@@ -871,6 +926,7 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sphericalPosition[2] = elevation;
 
     Vector3 <float> transformedSphericalPosition;
+    Vector2<float> screenPositionAngle(bearing, elevation);
     Matrix cameraTransform;
     bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
     if(isOK == true)
@@ -882,6 +938,7 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     sizeOnScreen.y = GoalPost->height();
     AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      transformedSphericalPosition,
                                                                     sphericalError,
+                                                                    screenPositionAngle,
                                                                     viewPosition,
                                                                     sizeOnScreen,
                                                                     vision->m_timestamp);

@@ -34,8 +34,8 @@ HeadTrackJob::HeadTrackJob(const Object& object, float centreelevation, float ce
 {
     if (object.TimeSeen() > 0)
     {
-        m_elevation = -object.measuredElevation();
-        m_bearing = object.measuredBearing();
+        m_elevation = -object.ScreenYTheta();
+        m_bearing = object.ScreenXTheta();
     }
     else
     {

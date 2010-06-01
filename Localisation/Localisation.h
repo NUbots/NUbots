@@ -35,7 +35,7 @@ class Localisation: public TimestampedData
         void feedback(double*);
         double feedbackPosition[3];
         void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets);
-        void CheckGameState();
+        bool CheckGameState();
         bool varianceCheck(int modelID);
         int varianceCheckAll();
         void ResetAll();
@@ -63,6 +63,8 @@ class Localisation: public TimestampedData
         void MergeModels(int maxAfterMerge);
 	    void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
+
+        bool IsValidObject(const Object& theObject);
 
         // Model Reset Functions
         bool ShouldRunInState(GameInformation::RobotState theState);

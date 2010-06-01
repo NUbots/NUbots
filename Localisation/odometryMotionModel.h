@@ -22,6 +22,11 @@ protected:
 		/// Simple Probability utilities object for sampling
 		ProbabilityUtils d_myProb;
 public:
+                double muXx     ;
+                double muXy     ;
+
+                double muYy     ;
+                double muYx     ;
 	
 	/// error in radians per meter
 	double d_tErr1;

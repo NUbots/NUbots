@@ -133,6 +133,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     Vector2<int> TopLeft = PossibleBall.getTopLeft();
     Vector2<int> BottomRight = PossibleBall.getBottomRight();
     int midX =  (int)((BottomRight.x-TopLeft.x)/2)+TopLeft.x;
+    int midY =  (int)((BottomRight.y-TopLeft.y)/2)+TopLeft.y;
     Vector2<int> SegStart;
     SegStart.x = midX;
     SegStart.y = TopLeft.y;
@@ -140,7 +141,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     SegEnd.x = midX;
     SegEnd.y = BottomRight.y;
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
-    ScanLine tempLine;
+    ScanLine tempLine = ScanLine();
 
     //! Maximum ball points = 4*2 = 8;
     int spacings = (int)(BottomRight.y - TopLeft.y)/4;
@@ -149,8 +150,14 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
         spacings = 2;
     }
     //qDebug() << spacings ;
+    std::vector<unsigned char> colourlist;
+    colourlist.reserve(3);
+    colourlist.push_back(ClassIndex::orange);
+    colourlist.push_back(ClassIndex::pink_orange);
+    colourlist.push_back(ClassIndex::yellow_orange);
     int direction = ScanLine::DOWN;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction);
+    //qDebug() << "Horizontal Scan : ";
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction,colourlist);
 
     std::vector< Vector2<int> > BallPoints;
 
@@ -170,7 +177,45 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
-        /*qDebug() << "At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+        /*qDebug() << "Horizontal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
+                <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
+                <<","<< tempSegement->getEndPoint().y << ")";*/
+
+    }
+
+    SegStart.x = TopLeft.x;
+    SegStart.y = midY;
+    SegEnd.x = BottomRight.x;
+    SegEnd.y = midY;
+    tempSeg = TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
+    tempLine = ScanLine();
+
+    BallPoints.push_back(SegStart);
+    BallPoints.push_back(SegEnd);
+
+    //! Maximum ball points = 4*2 = 8;
+    spacings = (int)(BottomRight.y - TopLeft.y)/4;
+    if(spacings < 2)
+    {
+        spacings = 2;
+    }
+    //qDebug() << "Vertical Scan : ";
+    direction = ScanLine::LEFT;
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
+    for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
+    {
+        TransitionSegment* tempSegement = tempLine.getSegment(i);
+        //! Check if the segments are at the edge of screen
+        if(!(tempSegement->getStartPoint().x < 0 || tempSegement->getStartPoint().y < 0))
+        {
+            BallPoints.push_back(tempSegement->getStartPoint());
+        }
+        if(!(tempSegement->getEndPoint().x >= heigth-1 || tempSegement->getEndPoint().x >= width-1))
+        {
+            BallPoints.push_back(tempSegement->getEndPoint());
+        }
+
+        /*qDebug() << "Veritcal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
                 <<","<< tempSegement->getEndPoint().y << ")";*/
 
@@ -226,7 +271,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            if(circ.sd > 3.5)
+            if(circ.sd > 5)
             {
                 circ.isDefined = false;
             }

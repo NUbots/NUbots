@@ -377,6 +377,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     if(BallCandidates.size() > 0)
     {
         circ = vision.DetectBall(BallCandidates);
+        qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
 

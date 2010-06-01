@@ -90,12 +90,13 @@ float TeamInformation::getTimeToBall()
         m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
         m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
         float measureddistance = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-        float balldistance;
-        if (measureddistance < 46)
-            balldistance = 1;
-        else
-            balldistance = sqrt(pow(measureddistance,2) - 46*46);
-        float ballbearing = headyaw + m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+        //float balldistance;
+		float balldistance = measureddistance * cos(m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
+//        if (measureddistance < 46)
+//            balldistance = 1;
+//        else
+//			balldistance = sqrt(pow(measureddistance,2) - 46*46);
+        float ballbearing = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
         time = balldistance/10.0 + fabs(ballbearing)/0.5;
     }
     return time;
