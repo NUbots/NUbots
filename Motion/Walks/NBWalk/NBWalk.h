@@ -50,6 +50,8 @@ class NBWalk : public NUWalk
 public:
     NBWalk();
     ~NBWalk();
+    
+    void kill();
 
     void setWalkParameters(const WalkParameters& walkparameters);
 protected:
