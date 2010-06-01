@@ -630,11 +630,14 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
 
     if(IsValidObject(ball) == false)
     {
-
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  <<"[" << m_timestamp << "]: Skipping Invalid Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        return KF_OUTLIER;
     }
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
-    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
+    debug_out  <<"[" << m_timestamp << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     double flatBallDistance = ball.measuredDistance() * cos(ball.measuredElevation());
@@ -651,6 +654,18 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 {
     int kf_return;
     int numSuccessfulUpdates = 0;
+
+    if(IsValidObject(landmark) == false)
+    {
+#if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  <<"[" << m_timestamp << "] Skipping Landmark Update: ";
+        debug_out  << landmark.getName();
+        debug_out  << " Distance = " << landmark.measuredDistance();
+        debug_out  << " Bearing = " << landmark.measuredBearing();
+#endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        return KF_OUTLIER;
+    }
+
     int objID = landmark.getID();
     double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
     //double flatObjectDistance = landmark.measuredDistance();
@@ -674,7 +689,7 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
-        //debug_out  << "Object = " << landmark.name();
+        debug_out  << "Object = " << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
         debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
@@ -707,6 +722,17 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
+
+    if(IsValidObject(ambigousObject) == false)
+    {
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  <<"[" << m_timestamp << "] Skipping Ambiguous Object: ";
+        debug_out  << ambigousObject.getName();
+        debug_out  << " Distance = " << ambigousObject.measuredDistance();
+        debug_out  << " Bearing = " << ambigousObject.measuredBearing();
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        return KF_OUTLIER;
+    }
 
     /*
     #if AMBIGUOUS_CORNERS_ON <= 0
