@@ -26,6 +26,12 @@ OdometryMotionModel::OdometryMotionModel(double terr1, double terr2, double rerr
 	d_tErr2 = terr2;
 	rErr1 = rerr1;
 	rErr2 = rerr2;
+
+        muXx     = terr1;
+        muXy     = terr2;
+
+        muYy     = rerr1;
+        muYx     = rerr2;
 	
 }
 
@@ -183,11 +189,7 @@ double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
 //	----------- works 
 	double t = sqrt ( (diffOdom.X*diffOdom.X) + (diffOdom.Y*diffOdom.Y) );
 	
-	double muXx     = 0.07;
-	double muXy     = 0.00005;
-	
-	double muYy     = 0.00005;
-	double muYx     = 0.000005;
+
 	
 	double muTheta = rErr1 * t + rErr2 * fabs(diffOdom.Theta);
 	
@@ -197,12 +199,12 @@ double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
 	
 	
 	double varX     = d_tErr1 * t   + rErr1 * fabs(diffOdom.Theta);
-	double varY     = d_tErr2 * t   + rErr2 * fabs(diffOdom.Theta);
+        double varY     =    muYy * fabs(diffOdom.Theta);
 	double varTheta = rErr1 * t + rErr2 * fabs(diffOdom.Theta);
 	      
  	
  	double tempX = d_myProb.randomGaussian( diffOdom.X*muXx + diffOdom.Y*muXy , diffOdom.X*varX);
-	double tempY = d_myProb.randomGaussian( 0.01 , varY);
+        double tempY = d_myProb.randomGaussian( diffOdom.Y*muYy + diffOdom.X*muYx , diffOdom.Y*varY );
 	      
 	double tempTheta = d_myProb.randomGaussian( muTheta , varTheta); 
 	       
