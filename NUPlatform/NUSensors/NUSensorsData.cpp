@@ -111,7 +111,16 @@ NUSensorsData::NUSensorsData()
     // Battery Sensors:
     addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
     
-    // GPS Sensor
+    // Motion Sensors:
+    addSensor(MotionFallActive, string("MotionFallActive"), sensor_t::MOTION_FALL_ACTIVE);
+    addSensor(MotionGetupActive, string("MotionGetupActive"), sensor_t::MOTION_GETUP_ACTIVE);
+    addSensor(MotionKickActive, string("MotionKickActive"), sensor_t::MOTION_KICK_ACTIVE);
+    addSensor(MotionSaveActive, string("MotionSaveActive"), sensor_t::MOTION_SAVE_ACTIVE);
+    addSensor(MotionScriptActive, string("MotionScriptActive"), sensor_t::MOTION_SCRIPT_ACTIVE);
+    addSensor(MotionWalkSpeed, string("MotionWalkSpeed"), sensor_t::MOTION_WALK_SPEED);
+    addSensor(MotionHeadCompletionTime, string("MotionHeadCompletionTime"), sensor_t::MOTION_HEAD_COMPLETION_TIME);
+
+    // GPS Sensor:
     addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
     addSensor(Compass, string("Compass"), sensor_t::COMPASS_VALUES);
 }
@@ -1051,6 +1060,111 @@ bool NUSensorsData::footImpact(foot_id_t footid, float& time)
 
 }
 
+/*! @brief Get whether the fall motion module is active
+    @param active will be updated to true if the fall module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionFallActive(bool& active)
+{
+    if (not MotionFallActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionFallActive->Data[0];
+        return true;
+    }
+}
+
+/*! @brief Get whether the getup motion module is active
+    @param active will be updated to true if the getup module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionGetupActive(bool& active)
+{
+    if (not MotionGetupActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionGetupActive->Data[0];
+        return true;
+    }
+}
+
+/*! @brief Get whether the kick motion module is active
+    @param active will be updated to true if the kick module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionKickActive(bool& active)
+{
+    if (not MotionKickActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionKickActive->Data[0];
+        return true;
+    }
+}
+
+/*! @brief Get whether the save motion module is active
+    @param active will be updated to true if the save module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionSaveActive(bool& active)
+{
+    if (not MotionSaveActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionSaveActive->Data[0];
+        return true;
+    }
+}
+
+/*! @brief Get whether the script motion module is active
+    @param active will be updated to true if the script module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionScriptActive(bool& active)
+{
+    if (not MotionSaveActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionSaveActive->Data[0];
+        return true;
+    }
+}
+
+/*! @brief Get current walk speed [cm/s, cm/s, rad/s]
+    @param speed will be updated with the current commanded walk speed
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionWalkSpeed(vector<float>& speed)
+{
+    if (not MotionWalkSpeed->IsValid)
+        return false;
+    else
+    {
+        speed = MotionWalkSpeed->Data;
+        return true;
+    }
+}
+
+/*! @brief Get the current head completion time 
+    @param time will be updated with the current head completion time
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionHeadCompletionTime(double& time)
+{
+    if (not MotionHeadCompletionTime->IsValid)
+        return false;
+    else
+    {
+        time = MotionHeadCompletionTime->Data[0];
+        return true;
+    }
+}
+
 /******************************************************************************************************************************************
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
@@ -1380,6 +1494,83 @@ void NUSensorsData::setBatteryValues(double time, const vector<float>& data, boo
     setData(BatteryValues, time, data, iscalculated);
 }
 
+/*! @brief Sets whether the fall engine is active
+    @param time the timestamp
+    @param active true if fall is active
+ */ 
+void NUSensorsData::setMotionFallActive(double time, bool active)
+{
+    static vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionFallActive, time, data, false);
+}
+
+/*! @brief Sets whether the getup engine is active
+    @param time the timestamp
+    @param active true if getup is active
+ */ 
+void NUSensorsData::setMotionGetupActive(double time, bool active)
+{
+    static vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionGetupActive, time, data, false);
+}
+
+/*! @brief Sets whether the kick engine is active
+    @param time the timestamp
+    @param active true if kick is active
+ */ 
+void NUSensorsData::setMotionKickActive(double time, bool active)
+{
+    static vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionKickActive, time, data, false);
+}
+
+/*! @brief Sets whether the save engine is active
+    @param time the timestamp
+    @param active true if save is active
+ */ 
+void NUSensorsData::setMotionSaveActive(double time, bool active)
+{
+    static vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionSaveActive, time, data, false);
+}
+
+/*! @brief Sets whether the script engine is active
+    @param time the timestamp
+    @param active true if script is active
+ */
+void NUSensorsData::setMotionScriptActive(double time, bool active)
+{
+    static vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionScriptActive, time, data, false);
+}
+
+/*! @brief Sets the current walk speed 
+    @param time the timestamp
+    @param x the forward speed in cm/s
+    @param y the sideward speed in cm/s
+    @param yaw the rotation speed in rad/s
+ */
+void NUSensorsData::setMotionWalkSpeed(double time, vector<float>& speed)
+{
+    setData(MotionWalkSpeed, time, speed, false);
+}
+
+/*! @brief Sets the completion time of the current head movement
+    @param time the time the data was set in milliseconds
+    @param completiontime the head movement completion time
+ */
+void NUSensorsData::setMotionHeadCompletionTime(double time, double completiontime)
+{
+    static vector<float> ct(1,0);
+    ct[0] = completiontime;
+    setData(MotionHeadCompletionTime, time, ct, false);
+}
+
 /*! @brief Sets the GPS coordinates to the given values
     @param time the time the data was collected in milliseconds
     @param data the GPS values
@@ -1582,6 +1773,27 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
             break;
         case sensor_t::BATTERY_VALUES:
             BatteryValues = p_sensor;
+            break;
+        case sensor_t::MOTION_FALL_ACTIVE:
+            MotionFallActive = p_sensor;
+            break;
+        case sensor_t::MOTION_GETUP_ACTIVE:
+            MotionGetupActive = p_sensor;
+            break;
+        case sensor_t::MOTION_KICK_ACTIVE:
+            MotionKickActive = p_sensor;
+            break;
+        case sensor_t::MOTION_SAVE_ACTIVE:
+            MotionSaveActive = p_sensor;
+            break;
+        case sensor_t::MOTION_SCRIPT_ACTIVE:
+            MotionScriptActive = p_sensor;
+            break;
+        case sensor_t::MOTION_WALK_SPEED:
+            MotionWalkSpeed = p_sensor;
+            break;
+        case sensor_t::MOTION_HEAD_COMPLETION_TIME:
+            MotionHeadCompletionTime = p_sensor;
             break;
         case sensor_t::GPS_VALUES:
             GPS = p_sensor;

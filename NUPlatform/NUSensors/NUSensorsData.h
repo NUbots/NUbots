@@ -160,6 +160,15 @@ public:
     bool isOnGround();
     bool footImpact(foot_id_t footid, float& time);
     
+    // Motion sensor get methods
+    bool getMotionFallActive(bool& active);
+    bool getMotionGetupActive(bool& active);
+    bool getMotionKickActive(bool& active);
+    bool getMotionSaveActive(bool& active);
+    bool getMotionScriptActive(bool& active);
+    bool getMotionWalkSpeed(vector<float>& speed);
+    bool getMotionHeadCompletionTime(double& time);
+    
     void setAvailableJoints(const vector<string>& joints);
     
     // Set methods for joints
@@ -183,6 +192,15 @@ public:
     void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
     void setGPSValues(double time, const vector<float>& data, bool iscalculated = false);
     void setCompassValues(double time, const vector<float>& data, bool iscalculated = false);
+    
+    // Set methods for motion 'sensors'
+    void setMotionFallActive(double time, bool active);
+    void setMotionGetupActive(double time, bool active);
+    void setMotionKickActive(double time, bool active);
+    void setMotionSaveActive(double time, bool active);
+    void setMotionScriptActive(double time, bool active);
+    void setMotionWalkSpeed(double time, vector<float>& speed);
+    void setMotionHeadCompletionTime(double time, double completiontime);
     
     void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
@@ -253,6 +271,15 @@ public:
 
     // Battery Sensors:
     sensor_t* BatteryValues;                    //!< stores the battery values in Volts, Amperes and Watts
+    
+    // Motion Sensors:
+    sensor_t* MotionFallActive;                 //!< stores whether the fall protection is currently active
+    sensor_t* MotionGetupActive;                //!< stores whether the getup is currently active
+    sensor_t* MotionKickActive;                 //!< stores whether the kick is currently active
+    sensor_t* MotionSaveActive;                 //!< stores whether the save is currently active
+    sensor_t* MotionScriptActive;               //!< stores whether the script engine is active
+    sensor_t* MotionWalkSpeed;                  //!< stores the current speeds [cm/s cm/s rad/s] of the walk engine
+    sensor_t* MotionHeadCompletionTime;         //!< stores the completion time of the last head movement
     
     // GPS Sensors
     sensor_t* GPS;                              //!< stores the gps position of the robot

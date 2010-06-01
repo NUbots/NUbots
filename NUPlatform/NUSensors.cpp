@@ -41,7 +41,7 @@ using namespace std;
  */
 NUSensors::NUSensors()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::NUSensors" << endl;
 #endif
     m_current_time = nusystem->getTime();
@@ -68,7 +68,7 @@ NUSensors::NUSensors()
  */
 NUSensors::~NUSensors()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::~NUSensors" << endl;
 #endif
     if (m_data != NULL)
@@ -91,7 +91,7 @@ NUSensorsData* NUSensors::update()
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
     
-#if DEBUG_NUSENSORS_VERBOSITY > 3
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     static bool firstrun = true;
     if (firstrun)
     {
@@ -100,8 +100,7 @@ NUSensorsData* NUSensors::update()
         firstrun = false;
     }
 #endif
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::NAOWebotsSensors():" << endl;
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     m_data->summaryTo(debug);
 #endif
     m_previous_time = m_current_time;
