@@ -117,6 +117,7 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
             {
                 if(job->saving() == true)
                 {
+                    currentSettings = m_camera->getSettings();
                     if (!imagefile.is_open())
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
@@ -127,6 +128,7 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                 {
                     imagefile.flush();
                     sensorfile.flush();
+                    m_camera->setSettings(currentSettings);
                     m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
             }
@@ -388,7 +390,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
-                //validColours.push_back(ClassIndex::shadow_blue);
+                validColours.push_back(ClassIndex::shadow_blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPRE-BLUE-GOALS" << endl;
@@ -546,29 +548,45 @@ void Vision::SaveAnImage()
         if (isSavingImagesWithVaryingSettings)
         {
             CameraSettings tempCameraSettings = m_camera->getSettings();
-            if (numSavedImages % 6 == 0 )
+            if (numSavedImages % 10 == 0 )
             {
-                tempCameraSettings.exposure = 100;
+                tempCameraSettings.exposure = currentSettings.exposure - 0;
             }
-            else if (numSavedImages % 6 == 1 )
+            else if (numSavedImages % 10 == 1 )
             {
-                tempCameraSettings.exposure = 150;
+                tempCameraSettings.exposure = currentSettings.exposure - 50;
             }
-            else if (numSavedImages % 6 == 2 )
+            else if (numSavedImages % 10 == 2 )
             {
-                tempCameraSettings.exposure = 200;
+                tempCameraSettings.exposure = currentSettings.exposure - 25;
             }
-            else if (numSavedImages % 6 == 3 )
+            else if (numSavedImages % 10 == 3 )
             {
-                tempCameraSettings.exposure = 250;
+                tempCameraSettings.exposure = currentSettings.exposure - 0;
             }
-            else if (numSavedImages % 6 == 4 )
+            else if (numSavedImages % 10 == 4 )
             {
-                tempCameraSettings.exposure = 300;
+                tempCameraSettings.exposure = currentSettings.exposure + 25;
             }
-            else if (numSavedImages % 6 == 5 )
+            else if (numSavedImages % 10 == 5 )
             {
-                tempCameraSettings.exposure = 400;
+                tempCameraSettings.exposure = currentSettings.exposure + 50;
+            }
+            else if (numSavedImages % 10 == 6 )
+            {
+                tempCameraSettings.exposure = currentSettings.exposure + 100;
+            }
+            else if (numSavedImages % 10 == 7 )
+            {
+                tempCameraSettings.exposure = currentSettings.exposure + 150;
+            }
+            else if (numSavedImages % 10 == 8 )
+            {
+                tempCameraSettings.exposure = currentSettings.exposure + 200;
+            }
+            else if (numSavedImages % 10 == 9 )
+            {
+                tempCameraSettings.exposure = currentSettings.exposure + 300;
             }
             m_camera->setSettings(tempCameraSettings);
         }
@@ -1121,7 +1139,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 }
 //! @brief  Pass a transition segment into this function, and will return a scanline which contains
 //!         many different at interval of "spacing" transition segments classified in the orthogonal to the "direction"
-void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
+void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction, const std::vector<unsigned char> &colourList)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
 {
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
@@ -1155,9 +1173,9 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
-            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff,colourList))
             {
-                if(tempsubPoint+skipPixel > width)
+                if(tempsubPoint+skipPixel >= width)
                 {
                     break;
                 }
@@ -1178,6 +1196,20 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
 
             tempSubEndPoint.x = tempsubPoint - bufferSize*skipPixel;
+            tempColour = tempTransition->getColour();
+            while(isValidColour(tempColour,colourList))
+            {
+                if(StartPoint.y+k < height && StartPoint.y+k > 0
+                   && tempSubEndPoint.x+1 < width && tempSubEndPoint.x+1 > 0)
+                {
+                    tempSubEndPoint.x = tempSubEndPoint.x+1;
+                    tempColour= classifyPixel(tempSubEndPoint.x,StartPoint.y+k);
+                }
+                else
+                {
+                    break;
+                }
+            }
             subAfterColour = tempColour;
             tempsubPoint = StartPoint.x;
             tempColour = tempTransition->getColour();
@@ -1187,7 +1219,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 colourBuff.push_back(tempTransition->getColour());
             }
             //qDebug() << "Condition:" << checkIfBufferSame(colourBuff) << colourBuff[0] << tempTransition->getColour();
-            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff, colourList))
             {
                 if(tempsubPoint-skipPixel < 0)
                 {
@@ -1209,6 +1241,20 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
             tempSubStartPoint.x = tempsubPoint + bufferSize*skipPixel;
+            tempColour = tempTransition->getColour();
+            while(isValidColour(tempColour,colourList))
+            {
+                if(StartPoint.y+k < height && StartPoint.y+k > 0
+                   && tempSubStartPoint.x-1 < width && tempSubStartPoint.x-1 > 0)
+                {
+                    tempSubStartPoint.x = tempSubStartPoint.x-1;
+                    tempColour= classifyPixel(tempSubStartPoint.x,StartPoint.y+k);
+                }
+                else
+                {
+                    break;
+                }
+            }
             subBeforeColour = tempColour;
             //THEN ADD TO LINE
             //qDebug() << "Adding Line: " << tempSubStartPoint.x << tempSubStartPoint.y << tempSubEndPoint.x << tempSubEndPoint.y;
@@ -1241,15 +1287,17 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             int tempY = StartPoint.y;
             tempColour = tempTransition->getColour();
             //Reseting ColourBuffer
+            //qDebug() << "Resetting:";
             for (int i = 0; i < bufferSize; i++)
             {
                 colourBuff.push_back(tempTransition->getColour());
             }
             //Search for End of Perpendicular Segment
-            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
+            //qDebug() << "Searching roughly for end:";
+            while(checkIfBufferContains(colourBuff, colourList))
             {
-                if(tempY+1 > height) break;
-                tempY++;
+                if(tempY+skipPixel >= height) break;
+                tempY = tempY+skipPixel;
 
                 if(StartPoint.x+k < width && StartPoint.x+k > 0 &&
                    tempY < height && tempY > 0)
@@ -1264,23 +1312,41 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             }
 
             tempSubEndPoint.y = tempY - bufferSize*skipPixel;
+            tempColour = tempTransition->getColour();
+            //qDebug() << "Searching closely for end:" ;
+            while(isValidColour(tempColour,colourList))
+            {
+                //qDebug() << StartPoint.x+k << tempSubEndPoint.y;
+                if(StartPoint.x+k < width && StartPoint.x+k > 0 &&
+                   tempSubEndPoint.y+1 < height && tempSubEndPoint.y+1 > 0)
+                {
+                    tempSubEndPoint.y = tempSubEndPoint.y+1;
+                    tempColour= classifyPixel(StartPoint.x+k,tempSubEndPoint.y);
+                }
+                else
+                {
+                    break;
+                }
+
+            }
             subAfterColour = tempColour;
             tempY = StartPoint.y;
             tempColour = tempTransition->getColour();
             //Reseting ColourBuffer
+            //qDebug() << "Resetting:";
             for (int i = 0; i < bufferSize; i++)
             {
                 colourBuff.push_back(tempTransition->getColour());
             }
-
+            //qDebug() << "Searching roughly:";
             //Search for Start of Perpendicular Segment
-            while(checkIfBufferContains(colourBuff, tempTransition->getColour()))
+            while(checkIfBufferContains(colourBuff, colourList))
             {
-                if(tempY-1 < 0)
+                if(tempY-skipPixel < 0)
                 {
                     break;
                 }
-                tempY--;
+                tempY = tempY-skipPixel;
                 if(StartPoint.x+k < width && StartPoint.x+k > 0
                    && tempY < height && tempY > 0)
                 {
@@ -1294,6 +1360,21 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
             tempSubStartPoint.y = tempY + bufferSize*skipPixel;
+            tempColour = tempTransition->getColour();
+            //qDebug() << "searching closely:";
+            while(isValidColour(tempColour,colourList))
+            {
+                if(StartPoint.x+k < width && StartPoint.x+k > 0
+                   && tempSubStartPoint.y-1 < height && tempSubStartPoint.y-1 > 0)
+                {
+                    tempSubStartPoint.y = tempSubStartPoint.y-1;
+                    tempColour= classifyPixel(StartPoint.x+k,tempSubStartPoint.y);
+                }
+                else
+                {
+                    break;
+                }
+            }
             subBeforeColour = tempTransition->getColour();
             //THEN ADD TO LINE
 
@@ -1307,11 +1388,11 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     }
 }
 
-bool Vision::checkIfBufferContains(boost::circular_buffer<unsigned char> cb, unsigned char colour)
+bool Vision::checkIfBufferContains(boost::circular_buffer<unsigned char> cb, const std::vector<unsigned char> &colourList)
 {
     for(unsigned int i = 0; i < cb.size(); i++)
     {
-        if(cb[i] == colour)
+        if(isValidColour(cb[i],colourList))
         {
             return true;
         }
@@ -1929,7 +2010,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
 
         }
-
+        //qDebug() << "Vision::DetectBall : Update FO_Ball" << (ball.radius*2);
         sizeOnScreen.x = int(ball.radius*2);
         sizeOnScreen.y = int(ball.radius*2);
 
