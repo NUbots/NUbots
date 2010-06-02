@@ -26,6 +26,8 @@
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
+#include "Motion/Tools/MotionFileTools.h"
+
 #include <albroker.h>
 #include <time.h>
 
@@ -73,20 +75,17 @@ void ALWalk::freeze()
 void ALWalk::kill()
 {
     freeze();
-    
-    // when we kill aldebaran's walk we need to turn on stiffness protection and set the stiffness to zero
-    m_al_stiffness_protection[0][1] = true;
-    m_al_motion->setMotionConfig(m_al_stiffness_protection);
-    m_al_motion->setStiffnesses(string("Body"), 0.0f);
 }
 
 void ALWalk::enableWalk()
 {
-    // when we un-kill aldebaran's walk we turn on the stiffness then turn off the stiffness protection ;)
-    // this is a hack to get the walk engine to check it is in initial position and then move to that position
-    m_al_motion->setStiffnesses(string("Body"), 0.65f);
-    m_al_stiffness_protection[0][1] = false;
-    m_al_motion->setMotionConfig(m_al_stiffness_protection);
+    // We need to put the robot back where almotion thinks it is
+    // all I have to do is ask al_motion where it thinks it is and then move the robot there using the dcm... 
+    m_initial_larm = convertToNUArmOrder(m_al_motion->getAngles("LArm", false));
+    m_initial_rarm = convertToNUArmOrder(m_al_motion->getAngles("RArm", false));
+    m_initial_lleg = convertToNULegOrder(m_al_motion->getAngles("LLeg", false));
+    m_initial_rleg = convertToNULegOrder(m_al_motion->getAngles("RLeg", false));
+    
     NUWalk::enableWalk();
 }
 
@@ -169,4 +168,48 @@ void ALWalk::setWalkParameters(const WalkParameters& walkparameters)
     NUWalk::setWalkParameters(walkparameters);
     setALConfig();
     m_al_motion->setMotionConfig(m_al_config);
+}
+
+/*! @Brief Converts data from Aldebaran's order to the order used by the NUPlatform interface.
+    @param data the Aldebaran ordered arm joint data
+    @return the NUPlatform ordered arm data
+ */
+vector<float> ALWalk::convertToNUArmOrder(const vector<float>& data)
+{
+    // Aldebaran's order: [LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll]
+    // NUPlatform's order:[LShoulderRoll, LShoulderPitch, LElbowRoll, LElbowYaw]
+    
+    vector<float> reordered;
+    if (data.size() < 4)
+        return reordered;
+    else
+    {
+        reordered.reserve(data.size());
+        reordered.push_back(data[1]);
+        reordered.push_back(data[0]);
+        reordered.push_back(data[3]);
+        reordered.push_back(data[2]);
+        return reordered;
+    }
+}
+
+vector<float> ALWalk::convertToNULegOrder(const vector<float>& data)
+{
+    // Aldebaran's order: [LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll]
+    // NUPlatform's order:[LHipRoll, LHipPitch, LHipYawPitch, LKneePitch, LAnkleRoll, LAnklePitch]
+    
+    vector<float> reordered;
+    if (data.size() < 6)
+        return reordered;
+    else
+    {
+        reordered.reserve(data.size());
+        reordered.push_back(data[1]);
+        reordered.push_back(data[2]);
+        reordered.push_back(data[0]);
+        reordered.push_back(data[3]);
+        reordered.push_back(data[5]);
+        reordered.push_back(data[4]);
+        return reordered;
+    }
 }

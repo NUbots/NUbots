@@ -43,6 +43,7 @@ public:
     static vector<float> toFloatVector(const string& data);
     static vector<float> toFloatVector(istream& input);
     
+    static string fromVector(vector<string> data);
     static vector<string> toStringVector(istream& input);
     
     static void toFloatWithRange(const string& data, float& value, vector<float>& range);

@@ -49,6 +49,9 @@ protected:
     void doWalk();
     void initALConfig();
     void setALConfig();
+    
+    vector<float> convertToNUArmOrder(const vector<float>& data);
+    vector<float> convertToNULegOrder(const vector<float>& data);
 private:
 public:
 protected:
