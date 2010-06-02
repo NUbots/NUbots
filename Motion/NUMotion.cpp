@@ -96,8 +96,6 @@ NUMotion::NUMotion()
             m_script = new Script(NULL);
         #endif
     #endif
-    
-    //m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -295,7 +293,7 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL)
+    if (jobs == NULL or m_data == NULL or m_actions == NULL)
         return;
     if (m_current_time < m_last_kill_time + 3000)
     {   // don't let the jobs queue up when in the killed state

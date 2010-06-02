@@ -61,6 +61,7 @@ private:
     ALValue m_al_param;             //!< A single parameter of m_al_config
     
     ALValue m_al_stiffness_protection;
+    double m_last_enabled_time;
 };
 
 #endif

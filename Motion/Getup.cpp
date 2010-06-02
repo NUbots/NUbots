@@ -135,7 +135,7 @@ void Getup::playGetup()
     vector<float> fallen;
     if (m_data->getFallen(fallen))
     {
-        MotionScript* getup;
+        MotionScript* getup = m_on_front;
         if (fallen[1])
             getup = m_on_left;
         else if (fallen[2])

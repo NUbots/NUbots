@@ -52,6 +52,7 @@ ALWalk::ALWalk()
     // load and init the walk parameters
     m_walk_parameters.load("ALWalkAldebaran");
     initALConfig();
+    m_last_enabled_time = 0;
 }
 
 /*! @brief Destructor for motion module
@@ -87,10 +88,20 @@ void ALWalk::enableWalk()
     m_initial_rleg = convertToNULegOrder(m_al_motion->getAngles("RLeg", false));
     
     NUWalk::enableWalk();
+    if (m_walk_enabled)
+        m_last_enabled_time = m_current_time;
 }
 
 void ALWalk::doWalk()
 {      
+    if (m_current_time - m_last_enabled_time < 1500)
+    {
+        float killfactor = (m_current_time - m_last_enabled_time)/1500;
+        m_speed_x *= killfactor;
+        m_speed_y *= killfactor;
+        m_speed_yaw *= killfactor;
+    }
+    
     // give the target speed to the walk engine
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
