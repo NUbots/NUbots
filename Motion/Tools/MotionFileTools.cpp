@@ -156,6 +156,24 @@ vector<float> MotionFileTools::toFloatVector(istream& input)
     return toFloatVector(buffer);
 }
 
+/*! @brief Converts a vector<string> to a formated string
+    @param data the data to be put in the string
+    @return thre formatted string
+ */
+string MotionFileTools::fromVector(vector<string> data)
+{
+    stringstream ss;
+    ss << "[";
+    if (not data.empty())
+    {
+        for (size_t i=0; i<data.size()-1; i++)
+            ss << data[i] << ", ";
+        ss << data[data.size()-1];
+    }
+    ss << "]";
+    return ss.str();
+}
+
 /*! @brief Reads the stream looking for comma separated list of strings. 
     @param input the stream to read from
     @return the list of strings

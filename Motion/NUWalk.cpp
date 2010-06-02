@@ -130,6 +130,9 @@ void NUWalk::enableWalk()
 void NUWalk::freeze()
 {
     m_walk_enabled = false;
+    m_speed_x = 0;
+    m_speed_y = 0;
+    m_speed_yaw = 0;
 }
 
 /*! @brief Kills the walk engine
@@ -211,6 +214,11 @@ void NUWalk::process(WalkParametersJob* job)
 void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_speed)
 {
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    
+    if (std::isnan(trans_speed))
+        trans_speed = 1.0;
+    if (std::isnan(trans_direction) or std::isnan(rot_speed))
+        return;
     
     // clip translational speed to be a fraction
     if (trans_speed < -1)
@@ -408,13 +416,13 @@ void NUWalk::moveToInitialPosition()
         // give the command to the actionators
         m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + 100, sensor_larm, velocity_larm, 40);
         m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + 100, sensor_rarm, velocity_rarm, 40);
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + 100, sensor_lleg, velocity_lleg, 60);
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + 100, sensor_lleg, velocity_lleg, 75);
         m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + 100, sensor_rleg, velocity_rleg, 60);
         
         m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + time_larm, m_initial_larm, velocity_larm, 40);
         m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + time_rarm, m_initial_rarm, velocity_rarm, 40);
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + time_lleg, m_initial_lleg, velocity_lleg, 60);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + time_rleg, m_initial_rleg, velocity_rleg, 60);
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + time_lleg, m_initial_lleg, velocity_lleg, 75);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + time_rleg, m_initial_rleg, velocity_rleg, 75);
     }
 }
 

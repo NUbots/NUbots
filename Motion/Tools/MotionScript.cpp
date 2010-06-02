@@ -156,7 +156,7 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
     if (not m_uses_set)
         setUses(actions);
     
-    m_play_start_time = data->CurrentTime;
+    m_play_start_time = data->CurrentTime + 100;        // I add 100ms here because it can take upto 100ms to calculate a long and detailed motion curve
     vector<vector<double> > times = m_times;
     for (size_t i=0; i<times.size(); i++)
         for (size_t j=0; j<times[i].size(); j++)
@@ -185,6 +185,13 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
         if (m_uses_rleg)
             debug << "RLeg until " << timeFinishedWithRLeg() << ", ";
         debug << "runs from " << m_play_start_time << " to " << timeFinished() << endl;
+    #endif
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 1
+        debug << MotionFileTools::fromMatrix(m_curvetimes) << endl;
+        debug << MotionFileTools::fromMatrix(m_curvepositions) << endl;
+        debug << MotionFileTools::fromMatrix(m_curvevelocities) << endl;
+        debug << MotionFileTools::fromMatrix(m_curvegains) << endl;
     #endif
 }
 
@@ -238,7 +245,7 @@ bool MotionScript::load()
                             if (m_gains[i].empty())
                                 m_gains[i].push_back(100.0);
                             else
-                                m_gains[i].push_back(m_gains[i].front());
+                                m_gains[i].push_back(m_gains[i].back());
                         }
                         
                     }

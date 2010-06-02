@@ -60,6 +60,7 @@ NUMotion::NUMotion()
     #endif
     m_current_time = 0;
     m_previous_time = 0;
+    m_killed = true;
     m_last_kill_time = m_current_time - 10000;
     
     m_data = NULL;
@@ -95,8 +96,6 @@ NUMotion::NUMotion()
             m_script = new Script(NULL);
         #endif
     #endif
-    
-    //m_block_left = new MotionScript("BlockLeft");
 }
 
 /*! @brief Destructor for motion module
@@ -132,6 +131,7 @@ NUMotion::~NUMotion()
  */
 void NUMotion::freeze()
 {
+    m_killed = true;
     m_last_kill_time = m_current_time;
     #ifdef USE_HEAD
         m_head->kill();
@@ -151,6 +151,7 @@ void NUMotion::freeze()
  */
 void NUMotion::kill()
 {
+    m_killed = true;
     m_last_kill_time = m_current_time;
     #ifdef USE_HEAD
         m_head->kill();
@@ -227,10 +228,15 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     m_current_time = m_data->CurrentTime;
+    updateMotionSensors();
     
-    if (m_fall_protection->enabled() and m_data->isFalling())
+    if (m_killed)
+    {   // if killed don't do any motion
+        return;
+    }
+    else if (m_fall_protection->enabled() and m_data->isFalling())
     {   // if falling no other motion module can run
-        //m_fall_protection->process(data, actions);
+        m_fall_protection->process(data, actions);
     }
     else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
     {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
@@ -276,13 +282,6 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     }
     
     m_previous_time = m_current_time;
-    
-    /*static bool alreadyran = false;
-    if (m_current_time > 15500 and not alreadyran)
-    {
-        m_block_left->play(data, actions);
-        alreadyran = true;
-    }*/
 }
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
@@ -294,7 +293,7 @@ void NUMotion::process(JobList* jobs)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUMotion::process(): Start" << endl;
 #endif
-    if (jobs == NULL)
+    if (jobs == NULL or m_data == NULL or m_actions == NULL)
         return;
     if (m_current_time < m_last_kill_time + 3000)
     {   // don't let the jobs queue up when in the killed state
@@ -310,9 +309,11 @@ void NUMotion::process(JobList* jobs)
         {
         #ifdef USE_WALK
             case Job::MOTION_WALK:
+                m_killed = false;
                 m_walk->process(reinterpret_cast<WalkJob*> (*it));
                 break;
             case Job::MOTION_WALK_TO_POINT:
+                m_killed = false;
                 m_walk->process(reinterpret_cast<WalkToPointJob*> (*it));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
@@ -321,33 +322,41 @@ void NUMotion::process(JobList* jobs)
         #endif
         #ifdef USE_KICK
             case Job::MOTION_KICK:
+                m_killed = false;
                 m_kick->process(reinterpret_cast<KickJob*> (*it));
                 break;
         #endif
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
+                m_killed = false;
                 m_head->process(reinterpret_cast<HeadJob*> (*it));
                 break;
             case Job::MOTION_TRACK:
+                m_killed = false;
                 m_head->process(reinterpret_cast<HeadTrackJob*> (*it));
                 break;
-            case Job:: MOTION_PAN:
+            case Job::MOTION_PAN:
+                m_killed = false;
                 m_head->process(reinterpret_cast<HeadPanJob*> (*it));
                 break;
             case Job::MOTION_NOD:
+                m_killed = false;
                 m_head->process(reinterpret_cast<HeadNodJob*> (*it));
                 break;
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             case Job::MOTION_BLOCK:
+                m_killed = false;
                 m_save->process(reinterpret_cast<BlockJob*> (*it));
                 break;
             case Job::MOTION_SAVE:
+                m_killed = false;
                 m_save->process(reinterpret_cast<SaveJob*> (*it));
                 break;
         #endif
         #ifdef USE_SCRIPT
             case Job::MOTION_SCRIPT:
+                m_killed = false;
                 m_script->process(reinterpret_cast<ScriptJob*> (*it));
                 break;
         #endif
@@ -376,5 +385,29 @@ void NUMotion::process(MotionKillJob* job)
 void NUMotion::process(MotionFreezeJob* job)
 {
     freeze();
+}
+
+/*! @brief Updates the motion sensors in NUSensorsData */
+void NUMotion::updateMotionSensors()
+{
+    m_data->setMotionFallActive(m_current_time, m_fall_protection->enabled() and m_data->isFalling());
+    m_data->setMotionGetupActive(m_current_time, m_getup->isActive());
+    #ifdef USE_KICK
+        m_data->setMotionKickActive(m_current_time, m_kick->isActive());
+    #endif
+    #ifdef USE_SAVE
+        m_data->setMotionSaveActive(m_current_time, m_save->isActive());
+    #endif
+    #ifdef USE_SCRIPT
+        m_data->setMotionScriptActive(m_current_time, m_script->isActive());
+    #endif
+    #ifdef USE_WALK
+        vector<float> speed;
+        m_walk->getCurrentSpeed(speed);
+        m_data->setMotionWalkSpeed(m_current_time, speed);
+    #endif
+    #ifdef USE_HEAD
+        m_data->setMotionHeadCompletionTime(m_current_time, m_head->getCompletionTime());
+    #endif
 }
 
