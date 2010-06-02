@@ -90,12 +90,13 @@ public:
             m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
             m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-            float balldistance;
-            if (measureddistance < 46)
-                balldistance = 1;
-            else
-                balldistance = sqrt(pow(measureddistance,2) - 46*46);
-            float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+            float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
+            //float balldistance;
+            //if (measureddistance < 46)
+            //    balldistance = 1;
+            //else
+            //    balldistance = sqrt(pow(measureddistance,2) - 46*46);
+            float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
             float trans_speed = 1;
             float trans_direction = ballbearing;
@@ -171,12 +172,13 @@ public:
             m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
             
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-            float balldistance;
-            if (measureddistance < 46)
-                balldistance = 1;
-            else
-                balldistance = sqrt(pow(measureddistance,2) - 46*46);
-            float ballbearing = headyaw + m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
+            float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
+            //float balldistance;
+            //if (measureddistance < 46)
+            //    balldistance = 1;
+            //else
+            //    balldistance = sqrt(pow(measureddistance,2) - 46*46);
+            float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
             vector<float> walkVector(3, 0);
             walkVector[1] = 2*sin(ballbearing);

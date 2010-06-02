@@ -66,7 +66,15 @@ void NUHead::kill()
 {
     m_is_nodding = false;
     m_is_panning = false;
+    m_move_end_time = m_data->CurrentTime;
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
+}
+
+/*! @brief Returns the completion time of the current head movement.
+ */
+double NUHead::getCompletionTime()
+{
+    return m_move_end_time;
 }
 
 /*! @brief Process new sensor data, and produce actionator commands

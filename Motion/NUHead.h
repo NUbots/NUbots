@@ -41,6 +41,7 @@ public:
     NUHead();
     ~NUHead();
     void kill();
+    double getCompletionTime();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(HeadJob* job);

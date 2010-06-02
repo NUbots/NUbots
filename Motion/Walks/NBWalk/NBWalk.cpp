@@ -69,6 +69,14 @@ NBWalk::~NBWalk()
     pthread_mutex_destroy(&next_joints_mutex);
 }
 
+/*! @brief Kills the walk
+ */
+void NBWalk::kill()
+{
+    NUWalk::kill();
+    walkProvider.hardReset();
+}
+
 void NBWalk::doWalk()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4

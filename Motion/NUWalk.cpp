@@ -130,6 +130,9 @@ void NUWalk::enableWalk()
 void NUWalk::freeze()
 {
     m_walk_enabled = false;
+    m_speed_x = 0;
+    m_speed_y = 0;
+    m_speed_yaw = 0;
 }
 
 /*! @brief Kills the walk engine

@@ -35,8 +35,14 @@ const float KF::c_R_ball_theta = 0.0001f;
 const float KF::c_R_ball_range_offset = 25.0f; // (5cm)^2
 const float KF::c_R_ball_range_relative = 0.0025f; // 5% of range added.
 
+
+double muXx     = 0.07;
+double muXy     = 0.00005;
+
+double muYy     = 0.00005;
+double muYx     = 0.000005;
 // odom_Model(0.0005,0.0001,0.000005,0.0008)
-KF::KF():odom_Model(0.0005,0.0001,0.000005,0.0008)
+KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 {
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/

@@ -207,7 +207,10 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                 {
                     ScanLine tempScanLine;
                     previouslyCloselyScanedSegment = segment;
-                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ScanLine::DOWN);
+                    std::vector<unsigned char> colourlist;
+                    colourlist.reserve(1);
+                    colourlist.push_back(ClassIndex::white);
+                    vision->CloselyClassifyScanline(&tempScanLine,segment,8,ScanLine::DOWN,colourlist);
                     ////qDebug()    << "After Closly Scan: "<<tempScanLine.getNumberOfSegments()
                     //            << segment->getStartPoint().x << "," << segment->getStartPoint().y
                     //            ;
@@ -764,6 +767,7 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         double TempDist = 0;
                         double TempBearing = 0;
                         double TempElev = 0;
+                        Vector2<float> screenPositionAngle(vision->CalculateBearing(mx), vision->CalculateElevation(my));
                         GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
                         //qDebug() << "Distance:\t\t"<< TempDist<< endl;
 
@@ -775,7 +779,7 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         Vector3<float> measuredError(0.0,0.0,0.0);
                         Vector2<int> screenPosition(mx, my);
                         Vector2<int> sizeOnScreen(8,2);
-                        tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,vision->m_timestamp);
+                        tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
                         possiblePenaltySpots.push_back(tempUnknownPenalty);
                 }
                 else
@@ -1110,6 +1114,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 
             //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
             TempDist = 0.0;
+            Vector2<float> screenPositionAngle(vision->CalculateBearing(cx), vision->CalculateElevation(cy));
             GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
 
             if (TempDist > 100.0  || TempDist == 0.0) {
@@ -1129,7 +1134,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                     sizeOnScreen.y = r2*2;
                 }
 
-                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
                 return;
             }
         }
@@ -1210,13 +1215,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 		//START DECODING T
 		if (TempID){
 			//Initialising Variables
+                        Vector2<float> screenPositionAngle(vision->CalculateBearing(cornerPoints[x].PosX), vision->CalculateElevation(cornerPoints[x].PosY));
                         GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
                         AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
                         Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
                         Vector2<int> sizeOnScreen(4,4);
-                        tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+                        tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
 
                         //fieldObjects[TempID].visionBearing = TempBearing;
                         //fieldObjects[TempID].visionDistance = TempDist;
@@ -1557,8 +1563,9 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                     Vector3<float> measured(TempDist,TempBearing,TempElev);
                     Vector3<float> measuredError(0,0,0);
                     Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
+                    Vector2<float> screenPositionAngle(vision->CalculateBearing(screenPosition.x), vision->CalculateElevation(screenPosition.y));
                     Vector2<int> sizeOnScreen(4,4);
-                    tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPosition,sizeOnScreen,timestamp);
+                    tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
                     AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
                 }
         }

@@ -17,7 +17,7 @@ class Object
         Vector3<float> estimatedRelativeLocation;
         
         // Vision Parameters:
-
+        Vector2<float> imagePositionAngle; // Position on Screen in terms of angle from centre (centre of object)
         Vector2<int> imagePosition;         // Position on Screen (centre of object)
         Vector2<int> sizeOnScreen;          // (x,y) = (width, height) with ImagePosition at the center.
         float timeLastSeen;                 // The time in ms the object was last seen
@@ -37,6 +37,7 @@ class Object
 
         void UpdateVisualObject(    const Vector3<float>& newMeasured,
                                     const Vector3<float>& newMeasuredError,
+                                    const Vector2<float>& newImagePositionAngle,
                                     const Vector2<int>& newImagePosition,
                                     const Vector2<int>& newSizeOnScreen,
                                     const float timestamp);
@@ -67,6 +68,8 @@ class Object
         float measuredDistance() const {return measuredRelativePosition.x;}
         float measuredBearing() const {return measuredRelativePosition.y;}
         float measuredElevation() const {return measuredRelativePosition.z;}
+        float ScreenXTheta() const {return imagePositionAngle.x;}
+        float ScreenYTheta() const {return imagePositionAngle.y;}
         int ScreenX() const {return imagePosition.x;}
         int ScreenY() const {return imagePosition.y;}
         int getObjectWidth() const {return sizeOnScreen.x;}

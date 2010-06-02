@@ -177,7 +177,7 @@ class Vision
     ClassifiedSection horizontalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
-    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction);
+    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction, const std::vector<unsigned char> &colourList);
 
     void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
 
@@ -203,7 +203,7 @@ class Vision
     int getScanSpacings(){return spacings;}
 
     NUSensorsData* getSensorsData() {return m_sensor_data;}
-    bool checkIfBufferContains(boost::circular_buffer<unsigned char> cb, unsigned char colour);
+    bool checkIfBufferContains(boost::circular_buffer<unsigned char> cb, const std::vector<unsigned char> &colourList);
 
 };
 #endif // VISION_H

@@ -196,8 +196,10 @@ void NUbot::createThreads()
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
-    m_watchdog_thread = new WatchDogThread(this);
-    m_watchdog_thread->start();
+    #ifndef TARGET_IS_NAOWEBOTS
+        m_watchdog_thread = new WatchDogThread(this);
+        m_watchdog_thread->start();
+    #endif
     
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
         m_seethink_thread->start();
