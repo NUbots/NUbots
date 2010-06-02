@@ -2044,6 +2044,8 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
 
 void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 {
+    int MaxPercentageOfColour = 50;
+    int MinPercentageOfColour = 1;
     for(unsigned int i = 0; i < RobotCandidates.size(); i++)
     {
         std::vector <TransitionSegment > segments = RobotCandidates[i].getSegments();
@@ -2068,7 +2070,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 
         }
         //qDebug() << i <<": Segments: " << segments.size()<< "White: " <<  whiteSize << "  Blue: " << blueSize;
-        if( (blueSize > pinkSize && whiteSize*0.25 > blueSize && blueSize > 0))// || RobotCandidates[i].getColour() == ClassIndex::blue || RobotCandidates[i].getColour() == ClassIndex::shadow_blue)
+        if( (blueSize > pinkSize && whiteSize*MaxPercentageOfColour/100 > blueSize && blueSize > whiteSize*MinPercentageOfColour/100))// || RobotCandidates[i].getColour() == ClassIndex::blue || RobotCandidates[i].getColour() == ClassIndex::shadow_blue)
         {
             //qDebug() << i <<": Blue Robot: ";
             RobotCandidates[i].setColour(ClassIndex::shadow_blue);
@@ -2104,7 +2106,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             AllFieldObjects->ambiguousFieldObjects.push_back(tempRobotObject);
             //qDebug() << i <<": Blue Robot: object push to FO";
         }
-        else if( (blueSize < pinkSize && whiteSize*0.25 > pinkSize &&  pinkSize > 0) ) //|| RobotCandidates[i].getColour() == ClassIndex::pink || RobotCandidates[i].getColour() == ClassIndex::pink_orange)
+        else if( (blueSize < pinkSize && whiteSize*MaxPercentageOfColour/100 > pinkSize &&  pinkSize > whiteSize*MinPercentageOfColour/100) ) //|| RobotCandidates[i].getColour() == ClassIndex::pink || RobotCandidates[i].getColour() == ClassIndex::pink_orange)
         {
             //qDebug() << i <<": Pink Robot: ";
             RobotCandidates[i].setColour(ClassIndex::pink);
