@@ -65,6 +65,7 @@ public:
 private:
     void process(MotionKillJob* job);
     void process(MotionFreezeJob* job);
+    void updateMotionSensors();
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
@@ -91,9 +92,8 @@ private:
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)
+    bool m_killed;                      //!< true if the motion module is currently killed, false otherwise
     double m_last_kill_time;            //!< the last time a kill was called in ms (a recent call disables ALL motion)
-    
-    MotionScript* m_block_left;
 };
 
 #endif

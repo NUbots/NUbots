@@ -49,6 +49,9 @@ protected:
     void doWalk();
     void initALConfig();
     void setALConfig();
+    
+    vector<float> convertToNUArmOrder(const vector<float>& data);
+    vector<float> convertToNULegOrder(const vector<float>& data);
 private:
 public:
 protected:
@@ -58,6 +61,7 @@ private:
     ALValue m_al_param;             //!< A single parameter of m_al_config
     
     ALValue m_al_stiffness_protection;
+    double m_last_enabled_time;
 };
 
 #endif
