@@ -30,9 +30,9 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
 
     m_processNoise = Matrix(numStates,numStates,false);
     m_processNoise[pitchAngle][pitchAngle] = 1e-3;
-    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-4;
+    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-5;
     m_processNoise[rollAngle][rollAngle] = 1e-3;
-    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-4;
+    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-5;
 
     m_initialised = true;
 }
@@ -137,7 +137,11 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
 
     // Observation noise
     Matrix S_Obs(numMeasurements,numMeasurements,true);
-    double accelNoise = 200.0*200.0;
+    //double accelNoise = 200.0*200.0;
+    double accelVectorMag = sqrt(accelerations[0]*accelerations[0] + accelerations[1]*accelerations[1] + accelerations[2]*accelerations[2]);
+    double errorFromIdealGravity = accelVectorMag - fabs(gravityAccel);
+    double accelNoise = 25.0 + fabs(errorFromIdealGravity);
+    accelNoise = accelNoise*accelNoise;
 
     S_Obs[0][0] = accelNoise;
     S_Obs[1][1] = accelNoise;
