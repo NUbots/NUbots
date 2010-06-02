@@ -29,8 +29,8 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                                         Vision* vision,int height,int width)
 {
         //! Set the Minimum goal width in pixels as a function of screen width
-        MINIMUM_GOAL_WIDTH_IN_PIXELS = vision->getImageWidth()/80.0; //4 Pixels for 320 width
-        MINIMUM_GOAL_HEIGHT_IN_PIXELS = vision->getImageHeight()/7.5; //32pixels for 240 height
+        MINIMUM_GOAL_WIDTH_IN_PIXELS = vision->getImageWidth()/60; //6 Pixels for 320 width = 8m range
+        MINIMUM_GOAL_HEIGHT_IN_PIXELS = vision->getImageHeight()/6.2; //38pixels for 240 height = 8m range
 
         ObjectCandidate result;
         vector < ObjectCandidate > ::iterator it;
@@ -615,25 +615,29 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
         objectRemoved = false;
-        if(it->getColour() != ClassIndex::blue || it->getColour() != ClassIndex::shadow_blue )
+
+        if(it->getColour() != ClassIndex::blue && it->getColour() != ClassIndex::shadow_blue )
         {
             ++it;
             continue;
         }
+        //qDebug() << "Checking  Goal: BLUE" ;
         Vector2<int> topLeft = it->getTopLeft();
         Vector2<int> bottomRight = it->getBottomRight();
         vector < AmbiguousObject > ::iterator FO_it;
-        for (FO_it = AllObjects->ambiguousFieldObjects.begin();  it  < FO_Candidates.end(); FO_it++)
+        for (FO_it = AllObjects->ambiguousFieldObjects.begin();  FO_it  < AllObjects->ambiguousFieldObjects.end(); FO_it++)
         {
+            //qDebug() << "Checking  Robot: " << FO_it->getID();
             if(FO_it->getID() != FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
-            Vector2<int> robotTopLeft, robotBottomLeft;
+            Vector2<int> robotTopLeft, robotBottomRight;
             robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2;
             robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2;
-            robotBottomLeft.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2;
-            robotBottomLeft.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
-
-            if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomLeft.x &&  bottomRight.y <= robotBottomLeft.y)
+            robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2;
+            robotBottomRight.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
+            //qDebug() << "Checking Goal inside Robot: " << topLeft.x << robotTopLeft.x << topLeft.y << robotTopLeft.y << bottomRight.x << robotBottomRight.x <<  bottomRight.y << robotBottomRight.y;
+            if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomRight.x &&  bottomRight.y <= robotBottomRight.y)
             {
+                //qDebug() << "Errasing Goal because inside Robot";
                 objectRemoved = true;
                 it = FO_Candidates.erase(it);
                 break;

@@ -355,9 +355,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     //! Find Robots:
 
-
+    qDebug() << "Robot Candidates: " << RobotCandidates.size();
     vision.DetectRobots(RobotCandidates);
     candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
+    qDebug() << "Robot Candidates: " << RobotCandidates.size() << "Coloured Robots Found: "<<vision.AllFieldObjects->ambiguousFieldObjects.size();
 
     qDebug() << "Finding YELLOW Goals";
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);

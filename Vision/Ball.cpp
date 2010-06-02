@@ -1,4 +1,5 @@
 #include "Ball.h"
+#include "Vision.h"
 #include "ClassificationColours.h"
 #include "TransitionSegment.h"
 #include "ScanLine.h"
@@ -34,6 +35,8 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
 
         if(!isObjectAPossibleBall(PossibleBall)) continue;
 
+        if(isObjectTooBig(PossibleBall, vision)) continue;
+
         //! Check if the ratio is correct: Height and Width ratio should be 1 as it is a circle,
         //! through can be skewed (camera moving), so we better put some threshold on it.
         if(!isCorrectCheckRatio(PossibleBall, height, width)) continue;
@@ -59,7 +62,7 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         //! Perform Circle Fit: Must pass a threshold on fit to become a circle!
         //debug << "BALL::FindBall  Circle Fit ";
 
-        result = isCorrectFit(ballPoints,largestCandidate);
+        result = isCorrectFit(ballPoints,largestCandidate, vision);
     }
     return result;
 }
@@ -99,6 +102,28 @@ bool Ball::isObjectAPossibleBall(const ObjectCandidate &PossibleBall)
     }
 
 }
+bool Ball::isObjectTooBig(const ObjectCandidate &PossibleBall, Vision* vision)
+{
+    float MaxPixels = getMaxPixelsOfBall(vision);
+    int heightOfPossibleBall = PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y;
+    int widthOfPossibleBall = PossibleBall.getBottomRight().x - PossibleBall.getTopLeft().x;
+
+    if(heightOfPossibleBall > MaxPixels || widthOfPossibleBall > MaxPixels)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+float Ball::getMaxPixelsOfBall(Vision* vision)
+{
+    float ClosestDistance = 30.0; //CM with Robot sitting down (40cm), standing about 50cm.
+    float MaxPixels = vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS() * ORANGE_BALL_DIAMETER / ClosestDistance;
+    return MaxPixels;
+}
+
 bool Ball::isObjectInRobot(const ObjectCandidate &PossibleBall, FieldObjects *AllObjects)
 {
     Vector2<int> topLeft = PossibleBall.getTopLeft();
@@ -255,7 +280,7 @@ bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, i
         return true;
     }
 }
-Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall)
+Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall, Vision* vision)
 {
     Circle circ;
     circ.radius = 0.0;
@@ -271,7 +296,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
-            if(circ.sd > 5)
+            if(circ.sd > 5 ||  circ.radius*2 > getMaxPixelsOfBall(vision) )
             {
                 circ.isDefined = false;
             }
