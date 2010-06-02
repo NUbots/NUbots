@@ -365,7 +365,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
     std::vector<unsigned char> colourlist;
-    colourlist.reserve(2);
+    colourlist.reserve(3);
     if(PossibleGoal->getColour() == ClassIndex::yellow ||PossibleGoal->getColour() == ClassIndex::yellow_orange )
     {
         colourlist.push_back(ClassIndex::yellow);
@@ -376,6 +376,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
         colourlist.push_back(ClassIndex::blue);
         colourlist.push_back(ClassIndex::shadow_blue);
     }
+
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
 
     //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
@@ -699,7 +700,19 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
         i = j-1;
         //! Removes Small and "Top segments = cross bar"
-
+        std::vector <unsigned char> colourlist;
+        colourlist.reserve(3);
+        if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
+        {
+            colourlist.push_back(ClassIndex::blue);
+            colourlist.push_back(ClassIndex::shadow_blue);
+            colourlist.push_back(ClassIndex::shadow_object);
+        }
+        else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+        {
+            colourlist.push_back(ClassIndex::yellow);
+            colourlist.push_back(ClassIndex::yellow_orange);
+        }
         if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size() - 1)
         {
             Vector2<int> tempMidPoint;
@@ -707,12 +720,12 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             int checkEndx = tempEnd.x;
             int checkStartx = tempStart.x;
             //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
-            if(PossibleGoal.getColour() != vision->classifyPixel(tempStart.x,tempStart.y))
+            if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
                 //Find the pixel which isnt the colour
                 if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                 {
-                    while( PossibleGoal.getColour() != vision->classifyPixel(checkStartx+1,tempStart.y))
+                    while(vision->isValidColour(vision->classifyPixel(checkStartx+1,tempStart.y),colourlist))
                     {
                         checkStartx++;
                         if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
@@ -724,7 +737,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             {
                 if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                 {
-                    while( PossibleGoal.getColour() == vision->classifyPixel(checkStartx-1,tempStart.y))
+                    while( vision->isValidColour(vision->classifyPixel(checkStartx-1,tempStart.y),colourlist))
                     {
                         checkStartx--;
                         if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
@@ -738,7 +751,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
                 //Find the pixel which isnt the colour
                 if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                 {
-                    while( PossibleGoal.getColour() != vision->classifyPixel(checkEndx-1,tempEnd.y))
+                    while( vision->isValidColour(vision->classifyPixel(checkEndx-1,tempEnd.y),colourlist))
                     {
                         checkEndx--;
                         if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
@@ -750,7 +763,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             {
                 if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
                 {
-                    while( PossibleGoal.getColour() == vision->classifyPixel(checkEndx+1,tempEnd.y))
+                    while(  vision->isValidColour(vision->classifyPixel(checkEndx+1,tempEnd.y),colourlist))
                     {
                         checkEndx++;
                         if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
