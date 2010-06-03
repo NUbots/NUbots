@@ -13,6 +13,7 @@ Xhat[6][0]=ballVeocityY
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/General.h"
 #include <iostream>
+#include "debug.h"
 #include "odometryMotionModel.h"
 #include "pose2d.h"
 
@@ -20,7 +21,7 @@ using namespace mathGeneral;
 
 // Tuning Values (Constants)
 const float KF::c_Kappa = 1.0f; // weight used in w matrix. (Constant)
-const float KF::c_ballDecayRate=0.975f; // Ball weighting. (Constant)
+const float KF::c_ballDecayRate = 0.985f; // Ball weighting 0.985 => speed halves every 1.5 seconds. (Constant)
 const float KF::c_threshold2 = 15.0f; // Threshold for outlier rejection. Magic Number. (Constant)
 
 // const float KF::sb_alpha1 = 0.05;
@@ -66,11 +67,11 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   sqrtOfProcessNoise = Matrix(7,7,true);
   sqrtOfProcessNoise[0][0] = 0.1; // Robot X coord.
   sqrtOfProcessNoise[1][1] = 0.1; // Robot Y coord.
-  sqrtOfProcessNoise[2][2] = 0.0316228; // Robot Theta.
+  sqrtOfProcessNoise[2][2] = 0.00001; // Robot Theta.
   sqrtOfProcessNoise[3][3] = 4.0; // Ball X.
   sqrtOfProcessNoise[4][4] = 4.0; // Ball Y.
-  sqrtOfProcessNoise[5][5] = 3.16228; // Ball X Velocity.
-  sqrtOfProcessNoise[6][6] = 3.16228; // Ball Y Velocity.
+  sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
+  sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
 
 	//RHM 7/7/08: Extra matrix for resetting
   // Process noise for used for reset.
@@ -682,7 +683,7 @@ KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
   // RHM 8/7/08:
   double R_range = c_R_ball_range_offset + c_R_ball_range_relative*pow(Ballmeas,2);
   double R_bearing = c_R_ball_theta;
-
+    
   // Calculate update uncertainties - S_ball_rel & R_ball_rel.
   Matrix S_ball_rel = Matrix(2,2,false);
   S_ball_rel[0][0] = cos(theta_Ballmeas) * sqrt(R_range);
@@ -719,7 +720,7 @@ KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
     Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
     My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
   }                                      
-    
+
   Matrix M1 = sqrtOfTestWeightings;
   yBar = My * M1.transp(); // Predicted Measurement
   Py = (My - yBar * M1) * (My - yBar * M1).transp();
@@ -744,6 +745,7 @@ KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
 
   stateStandardDeviations = HT( horzcat(Mx - stateEstimates*M1 - K*My + K*yBar* M1, K*S_ball_rel) ); // Update uncertainties.
   stateEstimates = stateEstimates - K * (yBar - y); // Update States.
+    
   return KF_OK; // It all worked OK!
 }
 
