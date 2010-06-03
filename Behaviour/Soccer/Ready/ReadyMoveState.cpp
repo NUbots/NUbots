@@ -64,15 +64,31 @@ void ReadyMoveState::doState()
     vector<float> result = m_field_objects->self.CalculateDifferenceFromFieldState(position);
     debug << "Result: " << result[0]<< result[1] << result [2]<<endl;
     
-    m_jobs->addMotionJob(new WalkJob(0.5*result[0], result[1], result[2]/2.0));
+    float distance = result[0];
+    float bearing = result[1];
+    float heading = result[2];
+    
+    const float d = 20;			    // distance in cm to start slowing down
+    const float s = 80;			    // distance in cm which to start facing the heading
+    const float rot_gain = 0.5;    // rotational gain 
+
+    // calculate translation speed
+    float trans_speed = 1.0;
+    if (distance < d)
+        trans_speed = distance/d;
+    
+    // calculate rotational speed
+    float rot_speed = rot_gain*heading;
+    if (distance > s)
+        rot_speed = rot_gain*bearing;
+    
+    m_jobs->addMotionJob(new WalkJob(trans_speed, bearing, rot_speed));
 }
 
 vector<float> ReadyMoveState::getReadyFieldPositions()
 {
-	vector<float> position;
-	position.reserve(2);
-	position.push_back(0.0);
-	position.push_back(0.0);
+	vector<float> position(3,0);
+    
 	
 	//debug << "Getting GameInformation" << endl;
 	//debug << "PlayerNumber \t" << m_game_info->getPlayerNumber() <<endl;
@@ -81,7 +97,7 @@ vector<float> ReadyMoveState::getReadyFieldPositions()
 	//debug << "Initial Position \t" << position[0] <<  position[1]<<endl;
 	if(m_game_info->getPlayerNumber() == 1)
 	{
-		position[0] = 280.0;
+		position[0] = 290.0;
 		position[1] = 0.0;
 	}
 	else if(m_game_info->getPlayerNumber() == 2)
@@ -94,7 +110,7 @@ vector<float> ReadyMoveState::getReadyFieldPositions()
 		else
 		{
 			position[0] = 140.0;
-			position[1] = 100.0;
+			position[1] = 0.0;
 		}
 	}
 	else if(m_game_info->getPlayerNumber() == 3)
@@ -102,13 +118,13 @@ vector<float> ReadyMoveState::getReadyFieldPositions()
 		//debug << "Before player 3 Position \t" << position[0] <<   ","<<position[1]<<endl;
 		if(m_game_info->haveKickoff())
 		{
-			position[0] = 75.0;
-			position[1] = -75.0;
+			position[0] = 60.0;
+			position[1] = 100.0;
 		}
 		else
 		{
 			position[0] = 140.0;
-			position[1] = -100.0;
+			position[1] = 90.0;
 		}
 		//debug << "Player 3 Position \t" << position[0] <<  ","<<  position[1]<<endl;
 	}
@@ -116,7 +132,14 @@ vector<float> ReadyMoveState::getReadyFieldPositions()
 	if(m_game_info->getTeamColour() == TEAM_BLUE)
 	{
 		position[0] = -position[0];
+        position[1] = -position[1];
+        position[2] = 0;
 	}
+    else
+    {
+        position[2] = 3.141;
+    }
+
 	//debug << "Position On Field: " << position[0]<< position[1] <<endl;
 	return position;
 }
