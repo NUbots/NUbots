@@ -60,6 +60,10 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
         //! Check if the Goal is in a Robot:
         CheckCandidateIsInRobot(FO_Candidates, AllObjects);
+
+        CheckIsFilled(FO_Candidates, vision);
+
+
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
 
@@ -235,6 +239,9 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
     }
     return false;
 }
+
+
+
 void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                                            const std::vector < TransitionSegment > &horizontalSegments)
@@ -575,7 +582,43 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     return;
 }
 
+void GoalDetection::CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates, Vision* vision)
+{
+    //Calculate the minimum size of horizontal scanlines
+    //Add lengths of segments of these scanlines (be a multiple of width)
+    //Add lengths of transition segments in object
+    //Compare and throw out "small percentages"
+    vector < ObjectCandidate > ::iterator it;
+    for(it =  FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
 
+        int heigtOfPossibleGoal = it->width();
+        int widthOfPossibleGoal = it->height();
+
+        int horizontalScanspacing = vision->getScanSpacings();
+        float minIntersectingScanlines = heigtOfPossibleGoal / (float)horizontalScanspacing;
+
+        int maxScanLengthOfMinScanlines = minIntersectingScanlines * widthOfPossibleGoal;
+
+        vector<TransitionSegment> segments = it->getSegments();
+        int lengthsOfSegments = 0;
+        for(unsigned int i = 0; i < segments.size(); i++)
+        {
+            lengthsOfSegments = lengthsOfSegments + segments[i].getSize();
+        }
+
+        //qDebug() << "Comparing LengthOfMinScanIntersection and actual lengths: " <<maxScanLengthOfMinScanlines << lengthsOfSegments << heigtOfPossibleGoal << widthOfPossibleGoal;
+        if(lengthsOfSegments <  maxScanLengthOfMinScanlines*0.5)
+        {
+            it = FO_Candidates.erase(it);
+            continue;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
 
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
@@ -613,6 +656,7 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
 {
     vector < ObjectCandidate > ::iterator it;
     bool objectRemoved;
+
        //! Go through all the candidates: to find a possible goal
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
@@ -632,9 +676,10 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
             //qDebug() << "Checking  Robot: " << FO_it->getID();
             if(FO_it->getID() != FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
             Vector2<int> robotTopLeft, robotBottomRight;
-            robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2;
-            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2;
-            robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2;
+            int widthbuffer = FO_it->getObjectWidth()*0.1;
+            robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2 - widthbuffer;
+            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2 + FO_it->getObjectHeight();
+            robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2 + widthbuffer;
             robotBottomRight.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
             //qDebug() << "Checking Goal inside Robot: " << topLeft.x << robotTopLeft.x << topLeft.y << robotTopLeft.y << bottomRight.x << robotBottomRight.x <<  bottomRight.y << robotBottomRight.y;
             if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomRight.x &&  bottomRight.y <= robotBottomRight.y)

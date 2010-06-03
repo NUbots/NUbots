@@ -64,6 +64,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     //clock_t startLineForm = clock();
+    //qDebug() << "Finding Lines with segments:  " << linePoints.size();
     FindFieldLines(image_width,image_height);
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -82,9 +83,10 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //    }
     //}
+
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
-    //qDebug() << "Finnished Finding Penalty Spots:";
+    //qDebug() << "Finding Corner Points:";
     FindCornerPoints(image_width,image_height);
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
@@ -102,6 +104,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     //clock_t startCorner = clock();
+    //qDebug() << "Decode Corners:";
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
