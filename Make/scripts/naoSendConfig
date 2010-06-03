@@ -12,3 +12,4 @@ do
     echo Sending config to $robot_ip
     scp -rpC ./Config nao@$robot_ip:/home/nao/nubot/
 done
+
