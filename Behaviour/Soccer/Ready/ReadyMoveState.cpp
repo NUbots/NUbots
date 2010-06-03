@@ -21,6 +21,8 @@
 
 #include "ReadyMoveState.h"
 
+#include "Behaviour/GameInformation.h"
+
 #include "Behaviour/Jobs/JobList.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 
@@ -56,8 +58,65 @@ void ReadyMoveState::doState()
     else
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
     
-    vector<float> result = m_field_objects->self.CalculateDifferenceFromFieldState(vector<float>(3,0));
+    vector<float> position = getReadyFieldPositions();
+    debug << "Position On Field: " << position[0]<< position[1] <<endl;
+    
+    vector<float> result = m_field_objects->self.CalculateDifferenceFromFieldState(position);
+    debug << "Result: " << result[0]<< result[1] << result [2]<<endl;
     
     m_jobs->addMotionJob(new WalkJob(0.5*result[0], result[1], result[2]/2.0));
 }
 
+vector<float> ReadyMoveState::getReadyFieldPositions()
+{
+	vector<float> position;
+	position.reserve(2);
+	position.push_back(0.0);
+	position.push_back(0.0);
+	
+	//debug << "Getting GameInformation" << endl;
+	//debug << "PlayerNumber \t" << m_game_info->getPlayerNumber() <<endl;
+	//debug << "Team \t" << m_game_info->getTeamColour() <<endl;
+	//debug << "We have Kickoff \t" << m_game_info->haveKickoff() << endl;
+	//debug << "Initial Position \t" << position[0] <<  position[1]<<endl;
+	if(m_game_info->getPlayerNumber() == 1)
+	{
+		position[0] = 280.0;
+		position[1] = 0.0;
+	}
+	else if(m_game_info->getPlayerNumber() == 2)
+	{
+		if(m_game_info->haveKickoff())
+		{
+			position[0] = 15.0;
+			position[1] = 0.0;
+		}
+		else
+		{
+			position[0] = 140.0;
+			position[1] = 100.0;
+		}
+	}
+	else if(m_game_info->getPlayerNumber() == 3)
+	{
+		//debug << "Before player 3 Position \t" << position[0] <<   ","<<position[1]<<endl;
+		if(m_game_info->haveKickoff())
+		{
+			position[0] = 75.0;
+			position[1] = -75.0;
+		}
+		else
+		{
+			position[0] = 140.0;
+			position[1] = -100.0;
+		}
+		//debug << "Player 3 Position \t" << position[0] <<  ","<<  position[1]<<endl;
+	}
+	//debug << "Position On Field: " << position[0]<< position[1] <<endl;
+	if(m_game_info->getTeamColour() == TEAM_BLUE)
+	{
+		position[0] = -position[0];
+	}
+	//debug << "Position On Field: " << position[0]<< position[1] <<endl;
+	return position;
+}

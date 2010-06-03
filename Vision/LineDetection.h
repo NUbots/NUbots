@@ -16,7 +16,7 @@ class Kinematics;
 #define MAX_FIELDLINES 15
 #define MAX_CORNERPOINTS 10
 #define VERT_POINT_THICKNESS 40
-#define MIN_POINT_THICKNESS 2
+#define MIN_POINT_THICKNESS 1
 #define HORZ_POINT_THICKNESS 40
 
 #define POST_T_LIMIT (320) // set as define at top later  ALSO  these values need to be a defined fraction of the IMAGE_WIDTH
@@ -65,6 +65,8 @@ class LineDetection{
 
         void FindFieldLines(int image_width,int image_height);
 
+        bool checkAroundForWhite(int lx, int ly,int mx,int  my,int rx, int ry, double lineLength,Vision* vision);
+        bool checkAroundForWhite(int mx, int my,double length, Vision* vision);
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
         void FindPenaltySpot(Vision* vision);
         void DecodePenaltySpot(FieldObjects* AllObjects, float timestamp);
