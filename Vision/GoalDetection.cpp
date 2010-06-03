@@ -233,6 +233,7 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
     else{
         return false;
     }
+    return false;
 }
 void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,

@@ -14,3 +14,4 @@ do
     scp -pC ./Build/NAO/sdk/lib/naoqi/libnubot.so nao@$robot_ip:/home/nao/naoqi/lib/naoqi/
     ssh nao@$robot_ip /etc/init.d/naoqi start
 done
+
