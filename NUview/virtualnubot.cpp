@@ -390,7 +390,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     for (int x = 0; x < canvas->width(); x++)
         for(int y = 0; y < canvas->height(); y++)
             canvas->setPixel(x,y,0);
-
+/*
     if (RobotCandidates.size() > 0)
     {
 
@@ -425,6 +425,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         }
 
     }
+ */
 
     emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
     //emit fftChanged(vision.getFFT(), GLDisplay::FFT);
