@@ -292,7 +292,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     {
         debug << "("<<ballPoints[i].x << ","<<ballPoints[i].y<< ")";
     }*/
-    if(ballPoints.size() > 5)
+    if(ballPoints.size() > 10)
     {
 
             circ = CircleFit.FitCircleLMA(ballPoints);
@@ -303,7 +303,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
             //qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
 
     }
-    else if ((ballPoints.size() <= 5))
+    else if ((ballPoints.size() <= 10))
     {
         Vector2<int> bottomRight = PossibleBall.getBottomRight();
         Vector2<int> topLeft = PossibleBall.getTopLeft();

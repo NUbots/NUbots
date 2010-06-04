@@ -3,7 +3,7 @@
 #include "ClassificationColours.h"
 #include <math.h>
 #define MIN_POINTS_ON_LINE_FINAL 4
-#define MIN_POINTS_ON_LINE 3
+#define MIN_POINTS_ON_LINE 2
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
@@ -64,6 +64,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     //clock_t startLineForm = clock();
+    //qDebug() << "Finding Lines with segments:  " << linePoints.size();
     FindFieldLines(image_width,image_height);
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -82,9 +83,10 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //    }
     //}
+
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
-    //qDebug() << "Finnished Finding Penalty Spots:";
+    //qDebug() << "Finding Corner Points:";
     FindCornerPoints(image_width,image_height);
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
@@ -102,6 +104,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     //clock_t startCorner = clock();
+    //qDebug() << "Decode Corners:";
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
@@ -354,7 +357,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //clock_t startHorizontalSearch = clock();
     //debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
     //Only bother searching if there is enough points to make part of a line..
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++)
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size() ; SearchFrom++)
     {   //for all line points recorded
         if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
@@ -416,7 +419,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             }
             else
             {
-                EndCheck = linePoints.size()-1;
+                EndCheck = linePoints.size();
             }
 
         }
@@ -428,16 +431,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //// //qDebug() << "SORTING...";
     //clock_t startSortAgain = clock();
     //debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
-    qsort(linePoints,0,linePoints.size()-1,2);
+    qsort(linePoints,0,linePoints.size(),2);
     //qDebug() << "Finnished...";
 
     //clock_t startVerticalSearch = clock();
     //debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
-    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size()-1 ; SearchFrom++){
+    for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size() ; SearchFrom++){
         if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
 
-        for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size()-1; EndCheck++){
+        for (unsigned int EndCheck = SearchFrom+1; EndCheck < linePoints.size(); EndCheck++){
                 //std::cout << "Comparing.."<< SearchFrom << " with " << EndCheck <<std::endl;
                 //Skip all points on the same search line as this one or have already been removed..
 
@@ -460,7 +463,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                     previousPointID = EndCheck;
                     ColSlopeVal = linePoints[SearchFrom].x - linePoints[EndCheck].x;
 
-                    for (unsigned int PointID = EndCheck+1; PointID < linePoints.size()-1; PointID++)
+                    for (unsigned int PointID = EndCheck+1; PointID < linePoints.size(); PointID++)
                     {
                         if(linePoints[PointID].y > linePoints[previousPointID].y + GRID)
                         {
@@ -532,7 +535,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
 
     //We should now have about 10 lines max, some of which can be joined together (since they may be two lines seperated by a break but otherwise one line really...)
-    for (LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
+    for (LineIDStart = 0; LineIDStart < fieldLines.size(); LineIDStart++){
         if (!fieldLines[LineIDStart].valid) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
         for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++)
         {
@@ -678,6 +681,8 @@ void LineDetection::FindPenaltySpot(Vision* vision)
         my = 0;
         lineLength = 0.0;
         //qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
+
+        //CHECK LINES:
         for (unsigned int i = 0; i < fieldLines.size(); i++)
         {
         //CHECK ALL LINES (EVEN IF NOT A LINE!)
@@ -698,70 +703,12 @@ void LineDetection::FindPenaltySpot(Vision* vision)
                         //	Left Point:	(lx-0.5length,ly), (lx, ly+3/4length), (lx, ly-3/4length),
                         //	MidPoint:	(mx, my-3/4length), (mx, my-3/4length)
                         //	Right Point:	(rx+0.5length,ry), (rx, ry+3/4length), (lx, ry-3/4length),
-                        int checkX, checkY;
-                        int searchRadius = (int)(lineLength/16);
-                        if (searchRadius < 3)
-                        {
-                                searchRadius =3;
-                        }
 
-                        bool whitePixelFound;
+                        if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
 
-                        //Left Point 1: (lx-0.5length,ly)
-                        checkX = lx - (int)(lineLength/2);
-                        checkY = ly;
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
 
-                        //Left Point 2: (lx, ly+3/4length)
-                        checkX = lx ;
-                        checkY = ly + (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
 
-                        //Left Point3: (lx, ly-3/4length)
-                        checkX = lx ;
-                        checkY = ly - (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
 
-                        //Mid Point1: (mx, my-3/4length)
-                        checkX = mx ;
-                        checkY = my - (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
-
-                        //Mid Point2: (mx, my+3/4length)
-                        checkX = mx ;
-                        checkY = my + (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
-
-                        //Right Point1: (rx+0.5length,ry)
-                        checkX = rx + (int)(lineLength/2);
-                        checkY = ry;
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
-
-                        //Right Point2: (rx, ry+3/4length)
-                        checkX = rx;
-                        checkY = ry+ (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
-
-                        //Right Point2: (rx, ry-3/4length)
-                        checkX = rx;
-                        checkY = ry - (int)(3*lineLength/4);
-                        whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
-                        if(whitePixelFound)
-                                continue;
 
                         //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
                         double TempDist = 0;
@@ -790,6 +737,113 @@ void LineDetection::FindPenaltySpot(Vision* vision)
         }
 
 
+}
+
+bool LineDetection::checkAroundForWhite(int mx, int my,double length, Vision* vision)
+{
+    bool whitePixelFound;
+    int checkX, checkY;
+    int searchRadius = (int)(length/16);
+    if (searchRadius < 3)
+    {
+            searchRadius =3;
+    }
+    //qDebug() << "\tChecking Left " ;
+    //Mid Point Left: (lx-0.5length,ly)
+    checkX = mx - (int)(length);
+    checkY = my;
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+    //qDebug() << "\tChecking Right " ;
+    checkX = mx + (int)(length);
+    checkY = my;
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+    //qDebug() << "\tChecking Bottom " ;
+    //Mid Point1: (mx, my-3/4length)
+    checkX = mx ;
+    checkY = my - (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+    //qDebug() << "\tChecking Top " ;
+    //Mid Point2: (mx, my+3/4length)
+    checkX = mx ;
+    checkY = my + (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    return false;
+}
+bool LineDetection::checkAroundForWhite(int lx, int ly, int mx, int my, int rx, int ry,double length, Vision* vision)
+{
+    bool whitePixelFound;
+    int checkX, checkY;
+    int searchRadius = (int)(length/16);
+    if (searchRadius < 2)
+    {
+            searchRadius =2;
+    }
+    //Left Point 1: (lx-0.5length,ly)
+    checkX = lx - (int)(length);
+    checkY = ly;
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Left Point 2: (lx, ly+3/4length)
+    checkX = lx ;
+    checkY = ly + (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Left Point3: (lx, ly-3/4length)
+    checkX = lx ;
+    checkY = ly - (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Mid Point1: (mx, my-3/4length)
+    checkX = mx ;
+    checkY = my - (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Mid Point2: (mx, my+3/4length)
+    checkX = mx ;
+    checkY = my + (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Right Point1: (rx+0.5length,ry)
+    checkX = rx + (int)(length);
+    checkY = ry;
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Right Point2: (rx, ry+3/4length)
+    checkX = rx;
+    checkY = ry+ (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    //Right Point2: (rx, ry-3/4length)
+    checkX = rx;
+    checkY = ry - (int)(3*length/4);
+    whitePixelFound = DetectWhitePixels(checkX,checkY, searchRadius, vision);
+    if(whitePixelFound)
+            return true;
+
+    return false;
 }
 
 bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision)

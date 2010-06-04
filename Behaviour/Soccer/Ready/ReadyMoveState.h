@@ -27,6 +27,7 @@
 
 class SoccerFSMState;
 #include "../SoccerState.h"
+#include <vector>
 
 class ReadyMoveState : public SoccerState
 {
@@ -36,6 +37,7 @@ public:
     BehaviourState* nextState();
 protected:
     void doState();
+    std::vector<float> getReadyFieldPositions();
 };
 
 

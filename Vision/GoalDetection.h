@@ -29,6 +29,8 @@ class GoalDetection
 
         bool isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal);
 
+        void CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates, Vision* vision);
+
         void classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vision);
 
         void CombineOverlappingCandidates(std::vector<ObjectCandidate>& FO_Candidates);

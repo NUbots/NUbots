@@ -31,7 +31,9 @@
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
-//#include <QDebug>
+#include <QImage>
+#include "../ColorModelConversions.h"
+#include <QDebug>
 
 using namespace mathGeneral;
 Vision::Vision()
@@ -374,7 +376,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             case YELLOW_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::yellow);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPRE-YELLOW-GOALS" << endl;
                 #endif
@@ -390,7 +392,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             case BLUE_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::blue);
-                validColours.push_back(ClassIndex::shadow_blue);
+                //validColours.push_back(ClassIndex::shadow_blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug << "\tPRE-BLUE-GOALS" << endl;
@@ -2179,6 +2181,100 @@ int Vision::getNumFramesProcessed()
     int framesprocessed = numFramesProcessed;
     numFramesProcessed = 0;
     return framesprocessed;
+}
+
+QImage Vision::getEdgeFilter()
+{
+    return getEdgeFilter(0,0,currentImage->getWidth(), currentImage->getHeight());
+}
+
+QImage Vision::getEdgeFilter(int x, int y, int width, int height)
+{
+    return getEdgeFilter(currentImage->getSubImage(x,y,width, height, 1));
+}
+
+QImage Vision::getEdgeFilter(int x, int y, int width, int height, int decimation_spacing)
+{
+    return getEdgeFilter(currentImage->getSubImage(x,y,width, height, decimation_spacing));
+}
+
+QImage Vision::getEdgeFilter(QImage image)
+{
+    QImage* resultant = new QImage(image.width(), image.height(), QImage::Format_ARGB32);
+    QImage* grayscale = new QImage(image.width(), image.height(), QImage::Format_ARGB32);
+    float c = 0;
+    unsigned char cP = 0;
+    unsigned char cR = 0;
+    unsigned int rgb = 0, gray = 0;
+
+    //Precalculate Grayscale image
+    for (int x = 1; x < image.width() - 1; x++)
+        for (int y = 1; y < image.height() - 1; y++)
+        {
+            rgb = image.pixel(x,y);
+            ColorModelConversions::rgb2gray(rgb, gray);
+            grayscale->setPixel(x,y,gray);
+        }
+
+     //filter with edge detecting filter
+     for (int x = 1; x < image.width() - 1; x++)
+     {
+         for (int y = 1; y < image.height() - 1; y++)
+         {
+             c = 0; cP = 0; cR = 0;
+
+             c += 2*(grayscale->pixel(x-1,y-1) % 256); //a
+             c += 2*(grayscale->pixel(x  ,y-1) % 256); //b
+             c += 2*(grayscale->pixel(x-1,y  ) % 256); //d
+
+             c -= 2*(grayscale->pixel(x+1,y  ) % 256); //f
+             c -= 2*(grayscale->pixel(x  ,y+1) % 256); //h
+             c -= 2*(grayscale->pixel(x+1,y+1) % 256); //i
+
+             if      (c > 255) cR = 255;
+             else if (c <   0) cR = 0;
+             else                    cR = (unsigned char)(c);
+             resultant->setPixel(x,y, (cR * 0x01010101));
+         }
+     }
+
+    return *resultant;
+}
+
+/*!
+  @brief perform an fft to extract prominent features for further analysis
+  */
+QImage Vision::getFFT()
+{
+    qDebug() << "getFFT()";
+    return getFFT(0,0,currentImage->getWidth(), currentImage->getHeight(), 1);
+}
+QImage Vision::getFFT(int x, int y, int width, int height)
+{
+    return getFFT(currentImage->getSubImage(x,y,width, height, 1));
+}
+QImage Vision::getFFT(int x, int y, int width, int height, int decimation_spacing)
+{
+    qDebug() << "getFFT(int "<< x <<", int "<< y <<", int "<< width <<", int "<< height <<", int "<< decimation_spacing <<")";
+    return getFFT(currentImage->getSubImage(x,y,width, height, decimation_spacing));
+}
+
+QImage Vision::getFFT(QImage image)
+{
+    qDebug() << "getFFT(QImage)";
+    unsigned int rgb = 0, gray = 0;
+    for (int x = 0; x < image.width(); x++){
+        for (int y = 0; y < image.height(); y++){
+            rgb = image.pixel(x,y);
+            qDebug() << "("<<x<<","<<y<<")::"<<((rgb/16777216)%256)<<"|"<<((rgb/65536)%256)<<"|"<<((rgb/256)%256)<<"|"<<((rgb)%256);
+            ColorModelConversions::rgb2gray(rgb, gray);
+            qDebug() << "("<<x<<","<<y<<")::"<<((gray/16777216)%256)<<"|"<<((gray/65536)%256)<<"|"<<((gray/256)%256)<<"|"<<((gray)%256);
+            image.setPixel(x, y, gray);
+        }
+    }
+    qDebug() << "getFFT(QImage)end";
+
+    return image;
 }
 
 bool Vision::isPixelOnScreen(int x, int y)
