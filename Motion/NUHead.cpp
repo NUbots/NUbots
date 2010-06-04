@@ -210,6 +210,14 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
         
         times.push_back(m_data->CurrentTime);
         
+        // clip the head targets to 'limits'
+        float min_pitch = (m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.1);
+        float max_pitch = 0.44;
+        if (new_pitch < min_pitch)
+            new_pitch = min_pitch;
+        else if (new_pitch > max_pitch)
+            new_pitch = max_pitch;
+        
         vector<float> target(2,0);
         target[0] = new_pitch;
         target[1] = new_yaw;
