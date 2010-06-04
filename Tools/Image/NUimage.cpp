@@ -1,8 +1,6 @@
 #include "NUimage.h"
-#include <QImage>
 #include <cstring>
 #include <string>
-#include <QDebug>
 #include "ColorModelConversions.h"
 /*!
 @file NUimage.h
@@ -207,6 +205,7 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
     return;
 }
 
+/*
 QImage NUimage::getSubImage(int x, int y, int width, int height) const
 {
     return getSubImage(x, y, width, height, 1);
@@ -244,7 +243,7 @@ QImage NUimage::getSubImage(int x, int y, int width, int height, int decimation_
     }
     //qDebug() << "getSubImage6";
     return image;
-}
+}*/
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */

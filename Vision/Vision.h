@@ -22,7 +22,7 @@
 #include "Tools/FileFormats/LUTTools.h"
 #include <iostream>
 #include <fstream>
-#include <QImage>
+//#include <QImage>
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -101,21 +101,22 @@ class Vision
     int getNumFramesDropped();
     int getNumFramesProcessed();
 
+    
     /*!
       @brief perform an edge filter to extract prominent features for further analysis
       */
-    QImage getEdgeFilter();
+    /*QImage getEdgeFilter();
     QImage getEdgeFilter(int x, int y, int width, int height);
     QImage getEdgeFilter(int x, int y, int width, int height, int decimation_spacing);
-    QImage getEdgeFilter(QImage image);
+    QImage getEdgeFilter(QImage image);*/
 
     /*!
       @brief perform an fft to extract prominent features for further analysis
       */
-    QImage getFFT();
+    /*QImage getFFT();
     QImage getFFT(int x, int y, int width, int height);
     QImage getFFT(int x, int y, int width, int height, int decimation_spacing);
-    QImage getFFT(QImage image);
+    QImage getFFT(QImage image);*/
 
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* tempLut);
     /*!

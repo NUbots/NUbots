@@ -31,9 +31,6 @@
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
-#include <QImage>
-#include "../ColorModelConversions.h"
-#include <QDebug>
 
 using namespace mathGeneral;
 Vision::Vision()
@@ -2183,6 +2180,7 @@ int Vision::getNumFramesProcessed()
     return framesprocessed;
 }
 
+/*
 QImage Vision::getEdgeFilter()
 {
     return getEdgeFilter(0,0,currentImage->getWidth(), currentImage->getHeight());
@@ -2240,10 +2238,11 @@ QImage Vision::getEdgeFilter(QImage image)
 
     return *resultant;
 }
-
+*/
 /*!
   @brief perform an fft to extract prominent features for further analysis
   */
+/*
 QImage Vision::getFFT()
 {
     qDebug() << "getFFT()";
@@ -2275,7 +2274,7 @@ QImage Vision::getFFT(QImage image)
     qDebug() << "getFFT(QImage)end";
 
     return image;
-}
+}*/
 
 bool Vision::isPixelOnScreen(int x, int y)
 {
