@@ -193,25 +193,28 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
  */
 void NUHead::calculateHeadTarget(float elevation, float bearing, float centreelevation, float centrebearing, vector<double>& times, vector<vector<float> >& positions)
 {
-    getSensorValues();
-    const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-    const float gain_yaw = 0.6;             // proportional gain in the yaw direction
-    
-    float c_pitch = -centreelevation;
-    float c_yaw = -centrebearing;
-    
-    float e_pitch = c_pitch - elevation;
-    float e_yaw = c_yaw - bearing;
-    
-    float new_pitch = m_sensor_pitch - gain_pitch*e_pitch;
-    float new_yaw = m_sensor_yaw - gain_yaw*e_yaw;
-    
-    times.push_back(m_data->CurrentTime);
-    
-    vector<float> target(2,0);
-    target[0] = new_pitch;
-    target[1] = new_yaw;
-    positions.push_back(target);
+    if (m_data and m_actions)
+    {
+        getSensorValues();
+        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
+        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
+        
+        float c_pitch = -centreelevation;
+        float c_yaw = -centrebearing;
+        
+        float e_pitch = c_pitch - elevation;
+        float e_yaw = c_yaw - bearing;
+        
+        float new_pitch = m_sensor_pitch - gain_pitch*e_pitch;
+        float new_yaw = m_sensor_yaw - gain_yaw*e_yaw;
+        
+        times.push_back(m_data->CurrentTime);
+        
+        vector<float> target(2,0);
+        target[0] = new_pitch;
+        target[1] = new_yaw;
+        positions.push_back(target);
+    }
 }
 
 /*! @brief Calculates the minimum and maximum head pitch values given a range on the field to look over
