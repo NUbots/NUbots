@@ -678,7 +678,7 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
             Vector2<int> robotTopLeft, robotBottomRight;
             int widthbuffer = FO_it->getObjectWidth()*0.1;
             robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2 - widthbuffer;
-            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2 + FO_it->getObjectHeight();
+            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2 - FO_it->getObjectHeight();
             robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2 + widthbuffer;
             robotBottomRight.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
             //qDebug() << "Checking Goal inside Robot: " << topLeft.x << robotTopLeft.x << topLeft.y << robotTopLeft.y << bottomRight.x << robotBottomRight.x <<  bottomRight.y << robotBottomRight.y;
@@ -721,6 +721,21 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! USE CADIDATE WIDTH:
+
+    //! Calculate the soft colour list:
+    std::vector <unsigned char> colourlist;
+    colourlist.reserve(2);
+    if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
+    {
+        //qDebug() << "BlueGoal Found: addding blue softColours to list" ;
+        colourlist.push_back(ClassIndex::blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
+    }
+    else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+    {
+        colourlist.push_back(ClassIndex::yellow);
+        colourlist.push_back(ClassIndex::yellow_orange);
+    }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)
     {\
@@ -746,20 +761,8 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
         i = j-1;
         //! Removes Small and "Top segments = cross bar"
-        std::vector <unsigned char> colourlist;
-        colourlist.reserve(3);
-        if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
-        {
-            colourlist.push_back(ClassIndex::blue);
-            colourlist.push_back(ClassIndex::shadow_blue);
-            colourlist.push_back(ClassIndex::shadow_object);
-        }
-        else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
-        {
-            colourlist.push_back(ClassIndex::yellow);
-            colourlist.push_back(ClassIndex::yellow_orange);
-        }
-        if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size() - 1)
+
+        if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size())
         {
             Vector2<int> tempMidPoint;
             //FIND the EXACT TEMPEND and TEMPSTART points:
@@ -769,56 +772,58 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                 {
-                    while(vision->isValidColour(vision->classifyPixel(checkStartx+1,tempStart.y),colourlist))
+                    while(vision->isValidColour(vision->classifyPixel(checkStartx-1,tempStart.y),colourlist))
                     {
-                        checkStartx++;
-                        if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                        checkStartx--;
+                        if(!vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                             break;
                     }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                 {
-                    while( vision->isValidColour(vision->classifyPixel(checkStartx-1,tempStart.y),colourlist))
+                    while( vision->isValidColour(vision->classifyPixel(checkStartx+1,tempStart.y),colourlist))
                     {
-                        checkStartx--;
-                        if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                        checkStartx++;
+                        if(!vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                             break;
                     }
                 }
             }
             tempStart.x = checkStartx;
-            if(PossibleGoal.getColour() != vision->classifyPixel(tempEnd.x,tempEnd.y))
+            if(vision->isValidColour(vision->classifyPixel(tempEnd.x,tempEnd.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
                 {
-                    while( vision->isValidColour(vision->classifyPixel(checkEndx-1,tempEnd.y),colourlist))
+                    while( vision->isValidColour(vision->classifyPixel(checkEndx+1,tempEnd.y),colourlist))
                     {
-                        checkEndx--;
-                        if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                        checkEndx++;
+                        if(!vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
                             break;
                     }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+                if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                 {
-                    while(  vision->isValidColour(vision->classifyPixel(checkEndx+1,tempEnd.y),colourlist))
+                    while(  vision->isValidColour(vision->classifyPixel(checkEndx-1,tempEnd.y),colourlist))
                     {
-                        checkEndx++;
-                        if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+                        checkEndx--;
+                        if(!vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                             break;
                     }
                 }
             }
             tempEnd.x = checkEndx;
-            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
+            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
+            if(tempEnd.x -tempStart.x < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+
 
             tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
             tempMidPoint.y = (int)((tempEnd.y - tempStart.y)/2)+tempStart.y;
@@ -889,7 +894,11 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         Vector2<int> rightpoint = rightPoints[i];
         float leftPixels = DistanceLineToPoint(midPointLine, leftpoint);
         float rightPixels = DistanceLineToPoint(midPointLine, rightpoint);
+
+        if(leftPixels+rightPixels < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+
         widthSum +=  leftPixels + rightPixels;
+
         //Check if the current width is larger then the largest width and pixels are close to the mid line
         if(fabs(leftPixels - rightPixels) < (leftPixels + rightPixels) * 0.15)
         {
@@ -904,7 +913,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         {
             largestWidth = leftPixels + rightPixels;
         }
-        //qDebug() << DistanceLineToPoint(midPointLine, leftpoint) << ", "<< DistanceLineToPoint(midPointLine, rightpoint);
+        //qDebug() << DistanceLineToPoint(midPointLine, leftpoint) << ", "<< DistanceLineToPoint(midPointLine, rightpoint) <<  " = "<< DistanceLineToPoint(midPointLine, leftpoint) +  DistanceLineToPoint(midPointLine, rightpoint) ;
 
     }
 
