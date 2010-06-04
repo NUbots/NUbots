@@ -29,10 +29,10 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
     m_covariance[rollAngle][rollAngle] = 0.5f * 0.5f;
 
     m_processNoise = Matrix(numStates,numStates,false);
-    m_processNoise[pitchAngle][pitchAngle] = 1e-3;
-    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-4;
-    m_processNoise[rollAngle][rollAngle] = 1e-3;
-    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-4;
+    m_processNoise[pitchAngle][pitchAngle] = 1e-2;
+    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-5;
+    m_processNoise[rollAngle][rollAngle] = 1e-2;
+    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-5;
 
     m_initialised = true;
 }
@@ -137,7 +137,12 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
 
     // Observation noise
     Matrix S_Obs(numMeasurements,numMeasurements,true);
-    double accelNoise = 200.0*200.0;
+    //double accelNoise = 200.0*200.0;
+    double accelVectorMag = sqrt(accelerations[0]*accelerations[0] + accelerations[1]*accelerations[1] + accelerations[2]*accelerations[2]);
+    double errorFromIdealGravity = accelVectorMag - fabs(gravityAccel);
+    double accelNoise = 25.0 + fabs(errorFromIdealGravity);
+//    file << "Using accel noise: " << accelNoise << std::endl;
+    accelNoise = accelNoise*accelNoise;
 
     S_Obs[0][0] = accelNoise;
     S_Obs[1][1] = accelNoise;
@@ -158,18 +163,15 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
     {
         pitch = mathGeneral::normaliseAngle(sigmaPoints[pitchAngle][i]);
         roll = mathGeneral::normaliseAngle(sigmaPoints[rollAngle][i]);
-        //accX = sigmaPoints[xAcceleration][i];
-        //accY = sigmaPoints[yAcceleration][i];
-        //accZ = sigmaPoints[zAcceleration][i];
 
         // Calculate predicted x acceleration due to gravity + external acceleration.
-        temp[0][0] = gravityAccel * sin(pitch);// + accX;
+        temp[0][0] = gravityAccel * sin(pitch);
 
         // Calculate predicted y acceleration due to gravity + external acceleration.
-        temp[1][0] = -gravityAccel * cos(pitch) * sin(roll);// + accY;
+        temp[1][0] = -gravityAccel * sin(roll);
 
         // Calculate predicted z acceleration due to gravity + external acceleration.
-        temp[2][0] = -gravityAccel * cos(pitch) * cos(roll);// + accZ;
+        temp[2][0] = -gravityAccel * cos(pitch) * cos(roll);
 
         if(validKinematics)
         {

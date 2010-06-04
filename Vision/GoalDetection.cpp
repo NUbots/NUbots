@@ -60,6 +60,10 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
         //! Check if the Goal is in a Robot:
         CheckCandidateIsInRobot(FO_Candidates, AllObjects);
+
+        CheckIsFilled(FO_Candidates, vision);
+
+
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
 
@@ -233,7 +237,11 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
     else{
         return false;
     }
+    return false;
 }
+
+
+
 void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                                            const std::vector < TransitionSegment > &horizontalSegments)
@@ -365,7 +373,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
     int spacings = vision->getScanSpacings()/2; //8
     int direction = ScanLine::RIGHT;
     std::vector<unsigned char> colourlist;
-    colourlist.reserve(2);
+    colourlist.reserve(3);
     if(PossibleGoal->getColour() == ClassIndex::yellow ||PossibleGoal->getColour() == ClassIndex::yellow_orange )
     {
         colourlist.push_back(ClassIndex::yellow);
@@ -376,6 +384,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
         colourlist.push_back(ClassIndex::blue);
         colourlist.push_back(ClassIndex::shadow_blue);
     }
+
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
 
     //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
@@ -573,7 +582,43 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     return;
 }
 
+void GoalDetection::CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates, Vision* vision)
+{
+    //Calculate the minimum size of horizontal scanlines
+    //Add lengths of segments of these scanlines (be a multiple of width)
+    //Add lengths of transition segments in object
+    //Compare and throw out "small percentages"
+    vector < ObjectCandidate > ::iterator it;
+    for(it =  FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
 
+        int heigtOfPossibleGoal = it->width();
+        int widthOfPossibleGoal = it->height();
+
+        int horizontalScanspacing = vision->getScanSpacings();
+        float minIntersectingScanlines = heigtOfPossibleGoal / (float)horizontalScanspacing;
+
+        int maxScanLengthOfMinScanlines = minIntersectingScanlines * widthOfPossibleGoal;
+
+        vector<TransitionSegment> segments = it->getSegments();
+        int lengthsOfSegments = 0;
+        for(unsigned int i = 0; i < segments.size(); i++)
+        {
+            lengthsOfSegments = lengthsOfSegments + segments[i].getSize();
+        }
+
+        //qDebug() << "Comparing LengthOfMinScanIntersection and actual lengths: " <<maxScanLengthOfMinScanlines << lengthsOfSegments << heigtOfPossibleGoal << widthOfPossibleGoal;
+        if(lengthsOfSegments <  maxScanLengthOfMinScanlines*0.5)
+        {
+            it = FO_Candidates.erase(it);
+            continue;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
 
 bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height, int width)
 {
@@ -611,6 +656,7 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
 {
     vector < ObjectCandidate > ::iterator it;
     bool objectRemoved;
+
        //! Go through all the candidates: to find a possible goal
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
@@ -630,9 +676,10 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
             //qDebug() << "Checking  Robot: " << FO_it->getID();
             if(FO_it->getID() != FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
             Vector2<int> robotTopLeft, robotBottomRight;
-            robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2;
-            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2;
-            robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2;
+            int widthbuffer = FO_it->getObjectWidth()*0.1;
+            robotTopLeft.x = FO_it->ScreenX() -  FO_it->getObjectWidth()/2 - widthbuffer;
+            robotTopLeft.y = FO_it->ScreenY() -  FO_it->getObjectHeight()/2 - FO_it->getObjectHeight();
+            robotBottomRight.x = FO_it->ScreenX() +  FO_it->getObjectWidth()/2 + widthbuffer;
             robotBottomRight.y = FO_it->ScreenY() +  FO_it->getObjectHeight()/2;
             //qDebug() << "Checking Goal inside Robot: " << topLeft.x << robotTopLeft.x << topLeft.y << robotTopLeft.y << bottomRight.x << robotBottomRight.x <<  bottomRight.y << robotBottomRight.y;
             if( topLeft.x >= robotTopLeft.x && topLeft.y >= robotTopLeft.y && bottomRight.x <= robotBottomRight.x &&  bottomRight.y <= robotBottomRight.y)
@@ -674,6 +721,21 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! USE CADIDATE WIDTH:
+
+    //! Calculate the soft colour list:
+    std::vector <unsigned char> colourlist;
+    colourlist.reserve(2);
+    if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
+    {
+        //qDebug() << "BlueGoal Found: addding blue softColours to list" ;
+        colourlist.push_back(ClassIndex::blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
+    }
+    else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+    {
+        colourlist.push_back(ClassIndex::yellow);
+        colourlist.push_back(ClassIndex::yellow_orange);
+    }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)
     {\
@@ -700,66 +762,68 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         i = j-1;
         //! Removes Small and "Top segments = cross bar"
 
-        if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size() - 1)
+        if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size())
         {
             Vector2<int> tempMidPoint;
             //FIND the EXACT TEMPEND and TEMPSTART points:
             int checkEndx = tempEnd.x;
             int checkStartx = tempStart.x;
             //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
-            if(PossibleGoal.getColour() != vision->classifyPixel(tempStart.x,tempStart.y))
+            if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                 {
-                    while( PossibleGoal.getColour() != vision->classifyPixel(checkStartx+1,tempStart.y))
+                    while(vision->isValidColour(vision->classifyPixel(checkStartx-1,tempStart.y),colourlist))
                     {
-                        checkStartx++;
-                        if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                        checkStartx--;
+                        if(!vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                             break;
                     }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                 {
-                    while( PossibleGoal.getColour() == vision->classifyPixel(checkStartx-1,tempStart.y))
+                    while( vision->isValidColour(vision->classifyPixel(checkStartx+1,tempStart.y),colourlist))
                     {
-                        checkStartx--;
-                        if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                        checkStartx++;
+                        if(!vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                             break;
                     }
                 }
             }
             tempStart.x = checkStartx;
-            if(PossibleGoal.getColour() != vision->classifyPixel(tempEnd.x,tempEnd.y))
+            if(vision->isValidColour(vision->classifyPixel(tempEnd.x,tempEnd.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
                 {
-                    while( PossibleGoal.getColour() != vision->classifyPixel(checkEndx-1,tempEnd.y))
+                    while( vision->isValidColour(vision->classifyPixel(checkEndx+1,tempEnd.y),colourlist))
                     {
-                        checkEndx--;
-                        if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                        checkEndx++;
+                        if(!vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
                             break;
                     }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+                if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                 {
-                    while( PossibleGoal.getColour() == vision->classifyPixel(checkEndx+1,tempEnd.y))
+                    while(  vision->isValidColour(vision->classifyPixel(checkEndx-1,tempEnd.y),colourlist))
                     {
-                        checkEndx++;
-                        if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+                        checkEndx--;
+                        if(!vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                             break;
                     }
                 }
             }
             tempEnd.x = checkEndx;
-            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
+            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
+            if(tempEnd.x -tempStart.x < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+
 
             tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
             tempMidPoint.y = (int)((tempEnd.y - tempStart.y)/2)+tempStart.y;
@@ -830,7 +894,11 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         Vector2<int> rightpoint = rightPoints[i];
         float leftPixels = DistanceLineToPoint(midPointLine, leftpoint);
         float rightPixels = DistanceLineToPoint(midPointLine, rightpoint);
+
+        if(leftPixels+rightPixels < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+
         widthSum +=  leftPixels + rightPixels;
+
         //Check if the current width is larger then the largest width and pixels are close to the mid line
         if(fabs(leftPixels - rightPixels) < (leftPixels + rightPixels) * 0.15)
         {
@@ -845,7 +913,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         {
             largestWidth = leftPixels + rightPixels;
         }
-        //qDebug() << DistanceLineToPoint(midPointLine, leftpoint) << ", "<< DistanceLineToPoint(midPointLine, rightpoint);
+        //qDebug() << DistanceLineToPoint(midPointLine, leftpoint) << ", "<< DistanceLineToPoint(midPointLine, rightpoint) <<  " = "<< DistanceLineToPoint(midPointLine, leftpoint) +  DistanceLineToPoint(midPointLine, rightpoint) ;
 
     }
 
