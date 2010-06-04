@@ -10,6 +10,7 @@
 #include "Pixel.h"
 #include <iostream>
 #include "Tools/FileFormats/TimestampedData.h"
+#include <QImage>
 
 /*!
 @brief Class used to store an image and its relevant information.
@@ -140,6 +141,28 @@ public:
     {
         return m_timestamp;
     }
+
+    /*!
+      @brief gets the sub image as defined by the (x,y) of the top left corner and the
+      height and width of the rectangle the extends from this origin.
+      @param x                  distance from left edge of super-image
+      @param y                  distance from top  edge of super-image
+      @param width              the width  of the sub image to extract
+      @param height             the height of the sub image to extract
+      @return returns the subimage from the super image
+      */
+    QImage getSubImage(int x, int y, int width, int height) const;
+    /*!
+      @brief gets the sub image as defined by the (x,y) of the top left corner and the
+      height and width of the rectangle the extends from this origin.
+      @param x                  distance from left edge of super-image
+      @param y                  distance from top  edge of super-image
+      @param width              the width  of the sub image to extract
+      @param height             the height of the sub image to extract
+      @param decimation_spacing this is an integer to select every nth pixel in both (x,y)
+      @return returns the subimage from the super image
+      */
+    QImage getSubImage(int x, int y, int width, int height, int decimation_spacing) const;
 
     Pixel **m_image;                    //!< Pointer to the image array.
     double m_timestamp;			//!< Time point at which the image was captured. (Unix Time)

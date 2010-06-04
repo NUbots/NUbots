@@ -170,8 +170,14 @@ public:
           */
         void writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId);
 
-
         /*!
+          @brief Test stub for displaying alpha transparent images
+          @param displayId The id of the display layer to write to.
+          @param image     The image to update the layer with
+          */
+        void stub(QImage image, GLDisplay::display displayId);
+        /*!
+
         @brief Removes all of the previous display instructions so old display data is not reused.
         */
         void clearAllDisplays();
