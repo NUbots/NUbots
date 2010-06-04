@@ -2145,7 +2145,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 
 double Vision::CalculateBearing(double cx){
     double FOVx = deg2rad(45.0f); //Taken from Old Globals
-    return atan( (currentImage->getHeight()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
+    return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 
 
