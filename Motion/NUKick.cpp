@@ -266,6 +266,7 @@ void NUKick::doKick()
                             pose = POST_KICK;
                             break;
                         }
+                        // Shift the weight of the robot to the support leg.
                         done = ShiftWeightToFoot(supportLeg,1.0f,0.04);
                         if(done)
                         {
@@ -353,7 +354,7 @@ void NUKick::doKick()
 		case SWING:
 		{
                         debug << "Swinging Leg..." << endl;
-                        done = SwingLegForward(m_kickingLeg, 0.7);
+                        done = SwingLegForward(m_kickingLeg, 0.1);
                         if(done)
                         {
                             cout << "Swing completed!" << endl;
@@ -401,25 +402,15 @@ void NUKick::doKick()
                 case UNSHIFT_LEG:
                 {
                         debug << "Unshifting Weight..." << endl;
-                        done = this->ShiftWeightToFoot(m_kickingLeg,0.6f,0.04);
+                        done = this->ShiftWeightToFoot(m_kickingLeg,0.5f,0.04);
                         if(done)
                         {
                             debug << "Weight Unshifted!" << endl;
                             //m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), LeftLegTheta, vel, gain);
                             //m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), RightLegTheta, vel, gain);
                             pose = POST_KICK;
-                            m_resumeTime = m_data->CurrentTime + 333.0f;
                         }
                         break;
-                }
-                case WAIT:
-                {
-                    done = IsPastTime(m_resumeTime);
-                    if(done)
-                    {
-                        pose = POST_KICK;
-                    }
-                    break;
                 }
 
                 case RESET:
@@ -628,7 +619,7 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
 {
     const float maxShiftSpeed = speed;
     const float reqiredAccuracy = 0.05;
-    const float propGain = 0.04f;
+    const float propGain = 0.05f;
     bool validData = true;
     bool leftContact, rightContact;
     validData = validData && m_data->getFootContact(NUSensorsData::LeftFoot, leftContact);
@@ -812,29 +803,52 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
 {
     float swingSpeed = speed;
     bool validData = true;
-    bool leftContact, rightContact;
-    validData = validData && m_data->getFootContact(NUSensorsData::LeftFoot, leftContact);
-    validData = validData && m_data->getFootContact(NUSensorsData::RightFoot, rightContact);
+
+    NUSensorsData::foot_id_t s_supportFoot;
+    NUSensorsData::foot_id_t s_kickingFoot;
+    NUSensorsData::bodypart_id_t s_supportLeg;
+    NUSensorsData::bodypart_id_t s_kickingLeg;
+    NUActionatorsData::bodypart_id_t a_supportLeg;
+    NUActionatorsData::bodypart_id_t a_kickingLeg;
+    if(kickingLeg == rightLeg)
+    {
+        s_supportFoot = NUSensorsData::LeftFoot;
+        s_kickingFoot = NUSensorsData::RightFoot;
+        s_supportLeg = NUSensorsData::LeftLegJoints;
+        s_kickingLeg = NUSensorsData::RightLegJoints;
+        a_supportLeg = NUActionatorsData::LeftLegJoints;
+        a_kickingLeg = NUActionatorsData::RightLegJoints;
+    }
+    else if(kickingLeg == leftLeg)
+    {
+        s_supportFoot = NUSensorsData::RightFoot;
+        s_kickingFoot = NUSensorsData::LeftFoot;
+        s_supportLeg = NUSensorsData::RightLegJoints;
+        s_kickingLeg = NUSensorsData::LeftLegJoints;
+        a_supportLeg = NUActionatorsData::RightLegJoints;
+        a_kickingLeg = NUActionatorsData::LeftLegJoints;
+    }
+    else return true;
+
+
+    bool supportFootContact;
+    validData = validData && m_data->getFootContact(s_supportFoot, supportFootContact);
+
     if(!validData) return false;
-    float lcopx(0.0f),lcopy(0.0f),rcopx(0.0f),rcopy(0.0f);
-    float lforce(0.0f),rforce(0.0f);
+    float copx(0.0f),copy(0.0f);
+    float force(0.0f);
 
-    if(leftContact)
+    if(supportFootContact)
     {
-        validData = validData && m_data->getFootCoP(NUSensorsData::LeftFoot,lcopx,lcopy);
-        validData = validData && m_data->getFootForce(NUSensorsData::LeftFoot,lforce);
-    }
-    if(rightContact)
-    {
-        validData = validData && m_data->getFootCoP(NUSensorsData::RightFoot,rcopx,rcopy);
-        validData = validData && m_data->getFootForce(NUSensorsData::RightFoot,rforce);
+        validData = validData && m_data->getFootCoP(s_supportFoot,copx,copy);
+        validData = validData && m_data->getFootForce(s_supportFoot,force);
     }
 
-    vector<float>leftJoints;
-    vector<float>rightJoints;
-    validData = validData && m_data->getJointTargets(NUSensorsData::LeftLegJoints,leftJoints);
-    validData = validData && m_data->getJointTargets(NUSensorsData::RightLegJoints,rightJoints);
-    validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
+    vector<float>supportLegJoints;
+    vector<float>kickingLegJoints;
+    validData = validData && m_data->getJointTargets(s_supportLeg,supportLegJoints);
+    validData = validData && m_data->getJointTargets(s_kickingLeg,kickingLegJoints);
+    validData = validData && (supportLegJoints.size() >= 6) && (kickingLegJoints.size() >= 6);
 
     const float targetHipPitch = -1.2;
     const float targetKneePitch = 0.6f;
@@ -844,10 +858,10 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
         vector<float> vel (6, 0);
         vector<float> gain (6, 100);
 
-        if(kickingLeg == rightLeg)
-        {
-            float hipDiff = targetHipPitch - rightJoints[1];
-            float kneeDiff = targetKneePitch - rightJoints[3];
+//        if(kickingLeg == rightLeg)
+//        {
+            float hipDiff = targetHipPitch - kickingLegJoints[1];
+            float kneeDiff = targetKneePitch - kickingLegJoints[3];
 
             if((hipDiff > 0) && (kneeDiff > 0)) return true;
 
@@ -865,63 +879,63 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
             debug << "kneeFramesRequired = " << kneeFramesRequired << endl;
             debug << "slowestJointSamplesLeft = " << slowestJointSamplesLeft << endl;
 
-            BalanceCoP(leftJoints, lcopx, lcopy);
-            rightJoints[0] = leftJoints[0];
-            rightJoints[4] = leftJoints[4];
+            BalanceCoP(supportLegJoints, copx, copy);
+            kickingLegJoints[0] = supportLegJoints[0];
+            kickingLegJoints[4] = supportLegJoints[4];
 
             if(slowestJointSamplesLeft - hipFramesRequired < 1.0)
             {
-                rightJoints[1] -= swingSpeed;
-                debug << "moving Hip = " << rightJoints[1] << endl;
+                kickingLegJoints[1] -= swingSpeed;
+                debug << "moving Hip = " << kickingLegJoints[1] << endl;
             }
             if(slowestJointSamplesLeft - kneeFramesRequired < 1.0)
             {
-                rightJoints[3] -= swingSpeed;
-                debug << "moving Knee = " << rightJoints[3] << endl;
+                kickingLegJoints[3] -= swingSpeed;
+                debug << "moving Knee = " << kickingLegJoints[3] << endl;
             }
-            FlattenFoot(rightJoints);
+            FlattenFoot(kickingLegJoints);
 
-        }
-        else if(kickingLeg == leftLeg)
-        {
-            float hipDiff = targetHipPitch - leftJoints[1];
-            float kneeDiff = targetKneePitch - leftJoints[3];
+//        }
+//        else if(kickingLeg == leftLeg)
+//        {
+//            float hipDiff = targetHipPitch - leftJoints[1];
+//            float kneeDiff = targetKneePitch - leftJoints[3];
+//
+//            if((hipDiff > 0) && (kneeDiff > 0)) return true;
+//
+//            float hipFramesRequired = fabs(hipDiff) / swingSpeed;
+//            float kneeFramesRequired = fabs(kneeDiff) / swingSpeed;
+//
+//            float slowestJointSamplesLeft = 0.0f;
+//            if(hipFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = hipFramesRequired;
+//            if(kneeFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = kneeFramesRequired;
+//
+//            debug << "swingSpeed = " << swingSpeed << endl;
+//            debug << "hipDiff = " << hipDiff << endl;
+//            debug << "kneeDiff = " << kneeDiff << endl;
+//            debug << "hipFramesRequired = " << hipFramesRequired << endl;
+//            debug << "kneeFramesRequired = " << kneeFramesRequired << endl;
+//            debug << "slowestJointSamplesLeft = " << slowestJointSamplesLeft << endl;
+//
+//            BalanceCoP(rightJoints, rcopx, rcopy);
+//            leftJoints[0] = rightJoints[0];
+//            leftJoints[4] = rightJoints[4];
+//
+//            if(slowestJointSamplesLeft - hipFramesRequired < 1.0)
+//            {
+//                leftJoints[1] -= swingSpeed;
+//                debug << "moving Hip = " << leftJoints[1] << endl;
+//            }
+//            if(slowestJointSamplesLeft - kneeFramesRequired < 1.0)
+//            {
+//                leftJoints[3] -= swingSpeed;
+//                debug << "moving Knee = " << leftJoints[3] << endl;
+//            }
+//            FlattenFoot(leftJoints);
+//        }
 
-            if((hipDiff > 0) && (kneeDiff > 0)) return true;
-
-            float hipFramesRequired = fabs(hipDiff) / swingSpeed;
-            float kneeFramesRequired = fabs(kneeDiff) / swingSpeed;
-
-            float slowestJointSamplesLeft = 0.0f;
-            if(hipFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = hipFramesRequired;
-            if(kneeFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = kneeFramesRequired;
-
-            debug << "swingSpeed = " << swingSpeed << endl;
-            debug << "hipDiff = " << hipDiff << endl;
-            debug << "kneeDiff = " << kneeDiff << endl;
-            debug << "hipFramesRequired = " << hipFramesRequired << endl;
-            debug << "kneeFramesRequired = " << kneeFramesRequired << endl;
-            debug << "slowestJointSamplesLeft = " << slowestJointSamplesLeft << endl;
-
-            BalanceCoP(rightJoints, rcopx, rcopy);
-            leftJoints[0] = rightJoints[0];
-            leftJoints[4] = rightJoints[4];
-
-            if(slowestJointSamplesLeft - hipFramesRequired < 1.0)
-            {
-                leftJoints[1] -= swingSpeed;
-                debug << "moving Hip = " << leftJoints[1] << endl;
-            }
-            if(slowestJointSamplesLeft - kneeFramesRequired < 1.0)
-            {
-                leftJoints[3] -= swingSpeed;
-                debug << "moving Knee = " << leftJoints[3] << endl;
-            }
-            FlattenFoot(leftJoints);
-        }
-
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), leftJoints, vel, gain);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), rightJoints, vel, gain);
+        m_actions->addJointPositions(a_supportLeg, nusystem->getTime(), supportLegJoints, vel, gain);
+        m_actions->addJointPositions(a_kickingLeg, nusystem->getTime(), kickingLegJoints, vel, gain);
     }
     return false;
 }

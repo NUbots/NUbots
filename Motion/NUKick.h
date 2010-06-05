@@ -34,7 +34,7 @@ class NUWalk;
 #include <stack>
 #include "Kinematics/Kinematics.h"
 
-enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SET_LEG, POISE_LEG, SWING, RETRACT, REALIGN_LEGS, UNSHIFT_LEG, RESET, NO_KICK, WAIT, PRE_KICK, POST_KICK, TRANSFER_TO_SUPPORT};
+enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SET_LEG, POISE_LEG, SWING, RETRACT, REALIGN_LEGS, UNSHIFT_LEG, RESET, NO_KICK, PRE_KICK, POST_KICK, TRANSFER_TO_SUPPORT};
 
 class NUKick
 {
@@ -102,7 +102,6 @@ private:
 
     stack<vector<double> > poseStack;
     legId_t m_kickingLeg;
-    float m_resumeTime;
     Legs * IKSys;
     bool m_kickIsActive;
 };
