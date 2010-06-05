@@ -31,6 +31,7 @@
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "Behaviour/TeamInformation.h"
 
+#include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
@@ -84,6 +85,25 @@ public:
     
     void doState()
     {
+        static int lastKickSign = 1;
+        bool activeKick;
+        if(m_provider->m_data->getMotionKickActive(activeKick))
+        {
+            if(!activeKick)
+            {
+                vector<float> kickPos(2,0.0f);
+                vector<float> targetPos(2,0.0f);
+                kickPos[0] = 15.0f;
+                kickPos[1] = lastKickSign * 10.0f;
+                targetPos[0] = 1000.0f;
+                targetPos[1] = lastKickSign * 10.0f;
+                KickJob* kick = new KickJob(0,kickPos,targetPos);
+                m_provider->m_jobs->addMotionJob(kick);
+                lastKickSign *= -1;
+            }
+        }
+        return;
+
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
