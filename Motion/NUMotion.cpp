@@ -258,7 +258,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         #ifdef USE_KICK
         if (m_kick->isActive())
             m_kick->process(data, actions);
-        else
+        else {
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             if (m_save->isActive())
@@ -276,8 +276,11 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
                 #else
                     ;
                 #endif
-        #if defined(USE_KICK) or defined(USE_BLOCK) or defined(USE_SAVE)
+        #if defined(USE_BLOCK) or defined(USE_SAVE)
             }
+        #endif
+        #if defined(USE_KICK)
+        }
         #endif
     }
     
