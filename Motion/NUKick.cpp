@@ -64,7 +64,24 @@ NUKick::~NUKick()
  */
 void NUKick::kill()
 {
-    
+    // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
+    switch(pose)
+    {
+        case PRE_KICK:
+            pose = POST_KICK;
+            break;
+        case TRANSFER_TO_SUPPORT:
+            pose = UNSHIFT_LEG;
+            break;
+        case LIFT_LEG:
+            pose = RETRACT;
+            break;
+        case SWING:
+            pose = RETRACT;
+            break;
+        default:
+            pose = pose;
+    }
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
