@@ -49,6 +49,9 @@ NUKick::NUKick(NUWalk* walk)
     m_initialPositionSaved = false;
     m_leftStoredPosition.reserve(6);
     m_rightStoredPosition.reserve(6);
+
+    m_currentTimestamp = 0;
+    m_previousTimestamp = 0;
 }
 
 /*! @brief Destructor for motion module
@@ -95,6 +98,8 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     m_data = data;
     m_actions = actions;
+    m_previousTimestamp = m_currentTimestamp;
+    m_currentTimestamp = data->CurrentTime;
     doKick();
 }
 

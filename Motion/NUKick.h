@@ -78,7 +78,8 @@ private:
     void FlattenFoot(vector<float>& jointAngles);
     bool IsPastTime(float time);
     void MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight);
-
+    double TimeBetweenFrames(){return (m_currentTimestamp - m_previousTimestamp);}
+    float perSec2perFrame(float value){return value * (TimeBetweenFrames() / 1000.0);}
 
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
@@ -104,6 +105,9 @@ private:
     legId_t m_kickingLeg;
     Legs * IKSys;
     bool m_kickIsActive;
+
+    double m_currentTimestamp;
+    double m_previousTimestamp;
 };
 
 #endif
