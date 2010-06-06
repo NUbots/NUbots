@@ -68,3 +68,8 @@ void MobileObject::updateObjectVelocities(float velX, float velY, float sdVelX, 
         estimatedVelocityError[0] = sdVelX;
         estimatedVelocityError[1] = sdVelY;
 }
+
+void MobileObject::updateSR(const Matrix& sharedBallSR)
+{
+    sharedBallInfo = sharedBallSR;
+}

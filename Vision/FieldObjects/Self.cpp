@@ -19,14 +19,18 @@ Self::~Self()
 Self::Self(float wmX, float wmY)
 {
 	WorldModelLocation[0] = wmX;
-        WorldModelLocation[1] = wmY;
-        WorldModelLocation[2] = 0;
+    WorldModelLocation[1] = wmY;
+    WorldModelLocation[2] = 0;
 }
-void Self::updateLocationOfSelf(float wmX, float wmY, float heading)
+void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading)
 {
 	WorldModelLocation[0] = wmX;
-        WorldModelLocation[1] = wmY;
-        WorldModelLocation[2] = heading;
+    WorldModelLocation[1] = wmY;
+    WorldModelLocation[2] = heading;
+    
+    WorldModelLocationError[0] = sdX;
+    WorldModelLocationError[1] = sdY;
+    WorldModelLocationError[2] = sdHeading;
 }
 
 std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<float> targetState)

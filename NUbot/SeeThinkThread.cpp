@@ -128,7 +128,7 @@ void SeeThinkThread::run()
             #endif
 
             #ifdef USE_LOCALISATION
-                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects, m_nubot->GameInfo);
+                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("localisation");
                 #endif
