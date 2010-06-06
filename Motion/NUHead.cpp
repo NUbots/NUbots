@@ -1,9 +1,9 @@
 /*! @file NUHead.cpp
     @brief Implementation of nuhead class
 
-    @author Jed Rietveld
+    @author Jason Kulk
  
- Copyright (c) 2010 Jed Rietveld
+ Copyright (c) 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -139,6 +139,13 @@ void NUHead::process(HeadTrackJob* job)
 void NUHead::process(HeadPanJob* job)
 {
     HeadPanJob::head_pan_t pantype = job->getPanType();
+    m_pan_default_values = job->useDefaultValues();
+    if (not m_pan_default_values)
+    {
+        job->getX(m_x_min, m_x_max);
+        job->getYaw(m_yaw_min, m_yaw_max);
+    }
+    
     if (m_is_panning == false || pantype != m_pan_type)
     {
         m_is_panning = true;
@@ -255,28 +262,40 @@ void NUHead::calculatePan()
 
 void NUHead::calculateBallPan()
 {
-    calculateGenericPan(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, m_pan_ball_speed);
+    if (m_pan_default_values)
+        calculateGenericPan(m_BALL_SIZE, 1.1*m_FIELD_DIAGONAL, m_yaw_limits[0], m_yaw_limits[1], m_pan_ball_speed);
+    else
+        calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, m_pan_ball_speed);
 }
 
 void NUHead::calculateBallAndLocalisationPan()
 {
-    calculateGenericPan(m_BALL_SIZE, 1e10, min(m_pan_ball_speed, m_pan_localisation_speed));
+    if (m_pan_default_values)
+        calculateGenericPan(m_BALL_SIZE, 1e10, m_yaw_limits[0], m_yaw_limits[1], min(m_pan_ball_speed, m_pan_localisation_speed));
+    else
+    {
+        cout << m_x_min << "," << m_x_max << "," << m_yaw_min << "," << m_yaw_max << endl;
+        calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, min(m_pan_ball_speed, m_pan_localisation_speed));
+    }
 }
 
 void NUHead::calculateLocalisationPan()
 {
-    calculateGenericPan(250, 1e10, m_pan_localisation_speed);
+    if (m_pan_default_values)
+        calculateGenericPan(120, 1e10, m_yaw_limits[0], m_yaw_limits[1], m_pan_localisation_speed);
+    else
+        calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, m_pan_localisation_speed);
 }
 
 /*! @brief Calculates a pan between mindistance (cm) and maxdistance (cm) at panspeed (cm/s)
  */
-void NUHead::calculateGenericPan(float mindistance, float maxdistance, float panspeed)
+void NUHead::calculateGenericPan(float mindistance, float maxdistance, float minyaw, float maxyaw, float panspeed)
 {
     float minpitch, maxpitch;
     calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
     
     vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
-    vector<vector<float> > scan_points = calculatePanPoints(scan_levels);
+    vector<vector<float> > scan_points = calculatePanPoints(scan_levels, minyaw, maxyaw);
     vector<double> times = calculatePanTimes(scan_points, panspeed);
     
     moveTo(times, scan_points);
@@ -350,23 +369,27 @@ vector<float> NUHead::calculatePanLevels(float minpitch, float maxpitch)
     @param levels the pan levels (in radians)
     @return a matrix containing [[pitch0, yaw0], [pitch1, yaw1], ...]
  */
-vector<vector<float> > NUHead::calculatePanPoints(const vector<float>& levels)
+vector<vector<float> > NUHead::calculatePanPoints(const vector<float>& levels, float minyaw, float maxyaw)
 {
     vector<vector<float> > points;
     bool onleft = m_sensor_yaw >= 0;
     
     if (levels.size() > 0)
-        generateScan(levels[0], m_sensor_pitch, onleft, points);
+        generateScan(levels[0], m_sensor_pitch, minyaw, maxyaw, onleft, points);
     for (unsigned int i=1; i<levels.size(); i++)
-        generateScan(levels[i], levels[i-1], onleft, points);
+        generateScan(levels[i], levels[i-1], minyaw, maxyaw, onleft, points);
 
     return points;
 }
 
 /*! @brief Calculates a single scan to the given pitch value
  */
-void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan)
+void NUHead::generateScan(float pitch, float previouspitch, float minyaw, float maxyaw, bool& onleft, vector<vector<float> >& scan)
 {
+    // Note. This function is confusing ;(.
+    //      - m_pan_limits_yaw[i][0] is actually the right limit and m_pan_limits_yaw[i][1] is the left
+    //        This means we need to match minyaw with m_pan_limits_yaw[i][0] and maxyaw with m_pan_limits_yaw[i][1]
+    //      - onleft == true means we are currently on the left
     static vector<float> s(2,0);        // holds the special extra point when the yaw limits change
     static vector<float> a(2,0);        // holds the first of the scan line
     static vector<float> b(2,0);        // holds the second of the scan line
@@ -383,20 +406,23 @@ void NUHead::generateScan(float pitch, float previouspitch, bool& onleft, vector
             s[1] = min(m_pan_limits_yaw[p][1], m_pan_limits_yaw[i][1]);
         else
             s[1] = max(m_pan_limits_yaw[p][0], m_pan_limits_yaw[i][0]);
-        scan.push_back(s);
+        
+        // now that we have made the point see if we actually need it by comparing it to the min and max yaw
+        if ((onleft and maxyaw > s[1]) or (not onleft and minyaw < s[1]))
+            scan.push_back(s);
     }
     
     a[0] = pitch;
     b[0] = pitch;
     if (onleft)
     {
-        a[1] = m_pan_limits_yaw[i][1];
-        b[1] = m_pan_limits_yaw[i][0];
+        a[1] = min(m_pan_limits_yaw[i][1], maxyaw);         // pick the smallest of the limit and the desired
+        b[1] = max(m_pan_limits_yaw[i][0], minyaw);         // pick the largest
     }
     else
     {
-        a[1] = m_pan_limits_yaw[i][0];
-        b[1] = m_pan_limits_yaw[i][1];
+        a[1] = max(m_pan_limits_yaw[i][0], minyaw);
+        b[1] = min(m_pan_limits_yaw[i][1], maxyaw);
     }
     scan.push_back(a);
     scan.push_back(b);
@@ -500,7 +526,7 @@ void NUHead::calculateBallAndLocalisationNod()
 
 void NUHead::calculateLocalisationNod()
 {
-    calculateGenericNod(100, 1e10, m_pan_localisation_speed);
+    calculateGenericNod(120, 1e10, m_pan_localisation_speed);
 }
 
 /*! @brief Calculates a nod between mindistance and maxdistance (cm) at nodspeed (cm/s). 

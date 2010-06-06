@@ -20,6 +20,8 @@
  */
 
 #include "HeadPanJob.h"
+#include "Vision/FieldObjects/MobileObject.h"
+
 #include "debug.h"
 #include "debugverbosityjobs.h"
 
@@ -33,9 +35,47 @@ HeadPanJob::HeadPanJob(head_pan_t pantype) : MotionJob(Job::MOTION_PAN)
     #endif
     m_job_time = 0;
     m_pan_type = pantype;
+    m_use_default = true;
     #if DEBUG_JOBS_VERBOSITY > 0
         summaryTo(debug);
     #endif
+}
+
+/*! @brief Constructs a PanJob over the given area on the field
+    @param xmin the minimum x distance to include in the pan
+    @param xmax the maximum x distance to include in the pan (cm)
+    @param yawmin the minimum yaw angle to include in the pan (rad)
+    @param yawmax the maximum yaw angle to include in the pan (rad)
+ */
+HeadPanJob::HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax) : MotionJob(Job::MOTION_PAN)
+{
+    m_job_time = 0;
+    m_pan_type = pantype;
+    
+    m_use_default = false;
+    m_x_min = xmin;
+    m_x_max = xmax;
+    m_yaw_min = yawmin;
+    m_yaw_max = yawmax;
+}
+
+/*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
+    @param object the mobile field object you are looking for
+ */
+HeadPanJob::HeadPanJob(const MobileObject& object) : MotionJob(Job::MOTION_PAN)
+{
+    m_job_time = 0;
+    m_pan_type = BallAndLocalisation;
+    
+    m_use_default = false;
+    float d = object.estimatedDistance();
+    float t = object.estimatedBearing();
+    float sd = max(object.sdX(), object.sdY());
+    
+    m_x_min = d - sd;
+    m_x_max = d + sd;
+    m_yaw_min = t - atan2(sd,d);
+    m_yaw_max = t + atan2(sd,d);
 }
 
 /*! @brief Constructs a HeadPanJob from stream data
@@ -46,10 +86,21 @@ HeadPanJob::HeadPanJob(istream& input) : MotionJob(Job::MOTION_PAN)
     m_job_time = 0;
     // Temporary read buffers
     head_pan_t hptBuffer;
-    
-    // read in the pan type
+    bool boolBuffer;
+    float floatBuffer;
+
     input.read(reinterpret_cast<char*>(&hptBuffer), sizeof(hptBuffer));
     m_pan_type = hptBuffer;
+    input.read(reinterpret_cast<char*>(&boolBuffer), sizeof(boolBuffer));
+    m_use_default = boolBuffer;
+    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+    m_x_min = floatBuffer;
+    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+    m_x_max = floatBuffer;
+    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+    m_yaw_min = floatBuffer;
+    input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(floatBuffer));
+    m_yaw_max = floatBuffer;
     
     #if DEBUG_JOBS_VERBOSITY > 0
         summaryTo(debug);
@@ -72,6 +123,27 @@ HeadPanJob::head_pan_t HeadPanJob::getPanType()
     return m_pan_type;
 }
 
+/*! @brief Returns true if the default values for this pan type should be used
+ */
+bool HeadPanJob::useDefaultValues()
+{
+    return m_use_default;
+}
+
+/*! @brief Gets the x distances to include in the pan */
+void HeadPanJob::getX(float& xmin, float& xmax)
+{
+    xmin = m_x_min;
+    xmax = m_x_max;
+}
+
+/*! @brief Gets the yaw angles to include in the pan */
+void HeadPanJob::getYaw(float& yawmin, float& yawmax)
+{
+    yawmin = m_yaw_min;
+    yawmax = m_yaw_max;
+}
+
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
@@ -84,6 +156,8 @@ void HeadPanJob::summaryTo(ostream& output)
         output << "BallAndLocalisation";
     else
         output << "Localisation";
+    if (not m_use_default)
+        output << " [" << m_x_min << "," << m_x_max << "] [" << m_yaw_min << "," << m_yaw_max << "]";
     output << endl;
     
 }
@@ -119,6 +193,11 @@ void HeadPanJob::toStream(ostream& output) const
     MotionJob::toStream(output);            // This writes data introduced at the motion level
                                             // Then we write HeadPanJob specific data
     output.write((char*) &m_pan_type, sizeof(m_pan_type));
+    output.write((char*) &m_use_default, sizeof(m_use_default));
+    output.write((char*) &m_x_min, sizeof(m_x_min));
+    output.write((char*) &m_x_max, sizeof(m_x_max));
+    output.write((char*) &m_yaw_min, sizeof(m_yaw_min));
+    output.write((char*) &m_yaw_max, sizeof(m_yaw_max));
 }
 
 /*! @relates HeadPanJob
