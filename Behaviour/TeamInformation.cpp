@@ -119,15 +119,23 @@ void TeamInformation::updateTeamPacket()
 float TeamInformation::getTimeToBall()
 {
     float time = 600;
-    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0 and not m_data->isIncapacitated())
     {
-        float headyaw, headpitch;
-        m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-        m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        float measureddistance = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-		float balldistance = measureddistance * cos(m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
-        float ballbearing = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-        time = balldistance/10.0 + fabs(ballbearing)/0.5;
+        MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+		float balldistance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+        float ballbearing = ball.estimatedBearing();
+        
+        vector<float> walkspeed, maxspeed;
+        m_data->getMotionWalkSpeed(walkspeed);
+        m_data->getMotionWalkMaxSpeed(maxspeed);
+        
+        // Add time for the movement to the ball
+        time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
+        
+        if (balldistance > 30)
+        {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
+            time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+        }
     }
     return time;
 }

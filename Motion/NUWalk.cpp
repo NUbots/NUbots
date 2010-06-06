@@ -303,6 +303,12 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
     currentspeed = speeds;
 }
 
+/*! @brief Updates maxspeeds with the current maximum speeds of the walk engine */
+void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
+{
+    maxspeeds = m_walk_parameters.getMaxSpeeds();
+}
+
 /*! @brief Walk to the given point by the given time
  
     Use this function to make use of the internal path planning algorithms. These algorithms are purely time-based and
