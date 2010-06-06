@@ -1,8 +1,8 @@
-/*! @file ChaseBallBehaviourState.h
-    @brief Declaration of a wrapper state for the chase ball provider (ie the field-less demo behaviour)
+/*! @file PositioningState.h
+    @brief Declaration of the chase ball soccer state
  
-    @class ChaseBallBehaviourState
-    @brief A wrapper state for the chase ball provider (ie the field-less demo behaviour)
+    @class PositioningState
+    @brief The chase ball soccer state
 
     @author Jason Kulk
  
@@ -22,23 +22,23 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CHASE_BALL_BEHAVIOUR_STATE_H
-#define CHASE_BALL_BEHAVIOUR_STATE_H
+#ifndef POSITIONING_SOCCER_FSM_STATE_H
+#define POSITIONING_SOCCER_FSM_STATE_H
 
-class SoccerFSMState;
-#include "../SoccerState.h"
-class ChaseBallProvider;
+#include "../SoccerFSMState.h"
+class GoToPosition;
 
-class ChaseBallBehaviourState : public SoccerState
+class PositioningState : public SoccerFSMState
 {
 public:
-    ChaseBallBehaviourState(SoccerFSMState* parent);
-    ~ChaseBallBehaviourState();
-    BehaviourState* nextState();
-protected:
-    void doState();
+    PositioningState(SoccerFSMState* parent);
+    ~PositioningState();
+    BehaviourFSMState* nextState();
 private:
-    ChaseBallProvider* m_chase_provider;
+    void doStateCommons();
+    BehaviourState* nextStateCommons();
+protected:
+    GoToPosition* m_go_to_position;
 };
 
 

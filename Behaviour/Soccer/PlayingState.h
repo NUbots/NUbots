@@ -3,6 +3,17 @@
  
     @class PlayingState
     @brief The playing soccer state
+ 
+    The top-level playing state machine. There are only 4 states at this level:
+        - ChaseState where the robot will chase and kick the ball
+        - PositioningState where the robot will position in a offensive or defensive position
+        - BallIsLost where the robot will search for the ball
+        - ImLost where the robot will attempt to localise
+ 
+    We are in the ball is lost state if the ball is lost, no exceptions.
+    We are in the chasing state if we are the closest to the ball, no exceptions.
+    We are in the lost state if we are lost.
+    We are in the positioning state if we are not closest to the ball.
 
     @author Jason Kulk
  
@@ -28,18 +39,24 @@
 class SoccerProvider;
 #include "SoccerFSMState.h"
 
-class ChaseBallBehaviourState;
+class ChaseState;
+class PositioningState;
+class BallIsLostState;
+class ImLostState;
 
 class PlayingState : public SoccerFSMState
 {
 public:
     PlayingState(SoccerProvider* provider);
-    ~PlayingState();
-    BehaviourFSMState* nextState() {return this;};
-private:
-    void doStateCommons();
-private:
-    ChaseBallBehaviourState* m_chase_state;
+    virtual ~PlayingState();
+    BehaviourFSMState* nextState();
+protected:
+    virtual void doStateCommons();
+    virtual BehaviourFSMState* nextStateCommons();
+    ChaseState* m_chase_state;
+    PositioningState* m_positioning_state;
+    BallIsLostState* m_ball_is_lost_state;
+    ImLostState* m_im_lost_state;
 };
 
 
