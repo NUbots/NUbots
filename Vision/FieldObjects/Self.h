@@ -19,6 +19,7 @@ class Self {
         float sdX() {return WorldModelLocationError[0];}
         float sdY() {return WorldModelLocationError[1];}
         float sdHeading() {return WorldModelLocationError[2];}
+        bool isLost() {return false;}           // TODO: return true when lost!
     
         std::vector<float> CalculateDifferenceFromFieldState(const std::vector<float> desiredState);
         float CalculateDistanceToStationaryObject(const StationaryObject& theObject);

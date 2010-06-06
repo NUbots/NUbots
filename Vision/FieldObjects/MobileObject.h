@@ -42,6 +42,7 @@ class MobileObject : public Object{
         float Y() const {return estimatedFieldLocation.y;}
         float sdX() const {return estimatedFieldLocationError.x;}
         float sdY() const {return estimatedFieldLocationError.y;}
+        bool isLost() const {return false;}                     // TODO: return true when lost!
         float velX() const {return estimatedVelocity.x;}
         float velY() const {return estimatedVelocity.y;}
         float sdVelX() const {return estimatedVelocityError.x;}
