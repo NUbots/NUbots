@@ -68,7 +68,7 @@ HeadPanJob::HeadPanJob(const MobileObject& object) : MotionJob(Job::MOTION_PAN)
     m_pan_type = BallAndLocalisation;
     
     m_use_default = false;
-    float d = object.estimatedDistance();
+    float d = object.estimatedDistance()*cos(object.estimatedElevation());
     float t = object.estimatedBearing();
     float sd = max(object.sdX(), object.sdY());
     
