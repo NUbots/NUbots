@@ -281,8 +281,8 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
     // Set the balls location.
     float distance,bearing;
-    distance = model.getDistanceToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
-    bearing = model.getBearingToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
+    distance = model.getDistanceToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
+    bearing = model.getBearingToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.getState(KF::ballX),model.getState(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.getState(KF::ballXVelocity),model.getState(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
