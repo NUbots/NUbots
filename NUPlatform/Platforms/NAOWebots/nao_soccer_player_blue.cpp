@@ -15,26 +15,29 @@
 #include <sstream>
 #include <string.h>
 #include <stdlib.h>
+#include <iomanip>
 
 using namespace std;
 ofstream debug;
 ofstream errorlog;
 
-int getPlayerNumber(int argc, const char *argv[])
+int getLogNumber(int argc, const char *argv[])
 {
     if (argc < 3)
         errorlog << "nao_soccer_player_blue::getPlayerNumber(). Could not find team id and player id in controllerArgs" << endl;
     
-    return atoi(argv[1]) + 1;
+    return atoi(argv[1]) + 1 + 10*atoi(argv[2]);
 }
 
 int main(int argc, const char *argv[]) 
 {
     stringstream filename;
-    filename << getPlayerNumber(argc, argv) << "debug.log";
+    filename << setfill('0') << setw(2);
+    filename << getLogNumber(argc, argv) << "debug.log";
     debug.open((DATA_DIR + filename.str()).c_str());    // I need to use a different name for each robot!
     stringstream errorlogname;
-    errorlogname << getPlayerNumber(argc, argv) << "error.log";
+    errorlogname << setfill('0') << setw(2);
+    errorlogname << getLogNumber(argc, argv) << "error.log";
     errorlog.open((DATA_DIR + errorlogname.str()).c_str());
     NUbot* nubot = new NUbot(argc, argv);
     nubot->run();
