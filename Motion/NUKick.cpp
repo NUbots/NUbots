@@ -65,9 +65,20 @@ NUKick::~NUKick()
     delete kinematicModel;
 }
 
+bool NUKick::isActive()
+{
+    return m_kickIsActive;
+}
+
 /*! @brief Kills the kick module
  */
 void NUKick::kill()
+{
+    pose = DO_NOTHING;
+    m_kickIsActive = false;
+}
+
+void NUKick::stop()
 {
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
     switch(pose)
@@ -102,6 +113,13 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     m_actions = actions;
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
+    
+    if (m_currentTimestamp - m_previousTimestamp > 200)
+    {
+        kill();
+        return;
+    }
+    
     doKick();
     #ifdef USE_WALK
     if(pose == PRE_KICK)
@@ -271,12 +289,13 @@ void NUKick::doKick()
                 case POST_KICK:
                 {
                     debug << "Doing Post-Kick..." << endl;
-                    done = doPostKick();
+                    done = true;
                     if(done)
                     {
                         cout << "Post kick complete!" << endl;
                         debug << "Post kick complete!" << endl;
                         m_kickIsActive = false;
+                        m_initialPositionSaved = false;
                         pose = DO_NOTHING;
                     }
                     break;
@@ -565,25 +584,14 @@ bool NUKick::doPreKick()
     if(m_walk)
     {
         debug << "Walk detected - stopping robot..." << endl;
-        const float maxStoppedVelocitySum = 1.2f;
-        debug << "Creating speed." << endl;
-        std::vector<float> desiredWalkSpeed(3,0.0f);
-        debug << "Adding speed." << endl;
-        m_walk->process(new WalkJob(desiredWalkSpeed[0],desiredWalkSpeed[1],desiredWalkSpeed[2]));
-        debug << "Walk speed set to zero." << endl;
+        const float maxStoppedVelocitySum = 0.4f;
+        m_walk->process(new WalkJob(0,0,0));
         vector<float> speed;
         m_walk->getCurrentSpeed(speed);
 
         if(speed.size() < 3) return false;
 
-        bool walkStopped = true;
-        for (int i = 0; i < desiredWalkSpeed.size(); i++)
-        {
-            if(speed[i] != desiredWalkSpeed[i])
-            {
-                walkStopped = false;
-            }
-        }
+        bool walkStopped = allZeros(speed);
 
         vector<float>jointVelocities;
         float jointVelocitySum = 0.0f;
@@ -598,12 +606,8 @@ bool NUKick::doPreKick()
         debug << "Walk stopped = " << walkStopped << endl;
         bool robotStopped = walkStopped && (jointVelocitySum < maxStoppedVelocitySum);
         debug << "Robot stopped = " << robotStopped << endl;
-        if(robotStopped)
-        {
-            debug << "Killing walk." << endl;
-            m_walk->kill();
-        }
-        else return false;
+        if(not robotStopped)
+            return false;
     }
 #endif // USE_WALK
     bool validData = true;
@@ -621,6 +625,7 @@ bool NUKick::doPreKick()
     if(!m_initialPositionSaved && validData)
     {
         debug << "Saving Reset Position" << endl;
+        m_walk->kill();
         m_initialPositionSaved = true;
         m_leftStoredPosition = leftJoints;
         m_rightStoredPosition = rightJoints;
@@ -631,22 +636,7 @@ bool NUKick::doPreKick()
     }
     if(validData)
     {
-        float distanceFromTarget = 0.0f;
-        float diff;
-        for (int i = 0; i < leftInitPose.size(); i++)
-        {
-            diff = leftInitPose[i] - leftJoints[i];
-            //distanceFromTarget = sqrt(distanceFromTarget*distanceFromTarget + diff*diff);
-            distanceFromTarget += fabs(diff);
-            diff = rightInitPose[i] - rightJoints[i];
-            distanceFromTarget += fabs(diff);
-            //distanceFromTarget = sqrt(distanceFromTarget*distanceFromTarget + diff*diff);
-        }
-        debug << "distanceFromTarget = " << distanceFromTarget << endl;
-        if(distanceFromTarget < 1.2)
-        {
-            return true;
-        }
+        return allEqual(leftInitPose, leftJoints, 0.05f) and allEqual(rightInitPose, rightJoints, 0.05f);
     }
     return false;
 }
@@ -672,23 +662,10 @@ bool NUKick::doPostKick()
             float endTime = nusystem->getTime() + 2000;
             m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, endTime, m_leftStoredPosition, vel, gain);
             m_actions->addJointPositions(NUActionatorsData::RightLegJoints, endTime, m_rightStoredPosition, vel, gain);
-            m_initialPositionSaved = false;
             moveCommandSent = true;
         }
 
-        float distanceFromTarget = 0.0f;
-        float diff;
-        for (int i = 0; i < m_leftStoredPosition.size(); i++)
-        {
-            diff = m_leftStoredPosition[i] - leftJoints[i];
-            //distanceFromTarget = sqrt(distanceFromTarget*distanceFromTarget + diff*diff);
-            distanceFromTarget += fabs(diff);
-            diff = m_rightStoredPosition[i] - rightJoints[i];
-            distanceFromTarget += fabs(diff);
-            //distanceFromTarget = sqrt(distanceFromTarget*distanceFromTarget + diff*diff);
-        }
-        debug << "distanceFromTarget = " << distanceFromTarget << endl;
-        if(distanceFromTarget < 1.2)
+        if(allEqual(m_leftStoredPosition, leftJoints, 0.05f) and allEqual(m_rightStoredPosition, rightJoints, 0.05f))
         {
             m_initialPositionSaved = false;
             m_leftStoredPosition.clear();

@@ -48,11 +48,12 @@ class NUKick
 public:
     NUKick(NUWalk* walk);
     ~NUKick();
+    void stop();
     void kill();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(KickJob* job);
-    bool isActive(){return m_kickIsActive;}
+    bool isActive();
 private:
     vector<float> bestKickingPosition(const vector<float>& ballPosition,const vector<float>& targetPositon);
     void kickToPoint(const vector<float>& position, const vector<float>& target);
