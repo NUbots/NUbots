@@ -9,6 +9,11 @@ MobileObject::MobileObject(int initID, const std::string& initName):
     estimatedVelocity[1] = 0;
     estimatedVelocityError[0] = 0;
     estimatedVelocityError[1] = 0;
+    
+    sharedBallInfo = Matrix(2,2);
+    sharedBallInfo[0][0] = 600;
+    sharedBallInfo[0][1] = 0;
+    sharedBallInfo[1][1] = 600;
 }
 
 MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
@@ -21,6 +26,11 @@ MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initI
         estimatedVelocity[1] = 0;
         estimatedVelocityError[0] = 0;
         estimatedVelocityError[1] = 0;	
+    
+        sharedBallInfo = Matrix(2,2);
+        sharedBallInfo[0][0] = 600;
+        sharedBallInfo[0][1] = 0;
+        sharedBallInfo[1][1] = 600;
 }
 
 MobileObject::MobileObject(const MobileObject& srcObj):
@@ -28,7 +38,8 @@ MobileObject::MobileObject(const MobileObject& srcObj):
         estimatedFieldLocation(srcObj.getEstimatedFieldLocation()),
         estimatedFieldLocationError(srcObj.getEstimatedFieldLocationError()),
         estimatedVelocity(srcObj.getEstimatedVelocity()),
-        estimatedVelocityError(srcObj.getEstimatedVelocityError())
+        estimatedVelocityError(srcObj.getEstimatedVelocityError()),
+        sharedBallInfo(srcObj.sharedBallInfo)
 {
 }
 

@@ -92,6 +92,7 @@ void TeamInformation::updateTeamPacket()
 {
     if (m_data == NULL or m_objects == NULL)
         return;
+
     m_packet.ID = m_packet.ID + 1;
     m_packet.SentTime = m_data->CurrentTime;
     m_packet.TimeToBall = getTimeToBall();
