@@ -81,6 +81,8 @@ private:
     double TimeBetweenFrames(){return (m_currentTimestamp - m_previousTimestamp);}
     float perSec2perFrame(float value){return value * (TimeBetweenFrames() / 1000.0);}
 
+    bool positionReached(vector<float> targetPosition, vector<float> currentPosition);
+
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
