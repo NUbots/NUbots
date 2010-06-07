@@ -242,6 +242,17 @@ void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float
 {
     minpitch = std::min(static_cast<float>(atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
     maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[0]);
+    
+    if (minpitch <= maxpitch)
+    {
+        float pitch = atan2(m_camera_height, (mindistance + maxdistance)/2) - m_CAMERA_OFFSET - m_body_pitch;
+        if (pitch > m_pitch_limits[1])
+            pitch = m_pitch_limits[1];
+        else if (pitch < m_pitch_limits[0])
+            pitch = m_pitch_limits[0];
+        minpitch = pitch;
+        maxpitch = pitch;
+    }
 }
 
 /*! @brief Calculates the a new motion sequence for the current pan type, and sends it to the actionators
@@ -273,10 +284,7 @@ void NUHead::calculateBallAndLocalisationPan()
     if (m_pan_default_values)
         calculateGenericPan(m_BALL_SIZE, 1e10, m_yaw_limits[0], m_yaw_limits[1], min(m_pan_ball_speed, m_pan_localisation_speed));
     else
-    {
-        cout << m_x_min << "," << m_x_max << "," << m_yaw_min << "," << m_yaw_max << endl;
         calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, min(m_pan_ball_speed, m_pan_localisation_speed));
-    }
 }
 
 void NUHead::calculateLocalisationPan()
@@ -293,6 +301,8 @@ void NUHead::calculateGenericPan(float mindistance, float maxdistance, float min
 {
     float minpitch, maxpitch;
     calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
+    
+    debug << "pancommands: " << mindistance << "," << maxdistance << endl;
     
     vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
     vector<vector<float> > scan_points = calculatePanPoints(scan_levels, minyaw, maxyaw);
@@ -340,10 +350,9 @@ vector<float> NUHead::calculatePanLevels(float minpitch, float maxpitch)
     // calculate scan lines required to scan the area between the min and max scan lines
     int numscans;       // the number of scans (pans)
     float spacing;      // the pitch spacing between each scan (radians)
-    if (minpitch <= maxpitch)
-    {   // special case: only a single pan is required when the minpitch is above the maxpitch
+    if (minpitch == maxpitch)
+    {   // special case: only a single pan is required when the minpitch equal to maxpitch
         numscans = 1;
-        minpitch = maxpitch;
         spacing = 0;
     }
     else
@@ -443,6 +452,7 @@ vector<double> NUHead::calculatePanTimes(const vector<vector<float> >& points, f
             distance = 1.1*m_FIELD_DIAGONAL;
         else
             distance = m_camera_height/ratio_hl;
+        debug << "pandistance: " << distance << endl;
         yawspeed = min(panspeed/distance, m_max_speeds[1]);
         yawtime = fabs(points[0][1] - m_sensor_yaw)/yawspeed;
         pitchtime = fabs(points[0][0] - m_sensor_pitch)/m_max_speeds[0];
