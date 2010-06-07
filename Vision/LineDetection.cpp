@@ -423,7 +423,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }
 
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
-    int horizontalEnd = fieldLines.size();
+    unsigned int horizontalEnd = fieldLines.size();
     //SORT POINTS
     //qDebug() << "SORTING...";
     //clock_t startSortAgain = clock();
