@@ -85,25 +85,6 @@ public:
     
     void doState()
     {
-        static int lastKickSign = 1;
-        bool activeKick;
-        if(m_provider->m_data->getMotionKickActive(activeKick))
-        {
-            if(!activeKick)
-            {
-                vector<float> kickPos(2,0.0f);
-                vector<float> targetPos(2,0.0f);
-                kickPos[0] = 15.0f;
-                kickPos[1] = lastKickSign * 10.0f;
-                targetPos[0] = 1000.0f;
-                targetPos[1] = lastKickSign * 10.0f;
-                KickJob* kick = new KickJob(0,kickPos,targetPos);
-                m_provider->m_jobs->addMotionJob(kick);
-                lastKickSign *= -1;
-            }
-        }
-        return;
-
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
@@ -153,8 +134,34 @@ public:
                 }
             }
             
-            WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
-            m_provider->m_jobs->addMotionJob(walk);
+            //WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
+            //m_provider->m_jobs->addMotionJob(walk);
+
+	        static int lastKickSign = 1;
+			static bool kickSideChanged = false;
+			bool activeKick;
+			
+			bool validKickActive = m_provider->m_data->getMotionKickActive(activeKick);
+			if(validKickActive)
+			{
+				if(!activeKick)
+				{
+					kickSideChanged = false;
+					vector<float> kickPos(2,0.0f);
+					vector<float> targetPos(2,0.0f);
+					kickPos[0] = 15.0f;
+					kickPos[1] = lastKickSign * 10.0f;
+					targetPos[0] = 1000.0f;
+					targetPos[1] = lastKickSign * 10.0f;
+					KickJob* kick = new KickJob(0,kickPos,targetPos);
+					m_provider->m_jobs->addMotionJob(kick);
+				}
+				else if(!kickSideChanged)
+				{
+					kickSideChanged = true;
+					lastKickSign *= -1;
+				}
+			}
             
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
             m_provider->m_jobs->addMotionJob(head);
