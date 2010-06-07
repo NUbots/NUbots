@@ -33,6 +33,7 @@ class NUWalk;
 #include "./Kicks/IK.h"
 #include <stack>
 #include "Kinematics/Kinematics.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 
 enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SET_LEG, POISE_LEG, SWING, RETRACT, REALIGN_LEGS, UNSHIFT_LEG, RESET, NO_KICK, PRE_KICK, POST_KICK, TRANSFER_TO_SUPPORT};
 
@@ -50,7 +51,7 @@ public:
     ~NUKick();
     void stop();
     void kill();
-    
+    void loadKickParameters();
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(KickJob* job);
     bool isActive();
@@ -73,16 +74,15 @@ private:
     bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed);
     bool LiftKickingLeg(legId_t kickingLeg);
     bool SwingLegForward(legId_t kickingLeg, float speed);
-    bool RetractLeg(legId_t kickingLeg);
     bool LowerLeg(legId_t kickingLeg);
     void BalanceCoP(vector<float>& jointAngles, float CoPx, float CoPy);
     void FlattenFoot(vector<float>& jointAngles);
     bool IsPastTime(float time);
     void MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight);
-    double TimeBetweenFrames(){return (m_currentTimestamp - m_previousTimestamp);}
-    float perSec2perFrame(float value){return value * (TimeBetweenFrames() / 1000.0);}
-
-    bool positionReached(vector<float> targetPosition, vector<float> currentPosition);
+    double TimeBetweenFrames();
+    float perSec2perFrame(float value);
+    float SpeedMultiplier();
+    void MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
 
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
@@ -100,15 +100,17 @@ private:
     vector<double> poseData;
     poseType pose;
     bool lock;
-    bool m_initialPositionSaved;
-    vector<float> m_leftStoredPosition;
-    vector<float> m_rightStoredPosition;
+
+    float m_defaultMotorGain;
+    vector<float> m_leftLegInitialPose;
+    vector<float> m_rightLegInitialPose;
 
     stack<vector<double> > poseStack;
     legId_t m_kickingLeg;
     Legs * IKSys;
     bool m_kickIsActive;
 
+    bool m_initialPositionCommandGiven;
     double m_currentTimestamp;
     double m_previousTimestamp;
 };
