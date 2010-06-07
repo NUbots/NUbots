@@ -550,7 +550,7 @@ bool targetReached(vector<float> target, vector<float> current, float accuracy)
 {
     float errorSum;
     if(target.size() != current.size()) return false;
-    for (int i = 0; i < targetPosition.size(); i++)
+    for (int i = 0; i < target.size(); i++)
     {
          errorSum += fabs(target[i] - current[i]);
     }
