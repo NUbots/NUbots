@@ -28,8 +28,11 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 
 SetState::SetState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -59,6 +62,13 @@ void SetState::doState()
     else
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
     
+    // In set we can move the head, so track the ball if you can see it otherwise do a pan
+    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
+    else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+    
+    // In set we must not walk
     m_jobs->addMotionJob(new WalkJob(0,0,0));
 }
 

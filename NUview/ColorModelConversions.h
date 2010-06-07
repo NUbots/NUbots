@@ -256,5 +256,19 @@ static void fromYCbCrToHSV( unsigned char Y,
     return;
 }
 
+static void rgb2gray(unsigned int rgb,
+                     unsigned int& gray)
+{
+    //0.2989 * R + 0.5870 * G + 0.1140 * B
+    unsigned int A, R, G, B, g;
+    A = (rgb & 0xff0000);
+    R = (rgb & 0x00ff0000) >> 16;
+    G = (rgb & 0x0000ff00) >>  8;
+    B = (rgb & 0x000000ff) >>  0;
+    g = 0.2989 * R + 0.5870 * G + 0.1140 * B;
+    gray = A | (g << 16) | (g << 8) | g; // preserve alpha
+
+}
+
 };
 #endif //__ColorModelConversions_h_
