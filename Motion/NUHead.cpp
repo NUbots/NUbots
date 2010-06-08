@@ -302,8 +302,6 @@ void NUHead::calculateGenericPan(float mindistance, float maxdistance, float min
     float minpitch, maxpitch;
     calculateMinAndMaxPitch(mindistance, maxdistance, minpitch, maxpitch);
     
-    debug << "pancommands: " << mindistance << "," << maxdistance << endl;
-    
     vector<float> scan_levels = calculatePanLevels(minpitch, maxpitch);
     vector<vector<float> > scan_points = calculatePanPoints(scan_levels, minyaw, maxyaw);
     vector<double> times = calculatePanTimes(scan_points, panspeed);
@@ -452,7 +450,6 @@ vector<double> NUHead::calculatePanTimes(const vector<vector<float> >& points, f
             distance = 1.1*m_FIELD_DIAGONAL;
         else
             distance = m_camera_height/ratio_hl;
-        debug << "pandistance: " << distance << endl;
         yawspeed = min(panspeed/distance, m_max_speeds[1]);
         yawtime = fabs(points[0][1] - m_sensor_yaw)/yawspeed;
         pitchtime = fabs(points[0][0] - m_sensor_pitch)/m_max_speeds[0];
