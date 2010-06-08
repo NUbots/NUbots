@@ -1751,6 +1751,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             //Initialising Variables
             GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
 
+            if(TempDist > 800) continue;
 
             Vector3<float> measured(TempDist,TempBearing,TempElev);
             Vector3<float> measuredError(0,0,0);
