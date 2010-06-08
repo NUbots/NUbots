@@ -1,6 +1,7 @@
 #include "NUimage.h"
 #include <cstring>
 #include <string>
+#include "ColorModelConversions.h"
 /*!
 @file NUimage.h
 @brief Declaration of NUbots NUimage class. Storage class for images.
@@ -203,6 +204,46 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
     m_imageHeight = newHeight;
     return;
 }
+
+/*
+QImage NUimage::getSubImage(int x, int y, int width, int height) const
+{
+    return getSubImage(x, y, width, height, 1);
+}
+
+QImage NUimage::getSubImage(int x, int y, int width, int height, int decimation_spacing) const
+{
+    //Sanitise inputs
+    if (width <= 0  || width  > m_imageWidth)  width  = m_imageWidth;
+    if (height <= 0 || height > m_imageHeight) height = m_imageHeight;
+    if (x+width > m_imageWidth) x = m_imageWidth - width;
+    if (y+height > m_imageHeight) y = m_imageHeight - height;
+    if (decimation_spacing < 1) decimation_spacing = 1;
+
+    //qDebug() << "getSubImage ("<<x<<","<<y<<")::w("<<width<<")::h("<<height<<")::iw("<<m_imageWidth<<")::ih("<<m_imageHeight<<")";
+
+    QImage image(width/decimation_spacing, height/decimation_spacing, QImage::Format_ARGB32);
+    unsigned int color = 0;
+    unsigned char r = 0, g = 0, b = 0;
+    Pixel* p;
+    //qDebug() << "getSubImage5: "<<decimation_spacing;
+    for (int x_ = x; x_ < x+width; x_ += decimation_spacing)
+    {
+        for (int y_ = y; y_ < y+height; y_ += decimation_spacing)
+        {
+            //qDebug() << "1 (" << x_ << "," << y_ <<")";
+            p = &m_image[y_][x_];
+            //qDebug() << "2: "<< p->y << "," << p->cb << "," << p->cr;
+            ColorModelConversions::fromYCbCrToRGB( p->y, p->cb, p->cr, r, g, b);
+            //qDebug() << "3: " << r << "," << g << "," << b;
+            color = (0xff000000) | (r << 16) | (g << 8) | b;
+            //qDebug() << "4: alpha=" << (color/16777216);
+            image.setPixel(x_ - x, y_ - y, color );
+        }
+    }
+    //qDebug() << "getSubImage6";
+    return image;
+}*/
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */

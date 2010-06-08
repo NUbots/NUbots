@@ -2,6 +2,7 @@
 #define VIRTUALNUBOT_H
 
 #include <QObject>
+#include <QImage>
 #include "Tools/FileFormats/NUbotImage.h"
 #include "Tools/Image/NUimage.h"
 #include "Vision/ClassificationColours.h"
@@ -75,6 +76,8 @@ signals:
     void linePointsDisplayChanged(std::vector<LinePoint> linepoints, GLDisplay::display displayId);
     void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
+    void edgeFilterChanged(QImage image, GLDisplay::display displayId);
+    void fftChanged(QImage image, GLDisplay::display displayId);
 
 private:
     class classEntry

@@ -144,6 +144,7 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(const NUimage* image)
 {
+
     if(!imageAvailable()) return;
     qDebug() << "Begin Process Frame";
     std::vector< Vector2<int> > points;
@@ -308,9 +309,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
                 validColours.push_back(ClassIndex::shadow_blue);
                 //validColours.push_back(ClassIndex::blue);
 
-                qDebug() << "PRE-ROBOT";
+                //qDebug() << "PRE-ROBOT";
                 RobotCandidates = vision.classifyCandidates(LineDetector.robotSegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
-                qDebug() << "POST-ROBOT";
+                //qDebug() << "POST-ROBOT";
 
                 break;
         case BALL:
@@ -327,7 +328,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
             case YELLOW_GOALS:
                 validColours.clear();
                 validColours.push_back(ClassIndex::yellow);
-                validColours.push_back(ClassIndex::yellow_orange);
+                //validColours.push_back(ClassIndex::yellow_orange);
 
                 //qDebug() << "PRE-GOALS";
                 YellowGoalCandidates = vision.classifyCandidates(GoalYellowSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
@@ -350,7 +351,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     }
     //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    qDebug() << "POSTclassifyCandidates";
+    //qDebug() << "POSTclassifyCandidates";
     //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
 
     //! Find Robots:
@@ -381,6 +382,54 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
         qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
         candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
     }
+
+
+    QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
+
+    //Blank canvas - zero alpha (transparent)
+    for (int x = 0; x < canvas->width(); x++)
+        for(int y = 0; y < canvas->height(); y++)
+            canvas->setPixel(x,y,0);
+/*
+    if (RobotCandidates.size() > 0)
+    {
+
+        int x_offs = 0, y_offs = 0;
+        Vector2<int> offs;
+        unsigned int currentPixel = 0;
+        QImage subImage;
+
+        std::vector< ObjectCandidate >::iterator rit;
+        for (rit = RobotCandidates.begin(); rit != RobotCandidates.end(); rit++)
+        {
+            offs = rit->getTopLeft();
+            x_offs = offs.x;
+            y_offs = offs.y;
+
+            subImage = vision.getEdgeFilter(x_offs, y_offs, rit->width(), rit->height());
+
+            for(int x = 0; x < rit->width(); x++)
+                for(int y = 0; y < rit->height(); y++)
+                {
+                    currentPixel = canvas->pixel(x+x_offs,y+y_offs);
+                    currentPixel = currentPixel % 256;
+                    if (currentPixel + (subImage.pixel(x,y)%256) > 255)
+                    {
+                        canvas->setPixel(x,y, 0xffffffff);
+                    }
+                    else
+                    {
+                        canvas->setPixel(x+x_offs,y+y_offs, (currentPixel + subImage.pixel(x,y)%256)* 0x01010101  );
+                    }
+                }
+        }
+
+    }
+ */
+
+    emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
+    //emit fftChanged(vision.getFFT(), GLDisplay::FFT);
+
 
     //POST PROCESS:
     vision.AllFieldObjects->postProcess(image->m_timestamp);
