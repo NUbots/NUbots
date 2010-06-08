@@ -82,6 +82,7 @@ private:
     double TimeBetweenFrames();
     float perSec2perFrame(float value);
     float SpeedMultiplier();
+    float GainMultiplier();
     void MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
 
 //private:
@@ -110,7 +111,7 @@ private:
     Legs * IKSys;
     bool m_kickIsActive;
 
-    bool m_initialPositionCommandGiven;
+    bool m_stateCommandGiven;
     double m_currentTimestamp;
     double m_previousTimestamp;
 };

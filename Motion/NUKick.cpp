@@ -47,7 +47,7 @@ NUKick::NUKick(NUWalk* walk)
     m_kickingLeg = noLeg;
 
     m_kickIsActive = false;
-    m_initialPositionCommandGiven = false;
+    m_stateCommandGiven = false;
 
     m_currentTimestamp = 0;
     m_previousTimestamp = 0;
@@ -81,11 +81,12 @@ void NUKick::kill()
 {
     pose = DO_NOTHING;
     m_kickIsActive = false;
-    m_initialPositionCommandGiven = false;
+    m_stateCommandGiven = false;
 }
 
 void NUKick::stop()
 {
+    m_stateCommandGiven = false;
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
     switch(pose)
     {
@@ -414,7 +415,7 @@ void NUKick::doKick()
 		case SWING:
 		{
                         debug << "Swinging Leg..." << endl;
-                        done = SwingLegForward(m_kickingLeg, 0.1);
+                        done = SwingLegForward(m_kickingLeg, 0.01);
                         if(done)
                         {
                             cout << "Swing completed!" << endl;
@@ -549,7 +550,7 @@ bool NUKick::doPreKick()
     validData = validData && m_data->getJointPositions(NUSensorsData::LeftArmJoints,leftArmJoints);
     validData = validData && m_data->getJointPositions(NUSensorsData::RightArmJoints,rightArmJoints);
 
-    if(!m_initialPositionCommandGiven && validData)
+    if(!m_stateCommandGiven && validData)
     {
         debug << "Moving to Initial Position" << endl;
     #ifdef USE_WALK
@@ -567,11 +568,15 @@ bool NUKick::doPreKick()
         armpos[0] = -PI/8.0;
         armpos[3] = PI/2.0f;
         MoveLimbToPositionWithSpeed(NUActionatorsData::RightArmJoints, rightArmJoints, armpos, maxSpeed , 40.0);
-        m_initialPositionCommandGiven = true;
+        m_stateCommandGiven = true;
     }
     if(validData)
     {
-        return allEqual(m_leftLegInitialPose, leftJoints, 0.05f) && allEqual(m_leftLegInitialPose, rightJoints, 0.05f);
+        if(allEqual(m_leftLegInitialPose, leftJoints, 0.05f) && allEqual(m_leftLegInitialPose, rightJoints, 0.05f))
+        {
+            m_stateCommandGiven = false;
+            return true;
+        }
     }
     return false;
 }
@@ -579,7 +584,6 @@ bool NUKick::doPreKick()
 bool NUKick::doPostKick()
 {
     m_kickIsActive = false;
-    m_initialPositionCommandGiven = false;
     return true;
 }
 
@@ -663,7 +667,6 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
 
 bool NUKick::LiftKickingLeg(legId_t kickingLeg)
 {
-    static bool commandSent = false;;
     bool validData = true;
 
     NUSensorsData::foot_id_t s_supportFoot;
@@ -727,11 +730,10 @@ bool NUKick::LiftKickingLeg(legId_t kickingLeg)
         // Balance using support leg
         BalanceCoP(supportLegJoints, copx, copy);
 
-        if(!commandSent)
+        if(!m_stateCommandGiven)
         {
             MoveLimbToPositionWithSpeed(a_kickingLeg, kickLegPositions, kickLegTargets, 0.7 , 75.0);
-
-            commandSent = true;
+            m_stateCommandGiven = true;
         }
 /*
         // Keep kicking leg paralled in a lengthways orientation.
@@ -754,7 +756,7 @@ bool NUKick::LiftKickingLeg(legId_t kickingLeg)
         */
         if(allEqual(kickLegTargets, kickLegPositions, 0.05f))
         {
-            commandSent = false;
+            m_stateCommandGiven = false;
             return true;
         }
     }
@@ -776,6 +778,11 @@ float NUKick::SpeedMultiplier()
     return TimeBetweenFrames() / 20.0f;
 }
 
+float NUKick::GainMultiplier()
+{
+    return TimeBetweenFrames() / 20.0f;
+}
+
 bool NUKick::IsPastTime(float time){
     return (m_data->CurrentTime > time);
 }
@@ -783,8 +790,8 @@ bool NUKick::IsPastTime(float time){
 void NUKick::BalanceCoP(vector<float>& jointAngles, float CoPx, float CoPy)
 {
     // Linear controller to centre CoP
-    const float gainx = 0.006 * SpeedMultiplier();
-    const float gainy = 0.006 * SpeedMultiplier();
+    const float gainx = 0.006 * GainMultiplier();
+    const float gainy = 0.006 * GainMultiplier();
 
     // Vertical correction
     // Ankle Roll
