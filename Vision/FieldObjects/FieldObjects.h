@@ -38,15 +38,21 @@ class FieldObjects{
                 FO_CORNER_BLUE_T_RIGHT          = 17,
                 FO_CORNER_BLUE_FIELD_RIGHT 	= 18,
 
+                //Projected Field Corners
+                FO_CORNER_PROJECTED_T_YELLOW_LEFT = 19,
+                FO_CORNER_PROJECTED_T_YELLOW_RIGHT = 20,
+                FO_CORNER_PROJECTED_T_BLUE_LEFT = 21,
+                FO_CORNER_PROJECTED_T_BLUE_RIGHT = 22,
+
                 //Penalty Spots
-                FO_PENALTY_YELLOW               = 19,
-                FO_PENALTY_BLUE                 = 20,
+                FO_PENALTY_YELLOW               = 23,
+                FO_PENALTY_BLUE                 = 24,
 
                 // Goal Gaps
-                FO_YELLOW_GOAL_GAP 		= 21,
-                FO_BLUE_GOAL_GAP 		= 22,
+                FO_YELLOW_GOAL_GAP 		= 25,
+                FO_BLUE_GOAL_GAP 		= 26,
 
-                NUM_STAT_FIELD_OBJECTS 		= 23
+                NUM_STAT_FIELD_OBJECTS 		= 27
 
             };
 
@@ -77,13 +83,14 @@ class FieldObjects{
                 FO_YELLOW_GOALPOST_UNKNOWN = 4,
 
                 //New Unknown corners
-                FO_CORNER_UNKNOWN_L 	= 5,
-                FO_CORNER_UNKNOWN_T 	= 6,
+                FO_CORNER_UNKNOWN_INSIDE_L 	= 5,
+                FO_CORNER_UNKNOWN_OUTSIDE_L 	= 6,
+                FO_CORNER_UNKNOWN_T 	= 7,
 
                 //New Unknown Penalty Spots
-                FO_PENALTY_UNKNOWN = 7,
+                FO_PENALTY_UNKNOWN = 8,
 
-                NUM_AMBIGUOUS_FIELD_OBJECTS = 8
+                NUM_AMBIGUOUS_FIELD_OBJECTS = 9
             };
 
             Self self;

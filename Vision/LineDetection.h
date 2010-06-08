@@ -72,6 +72,7 @@ class LineDetection{
         void DecodePenaltySpot(FieldObjects* AllObjects, float timestamp);
 
         void FindCornerPoints(int image_width,int image_height);
+        float findAngleOfLCorner(CornerPoint cornerPoint);
         void DecodeCorners(FieldObjects* AllObjects, float timestamp,  Vision* vision);
         void GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
 

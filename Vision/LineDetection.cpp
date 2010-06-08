@@ -233,8 +233,8 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                             &&  (tempSeg->getAfterColour() == ClassIndex::green && (tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object) )
                             &&  (tempSeg->getBeforeColour() == ClassIndex::green &&(tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )*/
                                 (ClassIndex::white   ==  tempSeg->getColour())
-                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::shadow_object)
-                                &&  (tempSeg->getAfterColour() == ClassIndex::green ||  tempSeg->getAfterColour() == ClassIndex::shadow_object ) )
+                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::shadow_object || tempSeg->getBeforeColour() == ClassIndex::unclassified)
+                                &&  (tempSeg->getAfterColour() == ClassIndex::green ||  tempSeg->getAfterColour() == ClassIndex::shadow_object  || tempSeg->getAfterColour() == ClassIndex::unclassified) )
 
 
                         {
@@ -277,10 +277,10 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
             if(    ((ClassIndex::white   ==  segment->getColour())
 
                      && (segment->getBeforeColour() == ClassIndex::green
-                         || segment->getBeforeColour() == ClassIndex::shadow_object) )
+                         || segment->getBeforeColour() == ClassIndex::shadow_object || segment->getBeforeColour() == ClassIndex::unclassified ) )
 
                      && (segment->getAfterColour() == ClassIndex::green
-                         || segment->getAfterColour() == ClassIndex::shadow_object) )
+                         || segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::unclassified ) )
 
             {
                 //ADD A FIELD LINEPOINT!
@@ -1022,15 +1022,27 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 			//L shape corner..
 				if (Left == Right){
 					if(Bottom >= Top)
+                                        {
                                                 tempCornerPoint.Orientation = POINT_UP; // was -1 is 1
+                                                //qDebug() << "L Corner: UP \t" << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 					else
+                                        {
                                                 tempCornerPoint.Orientation = POINT_DOWN;  // was 1 is 2
+                                                //qDebug() << "L Corner: DOWN \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 				}
 				else {
 					if (Left >= Right)
+                                        {
                                                 tempCornerPoint.Orientation = POINT_RIGHT;  //4
+                                                //qDebug() << "L Corner: RIGHT \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 					else 
+                                        {
                                                 tempCornerPoint.Orientation = POINT_LEFT;  //3
+                                                //qDebug() << "L Corner: LEFT \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 				}
 			}
                         if (tempCornerPoint.CornerType == 1){
@@ -1049,18 +1061,58 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 					}
 				}
 			}
+
+                        float angle = findAngleOfLCorner(tempCornerPoint);
+                        //qDebug() << "Angle: " << angle*57.2957795 << "Degrees";
+                        if(angle > 3.14/4)
+                        {
+                            tempCornerPoint.isObtuse = true;
+                        }
+                        else
+                        {
+                            tempCornerPoint.isObtuse = false;
+                        }
+
+
+
                         cornerPoints.push_back(tempCornerPoint);
 
 		}
 	}
         //qDebug() << "Total Corners Found: " << cornerPoints.size();
 
-        for (unsigned int i = 0; i < cornerPoints.size() ; i++)
-        {
+        //for (unsigned int i = 0; i < cornerPoints.size() ; i++)
+        //{
             //qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
-        }
+        //}
 }
 
+
+//Find the Angle between the L corners:
+
+float LineDetection::findAngleOfLCorner(CornerPoint cornerPoint)
+{
+        float angle = 0.0;
+        LSFittedLine Line1 = cornerPoint.Line[0];
+        LSFittedLine Line2 = cornerPoint.Line[1];
+
+        //Get Unit Vector:
+        Point L1Left = Line1.leftPoint;
+        Point L2Left = Line2.leftPoint;
+
+        float LengthV1 = sqrt((L1Left.x - cornerPoint.PosX)*(L1Left.x - cornerPoint.PosX) + (L1Left.y - cornerPoint.PosY)*(L1Left.y - cornerPoint.PosY));
+        float LengthV2 = sqrt((L2Left.x - cornerPoint.PosX)*(L2Left.x - cornerPoint.PosX) + (L2Left.y - cornerPoint.PosY)*(L2Left.y - cornerPoint.PosY));
+        Vector2<float> V1, V2;
+        V1.x = (L1Left.x - cornerPoint.PosX) / (LengthV1);
+        V1.y = (L1Left.y - cornerPoint.PosY) / (LengthV1);
+
+        V2.x = (L2Left.x - cornerPoint.PosX) / (LengthV2);
+        V2.y = (L2Left.y - cornerPoint.PosY) / (LengthV2);
+
+        angle = acos(V1.x*V2.x + V1.y *V2.y);
+
+        return angle;
+}
 
 /*------------------
 // Method: 	DecodeCorners
@@ -1285,7 +1337,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 		//ASSIGNING T, L or X corner To TempID
 		if (cornerPoints[x].CornerType == 0)
                 {
-                    TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                    if(cornerPoints[x].Orientation == POINT_UP)
+                    {
+                        TempID = FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L;
+                    }
+                    else
+                    {
+                        TempID = FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L;
+                    }
                     //qDebug("FO_CORNER_UNKNOWN_L located \n");
                 }
 		else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
@@ -1304,7 +1363,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 			//Initialising Variables
                         Vector2<float> screenPositionAngle(vision->CalculateBearing(cornerPoints[x].PosX), vision->CalculateElevation(cornerPoints[x].PosY));
                         GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
-                        AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                        AmbiguousObject tempUnknownCorner(TempID, "Unknown Corner");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
                         Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
@@ -1619,14 +1678,68 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             TempID = 0;
             //qDebug("Checking CornerID: %i \t",x);
             //ASSIGNING T, L or X corner To TempID
+
+            AmbiguousObject tempUnknownCorner;
+
             if (cornerPoints[x].CornerType == 0)
             {
-                TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                if(cornerPoints[x].Orientation == POINT_UP)
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L;
+                    tempUnknownCorner = AmbiguousObject(TempID, "Unknown Inside L");
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
+
+                }
+                else
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L;
+                    tempUnknownCorner = AmbiguousObject(TempID, "Unknown Outside L");
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+
+                }
+
                 //qDebug("FO_CORNER_UNKNOWN_L located \n");
             }
             else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
             {
                 TempID = FieldObjects::FO_CORNER_UNKNOWN_T;
+                tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
                 //qDebug("FO_CORNER_UNKNOWN_T located \n");
             }
             else if (cornerPoints[x].CornerType > 1)
@@ -1635,26 +1748,18 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 continue;
             }
 
-            //START DECODING T
-            if (TempID){
-                    //Initialising Variables
-                    GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
-                    AmbiguousObject tempUnknownCorner;
-                    if(TempID == FieldObjects::FO_CORNER_UNKNOWN_L){
-                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown L");
-                    }
-                    else
-                    {
-                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
-                    }
-                    Vector3<float> measured(TempDist,TempBearing,TempElev);
-                    Vector3<float> measuredError(0,0,0);
-                    Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
-                    Vector2<float> screenPositionAngle(vision->CalculateBearing(screenPosition.x), vision->CalculateElevation(screenPosition.y));
-                    Vector2<int> sizeOnScreen(4,4);
-                    tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
-                    AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
-                }
+            //Initialising Variables
+            GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
+
+
+            Vector3<float> measured(TempDist,TempBearing,TempElev);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
+            Vector2<float> screenPositionAngle(vision->CalculateBearing(screenPosition.x), vision->CalculateElevation(screenPosition.y));
+            Vector2<int> sizeOnScreen(4,4);
+            tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
+            AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
+
         }
     }
 

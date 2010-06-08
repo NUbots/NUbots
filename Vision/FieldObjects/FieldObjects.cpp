@@ -176,6 +176,22 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 0.0f;
                     objectName = "Centre Circle";
                     break;
+                case FO_CORNER_PROJECTED_T_YELLOW_LEFT:
+                    x = 240.0f;
+                    y = 200.0f;
+                    objectName = "Projected T Yellow Left";
+                case FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
+                    x = 240.0f;
+                    y = -200.0f;
+                    objectName = "Projected T Yellow Right";
+                case FO_CORNER_PROJECTED_T_BLUE_LEFT:
+                    x = -240.0f;
+                    y = -200.0f;
+                    objectName = "Projected T Blue Left";
+                case FO_CORNER_PROJECTED_T_BLUE_RIGHT:
+                    x = -240.0f;
+                    y = 200.0f;
+                    objectName = "Projected T Blue Right";
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";
