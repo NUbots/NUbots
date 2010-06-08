@@ -880,7 +880,7 @@ ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldB
 
     //! Then calculate horizontal scanlines above the field boarder
     //! Generate Scan pattern for above the max of green boarder.
-    for(int y = 0; y < minY; y = y + scanSpacing)
+    for(int y = 0; y < minY; y = y + scanSpacing*0.5)
     {
         temp.x =0;
         temp.y = y;
@@ -888,7 +888,7 @@ ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldB
         scanArea.addScanLine(tempScanLine);
     }
     //! Generate Scan Pattern for in between the max and min of green horizon.
-    for(int y = minY; y < maxY; y = y + scanSpacing*2)
+    for(int y = minY; y < maxY; y = y + scanSpacing*1)
     {
         temp.x =0;
         temp.y = y;

@@ -742,7 +742,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
         //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
-        //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
+                            //<< tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
         if(tempStart.x == tempEnd.x && tempStart.y != tempEnd.y) continue; //! Throw out vertical lines
 
         int j = i+1;
@@ -750,7 +750,8 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         {
             while(tempStart.y == tempSegments[j].getStartPoint().y)
             {
-                tempEnd = tempSegments[j].getEndPoint();
+                //Scan is backwards, so if a segment is found, we should up date the start point, not the end point
+                tempStart = tempSegments[j].getStartPoint();
                 j++;
                 if(j >= (int)tempSegments.size())
                 {
@@ -762,22 +763,29 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         i = j-1;
         //! Removes Small and "Top segments = cross bar"
 
-        if(tempEnd.x-tempStart.x > 2 && i < (int)tempSegments.size())
+        //qDebug() << i<<": " <<tempStart.x << "," <<tempStart.y
+        //                    << tempEnd.x  << "," << tempEnd.y  ;
+
+
+        if(fabs(tempEnd.x-tempStart.x) > 2 && i < (int)tempSegments.size())
         {
             Vector2<int> tempMidPoint;
             //FIND the EXACT TEMPEND and TEMPSTART points:
             int checkEndx = tempEnd.x;
             int checkStartx = tempStart.x;
             //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
+            //qDebug() << "Colour At Start: "<< vision->classifyPixel(tempStart.x,tempStart.y);
+            //Checking Start of Transition: Go Backwards if current colour is valid, otherwise go forwards
             if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
                 //Find the pixel which isnt the colour
                 if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
                 {
-                    while(vision->isValidColour(vision->classifyPixel(checkStartx-1,tempStart.y),colourlist))
+                    checkStartx--;
+                    while(vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist))
                     {
                         checkStartx--;
-                        if(!vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                        if(!vision->isPixelOnScreen(checkStartx,tempStart.y))
                             break;
                     }
                 }
@@ -786,24 +794,29 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             {
                 if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
                 {
-                    while( vision->isValidColour(vision->classifyPixel(checkStartx+1,tempStart.y),colourlist))
+                    checkStartx++;
+                    while(!vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist))
                     {
                         checkStartx++;
-                        if(!vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                        if(!vision->isPixelOnScreen(checkStartx,tempStart.y))
                             break;
                     }
                 }
             }
             tempStart.x = checkStartx;
+            //Checking End of Transition: Go forwards if current colour is valid, otherwise go backwards
+            //qDebug() << "Colour At End: "<< vision->classifyPixel(tempEnd.x,tempEnd.y);
             if(vision->isValidColour(vision->classifyPixel(tempEnd.x,tempEnd.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+
+                if(vision->isPixelOnScreen(checkEndx,tempEnd.y))
                 {
-                    while( vision->isValidColour(vision->classifyPixel(checkEndx+1,tempEnd.y),colourlist))
+                    checkEndx++;
+                    while( vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
                     {
                         checkEndx++;
-                        if(!vision->isPixelOnScreen(checkEndx+1,tempEnd.y))
+                        if(!vision->isPixelOnScreen(checkEndx,tempEnd.y))
                             break;
                     }
                 }
@@ -812,17 +825,18 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             {
                 if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
                 {
-                    while(  vision->isValidColour(vision->classifyPixel(checkEndx-1,tempEnd.y),colourlist))
+                    checkEndx--;
+                    while(!vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
                     {
                         checkEndx--;
-                        if(!vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                        if(!vision->isPixelOnScreen(checkEndx,tempEnd.y))
                             break;
                     }
                 }
             }
             tempEnd.x = checkEndx;
-            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
-            if(tempEnd.x -tempStart.x < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+            //qDebug() << "Start, End: "<< i <<":" << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
+            if(fabs(tempEnd.x -tempStart.x) < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
 
 
             tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
