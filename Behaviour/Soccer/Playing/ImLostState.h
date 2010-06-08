@@ -32,8 +32,8 @@ class ImLostState : public SoccerFSMState
 public:
     ImLostState(SoccerFSMState* parent);
     ~ImLostState();
-    BehaviourFSMState* nextState();
 private:
+    BehaviourFSMState* nextState();
     void doStateCommons();
     BehaviourState* nextStateCommons();
 private:

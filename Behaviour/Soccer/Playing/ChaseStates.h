@@ -34,11 +34,11 @@ class GoToBall : public SoccerState
 public:
     GoToBall(SoccerFSMState* parent) : SoccerState(parent) {}
     ~GoToBall() {};
+protected:
     BehaviourState* nextState()
     {   // do state transitions in the chase state machine
         return this;
     }
-protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
@@ -52,11 +52,11 @@ class FindTarget : public SoccerState
 public:
     FindTarget(SoccerFSMState* parent) : SoccerState(parent) {}
     ~FindTarget() {};
+protected:
     BehaviourState* nextState()
     {   // do state transitions in the chase state machine
         return this;
     }
-protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1

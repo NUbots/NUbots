@@ -27,6 +27,9 @@
 
 #include "../SoccerFSMState.h"
 
+class BallIsLostPan;
+class BallIsLostSpin;
+
 class BallIsLostState : public SoccerFSMState
 {
 public:
@@ -36,7 +39,11 @@ public:
 private:
     void doStateCommons();
     BehaviourState* nextStateCommons();
-private:
+protected:
+    friend class BallIsLostPan;
+    BehaviourState* m_lost_pan;
+    friend class BallIsLostSpin;
+    BehaviourState* m_lost_spin;
 };
 
 

@@ -20,6 +20,7 @@
 */
 
 #include "BallIsLostState.h"
+#include "BallIsLostStates.h"
 
 #include "Behaviour/GameInformation.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
@@ -31,11 +32,16 @@ using namespace std;
 
 BallIsLostState::BallIsLostState(SoccerFSMState* parent) : SoccerFSMState(parent)
 {
-    m_state = NULL;
+    m_lost_pan = new BallIsLostPan(this);
+    m_lost_spin = new BallIsLostSpin(this);
+    
+    m_state = m_lost_pan;
 }
 
 BallIsLostState::~BallIsLostState()
 {
+    delete m_lost_pan;
+    delete m_lost_spin;
 }
 
 void BallIsLostState::doStateCommons()

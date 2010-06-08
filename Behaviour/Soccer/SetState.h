@@ -33,8 +33,8 @@ class SetState : public SoccerState
 public:
     SetState(SoccerProvider* provider);
     ~SetState();
-    BehaviourState* nextState();
 protected:
+    BehaviourState* nextState();
     void doState();
 };
 

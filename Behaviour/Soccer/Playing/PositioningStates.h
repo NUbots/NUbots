@@ -34,11 +34,11 @@ class GoToPosition : public SoccerState
 public:
     GoToPosition(SoccerFSMState* parent) : SoccerState(parent) {}
     ~GoToPosition() {};
+protected:
     BehaviourState* nextState()
     {   // do state transitions in the positioning state machine
         return this;
     }
-protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1

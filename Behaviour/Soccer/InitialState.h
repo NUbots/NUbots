@@ -33,8 +33,8 @@ class InitialState : public SoccerState
 public:
     InitialState(SoccerProvider* provider);
     ~InitialState();
-    BehaviourState* nextState();
 protected:
+    BehaviourState* nextState();
     void doState();
 };
 

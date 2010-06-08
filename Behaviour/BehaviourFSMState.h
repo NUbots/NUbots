@@ -38,7 +38,6 @@ class BehaviourFSMState : public BehaviourState
 {
 public:
     virtual ~BehaviourFSMState() {};
-    virtual BehaviourFSMState* nextState() = 0;
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     bool stateChanged() {return m_state_changed;};
 protected:
@@ -48,6 +47,7 @@ protected:
         m_previous_state = 0;
         m_state_changed = true;
     };
+    virtual BehaviourFSMState* nextState() = 0;
     void doState();
     virtual void doStateCommons() {};
     virtual BehaviourState* nextStateCommons()

@@ -33,8 +33,8 @@ class PositioningState : public SoccerFSMState
 public:
     PositioningState(SoccerFSMState* parent);
     ~PositioningState();
-    BehaviourFSMState* nextState();
 private:
+    BehaviourFSMState* nextState();
     void doStateCommons();
     BehaviourState* nextStateCommons();
 protected:

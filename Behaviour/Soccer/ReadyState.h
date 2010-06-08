@@ -36,8 +36,8 @@ class ReadyState : public SoccerFSMState
 public:
     ReadyState(SoccerProvider* provider);
     ~ReadyState();
-    BehaviourFSMState* nextState() {return this;};
 private:
+    BehaviourFSMState* nextState() {return this;};
     void doStateCommons();
 private:
     ReadyMoveState* m_move_state;

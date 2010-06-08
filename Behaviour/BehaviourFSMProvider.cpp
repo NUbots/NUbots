@@ -80,7 +80,7 @@ void BehaviourFSMProvider::doBehaviour()
     // check for state changes common to all states
     BehaviourState* nextstate = nextStateCommons();
     if (nextstate == m_state)       // then check for state change specific to this state
-        nextstate = m_state->nextState();
+        nextstate = m_state->getNextState();
     
     // do state transition
     if (nextstate != m_state)

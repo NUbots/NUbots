@@ -10,7 +10,7 @@
         - BallIsLost where the robot will search for the ball
         - ImLost where the robot will attempt to localise
  
-    We are in the ball is lost state if the ball is lost, no exceptions.
+    We are in the ball is lost state if the ball is lost and we are a field player, no exceptions.
     We are in the chasing state if we are the closest to the ball, no exceptions.
     We are in the lost state if we are lost.
     We are in the positioning state if we are not closest to the ball.
@@ -44,19 +44,29 @@ class PositioningState;
 class BallIsLostState;
 class ImLostState;
 
+#include <vector>
+using namespace std;
+
 class PlayingState : public SoccerFSMState
 {
 public:
     PlayingState(SoccerProvider* provider);
     virtual ~PlayingState();
-    BehaviourFSMState* nextState();
 protected:
+    BehaviourFSMState* nextState();
     virtual void doStateCommons();
     virtual BehaviourFSMState* nextStateCommons();
     ChaseState* m_chase_state;
     PositioningState* m_positioning_state;
     BallIsLostState* m_ball_is_lost_state;
     ImLostState* m_im_lost_state;
+private:
+    vector<int> m_chase_led_indices;        // 3,4
+    vector<int> m_lost_led_indices;         // 0,7
+    vector<vector<float> > m_led_on;
+    vector<vector<float> > m_led_off;
+    vector<vector<float> > m_led_red;
+    vector<vector<float> > m_led_green;
 };
 
 
