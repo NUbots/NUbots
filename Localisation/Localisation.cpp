@@ -287,7 +287,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.getState(KF::ballX),model.getState(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.getState(KF::ballXVelocity),model.getState(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSR(model.GetBallSR());
+    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
     // Set my location.
     fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta));
@@ -614,6 +614,9 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
 
     if (timeSinceSeen > 0)      // don't process sharedBalls unless they are seen
         return 0;
+    
+    if (timeSinceSeen < 250)    // if another robot can see the ball then it is not lost
+        m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
     
     #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;

@@ -14,13 +14,16 @@ class MobileObject : public Object{
         Vector2<float> estimatedVelocity;
         Vector2<float> estimatedVelocityError;
     
-        Matrix sharedBallInfo;
+        Matrix sharedCovariance;
+        bool isLost;
             
 	public:
 		~MobileObject();
         MobileObject(int initID = -1, const std::string& initName = "Unknown");
         MobileObject(const Vector2<float>& newAbsoluteLocation, int initID = -1, const std::string& initName = "Unknown");
         MobileObject(const MobileObject& srcObj);
+        void postProcess(const float timestamp);
+    
         void updateAbsoluteLocation(const Vector2<float>& newAbsoluteLocation);
         void updateAbsoluteLocationError(const Vector2<float>& newAbsoluteLocationError);
         void updateObjectLocation(float x, float y, float sdx, float sdy);
@@ -28,8 +31,8 @@ class MobileObject : public Object{
         void updateVelocity(const Vector2<float>& newVelocity);
         void updateVelocityError(const Vector2<float>& newVelocityError);
         void updateObjectVelocities(float velX, float velY, float sdVelX, float sdVelY);
-    
-        void updateSR(const Matrix& sharedBallSR);
+        void updateSharedCovariance(const Matrix& sharedSR);
+        void updateIsLost(bool islost);
 
 		//Access:
         Vector2<float> getEstimatedFieldLocation() const {return estimatedFieldLocation;}
@@ -42,14 +45,14 @@ class MobileObject : public Object{
         float Y() const {return estimatedFieldLocation.y;}
         float sdX() const {return estimatedFieldLocationError.x;}
         float sdY() const {return estimatedFieldLocationError.y;}
-        bool isLost() const {return false;}                     // TODO: return true when lost!
+        bool lost() const {return isLost;}
         float velX() const {return estimatedVelocity.x;}
         float velY() const {return estimatedVelocity.y;}
         float sdVelX() const {return estimatedVelocityError.x;}
         float sdVelY() const {return estimatedVelocityError.y;}		
-        float srXX() const {return sharedBallInfo[0][0];}
-        float srXY() const {return sharedBallInfo[0][1];}
-        float srYY() const {return sharedBallInfo[1][1];}
+        float srXX() const {return sharedCovariance[0][0];}
+        float srXY() const {return sharedCovariance[0][1];}
+        float srYY() const {return sharedCovariance[1][1];}
 };
 #endif
 

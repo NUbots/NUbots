@@ -10,10 +10,11 @@ MobileObject::MobileObject(int initID, const std::string& initName):
     estimatedVelocityError[0] = 0;
     estimatedVelocityError[1] = 0;
     
-    sharedBallInfo = Matrix(2,2);
-    sharedBallInfo[0][0] = 600;
-    sharedBallInfo[0][1] = 0;
-    sharedBallInfo[1][1] = 600;
+    sharedCovariance = Matrix(2,2);
+    sharedCovariance[0][0] = 600;
+    sharedCovariance[0][1] = 0;
+    sharedCovariance[1][1] = 600;
+    isLost = false;
 }
 
 MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
@@ -27,10 +28,11 @@ MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initI
         estimatedVelocityError[0] = 0;
         estimatedVelocityError[1] = 0;	
     
-        sharedBallInfo = Matrix(2,2);
-        sharedBallInfo[0][0] = 600;
-        sharedBallInfo[0][1] = 0;
-        sharedBallInfo[1][1] = 600;
+        sharedCovariance = Matrix(2,2);
+        sharedCovariance[0][0] = 600;
+        sharedCovariance[0][1] = 0;
+        sharedCovariance[1][1] = 600;
+        isLost = false;
 }
 
 MobileObject::MobileObject(const MobileObject& srcObj):
@@ -39,12 +41,27 @@ MobileObject::MobileObject(const MobileObject& srcObj):
         estimatedFieldLocationError(srcObj.getEstimatedFieldLocationError()),
         estimatedVelocity(srcObj.getEstimatedVelocity()),
         estimatedVelocityError(srcObj.getEstimatedVelocityError()),
-        sharedBallInfo(srcObj.sharedBallInfo)
+        sharedCovariance(srcObj.sharedCovariance),
+        isLost(srcObj.isLost)
 {
 }
 
 MobileObject::~MobileObject()
 {
+}
+
+/*! @brief Postprocess the field object after updating visual information
+    @param timestamp the current image timestamp
+
+    This function sets everything Object::postProcess does, as well as the isLost flag.
+ */
+void MobileObject::postProcess(const float timestamp)
+{
+    Object::postProcess(timestamp);
+    if (timeSinceLastSeen < 250)
+        isLost = false;
+    else
+        isLost = true;
 }
 
 void MobileObject::updateAbsoluteLocation(const Vector2<float>& newAbsoluteLocation)
@@ -80,7 +97,14 @@ void MobileObject::updateObjectVelocities(float velX, float velY, float sdVelX, 
         estimatedVelocityError[1] = sdVelY;
 }
 
-void MobileObject::updateSR(const Matrix& sharedBallSR)
+/*! @brief Updates the shared covariance matrix for this mobile object */
+void MobileObject::updateSharedCovariance(const Matrix& sharedSR)
 {
-    sharedBallInfo = sharedBallSR;
+    sharedCovariance = sharedSR;
+}
+
+/*! @brief Updates whether this mobile object is lost */
+void MobileObject::updateIsLost(bool islost)
+{
+    isLost = islost;
 }
