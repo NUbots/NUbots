@@ -67,6 +67,7 @@ private:
     vector<vector<float> > m_led_off;
     vector<vector<float> > m_led_red;
     vector<vector<float> > m_led_green;
+    vector<vector<float> > m_led_yellow;
 };
 
 
