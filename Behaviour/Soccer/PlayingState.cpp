@@ -96,7 +96,7 @@ BehaviourFSMState* PlayingState::nextStateCommons()
     else if (m_team_info->amIClosestToBall())
         return m_chase_state;
     else if (m_field_objects->self.lost())
-        return m_im_lost_state;
+        return m_chase_state; //m_im_lost_state;
     else
         return m_positioning_state;
 }

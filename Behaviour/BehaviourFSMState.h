@@ -39,7 +39,7 @@ class BehaviourFSMState : public BehaviourState
 public:
     virtual ~BehaviourFSMState() {};
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
-    bool stateChanged() {return m_state_changed;};
+    virtual bool stateChanged() {return m_state_changed;};
 protected:
     BehaviourFSMState()
     {

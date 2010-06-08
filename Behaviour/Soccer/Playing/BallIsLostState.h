@@ -29,6 +29,7 @@
 
 class BallIsLostPan;
 class BallIsLostSpin;
+class BallIsLostMove;
 
 class BallIsLostState : public SoccerFSMState
 {
@@ -44,6 +45,8 @@ protected:
     BehaviourState* m_lost_pan;
     friend class BallIsLostSpin;
     BehaviourState* m_lost_spin;
+    friend class BallIsLostMove;
+    BehaviourState* m_lost_move;
 };
 
 

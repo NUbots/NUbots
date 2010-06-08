@@ -25,6 +25,16 @@
 #include "../SoccerState.h"
 class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
+#include "Behaviour/Jobs/JobList.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/TeamInformation.h"
+
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 using namespace std;
@@ -44,6 +54,11 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "GoToBall" << endl;
         #endif
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        if (ball.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(ball));
+        
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
     }
 };
 

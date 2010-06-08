@@ -56,14 +56,18 @@ protected:
 class BallIsLostPan : public BallIsLostSubState
 {
 public:
-    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent) {}
+    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent) 
+    {
+        m_time_in_state = 0;
+        m_previous_time = 0;
+        m_pan_started = false;
+        m_pan_end_time = 0;
+    }
     ~BallIsLostPan() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
-        double pan_end_time;
-        debug << m_data << endl;
-        if (m_data->getMotionHeadCompletionTime(pan_end_time) and pan_end_time < m_data->CurrentTime)
+        if (m_pan_started and m_pan_end_time < m_data->CurrentTime)
             return m_lost_machine->m_lost_spin;
         else
             return this;
@@ -75,7 +79,32 @@ protected:
         #endif
         m_jobs->addMotionJob(new WalkJob(0, 0, 0));
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        
+        // keep track of the time in this state
+        if (m_parent->stateChanged())
+            reset();
+        else
+            m_time_in_state += m_data->CurrentTime - m_previous_time;
+        m_previous_time = m_data->CurrentTime;
+        
+        // grab the pan end time
+        if (not m_pan_started and m_time_in_state > 200)
+        {
+            if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
+                m_pan_started = true;
+        }
     }
+private:
+    void reset()
+    {
+        m_time_in_state = 0;
+        m_pan_started = false;
+        m_pan_end_time = 0;
+    }
+    float m_time_in_state;
+    double m_previous_time;
+    bool m_pan_started;
+    double m_pan_end_time;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- BallIsLostPan
@@ -85,8 +114,57 @@ protected:
 class BallIsLostSpin : public BallIsLostSubState
 {
 public:
-    BallIsLostSpin(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4) {}
+    BallIsLostSpin(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    {
+        m_spin_speed = m_ROTATIONAL_SPEED;
+        m_time_in_state = 0;
+        m_previous_time = 0;
+    }
     ~BallIsLostSpin() {};
+protected:
+    BehaviourState* nextState()
+    {   // do state transitions in the ball is lost state machine
+        if (m_time_in_state > 1000*(6.28/m_ROTATIONAL_SPEED))
+            return m_lost_machine->m_lost_move;
+        else
+            return this;
+    }
+    void doState()
+    {
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "BallIsLostSpin" << endl;
+        #endif
+        if (m_parent->stateChanged())
+        {   // decided which direction to spin based on the estimated bearing when we enter this state
+            m_time_in_state = 0;
+            if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing() < 0)
+                m_spin_speed = -m_ROTATIONAL_SPEED;
+            else
+                m_spin_speed = m_ROTATIONAL_SPEED;
+        }
+        else
+            m_time_in_state += m_data->CurrentTime - m_previous_time;
+        m_previous_time = m_data->CurrentTime;
+        
+        m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, m_spin_speed));
+    }
+private:
+    const float m_ROTATIONAL_SPEED;
+    float m_spin_speed;
+    float m_time_in_state;
+    float m_previous_time;
+};
+
+// ----------------------------------------------------------------------------------------------------------------------- BallIsLostMove
+/*! @class BallIsLostMove
+    In this state we move to one of four positions on the field, and pan for the ball the whole time.
+ */
+class BallIsLostMove : public BallIsLostSubState
+{
+public:
+    BallIsLostMove(BallIsLostState* parent) : BallIsLostSubState(parent) {}
+    ~BallIsLostMove() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
@@ -94,19 +172,16 @@ protected:
     }
     void doState()
     {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "BallIsLostSpin" << endl;
-        #endif
-        float spinspeed;
-        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing() < 0)
-            spinspeed = -m_ROTATIONAL_SPEED;
-        else
-            spinspeed = m_ROTATIONAL_SPEED;
-        m_jobs->addMotionJob(new WalkJob(0, 0, spinspeed));
-        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, spinspeed));
+#if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "BallIsLostMove" << endl;
+#endif
+        if (m_parent->stateChanged())
+        {   // decided which location on the field to go to
+        }
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, 0));
     }
 private:
-    const float m_ROTATIONAL_SPEED;
 };
 
 #endif
