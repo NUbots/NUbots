@@ -34,12 +34,12 @@ void Rectangle::Set(float minx, float maxx, float miny, float maxy)
 
 float Rectangle::CentreX()
 {
-    return minx + Width/2.0;
+    return m_minx + Width()/2.0;
 }
 
 float Rectangle::CentreY()
 {
-    return miny + Height/2.0;
+    return m_miny + Height()/2.0;
 }
 
 float Rectangle::Width()

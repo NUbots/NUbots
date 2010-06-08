@@ -21,10 +21,10 @@ public:
     float MaxY();
 
 private:
-    float minx;
-    float maxx;
-    float miny;
-    float maxy;
+    float m_minx;
+    float m_maxx;
+    float m_miny;
+    float m_maxy;
 };
 
 #endif // RECTANGLE_H
