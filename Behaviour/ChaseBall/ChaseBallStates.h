@@ -40,19 +40,19 @@
 
 #include "debug.h"
 
-class ChaseBallState : public BehaviourState
+class ChaseBallSubState : public BehaviourState
 {
 public:
-    ChaseBallState(ChaseBallProvider* provider){m_provider = provider;};
+    ChaseBallSubState(ChaseBallProvider* provider){m_provider = provider;};
 protected:
     ChaseBallProvider* m_provider;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- PausedState
-class PausedState : public ChaseBallState
+class PausedState : public ChaseBallSubState
 {
 public:
-    PausedState(ChaseBallProvider* provider) : ChaseBallState(provider) {};
+    PausedState(ChaseBallProvider* provider) : ChaseBallSubState(provider) {};
     BehaviourState* nextState() {return m_provider->m_state;};
     void doState() 
     {
@@ -62,10 +62,10 @@ public:
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- ChaseState
-class ChaseState : public ChaseBallState
+class ChaseBallState : public ChaseBallSubState
 {
 public:
-    ChaseState(ChaseBallProvider* provider) : ChaseBallState(provider) {};
+    ChaseBallState(ChaseBallProvider* provider) : ChaseBallSubState(provider) {};
     BehaviourState* nextState()
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
@@ -143,10 +143,10 @@ public:
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- PositonState
-class PositionState : public ChaseState
+class PositionState : public ChaseBallState
 {
 public:
-    PositionState(ChaseBallProvider* provider) : ChaseState(provider) {};
+    PositionState(ChaseBallProvider* provider) : ChaseBallState(provider) {};
     BehaviourState* nextState()
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
@@ -217,10 +217,10 @@ public:
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- SearchState
-class SearchState : public ChaseBallState
+class SearchState : public ChaseBallSubState
 {
 public:
-    SearchState(ChaseBallProvider* provider) : ChaseBallState(provider) {};
+    SearchState(ChaseBallProvider* provider) : ChaseBallSubState(provider) {};
     BehaviourState* nextState()
     {
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
