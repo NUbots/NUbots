@@ -8,6 +8,7 @@
         - Ball --- a pan to just look for the ball
         - BallAndLocalisation --- a pan to both look for the ball and to passively localise
         - Localisation -- a pan just for localisation
+    The type specifies (a) default pitch and yaw limits (b) the speed.
  
     @author Jason Kulk
  
@@ -31,6 +32,8 @@
 #define PANHEADJOB_H
 
 #include "../MotionJob.h"
+class MobileObject;
+
 #include <vector>
 using namespace std;
 
@@ -45,20 +48,30 @@ public:
     };
 public:
     HeadPanJob(head_pan_t pantype);
+    HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax);
+    HeadPanJob(const MobileObject& object);
     HeadPanJob(istream& input);
     ~HeadPanJob();
     
     head_pan_t getPanType();
+    bool useDefaultValues();
+    void getX(float& xmin, float& xmax);
+    void getYaw(float& yawmin, float& yawmax);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    void summaryTo(ostream& output);
+    void csvTo(ostream& output);
     
     friend ostream& operator<<(ostream& output, const HeadPanJob& job);
     friend ostream& operator<<(ostream& output, const HeadPanJob* job);
 protected:
     virtual void toStream(ostream& output) const;
 private:
-    head_pan_t m_pan_type;
+    head_pan_t m_pan_type;              //!< the type of pan
+    bool m_use_default;                 //!< true if the head should use the default values
+    float m_x_min;                      //!< the minimum x distance to include in the pan (cm)
+    float m_x_max;                      //!< the maximum x distance to include in the pan (cm)
+    float m_yaw_min;                    //!< the minimum (right) yaw angle to include in the pan (rad)
+    float m_yaw_max;                    //!< the maximum (left) yaw angle to include in the pan (rad)
 };
 
 #endif

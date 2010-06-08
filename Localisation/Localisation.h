@@ -4,16 +4,13 @@
 
 #include "Vision/FieldObjects/FieldObjects.h"
 class NUSensorsData;
+class GameInformation;
+#include "Behaviour/TeamInformation.h"
 
 #include "debug.h"
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
-#include "Behaviour/GameInformation.h"
-
-#define MULTIPLE_MODELS_ON 1
-#define AMBIGUOUS_CORNERS_ON 0
-#define SHARED_BALL_ON 0
 
 // Debug output level
 // 0 - No messages
@@ -28,13 +25,13 @@ class Localisation: public TimestampedData
         Localisation(int playerNumber = 0);
         ~Localisation();
     
-        void process(NUSensorsData* data, FieldObjects* objects, GameInformation* gameInfo);
+        void process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo);
         //! TODO: Require robots state to be sent to enable smart model resetting.
         //! TODO: Need to add shared packets.
 	
         void feedback(double*);
         double feedbackPosition[3];
-        void ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets);
+        void ProcessObjects();
         bool CheckGameState();
         bool varianceCheck(int modelID);
         int varianceCheckAll();
@@ -45,7 +42,7 @@ class Localisation: public TimestampedData
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
-        //int doSharedBallUpdate(WirelessFieldObj &sharedBall);
+        int doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
         int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
         int getNumActiveModels();
@@ -67,7 +64,6 @@ class Localisation: public TimestampedData
         bool IsValidObject(const Object& theObject);
 
         // Model Reset Functions
-        bool ShouldRunInState(GameInformation::RobotState theState);
         void doPenaltyReset();
         void doPlayerReset();
         void resetSdMatrix(int modelNumber);
@@ -92,7 +88,12 @@ class Localisation: public TimestampedData
         static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         KF tempModel;
         KF models[c_MAX_MODELS];
-        FieldObjects *objects;
+    
+        // local pointers to the public store
+        NUSensorsData* m_sensor_data;
+        FieldObjects* m_objects;
+        GameInformation* m_game_info;
+        TeamInformation* m_team_info;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file

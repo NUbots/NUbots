@@ -29,7 +29,7 @@
 
 #include "debug.h"
 
-TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
+TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects) : m_TIMEOUT(2000)
 {
     m_player_number = playernum;
     m_team_number = teamnum;
@@ -52,11 +52,27 @@ bool TeamInformation::amIClosestToBall()
     {
         if (not m_received_packets[i].empty())
         {
-            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < 2000) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
+            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
                 return false;
         }
     }
     return true;
+}
+
+/*! @brief Returns all of the shared balls in the TeamInformation
+ */
+vector<TeamPacket::SharedBall> TeamInformation::getSharedBalls()
+{
+    vector<TeamPacket::SharedBall> sharedballs;
+    sharedballs.reserve(m_received_packets.size());
+    for (size_t i=0; i<m_received_packets.size(); i++)
+    {
+        if (not m_received_packets[i].empty() and (m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT))
+        {   // if there is a received packet that is not too old grab the shared ball
+            sharedballs.push_back(m_received_packets[i].back().Ball);
+        }
+    }
+    return sharedballs;
 }
 
 /*! @brief Initialises my team packet to send to my team mates
@@ -76,28 +92,51 @@ void TeamInformation::updateTeamPacket()
 {
     if (m_data == NULL or m_objects == NULL)
         return;
+
     m_packet.ID = m_packet.ID + 1;
     m_packet.SentTime = m_data->CurrentTime;
     m_packet.TimeToBall = getTimeToBall();
+    
+    // ------------------------------ Update shared localisation information
+    // update shared ball
+    MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+    m_packet.Ball.TimeSinceLastSeen = ball.TimeSinceLastSeen();
+    m_packet.Ball.X = ball.X();
+    m_packet.Ball.Y = ball.Y();
+    m_packet.Ball.SRXX = ball.srXX();
+    m_packet.Ball.SRXY = ball.srXY();
+    m_packet.Ball.SRYY = ball.srYY();
+    
+    // update self
+    Self& self = m_objects->self;
+    m_packet.Self.X = self.wmX();
+    m_packet.Self.Y = self.wmY();
+    m_packet.Self.Heading = self.Heading();
+    m_packet.Self.SDX = self.sdX();
+    m_packet.Self.SDY = self.sdY();
+    m_packet.Self.SDHeading = self.sdHeading();
 }
 
 float TeamInformation::getTimeToBall()
 {
     float time = 600;
-    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0 and not m_data->isIncapacitated())
     {
-        float headyaw, headpitch;
-        m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-        m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        float measureddistance = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
-        //float balldistance;
-		float balldistance = measureddistance * cos(m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
-//        if (measureddistance < 46)
-//            balldistance = 1;
-//        else
-//			balldistance = sqrt(pow(measureddistance,2) - 46*46);
-        float ballbearing = m_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
-        time = balldistance/10.0 + fabs(ballbearing)/0.5;
+        MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+		float balldistance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+        float ballbearing = ball.estimatedBearing();
+        
+        vector<float> walkspeed, maxspeed;
+        m_data->getMotionWalkSpeed(walkspeed);
+        m_data->getMotionWalkMaxSpeed(maxspeed);
+        
+        // Add time for the movement to the ball
+        time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
+        
+        if (balldistance > 30)
+        {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
+            time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+        }
     }
     return time;
 }

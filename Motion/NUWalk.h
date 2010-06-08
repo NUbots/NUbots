@@ -53,6 +53,7 @@ public:
     virtual void setArmEnabled(bool leftarm, bool rightarm);
     
     void getCurrentSpeed(vector<float>& currentspeed);
+    void getMaximumSpeed(vector<float>& currentspeed);
 protected:
     virtual void doWalk() = 0;
     

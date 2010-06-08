@@ -34,8 +34,8 @@ class ReadyMoveState : public SoccerState
 public:
     ReadyMoveState(SoccerFSMState* parent);
     ~ReadyMoveState();
-    BehaviourState* nextState();
 protected:
+    BehaviourState* nextState();
     void doState();
     std::vector<float> getReadyFieldPositions();
 };

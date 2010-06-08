@@ -10,6 +10,10 @@ Self::Self()
 	WorldModelLocation[0] = 0;
 	WorldModelLocation[1] = 0;
 	WorldModelLocation[2] = 0;
+    
+    WorldModelLocationError[0] = 600;
+    WorldModelLocationError[1] = 600;
+    WorldModelLocationError[0] = 6.283;
 }
 Self::~Self()
 {
@@ -19,14 +23,32 @@ Self::~Self()
 Self::Self(float wmX, float wmY)
 {
 	WorldModelLocation[0] = wmX;
-        WorldModelLocation[1] = wmY;
-        WorldModelLocation[2] = 0;
+    WorldModelLocation[1] = wmY;
+    WorldModelLocation[2] = 0;
+    
+    WorldModelLocationError[0] = 600;
+    WorldModelLocationError[1] = 600;
+    WorldModelLocationError[0] = 6.283;
 }
-void Self::updateLocationOfSelf(float wmX, float wmY, float heading)
+void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading)
 {
 	WorldModelLocation[0] = wmX;
-        WorldModelLocation[1] = wmY;
-        WorldModelLocation[2] = heading;
+    WorldModelLocation[1] = wmY;
+    WorldModelLocation[2] = heading;
+    
+    WorldModelLocationError[0] = sdX;
+    WorldModelLocationError[1] = sdY;
+    WorldModelLocationError[2] = sdHeading;
+}
+
+bool Self::lost()
+{
+    if (WorldModelLocationError[2]*2 > 1.5708)      // if heading is really uncertain we are lost
+        return true;
+    else if (WorldModelLocationError[0]*2 > 3.0 or WorldModelLocationError[1]*2 > 2.0)
+        return true;
+    else
+        return false;
 }
 
 std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<float> targetState)

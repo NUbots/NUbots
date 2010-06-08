@@ -27,6 +27,14 @@
 
 using namespace std;
 
+BehaviourState* BehaviourState::getNextState()
+{
+    if (m_processed)
+        return nextState();
+    else
+        return this;
+}
+
 void BehaviourState::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
     m_data = data;
@@ -35,7 +43,7 @@ void BehaviourState::process(JobList* jobs, NUSensorsData* data, NUActionatorsDa
     m_field_objects = fieldobjects;
     m_game_info = gameinfo;
     m_team_info = teaminfo;
-    
+    m_processed = true;
     doState();
 }
 

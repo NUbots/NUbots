@@ -7,7 +7,7 @@
 
 class Object
 {
-    private:
+    protected:
         int ID;
         std::string name;
         //For Vision to update
@@ -24,9 +24,6 @@ class Object
         float timeSinceLastSeen;            // The time in ms since the object was last seen
         float timeSeen;                     // The consecutive time in ms the object has been seen
         float previousFrameTimestamp;       // The previous frame's timestamp (I use this to increment the timeSeen)
-
-    protected:
-
         bool isVisible;                     // true if the object was seen in this image, false otherwise
 
     public:
@@ -42,7 +39,7 @@ class Object
                                     const Vector2<int>& newSizeOnScreen,
                                     const float timestamp);
 
-        void postProcess(const float timestamp);
+        virtual void postProcess(const float timestamp);
 
         int getID() const {return ID;};
         std::string getName() const {return name;};

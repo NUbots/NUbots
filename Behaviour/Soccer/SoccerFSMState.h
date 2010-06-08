@@ -25,13 +25,23 @@
 #ifndef SOCCER_FSM_STATE_H
 #define SOCCER_FSM_STATE_H
 
-class SoccerProvider;
+#include "SoccerProvider.h"
 #include "Behaviour/BehaviourFSMState.h"
 
 class SoccerFSMState : public BehaviourFSMState
 {
 public:
     virtual ~SoccerFSMState() {};
+    virtual bool stateChanged()
+    {
+        if (m_state_changed)
+            return true;
+        if (m_provider and m_provider->stateChanged())
+            return true;
+        if (m_parent and m_parent->stateChanged())
+            return true;
+        return false;
+    }
 protected:
     SoccerFSMState(SoccerProvider* provider) {m_provider = provider; m_parent = 0;};
     SoccerFSMState(SoccerFSMState* parent) {m_parent = parent; m_provider = parent->m_provider;};
