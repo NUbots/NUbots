@@ -25,6 +25,7 @@
 #define BEHAVIOUR_SCHEMAS_H
 
 #include "Vision/FieldObjects/Self.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"
@@ -142,17 +143,43 @@ namespace BehaviourPotentials
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    vector<float> sensorAvoidObjects(const vector<float>& speed, float objectsize = 30, float dontcaredistance = 50)
+    vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
     {
-        /*vector<float> temp;
+        // Get obstacle distances from the sensors
+        vector<float> temp;
         float leftobstacle = 255;
         float rightobstacle = 255;
-        if (m_data->getDistanceLeftValues(temp))
+        if (sensors->getDistanceLeftValues(temp) and temp.size() > 0)
             leftobstacle = temp[0];
-        if (m_data->getDistanceRightValues(temp))
-            rightobstacle = temp[0];*/
-        return vector<float>(3,0);
+        if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
+            rightobstacle = temp[0];
         
+        if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
+        {   // if the obstacles are too far away don't dodge
+            return speed;
+        }
+        else
+        {   // an obstacle needs to be dodged
+            vector<float> newspeed = speed;
+            float obstacle = min(leftobstacle, rightobstacle);
+            float dodgeangle;
+            if (obstacle < objectsize)          // if we are 'inside' the object
+                dodgeangle = mathGeneral::PI/2 + asin((objectsize - obstacle)/objectsize);
+            else                                // if we are 'outside' the object
+                dodgeangle = asin(objectsize/obstacle);
+            
+            if (leftobstacle <= rightobstacle)
+            {   // the obstacle is on the left
+                if (speed[2] > -dodgeangle)
+                    newspeed[2] = -dodgeangle;
+            }
+            else
+            {   // the obstacle is on the right
+                if (speed[2] < dodgeangle)
+                    newspeed[2] = dodgeangle;
+            }
+            return newspeed;
+        }
     }
 }
 
