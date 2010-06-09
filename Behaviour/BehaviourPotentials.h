@@ -49,7 +49,7 @@ namespace BehaviourPotentials
         float bearing = relativestate[1];
         float heading = relativestate[2];
         
-        if (distance < stoppeddistance)         // if we are close --- enough stop
+        if (distance < stoppeddistance and fabs(heading) < 0.1)         // if we are close --- enough stop
             return result;
         else
         {
@@ -75,7 +75,7 @@ namespace BehaviourPotentials
         @param objectsize the radius in cm of the object to avoid
         @param dontcaredistance the distance in cm at which I make no attempt to avoid the object
      */
-    vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 10, float dontcaredistance = 200)
+    vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
     {
         vector<float> result(3,0);
         if (fieldstate.size() < 3)
@@ -86,7 +86,7 @@ namespace BehaviourPotentials
         float bearing = relativestate[1];
         
         if (distance > dontcaredistance)
-        {   // if the object is too far away don't avoid it --- don't
+        {   // if the object is too far away don't avoid it
             return result;
         }
         else
@@ -97,15 +97,17 @@ namespace BehaviourPotentials
             else
                 result[0] = (distance - dontcaredistance)/(objectsize - dontcaredistance);
             // calculate the translational bearing --- away
-            result[1] = -bearing;
+            if (fabs(bearing) < 0.1)
+                result[1] = mathGeneral::PI/2;
+            else
+                result[1] = bearing - mathGeneral::sign(bearing)*mathGeneral::PI/2;
             // calculate the rotational speed --- spin facing object if infront, spin away if behind
-            if (distance < (dontcaredistance - objectsize)/2)
-            {
-                if (fabs(bearing) < 1.5708)         
-                    result[2] = 0.8*bearing;
-                else                                
-                    result[2] = -0.8*(bearing - mathGeneral::sign(bearing)*1.5708);
-            }
+            if (fabs(bearing) < 0.1)
+                result[2] = 0.15*mathGeneral::PI/4;
+            else if (fabs(bearing) < mathGeneral::PI/4)
+                result[2] = 0.15*(bearing - mathGeneral::sign(bearing)*mathGeneral::PI/4);
+            else
+                result[2] = 0;
             return result;
         }
     }
@@ -118,27 +120,20 @@ namespace BehaviourPotentials
         float xsum = 0;
         float ysum = 0;
         float yawsum = 0;
-        int numpotentials = 0;
+        int maxspeed = 0;
         for (size_t i=0; i<potentials.size(); i++)
         {
-            if (potentials[i][0] != 0)
-            {
-                xsum += potentials[i][0]*cos(potentials[i][1]);
-                ysum += potentials[i][0]*sin(potentials[i][1]);
-                numpotentials++;
-            }
+            if (potentials[i][0] > maxspeed)
+                maxspeed = potentials[i][0];
+            xsum += potentials[i][0]*cos(potentials[i][1]);
+            ysum += potentials[i][0]*sin(potentials[i][1]);
             yawsum += potentials[i][2];
         }
         vector<float> result(3,0);
-        if (numpotentials == 0)
-            return result;
-        else
-        {
-            result[0] = sqrt(pow(xsum,2) + pow(ysum,2))/numpotentials;
-            result[1] = atan2(ysum,xsum);
-            result[2] = yawsum;
-            return result;
-        }
+        result[0] = maxspeed;
+        result[1] = atan2(ysum,xsum);
+        result[2] = yawsum;
+        return result;
     }
     
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors

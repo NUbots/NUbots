@@ -625,7 +625,7 @@ void NUSensors::calculateOdometry()
     debug << "NUSensors::calculateOdometry()" << endl;
 #endif
 
-    const float turnMultiplier = 1.0;
+    const float turnMultiplier = 0.8;
     const float xMultiplier = 1.25; // 2.5;
     const float yMultiplier = -1.0;
 
