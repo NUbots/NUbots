@@ -21,8 +21,9 @@
 
 #include "ReadyMoveState.h"
 
-#include "Behaviour/GameInformation.h"
+#include "Behaviour/BehaviourPotentials.h"
 
+#include "Behaviour/GameInformation.h"
 #include "Behaviour/Jobs/JobList.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 
@@ -47,42 +48,38 @@ BehaviourState* ReadyMoveState::nextState()
 
 void ReadyMoveState::doState()
 {
-    if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible())
-        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]));
-    else if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
-        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]));
-    else if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
-        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST]));
-    else if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
-        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]));
-    else
+    // I want to do smart pan based on where we are in the field
+    // if fabs(heading) < pi/2
+    //      if (distance from yellow goal > 4.2)
+    //          pan to see the half way line and the yellow goals
+    //      else
+    //          pan to see the yellow goals
+    
+    StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+    StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+    StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+    StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+    
+    if (yellow_left.isObjectVisible() and yellow_right.isObjectVisible())
+    {
+        float bearing = (yellow_left.ScreenXTheta() + yellow_right.ScreenXTheta())/2;
+        float elevation = (yellow_left.ScreenYTheta() + yellow_right.ScreenYTheta())/2;
+        m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
+    }
+    else if (blue_left.isObjectVisible() and blue_right.isObjectVisible())
+    {
+        float bearing = (blue_left.ScreenXTheta() + blue_right.ScreenXTheta())/2;
+        float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
+        m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
+    }
+    else if (yellow_left.TimeSinceLastSeen() > 250 and yellow_right.TimeSinceLastSeen() > 250 and blue_left.TimeSinceLastSeen() > 250 and blue_right.TimeSinceLastSeen() > 250)
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
     
+    
+    
     vector<float> position = getReadyFieldPositions();
-    debug << "Position On Field: " << position[0]<< position[1] <<endl;
-    
-    vector<float> result = m_field_objects->self.CalculateDifferenceFromFieldState(position);
-    debug << "Result: " << result[0]<< result[1] << result [2]<<endl;
-    
-    float distance = result[0];
-    float bearing = result[1];
-    float heading = result[2];
-    
-    const float d = 20;			    // distance in cm to start slowing down
-    const float s = 80;			    // distance in cm which to start facing the heading
-    const float rot_gain = 0.5;    // rotational gain 
-
-    // calculate translation speed
-    float trans_speed = 1.0;
-    if (distance < d)
-        trans_speed = distance/d;
-    
-    // calculate rotational speed
-    float rot_speed = rot_gain*heading;
-    if (distance > s)
-        rot_speed = rot_gain*bearing;
-    
-    m_jobs->addMotionJob(new WalkJob(trans_speed, bearing, rot_speed));
+    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 20, 30);
+    m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
 vector<float> ReadyMoveState::getReadyFieldPositions()

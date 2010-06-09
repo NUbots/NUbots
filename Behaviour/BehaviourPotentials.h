@@ -40,7 +40,7 @@ namespace BehaviourPotentials
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    vector<float> goToFieldState(const Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 20, float turningdistance = 60)
+    vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 20, float turningdistance = 60)
     {
         vector<float> result(3,0);
         vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
@@ -75,7 +75,7 @@ namespace BehaviourPotentials
         @param objectsize the radius in cm of the object to avoid
         @param dontcaredistance the distance in cm at which I make no attempt to avoid the object
      */
-    vector<float> avoidFieldState(const Self& self, vector<float>& fieldstate, float objectsize = 10, float dontcaredistance = 200)
+    vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 10, float dontcaredistance = 200)
     {
         vector<float> result(3,0);
         if (fieldstate.size() < 3)
@@ -113,7 +113,7 @@ namespace BehaviourPotentials
     /*! @brief Returns a the vector sum of the potentials
         @param potentials a list of [trans_speed, trans_direction, rot_speed] vectors
      */
-    vector<float> sumPotentials(vector<vector<float> > potentials)
+    vector<float> sumPotentials(const vector<vector<float> >& potentials)
     {
         float xsum = 0;
         float ysum = 0;
@@ -137,7 +137,24 @@ namespace BehaviourPotentials
             result[0] = sqrt(pow(xsum,2) + pow(ysum,2))/numpotentials;
             result[1] = atan2(ysum,xsum);
             result[2] = yawsum;
+            return result;
         }
+    }
+    
+    /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
+        @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
+     */
+    vector<float> sensorAvoidObjects(const vector<float>& speed, float objectsize = 30, float dontcaredistance = 50)
+    {
+        /*vector<float> temp;
+        float leftobstacle = 255;
+        float rightobstacle = 255;
+        if (m_data->getDistanceLeftValues(temp))
+            leftobstacle = temp[0];
+        if (m_data->getDistanceRightValues(temp))
+            rightobstacle = temp[0];*/
+        return vector<float>(3,0);
+        
     }
 }
 

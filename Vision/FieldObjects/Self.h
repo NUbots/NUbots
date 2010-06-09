@@ -1,3 +1,6 @@
+#ifndef FIELDOBJECTS_SELF_H
+#define FIELDOBJECTS_SELF_H
+
 #include "../../Tools/Math/Vector3.h"
 #include <vector>
 class StationaryObject;
@@ -28,3 +31,5 @@ class Self {
         float CalculateYInterceptOfMobileObject(const MobileObject& theObject);
 		float CalculateXInterceptOfMobileObject(const MobileObject& theObject);
 };
+
+#endif
