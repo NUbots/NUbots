@@ -27,6 +27,8 @@
 #include "Vision/FieldObjects/Self.h"
 #include "Tools/Math/General.h"
 
+#include "debug.h"
+
 #include <vector>
 #include <string>
 using namespace std;
@@ -102,12 +104,13 @@ namespace BehaviourPotentials
             else
                 result[1] = bearing - mathGeneral::sign(bearing)*mathGeneral::PI/2;
             // calculate the rotational speed --- spin facing object if infront, spin away if behind
-            if (fabs(bearing) < 0.1)
-                result[2] = 0.15*mathGeneral::PI/4;
-            else if (fabs(bearing) < mathGeneral::PI/4)
-                result[2] = 0.15*(bearing - mathGeneral::sign(bearing)*mathGeneral::PI/4);
+            float y = distance*sin(bearing);
+            float x = distance*cos(bearing);
+            if (fabs(y) < objectsize)
+                result[2] = atan2(y - mathGeneral::sign(y)*objectsize, x);
             else
                 result[2] = 0;
+            
             return result;
         }
     }
@@ -120,7 +123,7 @@ namespace BehaviourPotentials
         float xsum = 0;
         float ysum = 0;
         float yawsum = 0;
-        int maxspeed = 0;
+        float maxspeed = 0;
         for (size_t i=0; i<potentials.size(); i++)
         {
             if (potentials[i][0] > maxspeed)
