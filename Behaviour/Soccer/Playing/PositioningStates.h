@@ -1,8 +1,5 @@
-/*! @file ChaseBallBehaviourState.h
-    @brief Declaration of a wrapper state for the chase ball provider (ie the field-less demo behaviour)
- 
-    @class ChaseBallBehaviourState
-    @brief A wrapper state for the chase ball provider (ie the field-less demo behaviour)
+/*! @file PositioningStates.h
+    @brief Declaration of the positioning states
 
     @author Jason Kulk
  
@@ -22,25 +19,33 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CHASE_BALL_BEHAVIOUR_STATE_H
-#define CHASE_BALL_BEHAVIOUR_STATE_H
+#ifndef POSITIONING_STATES_H
+#define POSITIONING_STATES_H
 
-class SoccerFSMState;
 #include "../SoccerState.h"
-class ChaseBallProvider;
+class SoccerFSMState;       // PositioningState is a SoccerFSMState
 
-class ChaseBallBehaviourState : public SoccerState
+#include "debug.h"
+#include "debugverbositybehaviour.h"
+using namespace std;
+
+class GoToPosition : public SoccerState
 {
 public:
-    ChaseBallBehaviourState(SoccerFSMState* parent);
-    ~ChaseBallBehaviourState();
-    BehaviourState* nextState();
+    GoToPosition(SoccerFSMState* parent) : SoccerState(parent) {}
+    ~GoToPosition() {};
 protected:
-    void doState();
-private:
-    ChaseBallProvider* m_chase_provider;
+    BehaviourState* nextState()
+    {   // do state transitions in the positioning state machine
+        return this;
+    }
+    void doState()
+    {
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "GoToPosition" << endl;
+        #endif
+    }
 };
-
 
 #endif
 

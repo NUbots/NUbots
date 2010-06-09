@@ -35,7 +35,7 @@ void BehaviourFSMState::doState()
     // check for state changes common to all child states
     BehaviourState* nextstate = nextStateCommons();
     if (nextstate == m_state)               // then check if the current state wants to change the state
-        nextstate = m_state->nextState();
+        nextstate = m_state->getNextState();
     
     // do state transition
     if (nextstate != m_state)

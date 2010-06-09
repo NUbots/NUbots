@@ -40,7 +40,7 @@ using namespace std;
 
 ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : BehaviourFSMProvider(manager)
 {
-    m_chase_state = new ChaseState(this);
+    m_chase_state = new ChaseBallState(this);
     m_search_state = new SearchState(this);
     m_position_state = new PositionState(this);
     m_paused_state = new PausedState(this);

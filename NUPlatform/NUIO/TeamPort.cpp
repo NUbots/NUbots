@@ -53,6 +53,10 @@ TeamPort::~TeamPort()
 */
 void TeamPort::handleNewData(std::stringstream& buffer)
 {
-    buffer >> m_team_information;
+    string s_buffer = buffer.str();
+    if (s_buffer.size() == sizeof(TeamPacket))
+    {   // discard team packets that are the wrong size
+        buffer >> m_team_information;
+    }
 }
 

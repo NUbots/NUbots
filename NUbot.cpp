@@ -126,6 +126,11 @@ NUbot::NUbot(int argc, const char *argv[])
     Jobs = new JobList();
     GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions);
     TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
+    
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::NUbot(). Public storage pointers:" << endl;
+        debug << "SensorData: " << (void*)SensorData << " Actions: " << (void*)Actions << " Objects: " << (void*)Objects << " Jobs: " << (void*)Jobs << endl;
+    #endif
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)

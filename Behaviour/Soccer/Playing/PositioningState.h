@@ -1,8 +1,8 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
+/*! @file PositioningState.h
+    @brief Declaration of the chase ball soccer state
  
-    @class InitialState
-    @brief The initial soccer state
+    @class PositioningState
+    @brief The chase ball soccer state
 
     @author Jason Kulk
  
@@ -22,20 +22,23 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef POSITIONING_SOCCER_FSM_STATE_H
+#define POSITIONING_SOCCER_FSM_STATE_H
 
-class SoccerProvider;
-#include "SoccerState.h"
+#include "../SoccerFSMState.h"
+class GoToPosition;
 
-class InitialState : public SoccerState
+class PositioningState : public SoccerFSMState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
+    PositioningState(SoccerFSMState* parent);
+    ~PositioningState();
+private:
+    BehaviourFSMState* nextState();
+    void doStateCommons();
+    BehaviourState* nextStateCommons();
 protected:
-    BehaviourState* nextState();
-    void doState();
+    GoToPosition* m_go_to_position;
 };
 
 

@@ -33,8 +33,8 @@ class ReadyMarkState : public SoccerState
 public:
     ReadyMarkState(SoccerFSMState* parent);
     ~ReadyMarkState();
-    BehaviourState* nextState();
 protected:
+    BehaviourState* nextState();
     void doState();
 };
 

@@ -60,9 +60,9 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
 }
-void virtualNUbot::setSensorData(NUSensorsData* newensorsData)
+void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
-    sensorsData = newensorsData;
+    sensorsData = newsensorsData;
     vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
     if(isOK)
@@ -70,6 +70,8 @@ void virtualNUbot::setSensorData(NUSensorsData* newensorsData)
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+
+
 
 }
 
@@ -429,6 +431,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
 
     emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
     //emit fftChanged(vision.getFFT(), GLDisplay::FFT);
+
+    float datavalue = 0.0;
+    sensorsData->getJointPosition(NUSensorsData::HeadPitch,datavalue);
+    qDebug() << "Sensors Data: Head Elevation: " << datavalue;
 
 
     //POST PROCESS:

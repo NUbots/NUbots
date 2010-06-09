@@ -33,8 +33,8 @@ class FinishedState : public SoccerState
 public:
     FinishedState(SoccerProvider* provider);
     ~FinishedState();
-    BehaviourState* nextState();
 protected:
+    BehaviourState* nextState();
     void doState();
 };
 
