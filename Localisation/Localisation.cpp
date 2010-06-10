@@ -991,9 +991,19 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
     int numObjects = 0;
     bool reset = false;
     for(int objID = 0; objID < c_numOutlierTrackedObjects; objID++){
-        sum += modelObjectErrors[modelID][objID];
-        if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
-        modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
+        switch(objID)
+        {
+        case FieldObjects::FO_BLUE_LEFT_GOALPOST:
+        case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
+        case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
+        case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
+            sum += modelObjectErrors[modelID][objID];
+            if (modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
+            modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
+            break;
+        default:
+            break;
+        }
     }
 
     // Check if enough recent 'outliers' that we should reset ?
