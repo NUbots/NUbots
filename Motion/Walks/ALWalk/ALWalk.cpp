@@ -164,7 +164,7 @@ void ALWalk::setALConfig()
     m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].Value));      // "WALK_STEP_MIN_PERIOD";
     
     m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].Value);               // "WALK_MAX_STEP_X";
-    m_al_config[2][1] = maxspeeds[1]/(100*parameters[0].Value);               // "WALK_MAX_STEP_Y";
+    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].Value);             // "WALK_MAX_STEP_Y";
     m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].Value);         // "WALK_MAX_STEP_THETA";
     
     m_al_config[4][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";
