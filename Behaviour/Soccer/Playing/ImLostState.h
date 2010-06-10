@@ -1,8 +1,8 @@
-/*! @file InitialState.h
-    @brief Declaration of the initial soccer state
+/*! @file ImLostState.h
+    @brief Declaration of the chase ball soccer state
  
-    @class InitialState
-    @brief The initial soccer state
+    @class ImLostState
+    @brief The chase ball soccer state
 
     @author Jason Kulk
  
@@ -22,20 +22,21 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INITIAL_STATE_H
-#define INITIAL_STATE_H
+#ifndef IM_LOST_FSM_STATE_H
+#define IM_LOST_FSM_STATE_H
 
-class SoccerProvider;
-#include "SoccerState.h"
+#include "../SoccerFSMState.h"
 
-class InitialState : public SoccerState
+class ImLostState : public SoccerFSMState
 {
 public:
-    InitialState(SoccerProvider* provider);
-    ~InitialState();
-protected:
-    BehaviourState* nextState();
-    void doState();
+    ImLostState(SoccerFSMState* parent);
+    ~ImLostState();
+private:
+    BehaviourFSMState* nextState();
+    void doStateCommons();
+    BehaviourState* nextStateCommons();
+private:
 };
 
 

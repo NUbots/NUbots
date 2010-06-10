@@ -1,8 +1,8 @@
-/*! @file ReadyState.h
-    @brief Declaration of the ready soccer state
+/*! @file BallIsLostState.h
+    @brief Declaration of the chase ball soccer state
  
-    @class ReadyState
-    @brief The ready soccer state
+    @class BallIsLostState
+    @brief The chase ball soccer state
 
     @author Jason Kulk
  
@@ -22,26 +22,31 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef READY_FSM_STATE_H
-#define READY_FSM_STATE_H
+#ifndef BALL_IS_LOST_SOCCER_FSM_STATE_H
+#define BALL_IS_LOST_SOCCER_FSM_STATE_H
 
-class SoccerProvider;
-#include "SoccerFSMState.h"
+#include "../SoccerFSMState.h"
 
-class ReadyMoveState;
-class ReadyMarkState;
+class BallIsLostPan;
+class BallIsLostSpin;
+class BallIsLostMove;
 
-class ReadyState : public SoccerFSMState
+class BallIsLostState : public SoccerFSMState
 {
 public:
-    ReadyState(SoccerProvider* provider);
-    ~ReadyState();
+    BallIsLostState(SoccerFSMState* parent);
+    ~BallIsLostState();
+    BehaviourFSMState* nextState();
 private:
-    BehaviourFSMState* nextState() {return this;};
     void doStateCommons();
-private:
-    ReadyMoveState* m_move_state;
-    ReadyMarkState* m_mark_state;
+    BehaviourState* nextStateCommons();
+protected:
+    friend class BallIsLostPan;
+    BehaviourState* m_lost_pan;
+    friend class BallIsLostSpin;
+    BehaviourState* m_lost_spin;
+    friend class BallIsLostMove;
+    BehaviourState* m_lost_move;
 };
 
 

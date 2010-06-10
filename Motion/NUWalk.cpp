@@ -215,9 +215,9 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
 {
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
-    if (std::isnan(trans_speed))
+    if (isnan(trans_speed))
         trans_speed = 1.0;
-    if (std::isnan(trans_direction) or std::isnan(rot_speed))
+    if (isnan(trans_direction) or isnan(rot_speed))
         return;
     
     // clip translational speed to be a fraction
@@ -301,6 +301,12 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
     speeds[1] = m_speed_y;
     speeds[2] = m_speed_yaw;
     currentspeed = speeds;
+}
+
+/*! @brief Updates maxspeeds with the current maximum speeds of the walk engine */
+void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
+{
+    maxspeeds = m_walk_parameters.getMaxSpeeds();
 }
 
 /*! @brief Walk to the given point by the given time

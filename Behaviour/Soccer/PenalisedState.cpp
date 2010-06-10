@@ -29,7 +29,8 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 
 PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -49,9 +50,12 @@ void PenalisedState::doState()
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
         m_actions->addSound(m_data->CurrentTime, NUSounds::PENALISED);
-        m_jobs->addMotionJob(new MotionFreezeJob());
+        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 300, vector<float>(2,0)));
     }
     // In penalty the chest led should be red
     m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 0, 0);
+    
+    // In penalty we should not walk
+    m_jobs->addMotionJob(new WalkJob(0,0,0));
 }
 

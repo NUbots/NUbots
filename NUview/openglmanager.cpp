@@ -465,6 +465,20 @@ void OpenglManager::writeCornersToDisplay(std::vector< CornerPoint > corners, GL
     emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
+void OpenglManager::stub(QImage image, GLDisplay::display displayId)
+{
+    /*for (int x = 0; x < image.width(); x++)
+    {
+        for (int y = 0; y < image.height(); y++)
+        {
+            //image.setPixel(x,y, (0x00ffffff + ((x%256) << 24)));
+            qDebug() << "p: ("<<x<<","<<y<<")" << image.pixel(x,y);
+        }
+    }//*/
+    createDrawTextureImage(image, displayId);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+}
+
 void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId)
 {
     //! CLEAR DRAWING LIST

@@ -1,5 +1,7 @@
 #include "Localisation.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Behaviour/GameInformation.h"
+#include "Behaviour/TeamInformation.h"
 
 #include "Tools/Math/General.h"
 #include <string>
@@ -8,6 +10,10 @@
 #include <fstream>
 #include <sstream>
 #include "nubotdataconfig.h"
+
+#define MULTIPLE_MODELS_ON 1
+#define AMBIGUOUS_CORNERS_ON 0
+#define SHARED_BALL_ON 1
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -77,13 +83,23 @@ Localisation::~Localisation()
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
 
-void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo)
+void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo)
 {
+    if (data == NULL or fobs == NULL)
+        return;
+    m_sensor_data = data;
+    m_objects = fobs;
+    m_game_info = gameInfo;
+    m_team_info = teamInfo;
+    
+    
     bool doProcessing = CheckGameState();
-    if(doProcessing == false) return;
+    if(doProcessing == false)
+        return;
+    
     float odo_time;
     vector<float> odo;
-    if (data->getOdometry(odo_time, odo))
+    if (m_sensor_data->getOdometry(odo_time, odo))
     {
         odomForward = odo[0];
         odomLeft = odo[1];
@@ -91,28 +107,28 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     }
     
     vector<float> gps;
-    if (data->getGPSValues(gps))
+    if (m_sensor_data->getGPSValues(gps))
     {   // have GPS use it to check localisation performance
         // x = gps[0]; y = gps[1]; z = gps[2];
     }
     
     vector<float> compass;
-    if (data->getCompassValues(compass))
+    if (m_sensor_data->getCompassValues(compass))
     {   // have Compass use it to check localisation performance
         // heading = compass[0];
     }
     // perform odometry update and change the variance of the model
     doTimeUpdate((-odomForward), odomLeft, odomTurn);
-    ProcessObjects(0,fobs,NULL);
-    m_timestamp = data->CurrentTime;
+    ProcessObjects();
+    
+    m_timestamp = m_sensor_data->CurrentTime;
 }
 
-void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void* mostRecentPackets)
+void Localisation::ProcessObjects()
 {
     int numUpdates = 0;
     int updateResult;
-    currentFrameNumber = frameNumber;
-    objects = ourfieldObjects;
+    currentFrameNumber = 0;
     //if(balanceFallen) return;
 // 	debug_out  << "Dont put anything "<<endl;
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -141,11 +157,9 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
                 << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
-    if(objects == NULL) return;
-
     // Proccess the Stationary Known Field Objects
-    StationaryObjectsIt currStat(objects->stationaryFieldObjects.begin());
-    StationaryObjectsConstIt endStat(objects->stationaryFieldObjects.end());
+    StationaryObjectsIt currStat(m_objects->stationaryFieldObjects.begin());
+    StationaryObjectsConstIt endStat(m_objects->stationaryFieldObjects.end());
 
     for(; currStat != endStat; ++currStat)
     {
@@ -155,8 +169,8 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     }
 
     // Proccess the Moving Known Field Objects
-    MobileObjectsIt currMob(objects->mobileFieldObjects.begin());
-    MobileObjectsConstIt endMob(objects->mobileFieldObjects.end());
+    MobileObjectsIt currMob(m_objects->mobileFieldObjects.begin());
+    MobileObjectsConstIt endMob(m_objects->mobileFieldObjects.end());
 
     for (; currMob != endMob; ++currMob)
     {
@@ -172,38 +186,25 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
     // there have been probems where the team will keep sharing the previous position of their ball
     // and updates in vision do not supercede the shared data.
     int myPlayerNumber = 0;
-    if(ourfieldObjects[FO_BALL].framesSinceLastSeen > 3){ // TODO: Change to a SD value
-        for(int robotNum = 0; robotNum < NUM_ROBOTS; robotNum++){
-            if(myPlayerNumber == (robotNum+1)) continue;
-                if(mostRecentPackets[robotNum].processedWM == false){
-                    if(mostRecentPackets[robotNum].packet.ball.seen == true){
-#if DEBUG_LOCALISATION_VERBOSITY > 2
-                        debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
-#endif // DEBUG_LOCALISATION_VERBOSITY > 2
-                        doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
-                    }
-                    else {
-#if DEBUG_LOCALISATION_VERBOSITY > 2
-                        debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
-#endif // DEBUG_LOCALISATION_VERBOSITY > 2
-                    }
-                    mostRecentPackets[robotNum].processedWM = true;
-                }
-            }
-        }
+    if(m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)    // TODO: Change to a SD value
+    { 
+        vector<TeamPacket::SharedBall> sharedballs = m_team_info->getSharedBalls();
+        for (size_t i=0; i<sharedballs.size(); i++)
+            doSharedBallUpdate(sharedballs[i]);
+    }
 #endif // SHARED_BALL_ON
 
         NormaliseAlphas();
 
 #if MULTIPLE_MODELS_ON
         // Do Ambiguous objects.
-        AmbiguousObjectsIt currAmb(objects->ambiguousFieldObjects.begin());
-        AmbiguousObjectsConstIt endAmb(objects->ambiguousFieldObjects.end());
+        AmbiguousObjectsIt currAmb(m_objects->ambiguousFieldObjects.begin());
+        AmbiguousObjectsConstIt endAmb(m_objects->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
             if(currStat->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || currStat->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
             {
-                updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
+                updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), m_objects->stationaryFieldObjects);
                 NormaliseAlphas();
                 numUpdates++;
             }
@@ -235,7 +236,7 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
         //int bestModelID = getBestModelID();
         // Get the best model to use.
 
-        WriteModelToObjects(getBestModel(), ourfieldObjects);
+        WriteModelToObjects(getBestModel(), m_objects);
 
         const KF* bestModel = &(getBestModel());
 
@@ -281,14 +282,15 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
     // Set the balls location.
     float distance,bearing;
-    distance = model.getDistanceToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
-    bearing = model.getBearingToPosition(model.getState(KF::ballX), model.sd(KF::ballY));
+    distance = model.getDistanceToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
+    bearing = model.getBearingToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.getState(KF::ballX),model.getState(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.getState(KF::ballXVelocity),model.getState(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
+    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
     // Set my location.
-    fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX),model.getState(KF::selfY),model.getState(KF::selfTheta));
+    fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta));
 }
 
 bool Localisation::CheckGameState()
@@ -598,20 +600,27 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
 }
 
 
-/*
-int Localisation::doSharedBallUpdate(WirelessFieldObj &sharedBall)
+
+int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
 {
     int kf_return;
     int numSuccessfulUpdates = 0;
-    double sharedBallX = sharedBall.x;
-    double sharedBallY = sharedBall.y;
+    float timeSinceSeen = sharedBall.TimeSinceLastSeen;
+    double sharedBallX = sharedBall.X;
+    double sharedBallY = sharedBall.Y;
     double SRXX = sharedBall.SRXX;
     double SRXY = sharedBall.SRXY;
     double SRYY = sharedBall.SRYY;
 
-#if DEBUG_LOCALISATION_VERBOSITY > 1
-    debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
-#endif
+    if (timeSinceSeen > 0)      // don't process sharedBalls unless they are seen
+        return 0;
+    
+    if (timeSinceSeen < 250)    // if another robot can see the ball then it is not lost
+        m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
+    
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
+    #endif
 
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
@@ -621,7 +630,7 @@ int Localisation::doSharedBallUpdate(WirelessFieldObj &sharedBall)
     }
     return numSuccessfulUpdates;
 }
-*/
+
 
 
 int Localisation::doBallMeasurementUpdate(MobileObject &ball)
@@ -1066,28 +1075,24 @@ bool Localisation::varianceCheck(int modelID)
 
      // Otherwise try to adjust to fit a goal we can see.
      // Blue Goal - From center at PI radians bearing.
-    if (objects == NULL)
-    {
-	    return false;    
-    }
-     if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() > 100) )
+     if( (m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true) && (m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() > 100) )
      {	
   	  #if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left blue goal , and distance is : "
-			    <<objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()<<endl;
+			    <<m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()<<endl;
 	  #endif
-          models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredBearing());
+          models[modelID].stateEstimates[2][0]=(blueDirection - m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredBearing());
               changed = true;
      }
  
-     else if( (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() > 100) )
+     else if( (m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true) && (m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() > 100) )
      {
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw right blue goal , and distance is : "
-			    <<objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()<<endl;
+			    <<m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()<<endl;
 	#endif
 
-         models[modelID].stateEstimates[2][0]=(blueDirection - objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredBearing());
+         models[modelID].stateEstimates[2][0]=(blueDirection - m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredBearing());
          changed = true;
      }
          /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!
@@ -1098,29 +1103,29 @@ bool Localisation::varianceCheck(int modelID)
          */
  
    // Yellow Goal - From center at 0.0 radians bearing.
-     if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) &&
-	  (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() > 100) )
+     if( (m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true) &&
+	  (m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() > 100) )
      {
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
-			    <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<endl;
+			    <<m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<endl;
 	#endif
 			     
          models[modelID].stateEstimates[2][0]=(yellowDirection -
-			 objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredBearing());
+			 m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredBearing());
          changed = true;
      }
-     else if( (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true) &&
-	       (objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() > 100) )
+     else if( (m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true) &&
+	       (m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() > 100) )
      {
 	     
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
-			    <<objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<endl;
+			    <<m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<endl;
 	#endif
 			     
          models[modelID].stateEstimates[2][0]=(yellowDirection -
-			 objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredBearing());
+			 m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredBearing());
          changed = true;
      }
      

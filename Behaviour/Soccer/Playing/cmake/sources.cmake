@@ -20,7 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  ChaseBallBehaviourState.cpp ChaseBallBehaviourState.h
+SET (YOUR_SRCS  ChaseState.cpp ChaseState.h
+                ChaseStates.h
+                PositioningState.cpp PositioningState.h
+                PositioningStates.h
+                BallIsLostState.cpp BallIsLostState.h
+                ImLostState.cpp ImLostState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

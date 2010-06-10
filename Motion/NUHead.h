@@ -58,13 +58,13 @@ private:
     void calculateBallPan();
     void calculateBallAndLocalisationPan();
     void calculateLocalisationPan();
-    void calculateGenericPan(float mindistance, float maxdistance, float panspeed);
+    void calculateGenericPan(float mindistance, float maxdistance, float minyaw, float maxyaw, float panspeed);
     
     void getSensorValues();
     void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
     vector<float> calculatePanLevels(float minpitch, float maxpitch);
-    vector<vector<float> > calculatePanPoints(const vector<float>& levels);
-    void generateScan(float pitch, float previouspitch, bool& onleft, vector<vector<float> >& scan);
+    vector<vector<float> > calculatePanPoints(const vector<float>& levels, float minyaw, float maxyaw);
+    void generateScan(float pitch, float previouspitch, float minyaw, float maxyaw, bool& onleft, vector<vector<float> >& scan);
     vector<double> calculatePanTimes(const vector<vector<float> >& points, float panspeed);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
@@ -98,10 +98,13 @@ private:
     
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing
+    bool m_pan_default_values;                  //!< true if the pan should use the default values for the pantype
     float m_pan_ball_speed;                     //!< the speed of pans looking for the ball (Loaded from HeadPan.cfg)
     float m_pan_localisation_speed;             //!< the speed of pans looking for field objects that aren't the ball (Loaded from HeadPan.cfg)
     vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits (Loaded from HeadPan.cfg)
     vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (Loaded from HeadPan.cfg)
+    float m_x_min, m_x_max;                     //!< the minimum and maximum distances to use for a pan when m_pan_default_values is false
+    float m_yaw_min, m_yaw_max;                 //!< the minimum and maximum distances to use for a pan when m_pan_default_values is false
     
     bool m_is_nodding;                          //!< true if we are currently nodding the head
     HeadNodJob::head_nod_t m_nod_type;          //!< the type of nod we are currently performing

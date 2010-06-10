@@ -10,6 +10,7 @@ class CornerPoint {
 		  LSFittedLine Line[2];
 		  unsigned short CornerType, FieldObjectID;
 		  short Orientation, Direction;
+                  bool isObtuse;
 		  double visBearing;
 		  double visDistance;
 		  double visElevation;

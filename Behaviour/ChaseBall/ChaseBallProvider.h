@@ -27,7 +27,7 @@
 
 #include "Behaviour/BehaviourFSMProvider.h"
 
-class ChaseState;
+class ChaseBallState;
 class SearchState;
 class PositionState;
 class PausedState;
@@ -45,7 +45,7 @@ protected:
 private:
     bool m_pauseable;
     
-    friend class ChaseState;
+    friend class ChaseBallState;
     BehaviourState* m_chase_state;
     friend class SearchState;
     BehaviourState* m_search_state;

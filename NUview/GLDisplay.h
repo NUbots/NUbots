@@ -101,6 +101,8 @@ public:
         FieldLines,
         ObjectCandidates,
         FieldObjects,
+        EdgeFilter,
+        FFT,
         wmRightLeg,
         wmLeftLeg,
         wmBall,
@@ -157,6 +159,10 @@ public:
                 return QString("Field Object Candidates");
             case FieldObjects:
                 return QString("Field Objects");
+            case EdgeFilter:
+                return QString("Edge Filter");
+            case FFT:
+                return QString("FFT");
             case wmLeftLeg:
                 return QString("World Model: Left Leg");
             case wmRightLeg:
@@ -316,6 +322,10 @@ private:
                 return QColor(255,255,255);
             case ObjectCandidates:
                 return QColor(255,128,64);
+            case EdgeFilter:
+                return QColor(255,255,255);
+            case FFT:
+                return QColor(255,255,255);
             case FieldLines:
                 return QColor(100,100,100);
             case wmLeftLeg:

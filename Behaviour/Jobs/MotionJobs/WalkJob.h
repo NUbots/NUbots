@@ -33,7 +33,6 @@ class WalkJob : public MotionJob
 {
 public:
     WalkJob(float x, float y, float yaw);
-    WalkJob(const vector<float>& speed);
     WalkJob(istream& input);
     ~WalkJob();
     

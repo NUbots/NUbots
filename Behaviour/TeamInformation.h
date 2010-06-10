@@ -39,6 +39,24 @@ using namespace std;
 class TeamPacket
 {
 public:
+    struct SharedBall 
+    {
+        float TimeSinceLastSeen;
+        float X;
+        float Y;
+        float SRXX;
+        float SRXY;
+        float SRYY;
+    };
+    struct SharedSelf
+    {
+        float X;
+        float Y;
+        float Heading;
+        float SDX;
+        float SDY;
+        float SDHeading;
+    };
     char Header[4];
     unsigned long ID;
     double SentTime;
@@ -46,6 +64,8 @@ public:
     char PlayerNumber;
     char TeamNumber;
     float TimeToBall;
+    SharedBall Ball;
+    SharedSelf Self;
     
     void summaryTo(ostream& output);
     friend ostream& operator<< (ostream& output, const TeamPacket& packet);
@@ -62,6 +82,8 @@ public:
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
+    vector<TeamPacket::SharedBall> getSharedBalls();
+    
     friend ostream& operator<< (ostream& output, TeamInformation& info);
     friend ostream& operator<< (ostream& output, TeamInformation* info);
     friend istream& operator>> (istream& input, TeamInformation& info);
@@ -71,6 +93,7 @@ private:
     void updateTeamPacket();
     float getTimeToBall();
 private:
+    const float m_TIMEOUT;
     int m_player_number;
     int m_team_number;
     

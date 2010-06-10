@@ -118,6 +118,7 @@ NUSensorsData::NUSensorsData()
     addSensor(MotionSaveActive, string("MotionSaveActive"), sensor_t::MOTION_SAVE_ACTIVE);
     addSensor(MotionScriptActive, string("MotionScriptActive"), sensor_t::MOTION_SCRIPT_ACTIVE);
     addSensor(MotionWalkSpeed, string("MotionWalkSpeed"), sensor_t::MOTION_WALK_SPEED);
+    addSensor(MotionWalkMaxSpeed, string("MotionWalkMaxSpeed"), sensor_t::MOTION_WALK_MAX_SPEED);
     addSensor(MotionHeadCompletionTime, string("MotionHeadCompletionTime"), sensor_t::MOTION_HEAD_COMPLETION_TIME);
 
     // GPS Sensor:
@@ -1026,6 +1027,15 @@ bool NUSensorsData::isOnGround()
         return false;
 }
 
+/*! @brief Returns true if the robot is currently incapacitated 
+ */
+bool NUSensorsData::isIncapacitated()
+{
+    bool gettingup = false;
+    getMotionGetupActive(gettingup);
+    return isFalling() or isFallen() or not isOnGround() or gettingup;
+}
+
 /*! @brief Returns true has impacted in the ground in this cycle
     @param footid the foot you want to know about
     @param time time will be updated with the time at which the last impact on that foot occured.
@@ -1146,6 +1156,21 @@ bool NUSensorsData::getMotionWalkSpeed(vector<float>& speed)
     else
     {
         speed = MotionWalkSpeed->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the current walk maximum speed as [x cm/s, y cm/s yaw rad/s]
+    @param speed will be updated with the current max walk speed
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionWalkMaxSpeed(vector<float>& speed)
+{
+    if (not MotionWalkMaxSpeed->IsValid)
+        return false;
+    else
+    {
+        speed = MotionWalkMaxSpeed->Data;
         return true;
     }
 }
@@ -1551,13 +1576,20 @@ void NUSensorsData::setMotionScriptActive(double time, bool active)
 
 /*! @brief Sets the current walk speed 
     @param time the timestamp
-    @param x the forward speed in cm/s
-    @param y the sideward speed in cm/s
-    @param yaw the rotation speed in rad/s
+    @param speed [x,y,yaw]
  */
 void NUSensorsData::setMotionWalkSpeed(double time, vector<float>& speed)
 {
     setData(MotionWalkSpeed, time, speed, false);
+}
+
+/*! @brief Sets the current walk speed 
+    @param time the timestamp
+    @param speed the maximum speeds of [x,y,yaw]
+ */
+void NUSensorsData::setMotionWalkMaxSpeed(double time, vector<float>& speed)
+{
+    setData(MotionWalkMaxSpeed, time, speed, false);
 }
 
 /*! @brief Sets the completion time of the current head movement
@@ -1792,6 +1824,9 @@ void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
         case sensor_t::MOTION_WALK_SPEED:
             MotionWalkSpeed = p_sensor;
             break;
+        case sensor_t::MOTION_WALK_MAX_SPEED:
+            MotionWalkMaxSpeed = p_sensor;
+            break;            
         case sensor_t::MOTION_HEAD_COMPLETION_TIME:
             MotionHeadCompletionTime = p_sensor;
             break;

@@ -3,7 +3,7 @@
 #include "ClassificationColours.h"
 #include <math.h>
 #define MIN_POINTS_ON_LINE_FINAL 4
-#define MIN_POINTS_ON_LINE 2
+#define MIN_POINTS_ON_LINE 3
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
@@ -58,12 +58,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
 
     //qDebug() << "Robot Segments: " << robotSegments.size();
-    //for(unsigned int j = 0; j < linePoints.size(); j++)
-    //{
-    //            ////qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
-    //}
+    /*for(unsigned int j = 0; j < linePoints.size(); j++)
+    {
+         qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
+    }*/
 
     //clock_t startLineForm = clock();
+    //qDebug() << "Finding Lines with segments:  " << linePoints.size();
     FindFieldLines(image_width,image_height);
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -82,9 +83,10 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //    }
     //}
+
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
-    //qDebug() << "Finnished Finding Penalty Spots:";
+    //qDebug() << "Finding Corner Points:";
     FindCornerPoints(image_width,image_height);
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
@@ -102,6 +104,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     //clock_t startCorner = clock();
+    //qDebug() << "Decode Corners:";
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
@@ -230,8 +233,8 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                             &&  (tempSeg->getAfterColour() == ClassIndex::green && (tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object) )
                             &&  (tempSeg->getBeforeColour() == ClassIndex::green &&(tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )*/
                                 (ClassIndex::white   ==  tempSeg->getColour())
-                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object)
-                                &&  (tempSeg->getAfterColour() == ClassIndex::green || tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )
+                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::shadow_object || tempSeg->getBeforeColour() == ClassIndex::unclassified)
+                                &&  (tempSeg->getAfterColour() == ClassIndex::green ||  tempSeg->getAfterColour() == ClassIndex::shadow_object  || tempSeg->getAfterColour() == ClassIndex::unclassified) )
 
 
                         {
@@ -249,8 +252,8 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                                 for (unsigned int num =0; num <linePoints.size(); num++)
                                 {
 
-                                    if((fabs(tempLinePoint.x - linePoints[num].x) <= LINE_SEARCH_GRID_SIZE) &&
-                                       (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE))
+                                    if((fabs(tempLinePoint.x - linePoints[num].x) <= LINE_SEARCH_GRID_SIZE*1.5) &&
+                                       (fabs(tempLinePoint.y - linePoints[num].y) <= LINE_SEARCH_GRID_SIZE*1.5))
                                     {
                                         canNotAdd = true;
 
@@ -271,12 +274,13 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            if(     ((ClassIndex::green   ==  segment->getBeforeColour()) &&
-                    (ClassIndex::white   ==  segment->getColour()) &&
-                    (ClassIndex::green   ==  segment->getAfterColour()))||
-                    ((ClassIndex::white   ==  segment->getColour())
-                &&  ((segment->getAfterColour() == ClassIndex::green) && (segment->getBeforeColour() == ClassIndex::unclassified || segment->getBeforeColour() == ClassIndex::shadow_object) )
-                &&  ((segment->getBeforeColour() == ClassIndex::green) &&(segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::shadow_object ) )  ))
+            if(    ((ClassIndex::white   ==  segment->getColour())
+
+                     && (segment->getBeforeColour() == ClassIndex::green
+                         || segment->getBeforeColour() == ClassIndex::shadow_object || segment->getBeforeColour() == ClassIndex::unclassified ) )
+
+                     && (segment->getAfterColour() == ClassIndex::green
+                         || segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::unclassified ) )
 
             {
                 //ADD A FIELD LINEPOINT!
@@ -345,11 +349,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //SORT THE LINES BY Y then BY X:
     //clock_t startSort = clock();
     //qsort(linePoints,0,linePoints.size()-1,2);
-    for (size_t i = 0; i < linePoints.size() ; i++)
-    {
-        //qDebug() << i << ": "<< linePoints[i].x << "," << linePoints[i].y;
 
-    }
     //HORIZONTAL Line Search:
     //clock_t startHorizontalSearch = clock();
     //debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
@@ -404,7 +404,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                             }
                         }
                     }
-                    if(tempFieldLine.numPoints > MIN_POINTS_ON_LINE)
+                    if(tempFieldLine.numPoints > MIN_POINTS_ON_LINE-1)
                     {
                         fieldLines.push_back(tempFieldLine);
                     }
@@ -423,12 +423,17 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }
 
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
-
+    unsigned int horizontalEnd = fieldLines.size();
     //SORT POINTS
-    //// //qDebug() << "SORTING...";
+    //qDebug() << "SORTING...";
     //clock_t startSortAgain = clock();
     //debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
-    qsort(linePoints,0,linePoints.size(),2);
+    qsort(linePoints,0,linePoints.size()-1,1);
+    /*for (size_t i = 0; i < linePoints.size() ; i++)
+    {
+        qDebug() << i << ": "<< linePoints[i].x << "," << linePoints[i].y;
+
+    }*/
     //qDebug() << "Finnished...";
 
     //clock_t startVerticalSearch = clock();
@@ -484,7 +489,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                         }
 
                     }
-                    if(tempFieldLine.numPoints > MIN_POINTS_ON_LINE)
+                    if(tempFieldLine.numPoints > MIN_POINTS_ON_LINE-1)
                     {
                         fieldLines.push_back(tempFieldLine);
                     }
@@ -529,14 +534,31 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //	}
     //	std::cout << std::endl;
     //}
+    /*for (unsigned int i = 0; i < fieldLines.size(); i++)
+    {
+        qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+                << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
+                << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
+                << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
+        std::vector<LinePoint*> points = fieldLines[i].getPoints();
 
+        for(unsigned int j = 0; j < points.size() ; j ++)
+        {
+            qDebug() << "{" << points[j]->x << ","<<  points[j]->y << "} ";
+        }
+
+    }*/
 
     //We should now have about 10 lines max, some of which can be joined together (since they may be two lines seperated by a break but otherwise one line really...)
-    for (LineIDStart = 0; LineIDStart < fieldLines.size(); LineIDStart++){
-        if (!fieldLines[LineIDStart].valid) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
-        for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd<fieldLines.size(); LineIDEnd++)
+    for (LineIDStart = 0; LineIDStart < fieldLines.size()-1; LineIDStart++){
+
+        if (!fieldLines[LineIDStart].valid || fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE) continue;   	// this apears to me to be first use of 'validLine' so how does it get to be true? ALEX
+
+        for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd < fieldLines.size(); LineIDEnd++)
         {
-            if (!fieldLines[LineIDEnd].valid) continue;
+            if (LineIDStart < horizontalEnd && LineIDEnd > horizontalEnd) break;
+
+            if (!fieldLines[LineIDEnd].valid || fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE) continue;
             //Try extending the lines so they are near the ends of the other ones, and see if their in any way close...
             //qDebug() << "Trying to join: " << LineIDStart << " \t with " << LineIDEnd;
             //We need to check both, since in the actual points can be close enough together to make a small short segment
@@ -608,7 +630,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //Now make sure the slopes are both about the same degree angle....
             // Seems to have a problem with lines "within" other lines, so pick them out..
             //qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
-            if ((r2tls1 > .90 && r2tls2 > .90 && MSD1 < 40  && MSD2 < 40))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
+            if ((r2tls1 > .98 && r2tls2 > .98 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
             {
                 //They are the same line, so join them together...
                 //qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
@@ -616,8 +638,8 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                 //std::cout << "Num Points Line2: "<< fieldLines[LineIDEnd].numPoints <<std::endl;
                 fieldLines[LineIDEnd].clearPoints();
                 //! Reset ans start again:
-                LineIDStart = 0;
-                LineIDEnd = LineIDStart+1;
+                //LineIDStart = 0;
+                //LineIDEnd = LineIDStart+1;
 
             }
         }
@@ -626,7 +648,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //Remove any lines that are still too small (or really badly fitted)..
     for (LineIDStart = 0; LineIDStart < fieldLines.size(); LineIDStart++){
         if (!fieldLines[LineIDStart].valid) continue;
-        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .80)
+        if (fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE_FINAL  || fieldLines[LineIDStart].getr2tls() < .85)
         {// alex ADJUST CAN HELP TO DELETE CIRCLE LINES
             fieldLines[LineIDStart].valid = false;
 
@@ -643,10 +665,16 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     /*for (unsigned int i = 0; i < fieldLines.size(); i++)
     {
-        //qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
+        qDebug() << i<< ": \t Valid: "<<fieldLines[i].valid
                 << " \t Start(x,y): ("<< fieldLines[i].leftPoint.x<<","<< fieldLines[i].leftPoint.y
                 << ") \t EndPoint(x,y):(" << fieldLines[i].rightPoint.x<<","<< fieldLines[i].rightPoint.y<< ")"
                 << "\t Number of LinePoints: "<< fieldLines[i].numPoints;
+        std::vector<LinePoint*> points = fieldLines[i].getPoints();
+
+        for(unsigned int j = 0; j < points.size() ; j ++)
+        {
+            qDebug() << "{" << points[j]->x << ","<<  points[j]->y << "} ";
+        }
 
     }*/
 
@@ -994,15 +1022,27 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 			//L shape corner..
 				if (Left == Right){
 					if(Bottom >= Top)
+                                        {
                                                 tempCornerPoint.Orientation = POINT_UP; // was -1 is 1
+                                                //qDebug() << "L Corner: UP \t" << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 					else
+                                        {
                                                 tempCornerPoint.Orientation = POINT_DOWN;  // was 1 is 2
+                                                //qDebug() << "L Corner: DOWN \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 				}
 				else {
 					if (Left >= Right)
+                                        {
                                                 tempCornerPoint.Orientation = POINT_RIGHT;  //4
+                                                //qDebug() << "L Corner: RIGHT \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 					else 
+                                        {
                                                 tempCornerPoint.Orientation = POINT_LEFT;  //3
+                                                //qDebug() << "L Corner: LEFT \t " << tempCornerPoint.PosX << "," << tempCornerPoint.PosY;
+                                        }
 				}
 			}
                         if (tempCornerPoint.CornerType == 1){
@@ -1021,18 +1061,58 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 					}
 				}
 			}
+
+                        float angle = findAngleOfLCorner(tempCornerPoint);
+                        //qDebug() << "Angle: " << angle*57.2957795 << "Degrees";
+                        if(angle > 3.14/4)
+                        {
+                            tempCornerPoint.isObtuse = true;
+                        }
+                        else
+                        {
+                            tempCornerPoint.isObtuse = false;
+                        }
+
+
+
                         cornerPoints.push_back(tempCornerPoint);
 
 		}
 	}
         //qDebug() << "Total Corners Found: " << cornerPoints.size();
 
-        for (unsigned int i = 0; i < cornerPoints.size() ; i++)
-        {
+        //for (unsigned int i = 0; i < cornerPoints.size() ; i++)
+        //{
             //qDebug() << i << ": \t "<< cornerPoints[i].PosX << ","<< cornerPoints[i].PosY;
-        }
+        //}
 }
 
+
+//Find the Angle between the L corners:
+
+float LineDetection::findAngleOfLCorner(CornerPoint cornerPoint)
+{
+        float angle = 0.0;
+        LSFittedLine Line1 = cornerPoint.Line[0];
+        LSFittedLine Line2 = cornerPoint.Line[1];
+
+        //Get Unit Vector:
+        Point L1Left = Line1.leftPoint;
+        Point L2Left = Line2.leftPoint;
+
+        float LengthV1 = sqrt((L1Left.x - cornerPoint.PosX)*(L1Left.x - cornerPoint.PosX) + (L1Left.y - cornerPoint.PosY)*(L1Left.y - cornerPoint.PosY));
+        float LengthV2 = sqrt((L2Left.x - cornerPoint.PosX)*(L2Left.x - cornerPoint.PosX) + (L2Left.y - cornerPoint.PosY)*(L2Left.y - cornerPoint.PosY));
+        Vector2<float> V1, V2;
+        V1.x = (L1Left.x - cornerPoint.PosX) / (LengthV1);
+        V1.y = (L1Left.y - cornerPoint.PosY) / (LengthV1);
+
+        V2.x = (L2Left.x - cornerPoint.PosX) / (LengthV2);
+        V2.y = (L2Left.y - cornerPoint.PosY) / (LengthV2);
+
+        angle = acos(V1.x*V2.x + V1.y *V2.y);
+
+        return angle;
+}
 
 /*------------------
 // Method: 	DecodeCorners
@@ -1052,8 +1132,16 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
     int TempID;
     unsigned int x;
     bool recheck = false;
-
-    if (cornerPoints.size() > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
+\
+    int cornerPointsOnScreen = 0;
+    for(unsigned int i = 0; i < cornerPoints.size(); i++)
+    {
+        if(vision->isPixelOnScreen(cornerPoints[i].PosX,cornerPoints[i].PosY) )
+        {
+            cornerPointsOnScreen++;
+        }
+    }
+    if (cornerPointsOnScreen > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
 
@@ -1249,7 +1337,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 		//ASSIGNING T, L or X corner To TempID
 		if (cornerPoints[x].CornerType == 0)
                 {
-                    TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                    if(cornerPoints[x].Orientation == POINT_UP)
+                    {
+                        TempID = FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L;
+                    }
+                    else
+                    {
+                        TempID = FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L;
+                    }
                     //qDebug("FO_CORNER_UNKNOWN_L located \n");
                 }
 		else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
@@ -1268,7 +1363,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 			//Initialising Variables
                         Vector2<float> screenPositionAngle(vision->CalculateBearing(cornerPoints[x].PosX), vision->CalculateElevation(cornerPoints[x].PosY));
                         GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
-                        AmbiguousObject tempUnknownCorner(TempID, "Unknown T");
+                        AmbiguousObject tempUnknownCorner(TempID, "Unknown Corner");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
                         Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
@@ -1583,14 +1678,68 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             TempID = 0;
             //qDebug("Checking CornerID: %i \t",x);
             //ASSIGNING T, L or X corner To TempID
+
+            AmbiguousObject tempUnknownCorner;
+
             if (cornerPoints[x].CornerType == 0)
             {
-                TempID = FieldObjects::FO_CORNER_UNKNOWN_L;
+                if(cornerPoints[x].Orientation == POINT_UP)
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L;
+                    tempUnknownCorner = AmbiguousObject(TempID, "Unknown Inside L");
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
+
+                }
+                else
+                {
+                    TempID = FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L;
+                    tempUnknownCorner = AmbiguousObject(TempID, "Unknown Outside L");
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+
+                }
+
                 //qDebug("FO_CORNER_UNKNOWN_L located \n");
             }
             else if (cornerPoints[x].CornerType == 1) //create new type for cross and check here. add definition in globals FO_CORNER_UNKNOWN_X
             {
                 TempID = FieldObjects::FO_CORNER_UNKNOWN_T;
+                tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+                tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
                 //qDebug("FO_CORNER_UNKNOWN_T located \n");
             }
             else if (cornerPoints[x].CornerType > 1)
@@ -1599,26 +1748,19 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 continue;
             }
 
-            //START DECODING T
-            if (TempID){
-                    //Initialising Variables
-                    GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
-                    AmbiguousObject tempUnknownCorner;
-                    if(TempID == FieldObjects::FO_CORNER_UNKNOWN_L){
-                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown L");
-                    }
-                    else
-                    {
-                        tempUnknownCorner = AmbiguousObject(TempID, "Unknown T");
-                    }
-                    Vector3<float> measured(TempDist,TempBearing,TempElev);
-                    Vector3<float> measuredError(0,0,0);
-                    Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
-                    Vector2<float> screenPositionAngle(vision->CalculateBearing(screenPosition.x), vision->CalculateElevation(screenPosition.y));
-                    Vector2<int> sizeOnScreen(4,4);
-                    tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
-                    AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
-                }
+            //Initialising Variables
+            GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
+
+            if(TempDist > 800) continue;
+
+            Vector3<float> measured(TempDist,TempBearing,TempElev);
+            Vector3<float> measuredError(0,0,0);
+            Vector2<int> screenPosition(cornerPoints[x].PosX, cornerPoints[x].PosY);
+            Vector2<float> screenPositionAngle(vision->CalculateBearing(screenPosition.x), vision->CalculateElevation(screenPosition.y));
+            Vector2<int> sizeOnScreen(4,4);
+            tempUnknownCorner.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
+            AllObjects->ambiguousFieldObjects.push_back(tempUnknownCorner);
+
         }
     }
 
@@ -1645,12 +1787,12 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
                 blueGoalSeen = true;
-                bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+                bDist = AllObjects->ambiguousFieldObjects[i].measuredDistance();
         }
         else if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
-                blueGoalSeen = true;
-                bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+                yellowGoalSeen = true;
+                yDist = AllObjects->ambiguousFieldObjects[i].measuredDistance();
         }
     }
     for(int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <= FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)

@@ -6,6 +6,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "../NUPlatform/NUSensors/NUSensorsData.h"
 //#include <QDebug>
 Ball::Ball()
 {
@@ -153,8 +154,9 @@ bool Ball::isObjectInRobot(const ObjectCandidate &PossibleBall, FieldObjects *Al
     return isInRobot;
 }
 
-std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int heigth, int width)
+std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height, int width)
 {
+    int buffer = 20;
     Vector2<int> TopLeft = PossibleBall.getTopLeft();
     Vector2<int> BottomRight = PossibleBall.getBottomRight();
     int midX =  (int)((BottomRight.x-TopLeft.x)/2)+TopLeft.x;
@@ -193,11 +195,11 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     {
         TransitionSegment* tempSegement = tempLine.getSegment(i);
         //! Check if the segments are at the edge of screen
-        if(!(tempSegement->getStartPoint().x < 0 || tempSegement->getStartPoint().y < 0))
+        if(!(tempSegement->getStartPoint().x < buffer || tempSegement->getStartPoint().y < buffer))
         {
             BallPoints.push_back(tempSegement->getStartPoint());
         }
-        if(!(tempSegement->getEndPoint().x >= heigth-1 || tempSegement->getEndPoint().x >= width-1))
+        if(!(tempSegement->getEndPoint().x >= height-buffer || tempSegement->getEndPoint().x >= width-buffer))
         {
             BallPoints.push_back(tempSegement->getEndPoint());
         }
@@ -229,17 +231,23 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
+
         TransitionSegment* tempSegement = tempLine.getSegment(i);
         //! Check if the segments are at the edge of screen
-        if(!(tempSegement->getStartPoint().x < 0 || tempSegement->getStartPoint().y < 0))
+        if(!(tempSegement->getStartPoint().x < buffer || tempSegement->getStartPoint().y < buffer))
         {
             BallPoints.push_back(tempSegement->getStartPoint());
         }
-        if(!(tempSegement->getEndPoint().x >= heigth-1 || tempSegement->getEndPoint().x >= width-1))
+
+        float headElevation = 0.0;
+        vision->getSensorsData()->getJointPosition(NUSensorsData::HeadPitch,headElevation);
+
+        if(!(tempSegement->getEndPoint().y >= height-buffer || tempSegement->getEndPoint().x >= width-buffer) &&  headElevation < 0.3)
         {
             BallPoints.push_back(tempSegement->getEndPoint());
         }
-
+        //vision->getSensorsData()->getJointPosition(NUSensorsData::HeadPitch,headElevation);
+        //qDebug() << "Ball Head Elevation:" << headElevation;
         /*qDebug() << "Veritcal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
                 <<","<< tempSegement->getEndPoint().y << ")";*/
