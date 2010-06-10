@@ -4,6 +4,7 @@
 #include <string>
 #include "EndEffector.h"
 #include "Tools/Math/Vector3.h"
+#include "Tools/Math/Rectangle.h"
 #include "debug.h"
 
 class Kinematics
@@ -17,6 +18,7 @@ public:
         rightFoot,
         numEffectors
     };
+
     bool LoadModel(const std::string& fileName);
     Matrix CalculateTransform(Effector effectorId, const std::vector<float>& jointValues);
 
@@ -87,6 +89,39 @@ public:
     }
 
     std::vector<EndEffector> m_endEffectors;
+
+    Rectangle CalculateFootPosition(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
+    double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
+
+private:
+            
+    // Top camera
+    float m_cameraTopOffsetZ;
+    float m_cameraTopOffsetX;
+    float m_cameraTopOffsetAngle;
+
+    // Bottom Camera
+    float m_cameraBottomOffsetZ;
+    float m_cameraBottomOffsetX;
+    float m_cameraBottomOffsetAngle;
+
+    // Neck
+    float m_neckOffsetZ;
+
+    // Hips
+    float m_hipOffsetY;
+    float m_hipOffsetZ;
+
+    // Legs
+    float m_thighLength;
+    float m_tibiaLength;
+    float m_footHeight;
+
+    // Feet
+    float m_footInnerWidth;
+    float m_footOuterWidth;
+    float m_footForwardLength;
+    float m_footBackwardLength;
 };
 
 #endif

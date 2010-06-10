@@ -13,26 +13,32 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // Constant distances (in cm) From documentation
 
     // Top camera
-    const float cameraTopOffsetZ = 6.79;
-    const float cameraTopOffsetX = 5.39;
-    //const float cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
+    m_cameraTopOffsetZ = 6.79;
+    m_cameraTopOffsetX = 5.39;
+    m_cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
 
     // Bottom Camera
-    const float cameraBottomOffsetZ = 2.381;
-    const float cameraBottomOffsetX = 4.88;
-    const float cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0);
+    m_cameraBottomOffsetZ = 2.381;
+    m_cameraBottomOffsetX = 4.88;
+    m_cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0);
 
     // Neck
-    const float neckOffsetZ = 12.65;
+    m_neckOffsetZ = 12.65;
 
     // Hips
-    const float hipOffsetY = 5.0;
-    const float hipOffsetZ = 8.5;
+    m_hipOffsetY = 5.0;
+    m_hipOffsetZ = 8.5;
 
     // Legs
-    const float thighLength = 10.0;
-    const float tibiaLength = 10.0;
-    const float footHeight = 4.6;
+    m_thighLength = 10.0;
+    m_tibiaLength = 10.0;
+    m_footHeight = 4.6;
+
+    // Feet (Measured)
+    m_footInnerWidth = 4.5;
+    m_footOuterWidth = 5.0;
+    m_footForwardLength = 9.0;
+    m_footBackwardLength = 7.0;
 
     DHParameters tempParam;
     std::vector<Link> links;
@@ -42,9 +48,9 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // ---------------
     // BOTTOM CAMERA
     // ---------------
-    startTrans = Translation( 0, 0, neckOffsetZ );
+    startTrans = Translation( 0, 0, m_neckOffsetZ );
     endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
-    endTrans = endTrans * Translation(cameraBottomOffsetX,0,cameraBottomOffsetZ) * RotY(cameraBottomOffsetAngle);
+    endTrans = endTrans * Translation(m_cameraBottomOffsetX,0,m_cameraBottomOffsetZ) * RotY(m_cameraBottomOffsetAngle);
 
     tempParam.alpha = 0.0;
     tempParam.a = 0;
@@ -63,9 +69,9 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // ---------------
     // TOP CAMERA
     // ---------------
-    startTrans = Translation( 0, 0, neckOffsetZ );
+    startTrans = Translation( 0, 0, m_neckOffsetZ );
     endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
-    endTrans = endTrans * Translation(cameraTopOffsetX,0,cameraTopOffsetZ);
+    endTrans = endTrans * Translation(m_cameraTopOffsetX,0,m_cameraTopOffsetZ);
 
     links.clear();
 
@@ -86,8 +92,8 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // ---------------
     // LEFT FOOT
     // ---------------
-    startTrans = Translation(0.0f, hipOffsetY, -hipOffsetZ);
-    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
+    startTrans = Translation(0.0f, m_hipOffsetY, -m_hipOffsetZ);
+    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
     links.clear();
 
     tempParam.alpha = -3.0*mathGeneral::PI/4.0;
@@ -109,13 +115,13 @@ bool Kinematics::LoadModel(const std::string& fileName)
     links.push_back(Link(tempParam,"LeftHipPitch"));
 
     tempParam.alpha = 0;
-    tempParam.a = -thighLength;
+    tempParam.a = -m_thighLength;
     tempParam.thetaOffset = 0;
     tempParam.d = 0;
     links.push_back(Link(tempParam,"LeftKneePitch"));
 
     tempParam.alpha = 0;
-    tempParam.a = -tibiaLength;
+    tempParam.a = -m_tibiaLength;
     tempParam.thetaOffset = 0;
     tempParam.d = 0;
     links.push_back(Link(tempParam,"LeftAnklePitch"));
@@ -131,8 +137,8 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // ---------------
     // RIGHT FOOT
     // ---------------
-    startTrans = Translation(0.0f, -hipOffsetY, -hipOffsetZ);
-    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-footHeight);    // To foot
+    startTrans = Translation(0.0f, -m_hipOffsetY, -m_hipOffsetZ);
+    endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
     links.clear();
 
     tempParam.alpha = -mathGeneral::PI/4.0;
@@ -154,13 +160,13 @@ bool Kinematics::LoadModel(const std::string& fileName)
     links.push_back(Link(tempParam,"RightHipPitch"));
 
     tempParam.alpha = 0;
-    tempParam.a = -thighLength;
+    tempParam.a = -m_thighLength;
     tempParam.thetaOffset = 0;
     tempParam.d = 0;
     links.push_back(Link(tempParam,"RightKneePitch"));
 
     tempParam.alpha = 0;
-    tempParam.a = -tibiaLength;
+    tempParam.a = -m_tibiaLength;
     tempParam.thetaOffset = 0;
     tempParam.d = 0;
     links.push_back(Link(tempParam,"RightAnklePitch"));
@@ -310,3 +316,46 @@ std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldC
     std::vector<float> result;
     return result;
 }
+
+ Rectangle Kinematics::CalculateFootPosition(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot)
+{
+    if((theFoot != leftFoot) && (theFoot != rightFoot)) return Rectangle();
+    Matrix totalTransform = InverseMatrix(supportFootTransformMatrix) * theFootTransformMatrix;
+
+    // Select 2 corners to get total rect area
+    Matrix frontRightPoint(4, 1);
+    Matrix backLeftPoint(4, 1);
+    if(theFoot == leftFoot)
+    {
+        frontRightPoint[1][0] = m_footInnerWidth;
+        backLeftPoint[1][0] = -m_footOuterWidth;
+    }
+    else
+    {
+        frontRightPoint[1][0] = m_footOuterWidth;
+        backLeftPoint[1][0] = -m_footInnerWidth;
+    }
+
+    frontRightPoint[0][0] = m_footForwardLength;
+    backLeftPoint[0][0] = -m_footBackwardLength;
+    frontRightPoint[3][0] = 1.0;
+    backLeftPoint[3][0] = 1.0;
+
+    Matrix frontRightResult = totalTransform * frontRightPoint;
+    Matrix backLeftResult = totalTransform * backLeftPoint;
+    return Rectangle(backLeftResult[0][0], frontRightResult[0][0], backLeftResult[1][0], frontRightResult[1][0]);
+}
+
+double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot)
+{
+    if((theFoot != leftFoot) && (theFoot != rightFoot)) return 0.0;
+    Matrix totalTransform = InverseMatrix(supportFootTransformMatrix) * theFootTransformMatrix;
+
+    // Use centre of the foot
+    Matrix footCentre(4, 1, false);
+    footCentre[3][0] = 1.0;
+
+    Matrix result = totalTransform * footCentre;
+    return result[2][0];
+}
+
