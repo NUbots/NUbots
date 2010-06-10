@@ -47,6 +47,7 @@ enum poseType {
     RETRACT,
     REALIGN_LEGS,
     UNSHIFT_LEG,
+    ALIGN_BALL,
     RESET,
     NO_KICK,
     PRE_KICK,
@@ -90,10 +91,12 @@ private:
 //    bool swing();
 //    bool retract();
 //    void postKick();
-    bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed);
+    bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed, float time);
     bool LiftKickingLeg(legId_t kickingLeg);
     bool SwingLegForward(legId_t kickingLeg, float speed);
+    bool AlignBallYaxis(legId_t kickingLeg, float speed);
     bool LowerLeg(legId_t kickingLeg);
+    bool BalanceCoP(legId_t supportLeg);
     void BalanceCoP(vector<float>& jointAngles, float CoPx, float CoPy);
     void FlattenFoot(vector<float>& jointAngles);
     bool IsPastTime(float time);

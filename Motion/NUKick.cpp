@@ -24,6 +24,7 @@
 #include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "NUPlatform/NUSystem.h"
+#include "Motion/Tools/MotionCurves.h"
 
 #include "motionconfig.h"
 
@@ -163,8 +164,6 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
         kill();
         return;
     }
-    return;
-
     doKick();
     #ifdef USE_WALK
     if(pose == PRE_KICK)
@@ -297,6 +296,18 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
 void NUKick::doKick()
 {
     bool done = false;
+
+    legId_t supportLeg = noLeg;
+    if(m_kickingLeg == rightLeg)
+        supportLeg = leftLeg;
+    else if(m_kickingLeg == leftLeg)
+        supportLeg = rightLeg;
+    else
+    {
+        pose = POST_KICK;
+        return;
+    }
+    /*
     vector<float> pos (6, 0);
     vector<float> vel (6, 0);
     vector<float> gain (6, m_defaultMotorGain);
@@ -306,10 +317,7 @@ void NUKick::doKick()
 
     m_data->getJointPositions(NUSensorsData::LeftLegJoints, LeftLegTheta);
     m_data->getJointPositions(NUSensorsData::RightLegJoints, RightLegTheta);
-
-        //IKSys->inputLeft(LeftLegTheta);
-        //IKSys->inputRight(RightLegTheta);
-
+*/
         debug << "void NUKick::doKick()" << endl;
 	switch(pose)
 	{
@@ -345,18 +353,8 @@ void NUKick::doKick()
                 case TRANSFER_TO_SUPPORT:
 		{
                         debug << "Shifting Weight..." << endl;
-                        legId_t supportLeg = noLeg;
-                        if(m_kickingLeg == rightLeg)
-                            supportLeg = leftLeg;
-                        else if(m_kickingLeg == leftLeg)
-                            supportLeg = rightLeg;
-                        else
-                        {
-                            pose = POST_KICK;
-                            break;
-                        }
                         // Shift the weight of the robot to the support leg.
-                        done = ShiftWeightToFoot(supportLeg,1.0f,0.01);
+                        done = ShiftWeightToFoot(supportLeg,1.0f,0.01, 1500);
                         if(done)
                         {
                             //m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), LeftLegTheta, vel, gain);
@@ -392,10 +390,9 @@ void NUKick::doKick()
 		{
                         debug << "Lifting Leg..." << endl;
                         done = LiftKickingLeg(m_kickingLeg);
+                        BalanceCoP(supportLeg);
                         if(done)
                         {
-                            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), LeftLegTheta, vel, gain);
-                            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), RightLegTheta, vel, gain);
                             cout << "Leg is now lifted!" << endl;
                             debug << "Leg is now lifted!" << endl;
                             pose = POISE_LEG;
@@ -438,41 +435,42 @@ void NUKick::doKick()
 		case POISE_LEG:
 		{
                         debug << "Poising leg..." << endl;
-                        done = doPoise(m_kickingLeg, 0.4, 0.35);
+                        done = doPoise(m_kickingLeg, 0.7, 0.35);
+                        BalanceCoP(supportLeg);
                         if(done)
                         {
                             cout << "Leg is now poised!" << endl;
                             debug << "Leg is now poised!" << endl;
-                            pose = SWING;
+                            pose = ALIGN_BALL;
                         }
-                        /*
-			IKSys->setLeg(poseData[0], poseData[1], poseData[2]);
-			pos = IKSys->outputLeft();
-			m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), pos, vel, gain);
-			pos = IKSys->outputRight();
-			m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), pos, vel, gain);
-                        */
 			break;
 		}
+
+                case ALIGN_BALL:
+                {
+                    debug << "Aligning Ball..." << endl;
+                    done = this->AlignBallYaxis(m_kickingLeg,0.1);
+                    BalanceCoP(supportLeg);
+                    if(done && false)
+                    {
+                        cout << "Ball is now aligned!" << endl;
+                        debug << "Ball is now aligned!" << endl;
+                        pose = SWING;
+                    }
+                   break;
+                }
 
 		case SWING:
 		{
                         debug << "Swinging Leg..." << endl;
-                        done = SwingLegForward(m_kickingLeg, 0.05);
+                        done = SwingLegForward(m_kickingLeg, 10.0);
+                        BalanceCoP(supportLeg);
                         if(done)
                         {
                             cout << "Swing completed!" << endl;
                             debug << "Swing completed!" << endl;
                             pose = RETRACT;
                         }
-                        /*
-                        debug << "Adding joint positions for swing..." << endl;
-			IKSys->moveLeg(poseData[0], poseData[1], poseData[2]);
-			pos = IKSys->outputLeft();
-			m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), pos, vel, gain);
-			pos = IKSys->outputRight();
-			m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), pos, vel, gain);
-                        */
 			break;
 		}
                 case RETRACT:
@@ -480,6 +478,7 @@ void NUKick::doKick()
                         debug << "Retracting Leg..." << endl;
                         //done = RetractLeg(m_kickingLeg);
                         done = LiftKickingLeg(m_kickingLeg);
+                        BalanceCoP(supportLeg);
                         if(done)
                         {
                             cout << "Leg Retracted!" << endl;
@@ -494,6 +493,7 @@ void NUKick::doKick()
                     {
                         debug << "Lowering Leg..." << endl;
                         done = LowerLeg(m_kickingLeg);
+                        //BalanceCoP(supportLeg);
                         if(done)
                         {
                             cout << "Legs Aligned!" << endl;
@@ -507,7 +507,7 @@ void NUKick::doKick()
                 case UNSHIFT_LEG:
                 {
                         debug << "Unshifting Weight..." << endl;
-                        done = this->ShiftWeightToFoot(m_kickingLeg,0.5f,0.005);
+                        done = this->ShiftWeightToFoot(m_kickingLeg,0.5f,0.005, 500.0f);
                         if(done)
                         {
                             debug << "Weight Unshifted!" << endl;
@@ -632,10 +632,10 @@ bool NUKick::doPostKick()
     return true;
 }
 
-bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, float speed)
+bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, float speed, float time)
 {
     const float maxShiftSpeed = speed * SpeedMultiplier();
-    const float reqiredAccuracy = 0.05;
+    const float reqiredAccuracy = 0.1; // 5%
     const float propGain = 0.05f;
     bool validData = true;
     bool leftContact, rightContact;
@@ -644,7 +644,6 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
     if(!validData) return false;
     float lcopx(0.0f),lcopy(0.0f),rcopx(0.0f),rcopy(0.0f);
     float lforce(0.0f),rforce(0.0f);
-
 
     float leftImpactTime, rightImpactTime;
     bool recentLeftImpact = m_data->footImpact(NUSensorsData::LeftFoot,leftImpactTime);
@@ -662,12 +661,12 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
     }
 
 
+
     vector<float>leftJoints;
     vector<float>rightJoints;
     validData = validData && m_data->getJointTargets(NUSensorsData::LeftLegJoints,leftJoints);
     validData = validData && m_data->getJointTargets(NUSensorsData::RightLegJoints,rightJoints);
     validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
-
 
     if(validData)
     {
@@ -693,6 +692,11 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
             recentImpact = m_data->CurrentTime - leftImpactTime < 5*TimeBetweenFrames();
             newHipPos = leftJoints[0] + crop(weightError*propGain, -maxShiftSpeed, maxShiftSpeed);
         }
+        if(!m_stateCommandGiven)
+        {
+            m_stateCommandGiven = true;
+            m_estimatedStateCompleteTime = m_data->CurrentTime + time;
+        }
         if(fabs(weightError) > reqiredAccuracy)
         {
             leftJoints[0] = newHipPos;
@@ -700,8 +704,13 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
             leftJoints[4] = -newHipPos;
             rightJoints[4] = -newHipPos;
         }
-        else if(!recentImpact)
+        else
         {
+            m_estimatedStateCompleteTime -= TimeBetweenFrames();
+        }
+        if(m_stateCommandGiven && !recentImpact && (m_estimatedStateCompleteTime < m_data->CurrentTime))
+        {
+            m_stateCommandGiven = false;
             return true;
         }
         m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), leftJoints, vel, gain);
@@ -713,74 +722,47 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
 bool NUKick::LiftKickingLeg(legId_t kickingLeg)
 {
     bool validData = true;
-    NUSensorsData::foot_id_t s_supportFoot;
     NUSensorsData::foot_id_t s_kickingFoot;
-    NUSensorsData::bodypart_id_t s_supportLeg;
     NUSensorsData::bodypart_id_t s_kickingLeg;
-    NUActionatorsData::bodypart_id_t a_supportLeg;
     NUActionatorsData::bodypart_id_t a_kickingLeg;
     if(kickingLeg == rightLeg)
     {
-        s_supportFoot = NUSensorsData::LeftFoot;
         s_kickingFoot = NUSensorsData::RightFoot;
-        s_supportLeg = NUSensorsData::LeftLegJoints;
         s_kickingLeg = NUSensorsData::RightLegJoints;
-        a_supportLeg = NUActionatorsData::LeftLegJoints;
         a_kickingLeg = NUActionatorsData::RightLegJoints;
     }
     else if(kickingLeg == leftLeg)
     {
-        s_supportFoot = NUSensorsData::RightFoot;
         s_kickingFoot = NUSensorsData::LeftFoot;
-        s_supportLeg = NUSensorsData::RightLegJoints;
         s_kickingLeg = NUSensorsData::LeftLegJoints;
-        a_supportLeg = NUActionatorsData::RightLegJoints;
         a_kickingLeg = NUActionatorsData::LeftLegJoints;
     }
     else return true;
 
-    bool supportContact, kickContact;
-    validData = validData && m_data->getFootContact(s_supportFoot, supportContact);
+    bool kickContact;
     validData = validData && m_data->getFootContact(s_kickingFoot, kickContact);
     if(!validData) return false;
-    float copx(0.0f),copy(0.0f);
-    float force(0.0f);
 
-    if(supportContact)
-    {
-        validData = validData && m_data->getFootCoP(s_supportFoot,copx,copy);
-        validData = validData && m_data->getFootForce(s_supportFoot,force);
-    }
-
-    vector<float>supportLegJoints;
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
-    validData = validData && m_data->getJointTargets(s_supportLeg,supportLegJoints);
     validData = validData && m_data->getJointTargets(s_kickingLeg,kickLegJoints);
     validData = validData && m_data->getJointPositions(s_kickingLeg,kickLegPositions);
-    validData = validData && (supportLegJoints.size() >= 6) && (kickLegJoints.size() >= 6);
+    validData = validData && (kickLegJoints.size() >= 6);
 
     vector<float>kickLegTargets(kickLegPositions);
 
-    kickLegTargets[3] = 1.5f;
+    kickLegTargets[3] = 1.6f;
     kickLegTargets[1] = -kickLegTargets[3] / 2.0f;
     kickLegTargets[5] = -kickLegTargets[3] / 2.0f;
 
     if(validData)
     {
-        // Balance using support leg
-        BalanceCoP(supportLegJoints, copx, copy);
-
         if(!m_stateCommandGiven)
         {
             debug << "Motion Command Given." << endl;
             m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(a_kickingLeg, kickLegPositions, kickLegTargets, 0.7 , 75.0);
             m_stateCommandGiven = true;
         }
-
-        vector<float> vel (6, 0);
-        vector<float> gain (6, m_defaultMotorGain);
-        //m_actions->addJointPositions(a_supportLeg, nusystem->getTime(), supportLegJoints, vel, gain);
 
         if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
         {
@@ -794,62 +776,37 @@ bool NUKick::LiftKickingLeg(legId_t kickingLeg)
 bool NUKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
 {
     bool validData = true;
-    NUSensorsData::foot_id_t s_supportFoot;
     NUSensorsData::foot_id_t s_kickingFoot;
-    NUSensorsData::bodypart_id_t s_supportLeg;
     NUSensorsData::bodypart_id_t s_kickingLeg;
-    NUActionatorsData::bodypart_id_t a_supportLeg;
     NUActionatorsData::bodypart_id_t a_kickingLeg;
-    legId_t supportLeg;
     if(poiseLeg == rightLeg)
     {
-        supportLeg = leftLeg;
-        s_supportFoot = NUSensorsData::LeftFoot;
         s_kickingFoot = NUSensorsData::RightFoot;
-        s_supportLeg = NUSensorsData::LeftLegJoints;
         s_kickingLeg = NUSensorsData::RightLegJoints;
-        a_supportLeg = NUActionatorsData::LeftLegJoints;
         a_kickingLeg = NUActionatorsData::RightLegJoints;
     }
     else if(poiseLeg == leftLeg)
     {
-        supportLeg = rightLeg;
-        s_supportFoot = NUSensorsData::RightFoot;
         s_kickingFoot = NUSensorsData::LeftFoot;
-        s_supportLeg = NUSensorsData::RightLegJoints;
         s_kickingLeg = NUSensorsData::LeftLegJoints;
-        a_supportLeg = NUActionatorsData::RightLegJoints;
         a_kickingLeg = NUActionatorsData::LeftLegJoints;
     }
     else return true;
 
-    bool supportContact, kickContact;
-    validData = validData && m_data->getFootContact(s_supportFoot, supportContact);
+    bool kickContact;
     validData = validData && m_data->getFootContact(s_kickingFoot, kickContact);
     if(!validData) return false;
-    float copx(0.0f),copy(0.0f);
-    float force(0.0f);
 
-    if(supportContact)
-    {
-        validData = validData && m_data->getFootCoP(s_supportFoot,copx,copy);
-        validData = validData && m_data->getFootForce(s_supportFoot,force);
-    }
-
-    vector<float>supportLegJoints;
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
-    validData = validData && m_data->getJointTargets(s_supportLeg,supportLegJoints);
     validData = validData && m_data->getJointTargets(s_kickingLeg,kickLegJoints);
     validData = validData && m_data->getJointPositions(s_kickingLeg,kickLegPositions);
-    validData = validData && (supportLegJoints.size() >= 6) && (kickLegJoints.size() >= 6);
+    validData = validData && (kickLegJoints.size() >= 6) && (kickLegPositions.size() >= 6);
 
     static vector<float>kickLegTargets;
 
     if(validData)
     {
-        // Balance using support leg
-        BalanceCoP(supportLegJoints, copx, copy);
         if(!m_stateCommandGiven)
         {
             kickLegTargets.assign(kickLegPositions.begin(), kickLegPositions.end());
@@ -859,14 +816,7 @@ bool NUKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
             debug << "Motion Command Given." << endl;
             m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(a_kickingLeg, kickLegPositions, kickLegTargets, speed , m_defaultMotorGain);
             m_stateCommandGiven = true;
-
         }
-
-        vector<float> vel (6, 0);
-        vector<float> gain (6, m_defaultMotorGain);
-        LimitJoints(supportLeg,supportLegJoints);
-        m_actions->addJointPositions(a_supportLeg, nusystem->getTime(), supportLegJoints, vel, gain);
-
         if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
         {
             m_stateCommandGiven = false;
@@ -926,11 +876,57 @@ bool NUKick::IsPastTime(float time){
     return (m_data->CurrentTime > time);
 }
 
+bool NUKick::BalanceCoP(legId_t supportLeg)
+{
+    bool validData = true;
+
+    NUSensorsData::foot_id_t s_supportFoot;
+    NUSensorsData::bodypart_id_t s_supportLeg;
+    NUActionatorsData::bodypart_id_t a_supportLeg;
+    if(supportLeg == rightLeg)
+    {
+        s_supportFoot = NUSensorsData::RightFoot;
+        s_supportLeg = NUSensorsData::RightLegJoints;
+        a_supportLeg = NUActionatorsData::RightLegJoints;
+    }
+    else if(supportLeg == leftLeg)
+    {
+        s_supportFoot = NUSensorsData::LeftFoot;
+        s_supportLeg = NUSensorsData::LeftLegJoints;
+        a_supportLeg = NUActionatorsData::LeftLegJoints;
+    }
+    else return true;
+
+    bool supportFootContact, isSupport;
+    validData = validData && m_data->getFootContact(s_supportFoot, supportFootContact);
+    validData = validData && m_data->getFootSupport(s_supportFoot,isSupport);
+    if(validData && supportFootContact)
+    {
+        vector<float>supportLegJoints;
+        validData = validData && m_data->getJointTargets(s_supportLeg,supportLegJoints);
+        validData = validData && (supportLegJoints.size() >= 6);
+        float copx(0.0f),copy(0.0f);
+        float force(0.0f);
+        validData = validData && m_data->getFootCoP(s_supportFoot,copx,copy);
+        validData = validData && m_data->getFootForce(s_supportFoot,force);
+        if(validData)
+        {
+            BalanceCoP(supportLegJoints, copx, copy);
+            vector<float> vel (6, 0);
+            vector<float> gain (6, 100);
+            LimitJoints(supportLeg,supportLegJoints);
+            m_actions->addJointPositions(a_supportLeg, m_data->CurrentTime, supportLegJoints, vel, gain);
+            return true;
+        }
+    }
+    return false;
+}
+
 void NUKick::BalanceCoP(vector<float>& jointAngles, float CoPx, float CoPy)
 {
     // Linear controller to centre CoP
-    const float gainx = 0.006 * GainMultiplier();
-    const float gainy = 0.006 * GainMultiplier();
+    const float gainx = 0.01 * GainMultiplier();
+    const float gainy = 0.01 * GainMultiplier();
 
     // Vertical correction
     // Ankle Roll
@@ -943,6 +939,43 @@ void NUKick::BalanceCoP(vector<float>& jointAngles, float CoPx, float CoPy)
     // Hip Pitch - Reverse of pitch to maintain vertical torso.
     jointAngles[2] = 0.5*jointAngles[5];
     return;
+}
+
+bool NUKick::AlignBallYaxis(legId_t kickingLeg, float speed)
+{
+    const float gain = 0.1;
+    bool validData = true;
+    NUSensorsData::bodypart_id_t s_kickingLeg;
+    NUActionatorsData::joint_id_t a_kickingHipRoll;
+    Matrix supportLegTransform;
+    if(kickingLeg == rightLeg)
+    {
+        s_kickingLeg = NUSensorsData::RightLegJoints;
+        a_kickingHipRoll = NUActionatorsData::RHipRoll;
+        validData = validData && m_data->getRightLegTransform(supportLegTransform);
+    }
+    else if(kickingLeg == leftLeg)
+    {
+        s_kickingLeg = NUSensorsData::LeftLegJoints;
+        a_kickingHipRoll = NUActionatorsData::LHipRoll;
+        validData = validData && m_data->getLeftLegTransform(supportLegTransform);
+    }
+    else return true;
+
+    vector<float>kickLegJoints;
+    vector<float>kickLegPositions;
+    validData = validData && m_data->getJointTargets(s_kickingLeg,kickLegJoints);
+    validData = validData && m_data->getJointPositions(s_kickingLeg,kickLegPositions);
+    validData = validData && (kickLegJoints.size() >= 6);
+    vector<float> footPosition = Kinematics::PositionFromTransform(supportLegTransform);
+    float deltaY = m_ball_y - footPosition[1];
+    if(validData)
+    {
+        //float deltaTheta = asin(deltaY / Kinematics::CalculateRadialLegLength(kickLegPositions));
+        float newHipRollAngle = kickLegPositions[0] + crop(gain*deltaY,-speed,speed);
+        m_actions->addJointPosition(a_kickingHipRoll,m_data->CurrentTime,newHipRollAngle,0,0.75);
+    }
+    return (fabs(deltaY) < 0.5);
 }
 
 void NUKick::FlattenFoot(vector<float>& jointAngles)
@@ -958,99 +991,83 @@ void NUKick::MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJo
 
 bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
 {
-    float swingSpeed = speed * SpeedMultiplier();
+    float swingSpeed = speed;
     bool validData = true;
 
-    NUSensorsData::foot_id_t s_supportFoot;
     NUSensorsData::foot_id_t s_kickingFoot;
-    NUSensorsData::bodypart_id_t s_supportLeg;
     NUSensorsData::bodypart_id_t s_kickingLeg;
-    NUActionatorsData::bodypart_id_t a_supportLeg;
     NUActionatorsData::bodypart_id_t a_kickingLeg;
+    NUActionatorsData::joint_id_t a_kickingKneePitch;
+    NUActionatorsData::joint_id_t a_kickingHipPitch;
+    NUActionatorsData::joint_id_t a_kickingAnklePitch;
     if(kickingLeg == rightLeg)
     {
-        s_supportFoot = NUSensorsData::LeftFoot;
         s_kickingFoot = NUSensorsData::RightFoot;
-        s_supportLeg = NUSensorsData::LeftLegJoints;
         s_kickingLeg = NUSensorsData::RightLegJoints;
-        a_supportLeg = NUActionatorsData::LeftLegJoints;
         a_kickingLeg = NUActionatorsData::RightLegJoints;
+        a_kickingHipPitch = NUActionatorsData::RHipPitch;
+        a_kickingKneePitch = NUActionatorsData::RKneePitch;
+        a_kickingAnklePitch = NUActionatorsData::RAnklePitch;
     }
     else if(kickingLeg == leftLeg)
     {
-        s_supportFoot = NUSensorsData::RightFoot;
         s_kickingFoot = NUSensorsData::LeftFoot;
-        s_supportLeg = NUSensorsData::RightLegJoints;
         s_kickingLeg = NUSensorsData::LeftLegJoints;
-        a_supportLeg = NUActionatorsData::RightLegJoints;
         a_kickingLeg = NUActionatorsData::LeftLegJoints;
+        a_kickingHipPitch = NUActionatorsData::LHipPitch;
+        a_kickingKneePitch = NUActionatorsData::LKneePitch;
+        a_kickingAnklePitch = NUActionatorsData::LAnklePitch;
     }
     else return true;
 
-
-    bool supportFootContact;
-    validData = validData && m_data->getFootContact(s_supportFoot, supportFootContact);
-
     if(!validData) return false;
-    float copx(0.0f),copy(0.0f);
-    float force(0.0f);
 
-    if(supportFootContact)
-    {
-        validData = validData && m_data->getFootCoP(s_supportFoot,copx,copy);
-        validData = validData && m_data->getFootForce(s_supportFoot,force);
-    }
-
-    vector<float>supportLegJoints;
     vector<float>kickingLegJoints;
-    validData = validData && m_data->getJointTargets(s_supportLeg,supportLegJoints);
-    validData = validData && m_data->getJointTargets(s_kickingLeg,kickingLegJoints);
-    validData = validData && (supportLegJoints.size() >= 6) && (kickingLegJoints.size() >= 6);
+    validData = validData && m_data->getJointPositions(s_kickingLeg,kickingLegJoints);
+    validData = validData && (kickingLegJoints.size() >= 6);
 
     const float targetHipPitch = -1.2;
     const float targetKneePitch = 0.6f;
 
+    static float endHipAngle = 0;
+    static float endKneeAngle = 0;
+    static float endAnkleAngle = 0;
+
     if(validData)
     {
-        vector<float> vel (6, 0);
-        vector<float> gain (6, 100);
 
-        float hipDiff = targetHipPitch - kickingLegJoints[1];
-        float kneeDiff = targetKneePitch - kickingLegJoints[3];
-
-        if((hipDiff > 0) && (kneeDiff > 0)) return true;
-
-        float hipFramesRequired = fabs(hipDiff) / swingSpeed;
-        float kneeFramesRequired = fabs(kneeDiff) / swingSpeed;
-
-        float slowestJointSamplesLeft = 0.0f;
-        if(hipFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = hipFramesRequired;
-        if(kneeFramesRequired > slowestJointSamplesLeft) slowestJointSamplesLeft = kneeFramesRequired;
-
-        debug << "swingSpeed = " << swingSpeed << endl;
-        debug << "hipDiff = " << hipDiff << endl;
-        debug << "kneeDiff = " << kneeDiff << endl;
-        debug << "hipFramesRequired = " << hipFramesRequired << endl;
-        debug << "kneeFramesRequired = " << kneeFramesRequired << endl;
-        debug << "slowestJointSamplesLeft = " << slowestJointSamplesLeft << endl;
-
-        BalanceCoP(supportLegJoints, copx, copy);
-        kickingLegJoints[0] = supportLegJoints[0];
-        kickingLegJoints[4] = supportLegJoints[4];
-
-        if(slowestJointSamplesLeft - hipFramesRequired < 1.0)
+        if(m_stateCommandGiven && (endHipAngle-kickingLegJoints[1] >= -0.01) && (endKneeAngle-kickingLegJoints[3] >= -0.01))
         {
-            kickingLegJoints[1] -= swingSpeed;
-            debug << "moving Hip = " << kickingLegJoints[1] << endl;
+            m_stateCommandGiven = false;
+            return true;
         }
-        if(slowestJointSamplesLeft - kneeFramesRequired < 1.0)
+
+        if(!m_stateCommandGiven)
         {
-            kickingLegJoints[3] -= swingSpeed;
-            debug << "moving Knee = " << kickingLegJoints[3] << endl;
+            float startHipAngle = kickingLegJoints[1];
+            float startKneeAngle = kickingLegJoints[3];
+            float startAnkleAngle = -(startHipAngle + startKneeAngle);
+
+            endHipAngle = targetHipPitch;//startHipAngle - PI/4;
+            endKneeAngle = targetKneePitch;//startKneeAngle - PI/4;
+            endAnkleAngle = -(endHipAngle + endKneeAngle);
+
+            vector<double> hipTimes, kneeTimes, ankleTimes;
+            vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
+
+            const float startTime = m_data->CurrentTime+100.0;
+            const float maxChange = max(max(fabs(endHipAngle - startHipAngle),fabs(endKneeAngle - startKneeAngle)),fabs(endAnkleAngle-startAnkleAngle));
+            const float swingTime = 1000.0*maxChange / swingSpeed;
+            const float endTime = startTime + swingTime;
+            debug << "staring swing command - Estimated swing time = " << swingTime << endl;
+            MotionCurves::calculate(startTime,endTime, startHipAngle, endHipAngle, 1.0, 20.0f, hipTimes, hipPositions, hipVelocities);
+            MotionCurves::calculate(startTime,endTime, startKneeAngle, endKneeAngle, 1.0, 20.0f, kneeTimes, kneePositions, kneeVelocities);
+            MotionCurves::calculate(startTime,endTime, startAnkleAngle, endAnkleAngle, 1.0, 20.0f, ankleTimes, anklePositions, ankleVelocities);
+            m_actions->addJointPositions(a_kickingHipPitch,hipTimes,hipPositions,hipVelocities,100.0);
+            m_actions->addJointPositions(a_kickingKneePitch,kneeTimes,kneePositions,kneeVelocities,100.0);
+            m_actions->addJointPositions(a_kickingAnklePitch,ankleTimes,anklePositions,ankleVelocities,100.0);
+            m_stateCommandGiven = true;
         }
-        FlattenFoot(kickingLegJoints);
-        m_actions->addJointPositions(a_supportLeg, nusystem->getTime(), supportLegJoints, vel, gain);
-        m_actions->addJointPositions(a_kickingLeg, nusystem->getTime(), kickingLegJoints, vel, gain);
     }
     return false;
 }
