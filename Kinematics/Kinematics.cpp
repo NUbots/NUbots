@@ -359,3 +359,22 @@ double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransfor
     return result[2][0];
 }
 
+float Kinematics::CalculateRadialLegLength(const vector<float>& legJoints)
+{
+    float kneeAngle = legJoints[3];
+    // Using law of cosines.
+    return sqrt( pow(m_thighLength,2) + pow(m_tibiaLength,2) - 2*m_thighLength*m_tibiaLength*cos(kneeAngle));
+}
+
+float Kinematics::CalculateHipPitchAngleForRelYPosition(const vector<float>& legJoints, float relYPos)
+{
+    float radialLegLength = CalculateRadialLegLength(legJoints);
+    return asin(relYPos / radialLegLength);
+}
+/*
+float Kinematics::CalculateRelY(const vector<float>& legJoints, float relYPos)
+{
+    float radialLegLength = CalculateRadialLegLength(legJoints);
+    return asin(relYPos / radialLegLength);
+}
+*/

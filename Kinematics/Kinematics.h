@@ -92,6 +92,8 @@ public:
 
     Rectangle CalculateFootPosition(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
     double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
+    float CalculateRadialLegLength(const std::vector<float>& legJoints);
+    float CalculateHipPitchAngleForRelYPosition(const std::vector<float>& legJoints, float relYPos);
 
 private:
             
