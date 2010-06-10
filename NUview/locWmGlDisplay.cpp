@@ -1,6 +1,8 @@
 #include "locWmGlDisplay.h"
 #include <QDebug>
 #include <QMouseEvent>
+#include <qclipboard.h>
+#include <QApplication>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
 
@@ -18,6 +20,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     light = true;
     perspective = true;
     drawRobotModel = true;
+    drawSigmaPoints = true;
     setFont(QFont("Helvetica",8,QFont::Bold,false));
 }
 
@@ -77,6 +80,10 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             viewOrientation[0] = 0.0f;
             viewOrientation[1] = 0.0f;
             viewOrientation[2] = 0.0f;
+            update();
+            break;
+        case Qt::Key_S:
+            drawSigmaPoints = !drawSigmaPoints;
             update();
             break;
         case Qt::Key_K:
@@ -218,6 +225,14 @@ void locWmGlDisplay::paintGL()
     //drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.75f);
     glFlush ();         // Run Queued Commands
     return;
+}
+
+void locWmGlDisplay::snapshotToClipboard()
+{
+    paintGL(); // Redraw the scene in case it needs to be updated.
+    QClipboard *cb = QApplication::clipboard(); // get the clipboard
+    QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
+    cb->setImage(tempPicture); // put current image on the clipboard.
 }
 
 void locWmGlDisplay::drawField()
@@ -407,11 +422,14 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
 
 void locWmGlDisplay::DrawModel(const KF& model)
 {
-    Matrix sigmaPoints = model.CalculateSigmaPoints();
     drawRobot(QColor(255,255,255,model.alpha*255), model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
-    for (int i=1; i < sigmaPoints.getn(); i++)
+    if(drawSigmaPoints)
     {
-        DrawSigmaPoint(QColor(255,255,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+        Matrix sigmaPoints = model.CalculateSigmaPoints();
+        for (int i=1; i < sigmaPoints.getn(); i++)
+        {
+            DrawSigmaPoint(QColor(255,255,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+        }
     }
     drawBall(QColor(255,165,0,255), model.getState(KF::ballX), model.getState(KF::ballY));
 }
