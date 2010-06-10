@@ -170,13 +170,13 @@ namespace BehaviourPotentials
             
             if (leftobstacle <= rightobstacle)
             {   // the obstacle is on the left
-                if (speed[2] > -dodgeangle)
-                    newspeed[2] = -dodgeangle;
+                if (speed[1] > -dodgeangle)
+                    newspeed[1] = -dodgeangle;
             }
             else
             {   // the obstacle is on the right
-                if (speed[2] < dodgeangle)
-                    newspeed[2] = dodgeangle;
+                if (speed[1] < dodgeangle)
+                    newspeed[1] = dodgeangle;
             }
             return newspeed;
         }

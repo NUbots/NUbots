@@ -79,7 +79,8 @@ void ReadyMoveState::doState()
     
     vector<float> position = getReadyFieldPositions();
     vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 20, 30);
-    m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+    vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 30, 100);
+    m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
 }
 
 vector<float> ReadyMoveState::getReadyFieldPositions()
