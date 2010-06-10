@@ -30,12 +30,29 @@ class NUActionatorsData;
 class KickJob;
 class NUWalk;
 
-#include "./Kicks/IK.h"
-#include <stack>
+//#include "./Kicks/IK.h"
+//#include <stack>
 #include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
-enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SET_LEG, POISE_LEG, SWING, RETRACT, REALIGN_LEGS, UNSHIFT_LEG, RESET, NO_KICK, PRE_KICK, POST_KICK, TRANSFER_TO_SUPPORT};
+enum poseType {
+    DO_NOTHING,
+    USE_LEFT_LEG,
+    USE_RIGHT_LEG,
+    LIFT_LEG,
+    ADJUST_YAW,
+    SET_LEG,
+    POISE_LEG,
+    SWING,
+    RETRACT,
+    REALIGN_LEGS,
+    UNSHIFT_LEG,
+    RESET,
+    NO_KICK,
+    PRE_KICK,
+    POST_KICK,
+    TRANSFER_TO_SUPPORT
+};
 
 class NUKick
 {
@@ -62,15 +79,17 @@ private:
     void doKick();
     bool doPreKick();
     bool doPostKick();
+    bool doPoise(legId_t leg, float angleChange, float speed);
+
     bool chooseLeg();
-    bool liftLeg();
-    bool adjustYaw();
-    bool positionFoot();
-    bool setLeg();
-    bool poiseLeg();
-    bool swing();
-    bool retract();
-    void postKick();
+//    bool liftLeg();
+//    bool adjustYaw();
+//    bool positionFoot();
+//    bool setLeg();
+//    bool poiseLeg();
+//    bool swing();
+//    bool retract();
+//    void postKick();
     bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed);
     bool LiftKickingLeg(legId_t kickingLeg);
     bool SwingLegForward(legId_t kickingLeg, float speed);
@@ -83,13 +102,13 @@ private:
     float perSec2perFrame(float value);
     float SpeedMultiplier();
     float GainMultiplier();
-    void MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
 
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
     NUWalk* m_walk;                     //!< local pointer to the walk engine
-    Kinematics* kinematicModel;
+    Kinematics* m_kinematicModel;
     
     float m_ball_x;                    //!< the current ball x position relative to robot in cm
     float m_ball_y;                    //!< the current ball y position relative to robot in cm
@@ -98,7 +117,6 @@ private:
     float m_target_y;
     double m_target_timestamp;
 
-    vector<double> poseData;
     poseType pose;
     bool lock;
 
@@ -106,14 +124,27 @@ private:
     vector<float> m_leftLegInitialPose;
     vector<float> m_rightLegInitialPose;
 
-    stack<vector<double> > poseStack;
+//    stack<vector<double> > poseStack;
     legId_t m_kickingLeg;
-    Legs * IKSys;
+    //Legs * IKSys;
     bool m_kickIsActive;
 
     bool m_stateCommandGiven;
+    double m_estimatedStateCompleteTime;
     double m_currentTimestamp;
     double m_previousTimestamp;
+
+    class jointLimit
+    {
+    public:
+        jointLimit(float minAngle, float maxAngle): min(minAngle), max(maxAngle){};
+        float min;
+        float max;
+    };
+
+    bool LimitJoints(legId_t leg, vector<float> jointPositions);
+    vector<jointLimit> m_leftLegLimits;
+    vector<jointLimit> m_rightLegLimits;
 };
 
 #endif
