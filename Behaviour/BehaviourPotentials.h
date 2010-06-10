@@ -21,10 +21,11 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BEHAVIOUR_SCHEMAS_H
-#define BEHAVIOUR_SCHEMAS_H
+#ifndef BEHAVIOUR_POTENTIALS_H
+#define BEHAVIOUR_POTENTIALS_H
 
 #include "Vision/FieldObjects/Self.h"
+#include "Vision/FieldObjects/MobileObject.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
@@ -43,7 +44,7 @@ namespace BehaviourPotentials
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 20, float turningdistance = 60)
+    inline vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 20, float turningdistance = 60)
     {
         vector<float> result(3,0);
         vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
@@ -78,7 +79,7 @@ namespace BehaviourPotentials
         @param objectsize the radius in cm of the object to avoid
         @param dontcaredistance the distance in cm at which I make no attempt to avoid the object
      */
-    vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
+    inline vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
     {
         vector<float> result(3,0);
         if (fieldstate.size() < 3)
@@ -116,10 +117,68 @@ namespace BehaviourPotentials
         }
     }
     
+    /*! @brief Returns a vector to go to a ball
+     */
+    inline vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 15.5, float stoppingdistance = 55)
+    {
+        float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+        float bearing = ball.estimatedBearing();
+        
+        // calculate the component to position the ball at the kicking distance
+        float position_speed;
+        float position_direction;
+        float position_rotation;
+        if (distance < kickingdistance)
+        {   // if we are too close to the ball then we need to go backwards
+            position_speed = (kickingdistance - distance)/kickingdistance;
+            position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
+            position_rotation = 0.8*bearing;
+        }
+        else if (distance < stoppingdistance)
+        {   // if we are close enough to slow down
+            position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+            position_direction = bearing;
+            position_rotation = 0.5*bearing;
+        }
+        else
+        {   // if it is outside the stopping distance - full speed
+            position_speed = 1;
+            position_direction = bearing;
+            position_rotation = 0.5*bearing;
+        }
+        
+        // calculate the component to go around the ball to face the heading
+        float around_speed;
+        float around_direction;
+        if (distance < stoppingdistance)
+        {   // if we are close enough to worry about the heading
+            if (fabs(heading) < 1)
+                around_speed = fabs(heading);
+            else
+                around_speed = 1;
+            around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
+        }
+        else
+        {
+            around_speed = 0;
+            around_direction = 0;
+        }
+        
+        
+        vector<float> speed(3,0);
+        speed[0] = max(position_speed, around_speed);
+        float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
+        float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
+        speed[1] = atan2(ysum, xsum);
+        speed[2] = position_rotation;
+        
+        return speed;
+    }
+    
     /*! @brief Returns a the vector sum of the potentials
         @param potentials a list of [trans_speed, trans_direction, rot_speed] vectors
      */
-    vector<float> sumPotentials(const vector<vector<float> >& potentials)
+    inline vector<float> sumPotentials(const vector<vector<float> >& potentials)
     {
         float xsum = 0;
         float ysum = 0;
@@ -143,7 +202,7 @@ namespace BehaviourPotentials
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
+    inline vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
     {
         // Get obstacle distances from the sensors
         vector<float> temp;
