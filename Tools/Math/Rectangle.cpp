@@ -56,3 +56,23 @@ float Rectangle::Area()
 {
     return Width() * Height();
 }
+
+float Rectangle::MinX()
+{
+    return m_minx;
+}
+
+float Rectangle::MaxX()
+{
+    return m_maxx;
+}
+
+float Rectangle::MinY()
+{
+    return m_miny;
+}
+
+float Rectangle::MaxY()
+{
+    return m_maxy;
+}

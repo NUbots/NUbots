@@ -140,7 +140,8 @@ HEADERS += ui_mainwindow.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
-    ../Vision/EllipseFitting/FittingCalculations.h
+    ../Vision/EllipseFitting/FittingCalculations.h \
+    ../Tools/Math/Rectangle.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -232,6 +233,7 @@ SOURCES += mainwindow.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
-    ../Vision/EllipseFitting/FittingCalculations.cpp
+    ../Vision/EllipseFitting/FittingCalculations.cpp \
+    ../Tools/Math/Rectangle.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

@@ -8,6 +8,7 @@ public:
     Rectangle(const Rectangle& source);
     Rectangle(float minx, float maxx, float miny, float maxy);
     void Set(float minx, float maxx, float miny, float maxy);
+
     float Width();
     float Height();
     float Area();
