@@ -803,7 +803,7 @@ bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float 
         return false;
     else 
     {
-        static vector<float> data (3, 0);
+        vector<float> data (3, 0);
         data[0] = position;
         data[1] = velocity;
         data[2] = gain;
@@ -881,7 +881,7 @@ bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float to
         return false;
     else 
     {
-        static vector<float> data (2, 0);
+        vector<float> data (2, 0);
         data[0] = torque;
         data[1] = gain;
         TorqueActionators[jointid]->addPoint(time, data);
@@ -1253,7 +1253,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vecto
     
     vector<int>& selectedleds = getSelectedLeds(ledgroup);
     
-    static vector<float> data(3,0);
+    vector<float> data(3,0);
     if (values.size() < 3)
     {
         data[0] = values[0];
@@ -1283,7 +1283,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vecto
  */
 bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, float red, float green, float blue)
 {
-    static vector<float> values(3,0);
+    vector<float> values(3,0);
     values[0] = red;
     values[1] = green;
     values[2] = blue;
@@ -1309,7 +1309,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vecto
         vector<int>& selectedleds = getSelectedLeds(ledgroup);
         int numpoints = std::min(selectedleds.size(), values.size());
         
-        static vector<float> data (3, 0);
+        vector<float> data (3, 0);
         for (int i=0; i<numpoints; i++)
         {
             if (values[i].size() < 3)
@@ -1397,7 +1397,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
     
     if (values.size() == 1)
     {   // if the size of the values is one, then set that value to all in the group
-        static vector<float> data(3,0);
+        vector<float> data(3,0);
         if (values[0].size() < 3)
         {
             data[0] = values[0][0];
@@ -1422,7 +1422,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
     {   // otherwise set each led individually.
         int numpoints = std::min(indices.size(), values.size());
         
-        static vector<float> data (3, 0);
+        vector<float> data (3, 0);
         for (int i=0; i<numpoints; i++)
         {
             if (values[i].size() < 3)
@@ -1453,7 +1453,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
  */
 bool NUActionatorsData::addSound(double time, string sound)
 {
-    static vector<string> data (1, "");
+    vector<string> data (1, "");
     if (Sound == NULL)
         return false;
     else 
@@ -1492,7 +1492,7 @@ bool NUActionatorsData::addSounds(double time, vector<string> sounds)
  */
 bool NUActionatorsData::addTeleportation(double time, float x, float y, float bearing)
 {
-    static vector<float> data (3, 0);
+    vector<float> data (3, 0);
     if (Teleporter == NULL)
         return false;
     else
