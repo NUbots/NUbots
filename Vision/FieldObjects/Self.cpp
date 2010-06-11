@@ -2,6 +2,7 @@
 #include "StationaryObject.h"
 #include "MobileObject.h"
 #include "Tools/Math/General.h"
+#include "debug.h"
 using namespace mathGeneral;
 
 
@@ -43,9 +44,9 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
 
 bool Self::lost()
 {
-    if (WorldModelLocationError[2]*2 > 1.5708)      // if heading is really uncertain we are lost
+    if (WorldModelLocationError[2]*2 > PI/2)      // if heading is really uncertain we are lost
         return true;
-    else if (WorldModelLocationError[0]*2 > 3.0 or WorldModelLocationError[1]*2 > 2.0)
+    else if (WorldModelLocationError[0]*2 > 300 or WorldModelLocationError[1]*2 > 200)
         return true;
     else
         return false;
