@@ -109,8 +109,18 @@ void ALWalk::doWalk()
     // handle the joint stiffnesses
     static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
     static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, m_walk_parameters.getLegGains()[0]);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, m_walk_parameters.getLegGains()[0]);
+    
+    // voltage stablise the gains for the legs
+    vector<float> leggains = m_walk_parameters.getLegGains()[0];
+    vector<float> battery;
+    if (m_data->getBatteryValues(battery))
+    {   // this has been hastily ported over from 2009!
+        float voltagestablisation = 24654.0/(3*(battery[2] + battery[3]));        // the battery voltage in mV
+        for (size_t i=0; i<leggains.size(); i++)
+            leggains[i] *= voltagestablisation;
+    }
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
     if (m_larm_enabled)
         m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
     if (m_rarm_enabled)
