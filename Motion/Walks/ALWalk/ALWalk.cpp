@@ -50,7 +50,7 @@ ALWalk::ALWalk()
     m_al_motion->setMotionConfig(m_al_config);
     
     // load and init the walk parameters
-    m_walk_parameters.load("ALWalkAldebaran");
+    m_walk_parameters.load("ALWalkCrab");
     initALConfig();
     m_last_enabled_time = 0;
 }
@@ -109,8 +109,18 @@ void ALWalk::doWalk()
     // handle the joint stiffnesses
     static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
     static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, m_walk_parameters.getLegGains()[0]);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, m_walk_parameters.getLegGains()[0]);
+    
+    // voltage stablise the gains for the legs
+    vector<float> leggains = m_walk_parameters.getLegGains()[0];
+    vector<float> battery;
+    if (m_data->getBatteryValues(battery))
+    {   // this has been hastily ported over from 2009!
+        float voltagestablisation = 24654.0/(3*(battery[2] + battery[3]));        // the battery voltage in mV
+        for (size_t i=0; i<leggains.size(); i++)
+            leggains[i] *= voltagestablisation;
+    }
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
     if (m_larm_enabled)
         m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
     if (m_rarm_enabled)
@@ -164,7 +174,7 @@ void ALWalk::setALConfig()
     m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].Value));      // "WALK_STEP_MIN_PERIOD";
     
     m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].Value);               // "WALK_MAX_STEP_X";
-    m_al_config[2][1] = maxspeeds[1]/(100*parameters[0].Value);               // "WALK_MAX_STEP_Y";
+    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].Value);             // "WALK_MAX_STEP_Y";
     m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].Value);         // "WALK_MAX_STEP_THETA";
     
     m_al_config[4][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";

@@ -1367,8 +1367,10 @@ vector<int>& NUActionatorsData::getSelectedLeds(ledgroup_id_t ledgroup)
  */
 bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values)
 {
-    if (LedActionators.size() == 0)
+    if (LedActionators.empty())
         return false;                       
+    
+    size_t numleds = LedActionators.size();
     
     int groupoffset = 0;
     if (ledgroup == AllLeds)
@@ -1411,7 +1413,9 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
         
         for (unsigned int i=0; i<indices.size(); i++)
         {
-            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
+            int index = groupoffset + indices[i];
+            if (index < numleds)
+                LedActionators[index]->addPoint(time, data);
         }
     }
     else
@@ -1433,7 +1437,9 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
                 data[1] = values[i][1];
                 data[2] = values[i][2];
             }
-            LedActionators[groupoffset + indices[i]]->addPoint(time, data);
+            int index = groupoffset + indices[i];
+            if (index < numleds)
+                LedActionators[index]->addPoint(time, data);
         }
     }
     return true;

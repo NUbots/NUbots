@@ -232,7 +232,7 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     
     float rot_frac = fabs(rot_speed)/maxspeeds[2];
     const float clip_threshold = 0.25;
-    const float min_trans = 0.1;
+    const float min_trans = 0.25;
     if (rot_frac > clip_threshold)
     {   // if the rotation speed is high then clip the trans_speed
         trans_speed = trans_speed*(1 + ((min_trans - 1)/(1 - clip_threshold))*(rot_frac - clip_threshold));
@@ -240,6 +240,12 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     
     float x = trans_speed*maxspeeds[0]*cos(trans_direction);               // compute desired x
     float y = trans_speed*maxspeeds[0]*sin(trans_direction);               // compute desired y
+    
+    if (x < -0.75*maxspeeds[0])
+    {   // if walking backwards clip the x first
+        x = -0.75*maxspeeds[0];
+        y = x*tan(trans_direction);
+    }
     
     if (fabs(y) > maxspeeds[1])
     {   // we assume the sidewards direction is always the slowest, if it needs clipping, clip the x to achieve the desired direction

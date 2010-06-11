@@ -41,7 +41,16 @@ public:
     BehaviourState* getNextState();
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
 protected:
-    BehaviourState() {};
+    BehaviourState()
+    {
+        m_data = 0;
+        m_actions = 0;
+        m_jobs = 0;
+        m_field_objects = 0;
+        m_game_info = 0;
+        m_team_info = 0;
+        m_processed = false;
+    };
     virtual void doState() = 0;
     virtual BehaviourState* nextState() = 0;
 protected:
