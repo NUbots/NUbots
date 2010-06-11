@@ -458,7 +458,7 @@ bool NUSensorsData::getCameraHeight(float& height)
  */
 bool NUSensorsData::getJointNames(bodypart_id_t partid, vector<string>& names)
 {
-    static vector<joint_id_t> selectedjoints;
+    vector<joint_id_t> selectedjoints;
     if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
     if (partid == BodyJoints)
@@ -519,7 +519,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
     }
     else 
     {   // if we want a subset, then its harder; use the ids lists to make a subarray
-        static vector<joint_id_t> selectedjoints;
+        vector<joint_id_t> selectedjoints;
         if (partid == BodyJoints)
             selectedjoints = m_body_ids;
         else if (partid == HeadJoints)
