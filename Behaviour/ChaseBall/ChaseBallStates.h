@@ -128,16 +128,9 @@ public:
                 }
             }
             
-            /*WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
-            m_provider->m_jobs->addMotionJob(walk);*/
-
-            WalkJob* walk;
-            if (ballbearing > 0)
-                walk = new WalkJob(1, 1.578, 0);
-            else
-                walk = new WalkJob(1, -1.578, 0);
+            WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
             m_provider->m_jobs->addMotionJob(walk);
-            
+
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
             m_provider->m_jobs->addMotionJob(head);
         }
