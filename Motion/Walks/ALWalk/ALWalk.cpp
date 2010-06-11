@@ -50,7 +50,7 @@ ALWalk::ALWalk()
     m_al_motion->setMotionConfig(m_al_config);
     
     // load and init the walk parameters
-    m_walk_parameters.load("ALWalkAldebaran");
+    m_walk_parameters.load("ALWalkCrab");
     initALConfig();
     m_last_enabled_time = 0;
 }

@@ -44,7 +44,7 @@ namespace BehaviourPotentials
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    inline vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 20, float turningdistance = 60)
+    inline vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
     {
         vector<float> result(3,0);
         vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
@@ -119,7 +119,7 @@ namespace BehaviourPotentials
     
     /*! @brief Returns a vector to go to a ball
      */
-    inline vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 15.5, float stoppingdistance = 55)
+    inline vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 16, float stoppingdistance = 70)
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
@@ -132,19 +132,19 @@ namespace BehaviourPotentials
         {   // if we are too close to the ball then we need to go backwards
             position_speed = (kickingdistance - distance)/kickingdistance;
             position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
-            position_rotation = 0.8*bearing;
+            position_rotation = bearing;
         }
         else if (distance < stoppingdistance)
         {   // if we are close enough to slow down
             position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
             position_direction = bearing;
-            position_rotation = 0.5*bearing;
+            position_rotation = bearing;
         }
         else
         {   // if it is outside the stopping distance - full speed
             position_speed = 1;
             position_direction = bearing;
-            position_rotation = 0.5*bearing;
+            position_rotation = bearing;
         }
         
         // calculate the component to go around the ball to face the heading
@@ -152,11 +152,11 @@ namespace BehaviourPotentials
         float around_direction;
         if (distance < stoppingdistance)
         {   // if we are close enough to worry about the heading
-            if (fabs(heading) < 1)
-                around_speed = fabs(heading);
+            around_speed = 0.5*(fabs(heading)/mathGeneral::PI);
+            if (fabs(heading) > 2.5)
+                around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
             else
-                around_speed = 1;
-            around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
+                around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
         }
         else
         {
