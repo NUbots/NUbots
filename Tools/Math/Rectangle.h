@@ -20,6 +20,7 @@ public:
     float MaxX();
     float MinY();
     float MaxY();
+    bool PointInside(float x, float y);
 
 private:
     float m_minx;

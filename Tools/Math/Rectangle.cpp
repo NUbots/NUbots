@@ -1,5 +1,5 @@
 #include "Rectangle.h"
-
+#include "debug.h"
 Rectangle::Rectangle()
 {
     m_minx = 0;
@@ -55,6 +55,37 @@ float Rectangle::Height()
 float Rectangle::Area()
 {
     return Width() * Height();
+}
+
+bool Rectangle::PointInside(float x, float y)
+{
+    // From: http://www.gamedev.net/community/forums/topic.asp?topic_id=483716
+
+    // Distance of point from bottom left corner
+    float vpx =  x - m_minx;
+    float vpy =  y - m_miny;
+
+    // Vector of bottom side
+    float vbx = m_maxx - m_minx;
+    float vby = m_miny - m_miny;
+
+    // Vector of left side
+    float vlx = m_minx - m_minx;
+    float vly = m_maxy - m_miny;
+
+    float dotvpvbx = vpx*vbx + vpy*vby;
+    float dotvbvbx = vbx*vbx + vby*vby;
+    float dotvpvlx = vpx*vlx + vpy*vly;
+    float dotvlvlx = vlx*vlx + vly*vly;
+
+    bool inside = (0.0f <= dotvpvbx) && (dotvpvbx <= dotvbvbx) && (0.0f <= dotvpvlx) && (dotvpvlx <= dotvlvlx);
+    /*
+    debug << "point (" << x << "," << y << ") is ";
+    if(inside) debug << "inside";
+    else debug << "outside";
+    debug << " Rectangle (" << m_minx << "," << m_maxx << "," << m_miny << "," << m_maxy << ").";
+    */
+    return inside;
 }
 
 float Rectangle::MinX()
