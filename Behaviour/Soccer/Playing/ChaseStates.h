@@ -25,6 +25,8 @@
 #include "../SoccerState.h"
 class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
+#include "Behaviour/BehaviourPotentials.h"
+
 #include "Behaviour/Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
@@ -58,7 +60,8 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        vector<float> speed = BehaviourPotentials::goToBall(ball, m_field_objects->self.CalculateBearingToStationaryObject(m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]));
+        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };
 
