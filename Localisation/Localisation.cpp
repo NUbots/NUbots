@@ -201,12 +201,9 @@ void Localisation::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects
         AmbiguousObjectsConstIt endAmb(objects->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-            if(currStat->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || currStat->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
-            {
-                updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
-                NormaliseAlphas();
-                numUpdates++;
-            }
+            updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
+            NormaliseAlphas();
+            numUpdates++;
         }
 
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
@@ -735,16 +732,14 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         return KF_OUTLIER;
     }
 
-    /*
     #if AMBIGUOUS_CORNERS_ON <= 0
-    if((ambigousObject.getID() != FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FO_YELLOW_GOALPOST_UNKNOWN)){
+    if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)){
     #if DEBUG_LOCALISATION_VERBOSITY > 1
-        debug_out  <<"[" << currentFrameNumber << "]: ingored unkown object " << ambigousObject.name() << std::endl;
+        debug_out  <<"[" << currentFrameNumber << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
     #endif // AMBIGUOUS_CORNERS_ON <= 0
-    */
 
     vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
     unsigned int numOptions = possabilities.size();
