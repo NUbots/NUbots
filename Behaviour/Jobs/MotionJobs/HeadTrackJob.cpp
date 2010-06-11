@@ -43,6 +43,7 @@ HeadTrackJob::HeadTrackJob(const Object& object, float centreelevation, float ce
         // m_elevation = object.filteredImageElevation();
         // m_bearing = object.filteredImageBearing();
     }
+	m_job_time = 0;
     m_centre_elevation = centreelevation;
     m_centre_bearing = centrebearing;
 }
@@ -59,6 +60,7 @@ HeadTrackJob::HeadTrackJob(float elevation, float bearing, float centreelevation
     m_bearing = bearing;
     m_centre_elevation = centreelevation;
     m_centre_bearing = centrebearing;
+	m_job_time = 0;
 }
 
 /*! @brief Constructs a HeadTrackJob from stream data
