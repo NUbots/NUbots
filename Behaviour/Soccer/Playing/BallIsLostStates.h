@@ -79,7 +79,7 @@ protected:
             debug << "BallIsLostPan" << endl;
         #endif
         m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         
         // keep track of the time in this state
         if (m_parent->stateChanged())
@@ -126,7 +126,7 @@ protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         if (m_time_in_state > 1000*(6.28/m_ROTATIONAL_SPEED))
-            return m_lost_machine->m_lost_move;
+            return m_lost_machine->m_lost_pan;
         else
             return this;
     }
