@@ -4,6 +4,8 @@
 #include <math.h>
 #define MIN_POINTS_ON_LINE_FINAL 4
 #define MIN_POINTS_ON_LINE 3
+#define MAX_DISTANCE_T_GOAL 40*2 //40cm away from goal with factor of 2 error
+#define MAX_DISTANCE_L_GOAL 80*2 //80cm from point to goal with factor of 2 error
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
@@ -105,6 +107,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //clock_t startCorner = clock();
     //qDebug() << "Decode Corners:";
+
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
     //qDebug() << "Decode Penalty Spots:";
@@ -226,15 +229,15 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                         //        << "\t" << tempSeg->getSize() << tempSeg->getStartPoint().x << "," << tempSeg->getStartPoint().y;
                         if(tempSeg->getSize() > HORZ_POINT_THICKNESS) continue;
                         //! Check Colour Conditions of segment
-                        if (    /*(ClassIndex::green   ==  tempSeg->getBeforeColour()) &&
+                        if (  /*  ((ClassIndex::green   ==  tempSeg->getBeforeColour()) &&
                                 (ClassIndex::white   ==  tempSeg->getColour()) &&
-                                (ClassIndex::green   ==  tempSeg->getAfterColour()) ||
-                                (ClassIndex::white   ==  tempSeg->getColour())
+                                (ClassIndex::green   ==  tempSeg->getAfterColour())) ||
+                                ((ClassIndex::white   ==  tempSeg->getColour())
                             &&  (tempSeg->getAfterColour() == ClassIndex::green && (tempSeg->getBeforeColour() == ClassIndex::unclassified || tempSeg->getBeforeColour() == ClassIndex::shadow_object) )
-                            &&  (tempSeg->getBeforeColour() == ClassIndex::green &&(tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) )*/
+                            &&  (tempSeg->getBeforeColour() == ClassIndex::green &&(tempSeg->getAfterColour() == ClassIndex::unclassified || tempSeg->getAfterColour() == ClassIndex::shadow_object ) ))*/
                                 (ClassIndex::white   ==  tempSeg->getColour())
-                                &&  (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::shadow_object || tempSeg->getBeforeColour() == ClassIndex::unclassified)
-                                &&  (tempSeg->getAfterColour() == ClassIndex::green ||  tempSeg->getAfterColour() == ClassIndex::shadow_object  || tempSeg->getAfterColour() == ClassIndex::unclassified) )
+                                &&  ((tempSeg->getAfterColour() == ClassIndex::green || tempSeg->getAfterColour() == ClassIndex::unclassified) && (tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::shadow_object || tempSeg->getBeforeColour() == ClassIndex::unclassified))
+                                &&  ((tempSeg->getBeforeColour() == ClassIndex::green || tempSeg->getBeforeColour() == ClassIndex::unclassified) && (tempSeg->getAfterColour() == ClassIndex::green ||  tempSeg->getAfterColour() == ClassIndex::shadow_object  || tempSeg->getAfterColour() == ClassIndex::unclassified)))
 
 
                         {
@@ -274,13 +277,13 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
 
             //CHECK COLOUR(GREEN-WHITE-GREEN Transistion)
             //CHECK COLOUR (U-W-G or G-W-U Transistion)
-            if(    ((ClassIndex::white   ==  segment->getColour())
+            if(    ((ClassIndex::white   ==  segment->getColour()) &&
 
-                     && (segment->getBeforeColour() == ClassIndex::green
-                         || segment->getBeforeColour() == ClassIndex::shadow_object || segment->getBeforeColour() == ClassIndex::unclassified ) )
+                     ((segment->getAfterColour() == ClassIndex::green || segment->getAfterColour() == ClassIndex::unclassified)  && (segment->getBeforeColour() == ClassIndex::green
+                         || segment->getBeforeColour() == ClassIndex::shadow_object || segment->getBeforeColour() == ClassIndex::unclassified ) ))
 
-                     && (segment->getAfterColour() == ClassIndex::green
-                         || segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::unclassified ) )
+                     && ((segment->getBeforeColour() == ClassIndex::green || segment->getBeforeColour() == ClassIndex::unclassified)  && (segment->getAfterColour() == ClassIndex::green
+                         || segment->getAfterColour() == ClassIndex::shadow_object || segment->getAfterColour() == ClassIndex::unclassified )) )
 
             {
                 //ADD A FIELD LINEPOINT!
@@ -556,7 +559,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
         for (unsigned int LineIDEnd = LineIDStart+1; LineIDEnd < fieldLines.size(); LineIDEnd++)
         {
-            if (LineIDStart < horizontalEnd && LineIDEnd > horizontalEnd) break;
+            //if (LineIDStart < horizontalEnd && LineIDEnd > horizontalEnd) break;
 
             if (!fieldLines[LineIDEnd].valid || fieldLines[LineIDStart].numPoints < MIN_POINTS_ON_LINE) continue;
             //Try extending the lines so they are near the ends of the other ones, and see if their in any way close...
@@ -630,7 +633,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //Now make sure the slopes are both about the same degree angle....
             // Seems to have a problem with lines "within" other lines, so pick them out..
             //qDebug() << "Joining Line " <<LineIDStart <<"-"<<LineIDEnd <<": " <<r2tls1 << "," <<r2tls2 << ", "<<MSD1 << ", "<<MSD2;
-            if ((r2tls1 > .98 && r2tls2 > .98 && MSD1 < 20  && MSD2 < 20))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
+            if ((r2tls1 > .80 && r2tls2 > .80 && MSD1 < 50 && MSD2 < 50))// || (r2tls1 > .90 && r2tls2 > .90 && MSD2 < 20 && fabs(Line1.getGradient()) > 1))                    // (.90 & 40)alex CAN ADJUST THIS FOR LINE JOINING
             {
                 //They are the same line, so join them together...
                 //qDebug() << "Joining Lines: "<< LineIDEnd<< " to "<<LineIDStart;
@@ -879,6 +882,7 @@ bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,V
         {
                 for (int j =checkY - searchRadius; j< checkY + searchRadius; j++)
                 {
+                    
                     if((i > 0 && i < vision->getImageWidth()) && (j >0 && j < vision->getImageHeight()))
                     {
                         if(vision->classifyPixel(i,j) == ClassIndex::white)
@@ -1141,7 +1145,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             cornerPointsOnScreen++;
         }
     }
-    if (cornerPointsOnScreen > 5)                  //********  this filters out center circle. only a count 0f 2 is checked.
+    if (cornerPoints.size() > 9 || cornerPointsOnScreen > 6)                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
 
@@ -1363,6 +1367,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 			//Initialising Variables
                         Vector2<float> screenPositionAngle(vision->CalculateBearing(cornerPoints[x].PosX), vision->CalculateElevation(cornerPoints[x].PosY));
                         GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
+                        //qDebug() << "Corner " << x << ": " <<  TempDist;
+                        if(TempDist > 800)
+                        {
+                            CheckedCornerPoints[x] = true;
+                            continue;
+                        }
                         AmbiguousObject tempUnknownCorner(TempID, "Unknown Corner");
                         Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                         Vector3<float> measuredError(0.0,0.0,0.0);
@@ -1391,10 +1401,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                                     && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == false
                                                     || AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen())                                                     ){
                                                         //qDebug("\nTARGET ACQUIRED, BLUE left goal T       ..u\n");
-							recheck = true;
+
 							//COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
-                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
-                                                        tempUnknownCorner.setVisibility(false);
+                                                        if(fabs(tempUnknownCorner.measuredDistance() - AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                                        {
+                                                            recheck = true;
+                                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
+                                                            tempUnknownCorner.setVisibility(false);
+                                                        }
 							//COPY: fieldObjects[FO_BLUE_GOALPOST_UNKNOWN] TO fieldObjects[FO_BLUE_LEFT_GOALPOST]
 
                                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
@@ -1407,13 +1421,16 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                                          || AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen() ) )
                                                 {
                                                         //qDebug("\nTARGET ACQUIRED, BLUE right goal T       ..u\n");
+                                                    if(fabs(tempUnknownCorner.measuredDistance() - AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                                    {
 							recheck = true;
 							////COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_RIGHT]
                                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
                                                         tempUnknownCorner.setVisibility(false);
+                                                    }
 							//COPY: fieldObjects[FO_BLUE_GOALPOST_UNKNOWN] TO fieldObjects[FO_BLUE_RIGHT_GOALPOST]
-                                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
-                                                        AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
+                                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
+                                                    AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
 						}
 					}
                                     }
@@ -1426,9 +1443,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                     {
                                         //qDebug("\nTARGET ACQUIRED, BLUE left goal T      ..\n");
                                         //COPY: fieldObjects[TempID] TO fieldObjects[FO_CORNER_BLUE_T_LEFT]
-
-                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
-                                        tempUnknownCorner.setVisibility(false);
+                                        if(fabs(tempUnknownCorner.measuredDistance() - AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                        {
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_LEFT].CopyObject(tempUnknownCorner);
+                                            tempUnknownCorner.setVisibility(false);
+                                        }
                                     }
 
                                     else if( 	(AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true)
@@ -1440,9 +1459,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                     {
 
                                         //qDebug("\nTARGET ACQUIRED,  BLUE right goal T       ..\n");
-
-                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
-                                        tempUnknownCorner.setVisibility(false);
+                                        if(fabs(tempUnknownCorner.measuredDistance() - AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                        {
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_T_RIGHT].CopyObject(tempUnknownCorner);
+                                            tempUnknownCorner.setVisibility(false);
+                                        }
                                     }
 
 				}// end if((cornerPoints[x]->Orientation == 3)........
@@ -1464,8 +1485,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                     && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance() < 350)) {
 
                                     //qDebug("\nTARGET ACQUIRED, BLUE left penalty L       =\n");
+                                if(tempUnknownCorner.measuredDistance()!= 0 && fabs(tempUnknownCorner.measuredDistance() - AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                {
                                     AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_LEFT].CopyObject(tempUnknownCorner);
                                     tempUnknownCorner.setVisibility(false);
+                                }
                             }
 
                             else if (     ((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
@@ -1476,8 +1500,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                     && (AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance() < 350)) {
 
                                     //qDebug("\nTARGET ACQUIRED, BLUE right penalty L       =\n");
+                                if( tempUnknownCorner.measuredDistance()!= 0 && fabs(tempUnknownCorner.measuredDistance() - AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                {
                                     AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_RIGHT].CopyObject(tempUnknownCorner);
                                     tempUnknownCorner.setVisibility(false);
+                                }
                             }
                             for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++ )
                             {
@@ -1493,9 +1520,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                         && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()< 350)) {
 
                                         //qDebug("\nTARGET ACQUIRED, BLUE left penalty L       u=\n");
-                                        recheck = true;
-                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_LEFT].CopyObject(tempUnknownCorner);
-                                        tempUnknownCorner.setVisibility(false);
+                                        if(tempUnknownCorner.measuredDistance() != 0 && fabs(tempUnknownCorner.measuredDistance() - AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                        {
+                                            recheck = true;
+                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                            tempUnknownCorner.setVisibility(false);
+                                        }
                                         // blue left post should be populated with unknown data here.
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
                                         AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
@@ -1510,9 +1540,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                         && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
 
                                     //qDebug("\nTARGET ACQUIRED, BLUE right penalty L      u=\n");
-                                    recheck = true;
-                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_RIGHT].CopyObject(tempUnknownCorner);
-                                    tempUnknownCorner.setVisibility(false);
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() - AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                    {
+                                        recheck = true;
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_BLUE_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                    }
 
                                     // blue right post should be populated with unknown data here.
                                     AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
@@ -1542,9 +1575,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                                 || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()))
                                         {
                                             //qDebug("\nTARGET ACQUIRED, YELLOW left goal T       ..u\n");
-                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_LEFT].CopyObject(tempUnknownCorner);
-                                            tempUnknownCorner.setVisibility(false);
-                                            recheck = true;
+                                            if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                            {
+                                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_LEFT].CopyObject(tempUnknownCorner);
+                                                tempUnknownCorner.setVisibility(false);
+                                                recheck = true;
+                                            }
                                             // yellow left post should be populated with unknown data here.
                                             AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
                                             AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
@@ -1554,9 +1590,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                                 || AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() != tempUnknownCorner.TimeLastSeen()))
                                         {
                                             //qDebug("\nTARGET ACQUIRED, YELLOW right goal T       ..u\n");
-                                            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_RIGHT].CopyObject(tempUnknownCorner);
-                                            tempUnknownCorner.setVisibility(false);
-                                            recheck = true;
+                                            if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                            {
+                                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_RIGHT].CopyObject(tempUnknownCorner);
+                                                tempUnknownCorner.setVisibility(false);
+                                                recheck = true;
+                                            }
                                             // yellow left post should be populated with unknown data here.
                                             AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
                                             AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
@@ -1571,9 +1610,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                         && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() < 350)){
 
                                         //qDebug("\nTARGET ACQUIRED, YELLOW left goal T       ..\n");
-
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&   fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                    {
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_LEFT].CopyObject(tempUnknownCorner);
                                         tempUnknownCorner.setVisibility(false);
+                                    }
                                 }
                                 if( 	   (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible() == true)
                                         && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].TimeLastSeen() == tempUnknownCorner.TimeLastSeen())
@@ -1583,8 +1624,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                         && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() < 350)){
 
                                         //qDebug("\nTARGET ACQUIRED, YELLOW right goal T       ..\n");
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()) < MAX_DISTANCE_T_GOAL)
+                                    {
                                         AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_T_RIGHT].CopyObject(tempUnknownCorner);
                                         tempUnknownCorner.setVisibility(false);
+                                    }
 
                                 }
                             }// end if((cornerPoints[x]->Orientation == 3)........
@@ -1604,9 +1648,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                 && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance() < 350)) {
 
                                 //qDebug("\nTARGET ACQUIRED, YELLOW left penalty L      =\n");
-                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
-                                tempUnknownCorner.setVisibility(false);
-					
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                    {
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                    }
                                 }
 		
                             if ( 	((cornerPoints[x].Orientation == 3)||(cornerPoints[x].Orientation == 2))
@@ -1617,8 +1663,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                 && (AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance() < 350)) {
 
                                 //qDebug("\nTARGET ACQUIRED, YELLOW right penalty L      =\n");
-                                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
-                                tempUnknownCorner.setVisibility(false);
+                                if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                {
+                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                    tempUnknownCorner.setVisibility(false);
+                                }
                             }
                             for(unsigned int FO_Counter = 0; FO_Counter < AllObjects->ambiguousFieldObjects.size(); FO_Counter++)
                             {
@@ -1635,9 +1684,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                     && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
 
                                     //qDebug("\nTARGET ACQUIRED, YELLOW left penalty L      u=\n");
-                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
-                                    tempUnknownCorner.setVisibility(false);
-                                    recheck = true;
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                    {
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                        recheck = true;
+                                    }
                                     // yellow left post should be populated with unknown data here.
                                     AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
                                     AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
@@ -1652,9 +1704,12 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                                         && (AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance() < 350)) {
 
                                     //qDebug("\nTARGET ACQUIRED, YELLOW right penalty L      u=\n");
-                                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
-                                    tempUnknownCorner.setVisibility(false);
-                                    recheck = true;
+                                    if(tempUnknownCorner.measuredDistance()!= 0 &&  fabs(tempUnknownCorner.measuredDistance() -  AllObjects->ambiguousFieldObjects[FO_Counter].measuredDistance()) < MAX_DISTANCE_L_GOAL)
+                                    {
+                                        AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT].CopyObject(tempUnknownCorner);
+                                        tempUnknownCorner.setVisibility(false);
+                                        recheck = true;
+                                    }
                                     // yellow left post should be populated with unknown data here.
                                     AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].CopyObject(AllObjects->ambiguousFieldObjects[FO_Counter]);
                                     AllObjects->ambiguousFieldObjects[FO_Counter].setVisibility(false);
@@ -1751,7 +1806,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             //Initialising Variables
             GetDistanceToPoint(cornerPoints[x].PosX, cornerPoints[x].PosY, &TempDist, &TempBearing, &TempElev, vision);
 
-            if(TempDist > 800) continue;
+            if(TempDist > 600 || TempDist == 0) continue; //Too Big distances, or no body angle information(0)
 
             Vector3<float> measured(TempDist,TempBearing,TempElev);
             Vector3<float> measuredError(0,0,0);
@@ -1828,13 +1883,13 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         if(yellowGoalSeen && blueGoalSeen)
         {
                 //cout<< "Cannot see both yellow and blue Goals at once." << endl;
-                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
         if(yellowGoalSeen==false && blueGoalSeen==false)
         {
                 //cout<< "No Goals or Posts seen." << endl;
-                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
         if(AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].TimeLastSeen() == timestamp)
@@ -1844,7 +1899,7 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         else
         {
                 //cout << "No CentreCircle Visible" << endl;
-                AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+                //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
 
@@ -1885,7 +1940,7 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
         }
         else
         {
-            AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
+            //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
         }
         return;
     }
