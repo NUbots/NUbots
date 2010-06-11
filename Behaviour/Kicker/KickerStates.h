@@ -112,7 +112,7 @@ public:
         float ballYvel = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].velY();
         float ballVelocity = sqrt(ballXvel*ballXvel + ballYvel*ballYvel);
 
-        if (kickFinished || !ballvisible || (ballVelocity > 15.0f))
+        if (kickFinished)
         {
             debug << "Kicking -> Waiting" << endl;
             debug << "kickFinished = " << kickFinished << " ballvisible = " << ballvisible << " ballVelocity = " << ballVelocity << endl;
@@ -129,7 +129,7 @@ public:
         float ballDistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedDistance();
         float ballBearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing();
         kickPos[0] = ballDistance * cos(ballBearing);
-        kickPos[1] = -ballDistance * sin(ballBearing);
+        kickPos[1] = ballDistance * sin(ballBearing);
         targetPos[0] = kickPos[0] + 1000;
         targetPos[1] = kickPos[1];
         KickJob* kick = new KickJob(0,kickPos,targetPos);
