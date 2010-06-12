@@ -3,8 +3,8 @@
 #include "KF.h"
 
 #include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/GameInformation.h"
 class NUSensorsData;
-class GameInformation;
 #include "Behaviour/TeamInformation.h"
 
 #include "debug.h"
@@ -32,7 +32,7 @@ class Localisation: public TimestampedData
         void feedback(double*);
         double feedbackPosition[3];
         void ProcessObjects();
-        bool CheckGameState();
+        bool CheckGameState(GameInformation* gameInfo);
         bool varianceCheck(int modelID);
         int varianceCheckAll();
         void ResetAll();
@@ -66,6 +66,7 @@ class Localisation: public TimestampedData
         // Model Reset Functions
         void doPenaltyReset();
         void doPlayerReset();
+        void doBallOutReset();
         void resetSdMatrix(int modelNumber);
 
         /*!
@@ -106,8 +107,8 @@ class Localisation: public TimestampedData
 
         // Game state memory
         bool wasPreviouslyPenalised;
-        int previousGameState;
-	float odomForward, odomLeft, odomTurn;
+        GameInformation::RobotState m_previousGameState;
+        float odomForward, odomLeft, odomTurn;
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;

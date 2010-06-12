@@ -93,7 +93,7 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     m_team_info = teamInfo;
     
     
-    bool doProcessing = CheckGameState();
+    bool doProcessing = CheckGameState(gameInfo);
     if(doProcessing == false)
         return;
     
@@ -287,43 +287,53 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta));
 }
 
-bool Localisation::CheckGameState()
+bool Localisation::CheckGameState(GameInformation* gameInfo)
 {
+    bool doProcessing;
 
-    return true;
-    /*
-    GameController* gc = &GameController::getInstance();
-    bool isPenalised = gc->isPenalised();
-    int currentState = gc->getGameState();
-
-    // If robot has been penalised and penalty is lifted, reset to the penalty replacement positions.
-    if( (isPenalised == false) && (wasPreviouslyPenalised == true) ){
-        doPenaltyReset();
-    } 
-    else if ( (previousGameState != currentState) && (previousGameState == STATE_INITIAL)){
-        doPlayerReset();
+    // Determine if localisation processing should be done.
+    switch(gameInfo->getCurrentState())
+    {
+    case GameInformation::ReadyState:
+    case GameInformation::SetState:
+    case GameInformation::PlayingState:
+    case GameInformation::RequiresSubstitutionState:
+        doProcessing = true;
+        break;
+    case GameInformation::InitialState:
+    case GameInformation::PenalisedState:
+    case GameInformation::FinishedState:
+    case GameInformation::SubstituteState:
+    default:
+        doProcessing = false;
+        break;
     }
 
-    if(gc->getTimeSinceLastBallOut() == 0){
-        // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
-        for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
-            if(models[modelNumber].isActive == false) continue;
-            models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 100 cm
-            models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 150 cm
-            models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
-            models[modelNumber].stateStandardDeviations[6][6] = 10.0;   // 10 cm/s
+    // Check for resets due to previous state.
+    if(doProcessing && (m_previousGameState != gameInfo->getCurrentState()))
+    {
+        switch(m_previousGameState)
+        {
+        case GameInformation::PenalisedState:
+            doPenaltyReset();
+            break;
+        case GameInformation::InitialState:
+        case GameInformation::FinishedState:
+        case GameInformation::RequiresSubstitutionState:
+        case GameInformation::SubstituteState:
+            doPlayerReset();
+            break;
+        default:
+            break;
         }
     }
-    
-    if(balanceFallen == true){
-        for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
-            // Increase heading uncertainty if fallen
-            models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
-        }
-    }
-    wasPreviouslyPenalised = isPenalised;
-    previousGameState = currentState;
-    */
+
+    // Check for the ball going out -- not in the game info yet.
+//    if(gameInfo->)
+//    doBallOutReset
+
+    m_previousGameState = gameInfo->getCurrentState();
+    return doProcessing;
 }
 
 void Localisation::ClearAllModels()
@@ -452,6 +462,18 @@ void Localisation::doPlayerReset()
     return;
 }
 
+void Localisation::doBallOutReset()
+{
+    // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
+    for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
+        if(models[modelNumber].isActive == false) continue;
+        models[modelNumber].stateStandardDeviations[3][3] += 100.0; // 100 cm
+        models[modelNumber].stateStandardDeviations[4][4] += 60.0; // 60 cm
+        models[modelNumber].stateStandardDeviations[5][5] += 10.0;   // 10 cm/s
+        models[modelNumber].stateStandardDeviations[6][6] += 10.0;   // 10 cm/s
+    }
+    return;
+}
 
 void Localisation::resetSdMatrix(int modelNumber)
 {
