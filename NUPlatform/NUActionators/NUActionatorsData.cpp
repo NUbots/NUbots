@@ -1413,7 +1413,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
         
         for (unsigned int i=0; i<indices.size(); i++)
         {
-            int index = groupoffset + indices[i];
+            unsigned int index = groupoffset + indices[i];
             if (index < numleds)
                 LedActionators[index]->addPoint(time, data);
         }
@@ -1437,7 +1437,7 @@ bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indic
                 data[1] = values[i][1];
                 data[2] = values[i][2];
             }
-            int index = groupoffset + indices[i];
+            unsigned int index = groupoffset + indices[i];
             if (index < numleds)
                 LedActionators[index]->addPoint(time, data);
         }
