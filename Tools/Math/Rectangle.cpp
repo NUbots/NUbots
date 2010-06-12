@@ -78,13 +78,7 @@ bool Rectangle::PointInside(float x, float y)
     float dotvpvlx = vpx*vlx + vpy*vly;
     float dotvlvlx = vlx*vlx + vly*vly;
 
-    bool inside = (0.0f <= dotvpvbx) && (dotvpvbx <= dotvbvbx) && (0.0f <= dotvpvlx) && (dotvpvlx <= dotvlvlx);
-    /*
-    debug << "point (" << x << "," << y << ") is ";
-    if(inside) debug << "inside";
-    else debug << "outside";
-    debug << " Rectangle (" << m_minx << "," << m_maxx << "," << m_miny << "," << m_maxy << ").";
-    */
+    bool inside = (0.0f < dotvpvbx) && (dotvpvbx < dotvbvbx) && (0.0f < dotvpvlx) && (dotvpvlx < dotvlvlx);
     return inside;
 }
 
