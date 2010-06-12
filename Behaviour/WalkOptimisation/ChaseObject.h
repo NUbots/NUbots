@@ -47,15 +47,11 @@ public:
     virtual void doState()
     {
         // track the object
-        HeadTrackJob* job = new HeadTrackJob(m_target);
-        m_jobs->addMotionJob(job);
+        if (m_target.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(m_target));
         
         // walk torward the object
-        float headyaw;
-        m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
-        WalkJob* walkjob;
-        walkjob = new WalkJob(1, m_target.measuredBearing(), (m_target.measuredBearing())/2.0);
-        m_jobs->addMotionJob(walkjob);
+        m_jobs->addMotionJob(new WalkJob(1, m_target.measuredBearing(), (m_target.measuredBearing())/2.0));
     };
 protected:
     void updateTarget()

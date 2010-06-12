@@ -91,11 +91,6 @@ public:
             m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
-            //float balldistance;
-            //if (measureddistance < 46)
-            //    balldistance = 1;
-            //else
-            //    balldistance = sqrt(pow(measureddistance,2) - 46*46);
             float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
             float trans_speed = 1;
@@ -135,7 +130,7 @@ public:
             
             WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
             m_provider->m_jobs->addMotionJob(walk);
-            
+
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
             m_provider->m_jobs->addMotionJob(head);
         }

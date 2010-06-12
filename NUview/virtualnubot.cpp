@@ -374,6 +374,9 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
     emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
+    //Corner Debugging:
+
+
     qDebug() << "Updating Corners";
     emit cornerPointsDisplayChanged(LineDetector.cornerPoints,GLDisplay::FieldLines);
 

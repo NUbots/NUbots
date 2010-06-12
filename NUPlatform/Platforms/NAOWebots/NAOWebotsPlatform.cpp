@@ -48,10 +48,17 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     debug << "NAOWebotsPlatform::NAOWebotsPlatform" << endl;
 #endif
     if (argc < 3)
+    {
         errorlog << "NAOWebotsPlatform::NAOWebotsPlatform(). Could not find team id and player id in controllerArgs" << endl;
+        m_player_number = 0;
+        m_team_number = 0;
+    }
+    else
+    {
+        m_player_number = atoi(argv[1]) + 1;
+        m_team_number = atoi(argv[2]);
+    }
     
-    m_player_number = atoi(argv[1]) + 1;
-    m_team_number = atoi(argv[2]);
     stringstream ss;
     ss << "nubot" << m_player_number;
     m_name = ss.str();

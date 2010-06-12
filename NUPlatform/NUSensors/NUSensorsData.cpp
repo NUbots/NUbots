@@ -459,7 +459,7 @@ bool NUSensorsData::getCameraHeight(float& height)
  */
 bool NUSensorsData::getJointNames(bodypart_id_t partid, vector<string>& names)
 {
-    static vector<joint_id_t> selectedjoints;
+    vector<joint_id_t> selectedjoints;
     if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
     if (partid == BodyJoints)
@@ -520,7 +520,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vect
     }
     else 
     {   // if we want a subset, then its harder; use the ids lists to make a subarray
-        static vector<joint_id_t> selectedjoints;
+        vector<joint_id_t> selectedjoints;
         if (partid == BodyJoints)
             selectedjoints = m_body_ids;
         else if (partid == HeadJoints)
@@ -1525,7 +1525,7 @@ void NUSensorsData::setBatteryValues(double time, const vector<float>& data, boo
  */ 
 void NUSensorsData::setMotionFallActive(double time, bool active)
 {
-    static vector<float> data(1,0);
+    vector<float> data(1,0);
     data[0] = active;
     setData(MotionFallActive, time, data, false);
 }
@@ -1536,7 +1536,7 @@ void NUSensorsData::setMotionFallActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionGetupActive(double time, bool active)
 {
-    static vector<float> data(1,0);
+    vector<float> data(1,0);
     data[0] = active;
     setData(MotionGetupActive, time, data, false);
 }
@@ -1547,7 +1547,7 @@ void NUSensorsData::setMotionGetupActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionKickActive(double time, bool active)
 {
-    static vector<float> data(1,0);
+    vector<float> data(1,0);
     data[0] = active;
     setData(MotionKickActive, time, data, false);
 }
@@ -1558,7 +1558,7 @@ void NUSensorsData::setMotionKickActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionSaveActive(double time, bool active)
 {
-    static vector<float> data(1,0);
+    vector<float> data(1,0);
     data[0] = active;
     setData(MotionSaveActive, time, data, false);
 }
@@ -1569,7 +1569,7 @@ void NUSensorsData::setMotionSaveActive(double time, bool active)
  */
 void NUSensorsData::setMotionScriptActive(double time, bool active)
 {
-    static vector<float> data(1,0);
+    vector<float> data(1,0);
     data[0] = active;
     setData(MotionScriptActive, time, data, false);
 }
@@ -1598,7 +1598,7 @@ void NUSensorsData::setMotionWalkMaxSpeed(double time, vector<float>& speed)
  */
 void NUSensorsData::setMotionHeadCompletionTime(double time, double completiontime)
 {
-    static vector<float> ct(1,0);
+    vector<float> ct(1,0);
     ct[0] = completiontime;
     setData(MotionHeadCompletionTime, time, ct, false);
 }

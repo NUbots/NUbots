@@ -186,6 +186,8 @@ void NAOSensors::copyFromHardwareCommunications()
     m_data->setButtonValues(m_current_time, temp);
     
     m_al_battery_access->GetValues(temp);
+    temp[2] = *(reinterpret_cast<int*>(&temp[2]));      // some casting madness for the battery values which are actually ints
+    temp[3] = *(reinterpret_cast<int*>(&temp[3]));
     m_data->setBatteryValues(m_current_time, temp);    
     
     //Set Ultrasonic Distances:

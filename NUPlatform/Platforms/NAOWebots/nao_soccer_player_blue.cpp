@@ -24,7 +24,7 @@ ofstream errorlog;
 int getLogNumber(int argc, const char *argv[])
 {
     if (argc < 3)
-        errorlog << "nao_soccer_player_blue::getPlayerNumber(). Could not find team id and player id in controllerArgs" << endl;
+        return 0;
     
     return atoi(argv[1]) + 1 + 10*atoi(argv[2]);
 }
