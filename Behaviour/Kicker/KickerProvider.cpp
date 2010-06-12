@@ -59,6 +59,8 @@ BehaviourState* KickerProvider::nextStateCommons()
     {
         if (m_state == m_wait_state)
             return m_kick_state;
+        else if (m_state == m_kick_state)
+            return m_wait_state;
         else
             return m_state;
     }
