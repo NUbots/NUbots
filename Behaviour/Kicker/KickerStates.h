@@ -38,6 +38,7 @@
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
 #include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "debug.h"
 
@@ -60,14 +61,14 @@ public:
         float ballXvel = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].velX();
         float ballYvel = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].velY();
         float ballVelocity = sqrt(ballXvel*ballXvel + ballYvel*ballYvel);
-        if ((m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 500) && (ballVelocity < 5.0f))
-        {
-            debug << "Wait -> Kick" << endl;
-            debug << "TimeSeen = " << m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() << " ballVelocity = " << ballVelocity << endl;
-            m_initialMoveCounter = 0;
-            return m_provider->m_kick_state;
-        }
-        else
+//        if ((m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 500) && (ballVelocity < 5.0f))
+//        {
+//            debug << "Wait -> Kick" << endl;
+//            debug << "TimeSeen = " << m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() << " ballVelocity = " << ballVelocity << endl;
+//            m_initialMoveCounter = 0;
+//            return m_provider->m_kick_state;
+//        }
+//        else
             return m_provider->m_state;
     };
     
@@ -128,12 +129,41 @@ public:
         vector<float> targetPos(2,0.0f);
         float ballDistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedDistance();
         float ballBearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing();
-        kickPos[0] = ballDistance * cos(ballBearing);
-        kickPos[1] = ballDistance * sin(ballBearing);
-        targetPos[0] = kickPos[0] + 1000;
-        targetPos[1] = kickPos[1];
+//        kickPos[0] = ballDistance * cos(ballBearing);
+//        kickPos[1] = ballDistance * sin(ballBearing);
+
+        // FWD TEST
+//        kickPos[0] = 5;
+//        kickPos[1] = 10;
+//        targetPos[0] = kickPos[0] + 1000;
+//        targetPos[1] = kickPos[1];
+
+        // RIGHT FOOT LEFT TEST
+        kickPos[0] = 8;
+        kickPos[1] = -10;
+        targetPos[0] = kickPos[0];
+        targetPos[1] = kickPos[1]+ 1000;
+
+        if(m_provider->singleLeftBumperClick())
+        {
+            kickPos[0] = 1.0;
+            kickPos[1] = 1.0;
+            targetPos[0] = 1.0;
+            targetPos[1] = 1.0;
+            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+        }
+        else if(m_provider->singleRightBumperClick())
+        {
+            kickPos[0] = -1.0;
+            kickPos[1] = -1.0;
+            targetPos[0] = -1.0;
+            targetPos[1] = -1.0;
+            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+        }
+
         KickJob* kick = new KickJob(0,kickPos,targetPos);
         m_provider->m_jobs->addMotionJob(kick);
+
         if(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
