@@ -185,9 +185,30 @@ double OdometryMotionModel::getProbabilityOfSample(Pose2D newState,Pose2D diffOd
  */
 double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
 {
-	
+    muXx = 2.0;
+    muXy = 0.0;     // don't know why but it looks like the covariance's should be 0
+    muYy = 2.0;
+    muYx = 0.0;
+    double muTt = 0.75;
+    double muXt = 0.003;
+    double muYt = 0.003;
+    
+    double varX = muXx*fabs(diffOdom.X) + muYx*fabs(diffOdom.Y);
+    double varY = muYy*fabs(diffOdom.Y) + muXy*fabs(diffOdom.X);
+    double varTheta = muTt*fabs(diffOdom.Theta) + muXt*fabs(diffOdom.X) + muYt*fabs(diffOdom.Y);
+
+    double tempX = d_myProb.randomGaussian( 0.0 , varX);
+    double tempY = d_myProb.randomGaussian( 0.0 , varY);
+    double tempTheta = d_myProb.randomGaussian( 0.0 , varTheta); 
+
+    newPose[0] = oldSigma.X + diffOdom.X*cos(oldSigma.Theta + (diffOdom.Theta/2)) - diffOdom.Y*sin(oldSigma.Theta + (diffOdom.Theta/2)) + tempX;
+    newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2)) + tempY;
+    newPose[2] = oldSigma.Theta + diffOdom.Theta + tempTheta;
+
+    return newPose;
+    
 //	----------- works 
-	double t = sqrt ( (diffOdom.X*diffOdom.X) + (diffOdom.Y*diffOdom.Y) );
+	/*double t = sqrt ( (diffOdom.X*diffOdom.X) + (diffOdom.Y*diffOdom.Y) );
 	
 
 	
@@ -213,9 +234,9 @@ double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
 
 	newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2)) + tempY;
 	
-	newPose[2] = oldSigma.Theta + diffOdom.Theta ;//+ tempTheta
+	newPose[2] = oldSigma.Theta + diffOdom.Theta + tempTheta
 
-	return newPose;
+	return newPose;*/
 	//----------------------------------------*/
 // 	double muD_t = 0.1;
 // 	double muD_r = 0.01;
