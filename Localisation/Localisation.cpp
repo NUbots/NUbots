@@ -185,7 +185,6 @@ void Localisation::ProcessObjects()
     // We only want to do the shared ball updates if we can't see the ball ourselves.
     // there have been probems where the team will keep sharing the previous position of their ball
     // and updates in vision do not supercede the shared data.
-    int myPlayerNumber = 0;
     if(m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)    // TODO: Change to a SD value
     { 
         vector<TeamPacket::SharedBall> sharedballs = m_team_info->getSharedBalls();
@@ -202,7 +201,7 @@ void Localisation::ProcessObjects()
         AmbiguousObjectsConstIt endAmb(m_objects->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-            updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), objects->stationaryFieldObjects);
+            updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), m_objects->stationaryFieldObjects);
             NormaliseAlphas();
             numUpdates++;
         }
@@ -232,12 +231,10 @@ void Localisation::ProcessObjects()
         // Store WM Data in Field Objects.
         //int bestModelID = getBestModelID();
         // Get the best model to use.
-
         WriteModelToObjects(getBestModel(), m_objects);
 
-        const KF* bestModel = &(getBestModel());
-
 #if DEBUG_LOCALISATION_VERBOSITY > 2
+        const KF* bestModel = &(getBestModel());
         if(numUpdates > 0)
         {
             for (int i = 0; i < c_MAX_MODELS; i++){
@@ -1062,8 +1059,8 @@ bool Localisation::varianceCheck(int modelID)
     const double yellowDirection = 0;
 
     bool   changed = false;
-    double var = models[modelID].variance(2);	//angle variance
-    bool   largeVariance = (var > (c_LargeAngleSD * c_LargeAngleSD));
+    //double var = models[modelID].variance(2);	//angle variance
+    //bool   largeVariance = (var > (c_LargeAngleSD * c_LargeAngleSD));
     
     // If we think we know where we are facing don't change anything
 //    if(largeVariance == false) return changed;
