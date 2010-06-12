@@ -44,9 +44,9 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
 
 bool Self::lost()
 {
-    if (WorldModelLocationError[2]*2 > PI/2)      // if heading is really uncertain we are lost
+    if (WorldModelLocationError[2]*2 > PI/4)      // if heading is really uncertain we are lost
         return true;
-    else if (WorldModelLocationError[0]*2 > 300 or WorldModelLocationError[1]*2 > 200)
+    else if (WorldModelLocationError[0]*2 > 150 or WorldModelLocationError[1]*2 > 100)
         return true;
     else
         return false;
