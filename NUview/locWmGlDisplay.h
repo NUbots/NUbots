@@ -26,6 +26,10 @@ public slots:
         currentLocalisation = newLocalisation;
         update();
     };
+    /*!
+      @brief Copy the current image displayed to the system clipboard.
+      */
+    void snapshotToClipboard();
 
 protected:
         void keyPressEvent ( QKeyEvent * e );
@@ -63,6 +67,7 @@ protected:
         bool light;
         bool perspective;
         bool drawRobotModel;
+        bool drawSigmaPoints;
 
 };
 

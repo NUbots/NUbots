@@ -30,36 +30,100 @@ class NUActionatorsData;
 class KickJob;
 class NUWalk;
 
-#include "./Kicks/IK.h"
-#include <stack>
-
-enum poseType {DO_NOTHING, USE_LEFT_LEG, USE_RIGHT_LEG, LIFT_LEG, ADJUST_YAW, SET_LEG, POISE_LEG, SWING, RETRACT, RESET, NO_KICK};
+#include "Kinematics/Kinematics.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include <string>
 
 class NUKick
 {
+
+    enum poseType_t
+    {
+        DO_NOTHING,
+        LIFT_LEG,
+        ADJUST_YAW,
+        SET_LEG,
+        POISE_LEG,
+        SWING,
+        RETRACT,
+        REALIGN_LEGS,
+        UNSHIFT_LEG,
+        ALIGN_BALL,
+        ALIGN_SIDE,
+        EXTEND_SIDE,
+        RESET,
+        NO_KICK,
+        PRE_KICK,
+        POST_KICK,
+        TRANSFER_TO_SUPPORT,
+        numPoses
+    };
+
+    enum swingDirection_t
+    {
+        ForwardSwing,
+        LeftSwing,
+        RightSwing,
+        numStyles
+    };
+
+    enum legId_t
+    {
+        leftLeg,
+        rightLeg,
+        noLeg
+    };
+
 public:
     NUKick(NUWalk* walk);
     ~NUKick();
+    void stop();
     void kill();
-    
+    void loadKickParameters();
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(KickJob* job);
-
+    bool isActive();
+    std::string toString(legId_t theLeg);
+    std::string toString(swingDirection_t theSwingDirection);
+    std::string toString(poseType_t thePose);
 private:
-    void setKickPoint(const vector<float>& position, const vector<float>& target);
+    vector<float> bestKickingPosition(const vector<float>& ballPosition,const vector<float>& targetPositon);
+    void kickToPoint(const vector<float>& position, const vector<float>& target);
+    void preKick();
     void doKick();
-	bool chooseLeg();
-	bool liftLeg();
-	bool adjustYaw();
-	bool positionFoot();
-	bool setLeg();
-	bool poiseLeg();
-	bool swing();
-	bool retract();
+    bool doPreKick();
+    bool doPostKick();
+    bool doPoise(legId_t leg, float angleChange, float speed);
+
+    bool chooseLeg();
+    bool kickAbortCondition();
+    bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed, float time);
+    bool LiftKickingLeg(legId_t kickingLeg);
+    bool SwingLegForward(legId_t kickingLeg, float speed);
+    bool SwingLegSideward(legId_t kickingLeg, float speed);
+    bool AlignYposition(legId_t kickingLeg, float speed, float yPos);
+    bool AlignXposition(legId_t kickingLeg, float speed, float xPos);
+    bool LowerLeg(legId_t kickingLeg);
+    bool BalanceCoP(legId_t supportLeg);
+    void BalanceCoPLevelTorso(vector<float>& jointAngles, float CoPx, float CoPy);
+    void BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy);
+    void BalanceCoPHip(vector<float>& jointAngles, float CoPx, float CoPy);
+    void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy);
+    void FlattenFoot(vector<float>& jointAngles);
+    float FlatFootAnklePitch(float hipPitch, float kneePitch);
+    bool IsPastTime(float time);
+    void MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight);
+    double TimeBetweenFrames();
+    float perSec2perFrame(float value);
+    float SpeedMultiplier();
+    float GainMultiplier();
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
+
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
     NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
     NUWalk* m_walk;                     //!< local pointer to the walk engine
+    Kinematics* m_kinematicModel;
     
     float m_ball_x;                    //!< the current ball x position relative to robot in cm
     float m_ball_y;                    //!< the current ball y position relative to robot in cm
@@ -68,14 +132,47 @@ private:
     float m_target_y;
     double m_target_timestamp;
 
-	vector<double> poseData;
-	poseType pose;
-	bool lock;
+    poseType_t pose;
+    bool lock;
 
-	stack<vector<double> > poseStack;
+    float m_defaultMotorGain;
+    vector<float> m_leftLegInitialPose;
+    vector<float> m_rightLegInitialPose;
 
-	Legs * IKSys;
+//    stack<vector<double> > poseStack;
+    legId_t m_kickingLeg;
+    swingDirection_t m_swingDirection;
+    //Legs * IKSys;
+    bool m_kickIsActive;
 
+    bool m_stateCommandGiven;
+    double m_estimatedStateCompleteTime;
+    double m_currentTimestamp;
+    double m_previousTimestamp;
+
+    class jointLimit
+    {
+    public:
+        jointLimit(): min(0.0f), max(0.0f){};
+        jointLimit(float minAngle, float maxAngle): min(minAngle), max(maxAngle){};
+        float min;
+        float max;
+    };
+
+    bool LimitJoints(legId_t leg, vector<float> jointPositions);
+    vector<jointLimit> m_leftLegLimits;
+    vector<jointLimit> m_rightLegLimits;
+    Rectangle LeftFootForwardKickableArea;
+    Rectangle RightFootForwardKickableArea;
+    Rectangle LeftFootLeftKickableArea;
+    Rectangle RightFootLeftKickableArea;
+    Rectangle LeftFootRightKickableArea;
+    Rectangle RightFootRightKickableArea;
+
+    float m_footWidth;
+    float m_ballRadius;
+    bool m_pauseState;
+    float m_variableGainValue;
 };
 
 #endif

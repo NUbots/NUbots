@@ -30,18 +30,6 @@ inline T abs(T x){
 }
 
 template <class T>
-inline T max(T x, T y){
-  if(x > y) return x;
-  else return y;
-}
-
-template <class T>
-inline T min(T x, T y){
-  if(x < y) return x;
-  else return y;
-}
-
-template <class T>
 inline T crop(T num, T low, T high){
   if (num < low) num = low;
   else if (num > high) num = high;

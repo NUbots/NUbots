@@ -31,6 +31,7 @@
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "Behaviour/TeamInformation.h"
 
+#include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
@@ -127,10 +128,8 @@ public:
                     yaw = yaw + 0.015*(rightobstacle - 50);
                 }
             }
-            
             WalkJob* walk = new WalkJob(trans_speed, trans_direction, yaw);
             m_provider->m_jobs->addMotionJob(walk);
-
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
             m_provider->m_jobs->addMotionJob(head);
         }
