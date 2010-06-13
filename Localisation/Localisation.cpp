@@ -42,7 +42,7 @@ const float Localisation::c_RESET_SUM_THRESHOLD = 3.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.01f*0.01f;            // (0.01 rad)^2
+const float Localisation::R_obj_theta = 0.0316f*0.0316f;        // (0.01 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
 const float Localisation::R_obj_range_relative = 0.25f*0.25f;   // 25% of range added
 
