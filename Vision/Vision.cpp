@@ -192,7 +192,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
 
     if(m_sensor_data->getHorizon(horizonInfo))
     {
-        horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+        m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
     }
     else
     {
@@ -228,7 +228,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     debug << "Begin Scanning: " << endl;
     #endif
 
-    points = findGreenBorderPoints(spacings,&horizonLine);
+    points = findGreenBorderPoints(spacings,&m_horizonLine);
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tFind Edges: finnished" << endl;

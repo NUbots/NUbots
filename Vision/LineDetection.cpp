@@ -1147,32 +1147,41 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
     }
     //Check if any goals are close by that has been seen in current image:
     bool closeGoalSeen = false;
+    float closeGoalDistance = 10000;
     for(unsigned int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <= FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)
     {
         if(AllObjects->stationaryFieldObjects[i].TimeLastSeen() == timestamp)
         {
+
+            if(closeGoalDistance > AllObjects->stationaryFieldObjects[i].measuredDistance())
+            {
+                closeGoalDistance = AllObjects->stationaryFieldObjects[i].measuredDistance();
+            }
             if(AllObjects->stationaryFieldObjects[i].measuredDistance() < 250)
             {
                 closeGoalSeen = true;
-                break;
+
             }
         }
     }
-    if(closeGoalSeen == false)
+
+    for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
     {
-        for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+        if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN
+           || AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
-            if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN
-               || AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            if(closeGoalDistance > AllObjects->ambiguousFieldObjects[i].measuredDistance())
             {
-                if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < 250)
-                {
-                    closeGoalSeen = true;
-                    break;
-                }
+                closeGoalDistance = AllObjects->ambiguousFieldObjects[i].measuredDistance();
+            }
+            if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < 250)
+            {
+                closeGoalSeen = true;
+
             }
         }
     }
+
 
     if ( (cornerPoints.size() > 8 || cornerPointsOnScreen > 5) && closeGoalSeen == false )                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
@@ -1288,8 +1297,8 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             TempDist = 0.0;
             Vector2<float> screenPositionAngle(vision->CalculateBearing(cx), vision->CalculateElevation(cy));
             GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
-
-            if (TempDist > 100.0  || TempDist == 0.0) {
+            //qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+            if (TempDist > 100.0  && TempDist != 0.0  && fabs( TempDist - closeGoalDistance) > 200) {
 
                 Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
                 Vector3<float> measuredError(0.0,0.0,0.0);

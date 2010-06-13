@@ -68,6 +68,7 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     if(isOK)
     {
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
+        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
@@ -363,10 +364,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
     qDebug() << "Robot Candidates: " << RobotCandidates.size() << "Coloured Robots Found: "<<vision.AllFieldObjects->ambiguousFieldObjects.size();
 
-    qDebug() << "Finding YELLOW Goals";
+    qDebug() << "Finding YELLOW Goals \t" << YellowGoalCandidates.size() << YellowGoalAboveHorizonCandidates.size();
     vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
     candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
-    qDebug() << "Finding BLUE Goals";
+    qDebug() << "Finding BLUE Goals \t" <<BlueGoalCandidates.size() << BlueGoalAboveHorizonCandidates.size() ;
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
      qDebug() << "Finding Lines" ;

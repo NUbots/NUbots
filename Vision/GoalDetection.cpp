@@ -574,16 +574,18 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
         int boarder = 5; //! Boarder of pixels
         if (it->getBottomRight().x < width-boarder && it->getTopLeft().x > 0+boarder )
         {
-            if((it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS)
+            if(fabs(it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS)
             {
+                //qDebug() << "Removed due to width been too small";
                 it = FO_Candidates.erase(it);
                 continue;
             }
         }
         if(it->getBottomRight().y < height-boarder && it->getTopLeft().y > 0+boarder )
         {
-            if((it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS)
+            if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS)
             {
+                //qDebug() << "Removed due to height been too small";
                 it = FO_Candidates.erase(it);
                 continue;
             }
@@ -725,8 +727,11 @@ void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_C
     vector < ObjectCandidate > ::iterator it;
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
-        if(!vision->horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y))
+        if((vision->m_horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y))== false)
         {
+            //qDebug() << "Removing Goal Above Horizon:" << it->getBottomRight().x<< ","<< it->getBottomRight().y << vision->m_horizonLine.findYFromX(it->getBottomRight().x);
+            //qDebug() << "Horizon Information: " << vision->m_horizonLine.getGradient() << "x + " << vision->m_horizonLine.getYIntercept();
+            //qDebug() << vision->m_horizonLine.getA() << "x + "<< vision->m_horizonLine.getB() << "y + " << vision->m_horizonLine.getC();
             it = FO_Candidates.erase(it);
             continue;
         }
