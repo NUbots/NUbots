@@ -466,7 +466,7 @@ float& WalkParameters::operator[] (const int index)
         return m_max_accelerations[index - nummaxspeedsused];
     else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused)
         return m_parameters[index - nummaxspeedsused - nummaxaccelsused].Value;
-    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused + m_num_leg_gains)
+    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused + int(m_num_leg_gains))
         return m_leg_gains[(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
     else
         return m_max_speeds[0];

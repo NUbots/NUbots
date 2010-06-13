@@ -341,7 +341,6 @@ void NUSensors::calculateFallSense()
     static const float Fallen = 1.0;
     static const float RollFallenThreshold = 1.1;       // approx. 60 deg. The falling threshold will be approx 30 deg
     static const float PitchFallenThreshold = 1.22;     // approx. 70 deg.
-    static const float Falling = 1.0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
@@ -543,7 +542,6 @@ void NUSensors::calculateFootImpact()
         static float leftforcemax = leftforce;
         static float rightforcemin = rightforce;
         static float rightforcemax = rightforce;
-        static unsigned int forcecount = 0;
         
         previousleftforces.push_back(leftforce);
         previousrightforces.push_back(rightforce);

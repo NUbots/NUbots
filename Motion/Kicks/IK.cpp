@@ -1,16 +1,15 @@
 #include "IK.h"
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>         
+#include <iostream>
+#include "debug.h"
 
 Joint::Joint()
 {
     alpha = 0;
     a = 0;
     theta = 0;
-    d = 0;
-    trans = NULL;
-    diff = NULL;            
+    d = 0;           
 }
 
 Joint::Joint(const Joint& j)
@@ -19,10 +18,8 @@ Joint::Joint(const Joint& j)
 	a = j.a;
 	theta = j.theta;
 	d = j.d;
-	delete trans;
-	trans = new Matrix(*(j.trans));
-	delete diff;
-	diff = new Matrix(*(j.diff));
+        trans = j.trans;
+        diff = j.diff;
 }
 
 Joint::Joint(double alpha, double a, double theta, double d)
@@ -31,24 +28,22 @@ Joint::Joint(double alpha, double a, double theta, double d)
     this->a = a;
     this->theta = theta;
     this->d = d;
-    trans = new Matrix(createTransformMatrix());
-    diff = new Matrix(createDiffTransformMatrix());
+    trans = createTransformMatrix();
+    diff = createDiffTransformMatrix();
 }
 
 Joint::~Joint()
 {
-	delete trans;
-	delete diff;
 }
 
 Matrix * Joint::getTransformMatrix()
 {
-	return trans;
+        return &trans;
 }
 
 Matrix * Joint::getDiffTransformMatrix()
 {
-	return diff;
+        return &diff;
 }
 
 Matrix Joint::createTransformMatrix()
@@ -98,23 +93,18 @@ Matrix Joint::createDiffTransformMatrix()
 
 void Joint::updateTransforms()
 {
-    delete trans;
-    delete diff;
-    trans = new Matrix(createTransformMatrix());
-    diff = new Matrix(createDiffTransformMatrix());
-       
+    trans = createTransformMatrix();
+    diff = createDiffTransformMatrix();
 } 
 
-const Joint& Joint::operator=(const Joint& j)
+Joint& Joint::operator=(const Joint& j)
 {
 	alpha = j.alpha;
 	a = j.a;
 	theta = j.theta;
 	d = j.d;
-	delete trans;
-	trans = new Matrix(*(j.trans));
-	delete diff;
-	diff = new Matrix(*(j.diff));
+        trans = j.trans;
+        diff = j.diff;
 	return (*this);
 } 
 
@@ -123,11 +113,6 @@ JointSystem::JointSystem()
     JointVector = new vector<Joint>();
     JointVector->reserve(6);
     initialTheta.reserve(6);
-    baseT = NULL;
-    endT = NULL;
-    Total = NULL;
-    Jacobian = NULL;
-    InvJacobian = NULL;
     position.resize(3);
     finalPosition.resize(3);
                        
@@ -135,17 +120,12 @@ JointSystem::JointSystem()
 
 JointSystem::~JointSystem()
 {
-    delete JointVector;
-    delete baseT;
-    delete endT;
-    delete Total;
-    delete Jacobian;
-    delete InvJacobian;                           
+    delete JointVector;                         
 }
 
 void JointSystem::addJoint(Joint &j)
 {
-	JointVector->push_back(j);
+        JointVector->push_back(j);
 	initialTheta.push_back((j.getTheta()));
 }
 
@@ -161,7 +141,7 @@ void JointSystem::updateTheta()
     Matrix deltaX(3,1);
     for(int i = 0; i<3; i++)
         deltaX(i,0) = (finalPosition[i]-position[i]);
-    Matrix mat((*InvJacobian) * deltaX);
+    Matrix mat(InvJacobian * deltaX);
     for(int i=1; i<4; i++)
         (*this)[i] += mat(i-1,0);   
     
@@ -178,22 +158,21 @@ void JointSystem::updateTheta()
 
 void JointSystem::updateTotal()
 {
-    Matrix mat(*((*JointVector)[0].getTransformMatrix()));
+    Matrix mat(*(*JointVector)[0].getTransformMatrix());
+
     for(int i = 1; i<6; i++)
     {   
-        mat = Matrix((mat)*(*((*JointVector)[i].getTransformMatrix())));
+        mat = mat*(*(*JointVector)[i].getTransformMatrix());
                         
     }
-    delete Total;
-    Total = new Matrix((*baseT)*(mat)*(*endT));
+    Total = baseT * mat * endT;
     for(int i=0; i<3; i++)
-        position[i] = (*Total)(i,3);
+        position[i] = Total[i][3];
 }
 
 void JointSystem::updateJacobian()
 {
-    delete Jacobian;
-    Jacobian = new Matrix(3, 3);
+    Jacobian = Matrix(3, 3);
     for(size_t i=1; i<4; i++)
     {
         Matrix mat(*((*JointVector)[0].getTransformMatrix()));
@@ -204,21 +183,20 @@ void JointSystem::updateJacobian()
             else
                 mat = Matrix((mat)*(*((*JointVector)[j].getTransformMatrix())));                        
         }
-        mat = Matrix((*baseT)*(mat)*(*endT));
+        mat = baseT * mat * endT;
         for(int k=0; k<3; k++)
-            (*Jacobian)(k,i-1) = mat(k,3);             
+            Jacobian[k][i-1] = mat(k,3);
     }   
 }
 
 void JointSystem::updateInvJacobian()
 {
-    delete InvJacobian;
     Matrix deltaX(3,1);
     for(int i = 0; i<3; i++)
-        deltaX(i,0)=(finalPosition[i]-position[i]);
-    Matrix operand((*Jacobian)*(Jacobian->transp())*(deltaX));
+        deltaX[i][0] = (finalPosition[i]-position[i]);
+    Matrix operand(Jacobian * Jacobian.transp() * deltaX);
     double damp = (dot((deltaX),(operand))/dot((operand),(operand)));
-    InvJacobian = new Matrix(damp*(Jacobian->transp()));
+    InvJacobian = damp * Jacobian.transp();
 }
 
 void JointSystem::setFinalPosition(const vector<double>& p)
@@ -234,14 +212,12 @@ const vector<double>& JointSystem::getPosition()
 
 void JointSystem::setBaseT(const Matrix &mat)
 {
-    delete baseT;
-    baseT = new Matrix(mat);        
+    baseT = mat;
 }
 
 void JointSystem::setEndT(const Matrix &mat)
 {
-    delete endT;
-    endT = new Matrix(mat);   
+    endT = mat;
 }
 
 void JointSystem::updateTransforms(bool all)
@@ -263,15 +239,15 @@ void JointSystem::updateTransform(int i)
 void JointSystem::correctOrientation()
 {	
 	
-	if((*Total)(0,2)>0)
+        if(Total[0][2]>0)
 	{
-		while((*Total)(0,2)>0)
+                while(Total[0][2]>0)
 		{
 			(*this)[4] -= 0.01;
 			(*JointVector)[4].updateTransforms();
 			updateTotal();
 		}
-		while((*Total)(0,2)<0)
+                while(Total[0][2]<0)
 		{
 			(*this)[4] += 0.001;
 			(*JointVector)[4].updateTransforms();
@@ -279,15 +255,15 @@ void JointSystem::correctOrientation()
 		}
 			
 	}
-	if((*Total)(0,2)<0)
+        if(Total[0][2]<0)
 	{
-		while((*Total)(0,2)<0)
+                while(Total[0][2]<0)
 		{
 			(*this)[4] += 0.01;
 			(*JointVector)[4].updateTransforms();
 			updateTotal();
 		}
-		while((*Total)(0,2)>0)
+                while(Total[0][2]>0)
 		{
 			(*this)[4] -= 0.001;
 			(*JointVector)[4].updateTransforms();
@@ -295,15 +271,15 @@ void JointSystem::correctOrientation()
 		}
 	}
 	
-	if((*Total)(1,2)>0)
+        if(Total[1][2]>0)
 	{
-		while((*Total)(1,2)>0)
+                while(Total[1][2]>0)
 		{
 			(*this)[5] += 0.01;
 			(*JointVector)[5].updateTransforms();
 			updateTotal();
 		}
-		while((*Total)(1,2)<0)
+                while(Total[1][2]<0)
 		{
 			(*this)[5] -= 0.001;
 			(*JointVector)[5].updateTransforms();
@@ -311,15 +287,15 @@ void JointSystem::correctOrientation()
 		}
 			
 	}
-	if((*Total)(1,2)<0)
+        if(Total[1][2]<0)
 	{
-		while((*Total)(1,2)<0)
+                while(Total[1][2]<0)
 		{
 			(*this)[5] -= 0.01;
 			(*JointVector)[5].updateTransforms();
 			updateTotal();
 		}
-		while((*Total)(1,2)>0)
+                while(Total[1][2]>0)
 		{
 			(*this)[5] += 0.001;
 			(*JointVector)[5].updateTransforms();
@@ -333,6 +309,7 @@ Legs::Legs()
 {
     LeftLeg = new JointSystem();
     RightLeg = new JointSystem();
+
     for(int i=0; i<6; i++)
     { 
         Joint lj(alphArrL[i], aArrL[i], thArrL[i], dArrL[i]);
@@ -343,16 +320,16 @@ Legs::Legs()
 
     LeftLeg->setBaseT(Trans(0, HY, -HZ));
     LeftLeg->setEndT(RotZ(PI)*RotY(-PI/2));
-	
+
     RightLeg->setBaseT(Trans(0, -HY, -HZ));
     RightLeg->setEndT(RotZ(PI)*RotY(-PI/2));
     
     LeftLeg->updateTotal();
     RightLeg->updateTotal();
-    
+
     lLegPos = LeftLeg->getPosition();
     rLegPos = RightLeg->getPosition();
-    
+
     yaw = 0;
     
     legInUse = NONE;		
@@ -585,7 +562,8 @@ void Legs::inputRight(vector<float> input)
 	(*RightLeg)[3] = input[3];
 	(*RightLeg)[5] = input[4];
 	(*RightLeg)[4] = input[5];
-	RightLeg->updateTransforms(true);
+	RightLeg->updateTransforms(true);
+
 }
 
 vector<float> Legs::outputLeft()

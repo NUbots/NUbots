@@ -58,7 +58,7 @@ class Localisation: public TimestampedData
         bool MergeTwoModels(int index1, int index2);
         double MergeMetric(int index1, int index2);
         void MergeModels(int maxAfterMerge);
-	    void MergeModelsBelowThreshold(double MergeMetricThreshold);
+        void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
 
         bool IsValidObject(const Object& theObject);
