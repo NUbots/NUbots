@@ -4,7 +4,7 @@
 
 #include "Vision/FieldObjects/FieldObjects.h"
 class NUSensorsData;
-class GameInformation;
+#include "Behaviour/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
 
 #include "debug.h"
@@ -32,7 +32,6 @@ class Localisation: public TimestampedData
         void feedback(double*);
         double feedbackPosition[3];
         void ProcessObjects();
-        bool CheckGameState();
         bool varianceCheck(int modelID);
         int varianceCheckAll();
         void ResetAll();
@@ -64,9 +63,16 @@ class Localisation: public TimestampedData
         bool IsValidObject(const Object& theObject);
 
         // Model Reset Functions
+        bool CheckGameState();
+        void doInitialReset();
+        void doSetReset();
         void doPenaltyReset();
-        void doPlayerReset();
+        void doFallenReset();
+        void doReset();
+        void setupModel(int modelNumber, int numModels, float x, float y, float heading);
+        void setupModelSd(int modelNumber, float sdx, float sdy, float sdheading);
         void resetSdMatrix(int modelNumber);
+        void swapFieldStateTeam(float& x, float& y, float& heading);
 
         /*!
         @brief Output streaming operation.
@@ -83,7 +89,7 @@ class Localisation: public TimestampedData
         friend std::istream& operator>> (std::istream& input, Localisation& p_loc);
 
         // Multiple Models Stuff
-        static const int c_MAX_MODELS_AFTER_MERGE = 4; // Max models at the end of the frame
+        static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         KF tempModel;
@@ -105,9 +111,10 @@ class Localisation: public TimestampedData
         float modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
 
         // Game state memory
-        bool wasPreviouslyPenalised;
-        int previousGameState;
-	float odomForward, odomLeft, odomTurn;
+        bool m_previously_incapacitated;
+        GameInformation::RobotState m_previous_game_state;
+        
+        float odomForward, odomLeft, odomTurn;
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;

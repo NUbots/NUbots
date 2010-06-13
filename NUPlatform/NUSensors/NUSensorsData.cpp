@@ -1027,7 +1027,7 @@ bool NUSensorsData::isOnGround()
         return false;
 }
 
-/*! @brief Returns true if the robot is currently incapacitated 
+/*! @brief Returns true if the robot is currently incapacitated. A robot is incapacitated if it is falling, fallen, not on the ground or getting up
  */
 bool NUSensorsData::isIncapacitated()
 {

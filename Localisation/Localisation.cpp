@@ -38,21 +38,20 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 5.0f; // 3 // then 8.0 (home)
+const float Localisation::c_RESET_SUM_THRESHOLD = 3.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.001f; // (0.01 rad)^2
-const float Localisation::R_obj_range_offset = 10.0f*10.0f; // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.02f; // 10% of range added. (0.1)^2
+const float Localisation::R_obj_theta = 0.0316f*0.0316f;        // (0.01 rad)^2
+const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
+const float Localisation::R_obj_range_relative = 0.25f*0.25f;   // 25% of range added
 
-const float Localisation::centreCircleBearingError = (float)(deg2rad(10)*deg2rad(10)); // (10 degrees)^2
+const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
-    doPlayerReset();
-
-    wasPreviouslyPenalised = false;
+    m_previously_incapacitated = true;
+    m_previous_game_state = GameInformation::InitialState;
 
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
@@ -289,20 +288,50 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
 bool Localisation::CheckGameState()
 {
+    bool currently_incapacitated = m_sensor_data->isIncapacitated();
+    GameInformation::RobotState current_state = m_game_info->getCurrentState();
 
-    return true;
-    /*
-    GameController* gc = &GameController::getInstance();
-    bool isPenalised = gc->isPenalised();
-    int currentState = gc->getGameState();
-
-    // If robot has been penalised and penalty is lifted, reset to the penalty replacement positions.
-    if( (isPenalised == false) && (wasPreviouslyPenalised == true) ){
-        doPenaltyReset();
-    } 
-    else if ( (previousGameState != currentState) && (previousGameState == STATE_INITIAL)){
-        doPlayerReset();
+    if (m_sensor_data->isIncapacitated())
+    {   // if the robot is incapacitated there is no point running localisation
+        m_previous_game_state = current_state;
+        m_previously_incapacitated = true;
+        return false;
     }
+    
+    if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState or current_state == GameInformation::SubstituteState)
+    {   // if we are in initial, finished, penalised or substitute states do not do localisation
+        m_previous_game_state = current_state;
+        m_previously_incapacitated = currently_incapacitated;
+        return false;
+    }
+    
+    if (current_state == GameInformation::ReadyState)
+    {   // if are in ready. If previously in initial or penalised do a reset. Also reset if fallen over.
+        if (m_previous_game_state == GameInformation::InitialState)
+            doInitialReset();
+        else if (m_previous_game_state == GameInformation::PenalisedState)
+            doPenaltyReset();
+        else if (m_previously_incapacitated and not currently_incapacitated)
+            doFallenReset();
+    }
+    else if (current_state == GameInformation::SetState)
+    {   // if we are in set look for manual placement, if detected then do a reset.
+        if (m_previously_incapacitated and not currently_incapacitated)
+            doSetReset();
+    }
+    else
+    {   // if we are playing. If previously penalised do a reset. Also reset if fallen over
+        if (m_previous_game_state == GameInformation::PenalisedState)
+            doPenaltyReset();
+        else if (m_previously_incapacitated and not currently_incapacitated)
+            doFallenReset();
+    }
+    
+    m_previously_incapacitated = currently_incapacitated;
+    m_previous_game_state = current_state;
+    return true;
+    
+    /*
 
     if(gc->getTimeSinceLastBallOut() == 0){
         // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
@@ -321,8 +350,6 @@ bool Localisation::CheckGameState()
             models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
         }
     }
-    wasPreviouslyPenalised = isPenalised;
-    previousGameState = currentState;
     */
 }
 
@@ -340,6 +367,124 @@ void Localisation::ClearAllModels()
     return;
 }
 
+void Localisation::doInitialReset()
+{
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out  << "[" << currentFrameNumber << "] Performing initial->ready reset." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    
+    ClearAllModels();
+    
+    // The models are always in the team's own half
+    // Model 0: On left sideline facing in, 1/3 from half way
+    // Model 1: On left sideline facing in, 2/3 from half way
+    // Model 2: On right sideline facing in, 1/3 from half way
+    // Model 3: On right sideline facing in, 2/3 from half way
+    // Model 4: In centre of own half facing opponents goal
+    const int num_models = 5;
+    
+    float left_y = 200.0;
+    float left_heading = -PI/2;
+    float right_y = -200.0;
+    float right_heading = PI/2;
+    
+    float front_x = -300.0/4;
+    float centre_x = -300.0/2;
+    float centre_heading = 0;
+    float back_x = -300*(3.0f/4);
+    if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+    {   // flip the invert the x for the red team and set the heading to PI
+        front_x = -front_x;
+        centre_x = -centre_x;
+        centre_heading = PI;
+        back_x = -back_x;
+    }
+    
+    setupModel(0, num_models, front_x, right_y, right_heading);
+    setupModelSd(0, 50, 15, 0.2);
+    setupModel(1, num_models, back_x, right_y, right_heading);
+    setupModelSd(1, 50, 15, 0.2);
+    setupModel(2, num_models, front_x, left_y, left_heading);
+    setupModelSd(2, 50, 15, 0.2);
+    setupModel(3, num_models, back_x, left_y, left_heading);
+    setupModelSd(3, 50, 15, 0.2);
+    setupModel(4, num_models, centre_x, 0, centre_heading);
+    setupModelSd(4, 100, 150, PI/2);
+    
+    return;
+}
+
+void Localisation::doSetReset()
+{
+    ClearAllModels();
+    
+    float x, y, heading;
+    const float position_sd = 15;
+    const float heading_sd = 0.1;
+    int num_models;
+    if (m_game_info->getPlayerNumber() == 1)
+    {   // if we are the goal keeper and we get manually positioned we know exactly where we will be put
+        num_models = 1;
+        x = -300;
+        y = 0; 
+        heading = 0;
+        if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+            swapFieldStateTeam(x, y, heading);
+        setupModel(0, num_models, x, y, heading);
+    }
+    else
+    {   // if we are a field player and we get manually positioned we could be in a three different places
+        if (m_game_info->haveKickoff())
+        {   // the attacking positions are on the circle or on either side of the penalty spot
+            num_models = 3;
+            // on the circle
+            x = -60;
+            y = 0;
+            heading = 0;
+            if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+                swapFieldStateTeam(x, y, heading);
+            setupModel(0, num_models, x, y, heading);
+            // on the left of the penalty spot
+            x = -120;
+            y = 70;
+            heading = 0;
+            if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+                swapFieldStateTeam(x, y, heading);
+            setupModel(1, num_models, x, y, heading);
+            // on the right of the penalty spot
+            x = -120;
+            y = -70;
+            heading = 0;
+            if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+                swapFieldStateTeam(x, y, heading);
+            setupModel(2, num_models, x, y, heading);
+            
+        }
+        else
+        {   // the defensive positions are on either corner of the penalty box
+            num_models = 2;
+            // top penalty box corner
+            x = -240;
+            y = 110;
+            heading = 0;
+            if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+                swapFieldStateTeam(x, y, heading);
+            setupModel(0, num_models, x, y, heading);
+            // bottom penalty box corner
+            x = -240;
+            y = -110;
+            heading = 0;
+            if (m_game_info->getTeamColour() == GameInformation::RedTeam)
+                swapFieldStateTeam(x, y, heading);
+            setupModel(1, num_models, x, y, heading);
+        }
+    }
+    
+    // setup the standard deviations
+    for (int i=0; i<num_models; i++)
+        setupModelSd(i, position_sd, position_sd, heading_sd);
+}
+
 void Localisation::doPenaltyReset()
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -348,41 +493,28 @@ void Localisation::doPenaltyReset()
 
     ClearAllModels();
 
+    const int num_models = 2;
     // setup model 0 as top 'T'
-    models[0].isActive = true;
-    models[0].alpha = 0.5;
-
-    // Set the state estimates
-    models[0].stateEstimates[0][0] = 0.0;       // Robot x
-    models[0].stateEstimates[1][0] = 200.0;     // Robot y
-    models[0].stateEstimates[2][0] = -PI/2.0;    // Robot heading
-    models[0].stateEstimates[3][0] = 0.0;       // Ball x 
-    models[0].stateEstimates[4][0] = 0.0;       // Ball y
-    models[0].stateEstimates[5][0] = 0.0;       // Ball vx
-    models[0].stateEstimates[6][0] = 0.0;       // Ball vy
-
-    // Set the uncertainties
-    resetSdMatrix(0);
+    setupModel(0, num_models, 0, 200, -PI/2.0);
+    setupModelSd(0, 75, 25, 0.35);
     
     // setup model 1 as bottom 'T'
-    models[1].isActive = true;  
-    models[1].alpha = 0.5;
-
-    // Set the state estimates
-    models[1].stateEstimates[0][0] = 0.0;       // Robot x
-    models[1].stateEstimates[1][0] = -200.0;    // Robot y
-    models[1].stateEstimates[2][0] = PI/2.0;   // Robot heading
-    models[1].stateEstimates[3][0] = 0.0;       // Ball x
-    models[1].stateEstimates[4][0] = 0.0;       // Ball y
-    models[1].stateEstimates[5][0] = 0.0;       // Ball vx
-    models[1].stateEstimates[6][0] = 0.0;       // ball vy
-
-    // Set the uncertainties
-    resetSdMatrix(1);
+    setupModel(1, num_models, 0, -200, PI/2.0);
+    setupModelSd(0, 75, 25, 0.35);
     return;
 }
 
-void Localisation::doPlayerReset()
+void Localisation::doFallenReset()
+{
+    for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
+    {   // Increase heading uncertainty if fallen
+        models[modelNumber].stateStandardDeviations[0][0] += 15;        // Robot x
+        models[modelNumber].stateStandardDeviations[1][1] += 15;        // Robot y
+        models[modelNumber].stateStandardDeviations[2][2] += 0.707;     // Robot heading
+    }
+}
+
+void Localisation::doReset()
 {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "[" << currentFrameNumber << "] Performing player reset." << endl;
@@ -452,6 +584,33 @@ void Localisation::doPlayerReset()
     return;
 }
 
+/*! @brief Setup model modelNumber with the given x, y and heading */
+void Localisation::setupModel(int modelNumber, int numModels, float x, float y, float heading)
+{
+    models[modelNumber].isActive = true;
+    models[modelNumber].alpha = 1.0f/numModels;
+    
+    models[modelNumber].stateEstimates[0][0] = x;             // Robot x
+    models[modelNumber].stateEstimates[1][0] = y;             // Robot y
+    models[modelNumber].stateEstimates[2][0] = heading;       // Robot heading
+    models[modelNumber].stateEstimates[3][0] = 0.0;           // Ball x
+    models[modelNumber].stateEstimates[4][0] = 0.0;           // Ball y
+    models[modelNumber].stateEstimates[5][0] = 0.0;           // Ball vx
+    models[modelNumber].stateEstimates[6][0] = 0.0;           // Ball vy
+}
+
+/*! @brief Setup a model's standard deviations with the given sdx, sdy, sdheading */
+void Localisation::setupModelSd(int modelNumber, float sdx, float sdy, float sdheading)
+{
+    models[modelNumber].stateStandardDeviations[0][0] = sdx;        // Robot x
+    models[modelNumber].stateStandardDeviations[1][1] = sdy;        // Robot y
+    models[modelNumber].stateStandardDeviations[2][2] = sdheading;  // Robot heading
+    models[modelNumber].stateStandardDeviations[3][3] = 150.0;      // Ball x
+    models[modelNumber].stateStandardDeviations[4][4] = 100.0;      // Ball y
+    models[modelNumber].stateStandardDeviations[5][5] = 10.0;       // Ball velocity x
+    models[modelNumber].stateStandardDeviations[6][6] = 10.0;       // Ball velocity y
+}
+
 
 void Localisation::resetSdMatrix(int modelNumber)
 {
@@ -475,6 +634,14 @@ void Localisation::resetSdMatrix(int modelNumber)
     
     
     return;  
+}
+
+/*! @brief Changes the field state so that it will be the position for the other team */
+void Localisation::swapFieldStateTeam(float& x, float& y, float& heading)
+{
+    x = -x;
+    y = -y;
+    heading = normaliseAngle(heading + PI);
 }
 
 bool Localisation::clipModelToField(int modelID)
@@ -1026,7 +1193,7 @@ int  Localisation::CheckForOutlierResets()
     }
     if(getNumActiveModels() < 1)
     {
-        this->doPlayerReset();
+        this->doReset();
     }
     return numResets;
 }
