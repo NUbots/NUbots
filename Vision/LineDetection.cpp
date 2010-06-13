@@ -426,7 +426,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }
 
     //Now do all that again, but this time looking for the vert lines from the horz search grid..
-    unsigned int horizontalEnd = fieldLines.size();
+    //unsigned int horizontalEnd = fieldLines.size();
     //SORT POINTS
     //qDebug() << "SORTING...";
     //clock_t startSortAgain = clock();
@@ -1136,7 +1136,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
     int TempID;
     unsigned int x;
     bool recheck = false;
-\
+
     int cornerPointsOnScreen = 0;
     for(unsigned int i = 0; i < cornerPoints.size(); i++)
     {
@@ -1145,7 +1145,36 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             cornerPointsOnScreen++;
         }
     }
-    if (cornerPoints.size() > 9 || cornerPointsOnScreen > 6)                  //********  this filters out center circle. only a count 0f 2 is checked.
+    //Check if any goals are close by that has been seen in current image:
+    bool closeGoalSeen = false;
+    for(unsigned int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <= FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)
+    {
+        if(AllObjects->stationaryFieldObjects[i].TimeLastSeen() == timestamp)
+        {
+            if(AllObjects->stationaryFieldObjects[i].measuredDistance() < 250)
+            {
+                closeGoalSeen = true;
+                break;
+            }
+        }
+    }
+    if(closeGoalSeen == false)
+    {
+        for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+        {
+            if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN
+               || AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < 250)
+                {
+                    closeGoalSeen = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if ( (cornerPoints.size() > 8 || cornerPointsOnScreen > 5) && closeGoalSeen == false )                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
 
