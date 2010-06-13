@@ -2,10 +2,12 @@
 #define H_IK
 
 #include "Tools/Math/Matrix.h"
+#include "Tools/Math/General.h"
 #include <cstdlib>
 #include <vector>
+using namespace mathGeneral;
 
-#define PI 3.141592653589793
+//#define PI 3.141592653589793
 #define SQRT_TWO 1.414213562
 #define SQRT_HLF 0.707106781
 
@@ -42,7 +44,7 @@ public:
 	Matrix * getDiffTransformMatrix();
     void updateTransforms();
     double& getTheta(){return theta;};
-    const Joint& operator=(const Joint& j);      
+    Joint& operator=(const Joint& j);
 private:
     Matrix createTransformMatrix();
     Matrix createDiffTransformMatrix(); 
@@ -50,8 +52,8 @@ private:
     double a;
     double theta;
     double d;
-    Matrix * trans;
-    Matrix * diff;                      
+    Matrix trans;
+    Matrix diff;
 };
 
 class JointSystem
@@ -77,11 +79,11 @@ public:
 private:
     vector<Joint> * JointVector;
     vector<double> initialTheta;
-    Matrix * baseT;
-    Matrix * endT;
-    Matrix * Total;
-    Matrix * Jacobian;
-    Matrix * InvJacobian;
+    Matrix baseT;
+    Matrix endT;
+    Matrix Total;
+    Matrix Jacobian;
+    Matrix InvJacobian;
     vector<double> position;
     vector<double> finalPosition;     
 };

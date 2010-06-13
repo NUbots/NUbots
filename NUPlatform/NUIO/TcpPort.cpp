@@ -191,10 +191,11 @@ void TcpPort::sendData(network_data_t netdata)
 
         //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
     #endif
+    int localnumBytes(0);
     #ifdef WIN32
-        int localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
+        localnumBytes = send(m_clientSockfd, netdata.data, netdata.size,0);
     #else
-        int localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
+        localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
     #endif
     #if DEBUG_NUSYSTEM_VERBOSITY > 4
         if(localnumBytes < 0)

@@ -36,6 +36,7 @@ SET (YOUR_DIRS  Jobs
                 ChaseBall
                 MiscBehaviours
                 WalkOptimisation
+                Kicker
 )
 ####################################################################################
 
