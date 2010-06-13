@@ -70,6 +70,18 @@ bool BehaviourFSMProvider::stateChanged()
     return m_state_changed;
 }
 
+/*! @brief Returns true if state was in fact the previous state, and false if it was not */
+bool BehaviourFSMProvider::wasPreviousState(BehaviourState* state)
+{
+    return (state == m_previous_state);
+}
+
+/*! @brief Returns a pointer to the previous state */
+BehaviourState* BehaviourFSMProvider::getPreviousState()
+{
+    return m_previous_state;
+}
+
 /*! @brief 
  */
 void BehaviourFSMProvider::doBehaviour()

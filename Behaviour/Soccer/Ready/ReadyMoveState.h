@@ -1,5 +1,5 @@
 /*! @file ReadyMoveState.h
-    @brief Declaration of the initial soccer state
+    @brief Declaration of the ready moving soccer state
  
     @class ReadyMoveState
     @brief The initial soccer state
@@ -25,19 +25,23 @@
 #ifndef READY_MOVE_STATE_H
 #define READY_MOVE_STATE_H
 
-class SoccerFSMState;
-#include "../SoccerState.h"
+#include "../SoccerFSMState.h"
 #include <vector>
 
-class ReadyMoveState : public SoccerState
+class ReadyMoveWalk;
+
+class ReadyMoveState : public SoccerFSMState
 {
 public:
     ReadyMoveState(SoccerFSMState* parent);
     ~ReadyMoveState();
 protected:
-    BehaviourState* nextState();
-    void doState();
-    std::vector<float> getReadyFieldPositions();
+    void doStateCommons();
+    BehaviourState* nextStateCommons();
+    BehaviourFSMState* nextState();
+    
+    friend class ReadyMoveWalk;
+    BehaviourState* m_walk_state;
 };
 
 

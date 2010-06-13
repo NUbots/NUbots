@@ -218,7 +218,7 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
         times.push_back(m_data->CurrentTime);
         
         // clip the head targets to 'limits'
-        float min_pitch = (m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch);
+        float min_pitch = (m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.05);
         float max_pitch = m_pitch_limits[1];
         if (new_pitch < min_pitch)
             new_pitch = min_pitch;
@@ -240,7 +240,7 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
  */
 void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch)
 {
-    float maxtilt_limit = m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch;
+    float maxtilt_limit = m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.05;
     minpitch = std::min(static_cast<float>(atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
     maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), maxtilt_limit);
     

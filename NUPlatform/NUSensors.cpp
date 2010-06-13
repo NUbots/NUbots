@@ -626,8 +626,8 @@ void NUSensors::calculateOdometry()
 #endif
 
     const float turnMultiplier = 0.8;       // sd: 0.1rad (0.032 rad/rad). Measured on 12/6/2010 with ALWalkCrab
-    const float xMultiplier = 1.35;         // sd: 7.9cm (0.023 cm/cm). Measured on 12/6/2010 with ALWalkCrab
-    const float yMultiplier = -1.48;        // sd: 4.2cm (0.021 cm/cm). Measured on 12/6/2010 with ALWalkCrab
+    const float xMultiplier = 1.0;         // 1.35 sd: 7.9cm (0.023 cm/cm). Measured on 12/6/2010 with ALWalkCrab
+    const float yMultiplier = -1.09;        // 1.48 sd: 4.2cm (0.021 cm/cm). Measured on 12/6/2010 with ALWalkCrab
 
     static float prevHipYaw = 0.0;
     static float prevLeftX = 0.0;

@@ -1,5 +1,5 @@
-/*! @file ImLostStates.h
-    @brief Declaration of the robot is lost states
+/*! @file ReadyLostStates.h
+    @brief Declaration of the robot is lost in ready states
 
     @author Jason Kulk
  
@@ -23,7 +23,7 @@
 #define IM_LOST_STATES_H
 
 #include "../SoccerState.h"
-#include "ImLostState.h"
+#include "ReadyLostState.h"
 
 #include "Behaviour/Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
@@ -36,34 +36,30 @@
 #include "debugverbositybehaviour.h"
 using namespace std;
 
-class ImLostSubState : public SoccerState
+class ReadyLostSubState : public SoccerState
 {
 public:
-    ImLostSubState(ImLostState* parent) : SoccerState(parent), m_parent_machine(parent) {};
-    virtual ~ImLostSubState() {};
+    ReadyLostSubState(ReadyLostState* parent) : SoccerState(parent), m_parent_machine(parent) {};
+    virtual ~ReadyLostSubState() {};
 protected:
-    ImLostState* m_parent_machine;
+    ReadyLostState* m_parent_machine;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------- ImLostPan
-/*! @class ImLostPan
+// ----------------------------------------------------------------------------------------------------------------------- ReadyLostPan
+/*! @class ReadyLostPan
     In this state we stop and do a wide localisation pan. When the pan is completed we move into a spin state.
  */
-class ImLostPan : public ImLostSubState
+class ReadyLostPan : public ReadyLostSubState
 {
 public:
-    ImLostPan(ImLostState* parent) : ImLostSubState(parent) 
+    ReadyLostPan(ReadyLostState* parent) : ReadyLostSubState(parent) 
     {
-        m_time_in_state = 0;
-        m_previous_time = 0;
-        m_pan_started = false;
-        m_pan_end_time = 0;
+        reset();
     }
-    ~ImLostPan() {};
+    ~ReadyLostPan() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the lost state machine
-        // we transition to the spin state when the pan is completed.
         if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent_machine->stateChanged())
             return m_parent_machine->m_lost_spin;
         else
@@ -72,9 +68,9 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ImLostPan" << endl;
+            debug << "ReadyLostPan" << endl;
         #endif
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        m_jobs->addMotionJob(new WalkJob(0.01, 0, 0));
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
         
         // keep track of the time in this state
@@ -94,6 +90,9 @@ protected:
 private:
     void reset()
     {
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "ReadyLostPan. Resetting" << endl;
+        #endif
         m_time_in_state = 0;
         m_pan_started = false;
         m_pan_end_time = 0;
@@ -104,19 +103,19 @@ private:
     double m_pan_end_time;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------- ImLostSpin
-/*! @class ImLostSpin
+// ----------------------------------------------------------------------------------------------------------------------- ReadyLostSpin
+/*! @class ReadyLostSpin
     In this state we spin on the spot and do the nod. After 1.25 revolutions we go back to the pan state.
  */
-class ImLostSpin : public ImLostSubState
+class ReadyLostSpin : public ReadyLostSubState
 {
 public:
-    ImLostSpin(ImLostState* parent) : ImLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    ReadyLostSpin(ReadyLostState* parent) : ReadyLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
     {
         m_time_in_state = 0;
         m_previous_time = 0;
     }
-    ~ImLostSpin() {};
+    ~ReadyLostSpin() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
@@ -128,7 +127,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ImLostSpin" << endl;
+            debug << "ReadyLostSpin" << endl;
         #endif
         if (m_parent_machine->stateChanged())
             m_time_in_state = 0;

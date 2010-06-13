@@ -1,5 +1,8 @@
-/*! @file ReadyMarkState.cpp
-    @brief Implementation of the initial soccer state
+/*! @file ReadyLostState.h
+    @brief Declaration of the initial soccer state
+ 
+    @class ReadyLostState
+    @brief The initial soccer state
 
     @author Jason Kulk
  
@@ -19,24 +22,32 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ReadyMarkState.h"
+#ifndef READY_LOST_STATE_H
+#define READY_LOST_STATE_H
 
-#include "Behaviour/Jobs/JobList.h"
+#include "../SoccerFSMState.h"
 
-ReadyMarkState::ReadyMarkState(SoccerFSMState* parent) : SoccerState(parent)
+class ReadyState;
+class ReadyLostPan;
+class ReadyLostSpin;
+
+class ReadyLostState : public SoccerFSMState
 {
-}
+public:
+    ReadyLostState(ReadyState* parent);
+    ~ReadyLostState();
+protected:
+    void doStateCommons();
+    BehaviourState* nextStateCommons();
+    BehaviourFSMState* nextState();
+    
+    ReadyState* m_ready_state;
+    friend class ReadyLostPan;
+    BehaviourState* m_lost_pan;
+    friend class ReadyLostSpin;
+    BehaviourState* m_lost_spin;
+};
 
-ReadyMarkState::~ReadyMarkState()
-{
-}
 
-BehaviourState* ReadyMarkState::nextState()
-{
-    return this;
-}
-
-void ReadyMarkState::doState()
-{
-}
+#endif
 

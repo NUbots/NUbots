@@ -21,10 +21,11 @@
 
 #include "ReadyState.h"
 #include "Ready/ReadyMoveState.h"
-#include "Ready/ReadyMarkState.h"
+#include "Ready/ReadyLostState.h"
 
 #include "SoccerProvider.h"
 
+#include "Vision/FieldObjects/FieldObjects.h"
 #include "Behaviour/GameInformation.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
@@ -32,7 +33,7 @@
 ReadyState::ReadyState(SoccerProvider* provider) : SoccerFSMState(provider)
 {
     m_move_state = new ReadyMoveState(this);
-    m_mark_state = new ReadyMarkState(this);
+    m_lost_state = new ReadyLostState(this);
     
     m_state = m_move_state;
 }
@@ -40,7 +41,7 @@ ReadyState::ReadyState(SoccerProvider* provider) : SoccerFSMState(provider)
 ReadyState::~ReadyState()
 {
     delete m_move_state;
-    delete m_mark_state;
+    delete m_lost_state;
 }
 
 void ReadyState::doStateCommons()
@@ -59,4 +60,23 @@ void ReadyState::doStateCommons()
         m_actions->addLeds(NUActionatorsData::RightFootLeds, m_actions->CurrentTime, 0, 0, 0);
 }
 
+BehaviourFSMState* ReadyState::nextStateCommons()
+{   // do state transitions in the ready state machine
+    if (m_provider->stateChanged())
+    {   // if the game state has changed decide whether to go into the lost state or start positioning immediately.
+        if (m_provider->wasPreviousState(m_provider->m_initial) or m_provider->wasPreviousState(m_provider->m_finished) or m_provider->wasPreviousState(m_provider->m_penalised))
+            return m_lost_state;
+        else if (m_field_objects->self.lost())
+            return m_lost_state;
+        else
+            return m_move_state;
+    }
+    else
+        return static_cast<BehaviourFSMState*>(m_state);
+}
+
+BehaviourFSMState* ReadyState::nextState()
+{   // the ready state machine can never modify the game state
+    return this;
+}
 
