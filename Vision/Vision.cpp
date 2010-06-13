@@ -188,7 +188,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     #endif
     //Generate HorizonLine:
     vector <float> horizonInfo;
-    Horizon horizonLine;
+
 
     if(m_sensor_data->getHorizon(horizonInfo))
     {
@@ -282,11 +282,11 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
             {
                 GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
             {
                 GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
             }
@@ -524,6 +524,24 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             }
         }
     #endif
+
+        //TESTING: Save Images which of a field object seen
+        bool BlueGoalSeen = false;
+        if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() )
+        {
+            BlueGoalSeen = true;
+        }
+        for(unsigned int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                BlueGoalSeen = true;
+            }
+        }
+        if(BlueGoalSeen)
+        {
+            SaveAnImage();
+        }
 }
 
 void Vision::SaveAnImage()
@@ -532,6 +550,10 @@ void Vision::SaveAnImage()
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
 
+    if (!imagefile.is_open())
+        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+    if (!sensorfile.is_open())
+        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
 
     if (imagefile.is_open() and numSavedImages < 2500)
     {

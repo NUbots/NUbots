@@ -70,6 +70,7 @@ class Vision
     public:
     //! FieldObjects Container
     FieldObjects* AllFieldObjects;
+    Horizon horizonLine;
     int classifiedCounter;
     //! Default constructor.
     Vision();
