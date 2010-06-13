@@ -379,7 +379,6 @@ void Localisation::doInitialReset()
     debug_out  << "[" << currentFrameNumber << "] Performing initial->ready reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     
-    debug << "Doing initial reset" << endl;
     ClearAllModels();
     
     // The models are always in the team's own half
@@ -423,7 +422,6 @@ void Localisation::doInitialReset()
 
 void Localisation::doSetReset()
 {
-    debug << "Doing set reset" << endl;
     ClearAllModels();
     
     float x, y, heading;
@@ -507,17 +505,18 @@ void Localisation::doPenaltyReset()
     setupModelSd(0, 75, 25, 0.35);
     
     // setup model 1 as bottom 'T'
-    setupModel(0, num_models, 0, -200, PI/2.0);
+    setupModel(1, num_models, 0, -200, PI/2.0);
     setupModelSd(0, 75, 25, 0.35);
     return;
 }
 
 void Localisation::doFallenReset()
 {
-    debug << "Doing Fallen reset" << endl;
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
     {   // Increase heading uncertainty if fallen
-        models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
+        models[modelNumber].stateStandardDeviations[0][0] += 15;        // Robot x
+        models[modelNumber].stateStandardDeviations[1][1] += 15;        // Robot y
+        models[modelNumber].stateStandardDeviations[2][2] += 0.707;     // Robot heading
     }
 }
 
@@ -595,7 +594,7 @@ void Localisation::doReset()
 void Localisation::setupModel(int modelNumber, int numModels, float x, float y, float heading)
 {
     models[modelNumber].isActive = true;
-    models[modelNumber].alpha = 1/numModels;
+    models[modelNumber].alpha = 1.0f/numModels;
     
     models[modelNumber].stateEstimates[0][0] = x;             // Robot x
     models[modelNumber].stateEstimates[1][0] = y;             // Robot y
