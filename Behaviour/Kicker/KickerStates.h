@@ -74,6 +74,7 @@ public:
     
     void doState()
     {
+        /*
         if(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
@@ -83,6 +84,7 @@ public:
         {
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         }
+        */
         if(m_initialMoveCounter < 10)
         {
             m_jobs->addMotionJob(new WalkJob(0.001,0,0));
@@ -131,18 +133,20 @@ public:
         float ballBearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing();
 //        kickPos[0] = ballDistance * cos(ballBearing);
 //        kickPos[1] = ballDistance * sin(ballBearing);
+//        targetPos[0] = kickPos[0];
+//        targetPos[1] = kickPos[1] + 1000;
 
         // FWD TEST
-//        kickPos[0] = 5;
-//        kickPos[1] = 10;
-//        targetPos[0] = kickPos[0] + 1000;
-//        targetPos[1] = kickPos[1];
+        kickPos[0] = 10;
+        kickPos[1] = 20;
+        targetPos[0] = kickPos[0] + 1000;
+        targetPos[1] = kickPos[1];
 
         // RIGHT FOOT LEFT TEST
-        kickPos[0] = 8;
-        kickPos[1] = -10;
-        targetPos[0] = kickPos[0];
-        targetPos[1] = kickPos[1]+ 1000;
+//        kickPos[0] = 8;
+//        kickPos[1] = -10;
+//        targetPos[0] = kickPos[0];
+//        targetPos[1] = kickPos[1]+ 1000;
 
         if(m_provider->singleLeftBumperClick())
         {
@@ -163,7 +167,7 @@ public:
 
         KickJob* kick = new KickJob(0,kickPos,targetPos);
         m_provider->m_jobs->addMotionJob(kick);
-
+/*
         if(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
@@ -173,6 +177,7 @@ public:
         {
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         }
+        */
     };
 };
 
