@@ -471,7 +471,7 @@ void NUKick::doKick()
                         {
                             cout << "Leg is now poised!" << endl;
                             debug << "Leg is now poised!" << endl;
-                            pose = ALIGN_BALL;
+                            pose = SWING;
                         }
 			break;
 		}
@@ -541,7 +541,7 @@ void NUKick::doKick()
                             done = SwingLegSideward(m_kickingLeg, 12.0);
                         }
 
-                        BalanceCoP(supportLeg, 4.0f, 0.0f);
+                        BalanceCoP(supportLeg, 3.0f, 0.0f);
                         if(done && !m_pauseState)
                         {
                             m_armCommandSent = false;
@@ -554,7 +554,7 @@ void NUKick::doKick()
                 case RETRACT:
                     {
                         done = LiftKickingLeg(m_kickingLeg, 1.0f);
-                        BalanceCoP(supportLeg,4.0f,0.0f);
+                        BalanceCoP(supportLeg,3.0f,0.0f);
                         if(done && !m_pauseState)
                         {
                             cout << "Leg Retracted!" << endl;
@@ -566,7 +566,7 @@ void NUKick::doKick()
                 case REALIGN_LEGS:
                     {
                         done = LowerLeg(m_kickingLeg, 0.7f);
-                        BalanceCoP(supportLeg,4.0f,0.0f);
+                        BalanceCoP(supportLeg,3.0f,0.0f);
                         if(done && !m_pauseState)
                         {
                             cout << "Legs Aligned!" << endl;
