@@ -32,13 +32,14 @@ class Self {
     
         std::vector<float> CalculateDifferenceFromGoal(const StationaryObject& goalpost);
         float CalculateAngularWidthOfGoal(const StationaryObject& goalpost);
+        float CalculateAngularWidthOfGoalFromMobileObject(const StationaryObject& goalpost, const MobileObject& mobileobject);
         bool sdHeadingLessThanGoalWidth(const StationaryObject& goalpost, float num_stddev = 2);
     
         std::vector<float> CalculateClosestInterceptToMobileObject(const MobileObject& theObject);
         float CalculateYInterceptOfMobileObject(const MobileObject& theObject);
 		float CalculateXInterceptOfMobileObject(const MobileObject& theObject);
-    
-        std::vector<float> CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefromgoal);
+        std::vector<float> CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefrommobile);
+        std::vector<float> CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth);
 };
 
 #endif
