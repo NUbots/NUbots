@@ -447,6 +447,11 @@ void MainWindow::copy()
             GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
             currWindow->snapshotToClipboard();
         }
+        else if(typeid(*widget) == typeid(locWmGlDisplay))
+        {
+            locWmGlDisplay* currWindow = qobject_cast<locWmGlDisplay *>(widget);
+            currWindow->snapshotToClipboard();
+        }
     }
 }
 

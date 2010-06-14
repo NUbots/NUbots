@@ -94,12 +94,15 @@ void ALWalk::enableWalk()
 
 void ALWalk::doWalk()
 {      
+    vector<float> leggains = m_walk_parameters.getLegGains()[0];
     if (m_current_time - m_last_enabled_time < 1500)
     {
         float killfactor = (m_current_time - m_last_enabled_time)/1500;
         m_speed_x *= killfactor;
         m_speed_y *= killfactor;
         m_speed_yaw *= killfactor;
+        for (size_t i=0; i<leggains.size(); i++)
+            leggains[i] += leggains[i]*(1-killfactor);
     }
     
     // give the target speed to the walk engine
@@ -111,7 +114,6 @@ void ALWalk::doWalk()
     static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
     
     // voltage stablise the gains for the legs
-    vector<float> leggains = m_walk_parameters.getLegGains()[0];
     vector<float> battery;
     if (m_data->getBatteryValues(battery))
     {   // this has been hastily ported over from 2009!

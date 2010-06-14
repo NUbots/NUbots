@@ -1,8 +1,8 @@
-/*! @file ReadyMarkState.h
-    @brief Declaration of the initial soccer state
+/*! @file ChaseBallProvider.h
+    @brief Declaration of simple chase ball behaviour for testing and demonstration purposes 
  
-    @class ReadyMarkState
-    @brief The initial soccer state
+    @class ChaseBallProvider
+    @brief A simple chase ball behaviour for testing and demonstration purposes 
 
     @author Jason Kulk
  
@@ -22,20 +22,29 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef READY_MARK_STATE_H
-#define READY_MARK_STATE_H
+#ifndef KICKERPROVIDER_H
+#define KICKERPROVIDER_H
 
-class SoccerFSMState;
-#include "../SoccerState.h"
+#include "Behaviour/BehaviourFSMProvider.h"
 
-class ReadyMarkState : public SoccerState
+class WaitState;
+class KickState;
+
+#include <vector>
+#include <string>
+
+class KickerProvider : public BehaviourFSMProvider
 {
 public:
-    ReadyMarkState(SoccerFSMState* parent);
-    ~ReadyMarkState();
+    KickerProvider(Behaviour* manager);
+    ~KickerProvider();
 protected:
-    BehaviourState* nextState();
-    void doState();
+    BehaviourState* nextStateCommons();
+private:
+    friend class WaitState;
+    BehaviourState* m_wait_state;
+    friend class KickState;
+    BehaviourState* m_kick_state;
 };
 
 

@@ -27,6 +27,7 @@
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
+#include "Kicker/KickerProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -97,6 +98,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new VisionCalibrationProvider(this);
     else if (name.find("walkoptimis") != string::npos)
         return new WalkOptimisationProvider(this);
+    else if (name.find("kicker") != string::npos)
+        return new KickerProvider(this);
     else
         return NULL;
 }

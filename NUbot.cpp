@@ -156,7 +156,6 @@ NUbot::NUbot(int argc, const char *argv[])
         #else
             m_localisation = new Localisation();
         #endif // defined(TARGET_IS_NAOWEBOTS)
-        m_localisation->doPlayerReset();
     #endif
     
     #ifdef USE_BEHAVIOUR

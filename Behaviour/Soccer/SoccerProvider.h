@@ -28,14 +28,8 @@
 class Behaviour;
 #include "Behaviour/BehaviourFSMProvider.h"
 
-class InitialState;
-class ReadyState;
-class SetState;
-class PlayingState;
-class FinishedState;
-class PenalisedState;
-class SubstituteState;
-class RequiresSubstituteState;
+#include <vector>
+using namespace std;
 
 class SoccerProvider : public BehaviourFSMProvider
 {
@@ -47,14 +41,24 @@ protected:
     void doBehaviourCommons();
     BehaviourState* nextStateCommons();
 public:
-    InitialState* m_initial;
-    ReadyState* m_ready;
-    SetState* m_set;
-    PlayingState* m_playing;
-    FinishedState* m_finished;
-    PenalisedState* m_penalised;
-    SubstituteState* m_substitute;
-    RequiresSubstituteState* m_requires_substitution;
+    BehaviourState* m_initial;
+    BehaviourState* m_ready;
+    BehaviourState* m_set;
+    BehaviourState* m_playing;
+    BehaviourState* m_finished;
+    BehaviourState* m_penalised;
+    BehaviourState* m_substitute;
+    BehaviourState* m_requires_substitution;
+    
+    vector<int> m_yellow_goal_led_indices;
+    vector<int> m_blue_goal_led_indices;
+    vector<int> m_lost_led_indices;
+    vector<vector<float> > m_led_on;
+    vector<vector<float> > m_led_off;
+    vector<vector<float> > m_led_red;
+    vector<vector<float> > m_led_green;
+    vector<vector<float> > m_led_yellow;
+    vector<vector<float> > m_led_blue;
 };
 
 

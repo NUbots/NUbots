@@ -26,6 +26,7 @@ LSFittedLine.cpp
 Matrix.cpp  
 TransformMatrices.cpp
 UKF.cpp
+Rectangle.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

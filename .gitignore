@@ -3,6 +3,7 @@
 # We don't want build files in the repo
 /Build/NAO/*
 /Build/NAOWebots/*
+/Build/NAOWebotsWindows/*
 /Build/Cycloid/*
 /Build/temp/*
 # We don't want to include Xcode project files

@@ -44,8 +44,6 @@ PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)
     
     m_chase_led_indices.push_back(3);
     m_chase_led_indices.push_back(4);
-    m_lost_led_indices.push_back(0);
-    m_lost_led_indices.push_back(7);
     m_led_on = vector<vector<float> >(1, vector<float>(3,1.0f));
     m_led_off = vector<vector<float> >(1, vector<float>(3,0.0f));
     m_led_red = m_led_off;
@@ -82,18 +80,6 @@ void PlayingState::doStateCommons()
         m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_chase_led_indices, m_actions->CurrentTime, m_led_green);
     else
         m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_chase_led_indices, m_actions->CurrentTime, m_led_off);
-    
-    // set the right eyes to indicate lost states
-    bool balllost = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();
-    bool selflost = m_field_objects->self.lost();
-    if (balllost and selflost)
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_yellow);
-    else if (balllost)
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_red);
-    else if (selflost)
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_green);
-    else
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_off);
 }
 
 BehaviourFSMState* PlayingState::nextStateCommons()
@@ -103,7 +89,7 @@ BehaviourFSMState* PlayingState::nextStateCommons()
     else if (m_team_info->amIClosestToBall())
         return m_chase_state;
     else if (m_field_objects->self.lost())
-        return m_chase_state; //m_im_lost_state;
+        return m_im_lost_state;
     else
         return m_positioning_state;
 }

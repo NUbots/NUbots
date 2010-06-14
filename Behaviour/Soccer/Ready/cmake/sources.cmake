@@ -21,7 +21,9 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  ReadyMoveState.cpp ReadyMoveState.h
-                ReadyMarkState.cpp ReadyMarkState.h
+                ReadyMoveStates.h
+                ReadyLostState.cpp ReadyLostState.h
+                ReadyLostStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

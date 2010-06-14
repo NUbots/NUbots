@@ -341,7 +341,6 @@ void NUSensors::calculateFallSense()
     static const float Fallen = 1.0;
     static const float RollFallenThreshold = 1.1;       // approx. 60 deg. The falling threshold will be approx 30 deg
     static const float PitchFallenThreshold = 1.22;     // approx. 70 deg.
-    static const float Falling = 1.0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
@@ -543,7 +542,6 @@ void NUSensors::calculateFootImpact()
         static float leftforcemax = leftforce;
         static float rightforcemin = rightforce;
         static float rightforcemax = rightforce;
-        static unsigned int forcecount = 0;
         
         previousleftforces.push_back(leftforce);
         previousrightforces.push_back(rightforce);
@@ -625,9 +623,9 @@ void NUSensors::calculateOdometry()
     debug << "NUSensors::calculateOdometry()" << endl;
 #endif
 
-    const float turnMultiplier = 0.8;
-    const float xMultiplier = 1.25; // 2.5;
-    const float yMultiplier = -1.0;
+    const float turnMultiplier = 0.8;       // sd: 0.1rad (0.032 rad/rad). Measured on 12/6/2010 with ALWalkCrab
+    const float xMultiplier = 1.0;         // 1.35 sd: 7.9cm (0.023 cm/cm). Measured on 12/6/2010 with ALWalkCrab
+    const float yMultiplier = -1.09;        // 1.48 sd: 4.2cm (0.021 cm/cm). Measured on 12/6/2010 with ALWalkCrab
 
     static float prevHipYaw = 0.0;
     static float prevLeftX = 0.0;
