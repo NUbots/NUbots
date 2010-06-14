@@ -373,6 +373,10 @@ void NUKick::doKick()
         return;
     }
 
+    //currently must be at zero position
+    double kickAngle = atan2(m_target_y-m_ball_y, m_target_x-m_ball_x);
+    double kickDistance = sqrt(pow(m_target_y-m_ball_y,2) + pow(m_target_x-m_ball_x,2));
+
     debug << "void NUKick::doKick() - Current Pose: " << toString(pose) << endl;
 	switch(pose)
 	{
@@ -529,16 +533,19 @@ void NUKick::doKick()
 		{
                         if(m_swingDirection == ForwardSwing)
                         {
-                            done = SwingLegForward(m_kickingLeg, 7.0);
+                           debug << "Kicking Distance: " << kickDistance << endl;
+                            float kickSpeed = CalculateForwardSwingSpeed(kickDistance);
+                            debug << "Swinging at speed: " << kickSpeed << endl;
+                            done = SwingLegForward(m_kickingLeg, kickSpeed);
                             if(!m_armCommandSent)
                             {
-                                MoveArmsToKickPose(supportLeg, 7.0);
+                                MoveArmsToKickPose(supportLeg, kickSpeed);
                                 m_armCommandSent = true;
                             }
                         }
                         else if( (m_swingDirection == LeftSwing) || (m_swingDirection == RightSwing))
                         {
-                            done = SwingLegSideward(m_kickingLeg, 12.0);
+                            done = SwingLegSideward(m_kickingLeg, CalculateSidewardSwingSpeed(kickDistance));
                         }
 
                         BalanceCoP(supportLeg, 3.0f, 0.0f);
@@ -1595,6 +1602,16 @@ bool NUKick::LowerLeg(legId_t kickingLeg, float speed)
 bool NUKick::kickAbortCondition()
 {
     return false;
+}
+
+float NUKick::CalculateForwardSwingSpeed(float kickDistance)
+{
+    return 4.0f;
+}
+
+float NUKick::CalculateSidewardSwingSpeed(float kickDistance)
+{
+    return 4.0f;
 }
 
 bool NUKick::chooseLeg()
