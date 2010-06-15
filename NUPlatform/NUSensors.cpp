@@ -203,8 +203,13 @@ void NUSensors::calculateOrientation()
     static vector<float> acceleration(3, 0.0f);
     static vector<float> gyros(3, 0.0f);
     static vector<float> gyroOffset(3, 0.0f);
-
-    if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
+    static vector<float> orientationhardware(3, 0.0f);
+    
+    if (m_data->getOrientationHardware(orientationhardware))
+    {
+        m_data->BalanceOrientation->setData(m_current_time, orientationhardware, false);
+    }
+    else if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
     {
         if(!m_orientationFilter->Initialised())
         {

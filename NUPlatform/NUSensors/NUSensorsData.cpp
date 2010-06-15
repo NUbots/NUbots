@@ -86,6 +86,7 @@ NUSensorsData::NUSensorsData()
     addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
     addSoftSensor(BalanceGyroOffset, string("BalanceGyroOffset"), sensor_t::BALANCE_GYRO_OFFSET);
     addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
+    addSensor(BalanceOrientationHardware, string("BalanceOrientationHardware"), sensor_t::BALANCE_ORIENTATION_HARDWARE);
     addSoftSensor(BalanceHorizon, string("BalanceHorzion"), sensor_t::BALANCE_HORIZON);
     addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
     addSoftSensor(BalanceFalling, string("BalanceFalling"), sensor_t::BALANCE_FALLING);
@@ -649,6 +650,19 @@ bool NUSensorsData::getOrientation(vector<float>& values)
     else 
     {
         values = BalanceOrientation->Data;
+        return true;
+    }
+}
+
+/*! @brief Gets the orientation [roll, pitch, yaw] in radians from the robot's hardware orientation sensor
+ */
+bool NUSensorsData::getOrientationHardware(vector<float>& values)
+{
+    if (BalanceOrientationHardware == NULL || BalanceOrientationHardware->IsValid == false)
+        return false;
+    else 
+    {
+        values = BalanceOrientationHardware->Data;
         return true;
     }
 }
@@ -1458,6 +1472,16 @@ void NUSensorsData::setBalanceAccelerometer(double time, const vector<float>& da
 void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool iscalculated)
 {
     setData(BalanceGyro, time, data, iscalculated);
+}
+
+/*! @brief Sets the hardware measurement of the robot's orientation
+    @param time the time the data was collected in milliseconds
+    @param data the orientation measurement
+    @param iscalculated set this to true if the data has been calculated, false otherwise
+ */
+void NUSensorsData::setBalanceOrientationHardware(double time, const vector<float>& data, bool iscalculated)
+{
+    setData(BalanceOrientationHardware, time, data, iscalculated);
 }
 
 /*! @brief Sets the left distance values to the given values
