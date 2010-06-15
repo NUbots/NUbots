@@ -109,18 +109,18 @@ void NUKick::loadKickParameters()
     // Ankle Pitch
     m_rightLegLimits.push_back(jointLimit(-1.186448, 0.932056));
 
-
     const float footWidth = m_kinematicModel->getFootInnerWidth() + m_kinematicModel->getFootOuterWidth();
-    const float yReachFwd = 30.0f;
-    const float yReachSide = 20.0f;
-    const float xMin = m_kinematicModel->getFootForwardLength();
-    const float xReachFwd = xMin + 15.0f;
-    const float xReachSide = 30.0f;
-
+    float footInnerWidth = m_kinematicModel->getFootInnerWidth();
     m_footWidth = footWidth;
     m_ballRadius = 3.5f;
-    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, footWidth, yReachFwd);
-    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -footWidth, -yReachFwd);
+    const float yReachFwd = 6.0f;
+    const float yReachSide = 20.0f;
+    const float xMin = m_kinematicModel->getFootForwardLength();
+    const float xReachFwd = xMin + 9.0f;
+    const float xReachSide = 30.0f;
+
+    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footInnerWidth+3.0f), (footInnerWidth + 3.0f + yReachFwd));
+    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footInnerWidth + 3.0f + yReachFwd), -(footInnerWidth+3.0f));
 
     LeftFootRightKickableArea = Rectangle(xMin, xReachSide, footWidth/2.0, yReachSide);
     //LeftFootLeftKickableArea = Rectangle(xMin, xReachSide, 2.0f*footWidth, 3.0f/2.0f*footWidth + yReachSide);
@@ -1261,12 +1261,18 @@ bool NUKick::AlignYposition(legId_t kickingLeg, float speed, float yPos)
 void NUKick::FlattenFoot(vector<float>& jointAngles)
 {
     jointAngles[5] = FlatFootAnklePitch(jointAngles[1], jointAngles[3]);
+    jointAngles[4] = FlatFootAnkleRoll(jointAngles[0]);
     return;
 }
 
 float NUKick::FlatFootAnklePitch(float hipPitch, float kneePitch)
 {
     return -(hipPitch + kneePitch);
+}
+
+float NUKick::FlatFootAnkleRoll(float hipRoll)
+{
+    return -(hipRoll);
 }
 
 void NUKick::MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight)
@@ -1366,8 +1372,8 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
     validData = validData && m_data->getJointPositions(s_kickingLeg,kickingLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
-    const float targetHipPitch = -1.2;
-    const float targetKneePitch = 0.6f;
+    const float targetHipPitch = -1.0;
+    const float targetKneePitch = 0.8f;
 
     static float endHipAngle = 0;
     static float endKneeAngle = 0;
@@ -1394,7 +1400,12 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
 
             vector<double> hipTimes, kneeTimes, ankleTimes;
             vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
+            vector<float> kickingTargets(kickingLegJoints);
+            kickingTargets[1] = endHipAngle;
+            kickingTargets[3] = endKneeAngle;
+            FlattenFoot(kickingTargets);
 
+            /*
             const float startTime = m_data->CurrentTime+100.0;
             const float maxChange = max(max(fabs(endHipAngle - startHipAngle),fabs(endKneeAngle - startKneeAngle)),fabs(endAnkleAngle-startAnkleAngle));
             const float swingTime = 1000.0*maxChange / swingSpeed;
@@ -1406,6 +1417,8 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
             m_actions->addJointPositions(a_kickingHipPitch,hipTimes,hipPositions,hipVelocities,100.0);
             m_actions->addJointPositions(a_kickingKneePitch,kneeTimes,kneePositions,kneeVelocities,100.0);
             m_actions->addJointPositions(a_kickingAnklePitch,ankleTimes,anklePositions,ankleVelocities,100.0);
+            */
+            MoveLimbToPositionWithSpeed(a_kickingLeg,kickingLegJoints,kickingTargets,swingSpeed,100.0f,1.0f);
             m_stateCommandGiven = true;
         }
     }
@@ -1606,7 +1619,7 @@ bool NUKick::kickAbortCondition()
 
 float NUKick::CalculateForwardSwingSpeed(float kickDistance)
 {
-    return 4.0f;
+    return 30.0f;
 }
 
 float NUKick::CalculateSidewardSwingSpeed(float kickDistance)
@@ -1655,6 +1668,10 @@ bool NUKick::chooseLeg()
 
         if(fabs(theta) < fwdAngleRange)
         {
+            debug << "Right foot: " << endl << RightFootForwardKickableArea.MinX() << " < " << leftFootRelativeBallLocation.x << " < " << RightFootForwardKickableArea.MaxX() << endl;
+            debug << RightFootForwardKickableArea.MinY() << " < " << leftFootRelativeBallLocation.y << " < " << RightFootForwardKickableArea.MaxY() << endl;
+            debug << "Left foot: " << endl << LeftFootForwardKickableArea.MinX() << " < " << rightFootRelativeBallLocation.x << " < " << LeftFootForwardKickableArea.MaxX() << endl;
+            debug << LeftFootForwardKickableArea.MinY() << " < " << rightFootRelativeBallLocation.y << " < " << LeftFootForwardKickableArea.MaxY() << endl;
             if(RightFootForwardKickableArea.PointInside(leftFootRelativeBallLocation.x,leftFootRelativeBallLocation.y))
             {
                 if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
@@ -1675,6 +1692,7 @@ bool NUKick::chooseLeg()
             }
             else if(LeftFootForwardKickableArea.PointInside(rightFootRelativeBallLocation.x,rightFootRelativeBallLocation.y))
             {
+
                 if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
                         return false;
                 else if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))

@@ -112,6 +112,7 @@ private:
     void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
     void FlattenFoot(vector<float>& jointAngles);
     float FlatFootAnklePitch(float hipPitch, float kneePitch);
+    float FlatFootAnkleRoll(float hipRoll);
     bool IsPastTime(float time);
     void MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight);
     double TimeBetweenFrames();
