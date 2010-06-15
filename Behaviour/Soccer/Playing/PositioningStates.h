@@ -25,6 +25,14 @@
 #include "../SoccerState.h"
 class SoccerFSMState;       // PositioningState is a SoccerFSMState
 
+#include "Behaviour/BehaviourPotentials.h"
+
+#include "Behaviour/Jobs/JobList.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 using namespace std;
@@ -44,6 +52,19 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "GoToPosition" << endl;
         #endif
+        
+        Self& self = m_field_objects->self;
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        StationaryObject& bluegoal = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        vector<float> result = self.CalculatePositionToProtectGoalFromMobileObject(ball, bluegoal, 75);
+        
+        float distance = sqrt(result[0]*result[0] + result[1]*result[1]);
+        float bearing = atan2(result[1], result[0]);
+        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing());
+        
+        if (ball.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(ball));
+        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };
 

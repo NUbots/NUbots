@@ -19,8 +19,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef IM_LOST_STATES_H
-#define IM_LOST_STATES_H
+#ifndef READY_LOST_STATES_H
+#define READY_LOST_STATES_H
 
 #include "../SoccerState.h"
 #include "ReadyLostState.h"

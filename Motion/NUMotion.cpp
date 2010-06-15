@@ -184,10 +184,22 @@ void NUMotion::kill()
         vector<float> orientation;
         if (m_data->getOrientation(orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
+            {
+                m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
+                m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
+                m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), larmpositions, armvelocities, 0);
+                m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), rarmpositions, armvelocities, 0);
                 return;
+            }
         // check the feet are on the ground
         if (not m_data->isOnGround())
-                return;
+        {
+            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
+            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
+            m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), larmpositions, armvelocities, 0);
+            m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), rarmpositions, armvelocities, 0);
+            return;
+        }
         
         // check the stiffness is on
         vector<float> leftstiffnesses, rightstiffnesses;
