@@ -35,8 +35,9 @@
 #include <string>
 using namespace std;
 
-namespace BehaviourPotentials 
+class BehaviourPotentials 
 {
+public:
     /*! @brief Returns a vector to go to a field state 
         @param self the self field object
         @param fieldstate the absolute position on the field [x(cm), y(cm), heading(rad)]
@@ -44,15 +45,23 @@ namespace BehaviourPotentials
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    inline vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
+    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
+    {
+        vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
+        return goToPoint(relativestate[0], relativestate[1], relativestate[2], stoppeddistance, stoppingdistance, turningdistance);
+    }
+    
+    /*! @brief Returns a vector to go to a field state 
+        @param distance to the distance to the point
+        @param bearing to the point
+        @param heading the desired heading at the point
+        @param stoppeddistance the distance in cm to the target at which the robot will stop walking, ie the accurarcy required.
+        @param stoppingdistance the distance in cm from the target the robot will start to slow
+        @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
+     */
+    static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
     {
         vector<float> result(3,0);
-        vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
-        
-        float distance = relativestate[0];
-        float bearing = relativestate[1];
-        float heading = relativestate[2];
-        
         if (distance < stoppeddistance and fabs(heading) < 0.1)         // if we are close --- enough stop
             return result;
         else
@@ -79,7 +88,7 @@ namespace BehaviourPotentials
         @param objectsize the radius in cm of the object to avoid
         @param dontcaredistance the distance in cm at which I make no attempt to avoid the object
      */
-    inline vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
+    static vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
     {
         vector<float> result(3,0);
         if (fieldstate.size() < 3)
@@ -119,7 +128,7 @@ namespace BehaviourPotentials
     
     /*! @brief Returns a vector to go to a ball
      */
-    inline vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 16, float stoppingdistance = 70)
+    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 16, float stoppingdistance = 70)
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
@@ -178,7 +187,7 @@ namespace BehaviourPotentials
     /*! @brief Returns a the vector sum of the potentials
         @param potentials a list of [trans_speed, trans_direction, rot_speed] vectors
      */
-    inline vector<float> sumPotentials(const vector<vector<float> >& potentials)
+    static vector<float> sumPotentials(const vector<vector<float> >& potentials)
     {
         float xsum = 0;
         float ysum = 0;
@@ -202,7 +211,7 @@ namespace BehaviourPotentials
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    inline vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
+    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
     {
         // Get obstacle distances from the sensors
         vector<float> temp;
@@ -240,7 +249,7 @@ namespace BehaviourPotentials
             return newspeed;
         }
     }
-}
+};
 
 
 #endif

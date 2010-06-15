@@ -63,6 +63,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 
         CheckIsFilled(FO_Candidates, vision);
 
+        CheckObjectIsBelowHorizon(FO_Candidates, vision);
 
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
@@ -570,13 +571,32 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
         //qDebug() << "Candidate: Ratio: TopLeft(x,y), BottomRight(x,y): "<< it->aspect()<< "\t" << it->getTopLeft().x << "," <<it->getTopLeft().y << "  "<<it->getBottomRight().x << ","<< it->getBottomRight().y;
+        int boarder = 5; //! Boarder of pixels
+        if (it->getBottomRight().x < width-boarder && it->getTopLeft().x > 0+boarder )
+        {
+            if(fabs(it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS)
+            {
+                //qDebug() << "Removed due to width been too small";
+                it = FO_Candidates.erase(it);
+                continue;
+            }
+        }
+        if(it->getBottomRight().y < height-boarder && it->getTopLeft().y > 0+boarder )
+        {
+            if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS)
+            {
+                //qDebug() << "Removed due to height been too small";
+                it = FO_Candidates.erase(it);
+                continue;
+            }
+        }
 
-        if( !isCorrectCheckRatio(*it,height, width)
-            || ((it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS && (it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS))
+        if( !isCorrectCheckRatio(*it,height, width))
         {
             it = FO_Candidates.erase(it);
             continue;
         }
+
         ++it;
     }
     return;
@@ -698,6 +718,26 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
         {
             ++it;
         }
+    }
+    return;
+}
+
+void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_Candidates, Vision* vision)
+{
+    vector < ObjectCandidate > ::iterator it;
+    for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
+        if((vision->m_horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y))== false)
+        {
+            //qDebug() << "Removing Goal Above Horizon:" << it->getBottomRight().x<< ","<< it->getBottomRight().y << vision->m_horizonLine.findYFromX(it->getBottomRight().x);
+            //qDebug() << "Horizon Information: " << vision->m_horizonLine.getGradient() << "x + " << vision->m_horizonLine.getYIntercept();
+            //qDebug() << vision->m_horizonLine.getA() << "x + "<< vision->m_horizonLine.getB() << "y + " << vision->m_horizonLine.getC();
+            it = FO_Candidates.erase(it);
+            continue;
+        }
+
+        ++it;
+
     }
     return;
 }
