@@ -58,9 +58,9 @@ MobileObject::~MobileObject()
 void MobileObject::postProcess(const float timestamp)
 {
     Object::postProcess(timestamp);
-    if (timeSinceLastSeen < 250)
+    if (timeSeen > 100)
         isLost = false;
-    else
+    else if (timeSinceLastSeen > 250)
         isLost = true;
 }
 
