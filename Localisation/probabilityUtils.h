@@ -16,6 +16,7 @@ class ProbabilityUtils{
 		/// Constructor
 		ProbabilityUtils();
 
+        float normalDistribution(float mean, float sigma);
 		/// Function to Draw Random Sample from Gaussian Distribution
 		double randomGaussian(double mean, double stdDev);
 		

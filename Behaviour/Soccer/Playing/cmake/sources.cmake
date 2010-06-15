@@ -25,7 +25,9 @@ SET (YOUR_SRCS  ChaseState.cpp ChaseState.h
                 PositioningState.cpp PositioningState.h
                 PositioningStates.h
                 BallIsLostState.cpp BallIsLostState.h
+                BallIsLostStates.h
                 ImLostState.cpp ImLostState.h
+                ImLostStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

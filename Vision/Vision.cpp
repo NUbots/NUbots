@@ -188,11 +188,11 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     #endif
     //Generate HorizonLine:
     vector <float> horizonInfo;
-    Horizon horizonLine;
+
 
     if(m_sensor_data->getHorizon(horizonInfo))
     {
-        horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+        m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
     }
     else
     {
@@ -228,7 +228,7 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     debug << "Begin Scanning: " << endl;
     #endif
 
-    points = findGreenBorderPoints(spacings,&horizonLine);
+    points = findGreenBorderPoints(spacings,&m_horizonLine);
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tFind Edges: finnished" << endl;
@@ -282,11 +282,11 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
             {
                 GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
             {
                 GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
             }
@@ -524,6 +524,28 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
             }
         }
     #endif
+
+        //START: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
+        /*
+        //TESTING: Save Images which of a field object seen
+        bool BlueGoalSeen = false;
+        if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() )
+        {
+            BlueGoalSeen = true;
+        }
+        for(unsigned int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
+        {
+            if(AllFieldObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                BlueGoalSeen = true;
+            }
+        }
+        if(BlueGoalSeen)
+        {
+            SaveAnImage();
+        }
+        */
+        //END: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
 }
 
 void Vision::SaveAnImage()
@@ -532,6 +554,10 @@ void Vision::SaveAnImage()
         debug << "Vision::SaveAnImage(). Starting..." << endl;
     #endif
 
+    if (!imagefile.is_open())
+        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+    if (!sensorfile.is_open())
+        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
 
     if (imagefile.is_open() and numSavedImages < 2500)
     {
@@ -880,7 +906,7 @@ ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldB
 
     //! Then calculate horizontal scanlines above the field boarder
     //! Generate Scan pattern for above the max of green boarder.
-    for(int y = 0; y < minY; y = y + scanSpacing*1)
+    for(int y = 0; y < minY; y = y + scanSpacing*0.5)
     {
         temp.x =0;
         temp.y = y;
@@ -888,7 +914,7 @@ ClassifiedSection Vision::horizontalScan(const std::vector<Vector2<int> >&fieldB
         scanArea.addScanLine(tempScanLine);
     }
     //! Generate Scan Pattern for in between the max and min of green horizon.
-    for(int y = minY; y < maxY; y = y + scanSpacing*2)
+    for(int y = minY; y < maxY; y = y + scanSpacing*1)
     {
         temp.x =0;
         temp.y = y;
@@ -931,9 +957,9 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     Vector2<int> currentPoint;
     Vector2<int> tempStartPoint;
     Vector2<int> startPoint;
-    unsigned char beforeColour = 0; //!< Colour Before the segment
-    unsigned char afterColour = 0;  //!< Colour in the next Segment
-    unsigned char currentColour = 0; //!< Colour in the current segment
+    unsigned char beforeColour = ClassIndex::unclassified; //!< Colour Before the segment
+    unsigned char afterColour = ClassIndex::unclassified;  //!< Colour in the next Segment
+    unsigned char currentColour = ClassIndex::unclassified; //!< Colour in the current segment
     //! initialising circular buffer
     int bufferSize = 1;
     boost::circular_buffer<unsigned char> colourBuff(bufferSize);
@@ -947,11 +973,11 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
         startPoint = tempLine->getStart();
         lineLength = tempLine->getLength();
         tempStartPoint = startPoint;
+        bool greenSeen = false;
 
-
-        beforeColour    = 0; //!< Colour Before the segment
-        afterColour     = 0;  //!< Colour in the next Segment
-        currentColour   = 0; //!< Colour in the current segment
+        beforeColour    = ClassIndex::unclassified; //!< Colour Before the segment
+        afterColour     = ClassIndex::unclassified;  //!< Colour in the next Segment
+        currentColour   = ClassIndex::unclassified; //!< Colour in the current segment
 
         //! No point in scanning lines less then the buffer size
         if(lineLength < bufferSize) continue;
@@ -987,6 +1013,10 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
                 if((currentColour == ClassIndex::green || currentColour == ClassIndex::unclassified || currentColour == ClassIndex::shadow_object))
                 {
+                    if(currentColour == ClassIndex::green)
+                    {
+                        greenSeen = true;
+                    }
                     tempStartPoint = currentPoint;
                     beforeColour = ClassIndex::unclassified;
                     currentColour = afterColour;
@@ -1119,8 +1149,17 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                                 tempStartPoint.x = tempStartPoint.x + bufferSize * skipPixel/2;
                             }
                         }
+                        //This rule removes
+                        if(tempLine->getNumberOfSegments() == 0 && currentColour == ClassIndex::white && greenSeen == false)
+                        {
+                            beforeColour = currentColour;
+                        }
                         TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
                         tempLine->addSegement(tempTransition);
+                    }
+                    if(currentColour == ClassIndex::green)
+                    {
+                        greenSeen = true;
                     }
                     tempStartPoint = currentPoint;
                     beforeColour = currentColour;

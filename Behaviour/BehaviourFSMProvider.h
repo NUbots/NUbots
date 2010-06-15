@@ -45,6 +45,8 @@ public:
     
     void process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo);
     bool stateChanged();
+    bool wasPreviousState(BehaviourState* state);
+    BehaviourState* getPreviousState();
 protected:
     BehaviourFSMProvider(Behaviour* manager);
 
