@@ -318,7 +318,7 @@ std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const Mobil
 
 std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth)
 {
-    float goal_angular_width = CalculateAngularWidthOfGoalFromMobileObject(goalpost, mobileobject);
+    float goal_angular_width = fabs(CalculateAngularWidthOfGoalFromMobileObject(goalpost, mobileobject));
     float goal_width = 2*fabs(goalpost.Y());
     
     float distancebetween = sqrt(pow(mobileobject.X() - goalpost.X(), 2) + pow(mobileobject.Y(),2));
