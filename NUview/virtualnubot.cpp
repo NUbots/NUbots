@@ -72,8 +72,22 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
+    Horizon testHorizonLine;
+    float bodyPitch;
+    float bodyRoll;
+    bodyRoll = newsensorsData->BalanceOrientation->Data[0];
+    bodyPitch = newsensorsData->BalanceOrientation->Data[1];
+    float headYaw;
+    newsensorsData->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+    float headPitch;
+    newsensorsData->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    int camera = 1;
 
+        testHorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
+    qDebug() << "Horizon Information: " << horizonLine.getGradient() << "x + " << horizonLine.getYIntercept();
+    qDebug() << horizonLine.getA() << "x + "<< horizonLine.getB() << "y + " << horizonLine.getC();
 
+    qDebug() << "Test: Horizon Information: " << testHorizonLine.getGradient() << "x + " << testHorizonLine.getYIntercept();
 }
 
 void virtualNUbot::saveLookupTableFile(QString fileName)
