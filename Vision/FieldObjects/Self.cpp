@@ -52,6 +52,10 @@ bool Self::lost()
         return false;
 }
 
+/*! @brief Calculate the difference from the given field state 
+    @param targetState the desired field state [x(cm), y(cm), heading(rad)] 
+    @return the difference between the current field state and the target state, otherwise known as the relative location of the target state [distance, bearing, heading]
+ */
 std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<float> targetState)
 {
     float selfX = WorldModelLocation[0];
@@ -79,6 +83,47 @@ std::vector<float> Self::CalculateDifferenceFromFieldState(const std::vector<flo
     return result;
 }
 
+/*! @brief Calculate the difference from the given field location [x,y]
+    @param desiredLocation the desired field location [x(cm), y(cm)]
+    @return the difference between the current location and the target location [distance, bearing]
+ */
+std::vector<float> Self::CalculateDifferenceFromFieldLocation(const std::vector<float> desiredLocation)
+{
+    float selfX = WorldModelLocation[0];
+    float selfY = WorldModelLocation[1];
+    float selfHeading = WorldModelLocation[2];
+    
+    float targetX = desiredLocation[0];
+    float targetY = desiredLocation[1];
+    
+    float diffX = targetX - selfX;
+    float diffY = targetY - selfY;
+    if( (diffX == 0) && (diffY == 0)) diffY = 0.0001;
+    float positionHeading = atan2(diffY, diffX);
+    
+    float distance = sqrt( diffX * diffX + diffY * diffY );
+    float bearing = normaliseAngle(positionHeading - selfHeading);
+    
+    std::vector<float> result(2,0);
+    result[0] = distance;
+    result[1] = bearing;
+    return result;
+}
+
+/*! @brief Calculates the difference between the current state and the stationary object
+    @param theObject the stationary field object you want the relative coordinates
+    @return the difference between the current field state and theObject, otherwise known as the relative location of theObject [distance, bearing]
+ */
+std::vector<float> Self::CalculateDifferenceFromStationaryObject(const StationaryObject& theObject)
+{
+    std::vector<float> fieldlocation(2,0);
+    fieldlocation[0] = theObject.X();
+    fieldlocation[1] = theObject.Y();
+    
+    return CalculateDifferenceFromFieldLocation(fieldlocation);
+}
+
+/*! @brief Calculate the distance to a stationary object */
 float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObject)
 {
     float selfX = WorldModelLocation[0];
@@ -89,6 +134,7 @@ float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObjec
     return distance;
 }
 
+/*! @brief Calculate the bearing to a stationary object */
 float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject)
 {
     float selfX = WorldModelLocation[0];
@@ -99,6 +145,63 @@ float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject
     float positionHeading = atan2(diffY, diffX);
     float bearing = normaliseAngle(positionHeading - selfHeading);
     return bearing;
+}
+
+/*! @brief Calculates the difference from a goal 
+    @return the difference between the current position and the goal [distance, bearing] */
+std::vector<float> Self::CalculateDifferenceFromGoal(const StationaryObject& goalpost)
+{
+    std::vector<float> fieldlocation(2,0);
+    fieldlocation[0] = goalpost.X();
+    return CalculateDifferenceFromFieldLocation(fieldlocation);
+}
+
+/*! @brief Calculates the angular width of the goal (in radians) from the current state */
+float Self::CalculateAngularWidthOfGoal(const StationaryObject& goalpost)
+{
+    std::vector<float> location = CalculateDifferenceFromGoal(goalpost);
+    float distance = location[0];
+    float bearing = normaliseAngle(location[1] + Heading());    // bearing from the field x-axis!
+    float width = 2*fabs(goalpost.Y());
+
+    // python: angularwidth = numpy.arctan2(width*numpy.cos(bearing), 2*distance + width*numpy.sin(bearing)) + numpy.arctan2(width*numpy.cos(bearing), 2*distance - width*numpy.sin(bearing))
+    float angularwidth = atan2(width*cos(bearing), 2*distance + width*sin(bearing)) + atan2(width*cos(bearing), 2*distance - width*sin(bearing));
+    return angularwidth;
+}
+
+/*! @brief Calculates the angular width (in radians) of the goal from the mobile object */
+float Self::CalculateAngularWidthOfGoalFromMobileObject(const StationaryObject& goalpost, const MobileObject& mobileobject)
+{
+    float mobileX = mobileobject.X();
+    float mobileY = mobileobject.Y();
+    
+    float goalX = goalpost.X();
+    float goalY = 0;
+    
+    float diffX = goalX - mobileX;
+    float diffY = goalY - mobileY;
+    if( (diffX == 0) && (diffY == 0)) diffY = 0.0001;
+    
+    float distance = sqrt( diffX * diffX + diffY * diffY );
+    float bearing = atan2(diffY, diffX);                        // bearing FROM the mobile object to the goal (from the field x-axis)
+    float width = 2*fabs(goalpost.Y());
+    
+    // python: angularwidth = numpy.arctan2(width*numpy.cos(bearing), 2*distance + width*numpy.sin(bearing)) + numpy.arctan2(width*numpy.cos(bearing), 2*distance - width*numpy.sin(bearing))
+    float angularwidth = atan2(width*cos(bearing), 2*distance + width*sin(bearing)) + atan2(width*cos(bearing), 2*distance - width*sin(bearing));
+    return angularwidth;
+}
+
+/*! @brief Returns true if the standard deviation on the robot's heading is less than the angular width of the goal for the current location
+    @param goalpost either opponent goal post
+    @param num_stddev the number of standard deviations to be less than the angular width (1 stddev = 68.2% and 2 stddev = 95.4%)
+ */
+bool Self::sdHeadingLessThanGoalWidth(const StationaryObject& goalpost, float num_stddev)
+{
+    float angularwidth = CalculateAngularWidthOfGoal(goalpost);
+    if (angularwidth < WorldModelLocationError[2])
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Returns the [time, x,y] of the closest intercept point to a moving object. 
@@ -118,7 +221,7 @@ std::vector<float> Self::CalculateClosestInterceptToMobileObject(const MobileObj
     float v_y = velocity_mag*sin(velocity_heading - heading);
     
     // Get the object position in relative coords
-    float b_r = theObject.estimatedDistance();
+    float b_r = theObject.estimatedDistance()*cos(theObject.estimatedElevation());
     float b_b = theObject.estimatedBearing();
     float b_x = b_r*cos(b_b);
     float b_y = b_r*sin(b_b);
@@ -146,7 +249,7 @@ float Self::CalculateYInterceptOfMobileObject(const MobileObject& theObject)
     float v_y = velocity_mag*sin(velocity_heading - heading);
     
     // Get the ball position in relative coords
-    float b_r = theObject.estimatedDistance();
+    float b_r = theObject.estimatedDistance()*cos(theObject.estimatedElevation());
     float b_b = theObject.estimatedBearing();
     float b_x = b_r*cos(b_b);
     float b_y = b_r*sin(b_b);
@@ -171,7 +274,7 @@ float Self::CalculateXInterceptOfMobileObject(const MobileObject& theObject)
     float v_y = velocity_mag*sin(velocity_heading - heading);
     
     // Get the ball position in relative coords
-    float b_r = theObject.estimatedDistance();
+    float b_r = theObject.estimatedDistance()*cos(theObject.estimatedElevation());
     float b_b = theObject.estimatedBearing();
     float b_x = b_r*cos(b_b);
     float b_y = b_r*sin(b_b);
@@ -179,4 +282,62 @@ float Self::CalculateXInterceptOfMobileObject(const MobileObject& theObject)
     // Now we can calculate the points where the ball will intersect our x and y axes
     float i_x = b_x - (v_x/v_y)*b_y;
     return i_x;
+}
+
+/*! @brief Calculates a position between a mobile object and a goal at distancefromgoal from the goal
+    @param mobileobject the object you are protecting the goal from
+    @param goalpost either goal post
+    @param distancefrommobile the desired distance from the mobile object
+    @return [x, y] of the position relative to the current state
+ */
+std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefrommobile)
+{
+    // get the relative x,y of the mobile object
+    float b_r = mobileobject.estimatedDistance()*cos(mobileobject.estimatedElevation());          // get the flat distance!
+    float b_b = mobileobject.estimatedBearing();
+    float b_x = b_r*cos(b_b);
+    float b_y = b_r*sin(b_b);
+    
+    // get the relative x,y of the goal
+    vector<float> goallocation = CalculateDifferenceFromGoal(goalpost);
+    float g_x = goallocation[0]*cos(goallocation[1]);
+    float g_y = goallocation[0]*sin(goallocation[1]);
+    
+    // get the relative x,y of the calculated position
+    float diffX = b_x - g_x;
+    float diffY = b_y - g_y;
+    if (diffX == 0) diffX = 0.001;
+    float p_x = b_x - distancefrommobile*cos(atan2(diffY, diffX));
+    float p_y = b_y + (diffY/diffX)*(p_x - b_x);
+    
+    vector<float> result(2,0);
+    result[0] = p_x;
+    result[1] = p_y;
+    return result;
+}
+
+std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth)
+{
+    float goal_angular_width = fabs(CalculateAngularWidthOfGoalFromMobileObject(goalpost, mobileobject));
+    float goal_width = 2*fabs(goalpost.Y());
+    
+    float distancebetween = sqrt(pow(mobileobject.X() - goalpost.X(), 2) + pow(mobileobject.Y(),2));
+    float distancefrommobile = (0.5*blockingwidth)/tan(0.5*goal_angular_width);
+    
+    vector<float> position(2,0);
+    if (distancebetween < 0.7*goal_width)
+    {   // if the mobile object is inside the goal then the calculation will break --- just go to the mobile object
+        float b_r = mobileobject.estimatedDistance()*cos(mobileobject.estimatedElevation());          // get the flat distance!
+        float b_b = mobileobject.estimatedBearing();
+        position[0] = b_r*cos(b_b);
+        position[1] = b_r*sin(b_b);
+        return position;
+    }
+    
+    // clip the distancefrommobile so that we don't go back into the goal.
+    if (distancebetween - distancefrommobile < 0.7*goal_width)
+        distancefrommobile = distancebetween - 0.7*goal_width;
+    
+    return CalculatePositionBetweenMobileObjectAndGoal(mobileobject, goalpost, distancefrommobile);
+    
 }
