@@ -24,8 +24,8 @@
 #ifndef BEHAVIOUR_POTENTIALS_H
 #define BEHAVIOUR_POTENTIALS_H
 
-#include "Vision/FieldObjects/Self.h"
-#include "Vision/FieldObjects/MobileObject.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/GameInformation.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
@@ -248,6 +248,56 @@ public:
             }
             return newspeed;
         }
+    }
+    
+    /*! @brief Returns the opponent's goal */
+    static StationaryObject& getOpponentGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject& bluegoal = fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& yellowgoal = fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        if (gameinfo->getTeamColour() == GameInformation::RedTeam)
+            return bluegoal;
+        else
+            return yellowgoal;
+    }
+    
+    /*! @brief Returns the relative position of the opponent's goal [x,y] */
+    static vector<float> getOpponentGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject& opponentgoal = getOpponentGoal(fieldobjects, gameinfo);
+        return fieldobjects->self.CalculateDifferenceFromGoal(opponentgoal);
+    }
+    
+    /*! @brief Returns the bearing to the opponent's goal */
+    static float getBearingToOpponentGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        vector<float> position = getOpponentGoalPosition(fieldobjects, gameinfo);
+        return atan2(position[1], position[0]);
+    }
+    
+    /*! @brief Returns your own goal */
+    static StationaryObject& getOwnGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject& bluegoal = fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& yellowgoal = fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        if (gameinfo->getTeamColour() == GameInformation::RedTeam)
+            return yellowgoal;
+        else
+            return bluegoal;
+    }
+    
+    /*! @brief Return the relative position of your own goal [x,y] */
+    static vector<float> getOwnGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject& owngoal = getOwnGoal(fieldobjects, gameinfo);
+        return fieldobjects->self.CalculateDifferenceFromGoal(owngoal);
+    }
+    
+    /*! @brief Returns the bearing to your own goal */
+    static float getBearingToOwnGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
+        return atan2(position[1], position[0]);
     }
 };
 
