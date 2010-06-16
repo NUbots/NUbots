@@ -119,7 +119,7 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     // perform odometry update and change the variance of the model
     doTimeUpdate((-odomForward), odomLeft, odomTurn);
     ProcessObjects();
-    
+
     m_timestamp = m_sensor_data->CurrentTime;
 }
 
@@ -208,7 +208,7 @@ void Localisation::ProcessObjects()
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
 #endif // MULTIPLE_MODELS_ON
 
-#if DEBUG_LOCALISATION_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 1
         for (int currID = 0; currID < c_MAX_MODELS; currID++){
             if(models[currID].isActive )
             {
@@ -330,27 +330,6 @@ bool Localisation::CheckGameState()
     m_previously_incapacitated = currently_incapacitated;
     m_previous_game_state = current_state;
     return true;
-    
-    /*
-
-    if(gc->getTimeSinceLastBallOut() == 0){
-        // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
-        for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
-            if(models[modelNumber].isActive == false) continue;
-            models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 100 cm
-            models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 150 cm
-            models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
-            models[modelNumber].stateStandardDeviations[6][6] = 10.0;   // 10 cm/s
-        }
-    }
-    
-    if(balanceFallen == true){
-        for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
-            // Increase heading uncertainty if fallen
-            models[modelNumber].stateStandardDeviations[2][2] = 2.0;   // 2 radians
-        }
-    }
-    */
 }
 
 void Localisation::ClearAllModels()
@@ -370,7 +349,7 @@ void Localisation::ClearAllModels()
 void Localisation::doInitialReset()
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "[" << currentFrameNumber << "] Performing initial->ready reset." << endl;
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing initial->ready reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     
     ClearAllModels();
@@ -416,8 +395,10 @@ void Localisation::doInitialReset()
 
 void Localisation::doSetReset()
 {
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing manual position reset." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
     ClearAllModels();
-    
     float x, y, heading;
     const float position_sd = 15;
     const float heading_sd = 0.1;
@@ -488,7 +469,7 @@ void Localisation::doSetReset()
 void Localisation::doPenaltyReset()
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "[" << currentFrameNumber << "] Performing penalty reset." << endl;
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing penalty reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     ClearAllModels();
@@ -506,6 +487,9 @@ void Localisation::doPenaltyReset()
 
 void Localisation::doFallenReset()
 {
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing fallen reset." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
     {   // Increase heading uncertainty if fallen
         models[modelNumber].stateStandardDeviations[0][0] += 15;        // Robot x
@@ -517,7 +501,7 @@ void Localisation::doFallenReset()
 void Localisation::doReset()
 {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "[" << currentFrameNumber << "] Performing player reset." << endl;
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing player reset." << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     ClearAllModels();
@@ -584,6 +568,22 @@ void Localisation::doReset()
     return;
 }
 
+void Localisation::doBallOutReset()
+{
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out  << "[" << m_sensor_data->CurrentTime << "] Performing ball out reset." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
+    for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
+        if(models[modelNumber].isActive == false) continue;
+        models[modelNumber].stateStandardDeviations[3][3] += 100.0; // 100 cm
+        models[modelNumber].stateStandardDeviations[4][4] += 60.0; // 60 cm
+        models[modelNumber].stateStandardDeviations[5][5] += 10.0;   // 10 cm/s
+        models[modelNumber].stateStandardDeviations[6][6] += 10.0;   // 10 cm/s
+    }
+    return;
+}
+
 /*! @brief Setup model modelNumber with the given x, y and heading */
 void Localisation::setupModel(int modelNumber, int numModels, float x, float y, float heading)
 {
@@ -610,7 +610,6 @@ void Localisation::setupModelSd(int modelNumber, float sdx, float sdy, float sdh
     models[modelNumber].stateStandardDeviations[5][5] = 10.0;       // Ball velocity x
     models[modelNumber].stateStandardDeviations[6][6] = 10.0;       // Ball velocity y
 }
-
 
 void Localisation::resetSdMatrix(int modelNumber)
 {
@@ -745,8 +744,6 @@ bool Localisation::clipActiveModelsToField()
     return wasClipped;
 }
 
-
-
 bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn)
 {
     bool result = false;
@@ -759,8 +756,6 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     }
     return result;
 }
-
-
 
 int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
 {
@@ -779,7 +774,7 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
     if (timeSinceSeen < 250)    // if another robot can see the ball then it is not lost
         m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
     
-    #if DEBUG_LOCALISATION_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
     #endif
 
@@ -792,8 +787,6 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
     return numSuccessfulUpdates;
 }
 
-
-
 int Localisation::doBallMeasurementUpdate(MobileObject &ball)
 {
     int kf_return;
@@ -801,13 +794,13 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
 
     if(IsValidObject(ball) == false)
     {
-    #if DEBUG_LOCALISATION_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
         debug_out  <<"[" << m_timestamp << "]: Skipping Invalid Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
 
-    #if DEBUG_LOCALISATION_VERBOSITY > 1
+    #if DEBUG_LOCALISATION_VERBOSITY > 2
     debug_out  <<"[" << m_timestamp << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
@@ -828,8 +821,8 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
     if(IsValidObject(landmark) == false)
     {
-#if DEBUG_LOCALISATION_VERBOSITY > 1
-        debug_out  <<"[" << m_timestamp << "] Skipping Landmark Update: ";
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+        debug_out  <<"[" << m_timestamp << "] Skipping Bad Landmark Update: ";
         debug_out  << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
@@ -858,12 +851,12 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
     {
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
 
-#if DEBUG_LOCALISATION_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
         debug_out  << "Object = " << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
-        debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
+        debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")";
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
         if(landmark.measuredBearing() != landmark.measuredBearing())
@@ -878,11 +871,13 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 			distanceOffsetError, distanceRelativeError, bearingError);
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
-#if DEBUG_LOCALISATION_VERBOSITY > 1
-        if(kf_return == KF_OK)
-            debug_out  << "OK" << endl;
-        else
-            debug_out  << "OUTLIER" << endl;
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+        if(kf_return != KF_OK)
+        {
+            debug_out << "Model[" << modelID << "]: Outlier Detected - " << landmark.getName() << endl;
+            debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << endl;
+            debug_out << "Expected - Distance = " << models[modelID].getDistanceToPosition(landmark.X(),landmark.Y()) << " Bearing = " << models[modelID].getBearingToPosition(landmark.X(),landmark.Y()) << endl;
+        }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
         if(kf_return == KF_OK) numSuccessfulUpdates++;
@@ -1037,7 +1032,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     if(index1 == index2) success = false; // Don't merge the same model.
     if((models[index1].isActive == false) || (models[index2].isActive == false)) success = false; // Both models must be active.
     if(success == false){
-#if DEBUG_LOCALISATION_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
         return success;
@@ -1170,7 +1165,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
         reset = true;
         //models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
-        #if DEBUG_LOCALISATION_VERBOSITY > 1
+        #if DEBUG_LOCALISATION_VERBOSITY > 0
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
@@ -1343,7 +1338,7 @@ int Localisation::FindNextFreeModel()
 void Localisation::ResetAll()
 {
 
-#if DEBUG_LOCALISATION_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  <<"[" << currentFrameNumber << "]: Resetting All Models." << endl;
 #endif
 
@@ -1377,7 +1372,7 @@ void Localisation::MergeModels(int maxAfterMerge) {
 
 void Localisation::PrintModelStatus(int modelID)
 {
-#if DEBUG_LOCALISATION_VERBOSITY > 1
+#if DEBUG_LOCALISATION_VERBOSITY > 2
   debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "]";
   debug_out  << "[alpha=" << models[modelID].alpha << "]";
   debug_out  << " active = " << models[modelID].isActive;

@@ -98,26 +98,33 @@ private:
     bool chooseLeg();
     bool kickAbortCondition();
     bool ShiftWeightToFoot(legId_t supportLeg, float targetWeightPercentage, float speed, float time);
-    bool LiftKickingLeg(legId_t kickingLeg);
+    bool ShiftWeightToFootClosedLoop(legId_t supportLeg, float targetWeightPercentage, float speed);
+    bool LiftKickingLeg(legId_t kickingLeg, float speed);
     bool SwingLegForward(legId_t kickingLeg, float speed);
     bool SwingLegSideward(legId_t kickingLeg, float speed);
     bool AlignYposition(legId_t kickingLeg, float speed, float yPos);
     bool AlignXposition(legId_t kickingLeg, float speed, float xPos);
-    bool LowerLeg(legId_t kickingLeg);
-    bool BalanceCoP(legId_t supportLeg);
-    void BalanceCoPLevelTorso(vector<float>& jointAngles, float CoPx, float CoPy);
-    void BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy);
-    void BalanceCoPHip(vector<float>& jointAngles, float CoPx, float CoPy);
-    void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy);
+    bool LowerLeg(legId_t kickingLeg, float speed);
+    bool BalanceCoP(legId_t supportLeg, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPLevelTorso(vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPHip(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
+    void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
     void FlattenFoot(vector<float>& jointAngles);
     float FlatFootAnklePitch(float hipPitch, float kneePitch);
+    float FlatFootAnkleRoll(float hipRoll);
     bool IsPastTime(float time);
     void MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight);
     double TimeBetweenFrames();
     float perSec2perFrame(float value);
     float SpeedMultiplier();
     float GainMultiplier();
-    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain);
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+
+    float CalculateForwardSwingSpeed(float kickDistance);
+    float CalculateSidewardSwingSpeed(float kickDistance);
+
+    void MoveArmsToKickPose(legId_t leadingArmleg, float speed);
 
 //private:
     NUSensorsData* m_data;              //!< local pointer to the latest sensor data
@@ -173,6 +180,7 @@ private:
     float m_ballRadius;
     bool m_pauseState;
     float m_variableGainValue;
+    bool m_armCommandSent;
 };
 
 #endif

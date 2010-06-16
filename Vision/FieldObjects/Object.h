@@ -4,6 +4,7 @@
 #include "../../Tools/Math/Vector2.h"
 #include "../../Tools/Math/Vector3.h"
 #include <string>
+#include <iostream>
 
 class Object
 {
@@ -71,6 +72,20 @@ class Object
         int ScreenY() const {return imagePosition.y;}
         int getObjectWidth() const {return sizeOnScreen.x;}
         int getObjectHeight() const {return sizeOnScreen.y;}
+
+        /*!
+        @brief Output streaming operation.
+        @param output The output stream.
+        @param p_loc The source localisation data to be streamed.
+        */
+        friend std::ostream& operator<< (std::ostream& output, const Object& p_obj);
+
+        /*!
+        @brief Input streaming operation.
+        @param input The input stream.
+        @param p_kf The destination localisation data to be streamed to.
+        */
+        friend std::istream& operator>> (std::istream& input, Object& p_obj);
 
         //Localisation to update:
         void updateEstimatedRelativeLocation(const Vector3<float>& newWMRelLoc);

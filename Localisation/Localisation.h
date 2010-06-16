@@ -3,8 +3,8 @@
 #include "KF.h"
 
 #include "Vision/FieldObjects/FieldObjects.h"
-class NUSensorsData;
 #include "Behaviour/GameInformation.h"
+class NUSensorsData;
 #include "Behaviour/TeamInformation.h"
 
 #include "debug.h"
@@ -67,6 +67,7 @@ class Localisation: public TimestampedData
         void doInitialReset();
         void doSetReset();
         void doPenaltyReset();
+        void doBallOutReset();
         void doFallenReset();
         void doReset();
         void setupModel(int modelNumber, int numModels, float x, float y, float heading);

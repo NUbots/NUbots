@@ -3,6 +3,7 @@
 
 #include "../../Tools/Math/Vector3.h"
 #include <vector>
+#include <iostream>
 class StationaryObject;
 class MobileObject;
 
@@ -40,6 +41,20 @@ class Self {
 		float CalculateXInterceptOfMobileObject(const MobileObject& theObject);
         std::vector<float> CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefrommobile);
         std::vector<float> CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth);
+
+        /*!
+        @brief Output streaming operation.
+        @param output The output stream.
+        @param p_loc The source localisation data to be streamed.
+        */
+        friend std::ostream& operator<< (std::ostream& output, const Self& p_self);
+
+        /*!
+        @brief Input streaming operation.
+        @param input The input stream.
+        @param p_kf The destination localisation data to be streamed to.
+        */
+        friend std::istream& operator>> (std::istream& input, Self& p_self);
 };
 
 #endif

@@ -108,3 +108,24 @@ void MobileObject::updateIsLost(bool islost)
 {
     isLost = islost;
 }
+
+std::ostream& operator<< (std::ostream& output, const MobileObject& p_mob)
+{
+    output << *static_cast<const Object*>(&p_mob);
+    output << p_mob.estimatedFieldLocationError.x << ' ' << p_mob.estimatedFieldLocationError.y << ' ';
+    output << p_mob.estimatedVelocity.x << ' ' << p_mob.estimatedVelocity.y << ' ';
+    output << p_mob.estimatedVelocityError.x << ' ' << p_mob.estimatedVelocityError.y << ' ';
+    output << p_mob.sharedCovariance[0][0] << ' ' << p_mob.sharedCovariance[0][1] << ' ' << p_mob.sharedCovariance[1][0] << ' ' << p_mob.sharedCovariance[1][1] << ' ';
+    output << p_mob.isLost << ' ';
+}
+
+std::istream& operator>> (std::istream& input, MobileObject& p_mob)
+{
+    input >> *static_cast<Object*>(&p_mob);
+    input >> p_mob.estimatedFieldLocationError.x >> p_mob.estimatedFieldLocationError.y;
+    input >> p_mob.estimatedVelocity.x >> p_mob.estimatedVelocity.y;
+    input >> p_mob.estimatedVelocityError.x >> p_mob.estimatedVelocityError.y;
+    p_mob.sharedCovariance = Matrix(2,2,false);
+    input >> p_mob.sharedCovariance[0][0] >> p_mob.sharedCovariance[0][1] >> p_mob.sharedCovariance[1][0] >> p_mob.sharedCovariance[1][1];
+    input >> p_mob;
+}
