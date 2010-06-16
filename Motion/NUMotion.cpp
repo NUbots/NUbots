@@ -268,9 +268,9 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         
         // if kick or save are running then they must run until completion (unless interrupted by fall protection or getup)
         #ifdef USE_KICK
-        if (true || m_kick->isActive()) // Turned on all of the time.
+        //if (m_kick->isActive()) // Turned on all of the time.
             m_kick->process(data, actions);
-        else {
+        //else {
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             if (m_save->isActive())
@@ -292,7 +292,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             }
         #endif
         #if defined(USE_KICK)
-        }
+//        }
         #endif
     }
     
