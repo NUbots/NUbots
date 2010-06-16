@@ -341,3 +341,17 @@ std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const Mo
     return CalculatePositionBetweenMobileObjectAndGoal(mobileobject, goalpost, distancefrommobile);
     
 }
+
+std::ostream& operator<< (std::ostream& output, const Self& p_self)
+{
+    output << p_self.WorldModelLocation.x << ' ' << p_self.WorldModelLocation.y << ' ' << p_self.WorldModelLocation.z << ' ';
+    output << p_self.WorldModelLocationError.x << ' ' << p_self.WorldModelLocationError.y << ' ' << p_self.WorldModelLocationError.z << ' ';
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, Self& p_self)
+{
+    input >> p_self.WorldModelLocation.x >> p_self.WorldModelLocation.y >> p_self.WorldModelLocation.z;
+    input >> p_self.WorldModelLocationError.x >> p_self.WorldModelLocationError.y >> p_self.WorldModelLocationError.z;
+    return input;
+}
