@@ -138,7 +138,7 @@ public:
 
         // FWD TEST
         kickPos[0] = 10;
-        kickPos[1] = 20;
+        kickPos[1] = 10;
         targetPos[0] = kickPos[0] + 1000;
         targetPos[1] = kickPos[1];
 
