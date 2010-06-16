@@ -26,4 +26,18 @@ StationaryObject::~StationaryObject()
 
 }
 
+std::ostream& operator<< (std::ostream& output, const StationaryObject& p_stat)
+{
+    output << *static_cast<const Object*>(&p_stat);
+    output << p_stat.fieldLocation.x << ' ' << p_stat.fieldLocation.y << ' ' ;
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, StationaryObject& p_stat)
+{
+    input >> *static_cast<Object*>(&p_stat);
+    input >> p_stat.fieldLocation.x;
+    input >> p_stat.fieldLocation.y;
+    return input;
+}
 

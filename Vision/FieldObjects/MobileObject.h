@@ -53,6 +53,20 @@ class MobileObject : public Object{
         float srXX() const {return sharedCovariance[0][0];}
         float srXY() const {return sharedCovariance[0][1];}
         float srYY() const {return sharedCovariance[1][1];}
+
+        /*!
+        @brief Output streaming operation.
+        @param output The output stream.
+        @param p_loc The source localisation data to be streamed.
+        */
+        friend std::ostream& operator<< (std::ostream& output, const MobileObject& p_mob);
+
+        /*!
+        @brief Input streaming operation.
+        @param input The input stream.
+        @param p_kf The destination localisation data to be streamed to.
+        */
+        friend std::istream& operator>> (std::istream& input, MobileObject& p_mob);
 };
 #endif
 
