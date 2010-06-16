@@ -119,8 +119,8 @@ void NUKick::loadKickParameters()
     const float xReachFwd = xMin + 9.0f;
     const float xReachSide = 30.0f;
 
-    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footInnerWidth+3.0f), (footInnerWidth + 3.0f + yReachFwd));
-    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footInnerWidth + 3.0f + yReachFwd), -(footInnerWidth+3.0f));
+    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footWidth), (footWidth + yReachFwd));
+    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footWidth + yReachFwd), -(footWidth));
 
     LeftFootRightKickableArea = Rectangle(xMin, xReachSide, footWidth/2.0, yReachSide);
     //LeftFootLeftKickableArea = Rectangle(xMin, xReachSide, 2.0f*footWidth, 3.0f/2.0f*footWidth + yReachSide);
