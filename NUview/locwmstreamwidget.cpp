@@ -9,11 +9,13 @@
 #include <QHostAddress>
 #include <sstream>
 #include "Localisation/Localisation.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 
 locwmStreamWidget::locwmStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
 
     locwm = new Localisation();
+    objects = new FieldObjects();
     robotName = QString("");
     setWindowTitle(tr("LocWm Stream Manager"));
     setObjectName(tr("LocWm Stream Manager"));
@@ -239,6 +241,17 @@ void locwmStreamWidget::readPendingData()
         buffer.write(reinterpret_cast<char*>(netdata.data() + sizeof(int)), datasize - sizeof(int));
         buffer >> (*locwm);
         emit locwmDataChanged(locwm);
+
+        if(buffer.str().size() - buffer.tellg() > 0)
+        {
+            qDebug() << buffer.str().size() << " " << QString(buffer.str().c_str());
+            buffer >> (*objects);
+            emit fieldObjectDataChanged(objects);
+        }
+        else
+        {
+            qDebug() << "Nothing left in buffer.";
+        }
 
         int mstime = timeToRecievePacket.elapsed();
         time.setInterval(100);
