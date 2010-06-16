@@ -261,7 +261,7 @@ public:
             return yellowgoal;
     }
     
-    /*! @brief Returns the relative position of the opponent's goal [x,y] */
+    /*! @brief Returns the relative position of the opponent's goal [distance, bearing] */
     static vector<float> getOpponentGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         StationaryObject& opponentgoal = getOpponentGoal(fieldobjects, gameinfo);
@@ -272,7 +272,7 @@ public:
     static float getBearingToOpponentGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         vector<float> position = getOpponentGoalPosition(fieldobjects, gameinfo);
-        return atan2(position[1], position[0]);
+        return position[1];
     }
     
     /*! @brief Returns your own goal */
@@ -286,7 +286,7 @@ public:
             return bluegoal;
     }
     
-    /*! @brief Return the relative position of your own goal [x,y] */
+    /*! @brief Return the relative position of your own goal [distance, bearing] */
     static vector<float> getOwnGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         StationaryObject& owngoal = getOwnGoal(fieldobjects, gameinfo);
@@ -297,7 +297,7 @@ public:
     static float getBearingToOwnGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
-        return atan2(position[1], position[0]);
+        return position[1];
     }
 };
 
