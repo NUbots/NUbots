@@ -282,7 +282,7 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     }
 
     input >> size;
-    p_fob.ambiguousFieldObjects.resize();
+    p_fob.ambiguousFieldObjects.resize(size);
     for(int i=0; i < size; i++)
     {
         input >> p_fob.ambiguousFieldObjects[i];
