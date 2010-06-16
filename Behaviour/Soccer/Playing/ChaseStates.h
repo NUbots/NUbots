@@ -41,10 +41,19 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 #include "debugverbositybehaviour.h"
 using namespace std;
 
-class GoToBall : public SoccerState
+class ChaseSubState : public SoccerState
 {
 public:
-    GoToBall(SoccerFSMState* parent) : SoccerState(parent) {}
+    ChaseSubState(ChaseState* parent) : SoccerState(parent), m_parent_machine(parent) {};
+    virtual ~ChaseSubState() {};
+protected:
+    ChaseState* m_parent_machine;
+};
+
+class GoToBall : public ChaseSubState
+{
+public:
+    GoToBall(ChaseState* parent) : ChaseSubState(parent) {}
     ~GoToBall() {};
 protected:
     BehaviourState* nextState()
@@ -65,10 +74,10 @@ protected:
     }
 };
 
-class FindTarget : public SoccerState
+class FindTarget : public ChaseSubState
 {
 public:
-    FindTarget(SoccerFSMState* parent) : SoccerState(parent) {}
+    FindTarget(ChaseState* parent) : ChaseSubState(parent) {}
     ~FindTarget() {};
 protected:
     BehaviourState* nextState()
@@ -83,10 +92,10 @@ protected:
     }
 };
 
-class Kick : public SoccerState
+class Kick : public ChaseSubState
 {
 public:
-    Kick(SoccerFSMState* parent) : SoccerState(parent) {}
+    Kick(ChaseState* parent) : ChaseSubState(parent) {}
     ~Kick() {};
     BehaviourState* nextState()
     {   // do state transitions in the chase state machine
