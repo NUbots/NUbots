@@ -21,5 +21,19 @@ class StationaryObject: public Object{
                 float X() const {return fieldLocation.x;}
                 float Y() const {return fieldLocation.y;}
 
+                /*!
+                @brief Output streaming operation.
+                @param output The output stream.
+                @param p_loc The source localisation data to be streamed.
+                */
+                friend std::ostream& operator<< (std::ostream& output, const StationaryObject& p_stat);
+
+                /*!
+                @brief Input streaming operation.
+                @param input The input stream.
+                @param p_kf The destination localisation data to be streamed to.
+                */
+                friend std::istream& operator>> (std::istream& input, StationaryObject& p_stat);
+
 };
 

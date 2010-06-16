@@ -4,6 +4,7 @@
 #include <string>
 #include "EndEffector.h"
 #include "Tools/Math/Vector3.h"
+#include "Tools/Math/Vector2.h"
 #include "Tools/Math/Rectangle.h"
 #include "debug.h"
 
@@ -94,7 +95,13 @@ public:
     double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
     float CalculateRadialLegLength(const std::vector<float>& legJoints);
     float CalculateHipPitchAngleForRelYPosition(const std::vector<float>& legJoints, float relYPos);
+    static Vector2<float> TransformPositionToFoot(const Matrix& FootTransformMatrix, Vector2<float> position);
 
+    float getFootInnerWidth() {return m_footInnerWidth;}
+    float getFootOuterWidth() {return m_footOuterWidth;}
+    float getFootForwardLength() {return m_footForwardLength;}
+    float getFootBackwardLength() {return m_footBackwardLength;}
+    float getHipOffsetY(){return m_hipOffsetY;}
 private:
             
     // Top camera

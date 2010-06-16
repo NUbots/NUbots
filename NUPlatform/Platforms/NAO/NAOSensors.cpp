@@ -47,6 +47,9 @@ vector<string> NAOSensors::m_accel_names(temp_accel_names, temp_accel_names + si
 static string temp_gyro_names[] = {DN_GYRO_X, DN_GYRO_Y};
 vector<string> NAOSensors::m_gyro_names(temp_gyro_names, temp_gyro_names + sizeof(temp_gyro_names)/sizeof(*temp_gyro_names));
 
+static string temp_orientation_names[] = {DN_ANGLE_X, DN_ANGLE_Y};
+vector<string> NAOSensors::m_orientation_names(temp_orientation_names, temp_orientation_names + sizeof(temp_orientation_names)/sizeof(*temp_orientation_names));
+
 static string temp_foot_sole_names[] = {DN_L_FSR_FL, DN_L_FSR_FR, DN_L_FSR_BL, DN_L_FSR_BR, DN_R_FSR_FL, DN_R_FSR_FR, DN_R_FSR_BL, DN_R_FSR_BR};
 vector<string> NAOSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
 
@@ -113,6 +116,8 @@ void NAOSensors::getSensorsFromALMemory()
     m_al_accel_access->ConnectToVariables(NUNAO::m_broker, m_accel_names);
     m_al_gyro_access = new ALMemoryFastAccess();
     m_al_gyro_access->ConnectToVariables(NUNAO::m_broker, m_gyro_names);
+    m_al_orientation_access = new ALMemoryFastAccess();
+    m_al_orientation_access->ConnectToVariables(NUNAO::m_broker, m_orientation_names);
     m_al_footsole_access = new ALMemoryFastAccess();
     m_al_footsole_access->ConnectToVariables(NUNAO::m_broker, m_foot_sole_names);
     m_al_footbumper_access = new ALMemoryFastAccess();
@@ -121,7 +126,6 @@ void NAOSensors::getSensorsFromALMemory()
     m_al_button_access->ConnectToVariables(NUNAO::m_broker, m_button_names);
     m_al_battery_access = new ALMemoryFastAccess();
     m_al_battery_access->ConnectToVariables(NUNAO::m_broker, m_battery_names);
-    
     m_al_ultrasonic_left_distances = new ALMemoryFastAccess();
     m_al_ultrasonic_left_distances->ConnectToVariables(NUNAO::m_broker, m_ultrasonic_left_distances);
     m_al_ultrasonic_right_distances = new ALMemoryFastAccess();
@@ -163,6 +167,9 @@ void NAOSensors::copyFromHardwareCommunications()
     for (unsigned int i=0; i<temp.size(); i++)      // we need to convert to rad/s
         temp[i] = temp[i]/154.7;                    // scaling factor: Alderbaran say it is 2.7 deg/s (PI/(2.7*180) = 1/154.7
     m_data->setBalanceGyro(m_current_time, temp);   
+    
+    m_al_orientation_access->GetValues(temp);
+    m_data->setBalanceOrientationHardware(m_current_time, temp);   
     
     m_al_footsole_access->GetValues(temp);
     for (unsigned int i=0; i<temp.size(); i++)

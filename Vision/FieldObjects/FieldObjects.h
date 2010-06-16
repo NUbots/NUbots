@@ -103,9 +103,25 @@ class FieldObjects{
             void preProcess(const float timestamp);
             void postProcess(const float timestamp);
 
+            /*!
+            @brief Output streaming operation.
+            @param output The output stream.
+            @param p_loc The source localisation data to be streamed.
+            */
+            friend std::ostream& operator<< (std::ostream& output, const FieldObjects& p_mob);
+
+            /*!
+            @brief Input streaming operation.
+            @param input The input stream.
+            @param p_kf The destination localisation data to be streamed to.
+            */
+            friend std::istream& operator>> (std::istream& input, FieldObjects& p_mob);
+
 	private:
             void InitStationaryFieldObjects();
             void InitMobileFieldObjects();
+
+
 };
 
 #endif

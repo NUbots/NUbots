@@ -242,7 +242,10 @@ void NUHead::calculateMinAndMaxPitch(float mindistance, float maxdistance, float
 {
     float maxtilt_limit = m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.05;
     minpitch = std::min(static_cast<float>(atan2(m_camera_height, mindistance) - m_CAMERA_OFFSET - 0.5*m_CAMERA_FOV_Y - m_body_pitch), m_pitch_limits[1]);
-    maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), maxtilt_limit);
+    if (maxdistance > 800)
+        maxpitch = maxtilt_limit;
+    else
+        maxpitch = std::max(static_cast<float>(atan2(m_camera_height, maxdistance) - m_CAMERA_OFFSET + 0.5*m_CAMERA_FOV_Y - m_body_pitch), maxtilt_limit);
     
     if (minpitch <= maxpitch)
     {

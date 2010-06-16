@@ -118,3 +118,30 @@ void Object::updateEstimatedRelativeVariables(float distance, float bearing, flo
         estimatedRelativeLocation[1] = bearing;
         estimatedRelativeLocation[2] = elevation;
 }
+
+
+std::ostream& operator<< (std::ostream& output, const Object& p_obj)
+{
+    output << p_obj.ID << ' ';
+    output << p_obj.measuredRelativePosition.x << ' ' << p_obj.measuredRelativePosition.y << ' ' << p_obj.measuredRelativePosition.z << ' ';
+    output << p_obj.relativeMeasurementError.x << ' ' << p_obj.relativeMeasurementError.y << ' ' << p_obj.relativeMeasurementError.z << ' ';
+    output << p_obj.estimatedRelativeLocation.x << ' ' << p_obj.estimatedRelativeLocation.y << ' ' << p_obj.estimatedRelativeLocation.z << ' ';
+    output << p_obj.imagePositionAngle.x << ' ' << p_obj.imagePositionAngle.y << ' ';
+    output << p_obj.imagePosition.x << ' ' << p_obj.imagePosition.y << ' ';
+    output << p_obj.sizeOnScreen.x << ' ' << p_obj.sizeOnScreen.y << ' ';
+    output << p_obj.timeLastSeen << ' ' << p_obj.timeSinceLastSeen << ' ' << p_obj.timeSeen << ' ' << p_obj.previousFrameTimestamp << ' ' << p_obj.isVisible << ' ';
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, Object& p_obj)
+{
+    input >> p_obj.ID;
+    input >> p_obj.measuredRelativePosition.x >> p_obj.measuredRelativePosition.y >> p_obj.measuredRelativePosition.z;
+    input >> p_obj.relativeMeasurementError.x >> p_obj.relativeMeasurementError.y >> p_obj.relativeMeasurementError.z;
+    input >> p_obj.estimatedRelativeLocation.x >> p_obj.estimatedRelativeLocation.y >> p_obj.estimatedRelativeLocation.z;
+    input >> p_obj.imagePositionAngle.x >> p_obj.imagePositionAngle.y;
+    input >> p_obj.imagePosition.x >> p_obj.imagePosition.y;
+    input >> p_obj.sizeOnScreen.x >> p_obj.sizeOnScreen.y;
+    input >> p_obj.timeLastSeen >> p_obj.timeSinceLastSeen >> p_obj.timeSeen >> p_obj.previousFrameTimestamp >> p_obj.isVisible;
+    return input;
+}

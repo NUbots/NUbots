@@ -89,6 +89,7 @@ struct RoboCupGameControlData {
 
 #define GAMECONTROLLER_RETURN_MSG_MAN_PENALISE 0
 #define GAMECONTROLLER_RETURN_MSG_MAN_UNPENALISE 1
+#define GAMECONTROLLER_RETURN_MSG_REQUEST_PICKUP 2
 
 struct RoboCupGameControlReturnData {
     char    header[4];

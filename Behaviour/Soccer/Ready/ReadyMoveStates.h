@@ -19,8 +19,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BALL_IS_LOST_STATES_H
-#define BALL_IS_LOST_STATES_H
+#ifndef READY_MOVE_STATES_H
+#define READY_MOVE_STATES_H
 
 #include "../SoccerState.h"
 #include "ReadyMoveState.h"

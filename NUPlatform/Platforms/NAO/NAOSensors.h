@@ -48,13 +48,13 @@ private:
     static vector<string> m_jointtemperature_names;         //!< a list of device names for the joint temperature sensors
     static vector<string> m_accel_names;                    //!< a list of device names for the accelerometers
     static vector<string> m_gyro_names;                     //!< a list of device names for the gyrometers
+    static vector<string> m_orientation_names;              //!< a list of device names for the orientation sensors
     static vector<string> m_foot_sole_names;                //!< a list of device names for the foot pressure sensors
     static vector<string> m_foot_bumper_names;              //!< a list of device names for the foot touch sensors
     static vector<string> m_button_names;                   //!< a list of device names for the buttons
     static vector<string> m_battery_names;                  //!< a list of device names for the battery
-
-    static vector<string> m_ultrasonic_left_distances;                  //!< a list of device names for the ultrasonic distances
-    static vector<string> m_ultrasonic_right_distances;                  //!< a list of device names for the ultrasonic distances
+    static vector<string> m_ultrasonic_left_distances;      //!< a list of device names for the ultrasonic distances
+    static vector<string> m_ultrasonic_right_distances;     //!< a list of device names for the ultrasonic distances
 
     ALMemoryFastAccess* m_al_positions_access;              //!< fast access to almemory position access
     ALMemoryFastAccess* m_al_targets_access;                //!< fast access to almemory target access
@@ -63,13 +63,14 @@ private:
     ALMemoryFastAccess* m_al_temperature_access;            //!< fast access to almemory temperature access
     ALMemoryFastAccess* m_al_accel_access;                  //!< fast access to almemory accelerometer access
     ALMemoryFastAccess* m_al_gyro_access;                   //!< fast access to almemory gyro access
+    ALMemoryFastAccess* m_al_orientation_access;            //!< fast access to almemory orientation access
     ALMemoryFastAccess* m_al_footsole_access;               //!< fast access to almemory foot sole access
     ALMemoryFastAccess* m_al_footbumper_access;             //!< fast access to almemory foot bumper access
     ALMemoryFastAccess* m_al_button_access;                 //!< fast access to almemory button access
     ALMemoryFastAccess* m_al_battery_access;                //!< fast access to almemory battery access
     
-     ALMemoryFastAccess* m_al_ultrasonic_left_distances;                 //!< a list of device names for the ultrasonic left distances
-     ALMemoryFastAccess* m_al_ultrasonic_right_distances;                 //!< a list of device names for the ultrasonic right distances
+    ALMemoryFastAccess* m_al_ultrasonic_left_distances;     //!< fast access to almemory left ultrasonic distance
+    ALMemoryFastAccess* m_al_ultrasonic_right_distances;    //!< fast access to almemory right ultrasonic distance
 };
 
 #endif

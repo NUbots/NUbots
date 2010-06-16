@@ -363,7 +363,7 @@ float Kinematics::CalculateRadialLegLength(const vector<float>& legJoints)
 {
     float kneeAngle = legJoints[3];
     // Using law of cosines.
-    return sqrt( pow(m_thighLength,2) + pow(m_tibiaLength,2) - 2*m_thighLength*m_tibiaLength*cos(kneeAngle));
+    return sqrt( pow(m_thighLength,2) + pow(m_tibiaLength,2) - 2*m_thighLength*m_tibiaLength*cos(mathGeneral::PI/2.0f - kneeAngle));
 }
 
 float Kinematics::CalculateHipPitchAngleForRelYPosition(const vector<float>& legJoints, float relYPos)
@@ -378,3 +378,18 @@ float Kinematics::CalculateRelY(const vector<float>& legJoints, float relYPos)
     return asin(relYPos / radialLegLength);
 }
 */
+
+Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMatrix, Vector2<float> position)
+{
+    Matrix footInverse = InverseMatrix(FootTransformMatrix);
+    Matrix positionCol(4,1);
+    positionCol[0][0] = position.x;
+    positionCol[1][0] = position.y;
+    positionCol[2][0] = -footInverse[2][3];
+    positionCol[3][0] = 1.0f;
+    Matrix result =  footInverse* positionCol;
+    Vector2<float> returnResult;
+    returnResult.x = result[0][0];
+    returnResult.y = result[1][0];
+    return returnResult;
+}
