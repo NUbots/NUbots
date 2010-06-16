@@ -23,6 +23,7 @@
 #define NUSYSTEM_H
 
 #include <time.h>
+#include <string>
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
     #define __NU_SYSTEM_CLOCK_GETTIME 
     #define __NU_PERIODIC_CLOCK_NANOSLEEP
@@ -62,6 +63,9 @@ public:
     virtual void displayOtherPacketReceived(NUActionatorsData* actions);
     // watchdog functions
     virtual void displayVisionFrameDrop(NUActionatorsData* actions);
+    
+    virtual std::string getWirelessMacAddress();
+    virtual std::string getWiredMacAddress();
     
     virtual void restart() {};
 private:

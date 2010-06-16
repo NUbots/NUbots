@@ -32,6 +32,16 @@
 	#include <windows.h>
 #endif
 
+#include <sstream>
+#include <cstring>
+#include <memory>
+#ifndef WIN32
+    #include <sys/ioctl.h>
+    #include <sys/socket.h>
+    #include <net/if.h>
+    #include <netinet/in.h>
+#endif
+
 using namespace std;
 
 NUSystem* nusystem;
@@ -275,6 +285,44 @@ void NUSystem::displayOtherPacketReceived(NUActionatorsData* actions)
 void NUSystem::displayVisionFrameDrop(NUActionatorsData* actions)
 {
     // by default there is no way to display such information!
+}
+
+string NUSystem::getWirelessMacAddress()
+{
+    return string();
+}
+
+string NUSystem::getWiredMacAddress()
+{
+#ifndef TARGET_OS_IS_WINDOWS
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) 
+    {
+        errorlog << "NUSystem::getWiredMacAddress(). Unable to open socket --- Unable to get mac address." << endl;
+        return string();
+    }
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    #ifdef TARGET_OS_IS_DARWIN
+        strcpy(ifr.ifr_name, "en0");
+        if (ioctl(sockfd, SIOCGIFMAC, &ifr) != -1)
+        {
+            // doesnt work on OS-X :(
+        }
+    #else
+        strcpy(ifr.ifr_name, "eth0");
+        if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) != -1)
+        {
+            stringstream ss;
+            ss << hex << setw(2) << setfill('0');
+            for (int i=0; i<5; i++)
+                ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[i] << "-";
+            ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[5];
+            return ss.str();
+        }
+    #endif
+#endif
+    return string();
 }
 
 
