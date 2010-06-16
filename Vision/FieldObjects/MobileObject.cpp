@@ -127,5 +127,5 @@ std::istream& operator>> (std::istream& input, MobileObject& p_mob)
     input >> p_mob.estimatedVelocityError.x >> p_mob.estimatedVelocityError.y;
     p_mob.sharedCovariance = Matrix(2,2,false);
     input >> p_mob.sharedCovariance[0][0] >> p_mob.sharedCovariance[0][1] >> p_mob.sharedCovariance[1][0] >> p_mob.sharedCovariance[1][1];
-    input >> p_mob;
+    input >> p_mob.isLost;
 }
