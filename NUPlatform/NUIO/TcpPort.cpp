@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include "Localisation/Localisation.h"
+#include "Vision/FieldObjects/FieldObjects.h"
 
 /*! @brief Constructs a tcp port on the specified port
  
@@ -243,12 +244,18 @@ void TcpPort::sendData(const NUimage& p_image, const NUSensorsData &p_sensors)
 }
 
 
-void TcpPort::sendData(const Localisation& p_locwm)
+void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
 {
+    debug << "Sending worldmodel packet" << endl;
     network_data_t netdata;
     network_data_t sizedata;
     stringstream buffer;
     buffer << p_locwm;
+    int locwmSize = buffer.str().size();
+    debug << "Localisation data size: " << locwmSize << endl;
+    buffer << p_objects;
+    debug << "Object data size: " << buffer.str().size()-locwmSize << endl;
+    debug << "Total size: " << buffer.str().size() << endl;
     netdata.data = (char*) buffer.str().c_str();
     netdata.size = buffer.str().size();
 
