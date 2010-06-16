@@ -26,6 +26,7 @@
 
 #include "UdpPort.h"
 class GameInformation;
+struct RoboCupGameControlReturnData;
 
 class GameControllerPort : public UdpPort
 {
@@ -33,6 +34,7 @@ public:
     GameControllerPort(GameInformation* nubotgameinformation);
     ~GameControllerPort();
     
+    void sendReturnPacket(RoboCupGameControlReturnData* data);
 private:
     void handleNewData(std::stringstream& buffer);
 public:
