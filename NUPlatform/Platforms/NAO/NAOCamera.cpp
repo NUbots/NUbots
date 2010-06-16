@@ -22,6 +22,7 @@
 #include "nubotdataconfig.h"        // for initial camera settings location
 
 #include <cstring>
+#include <sstream>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -243,6 +244,7 @@ storedTimeStamp(nusystem->getTime())
 	CameraSettings fileSettings;
 	fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
 	setSettings(fileSettings);
+    loadCameraOffset();
 	
 }
 
@@ -373,5 +375,35 @@ void NAOCamera::setSettings(const CameraSettings& newset)
     setControlSetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings.autoWhiteBalance = newset.autoWhiteBalance));
   if(newset.autoGain != settings.autoGain)
     setControlSetting(V4L2_CID_AUTOGAIN, (settings.autoGain = newset.autoGain));
+}
+
+void NAOCamera::loadCameraOffset()
+{
+    ifstream file((CONFIG_DIR + string("CameraOffsets.cfg")).c_str());
+    if (file.is_open())
+    {
+        string macaddress = nusystem->getWiredMacAddress();
+        while (not file.eof())
+        {
+            string buffer;
+            string addr_buffer;
+            float offset_buffer;
+            
+            getline(file, buffer);
+            stringstream ss(buffer);
+            getline(ss, addr_buffer, ':');
+            ss >> offset_buffer;
+            
+            if (macaddress.compare(addr_buffer) == 0)
+            {
+                CameraOffset = offset_buffer;
+                break;
+            }
+        }
+    }
+    else
+    {
+        errorlog << "NAOCamera::loadCameraOffset(). Unable to load camera offset." << endl;
+    }
 }
 

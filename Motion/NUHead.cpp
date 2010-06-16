@@ -28,6 +28,7 @@
 
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "NUPlatform/NUCamera.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -37,7 +38,7 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
+NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
 {
     m_data = NULL;
     m_actions = NULL;

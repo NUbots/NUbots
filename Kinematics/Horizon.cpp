@@ -1,4 +1,5 @@
 #include "Horizon.h"
+#include "NUPlatform/NUCamera.h"
 #include <cmath>
 
 Horizon::Horizon()
@@ -31,7 +32,7 @@ void Horizon::Calculate(double bodyPitch, double bodyRoll, double headYaw, doubl
     }
 
     if(cameraNumber == 1)
-      headPitch += 0.6981;
+        headPitch += 0.6981 + NUCamera::CameraOffset;
     
     //headPitch += 0.068/2;               // offsets measured through experiment 1/6/2010 for nubot2
     //bodyPitch += 0.068/2;
