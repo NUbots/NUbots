@@ -248,16 +248,15 @@ void FieldObjects::InitMobileFieldObjects()
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 {
     output << p_fob.self;
-
-    output << p_fob.stationaryFieldObjects.size();
+    output << p_fob.stationaryFieldObjects.size() << ' ';
     for(unsigned int i=0; i < p_fob.stationaryFieldObjects.size(); i++)
         output << p_fob.stationaryFieldObjects[i];
 
-    output << p_fob.mobileFieldObjects.size();
+    output << p_fob.mobileFieldObjects.size() << ' ';
     for(unsigned int i=0; i < p_fob.mobileFieldObjects.size(); i++)
         output << p_fob.mobileFieldObjects[i];
 
-    output << p_fob.ambiguousFieldObjects.size();
+    output << p_fob.ambiguousFieldObjects.size() << ' ';
     for(unsigned int i=0; i < p_fob.ambiguousFieldObjects.size(); i++)
         output << p_fob.ambiguousFieldObjects[i];
     output << endl;
@@ -283,6 +282,7 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     }
 
     input >> size;
+    p_fob.ambiguousFieldObjects.resize();
     for(int i=0; i < size; i++)
     {
         input >> p_fob.ambiguousFieldObjects[i];
