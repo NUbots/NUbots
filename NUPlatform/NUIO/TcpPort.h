@@ -39,6 +39,7 @@
 class NUimage;
 class NUSensorsData;
 class Localisation;
+class FieldObjects;
 
 #include <sstream>
 using namespace std;
@@ -60,7 +61,7 @@ public:
     virtual ~TcpPort();
     void sendData(network_data_t netData);
     void sendData(const NUimage& p_image, const NUSensorsData& p_sensors);
-    void sendData(const Localisation& p_locwm);
+    void sendData(const Localisation& p_locwm, const FieldObjects& p_objects);
     network_data_t receiveData();
 private:
     void run();

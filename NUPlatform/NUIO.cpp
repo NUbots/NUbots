@@ -176,7 +176,7 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
             network_data_t locnetdata = io.m_localisation_port->receiveData();
             if(locnetdata.size > 0)
             {
-                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()));
+                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(p_nubot.Objects));
             }
         }
     #endif
