@@ -888,7 +888,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     }
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
-    if(midpoints.size() < 2 )
+    if(midpoints.size() < 3 )
     {
         float FinalDistance;
         if(midpoints.empty())
@@ -972,6 +972,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! Width Averaging:
+    //qDebug() << (float)(leftPoints.size()-1);
     widthSum = widthSum/ (float)(leftPoints.size()-1);
     if(tightPoints > 0)
     {
