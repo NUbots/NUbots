@@ -5,6 +5,9 @@
 
 class KF;
 class Localisation;
+class FieldObjects;
+class Object;
+class StationaryObject;
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -24,6 +27,11 @@ public slots:
     void SetLocalisation(const Localisation* newLocalisation)
     {
         currentLocalisation = newLocalisation;
+        update();
+    };
+    void setFieldObjects(const FieldObjects* newFieldObjects)
+    {
+        currentObjects = newFieldObjects;
         update();
     };
     /*!
@@ -50,6 +58,8 @@ protected:
 
         void DrawModel(const KF& model);
         void DrawLocalisation(const Localisation& localisation);
+        void drawStationaryObjectLabel(const StationaryObject& object);
+        void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
 
         GLuint robotAuraTexture;
         GLuint fieldLineTexture;
@@ -63,6 +73,7 @@ protected:
         QPoint prevDragPos;
 
         const Localisation* currentLocalisation;
+        const FieldObjects* currentObjects;
 
         bool light;
         bool perspective;

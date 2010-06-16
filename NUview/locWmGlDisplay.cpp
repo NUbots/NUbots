@@ -5,7 +5,7 @@
 #include <QApplication>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
-
+#include "Vision/FieldObjects/FieldObjects.h"
 
 locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocalisation(0)
 {
@@ -220,6 +220,10 @@ void locWmGlDisplay::paintGL()
     if(currentLocalisation)
     {
         DrawLocalisation(*currentLocalisation);
+    }
+    if(currentObjects)
+    {
+        drawFieldObjectLabels(*currentObjects);
     }
     //drawBall(QColor(255,165,0,255), 0.0f, 0.0f);    // Draw the ball.
     //drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.75f);
@@ -450,6 +454,23 @@ void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
         }
     }
 
+}
+
+void locWmGlDisplay::drawStationaryObjectLabel(const StationaryObject& object)
+{
+    QString displayString("(%1,%2)");
+    renderText(object.X(), object.Y(),1,displayString.arg(object.measuredDistance(),0,'f',1).arg(object.measuredBearing(),0,'f',3));
+}
+
+void locWmGlDisplay::drawFieldObjectLabels(const FieldObjects& theFieldObjects)
+{
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    for (unsigned int i = 0; i < theFieldObjects.stationaryFieldObjects.size(); i++)
+    {
+        if(theFieldObjects.stationaryFieldObjects[i].isObjectVisible())
+            drawStationaryObjectLabel(theFieldObjects.stationaryFieldObjects[i]);
+    }
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
 }
 
 void locWmGlDisplay::resizeGL(int width, int height)
