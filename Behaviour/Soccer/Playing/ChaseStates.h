@@ -69,7 +69,7 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         
-        vector<float> speed = BehaviourPotentials::goToBall(ball, m_field_objects->self.CalculateBearingToStationaryObject(m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]));
+        vector<float> speed = BehaviourPotentials::goToBall(ball, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };

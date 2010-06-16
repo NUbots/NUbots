@@ -94,8 +94,8 @@ void NBWalk::sendWalkCommand()
 {
     static WalkCommand* command = new WalkCommand(0, 0, 0);
     command->x_mms = m_speed_x*10;
-    command->y_mms = m_speed_y*20;
-    command->theta_rads = m_speed_yaw*2;
+    command->y_mms = m_speed_y*10;
+    command->theta_rads = m_speed_yaw;
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NBWalk::sendWalkCommand() command: " << *command << endl;
@@ -208,12 +208,14 @@ void NBWalk::setGait()
     m_gait->zmp[1] = parameters[2].Value;           // zmp static fraction
     m_gait->zmp[2] = 10*parameters[3].Value;        // zmp offset
     m_gait->zmp[3] = 10*parameters[3].Value;        // zmp offset
-    m_gait->step[1] = parameters[4].Value;          // double support time
-    m_gait->hack[0] = parameters[5].Value;          // hip roll hack
-    m_gait->hack[1] = parameters[5].Value;          // hip roll hack
-    m_gait->step[3] = parameters[6].Value;          // foot lift angle
-    m_gait->stance[3] = parameters[7].Value;        // forward lean
-    m_gait->stance[0] = 10*parameters[8].Value;     // torso height
+    m_gait->zmp[4] = 10*parameters[4].Value;        // zmp offset strafe
+    m_gait->zmp[5] = 10*parameters[5].Value;        // zmp offset turn
+    m_gait->step[1] = parameters[6].Value;          // double support time
+    m_gait->hack[0] = parameters[7].Value;          // hip roll hack
+    m_gait->hack[1] = parameters[7].Value;          // hip roll hack
+    m_gait->step[3] = parameters[8].Value;          // foot lift angle
+    m_gait->stance[3] = parameters[9].Value;        // forward lean
+    m_gait->stance[0] = 10*parameters[10].Value;     // torso height
     
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];

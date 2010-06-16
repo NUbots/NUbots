@@ -30,6 +30,7 @@ class SoccerFSMState;       // PositioningState is a SoccerFSMState
 #include "Behaviour/Jobs/JobList.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 
+#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 
@@ -55,8 +56,8 @@ protected:
         
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
-        StationaryObject& bluegoal = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-        vector<float> result = self.CalculatePositionToProtectGoalFromMobileObject(ball, bluegoal, 75);
+        StationaryObject& owngoal = BehaviourPotentials::getOwnGoal(m_field_objects, m_game_info);
+        vector<float> result = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 75);
         
         float distance = sqrt(result[0]*result[0] + result[1]*result[1]);
         float bearing = atan2(result[1], result[0]);
@@ -64,6 +65,9 @@ protected:
         
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
+        else if (ball.TimeSinceLastSeen() > 250)
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };
