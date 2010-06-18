@@ -43,6 +43,17 @@ GameControllerPort::~GameControllerPort()
 {
 }
 
+/*! @brief Send game controller return packet */
+void GameControllerPort::sendReturnPacket(RoboCupGameControlReturnData* data)
+{
+    if (data)
+    { 
+        stringstream buffer;
+        buffer.write((char*) data, sizeof(*data));
+        sendData(buffer);
+    }
+}
+
 /*! @brief Copies the received data into the public nubot joblist
     @param buffer containing the joblist
 */

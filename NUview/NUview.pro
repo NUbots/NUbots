@@ -141,7 +141,8 @@ HEADERS += ui_mainwindow.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
     ../Vision/EllipseFitting/FittingCalculations.h \
-    ../Tools/Math/Rectangle.h
+    ../Tools/Math/Rectangle.h \
+    ../NUPlatform/NUCamera.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -234,6 +235,7 @@ SOURCES += mainwindow.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
     ../Vision/EllipseFitting/FittingCalculations.cpp \
-    ../Tools/Math/Rectangle.cpp
+    ../Tools/Math/Rectangle.cpp \
+    ../NUPlatform/NUCamera.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

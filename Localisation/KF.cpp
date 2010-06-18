@@ -826,7 +826,8 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
 
   // Update Alpha
   double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
-  alpha *= 1 / (1 + innovation2measError);
+  //alpha *= 1 / (1 + innovation2measError);
+  alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,0.01);
 
   if (innovation2 > c_threshold2){
 		return KF_OUTLIER;
@@ -1026,6 +1027,16 @@ Matrix KF::CalculateSigmaPoints() const
     }
     return scriptX;
 }
+
+float KF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const
+{
+    const int numMeas = 2;
+    float notOutlierLikelyhood = 1.0 - outlierLikelyhood;
+    float expRes = exp(-0.5*convDble(innovation.transp()*Invert22(innovationVariance)*innovation));
+    float fracRes = 1.0 / ( sqrt( pow(2*PI,numMeas)*determinant(innovationVariance) ) );
+    return notOutlierLikelyhood * fracRes * expRes + outlierLikelyhood;
+}
+
 
 std::ostream& operator<< (std::ostream& output, const KF& p_kf)
 {

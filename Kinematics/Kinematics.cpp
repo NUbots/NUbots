@@ -2,6 +2,7 @@
 #include <cmath>
 #include "Tools/Math/TransformMatrices.h"
 #include "Tools/Math/General.h"
+#include "NUPlatform/NUCamera.h"
 #include "debug.h"
 
 
@@ -20,7 +21,7 @@ bool Kinematics::LoadModel(const std::string& fileName)
     // Bottom Camera
     m_cameraBottomOffsetZ = 2.381;
     m_cameraBottomOffsetX = 4.88;
-    m_cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0);
+    m_cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0) + NUCamera::CameraOffset;
 
     // Neck
     m_neckOffsetZ = 12.65;

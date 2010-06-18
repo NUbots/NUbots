@@ -526,23 +526,33 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     #endif
 
         //START: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
-        /*
+
         //TESTING: Save Images which of a field object seen
-        bool BlueGoalSeen = false;
-        if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() )
+        //bool BlueGoalSeen = false;
+        /*
+        if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
         {
-            BlueGoalSeen = true;
+            if(isnan(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()))
+            {
+                SaveAnImage();
+            }
+
+        }
+        if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() )
+        {
+            if(isnan(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()))
+            {
+                SaveAnImage();
+            }
         }
         for(unsigned int i = 0; i < AllFieldObjects->ambiguousFieldObjects.size();i++)
         {
-            if(AllFieldObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            if(isnan(AllFieldObjects->ambiguousFieldObjects[i].measuredDistance()))
+
             {
-                BlueGoalSeen = true;
+                SaveAnImage();
             }
-        }
-        if(BlueGoalSeen)
-        {
-            SaveAnImage();
+
         }
         */
         //END: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------

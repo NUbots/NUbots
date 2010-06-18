@@ -888,12 +888,12 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     }
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
-    if(midpoints.size() < 2 )
+    if(midpoints.size() < 3 )
     {
         float FinalDistance;
         if(midpoints.empty())
         {
-
+            //TODO: Find the Largest Transition Segment
             float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
             float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x)); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
 
@@ -920,7 +920,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     //FORM EQUATION if MidPointLine
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << endl;
     LSFittedLine midPointLine;
-    for (int i = 0; i < (int) midpoints.size(); i++)
+    for (int i = 0; i < (int) midpoints.size()-1; i++)
     {
 
         LinePoint  point;
@@ -942,7 +942,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     //! Tight Average filter: Using the principle that mid-points should have symetrical left and right distances,
     //! we can filter mid-points which have bad left and right distances, by looking at the difference between left and right, as they should be "approx 0".
     //! Largest Width is obtained by itterating through the midpoint distances, and obtaining the largest width that has symetrical left and right distances.
-    for(int i = 0 ; i < (int)leftPoints.size(); i++)
+    for(int i = 0 ; i < (int)leftPoints.size()-1; i++)
     {
         Vector2<int> leftpoint = leftPoints[i];
         Vector2<int> rightpoint = rightPoints[i];
@@ -972,7 +972,8 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! Width Averaging:
-    widthSum = widthSum/ (float)leftPoints.size();
+    //qDebug() << (float)(leftPoints.size()-1);
+    widthSum = widthSum/ (float)(leftPoints.size()-1);
     if(tightPoints > 0)
     {
         tightwidthSum = tightwidthSum/tightPoints;

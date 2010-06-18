@@ -53,7 +53,6 @@ public:
     friend NUIO& operator<<(NUIO& io, JobList* jobs);
     void setJobPortTargetAddress(std::string ipaddress);
     void setJobPortToBroadcast();
-    
 
     // Raw Image streaming 
     friend NUIO& operator<<(NUIO& io, NUbot& p_nubot);

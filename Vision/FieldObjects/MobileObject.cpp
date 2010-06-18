@@ -58,9 +58,9 @@ MobileObject::~MobileObject()
 void MobileObject::postProcess(const float timestamp)
 {
     Object::postProcess(timestamp);
-    if (timeSinceLastSeen < 250)
+    if (timeSeen > 100)
         isLost = false;
-    else
+    else if (timeSinceLastSeen > 250)
         isLost = true;
 }
 
@@ -117,6 +117,7 @@ std::ostream& operator<< (std::ostream& output, const MobileObject& p_mob)
     output << p_mob.estimatedVelocityError.x << ' ' << p_mob.estimatedVelocityError.y << ' ';
     output << p_mob.sharedCovariance[0][0] << ' ' << p_mob.sharedCovariance[0][1] << ' ' << p_mob.sharedCovariance[1][0] << ' ' << p_mob.sharedCovariance[1][1] << ' ';
     output << p_mob.isLost << ' ';
+    return output;
 }
 
 std::istream& operator>> (std::istream& input, MobileObject& p_mob)
@@ -127,5 +128,6 @@ std::istream& operator>> (std::istream& input, MobileObject& p_mob)
     input >> p_mob.estimatedVelocityError.x >> p_mob.estimatedVelocityError.y;
     p_mob.sharedCovariance = Matrix(2,2,false);
     input >> p_mob.sharedCovariance[0][0] >> p_mob.sharedCovariance[0][1] >> p_mob.sharedCovariance[1][0] >> p_mob.sharedCovariance[1][1];
-    input >> p_mob;
+    input >> p_mob.isLost;
+    return input;
 }

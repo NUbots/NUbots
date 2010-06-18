@@ -35,6 +35,8 @@
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Tools/Math/General.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -56,8 +58,9 @@ protected:
 class BallIsLostPan : public BallIsLostSubState
 {
 public:
-    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent) 
+    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
     {
+        m_spin_speed = 0;
         m_time_in_state = 0;
         m_previous_time = 0;
         m_pan_started = false;
@@ -78,9 +81,6 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "BallIsLostPan" << endl;
         #endif
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
-        
         // keep track of the time in this state
         if (m_parent->stateChanged())
             reset();
@@ -94,6 +94,14 @@ protected:
             if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
                 m_pan_started = true;
         }
+        
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        if (ball.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(ball));
+        else
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        
+        m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
     }
 private:
     void reset()
@@ -101,7 +109,13 @@ private:
         m_time_in_state = 0;
         m_pan_started = false;
         m_pan_end_time = 0;
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing() < 0)
+            m_spin_speed = -m_ROTATIONAL_SPEED;
+        else
+            m_spin_speed = m_ROTATIONAL_SPEED;
     }
+    const float m_ROTATIONAL_SPEED;
+    float m_spin_speed;
     float m_time_in_state;
     double m_previous_time;
     bool m_pan_started;
@@ -135,20 +149,26 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "BallIsLostSpin" << endl;
         #endif
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (m_parent->stateChanged())
-        {   // decided which direction to spin based on the estimated bearing when we enter this state
+        {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
-            if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].estimatedBearing() < 0)
-                m_spin_speed = -m_ROTATIONAL_SPEED;
+            vector<float> walkspeed;
+            if (m_data->getMotionWalkSpeed(walkspeed) and walkspeed[2] != 0)        
+                m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
             else
-                m_spin_speed = m_ROTATIONAL_SPEED;
+                m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;
         }
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
         
+        if (ball.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(ball));
+        else
+            m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, m_spin_speed));
+        
         m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
-        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, m_spin_speed));
     }
 private:
     const float m_ROTATIONAL_SPEED;

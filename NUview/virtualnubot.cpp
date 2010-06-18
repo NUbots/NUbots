@@ -62,6 +62,10 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
 }
 void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
+
+
+
+
     sensorsData = newsensorsData;
     vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
@@ -70,9 +74,37 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
         vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
+    else
+    {
+        qDebug() << "Invalid Horizon Line Information";
+    }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
+    /*Horizon testHorizonLine;
+    float bodyPitch;
+    float bodyRoll;
+    bodyRoll = newsensorsData->BalanceOrientation->Data[0];
+    bodyPitch = newsensorsData->BalanceOrientation->Data[1];
+    float headYaw = 0.0;
+    bool isok = newsensorsData->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+    qDebug() << "Is HeadYaw Ok: " << isok;
 
+    float headPitch = 0.0;
+    isok = newsensorsData->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    qDebug() << "Is HeadPitch Ok: " << isok;
+
+    headPitch = -0.82 + 0.12; //7degrees in radians
+    int camera = 1;
+
+    float elevation = vision.CalculateElevation(120 - 16);
+    qDebug() << "Elevation: " << elevation;
+        testHorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
+
+    qDebug() <<"Body Pitch: " << bodyPitch << "\tBody Roll: " << bodyRoll << "\tHeadPitch:" << headPitch << "\tHeadYaw:" << headYaw;
+    qDebug() << "Test: Horizon Information: " << testHorizonLine.getGradient() << "x + " << testHorizonLine.getYIntercept();
+    */
+    qDebug() << "Horizon Information: " << horizonLine.getGradient() << "x + " << horizonLine.getYIntercept();
+    qDebug() << horizonLine.getA() << "x + "<< horizonLine.getB() << "y + " << horizonLine.getC();
 
 }
 

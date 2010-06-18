@@ -33,6 +33,7 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class GameControllerPort;
 
 class GameInformation
 {
@@ -74,6 +75,7 @@ public:
     int opponentScore() const;   
     
     // GameController packets
+    void addNetworkPort(GameControllerPort* port);
     friend GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data);
     void process(RoboCupGameControlData* data);
 
@@ -102,6 +104,7 @@ private:
     // Game Information
     RoboCupGameControlData* m_currentControlData;        //!< The current game info.
     double m_last_packet_time;                           //!< The time the last game controller packet was received
+    GameControllerPort* m_port;
     RoboCupGameControlReturnData* m_currentReturnData;   //!< The current return packet
 };
 

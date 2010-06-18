@@ -33,6 +33,7 @@
 #include "NUbot.h"
 #include "NUPlatform/NUPlatform.h"
 #include "Behaviour/Jobs.h"
+#include "Behaviour/GameInformation.h"
 #include "Tools/Image/NUimage.h"
 
 #include <sstream>
@@ -56,6 +57,7 @@ NUIO::NUIO(NUbot* nubot)
     
     #ifdef USE_NETWORK_GAMECONTROLLER
         m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
+        m_nubot->GameInfo->addNetworkPort(m_gamecontroller_port);
     #endif
     #ifdef USE_NETWORK_TEAMINFO
         m_team_port = new TeamPort(m_nubot->TeamInfo, TEAM_PORT);
@@ -176,7 +178,7 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
             network_data_t locnetdata = io.m_localisation_port->receiveData();
             if(locnetdata.size > 0)
             {
-                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()));
+                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(p_nubot.Objects));
             }
         }
     #endif

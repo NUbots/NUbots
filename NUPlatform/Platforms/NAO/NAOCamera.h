@@ -40,6 +40,8 @@ public:
     void setSettings(const CameraSettings& newset);
 
 private:
+    void loadCameraOffset();
+private:
   enum 
   {
     frameBufferCount = 20, //!< Number of available frame buffers.

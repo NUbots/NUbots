@@ -21,6 +21,7 @@
 
 #include "NUCamera.h"
 
+float NUCamera::CameraOffset = 0;
 
 /*NUCamera::NUCamera()
 {

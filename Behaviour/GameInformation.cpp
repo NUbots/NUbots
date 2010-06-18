@@ -2,6 +2,7 @@
 
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "NUPlatform/NUIO/GameControllerPort.h"
 #include "NUPlatform/NUSystem.h"
 
 #include <memory.h>
@@ -11,6 +12,7 @@ GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData
 {
     m_data = data;
     m_actions = actions;
+    m_port = 0;
     
     m_player_number = playerNumber;
     m_team_number = teamNumber;
@@ -168,7 +170,8 @@ void GameInformation::doManualStateChange()
         m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_MAN_UNPENALISE;
     }
     
-    //! @todo send game controller return packet
+    if (m_port)
+        m_port->sendReturnPacket(m_currentReturnData);
 }
 
 /*! @brief Does a manual team change
@@ -294,5 +297,10 @@ void GameInformation::process(RoboCupGameControlData* data)
             nusystem->displayGamePacketReceived(m_actions);
         }
     }
+}
+
+void GameInformation::addNetworkPort(GameControllerPort* port)
+{
+    m_port = port;
 }
 

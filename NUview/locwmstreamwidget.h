@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QTime>
 
+class FieldObjects;
 class Localisation;
 class QLabel;
 class QLineEdit;
@@ -62,6 +63,7 @@ signals:
       */
     void PacketReady(QByteArray* datagram);
     void locwmDataChanged(const Localisation*);
+    void fieldObjectDataChanged(const FieldObjects*);
 
 private:
     QString robotName;
@@ -92,6 +94,7 @@ private:
     QTimer time;
     QTime timeToRecievePacket;
     Localisation* locwm;
+    FieldObjects* objects;
 };
 
 #endif // VISIONSTREAMWIDGET_H

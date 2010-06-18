@@ -29,6 +29,8 @@
 class NUCamera
 {
 public:
+    static float CameraOffset;
+public:
     virtual ~NUCamera();
     virtual NUimage* grabNewImage() = 0;
     virtual void setSettings(const CameraSettings& newset) = 0;
