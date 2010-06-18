@@ -435,6 +435,8 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
         DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates, horizontalsegments);
 
+        PostProcessGoals();
+
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-GOALPost Recognition: " <<endl;
         #endif
@@ -2087,6 +2089,13 @@ void Vision::DetectGoals(std::vector<ObjectCandidate>& FO_Candidates,std::vector
     int height = currentImage->getHeight();
     GoalDetection goalDetector;
     goalDetector.FindGoal(FO_Candidates, FO_AboveHorizonCandidates, AllFieldObjects, horizontalSegments, this,height,width);
+    return;
+}
+
+void Vision::PostProcessGoals()
+{
+    GoalDetection goalDetector;
+    goalDetector.PostProcessGoalPosts(AllFieldObjects);
     return;
 }
 

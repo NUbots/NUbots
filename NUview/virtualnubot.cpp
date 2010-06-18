@@ -64,8 +64,6 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
 
 
-
-
     sensorsData = newsensorsData;
     vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
@@ -76,7 +74,13 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     }
     else
     {
-        qDebug() << "Invalid Horizon Line Information";
+        qDebug() << "Invalid Horizon Line Information" << horizondata.size() ;//<< horizondata[0]<< horizondata[1] <<horizondata[2];
+        horizondata.push_back(0);
+        horizondata.push_back(-320);
+        horizondata.push_back(320);
+
+        horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
+        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
@@ -402,6 +406,10 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     qDebug() << "Finding BLUE Goals \t" <<BlueGoalCandidates.size() << BlueGoalAboveHorizonCandidates.size() ;
     vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
     candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
+
+    //TODO: CHECK IF WORKING!
+    qDebug() << "Post Processing Goal Posts: ";
+    vision.PostProcessGoals();
      qDebug() << "Finding Lines" ;
     vision.DetectLines(&LineDetector);
     //! Extract Detected Line & Corners

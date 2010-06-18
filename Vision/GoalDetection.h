@@ -5,6 +5,8 @@
 #define GOAL_WIDTH 11 //LAB = 11cm, OFFICIAL = 10cm
 #define GOAL_HEIGHT 80 //in cm
 
+#define DISTANCE_BETWEEN_POSTS 140
+
 
 class GoalDetection
 {
@@ -19,6 +21,8 @@ class GoalDetection
                         Vision* vision,
                         int height,
                         int width);
+
+        void PostProcessGoalPosts(FieldObjects* AllObjects);
 
 
   private:
@@ -50,7 +54,21 @@ class GoalDetection
         void SortObjectCandidates(std::vector<ObjectCandidate>& FO_Candidates);
         static bool ObjectCandidateSizeSortPredicate(const ObjectCandidate& goal1, const ObjectCandidate& goal2);
 
-        void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate* GoalPost ,  int ID);
+
+
+
+
+        unsigned char FindColourOfClosestPost(FieldObjects* AllObjects);
+
+
+        //! FieldObject Updating Functions
+        void UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision);
+
+        void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate* GoalPost ,  int ID, Vector3<float> sphericalPosition);
+
+        void AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects* AllObjects, Vision* vision);
+
+        Vector3<float>  CalculateSphericalPosition(ObjectCandidate* GoalPost, Vision* vision);
 
         float MINIMUM_GOAL_WIDTH_IN_PIXELS;
         float MINIMUM_GOAL_HEIGHT_IN_PIXELS;
