@@ -30,15 +30,29 @@ class NUActionatorsData;
 class BlockJob;
 class SaveJob;
 class NUWalk;
+#include "Motion/NUMotionProvider.h"
 
-class NUSave
+class NUSave : public NUMotionProvider
 {
 public:
-    NUSave(NUWalk* walk);
+    NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~NUSave();
+    
+    void stop();
+    void stopHead();
+    void stopArms();
+    void stopLegs();
     void kill();
     
     bool isActive();
+    bool isUsingHead();
+    bool isUsingArms();
+    bool isUsingLegs();
+    
+    bool requiresHead() {return true;}
+    bool requiresArms() {return true;}
+    bool requiresLegs() {return true;}
+    
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(BlockJob* job);
     void process(SaveJob* job);
@@ -46,6 +60,18 @@ private:
 public:
 private:
     NUWalk* m_walk;
+    NUSensorsData* m_data;
+    NUActionatorsData* m_actions;
+
+    MotionScript m_block_left;
+    MotionScript m_block_right;
+    MotionScript m_block_centre;
+    MotionScript m_dive_left;
+    MotionScript m_dive_right;
+    
+    double m_head_completion_time;
+    double m_arm_completion_time;
+    double m_completion_time;
 };
 
 #endif

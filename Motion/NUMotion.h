@@ -30,6 +30,7 @@ class NUActionatorsData;
 class JobList;
 class MotionKillJob;
 class MotionFreezeJob;
+class NUMotionProvider;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
@@ -54,25 +55,37 @@ class MotionScript;
 class NUMotion
 {
 public:
-    NUMotion();
+    NUMotion(NUSensorsData* data, NUActionatorsData* actions);
     ~NUMotion();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList* jobs);
     
-    void freeze();
+    void stop();
     void kill();
 private:
     void process(MotionKillJob* job);
     void process(MotionFreezeJob* job);
     void updateMotionSensors();
+    
+    void killActiveProviders();
+    void stopActiveProviders();
+    void setNextProviders(NUMotionProvider* next_provider);
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object
     
+    NUMotionProvider* m_current_head_provider;          //!< the provider currently controling the head
+    NUMotionProvider* m_current_arm_provider;           //!< the provider currently controling the arms
+    NUMotionProvider* m_current_leg_provider;           //!< the provider currently controling the legs
+    
+    NUMotionProvider* m_next_head_provider;             //!< the next provider waiting to control the head
+    NUMotionProvider* m_next_arm_provider;              //!< the next provider waiting to control the arms
+    NUMotionProvider* m_next_leg_provider;              //!< the next provider waiting to control the legs
+    
     // essential motion components
-    FallProtection* m_fall_protection;  //!< the fall protection module
-    Getup* m_getup;                     //!< the getup module
+    FallProtection* m_fall_protection;      //!< the fall protection module
+    Getup* m_getup;                         //!< the getup module
     // optional motion components
     #ifdef USE_HEAD
         NUHead* m_head;                     //!< the head module

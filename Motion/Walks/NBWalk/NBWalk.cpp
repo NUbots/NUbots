@@ -40,9 +40,10 @@ inline T NORMALISE(T theta){
 
 /*! Creates a module to walk using NB's walk engine
  */
-NBWalk::NBWalk() :  nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
-                    walkProvider(nb_sensors),
-                    nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
+NBWalk::NBWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWalk(data, actions),
+                                                                   nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
+                                                                   walkProvider(nb_sensors),
+                                                                   nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
 {
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);

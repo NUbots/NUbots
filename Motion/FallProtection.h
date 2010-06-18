@@ -34,23 +34,40 @@
 #ifndef FALLPROTECTION_H
 #define FALLPROTECTION_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
 class NUWalk;
+#include "Motion/NUMotionProvider.h"
 
-class FallProtection
+class FallProtection : public NUMotionProvider
 {
 public:
-    FallProtection(NUWalk* walk);
+    FallProtection(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~FallProtection();
     
     bool enabled();
     void enable();
     void disable();
     
+    void stop();
+    void stopHead();
+    void stopArms();
+    void stopLegs();
+    void kill();
+    
+    bool isActive();
+    bool isUsingHead();
+    bool isUsingArms();
+    bool isUsingLegs();
+    
+    bool requiresHead() {return true;}
+    bool requiresArms() {return true;}
+    bool requiresLegs() {return true;}
+    
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:
-    NUWalk* m_walk;
+    NUWalk* m_walk;                                 //!< local pointer to the walk engine
+    
     bool m_enabled;
 };
 

@@ -29,14 +29,14 @@ class NUSensorsData;
 class NUActionatorsData;
 class KickJob;
 class NUWalk;
+#include "Motion/NUMotionProvider.h"
 
 #include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include <string>
 
-class NUKick
+class NUKick : public NUMotionProvider
 {
-
     enum poseType_t
     {
         DO_NOTHING,
@@ -75,14 +75,26 @@ class NUKick
     };
 
 public:
-    NUKick(NUWalk* walk);
+    NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~NUKick();
     void stop();
+    void stopHead();
+    void stopArms();
+    void stopLegs();
     void kill();
+    
+    bool isActive();
+    bool isUsingHead();
+    bool isUsingArms();
+    bool isUsingLegs();
+    
+    bool requiresHead() {return true;}
+    bool requiresArms() {return true;}
+    bool requiresLegs() {return true;}
+    
     void loadKickParameters();
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(KickJob* job);
-    bool isActive();
     std::string toString(legId_t theLeg);
     std::string toString(swingDirection_t theSwingDirection);
     std::string toString(poseType_t thePose);
@@ -127,8 +139,6 @@ private:
     void MoveArmsToKickPose(legId_t leadingArmleg, float speed);
 
 //private:
-    NUSensorsData* m_data;              //!< local pointer to the latest sensor data
-    NUActionatorsData* m_actions;       //!< local pointer to the next actionators data
     NUWalk* m_walk;                     //!< local pointer to the walk engine
     Kinematics* m_kinematicModel;
     

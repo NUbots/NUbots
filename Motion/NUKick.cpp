@@ -42,7 +42,7 @@ using namespace mathGeneral;
 
 
 
-NUKick::NUKick(NUWalk* walk)
+NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUKick", data, actions)
 {
     m_walk = walk;
     m_kinematicModel = new Kinematics();
@@ -233,9 +233,28 @@ std::string NUKick::toString(poseType_t thePose)
     return result;
 }
 
+/*! @brief Returns true if the kick is active */
 bool NUKick::isActive()
 {
     return m_kickIsActive;
+}
+
+/*! @brief Returns true if the kick is using the head */
+bool NUKick::isUsingHead()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the kick is using the arms */
+bool NUKick::isUsingArms()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the kick is using the legs */
+bool NUKick::isUsingLegs()
+{
+    return isActive();
 }
 
 /*! @brief Kills the kick module
@@ -251,6 +270,23 @@ void NUKick::kill()
 
 void NUKick::stop()
 {
+    stopHead();
+    stopArms();
+    stopLegs();
+}
+
+void NUKick::stopHead()
+{   // If another module wants to use the head, Steve says to bad...
+    return;
+}
+
+void NUKick::stopArms()
+{   // if another module wants to use the arms, Steve says to bad...
+    return;
+}
+
+void NUKick::stopLegs()
+{   // if another module wants to use the legs, then we should stop
     debug << "Kick stop called." << endl;
     m_stateCommandGiven = false;
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.

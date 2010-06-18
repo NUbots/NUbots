@@ -38,10 +38,8 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
+NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
 {
-    m_data = NULL;
-    m_actions = NULL;
     m_camera_height = 46;
     m_body_pitch = 0;
     m_sensor_pitch = 0;
@@ -61,17 +59,40 @@ NUHead::~NUHead()
     kill();
 }
 
+/*! @brief Stops the head module. The head module is really easy to stop so it happens immediately
+ */
+void NUHead::stop()
+{
+    stopHead();
+}
+
+void NUHead::stopHead()
+{
+    m_is_nodding = false;
+    m_is_panning = false;
+    m_move_end_time = 0;
+    if (m_data and m_actions)
+        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
+}
+
 /*! @brief Kills the head module
  */
 void NUHead::kill()
 {
-    m_is_nodding = false;
-    m_is_panning = false;
-    if (m_data and m_actions)
-    {
-        m_move_end_time = m_data->CurrentTime;
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
-    }
+    stop();
+}
+
+bool NUHead::isActive()
+{
+    return isUsingHead();
+}
+
+bool NUHead::isUsingHead()
+{
+    if (m_data and m_actions and m_data->CurrentTime <= m_move_end_time)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Returns the completion time of the current head movement.
@@ -189,6 +210,11 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    
+    if (times.size() > 0)
+        m_move_end_time = times.back();
+    else
+        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Calculates the head target from the image elevation and image bearing
@@ -312,11 +338,6 @@ void NUHead::calculateGenericPan(float mindistance, float maxdistance, float min
     vector<double> times = calculatePanTimes(scan_points, panspeed);
     
     moveTo(times, scan_points);
-    
-    if (times.size() > 0)
-        m_move_end_time = times[times.size() -1];
-    else
-        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Gets relevant sensor data from the NUSensorsData; sets m_camera_height, m_body_pitch, and m_sensor_pitch, m_sensor_yaw
@@ -552,11 +573,6 @@ void NUHead::calculateGenericNod(float mindistance, float maxdistance, float nod
     vector<double> times = calculateNodTimes(points, nodspeed);
     
     moveTo(times, points);
-    
-    if (times.size() > 0)
-        m_move_end_time = times.back();
-    else
-        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Orders the min and max pitch values */

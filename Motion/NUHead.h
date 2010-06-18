@@ -27,6 +27,7 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+#include "Motion/NUMotionProvider.h"
 
 class HeadJob;
 class HeadTrackJob;
@@ -35,13 +36,27 @@ class HeadTrackJob;
 
 #include <vector>
 
-class NUHead
+class NUHead : public NUMotionProvider
 {
 public:
-    NUHead();
+    NUHead(NUSensorsData* data, NUActionatorsData* actions);
     ~NUHead();
+    
+    void stop();
+    void stopHead();
+    void stopArms() {};
+    void stopLegs() {};
     void kill();
+    
+    bool isActive();
+    bool isUsingHead();
+    bool isUsingArms() {return false;};
+    bool isUsingLegs() {return false;};
     double getCompletionTime();
+    
+    bool requiresHead() {return true;}
+    bool requiresArms() {return false;}
+    bool requiresLegs() {return false;}
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(HeadJob* job);
@@ -82,9 +97,6 @@ private:
     void loadPanConfig();
 
 private:
-    NUSensorsData* m_data;                      //!< local pointer to the latest sensor data
-    NUActionatorsData* m_actions;               //!< local pointer to the next actionators data
-    
     float m_camera_height;                      //!< the camera height in cm
     float m_body_pitch;                         //!< the forward-backward lean of the robot is rad
     float m_sensor_pitch;                       //!< the sensor head pitch position

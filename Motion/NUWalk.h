@@ -28,19 +28,32 @@
 #include "Walks/WalkParameters.h"
 class NUSensorsData;
 class NUActionatorsData;
+#include "Motion/NUMotionProvider.h"
 
 class WalkJob;
 class WalkToPointJob;
 class WalkParametersJob;
 
-class NUWalk
+class NUWalk : public NUMotionProvider
 {
 public:
-    static NUWalk* getWalkEngine();
-    NUWalk();
+    static NUWalk* getWalkEngine(NUSensorsData* data, NUActionatorsData* actions);
+    NUWalk(NUSensorsData* data, NUActionatorsData* actions);
     virtual ~NUWalk();
-    virtual void freeze();
+    virtual void stop();
+    void stopHead() {};
+    void stopArms();
+    void stopLegs();
     virtual void kill();
+    
+    bool isActive();
+    bool isUsingHead();
+    bool isUsingArms();
+    bool isUsingLegs();
+    
+    bool requiresHead() {return false;}
+    bool requiresArms() {return (m_larm_enabled or m_rarm_enabled);}
+    bool requiresLegs() {return true;}
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(WalkJob* job);
@@ -68,8 +81,6 @@ protected:
 private:
 public:
 protected:
-    NUSensorsData* m_data;                          //!< local pointer to the latest sensor data
-    NUActionatorsData* m_actions;                   //!< local pointer to the next actionators data
     
     double m_current_time;                          //!< the current time
     double m_previous_time;                         //!< the previous time doWalk was called
