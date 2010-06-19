@@ -66,6 +66,7 @@ class KF {
         friend std::istream& operator>> (std::istream& input, KF& p_kf);
 
         Matrix CalculateSigmaPoints() const;
+        float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
         // Variables
 
         // Multiple Models - Model state Description.

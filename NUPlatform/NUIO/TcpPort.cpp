@@ -251,11 +251,7 @@ void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_object
     network_data_t sizedata;
     stringstream buffer;
     buffer << p_locwm;
-    int locwmSize = buffer.str().size();
-    debug << "Localisation data size: " << locwmSize << endl;
-    buffer << p_objects;
-    debug << "Object data size: " << buffer.str().size()-locwmSize << endl;
-    debug << "Total size: " << buffer.str().size() << endl;
+    //buffer << p_objects;
     netdata.data = (char*) buffer.str().c_str();
     netdata.size = buffer.str().size();
 

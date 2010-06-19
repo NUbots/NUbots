@@ -70,116 +70,8 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
 
         //! Assign FieldObjects: if more then 2 the first 2 (largest 2 posts) will be assigned left and right post
         //qDebug()<< "Candidate SORT: " <<FO_Candidates.size();
-        if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX())
-        {
-            if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
-               (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
-            {
-                //qDebug()<< "Updating FO: Posts A";
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-            }
-            else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
-                     (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
-            {
-                //qDebug()<< "Updating FO: Posts B";
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-            }
-        }
-        else if (FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() > FO_Candidates[1].getCentreX())
-        {
-            if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
-               (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
-            {
-                //qDebug()<< "Updating FO: Posts C";
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST);
-            }
-            else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
-                     (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
-            {
-                //qDebug()<< "Updating FO: Posts D";
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-            }
-        }
-        //qDebug()<< "Finisihed Updating FO: Posts";
-        for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
-        {
-            //! SKIP first 2 objects if greater then size is greater or equal then 2!
-            if(FO_Candidates.size() > 2 && it == FO_Candidates.begin())
-            {
-                ++it;
-                ++it;
-            }
-            if(FO_Candidates.size() == 2)
-            {
-                break;
-            }
-            classifyGoalClosely(&(*it), vision);
 
-            //ASSIGNING as ambiguous FIELDOBJECT:
-
-            //MAKE AN AMBIGUOUS OBJECT:
-            AmbiguousObject newAmbObj = AmbiguousObject();
-            //Assign Possible IDs: Yellow or Blue, Left or Right Posts
-            if((*it).getColour() == ClassIndex::blue || (*it).getColour() == ClassIndex::shadow_blue)
-            {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-
-            }
-            else if((*it).getColour() == ClassIndex::yellow || (*it).getColour() == ClassIndex::yellow_orange)
-            {
-                newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-
-            }
-            else{
-                ++it;
-                continue;
-            }
-
-            Vector2<int> viewPosition;
-            Vector2<int> sizeOnScreen;
-            Vector3<float> sphericalError;
-            Vector3<float> sphericalPosition;
-            viewPosition.x = (*it).getCentreX();
-            viewPosition.y = (*it).getCentreY();
-            float bearing = (float)vision->CalculateBearing(viewPosition.x);
-            float elevation = (float)vision->CalculateElevation(viewPosition.y);
-            sphericalPosition[0] = FindGoalDistance(*it,vision);
-            sphericalPosition[1] = bearing;
-            sphericalPosition[2] = elevation;
-            Vector3 <float> transformedSphericalPosition;
-            Vector2<float> screenPositionAngle(bearing, elevation);
-            Matrix cameraTransform;
-            bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
-            if(isOK == true)
-            {
-                transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
-            }
-
-            sizeOnScreen.x = (*it).width();
-            sizeOnScreen.y = (*it).height();
-
-            newAmbObj.UpdateVisualObject(   transformedSphericalPosition,
-                                            sphericalError,
-                                            screenPositionAngle,
-                                            viewPosition,
-                                            sizeOnScreen,
-                                            vision->m_timestamp);
-
-            AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
-
-            //debug << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
-            ++it;
-            //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
-
-	}
+        UpdateGoalObjects(FO_Candidates, AllObjects, vision);
 
 
         return result;
@@ -888,12 +780,12 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     }
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
-    if(midpoints.size() < 2 )
+    if(midpoints.size() < 3 )
     {
         float FinalDistance;
         if(midpoints.empty())
         {
-
+            //TODO: Find the Largest Transition Segment
             float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
             float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x)); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
 
@@ -920,7 +812,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     //FORM EQUATION if MidPointLine
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << endl;
     LSFittedLine midPointLine;
-    for (int i = 0; i < (int) midpoints.size(); i++)
+    for (int i = 0; i < (int) midpoints.size()-1; i++)
     {
 
         LinePoint  point;
@@ -942,7 +834,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     //! Tight Average filter: Using the principle that mid-points should have symetrical left and right distances,
     //! we can filter mid-points which have bad left and right distances, by looking at the difference between left and right, as they should be "approx 0".
     //! Largest Width is obtained by itterating through the midpoint distances, and obtaining the largest width that has symetrical left and right distances.
-    for(int i = 0 ; i < (int)leftPoints.size(); i++)
+    for(int i = 0 ; i < (int)leftPoints.size()-1; i++)
     {
         Vector2<int> leftpoint = leftPoints[i];
         Vector2<int> rightpoint = rightPoints[i];
@@ -972,7 +864,8 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! Width Averaging:
-    widthSum = widthSum/ (float)leftPoints.size();
+    //qDebug() << (float)(leftPoints.size()-1);
+    widthSum = widthSum/ (float)(leftPoints.size()-1);
     if(tightPoints > 0)
     {
         tightwidthSum = tightwidthSum/tightPoints;
@@ -1036,23 +929,17 @@ bool GoalDetection::ObjectCandidateSizeSortPredicate(const ObjectCandidate& goal
     return goal1.width()*goal1.height() > goal2.width()*goal2.height();
 }
 
-void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision, ObjectCandidate* GoalPost , int ID)
+void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision, ObjectCandidate* GoalPost , int ID, Vector3<float> sphericalPosition)
 {
-    classifyGoalClosely(GoalPost, vision);
+
     Vector2<int> viewPosition;
     Vector2<int> sizeOnScreen;
     Vector3<float> sphericalError;
-    Vector3<float> sphericalPosition;
+
     viewPosition.x = GoalPost->getCentreX();
     viewPosition.y = GoalPost->getCentreY();
-    float bearing = (float)vision->CalculateBearing(viewPosition.x);
-    float elevation = (float)vision->CalculateElevation(viewPosition.y);
-    sphericalPosition[0] = FindGoalDistance((*GoalPost),vision);
-    sphericalPosition[1] = bearing;
-    sphericalPosition[2] = elevation;
-
     Vector3 <float> transformedSphericalPosition;
-    Vector2<float> screenPositionAngle(bearing, elevation);
+    Vector2<float> screenPositionAngle(sphericalPosition[1], sphericalPosition[2]);
     Matrix cameraTransform;
     bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
     if(isOK == true)
@@ -1069,4 +956,296 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
                                                                     sizeOnScreen,
                                                                     vision->m_timestamp);
     return;
+}
+
+/**
+*
+* Function Name:	PostProcessGoalPosts
+* Author:		Aaron Wong
+* Description: 		Post processing of Goal Posts to remove blue and yellow posts seen in an image.
+*
+* Date:
+* input: 		NA
+* Output:		NA
+*/
+void GoalDetection::PostProcessGoalPosts(FieldObjects* AllObjects)
+{
+    //Empty Variables:
+
+    //! Find the Colour of closest goal:
+    unsigned int colour = FindColourOfClosestPost(AllObjects);
+    //qDebug() << "Closest Colour is:" << colour;
+    //! Removing Objects which are the opposite colour:
+    if (colour == ClassIndex::unclassified)
+    {
+        return;
+    }
+    else if( colour == ClassIndex::blue)
+    {
+        //qDebug() << "Removing ALL YELLOW POSTS";
+        //! Remove All Yellow Posts:
+        if( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() == true)
+        {
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].setIsVisible(false);
+        }
+        if( AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible()== true)
+        {
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].setIsVisible(false);
+        }
+        for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+        {
+            if(AllObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+                {
+                    AllObjects->ambiguousFieldObjects[i].setIsVisible(false);
+                }
+            }
+        }
+    }
+    else if(colour == ClassIndex::yellow)
+    {
+        //! Remove all Blue posts:
+        //qDebug() << "Removing ALL BLUE POSTS";
+        if( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() == true)
+        {
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].setIsVisible(false);
+        }
+        if( AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible() == true)
+        {
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].setIsVisible(false);
+        }
+        for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+        {
+            if(AllObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+                {
+                    AllObjects->ambiguousFieldObjects[i].setIsVisible(false);
+                }
+            }
+        }
+
+    }
+}
+
+unsigned char GoalDetection::FindColourOfClosestPost(FieldObjects* AllObjects)
+{
+    unsigned char colour = ClassIndex::unclassified;
+    int closestDistance = 2000;
+    //! CHECK FOR ALL KNOWN POSTS
+    for(unsigned int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <=  FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)
+    {
+        if(AllObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        {
+            if(AllObjects->stationaryFieldObjects[i].measuredDistance() < closestDistance)
+            {
+                closestDistance = AllObjects->stationaryFieldObjects[i].measuredDistance();
+                if(AllObjects->stationaryFieldObjects[i].getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST
+                   || AllObjects->stationaryFieldObjects[i].getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
+                {
+                    colour = ClassIndex::blue;
+                }
+                else
+                {
+                    colour = ClassIndex::yellow;
+                }
+            }
+        }
+    }
+    //! CHECK FOR ALL AMBIGUOUS POSTS
+    for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
+    {
+        if(AllObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
+        {
+            if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < closestDistance)
+                {
+                    closestDistance = AllObjects->ambiguousFieldObjects[i].measuredDistance();
+                    colour = ClassIndex::blue;
+
+                }
+            }
+            else if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+            {
+                if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < closestDistance)
+                {
+                    closestDistance = AllObjects->ambiguousFieldObjects[i].measuredDistance();
+                    colour = ClassIndex::yellow;
+                }
+            }
+        }
+    }
+    //qDebug() << "Closest Distance: " << closestDistance << "\t"<< colour;
+    return colour;
+}
+
+Vector3<float> GoalDetection::CalculateSphericalPosition(ObjectCandidate* GoalPost, Vision* vision)
+{
+    Vector3<float> sphericalPosition;
+    classifyGoalClosely(GoalPost, vision);
+
+    float bearing = (float)vision->CalculateBearing(GoalPost->getCentreX());
+    float elevation = (float)vision->CalculateElevation(GoalPost->getCentreY());
+    sphericalPosition[0] = FindGoalDistance((*GoalPost),vision);
+    sphericalPosition[1] = bearing;
+    sphericalPosition[2] = elevation;
+    return sphericalPosition;
+}
+
+void GoalDetection::AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects* AllObjects, Vision* vision)
+{
+    AmbiguousObject newAmbObj = AmbiguousObject();
+    //Assign Possible IDs: Yellow or Blue, Left or Right Posts
+    if(GoalPost->getColour() == ClassIndex::blue || GoalPost->getColour() == ClassIndex::shadow_blue)
+    {
+        newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
+        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+
+    }
+    else if(GoalPost->getColour() == ClassIndex::yellow || GoalPost->getColour()  == ClassIndex::yellow_orange)
+    {
+        newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
+        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+
+    }
+    else{
+        return;
+    }
+
+    Vector2<int> viewPosition;
+    Vector2<int> sizeOnScreen;
+    Vector3<float> sphericalError;
+    Vector3<float> sphericalPosition = CalculateSphericalPosition(GoalPost, vision);
+    viewPosition.x = GoalPost->getCentreX();
+    viewPosition.y = GoalPost->getCentreY();
+    Vector3 <float> transformedSphericalPosition;
+    Vector2<float> screenPositionAngle(sphericalPosition[1], sphericalPosition[2]);
+    Matrix cameraTransform;
+    bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
+    if(isOK == true)
+    {
+        transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
+    }
+
+    sizeOnScreen.x = GoalPost->width();
+    sizeOnScreen.y = GoalPost->height();
+
+    newAmbObj.UpdateVisualObject(   transformedSphericalPosition,
+                                    sphericalError,
+                                    screenPositionAngle,
+                                    viewPosition,
+                                    sizeOnScreen,
+                                    vision->m_timestamp);
+
+    AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
+}
+
+void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision)
+{
+
+    if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX() )
+    {
+        if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
+           (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
+        {
+            //qDebug()<< "Updating FO: Posts A";
+            Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
+            Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            {
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST,SphericalPosition0 );
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST,SphericalPosition1);
+            }
+            else
+            {
+                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+            }
+
+        }
+        else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
+                 (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
+        {
+            //qDebug()<< "Updating FO: Posts B";
+            Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
+            Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            {
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST,SphericalPosition0 );
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST,SphericalPosition1 );
+            }
+            else
+            {
+                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+            }
+        }
+    }
+    else if (FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() > FO_Candidates[1].getCentreX())
+    {
+        if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
+           (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
+        {
+            //qDebug()<< "Updating FO: Posts C";
+            Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
+            Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            {
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST,SphericalPosition0 );
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST,SphericalPosition1 );
+            }
+            else
+            {
+                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+            }
+        }
+        else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
+                 (FO_Candidates[1].getColour() == ClassIndex::yellow || FO_Candidates[1].getColour() == ClassIndex::yellow_orange) )
+        {
+            //qDebug()<< "Updating FO: Posts D";
+            Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
+            Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            {
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST,SphericalPosition0 );
+                UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST,SphericalPosition1 );
+            }
+            else
+            {
+                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+            }
+        }
+    }
+    //qDebug()<< "Finisihed Updating FO: Posts";
+    vector < ObjectCandidate > ::iterator it;
+    for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
+    {
+        //! SKIP first 2 objects if greater then size is greater or equal then 2!
+        if(FO_Candidates.size() > 2 && it == FO_Candidates.begin())
+        {
+            ++it;
+            ++it;
+        }
+        if(FO_Candidates.size() == 2)
+        {
+            break;
+        }
+
+        //ASSIGNING as ambiguous FIELDOBJECT:
+
+        //MAKE AN AMBIGUOUS OBJECT:
+        AddAmbiguousGoalPost(&(*it), AllObjects, vision);
+
+        //debug << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
+        ++it;
+        //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
+
+    }
+
 }

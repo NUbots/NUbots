@@ -244,13 +244,8 @@ void locwmStreamWidget::readPendingData()
 
         if(buffer.str().size() - buffer.tellg() > 0)
         {
-            qDebug() << buffer.str().size() << " " << QString(buffer.str().c_str());
             buffer >> (*objects);
             emit fieldObjectDataChanged(objects);
-        }
-        else
-        {
-            qDebug() << "Nothing left in buffer.";
         }
 
         int mstime = timeToRecievePacket.elapsed();
