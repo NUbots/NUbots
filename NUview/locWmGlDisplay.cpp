@@ -21,7 +21,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     perspective = true;
     drawRobotModel = true;
     drawSigmaPoints = true;
-    setFont(QFont("Helvetica",8,QFont::Bold,false));
+    setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
 }

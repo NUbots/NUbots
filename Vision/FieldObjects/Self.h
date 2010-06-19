@@ -11,12 +11,12 @@ class Self {
 	private:
 		Vector3<float> WorldModelLocation;
 		Vector3<float> WorldModelLocationError;
-	
+	bool amILost;
 	public:
 		Self();
 		~Self();
 		Self(float x, float y);
-        void updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading);
+        void updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading,bool lost);
 		float wmX(){return WorldModelLocation[0];}
 		float wmY(){return WorldModelLocation[1];}
 		float Heading(){return WorldModelLocation[2];}
