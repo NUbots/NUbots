@@ -29,6 +29,7 @@ class SoccerFSMState;       // PositioningState is a SoccerFSMState
 
 #include "Behaviour/Jobs/JobList.h"
 #include "Vision/FieldObjects/FieldObjects.h"
+#include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
@@ -57,18 +58,23 @@ protected:
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         StationaryObject& owngoal = BehaviourPotentials::getOwnGoal(m_field_objects, m_game_info);
-        vector<float> result = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 75);
+        StationaryObject& opponentgoal = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info);
         
-        float distance = sqrt(result[0]*result[0] + result[1]*result[1]);
-        float bearing = atan2(result[1], result[0]);
+        vector<float> position;
+        if (m_team_info->getPlayerNumber() == 1)
+            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 75);
+        else
+            position = BehaviourPotentials::CalculateSupportPlayerPosition(ball, self);
+        
+        float distance = sqrt(position[0]*position[0] + position[1]*position[1]);
+        float bearing = atan2(position[1], position[0]);
         vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing());
+        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else if (ball.TimeSinceLastSeen() > 250)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
-        
-        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };
 

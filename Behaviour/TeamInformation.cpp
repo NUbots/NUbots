@@ -123,19 +123,24 @@ float TeamInformation::getTimeToBall()
     if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0 and not m_data->isIncapacitated())
     {
         MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
-		float balldistance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+		float balldistance = ball.estimatedDistance();
         float ballbearing = ball.estimatedBearing();
         
-        vector<float> walkspeed, maxspeed;
-        m_data->getMotionWalkSpeed(walkspeed);
-        m_data->getMotionWalkMaxSpeed(maxspeed);
-        
-        // Add time for the movement to the ball
-        time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
-        
-        if (balldistance > 30)
-        {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
-            time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+        if (m_player_number == 1 and balldistance > 200)            // goal keeper is a special case, don't chase balls too far away
+            return time;
+        else
+        {
+            vector<float> walkspeed, maxspeed;
+            m_data->getMotionWalkSpeed(walkspeed);
+            m_data->getMotionWalkMaxSpeed(maxspeed);
+            
+            // Add time for the movement to the ball
+            time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
+            
+            if (balldistance > 30)
+            {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
+                time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+            }
         }
     }
     return time;

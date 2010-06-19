@@ -299,6 +299,31 @@ public:
         vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
         return position[1];
     }
+    
+    /*! @brief Returns the [x,y] of the support player position */
+    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 100)
+    {
+        // we calculate the position in field coordinates, then convert to local cartesian
+        vector<float> targetposition(3,0);
+        targetposition[0] = ball.X();
+        if (fabs(targetposition[0]) > 180)          // clip the target position to 1.2m from the goal
+            targetposition[0] = mathGeneral::sign(targetposition[0])*180;
+        
+        float b_y = ball.Y();
+        if (b_y < 50)
+            targetposition[1] = b_y + distancefromball;
+        else
+            targetposition[1] = b_y - distancefromball;
+        
+        // convert to relative coords
+        vector<float> polar = self.CalculateDifferenceFromFieldLocation(targetposition);
+        
+        // convert to cartesian
+        vector<float> cartesian(2,0);
+        cartesian[0] = polar[0]*cos(polar[1]);
+        cartesian[1] = polar[0]*sin(polar[1]);
+        return cartesian;
+    }
 };
 
 
