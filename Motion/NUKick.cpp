@@ -293,23 +293,27 @@ void NUKick::stopArms()
 void NUKick::stopLegs()
 {   // if another module wants to use the legs, then we should stop
     debug << "Kick stop called." << endl;
-    m_stateCommandGiven = false;
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
     switch(pose)
     {
         case PRE_KICK:
             pose = POST_KICK;
+            m_stateCommandGiven = false;
             break;
         case TRANSFER_TO_SUPPORT:
             pose = UNSHIFT_LEG;
+            m_stateCommandGiven = false;
             break;
         case LIFT_LEG:
             pose = RETRACT;
+            m_stateCommandGiven = false;
             break;
         case POISE_LEG:
             pose = RETRACT;
+            m_stateCommandGiven = false;
         case SWING:
             pose = RETRACT;
+            m_stateCommandGiven = false;
             break;
         default:
             pose = pose;

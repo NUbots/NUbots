@@ -914,6 +914,7 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         debug_out  << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
+        debug_out  << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
