@@ -71,6 +71,7 @@ private:
     void killActiveProviders();
     void stopActiveProviders();
     void setNextProviders(NUMotionProvider* next_provider);
+    bool isCurrentProvider(NUMotionProvider* provider);
 private:
     NUSensorsData* m_data;              //!< pointer to shared sensors data object
     NUActionatorsData* m_actions;       //!< pointer to shared actionators data object

@@ -59,6 +59,7 @@ public:
     virtual bool isUsingArms() = 0;
     virtual bool isUsingLegs() = 0;
     
+    virtual bool requiresStop() {return true;}
     virtual bool requiresHead() = 0;
     virtual bool requiresArms() = 0;
     virtual bool requiresLegs() = 0;

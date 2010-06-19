@@ -59,10 +59,10 @@ public:
     bool requiresLegs() {return false;}
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(HeadJob* job);
-    void process(HeadTrackJob* job);
-    void process(HeadPanJob* job);
-    void process(HeadNodJob* job);
+    void process(HeadJob* job, bool current_provider = false);
+    void process(HeadTrackJob* job, bool current_provider = false);
+    void process(HeadPanJob* job, bool current_provider = false);
+    void process(HeadNodJob* job, bool current_provider = false);
 private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();

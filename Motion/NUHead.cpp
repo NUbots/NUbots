@@ -125,9 +125,12 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process a generic head job
     @param job the head job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadJob* job)
+void NUHead::process(HeadJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     vector<double> times;                // the times to reach each headposition tuple
     vector<vector<float> > positions;    // a vector of headposition tuples
     
@@ -138,10 +141,13 @@ void NUHead::process(HeadJob* job)
 }
 
 /*! @brief Process a generic head job
- @param job the head job
+    @param job the head job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadTrackJob* job)
+void NUHead::process(HeadTrackJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     vector<double> times;                // the times to reach each headposition tuple
     vector<vector<float> > positions;    // a vector of headposition tuples
     
@@ -157,9 +163,12 @@ void NUHead::process(HeadTrackJob* job)
 
 /*! @brief Process a head pan job
     @param job the head pan job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadPanJob* job)
+void NUHead::process(HeadPanJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     HeadPanJob::head_pan_t pantype = job->getPanType();
     m_pan_default_values = job->useDefaultValues();
     if (not m_pan_default_values)
@@ -179,9 +188,12 @@ void NUHead::process(HeadPanJob* job)
 
 /*! @brief Process a head nod job
     @param job the nod job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadNodJob* job)
+void NUHead::process(HeadNodJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     HeadNodJob::head_nod_t nodtype = job->getNodType();
     if (m_is_nodding == false || nodtype != m_nod_type)
     {

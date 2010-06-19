@@ -225,9 +225,12 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process a walk speed job
     @param job the walk job to be processed
+    @param currentprovider true if the walk is the current provider, and therefore has permission to use the joints
  */
-void NUWalk::process(WalkJob* job)
+void NUWalk::process(WalkJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     float t,d,y;
     t = job->getTranslationSpeed();
     d = job->getDirection();
@@ -239,9 +242,12 @@ void NUWalk::process(WalkJob* job)
 
 /*! @brief Process a walk to point job
     @param job the walk to point job to be processed
+    @param currentprovider true if the walk is the current provider, and therefore has permission to use the joints
  */
-void NUWalk::process(WalkToPointJob* job)
+void NUWalk::process(WalkToPointJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     double time;
     vector<float> position;
     job->getPosition(time, position);

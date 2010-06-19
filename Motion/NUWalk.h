@@ -51,13 +51,14 @@ public:
     bool isUsingArms();
     bool isUsingLegs();
     
+    bool requiresStop() {return false;}
     bool requiresHead() {return false;}
     bool requiresArms() {return (m_larm_enabled or m_rarm_enabled);}
     bool requiresLegs() {return true;}
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
-    void process(WalkJob* job);
-    void process(WalkToPointJob* job);
+    void process(WalkJob* job, bool currentprovider = false);
+    void process(WalkToPointJob* job, bool currentprovider = false);
     void process(WalkParametersJob* job);
     
     virtual void setWalkParameters(const WalkParameters& walkparameters);
