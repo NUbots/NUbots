@@ -79,6 +79,12 @@ void Object::postProcess(const float timestamp)
     previousFrameTimestamp = timestamp;
 }
 
+void Object::setIsVisible(bool visibility)
+{
+    isVisible = visibility;
+}
+
+
 void Object::CopyObject(const Object& sourceObject)
 {
         measuredRelativePosition = sourceObject.getMeasuredRelativeLocation();
