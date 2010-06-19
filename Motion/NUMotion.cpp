@@ -559,12 +559,18 @@ void NUMotion::updateMotionSensors()
     m_data->setMotionGetupActive(m_current_time, m_getup->isActive());
     #ifdef USE_KICK
         m_data->setMotionKickActive(m_current_time, m_kick->isActive());
+    #else
+        m_data->setMotionKickActive(m_current_time, false);
     #endif
     #ifdef USE_SAVE
         m_data->setMotionSaveActive(m_current_time, m_save->isActive());
+    #else
+        m_data->setMotionSaveActive(m_current_time, false);
     #endif
     #ifdef USE_SCRIPT
         m_data->setMotionScriptActive(m_current_time, m_script->isActive());
+    #else
+        m_data->setMotionScriptActive(m_current_time, false);
     #endif
     #ifdef USE_WALK
         vector<float> speed;
@@ -572,9 +578,14 @@ void NUMotion::updateMotionSensors()
         m_data->setMotionWalkSpeed(m_current_time, speed);
         m_walk->getMaximumSpeed(speed);
         m_data->setMotionWalkMaxSpeed(m_current_time, speed);
+    #else
+        m_data->setMotionWalkSpeed(m_current_time, vector<float> (3,0));
+        m_data->setMotionWalkMaxSpeed(m_current_time, vector<float> (3, 0.1));
     #endif
     #ifdef USE_HEAD
         m_data->setMotionHeadCompletionTime(m_current_time, m_head->getCompletionTime());
+    #else
+        m_data->setMotionHeadCompletionTime(m_current_time, 0);
     #endif
 }
 
