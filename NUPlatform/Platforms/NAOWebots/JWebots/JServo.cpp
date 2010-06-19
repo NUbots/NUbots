@@ -105,8 +105,8 @@ void JServo::setForce(double force)
  */
 void JServo::setGain(double gain)
 {
-    if (gain <= 0)
-        gain = 0.01;
+    if (gain < 1)
+        gain = 1;
     else if (gain > 100)
         gain = 100;
     m_target_gain = gain;
