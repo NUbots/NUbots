@@ -185,11 +185,11 @@ double OdometryMotionModel::getProbabilityOfSample(Pose2D newState,Pose2D diffOd
  */
 double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
 {
-    muXx = 2.0;
+    muXx = 1.0;
     muXy = 0.0;     // don't know why but it looks like the covariance's should be 0
-    muYy = 2.0;
+    muYy = 1.0;
     muYx = 0.0;
-    double muTt = 0.75;
+    double muTt = 0.5;
     double muXt = 0.003;
     double muYt = 0.003;
     
