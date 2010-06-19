@@ -39,7 +39,7 @@ inline T NORMALISE(T theta){
     return atan2(sin(theta), cos(theta));
 }
 
-JuppWalk::JuppWalk()
+JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, actions)
 {
     initWalkParameters();
     

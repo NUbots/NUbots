@@ -26,6 +26,7 @@ INCLUDE("${THIS_SRC_DIR}/cmake/motionconfig.cmake")
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUMotion.cpp NUMotion.h
+                NUMotionProvider.h
                 FallProtection.cpp FallProtection.h
                 Getup.cpp Getup.h
                 Walks/WalkParameters.cpp Walks/WalkParameters.h

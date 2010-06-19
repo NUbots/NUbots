@@ -31,7 +31,7 @@ Self::Self(float wmX, float wmY)
     WorldModelLocationError[1] = 600;
     WorldModelLocationError[0] = 6.283;
 }
-void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading)
+void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading,bool lost)
 {
 	WorldModelLocation[0] = wmX;
     WorldModelLocation[1] = wmY;
@@ -40,6 +40,7 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
     WorldModelLocationError[0] = sdX;
     WorldModelLocationError[1] = sdY;
     WorldModelLocationError[2] = sdHeading;
+	amILost = lost;
 }
 
 bool Self::lost()

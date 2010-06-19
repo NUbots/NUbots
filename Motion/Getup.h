@@ -25,30 +25,42 @@
 #ifndef GETUP_H
 #define GETUP_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
 class NUWalk;
 class MotionScript;
+#include "Motion/NUMotionProvider.h"
 
-class Getup
+class Getup : public NUMotionProvider
 {
 public:
-    Getup(NUWalk* walk);
+    Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~Getup();
     
     void enable();
     void disable();
     bool enabled();
+    
+    void stop();
+    void stopHead();
+    void stopArms();
+    void stopLegs();
+    void kill();
+    
     bool isActive();
     bool isUsingHead();
+    bool isUsingArms();
+    bool isUsingLegs();
+    
+    bool requiresHead() {return true;}
+    bool requiresArms() {return true;}
+    bool requiresLegs() {return true;}
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
 private:
     void playGetup();
 private:
     NUWalk* m_walk;
-    NUSensorsData* m_data;
-    NUActionatorsData* m_actions;
     
     bool m_enabled;
     MotionScript* m_on_back;
@@ -57,6 +69,7 @@ private:
     MotionScript* m_on_right;
 
     double m_head_completion_time;
+    double m_arm_completion_time;
     double m_completion_time;
 };
 

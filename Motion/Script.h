@@ -29,15 +29,26 @@ class NUSensorsData;
 class NUActionatorsData;
 class ScriptJob;
 class NUWalk;
+#include "Motion/NUMotionProvider.h"
 
 class Script
 {
 public:
-    Script(NUWalk* walk);
+    Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~Script();
     
+    void stop();
+    void kill();
+    
     bool isActive();
+    bool isUsingHead();
+    bool isUsingArms();
     bool isUsingLegs();
+    
+    bool requiresHead() {return false;}
+    bool requiresArms() {return false;}
+    bool requiresLegs() {return false;}
+    
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(ScriptJob* job);
 private:
