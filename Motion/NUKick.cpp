@@ -50,7 +50,6 @@ NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
     pose = DO_NOTHING;
     m_kickingLeg = noLeg;
 
-    m_kickIsActive = false;
     m_stateCommandGiven = false;
     m_estimatedStateCompleteTime = 0.0;
     m_currentTimestamp = 0;
@@ -236,7 +235,7 @@ std::string NUKick::toString(poseType_t thePose)
 /*! @brief Returns true if the kick is active */
 bool NUKick::isActive()
 {
-    return m_kickIsActive;
+    return (pose != NO_KICK) && (pose != DO_NOTHING) && (pose != PRE_KICK);
 }
 
 bool NUKick::isReady()
@@ -268,7 +267,6 @@ void NUKick::kill()
 {
     debug << "Kick kill called." << endl;
     pose = DO_NOTHING;
-    m_kickIsActive = false;
     m_stateCommandGiven = false;
     m_estimatedStateCompleteTime = m_data->CurrentTime;
 }
@@ -661,38 +659,6 @@ void NUKick::doKick()
 bool NUKick::doPreKick()
 {
     debug << "Pre - Kick" << endl;
-
-#ifdef USE_WALK
-    if(m_walk)
-    {
-        debug << "Walk detected - stopping robot..." << endl;
-        const float maxStoppedVelocitySum = 0.4f;
-        WalkJob wj(0,0,0);
-        m_walk->process(&wj);
-        vector<float> speed;
-        m_walk->getCurrentSpeed(speed);
-
-        if(speed.size() < 3) return false;
-
-        bool walkStopped = allZeros(speed);
-
-        vector<float>jointVelocities;
-        float jointVelocitySum = 0.0f;
-        if(m_data->getJointVelocities(NUSensorsData::BodyJoints, jointVelocities))
-        {
-            for (unsigned int i = 0; i < jointVelocities.size(); i++)
-            {
-                jointVelocitySum += fabs(jointVelocities[i]);
-            }
-        }
-        debug << "jointVelocitySum = " << jointVelocitySum << endl;
-        debug << "Walk stopped = " << walkStopped << endl;
-        bool robotStopped = walkStopped && (jointVelocitySum < maxStoppedVelocitySum);
-        debug << "Robot stopped = " << robotStopped << endl;
-        if(!robotStopped)
-            return false;
-    }
-#endif // USE_WALK
     bool validData = true;
     vector<float>leftJoints;
     vector<float>rightJoints;
@@ -708,9 +674,6 @@ bool NUKick::doPreKick()
     if(!m_stateCommandGiven && validData)
     {
         debug << "Moving to Initial Position" << endl;
-    #ifdef USE_WALK
-        m_walk->kill();
-    #endif // USE_WALK
         vector<float> armpos (4, 0.0f);
         armpos[1] = PI/2.0f;
         float maxSpeed = 0.35;
@@ -739,7 +702,6 @@ bool NUKick::doPreKick()
 
 bool NUKick::doPostKick()
 {
-    m_kickIsActive = false;
     m_kickingLeg = noLeg;
     return true;
 }
@@ -1732,7 +1694,6 @@ bool NUKick::chooseLeg()
                     m_kickingLeg = rightLeg;
                     m_swingDirection = ForwardSwing;
                     pose = PRE_KICK;
-                    m_kickIsActive = true;
                     kickSelected = true;
                 }
             }
@@ -1751,7 +1712,6 @@ bool NUKick::chooseLeg()
                     m_kickingLeg = leftLeg;
                     m_swingDirection = ForwardSwing;
                     pose = PRE_KICK;
-                    m_kickIsActive = true;
                     kickSelected = true;
                 }
             }
@@ -1773,7 +1733,6 @@ bool NUKick::chooseLeg()
                     m_kickingLeg = rightLeg;
                     m_swingDirection = LeftSwing;
                     pose = PRE_KICK;
-                    m_kickIsActive = true;
                     kickSelected = true;
                 }
             }
@@ -1789,7 +1748,6 @@ bool NUKick::chooseLeg()
                 m_kickingLeg = leftLeg;
                 m_swingDirection = LeftSwing;
                 pose = PRE_KICK;
-                m_kickIsActive = true;
                 kickSelected = true;
             }
         }
@@ -1810,7 +1768,6 @@ bool NUKick::chooseLeg()
                     m_kickingLeg = leftLeg;
                     m_swingDirection = RightSwing;
                     pose = PRE_KICK;
-                    m_kickIsActive = true;
                     kickSelected = true;
                 }
             }
@@ -1828,7 +1785,6 @@ bool NUKick::chooseLeg()
                     m_kickingLeg = rightLeg;
                     m_swingDirection = RightSwing;
                     pose = PRE_KICK;
-                    m_kickIsActive = true;
                     kickSelected = true;
                 }
             }
