@@ -141,6 +141,9 @@ float TeamInformation::getTimeToBall()
             {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
                 time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
             }
+            
+            if (m_objects->self.lost())
+                time += 10;
         }
     }
     return time;
