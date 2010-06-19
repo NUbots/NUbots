@@ -61,6 +61,8 @@ class Localisation: public TimestampedData
         void PrintModelStatus(int modelID);
 
         bool IsValidObject(const Object& theObject);
+	    bool amILost;
+	    int lostCount;
 
         // Model Reset Functions
         bool CheckGameState();

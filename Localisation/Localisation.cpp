@@ -56,6 +56,9 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
     feedbackPosition[2] = 0;
+	
+	amILost = true;
+	lostCount = 0;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -282,8 +285,16 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
+	bool lost = false;
+	if((lostCount>=2) && amILost)
+	{
+		lost = true;
+		 cout << "\n  -----> I am lost \n";
+	}
+	
     // Set my location.
-    fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta));
+    fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
+											lost);
 }
 
 bool Localisation::CheckGameState()
@@ -361,7 +372,7 @@ void Localisation::doInitialReset()
     // Model 3: On right sideline facing in, 2/3 from half way
     // Model 4: In centre of own half facing opponents goal
     const int num_models = 5;
-    
+	 
     float left_y = 200.0;
     float left_heading = -PI/2;
     float right_y = -200.0;
@@ -754,7 +765,81 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         models[modelID].timeUpdate(0);
 	models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
-    return result;
+    
+	
+	
+	
+	//------------------------- Trial code for entropy ---- Made to work only on webots as of now
+
+	
+	int bestIndex = getBestModelID();
+	double rmsDistance = 0;
+	double entropy = 0;
+	double bestModelEntropy = 0;
+	
+	for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
+        if(models[modelID].isActive == false) continue; // Skip Inactive models.
+        
+		rmsDistance = pow (
+						   pow((models[bestIndex].stateEstimates[0][0] - models[modelID].stateEstimates[0][0]),2) +
+					       pow((models[bestIndex].stateEstimates[1][0] - models[modelID].stateEstimates[1][0]),2) +	  
+						   pow((models[bestIndex].stateEstimates[2][0] - models[modelID].stateEstimates[2][0]),2) , 0.5 );
+		entropy += (rmsDistance * models[modelID].alpha);
+		 
+    }
+	
+	Matrix bestModelCovariance(3,3,false);
+	
+	
+	for(int i =0 ; i < 3 ; i++)
+	{
+		for(int j = 0 ; j < 3 ; j++ )
+		{
+			bestModelCovariance[i][j] = models[bestIndex].stateStandardDeviations[i][j]  ;
+		}
+	}
+	
+   bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
+	
+   bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;	
+ 	
+//   cout<< "\nEntropy of all  Models : "<<entropy;
+//   cout<< "\nEntropy of best Model  : "<<bestModelEntropy<<endl;	
+//   cout<< "\nEntropy fused together : "<<entropy*bestModelEntropy<<endl;	
+
+	if(	amILost )
+	{
+		lostCount++;
+	}
+	else 
+	{
+		lostCount = 0;
+	}
+
+	
+   if(entropy >55 && models[bestIndex].alpha<50 )
+   {
+	 //  cout << "\nMultiple model trigger -----> I am lost \n";
+	   	amILost = true;
+   }
+	else if (entropy <=55 && bestModelEntropy > 6.5)
+	{
+	//	cout << "\nSingle   model trigger -----> I am lost \n";		
+			amILost = true;
+	}
+	else 
+	{
+		amILost = false;
+	}
+
+	
+		
+	// End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
+	
+	
+	
+	return result;
 }
 
 int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
