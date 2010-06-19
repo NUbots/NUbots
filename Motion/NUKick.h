@@ -88,6 +88,7 @@ public:
     bool isUsingArms();
     bool isUsingLegs();
     
+    bool isReady();
     bool requiresHead() {return true;}
     bool requiresArms() {return true;}
     bool requiresLegs() {return true;}

@@ -345,40 +345,25 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (m_current_head_provider != m_next_head_provider)
     {   // handle head provider transition
-        if (m_next_head_provider->requiresStop())
-        {
-            if (m_current_head_provider and m_current_head_provider->isUsingHead())
-                m_current_head_provider->stopHead();
-            if (not m_current_head_provider->isUsingHead())
-                m_current_head_provider = m_next_head_provider;
-        }
-        else
+        if (m_current_head_provider and m_current_head_provider->isUsingHead())
+            m_current_head_provider->stopHead();
+        if (not m_current_head_provider->isUsingHead())
             m_current_head_provider = m_next_head_provider;
     }
     
     if (m_current_arm_provider != m_next_arm_provider)
     {   // handle arm provider transition
-        if (m_next_arm_provider->requiresStop())
-        {
-            if (m_current_arm_provider and m_current_arm_provider->isUsingArms())
-                m_current_arm_provider->stopArms();
-            if (not m_current_arm_provider->isUsingArms())
-                m_current_arm_provider = m_next_arm_provider;
-        }
-        else
-            m_current_leg_provider = m_next_leg_provider;
+        if (m_current_arm_provider and m_current_arm_provider->isUsingArms())
+            m_current_arm_provider->stopArms();
+        if (not m_current_arm_provider->isUsingArms())
+            m_current_arm_provider = m_next_arm_provider;
     }
     
     if (m_current_leg_provider != m_next_leg_provider)
     {   // handle leg provider transition
-        if (m_next_leg_provider->requiresStop())
-        {
-            if (m_current_leg_provider and m_current_leg_provider->isUsingLegs())
-                m_current_leg_provider->stopLegs();
-            if (not m_current_leg_provider->isUsingLegs())
-                m_current_leg_provider = m_next_leg_provider;
-        }
-        else
+        if (m_current_leg_provider and m_current_leg_provider->isUsingLegs())
+            m_current_leg_provider->stopLegs();
+        if (not m_current_leg_provider->isUsingLegs())
             m_current_leg_provider = m_next_leg_provider;
     }
     
@@ -417,11 +402,11 @@ void NUMotion::process(JobList* jobs)
         #ifdef USE_WALK
             case Job::MOTION_WALK:
                 next_provider = m_walk;
-                m_walk->process(reinterpret_cast<WalkJob*> (*it), isCurrentProvider(m_walk));
+                m_walk->process(reinterpret_cast<WalkJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_TO_POINT:
                 next_provider = m_walk;
-                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it), isCurrentProvider(m_walk));
+                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
                 next_provider = m_walk;
@@ -437,19 +422,19 @@ void NUMotion::process(JobList* jobs)
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadJob*> (*it), isCurrentProvider(m_walk));
+                m_head->process(reinterpret_cast<HeadJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_TRACK:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadTrackJob*> (*it), isCurrentProvider(m_walk));
+                m_head->process(reinterpret_cast<HeadTrackJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_PAN:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadPanJob*> (*it), isCurrentProvider(m_walk));
+                m_head->process(reinterpret_cast<HeadPanJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_NOD:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadNodJob*> (*it), isCurrentProvider(m_walk));
+                m_head->process(reinterpret_cast<HeadNodJob*> (*it), canProcessJobs(m_walk));
                 break;
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
@@ -489,7 +474,7 @@ void NUMotion::process(JobList* jobs)
 /*! @brief Sets the m_next_*_providers depending on which limbs next_provider requires */
 void NUMotion::setNextProviders(NUMotionProvider* next_provider)
 {
-    if (next_provider and (m_current_time > m_last_kill_time + 2000))
+    if (next_provider and next_provider->isReady() and (m_current_time > m_last_kill_time + 2000))
     {
         if (next_provider->requiresHead())
             m_next_head_provider = next_provider;
@@ -521,14 +506,38 @@ bool NUMotion::isCurrentProvider(NUMotionProvider* provider)
         return false;
     else
     {
+        // check the provider is current on each limb it requires
         if (provider->requiresHead() and provider != m_current_head_provider)
             return false;
         if (provider->requiresArms() and provider != m_current_arm_provider)
             return false;
         if (provider->requiresLegs() and provider != m_current_leg_provider)
             return false;
+
         return true;
     }
+}
+
+bool NUMotion::isNextProviderReady(NUMotionProvider* provider)
+{
+    if (not provider)
+        return true;
+    else
+    {
+        if (provider == m_current_head_provider and m_current_head_provider != m_next_head_provider and m_next_head_provider->isReady())
+            return true;
+        if (provider == m_current_arm_provider and m_current_arm_provider != m_next_arm_provider and m_next_arm_provider->isReady())
+            return true;
+        if (provider == m_current_leg_provider and m_current_leg_provider != m_next_leg_provider and m_next_leg_provider->isReady())
+            return true;
+
+        return false;
+    }
+}
+                                
+bool NUMotion::canProcessJobs(NUMotionProvider* provider)
+{
+    return isCurrentProvider(provider) and not isNextProviderReady(provider);
 }
 
 /*! @brief Process a kill motion job */

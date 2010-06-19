@@ -126,20 +126,29 @@ void NUWalk::enableWalk()
  */
 void NUWalk::stop()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stop()" << endl;
+    #endif
     stopLegs();
 }
 
 
 void NUWalk::stopArms()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stopArms()" << endl;
+    #endif
     setArmEnabled(false, false);
 }
 
 void NUWalk::stopLegs()
 {
-    m_speed_x = 0;
-    m_speed_y = 0;
-    m_speed_yaw = 0;
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stopLegs()" << endl;
+    #endif
+    m_target_speed_x = 0;
+    m_target_speed_y = 0;
+    m_target_speed_yaw = 0;
     if (not isActive())
         kill();
 }
@@ -148,6 +157,9 @@ void NUWalk::stopLegs()
  */
 void NUWalk::kill()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::kill()" << endl;
+    #endif
     m_walk_enabled = false;
 }
 

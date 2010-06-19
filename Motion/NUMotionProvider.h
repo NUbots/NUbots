@@ -41,10 +41,8 @@ public:
     }
     
     /*! @brief Returns the name of this motion provider */
-    std::string getName()
-    {
-        return m_name;
-    }
+    std::string getName() {
+        return m_name;}
     
     virtual void process(NUSensorsData* data, NUActionatorsData* actions) = 0;
     
@@ -59,7 +57,7 @@ public:
     virtual bool isUsingArms() = 0;
     virtual bool isUsingLegs() = 0;
     
-    virtual bool requiresStop() {return true;}
+    virtual bool isReady() {return true;}
     virtual bool requiresHead() = 0;
     virtual bool requiresArms() = 0;
     virtual bool requiresLegs() = 0;

@@ -23,7 +23,10 @@
 using namespace Kinematics;
 
 #include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
+#include "debugverbositynumotion.h"
+
 
 #include <math.h>
 #include <list>

@@ -239,6 +239,11 @@ bool NUKick::isActive()
     return m_kickIsActive;
 }
 
+bool NUKick::isReady()
+{
+    return pose == PRE_KICK;
+}
+
 /*! @brief Returns true if the kick is using the head */
 bool NUKick::isUsingHead()
 {
@@ -320,16 +325,17 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (actions == NULL || data == NULL)
         return;
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
+    #endif
+    
     m_data = data;
     m_actions = actions;
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
-    if(!isActive()) return;
-    if (m_currentTimestamp - m_previousTimestamp > 200)
-    {
-        kill();
+
+    if(!isActive())
         return;
-    }
     doKick();
     #ifdef USE_WALK
     if(pose == PRE_KICK)
@@ -446,7 +452,7 @@ void NUKick::doKick()
 		{
                         // Shift the weight of the robot to the support leg.
                         //done = ShiftWeightToFoot(supportLeg,1.0f,0.01, 1500);
-                        done = ShiftWeightToFootClosedLoop(supportLeg, 1.0f, 0.3);
+                        done = ShiftWeightToFootClosedLoop(supportLeg, 0.9f, 0.3);
                         if(done && !m_pauseState)
                         {
                             cout << "Weight now on support foot!" << endl;
