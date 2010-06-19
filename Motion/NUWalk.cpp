@@ -53,22 +53,22 @@ using namespace std;
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
 
-NUWalk* NUWalk::getWalkEngine()
+NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
 {
 #ifdef USE_JWALK
-    return new JWalk();
+    return new JWalk(data, actions);
 #else
     #ifdef USE_JUPPWALK
-        return new JuppWalk();
+        return new JuppWalk(data, actions);
     #else
         #ifdef USE_NBWALK
-            return new NBWalk();
+            return new NBWalk(data, actions);
         #else
             #ifdef USE_VSCWALK
-                return new VSCWalk();
+                return new VSCWalk(data, actions);
             #else
                 #ifdef USE_ALWALK
-                    return new ALWalk();
+                    return new ALWalk(data, actions);
                 #endif
             #endif
         #endif
@@ -77,11 +77,8 @@ NUWalk* NUWalk::getWalkEngine()
     return NULL;
 }
 
-NUWalk::NUWalk()
+NUWalk::NUWalk(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUWalk", data, actions)
 {
-    m_data = NULL;
-    m_actions = NULL;
-    
     m_current_time = 0;
     m_previous_time = 0;
     
@@ -117,7 +114,7 @@ NUWalk::~NUWalk()
  */
 void NUWalk::enableWalk()
 {
-    if (m_data == NULL || m_actions == NULL)
+    if (m_data == NULL or m_actions == NULL)
         m_walk_enabled = false;
     else if (not inInitialPosition())
         moveToInitialPosition();
@@ -125,21 +122,90 @@ void NUWalk::enableWalk()
         m_walk_enabled = true;
 }
 
-/*! @brief Freezes the walk engine
+/*! @brief Freezes the walk engine and (eventually) frees the joint actionators to be used elsewhere
  */
-void NUWalk::freeze()
+void NUWalk::stop()
 {
-    m_walk_enabled = false;
-    m_speed_x = 0;
-    m_speed_y = 0;
-    m_speed_yaw = 0;
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stop()" << endl;
+    #endif
+    stopLegs();
+}
+
+
+void NUWalk::stopArms()
+{
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stopArms()" << endl;
+    #endif
+    setArmEnabled(false, false);
+}
+
+void NUWalk::stopLegs()
+{
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::stopLegs()" << endl;
+    #endif
+    m_target_speed_x = 0;
+    m_target_speed_y = 0;
+    m_target_speed_yaw = 0;
+    if (not isActive())
+        kill();
 }
 
 /*! @brief Kills the walk engine
  */
 void NUWalk::kill()
 {
-    freeze();
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::kill()" << endl;
+    #endif
+    m_walk_enabled = false;
+}
+
+/*! @brief Returns true if the walk is active */
+bool NUWalk::isActive()
+{   
+    if (not m_walk_enabled)
+        return false;
+    else if (m_target_speed_x != 0 or m_target_speed_y != 0 or m_target_speed_yaw != 0)
+        return true;
+    else 
+    {
+        vector<float> jointvelocities;
+        float jointvelocitysum = 0.0f;
+        if(m_data->getJointVelocities(NUSensorsData::BodyJoints, jointvelocities))
+        {
+            for (unsigned int i = 0; i < jointvelocities.size(); i++)
+                jointvelocitysum += fabs(jointvelocities[i]);
+        }
+        if (jointvelocitysum > 0.4)
+            return true;
+        else
+            return false;
+    }
+
+}
+
+/*! @brief Returns false */
+bool NUWalk::isUsingHead()
+{
+    return false;
+}
+
+/*! @brief Returns true if the walk engine is using the arms */
+bool NUWalk::isUsingArms()
+{
+    if (isActive() and (m_larm_enabled or m_rarm_enabled))
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Returns true if the walk engine is using the legs */
+bool NUWalk::isUsingLegs()
+{
+    return isActive();
 }
 
 /*! @brief Process new sensor data, and produce actionator commands
@@ -171,9 +237,12 @@ void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process a walk speed job
     @param job the walk job to be processed
+    @param currentprovider true if the walk is the current provider, and therefore has permission to use the joints
  */
-void NUWalk::process(WalkJob* job)
+void NUWalk::process(WalkJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     float t,d,y;
     t = job->getTranslationSpeed();
     d = job->getDirection();
@@ -185,9 +254,12 @@ void NUWalk::process(WalkJob* job)
 
 /*! @brief Process a walk to point job
     @param job the walk to point job to be processed
+    @param currentprovider true if the walk is the current provider, and therefore has permission to use the joints
  */
-void NUWalk::process(WalkToPointJob* job)
+void NUWalk::process(WalkToPointJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     double time;
     vector<float> position;
     job->getPosition(time, position);

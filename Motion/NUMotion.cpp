@@ -53,7 +53,7 @@
 
 /*! @brief Constructor for motion module
  */
-NUMotion::NUMotion()
+NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::NUMotion" << endl;
@@ -63,39 +63,53 @@ NUMotion::NUMotion()
     m_killed = true;
     m_last_kill_time = m_current_time - 10000;
     
-    m_data = NULL;
-    m_actions = NULL;
+    m_data = data;
+    m_actions = actions;
+    
+    m_current_head_provider = 0; 
+    m_current_arm_provider = 0; 
+    m_current_leg_provider = 0;
+    
+    m_next_head_provider = 0;
+    m_next_arm_provider = 0;
+    m_next_leg_provider = 0;
     
     #ifdef USE_HEAD
-        m_head = new NUHead();
+        m_head = new NUHead(m_data, m_actions);
+        m_current_head_provider = m_head;
     #endif
     
     #if defined(USE_WALK)
-        m_walk = NUWalk::getWalkEngine();
-        m_getup = new Getup(m_walk);
-        m_fall_protection = new FallProtection(m_walk);
+        m_walk = NUWalk::getWalkEngine(m_data, m_actions);
+        m_current_arm_provider = m_walk;
+        m_current_leg_provider = m_walk;
+        m_getup = new Getup(m_walk, m_data, m_actions);
+        m_fall_protection = new FallProtection(m_walk, m_data, m_actions);
         #if defined(USE_KICK)
-            m_kick = new NUKick(m_walk);
+            m_kick = new NUKick(m_walk, m_data, m_actions);
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
-            m_save = new NUSave(m_walk);
+            m_save = new NUSave(m_walk, m_data, m_actions);
         #endif
         #if defined(USE_SCRIPT)
-            m_script = new Script(m_walk);
+            m_script = new Script(m_walk, m_data, m_actions);
         #endif
     #else
-        m_getup = new Getup(NULL);
-        m_fall_protection = new FallProtection(NULL);
+        m_getup = new Getup(NULL, m_data, m_actions);
+        m_fall_protection = new FallProtection(NULL, m_data, m_actions);
         #if defined(USE_KICK)
-            m_kick = new NUKick(NULL);
+            m_kick = new NUKick(NULL, m_data, m_actions);
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
-            m_save = new NUSave(NULL);
+            m_save = new NUSave(NULL, m_data, m_actions);
         #endif
         #if defined(USE_SCRIPT)
-            m_script = new Script(NULL);
+            m_script = new Script(NULL, m_data, m_actions);
         #endif
     #endif
+    m_next_head_provider = m_current_head_provider;
+    m_next_arm_provider = m_current_arm_provider;
+    m_next_leg_provider = m_current_leg_provider;
 }
 
 /*! @brief Destructor for motion module
@@ -129,21 +143,23 @@ NUMotion::~NUMotion()
 
 /*! @brief Freezes all motion modules
  */
-void NUMotion::freeze()
+void NUMotion::stop()
 {
     m_killed = true;
     m_last_kill_time = m_current_time;
+    m_fall_protection->stop();
+    m_getup->stop();
     #ifdef USE_HEAD
-        m_head->kill();
+        m_head->stop();
     #endif
     #ifdef USE_WALK
-        m_walk->freeze();                
+        m_walk->stop();                
     #endif
     #ifdef USE_KICK
-        m_kick->kill();                   
+        m_kick->stop();                   
     #endif
     #if defined(USE_BLOCK) or defined(USE_SAVE)
-        m_save->kill();
+        m_save->stop();
     #endif
 }
 
@@ -153,6 +169,8 @@ void NUMotion::kill()
 {
     m_killed = true;
     m_last_kill_time = m_current_time;
+    m_fall_protection->kill();
+    m_getup->kill();
     #ifdef USE_HEAD
         m_head->kill();
     #endif
@@ -220,6 +238,28 @@ void NUMotion::kill()
     m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 2000, rarmpositions, armvelocities, 0);
 }
 
+/*! @brief Calls kill on each of the active motion providers */
+void NUMotion::killActiveProviders()
+{
+    if (m_current_head_provider)
+        m_current_head_provider->kill();
+    if (m_current_arm_provider)
+        m_current_arm_provider->kill();
+    if (m_current_leg_provider)
+        m_current_leg_provider->kill();
+}
+
+/*! @brief Calls stop on each of the active motion providers */
+void NUMotion::stopActiveProviders()
+{
+    if (m_current_head_provider)
+        m_current_head_provider->stop();
+    if (m_current_arm_provider)
+        m_current_arm_provider->stop();
+    if (m_current_leg_provider)
+        m_current_leg_provider->stop();
+}
+
 /*! @brief Process new sensor data, and produce actionator commands.
  
     This function basically calls all of the process functions of the submodules of motion. I have it setup
@@ -232,9 +272,9 @@ void NUMotion::kill()
  */
 void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-#if DEBUG_NUMOTION_VERBOSITY > 2
-    debug << "NUMotion::process(" << data << ", " << actions << ")" << endl;
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUMotion::process(" << data << ", " << actions << ")" << endl;
+    #endif
     if (data == NULL || actions == NULL)
         return;
     m_data = data;
@@ -243,58 +283,98 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     updateMotionSensors();
     
     if (m_killed)
-    {   // if killed don't do any motion
         return;
-    }
     else if (m_fall_protection->enabled() and m_data->isFalling())
-    {   // if falling no other motion module can run
-        m_fall_protection->process(data, actions);
-    }
-    else if (m_getup->enabled() and (m_data->isFallen() or m_getup->isActive()))
-    {   // if fallen over or getting up then only getup can run, and the head if getup has finished with it
-        m_getup->process(data, actions);
-        if (not m_data->isFallen() and not m_getup->isUsingHead())
-        {
-            #ifdef USE_HEAD
-                m_head->process(data, actions);
-            #endif
-        }
-    }
-    else
-    {   // if we aren't falling, fallen or getting up then we can run some of the other motion modules
-        #ifdef USE_HEAD
-            m_head->process(data, actions);
-        #endif
+    {
+        if (m_current_leg_provider != m_fall_protection)
+            killActiveProviders();          // fast hard kill on active providers if falling
         
-        // if kick or save are running then they must run until completion (unless interrupted by fall protection or getup)
-        #ifdef USE_KICK
-        //if (m_kick->isActive()) // Turned on all of the time.
-            m_kick->process(data, actions);
-        //else {
-        #endif
-        #if defined(USE_BLOCK) or defined(USE_SAVE)
-            if (m_save->isActive())
-                m_save->process(data, actions);
-            else {
-        #endif
-            // if kick and save aren't running then we can run scripts and walk
-            #ifdef USE_SCRIPT
-            if (m_script->isActive())
-                m_script->process(data, actions);
-            if (not m_script->isUsingLegs())
-            #endif
-                #ifdef USE_WALK
-                    m_walk->process(data, actions);
-                #else
-                    ;
-                #endif
-        #if defined(USE_BLOCK) or defined(USE_SAVE)
-            }
-        #endif
-        #if defined(USE_KICK)
-//        }
-        #endif
+        m_next_head_provider = m_fall_protection;
+        m_next_arm_provider = m_fall_protection;
+        m_next_leg_provider = m_fall_protection;
     }
+    else if (m_getup->enabled() and m_data->isFallen())
+    {
+        if (m_current_leg_provider != m_getup)
+            killActiveProviders();          // slow soft stop on active providers if fallen
+        
+        m_next_head_provider = m_getup;
+        m_next_arm_provider = m_getup;
+        m_next_leg_provider = m_getup;
+    }
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 0
+        debug << "NUMotion::CurrentHeadProvider: ";
+        if (m_current_head_provider)
+            debug << m_current_head_provider->getName();
+        else
+            debug << "None";
+        debug << " nextHeadProvider: ";
+        if (m_next_head_provider)
+            debug << m_next_head_provider->getName();
+        else
+            debug << "None";
+        debug << endl;
+    #endif
+    #if DEBUG_NUMOTION_VERBOSITY > 0
+        debug << "NUMotion::CurrentArmProvider: ";
+        if (m_current_arm_provider)
+            debug << m_current_arm_provider->getName();
+        else
+            debug << "None";
+        debug << " nextArmProvider: ";
+        if (m_next_arm_provider)
+            debug << m_next_arm_provider->getName();
+        else
+            debug << "None";
+        debug << endl;
+    #endif
+    #if DEBUG_NUMOTION_VERBOSITY > 0
+        debug << "NUMotion::CurrentLegProvider: ";
+        if (m_current_leg_provider)
+            debug << m_current_leg_provider->getName();
+        else
+            debug << "None";
+        debug << " nextLegProvider: ";
+        if (m_next_leg_provider)
+            debug << m_next_leg_provider->getName();
+        else
+            debug << "None";
+        debug << endl;
+    #endif
+    
+    if (m_current_head_provider != m_next_head_provider)
+    {   // handle head provider transition
+        if (m_current_head_provider and m_current_head_provider->isUsingHead())
+            m_current_head_provider->stopHead();
+        if (not m_current_head_provider->isUsingHead())
+            m_current_head_provider = m_next_head_provider;
+    }
+    
+    if (m_current_arm_provider != m_next_arm_provider)
+    {   // handle arm provider transition
+        if (m_current_arm_provider and m_current_arm_provider->isUsingArms())
+            m_current_arm_provider->stopArms();
+        if (not m_current_arm_provider->isUsingArms())
+            m_current_arm_provider = m_next_arm_provider;
+    }
+    
+    if (m_current_leg_provider != m_next_leg_provider)
+    {   // handle leg provider transition
+        if (m_current_leg_provider and m_current_leg_provider->isUsingLegs())
+            m_current_leg_provider->stopLegs();
+        if (not m_current_leg_provider->isUsingLegs())
+            m_current_leg_provider = m_next_leg_provider;
+    }
+    
+    if (isCurrentProvider(m_current_head_provider))
+        m_current_head_provider->process(data, actions);
+    
+    if (isCurrentProvider(m_current_arm_provider) and m_current_arm_provider != m_current_head_provider)
+        m_current_arm_provider->process(data, actions);
+    
+    if (isCurrentProvider(m_current_leg_provider) and m_current_leg_provider != m_current_arm_provider and m_current_leg_provider != m_current_head_provider)
+        m_current_leg_provider->process(data, actions);
     
     m_previous_time = m_current_time;
 }
@@ -310,104 +390,66 @@ void NUMotion::process(JobList* jobs)
 #endif
     if (jobs == NULL or m_data == NULL or m_actions == NULL)
         return;
-    if (m_current_time < m_last_kill_time + 3000)
-    {   // don't let the jobs queue up when in the killed state
-        jobs->clearMotionJobs();
-        return;
-    }
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
     while (it != jobs->motion_end())
     {
+        m_killed = false;
+        NUMotionProvider* next_provider = 0;
         Job::job_id_t id = (*it)->getID();
         switch (id) 
         {
         #ifdef USE_WALK
             case Job::MOTION_WALK:
-                m_killed = false;
-                #ifdef USE_KICK
-                if (m_kick->isActive())
-                {
-                    m_kick->stop();
-                    break;
-                }
-                #endif
-                #if defined(USE_BLOCK) or defined(USE_SAVE)
-                if (m_save->isActive())
-                {
-                    m_save->stop();
-                    break;
-                }
-                #endif
-                #ifdef USE_SCRIPT
-                    if (m_script->isUsingLegs())
-                        break;
-                #endif
-                m_walk->process(reinterpret_cast<WalkJob*> (*it));
+                next_provider = m_walk;
+                m_walk->process(reinterpret_cast<WalkJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_TO_POINT:
-                m_killed = false;
-                #ifdef USE_KICK
-                    if (m_kick->isActive())
-                    {
-                        m_kick->stop();
-                        break;
-                    }
-                #endif
-                #if defined(USE_BLOCK) or defined(USE_SAVE)
-                    if (m_save->isActive())
-                    {
-                        m_save->stop();
-                        break;
-                    }
-                #endif
-                #ifdef USE_SCRIPT
-                    if (m_script->isUsingLegs())
-                        break;
-                #endif
-                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it));
+                next_provider = m_walk;
+                m_walk->process(reinterpret_cast<WalkToPointJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
+                next_provider = m_walk;
                 m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
                 break;
         #endif
         #ifdef USE_KICK
             case Job::MOTION_KICK:
-                m_killed = false;
+                next_provider = m_kick;
                 m_kick->process(reinterpret_cast<KickJob*> (*it));
                 break;
         #endif
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
-                m_killed = false;
-                m_head->process(reinterpret_cast<HeadJob*> (*it));
+                next_provider = m_head;
+                m_head->process(reinterpret_cast<HeadJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_TRACK:
-                m_killed = false;
-                m_head->process(reinterpret_cast<HeadTrackJob*> (*it));
+                next_provider = m_head;
+                m_head->process(reinterpret_cast<HeadTrackJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_PAN:
-                m_killed = false;
-                m_head->process(reinterpret_cast<HeadPanJob*> (*it));
+                next_provider = m_head;
+                m_head->process(reinterpret_cast<HeadPanJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_NOD:
-                m_killed = false;
-                m_head->process(reinterpret_cast<HeadNodJob*> (*it));
+                next_provider = m_head;
+                m_head->process(reinterpret_cast<HeadNodJob*> (*it), canProcessJobs(m_walk));
                 break;
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             case Job::MOTION_BLOCK:
-                m_killed = false;
+                next_provider = m_save;
                 m_save->process(reinterpret_cast<BlockJob*> (*it));
                 break;
             case Job::MOTION_SAVE:
-                m_killed = false;
+                next_provider = m_save;
                 m_save->process(reinterpret_cast<SaveJob*> (*it));
                 break;
         #endif
         #ifdef USE_SCRIPT
             case Job::MOTION_SCRIPT:
-                m_killed = false;
+                next_provider = m_script;
                 m_script->process(reinterpret_cast<ScriptJob*> (*it));
                 break;
         #endif
@@ -421,6 +463,7 @@ void NUMotion::process(JobList* jobs)
                 break;
         }
         it = jobs->removeMotionJob(it);
+        setNextProviders(next_provider);
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
@@ -428,14 +471,85 @@ void NUMotion::process(JobList* jobs)
     #endif
 }
 
+/*! @brief Sets the m_next_*_providers depending on which limbs next_provider requires */
+void NUMotion::setNextProviders(NUMotionProvider* next_provider)
+{
+    if (next_provider and next_provider->isReady() and (m_current_time > m_last_kill_time + 2000))
+    {
+        if (next_provider->requiresHead())
+            m_next_head_provider = next_provider;
+        if (next_provider->requiresArms())
+            m_next_arm_provider = next_provider;
+        if (next_provider->requiresLegs())
+            m_next_leg_provider = next_provider;
+        
+        #if DEBUG_NUMOTION_VERBOSITY > 0
+            debug << "NUMotion::setNextProviders: ";
+            if (m_next_head_provider)
+                debug << m_next_head_provider->getName() << " ";
+            if (m_next_arm_provider)
+                debug << m_next_arm_provider->getName() << " ";
+            if (m_next_leg_provider)
+                debug << m_next_leg_provider->getName() << " ";
+            debug << endl;
+        #endif
+    }
+}
+
+/*! @brief Checks whether provider is the current provider
+    @param provider the provider you want to check is the current
+    @return true if it is the current provider of ALL of the limbs it requires
+ */
+bool NUMotion::isCurrentProvider(NUMotionProvider* provider)
+{
+    if (not provider)
+        return false;
+    else
+    {
+        // check the provider is current on each limb it requires
+        if (provider->requiresHead() and provider != m_current_head_provider)
+            return false;
+        if (provider->requiresArms() and provider != m_current_arm_provider)
+            return false;
+        if (provider->requiresLegs() and provider != m_current_leg_provider)
+            return false;
+
+        return true;
+    }
+}
+
+bool NUMotion::isNextProviderReady(NUMotionProvider* provider)
+{
+    if (not provider)
+        return true;
+    else
+    {
+        if (provider == m_current_head_provider and m_current_head_provider != m_next_head_provider and m_next_head_provider->isReady())
+            return true;
+        if (provider == m_current_arm_provider and m_current_arm_provider != m_next_arm_provider and m_next_arm_provider->isReady())
+            return true;
+        if (provider == m_current_leg_provider and m_current_leg_provider != m_next_leg_provider and m_next_leg_provider->isReady())
+            return true;
+
+        return false;
+    }
+}
+                                
+bool NUMotion::canProcessJobs(NUMotionProvider* provider)
+{
+    return isCurrentProvider(provider) and not isNextProviderReady(provider);
+}
+
+/*! @brief Process a kill motion job */
 void NUMotion::process(MotionKillJob* job)
 {
     kill();
 }
 
+/*! @brief Process a freeze motion job */
 void NUMotion::process(MotionFreezeJob* job)
 {
-    freeze();
+    stop();
 }
 
 /*! @brief Updates the motion sensors in NUSensorsData */

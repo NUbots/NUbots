@@ -163,7 +163,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_MOTION
-        m_motion = new NUMotion();
+        m_motion = new NUMotion(SensorData, Actions);
     #endif
     
     createThreads();

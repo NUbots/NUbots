@@ -38,7 +38,7 @@ using namespace std;
 class JuppWalk : public NUWalk
 {
 public:
-    JuppWalk();
+    JuppWalk(NUSensorsData* data, NUActionatorsData* actions);
     ~JuppWalk();
 protected:
     void doWalk();

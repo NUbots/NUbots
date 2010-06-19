@@ -34,6 +34,7 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 #include "Behaviour/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Behaviour/Jobs/MotionJobs/KickJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 
@@ -69,8 +70,25 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         
-        vector<float> speed = BehaviourPotentials::goToBall(ball, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
-        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+        bool iskicking;
+        m_data->getMotionKickActive(iskicking);
+        if(!iskicking)
+        {
+            vector<float> speed = BehaviourPotentials::goToBall(ball, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
+            m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+        }
+        
+        if(ball.estimatedDistance() < 20.0f)
+        {
+            vector<float> kickPosition(2,0);
+            vector<float> targetPosition(2,0);
+            kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
+            kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
+            targetPosition[0] = kickPosition[0] + 1000.0f;
+            targetPosition[1] = kickPosition[1];
+            KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
+            m_jobs->addMotionJob(kjob);
+        }
     }
 };
 

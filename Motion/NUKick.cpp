@@ -42,7 +42,7 @@ using namespace mathGeneral;
 
 
 
-NUKick::NUKick(NUWalk* walk)
+NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUKick", data, actions)
 {
     m_walk = walk;
     m_kinematicModel = new Kinematics();
@@ -119,8 +119,8 @@ void NUKick::loadKickParameters()
     const float xReachFwd = xMin + 9.0f;
     const float xReachSide = 30.0f;
 
-    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footWidth), (footWidth + yReachFwd));
-    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footWidth + yReachFwd), -(footWidth));
+    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footInnerWidth), (footInnerWidth + yReachFwd));
+    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footInnerWidth + yReachFwd), -(footInnerWidth));
 
     LeftFootRightKickableArea = Rectangle(xMin, xReachSide, footWidth/2.0, yReachSide);
     //LeftFootLeftKickableArea = Rectangle(xMin, xReachSide, 2.0f*footWidth, 3.0f/2.0f*footWidth + yReachSide);
@@ -233,9 +233,33 @@ std::string NUKick::toString(poseType_t thePose)
     return result;
 }
 
+/*! @brief Returns true if the kick is active */
 bool NUKick::isActive()
 {
     return m_kickIsActive;
+}
+
+bool NUKick::isReady()
+{
+    return pose == PRE_KICK;
+}
+
+/*! @brief Returns true if the kick is using the head */
+bool NUKick::isUsingHead()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the kick is using the arms */
+bool NUKick::isUsingArms()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the kick is using the legs */
+bool NUKick::isUsingLegs()
+{
+    return isActive();
 }
 
 /*! @brief Kills the kick module
@@ -251,6 +275,23 @@ void NUKick::kill()
 
 void NUKick::stop()
 {
+    stopHead();
+    stopArms();
+    stopLegs();
+}
+
+void NUKick::stopHead()
+{   // If another module wants to use the head, Steve says to bad...
+    return;
+}
+
+void NUKick::stopArms()
+{   // if another module wants to use the arms, Steve says to bad...
+    return;
+}
+
+void NUKick::stopLegs()
+{   // if another module wants to use the legs, then we should stop
     debug << "Kick stop called." << endl;
     m_stateCommandGiven = false;
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
@@ -284,16 +325,17 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (actions == NULL || data == NULL)
         return;
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
+    #endif
+    
     m_data = data;
     m_actions = actions;
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
-    if(!isActive()) return;
-    if (m_currentTimestamp - m_previousTimestamp > 200)
-    {
-        kill();
+
+    if(!isActive())
         return;
-    }
     doKick();
     #ifdef USE_WALK
     if(pose == PRE_KICK)
@@ -410,7 +452,7 @@ void NUKick::doKick()
 		{
                         // Shift the weight of the robot to the support leg.
                         //done = ShiftWeightToFoot(supportLeg,1.0f,0.01, 1500);
-                        done = ShiftWeightToFootClosedLoop(supportLeg, 1.0f, 0.3);
+                        done = ShiftWeightToFootClosedLoop(supportLeg, 0.9f, 0.3);
                         if(done && !m_pauseState)
                         {
                             cout << "Weight now on support foot!" << endl;
