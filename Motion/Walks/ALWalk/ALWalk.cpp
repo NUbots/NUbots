@@ -87,6 +87,9 @@ void ALWalk::enableWalk()
 
 void ALWalk::doWalk()
 {      
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "ALWalk::doWalk()" << endl;
+    #endif
     vector<float> leggains = m_walk_parameters.getLegGains()[0];
     if (m_current_time - m_last_enabled_time < 1500)
     {
@@ -98,6 +101,9 @@ void ALWalk::doWalk()
             leggains[i] += leggains[i]*(1-killfactor);
     }
     
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "ALWalk::doWalk() m_al_motion->setWalkTargetVelocity(" << m_speed_x << ", " << m_speed_x << ", " << m_speed_yaw << ")" << endl;
+    #endif
     // give the target speed to the walk engine
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
