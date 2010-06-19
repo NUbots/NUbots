@@ -31,7 +31,7 @@
 #include <albroker.h>
 #include <time.h>
 
-ALWalk::ALWalk()
+ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, actions)
 {   
     m_al_motion = new ALMotionProxy(NUNAO::m_broker);
     m_al_config.arrayReserve(10);
@@ -63,19 +63,12 @@ ALWalk::~ALWalk()
         delete m_al_motion;
 }
 
-/*! @brief Freezes the aldebaran walk engine
- */
-void ALWalk::freeze()
-{
-    NUWalk::freeze();
-    m_al_motion->killWalk();
-}
-
 /*! @brief Kill the aldebaran walk engine
  */
 void ALWalk::kill()
 {
-    freeze();
+    m_al_motion->killWalk();
+    NUWalk::kill();
 }
 
 void ALWalk::enableWalk()

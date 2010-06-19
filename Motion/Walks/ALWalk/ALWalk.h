@@ -36,12 +36,11 @@ using namespace AL;
 class ALWalk : public NUWalk
 {
 public:
-    ALWalk();
+    ALWalk(NUSensorsData* data, NUActionatorsData* actions);
     ~ALWalk();
     
     void setWalkParameters(const WalkParameters& walkparameters);
     
-    void freeze();
     void kill();
     void enableWalk();
     void setArmEnabled(bool leftarm, bool rightarm);

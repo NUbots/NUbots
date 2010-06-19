@@ -44,6 +44,7 @@ class Object
 
         int getID() const {return ID;};
         std::string getName() const {return name;};
+        void setIsVisible(bool visibility);
 
         Vector3<float> getMeasuredRelativeLocation() const {return measuredRelativePosition;}
         //void setRelativeLocation(Vector3<float> newSphericalPosition);

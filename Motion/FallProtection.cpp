@@ -21,6 +21,8 @@
 
 #include "FallProtection.h"
 #include "NUWalk.h"
+#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "NUPlatform/NUActionators/NUActionatorsData.h"
 
 #include "motionconfig.h"
 #include "debug.h"
@@ -28,7 +30,7 @@
 
 /*! @brief Constructor for FallProtection module
  */
-FallProtection::FallProtection(NUWalk* walk)
+FallProtection::FallProtection(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("FallProtection", data, actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "FallProtection::FallProtection()" << endl;
@@ -74,6 +76,62 @@ bool FallProtection::enabled()
     #endif
 }
 
+/*! @brief Stops the fall protection */
+void FallProtection::stop()
+{
+    stopHead();
+    stopArms();
+    stopLegs();
+}
+
+void FallProtection::stopHead()
+{
+    return;
+}
+
+void FallProtection::stopArms()
+{
+    return;
+}
+
+void FallProtection::stopLegs()
+{
+    return;
+}
+
+/*! @brief Kills the fall protection */
+void FallProtection::kill()
+{
+    return;
+}
+
+/*! @brief Returns true if the fall protection is currently active, false otherwise */
+bool FallProtection::isActive()
+{
+    if (m_data and m_data->isFalling())
+        return true;
+    else
+        return false;
+}
+
+/*! @brief Returns true if the fall protection is using the head */
+bool FallProtection::isUsingHead()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the fall protection is using the arms */
+bool FallProtection::isUsingArms()
+{
+    return isActive();
+}
+
+/*! @brief Returns true if the fall protection is using the legs */
+bool FallProtection::isUsingLegs()
+{
+    return isActive();
+}
+
 /*! @brief Produce actions from the data to protect the robot from a fall
  
     @param data a pointer to the most recent sensor data storage class
@@ -84,9 +142,30 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (data == NULL or actions == NULL or (not m_enabled))
         return;
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "FallProtection::process()" << endl;
-#endif
+    m_data = data;
+    m_actions = actions;
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "FallProtection::process()" << endl;
+    #endif
+    if (m_data->isFalling())
+    {
+        vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
+        vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), 0);
+        vector<float> velocity_lleg(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+        vector<float> velocity_rleg(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
+        
+        vector<float> sensor_larm, sensor_rarm;
+        vector<float> sensor_lleg, sensor_rleg;
+        m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
+        m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
+        m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
+        m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+        
+        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, 0, sensor_lleg, velocity_lleg, 0);
+        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, 0, sensor_rleg, velocity_rleg, 0);
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, 0, sensor_larm, velocity_larm, 0);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, 0, sensor_rarm, velocity_rarm, 0);
+    }
 }
 
 

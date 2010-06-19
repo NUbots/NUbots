@@ -38,10 +38,8 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead() : m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
+NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
 {
-    m_data = NULL;
-    m_actions = NULL;
     m_camera_height = 46;
     m_body_pitch = 0;
     m_sensor_pitch = 0;
@@ -61,17 +59,40 @@ NUHead::~NUHead()
     kill();
 }
 
+/*! @brief Stops the head module. The head module is really easy to stop so it happens immediately
+ */
+void NUHead::stop()
+{
+    stopHead();
+}
+
+void NUHead::stopHead()
+{
+    m_is_nodding = false;
+    m_is_panning = false;
+    m_move_end_time = 0;
+    if (m_data and m_actions)
+        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
+}
+
 /*! @brief Kills the head module
  */
 void NUHead::kill()
 {
-    m_is_nodding = false;
-    m_is_panning = false;
-    if (m_data and m_actions)
-    {
-        m_move_end_time = m_data->CurrentTime;
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
-    }
+    stop();
+}
+
+bool NUHead::isActive()
+{
+    return isUsingHead();
+}
+
+bool NUHead::isUsingHead()
+{
+    if (m_data and m_actions and m_data->CurrentTime <= m_move_end_time)
+        return true;
+    else
+        return false;
 }
 
 /*! @brief Returns the completion time of the current head movement.
@@ -104,9 +125,12 @@ void NUHead::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process a generic head job
     @param job the head job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadJob* job)
+void NUHead::process(HeadJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     vector<double> times;                // the times to reach each headposition tuple
     vector<vector<float> > positions;    // a vector of headposition tuples
     
@@ -117,10 +141,13 @@ void NUHead::process(HeadJob* job)
 }
 
 /*! @brief Process a generic head job
- @param job the head job
+    @param job the head job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadTrackJob* job)
+void NUHead::process(HeadTrackJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     vector<double> times;                // the times to reach each headposition tuple
     vector<vector<float> > positions;    // a vector of headposition tuples
     
@@ -136,9 +163,12 @@ void NUHead::process(HeadTrackJob* job)
 
 /*! @brief Process a head pan job
     @param job the head pan job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadPanJob* job)
+void NUHead::process(HeadPanJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     HeadPanJob::head_pan_t pantype = job->getPanType();
     m_pan_default_values = job->useDefaultValues();
     if (not m_pan_default_values)
@@ -158,9 +188,12 @@ void NUHead::process(HeadPanJob* job)
 
 /*! @brief Process a head nod job
     @param job the nod job
+    @param current_provider true if we are the current provider for the head, and therefore can control the joints
  */
-void NUHead::process(HeadNodJob* job)
+void NUHead::process(HeadNodJob* job, bool currentprovider)
 {
+    if (not currentprovider)
+        return;
     HeadNodJob::head_nod_t nodtype = job->getNodType();
     if (m_is_nodding == false || nodtype != m_nod_type)
     {
@@ -189,6 +222,11 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
     m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    
+    if (times.size() > 0)
+        m_move_end_time = times.back();
+    else
+        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Calculates the head target from the image elevation and image bearing
@@ -312,11 +350,6 @@ void NUHead::calculateGenericPan(float mindistance, float maxdistance, float min
     vector<double> times = calculatePanTimes(scan_points, panspeed);
     
     moveTo(times, scan_points);
-    
-    if (times.size() > 0)
-        m_move_end_time = times[times.size() -1];
-    else
-        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Gets relevant sensor data from the NUSensorsData; sets m_camera_height, m_body_pitch, and m_sensor_pitch, m_sensor_yaw
@@ -552,11 +585,6 @@ void NUHead::calculateGenericNod(float mindistance, float maxdistance, float nod
     vector<double> times = calculateNodTimes(points, nodspeed);
     
     moveTo(times, points);
-    
-    if (times.size() > 0)
-        m_move_end_time = times.back();
-    else
-        m_move_end_time = m_data->CurrentTime;
 }
 
 /*! @brief Orders the min and max pitch values */

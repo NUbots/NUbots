@@ -30,7 +30,7 @@
 
 /*! @brief Constructor for Script module
  */
-Script::Script(NUWalk* walk)
+Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Script", data, actions)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Script::Script()" << endl;
@@ -46,6 +46,16 @@ Script::~Script()
 
 /*! @brief Returns true is a script is currently being executed */
 bool Script::isActive()
+{
+    return false;
+}
+
+bool Script::isUsingHead()
+{
+    return false;
+}
+
+bool Script::isUsingArms()
 {
     return false;
 }

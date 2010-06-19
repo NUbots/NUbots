@@ -48,7 +48,7 @@ using namespace std;
 class NBWalk : public NUWalk
 {
 public:
-    NBWalk();
+    NBWalk(NUSensorsData* data, NUActionatorsData* actions);
     ~NBWalk();
     
     void kill();
