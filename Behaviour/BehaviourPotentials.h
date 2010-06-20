@@ -132,7 +132,28 @@ public:
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
-        
+
+		float x = distance * cos(bearing);
+		float y = distance * sin(bearing);
+  
+		const float offsetDistance = 5.0f;
+		if(fabs(heading) < mathGeneral::PI / 8.0f)
+		{
+			if(y > 0)
+			{
+				x -= offsetDistance * cos(heading + mathGeneral::PI/2);
+				y += offsetDistance * sin(heading + mathGeneral::PI/2);
+			}
+			else
+			{
+				x -= offsetDistance * cos(heading - mathGeneral::PI/2);
+				y += offsetDistance * sin(heading - mathGeneral::PI/2);
+			}
+		}
+
+		distance = sqrt(x*x + y*y);
+        bearing = atan2(y,x);
+
         // calculate the component to position the ball at the kicking distance
         float position_speed;
         float position_direction;
