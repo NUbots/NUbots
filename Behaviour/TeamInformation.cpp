@@ -28,6 +28,7 @@
 #include <memory.h>
 
 #include "debug.h"
+#include "debugverbositynetwork.h"
 
 TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects) : m_TIMEOUT(2000)
 {
@@ -153,6 +154,7 @@ void TeamPacket::summaryTo(ostream& output)
 {
     output << "ID: " << ID;
     output << " Player: " << (int)PlayerNumber;
+    output << " Team: " << (int)TeamNumber;
     output << " TimeToBall: " << TimeToBall;
     output << endl;
 }
@@ -201,10 +203,10 @@ istream& operator>> (istream& input, TeamInformation& info)
     
     if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number and temp.TeamNumber == info.m_team_number)
     {   // only accept packets from valid player numbers
+        nusystem->displayTeamPacketReceived(info.m_actions);
         if (info.m_received_packets[temp.PlayerNumber].empty())
         {   // if there have been no previous packets from this player always accept the packet
             info.m_received_packets[temp.PlayerNumber].push_back(temp);
-            nusystem->displayTeamPacketReceived(info.m_actions);
         }
         else
         {
@@ -212,14 +214,20 @@ istream& operator>> (istream& input, TeamInformation& info)
             if (timenow - lastpacket.ReceivedTime > 2000)
             {   // if there have been no packets recently from this player always accept the packet
                 info.m_received_packets[temp.PlayerNumber].push_back(temp);
-                nusystem->displayTeamPacketReceived(info.m_actions);
             }
             else if (temp.ID > lastpacket.ID)
             {   // avoid out of order packets by only adding recent packets that have a higher ID
                 info.m_received_packets[temp.PlayerNumber].push_back(temp);
-                nusystem->displayTeamPacketReceived(info.m_actions);
             }
         }
+    }
+    else
+    {
+        #if DEBUG_NETWORK_VERBOSITY > 0
+            debug << ">>TeamInformation. Rejected team packet:";
+            temp.summaryTo(debug);
+            debug << endl;
+        #endif
     }
     return input;
 }

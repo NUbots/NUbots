@@ -53,10 +53,15 @@ TeamPort::~TeamPort()
 */
 void TeamPort::handleNewData(std::stringstream& buffer)
 {
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "TeamPort::handleNewData()." << endl;
+    #endif
     string s_buffer = buffer.str();
     if (s_buffer.size() == sizeof(TeamPacket))
     {   // discard team packets that are the wrong size
         buffer >> m_team_information;
     }
+    else
+        debug << "TeamPort::handleNewData(). The received packet does not have the correct length: " << s_buffer.size() << " instead of " << sizeof(TeamPacket) << endl;
 }
 
