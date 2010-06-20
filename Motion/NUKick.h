@@ -119,7 +119,7 @@ private:
     bool AlignXposition(legId_t kickingLeg, float speed, float xPos);
     bool LowerLeg(legId_t kickingLeg, float speed);
     bool BalanceCoP(legId_t supportLeg, float targetX = 0.0f, float targetY = 0.0f);
-    void BalanceCoPLevelTorso(vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
     void BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
     void BalanceCoPHip(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
     void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
@@ -154,6 +154,7 @@ private:
     bool lock;
 
     float m_defaultMotorGain;
+    float m_defaultArmMotorGain;
     vector<float> m_leftLegInitialPose;
     vector<float> m_rightLegInitialPose;
 
@@ -185,13 +186,17 @@ private:
     Rectangle RightFootLeftKickableArea;
     Rectangle LeftFootRightKickableArea;
     Rectangle RightFootRightKickableArea;
+    float m_intialWeightShiftPercentage;
 
     float m_footWidth;
     float m_ballRadius;
     bool m_pauseState;
     float m_variableGainValue;
     bool m_armCommandSent;
+    bool m_kickActive;
+    bool m_kickReady;
 };
+
 
 #endif
 
