@@ -141,13 +141,13 @@ public:
 		{
 			if(y > 0)
 			{
-				x -= offsetDistance * cos(heading + mathGeneral::PI/2);
-				y += offsetDistance * sin(heading + mathGeneral::PI/2);
+				x += offsetDistance * cos(heading - mathGeneral::PI/2);
+				y += offsetDistance * sin(heading - mathGeneral::PI/2);
 			}
 			else
 			{
-				x -= offsetDistance * cos(heading - mathGeneral::PI/2);
-				y += offsetDistance * sin(heading - mathGeneral::PI/2);
+				x += offsetDistance * cos(heading + mathGeneral::PI/2);
+				y += offsetDistance * sin(heading + mathGeneral::PI/2);
 			}
 		}
 
