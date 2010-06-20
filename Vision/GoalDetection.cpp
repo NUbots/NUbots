@@ -304,6 +304,7 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
 
 void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& FO_Candidates)
 {
+
     vector < ObjectCandidate > ::iterator it;
     int boarder = 10;
     //! Go through all the candidates: to find overlapping and add to the bigger object candidate:
@@ -641,13 +642,14 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     std::vector < TransitionSegment > tempSegments = PossibleGoal.getSegments();
     std::vector < Vector2<int> > midpoints, leftPoints, rightPoints;
     Vector2<int> tempStart, tempEnd;
-
+    float pixelError = 0.0;
     //! USE CANDIDATE HEIGHT:
     if(PossibleGoal.getTopLeft().y > vision->getScanSpacings()
         && PossibleGoal.getTopLeft().y < vision->getImageHeight()-vision->getScanSpacings()
         && PossibleGoal.aspect() < 0.3 )
     {
         float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y);
+
         //qDebug() << "Height Distance " <<GoalHeightDistance ;
         return GoalHeightDistance;
     }
@@ -786,24 +788,41 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         if(midpoints.empty())
         {
             //TODO: Find the Largest Transition Segment
-            float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-            float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x)); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+            float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y) + pixelError); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+            float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x) + pixelError); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+            float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
 
-            if(GoalHeightDistance > GoalWidthDistance)
+            if(GoalHeightDistance > GoalWidthDistance && D2Pdistance > GoalWidthDistance )
             {
                 FinalDistance = GoalWidthDistance;
                 //qDebug() <<"WIDTH GOAL Distance: " << GoalWidthDistance <<endl;
             }
-            else
+            else if(GoalWidthDistance > GoalHeightDistance && D2Pdistance > GoalHeightDistance )
             {
                 FinalDistance = GoalHeightDistance;
                 //qDebug() <<"Height GOAL Distance: " << GoalHeightDistance <<endl;
+            }
+            else
+            {
+                FinalDistance = D2Pdistance;
+                //qDebug() <<"Distance to PointGOAL Distance: " << GoalHeightDistance <<endl;
             }
 
         }
         else //! Condition of 1 midpoint in goal
         {
-            FinalDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((rightPoints[0].x -leftPoints[0].x ));
+
+            FinalDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((rightPoints[0].x -leftPoints[0].x )+pixelError);
+
+
+            float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
+
+            //qDebug() << "Distance to Bottom Of Goals: Width:"<< FinalDistance << ", D2PDistance: " << D2Pdistance;
+            float distanceBuffer = 0;
+            if(FinalDistance > D2Pdistance + distanceBuffer)
+            {
+                FinalDistance = D2Pdistance;
+            }
             //qDebug() <<"Single Midpoint GOAL Distance: " << FinalDistance <<endl;
         }
         return FinalDistance;
@@ -876,27 +895,68 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //! Pick the which Goal Width Distance to use:
-
+    
     //qDebug() << "Comparing: Largest: "<< GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ largestWidth << "\tAverage: "<<GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ widthSum << "\tTighter Average: " << GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ tightwidthSum << "\tTighter Large fit: " << GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ tightlargestWidth ;
+    //qDebug() << "Comparing with Error: Largest: "<< GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidth +pixelError)<< "\tAverage: "<<GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (widthSum +pixelError)<< "\tTighter Average: " << GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (tightwidthSum + +pixelError)<< "\tTighter Large fit: " << GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (tightlargestWidth + +pixelError);
+
     //if(tightlargestWidth  == 0 &&  widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 && tightwidthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2)
 
     if((largestWidth < widthSum * 1.1 || widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 || midpoints.size() < 5) && largestWidth != 0 && largestWidth > widthSum )
     {
-        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ largestWidth; //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidth + pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
         //qDebug() << "Largest MidPoints Distance:" << distance << "cm using " << largestWidth << " pixels.";
     }
     else if (tightwidthSum > 0 )
     {
-        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ tightwidthSum; //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (tightwidthSum+ pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
         //qDebug() << "Tight Average MidPoints Distance:" << distance << "cm using " << tightwidthSum << "pixels.";
     }
     else
     {
-        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ widthSum; //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
+        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (widthSum + pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
         //qDebug() << "Average MidPoints Distance:" << distance << "cm using " << widthSum << "pixels.";
     }
 
+
+    float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
+
+        //qDebug() << "Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
+    float distanceBuffer = 0;
+    if(distance > D2Pdistance + distanceBuffer)
+    {
+        distance = D2Pdistance;
+    }
+
+
+
     return distance;
+}
+float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision* vision)
+{
+    //USING DISTANCE TO POINT
+    //get the center point of the of GOAL Post:
+    float D2Pdistance = 100000;
+    float MiddleX = (PossibleGoal.getTopLeft().x + PossibleGoal.getBottomRight().x)/2;
+    float BottomY = PossibleGoal.getBottomRight().y;
+
+    float bearing = vision->CalculateBearing(MiddleX);
+    float elevation = vision->CalculateElevation(BottomY);
+
+    Matrix camera2groundTransform;
+    bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+    if(isOK == true)
+    {
+        Vector3<float> result;
+        result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+        D2Pdistance = result[0];
+        bearing = result[1];
+        elevation = result[2];
+
+        #if DEBUG_VISION_VERBOSITY > 6
+            debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        #endif
+    }
+    return D2Pdistance;
 }
 
 float GoalDetection::DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> & point)

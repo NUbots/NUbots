@@ -136,10 +136,10 @@ void Localisation::ProcessObjects()
 #if DEBUG_LOCALISATION_VERBOSITY > 2
     if(numUpdates == 0 )
     {
-        debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Update Starting." << endl;
         for(int i = 0; i < c_MAX_MODELS; i++){
             if(models[i].isActive == false) continue;
-            debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
+            debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
             debug_out  << " [alpha = " << models[i].alpha << "]";
             debug_out  << " Robot X: " << models[i].getState(0);
             debug_out  << " Robot Y: " << models[i].getState(1);
@@ -155,7 +155,7 @@ void Localisation::ProcessObjects()
 // 	doTimeUpdate(0,0,0);
 	
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-    debug_out   << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward
+    debug_out   << "[" << m_timestamp << "]: Time update - odomForward = " << odomForward
                 << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
@@ -241,13 +241,13 @@ void Localisation::ProcessObjects()
         {
             for (int i = 0; i < c_MAX_MODELS; i++){
                 if(models[i].isActive == false) continue;
-                debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
+                debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
                 debug_out  << " [alpha = " << models[i].alpha << "]";
                 debug_out  << " Robot X: " << models[i].getState(0);
                 debug_out  << " Robot Y: " << models[i].getState(1);
                 debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
             }
-            debug_out  << "[" << currentFrameNumber << "]: Best Model";
+            debug_out  << "[" << m_timestamp << "]: Best Model";
             debug_out  << " [alpha = " << bestModel->alpha << "]";
             debug_out  << " Robot X: " << bestModel->getState(0);
             debug_out  << " Robot Y: " << bestModel->getState(1);
@@ -678,7 +678,7 @@ bool Localisation::clipModelToField(int modelID)
     clipped = models[modelID].clipState(0, fieldXMin, fieldXMax);		// Clipping for robot's X
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
-        debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+        debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(0) clipped.";
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
@@ -695,7 +695,7 @@ bool Localisation::clipModelToField(int modelID)
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
-        debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+        debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(1) clipped." << endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
@@ -712,7 +712,7 @@ bool Localisation::clipModelToField(int modelID)
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
-        debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+        debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(3) clipped." << endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
@@ -730,7 +730,7 @@ bool Localisation::clipModelToField(int modelID)
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
-        debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+        debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(4) clipped." << endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
@@ -863,7 +863,7 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
         m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
     
     #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
+        debug_out  << "[" << m_timestamp << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
     #endif
 
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -941,11 +941,11 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         if(models[modelID].isActive == false) continue; // Skip Inactive models.
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "] Landmark Update. "; 
+        debug_out  <<"[" << m_timestamp << "]: Model[" << modelID << "] Landmark Update. ";
         debug_out  << "Object = " << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
-        debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")";
+        debug_out  << " Location = (" << landmark.X() << "," << landmark.Y() << ")...";
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
         if(landmark.measuredBearing() != landmark.measuredBearing())
@@ -963,9 +963,14 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 #if DEBUG_LOCALISATION_VERBOSITY > 0
         if(kf_return != KF_OK)
         {
+            debug_out << "OUTLIER!" << endl;
             debug_out << "Model[" << modelID << "]: Outlier Detected - " << landmark.getName() << endl;
             debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << endl;
             debug_out << "Expected - Distance = " << models[modelID].getDistanceToPosition(landmark.X(),landmark.Y()) << " Bearing = " << models[modelID].getBearingToPosition(landmark.X(),landmark.Y()) << endl;
+        }
+        else
+        {
+            debug_out << "OK!" << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
@@ -992,7 +997,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)){
     #if DEBUG_LOCALISATION_VERBOSITY > 1
-        debug_out  <<"[" << currentFrameNumber << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
+        debug_out  <<"[" << m_timestamp << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
@@ -1009,20 +1014,20 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
-        debug_out  <<"[" << currentFrameNumber << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         MergeModels(maxActiveAfterMerge);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << endl;
+        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 
             #if DEBUG_LOCALISATION_VERBOSITY > 0
-            debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << endl;
+            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << endl;
             #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
             return KF_OUTLIER;
@@ -1057,7 +1062,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             if(newModelID < 0){ 
 
                 #if DEBUG_LOCALISATION_VERBOSITY > 0
-                debug_out  <<"[" << currentFrameNumber << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
+                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
                 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
                 for(int m = 0; m < c_MAX_MODELS; m++) models[m].toBeActivated = false;
@@ -1075,7 +1080,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             kf_return =  models[newModelID].fieldObjectmeas(ambigousObject.measuredDistance(), ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
             #if DEBUG_LOCALISATION_VERBOSITY > 2
-            debug_out  <<"[" << currentFrameNumber << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
+            debug_out  <<"[" << m_timestamp << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
             //debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
             debug_out  << "\tLocation = (" << possibleObjects[possibleObjectID].X() << "," << possibleObjects[possibleObjectID].Y() << ")...";
             #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -1122,7 +1127,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     if((models[index1].isActive == false) || (models[index2].isActive == false)) success = false; // Both models must be active.
     if(success == false){
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
         return success;
     }
@@ -1255,7 +1260,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
         //models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
         #if DEBUG_LOCALISATION_VERBOSITY > 0
-        debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
+        debug_out << "[" << m_timestamp << "]: Model[" << modelID << "] Reset due to outliers." << endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
         for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
@@ -1384,7 +1389,7 @@ bool Localisation::varianceCheck(int modelID)
    	  if(changed)
 	  {
 		  
-         	debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
+                debug_out << "[" << m_timestamp << "]: Model[" << modelID << "]";
          	debug_out << "Bearing adjusted due to Goal. New Value = " << models[modelID].stateEstimates[2][0] << endl;
 	  }
  	#endif
@@ -1428,7 +1433,7 @@ void Localisation::ResetAll()
 {
 
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  <<"[" << currentFrameNumber << "]: Resetting All Models." << endl;
+    debug_out  <<"[" << m_timestamp << "]: Resetting All Models." << endl;
 #endif
 
     for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++){
