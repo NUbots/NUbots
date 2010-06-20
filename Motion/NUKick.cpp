@@ -36,6 +36,7 @@
 #include "debug.h"
 #include "debugverbositynumotion.h"
 #include "Tools/Math/General.h"
+#include "Autoconfig/targetconfig.h"
 using namespace mathGeneral;
 
 //#if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -117,9 +118,13 @@ void NUKick::loadKickParameters()
     const float xMin = m_kinematicModel->getFootForwardLength();
     const float xReachFwd = xMin + 9.0f;
     const float xReachSide = 30.0f;
+    float yMin = footInnerWidth + 2.0f;
+#ifdef TARGET_IS_NAOWEBOTS
+    yMin = footInnerWidth;
+#endif
 
-    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (footInnerWidth), (footInnerWidth + yReachFwd));
-    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footInnerWidth + yReachFwd), -(footInnerWidth));
+    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (yMin), (footWidth + yReachFwd));
+    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footWidth + yReachFwd), -(yMin));
 
     LeftFootRightKickableArea = Rectangle(xMin, xReachSide, footWidth/2.0, yReachSide);
     //LeftFootLeftKickableArea = Rectangle(xMin, xReachSide, 2.0f*footWidth, 3.0f/2.0f*footWidth + yReachSide);
@@ -295,8 +300,9 @@ void NUKick::stopLegs()
     switch(pose)
     {
         case PRE_KICK:
-            pose = POST_KICK;
+            pose = DO_NOTHING;
             m_stateCommandGiven = false;
+            m_kickingLeg = noLeg;
             break;
         case TRANSFER_TO_SUPPORT:
             pose = UNSHIFT_LEG;
@@ -336,7 +342,7 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
 
-    if(!isActive())
+    if(!isActive() && !isReady())
         return;
     doKick();
 }
@@ -1283,6 +1289,7 @@ void NUKick::MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJo
 
 void NUKick::MoveArmsToKickPose(legId_t leadingArmleg, float speed)
 {
+    return;
     NUActionatorsData::bodypart_id_t a_leadingArm;
     NUSensorsData::bodypart_id_t s_leadingArm;
     NUActionatorsData::bodypart_id_t a_trailingArm;
