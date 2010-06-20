@@ -339,10 +339,6 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     if(!isActive())
         return;
     doKick();
-    #ifdef USE_WALK
-    if(pose == PRE_KICK)
-        m_walk->process(data, actions);
-    #endif // USE_WALK
 }
 
 /*! @brief Process a kick job
@@ -384,22 +380,19 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
         debug << "void NUKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
         debug << "current pose = " << toString(pose) << endl;
 
-	switch(pose)
-	{
-            case NO_KICK:
-            case DO_NOTHING:
+        if(!isActive())
+        {
+            debug << "NUKick::Choosing leg." << endl;
+            chooseLeg();
+        }
+        else
+        {
+            if(kickAbortCondition())
             {
-                debug << "Choosing leg." << endl;
-                chooseLeg();
-                return;
+                debug << "NUKick::Aborting kick." << endl;
+                stop();
             }
-            default:
-                if(kickAbortCondition())
-                {
-                    stop();
-                }
-                break;
-	}
+        }
 }
 
 void NUKick::doKick()
@@ -1682,38 +1675,17 @@ bool NUKick::chooseLeg()
             debug << LeftFootForwardKickableArea.MinY() << " < " << rightFootRelativeBallLocation.y << " < " << LeftFootForwardKickableArea.MaxY() << endl;
             if(RightFootForwardKickableArea.PointInside(leftFootRelativeBallLocation.x,leftFootRelativeBallLocation.y))
             {
-                if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
-                else
-                {
-                    m_kickingLeg = rightLeg;
-                    m_swingDirection = ForwardSwing;
-                    pose = PRE_KICK;
-                    kickSelected = true;
-                }
+                m_kickingLeg = rightLeg;
+                m_swingDirection = ForwardSwing;
+                pose = PRE_KICK;
+                kickSelected = true;
             }
             else if(LeftFootForwardKickableArea.PointInside(rightFootRelativeBallLocation.x,rightFootRelativeBallLocation.y))
             {
-
-                if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
-                else
-                {
-                    m_kickingLeg = leftLeg;
-                    m_swingDirection = ForwardSwing;
-                    pose = PRE_KICK;
-                    kickSelected = true;
-                }
+                m_kickingLeg = leftLeg;
+                m_swingDirection = ForwardSwing;
+                pose = PRE_KICK;
+                kickSelected = true;
             }
         }
         // Direction is to the leftish
@@ -1721,30 +1693,13 @@ bool NUKick::chooseLeg()
         {
             if(RightFootLeftKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
-                else
-                {
-                    m_kickingLeg = rightLeg;
-                    m_swingDirection = LeftSwing;
-                    pose = PRE_KICK;
-                    kickSelected = true;
-                }
+                m_kickingLeg = rightLeg;
+                m_swingDirection = LeftSwing;
+                pose = PRE_KICK;
+                kickSelected = true;
             }
             else if(LeftFootLeftKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
                 m_kickingLeg = leftLeg;
                 m_swingDirection = LeftSwing;
                 pose = PRE_KICK;
@@ -1756,37 +1711,17 @@ bool NUKick::chooseLeg()
         {
             if(LeftFootRightKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
-                else
-                {
-                    m_kickingLeg = leftLeg;
-                    m_swingDirection = RightSwing;
-                    pose = PRE_KICK;
-                    kickSelected = true;
-                }
+                m_kickingLeg = leftLeg;
+                m_swingDirection = RightSwing;
+                pose = PRE_KICK;
+                kickSelected = true;
             }
             if(RightFootRightKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                if(m_kickingLeg == leftLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                        return false;
-                else if(m_kickingLeg == rightLeg && (pose != DO_NOTHING) && (pose != NO_KICK))
-                {
-                    stop();
-                    return false;
-                }
-                else
-                {
-                    m_kickingLeg = rightLeg;
-                    m_swingDirection = RightSwing;
-                    pose = PRE_KICK;
-                    kickSelected = true;
-                }
+                m_kickingLeg = rightLeg;
+                m_swingDirection = RightSwing;
+                pose = PRE_KICK;
+                kickSelected = true;
             }
         }
         if(!kickSelected)
