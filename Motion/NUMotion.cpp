@@ -422,19 +422,19 @@ void NUMotion::process(JobList* jobs)
         #ifdef USE_HEAD
             case Job::MOTION_HEAD:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadJob*> (*it), canProcessJobs(m_walk));
+                m_head->process(reinterpret_cast<HeadJob*> (*it), canProcessJobs(m_head));
                 break;
             case Job::MOTION_TRACK:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadTrackJob*> (*it), canProcessJobs(m_walk));
+                m_head->process(reinterpret_cast<HeadTrackJob*> (*it), canProcessJobs(m_head));
                 break;
             case Job::MOTION_PAN:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadPanJob*> (*it), canProcessJobs(m_walk));
+                m_head->process(reinterpret_cast<HeadPanJob*> (*it), canProcessJobs(m_head));
                 break;
             case Job::MOTION_NOD:
                 next_provider = m_head;
-                m_head->process(reinterpret_cast<HeadNodJob*> (*it), canProcessJobs(m_walk));
+                m_head->process(reinterpret_cast<HeadNodJob*> (*it), canProcessJobs(m_head));
                 break;
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
