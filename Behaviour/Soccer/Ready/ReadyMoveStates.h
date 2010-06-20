@@ -105,7 +105,7 @@ protected:
         
         vector<float> position = getReadyFieldPositions();
         vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 60);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 30, 100);
+        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
     }
 private:
