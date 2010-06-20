@@ -309,11 +309,16 @@ public:
         if (fabs(targetposition[0]) > 180)          // clip the target position to 1.2m from the goal
             targetposition[0] = mathGeneral::sign(targetposition[0])*180;
         
-        float b_y = ball.Y();
-        if (b_y < 50)
-            targetposition[1] = b_y + distancefromball;
-        else
+        // I need a cost metric here that includes the current position of the robot, so that it does not cross the field unnecessarily
+        // b_y > 0 probably choose right, b_y < 0 probably choose left, 
+        // if s_y < b_y probably choose right s_y > b_y probably choose left
+        float b_y = ball.Y(); 
+        float s_y = self.wmY();
+        float cost = -b_y + 0.5*(s_y - b_y);
+        if (cost < 0)
             targetposition[1] = b_y - distancefromball;
+        else
+            targetposition[1] = b_y + distancefromball;
         
         // convert to relative coords
         vector<float> polar = self.CalculateDifferenceFromFieldLocation(targetposition);
