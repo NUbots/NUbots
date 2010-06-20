@@ -2,7 +2,7 @@
 #include "ObjectCandidate.h"
 #include "Tools/Math/LSFittedLine.h"
 
-#define GOAL_WIDTH 11 //LAB = 11cm, OFFICIAL = 10cm
+#define GOAL_WIDTH 10 //LAB = 11cm, OFFICIAL = 10cm
 #define GOAL_HEIGHT 80 //in cm
 
 #define DISTANCE_BETWEEN_POSTS 140
@@ -48,6 +48,8 @@ class GoalDetection
         void CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_Candidates, Vision* vision);
 
         float FindGoalDistance(const ObjectCandidate &PossibleGoal, Vision* vision);
+        float DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision* vision);
+
         float DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> &point);
 
         //! SORTING: BIGGEST TO SMALLEST

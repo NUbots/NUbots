@@ -161,7 +161,6 @@ private:
     legId_t m_kickingLeg;
     swingDirection_t m_swingDirection;
     //Legs * IKSys;
-    bool m_kickIsActive;
 
     bool m_stateCommandGiven;
     double m_estimatedStateCompleteTime;
