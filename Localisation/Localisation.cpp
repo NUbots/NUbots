@@ -287,13 +287,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
 	bool lost = false;
 	if((lostCount>=2) && amILost)
-	{
 		lost = true;
-		 cout << "\n  -----> I am lost \n";
-	}
-	else {
-		cout<<"\n";
-	}
 
     // Set my location.
     fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
