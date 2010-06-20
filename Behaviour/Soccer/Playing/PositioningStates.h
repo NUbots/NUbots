@@ -69,7 +69,8 @@ protected:
         float distance = sqrt(position[0]*position[0] + position[1]*position[1]);
         float bearing = atan2(position[1], position[0]);
         vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing());
-        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 75);
+        m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));

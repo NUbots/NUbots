@@ -75,7 +75,23 @@ protected:
         if(!iskicking)
         {
             vector<float> speed = BehaviourPotentials::goToBall(ball, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
-            m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+            vector<float> result;
+            // decide whether we need to dodge or not
+            float leftobstacle = 255;
+            float rightobstacle = 255;
+            vector<float> temp;
+            if (m_data->getDistanceLeftValues(temp) and temp.size() > 0)
+                leftobstacle = temp[0];
+            if (m_data->getDistanceRightValues(temp) and temp.size() > 0)
+                rightobstacle = temp[0];
+            
+            // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
+            if (ball.estimatedDistance() > 20 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
+                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 25.0f), 75);
+            else
+                result = speed;
+            
+            m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
         if(ball.estimatedDistance() < 20.0f)
