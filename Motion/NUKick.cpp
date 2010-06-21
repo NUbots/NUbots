@@ -1137,7 +1137,7 @@ void NUKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, fl
 //    const float gainy = m_variableGainValue * GainMultiplier();
 
     jointLimit hipRollLimits;
-    if(theLeg = leftLeg)
+    if(theLeg == leftLeg)
     {
         hipRollLimits = m_leftLegLimits[0];
     }
