@@ -360,6 +360,7 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
         debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
+        debug << "NUKick::process in " << toString(pose) << " ready: " << m_kickReady << " active: " << m_kickActive << endl;
     #endif
     
     m_data = data;
@@ -441,6 +442,9 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
 
 void NUKick::doKick()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUKick::doKick()" << endl;
+    #endif
     bool done = false;
     float balanceYoffset = 0.0f;
     float balanceXoffset = 3.0f;
@@ -456,16 +460,12 @@ void NUKick::doKick()
     else
     {
         pose = POST_KICK;
-        return;
     }
 
     //currently must be at zero position
     double kickAngle = atan2(m_target_y-m_ball_y, m_target_x-m_ball_x);
     double kickDistance = sqrt(pow(m_target_y-m_ball_y,2) + pow(m_target_x-m_ball_x,2));
 
-    #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "void NUKick::doKick() - Current Pose: " << toString(pose) << endl;
-    #endif
     switch(pose)
     {
         case DO_NOTHING:
