@@ -672,7 +672,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)
-    {\
+    {
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
         //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
@@ -770,7 +770,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             }
             tempEnd.x = checkEndx;
             //qDebug() << "Start, End: "<< i <<":" << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
-            if(fabs(tempEnd.x -tempStart.x) < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+            if(fabs(tempEnd.x -tempStart.x) < MINIMUM_GOAL_WIDTH_IN_PIXELS/2) continue;
 
 
             tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
@@ -782,7 +782,23 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     }
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size();
-    if(midpoints.size() < 3 )
+
+    //Check if the top is cut off:
+    //qDebug() << "Condition Check: "<<PossibleGoal.getTopLeft().y << vision->getScanSpacings()/2 << (PossibleGoal.getTopLeft().y < 0 +  vision->getScanSpacings()/2);
+    int MIN_MIDPOINTS, LAST_MIDPOINT;
+    if(false)
+    {
+        //IT IS CUT OFF: (NO CROSSBAR)
+        MIN_MIDPOINTS = 2;
+        LAST_MIDPOINT = midpoints.size();
+    }
+    else
+    {
+        //IS NOT CUTOFF: (Maybe CrossBAR)
+        MIN_MIDPOINTS = 3;
+        LAST_MIDPOINT = midpoints.size()-1;
+    }
+    if(midpoints.size() < (unsigned int)MIN_MIDPOINTS)
     {
         float FinalDistance;
         if(midpoints.empty())
@@ -790,7 +806,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             //TODO: Find the Largest Transition Segment
             float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y) + pixelError); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
             float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x) + pixelError); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-            float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
+            float D2Pdistance = 10000;  //DistanceToPoint(PossibleGoal,vision);
 
             if(GoalHeightDistance > GoalWidthDistance && D2Pdistance > GoalWidthDistance )
             {
@@ -815,7 +831,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             FinalDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((rightPoints[0].x -leftPoints[0].x )+pixelError);
 
 
-            float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
+            float D2Pdistance = 10000;//DistanceToPoint(PossibleGoal,vision);
 
             //qDebug() << "Distance to Bottom Of Goals: Width:"<< FinalDistance << ", D2PDistance: " << D2Pdistance;
             float distanceBuffer = 0;
@@ -829,16 +845,16 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
 
     //FORM EQUATION if MidPointLine
-    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << endl;
+    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << LAST_MIDPOINT<<endl;
     LSFittedLine midPointLine;
-    for (int i = 0; i < (int) midpoints.size()-1; i++)
+    for (int i = 0; i < (int) LAST_MIDPOINT; i++)
     {
 
         LinePoint  point;
         point.x = midpoints[i].x;
         point.y = midpoints[i].y;
         midPointLine.addPoint(point);
-        //debug << "MidPoint: \t" << point.x << "," <<point.y << endl;
+
     }
     //qDebug() << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0" << endl;
     //qDebug()<< "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << endl;
@@ -860,7 +876,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         float leftPixels = DistanceLineToPoint(midPointLine, leftpoint);
         float rightPixels = DistanceLineToPoint(midPointLine, rightpoint);
 
-        if(leftPixels+rightPixels < MINIMUM_GOAL_WIDTH_IN_PIXELS) continue;
+        //if(leftPixels+rightPixels < MINIMUM_GOAL_WIDTH_IN_PIXELS/2) continue;
 
         widthSum +=  leftPixels + rightPixels;
 
@@ -901,7 +917,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     //if(tightlargestWidth  == 0 &&  widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 && tightwidthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2)
 
-    if((largestWidth < widthSum * 1.1 || widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 || midpoints.size() < 5) && largestWidth != 0 && largestWidth > widthSum )
+    if(( widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 || midpoints.size() < 5) && largestWidth < widthSum * 1.2 && largestWidth != 0 && largestWidth > widthSum )
     {
         distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidth + pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
         //qDebug() << "Largest MidPoints Distance:" << distance << "cm using " << largestWidth << " pixels.";
@@ -917,16 +933,16 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         //qDebug() << "Average MidPoints Distance:" << distance << "cm using " << widthSum << "pixels.";
     }
 
-
+    /*
     float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
 
-        //qDebug() << "Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
+    qDebug() << "After Average Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
     float distanceBuffer = 0;
     if(distance > D2Pdistance + distanceBuffer)
     {
         distance = D2Pdistance;
     }
-
+    */
 
 
     return distance;
