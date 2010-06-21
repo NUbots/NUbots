@@ -58,7 +58,7 @@ protected:
 class BallIsLostPan : public BallIsLostSubState
 {
 public:
-    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.1)
     {
         m_spin_speed = 0;
         m_time_in_state = 0;
@@ -71,7 +71,7 @@ protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         // we transition to the spin state when the pan is completed.
-        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged())
+        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged() and m_team_info->getPlayerNumber() != 1)
             return m_lost_machine->m_lost_spin;
         else
             return this;
@@ -101,7 +101,10 @@ protected:
         else
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        if (m_team_info->getPlayerNumber() != 1)
+            m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        else
+            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
     }
 private:
     void reset()

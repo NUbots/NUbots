@@ -104,8 +104,13 @@ protected:
         
         
         vector<float> position = getReadyFieldPositions();
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 175);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 100);
+        
+        vector<float> result;
+        if (m_team_info->getPlayerNumber() != 1)
+            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
+        else
+            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 35);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
     }
 private:

@@ -84,7 +84,7 @@ void PlayingState::doStateCommons()
 
 BehaviourFSMState* PlayingState::nextStateCommons()
 {   // do state transitions in playing state machine
-    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost() and m_team_info->getPlayerNumber() != 1)
+    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
         return m_ball_is_lost_state;
     else if (m_team_info->amIClosestToBall())
         return m_chase_state;
