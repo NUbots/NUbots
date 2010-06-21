@@ -324,7 +324,7 @@ public:
         vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
         return position[1];
     }
-    
+
     /*! @brief Returns the [x,y] of the support player position */
     static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 100)
     {
@@ -353,6 +353,27 @@ public:
         cartesian[0] = polar[0]*cos(polar[1]);
         cartesian[1] = polar[0]*sin(polar[1]);
         return cartesian;
+    }
+
+    /*! @brief Returns true if goal is lined up, false if it is not. */
+    static bool opponentsGoalLinedUp(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject* targetGoalLeftPost;
+        StationaryObject* targetGoalRightPost;
+        Self& self = fieldobjects->self;
+        if (gameinfo->getTeamColour() == GameInformation::RedTeam)
+        {
+            targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST]);
+            targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
+        }
+        else
+        {
+            targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]);
+            targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
+        }
+        float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
+        float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
+        return (leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f);
     }
 };
 
