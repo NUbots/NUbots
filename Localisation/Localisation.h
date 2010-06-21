@@ -44,6 +44,7 @@ class Localisation: public TimestampedData
         int doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
         int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
+        int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         int getNumActiveModels();
         int getNumFreeModels();
         void ClearAllModels();
@@ -131,6 +132,7 @@ class Localisation: public TimestampedData
         static const float R_obj_range_offset;
         static const float R_obj_range_relative;
         static const float centreCircleBearingError;
+        static const float sdTwoObjectAngle;
 	void measureLocalization(double,double,double);
 };
 
