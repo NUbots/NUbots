@@ -373,7 +373,8 @@ public:
         }
         float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
         float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
-        return (leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f);
+        float middleBearing = leftGoalBearing + rightGoalBearing / 2.0f;
+        return ((leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f)) || (fabs(middleBearing) < mathGeneral::PI/16.0f);
     }
 };
 
