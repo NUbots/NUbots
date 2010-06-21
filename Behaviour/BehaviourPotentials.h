@@ -320,6 +320,26 @@ public:
         vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
         return position[1];
     }
+
+    static bool opponentsGoalLinedUp(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    {
+        StationaryObject* targetGoalLeftPost;
+        StationaryObject* targetGoalRightPost;
+        Self& self = fieldobjects->self;
+        if (gameinfo->getTeamColour() == GameInformation::RedTeam)
+        {
+            targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST]);
+            targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
+        }
+        else
+        {
+            targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]);
+            targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
+        }
+        float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
+        float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
+        return (leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f);
+    }
 };
 
 
