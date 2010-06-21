@@ -62,13 +62,18 @@ protected:
         
         vector<float> position;
         if (m_team_info->getPlayerNumber() == 1)
-            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 90);
+            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 85);
         else
             position = BehaviourPotentials::CalculateSupportPlayerPosition(ball, self);
         
         float distance = sqrt(position[0]*position[0] + position[1]*position[1]);
         float bearing = atan2(position[1], position[0]);
-        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing());
+        float turningdistance;
+        if (m_team_info->getPlayerNumber() == 1)
+            turningdistance = 200;
+        else
+            turningdistance = 100;
+        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 50, turningdistance);
         vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 75);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
