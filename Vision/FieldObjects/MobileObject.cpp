@@ -14,7 +14,7 @@ MobileObject::MobileObject(int initID, const std::string& initName):
     sharedCovariance[0][0] = 600;
     sharedCovariance[0][1] = 0;
     sharedCovariance[1][1] = 600;
-    isLost = false;
+    isLost = true;
 }
 
 MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
@@ -32,7 +32,7 @@ MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initI
         sharedCovariance[0][0] = 600;
         sharedCovariance[0][1] = 0;
         sharedCovariance[1][1] = 600;
-        isLost = false;
+        isLost = true;
 }
 
 MobileObject::MobileObject(const MobileObject& srcObj):

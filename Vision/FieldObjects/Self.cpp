@@ -45,12 +45,7 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
 
 bool Self::lost()
 {
-    if (WorldModelLocationError[2]*2 > PI/4)      // if heading is really uncertain we are lost
-        return true;
-    else if (WorldModelLocationError[0]*2 > 150 or WorldModelLocationError[1]*2 > 100)
-        return true;
-    else
-        return false;
+    return amILost;
 }
 
 /*! @brief Calculate the difference from the given field state 

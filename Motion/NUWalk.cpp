@@ -119,7 +119,10 @@ void NUWalk::enableWalk()
     else if (not inInitialPosition())
         moveToInitialPosition();
     else
+    {
         m_walk_enabled = true;
+        setArmEnabled(true, true);
+    }
 }
 
 /*! @brief Freezes the walk engine and (eventually) frees the joint actionators to be used elsewhere

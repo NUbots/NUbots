@@ -77,7 +77,7 @@ public:
             if (distance < turningdistance)
                 result[2] = 0.8*heading;
             else
-                result[2] = 0.8*bearing;
+                result[2] = 0.5*bearing;
             return result;
         }
     }
@@ -243,7 +243,11 @@ public:
         if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
             rightobstacle = temp[0];
         
-        if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
+        if (fabs(speed[1]) > mathGeneral::PI/2)
+        {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
+            return speed;
+        }
+        else if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
         {   // if the obstacles are too far away don't dodge
             return speed;
         }
@@ -321,6 +325,37 @@ public:
         return position[1];
     }
 
+    /*! @brief Returns the [x,y] of the support player position */
+    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 100)
+    {
+        // we calculate the position in field coordinates, then convert to local cartesian
+        vector<float> targetposition(3,0);
+        targetposition[0] = ball.X();
+        if (fabs(targetposition[0]) > 180)          // clip the target position to 1.2m from the goal
+            targetposition[0] = mathGeneral::sign(targetposition[0])*180;
+        
+        // I need a cost metric here that includes the current position of the robot, so that it does not cross the field unnecessarily
+        // b_y > 0 probably choose right, b_y < 0 probably choose left, 
+        // if s_y < b_y probably choose right s_y > b_y probably choose left
+        float b_y = ball.Y(); 
+        float s_y = self.wmY();
+        float cost = -b_y + 1.0*(s_y - b_y);
+        if (cost < 0)
+            targetposition[1] = b_y - distancefromball;
+        else
+            targetposition[1] = b_y + distancefromball;
+        
+        // convert to relative coords
+        vector<float> polar = self.CalculateDifferenceFromFieldLocation(targetposition);
+        
+        // convert to cartesian
+        vector<float> cartesian(2,0);
+        cartesian[0] = polar[0]*cos(polar[1]);
+        cartesian[1] = polar[0]*sin(polar[1]);
+        return cartesian;
+    }
+
+    /*! @brief Returns true if goal is lined up, false if it is not. */
     static bool opponentsGoalLinedUp(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         StationaryObject* targetGoalLeftPost;

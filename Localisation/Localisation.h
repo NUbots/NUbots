@@ -61,8 +61,9 @@ class Localisation: public TimestampedData
         void PrintModelStatus(int modelID);
 
         bool IsValidObject(const Object& theObject);
-	    bool amILost;
-	    int lostCount;
+	    bool amILost;               // true if we are 'lost' in this frame
+	    int lostCount;              // the number of consecutive frames in which we are 'lost'
+        float timeSinceFieldObjectSeen;
 
         // Model Reset Functions
         bool CheckGameState();
