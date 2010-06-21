@@ -937,13 +937,11 @@ KfUpdateResult KF::updateAngleBetween(double angle, double x1, double y1, double
     Matrix Pxy=Matrix(7, 1, false);                    //Pxy=[0;0;0];
     Matrix scriptX=Matrix(stateEstimates.getm(), 4 * nStates + 1, false);
     scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
-
+    float weight = sqrt((double)nStates + c_Kappa);
     for (int i = 1; i <= nStates; i++) //populate matrix of test points
     {  // Unscented KF. Creates test points used to compare against vision data.
-        scriptX.setCol(i, stateEstimates + testPointScaleFactor1 * stateStandardDeviations.getCol(i - 1));
-        scriptX.setCol(nStates + i, stateEstimates - testPointScaleFactor1 * stateStandardDeviations.getCol(i - 1));
-        scriptX.setCol(2*nStates + i, stateEstimates + testPointScaleFactor2 * stateStandardDeviations.getCol(i - 1));
-        scriptX.setCol(3*nStates + i, stateEstimates - testPointScaleFactor2 * stateStandardDeviations.getCol(i - 1));
+        scriptX.setCol(i, stateEstimates + weight * stateStandardDeviations.getCol(i - 1));
+        scriptX.setCol(nStates + i, stateEstimates - weight * stateStandardDeviations.getCol(i - 1));
     }
 
     //----------------------------------------------------------------
@@ -956,7 +954,7 @@ KfUpdateResult KF::updateAngleBetween(double angle, double x1, double y1, double
     {
         angleToObj1 = atan2 ( y1 - scriptX[1][i], x1 - scriptX[0][i] );
         angleToObj2 = atan2 ( y2 - scriptX[1][i], x2 - scriptX[0][i] );
-        scriptY[0][i] = NORMALISE ( angleToObj1 - angleToObj2 );
+        scriptY[0][i] = normaliseAngle(angleToObj1 - angleToObj2);
     }
 
     Matrix Mx = Matrix(scriptX.getm(), 4 * nStates + 1, false);
@@ -986,7 +984,6 @@ KfUpdateResult KF::updateAngleBetween(double angle, double x1, double y1, double
 
     if (innovation2 > c_threshold2)
     {
-        objectOutlierUpdateUncertainties();
         return KF_OUTLIER;
     }
 

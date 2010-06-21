@@ -14,7 +14,7 @@
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
-#define TWO_OBJECT_UPDATE_ON 0
+#define TWO_OBJECT_UPDATE_ON 1
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -174,15 +174,15 @@ void Localisation::ProcessObjects()
     }
 
     // Two Object update
-#ifdef TWO_OBJECT_UPDATE_ON
-    if( m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isVisible()
-        && m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isVisible())
+#if TWO_OBJECT_UPDATE_ON
+    if( m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible()
+        && m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
         {
             doTwoObjectUpdate(m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST],
                               m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
         }
-    if( m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isVisible()
-        && m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isVisible())
+    if( m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible()
+        && m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
         {
             doTwoObjectUpdate(m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST],
                               m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);

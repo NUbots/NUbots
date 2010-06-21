@@ -104,6 +104,8 @@ class KF {
         static const float c_R_ball_theta;
         static const float c_R_ball_range_offset;
         static const float c_R_ball_range_relative;
+
+        static const float c_outlierLikelyhood;
 	
 	void measureLocalization(double x,double y,double theta);
 	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);
