@@ -77,7 +77,7 @@ public:
             if (distance < turningdistance)
                 result[2] = 0.8*heading;
             else
-                result[2] = 0.8*bearing;
+                result[2] = 0.5*bearing;
             return result;
         }
     }
@@ -339,7 +339,7 @@ public:
         // if s_y < b_y probably choose right s_y > b_y probably choose left
         float b_y = ball.Y(); 
         float s_y = self.wmY();
-        float cost = -b_y + 0.5*(s_y - b_y);
+        float cost = -b_y + 1.0*(s_y - b_y);
         if (cost < 0)
             targetposition[1] = b_y - distancefromball;
         else
