@@ -182,7 +182,10 @@ bool NUWalk::isActive()
         if (jointvelocitysum > 0.4)
             return true;
         else
+        {
+            kill();
             return false;
+        }
     }
 
 }
