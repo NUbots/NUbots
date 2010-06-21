@@ -71,7 +71,7 @@ protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         // we transition to the spin state when the pan is completed.
-        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged() and m_team_info->getPlayerNumber() != 1)
+        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged())
             return m_lost_machine->m_lost_spin;
         else
             return this;
