@@ -1512,16 +1512,16 @@ bool NUKick::SwingLegForward(legId_t kickingLeg, float speed)
 
         if(!m_stateCommandGiven)
         {
-            float startHipAngle = kickingLegJoints[1];
-            float startKneeAngle = kickingLegJoints[3];
-            float startAnkleAngle = -(startHipAngle + startKneeAngle);
+            //float startHipAngle = kickingLegJoints[1];
+            //float startKneeAngle = kickingLegJoints[3];
+            //float startAnkleAngle = -(startHipAngle + startKneeAngle);
 
             endHipAngle = targetHipPitch;//startHipAngle - PI/4;
             endKneeAngle = targetKneePitch;//startKneeAngle - PI/4;
             endAnkleAngle = -(endHipAngle + endKneeAngle);
 
-            vector<double> hipTimes, kneeTimes, ankleTimes;
-            vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
+            //vector<double> hipTimes, kneeTimes, ankleTimes;
+            //vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
             vector<float> kickingTargets(kickingLegJoints);
             kickingTargets[1] = endHipAngle;
             kickingTargets[3] = endKneeAngle;
