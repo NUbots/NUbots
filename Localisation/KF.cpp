@@ -826,8 +826,8 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
 
   // Update Alpha
   double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
-  //alpha *= 1 / (1 + innovation2measError);
-  alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,0.01);
+  alpha *= 1 / (1 + innovation2measError);
+  //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,0.01);
 
   if (innovation2 > c_threshold2){
 		return KF_OUTLIER;
