@@ -35,6 +35,8 @@ class NUWalk;
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include <string>
 
+class FieldObjects;
+
 class NUKick : public NUMotionProvider
 {
     enum poseType_t
@@ -89,7 +91,7 @@ public:
     bool isUsingLegs();
     
     bool isReady();
-    bool requiresHead() {return true;}
+    bool requiresHead() {return isUsingHead();}
     bool requiresArms() {return true;}
     bool requiresLegs() {return true;}
     

@@ -25,6 +25,8 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "NUPlatform/NUSystem.h"
 #include "Motion/Tools/MotionCurves.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+
 
 #include "motionconfig.h"
 #include "debugverbositynumotion.h"
@@ -257,7 +259,21 @@ bool NUKick::isReady()
 /*! @brief Returns true if the kick is using the head */
 bool NUKick::isUsingHead()
 {
-    return isActive();
+    bool usingHead;
+    switch (pose)
+    {
+        case PRE_KICK:
+        case DO_NOTHING:
+        case POST_KICK:
+        case TRANSFER_TO_SUPPORT:
+        case UNSHIFT_LEG:
+            usingHead = false;
+            break;
+        default:
+            usingHead = true;
+            break;
+    }
+    return usingHead;
 }
 
 /*! @brief Returns true if the kick is using the arms */
