@@ -1137,7 +1137,7 @@ void NUKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, fl
 //    const float gainy = m_variableGainValue * GainMultiplier();
 
     jointLimit hipRollLimits;
-    if(theLeg = leftLeg)
+    if(theLeg == leftLeg)
     {
         hipRollLimits = m_leftLegLimits[0];
     }
@@ -1731,7 +1731,7 @@ bool NUKick::chooseLeg()
         debug << "Right Foot Relative: (" << rightFootRelativeBallLocation.x << "," << rightFootRelativeBallLocation.y << ")" << endl;
         debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << endl;
 
-        const float fwdAngleRange = PI/4.0f;
+        const float fwdAngleRange = PI/16.0f;
         const float sideAngleRange = PI/8.0f;
         // Direction is forwardsish
 

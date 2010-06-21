@@ -58,7 +58,7 @@ protected:
 class BallIsLostPan : public BallIsLostSubState
 {
 public:
-    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.1)
     {
         m_spin_speed = 0;
         m_time_in_state = 0;
@@ -101,7 +101,10 @@ protected:
         else
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        if (m_team_info->getPlayerNumber() != 1)
+            m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        else
+            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
     }
 private:
     void reset()
