@@ -62,7 +62,7 @@ protected:
         
         vector<float> position;
         if (m_team_info->getPlayerNumber() == 1)
-            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 75);
+            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 90);
         else
             position = BehaviourPotentials::CalculateSupportPlayerPosition(ball, self);
         

@@ -243,7 +243,11 @@ public:
         if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
             rightobstacle = temp[0];
         
-        if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
+        if (fabs(speed[1]) > mathGeneral::PI/2)
+        {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
+            return speed;
+        }
+        else if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
         {   // if the obstacles are too far away don't dodge
             return speed;
         }
