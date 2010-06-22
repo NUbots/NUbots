@@ -59,12 +59,12 @@ void FieldObjects::InitStationaryFieldObjects()
                 //    break;
 		case FO_BLUE_LEFT_GOALPOST:
                     x = -300.0f;
-                    y = -70.0f;
+                    y = -75.0f;
                     objectName = "Left Blue Goal Post";
                     break;
 		case FO_BLUE_RIGHT_GOALPOST:
                     x = -300.0f;
-                    y = 70.0f;
+                    y = 75.0f;
                     objectName = "Right Blue Goal Post";
                     break;
 		// Yellow Goal.
@@ -74,12 +74,12 @@ void FieldObjects::InitStationaryFieldObjects()
                 //    break;
 		case FO_YELLOW_LEFT_GOALPOST:
                     x = 300.0f;
-                    y = 70.0f;
+                    y = 75.0f;
                     objectName = "Left Yellow Goal Post";
                     break;
 		case FO_YELLOW_RIGHT_GOALPOST:
                     x = 300.0f;
-                    y = -70.0f;
+                    y = -75.0f;
                     objectName = "Right Yellow Goal Post";
                     break;
 		// Corners
