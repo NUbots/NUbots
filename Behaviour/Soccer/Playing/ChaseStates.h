@@ -66,6 +66,7 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "GoToBall" << endl;
         #endif
+        Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
@@ -76,7 +77,7 @@ protected:
         m_data->getMotionKickActive(iskicking);
         if(!iskicking)
         {
-            vector<float> speed = BehaviourPotentials::goToBall(ball, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
             vector<float> result;
             // decide whether we need to dodge or not
             float leftobstacle = 255;

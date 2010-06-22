@@ -140,6 +140,7 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "PassingKickingState" << endl;
         #endif
+        Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
@@ -156,7 +157,7 @@ protected:
         
         if(!iskicking)
         {
-            vector<float> speed = BehaviourPotentials::goToBall(ball, bearing_to_goal);
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, bearing_to_goal);
             m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         }
         

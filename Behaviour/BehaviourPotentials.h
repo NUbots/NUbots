@@ -30,6 +30,7 @@
 #include "Tools/Math/General.h"
 
 #include "debug.h"
+#include "debugverbositybehaviour.h"
 
 #include <vector>
 #include <string>
@@ -128,85 +129,103 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 14.5, float stoppingdistance = 55)
+    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 14.5, float stoppingdistance = 55)
     {
-        float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
-        float bearing = ball.estimatedBearing();
-
-        float x = distance * cos(bearing);
-        float y = distance * sin(bearing);
-        
-        const float offsetDistance = 5.0f;
-        float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
-        float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
-        float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
-        
-        float right_foot_x = x + offsetDistance * cos(heading + mathGeneral::PI/2);
-        float right_foot_y = y + offsetDistance * sin(heading + mathGeneral::PI/2);
-        float right_foot_distance = sqrt(pow(right_foot_x,2) + pow(right_foot_y,2));
-  
-        if(left_foot_distance < right_foot_distance)
-        {   // if the calculated left foot position is closer, then pick that one
-            x = left_foot_x;
-            y = left_foot_y;
+        vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
+        if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
+        {   // if the ball is moving go to where the ball will be!
+            float x = ball_prediction[1];
+            float y = ball_prediction[2];
+            float distance = sqrt(x*x + y*y);
+            float bearing = atan2(y,x);
+            float heading = ball.estimatedBearing();
+            
+            vector<float> speed = goToPoint(distance, bearing, 0, 0, 0, distance+9000);
+            
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+                debug << "goToBall Predicated x:" << x << " y: " << y << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << endl;
+            #endif
+            return speed;
         }
         else
         {
-            x = right_foot_x;
-            y = right_foot_y;
-        }
+            float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+            float bearing = ball.estimatedBearing();
 
-        distance = sqrt(x*x + y*y);
-        bearing = atan2(y,x);
-
-        // calculate the component to position the ball at the kicking distance
-        float position_speed;
-        float position_direction;
-        float position_rotation;
-        if (distance < kickingdistance)
-        {   // if we are too close to the ball then we need to go backwards
-            position_speed = (kickingdistance - distance)/kickingdistance;
-            position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
-            position_rotation = bearing;
-        }
-        else if (distance < stoppingdistance)
-        {   // if we are close enough to slow down
-            position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
-            position_direction = bearing;
-            position_rotation = 0.8*bearing;
-        }
-        else
-        {   // if it is outside the stopping distance - full speed
-            position_speed = 1;
-            position_direction = bearing;
-            position_rotation = 0.5*bearing;
-        }
-        
-        // calculate the component to go around the ball to face the heading
-        float around_speed;
-        float around_direction;
-        if (distance < 1.5*stoppingdistance)
-        {   // if we are close enough to worry about the heading
-            around_speed = 0.5*fabs(heading)/mathGeneral::PI;
-            if (fabs(heading) > 2.0)
-                around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
+            float x = distance * cos(bearing);
+            float y = distance * sin(bearing);
+            
+            const float offsetDistance = 5.0f;
+            float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
+            float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
+            float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
+            
+            float right_foot_x = x + offsetDistance * cos(heading + mathGeneral::PI/2);
+            float right_foot_y = y + offsetDistance * sin(heading + mathGeneral::PI/2);
+            float right_foot_distance = sqrt(pow(right_foot_x,2) + pow(right_foot_y,2));
+      
+            if(left_foot_distance < right_foot_distance)
+            {   // if the calculated left foot position is closer, then pick that one
+                x = left_foot_x;
+                y = left_foot_y;
+            }
             else
-                around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
+            {
+                x = right_foot_x;
+                y = right_foot_y;
+            }
+
+            distance = sqrt(x*x + y*y);
+            bearing = atan2(y,x);
+
+            // calculate the component to position the ball at the kicking distance
+            float position_speed;
+            float position_direction;
+            float position_rotation;
+            if (distance < kickingdistance)
+            {   // if we are too close to the ball then we need to go backwards
+                position_speed = (kickingdistance - distance)/kickingdistance;
+                position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
+                position_rotation = bearing;
+            }
+            else if (distance < stoppingdistance)
+            {   // if we are close enough to slow down
+                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+                position_direction = bearing;
+                position_rotation = 0.8*bearing;
+            }
+            else
+            {   // if it is outside the stopping distance - full speed
+                position_speed = 1;
+                position_direction = bearing;
+                position_rotation = 0.5*bearing;
+            }
+            
+            // calculate the component to go around the ball to face the heading
+            float around_speed;
+            float around_direction;
+            if (distance < 1.5*stoppingdistance)
+            {   // if we are close enough to worry about the heading
+                around_speed = 0.5*fabs(heading)/mathGeneral::PI;
+                if (fabs(heading) > 2.0)
+                    around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
+                else
+                    around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
+            }
+            else
+            {
+                around_speed = 0;
+                around_direction = 0;
+            }
+            
+            vector<float> speed(3,0);
+            speed[0] = max(position_speed, around_speed);
+            float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
+            float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
+            speed[1] = atan2(ysum, xsum);
+            speed[2] = position_rotation;
+            return speed;
         }
-        else
-        {
-            around_speed = 0;
-            around_direction = 0;
-        }
-        
-        vector<float> speed(3,0);
-        speed[0] = max(position_speed, around_speed);
-        float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
-        float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
-        speed[1] = atan2(ysum, xsum);
-        speed[2] = position_rotation;
-        
-        return speed;
     }
     
     /*! @brief Returns a the vector sum of the potentials
