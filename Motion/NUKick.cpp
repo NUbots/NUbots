@@ -118,10 +118,10 @@ void NUKick::loadKickParameters()
     float footInnerWidth = m_kinematicModel->getFootInnerWidth();
     m_footWidth = footWidth;
     m_ballRadius = 3.5f;
-    const float yReachFwd = 6.0f;
+    const float yReachFwd = 5.0f;
     const float yReachSide = 20.0f;
-    const float xMin = m_kinematicModel->getFootForwardLength();
-    const float xReachFwd = xMin + 9.0f;
+    const float xMin = m_kinematicModel->getFootForwardLength() - 1;
+    const float xReachFwd = xMin + 8.0f;
     const float xReachSide = 30.0f;
     float yMin = footInnerWidth + 2.0f;
 

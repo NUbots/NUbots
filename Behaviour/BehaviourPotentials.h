@@ -128,7 +128,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 15.5, float stoppingdistance = 80)
+    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 14.0, float stoppingdistance = 55)
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
@@ -173,19 +173,19 @@ public:
         {   // if we are close enough to slow down
             position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
             position_direction = bearing;
-            position_rotation = bearing;
+            position_rotation = 0.8*bearing;
         }
         else
         {   // if it is outside the stopping distance - full speed
             position_speed = 1;
             position_direction = bearing;
-            position_rotation = bearing;
+            position_rotation = 0.5*bearing;
         }
         
         // calculate the component to go around the ball to face the heading
         float around_speed;
         float around_direction;
-        if (distance < stoppingdistance)
+        if (distance < 1.5*stoppingdistance)
         {   // if we are close enough to worry about the heading
             around_speed = 0.5*fabs(heading)/mathGeneral::PI;
             if (fabs(heading) > 2.0)
