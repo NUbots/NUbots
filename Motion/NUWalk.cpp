@@ -114,6 +114,9 @@ NUWalk::~NUWalk()
  */
 void NUWalk::enableWalk()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::enable()" << endl;
+    #endif
     if (m_data == NULL or m_actions == NULL)
         m_walk_enabled = false;
     else if (not inInitialPosition())
@@ -222,7 +225,7 @@ bool NUWalk::isUsingLegs()
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "NUWalk::process(" << data << ", " << actions << ")" << endl;
+    debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << endl;
 #endif
     if (actions == NULL || data == NULL)
         return;
@@ -477,6 +480,7 @@ void NUWalk::moveToInitialPosition()
     else if (movecompletiontime >= m_current_time - 100)     // if a move has just finished don't start another one, just enable the walk (to avoid infinite loop)
     {
         m_walk_enabled = true;
+        setArmEnabled(true, true);
         return;
     }
     else

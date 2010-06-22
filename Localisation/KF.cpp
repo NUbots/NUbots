@@ -24,6 +24,8 @@ const float KF::c_Kappa = 1.0f; // weight used in w matrix. (Constant)
 const float KF::c_ballDecayRate = 0.985f; // Ball weighting 0.985 => speed halves every 1.5 seconds. (Constant)
 const float KF::c_threshold2 = 15.0f; // Threshold for outlier rejection. Magic Number. (Constant)
 
+const float KF::c_outlierLikelyhood = 1e-3;
+
 // const float KF::sb_alpha1 = 0.05;
 // const float KF::sb_alpha2 = 0.0005;
 // const float KF::sb_alpha3 = 0.005;
@@ -826,8 +828,8 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
 
   // Update Alpha
   double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
-  //alpha *= 1 / (1 + innovation2measError);
-  alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,0.01);
+  alpha *= 1 / (1 + innovation2measError);
+  //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
 
   if (innovation2 > c_threshold2){
 		return KF_OUTLIER;
@@ -919,6 +921,77 @@ void KF::linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12,
 //
 //
 
+KfUpdateResult KF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle)
+{
+        // Method to take the angle between two objects, that is,
+        // angle between object 1 (with fixed field coords (x1,y1))
+        // and object 2 (with fixed field coords (x2,y2) ) and perform an update.
+        // Note: as distinct from almost all other updates, the actual robot orientation
+        // doesn't matter for this update, and so 'cropping' etc. of the sigma points is not requied.
+
+        double R_angle;
+
+    // Unscented KF Stuff.
+    double yBar;                                  	//reset
+    double Py;
+    Matrix Pxy = Matrix(7, 1, false);                    //Pxy=[0;0;0];
+    Matrix scriptX = Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
+    scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
+    float weight = sqrt((double)nStates + c_Kappa);
+
+    for (int i = 1; i <= nStates; i++) //populate matrix of test points
+    {  // Unscented KF. Creates test points used to compare against vision data.
+        scriptX.setCol(i, stateEstimates + weight * stateStandardDeviations.getCol(i - 1));
+        scriptX.setCol(nStates + i, stateEstimates - weight * stateStandardDeviations.getCol(i - 1));
+    }
+
+    //----------------------------------------------------------------
+    Matrix scriptY = Matrix(1, 2 * nStates + 1, false);
+
+    double angleToObj1;
+    double angleToObj2;
+
+    for (int i = 0; i < 2 * nStates + 1; i++)
+    {
+        angleToObj1 = atan2 ( y1 - scriptX[1][i], x1 - scriptX[0][i] );
+        angleToObj2 = atan2 ( y2 - scriptX[1][i], x2 - scriptX[0][i] );
+        scriptY[0][i] = normaliseAngle(angleToObj1 - angleToObj2);
+    }
+
+    Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
+    Matrix My = Matrix(scriptY.getm(), 2 * nStates + 1, false);
+    for (int i = 0; i < 2 * nStates + 1; i++)
+    {
+        Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+        My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+    }
+
+    Matrix M1 = sqrtOfTestWeightings;
+    yBar = convDble ( My * M1.transp() ); // Predicted Measurement.
+    Py = convDble ((My - yBar * M1) * (My - yBar * M1).transp());
+    Pxy = (Mx - stateEstimates * M1) * (My - yBar * M1).transp();
+
+    R_angle  = sd_angle * sd_angle;
+
+    Matrix K = Pxy /( Py + R_angle ); // K = Kalman filter gain.
+
+    double y = angle;    //end of standard ukf stuff
+    //Outlier rejection.
+    double innovation2 = (yBar - y) * (yBar - y ) / ( Py + R_angle );
+
+    // Update Alpha (used in multiple model)
+    double innovation2measError = (yBar - y) * (yBar - y ) / R_angle ;
+    alpha *= 1 / (1 + innovation2measError);
+
+    if (innovation2 > c_threshold2)
+    {
+        return KF_OUTLIER;
+    }
+
+    stateStandardDeviations = HT( horzcat(Mx - stateEstimates*M1 - K*My + K*yBar*M1, K*sd_angle) );
+    stateEstimates = stateEstimates - K*(yBar - y);
+    return KF_OK;
+}
 
 
 double KF::variance(int Xi) const

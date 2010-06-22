@@ -25,6 +25,8 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "NUPlatform/NUSystem.h"
 #include "Motion/Tools/MotionCurves.h"
+#include "Vision/FieldObjects/FieldObjects.h"
+
 
 #include "motionconfig.h"
 #include "debugverbositynumotion.h"
@@ -116,10 +118,10 @@ void NUKick::loadKickParameters()
     float footInnerWidth = m_kinematicModel->getFootInnerWidth();
     m_footWidth = footWidth;
     m_ballRadius = 3.5f;
-    const float yReachFwd = 6.0f;
+    const float yReachFwd = 5.0f;
     const float yReachSide = 20.0f;
-    const float xMin = m_kinematicModel->getFootForwardLength();
-    const float xReachFwd = xMin + 9.0f;
+    const float xMin = m_kinematicModel->getFootForwardLength() - 1;
+    const float xReachFwd = xMin + 8.0f;
     const float xReachSide = 30.0f;
     float yMin = footInnerWidth + 2.0f;
 
@@ -257,7 +259,21 @@ bool NUKick::isReady()
 /*! @brief Returns true if the kick is using the head */
 bool NUKick::isUsingHead()
 {
-    return isActive();
+    bool usingHead;
+    switch (pose)
+    {
+        case PRE_KICK:
+        case DO_NOTHING:
+        case POST_KICK:
+        case TRANSFER_TO_SUPPORT:
+        case UNSHIFT_LEG:
+            usingHead = false;
+            break;
+        default:
+            usingHead = true;
+            break;
+    }
+    return usingHead;
 }
 
 /*! @brief Returns true if the kick is using the arms */
@@ -344,6 +360,7 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
         debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
+        debug << "NUKick::process in " << toString(pose) << " ready: " << m_kickReady << " active: " << m_kickActive << endl;
     #endif
     
     m_data = data;
@@ -425,6 +442,9 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
 
 void NUKick::doKick()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUKick::doKick()" << endl;
+    #endif
     bool done = false;
     float balanceYoffset = 0.0f;
     float balanceXoffset = 3.0f;
@@ -440,16 +460,12 @@ void NUKick::doKick()
     else
     {
         pose = POST_KICK;
-        return;
     }
 
     //currently must be at zero position
     double kickAngle = atan2(m_target_y-m_ball_y, m_target_x-m_ball_x);
     double kickDistance = sqrt(pow(m_target_y-m_ball_y,2) + pow(m_target_x-m_ball_x,2));
 
-    #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "void NUKick::doKick() - Current Pose: " << toString(pose) << endl;
-    #endif
     switch(pose)
     {
         case DO_NOTHING:
@@ -1667,7 +1683,7 @@ bool NUKick::kickAbortCondition()
 
 float NUKick::CalculateForwardSwingSpeed(float kickDistance)
 {
-    return 30.0f;
+    return 20.0f;
 }
 
 float NUKick::CalculateSidewardSwingSpeed(float kickDistance)

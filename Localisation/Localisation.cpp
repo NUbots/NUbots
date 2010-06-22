@@ -14,6 +14,7 @@
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
+#define TWO_OBJECT_UPDATE_ON 1
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -47,6 +48,8 @@ const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
 const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
+
+const float Localisation::sdTwoObjectAngle = (float) 0.003; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
@@ -173,6 +176,23 @@ void Localisation::ProcessObjects()
         usefulObjectCount++;
     }
 
+    // Two Object update
+#if TWO_OBJECT_UPDATE_ON
+    if( m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible()
+        && m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
+        {
+            doTwoObjectUpdate(m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST],
+                              m_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
+        }
+    if( m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible()
+        && m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
+        {
+            doTwoObjectUpdate(m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST],
+                              m_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
+        }
+#endif
+
+
     // Proccess the Moving Known Field Objects
     MobileObjectsIt currMob(m_objects->mobileFieldObjects.begin());
     MobileObjectsConstIt endMob(m_objects->mobileFieldObjects.end());
@@ -227,12 +247,13 @@ void Localisation::ProcessObjects()
             }
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-
+    
+    
         if (usefulObjectCount > 0)
             timeSinceFieldObjectSeen = 0;
         else
             timeSinceFieldObjectSeen += m_sensor_data->CurrentTime - m_timestamp;
-    
+
         // Check for model reset. -> with multiple models just remove if not last one??
         // Need to re-do reset to be model specific.
         //int numReset = CheckForOutlierResets();
@@ -804,30 +825,21 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
 	}
 	
     bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
-    bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;	
+    bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
     if(entropy >55 && models[bestIndex].alpha<50 )
-    {
-     //  cout << "\nMultiple model trigger -----> I am lost \n";
         amILost = true;
-    }
 	else if (entropy <=55 && bestModelEntropy > 6.5)
-	{
-	//	cout << "\nSingle   model trigger -----> I am lost \n";		
         amILost = true;
-	}
 	else 
-	{
 		amILost = false;
-	}
     
     if(	amILost )
 		lostCount++;
 	else 
-		lostCount = 0;
-
+		lostCount = 0;		
 	// End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
-	
+
 	return result;
 }
 
@@ -963,6 +975,24 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
+}
+
+int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
+{
+    float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
+
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out << "Two Object Update:" << endl;
+    debug_out << landmark1.getName() << " - Bearing = " << landmark1.measuredBearing() << endl;
+    debug_out << landmark2.getName() << " - Bearing = " << landmark2.measuredBearing() << endl;
+    #endif
+    for (int currID = 0; currID < c_MAX_MODELS; currID++){
+        if(models[currID].isActive )
+        {
+            models[currID].updateAngleBetween(totalAngle,landmark1.X(),landmark1.Y(),landmark2.X(),landmark2.Y(),sdTwoObjectAngle);
+        }
+    }
+    return 1;
 }
 
 int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)

@@ -37,6 +37,8 @@ class KF {
         KfUpdateResult ballmeas(double Ballmeas, double theta_Ballmeas);
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);
         void linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12, double SR22, int index1, int index2);
+        KfUpdateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle);
+
 
         // Data retrieval
         double sd(int Xi) const;
@@ -102,6 +104,8 @@ class KF {
         static const float c_R_ball_theta;
         static const float c_R_ball_range_offset;
         static const float c_R_ball_range_relative;
+
+        static const float c_outlierLikelyhood;
 	
 	void measureLocalization(double x,double y,double theta);
 	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);

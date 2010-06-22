@@ -128,30 +128,35 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 16, float stoppingdistance = 70)
+    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 14.5, float stoppingdistance = 55)
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
 
-		float x = distance * cos(bearing);
-		float y = distance * sin(bearing);
+        float x = distance * cos(bearing);
+        float y = distance * sin(bearing);
+        
+        const float offsetDistance = 5.0f;
+        float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
+        float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
+        float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
+        
+        float right_foot_x = x + offsetDistance * cos(heading + mathGeneral::PI/2);
+        float right_foot_y = y + offsetDistance * sin(heading + mathGeneral::PI/2);
+        float right_foot_distance = sqrt(pow(right_foot_x,2) + pow(right_foot_y,2));
   
-		const float offsetDistance = 5.0f;
-		if(fabs(heading) < mathGeneral::PI / 8.0f)
-		{
-			if(y > 0)
-			{
-				x += offsetDistance * cos(heading - mathGeneral::PI/2);
-				y += offsetDistance * sin(heading - mathGeneral::PI/2);
-			}
-			else
-			{
-				x += offsetDistance * cos(heading + mathGeneral::PI/2);
-				y += offsetDistance * sin(heading + mathGeneral::PI/2);
-			}
-		}
+        if(left_foot_distance < right_foot_distance)
+        {   // if the calculated left foot position is closer, then pick that one
+            x = left_foot_x;
+            y = left_foot_y;
+        }
+        else
+        {
+            x = right_foot_x;
+            y = right_foot_y;
+        }
 
-		distance = sqrt(x*x + y*y);
+        distance = sqrt(x*x + y*y);
         bearing = atan2(y,x);
 
         // calculate the component to position the ball at the kicking distance
@@ -168,22 +173,22 @@ public:
         {   // if we are close enough to slow down
             position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
             position_direction = bearing;
-            position_rotation = bearing;
+            position_rotation = 0.8*bearing;
         }
         else
         {   // if it is outside the stopping distance - full speed
             position_speed = 1;
             position_direction = bearing;
-            position_rotation = bearing;
+            position_rotation = 0.5*bearing;
         }
         
         // calculate the component to go around the ball to face the heading
         float around_speed;
         float around_direction;
-        if (distance < stoppingdistance)
+        if (distance < 1.5*stoppingdistance)
         {   // if we are close enough to worry about the heading
-            around_speed = 0.5*(fabs(heading)/mathGeneral::PI);
-            if (fabs(heading) > 2.5)
+            around_speed = 0.5*fabs(heading)/mathGeneral::PI;
+            if (fabs(heading) > 2.0)
                 around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
             else
                 around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
@@ -193,7 +198,6 @@ public:
             around_speed = 0;
             around_direction = 0;
         }
-        
         
         vector<float> speed(3,0);
         speed[0] = max(position_speed, around_speed);
@@ -373,7 +377,8 @@ public:
         }
         float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
         float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
-        return (leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f);
+        float middleBearing = leftGoalBearing + rightGoalBearing / 2.0f;
+        return ((leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f)) || (fabs(middleBearing) < mathGeneral::PI/16.0f);
     }
 };
 
