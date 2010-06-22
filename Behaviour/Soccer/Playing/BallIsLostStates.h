@@ -89,7 +89,7 @@ protected:
         m_previous_time = m_data->CurrentTime;
         
         // grab the pan end time
-        if (not m_pan_started and m_time_in_state > 200)
+        if (not m_pan_started and m_time_in_state > 100)
         {
             if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
                 m_pan_started = true;
@@ -99,7 +99,7 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 100, -0.95, 0.95));
         
         if (m_team_info->getPlayerNumber() != 1)
             m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));

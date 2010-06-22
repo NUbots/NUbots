@@ -77,10 +77,10 @@ protected:
         vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 75);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
-        if (ball.isObjectVisible())
-            m_jobs->addMotionJob(new HeadTrackJob(ball));
-        else if (ball.TimeSinceLastSeen() > 250)
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        float pan_width = 1.1;
+        if (m_team_info->getPlayerNumber() == 1)
+            pan_width = 0.4;
+        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 0.9*ball.estimatedDistance(), 9000, -pan_width, pan_width));
     }
 };
 
