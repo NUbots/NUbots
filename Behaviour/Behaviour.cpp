@@ -28,6 +28,7 @@
 #include "ChaseBall/ChaseBallProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
 #include "Kicker/KickerProvider.h"
+#include "PassingChallenge/PassingChallengeProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

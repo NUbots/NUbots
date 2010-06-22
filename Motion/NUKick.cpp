@@ -1683,7 +1683,7 @@ bool NUKick::kickAbortCondition()
 
 float NUKick::CalculateForwardSwingSpeed(float kickDistance)
 {
-    return 30.0f;
+    return 20.0f;
 }
 
 float NUKick::CalculateSidewardSwingSpeed(float kickDistance)
