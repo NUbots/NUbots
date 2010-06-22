@@ -128,7 +128,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 14.0, float stoppingdistance = 55)
+    static vector<float> goToBall(MobileObject& ball, float heading, float kickingdistance = 14.5, float stoppingdistance = 55)
     {
         float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
         float bearing = ball.estimatedBearing();
