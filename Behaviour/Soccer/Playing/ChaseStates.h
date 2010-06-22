@@ -69,6 +69,8 @@ protected:
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
+        else if (ball.TimeSinceLastSeen() > 250)
+            m_jobs->addMotionJob(new HeadPanJob(ball));
         
         bool iskicking;
         m_data->getMotionKickActive(iskicking);
