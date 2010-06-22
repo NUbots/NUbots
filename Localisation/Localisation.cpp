@@ -62,6 +62,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
 	
 	amILost = true;
 	lostCount = 0;
+    timeSinceFieldObjectSeen = 0;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -133,6 +134,7 @@ void Localisation::ProcessObjects()
 {
     int numUpdates = 0;
     int updateResult;
+    int usefulObjectCount = 0;
     currentFrameNumber = 0;
     //if(balanceFallen) return;
 // 	debug_out  << "Dont put anything "<<endl;
@@ -171,6 +173,7 @@ void Localisation::ProcessObjects()
         if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
         updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
         numUpdates++;
+        usefulObjectCount++;
     }
 
     // Two Object update
@@ -199,6 +202,7 @@ void Localisation::ProcessObjects()
         if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
         updateResult = doBallMeasurementUpdate((*currMob));
         numUpdates++;
+        usefulObjectCount++;
     }
     NormaliseAlphas();
 
@@ -226,6 +230,8 @@ void Localisation::ProcessObjects()
             updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), m_objects->stationaryFieldObjects);
             NormaliseAlphas();
             numUpdates++;
+            if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+                usefulObjectCount++;
         }
 
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
@@ -241,6 +247,12 @@ void Localisation::ProcessObjects()
             }
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    
+    
+        if (usefulObjectCount > 0)
+            timeSinceFieldObjectSeen = 0;
+        else
+            timeSinceFieldObjectSeen += m_sensor_data->CurrentTime - m_timestamp;
 
         // Check for model reset. -> with multiple models just remove if not last one??
         // Need to re-do reset to be model specific.
@@ -306,14 +318,8 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
 	bool lost = false;
-	if((lostCount>=2) && amILost)
-	{
+	if (lostCount > 20 or timeSinceFieldObjectSeen > 15000)
 		lost = true;
-		 cout << "\n  -----> I am lost \n";
-	}
-	else {
-		cout<<"\n";
-	}
 
     // Set my location.
     fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
@@ -789,12 +795,7 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
 	models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     
-	
-	
-	
 	//------------------------- Trial code for entropy ---- Made to work only on webots as of now
-
-	
 	int bestIndex = getBestModelID();
 	double rmsDistance = 0;
 	double entropy = 0;
@@ -823,45 +824,22 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
 		}
 	}
 	
-   bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
+    bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
+    bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
-   bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;	
- 	
-//   cout<< "\nEntropy of all  Models : "<<entropy;
-//   cout<< "\nEntropy of best Model  : "<<bestModelEntropy<<endl;	
-//   cout<< "\nEntropy fused together : "<<entropy*bestModelEntropy<<endl;	
-
-	if(	amILost )
-	{
-		lostCount++;
-	}
-	else 
-	{
-		lostCount = 0;
-	}
-
-	
-   if(entropy >55 && models[bestIndex].alpha<50 )
-   {
-	 //  cout << "\nMultiple model trigger -----> I am lost \n";
-	   	amILost = true;
-   }
+    if(entropy >55 && models[bestIndex].alpha<50 )
+        amILost = true;
 	else if (entropy <=55 && bestModelEntropy > 6.5)
-	{
-	//	cout << "\nSingle   model trigger -----> I am lost \n";		
-			amILost = true;
-	}
+        amILost = true;
 	else 
-	{
 		amILost = false;
-	}
-
-	
-		
+    
+    if(	amILost )
+		lostCount++;
+	else 
+		lostCount = 0;		
 	// End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
-	
-	
-	
+
 	return result;
 }
 
