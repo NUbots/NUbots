@@ -225,5 +225,7 @@ class Vision
     NUSensorsData* getSensorsData() {return m_sensor_data;}
     bool checkIfBufferContains(boost::circular_buffer<unsigned char> cb, const std::vector<unsigned char> &colourList);
 
+    int CalculateSkipSpacing(int currentPosition, int lineLength);
+
 };
 #endif // VISION_H
