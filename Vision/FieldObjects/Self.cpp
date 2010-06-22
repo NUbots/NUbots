@@ -200,7 +200,7 @@ bool Self::sdHeadingLessThanGoalWidth(const StationaryObject& goalpost, float nu
         return false;
 }
 
-/*! @brief Returns the [time, x,y] of the closest intercept point to a moving object. 
+/*! @brief Returns the [time (s), x,y] of the closest intercept point to a moving object. 
            Deacceleration is not taken into account, so the moving object may never reach the calculated point.
            In that case the time will be (very) large.
     @param theObject the moving mobile object
@@ -312,30 +312,47 @@ std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const Mobil
     return result;
 }
 
+/*! @brief Calculates the position to stand in to protect the goal from a mobile object
+    @return [x,y] of the position relative to the current state
+ */
 std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth)
 {
-    float goal_angular_width = fabs(CalculateAngularWidthOfGoalFromMobileObject(goalpost, mobileobject));
-    float goal_width = 2*fabs(goalpost.Y());
-    
-    float distancebetween = sqrt(pow(mobileobject.X() - goalpost.X(), 2) + pow(mobileobject.Y(),2));
-    float distancefrommobile = (0.5*blockingwidth)/tan(0.5*goal_angular_width);
-    
-    vector<float> position(2,0);
-    if (distancebetween < 0.7*goal_width)
-    {   // if the mobile object is inside the goal then the calculation will break --- just go to the mobile object
-        float b_r = mobileobject.estimatedDistance()*cos(mobileobject.estimatedElevation());          // get the flat distance!
-        float b_b = mobileobject.estimatedBearing();
-        position[0] = b_r*cos(b_b);
-        position[1] = b_r*sin(b_b);
-        return position;
+    vector<float> prediction = CalculateClosestInterceptToMobileObject(mobileobject);
+    if (prediction[0] < 4 and mobileobject.estimatedDistance() > 30)
+    {   // if the ball is moving go to where the ball will be!
+        vector<float> prediction_position(2,0);
+        prediction_position[0] = prediction[1];
+        prediction_position[1] = prediction[2];
+
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "protectGoal Predicated x:" << prediction_position[0] << " y: " << prediction_position[1] << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << endl;
+        #endif
+        return prediction_position;
     }
-    
-    // clip the distancefrommobile so that we don't go back into the goal.
-    if (distancebetween - distancefrommobile < 0.7*goal_width)
-        distancefrommobile = distancebetween - 0.7*goal_width;
-    
-    return CalculatePositionBetweenMobileObjectAndGoal(mobileobject, goalpost, distancefrommobile);
-    
+    else
+    {
+        float goal_angular_width = fabs(CalculateAngularWidthOfGoalFromMobileObject(goalpost, mobileobject));
+        float goal_width = 2*fabs(goalpost.Y());
+        
+        float distancebetween = sqrt(pow(mobileobject.X() - goalpost.X(), 2) + pow(mobileobject.Y(),2));
+        float distancefrommobile = (0.5*blockingwidth)/tan(0.5*goal_angular_width);
+        
+        vector<float> position(2,0);
+        if (distancebetween < 0.7*goal_width)
+        {   // if the mobile object is inside the goal then the calculation will break --- just go to the mobile object
+            float b_r = mobileobject.estimatedDistance()*cos(mobileobject.estimatedElevation());          // get the flat distance!
+            float b_b = mobileobject.estimatedBearing();
+            position[0] = b_r*cos(b_b);
+            position[1] = b_r*sin(b_b);
+            return position;
+        }
+        
+        // clip the distancefrommobile so that we don't go back into the goal.
+        if (distancebetween - distancefrommobile < 0.7*goal_width)
+            distancefrommobile = distancebetween - 0.7*goal_width;
+        
+        return CalculatePositionBetweenMobileObjectAndGoal(mobileobject, goalpost, distancefrommobile);
+    }
 }
 
 std::ostream& operator<< (std::ostream& output, const Self& p_self)
