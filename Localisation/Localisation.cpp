@@ -1001,7 +1001,7 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
 int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
-    float totalAngle = landmark1.measuredBearing() - landmark1.measuredBearing();
+    float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out << "Two Object Update:" << endl;
