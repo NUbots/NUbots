@@ -31,6 +31,7 @@ class BlockJob;
 class SaveJob;
 class NUWalk;
 #include "Motion/NUMotionProvider.h"
+#include "Motion/Tools/MotionScript.h"
 
 class NUSave : public NUMotionProvider
 {
@@ -49,7 +50,8 @@ public:
     bool isUsingArms();
     bool isUsingLegs();
     
-    bool requiresHead() {return true;}
+    bool isReady();
+    bool requiresHead() {return false;}
     bool requiresArms() {return true;}
     bool requiresLegs() {return true;}
     
@@ -57,6 +59,8 @@ public:
     void process(BlockJob* job);
     void process(SaveJob* job);
 private:
+    void playSave();
+    bool isBlockAble();
 public:
 private:
     NUWalk* m_walk;
@@ -68,10 +72,14 @@ private:
     MotionScript m_block_centre;
     MotionScript m_dive_left;
     MotionScript m_dive_right;
-    
-    double m_head_completion_time;
-    double m_arm_completion_time;
+
+    double m_block_timestamp;
     double m_completion_time;
+    
+    const float m_BLOCK_TRIGGER;
+    const float m_BLOCK_WIDTH;
+    double m_block_time;
+    vector<float> m_block_position;
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Behaviour/Jobs/MotionJobs/SaveJob.h"
+#include "Behaviour/Jobs/MotionJobs/BlockJob.h"
 #include "NUWalk.h"
 
 #include "debug.h"
@@ -30,22 +31,26 @@
 
 /*! @brief Constructor for NUSave module
  */
-NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUSave", data, actions)
+NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUSave", data, actions), m_BLOCK_TRIGGER(1.8f), m_BLOCK_WIDTH(55.0f)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUSave::NUSave()" << endl;
 #endif
     m_walk = walk;
+    m_data = data;
+    m_actions = actions;
     
     m_block_left = MotionScript("BlockLeft");
     m_block_right = MotionScript("BlockRight");
     m_block_centre = MotionScript("BlockCentre");
     m_dive_left = MotionScript("DiveLeft");
     m_dive_right = MotionScript("DiveRight");
-    
-    m_head_completion_time = 0;
-    m_arm_completion_time = 0;
+
     m_completion_time = 0;
+    m_block_timestamp = 0;
+    
+    m_block_time = 0;
+    m_block_position = vector<float>(2,0);
 }
 
 /*! @brief Destructor for FallProtection module
@@ -64,25 +69,26 @@ void NUSave::stop()
 }
 
 void NUSave::stopHead()
-{
+{   // save can't be stopped until it is completed
+    return;
 }
 
 void NUSave::stopArms()
-{
+{   // save can't be stopped until it is completed
+    return;
 }
 
 void NUSave::stopLegs()
-{
+{   // save can't be stopped until it is completed
+    return;
 }
 
 /*! @brief Kills the save module */
 void NUSave::kill()
 {
     if (isActive())
-    {   // if the getup is currently running, the only way to kill it is to set the stiffnesses to 0
+    {   // if the save is currently running, the only way to kill it is to set the stiffnesses to 0
         m_completion_time = 0;
-        m_head_completion_time = 0;
-        m_arm_completion_time = 0;
         
         vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
         vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), 0);
@@ -117,12 +123,7 @@ bool NUSave::isActive()
 /*! @brief Returns true if the save module is using the head */
 bool NUSave::isUsingHead()
 {
-    if (not isActive())
-        return false;
-    else if (m_data->CurrentTime <= m_head_completion_time)
-        return true;
-    else
-        return false;
+    return false;
 }
 
 /*! @brief Returns true if the save module is using the arms */
@@ -137,6 +138,12 @@ bool NUSave::isUsingLegs()
     return isActive();
 }
 
+/*! @brief Returns true if the save module is ready to block */
+bool NUSave::isReady()
+{
+    return isBlockAble();
+}
+
 /*! @brief Produce actions from the data to move the robot into a standing position
  
     @param data a pointer to the most recent sensor data storage class
@@ -147,21 +154,56 @@ void NUSave::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (data == NULL || actions == NULL)
         return;
+    m_data = data;
+    m_actions = actions;
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUSave::process()" << endl;
 #endif
+    if (not isActive())
+        playSave();
 }
 
+void NUSave::playSave()
+{
+    if (m_walk)
+        m_walk->kill();
+    
+    if (m_block_position[1] >= 3)
+    {
+        m_block_left.play(m_data, m_actions);
+        m_completion_time = m_block_left.timeFinished();
+    }
+    else if (m_block_position[1] <= -3)
+    {
+        m_block_right.play(m_data, m_actions);
+        m_completion_time = m_block_right.timeFinished();
+    }
+}
 
 /*! @brief Process a block job
  */
 void NUSave::process(BlockJob* job)
 {
+    job->getPosition(m_block_time, m_block_position);
+    if (m_data)
+        m_block_timestamp = m_data->CurrentTime;
 }
 
 /*! @brief Process a save job
  */
 void NUSave::process(SaveJob* job)
 {
+    job->getPosition(m_block_time, m_block_position);  
+    if (m_data)
+        m_block_timestamp = m_data->CurrentTime;
+}
+
+/*! @brief Returns true if the current block is doable */
+bool NUSave::isBlockAble()
+{
+    if (m_block_time > 0.3 and m_block_time < m_BLOCK_TRIGGER and fabs(m_block_position[1]) < m_BLOCK_WIDTH and m_data->CurrentTime - m_block_timestamp < 5000)
+        return true;
+    else
+        return false;
 }
 

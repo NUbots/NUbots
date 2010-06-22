@@ -296,12 +296,27 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     else if (m_getup->enabled() and m_data->isFallen())
     {
         if (m_current_leg_provider != m_getup)
-            killActiveProviders();          // slow soft stop on active providers if fallen
+            killActiveProviders();
         
         m_next_head_provider = m_getup;
         m_next_arm_provider = m_getup;
         m_next_leg_provider = m_getup;
     }
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+    else if (m_save->isReady())
+    {   // we need a fast transition into the save
+        if(m_current_leg_provider != m_save)
+        {
+            if (m_current_arm_provider)
+                m_current_arm_provider->kill();
+            if (m_current_leg_provider)
+                m_current_leg_provider->kill();
+        }
+        
+        m_next_arm_provider = m_save;
+        m_next_leg_provider = m_save;
+    }
+    #endif
     
     #if DEBUG_NUMOTION_VERBOSITY > 0
         debug << "NUMotion::CurrentHeadProvider: ";
