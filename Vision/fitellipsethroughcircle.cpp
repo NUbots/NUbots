@@ -10,7 +10,7 @@ class Vision;
 #include "Kinematics/Kinematics.h"
 #include "CircleFitting.h"
 #include "Vision.h"
-#include <QDebug>
+//#include <QDebug>
 FitEllipseThroughCircle::FitEllipseThroughCircle()
 {
     cx = 0;
@@ -41,7 +41,7 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
             tempLinePoint.x = relativePoint.x * cos(relativePoint.y) * cos (relativePoint.z);
             tempLinePoint.y = relativePoint.x * sin(relativePoint.y) * cos (relativePoint.z);
             points.push_back(tempLinePoint);
-            qDebug() << "CenterCircle through Circle: Point Found: " << tempLinePoint.x << "," <<tempLinePoint.y;
+            //qDebug() << "CenterCircle through Circle: Point Found: " << tempLinePoint.x << "," <<tempLinePoint.y;
         }
     }
     Circle circ = circleFitter.FitCircleLMA(points);
@@ -52,7 +52,7 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
     r1 = circ.radius;
     float reldistance = sqrt(relativeCentrePoint.x * relativeCentrePoint.x  + relativeCentrePoint.y *relativeCentrePoint.y);
     float bearing = atan2(relativeCentrePoint.y,relativeCentrePoint.x);
-    qDebug() << "CenterCircle through Circle: Distance: " << reldistance << "Bearing:" <<bearing << "Radius: " <<r1;
+    //qDebug() << "CenterCircle through Circle: Distance: " << reldistance << "Bearing:" <<bearing << "Radius: " <<r1;
     return true;
 }
 Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision* vision)

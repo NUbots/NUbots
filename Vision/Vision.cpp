@@ -32,6 +32,8 @@
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
 
+//#include <QDebug>
+
 using namespace mathGeneral;
 Vision::Vision()
 {
@@ -1010,7 +1012,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
         currentColour   = ClassIndex::unclassified; //!< Colour in the current segment
 
         //! No point in scanning lines less then the buffer size
-        if(lineLength < bufferSize) continue;
+        if(lineLength < bufferSize+2) continue;
 
         for(int j = 0; j < lineLength; j = j+skipPixel)
         {
@@ -1035,9 +1037,19 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.y = startPoint.y;
             }
             //debug << currentPoint.x << " " << currentPoint.y;
+            if(isPixelOnScreen(currentPoint.x,currentPoint.y) == false)
+            {
+                //qDebug() << "-----------------------------------------OverShoot Image:"<< currentPoint.x<< ","<<currentPoint.y;
+                continue;
+            }
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
 
+            /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                    "\t"<<currentColour<< "," << afterColour <<
+                    "\t"<< currentPoint.x << "," << currentImage->getWidth() <<
+                    "\t"<< currentPoint.y << "," << currentImage->getHeight();
+            */
             if(j >= lineLength - skipPixel)
             {
                 //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
@@ -1112,13 +1124,15 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             break;
                         }
                     }
+                    if(isPixelOnScreen(currentPoint.x,currentPoint.y) == false)
+                    {
+                        //qDebug() << "-----------------------------------------OverShoot Image:"<< currentPoint.y<< ","<<currentPoint.y;
+                        break;
+                    }
                     afterColour = classifyPixel(currentPoint.x,currentPoint.y);
                     colourBuff.push_back(afterColour);
-                    j = j+skipPixel*3;
-                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
-                            "\t"<<currentColour<< "," << afterColour <<
-                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
-                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
+                    j = j+6;
+
                 }
 
                 TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
@@ -1133,7 +1147,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 }
                 if(direction == ScanLine::DOWN)
                 {
-                    skipPixel = CalculateSkipSpacing(currentPoint.x,startPoint.y);
+                    skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y); //current point y check
                 }
                 else
                 {
@@ -1209,7 +1223,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
                     if(direction == ScanLine::DOWN)
                     {
-                        skipPixel = CalculateSkipSpacing(currentPoint.x,startPoint.y);
+                        skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y);
                     }
                     else
                     {
