@@ -1147,7 +1147,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 }
                 if(direction == ScanLine::DOWN)
                 {
-                    skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y); //current point y check
+                    skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y,greenSeen); //current point y check
                 }
                 else
                 {
@@ -1223,7 +1223,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
 
                     if(direction == ScanLine::DOWN)
                     {
-                        skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y);
+                        skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y,greenSeen);
                     }
                     else
                     {
@@ -1237,10 +1237,15 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     return;
 }
 
-int Vision::CalculateSkipSpacing(int currentPosition, int linestartPosition)
+int Vision::CalculateSkipSpacing(int currentPosition, int linestartPosition, bool greenSeen)
 {
     int skip = 1;
     int lengthToBottom = getImageHeight() - linestartPosition;
+    if (greenSeen == false)
+    {
+        skip = 3;
+        return skip;
+    }
     if(currentPosition < linestartPosition + lengthToBottom/6)
     {
         skip = 1;
