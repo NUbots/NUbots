@@ -142,7 +142,8 @@ HEADERS += ui_mainwindow.h \
     locwmstreamwidget.h \
     ../Vision/EllipseFitting/FittingCalculations.h \
     ../Tools/Math/Rectangle.h \
-    ../NUPlatform/NUCamera.h
+    ../NUPlatform/NUCamera.h \
+    ../Vision/fitellipsethroughcircle.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -236,6 +237,7 @@ SOURCES += mainwindow.cpp \
     locwmstreamwidget.cpp \
     ../Vision/EllipseFitting/FittingCalculations.cpp \
     ../Tools/Math/Rectangle.cpp \
-    ../NUPlatform/NUCamera.cpp
+    ../NUPlatform/NUCamera.cpp \
+    ../Vision/fitellipsethroughcircle.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
