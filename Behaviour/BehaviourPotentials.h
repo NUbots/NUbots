@@ -129,7 +129,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 14.5, float stoppingdistance = 55)
+    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15, float stoppingdistance = 60)
     {
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
@@ -192,7 +192,7 @@ public:
             {   // if we are close enough to slow down
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                position_rotation = 0.8*bearing;
+                position_rotation = 0.5*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
@@ -204,18 +204,27 @@ public:
             // calculate the component to go around the ball to face the heading
             float around_speed;
             float around_direction;
+            float around_rotation;
             if (distance < 1.5*stoppingdistance)
             {   // if we are close enough to worry about the heading
-                around_speed = 0.5*fabs(heading)/mathGeneral::PI;
+                const float heading_gain = 0.6;
+                const float heading_threshold = mathGeneral::PI/3;
+                if (fabs(heading) < heading_threshold)
+                    around_speed = (heading_gain/heading_threshold)*fabs(heading);
+                else
+                    around_speed = heading_gain;
                 if (fabs(heading) > 2.0)
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
+                
+                around_rotation = mathGeneral::sign(around_direction)*around_speed*9/distance;
             }
             else
             {
                 around_speed = 0;
                 around_direction = 0;
+                around_rotation = 0;
             }
             
             vector<float> speed(3,0);
@@ -223,7 +232,7 @@ public:
             float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
             float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
             speed[1] = atan2(ysum, xsum);
-            speed[2] = position_rotation;
+            speed[2] = position_rotation + around_rotation;
             return speed;
         }
     }
