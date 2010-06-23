@@ -406,7 +406,7 @@ public:
         float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
         float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
         float middleBearing = leftGoalBearing + rightGoalBearing / 2.0f;
-        return ((leftGoalBearing > 0.0f) && (rightGoalBearing < 0.0f)) || (fabs(middleBearing) < mathGeneral::PI/16.0f);
+        return ((leftGoalBearing > 0.2f) && (rightGoalBearing < -0.2f)) || (fabs(middleBearing) < mathGeneral::PI/16.0f);
     }
 };
 
