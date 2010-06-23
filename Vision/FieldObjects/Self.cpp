@@ -224,9 +224,14 @@ std::vector<float> Self::CalculateClosestInterceptToMobileObject(const MobileObj
     
     // Now I am going to calculate the point on the velocity vector which is closest to me
     vector<float> intercept(3,0);
-    intercept[1] = (b_x*v_y*v_y - b_y*v_x*v_y)/(v_x*v_x + v_y*v_y);                                       // intercept x
-    intercept[2] = -(v_x/v_y)*intercept[1];                                                               // intercept y
-    intercept[0] = sqrt(pow(b_x - intercept[1], 2) + pow(b_y - intercept[2], 2))/velocity_mag;            // intercept time (s)
+    if (((v_x > 0 and b_x < 0) or (v_x < 0 and b_x > 0)) or ((v_y > 0 and b_y < 0) or (v_y < 0 and b_y > 0)))
+    {   // if the ball is moving towards us then time can be calculated
+        intercept[1] = (b_x*v_y*v_y - b_y*v_x*v_y)/(v_x*v_x + v_y*v_y);                                       // intercept x
+        intercept[2] = -(v_x/v_y)*intercept[1];                                                               // intercept y
+        intercept[0] = sqrt(pow(b_x - intercept[1], 2) + pow(b_y - intercept[2], 2))/velocity_mag;            // intercept time (s)
+    }
+    else
+        intercept[0] = 600;
     return intercept;
 }
 

@@ -129,7 +129,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15, float stoppingdistance = 60)
+    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 14.5, float stoppingdistance = 65)
     {
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
@@ -207,8 +207,8 @@ public:
             float around_rotation;
             if (distance < 1.5*stoppingdistance)
             {   // if we are close enough to worry about the heading
-                const float heading_gain = 0.6;
-                const float heading_threshold = mathGeneral::PI/3;
+                const float heading_gain = 0.5;
+                const float heading_threshold = mathGeneral::PI;
                 if (fabs(heading) < heading_threshold)
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);
                 else
@@ -218,7 +218,7 @@ public:
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                 
-                around_rotation = mathGeneral::sign(around_direction)*around_speed*9/distance;
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*9/distance;
             }
             else
             {
