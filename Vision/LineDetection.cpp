@@ -13,6 +13,7 @@
 #include <vector>
 #include "Vision.h"
 #include "EllipseFit.h"
+#include "fitellipsethroughcircle.h"
 
 //For distance to Point:
 #include "../Kinematics/Kinematics.h"
@@ -1281,23 +1282,36 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
         if(points.size() > 5)
         {
 
+            double cx =0;
+            double cy =0;
+            double r1 =0;
+            double r2 =0;
+            Vector2<float> screenPositionAngle;
+            //FitEllipseThroughCircle ellipseCircleFitter;
+            //bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
 
+            if(true) //isOK  == false)
+            {
+                EllipseFit* e = new EllipseFit;
 
-            EllipseFit* e = new EllipseFit;
-
-            e->Fit_Ellipse(points);
+                e->Fit_Ellipse(points);
             //e->PrintFinal();
+                cx = e->GetX();
+                cy = e->GetY();
+                r1 = e->GetR1();
+                r2 = e->GetR2();
 
-            double cx = e->GetX();
-            double cy = e->GetY();
-            double r1 = e->GetR1();
-            double r2 = e->GetR2();
+                TempDist = 0.0;
+                Vector2<float> screenPositionAngle((float)vision->CalculateBearing(cx), (float)vision->CalculateElevation(cy));
+                GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
+                //qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+            }
+            else
+            {
 
+            }
             //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
-            TempDist = 0.0;
-            Vector2<float> screenPositionAngle(vision->CalculateBearing(cx), vision->CalculateElevation(cy));
-            GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
-            //qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+
             if (TempDist > 100.0  && TempDist != 0.0  && fabs( TempDist - closeGoalDistance) > 200) {
 
                 Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);

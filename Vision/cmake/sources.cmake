@@ -32,6 +32,7 @@ Vision.cpp
 Ball.cpp
 CircleFitting.cpp
 EllipseFit.cpp
+fitellipsethroughcircle.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

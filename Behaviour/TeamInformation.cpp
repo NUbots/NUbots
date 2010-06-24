@@ -121,31 +121,32 @@ void TeamInformation::updateTeamPacket()
 float TeamInformation::getTimeToBall()
 {
     float time = 600;
-    if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0 and not m_data->isIncapacitated())
-    {
-        MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
-		float balldistance = ball.estimatedDistance();
-        float ballbearing = ball.estimatedBearing();
+    
+    Self& self = m_objects->self;
+    MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+    float balldistance = ball.estimatedDistance();
+    float ballbearing = ball.estimatedBearing();
+    
+    if (m_data->isIncapacitated())                                   // if we are incapacitated then we can't chase a ball
+        return time;
+    else if (m_player_number == 1 and balldistance > 150)            // goal keeper is a special case, don't chase balls too far away
+        return time;
+    else if ((not ball.lost() and not self.lost()) or m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+    {   // if neither the ball or self are lost or if we can see the ball then we can chase.
+        vector<float> walkspeed, maxspeed;
+        m_data->getMotionWalkSpeed(walkspeed);
+        m_data->getMotionWalkMaxSpeed(maxspeed);
         
-        if (m_player_number == 1 and balldistance > 200)            // goal keeper is a special case, don't chase balls too far away
-            return time;
-        else
-        {
-            vector<float> walkspeed, maxspeed;
-            m_data->getMotionWalkSpeed(walkspeed);
-            m_data->getMotionWalkMaxSpeed(maxspeed);
-            
-            // Add time for the movement to the ball
-            time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
-            
-            if (balldistance > 30)
-            {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
-                time += 0.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 0.25*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 0.1*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
-            }
-            
-            if (m_objects->self.lost())
-                time += 10;
+        // Add time for the movement to the ball
+        time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
+        
+        if (balldistance > 30)
+        {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
+            time += 1.0*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.0*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.0*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
         }
+        
+        if (self.lost())
+            time += 3;
     }
     return time;
 }

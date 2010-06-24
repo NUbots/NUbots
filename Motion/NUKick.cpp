@@ -120,8 +120,8 @@ void NUKick::loadKickParameters()
     m_ballRadius = 3.5f;
     const float yReachFwd = 6.0f;
     const float yReachSide = 20.0f;
-    const float xMin = m_kinematicModel->getFootForwardLength();
-    const float xReachFwd = xMin + 9.0f;
+    const float xMin = m_kinematicModel->getFootForwardLength() - 1;
+    const float xReachFwd = xMin + 8.0f;
     const float xReachSide = 30.0f;
     float yMin = footInnerWidth + 2.0f;
 
@@ -1683,7 +1683,7 @@ bool NUKick::kickAbortCondition()
 
 float NUKick::CalculateForwardSwingSpeed(float kickDistance)
 {
-    return 30.0f;
+    return 20.0f;
 }
 
 float NUKick::CalculateSidewardSwingSpeed(float kickDistance)

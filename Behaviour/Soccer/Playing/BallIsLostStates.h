@@ -24,12 +24,14 @@
 
 #include "../SoccerState.h"
 #include "BallIsLostState.h"
+#include "Behaviour/BehaviourPotentials.h"
 
 #include "Behaviour/Jobs/JobList.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "Behaviour/TeamInformation.h"
+#include "Behaviour/GameInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
@@ -89,7 +91,7 @@ protected:
         m_previous_time = m_data->CurrentTime;
         
         // grab the pan end time
-        if (not m_pan_started and m_time_in_state > 200)
+        if (not m_pan_started and m_time_in_state > 100)
         {
             if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
                 m_pan_started = true;
@@ -99,7 +101,7 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 100, -0.95, 0.95));
         
         if (m_team_info->getPlayerNumber() != 1)
             m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
@@ -143,7 +145,7 @@ protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         if (m_time_in_state > 1000*(6.28/m_ROTATIONAL_SPEED))
-            return m_lost_machine->m_lost_pan;
+            return m_lost_machine->m_lost_move;
         else
             return this;
     }
@@ -187,25 +189,64 @@ private:
 class BallIsLostMove : public BallIsLostSubState
 {
 public:
-    BallIsLostMove(BallIsLostState* parent) : BallIsLostSubState(parent) {}
+    BallIsLostMove(BallIsLostState* parent) : BallIsLostSubState(parent) 
+    {
+        m_position = vector<float>(3,0);
+    }
     ~BallIsLostMove() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
-        return this;
+        Self& self = m_field_objects->self;
+        vector<float> distance = self.CalculateDifferenceFromFieldState(m_position);
+        if (distance[0] < 30)
+            return m_lost_machine->m_lost_spin;
+        else
+            return this;
     }
     void doState()
     {
 #if DEBUG_BEHAVIOUR_VERBOSITY > 1
         debug << "BallIsLostMove" << endl;
 #endif
+        Self& self = m_field_objects->self;
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        StationaryObject& owngoal = BehaviourPotentials::getOwnGoal(m_field_objects, m_game_info);
+        StationaryObject& opponentgoal = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info);
+    
         if (m_parent->stateChanged())
         {   // decided which location on the field to go to
+            if (m_game_info->getPlayerNumber() == 1)
+            {   // goal keeper goes back to his goal
+                m_position[0] = owngoal.X() - 25*mathGeneral::sign(owngoal.X());
+                m_position[1] = 0;
+                m_position[2] = 0;
+            }
+            else if (m_game_info->getPlayerNumber() == 2)
+            {   // player two goes to centre circle
+                m_position[0] = 0;
+                m_position[1] = 0;
+                m_position[2] = 0;
+            }
+            else
+            {   // goes two opponent penalty spot
+                m_position[0] = opponentgoal.X() - 120*mathGeneral::sign(opponentgoal.X());
+                m_position[1] = 0;
+                m_position[2] = 0;
+            }
         }
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, 0));
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_position, 0, 55, 0);
+        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
+        m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
+        
+        float pan_width = 1.1;
+        if (ball.isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(ball));
+        else
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 50, 9000, -pan_width, pan_width));
     }
 private:
+    vector<float> m_position;       // the target location in field coordinates
 };
 
 #endif

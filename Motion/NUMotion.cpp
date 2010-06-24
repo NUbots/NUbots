@@ -296,12 +296,27 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     else if (m_getup->enabled() and m_data->isFallen())
     {
         if (m_current_leg_provider != m_getup)
-            killActiveProviders();          // slow soft stop on active providers if fallen
+            killActiveProviders();
         
         m_next_head_provider = m_getup;
         m_next_arm_provider = m_getup;
         m_next_leg_provider = m_getup;
     }
+    #if defined(USE_BLOCK) or defined(USE_SAVE)
+    else if (m_save->isReady())
+    {   // we need a fast transition into the save
+        if(m_current_leg_provider != m_save)
+        {
+            if (m_current_arm_provider)
+                m_current_arm_provider->kill();
+            if (m_current_leg_provider)
+                m_current_leg_provider->kill();
+        }
+        
+        m_next_arm_provider = m_save;
+        m_next_leg_provider = m_save;
+    }
+    #endif
     
     #if DEBUG_NUMOTION_VERBOSITY > 0
         debug << "NUMotion::CurrentHeadProvider: ";
@@ -343,6 +358,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         debug << endl;
     #endif
     
+    // ---------------------------- Handle transitions for the head provider
     if (m_current_head_provider != m_next_head_provider)
     {   // handle head provider transition
         if (m_current_head_provider and m_current_head_provider->isUsingHead())
@@ -350,7 +366,22 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         if (not m_current_head_provider->isUsingHead())
             m_current_head_provider = m_next_head_provider;
     }
+    else if (m_current_leg_provider and m_current_leg_provider != m_current_head_provider and m_current_leg_provider->requiresHead())
+    {   // handle a leg provider later deciding that it requires the head
+        if (m_current_head_provider->isUsingHead())
+            m_current_head_provider->stopHead();
+        if (not m_current_head_provider->isUsingHead())
+            m_current_head_provider = m_current_arm_provider;
+    }
+    else if (m_current_arm_provider and m_current_arm_provider != m_current_head_provider and m_current_arm_provider->requiresHead())
+    {   // handle an arm provider later deciding that it requires the head
+        if (m_current_head_provider->isUsingHead())
+            m_current_head_provider->stopHead();
+        if (not m_current_head_provider->isUsingHead())
+            m_current_head_provider = m_current_arm_provider;
+    }
     
+    // ---------------------------- Handle transitions for the arm provider
     if (m_current_arm_provider != m_next_arm_provider)
     {   // handle arm provider transition
         if (m_current_arm_provider and m_current_arm_provider->isUsingArms())
@@ -358,7 +389,15 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         if (not m_current_arm_provider->isUsingArms())
             m_current_arm_provider = m_next_arm_provider;
     }
+    else if (m_current_leg_provider and m_current_leg_provider != m_current_arm_provider and m_current_leg_provider->requiresArms())
+    {   // handle a leg provider later deciding that it requires the arms
+        if (m_current_arm_provider->isUsingArms())
+            m_current_arm_provider->stopArms();
+        if (not m_current_arm_provider->isUsingArms())
+            m_current_arm_provider = m_current_leg_provider;
+    }
     
+    // ---------------------------- Handle transitions for the leg provider
     if (m_current_leg_provider != m_next_leg_provider)
     {   // handle leg provider transition
         if (m_current_leg_provider and m_current_leg_provider->isUsingLegs())
@@ -367,6 +406,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             m_current_leg_provider = m_next_leg_provider;
     }
     
+    // ---------------------------- Call the process functions of the current providers
     if (isCurrentProvider(m_current_head_provider))
         m_current_head_provider->process(data, actions);
     

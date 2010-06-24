@@ -32,6 +32,8 @@
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
 
+//#include <QDebug>
+
 using namespace mathGeneral;
 Vision::Vision()
 {
@@ -828,6 +830,7 @@ ClassifiedSection Vision::verticalScan(const std::vector<Vector2<int> >&fieldBor
     int fullLineLength = 0;
     int halfLineLength = 0;
     int quarterLineLength = 0;
+    int eightLineLength = 0;
     int midX = 0;
     int skip = int(scanSpacing/2);
 
@@ -850,18 +853,35 @@ ClassifiedSection Vision::verticalScan(const std::vector<Vector2<int> >&fieldBor
         //!Create half ScanLine
         midX = x+skip;
         temp.x = midX;
-        halfLineLength = int((height - y)/2);
+        halfLineLength = int((height - y)*1/2);
         ScanLine tempMidScanLine(temp,halfLineLength);
         scanArea.addScanLine(tempMidScanLine);
 
         //!Create Quarter ScanLines
         temp.x = int(midX - skip/2);
-        quarterLineLength = int((height - y)/4);
+        quarterLineLength = int((height - y)/3);
         ScanLine tempLeftQuarterLine(temp,quarterLineLength);
         scanArea.addScanLine(tempLeftQuarterLine);
         temp.x = int(midX + skip/2);
         ScanLine tempRightQuarterLine(temp,quarterLineLength);
         scanArea.addScanLine(tempRightQuarterLine);
+
+
+        //!Create Eight ScanLines
+
+        temp.x = int(midX - 3*skip/4);
+        eightLineLength = int((height - y)/6);
+        ScanLine tempLeft1EightLine(temp,eightLineLength);
+        scanArea.addScanLine(tempLeft1EightLine);
+        temp.x = int(midX - skip/4);        
+        ScanLine tempLeft2EightLine(temp,eightLineLength);
+        scanArea.addScanLine(tempLeft2EightLine);
+        temp.x = int(midX + skip/4);
+        ScanLine tempRight1EightLine(temp,eightLineLength);
+        scanArea.addScanLine(tempRight1EightLine);
+        temp.x = int(midX + 3*skip/4);
+        ScanLine tempRight2EightLine(temp,eightLineLength);
+        scanArea.addScanLine(tempRight2EightLine);
     }
 
     return scanArea;
@@ -964,7 +984,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     int direction = scanArea->getDirection();
     int numOfLines = scanArea->getNumberOfScanLines();
     int lineLength = 0;
-    int skipPixel = 2;
+    int skipPixel = 1;
     ScanLine* tempLine;
     Vector2<int> currentPoint;
     Vector2<int> tempStartPoint;
@@ -992,7 +1012,7 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
         currentColour   = ClassIndex::unclassified; //!< Colour in the current segment
 
         //! No point in scanning lines less then the buffer size
-        if(lineLength < bufferSize) continue;
+        if(lineLength < bufferSize+2) continue;
 
         for(int j = 0; j < lineLength; j = j+skipPixel)
         {
@@ -1017,9 +1037,19 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 currentPoint.y = startPoint.y;
             }
             //debug << currentPoint.x << " " << currentPoint.y;
+            if(isPixelOnScreen(currentPoint.x,currentPoint.y) == false)
+            {
+                //qDebug() << "-----------------------------------------OverShoot Image:"<< currentPoint.x<< ","<<currentPoint.y;
+                continue;
+            }
             afterColour = classifyPixel(currentPoint.x,currentPoint.y);
             colourBuff.push_back(afterColour);
 
+            /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
+                    "\t"<<currentColour<< "," << afterColour <<
+                    "\t"<< currentPoint.x << "," << currentImage->getWidth() <<
+                    "\t"<< currentPoint.y << "," << currentImage->getHeight();
+            */
             if(j >= lineLength - skipPixel)
             {
                 //! End Of SCANLINE detected: Continue scnaning and when buffer ends or end of screen Generate new segment and add to the line
@@ -1094,13 +1124,15 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                             break;
                         }
                     }
+                    if(isPixelOnScreen(currentPoint.x,currentPoint.y) == false)
+                    {
+                        //qDebug() << "-----------------------------------------OverShoot Image:"<< currentPoint.y<< ","<<currentPoint.y;
+                        break;
+                    }
                     afterColour = classifyPixel(currentPoint.x,currentPoint.y);
                     colourBuff.push_back(afterColour);
-                    j = j+skipPixel*3;
-                    /*qDebug() << "Scanning: " << skipPixel<<","<<j << "\t"<< currentPoint.x << "," << currentPoint.y <<
-                            "\t"<<currentColour<< "," << afterColour <<
-                            "\t"<< currentPoint.y+j << "," << currentImage->getHeight() <<
-                            "\t"<< currentPoint.x+j << "," << currentImage->getWidth();*/
+                    j = j+6;
+
                 }
 
                 TransitionSegment tempTransition(tempStartPoint, currentPoint, beforeColour, currentColour, afterColour);
@@ -1112,6 +1144,14 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                 for (int i = 0; i < bufferSize; i++)
                 {
                     colourBuff.push_back(0);
+                }
+                if(direction == ScanLine::DOWN)
+                {
+                    skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y,greenSeen); //current point y check
+                }
+                else
+                {
+                    skipPixel = 2;
                 }
                 continue;
             }
@@ -1180,6 +1220,15 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
                     {
                         colourBuff.push_back(0);
                     }
+
+                    if(direction == ScanLine::DOWN)
+                    {
+                        skipPixel = CalculateSkipSpacing(currentPoint.y,startPoint.y,greenSeen);
+                    }
+                    else
+                    {
+                        skipPixel = 2;
+                    }
                 }
             }
         }
@@ -1187,6 +1236,32 @@ void Vision::ClassifyScanArea(ClassifiedSection* scanArea)
     }
     return;
 }
+
+int Vision::CalculateSkipSpacing(int currentPosition, int linestartPosition, bool greenSeen)
+{
+    int skip = 1;
+    int lengthToBottom = getImageHeight() - linestartPosition;
+    if (greenSeen == false)
+    {
+        skip = 3;
+        return skip;
+    }
+    if(currentPosition < linestartPosition + lengthToBottom/6)
+    {
+        skip = 1;
+    }
+    else if(currentPosition < linestartPosition + lengthToBottom/3)
+    {
+        skip = 2;
+    }
+    else
+    {
+        skip = 3;
+    }
+    return skip;
+
+}
+
 //! @brief  Pass a transition segment into this function, and will return a scanline which contains
 //!         many different at interval of "spacing" transition segments classified in the orthogonal to the "direction"
 void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction, const std::vector<unsigned char> &colourList)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
