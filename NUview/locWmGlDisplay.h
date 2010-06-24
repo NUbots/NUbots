@@ -79,6 +79,7 @@ protected:
         bool perspective;
         bool drawRobotModel;
         bool drawSigmaPoints;
+        bool drawBestModelOnly;
 
 };
 
