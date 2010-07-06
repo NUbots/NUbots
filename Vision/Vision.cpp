@@ -532,6 +532,12 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         //START: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
 
         //TESTING: Save Images which of a field object seen
+        /*
+        if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        {
+            SaveAnImage();
+        }
+        */
         //bool BlueGoalSeen = false;
         /*
         if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
