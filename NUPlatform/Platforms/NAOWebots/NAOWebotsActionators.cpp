@@ -20,7 +20,7 @@
  */
 
 #include "NAOWebotsActionators.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 

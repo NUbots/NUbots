@@ -21,10 +21,10 @@
 
 #include "NAOWebotsNetworkThread.h"
 
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 #include "NUPlatform/NUIO/RoboCupGameControlData.h"
 #include "RoboCupGameControlDataWebots.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include <string>
 #include <sstream>

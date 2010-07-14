@@ -21,8 +21,8 @@
 
 #include "VisionCalibrationProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"

@@ -61,7 +61,7 @@ private:
     pthread_mutex_t m_objects_pointer_lock;
     pthread_mutex_t m_gameinfo_pointer_lock;
     pthread_mutex_t m_teaminfo_pointer_lock;
-}
+};
 
 extern NUBlackboard* Blackboard;
 

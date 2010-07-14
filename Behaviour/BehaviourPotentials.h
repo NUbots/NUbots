@@ -24,9 +24,9 @@
 #ifndef BEHAVIOUR_POTENTIALS_H
 #define BEHAVIOUR_POTENTIALS_H
 
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"

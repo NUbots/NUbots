@@ -21,7 +21,7 @@
 
 #include "JobPort.h"
 #include "NetworkPortNumbers.h"
-#include "Behaviour/Jobs/JobList.h"
+#include "Infrastructure/Jobs/JobList.h"
 
 #include "debug.h"
 #include "debugverbositynetwork.h"

@@ -44,7 +44,7 @@ NUSensors::NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::NUSensors" << endl;
 #endif
-    m_current_time = nusystem->getTime();
+    m_current_time = System->getTime();
     m_previous_time = 0;
     m_data = new NUSensorsData();
 	m_kinematicModel = new Kinematics();
@@ -87,7 +87,7 @@ NUSensorsData* NUSensors::update()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
-    m_current_time = nusystem->getTime();
+    m_current_time = System->getTime();
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
     

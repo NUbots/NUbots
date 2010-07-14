@@ -27,12 +27,12 @@
 
 #include "Behaviour/BehaviourPotentials.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"

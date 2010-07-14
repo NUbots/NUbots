@@ -20,8 +20,8 @@
  */
 
 #include "NUSystem.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositynusystem.h"
@@ -64,8 +64,7 @@ NUSystem::NUSystem()
 #if DEBUG_NUSYSTEM_VERBOSITY > 4
     debug << "NUSystem::NUSystem()" << endl;
 #endif 
-    if (nusystem == NULL)
-        nusystem = this;
+    System = this;
         
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME

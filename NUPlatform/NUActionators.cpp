@@ -20,7 +20,7 @@
  */
 
 #include "NUActionators.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSoundThread.h"
 #include "NUSystem.h"
 
@@ -58,7 +58,7 @@ void NUActionators::process(NUActionatorsData*& data)
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::process" << endl;
 #endif
-    m_current_time = nusystem->getTime();
+    m_current_time = System->getTime();
     m_data->preProcess();
     copyToHardwareCommunications();
     m_data->postProcess(m_current_time);

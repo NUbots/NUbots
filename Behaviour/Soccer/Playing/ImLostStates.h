@@ -25,8 +25,8 @@
 #include "../SoccerState.h"
 #include "ImLostState.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"

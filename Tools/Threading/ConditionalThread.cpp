@@ -110,7 +110,7 @@ void ConditionalThread::waitForCondition()
 void ConditionalThread::onLoopCompleted()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::loopCompleted() " << m_name << " at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::loopCompleted() " << m_name << " at " << System->getTime() << endl;
     #endif
     pthread_mutex_unlock(&m_running_mutex);
 }
@@ -120,11 +120,11 @@ void ConditionalThread::onLoopCompleted()
 void ConditionalThread::waitForLoopCompletion()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << System->getTime() << endl;
     #endif
     pthread_mutex_lock(&m_running_mutex);            // block if motion thread is STILL running
     pthread_mutex_unlock(&m_running_mutex);
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << System->getTime() << endl;
     #endif
 }

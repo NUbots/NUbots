@@ -36,7 +36,7 @@
 #ifndef MOTIONSCRIPT_H
 #define MOTIONSCRIPT_H
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 class NUSensorsData;
 
 #include <string>

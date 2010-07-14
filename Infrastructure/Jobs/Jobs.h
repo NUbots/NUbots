@@ -22,34 +22,34 @@
 #ifndef JOBS_H
 #define JOBS_H
 
-#include "Jobs/JobList.h"
-#include "Jobs/Job.h"
+#include "JobList.h"
+#include "Job.h"
 
-#include "Jobs/CameraJob.h"
-#include "Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "CameraJob.h"
+#include "CameraJobs/ChangeCameraSettingsJob.h"
 
-#include "Jobs/VisionJob.h"
-#include "Jobs/VisionJobs/SaveImagesJob.h"
+#include "VisionJob.h"
+#include "VisionJobs/SaveImagesJob.h"
 
-#include "Jobs/LocalisationJob.h"
-#include "Jobs/BehaviourJob.h"
-#include "Jobs/MotionJob.h"
-#include "Jobs/MotionJobs/BlockJob.h"
-#include "Jobs/MotionJobs/KickJob.h"
-#include "Jobs/MotionJobs/HeadJob.h"
-#include "Jobs/MotionJobs/HeadTrackJob.h"
-#include "Jobs/MotionJobs/HeadNodJob.h"
-#include "Jobs/MotionJobs/HeadPanJob.h"
-#include "Jobs/MotionJobs/SaveJob.h"
-#include "Jobs/MotionJobs/ScriptJob.h"
-#include "Jobs/MotionJobs/WalkJob.h"
-#include "Jobs/MotionJobs/WalkToPointJob.h"
-#include "Jobs/MotionJobs/WalkParametersJob.h"
-#include "Jobs/MotionJobs/MotionKillJob.h"
-#include "Jobs/MotionJobs/MotionFreezeJob.h"
+#include "LocalisationJob.h"
+#include "BehaviourJob.h"
+#include "MotionJob.h"
+#include "MotionJobs/BlockJob.h"
+#include "MotionJobs/KickJob.h"
+#include "MotionJobs/HeadJob.h"
+#include "MotionJobs/HeadTrackJob.h"
+#include "MotionJobs/HeadNodJob.h"
+#include "MotionJobs/HeadPanJob.h"
+#include "MotionJobs/SaveJob.h"
+#include "MotionJobs/ScriptJob.h"
+#include "MotionJobs/WalkJob.h"
+#include "MotionJobs/WalkToPointJob.h"
+#include "MotionJobs/WalkParametersJob.h"
+#include "MotionJobs/MotionKillJob.h"
+#include "MotionJobs/MotionFreezeJob.h"
 
-#include "Jobs/SystemJob.h"
-#include "Jobs/OtherJob.h"
+#include "SystemJob.h"
+#include "OtherJob.h"
 
 
 #endif

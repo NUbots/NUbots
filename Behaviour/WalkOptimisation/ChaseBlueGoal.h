@@ -25,9 +25,9 @@
 #include "WalkOptimisationProvider.h"
 #include "ChaseObject.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 #include "debug.h"
 

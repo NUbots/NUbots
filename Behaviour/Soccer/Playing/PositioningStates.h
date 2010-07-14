@@ -27,9 +27,9 @@ class SoccerFSMState;       // PositioningState is a SoccerFSMState
 
 #include "Behaviour/BehaviourPotentials.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"

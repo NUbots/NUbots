@@ -60,13 +60,13 @@ PeriodicThread::~PeriodicThread()
  */
 void PeriodicThread::sleepThread()
 {
-    double timenow = nusystem->getTime();
+    double timenow = System->getTime();
     double requiredsleeptime = m_period - (timenow - m_start_time);
     pthread_testcancel();
     if (requiredsleeptime > 0)
         NUSystem::msleep(requiredsleeptime);
     pthread_testcancel();
-    m_start_time = nusystem->getTime();
+    m_start_time = System->getTime();
 }
 
 /*! @brief Periodically runs

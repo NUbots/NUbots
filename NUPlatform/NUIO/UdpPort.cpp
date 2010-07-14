@@ -174,7 +174,7 @@ void UdpPort::run()
             #if DEBUG_NETWORK_VERBOSITY > 0
                 debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            m_time_last_receive = nusystem->getTime();
+            m_time_last_receive = System->getTime();
             stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
             handleNewData(buffer);

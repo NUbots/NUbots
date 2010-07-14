@@ -27,10 +27,10 @@
 
 #include "SoccerProvider.h"
 
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)

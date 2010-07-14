@@ -19,6 +19,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "NUBlackboard.h"
+
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -36,8 +38,9 @@ NUBlackboard* Blackboard = 0;
 */
 NUBlackboard::NUBlackboard()
 {
+    Blackboard = this;
     Sensors = new NUSensorsData();
-    Commands = new NUActionatorsData();
+    Actions = new NUActionatorsData();
     Objects = new FieldObjects();
     Jobs = new JobList();
     GameInfo = new GameInformation(System->getPlayerNumber(), System->getTeamNumber());
@@ -64,8 +67,8 @@ NUBlackboard::~NUBlackboard()
 {
     delete Sensors;
     Sensors = 0;
-    delete Commands;
-    Commands = 0;
+    delete Actions;
+    Actions = 0;
     setObjects(0);      // thread-safe delete of Objects
     delete Jobs;
     Jobs = 0;
@@ -78,7 +81,7 @@ NUBlackboard::~NUBlackboard()
     The Blackboard now owns objects and it should not be free'd.
     @param objects a pointer to the new Objects container.
  */
-void setObjects(FieldObjects* objects)
+void NUBlackboard::setObjects(FieldObjects* objects)
 {
     pthread_mutex_lock(&m_objects_pointer_lock);
     delete Objects;
@@ -91,7 +94,7 @@ void setObjects(FieldObjects* objects)
     The Blackboard now owns gameinfo and it should not be free'd.
     @param gameinfo a pointer to the new GameInfo container.
  */
-void setGameInfo(GameInformation* gameinfo)
+void NUBlackboard::setGameInfo(GameInformation* gameinfo)
 {
     pthread_mutex_lock(&m_gameinfo_lock);
     delete GameInfo;
@@ -104,7 +107,7 @@ void setGameInfo(GameInformation* gameinfo)
     The Blackboard now owns teaminfo and it should not be free'd.
     @param teaminfo a pointer to the new TeamInfo container.
  */
-void setTeamInfo(TeamInformation* teaminfo)
+void NUBlackboard::setTeamInfo(TeamInformation* teaminfo)
 {
     pthread_mutex_lock(&m_teaminfo_lock);
     delete TeamInfo;

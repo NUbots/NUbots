@@ -16,7 +16,7 @@
 #include "TransitionSegment.h"
 #include "RobotCandidate.h"
 #include "LineDetection.h"
-#include "FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "ObjectCandidate.h"
 #include "NUPlatform/NUCamera.h"
 #include "Tools/FileFormats/LUTTools.h"

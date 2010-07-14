@@ -22,8 +22,8 @@
 
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 #include "NUbot.h"
@@ -31,14 +31,14 @@
 
 
 #ifdef USE_VISION
-    #include "Vision/FieldObjects/FieldObjects.h"
+    #include "Infrastructure/FieldObjects/FieldObjects.h"
     #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
     #include "Behaviour/Behaviour.h"
-    #include "Behaviour/Jobs.h"
+    #include "Infrastructure/Jobs/Jobs.h"
 #endif
 
 #ifdef USE_LOCALISATION

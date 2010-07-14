@@ -32,7 +32,7 @@
 #ifndef NUSENSORS_H
 #define NUSENSORS_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 class Kinematics;
 class OrientationUKF;

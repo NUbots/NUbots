@@ -30,11 +30,11 @@
 /*#include "SubstituteState.h"
 #include "RequiresSubstituteState.h"*/
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/GameInformation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
 

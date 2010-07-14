@@ -32,8 +32,8 @@
 
 #include "NUbot.h"
 #include "NUPlatform/NUPlatform.h"
-#include "Behaviour/Jobs.h"
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/Jobs/Jobs.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 #include "Tools/Image/NUimage.h"
 
 #include <sstream>

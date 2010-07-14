@@ -23,8 +23,8 @@
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"

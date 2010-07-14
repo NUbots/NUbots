@@ -42,9 +42,9 @@ void Profiler::start()
 {
     if (nusystem)
     {
-        m_start_thread_time = nusystem->getThreadTime();
-        m_start_process_time = nusystem->getProcessTime();
-        m_start_real_time = nusystem->getRealTime();
+        m_start_thread_time = System->getThreadTime();
+        m_start_process_time = System->getProcessTime();
+        m_start_real_time = System->getRealTime();
     }
 }
 
@@ -60,9 +60,9 @@ void Profiler::stop()
  */
 void Profiler::split(std::string name)
 {
-    double threadtime = nusystem->getThreadTime();
-    double processtime = nusystem->getProcessTime();
-    double realtime = nusystem->getRealTime();
+    double threadtime = System->getThreadTime();
+    double processtime = System->getProcessTime();
+    double realtime = System->getRealTime();
 
     if (m_split_names.empty())
     {   // if it is the first split, then we time is the difference from the start

@@ -20,9 +20,9 @@
  */
 
 #include "TeamInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUSystem.h"
 
 #include <memory.h>
@@ -180,7 +180,7 @@ ostream& operator<< (ostream& output, TeamInformation& info)
 {
     info.updateTeamPacket();
     output << info.m_packet;
-    nusystem->displayTeamPacketSent(info.m_actions);
+    System->displayTeamPacketSent(info.m_actions);
     return output;
 }
 
@@ -199,12 +199,12 @@ istream& operator>> (istream& input, TeamInformation& info)
     if (info.m_data != NULL)
         timenow = info.m_data->CurrentTime;
     else
-        timenow = nusystem->getTime();
+        timenow = System->getTime();
     temp.ReceivedTime = timenow;
     
     if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number and temp.TeamNumber == info.m_team_number)
     {   // only accept packets from valid player numbers
-        nusystem->displayTeamPacketReceived(info.m_actions);
+        System->displayTeamPacketReceived(info.m_actions);
         if (info.m_received_packets[temp.PlayerNumber].empty())
         {   // if there have been no previous packets from this player always accept the packet
             info.m_received_packets[temp.PlayerNumber].push_back(temp);

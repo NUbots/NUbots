@@ -23,14 +23,14 @@
 
 // ---------------------------------------------------------------- Compulsory header files
 #include "NUPlatform/NUPlatform.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
-#include "Behaviour/Jobs.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/Jobs/Jobs.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "debugverbositynubot.h"
 #include "debug.h"
@@ -311,7 +311,7 @@ void NUbot::run()
     int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
-        previoussimtime = nusystem->getTime();
+        previoussimtime = System->getTime();
         webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
             m_sensemove_thread->startLoop();
@@ -345,12 +345,12 @@ void NUbot::run()
 
 void NUbot::periodicSleep(int period)
 {
-    static double starttime = nusystem->getTime();
-    double timenow = nusystem->getTime();
+    static double starttime = System->getTime();
+    double timenow = System->getTime();
     double requiredsleeptime = period - (timenow - starttime);
     if (requiredsleeptime > 0)
         NUSystem::msleep(requiredsleeptime);
-    starttime = nusystem->getTime();
+    starttime = System->getTime();
 }
 
 /*! @brief Handles unexpected termination signals
