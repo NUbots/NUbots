@@ -181,6 +181,12 @@ NAOWebots:
     endif
 
 NAOWebotsConfig:
+    ifeq ($(SYSTEM),Darwin)
+		@set -e; \
+			mkdir -p $(NAOWEBOTS_BUILD_DIR)/Xcode; \
+			cd $(NAOWEBOTS_BUILD_DIR)/Xcode; \
+			cmake -G Xcode $(MAKE_DIR);
+    endif
 	@set -e; \
 		cd $(NAOWEBOTS_BUILD_DIR); \
 		cmake $(MAKE_DIR); \
