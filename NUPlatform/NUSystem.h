@@ -79,7 +79,7 @@ private:
     static long double m_time_offset;                          //!< an offset so that timesincestart = unixstamp - offset and unixstamp = timesincestart + offset
 };
 
-extern NUSystem* nusystem;           //!< This is an omnipresent variable for the underlying system. Having a global variable is a compromise, hopefully it will be only exception @relates NUSystem
+extern NUSystem* System;           //!< This is an omnipresent variable for the underlying system. Having a global variable is a compromise, hopefully it will be only exception @relates NUSystem
 
 #endif
 

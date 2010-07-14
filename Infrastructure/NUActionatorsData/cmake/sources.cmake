@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -20,25 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS
-GoalDetection.cpp
-LineDetection.cpp
-ClassifiedSection.cpp
-ObjectCandidate.cpp
-RobotCandidate.cpp
-ScanLine.cpp
-TransitionSegment.cpp
-Vision.cpp
-Ball.cpp
-CircleFitting.cpp
-EllipseFit.cpp
-fitellipsethroughcircle.cpp
+SET (YOUR_SRCS  NUActionatorsData.cpp NUActionatorsData.h
+                actionator_t.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Threads
-EllipseFitting
 )
 ####################################################################################
 

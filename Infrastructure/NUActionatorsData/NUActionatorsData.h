@@ -184,7 +184,7 @@ private:
 
     // Peripheral actionators 
     vector<actionator_t<float>*> LedActionators;           //!< The led actionators
-    actionator_t<string>* Sound;                            //!< The sound actionator
+    actionator_t<string>* Sound;                           //!< The sound actionator
     
     // Magic actionators
     actionator_t<float>* Teleporter;                       //!< A magical actionator that teleports the robot from one location to another

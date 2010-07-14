@@ -44,7 +44,7 @@
 
 using namespace std;
 
-NUSystem* nusystem;
+NUSystem* System = NULL;
 
 #ifdef __NU_SYSTEM_CLOCK_GETTIME
     struct timespec NUSystem::m_gettime_starttime;            //!< the program's start time according to gettime()
