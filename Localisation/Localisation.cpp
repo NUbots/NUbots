@@ -49,7 +49,7 @@ const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range 
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float Localisation::sdTwoObjectAngle = (float) 0.003; //Small! error in angle difference is normally very small
+const float Localisation::sdTwoObjectAngle = (float) 0.0316; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
