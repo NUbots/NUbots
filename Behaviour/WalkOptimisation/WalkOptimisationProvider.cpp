@@ -24,20 +24,34 @@
 #include "EvaluateWalkParametersState.h"
 #include "PausedWalkOptimisationState.h"
 #include "Tools/Optimisation/Optimiser.h"
+#include "Motion/Tools/MotionFileTools.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
-
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "WalkOptimisationProvider::WalkOptimisationProvider" << endl;
+    #endif
+    
+    m_optimiser = new Optimiser("Test");
+    ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
+    if (points_file.is_open())
+    {
+        m_points = MotionFileTools::toFloatMatrix(points_file);
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "WalkOptimisationProvider::m_points " << MotionFileTools::fromMatrix(m_points) << endl;
+        #endif
+    }
+    else
+        errorlog << "WalkOptimisationProvider::WalkOptimsationProvider. Unable to load WalkPoints.cfg" << endl;
+    
     m_generate = new GenerateWalkParametersState(this);
     m_evaluate = new EvaluateWalkParametersState(this);
     m_paused = new PausedWalkOptimisationState(this);
     
     m_state = m_paused;
-    m_optimiser = new Optimiser("Test");
 }
 
 WalkOptimisationProvider::~WalkOptimisationProvider()

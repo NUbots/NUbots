@@ -25,6 +25,8 @@
 #include "WalkOptimisationProvider.h"
 #include "WalkOptimisationState.h"
 #include "Tools/Optimisation/Optimiser.h"
+#include "Tools/Math/General.h"
+#include "Motion/Tools/MotionFileTools.h"
 
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 #include "Vision/FieldObjects/FieldObjects.h"
@@ -44,20 +46,11 @@ using namespace std;
 class GenerateWalkParametersState : public WalkOptimisationState
 {
 public:
-    GenerateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent), m_X_DISTANCE(300), m_Y_DISTANCE(140)
+    GenerateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
     {
-        // initialise the starting position for the evaluation of new walk parameters
-        vector<float> state(3,0);
-        state[0] = m_X_DISTANCE/2.0;
-        state[1] = m_Y_DISTANCE/2.0;
-        state[2] = -3.1416;
-        m_start_states.push_back(state);
-        state[0] = -m_X_DISTANCE/2.0;
-        state[1] = m_Y_DISTANCE/2.0;
-        state[2] = 0;
-        m_start_state_index = 0;
-        m_start_states.push_back(state);
-        m_current_start_state = m_start_states[0];
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "GenerateWalkParametersState::GenerateWalkParametersState" << endl;
+        #endif
     }
     
     ~GenerateWalkParametersState() {};
@@ -77,12 +70,12 @@ public:
         #endif
         if (m_parent->stateChanged())
         {
-            #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-                debug << "GenerateWalkParametersState. Generating next set of walk parameters" << endl;
-            #endif
             vector<float>& parameters = m_parent->m_optimiser->nextParameters();
             m_current_start_state = getStartState();
-            //!< TODO: make a walk parameters job and give it to the walk engine
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+                debug << "GenerateWalkParametersState::doState(). Next parameters: " << MotionFileTools::fromVector(parameters) << endl;
+                debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
+            #endif
         }
         
         // handle the head movements: For now we look at the yellow or blue goal if we can see them, otherwise pan
@@ -104,28 +97,23 @@ public:
             m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
         }
         else if (yellow_left.TimeSinceLastSeen() > 500 and yellow_right.TimeSinceLastSeen() > 500 and blue_left.TimeSinceLastSeen() > 500 and blue_right.TimeSinceLastSeen() > 500)
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 700, 9000, -0.5, 0.5));
         
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 5, 50, sqrt(pow(m_X_DISTANCE,2) + pow(m_Y_DISTANCE,2)));
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 5, 50, 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 private:
     vector<float>& getStartState()
-    {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-            debug << "GenerateWalkParametersState::getStartState = [" << m_start_states[m_start_state_index][0] << "," << m_start_states[m_start_state_index][1] << "," << m_start_states[m_start_state_index][2] << "]" << endl;
-        #endif
-        m_start_state_index++;
-        if (m_start_state_index >= m_start_states.size())
-            m_start_state_index = 0;
-        
-        return m_start_states[m_start_state_index];
+    {   // we are only ever going to go back and forth between two states.
+        // you want to pick the one we are not at.
+        if (m_current_start_state.size() == 0)
+            return m_parent->m_points[0];
+        else if (mathGeneral::allEqual(m_current_start_state, m_parent->m_points[0]))
+            return m_parent->m_points[1];
+        else
+            return m_parent->m_points[0];
     }
 private:
-    const float m_X_DISTANCE;
-    const float m_Y_DISTANCE;
-    unsigned int m_start_state_index;
-    vector<vector<float> > m_start_states;
     vector<float> m_current_start_state;
 };
 

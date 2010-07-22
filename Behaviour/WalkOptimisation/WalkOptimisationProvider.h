@@ -30,6 +30,7 @@ class Optimiser;
 
 #include <vector>
 #include <string>
+using namespace std;
 
 class WalkOptimisationProvider : public BehaviourFSMProvider
 {
@@ -43,7 +44,8 @@ public:
     BehaviourState* m_evaluate;             //!< the state in which the parameter evaluation is done
     BehaviourState* m_paused;               //!< the optimisation process is paused in this state.
     
-    Optimiser* m_optimiser;
+    Optimiser* m_optimiser;                 //!< the optimiser itself
+    vector<vector<float> > m_points;        //!< the way points over which to optimise the walk
 };
 
 

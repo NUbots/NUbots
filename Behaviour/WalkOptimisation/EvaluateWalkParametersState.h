@@ -31,31 +31,25 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 
+#include "Motion/Tools/MotionFileTools.h"
+
 #include "debug.h"
+#include "debugverbositybehaviour.h"
+#include "nubotdataconfig.h"
 
 class EvaluateWalkParametersState : public WalkOptimisationState
 {
 public:
-    EvaluateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent), m_X_DISTANCE(300), m_Y_DISTANCE(140) 
+    EvaluateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
     {
-        // initialise the targets to chase while evaluating a set of walk parameters
-        vector<float> state(3,0);
-        state[0] = -m_X_DISTANCE/2.0;
-        state[1] = m_Y_DISTANCE/2.0;
-        state[2] = 0;
-        m_target_states.push_back(state);
-        state[0] = m_X_DISTANCE/2.0;
-        state[1] = m_Y_DISTANCE/2.0;
-        state[2] = 0;
-        m_target_states.push_back(state);
-        m_target_state_index = 1;
-        m_current_target_state = m_target_states[1];
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "EvaluateWalkParametersState::EvaluateWalkParametersState" << endl;
+        #endif
     }
     virtual ~EvaluateWalkParametersState() {};
     virtual BehaviourState* nextState() 
     {
-        bool targetbehind = fabs(m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state)[1]) > 1.571;
-        if (targetbehind)
+        if (allPointsReached())
             return m_parent->m_generate;
         else
             return this;
@@ -63,12 +57,11 @@ public:
     virtual void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "EvaluateWalkParametersState" << endl;
+            debug << "EvaluateWalkParametersState::doState()" << endl;
         #endif
         if (m_parent->stateChanged())
         {
-            //!< TODO: make a walk parameters job and give it to the walk engine
-            m_current_target_state = getTargetState();
+            m_current_target_state = getStartPoint();
         }
         
         // handle the head movements: For now we look at the yellow or blue goal if we can see them, otherwise pan
@@ -90,32 +83,78 @@ public:
             m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
         }
         else if (yellow_left.TimeSinceLastSeen() > 500 and yellow_right.TimeSinceLastSeen() > 500 and blue_left.TimeSinceLastSeen() > 500 and blue_right.TimeSinceLastSeen() > 500)
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 700, 9000, -0.5, 0.5));
         
-        vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
-        if (fabs(difference[1]) > 1.571)
-            m_jobs->addMotionJob(new WalkJob(0,0,0));
+        if (pointReached())
+            m_current_target_state = getNextPoint();
+        
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 0);
+        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+    }
+private:
+    vector<float>& getStartPoint()
+    {
+        vector<vector<float> >& points = m_parent->m_points;
+        float distance_from_first = m_field_objects->self.CalculateDifferenceFromFieldState(points[0])[0];
+        float distance_from_last = m_field_objects->self.CalculateDifferenceFromFieldState(points[points.size()-1])[0];
+        if (distance_from_first < distance_from_last)
+        {
+            m_reverse_points = false;
+            m_current_point_index = 0;
+        }
         else
         {
-            vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 0);
-            m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+            m_reverse_points = true;
+            m_current_point_index = points.size()-1;
+        }
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "EvaluateWalkParametersState. Start point " << MotionFileTools::fromVector(points[m_current_point_index]) << endl;
+        #endif
+        return points[m_current_point_index];
+    }
+    bool pointReached()
+    {
+        vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
+        if (difference[0] < 10)
+            return true;
+        else
+            return false;
+    }
+    vector<float>& getNextPoint()
+    {
+        if (not m_reverse_points)
+        {
+            if (m_current_point_index < m_parent->m_points.size()-1)
+                m_current_point_index++;
+        }
+        else
+        {
+            if (m_current_point_index > 0)
+                m_current_point_index--;
+        }
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "EvaluateWalkParametersState. Next point " << MotionFileTools::fromVector(m_parent->m_points[m_current_point_index]) << endl;
+        #endif
+        return m_parent->m_points[m_current_point_index];
+    }
+    bool allPointsReached()
+    {
+        if (not pointReached())
+            return false;
+        else
+        {
+            if (not m_reverse_points and m_current_point_index == m_parent->m_points.size()-1)
+                return true;
+            else if (m_reverse_points and m_current_point_index == 0)
+                return true;
+            else
+                return false;
         }
     }
 private:
-    vector<float>& getTargetState()
-    {
-        m_target_state_index++;
-        if (m_target_state_index >= m_target_states.size())
-            m_target_state_index = 0;
-        
-        return m_target_states[m_target_state_index];
-    }
-private:
-    const float m_X_DISTANCE;
-    const float m_Y_DISTANCE;
-    unsigned int m_target_state_index;
-    vector<vector<float> > m_target_states;
     vector<float> m_current_target_state;
+    bool m_reverse_points;
+    unsigned int m_current_point_index;
 };
 
 #endif
