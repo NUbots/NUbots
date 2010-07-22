@@ -29,8 +29,8 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
 PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {

@@ -17,7 +17,7 @@
 
 //For distance to Point:
 #include "../Kinematics/Kinematics.h"
-#include "../NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 //#include <QDebug>
 //#include "debug.h"

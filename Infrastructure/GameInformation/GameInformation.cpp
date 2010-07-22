@@ -2,16 +2,17 @@
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUIO/GameControllerPort.h"
 #include "NUPlatform/NUSystem.h"
 
 #include <memory.h>
 #include "debug.h"
 
-GameInformation::GameInformation(int playerNumber, int teamNumber, NUSensorsData* data, NUActionatorsData* actions)
+GameInformation::GameInformation(int playerNumber, int teamNumber)
 {
-    m_data = data;
-    m_actions = actions;
+    m_data = Blackboard->Sensors;
+    m_actions = Blackboard->Actions;
     m_port = 0;
     
     m_player_number = playerNumber;

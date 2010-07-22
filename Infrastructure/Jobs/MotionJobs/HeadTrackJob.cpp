@@ -20,7 +20,7 @@
  */
 
 #include "HeadTrackJob.h"
-#include "Vision/FieldObjects/Object.h"
+#include "Infrastructure/FieldObjects/Object.h"
 
 #include "debug.h"
 #include "debugverbosityjobs.h"

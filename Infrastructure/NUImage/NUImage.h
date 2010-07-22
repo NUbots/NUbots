@@ -1,6 +1,6 @@
 /*!
-@file NUimage.h 
-@brief Declaration of NUbots NUimage class.
+@file NUImage.h 
+@brief Declaration of NUbots NUImage class.
 @author Steven Nicklin
 */
 
@@ -21,13 +21,13 @@ to this standard image format we are able to have our software support multiple 
 platforms.
 */
 
-class NUimage: public TimestampedData
+class NUImage: public TimestampedData
 {
 public:
     /*!
     @brief Default constructor.
     */
-    NUimage();
+    NUImage();
 
     /*!
     @brief Constructor with initial settings.
@@ -36,32 +36,32 @@ public:
     @param useInternalBuffer Initial buffering setting.
     True and internal buffer is created. False it is not.
     */
-    NUimage(int width, int height, bool useInternalBuffer);
+    NUImage(int width, int height, bool useInternalBuffer);
 
     /*!
     @brief Copy constructor. Creates a deep copy of the source image.
     @param source The image from which to base the new class.
     */
-    NUimage(const NUimage& source);
+    NUImage(const NUImage& source);
 
     /*!
     @brief Destructor.
     */
-    ~NUimage();
+    ~NUImage();
 
     /*!
     @brief Creates a local copy of the source image.
     If the source image references an external buffer, a local copy of this buffer will be made.
     @param source The source image.
     */
-    void copyFromExisting(const NUimage& source);
+    void copyFromExisting(const NUImage& source);
 
     /*!
     @brief Creates an exact copy of the source image.
     If the source image references an external buffer, the clone will reference this same buffer.
     @param source The source image.
     */
-    void cloneExisting(const NUimage& source);
+    void cloneExisting(const NUImage& source);
 
     /*!
     @brief Maps a one-dimensional buffer to the two-dimensional image array.
@@ -92,14 +92,14 @@ public:
     @param output The output stream.
     @param p_nuimage The source image to be streamed.
     */
-    friend std::ostream& operator<< (std::ostream& output, const NUimage& p_nuimage);
+    friend std::ostream& operator<< (std::ostream& output, const NUImage& p_nuimage);
 
     /*!
     @brief Input streaming operation.
     @param input The input stream.
     @param p_nuimage The destination image to be streamed to.
     */
-    friend std::istream& operator>> (std::istream& input, NUimage& p_nuimage);
+    friend std::istream& operator>> (std::istream& input, NUImage& p_nuimage);
 
     /*!
     @brief Get the width of the current image.

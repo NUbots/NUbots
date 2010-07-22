@@ -21,7 +21,7 @@
 
 #include "TcpPort.h"
 #include "NUPlatform/NUSystem.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
@@ -206,7 +206,7 @@ void TcpPort::sendData(network_data_t netdata)
     return;
 }
 
-void TcpPort::sendData(const NUimage& p_image, const NUSensorsData &p_sensors)
+void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 {
     network_data_t netdata;
     stringstream buffer;

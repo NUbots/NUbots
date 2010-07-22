@@ -30,9 +30,9 @@
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 
 SetState::SetState(SoccerProvider* provider) : SoccerState(provider)
 {

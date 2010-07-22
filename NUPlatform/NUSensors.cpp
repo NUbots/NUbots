@@ -19,6 +19,9 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+
 #include "NUSensors.h"
 #include "NUSystem.h"
 #include "../Kinematics/Horizon.h"
@@ -46,7 +49,7 @@ NUSensors::NUSensors()
 #endif
     m_current_time = System->getTime();
     m_previous_time = 0;
-    m_data = new NUSensorsData();
+    m_data = Blackboard->Sensors;
 	m_kinematicModel = new Kinematics();
 	m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
@@ -71,8 +74,6 @@ NUSensors::~NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::~NUSensors" << endl;
 #endif
-    if (m_data != NULL)
-        delete m_data;
 	delete m_kinematicModel;
 	m_kinematicModel = 0;
         delete m_orientationFilter;
@@ -82,11 +83,12 @@ NUSensors::~NUSensors()
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
     @return a pointer to the freshly updated sensor data
  */
-NUSensorsData* NUSensors::update()
+void NUSensors::update()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
+    m_data = Blackboard->Sensors;
     m_current_time = System->getTime();
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
@@ -104,22 +106,6 @@ NUSensorsData* NUSensors::update()
     m_data->summaryTo(debug);
 #endif
     m_previous_time = m_current_time;
-    return getData();
-}
-
-/*! @brief Returns a pointer to the current NUSensorsData.
- 
-    @attention I do not copy any of the NUSensorsData, and the current data could be updated at any time.
-               Consequently, if you want to save some data to be synchronised with vision you have to make
-               the copy of what you need yourself. However, the getJointPositions etc functions of NUSensorsData
-               will return copies of the selected data.
- */
-NUSensorsData* NUSensors::getData()
-{
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::getData()" << endl;
-#endif
-    return m_data;
 }
 
 /*! @brief The lower level function which gets the sensor data from the hardware itself. 

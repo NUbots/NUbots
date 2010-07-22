@@ -33,11 +33,11 @@
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"

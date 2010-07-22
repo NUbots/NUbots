@@ -23,6 +23,9 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
+#include "nubotdataconfig.h"
+#include "Motion/Tools/MotionFileTools.h"
+
 #include "debug.h"
 #include "debugverbositynusystem.h"
 #include "targetconfig.h"
@@ -34,6 +37,7 @@
 
 #include <sstream>
 #include <cstring>
+#include <locale>
 #include <memory>
 #ifndef WIN32
     #include <sys/ioctl.h>
@@ -61,17 +65,15 @@ long double NUSystem::m_time_offset = 0;
 
 NUSystem::NUSystem()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
-    debug << "NUSystem::NUSystem()" << endl;
-#endif 
+    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        debug << "NUSystem::NUSystem()" << endl;
+    #endif 
     System = this;
         
-
-#ifdef __NU_SYSTEM_CLOCK_GETTIME
-    clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
-    clock_gettime(CLOCK_REALTIME_FAST, &m_gettimefast_starttime); 
-#endif
-    
+    #ifdef __NU_SYSTEM_CLOCK_GETTIME
+        clock_gettime(CLOCK_REALTIME, &m_gettime_starttime);
+        clock_gettime(CLOCK_REALTIME_FAST, &m_gettimefast_starttime); 
+    #endif
     // I need to get the offset between the unix timestamp and the time since start
     m_time_offset = getPosixTimeStamp();
 }
@@ -286,42 +288,92 @@ void NUSystem::displayVisionFrameDrop(NUActionatorsData* actions)
     // by default there is no way to display such information!
 }
 
-string NUSystem::getWirelessMacAddress()
+/*! @brief Loads the robot's idenity from system commands and files
+ 
+    The m_name, m_robot_number, m_team_number, wired MAC address. By default the hostname is used to set m_name, m_robot_number; m_team_number is loaded from a file,
+    and the MAC address is obtained through ioctrl.
+ 
+    The function is virtual so special cases can implemented by children of the NUSystem.
+ */
+void NUSystem::loadRobotIdentity()
 {
-    return string();
-}
-
-string NUSystem::getWiredMacAddress()
-{
-#ifndef TARGET_OS_IS_WINDOWS
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd == -1) 
+    char hostname[255];                                         // we store the name in /etc/hostname so the network name and robot name are the same
+    gethostname(hostname, 255);
+    m_name = string(hostname);  
+    
+    int robot_number_start = 0;
+    for (size_t i=m_name.size()-1; i>0; i--)
     {
-        errorlog << "NUSystem::getWiredMacAddress(). Unable to open socket --- Unable to get mac address." << endl;
-        return string();
-    }
-    struct ifreq ifr;
-    memset(&ifr, 0, sizeof(ifr));
-    #ifdef TARGET_OS_IS_DARWIN
-        strcpy(ifr.ifr_name, "en0");
-        if (ioctl(sockfd, SIOCGIFMAC, &ifr) != -1)
-        {
-            // doesnt work on OS-X :(
+        if (isalpha(m_name[i]))
+        {   // find the last alphabet, everything after that is the robot number
+            robot_number_start = i;
+            break;
         }
-    #else
-        strcpy(ifr.ifr_name, "eth0");
-        if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) != -1)
+    }
+    m_robot_number = atoi(m_name.substr(robot_number_start).c_str());           // the name will be nubotXX where XX is the player number
+    
+    ifstream teamfile((string(CONFIG_DIR) + string("Team.cfg")).c_str());      // the team number is stored in a file
+    if (teamfile.is_open())
+        m_team_number = MotionFileTools::toFloat(teamfile);
+    else
+    {
+        errorlog << "NUSystem::loadRobotIdentity(). Unable to load Team.cfg" << endl;
+        m_team_number = 0;
+    }
+    teamfile.close();
+    
+    #ifndef TARGET_OS_IS_WINDOWS
+        int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sockfd == -1) 
+            errorlog << "NUSystem::loadRobotIdentity(). Unable to open socket, so unable to get mac address." << endl;
+        else
         {
-            stringstream ss;
-            ss << hex << setw(2) << setfill('0');
-            for (int i=0; i<5; i++)
-                ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[i] << "-";
-            ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[5];
-            return ss.str();
+            struct ifreq ifr;
+            memset(&ifr, 0, sizeof(ifr));
+            #ifdef TARGET_OS_IS_DARWIN
+                strcpy(ifr.ifr_name, "en0");
+                if (ioctl(sockfd, SIOCGIFMAC, &ifr) != -1)
+                {
+                    // doesnt work on OS-X :(
+                }
+            #else
+                strcpy(ifr.ifr_name, "eth0");
+                if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) != -1)
+                {
+                    stringstream ss;
+                    ss << hex << setw(2) << setfill('0');
+                    for (int i=0; i<5; i++)
+                        ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[i] << "-";
+                    ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[5];
+                    m_mac_address = ss.str();
+                }
+            #endif
+            close(sockfd);
         }
     #endif
-#endif
-    return string();
 }
 
+/*! @brief Returns the name of the robot */
+string& NUSystem::getName()
+{
+    return m_name;
+}
+
+/*! @brief Returns the robot's number */
+int NUSystem::getRobotNumber()
+{
+    return m_robot_number;
+}
+
+/*! @brief Returns the robot's team number */
+int NUSystem::getTeamNumber()
+{
+    return m_team_number;
+}
+
+/*! @brief Returns the robot's mac address. The address is the wired, and the wireless only if the system has no wired. */
+string& NUSystem::getMacAddress()
+{
+    return m_mac_address;
+}
 

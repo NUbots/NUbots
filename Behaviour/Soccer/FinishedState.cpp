@@ -27,8 +27,8 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 FinishedState::FinishedState(SoccerProvider* provider) : SoccerState(provider)
 {

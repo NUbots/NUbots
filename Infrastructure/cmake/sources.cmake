@@ -26,6 +26,7 @@ SET (YOUR_SRCS  NUBlackboard.cpp NUBlackboard.h
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  NUSensorsData
                 NUActionatorsData
+                NUImage
                 FieldObjects
                 Jobs
                 GameInformation

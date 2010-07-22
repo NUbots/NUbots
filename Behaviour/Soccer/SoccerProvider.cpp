@@ -36,7 +36,7 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

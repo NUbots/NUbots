@@ -20,11 +20,11 @@
  */
 
 #include "NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkToPointJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkToPointJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "walkconfig.h"
 #ifdef USE_JWALK

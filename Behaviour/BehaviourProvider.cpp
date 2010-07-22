@@ -26,9 +26,9 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

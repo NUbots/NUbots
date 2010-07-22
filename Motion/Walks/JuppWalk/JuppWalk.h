@@ -29,8 +29,8 @@
 #define JUPPWALK_H
 
 #include "Motion/NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include <fstream>
 using namespace std;

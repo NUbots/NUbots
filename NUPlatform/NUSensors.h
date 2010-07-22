@@ -32,10 +32,12 @@
 #ifndef NUSENSORS_H
 #define NUSENSORS_H
 
-#include "Infrastructure/NUSensorsData/NUSensorsData.h"
-
+class NUSensorsData;
 class Kinematics;
 class OrientationUKF;
+
+#include <vector>
+using namespace std;
 
 /*! @brief Base sensor storage class
  */
@@ -45,8 +47,7 @@ public:
     NUSensors();
     virtual ~NUSensors();
     
-    NUSensorsData* update();
-    NUSensorsData* getData();
+    void update();
     
 protected:
     virtual void copyFromHardwareCommunications();

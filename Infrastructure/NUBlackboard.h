@@ -34,6 +34,7 @@
 
 class NUSensorsData;
 class NUActionatorsData;
+class NUImage;
 class FieldObjects;
 class JobList;
 class GameInformation;
@@ -53,6 +54,7 @@ public:
     
     NUSensorsData* Sensors;
     NUActionatorsData* Actions;
+    NUImage* Image;
     FieldObjects* Objects;
     JobList* Jobs;
     GameInformation* GameInfo;

@@ -1,18 +1,18 @@
-#include "NUimage.h"
+#include "NUImage.h"
 #include <cstring>
 #include <string>
 #include "ColorModelConversions.h"
 /*!
-@file NUimage.h
-@brief Declaration of NUbots NUimage class. Storage class for images.
+@file NUImage.h
+@brief Declaration of NUbots NUImage class. Storage class for images.
 */
 
-NUimage::NUimage(): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
+NUImage::NUImage(): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
 {
     m_image = 0;
 }
 
-NUimage::NUimage(int width, int height, bool useInternalBuffer): m_imageWidth(width), m_imageHeight(height), m_usingInternalBuffer(useInternalBuffer)
+NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(width), m_imageHeight(height), m_usingInternalBuffer(useInternalBuffer)
 {
     m_image = 0;
     if(m_usingInternalBuffer)
@@ -21,7 +21,7 @@ NUimage::NUimage(int width, int height, bool useInternalBuffer): m_imageWidth(wi
     }
 }
 
-NUimage::NUimage(const NUimage& source): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
+NUImage::NUImage(const NUImage& source): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
 {
     m_image = 0;
     int sourceWidth = source.getWidth();
@@ -35,7 +35,7 @@ NUimage::NUimage(const NUimage& source): m_imageWidth(0), m_imageHeight(0), m_us
     }
 }
 
-NUimage::~NUimage()
+NUImage::~NUImage()
 {
     if (m_usingInternalBuffer)
     {
@@ -48,7 +48,7 @@ NUimage::~NUimage()
     }
 }
 
-void NUimage::copyFromExisting(const NUimage& source)
+void NUImage::copyFromExisting(const NUImage& source)
 {
     int sourceWidth = source.getWidth();
     int sourceHeight = source.getHeight();
@@ -62,7 +62,7 @@ void NUimage::copyFromExisting(const NUimage& source)
     m_timestamp = source.m_timestamp;
 }
 
-void NUimage::cloneExisting(const NUimage& source)
+void NUImage::cloneExisting(const NUImage& source)
 {
     int sourceWidth = source.getWidth();
     int sourceHeight = source.getHeight();
@@ -78,7 +78,7 @@ void NUimage::cloneExisting(const NUimage& source)
     m_timestamp = source.m_timestamp;
 }
 
-void NUimage::useInternalBuffer(bool newCondition)
+void NUImage::useInternalBuffer(bool newCondition)
 {
     if(m_usingInternalBuffer == newCondition) return;
     if (newCondition == true)
@@ -92,7 +92,7 @@ void NUimage::useInternalBuffer(bool newCondition)
     }
 }
 
-void NUimage::removeInternalBuffer()
+void NUImage::removeInternalBuffer()
 {
     if (m_usingInternalBuffer)
     {
@@ -104,21 +104,21 @@ void NUimage::removeInternalBuffer()
     m_usingInternalBuffer = false;
 }
 
-void NUimage::addInternalBuffer(int width, int height)
+void NUImage::addInternalBuffer(int width, int height)
 {
     Pixel* buffer = allocateBuffer(width, height);
     MapBufferToImage(buffer, width, height);
     m_usingInternalBuffer = true;
 }
 
-Pixel* NUimage::allocateBuffer(int width, int height)
+Pixel* NUImage::allocateBuffer(int width, int height)
 {
     Pixel* buffer = new Pixel[width * height];
     m_localBuffer = buffer;
     return buffer;
 }
 
-void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
+void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
 {
     useInternalBuffer(false);
     int arrayWidth = width;
@@ -147,7 +147,7 @@ void NUimage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int
     m_imageHeight = height;
 }
 
-void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
+void NUImage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
 {
     width /= 2;
     height /= 2;
@@ -164,7 +164,7 @@ void NUimage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int h
     return;
 }
 
-void NUimage::MapBufferToImage(Pixel* buffer, int width, int height)
+void NUImage::MapBufferToImage(Pixel* buffer, int width, int height)
 {
     if(height != this->getHeight())
     {
@@ -187,7 +187,7 @@ void NUimage::MapBufferToImage(Pixel* buffer, int width, int height)
     m_imageHeight = height;
 }
 
-void NUimage::setImageDimensions(int newWidth, int newHeight)
+void NUImage::setImageDimensions(int newWidth, int newHeight)
 {
     // If the image size has not changed do nothing.
     if((m_imageWidth == newWidth) && (m_imageHeight == newHeight))
@@ -206,12 +206,12 @@ void NUimage::setImageDimensions(int newWidth, int newHeight)
 }
 
 /*
-QImage NUimage::getSubImage(int x, int y, int width, int height) const
+QImage NUImage::getSubImage(int x, int y, int width, int height) const
 {
     return getSubImage(x, y, width, height, 1);
 }
 
-QImage NUimage::getSubImage(int x, int y, int width, int height, int decimation_spacing) const
+QImage NUImage::getSubImage(int x, int y, int width, int height, int decimation_spacing) const
 {
     //Sanitise inputs
     if (width <= 0  || width  > m_imageWidth)  width  = m_imageWidth;
@@ -247,7 +247,7 @@ QImage NUimage::getSubImage(int x, int y, int width, int height, int decimation_
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */
-std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
+std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 {
     int sourceWidth = p_image.getWidth();
     int sourceHeight = p_image.getHeight();
@@ -262,7 +262,7 @@ std::ostream& operator<< (std::ostream& output, const NUimage& p_image)
     return output;
 }
 
-std::istream& operator>> (std::istream& input, NUimage& p_image)
+std::istream& operator>> (std::istream& input, NUImage& p_image)
 {
     int width, height;
     input.read(reinterpret_cast<char*>(&width), sizeof(width));

@@ -30,8 +30,8 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
 
 #include "debug.h"
 

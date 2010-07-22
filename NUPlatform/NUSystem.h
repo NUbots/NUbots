@@ -64,8 +64,10 @@ public:
     // watchdog functions
     virtual void displayVisionFrameDrop(NUActionatorsData* actions);
     
-    virtual std::string getWirelessMacAddress();
-    virtual std::string getWiredMacAddress();
+    std::string& getName();
+    int getRobotNumber();
+    int getTeamNumber();
+    std::string& getMacAddress();
     
     virtual void restart() {};
 private:
@@ -77,6 +79,12 @@ private:
         static boost::posix_time::ptime m_microsec_starttime;  //!< the program's start time according to boost::posix_time
     #endif
     static long double m_time_offset;                          //!< an offset so that timesincestart = unixstamp - offset and unixstamp = timesincestart + offset
+    
+    virtual void loadRobotIdentity();
+    std::string m_name;                                        //!< the robot's name
+    int m_robot_number;                                        //!< the robot's number
+    int m_team_number;                                         //!< the robot's team number
+    std::string m_mac_address;                                 //!< the robot's MAC address (wired)
 };
 
 extern NUSystem* System;           //!< This is an omnipresent variable for the underlying system. Having a global variable is a compromise, hopefully it will be only exception @relates NUSystem

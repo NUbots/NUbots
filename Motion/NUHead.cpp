@@ -21,13 +21,13 @@
 
 
 #include "NUHead.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Tools/MotionCurves.h"
 #include "Tools/MotionFileTools.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "NUPlatform/NUCamera.h"
 
 #include "debug.h"

@@ -24,9 +24,9 @@
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/ChaseBall/ChaseBallProvider.h"
 
 #include "debug.h"

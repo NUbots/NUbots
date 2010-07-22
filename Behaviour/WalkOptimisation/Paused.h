@@ -25,13 +25,13 @@
 #include "WalkOptimisationProvider.h"
 #include "WalkOptimisationState.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 #include "debug.h"
 

@@ -23,6 +23,7 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUSystem.h"
 
 #include <memory.h>
@@ -30,13 +31,13 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-TeamInformation::TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects) : m_TIMEOUT(2000)
+TeamInformation::TeamInformation(int playernum, int teamnum) : m_TIMEOUT(2000)
 {
     m_player_number = playernum;
     m_team_number = teamnum;
-    m_data = data;
-    m_actions = actions;
-    m_objects = fieldobjects;
+    m_data = Blackboard->Sensors;
+    m_actions = Blackboard->Actions;
+    m_objects = Blackboard->Objects;
     
     initTeamPacket();
     m_received_packets = vector<boost::circular_buffer<TeamPacket> >(13, boost::circular_buffer<TeamPacket>(3));

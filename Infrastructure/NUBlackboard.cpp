@@ -23,6 +23,7 @@
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/Jobs/Jobs.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -41,10 +42,11 @@ NUBlackboard::NUBlackboard()
     Blackboard = this;
     Sensors = new NUSensorsData();
     Actions = new NUActionatorsData();
+    Image = NULL;
     Objects = new FieldObjects();
     Jobs = new JobList();
-    GameInfo = new GameInformation(System->getPlayerNumber(), System->getTeamNumber());
-    TeamInfo = new TeamInformation(System->getPlayerNumber(), System->getTeamNumber());
+    GameInfo = new GameInformation(System->getRobotNumber(), System->getTeamNumber());
+    TeamInfo = new TeamInformation(System->getRobotNumber(), System->getTeamNumber());
     
     // create the locks protecting the objects, gameinfo and teaminfo pointers
     // These objects are potentially behaviour dependent, and we can switch behaviours on the fly
@@ -69,6 +71,7 @@ NUBlackboard::~NUBlackboard()
     Sensors = 0;
     delete Actions;
     Actions = 0;
+    delete Image;
     setObjects(0);      // thread-safe delete of Objects
     delete Jobs;
     Jobs = 0;
@@ -96,10 +99,10 @@ void NUBlackboard::setObjects(FieldObjects* objects)
  */
 void NUBlackboard::setGameInfo(GameInformation* gameinfo)
 {
-    pthread_mutex_lock(&m_gameinfo_lock);
+    pthread_mutex_lock(&m_gameinfo_pointer_lock);
     delete GameInfo;
     GameInfo = gameinfo;
-    pthread_mutex_unlock(&m_gameinfo_lock);
+    pthread_mutex_unlock(&m_gameinfo_pointer_lock);
 }
 
 /*! @brief Sets the blackboard's TeamInfo pointer to the given one 
@@ -109,8 +112,8 @@ void NUBlackboard::setGameInfo(GameInformation* gameinfo)
  */
 void NUBlackboard::setTeamInfo(TeamInformation* teaminfo)
 {
-    pthread_mutex_lock(&m_teaminfo_lock);
+    pthread_mutex_lock(&m_teaminfo_pointer_lock);
     delete TeamInfo;
     TeamInfo = teaminfo;
-    pthread_mutex_unlock(&m_teaminfo_lock);
+    pthread_mutex_unlock(&m_teaminfo_pointer_lock);
 }

@@ -22,6 +22,7 @@
 
 
 #include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
@@ -32,7 +33,7 @@
 
 #ifdef USE_VISION
     #include "Infrastructure/FieldObjects/FieldObjects.h"
-    #include "Tools/Image/NUimage.h"
+    #include "Infrastructure/NUImage/NUImage.h"
     #include "Vision/Vision.h"
 #endif
 
@@ -112,7 +113,7 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                m_nubot->Image = m_nubot->m_platform->camera->grabNewImage();
+                Blackboard->Image = m_nubot->m_platform->camera->grabNewImage();
                 *(m_nubot->m_io) << m_nubot;  //<! Raw IMAGE STREAMING (TCP)
             #endif
             
@@ -121,21 +122,21 @@ void SeeThinkThread::run()
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                m_nubot->m_vision->ProcessFrame(m_nubot->Image, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects);
+                m_nubot->m_vision->ProcessFrame(Blackboard->Image, Blackboard->Sensors, Blackboard->Actions, Blackboard->Objects);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision");
                 #endif
             #endif
 
             #ifdef USE_LOCALISATION
-                m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
+                m_nubot->m_localisation->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("localisation");
                 #endif
             #endif
             
             #if defined(USE_BEHAVIOUR)
-                m_nubot->m_behaviour->process(m_nubot->Jobs, m_nubot->SensorData, m_nubot->Actions, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
+                m_nubot->m_behaviour->process(Blackboard->Jobs, Blackboard->Sensors, Blackboard->Actions, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("behaviour");
                 #endif
@@ -146,13 +147,13 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                m_nubot->m_vision->process(m_nubot->Jobs, m_nubot->m_platform->camera,m_nubot->m_io) ; //<! Networking for Vision
+                m_nubot->m_vision->process(Blackboard->Jobs, m_nubot->m_platform->camera, m_nubot->m_io) ; //<! Networking for Vision
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif
             #endif
             #ifdef USE_MOTION
-                m_nubot->m_motion->process(m_nubot->Jobs);
+                m_nubot->m_motion->process(Blackboard->Jobs);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("motion_jobs");
                 #endif

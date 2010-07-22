@@ -31,7 +31,7 @@
 #include "NAOWebotsPlatform.h"
 #include <cstring>
 class webots::Camera;
-class NUimage;
+class NUImage;
 
 class NAOWebotsCamera : public NUCamera
 {
@@ -39,13 +39,13 @@ public:
     NAOWebotsCamera(NAOWebotsPlatform* platform);
     ~NAOWebotsCamera();
     
-    NUimage* grabNewImage();
+    NUImage* grabNewImage();
     void setSettings(const CameraSettings& newset);
 private:
     Camera* m_camera;
     int m_width, m_height, m_totalpixels;
     
-    NUimage* m_image;
+    NUImage* m_image;
     Pixel* m_yuyv_buffer;
 };
 

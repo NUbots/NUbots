@@ -5,7 +5,7 @@
 */
 
 #include "Vision.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Tools/Math/Line.h"
 #include "ClassificationColours.h"
 #include "Ball.h"
@@ -20,11 +20,11 @@
 
 #include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUCamera.h"
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 #include "NUPlatform/NUSystem.h"
@@ -145,7 +145,7 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 }
 
 
-void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
+void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
@@ -585,7 +585,7 @@ void Vision::SaveAnImage()
         {
             sensorfile << (*m_sensor_data) << flush;
         }
-        NUimage buffer;
+        NUImage buffer;
         buffer.cloneExisting(*currentImage);
         imagefile << buffer;
         numSavedImages++;
@@ -672,7 +672,7 @@ void Vision::loadLUTFromFile(const std::string& fileName)
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
-void Vision::setImage(const NUimage* newImage)
+void Vision::setImage(const NUImage* newImage)
 {
 
     currentImage = newImage;

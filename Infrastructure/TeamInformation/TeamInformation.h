@@ -75,7 +75,7 @@ public:
 class TeamInformation
 {
 public:
-    TeamInformation(int playernum, int teamnum, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
+    TeamInformation(int playernum, int teamnum);
     ~TeamInformation();
     
     int getPlayerNumber() {return m_player_number;};

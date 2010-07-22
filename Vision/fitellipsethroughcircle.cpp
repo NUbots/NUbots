@@ -6,7 +6,7 @@ class Vision;
 #include "../Tools/Math/Vector2.h"
 #include "CircleFitting.h"
 #include "Tools/Math/General.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Kinematics.h"
 #include "CircleFitting.h"
 #include "Vision.h"

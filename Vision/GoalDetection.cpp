@@ -5,7 +5,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "Tools/Math/General.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Kinematics.h"
 //#include <QDebug>
 using namespace mathGeneral;

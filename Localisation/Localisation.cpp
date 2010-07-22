@@ -1,7 +1,7 @@
 #include "Localisation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "Tools/Math/General.h"
 #include <string>

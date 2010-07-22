@@ -17,7 +17,7 @@ CUR_DIR = $(shell pwd)
 
 # Make directories
 MAKE_DIR = $(CUR_DIR)/Make
-MAKE_OPTIONS = --no-print-directory
+MAKE_OPTIONS = --no-print-directory -j 4
 
 # Build directories
 NAO_BUILD_DIR = Build/NAO
@@ -190,8 +190,7 @@ NAOWebotsConfig:
 	@set -e; \
 		cd $(NAOWEBOTS_BUILD_DIR); \
 		cmake $(MAKE_DIR); \
-		$(CCMAKE) .; \
-		make $(MAKE_OPTIONS);
+		$(CCMAKE) .;
 
 NAOWebotsClean:
 	@echo "Cleaning NAOWebots Build";

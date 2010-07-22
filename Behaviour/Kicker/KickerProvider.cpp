@@ -28,10 +28,10 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

@@ -6,7 +6,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
-#include "../NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 //#include <QDebug>
 Ball::Ball()
 {

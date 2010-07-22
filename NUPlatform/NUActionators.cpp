@@ -21,6 +21,7 @@
 
 #include "NUActionators.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUActionators/NUSoundThread.h"
 #include "NUSystem.h"
 
@@ -32,7 +33,6 @@ NUActionators::NUActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::NUActionators" << endl;
 #endif
-    m_data = new NUActionatorsData();
     m_sound_thread = new NUSoundThread();
 }
 
@@ -41,8 +41,6 @@ NUActionators::~NUActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::~NUActionators" << endl;
 #endif
-    if (m_data != NULL)
-        delete m_data;
     if (m_sound_thread != NULL)
         delete m_sound_thread;
 }
@@ -51,24 +49,16 @@ NUActionators::~NUActionators()
  
     @param data a pointer to the NUActionatorsData to be sent to the hardware
  */
-void NUActionators::process(NUActionatorsData*& data)
+void NUActionators::process(NUActionatorsData* data)
 {
-    if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
-        data = m_data;
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::process" << endl;
 #endif
+    m_data = Blackboard->Actions;
     m_current_time = System->getTime();
     m_data->preProcess();
     copyToHardwareCommunications();
     m_data->postProcess(m_current_time);
-}
-
-/*! @brief Returns the actions storage class
- */
-NUActionatorsData* NUActionators::getActions()
-{
-    return m_data;
 }
 
 /*! @brief Copies the sound actions to the sound player

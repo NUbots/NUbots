@@ -21,8 +21,8 @@
 
 #include "FallProtection.h"
 #include "NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "motionconfig.h"
 #include "debug.h"

@@ -20,7 +20,7 @@
  */
 
 #include "Job.h"
-#include "../Jobs.h"
+#include "Jobs.h"
 #include "debug.h"
 #include "debugverbosityjobs.h"
 

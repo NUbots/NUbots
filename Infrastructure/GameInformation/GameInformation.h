@@ -55,7 +55,7 @@ public:
         RedTeam = TEAM_RED
     };
 public:
-    GameInformation(int playerNumber, int teamNumber, NUSensorsData* data, NUActionatorsData* actions);
+    GameInformation(int playerNumber, int teamNumber);
     ~GameInformation();
 
     // My information

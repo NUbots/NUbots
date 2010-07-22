@@ -23,12 +23,13 @@
 
 // ---------------------------------------------------------------- Compulsory header files
 #include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUIO.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
-#include "NUPlatform/NUIO.h"
-#include "Infrastructure/Jobs/Jobs.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/Jobs.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 
@@ -37,7 +38,7 @@
 
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
-    #include "Tools/Image/NUimage.h"
+    #include "Infrastructure/NUImage/NUImage.h"
     #include "Vision/Vision.h"
 #endif
 
@@ -117,20 +118,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Objects = new FieldObjects();
-    Jobs = new JobList();
-    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions);
-    TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
-    
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Public storage pointers:" << endl;
-        debug << "SensorData: " << (void*)SensorData << " Actions: " << (void*)Actions << " Objects: " << (void*)Objects << " Jobs: " << (void*)Jobs << endl;
-    #endif
+    m_blackboard = new NUBlackboard();
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)
@@ -152,7 +140,7 @@ NUbot::NUbot(int argc, const char *argv[])
     
     #ifdef USE_LOCALISATION
         #if defined(TARGET_IS_NAOWEBOTS)
-            m_localisation = new Localisation(m_platform->getPlayerNumber());
+            m_localisation = new Localisation(System->getRobotNumber());
         #else
             m_localisation = new Localisation();
         #endif // defined(TARGET_IS_NAOWEBOTS)
@@ -163,7 +151,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     #ifdef USE_MOTION
-        m_motion = new NUMotion(SensorData, Actions);
+        m_motion = new NUMotion(m_blackboard->Sensors, m_blackboard->Actions);
     #endif
     
     createThreads();
@@ -224,7 +212,7 @@ NUbot::~NUbot()
     
     #ifdef USE_MOTION
         NUbot::m_this->m_motion->kill();
-        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        NUbot::m_this->m_platform->actionators->process(Blackboard->Actions);
         NUSystem::msleep(1500);
     #endif
 
@@ -270,20 +258,7 @@ NUbot::~NUbot()
         debug << "NUbot::~NUbot(). Deleting Public Storage" << endl;
     #endif
     
-    #ifdef USE_VISION
-        if (Image != NULL)
-            delete Image;
-    #endif
-    if (SensorData != NULL)
-        delete SensorData;
-    if (Actions != NULL)
-        delete Actions;
-    if (Jobs != NULL)
-        delete Jobs;
-    if (GameInfo != NULL)
-        delete GameInfo;
-    if (TeamInfo != NULL)
-        delete TeamInfo;
+    delete m_blackboard;
     
     #if DEBUG_NUBOT_VERBOSITY > 0
         debug << "NUbot::~NUbot(). Finished!" << endl;
@@ -407,21 +382,21 @@ void NUbot::terminationHandler(int signum)
         // safely kill motion
         #ifdef USE_MOTION
             NUbot::m_this->m_motion->kill();
-            NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+            NUbot::m_this->m_platform->actionators->process(Blackboard->Actions);
         #endif
         
         // play sound to indicate the error
         #ifndef TARGET_OS_IS_WINDOWS
             if (signum == SIGILL)
-                NUbot::m_this->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
+                Blackboard->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
             else if (signum == SIGSEGV)
-                NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+                Blackboard->Actions->addSound(0, NUSounds::SEG_FAULT);
             else if (signum == SIGBUS)
-                NUbot::m_this->Actions->addSound(0, NUSounds::BUS_ERROR);
+                Blackboard->Actions->addSound(0, NUSounds::BUS_ERROR);
             else if (signum == SIGABRT)
-                NUbot::m_this->Actions->addSound(0, NUSounds::ABORT);
+                Blackboard->Actions->addSound(0, NUSounds::ABORT);
         #endif
-        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
+        NUbot::m_this->m_platform->actionators->process(Blackboard->Actions);
         
         // sleep for a little bit so that the above things finish executing
         NUSystem::msleep(1500);
@@ -439,7 +414,7 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
-        NUbot::m_this->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
+        Blackboard->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
         void *array[10];

@@ -26,7 +26,6 @@ SET (YOUR_SRCS
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 Math
-Image
 FileFormats
 Profiling
 Threading

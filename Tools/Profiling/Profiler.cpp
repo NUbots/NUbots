@@ -40,7 +40,7 @@ Profiler::~Profiler()
  */
 void Profiler::start()
 {
-    if (nusystem)
+    if (System)
     {
         m_start_thread_time = System->getThreadTime();
         m_start_process_time = System->getProcessTime();

@@ -20,7 +20,7 @@
  */
 
 #include "HeadPanJob.h"
-#include "Vision/FieldObjects/MobileObject.h"
+#include "Infrastructure/FieldObjects/MobileObject.h"
 
 #include "debug.h"
 #include "debugverbosityjobs.h"
