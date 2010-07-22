@@ -20,21 +20,10 @@
  */
 
 #include "WalkOptimisationProvider.h"
-#include "ChaseBlueGoal.h"
-#include "ChaseYellowGoal.h"
-#include "SearchForBlueGoal.h"
-#include "SearchForYellowGoal.h"
-#include "Paused.h"
-
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "GenerateWalkParametersState.h"
+#include "EvaluateWalkParametersState.h"
+#include "PausedWalkOptimisationState.h"
+#include "Tools/Optimisation/Optimiser.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -43,30 +32,32 @@ using namespace std;
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
-    m_chase_blue_goal = new ChaseBlueGoal(this);
-    m_chase_yellow_goal = new ChaseYellowGoal(this);
-    m_search_blue_goal = new SearchForBlueGoal(this);
-    m_search_yellow_goal = new SearchForYellowGoal(this);
-    m_paused = new Paused(this);
+    m_generate = new GenerateWalkParametersState(this);
+    m_evaluate = new EvaluateWalkParametersState(this);
+    m_paused = new PausedWalkOptimisationState(this);
     
-    m_state = m_search_blue_goal;
+    m_state = m_paused;
+    m_optimiser = new Optimiser("Test");
 }
 
 WalkOptimisationProvider::~WalkOptimisationProvider()
 {
-    delete m_chase_blue_goal;
-    delete m_chase_yellow_goal;
-    delete m_search_blue_goal;
-    delete m_search_yellow_goal;
+    delete m_generate;
+    delete m_evaluate;
     delete m_paused;
+    
+    delete m_optimiser;
 }
 
 BehaviourState* WalkOptimisationProvider::nextStateCommons()
 {
+    while (m_game_info->getCurrentState() != GameInformation::PlayingState)
+        m_game_info->doManualStateChange();
+    
     if (singleChestClick() or longChestClick())
     {
         if (m_state == m_paused)
-            return m_previous_state;
+            return m_generate;
         else
             return m_paused;
     }

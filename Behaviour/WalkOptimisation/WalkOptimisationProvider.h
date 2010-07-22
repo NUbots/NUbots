@@ -1,8 +1,8 @@
 /*! @file WalkOptimisationProvider.h
-    @brief Declaration of simple chase ball behaviour for testing and demonstration purposes 
+    @brief Declaration of walk optimisation behaviour for testing and demonstration purposes 
  
     @class WalkOptimisationProvider
-    @brief A simple chase ball behaviour for testing and demonstration purposes 
+    @brief A walk optimisation behaviour provider
 
     @author Jason Kulk
  
@@ -26,11 +26,7 @@
 #define WALKOPTIMISATIONBEHAVIOUR_H
 
 #include "Behaviour/BehaviourFSMProvider.h"
-class ChaseBlueGoal;
-class ChaseYellowGoal;
-class SearchForBlueGoal;
-class SearchForYellowGoal;
-class Paused;
+class Optimiser;
 
 #include <vector>
 #include <string>
@@ -42,19 +38,12 @@ public:
     ~WalkOptimisationProvider();
 protected:
     BehaviourState* nextStateCommons();
-private:
-    friend class ChaseObject;
-    friend class SearchForObject;
-    friend class ChaseBlueGoal;
-    BehaviourState* m_chase_blue_goal;
-    friend class ChaseYellowGoal;
-    BehaviourState* m_chase_yellow_goal;
-    friend class SearchForBlueGoal;
-    BehaviourState* m_search_blue_goal;
-    friend class SearchForYellowGoal;
-    BehaviourState* m_search_yellow_goal;
-    friend class Paused;
-    BehaviourState* m_paused;
+public:
+    BehaviourState* m_generate;             //!< the state in which the parameter generation is done, and preparations for its evaluation
+    BehaviourState* m_evaluate;             //!< the state in which the parameter evaluation is done
+    BehaviourState* m_paused;               //!< the optimisation process is paused in this state.
+    
+    Optimiser* m_optimiser;
 };
 
 

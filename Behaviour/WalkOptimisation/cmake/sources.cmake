@@ -22,12 +22,9 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  WalkOptimisationProvider.cpp WalkOptimisationProvider.h
                 WalkOptimisationState.h
-		ChaseObject.h
-		SearchForObject.h
-		ChaseBlueGoal.h
-		ChaseYellowGoal.h
-		SearchForBlueGoal.h
-		SearchForYellowGoal.h
+                EvaluateWalkParametersState.h
+                GenerateWalkParametersState.h
+                PausedWalkOptimisationState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
