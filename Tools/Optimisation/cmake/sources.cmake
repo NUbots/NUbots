@@ -20,17 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS Optimiser.h  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Math
-Image
-FileFormats
-Profiling
-Threading
-Optimisation
 )
 ####################################################################################
 
