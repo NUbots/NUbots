@@ -96,6 +96,28 @@ public:
             float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
             m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
         }
+        else if (blue_left.isObjectVisible() and blue_right.isObjectVisible())
+        {
+            float bearing = (blue_left.ScreenXTheta() + blue_right.ScreenXTheta())/2;
+            float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
+            m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
+        }
+        else if (yellow_left.isObjectVisible() and yellow_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(yellow_left));
+        }
+        else if (yellow_right.isObjectVisible() and yellow_left.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(yellow_right));
+        }        
+        else if (blue_left.isObjectVisible() and blue_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(blue_left));
+        }
+        else if (blue_right.isObjectVisible() and blue_left.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(blue_right));
+        }
         else if (yellow_left.TimeSinceLastSeen() > 500 and yellow_right.TimeSinceLastSeen() > 500 and blue_left.TimeSinceLastSeen() > 500 and blue_right.TimeSinceLastSeen() > 500)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 700, 9000, -0.5, 0.5));
         
@@ -107,11 +129,11 @@ private:
     {   // we are only ever going to go back and forth between two states.
         // you want to pick the one we are not at.
         if (m_current_start_state.size() == 0)
-            return m_parent->m_points[0];
-        else if (mathGeneral::allEqual(m_current_start_state, m_parent->m_points[0]))
-            return m_parent->m_points[1];
+            return m_parent->m_points.front();
+        else if (mathGeneral::allEqual(m_current_start_state, m_parent->m_points.front()))
+            return m_parent->m_points.back();
         else
-            return m_parent->m_points[0];
+            return m_parent->m_points.front();
     }
 private:
     vector<float> m_current_start_state;

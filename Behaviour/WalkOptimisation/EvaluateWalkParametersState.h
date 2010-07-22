@@ -69,6 +69,16 @@ public:
         StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
         StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
         StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        AmbiguousObject yellow_unknown;
+        AmbiguousObject blue_unknown;
+        for (size_t i=0; i<m_field_objects->ambiguousFieldObjects.size(); i++)
+        {
+            int ambig_id = m_field_objects->ambiguousFieldObjects[i].getID();
+            if (ambig_id == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+                yellow_unknown = m_field_objects->ambiguousFieldObjects[i];
+            else if (ambig_id == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+                blue_unknown = m_field_objects->ambiguousFieldObjects[i];
+        }
         
         if (yellow_left.isObjectVisible() and yellow_right.isObjectVisible())
         {
@@ -82,8 +92,32 @@ public:
             float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
             m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
         }
+        else if (yellow_left.isObjectVisible() and yellow_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(yellow_left));
+        }
+        else if (yellow_right.isObjectVisible() and yellow_left.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(yellow_right));
+        }        
+        else if (blue_left.isObjectVisible() and blue_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(blue_left));
+        }
+        else if (blue_right.isObjectVisible() and blue_left.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(blue_right));
+        }
+        else if (yellow_unknown.getID() > 0 and yellow_left.TimeSinceLastSeen() > 500 and yellow_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(yellow_unknown));
+        }
+        else if (blue_unknown.getID() > 0 and blue_left.TimeSinceLastSeen() > 500 and blue_right.TimeSinceLastSeen() > 500)
+        {
+            m_jobs->addMotionJob(new HeadTrackJob(blue_unknown));
+        }
         else if (yellow_left.TimeSinceLastSeen() > 500 and yellow_right.TimeSinceLastSeen() > 500 and blue_left.TimeSinceLastSeen() > 500 and blue_right.TimeSinceLastSeen() > 500)
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 700, 9000, -0.5, 0.5));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 700, 9000, -0.75, 0.75));
         
         if (pointReached())
             m_current_target_state = getNextPoint();
@@ -95,8 +129,8 @@ private:
     vector<float>& getStartPoint()
     {
         vector<vector<float> >& points = m_parent->m_points;
-        float distance_from_first = m_field_objects->self.CalculateDifferenceFromFieldState(points[0])[0];
-        float distance_from_last = m_field_objects->self.CalculateDifferenceFromFieldState(points[points.size()-1])[0];
+        float distance_from_first = m_field_objects->self.CalculateDifferenceFromFieldState(points.front())[0];
+        float distance_from_last = m_field_objects->self.CalculateDifferenceFromFieldState(points.back())[0];
         if (distance_from_first < distance_from_last)
         {
             m_reverse_points = false;
