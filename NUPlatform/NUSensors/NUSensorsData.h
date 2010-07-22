@@ -165,6 +165,7 @@ public:
     // Motion sensor get methods
     bool getMotionFallActive(bool& active);
     bool getMotionGetupActive(bool& active);
+    bool getMotionWalkActive(bool& active);
     bool getMotionKickActive(bool& active);
     bool getMotionSaveActive(bool& active);
     bool getMotionScriptActive(bool& active);
@@ -200,6 +201,7 @@ public:
     // Set methods for motion 'sensors'
     void setMotionFallActive(double time, bool active);
     void setMotionGetupActive(double time, bool active);
+    void setMotionWalkActive(double time, bool active);
     void setMotionKickActive(double time, bool active);
     void setMotionSaveActive(double time, bool active);
     void setMotionScriptActive(double time, bool active);
@@ -281,6 +283,7 @@ public:
     // Motion Sensors:
     sensor_t* MotionFallActive;                 //!< stores whether the fall protection is currently active
     sensor_t* MotionGetupActive;                //!< stores whether the getup is currently active
+    sensor_t* MotionWalkActive;                 //!< stores whether the walk is currently active
     sensor_t* MotionKickActive;                 //!< stores whether the kick is currently active
     sensor_t* MotionSaveActive;                 //!< stores whether the save is currently active
     sensor_t* MotionScriptActive;               //!< stores whether the script engine is active

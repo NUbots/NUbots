@@ -174,7 +174,7 @@ bool NUWalk::isActive()
 {   
     if (not m_walk_enabled)
         return false;
-    else if (m_target_speed_x != 0 or m_target_speed_y != 0 or m_target_speed_yaw != 0)
+    else if (m_speed_x != 0 or m_speed_y != 0 or m_speed_yaw != 0)
         return true;
     else 
     {
@@ -188,10 +188,7 @@ bool NUWalk::isActive()
         if (jointvelocitysum > 0.4)
             return true;
         else
-        {
-            kill();
             return false;
-        }
     }
 
 }

@@ -613,6 +613,7 @@ void NUMotion::updateMotionSensors()
         m_data->setMotionScriptActive(m_current_time, false);
     #endif
     #ifdef USE_WALK
+        m_data->setMotionWalkActive(m_current_time, m_walk->isActive());
         vector<float> speed;
         m_walk->getCurrentSpeed(speed);
         m_data->setMotionWalkSpeed(m_current_time, speed);
