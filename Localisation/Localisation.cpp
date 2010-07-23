@@ -45,11 +45,11 @@ const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 // Object distance measurement error weightings (Constant)
 const float Localisation::R_obj_theta = 0.0316f*0.0316f;        // (0.01 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
+const float Localisation::R_obj_range_relative = 0.15f*0.15f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float Localisation::sdTwoObjectAngle = (float) 0.0316; //Small! error in angle difference is normally very small
+const float Localisation::sdTwoObjectAngle = (float) 0.02; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {

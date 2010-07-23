@@ -125,13 +125,17 @@ public:
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 private:
-    vector<float>& getStartState()
+    vector<float> getStartState()
     {   // we are only ever going to go back and forth between two states.
         // you want to pick the one we are not at.
         if (m_current_start_state.size() == 0)
             return m_parent->m_points.front();
         else if (mathGeneral::allEqual(m_current_start_state, m_parent->m_points.front()))
-            return m_parent->m_points.back();
+        {
+            vector<float> back = m_parent->m_points.back();
+            back[2] += 3.1416;       // need to add PI to the heading when going backwards
+            return back;
+        }
         else
             return m_parent->m_points.front();
     }

@@ -76,7 +76,11 @@ public:
             result[1] = bearing;
             // calculate the rotational speed
             if (distance < turningdistance)
+            {
+                if (fabs(heading) > 2.5)
+                    heading = fabs(heading);
                 result[2] = 0.8*heading;
+            }
             else
                 result[2] = 0.5*bearing;
             return result;
@@ -213,7 +217,7 @@ public:
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);
                 else
                     around_speed = heading_gain;
-                if (fabs(heading) > 2.0)
+                if (fabs(heading) > 2.5)
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);

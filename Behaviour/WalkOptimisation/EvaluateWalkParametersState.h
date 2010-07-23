@@ -122,11 +122,11 @@ public:
         if (pointReached())
             m_current_target_state = getNextPoint();
         
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 0);
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 private:
-    vector<float>& getStartPoint()
+    vector<float> getStartPoint()
     {
         vector<vector<float> >& points = m_parent->m_points;
         float distance_from_first = m_field_objects->self.CalculateDifferenceFromFieldState(points.front())[0];
@@ -144,7 +144,14 @@ private:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 0
             debug << "EvaluateWalkParametersState. Start point " << MotionFileTools::fromVector(points[m_current_point_index]) << endl;
         #endif
-        return points[m_current_point_index];
+        if (not m_reverse_points)
+            return points[m_current_point_index];
+        else
+        {
+            vector<float> point = points[m_current_point_index];
+            point[2] += 3.1416;         // need to reverse the heading when going backwards
+            return point;
+        }
     }
     bool pointReached()
     {
@@ -154,7 +161,7 @@ private:
         else
             return false;
     }
-    vector<float>& getNextPoint()
+    vector<float> getNextPoint()
     {
         if (not m_reverse_points)
         {
@@ -169,7 +176,14 @@ private:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 0
             debug << "EvaluateWalkParametersState. Next point " << MotionFileTools::fromVector(m_parent->m_points[m_current_point_index]) << endl;
         #endif
-        return m_parent->m_points[m_current_point_index];
+        if (not m_reverse_points)
+            return m_parent->m_points[m_current_point_index];
+        else
+        {
+            vector<float> point = m_parent->m_points[m_current_point_index];
+            point[2] += 3.1416;         // need to reverse the heading when going backwards
+            return point;
+        }
     }
     bool allPointsReached()
     {

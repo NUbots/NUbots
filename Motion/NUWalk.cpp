@@ -309,8 +309,8 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
         rot_speed = sign(rot_speed)*maxspeeds[2];
     
     float rot_frac = fabs(rot_speed)/maxspeeds[2];
-    const float clip_threshold = 0.25;
-    const float min_trans = 0.25;
+    const float clip_threshold = 0.4;
+    const float min_trans = 0.4;
     if (rot_frac > clip_threshold)
     {   // if the rotation speed is high then clip the trans_speed
         trans_speed = trans_speed*(1 + ((min_trans - 1)/(1 - clip_threshold))*(rot_frac - clip_threshold));
