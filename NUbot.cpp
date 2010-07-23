@@ -108,6 +108,9 @@ NUbot::NUbot(int argc, const char *argv[])
         debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
     #endif
     
+    // --------------------------------- construct the public storage
+    m_blackboard = new NUBlackboard();
+    
     // --------------------------------- construct the platform
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
@@ -116,9 +119,6 @@ NUbot::NUbot(int argc, const char *argv[])
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
     #endif
-    
-    // --------------------------------- construct the public storage
-    m_blackboard = new NUBlackboard();
 
     // --------------------------------- construct the io
     #if defined(TARGET_IS_NAOWEBOTS)

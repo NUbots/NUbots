@@ -19,7 +19,6 @@
 */
 
 #include "sensor_t.h"
-#include "NUPlatform/NUSystem.h"
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
