@@ -61,7 +61,7 @@ void JobPort::setTargetAddress(std::string ipaddress)
  */
 void JobPort::setBroadcast()
 {
-    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;
+    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFFFF0000;
 }
 
 /*! @brief Send the jobs over the network

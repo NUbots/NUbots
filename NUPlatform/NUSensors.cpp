@@ -344,43 +344,53 @@ void NUSensors::calculateZMP()
 void NUSensors::calculateFallSense()
 {
     static const float Fallen = 1.0;
-    static const float RollFallenThreshold = 1.1;       // approx. 60 deg. The falling threshold will be approx 30 deg
-    static const float PitchFallenThreshold = 1.22;     // approx. 70 deg.
+    static const float Falling = 1.0;
+    static const float RollFallenThreshold = 1.1;  
+    static const float PitchFallenThreshold = 1.22;
+    static const float RollFallingThreshold = 0.55;
+    static const float ForwardFallingThreshold = 0.55;
+    static const float BackwardFallingThreshold = 0.45;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
-    // check if the robot has fallen over
     static vector<float> orientation(3,0);
     static vector<float> angularvelocity(3,0);
-    static vector<float> falling(5,0);
-    static vector<float> fallen(5,0);
-    
     m_data->getOrientation(orientation);
     m_data->getGyroFilteredValues(angularvelocity);
+    
+    // check if the robot has fallen over
+    vector<float> fallen(5,0);
     
     // check if fallen left
     if (orientation[0] < -RollFallenThreshold)
         fallen[1] = Fallen;
-    else
-        fallen[1] = 0.0;
+
     // check if fallen right
     if (orientation[0] > RollFallenThreshold)
         fallen[2] = Fallen;
-    else
-        fallen[2] = 0.0;
+
     // check if fallen forward
     if (orientation[1] > PitchFallenThreshold)
         fallen[3] = Fallen;
-    else
-        fallen[3] = 0.0;
+
     // check if fallen backward
     if (orientation[1] < -PitchFallenThreshold)
         fallen[4] = Fallen;
-    else
-        fallen[4] = 0.0;
+
     fallen[0] = fallen[1] + fallen[2] + fallen[3] + fallen[4];
     m_data->BalanceFallen->setData(m_current_time, fallen, true);
+    
     // check if the robot is falling over
+    vector<float> falling(5,0);
+    if (orientation[0] < -RollFallingThreshold)
+        falling[1] = Falling;
+    if (orientation[0] > RollFallingThreshold)
+        falling[2] = Falling;
+    if (orientation[1] > ForwardFallingThreshold)
+        falling[3] = Falling;
+    if (orientation[1] < -BackwardFallingThreshold)
+        falling[4] = Falling;
+    
     falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
     m_data->BalanceFalling->setData(m_current_time, falling, true);
 }
