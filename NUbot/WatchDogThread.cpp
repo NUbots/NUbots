@@ -25,7 +25,6 @@
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
-#include "NUPlatform/NUSystem.h"
 
 #ifdef USE_VISION
     #include "Vision/Vision.h"
@@ -65,13 +64,13 @@ WatchDogThread::~WatchDogThread()
 
 void WatchDogThread::periodicFunction()
 {
-    System->displayBatteryState(Blackboard->Sensors, Blackboard->Actions);
+    //System->displayBatteryState(Blackboard->Sensors, Blackboard->Actions);
     #ifdef USE_VISION
         int framesdropped = m_nubot->m_vision->getNumFramesDropped();
         int framesprocessed = m_nubot->m_vision->getNumFramesProcessed();
         if (framesprocessed < 29 || framesdropped > 9)
         {
-            System->displayVisionFrameDrop(Blackboard->Actions);
+            //System->displayVisionFrameDrop(Blackboard->Actions);
             debug << "WatchDogThread: Vision processed " << framesprocessed << " and 'dropped' " << framesdropped << endl;
         }
     #endif

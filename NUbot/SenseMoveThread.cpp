@@ -100,7 +100,7 @@ void SenseMoveThread::run()
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.start();
             #endif
-            m_nubot->m_platform->sensors->update();
+            m_nubot->m_platform->updateSensors();
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.split("sensors");
             #endif
@@ -110,7 +110,7 @@ void SenseMoveThread::run()
                     prof.split("motion");
                 #endif
             #endif
-            m_nubot->m_platform->actionators->process(Blackboard->Actions);
+            m_nubot->m_platform->processActions();
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.split("actionators");
                 debug << prof;

@@ -21,7 +21,6 @@
 
 #include "JuppWalk.h"
 
-#include "NUPlatform/NUSystem.h"
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -44,7 +43,7 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     initWalkParameters();
     
     m_leg_length = 20;          // The NAO has legs 20cm long
-    m_current_time = System->getTime();
+    m_current_time = 0;
     m_previous_time = m_current_time;
     
     m_gait_phase = 0;

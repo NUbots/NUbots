@@ -113,7 +113,7 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                Blackboard->Image = m_nubot->m_platform->camera->grabNewImage();
+                m_nubot->m_platform->updateImage();
                 *(m_nubot->m_io) << m_nubot;  //<! Raw IMAGE STREAMING (TCP)
             #endif
             
@@ -147,7 +147,7 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-                m_nubot->m_vision->process(Blackboard->Jobs, m_nubot->m_platform->camera, m_nubot->m_io) ; //<! Networking for Vision
+            //m_nubot->m_vision->process(Blackboard->Jobs, m_nubot->m_platform->camera, m_nubot->m_io) ; //<! Networking for Vision
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif

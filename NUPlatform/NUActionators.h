@@ -36,6 +36,7 @@ public:
     virtual ~NUActionators();
     
     void process(NUActionatorsData* data);
+    NUActionatorsData* getNUActionatorsData();
 protected:
     virtual void copyToHardwareCommunications() = 0;
     virtual void copyToSound();

@@ -1,6 +1,6 @@
 #include "OrientationUKF.h"
 #include "Tools/Math/General.h"
-#include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
 #include "nubotdataconfig.h"
 OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)

@@ -23,14 +23,22 @@
 #define NAOWEBOTSPLATFORM_H
 
 #include "NUPlatform/NUPlatform.h"
-#include "JWebots/JRobot.h"
+#include "NUPlatform/Platforms/Webots/JRobot.h"
 
-class NAOWebotsPlatform : public NUPlatform, public JRobot
+class NAOWebotsPlatform : public NUPlatform, public webots::JRobot
 {
 // Functions:
 public:
     NAOWebotsPlatform(int argc, const char *argv[]);
     ~NAOWebotsPlatform();
+protected:
+    void initName();
+    void initNumber();
+    void initTeam();
+    void initMAC();
+    
+    int m_argc;
+    const char** m_argv; 
 };
 
 #endif

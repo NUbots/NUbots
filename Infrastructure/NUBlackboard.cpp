@@ -29,40 +29,20 @@
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 
-#include "NUPlatform/NUSystem.h"
-#include "debug.h"
-
 NUBlackboard* Blackboard = 0;
 
 /*! @brief Construct the NUBlackboard --- the global data store. 
-    The NUSystem and NUPlatform need to be created before the NUBlackboard
 */
 NUBlackboard::NUBlackboard()
 {
     Blackboard = this;
-    Sensors = new NUSensorsData();
-    Actions = new NUActionatorsData();
-    Image = NULL;
-    Objects = new FieldObjects();
-    Jobs = new JobList();
-    GameInfo = new GameInformation(System->getRobotNumber(), System->getTeamNumber());
-    TeamInfo = new TeamInformation(System->getRobotNumber(), System->getTeamNumber());
-    
-    // create the locks protecting the objects, gameinfo and teaminfo pointers
-    // These objects are potentially behaviour dependent, and we can switch behaviours on the fly
-    // Thus, we need to provider a safe way for behaviour to swap the pointers to the behaviour specific ones
-    int err;
-    err = pthread_mutex_init(&m_objects_pointer_lock, NULL);
-    if (err != 0)
-        errorlog << "NUBlackboard::NUBlackboard() Failed to create m_objects_pointer_lock." << endl;
-    
-    err = pthread_mutex_init(&m_gameinfo_pointer_lock, NULL);
-    if (err != 0)
-        errorlog << "NUBlackboard::NUBlackboard() Failed to create m_game_info_pointer_lock." << endl;
-    
-    err = pthread_mutex_init(&m_teaminfo_pointer_lock, NULL);
-    if (err != 0)
-        errorlog << "NUBlackboard::NUBlackboard() Failed to create m_team_info_pointer_lock." << endl;
+    Sensors = 0;
+    Actions = 0;
+    Image = 0;
+    Objects = 0;
+    Jobs = 0;
+    GameInfo = 0;
+    TeamInfo = 0;
 }
 
 NUBlackboard::~NUBlackboard()
@@ -72,48 +52,85 @@ NUBlackboard::~NUBlackboard()
     delete Actions;
     Actions = 0;
     delete Image;
-    setObjects(0);      // thread-safe delete of Objects
+    Image = 0;
+    delete Objects;
+    Objects = 0;
     delete Jobs;
     Jobs = 0;
-    setGameInfo(0);     // thread-safe delete of GameInfo
-    setTeamInfo(0);     // thread-safe delete of TeamInfo
-}
-
-/*! @brief Sets the blackboard's Objects pointer to the given one 
-    
-    The Blackboard now owns objects and it should not be free'd.
-    @param objects a pointer to the new Objects container.
- */
-void NUBlackboard::setObjects(FieldObjects* objects)
-{
-    pthread_mutex_lock(&m_objects_pointer_lock);
-    delete Objects;
-    Objects = objects;
-    pthread_mutex_unlock(&m_objects_pointer_lock);
-}
-
-/*! @brief Sets the blackboard's GameInfo pointer to the given one 
- 
-    The Blackboard now owns gameinfo and it should not be free'd.
-    @param gameinfo a pointer to the new GameInfo container.
- */
-void NUBlackboard::setGameInfo(GameInformation* gameinfo)
-{
-    pthread_mutex_lock(&m_gameinfo_pointer_lock);
     delete GameInfo;
-    GameInfo = gameinfo;
-    pthread_mutex_unlock(&m_gameinfo_pointer_lock);
+    GameInfo = 0;
+    delete TeamInfo;
+    TeamInfo = 0;
 }
 
-/*! @brief Sets the blackboard's TeamInfo pointer to the given one 
- 
-    The Blackboard now owns teaminfo and it should not be free'd.
-    @param teaminfo a pointer to the new TeamInfo container.
+/*! @brief Adds a NUSensorsData object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param sensorsdata a pointer to the new sensors data
  */
-void NUBlackboard::setTeamInfo(TeamInformation* teaminfo)
+void NUBlackboard::add(NUSensorsData* sensorsdata)
 {
-    pthread_mutex_lock(&m_teaminfo_pointer_lock);
-    delete TeamInfo;
-    TeamInfo = teaminfo;
-    pthread_mutex_unlock(&m_teaminfo_pointer_lock);
+    NUSensorsData* oldsensors = Sensors;
+    Sensors = sensorsdata;
+    delete oldsensors;
 }
+
+/*! @brief Adds a NUActionatorsData object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param actionsdata a pointer to the new actions data
+ */
+void NUBlackboard::add(NUActionatorsData* actionsdata)
+{
+    NUActionatorsData* oldactions = Actions;
+    Actions = actionsdata;
+    delete oldactions;
+}
+
+/*! @brief Adds a NUImage object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param image a pointer to the new image
+ */
+void NUBlackboard::add(NUImage* image)
+{
+    NUImage* oldimage = Image;
+    Image = image;
+    delete oldimage;
+}
+
+/*! @brief Adds a FieldObjects object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param objects a pointer to the new field objects
+ */
+void NUBlackboard::add(FieldObjects* objects)
+{
+    FieldObjects* oldobjects = Objects;
+    Objects = objects;
+    delete oldobjects;
+}
+
+/*! @brief Adds a JobList object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param joblist a pointer to the new job list
+ */
+void NUBlackboard::add(JobList* joblist)
+{
+    JobList* oldjobs = Jobs;
+    Jobs = joblist;
+    delete oldjobs;
+}
+
+/*! @brief Adds a GameInformation object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param gameinfo a pointer to the new game information object
+ */
+void NUBlackboard::add(GameInformation* gameinfo)
+{
+    GameInformation* oldgame = GameInfo;
+    GameInfo = gameinfo;
+    delete oldgame;
+}
+
+/*! @brief Adds a TeamInformation object to the blackboard. Note that ownership of the object is now with the Blackboard. 
+    @param teaminfo a pointer to the new team information data
+ */
+void NUBlackboard::add(TeamInformation* teaminfo)
+{
+    TeamInformation* oldteam = TeamInfo;
+    TeamInfo = teaminfo;
+    delete oldteam;
+}
+
+

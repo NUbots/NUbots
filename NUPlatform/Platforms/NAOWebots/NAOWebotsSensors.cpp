@@ -21,8 +21,10 @@
 
 #include "NAOWebotsSensors.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+
 #include "debug.h"
 #include "debugverbositynusensors.h"
+using namespace webots;
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 

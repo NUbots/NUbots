@@ -48,6 +48,7 @@ public:
     virtual ~NUSensors();
     
     void update();
+    NUSensorsData* getNUSensorsData();
     
 protected:
     virtual void copyFromHardwareCommunications();

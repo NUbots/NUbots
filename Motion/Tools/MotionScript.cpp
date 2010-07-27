@@ -24,7 +24,6 @@
 #include "MotionCurves.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
-#include "NUPlatform/NUSystem.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"

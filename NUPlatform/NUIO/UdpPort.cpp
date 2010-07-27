@@ -20,11 +20,10 @@
  */
 
 #include "UdpPort.h"
-#include "NUPlatform/NUSystem.h"
-#include "debug.h"
-#include "debugverbositynetwork.h"
 
 #include "targetconfig.h"
+#include "debug.h"
+#include "debugverbositynetwork.h"
 
 #ifndef WIN32
     #include <sys/ioctl.h>
@@ -133,8 +132,6 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     // Bind the socket to this address
     if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
         errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << endl;
-
-    m_time_last_receive = 0;
     
     pthread_mutex_init(&m_socket_mutex, NULL);
     
@@ -174,7 +171,6 @@ void UdpPort::run()
             #if DEBUG_NETWORK_VERBOSITY > 0
                 debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            m_time_last_receive = System->getTime();
             stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
             handleNewData(buffer);

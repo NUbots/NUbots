@@ -20,11 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS  Webots
 )
 ####################################################################################
 
@@ -37,7 +37,7 @@ FOREACH(loop_var ${YOUR_SRCS})
 ENDFOREACH(loop_var ${YOUR_SRCS})
 
 # Do the same thing for each subdirectory in TWO steps
-SET(YOUR_CMAKE_FILES )				
+SET(YOUR_CMAKE_FILES )
 FOREACH(loop_var ${YOUR_DIRS}) 
     LIST(APPEND YOUR_CMAKE_FILES "${THIS_SRC_DIR}/${loop_var}/cmake/sources.cmake")
 ENDFOREACH(loop_var ${YOUR_DIRS})

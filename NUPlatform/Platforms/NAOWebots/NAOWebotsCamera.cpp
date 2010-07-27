@@ -22,11 +22,11 @@
 #include "NAOWebotsCamera.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 #include "Infrastructure/NUImage/Pixel.h"
+#include "NUPlatform/NUPlatform.h"
+
 #include "debug.h"
 #include "debugverbositynucamera.h"
-#include "NUPlatform/NUSystem.h"
 
-#include "webots/Robot.hpp"
 using namespace webots;
 
 /*! @brief Constructs a webots camera
@@ -90,7 +90,7 @@ NUImage* NAOWebotsCamera::grabNewImage()
     }
     
     m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have NUImage use m_yuyv_buffer
-    m_image->m_timestamp = System->getTime();
+    m_image->m_timestamp = Platform->getTime();
     return m_image;
 }
 

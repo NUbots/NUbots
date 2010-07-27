@@ -29,12 +29,11 @@
 #include "targetconfig.h"
 #include "nubotconfig.h"
 
-class NUPlatform;
 class NUBlackboard;
+class NUPlatform;
 class NUIO;
 
 #ifdef USE_VISION
-    class NUImage;
     class Vision;
 #endif
 
@@ -71,16 +70,25 @@ public:
 #endif
     
 private:
-    void connectErrorHandling();
+    void createErrorHandling();
+    void createPlatform(int argc, const char *argv[]);
+    void destroyPlatform();
+    void createBlackboard();
+    void destroyBlackboard();
+    void createNetwork();
+    void destroyNetwork();
+    void createModules();
+    void destroyModules();
+    void createThreads();
+    void destroyThreads();
+    
+    void periodicSleep(int period);
     static void terminationHandler(int signum);
     void unhandledExceptionHandler(std::exception& e);
-    
-    void createThreads();
-    void periodicSleep(int period);
 private:
     static NUbot* m_this;                 //!< a pointer to the last instance of a NUbot
     NUPlatform* m_platform;               //!< interface to robot platform
-    NUBlackboard* m_blackboard;
+    NUBlackboard* m_blackboard;           //!< a pointer to the public store
     #ifdef USE_VISION
         Vision* m_vision;                 //!< vision module
     #endif

@@ -33,23 +33,18 @@
  */
 NAOPlatform::NAOPlatform()
 {
-#if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "NAOPlatform::NAOPlatform()" << endl;
-#endif
-    system = new NAOSystem();                 // the system needs to be created first because it provides times for the other modules! 
-    camera = new NAOCamera();
-    sensors = new NAOSensors();
-    actionators = new NAOActionators();
-	
-#if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "NAOPlatform::NAOPlatform(). Completed." << endl;
-#endif
+    #if DEBUG_NUPLATFORM_VERBOSITY > 1
+        debug << "NAOPlatform::NAOPlatform()" << endl;
+    #endif
+    m_camera = new NAOCamera();
+    m_sensors = new NAOSensors();
+    m_actionators = new NAOActionators();
 }
 
 NAOPlatform::~NAOPlatform()
 {
-#if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "NAOPlatform::~NAOPlatform()" << endl;
-#endif
+    #if DEBUG_NUPLATFORM_VERBOSITY > 0
+        debug << "NAOPlatform::~NAOPlatform()" << endl;
+    #endif
 }
 

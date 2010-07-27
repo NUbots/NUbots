@@ -11,6 +11,8 @@
                 - GameInfo; which contains all of the information about the state of the 'game'
                 - TeamInfo; which contains all of the information about the team mates' state
  
+    @note Adding a new type of object to the Blackboard is considered a major change, and should be avoided.
+ 
     @author Jason Kulk
  
   Copyright (c) 2010 Jason Kulk
@@ -39,8 +41,7 @@ class FieldObjects;
 class JobList;
 class GameInformation;
 class TeamInformation;
-
-#include <pthread.h>
+class NUPlatform;
 
 class NUBlackboard
 {
@@ -48,10 +49,15 @@ public:
     NUBlackboard();
     ~NUBlackboard();
     
-    void setObjects(FieldObjects* objects);
-    void setGameInfo(GameInformation* gameinfo);
-    void setTeamInfo(TeamInformation* teaminfo);
+    void add(NUSensorsData* sensorsdata);
+    void add(NUActionatorsData* actionsdata);
+    void add(NUImage* image);
+    void add(FieldObjects* objects);
+    void add(JobList* joblist);
+    void add(GameInformation* gameinfo);
+    void add(TeamInformation* teaminfo);
     
+public:
     NUSensorsData* Sensors;
     NUActionatorsData* Actions;
     NUImage* Image;
@@ -59,10 +65,6 @@ public:
     JobList* Jobs;
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;
-private:
-    pthread_mutex_t m_objects_pointer_lock;
-    pthread_mutex_t m_gameinfo_pointer_lock;
-    pthread_mutex_t m_teaminfo_pointer_lock;
 };
 
 extern NUBlackboard* Blackboard;

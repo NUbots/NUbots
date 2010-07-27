@@ -21,18 +21,18 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors.h"
 
-#include "NUSensors.h"
-#include "NUSystem.h"
 #include "../Kinematics/Horizon.h"
 #include "Kinematics/Kinematics.h"
 #include "Kinematics/OrientationUKF.h"
 #include "Tools/Math/General.h"
+#include "Motion/Tools/MotionFileTools.h"
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
 #include "nubotdataconfig.h"
-#include "Motion/Tools/MotionFileTools.h"
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
@@ -47,9 +47,9 @@ NUSensors::NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::NUSensors" << endl;
 #endif
-    m_current_time = System->getTime();
+    m_current_time = Platform->getTime();
     m_previous_time = 0;
-    m_data = Blackboard->Sensors;
+    m_data = new NUSensorsData();
 	m_kinematicModel = new Kinematics();
 	m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
@@ -76,8 +76,8 @@ NUSensors::~NUSensors()
 #endif
 	delete m_kinematicModel;
 	m_kinematicModel = 0;
-        delete m_orientationFilter;
-        m_orientationFilter = 0;
+    delete m_orientationFilter;
+    m_orientationFilter = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -88,8 +88,7 @@ void NUSensors::update()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
-    m_data = Blackboard->Sensors;
-    m_current_time = System->getTime();
+    m_current_time = Platform->getTime();
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
     
@@ -106,6 +105,12 @@ void NUSensors::update()
     m_data->summaryTo(debug);
 #endif
     m_previous_time = m_current_time;
+}
+
+/*! @brief Returns a pointer to the NUSensorsData object used to store sensor values */
+NUSensorsData* NUSensors::getNUSensorsData()
+{
+    return m_data;
 }
 
 /*! @brief The lower level function which gets the sensor data from the hardware itself. 

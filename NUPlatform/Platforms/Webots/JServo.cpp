@@ -25,7 +25,9 @@
 #include <math.h>
 #include <string>
 
-JServo::JServo(const std::string &name) : Servo(name)
+using namespace webots;
+
+JServo::JServo(const std::string &name) : webots::Servo(name)
 {
     m_target_acceleration = -1;         // according to webots documentation -1 is default
     m_target_velocity = 10;

@@ -27,7 +27,6 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
-#include "NUPlatform/NUSystem.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>

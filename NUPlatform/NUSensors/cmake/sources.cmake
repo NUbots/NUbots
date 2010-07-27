@@ -23,6 +23,10 @@ ENDIF()
 SET (YOUR_SRCS  
 )
 ####################################################################################
+########## List your subdirectories here! ##########################################
+SET (YOUR_DIRS
+)
+####################################################################################
 
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})

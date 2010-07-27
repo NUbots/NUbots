@@ -42,7 +42,7 @@ public:
     NUImage* grabNewImage();
     void setSettings(const CameraSettings& newset);
 private:
-    Camera* m_camera;
+    webots::Camera* m_camera;
     int m_width, m_height, m_totalpixels;
     
     NUImage* m_image;

@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
  */
 
 #include "NUActionators.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
-#include "infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUActionators/NUSoundThread.h"
-#include "NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
@@ -33,6 +33,7 @@ NUActionators::NUActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::NUActionators" << endl;
 #endif
+    m_data = new NUActionatorsData();
     m_sound_thread = new NUSoundThread();
 }
 
@@ -41,8 +42,8 @@ NUActionators::~NUActionators()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::~NUActionators" << endl;
 #endif
-    if (m_sound_thread != NULL)
-        delete m_sound_thread;
+    delete m_sound_thread;
+    m_sound_thread = 0;
 }
 
 /*! @brief Processes the NUActionatorsData and sends the actions to the hardware
@@ -54,11 +55,16 @@ void NUActionators::process(NUActionatorsData* data)
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NUActionators::process" << endl;
 #endif
-    m_data = Blackboard->Actions;
-    m_current_time = System->getTime();
+    m_current_time = Platform->getTime();
     m_data->preProcess();
     copyToHardwareCommunications();
     m_data->postProcess(m_current_time);
+}
+
+/*! @brief Returns a pointer to the NUActionatorsData object used to store actions for the hardware */
+NUActionatorsData* NUActionators::getNUActionatorsData()
+{
+    return m_data;
 }
 
 /*! @brief Copies the sound actions to the sound player

@@ -4,7 +4,6 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUIO/GameControllerPort.h"
-#include "NUPlatform/NUSystem.h"
 
 #include <memory.h>
 #include "debug.h"
@@ -295,7 +294,7 @@ void GameInformation::process(RoboCupGameControlData* data)
                 m_last_packet_time = m_data->CurrentTime;
             memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
             doGameControllerUpdate();
-            System->displayGamePacketReceived(m_actions);
+            //System->displayGamePacketReceived(m_actions);
         }
     }
 }

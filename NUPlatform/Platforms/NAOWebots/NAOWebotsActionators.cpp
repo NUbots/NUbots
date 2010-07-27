@@ -238,7 +238,7 @@ void NAOWebotsActionators::copyToTeleporter()
             static char teamblue[] = "BLUE";
             static int id;             // webots id = id - 1
             // get the player id
-            id = m_platform->getPlayerNumber();
+            id = m_platform->getRobotNumber();
             id--;
             
             // get the player's colour

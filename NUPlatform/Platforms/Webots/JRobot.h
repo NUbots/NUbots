@@ -1,7 +1,11 @@
-/*! @file JRobot.cpp
-    @brief Implementation of JRobot class
+/*! @file JRobot.h
+    @brief Declaration of a JRobot (A slightly extended version of Webots' Robot) class
     @author Jason Kulk
  
+    @class actionator_t
+    @brief A JRobot (A slightly extended version of Webots' Robot) class
+ 
+    @author Jason Kulk
  
   Copyright (c) 2009 Jason Kulk
  
@@ -19,19 +23,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "JRobot.h"
-#include "debug.h"
+#ifndef JROBOT_H
+#define JROBOT_H
 
-JRobot::JRobot() : Robot()
+#include "JServo.h"
+#include <webots/Robot.hpp>
+
+namespace webots
 {
+    class JRobot : public Robot 
+    {
+    public:
+        JRobot();
+        virtual ~JRobot();
+    protected:
+        virtual Servo *createServo(const std::string &name) const;
+        
+    };
 }
 
-JRobot::~JRobot()
-{
-}
+#endif
 
-Servo* JRobot::createServo(const std::string &name) const
-{
-    Servo* servo = new JServo(name);
-    return servo;
-}

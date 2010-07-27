@@ -20,7 +20,6 @@
  */
 
 #include "TcpPort.h"
-#include "NUPlatform/NUSystem.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "debug.h"
@@ -139,7 +138,6 @@ void TcpPort::run()
             #endif
 
             pthread_mutex_lock(&m_socket_mutex);
-            m_time_last_receive = System->getTime();
             memcpy(m_data, localdata, 10*1024);
             m_message_size = localnumBytes; 
             m_has_data = true;
