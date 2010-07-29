@@ -28,6 +28,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+#include "nubotdataconfig.h"
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
@@ -39,9 +40,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())
     {
-        m_points = MotionFileTools::toFloatMatrix(points_file);
+        m_speed_points = MotionFileTools::toFloatMatrix(points_file);
         #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-            debug << "WalkOptimisationProvider::m_points " << MotionFileTools::fromMatrix(m_points) << endl;
+            debug << "WalkOptimisationProvider::m_speed_points " << MotionFileTools::fromMatrix(m_speed_points) << endl;
+        #endif
+        m_stability_points = MotionFileTools::toFloatMatrix(points_file);
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "WalkOptimisationProvider::m_stability_points " << MotionFileTools::fromMatrix(m_stability_points) << endl;
         #endif
     }
     else

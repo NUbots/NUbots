@@ -79,7 +79,7 @@ public:
             {
                 if (fabs(heading) > 2.5)
                     heading = fabs(heading);
-                result[2] = 0.8*heading;
+                result[2] = 0.5*heading;
             }
             else
                 result[2] = 0.5*bearing;

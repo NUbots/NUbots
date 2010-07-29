@@ -22,7 +22,9 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  WalkOptimisationProvider.cpp WalkOptimisationProvider.h
                 WalkOptimisationState.h
-                EvaluateWalkParametersState.h
+                EvaluateWalkParametersState.cpp EvaluateWalkParametersState.h
+                EvaluateSpeedOfWalkParametersState.cpp EvaluateSpeedOfWalkParametersState.h
+                EvaluateStabilityOfWalkParametersState.cpp EvaluateStabilityOfWalkParametersState.h
                 GenerateWalkParametersState.h
                 PausedWalkOptimisationState.h
 )

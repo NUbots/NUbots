@@ -40,12 +40,13 @@ public:
 protected:
     BehaviourState* nextStateCommons();
 public:
-    BehaviourState* m_generate;             //!< the state in which the parameter generation is done, and preparations for its evaluation
-    BehaviourState* m_evaluate;             //!< the state in which the parameter evaluation is done
-    BehaviourState* m_paused;               //!< the optimisation process is paused in this state.
+    BehaviourState* m_generate;                 //!< the state in which the parameter generation is done, and preparations for its evaluation
+    BehaviourState* m_evaluate;                 //!< the state in which the parameter evaluation is done
+    BehaviourState* m_paused;                   //!< the optimisation process is paused in this state.
     
-    Optimiser* m_optimiser;                 //!< the optimiser itself
-    vector<vector<float> > m_points;        //!< the way points over which to optimise the walk
+    Optimiser* m_optimiser;                     //!< the optimiser itself
+    vector<vector<float> > m_speed_points;      //!< the way points over which to evaluate to speed and efficiency of the walk parameters
+    vector<vector<float> > m_stability_points;  //!< the way points over which to evaluate the stability of the walk parameters
 };
 
 
