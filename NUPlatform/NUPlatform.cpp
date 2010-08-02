@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <cstring>
+#include <iomanip>
 #include <memory>
 #ifdef TARGET_OS_IS_WINDOWS
     #include <windows.h>
@@ -58,13 +59,11 @@ NUPlatform::NUPlatform()
         debug << "NUPlatform::NUPlatform()" << endl;
     #endif
     Platform = this;
-    initClock();
-    initIdentity();
 }
 
 NUPlatform::~NUPlatform()
 {
-    #if DEBUG_NUPLATFORM_VERBOSITY > 4
+    #if DEBUG_NUPLATFORM_VERBOSITY > 0
         debug << "NUPlatform::~NUPlatform()" << endl;
     #endif
     delete m_camera;
@@ -73,6 +72,17 @@ NUPlatform::~NUPlatform()
     m_sensors = 0;
     delete m_actionators;
     m_actionators = 0;
+}
+
+/*! @brief Initialises the NUPlatform's members 
+    @note Every derived class must call this function inside its constructor. 
+          This is necessary to properly call derived initName, initNumber, initTeam and initMAC
+ */
+void NUPlatform::init()
+{
+    initClock();
+    initIdentity();
+    debug << "NUPlatform Name: " << m_name << " Number: " << m_robot_number << " Team: " << m_team_number << " MAC: " << m_mac_address << endl;
 }
 
 /*! @brief Initialises the NUPlatform's clock 

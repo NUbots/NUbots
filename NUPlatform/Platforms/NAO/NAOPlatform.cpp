@@ -36,6 +36,7 @@ NAOPlatform::NAOPlatform()
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
         debug << "NAOPlatform::NAOPlatform()" << endl;
     #endif
+    init();
     m_camera = new NAOCamera();
     m_sensors = new NAOSensors();
     m_actionators = new NAOActionators();

@@ -74,6 +74,7 @@ public:
     void kill();
 protected:
     NUPlatform();
+    void init();
     virtual void initName();
     virtual void initNumber();
     virtual void initTeam();

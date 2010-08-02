@@ -41,6 +41,7 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[]) : m_argc(argc
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
         debug << "NAOWebotsPlatform::NAOWebotsPlatform()" << endl;
     #endif
+    init();
     
     m_camera = new NAOWebotsCamera(this);
     m_sensors = new NAOWebotsSensors(this);
@@ -84,7 +85,7 @@ void NAOWebotsPlatform::initTeam()
 {
     // In webots the team number is a command line arguement.
     if (m_argc >= 3)
-        m_team_number = atoi(m_argv[2]) + 1;
+        m_team_number = atoi(m_argv[2]);
 }
 
 /*! @brief Intialise the NUPlatform's mac address 

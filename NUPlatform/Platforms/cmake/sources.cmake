@@ -24,8 +24,11 @@ SET (YOUR_SRCS
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Webots
+SET (YOUR_DIRS
 )
+IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
+    LIST(APPEND YOUR_DIRS Webots)
+ENDIF()
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
