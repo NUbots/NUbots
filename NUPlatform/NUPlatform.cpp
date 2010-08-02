@@ -19,6 +19,9 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "NUPlatform.h"
+#include "NUSensors.h"
+#include "NUActionators.h"
+#include "NUCamera.h"
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Motion/Tools/MotionFileTools.h"

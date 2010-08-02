@@ -32,7 +32,7 @@ class NUWalk;
 #include "Motion/NUMotionProvider.h"
 
 #include "Kinematics/Kinematics.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include <string>
 
 class FieldObjects;

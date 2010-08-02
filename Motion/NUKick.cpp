@@ -20,25 +20,18 @@
  */
 
 #include "NUKick.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "Behaviour/Jobs/MotionJobs/KickJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/MotionJobs/KickJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Motion/Tools/MotionCurves.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-
 
 #include "motionconfig.h"
 #include "debugverbositynumotion.h"
-
-#ifdef USE_WALK
-#include "Motion/NUWalk.h"
-#endif // USE_WALK
-
-#include "debug.h"
-#include "debugverbositynumotion.h"
-#include "Tools/Math/General.h"
 #include "Autoconfig/targetconfig.h"
+
+#include "Tools/Math/General.h"
 using namespace mathGeneral;
 
 //#if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -413,7 +406,7 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
 	
 	m_target_x = target[0];
 	m_target_y = target[1];
-	m_target_timestamp = nusystem->getTime();
+	m_target_timestamp = Platform->getTime();
 
         #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "void NUKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
@@ -870,8 +863,8 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
             rightJoints[0] = newHipPos;
             leftJoints[4] = -newHipPos;
             rightJoints[4] = -newHipPos;
-            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), leftJoints, vel, gain);
-            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), rightJoints, vel, gain);
+            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime(), leftJoints, vel, gain);
+            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime(), rightJoints, vel, gain);
         }
         else
         {

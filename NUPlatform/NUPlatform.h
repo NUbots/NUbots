@@ -26,9 +26,11 @@
 #ifndef NUPLATFORM_H
 #define NUPLATFORM_H
 
-#include "NUSensors.h"
-#include "NUActionators.h"
-#include "NUCamera.h"
+class NUSensors;
+class NUSensorsData;
+class NUActionators;
+class NUActionatorsData;
+class NUCamera;
 
 #include <ctime>
 #include <string>
