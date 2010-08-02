@@ -21,7 +21,9 @@
 
 #include "NAOSensors.h"
 #include "NAOSensorNames.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "NUNAO.h"
+
 #include "debug.h"
 #include "debugverbositynusensors.h"
 

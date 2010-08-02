@@ -21,8 +21,8 @@
 
 #include "NAOActionators.h"
 #include "NAOActionatorNames.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
@@ -141,7 +141,7 @@ void NAOActionators::getActionatorsFromAldebaran()
     debug << "NAOActionators::getActionatorsFromALDCM()" << endl;
 #endif
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
-    m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
+    m_al_time_offset = m_al_dcm->getTime(0) - Platform->getTime();       // so when talking to motors use time + m_al_time_offset
     
     // Create actionator aliases
     ALValue param;

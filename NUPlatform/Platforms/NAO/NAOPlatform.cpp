@@ -23,7 +23,6 @@
 #include "NAOCamera.h"
 #include "NAOSensors.h"
 #include "NAOActionators.h"
-#include "NAOSystem.h"
 #include "NAOIO.h"
 
 #include "debug.h"

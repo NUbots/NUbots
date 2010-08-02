@@ -21,8 +21,11 @@
 
 #include "ALWalk.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/Platforms/NAO/NUNAO.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
