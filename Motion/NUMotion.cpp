@@ -286,7 +286,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     else if (m_fall_protection->enabled() and m_data->isFalling())
     {
-        if (m_current_leg_provider != m_fall_protection)
+        if (m_current_leg_provider != m_getup and m_current_leg_provider != m_fall_protection)
             killActiveProviders();          // fast hard kill on active providers if falling
         
         m_next_head_provider = m_fall_protection;

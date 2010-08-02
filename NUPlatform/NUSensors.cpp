@@ -382,15 +382,17 @@ void NUSensors::calculateFallSense()
     
     // check if the robot is falling over
     vector<float> falling(5,0);
-    if (orientation[0] < -RollFallingThreshold)
-        falling[1] = Falling;
-    if (orientation[0] > RollFallingThreshold)
-        falling[2] = Falling;
-    if (orientation[1] > ForwardFallingThreshold)
-        falling[3] = Falling;
-    if (orientation[1] < -BackwardFallingThreshold)
-        falling[4] = Falling;
-    
+    if (not fallen[0])
+    {
+        if (orientation[0] < -RollFallingThreshold)
+            falling[1] = Falling;
+        if (orientation[0] > RollFallingThreshold)
+            falling[2] = Falling;
+        if (orientation[1] > ForwardFallingThreshold)
+            falling[3] = Falling;
+        if (orientation[1] < -BackwardFallingThreshold)
+            falling[4] = Falling;
+    }
     falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
     m_data->BalanceFalling->setData(m_current_time, falling, true);
 }
