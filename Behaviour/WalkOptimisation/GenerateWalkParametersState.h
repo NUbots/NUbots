@@ -99,7 +99,10 @@ private:
         
         vector<float> startpoint;
         if (difference_from_back[0] < difference_from_front[0])
+        {
             startpoint = back;
+            startpoint[2] += 3.14;
+        }
         else
             startpoint = front;
         

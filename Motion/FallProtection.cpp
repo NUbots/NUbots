@@ -165,6 +165,16 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
         m_actions->addJointPositions(NUActionatorsData::RightLegJoints, 0, sensor_rleg, velocity_rleg, 0);
         m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, 0, sensor_larm, velocity_larm, 0);
         m_actions->addJointPositions(NUActionatorsData::RightArmJoints, 0, sensor_rarm, velocity_rarm, 0);
+        
+        vector<float> head_position(2,0);
+        vector<float> head_velocity(2,0);
+        vector<float> falling;
+        m_data->getFalling(falling);
+        if (falling[3])         // forward
+            head_position[0] = -0.67;
+        else if (falling[4])    // backward
+            head_position[0] = 0.44;
+        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, head_position, head_velocity, 45);
     }
 }
 
