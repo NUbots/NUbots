@@ -2310,7 +2310,7 @@
             <Preference name="Error" value="0" type="int" />
             <Preference name="Offset" value="0" type="float" />
             <Preference name="Gain"  value="0.016" type="float" />
-            <Preference name="Max" value="1.15" type="float" />
+            <Preference name="Max" value="0.5" type="float" />
             <Preference name="Min" value="0" type="float" />
         </Preference>
         <Preference name="LHipYawPitch/Temperature/Sensor" type="array">
