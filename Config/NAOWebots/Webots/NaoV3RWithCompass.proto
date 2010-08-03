@@ -20,6 +20,7 @@ PROTO NaoV3RWithCompass [
   field SFString controller "void"
   field SFString controllerArgs ""
   field SFBool synchronization TRUE
+  field SFBool selfCollision FALSE
   field SFString name "nao"
   field SFFloat gpsResolution 0.0
   field SFFloat cameraFieldOfView 0.81
@@ -35,6 +36,7 @@ Robot {
   controller IS controller
   controllerArgs IS controllerArgs
   synchronization IS synchronization
+  selfCollision IS selfCollision
   name IS name
   children [
     DEF WAIST_BAND Transform {
@@ -2097,6 +2099,7 @@ Robot {
             density -1
             mass 0.477
             centerOfMass 0.00383 0.05156 0.00093
+            bounce 0.7
           }
           maxVelocity 7.19
           maxForce 2.61
@@ -2111,6 +2114,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.01
+        bounce 0.7
       }
       maxVelocity 8.27
       maxForce 2.27
@@ -3129,6 +3133,7 @@ Robot {
                     density -1
                     mass 0.11282
                     centerOfMass -0.06992 -0.00114 0.00096
+                    bounce 0.7
                   }
                   maxVelocity 7.19
                   maxForce 2.61
@@ -3142,6 +3147,7 @@ Robot {
               physics Physics {
                 density -1
                 mass 0.01
+                bounce 0.7
               }
               maxVelocity 8.27
               maxForce 2.27
@@ -3162,6 +3168,7 @@ Robot {
             density -1
             mass 0.18125
             centerOfMass -0.002 0 0.0595
+            bounce 0.7
           }
           maxVelocity 7.19
           maxForce 2.61
@@ -3175,6 +3182,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.01
+        bounce 0.7
       }
       maxVelocity 8.27
       maxForce 2.27
@@ -3983,6 +3991,7 @@ Robot {
                     density -1
                     mass 0.11282
                     centerOfMass -0.06992 -0.00114 0.00096
+                    bounce 0.7
                   }
                   maxVelocity 7.19
                   maxForce 2.61
@@ -3996,6 +4005,7 @@ Robot {
               physics Physics {
                 density -1
                 mass 0.01
+                bounce 0.7
               }
               maxVelocity 8.27
               maxForce 2.27
@@ -4014,6 +4024,7 @@ Robot {
             density -1
             mass 0.18125
             centerOfMass -0.002 0 0.0595
+            bounce 0.7
           }
           maxVelocity 7.19
           maxForce 2.61
@@ -4027,6 +4038,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.01
+        bounce 0.7
       }
       maxVelocity 8.27
       maxForce 2.27
@@ -5602,11 +5614,13 @@ Robot {
                           children [
                             DEF RFsrFL TouchSensor {
                               translation 0.023 -0.045 0.0701
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 DEF FSR_BO Shape {
-                                  geometry Sphere {
-                                    radius 0.005
+                                  geometry Cylinder {
+                                    height 0.0025
+                                    radius 0.012
+                                    subdivision 16
                                   }
                                 }
                               ]
@@ -5615,6 +5629,8 @@ Robot {
                               physics DEF FSR_PHYSICS Physics {
                                 density -1
                                 mass 0.005
+                                coulombFriction 0.5
+                                bounce 0.7
                               }
                               type "force"
                               lookupTable [
@@ -5624,7 +5640,7 @@ Robot {
                             }
                             DEF RFsrFR TouchSensor {
                               translation -0.03 -0.045 0.0701
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -5639,7 +5655,7 @@ Robot {
                             }
                             DEF RFsrBR TouchSensor {
                               translation -0.03 -0.045 -0.0304
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -5654,7 +5670,7 @@ Robot {
                             }
                             DEF RFsrBL TouchSensor {
                               translation 0.019 -0.045 -0.0298
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -6063,6 +6079,8 @@ Robot {
                             density -1
                             mass 0.16304
                             centerOfMass 0.02489 -0.03208 0.0033
+                            bounce 0.7
+                            coulombFriction 0.5
                           }
                           maxVelocity 4.16
                           maxForce 11.97
@@ -6098,6 +6116,7 @@ Robot {
                     density -1
                     mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
+                    bounce 0.7
                   }
                   maxVelocity 6.4
                   maxForce 7.78
@@ -6118,6 +6137,7 @@ Robot {
                 density -1
                 mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
+                bounce 0.7
               }
               maxVelocity 6.4
               maxForce 7.78
@@ -6132,6 +6152,7 @@ Robot {
           physics Physics {
             density -1
             mass 0.01
+            bounce 0.7
           }
           maxVelocity 4.16
           maxForce 11.97
@@ -6146,6 +6167,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.07244
+        bounce 0.7
       }
       maxVelocity 4.16
       maxForce 11.97
@@ -7340,7 +7362,7 @@ Robot {
                           children [
                             DEF LFsrFL TouchSensor {
                               translation 0.03 -0.045 0.0701
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7355,7 +7377,7 @@ Robot {
                             }
                             DEF LFsrFR TouchSensor {
                               translation -0.023 -0.045 0.0701
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7370,7 +7392,7 @@ Robot {
                             }
                             DEF LFsrBR TouchSensor {
                               translation -0.019 -0.045 -0.0298
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7385,7 +7407,7 @@ Robot {
                             }
                             DEF LFsrBL TouchSensor {
                               translation 0.03 -0.045 -0.0304
-                              rotation 1 0 0 1.57
+                              rotation 0 1 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7790,6 +7812,7 @@ Robot {
                             density -1
                             mass 0.16304
                             centerOfMass 0.02489 -0.03208 0.0033
+                            bounce 0.7
                           }
                           maxVelocity 4.16
                           maxForce 11.97
@@ -7804,6 +7827,7 @@ Robot {
                       physics Physics {
                         density -1
                         mass 0.01
+                        bounce 0.7
                       }
                       maxVelocity 6.4
                       maxForce 7.78
@@ -7825,6 +7849,7 @@ Robot {
                     density -1
                     mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
+                    bounce 0.7
                   }
                   maxVelocity 6.4
                   maxForce 7.78
@@ -7843,6 +7868,7 @@ Robot {
                 density -1
                 mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
+                bounce 0.7
               }
               maxVelocity 6.4
               maxForce 7.78
@@ -7857,6 +7883,7 @@ Robot {
           physics Physics {
             density -1
             mass 0.01
+            bounce 0.7
           }
           maxVelocity 4.16
           maxForce 11.97
@@ -7871,6 +7898,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.07244
+        bounce 0.7
       }
       maxVelocity 4.16
       maxForce 11.97
@@ -7905,6 +7933,7 @@ Robot {
     density -1
     mass 1.57565
     centerOfMass 0 0.046466 0
+    bounce 0.7
   }
 }
 }
