@@ -20,6 +20,8 @@
  */
 
 #include "NAOWebotsSensors.h"
+#include "Tools/Math/General.h"
+
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
@@ -90,7 +92,9 @@ void NAOWebotsSensors::getSensorsFromWebots()
     
     // Get the compass if avaliable
     if (Compass::exists("compass"))
+    {
         m_compass = m_platform->getCompass("compass");
+    }
     else
         m_compass = NULL;
 }
@@ -311,7 +315,7 @@ void NAOWebotsSensors::copyFromCompass()
         #endif
         
         buffer = m_compass->getValues();
-        compassdata[0] = atan2(buffer[0], buffer[1]);
+        compassdata[0] = mathGeneral::normaliseAngle(atan2(buffer[0], buffer[1]) - 1.5708);
         m_data->setCompassValues(m_current_time, compassdata);
     }
 }
