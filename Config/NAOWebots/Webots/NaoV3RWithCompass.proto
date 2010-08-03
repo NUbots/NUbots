@@ -913,6 +913,7 @@ Robot {
       resolution IS gpsResolution
     }
     DEF COMPASS Compass {
+      rotation 0.57735 0.57735 0.57735 -2.0944
       name "compass"
     }
     DEF RECEIVER Receiver {
@@ -2094,8 +2095,8 @@ Robot {
           }
           physics Physics {
             density -1
-            mass 0.391
-            centerOfMass 0 0.044399 -0.000247
+            mass 0.477
+            centerOfMass 0.00383 0.05156 0.00093
           }
           maxVelocity 7.19
           maxForce 2.61
@@ -3126,8 +3127,8 @@ Robot {
                   }
                   physics Physics {
                     density -1
-                    mass 0.077
-                    centerOfMass -0.002 0 0.07615
+                    mass 0.11282
+                    centerOfMass -0.06992 -0.00114 0.00096
                   }
                   maxVelocity 7.19
                   maxForce 2.61
@@ -3159,7 +3160,7 @@ Robot {
           }
           physics Physics {
             density -1
-            mass 0.153
+            mass 0.18125
             centerOfMass -0.002 0 0.0595
           }
           maxVelocity 7.19
@@ -3980,8 +3981,8 @@ Robot {
                   }
                   physics Physics {
                     density -1
-                    mass 0.077
-                    centerOfMass 0.002 0 0.07615
+                    mass 0.11282
+                    centerOfMass -0.06992 -0.00114 0.00096
                   }
                   maxVelocity 7.19
                   maxForce 2.61
@@ -4011,8 +4012,8 @@ Robot {
           }
           physics Physics {
             density -1
-            mass 0.153
-            centerOfMass 0.002 0 0.0595
+            mass 0.18125
+            centerOfMass -0.002 0 0.0595
           }
           maxVelocity 7.19
           maxForce 2.61
@@ -6060,8 +6061,8 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.128
-                            centerOfMass 0 -0.03 0.018015
+                            mass 0.16304
+                            centerOfMass 0.02489 -0.03208 0.0033
                           }
                           maxVelocity 4.16
                           maxForce 11.97
@@ -6095,7 +6096,7 @@ Robot {
                   }
                   physics Physics {
                     density -1
-                    mass 0.423
+                    mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
                   }
                   maxVelocity 6.4
@@ -6115,7 +6116,7 @@ Robot {
               }
               physics Physics {
                 density -1
-                mass 0.513
+                mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
               }
               maxVelocity 6.4
@@ -6144,7 +6145,7 @@ Robot {
       }
       physics Physics {
         density -1
-        mass 0.01
+        mass 0.07244
       }
       maxVelocity 4.16
       maxForce 11.97
@@ -7787,8 +7788,8 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.128
-                            centerOfMass 0 -0.03 0.018015
+                            mass 0.16304
+                            centerOfMass 0.02489 -0.03208 0.0033
                           }
                           maxVelocity 4.16
                           maxForce 11.97
@@ -7822,7 +7823,7 @@ Robot {
                   }
                   physics Physics {
                     density -1
-                    mass 0.423
+                    mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
                   }
                   maxVelocity 6.4
@@ -7840,7 +7841,7 @@ Robot {
               }
               physics Physics {
                 density -1
-                mass 0.513
+                mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
               }
               maxVelocity 6.4
@@ -7869,7 +7870,7 @@ Robot {
       }
       physics Physics {
         density -1
-        mass 0.01
+        mass 0.07244
       }
       maxVelocity 4.16
       maxForce 11.97
@@ -7902,8 +7903,8 @@ Robot {
   }
   physics Physics {
     density -1
-    mass 1.2171
-    centerOfMass 0 0.046466 -0.007829
+    mass 1.57565
+    centerOfMass 0 0.046466 0
   }
 }
 }
