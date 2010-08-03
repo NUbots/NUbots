@@ -128,10 +128,10 @@ void NUPlatform::initName()
 void NUPlatform::initNumber()
 {
     // By default the robot's number should be the last few characters of the name
-    int robot_number_start = 0;
+    int robot_number_start = m_name.size()-1;
     for (size_t i=m_name.size()-1; i>0; i--)
     {
-        if (isalpha(m_name[i]))
+        if (isalpha(m_name[i-1]))
         {   // find the last alphabet, everything after that is the robot number
             robot_number_start = i;
             break;
