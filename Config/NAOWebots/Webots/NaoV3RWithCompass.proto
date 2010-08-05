@@ -3133,6 +3133,7 @@ Robot {
                     density -1
                     mass 0.11282
                     centerOfMass -0.06992 -0.00114 0.00096
+                    coulombFriction 0.5
                     bounce 0.7
                   }
                   maxVelocity 7.19
@@ -3147,6 +3148,7 @@ Robot {
               physics Physics {
                 density -1
                 mass 0.01
+                coulombFriction 0.5
                 bounce 0.7
               }
               maxVelocity 8.27
@@ -3168,6 +3170,7 @@ Robot {
             density -1
             mass 0.18125
             centerOfMass -0.002 0 0.0595
+            coulombFriction 0.5
             bounce 0.7
           }
           maxVelocity 7.19
@@ -3182,6 +3185,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.01
+        coulombFriction 0.5
         bounce 0.7
       }
       maxVelocity 8.27
@@ -3991,6 +3995,7 @@ Robot {
                     density -1
                     mass 0.11282
                     centerOfMass -0.06992 -0.00114 0.00096
+                    coulombFriction 0.5
                     bounce 0.7
                   }
                   maxVelocity 7.19
@@ -4005,6 +4010,7 @@ Robot {
               physics Physics {
                 density -1
                 mass 0.01
+                coulombFriction 0.5
                 bounce 0.7
               }
               maxVelocity 8.27
@@ -4024,6 +4030,7 @@ Robot {
             density -1
             mass 0.18125
             centerOfMass -0.002 0 0.0595
+            coulombFriction 0.5
             bounce 0.7
           }
           maxVelocity 7.19
@@ -4038,6 +4045,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.01
+        coulombFriction 0.5
         bounce 0.7
       }
       maxVelocity 8.27
@@ -6116,6 +6124,7 @@ Robot {
                     density -1
                     mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
+                    coulombFriction 0.5
                     bounce 0.7
                   }
                   maxVelocity 6.4
@@ -6137,6 +6146,7 @@ Robot {
                 density -1
                 mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
+                coulombFriction 0.5
                 bounce 0.7
               }
               maxVelocity 6.4
@@ -6152,6 +6162,7 @@ Robot {
           physics Physics {
             density -1
             mass 0.01
+            coulombFriction 0.5
             bounce 0.7
           }
           maxVelocity 4.16
@@ -6167,6 +6178,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.07244
+        coulombFriction 0.5
         bounce 0.7
       }
       maxVelocity 4.16
@@ -7812,6 +7824,7 @@ Robot {
                             density -1
                             mass 0.16304
                             centerOfMass 0.02489 -0.03208 0.0033
+                            coulombFriction 0.5
                             bounce 0.7
                           }
                           maxVelocity 4.16
@@ -7827,6 +7840,7 @@ Robot {
                       physics Physics {
                         density -1
                         mass 0.01
+                        coulombFriction 0.5
                         bounce 0.7
                       }
                       maxVelocity 6.4
@@ -7849,6 +7863,7 @@ Robot {
                     density -1
                     mass 0.43598
                     centerOfMass 0 -0.0691 -0.000511
+                    coulombFriction 0.5
                     bounce 0.7
                   }
                   maxVelocity 6.4
@@ -7868,6 +7883,7 @@ Robot {
                 density -1
                 mass 0.53328
                 centerOfMass 0 -0.038 -0.005579
+                coulombFriction 0.5
                 bounce 0.7
               }
               maxVelocity 6.4
@@ -7898,6 +7914,7 @@ Robot {
       physics Physics {
         density -1
         mass 0.07244
+        coulombFriction 0.5
         bounce 0.7
       }
       maxVelocity 4.16
@@ -7933,6 +7950,7 @@ Robot {
     density -1
     mass 1.57565
     centerOfMass 0 0.046466 0
+    coulombFriction 0.5
     bounce 0.7
   }
 }
