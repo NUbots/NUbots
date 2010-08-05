@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include "nubotdataconfig.h"
+#include "nubotconfig.h"
 
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
@@ -112,17 +113,15 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
         odomTurn = odo[2];
     }
     
-    vector<float> gps;
-    if (m_sensor_data->getGPSValues(gps))
-    {   // have GPS use it to check localisation performance
-        // x = gps[0]; y = gps[1]; z = gps[2];
+    vector<float> gps, compass;
+    if (m_sensor_data->getGPSValues(gps) and m_sensor_data->getCompassValues(compass))
+    {   
+        #ifndef USE_VISION
+            m_objects->self.updateLocationOfSelf(gps[0], gps[1], compass[0], 0.1, 0.1, 0.01, false);
+            return;
+        #endif
     }
-    
-    vector<float> compass;
-    if (m_sensor_data->getCompassValues(compass))
-    {   // have Compass use it to check localisation performance
-        // heading = compass[0];
-    }
+
     // perform odometry update and change the variance of the model
     doTimeUpdate((-odomForward), odomLeft, odomTurn);
     ProcessObjects();

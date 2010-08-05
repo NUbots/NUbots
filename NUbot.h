@@ -33,7 +33,6 @@ class NUPlatform;
 class NUIO;
 
 #ifdef USE_VISION
-    class NUimage;
     class Vision;
 #endif
 
@@ -55,6 +54,7 @@ class FieldObjects;
 class JobList;
 class GameInformation;
 class TeamInformation;
+class NUimage;
 
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     class SeeThinkThread;
@@ -85,9 +85,7 @@ private:
     void periodicSleep(int period);
     
 public:
-    #ifdef USE_VISION
-        NUimage* Image;
-    #endif
+    NUimage* Image;
     NUSensorsData* SensorData;
     NUActionatorsData* Actions;
     FieldObjects* Objects;

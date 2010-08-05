@@ -31,13 +31,13 @@
 #include "Vision/FieldObjects/FieldObjects.h"
 #include "Behaviour/GameInformation.h"
 #include "Behaviour/TeamInformation.h"
+#include "Tools/Image/NUimage.h"
 
 #include "debugverbositynubot.h"
 #include "debug.h"
 
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
-    #include "Tools/Image/NUimage.h"
     #include "Vision/Vision.h"
 #endif
 
@@ -117,9 +117,7 @@ NUbot::NUbot(int argc, const char *argv[])
     #endif
     
     // --------------------------------- construct the public storage
-    #ifdef USE_VISION
-        Image = NULL;
-    #endif
+    Image = NULL;
     SensorData = m_platform->sensors->getData();
     Actions = m_platform->actionators->getActions();
     Objects = new FieldObjects();
@@ -270,10 +268,8 @@ NUbot::~NUbot()
         debug << "NUbot::~NUbot(). Deleting Public Storage" << endl;
     #endif
     
-    #ifdef USE_VISION
-        if (Image != NULL)
-            delete Image;
-    #endif
+    if (Image != NULL)
+        delete Image;
     if (SensorData != NULL)
         delete SensorData;
     if (Actions != NULL)

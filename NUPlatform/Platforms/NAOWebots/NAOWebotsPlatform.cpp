@@ -25,8 +25,10 @@
 #include "NAOWebotsActionators.h"
 #include "NAOWebotsSystem.h"
 #include "NAOWebotsIO.h"
+
 #include "debug.h"
 #include "debugverbositynuplatform.h"
+#include "nubotconfig.h"
 
 #include <string.h>
 #include <iostream>
@@ -64,7 +66,11 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
     m_name = ss.str();
     
     system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
-    camera = new NAOWebotsCamera(this);
+    #ifdef USE_VISION
+        camera = new NAOWebotsCamera(this);
+    #else
+        camera = 0;
+    #endif
     sensors = new NAOWebotsSensors(this);
     actionators = new NAOWebotsActionators(this);
 }

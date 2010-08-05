@@ -29,6 +29,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 #include "nubotdataconfig.h"
+#include "targetconfig.h"
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
@@ -73,15 +74,22 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
     while (m_game_info->getCurrentState() != GameInformation::PlayingState)
         m_game_info->doManualStateChange();
     
-    if (singleChestClick() or longChestClick())
-    {
+    #ifndef TARGET_IS_NAOWEBOTS    
+        if (singleChestClick() or longChestClick())
+        {
+            if (m_state == m_paused)
+                return m_generate;
+            else
+                return m_paused;
+        }
+        else
+            return m_state;
+    #else
         if (m_state == m_paused)
             return m_generate;
         else
-            return m_paused;
-    }
-    else
-        return m_state;
+            return m_state;
+    #endif
 }
 
 
