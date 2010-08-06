@@ -58,9 +58,9 @@ private:
     // Actionators
     static vector<string> m_servo_control_names;    //!< the names of the available joint control methods (usually position and/or torque)
     static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
-    vector<webots::Servo*> m_servos;                        //!< the actual webots::Servo pointers.
+    vector<webots::Servo*> m_servos;                //!< the actual webots::Servo pointers.
     static vector<string> m_led_names;              //!< the names of the leds available in webots
-    vector<webots::LED*> m_leds;                            //!< the actual webots::LED pointers
+    vector<webots::LED*> m_leds;                    //!< the actual webots::LED pointers
     static vector<string> m_other_names;            //!< the names of other available actionators in webots
     webots::Emitter* m_teleporter;
 };

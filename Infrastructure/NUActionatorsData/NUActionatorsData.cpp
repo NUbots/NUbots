@@ -20,37 +20,10 @@
  */
 
 #include "NUActionatorsData.h"
-#include "actionator_t.h"
+#include "Actionator.h"
+
 #include "debug.h"
 #include "debugverbositynuactionators.h"
-
-NUActionatorsData::joint_id_t NUActionatorsData::HeadPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::HeadYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RShoulderRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RShoulderPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RElbowRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RElbowYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::TorsoYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::LAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYawPitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RHipYaw = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RKneePitch = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RAnkleRoll = NUActionatorsData::ACTIONATOR_MISSING;
-NUActionatorsData::joint_id_t NUActionatorsData::RAnklePitch = NUActionatorsData::ACTIONATOR_MISSING;
 
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
@@ -87,25 +60,6 @@ NUActionatorsData::~NUActionatorsData()
 /******************************************************************************************************************************************
  Initialisation and Availability Setting Methods
  ******************************************************************************************************************************************/
-
-/*! @brief Sets the available joint control methods, that is whether the joints can be position, torque or both controlled.
- @param methodnames a vector of strings where each string names a method
- */
-void NUActionatorsData::setAvailableJointControlMethods(const vector<string>& methodnames)
-{
-    vector<string> simplemethodnames;
-    simplifyNames(methodnames, simplemethodnames);
-    
-    for (unsigned int i=0; i<simplemethodnames.size(); i++)
-    {
-        if (simplemethodnames[i].find("position") != string::npos)
-            m_positionactionation = true;
-        else if (simplemethodnames[i].find("torque") != string::npos)
-            m_torqueactionation = true;
-        else
-            debug << "NUActionatorsData::setAvailableJointControlMethods. You have specified an unrecognised joint control method: " << methodnames[i] << endl;
-    }
-}
 
 
 /*! @brief Adds the joint actionators and sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
@@ -486,9 +440,9 @@ void NUActionatorsData::postProcess(double currenttime)
 {
     CurrentTime = currenttime;
     for (unsigned int i=0; i<m_all_actionators.size(); i++)
-        m_all_actionators[i]->removeCompletedPoints(currenttime);
+        m_all_actionators[i]->postProcess(currenttime);
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
-        m_all_string_actionators[i]->removeCompletedPoints(currenttime);
+        m_all_string_actionators[i]->postProcess(currenttime);
 }
 
 /*! @brief Returns the number of joints in the specified body part
@@ -790,720 +744,205 @@ bool NUActionatorsData::getNextTeleportation(bool& isvalid, double& time, vector
  Set Methods
  ******************************************************************************************************************************************/
 
-/*! @brief Adds a single joint position control point
-    @param jointid the id of the joint you want to control
-    @param time the time at which you want the joint to reach its target (in milliseconds)
-    @param position the target position (in radians)
-    @param velocity the target velocity (in rad/s)
-    @param gain the target gain (in Percent)
+// ------------------------------------------------------------------------------------------- Single time functions
+/* A single time and a single data.
+    for each actionator in actionator id 
+        add [time,data] to actionator
  */
-bool NUActionatorsData::addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
-    else 
-    {
-        vector<float> data (3, 0);
-        data[0] = position;
-        data[1] = velocity;
-        data[2] = gain;
-        PositionActionators[jointid]->addPoint(time, data);
-        return true;
-    }
-}
+void add(actionator_id_t actionatorid, double time, float data);
 
-/*! @brief Adds a position/velocity curve for a single joint
-    @param jointid the id of the joint you want to control
-    @param times the times for each of the points in the specified motion curve (in milliseconds)
-    @param positions the target positions (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gain the target gain used for the entire curve (in Percent)
+/* A single time and a single data.
+    for each actionator in actionator id 
+        add [time,[data,gain]] to actionator
  */
-bool NUActionatorsData::addJointPositions(joint_id_t jointid, const vector<double>& times, const vector<float>& positions, const vector<float>& velocities, float gain)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
-    else
-    {
-        unsigned int timelength = times.size();
-        unsigned int positionlength = positions.size();
-        unsigned int velocitylength = velocities.size();
-        
-        if (positionlength < timelength || velocitylength < timelength)
-            return false;
+void add(actionator_id_t actionatorid, double time, float data, float gain);
+
+/* A single time, and a vector of data 
+    if actionatorid is a group
+        if data.size matches group.size
+            add(actionatorid[i], time, data[i])
         else
-        {
-            for (unsigned int i=0; i<timelength; i++)
-                addJointPosition(jointid, times[i], positions[i], velocities[i], gain);
-        }
-    }
-    return true;
-}
-
-/*! @brief Adds a position/velocity curve for a single joint
-    @param jointid the id of the joint you want to control
-    @param times the times for each of the points in the specified motion curve (in milliseconds)
-    @param positions the target positions (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gains the target gains (in Percent)
- */
-bool NUActionatorsData::addJointPositions(joint_id_t jointid, const vector<double>& times, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
+            add(actionatorid[i], time, data)
     else
-    {
-        unsigned int timelength = times.size();
-        unsigned int positionlength = positions.size();
-        unsigned int velocitylength = velocities.size();
-        unsigned int gainlength = gains.size();
-        
-        if (positionlength < timelength || velocitylength < timelength || gainlength < timelength)
-            return false;
+        add [time,data] to actionator
+ */
+void add(actionator_id_t actionatorid, double time, const vector<float>& data);
+
+/* A single time, and a vector<vector> of data
+    if actionator is a group
+        if data.size matches group.size
+            add(actionatorid[i], time, data[i])
         else
-        {
-            for (unsigned int i=0; i<timelength; i++)
-                addJointPosition(jointid, times[i], positions[i], velocities[i], gains[i]);
-        }
-    }
-    return true;
-}
-
-/*! @brief Adds a single joint torque control point
-    @param jointid the id of the joint you want to control
-    @param time the time at which you want the joint to reach its target  (in milliseconds)
-    @param torque the target torque (in Nm)
-    @param gain the target gain (in Percent)
- */
-bool NUActionatorsData::addJointTorque(joint_id_t jointid, double time, float torque, float gain)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
-    else 
-    {
-        vector<float> data (2, 0);
-        data[0] = torque;
-        data[1] = gain;
-        TorqueActionators[jointid]->addPoint(time, data);
-        return true;
-    }
-}
-
-/*! @brief Adds a torque curve for a single joint
- @param jointid the id of the joint you want to control
- @param times the times for each of the points in the specified motion curve (in milliseconds)
- @param positions the target positions (in radians)
- @param gain the target gain used for the entire curve (in Percent)
- */
-bool NUActionatorsData::addJointTorques(joint_id_t jointid, const vector<double>& times, const vector<float>& torques, float gain)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
+            add(actionatorid[i], time, data)
     else
-    {
-        unsigned int timelength = times.size();
-        unsigned int torquelength = torques.size();
-        
-        if (torquelength < timelength)
-            return false;
+        add [time,data] to actionator
+ */
+void add(actionator_id_t actionatorid, double time, const vector<vector<float> >& data);
+
+/* A single time, and a vector<vector<vector>> of data
+    if actionator is a group
+        if data.size matches group.size
+            add(actionatorid[i], time, data[i])
         else
-        {
-            for (unsigned int i=0; i<timelength; i++)
-                addJointTorque(jointid, times[i], torques[i], gain);
-        }
-    }
-    return true;
-}
-
-/*! @brief Adds a torque curve for a single joint
-    @param jointid the id of the joint you want to control
-    @param times the times for each of the points in the specified motion curve (in milliseconds)
-    @param positions the target positions (in radians)
-    @param gains the target gains (in Percent)
- */
-bool NUActionatorsData::addJointTorques(joint_id_t jointid, const vector<double>& times, const vector<float>& torques, const vector<float>& gains)
-{
-    if (jointid == ACTIONATOR_MISSING)
-        return false;
+            add(actionatorid[i], time, data)
     else
-    {
-        unsigned int timelength = times.size();
-        unsigned int torquelength = torques.size();
-        unsigned int gainlength = gains.size();
-        
-        if (torquelength < timelength || gainlength < timelength)
-            return false;
-        else
-        {
-            for (unsigned int i=0; i<timelength; i++)
-                addJointTorque(jointid, times[i], torques[i], gains[i]);
-        }
-    }
-    return true;
-}
-
-/*! @brief Returns the selected joint ids in the given bodypart
-    @param partid the body part id you want the joint ids for
-    @return a vector of the joint_id_t's in the body part
+        add [time,data] to actionator
  */
-vector<NUActionatorsData::joint_id_t>& NUActionatorsData::getSelectedJoints(bodypart_id_t partid)
-{
-    if (partid != ACTIONATOR_MISSING)
-    {
-        if (partid == AllJoints)
-            return m_all_joint_ids;
-        else if (partid == BodyJoints)
-            return m_body_ids;
-        else if (partid == HeadJoints)
-            return m_head_ids;
-        else if (partid == LeftArmJoints)
-            return m_larm_ids;
-        else if (partid == RightArmJoints)
-            return m_rarm_ids;
-        else if (partid == TorsoJoints)
-            return m_torso_ids;
-        else if (partid == LeftLegJoints)
-            return m_lleg_ids;
-        else if (partid == RightLegJoints)
-            return m_rleg_ids;
-        else
-        {
-            debug << "NUActionatorsData::getSelectedJoints(). UNDEFINED Body part.";
-            return m_all_joint_ids;
-        }
-    }
-    else
-        return m_all_joint_ids;
-}
+void add(actionator_id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
 
-/*! @brief Adds a single joint position control point for each joint in the selected body part (the body part could be 'All' to set all joints at once)
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the part will reach its target (in milliseconds)
-    @param positions the target position (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gain the target gain for every joint in the body part (in Percent)
+/* A single time, and a string of data
+    for each actionator in actionator id 
+        add [time,data] to actionator
  */
-bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, float gain)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    if (selectedjoints.size() < positions.size())
-    {
-        debug << "NUActionatorsData::addJointPositions. Specified positions are not the correct length. They are " << positions.size() << " and they should be " << selectedjoints.size() << endl;
-        return false;
-    }
-    else 
-    {
-        for (unsigned int i=0; i<selectedjoints.size(); i++)
-            addJointPosition(selectedjoints[i], time, positions[i], velocities[i], gain);
-        return true;
-    }
-}
+void add(actionator_id_t actionatorid, double time, const string& data);
 
-/*! @brief Adds a single joint position control point for each joint in the selected body part (the body part could be 'All' to set all joints at once)
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the part will reach its target (in milliseconds)
-    @param positions the target position (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gains the target gains (in Percent)
- */
-bool NUActionatorsData::addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    if (selectedjoints.size() < positions.size())
-    {
-        debug << "NUActionatorsData::addJointPositions. Specified positions are not the correct length. They are " << positions.size() << " and they should be " << selectedjoints.size() << endl;
-        return false;
-    }
-    else 
-    {
-        for (unsigned int i=0; i<selectedjoints.size(); i++)
-            addJointPosition(selectedjoints[i], time, positions[i], velocities[i], gains[i]);
-        return true;
-    }
-}
 
-/*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the joint to reach its target  (in milliseconds)
-    @param torques the target torque (in Nm)
-    @param gain the target gain for all joints in the body part (in Percent)
- */
-bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, float gain)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    if (selectedjoints.size() < torques.size())
-    {
-        debug << "NUActionatorsData::addJointTorques. Specified torques are not the correct length. They are " << torques.size() << " and they should be " << selectedjoints.size() << endl;
-        return false;
-    }
-    else 
-    {
-        for (unsigned int i=0; i<selectedjoints.size(); i++)
-            addJointTorque(selectedjoints[i], time, torques[i], gain);
-        return true;
-    }
-}
-
-/*! @brief Adds joint torque control points for a body part (the body part could be 'All' to set all joints at once)
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the joint to reach its target  (in milliseconds)
-    @param torques the target torque (in Nm)
-    @param gains the target gain (in Percent)
- */
-bool NUActionatorsData::addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    if (selectedjoints.size() < torques.size())
-    {
-        debug << "NUActionatorsData::addJointTorques. Specified torques are not the correct length. They are " << torques.size() << " and they should be " << selectedjoints.size() << endl;
-        return false;
-    }
-    else 
-    {
-        for (unsigned int i=0; i<selectedjoints.size(); i++)
-            addJointTorque(selectedjoints[i], time, torques[i], gains[i]);
-        return true;
-    }
-}
-
-/*! @brief Adds a a motion curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ... , [posi0, posi1, ...]_N]
- 
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the part will reach its target (in milliseconds)
-    @param positions the target position (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gain the target gain for every joint for the entire curve (in Percent)
- */
-bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, float gain)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || positions.size() < numjoints || velocities.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointPositions(selectedjoints[i], times[i], positions[i], velocities[i], gain); 
-    
-    return true;
-}
-
-/*! @brief Adds a a motion curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ... , [posi0, posi1, ...]_N]
-
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the part will reach its target (in milliseconds)
-    @param positions the target position (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gain the target gain for each joint for the entire curve (in Percent)
- */
-bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<float>& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || positions.size() < numjoints || velocities.size() < numjoints || gains.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointPositions(selectedjoints[i], times[i], positions[i], velocities[i], gains[i]); 
-    
-    return true;
-}
-
-/*! @brief Adds a a motion curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[posi0, posi1, ...]_0, [posi0, posi1, ...]_1, ... , [posi0, posi1, ...]_N]
- 
-    @param partid the id of the body part you want to control
-    @param time the time at which you want the part will reach its target (in milliseconds)
-    @param positions the target position (in radians)
-    @param velocities the target velocities (in rad/s)
-    @param gains the target gains (in Percent)
- */
-bool NUActionatorsData::addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<vector<float> >& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || positions.size() < numjoints || velocities.size() < numjoints || gains.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointPositions(selectedjoints[i], times[i], positions[i], velocities[i], gains[i]); 
-    
-    return true;
-}
-
-/*! @brief Adds a torque curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[torq0, torq1, ...]_0, [torq0, torq1, ...]_1, ... , [torq0, torq1, ...]_N]
-
-    @param partid the id of the body part you want to control
-    @param times the time for each torque point (in milliseconds)
-    @param torques the target torque (in Nm)
-    @param gain the target gain for every joint of the entire curve (in Percent)
- */
-bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, float gain)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || torques.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointTorques(selectedjoints[i], times[i], torques[i], gain); 
-    
-    return true;
-}
-
-/*! @brief Adds a torque curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[torq0, torq1, ...]_0, [torq0, torq1, ...]_1, ... , [torq0, torq1, ...]_N]
-
-    @param partid the id of the body part you want to control
-    @param times the time for each torque point (in milliseconds)
-    @param torques the target torque (in Nm)
-    @param gains the target gain for each joint of the entire curve (in Percent)
- */
-bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<float>& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || torques.size() < numjoints || gains.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointTorques(selectedjoints[i], times[i], torques[i], gains[i]); 
-    
-    return true;
-}
-
-/*! @brief Adds a torque curve for each joint in the given body part
- 
-    For a body part with N joints the data needs to take the following format:
-    [[time0, time1, ...]_0, [time0, time1, ...]_1, ... , [time0, time1, ...]_N]
-    [[torq0, torq1, ...]_0, [torq0, torq1, ...]_1, ... , [torq0, torq1, ...]_N]
-
-    @param partid the id of the body part you want to control
-    @param times the time for each torque point (in milliseconds)
-    @param torques the target torque (in Nm)
-    @param gains the target gains (in Percent)
- */
-bool NUActionatorsData::addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains)
-{
-    vector<joint_id_t>& selectedjoints = getSelectedJoints(partid);
-    
-    // check that there is enough joint data in the given vectors
-    unsigned int numjoints = selectedjoints.size();
-    if (times.size() < numjoints || torques.size() < numjoints || gains.size() < numjoints)
-    { 
-        debug << "NUActionatorsData::addJointPositions. Specfied curve does not have enough joints; has " << times.size() << " needs " << numjoints << endl;
-        return false;
-    }
-    for (unsigned int i=0; i<numjoints; i++)
-        addJointTorques(selectedjoints[i], times[i], torques[i], gains[i]); 
-    
-    return true;
-}
-
-/*! @brief Adds a single led control point
-     @param ledid the id of the led you want to control
-     @param time the time at which you want the led to reach its target (in milliseconds)
-     @param values the [r,g,b]
- */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<float>& values)
-{
-    if (LedActionators.empty())
-        return false;                       
-    
-    vector<int>& selectedleds = getSelectedLeds(ledgroup);
-    
-    vector<float> data(3,0);
-    if (values.size() < 3)
-    {
-        data[0] = values[0];
-        data[1] = values[0];
-        data[2] = values[0];
-    }
-    else 
-    {
-        data[0] = values[0];
-        data[1] = values[1];
-        data[2] = values[2];
-    }
-    
-    for (unsigned int i=0; i<selectedleds.size(); i++)
-    {
-        LedActionators[selectedleds[i]]->addPoint(time, data);
-    }
-    return true;
-}
-
-/*! @brief Adds a single led control point
-    @param ledid the id of the led you want to control
-    @param time the time at which you want the led to reach its target (in milliseconds)
-    @param red red led value
-    @param green green led value
-    @param blue blue led value
- */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, float red, float green, float blue)
-{
-    vector<float> values(3,0);
-    values[0] = red;
-    values[1] = green;
-    values[2] = blue;
-    return addLeds(ledgroup, time, values);
-}
-
-/*! @brief Adds a single led control point
-    @param ledid the id of the led you want to control
-    @param time the time at which you want the led to reach its target (in milliseconds)
-    @param values the [[r,g,b], [r,g,b] ...]
- */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values)
-{
-    if (LedActionators.empty())
-        return false;                       
-    
-    if (values.size() == 1)
-    {   // if the size of the values is one, then set that value to all in the group
-        return addLeds(ledgroup, time, values[0]);
-    }
-    else
-    {   // otherwise set each led individually.
-        vector<int>& selectedleds = getSelectedLeds(ledgroup);
-        int numpoints = std::min(selectedleds.size(), values.size());
-        
-        vector<float> data (3, 0);
-        for (int i=0; i<numpoints; i++)
-        {
-            if (values[i].size() < 3)
-            {
-                data[0] = values[i][0];
-                data[1] = values[i][0];
-                data[2] = values[i][0];
-            }
+// ------------------------------------------------------------------------------------------- Vector time functions
+/* A vector of time and a vector of data
+    if actionator is a group
+        if time.size matches group.size
+            if group.size matches data.size
+                add(actionatorid[i], time[i], data[i])
             else
-            {
-                data[0] = values[i][0];
-                data[1] = values[i][1];
-                data[2] = values[i][2];
-            }
-            LedActionators[selectedleds[i]]->addPoint(time, data);
-        }
-    }
-    return true;
-}
-
-/*! @brief Returns the selected leds ids in the given group
-    @param ledgroup the group you want ids for
-    @return a vector of the ids in the led group
- */
-vector<int>& NUActionatorsData::getSelectedLeds(ledgroup_id_t ledgroup)
-{
-    if (ledgroup == AllLeds)
-        return m_all_led_ids;
-    else if (ledgroup == LeftEarLeds)
-        return m_lear_ids;
-    else if (ledgroup == RightEarLeds)
-        return m_rear_ids;
-    else if (ledgroup == LeftEyeLeds)
-        return m_leye_ids;
-    else if (ledgroup == RightEyeLeds)
-        return m_reye_ids;
-    else if (ledgroup == ChestLeds)
-        return m_chest_ids;
-    else if (ledgroup == LeftFootLeds)
-        return m_lfoot_ids;
-    else if (ledgroup == RightFootLeds)
-        return m_rfoot_ids;
-    else
-    {
-        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
-        return m_all_led_ids;
-    }    
-}
-
-/*! @brief Adds led control points for several leds in the given group
-    @param ledgroup the id of the led group you want to control
-    @param indices the indices of the leds within the group you want to change
-    @param time the time at which you want the led to reach its target (in milliseconds)
-    @param values [[red, green, blue], ...] or [[intensity], ...]
- */
-bool NUActionatorsData::addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values)
-{
-    if (LedActionators.empty())
-        return false;                       
-    
-    size_t numleds = LedActionators.size();
-    
-    int groupoffset = 0;
-    if (ledgroup == AllLeds)
-        groupoffset = m_all_led_ids[0];
-    else if (not m_lear_ids.empty() and ledgroup == LeftEarLeds)
-        groupoffset = m_lear_ids[0];
-    else if (not m_rear_ids.empty() and ledgroup == RightEarLeds)
-        groupoffset = m_rear_ids[0];
-    else if (not m_leye_ids.empty() and ledgroup == LeftEyeLeds)
-        groupoffset = m_leye_ids[0];
-    else if (not m_reye_ids.empty() and ledgroup == RightEyeLeds)
-        groupoffset = m_reye_ids[0];
-    else if (not m_chest_ids.empty() and ledgroup == ChestLeds)
-        groupoffset = m_chest_ids[0];
-    else if (not m_lfoot_ids.empty() and ledgroup == LeftFootLeds)
-        groupoffset = m_lfoot_ids[0];
-    else if (not m_rfoot_ids.empty() and ledgroup == RightFootLeds)
-        groupoffset = m_rfoot_ids[0];
-    else
-    {
-        debug << "NUActionatorsData::addLeds. UNDEFINED led group.";
-        return false;
-    }
-    
-    if (values.size() == 1)
-    {   // if the size of the values is one, then set that value to all in the group
-        vector<float> data(3,0);
-        if (values[0].size() < 3)
-        {
-            data[0] = values[0][0];
-            data[1] = values[0][0];
-            data[2] = values[0][0];
-        }
+                add(actionatorid[i], time[i], data)
         else 
-        {
-            data[0] = values[0][0];
-            data[1] = values[0][1];
-            data[2] = values[0][2];
-        }
-        
-        for (unsigned int i=0; i<indices.size(); i++)
-        {
-            unsigned int index = groupoffset + indices[i];
-            if (index < numleds)
-                LedActionators[index]->addPoint(time, data);
-        }
-    }
+            makes no sense
     else
-    {   // otherwise set each led individually.
-        int numpoints = std::min(indices.size(), values.size());
-        
-        vector<float> data (3, 0);
-        for (int i=0; i<numpoints; i++)
-        {
-            if (values[i].size() < 3)
-            {
-                data[0] = values[i][0];
-                data[1] = values[i][0];
-                data[2] = values[i][0];
-            }
-            else
-            {
-                data[0] = values[i][0];
-                data[1] = values[i][1];
-                data[2] = values[i][2];
-            }
-            unsigned int index = groupoffset + indices[i];
-            if (index < numleds)
-                LedActionators[index]->addPoint(time, data);
-        }
-    }
-    return true;
-}
-
-/*! @brief Adds a single sound
-    @param time the time in milliseconds to play the sound
-    @param sound the filename of the sound to be played
- 
-    @return true if the sound is successfully added, false otherwise
+        if time.size matches data.size
+            add(actionator, time[i], data[i])
+        else
+            makes no sense
  */
-bool NUActionatorsData::addSound(double time, string sound)
-{
-    vector<string> data (1, "");
-    if (Sound == NULL)
-        return false;
-    else 
-    {
-        data[0] = sound;
-        Sound->addPoint(time, data);
-        return true;
-    }
-}
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data);
 
-/*! @brief Adds a several sounds to be played
-    @param time the time in milliseconds to play the sound
-    @param sounds the filenames of the sounds to be played
-
-    @return true if the sounds are successfully added, false otherwise
+/* A vector of time and a vector of data
+     if actionator is a group
+         if time.size matches group.size
+             if group.size matches data.size matches gain.size
+                 add(actionatorid[i], time[i], data[i], gain[i])
+             else 
+                 makes no sense
+     else
+         if time.size matches data.size matches gain.size
+             add(actionator, time[i], data[i], gain[i])
+         else
+             makes no sense
  */
-bool NUActionatorsData::addSounds(double time, vector<string> sounds)
-{
-    if (Sound == NULL)
-        return false;
-    else 
-    {
-        Sound->addPoint(time, sounds);
-        return true;
-    }
-}
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
 
-/*! @brief Adds a single teleportation command
- 
-    @param time the time in milliseconds to teleport
-    @param x the x position (cm)
-    @param y the y position (cm)
-    @param bearing the bearing (rad)
- 
-    @return true if the command is successfully added, false otherwise
- */
-bool NUActionatorsData::addTeleportation(double time, float x, float y, float bearing)
-{
-    vector<float> data (3, 0);
-    if (Teleporter == NULL)
-        return false;
+/* A vector of time and a vector<vector> of data
+    if actionator is a group
+        if times.size matches data.size
+            add(actionator (group), time[i], data[i])
+        else if group.size matches data.size
+            add(actionator[i], time, data[i])
+        else if time.size matches group.size
+            add(actionator[i], time[i], data)
+        else
+            makes no sense
     else
-    {
-        data[0] = x;
-        data[1] = y;
-        data[2] = bearing;
-        Teleporter->addPoint(time, data);
-        return true;
-    }
-}
+        if time.size matches data.size
+            add(actionator, time[i], data[i]
+        else
+            makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
+
+/* A vector of time and a vector<vector<vector>> of data
+    if actionator is a group
+        if times.size matches data.size
+            add(actionator (group), time[i], data[i])
+        else if group.size matches data.size
+            add(actionator[i], time, data[i])
+        else if time.size matches group.size
+            add(actionator[i], time[i], data)
+        else
+            makes no sense
+    else
+        if time.size matches data.size
+            add(actionator, time[i], data[i])
+        else
+            makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
+
+/*! A vector of time and a vector<vector<vector<vector>>> of data
+     if actionator is a group
+         if times.size matches data.size
+             add(actionator (group), time[i], data[i])
+         else if group.size matches data.size
+             add(actionator[i], time, data[i])
+         else if time.size matches group.size
+             add(actionator[i], time[i], data)
+         else
+             makes no sense
+     else
+         if time.size matches data.size
+             add(actionator, time[i], data[i])
+         else
+             makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
+
+/* A vector of time and a vector of strings
+    if actionator is a group
+        if time.size matches group.size matches data.size
+            add(actionatorid[i], time[i] , data[i]]
+        else
+            makes no sense
+    else
+        if time.size matches data.size
+            add(actionator, time[i], data[i])
+        else
+            makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<double>& time, const vector<string>& data);
+
+// ------------------------------------------------------------------------------------------- Matrix time functions
+/* A matrix of time and a matrix of data
+    if actionator is a group:
+        if time.size matches group.size matches data.size
+            add(actionator[i], time[i], data[i])
+        else
+            makes no sense
+    else
+        makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
+
+/* A matrix of time and a matrix of data
+     if actionator is a group:
+         if time.size matches group.size matches data.size matches gain.size
+             add(actionator[i], time[i], data[i], gain[i])
+         else
+             makes no sense
+     else
+         makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
+
+
+/* A matrix of time and a vector<vector<vector>>
+    if actionator is a group:
+        if time.size matches group.size matches data.size
+            add(actionator[i], time[i], data[i])
+        else
+            makes no sense
+    else
+        makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
+
+/* A matrix of time and a vector<vector<vector<vector>>>
+     if actionator is a group:
+         if time.size matches group.size matches data.size
+             add(actionator[i], time[i], data[i])
+         else
+             makes no sense
+     else
+         makes no sense
+ */
+void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
 
 /******************************************************************************************************************************************
  Displaying Contents and Serialisation

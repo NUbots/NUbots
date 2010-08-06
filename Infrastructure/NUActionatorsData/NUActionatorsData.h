@@ -26,8 +26,7 @@
 #ifndef NUACTIONATORSDATA_H
 #define NUACTIONATORSDATA_H
 
-template <class T>
-class actionator_t;
+class Actionator;
 
 #include <vector>
 #include <string>
@@ -36,61 +35,65 @@ using namespace std;
 class NUActionatorsData
 {
 public:
-    typedef int joint_id_t;
-    enum bodypart_id_t
+    enum actionator_id_t
     {
+        // Joint actionators
+        HeadRoll,
+        HeadPitch,
+        HeadYaw,
+        NeckRoll,
+        NeckPitch,
+        NeckYaw,
+        LShoulderRoll,
+        LShoulderPitch,
+        LShoulderYaw,
+        LElbowPitch,
+        LElbowYaw,
+        RShoulderRoll,
+        RShoulderPitch,
+        RShoulderYaw,
+        RElbowPitch,
+        RElbowYaw,
+        TorsoRoll,
+        TorsoPitch,
+        TorsoYaw,
+        LHipRoll,
+        LHipPitch,
+        LHipYaw,
+        LKneePitch,
+        LAnkleRoll,
+        LAnklePitch,
+        RHipRoll,
+        RHipPitch,
+        RHipYaw,
+        RKneePitch,
+        RAnkleRoll,
+        RAnklePitch,
+        // Joint groups
+        AllJoints,
         HeadJoints,
-        LeftArmJoints,
-        RightArmJoints,
-        TorsoJoints,
-        LeftLegJoints,
-        RightLegJoints,
         BodyJoints,
-        AllJoints
-    };
-    
-    enum ledgroup_id_t
-    {
-        LeftEarLeds,
-        RightEarLeds,
-        LeftEyeLeds,
-        RightEyeLeds,
-        ChestLeds,
-        LeftFootLeds,
-        RightFootLeds,
-        AllLeds
-    };
-
-    static const int ACTIONATOR_MISSING = -1;
-    
-    // joints
-    static joint_id_t HeadPitch;
-    static joint_id_t HeadYaw;
-    static joint_id_t LShoulderRoll;
-    static joint_id_t LShoulderPitch;
-    static joint_id_t LElbowRoll;
-    static joint_id_t LElbowYaw;
-    static joint_id_t RShoulderRoll;
-    static joint_id_t RShoulderPitch;
-    static joint_id_t RElbowRoll;
-    static joint_id_t RElbowYaw;
-    static joint_id_t TorsoRoll;
-    static joint_id_t TorsoPitch;
-    static joint_id_t TorsoYaw;
-    static joint_id_t LHipRoll;
-    static joint_id_t LHipPitch;
-    static joint_id_t LHipYawPitch;
-    static joint_id_t LHipYaw;
-    static joint_id_t LKneePitch;
-    static joint_id_t LAnkleRoll;
-    static joint_id_t LAnklePitch;
-    static joint_id_t RHipRoll;
-    static joint_id_t RHipPitch;
-    static joint_id_t RHipYawPitch;
-    static joint_id_t RHipYaw;
-    static joint_id_t RKneePitch;
-    static joint_id_t RAnkleRoll;
-    static joint_id_t RAnklePitch;
+        LArmJoints,
+        RArmJoints,
+        TorsoJoints,
+        LLegJoints,
+        RLegJoints,
+        // Led actionators
+        ChestLed,
+        LeftFootLed,
+        RightFootLed,
+        LeftEyeLed,
+        RightEyeLed,
+        LeftEarLed,
+        RightEarLed,
+        // Led groups
+        AllLeds,
+        // Other actionators
+        Sound,
+        Teleporter,
+        // Total number of actionators
+        NumActionators
+    }
     
     double CurrentTime;
 public:
@@ -98,9 +101,7 @@ public:
     ~NUActionatorsData();
     
     // Methods for setting which actionators are available on init
-    void setAvailableJointControlMethods(const vector<string>& methodnames);
     void setAvailableJoints(const vector<string>& jointnamess);
-    void setAvailableCameraSettings(const vector<string>& camerasettingnames);
     void setAvailableLeds(const vector<string>& lednames);
     void setAvailableOtherActionators(const vector<string>& actionatornames);
     
@@ -124,35 +125,24 @@ public:
         // magical data for the NUActionators
     bool getNextTeleportation(bool& isvalid, double& time, vector<float>& data);
     
-    // Add methods to be used by modules (ie by Vision, Motion etc)
-        // add new joint commands
-    bool addJointPosition(joint_id_t jointid, double time, float position, float velocity, float gain);
-    bool addJointPositions(joint_id_t jointid, const vector<double>& times, const vector<float>& positions, const vector<float>& velocities, float gain);
-    bool addJointPositions(joint_id_t jointid, const vector<double>& times, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
-    bool addJointTorque(joint_id_t jointid, double time, float torque, float gain);
-    bool addJointTorques(joint_id_t jointid, const vector<double>& times, const vector<float>& torques, float gain);
-    bool addJointTorques(joint_id_t jointid, const vector<double>& times, const vector<float>& torques, const vector<float>& gains);
+    void add(actionator_id_t actionatorid, double time, float data);
+    void add(actionator_id_t actionatorid, double time, float data, float gain);
+    void add(actionator_id_t actionatorid, double time, const vector<float>& data);
+    void add(actionator_id_t actionatorid, double time, const vector<vector<float> >& data);
+    void add(actionator_id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
+    void add(actionator_id_t actionatorid, double time, const string& data);
     
-    bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, float gain);
-    bool addJointPositions(bodypart_id_t partid, double time, const vector<float>& positions, const vector<float>& velocities, const vector<float>& gains);
-    bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, float gain);
-    bool addJointTorques(bodypart_id_t partid, double time, const vector<float>& torques, const vector<float>& gains);
-    bool addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, float gain);
-    bool addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<float>& gain);
-    bool addJointPositions(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& positions, const vector<vector<float> >& velocities, const vector<vector<float> >& gains);
-    bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, float gain);
-    bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<float>& gain);
-    bool addJointTorques(bodypart_id_t partid, const vector<vector<double> >& times, const vector<vector<float> >& torques, const vector<vector<float> >& gains);
-    
-        // add other commands
-    bool addLeds(ledgroup_id_t ledgroup, double time, float red, float blue, float green);
-    bool addLeds(ledgroup_id_t ledgroup, double time, const vector<float>& values);
-    bool addLeds(ledgroup_id_t ledgroup, double time, const vector<vector<float> >& values);
-    bool addLeds(ledgroup_id_t ledgroup, const vector<int>& indices, double time, const vector<vector<float> >& values);
-    bool addSound(double time, string sound);
-    bool addSounds(double time, vector<string> sound);
-        // add magic commands
-    bool addTeleportation(double time, float x, float y, float bearing);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<string>& data);
+
+    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
+    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
+    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
+    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -176,11 +166,7 @@ private:
 private:
     vector<actionator_t<float>*> m_all_actionators;        //!< a vector with every float actionator
     vector<actionator_t<string>*> m_all_string_actionators;      //!< a vector with every string actionator
-    // Limb position and torque actionators
-    bool m_positionactionation;
-    bool m_torqueactionation;
     vector<actionator_t<float>*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
-    vector<actionator_t<float>*> TorqueActionators;        //!< the actionators to change the torque, and torque-gain
 
     // Peripheral actionators 
     vector<actionator_t<float>*> LedActionators;           //!< The led actionators

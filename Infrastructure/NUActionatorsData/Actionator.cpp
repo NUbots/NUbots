@@ -1,4 +1,4 @@
-/*! @file actionator_t.cpp
+/*! @file Actionator.cpp
     @brief Implementation of a single actionator class
     @author Jason Kulk
  
@@ -18,75 +18,97 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "actionator_t.h"
+#include "Actionator.h"
+#include "ActionatorPoint.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
 #include <algorithm>
 
-/*! @brief Default constructor for a actionator_t. Initialises the actionator to be undefined and unavailable
- */
-template <typename T> 
-actionator_t<T>::actionator_t()
-{
-    Name = string("Undefined");
-    ActionatorType = UNDEFINED;
-    m_add_points_buffer.reserve(1024);
-    m_preprocess_buffer.reserve(1024);
-    IsAvailable = false;
-    int err;
-    err = pthread_mutex_init(&m_lock, NULL);
-    if (err != 0)
-        errorlog << "actionator_t<T>::actionator_t(" << Name << ") Failed to create m_lock." << endl;
-}
-
-/*! @brief Constructor for an actionator_t with known name and type
+/*! @brief Constructor for an Actionator with known name and type
     @param actionatorname the name of the actionator
     @param actionatortype the type of the actionator to be used for RTTI
  */
-template <typename T> 
-actionator_t<T>::actionator_t(string actionatorname, actionator_type_t actionatortype)
+Actionator::Actionator(string actionatorname, Actionatorype_t actionatortype)
 {
     Name = actionatorname;
     ActionatorType = actionatortype;
     m_add_points_buffer.reserve(1024);
     m_preprocess_buffer.reserve(1024);
-    IsAvailable = true;
     int err;
     err = pthread_mutex_init(&m_lock, NULL);
     if (err != 0)
-    {
-        errorlog << "actionator_t<T>::actionator_t(" << Name << ") Failed to create m_lock." << endl;
-        IsAvailable = false;
-    }
+        errorlog << "Actionator::Actionator(" << Name << ") Failed to create m_lock." << endl;
 }
 
-/*! @brief Adds a point to the actionator
-    @param time the time the point will be completed
-    @param data the data for the point 
- */
-template <typename T>
-void actionator_t<T>::addPoint(double time, const vector<T>& data)
+/*! @brief Destroys the Actionator */
+Actionator::~Actionator()
 {
-    if (data.size() == 0)
-    {
-        debug << "actionator_t<T>::addPoint. " << Name << " Your data is invalid. It will be ignored!." << endl;
-        return;
-    }
-    actionator_point_t point;
-    point.Time = time;
-    point.Data = data;
-    
+    pthread_mutex_destroy(&m_lock);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point (single float)
+ */
+void Actionator::add(double time, const float data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point (vector of float)
+ */
+void Actionator::add(double time, const vector<float>& data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point (matrix of float)
+ */
+void Actionator::add(double time, const vector<vector<float> >& data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point (3d matrix of float)
+ */
+void Actionator::add(double time, const vector<vector<vector<float> > >& data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point
+ */
+void Actionator::add(double time, const string& data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Pushes the point to the back of the m_add_points_buffer */
+void Actionator::addToBuffer(const ActionatorPoint& p)
+{
     pthread_mutex_lock(&m_lock);
-    m_add_points_buffer.push_back(point);
+    m_add_points_buffer.push_back(p);
     pthread_mutex_unlock(&m_lock);
 }
 
-/*! @brief
+/*! @brief Preprocesses the data for the actionator
  */
-template <typename T>
-void actionator_t<T>::preProcess()
+void Actionator::preProcess()
 {
     if (m_add_points_buffer.empty())
         return;
@@ -109,7 +131,6 @@ void actionator_t<T>::preProcess()
             insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front(), comparePoints);
             m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
         }
-        
         m_points.insert(m_points.end(), m_preprocess_buffer.begin(), m_preprocess_buffer.end());
 
         // clear the preprocess buffer after I have added all of the points
@@ -118,10 +139,9 @@ void actionator_t<T>::preProcess()
 }
 
 /*! @brief Remove all of the completed points
-     @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
+    @param currenttime the current time in milliseconds since epoch or program start (whichever you used to add the actionator point!)
  */
-template <typename T>
-void actionator_t<T>::removeCompletedPoints(double currenttime)
+void Actionator::postProcess(double currenttime)
 {
     while (not m_points.empty() and m_points[0].Time <= currenttime)
         m_points.pop_front();
@@ -129,60 +149,44 @@ void actionator_t<T>::removeCompletedPoints(double currenttime)
 
 /*! @brief Returns true if there are no points in the queue, false if there are point to be applied
  */
-template <typename T>
-bool actionator_t<T>::isEmpty()
+bool Actionator::isEmpty()
 {
     return m_points.empty();
 }
 
-/*! Returns true if a should go before b, false otherwise.
- */
-template <typename T>
-bool actionator_t<T>::comparePoints(const actionator_point_t& a, const actionator_point_t& b)
-{
-    return a.Time < b.Time;
-}
-
-/*! @brief Provides a text summary of the contents of the actionator_t
+/*! @brief Provides a text summary of the contents of the Actionator
  
  The idea is to use this function when writing to a debug log. I guarentee that the 
  output will be human readable.
  
  @param output the ostream in which to put the string
  */
-template <typename T>
-void actionator_t<T>::summaryTo(ostream& output)
+void Actionator::summaryTo(ostream& output)
 {
     output << Name << " ";
     if (isEmpty())
         output << "EMPTY" << endl;
-    else {
-        output << endl;
+    else 
+    {
         for (unsigned int i=0; i<m_points.size(); i++)
-        {
-            output << m_points[i].Time << ": ";
-            for (unsigned int j=0; j<m_points[i].Data.size(); j++)
-                output << m_points[i].Data[j] << " ";
-            output << endl;
-        }
+            output << m_points[i] << " ";
+        output << endl;
     }
-
 }
 
-template <typename T>
-void actionator_t<T>::csvTo(ostream& output)
+void Actionator::csvTo(ostream& output)
 {
 }
 
-template <typename T>
-ostream& operator<< (ostream& output, const actionator_t<T>& p_actionator)
+
+ostream& operator<< (ostream& output, const Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
     return output;
 }
 
-template <typename T>
-istream& operator>> (istream& input, actionator_t<T>& p_actionator)
+
+istream& operator>> (istream& input, Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
     return input;
