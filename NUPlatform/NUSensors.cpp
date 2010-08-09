@@ -345,39 +345,43 @@ void NUSensors::calculateFallSense()
 {
     static const float Fallen = 1.0;
     static const float Falling = 1.0;
-    static const float RollFallenThreshold = 1.1;  
-    static const float PitchFallenThreshold = 1.22;
+    static const float FallenThreshold = 1.1;  
     static const float RollFallingThreshold = 0.55;
     static const float ForwardFallingThreshold = 0.55;
     static const float BackwardFallingThreshold = 0.45;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
-    static vector<float> orientation(3,0);
-    static vector<float> angularvelocity(3,0);
+    vector<float> acceleration;
+    float acceleration_mag;
+    vector<float> orientation;
+    vector<float> angularvelocity;
+    m_data->getAccelerometerValues(acceleration);
     m_data->getOrientation(orientation);
     m_data->getGyroFilteredValues(angularvelocity);
     
+    acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
     // check if the robot has fallen over
     vector<float> fallen(5,0);
-    
-    // check if fallen left
-    if (orientation[0] < -RollFallenThreshold)
-        fallen[1] = Fallen;
-
-    // check if fallen right
-    if (orientation[0] > RollFallenThreshold)
-        fallen[2] = Fallen;
-
-    // check if fallen forward
-    if (orientation[1] > PitchFallenThreshold)
-        fallen[3] = Fallen;
-
-    // check if fallen backward
-    if (orientation[1] < -PitchFallenThreshold)
-        fallen[4] = Fallen;
-
-    fallen[0] = fallen[1] + fallen[2] + fallen[3] + fallen[4];
+    if (fabs(acceleration_mag - 981) < 0.1*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+    {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
+        // We use only the angle to determine we have fallen, not the direction
+        fallen[0] = Fallen;
+        if (fabs(acceleration[0]) > fabs(acceleration[1]))
+        {   
+            if (acceleration[0] > 0)
+                fallen[3] = Fallen;
+            else
+                fallen[4] = Fallen;
+        }
+        else
+        {
+            if (acceleration[1] > 0)
+                fallen[1] = Fallen;
+            else
+                fallen[2] = Fallen;
+        }
+    }
     m_data->BalanceFallen->setData(m_current_time, fallen, true);
     
     // check if the robot is falling over
