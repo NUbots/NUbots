@@ -29,6 +29,7 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkPerturbationJob.h"
 
 #include "Behaviour/BehaviourPotentials.h"
 #include "Motion/Tools/MotionFileTools.h"
@@ -178,9 +179,17 @@ void EvaluateStabilityOfWalkParametersStartState::lookAtGoals()
 }
 
 // ----------------------------------------------------------------------------------------------------------------------- EvaluateStabilityOfWalkParametersStartState
+// In this state we need to count steps, and perturb every third step
+// We have 4 directions to push forward, backward, inward and outward (inward and outward are both left pushes but on different feet).
 /*! @brief Construct a evaluate stability of walk parameters state */
-EvaluateStabilityOfWalkParametersRunState::EvaluateStabilityOfWalkParametersRunState(EvaluateStabilityOfWalkParametersState* parent): m_parent(parent), m_provider(parent->m_provider) 
+EvaluateStabilityOfWalkParametersRunState::EvaluateStabilityOfWalkParametersRunState(EvaluateStabilityOfWalkParametersState* parent): m_parent(parent), 
+                                                                                                                                      m_provider(parent->m_provider), 
+                                                                                                                                      m_PI(3.1416),
+                                                                                                                                      m_INITIAL_PERTURBATION_MAG(20),
+                                                                                                                                      m_PERTURBATION_MAG_INC(10),
+                                                                                                                                      m_PERTURBATION_INTERVAL(3)
 {
+    reset();
 }
 
 /*! @brief Returns the desired next state in the EvaluateStability state machine */
@@ -192,14 +201,81 @@ BehaviourState* EvaluateStabilityOfWalkParametersRunState::nextState()
 void EvaluateStabilityOfWalkParametersRunState::doState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "EvaluateStabilityOfWalkParametersRunState::doState()" << endl;
+        debug << "EvaluateStabilityOfWalkParametersRunState::doState() stepcount:" << m_step_count << endl;
     #endif
     if (m_parent->stateChanged())
-    {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-            debug << "EvaluateStabilityOfWalkParametersRunState::doState(). Resetting." << endl;
-        #endif
-    }
+        reset();
+    float previousleft = m_left_impact_time;
+    float previousright = m_right_impact_time;
+    m_data->footImpact(NUSensorsData::LeftFoot, m_left_impact_time);
+    m_data->footImpact(NUSensorsData::RightFoot, m_right_impact_time);
+    
+    if (m_left_impact_time != previousleft or m_right_impact_time != previousright)
+        m_step_count++;
+    
+    if (m_step_count%m_PERTURBATION_INTERVAL == 0 and m_step_count > 3)
+        doPerturbation();
+    
     m_jobs->addMotionJob(new WalkJob(1, -0.785, 0));
 }
+
+void EvaluateStabilityOfWalkParametersRunState::reset()
+{
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+        debug << "EvaluateStabilityOfWalkParametersRunState::doState(). Resetting." << endl;
+    #endif
+    m_perturbation_magnitude = m_INITIAL_PERTURBATION_MAG;
+    m_perturbation_direction = 0;
+    m_step_count = 0;
+    m_perturbation_count = 0;
+    m_left_impact_time = 0;
+    m_right_impact_time = 0;
+}
+
+void EvaluateStabilityOfWalkParametersRunState::doPerturbation()
+{
+    // estimate the time to perturb the robot (assume midstep is half of the previous step period)
+    float steptime = fabs(m_left_impact_time - m_right_impact_time);
+    float perturbationtime = 0;
+    if (m_left_impact_time > m_right_impact_time)
+        perturbationtime = m_left_impact_time + 0.20*steptime;
+    else
+        perturbationtime = m_right_impact_time + 0.20*steptime;
+    
+    if (m_data->CurrentTime - perturbationtime > 0 and m_step_last_perturbed != m_step_count)
+        generatePerturbation();
+}
+
+void EvaluateStabilityOfWalkParametersRunState::generatePerturbation()
+{
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+        debug << "EvaluateStabilityOfWalkParametersRunState::generatePerturbation() " << m_perturbation_magnitude << " " << m_perturbation_direction << endl;
+    #endif
+    m_step_last_perturbed = m_step_count;
+    m_perturbation_count++;
+    
+    m_jobs->addMotionJob(new WalkPerturbationJob(m_perturbation_magnitude, m_perturbation_direction));
+    
+    // ----------------------------------- Update the perturbation direction
+    if (m_PERTURBATION_INTERVAL%2 == 0)     
+    {   // if the perturbation is an even number of steps, the perturbation direction sequence is 0, PI/2, PI, -PI/2
+        m_perturbation_direction += m_PI/2;
+        if (m_perturbation_direction > m_PI)
+            m_perturbation_direction = -m_PI/2;
+    }
+    else
+    {   // if the perturbation is every odd number of steps, the perturbation direction sequence is 0, PI/2, PI, PI/2
+        if (m_perturbation_count%4 == 0)
+            m_perturbation_direction = 0;
+        else if (m_perturbation_count%4 < 3)
+            m_perturbation_direction += m_PI/2;
+        else 
+            m_perturbation_direction = m_PI/2;
+    }
+    
+    // ----------------------------------- Update the perturbation magnitude
+    if (m_perturbation_direction == 0)
+        m_perturbation_magnitude += m_PERTURBATION_MAG_INC;
+}
+
 

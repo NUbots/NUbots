@@ -32,6 +32,7 @@ class EvaluateWalkParametersState;
 #include <vector>
 using namespace std;
 
+// Evaluate Stability State Machine
 class EvaluateStabilityOfWalkParametersState : public BehaviourFSMState
 {
 public:
@@ -49,6 +50,7 @@ private:
     friend class EvaluateStabilityOfWalkParametersRunState;
 };
 
+// Initial go to start position state
 class EvaluateStabilityOfWalkParametersStartState : public BehaviourState
 {
 public:
@@ -65,6 +67,7 @@ private:
     vector<float> m_current_start_state;
 };
 
+// Actual state in which stability is measured
 class EvaluateStabilityOfWalkParametersRunState : public BehaviourState
 {
 public:
@@ -72,8 +75,26 @@ public:
     BehaviourState* nextState();
     void doState();
 private:
+    void reset();
+    void doPerturbation();
+    void generatePerturbation();
+    
+    const float m_INITIAL_PERTURBATION_MAG;                 //!< The initial perturbation magnitude
+    const float m_PERTURBATION_MAG_INC;                     //!< The increment applied to the perturbatio magnitude after each direction has been tested
+    const int m_PERTURBATION_INTERVAL;                      //!< The number of steps between each perturbation
+    const float m_PI;
+    
+    float m_perturbation_magnitude;
+    float m_perturbation_direction;
+    int m_step_count;
+    int m_step_last_perturbed;
+    int m_perturbation_count;
+    float m_left_impact_time;
+    float m_right_impact_time;
+    
     EvaluateStabilityOfWalkParametersState* m_parent;
     WalkOptimisationProvider* m_provider;
+    
 };
 
 #endif
