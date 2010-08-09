@@ -449,8 +449,10 @@ void NUMotion::process(JobList* jobs)
                 m_walk->process(reinterpret_cast<WalkToPointJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
-                next_provider = m_walk;
                 m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
+                break;
+            case Job::MOTION_WALK_PERTURBATION:
+                m_walk->process(reinterpret_cast<WalkPerturbationJob*> (*it));
                 break;
         #endif
         #ifdef USE_KICK

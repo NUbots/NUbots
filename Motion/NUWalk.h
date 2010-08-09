@@ -33,6 +33,7 @@ class NUActionatorsData;
 class WalkJob;
 class WalkToPointJob;
 class WalkParametersJob;
+class WalkPerturbationJob;
 
 class NUWalk : public NUMotionProvider
 {
@@ -60,6 +61,7 @@ public:
     void process(WalkJob* job, bool currentprovider = false);
     void process(WalkToPointJob* job, bool currentprovider = false);
     void process(WalkParametersJob* job);
+    void process(WalkPerturbationJob* job);
     
     virtual void setWalkParameters(const WalkParameters& walkparameters);
     WalkParameters& getWalkParameters();

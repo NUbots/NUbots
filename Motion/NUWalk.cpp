@@ -25,6 +25,7 @@
 #include "Behaviour/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkToPointJob.h"
 #include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
+#include "Behaviour/Jobs/MotionJobs/WalkPerturbationJob.h"
 
 #include "walkconfig.h"
 #ifdef USE_JWALK
@@ -282,6 +283,18 @@ void NUWalk::process(WalkParametersJob* job)
     WalkParameters parameters;
     job->getWalkParameters(parameters);                
     setWalkParameters(parameters);
+}
+
+/*! @brief Process a walk perturbation job
+    @param job the walk perturbation job to be processed
+ */
+void NUWalk::process(WalkPerturbationJob* job)
+{
+    float mag, dir;
+    mag = job->getMagnitude();
+    dir = job->getDirection();
+    
+    debug << "NUWalk::process(WalkPerturbationJob)" << endl;
 }
 
 /*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw.
