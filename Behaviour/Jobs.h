@@ -43,6 +43,7 @@
 #include "Jobs/MotionJobs/SaveJob.h"
 #include "Jobs/MotionJobs/ScriptJob.h"
 #include "Jobs/MotionJobs/WalkJob.h"
+#include "Jobs/MotionJobs/WalkPerturbationJob.h"
 #include "Jobs/MotionJobs/WalkToPointJob.h"
 #include "Jobs/MotionJobs/WalkParametersJob.h"
 #include "Jobs/MotionJobs/MotionKillJob.h"
