@@ -435,8 +435,8 @@ void NUSensors::calculateFootForce()
         
         if (forcecount > 500)
         {   // only scale using the long term averages, if we have enough data
-            forces[0] *= (leftforceaverage + rightforceaverage)/leftforceaverage;
-            forces[1] *= (leftforceaverage + rightforceaverage)/rightforceaverage;
+            forces[0] *= (leftforceaverage + rightforceaverage)/(2*leftforceaverage);
+            forces[1] *= (leftforceaverage + rightforceaverage)/(2*rightforceaverage);
         }
         
         if (forcecount > 5000)
