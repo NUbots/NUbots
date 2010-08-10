@@ -356,11 +356,16 @@ void NBWalk::updateActionatorsData()
     nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
     nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
     
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, 50);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, 50);
+    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
+    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
+    
+    applyPerturbation(nu_nextLeftLegJoints, leggains[0], nu_nextRightLegJoints, leggains[0]);
+    
+    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), nu_nextLeftLegJoints, zerovel, leggains[0]);
+    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), nu_nextRightLegJoints, zerovel, leggains[0]);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, 30);
+        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), nu_nextLeftArmJoints, zerovel, armgains[0]);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, 30);
+        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), nu_nextRightArmJoints, zerovel, armgains[0]);
 }
 
