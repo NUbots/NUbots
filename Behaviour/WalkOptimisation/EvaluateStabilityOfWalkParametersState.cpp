@@ -179,8 +179,6 @@ void EvaluateStabilityOfWalkParametersStartState::lookAtGoals()
 }
 
 // ----------------------------------------------------------------------------------------------------------------------- EvaluateStabilityOfWalkParametersStartState
-// In this state we need to count steps, and perturb every third step
-// We have 4 directions to push forward, backward, inward and outward (inward and outward are both left pushes but on different feet).
 /*! @brief Construct a evaluate stability of walk parameters state */
 EvaluateStabilityOfWalkParametersRunState::EvaluateStabilityOfWalkParametersRunState(EvaluateStabilityOfWalkParametersState* parent): m_parent(parent), 
                                                                                                                                       m_provider(parent->m_provider), 
@@ -219,6 +217,7 @@ void EvaluateStabilityOfWalkParametersRunState::doState()
     m_jobs->addMotionJob(new WalkJob(1, -0.785, 0));
 }
 
+/*! @brief Resets all of the trial variables */
 void EvaluateStabilityOfWalkParametersRunState::reset()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
@@ -232,20 +231,15 @@ void EvaluateStabilityOfWalkParametersRunState::reset()
     m_right_impact_time = 0;
 }
 
+/*! @brief Generates a single perturbation 40ms after the last foot impact */
 void EvaluateStabilityOfWalkParametersRunState::doPerturbation()
 {
-    // estimate the time to perturb the robot (assume midstep is half of the previous step period)
-    float steptime = fabs(m_left_impact_time - m_right_impact_time);
-    float perturbationtime = 0;
-    if (m_left_impact_time > m_right_impact_time)
-        perturbationtime = m_left_impact_time + 0.20*steptime;
-    else
-        perturbationtime = m_right_impact_time + 0.20*steptime;
-    
-    if (m_data->CurrentTime - perturbationtime > 0 and m_step_last_perturbed != m_step_count)
+    float perturbationtime = max(m_left_impact_time, m_right_impact_time) + 40;
+    if (m_data->CurrentTime - perturbationtime >= 0 and m_step_last_perturbed != m_step_count)
         generatePerturbation();
 }
 
+/*! @brief Adds a perturbation job to the joblist. Handles the gradual increase in magnitude and the direction sequence */
 void EvaluateStabilityOfWalkParametersRunState::generatePerturbation()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0

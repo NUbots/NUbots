@@ -39,7 +39,6 @@ class NUWalk : public NUMotionProvider
 {
 public:
     static NUWalk* getWalkEngine(NUSensorsData* data, NUActionatorsData* actions);
-    NUWalk(NUSensorsData* data, NUActionatorsData* actions);
     virtual ~NUWalk();
     virtual void stop();
     void stopHead() {};
@@ -71,6 +70,7 @@ public:
     void getCurrentSpeed(vector<float>& currentspeed);
     void getMaximumSpeed(vector<float>& currentspeed);
 protected:
+    NUWalk(NUSensorsData* data, NUActionatorsData* actions);
     virtual void doWalk() = 0;
     
     virtual void enableWalk();
@@ -78,13 +78,9 @@ protected:
     void moveToInitialPosition();
 
     void setTargetSpeed(float trans_speed, float trans_direction, float rot_speed);
-    void setTargetPoint(double time, const vector<float>& position);
     void calculateCurrentSpeed();
 
-private:
-public:
 protected:
-    
     double m_current_time;                          //!< the current time
     double m_previous_time;                         //!< the previous time doWalk was called
     
@@ -101,11 +97,6 @@ protected:
     float m_speed_x;                                //!< the current x speed in cm/s
     float m_speed_y;                                //!< the current y speed in cm/s
     float m_speed_yaw;                              //!< the current rotation speed in rad/s
-    
-    double m_point_time;                            //!< the desired time to reach the current target point in milliseconds from now
-    float m_point_x;                                //!< the current target point's x position in cm
-    float m_point_y;                                //!< the current target point's y position in cm
-    float m_point_theta;                            //!< the current target point's final orientation relative to the current in radians
     
     WalkParameters m_walk_parameters;               //!< the current set of walk parameters
     
