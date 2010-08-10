@@ -5622,13 +5622,11 @@ Robot {
                           children [
                             DEF RFsrFL TouchSensor {
                               translation 0.023 -0.045 0.0701
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 DEF FSR_BO Shape {
-                                  geometry Cylinder {
-                                    height 0.0025
-                                    radius 0.012
-                                    subdivision 16
+                                  geometry Box {
+                                    size 0.016 0.016 0.005
                                   }
                                 }
                               ]
@@ -5638,7 +5636,7 @@ Robot {
                                 density -1
                                 mass 0.005
                                 coulombFriction 0.5
-                                bounce 0.7
+                                bounce 0.5
                               }
                               type "force"
                               lookupTable [
@@ -5648,7 +5646,7 @@ Robot {
                             }
                             DEF RFsrFR TouchSensor {
                               translation -0.03 -0.045 0.0701
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -5663,7 +5661,7 @@ Robot {
                             }
                             DEF RFsrBR TouchSensor {
                               translation -0.03 -0.045 -0.0304
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -5678,7 +5676,7 @@ Robot {
                             }
                             DEF RFsrBL TouchSensor {
                               translation 0.019 -0.045 -0.0298
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7374,7 +7372,7 @@ Robot {
                           children [
                             DEF LFsrFL TouchSensor {
                               translation 0.03 -0.045 0.0701
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7389,7 +7387,7 @@ Robot {
                             }
                             DEF LFsrFR TouchSensor {
                               translation -0.023 -0.045 0.0701
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7404,7 +7402,7 @@ Robot {
                             }
                             DEF LFsrBR TouchSensor {
                               translation -0.019 -0.045 -0.0298
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
@@ -7419,7 +7417,7 @@ Robot {
                             }
                             DEF LFsrBL TouchSensor {
                               translation 0.03 -0.045 -0.0304
-                              rotation 0 1 0 1.57
+                              rotation 1 0 0 1.57
                               children [
                                 USE FSR_BO
                               ]
