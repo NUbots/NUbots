@@ -1,4 +1,4 @@
-Smoothness: 0.5
+Smoothness: 1.0
 Return to Start Position: false
 "Time (s)","HeadPitch","HeadYaw","LShoulderRoll","LShoulderPitch","LElbowRoll","LElbowYaw","RShoulderRoll","RShoulderPitch","RElbowRoll","RElbowYaw","LHipRoll","LHipPitch","LHipYawPitch","LKneePitch","LAnkleRoll","LAnklePitch","RHipRoll","RHipPitch","RHipYawPitch","RKneePitch","RAnkleRoll","RAnklePitch"
 0.1: [[ 0.00], [ 0.00],  [0.15], [1.57], [ 0.00], [ 0.00], [-0.15], [1.57], [0.00], [ 0.00], 	[ 0.00], [-0.17], [ 0.00], [1.68], [ 0.00], [ 0.24], [ 0.00], [-0.17], [ 0.00], [1.68], [ 0.00], [ 0.24]]
