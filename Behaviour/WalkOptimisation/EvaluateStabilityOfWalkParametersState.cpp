@@ -183,7 +183,7 @@ void EvaluateStabilityOfWalkParametersStartState::lookAtGoals()
 EvaluateStabilityOfWalkParametersRunState::EvaluateStabilityOfWalkParametersRunState(EvaluateStabilityOfWalkParametersState* parent): m_parent(parent), 
                                                                                                                                       m_provider(parent->m_provider), 
                                                                                                                                       m_PI(3.1416),
-                                                                                                                                      m_INITIAL_PERTURBATION_MAG(20),
+                                                                                                                                      m_INITIAL_PERTURBATION_MAG(10),
                                                                                                                                       m_PERTURBATION_MAG_INC(10),
                                                                                                                                       m_PERTURBATION_INTERVAL(3)
 {
@@ -251,21 +251,10 @@ void EvaluateStabilityOfWalkParametersRunState::generatePerturbation()
     m_jobs->addMotionJob(new WalkPerturbationJob(m_perturbation_magnitude, m_perturbation_direction));
     
     // ----------------------------------- Update the perturbation direction
-    if (m_PERTURBATION_INTERVAL%2 == 0)     
-    {   // if the perturbation is an even number of steps, the perturbation direction sequence is 0, PI/2, PI, -PI/2
-        m_perturbation_direction += m_PI/2;
-        if (m_perturbation_direction > m_PI)
-            m_perturbation_direction = -m_PI/2;
-    }
-    else
-    {   // if the perturbation is every odd number of steps, the perturbation direction sequence is 0, PI/2, PI, PI/2
-        if (m_perturbation_count%4 == 0)
-            m_perturbation_direction = 0;
-        else if (m_perturbation_count%4 < 3)
-            m_perturbation_direction += m_PI/2;
-        else 
-            m_perturbation_direction = m_PI/2;
-    }
+    // the perturbation direction sequence is 0, PI/2, PI, -PI/2 (for both odd and even step intervals)
+    m_perturbation_direction += m_PI/2;
+    if (m_perturbation_direction > m_PI)
+        m_perturbation_direction = -m_PI/2;
     
     // ----------------------------------- Update the perturbation magnitude
     if (m_perturbation_direction == 0)

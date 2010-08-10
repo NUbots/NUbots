@@ -79,6 +79,9 @@ protected:
 
     void setTargetSpeed(float trans_speed, float trans_direction, float rot_speed);
     void calculateCurrentSpeed();
+    
+    virtual void applyPerturbation() {};
+    void applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains);
 
 protected:
     double m_current_time;                          //!< the current time
@@ -99,13 +102,14 @@ protected:
     float m_speed_yaw;                              //!< the current rotation speed in rad/s
     
     WalkParameters m_walk_parameters;               //!< the current set of walk parameters
+    double m_perturbation_start_time;               //!< the time at which the current perturbation started in ms
+    float m_perturbation_magnitude;                 //!< the magnitude of the current perturbation as a percentage
+    float m_perturbation_direction;                 //!< the direction of the current perturbation in radians
     
     vector<float> m_initial_larm;
     vector<float> m_initial_rarm;
     vector<float> m_initial_lleg;
     vector<float> m_initial_rleg;
-
-private:
 };
 
 #endif

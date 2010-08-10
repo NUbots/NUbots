@@ -94,6 +94,10 @@ NUWalk::NUWalk(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvid
     m_walk_enabled = false;
     m_larm_enabled = true;
     m_rarm_enabled = true;
+    
+    m_perturbation_start_time = -1000;
+    m_perturbation_magnitude = 0;
+    m_perturbation_direction = 0;
 }
 
 /*! @brief Destructor for motion module
@@ -278,11 +282,9 @@ void NUWalk::process(WalkParametersJob* job)
  */
 void NUWalk::process(WalkPerturbationJob* job)
 {
-    float mag, dir;
-    mag = job->getMagnitude();
-    dir = job->getDirection();
-    
-    debug << "NUWalk::process(WalkPerturbationJob)" << endl;
+    m_perturbation_start_time = m_current_time;
+    m_perturbation_magnitude = job->getMagnitude();
+    m_perturbation_direction = job->getDirection();
 }
 
 /*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw.
@@ -482,6 +484,28 @@ void NUWalk::moveToInitialPosition()
         m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + time_rarm, m_initial_rarm, velocity_rarm, 40);
         m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + time_lleg, m_initial_lleg, velocity_lleg, 75);
         m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + time_rleg, m_initial_rleg, velocity_rleg, 75);
+    }
+}
+
+/*! @brief Applies m_perturbation_magnitude and m_perturbation_direction to the leftleg and rightleg vectors in place
+    @param leftleg a vector of joint values for the left leg
+    @param rightleg a vector of joint values for the right leg
+ */
+void NUWalk::applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains)
+{   // the problem is that here I can't do this in a platform independent way :(
+    // so this will have to go on my TODO: implement this in a platform independent way
+    if (m_current_time - m_perturbation_start_time < 300)
+    {
+        float roll = -(m_perturbation_magnitude/500)*sin(m_perturbation_direction);
+        float pitch = -(m_perturbation_magnitude/500)*cos(m_perturbation_direction); 
+        
+        // THIS WILL ONLY WORK FOR THE NAO [Roll,Pitch,Yaw,Knee,Roll,Pitch]
+        leftleg[0] += roll*(100/leftleggains[0]);
+        leftleg[4] -= roll*(100/leftleggains[4]);
+        rightleg[0] += roll*(100/rightleggains[0]);
+        rightleg[4] -= roll*(100/rightleggains[4]);
+        leftleg[5] += pitch*(100/leftleggains[5]);
+        rightleg[5] += pitch*(100/rightleggains[5]);
     }
 }
 
