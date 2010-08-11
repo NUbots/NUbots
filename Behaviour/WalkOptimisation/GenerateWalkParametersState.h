@@ -52,9 +52,11 @@ class GenerateWalkParametersState : public WalkOptimisationState
 public:
     GenerateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
     {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState::GenerateWalkParametersState" << endl;
         #endif
+        m_getting_up = false;
+        m_previously_getting_up = false;
     }
     
     ~GenerateWalkParametersState() {};
@@ -69,15 +71,17 @@ public:
     
     void doState()
     {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState" << endl;
         #endif
-        if (m_parent->stateChanged())
+        m_previously_getting_up = m_getting_up;
+        m_data->getMotionGetupActive(m_getting_up);
+        
+        if (m_parent->stateChanged())// or (m_previously_getting_up and not m_getting_up))
         {
-            vector<float>& parameters = m_parent->m_optimiser->nextParameters();
+            m_parent->tickOptimiser();
             m_current_start_state = getStartState();
-            #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-                debug << "GenerateWalkParametersState::doState(). Next parameters: " << MotionFileTools::fromVector(parameters) << endl;
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
             #endif
         }
@@ -155,6 +159,9 @@ private:
     }
 private:
     vector<float> m_current_start_state;
+    
+    bool m_previously_getting_up;
+    bool m_getting_up;
 };
 
 #endif

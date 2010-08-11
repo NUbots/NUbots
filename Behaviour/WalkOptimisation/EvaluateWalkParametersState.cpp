@@ -39,6 +39,7 @@ EvaluateWalkParametersState::EvaluateWalkParametersState(WalkOptimisationProvide
     m_evaluate_stability = new EvaluateStabilityOfWalkParametersState(this);
     
     m_state = m_evaluate_speed;
+    m_speed_evaluation_completed = false;
 }
 
 /*! @brief Destroy the evaluate walk parameters state */
@@ -53,7 +54,7 @@ EvaluateWalkParametersState::~EvaluateWalkParametersState()
 /*! @brief Returns the desired next state in the walk optimisation provider */
 BehaviourState* EvaluateWalkParametersState::nextState()
 {
-    if (m_data->isFallen())
+    if (m_data->isFallen())// or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
         return m_parent->m_generate;
     else
         return this;
@@ -66,5 +67,23 @@ BehaviourState* EvaluateWalkParametersState::nextStateCommons()
         return m_evaluate_speed;
     else
         return m_state;
+}
+
+/*! @brief Returns true if the speed evalution has completed. This is a hack to shortcut the stability measurement when I don't need it */
+bool EvaluateWalkParametersState::speedEvaluationFinished()
+{
+    if (m_speed_evaluation_completed)
+    {
+        m_speed_evaluation_completed = false;
+        return true;
+    }
+    else
+        return false;
+}
+
+/*! @brief Marks the speed evaluation as being complete. This is a hack to shortcut the stability measurement when I don't need it */
+void EvaluateWalkParametersState::markSpeedEvaluationCompleted()
+{
+    m_speed_evaluation_completed = true;
 }
 

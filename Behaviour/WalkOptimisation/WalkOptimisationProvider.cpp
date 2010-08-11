@@ -23,8 +23,12 @@
 #include "GenerateWalkParametersState.h"
 #include "EvaluateWalkParametersState.h"
 #include "PausedWalkOptimisationState.h"
+
 #include "Tools/Optimisation/Optimiser.h"
 #include "Motion/Tools/MotionFileTools.h"
+
+#include "Behaviour/Jobs/JobList.h"
+#include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -37,7 +41,9 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         debug << "WalkOptimisationProvider::WalkOptimisationProvider" << endl;
     #endif
     
-    m_optimiser = new Optimiser("Test");
+    m_parameters.load("NBWalkDefault");
+    m_optimiser = new Optimiser("Test", m_parameters.getAsParameters());
+    
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())
     {
@@ -58,6 +64,11 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     m_paused = new PausedWalkOptimisationState(this);
     
     m_state = m_paused;
+    
+    m_first_run = true;
+    m_duration = 0;
+    m_energy = 0;	
+    m_stability = 0;
 }
 
 WalkOptimisationProvider::~WalkOptimisationProvider()
@@ -92,4 +103,88 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
     #endif
 }
 
+void WalkOptimisationProvider::tickOptimiser()
+{
+    if (m_first_run)
+    {	// avoid actually ticking the optimiser, the behaviour is sloppy; the first tick happens before the first set of parameters is even tested ;)
+        m_first_run = false;
+        return;
+    }
+    // save the state of the optimiser, and the walk parameters in case of hardware failure.
+    
+    // update the optimiser and give the next set of parameters to the walk engine
+    m_optimiser->setParametersResult(calculateFitness());
+    vector<float> nextparameters = m_optimiser->getNextParameters();
+    m_parameters.set(nextparameters);
+    m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
+    
+    // reset the fitness
+    m_duration = 0;
+    m_energy = 0;	
+    m_stability = 0;
+    
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "WalkOptimisationProvider::tickOptimiser" << endl;
+        m_parameters.summaryTo(debug);
+        m_optimiser->summaryTo(debug);
+    #endif
+}
+
+float WalkOptimisationProvider::calculateFitness()
+{
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "WalkOptimisationProvider::calculateFitness() " << m_duration << " " << m_energy << " " << m_stability << endl;
+        m_parameters.summaryTo(debug);
+        m_optimiser->summaryTo(debug);
+    #endif
+    if (m_energy == 0 and m_duration == 0 and m_stability == 0)
+    {	// we have fallen over before actually reaching the start of the evaluation
+        return 0;
+    }
+    else if (m_energy == 0 and m_stability == 0)
+    {	// we have fallen over during the evaluation
+        vector<float>& speeds = m_parameters.getMaxSpeeds();
+        float travelleddistance = speeds[0]*m_duration;
+        float pathdistance = calculatePathDistance();
+        float predictedfalls = pathdistance/travelleddistance;
+        return pathdistance/(pathdistance/speeds[0] + predictedfalls*10);
+    }
+    else if (m_stability == 0)
+    {	// we are not using the stability metric
+     	return 1000*calculatePathDistance()/m_duration;   
+    }
+    else
+    {	// we are not using the stability metric
+        return 1000*calculatePathDistance()/m_duration;
+    }
+}
+
+/*! @brief Returns the distance in cm of the path specified by m_points 
+ @return the distance of the evaluation path 
+ */
+float WalkOptimisationProvider::calculatePathDistance()
+{
+    float distance = 0;
+    for (size_t i=1; i<m_speed_points.size(); i++)
+        distance += sqrt(pow(m_speed_points[i][0] - m_speed_points[i-1][0],2) + pow(m_speed_points[i][1] - m_speed_points[i-1][1],2));
+    return distance;
+}
+
+/*! @brief Sets the duration of the current trial */
+void WalkOptimisationProvider::setDuration(float duration)
+{
+    m_duration = duration;
+}
+
+/*! @brief Sets the energy used over the current trial */
+void WalkOptimisationProvider::setEnergy(float energy)
+{
+    m_energy = energy;
+}
+
+/*! @brief Sets the stability of the parameters */
+void WalkOptimisationProvider::setStability(float stability)
+{
+    m_stability = stability;
+}
 

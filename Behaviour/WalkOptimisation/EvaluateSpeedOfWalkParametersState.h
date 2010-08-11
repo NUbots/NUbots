@@ -41,10 +41,10 @@ public:
     BehaviourState* nextState();
     void doState();
 private:
-    void updateEvaluation();
-    void updateSpeedEvaluation();
-    void updateEfficiencyEvaluation();
-    void finaliseEvaluation();    
+    void startEvaluation();
+    void tickEvaluation();
+    void finishEvaluation();    
+    void updateEnergy();
     
     vector<float> getStartPoint();
     bool pointReached();
@@ -60,6 +60,11 @@ private:
     vector<float> m_current_target_state;
     bool m_reverse_points;
     unsigned int m_current_point_index;
+    
+    double m_trial_start_time;
+    float m_energy_used;
+    double m_previous_time;
+    vector<float> m_previous_positions;
 };
 
 #endif

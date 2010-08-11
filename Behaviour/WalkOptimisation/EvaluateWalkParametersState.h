@@ -41,6 +41,8 @@ public:
 private:
     BehaviourState* nextState();
     BehaviourState* nextStateCommons();
+    bool speedEvaluationFinished();	
+    void markSpeedEvaluationCompleted();
     
     WalkOptimisationProvider* m_parent;                 //!< the walk optimisation provider
     BehaviourState* m_evaluate_speed;                   //!< the speed evaluation state machine
@@ -48,6 +50,8 @@ private:
     float m_energy;                                     //!< the energy used over a trial
     BehaviourState* m_evaluate_stability;               //!< the stability evaluation state machine
     float m_stability;                                  //!< the stability over a trial
+    
+    bool m_speed_evaluation_completed;
     
     friend class EvaluateStabilityOfWalkParametersState;
     friend class EvaluateSpeedOfWalkParametersState; 

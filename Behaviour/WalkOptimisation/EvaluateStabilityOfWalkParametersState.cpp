@@ -258,7 +258,10 @@ void EvaluateStabilityOfWalkParametersRunState::generatePerturbation()
     
     // ----------------------------------- Update the perturbation magnitude
     if (m_perturbation_direction == 0)
+    {
+        m_provider->setStability(m_perturbation_magnitude);
         m_perturbation_magnitude += m_PERTURBATION_MAG_INC;
+    }
 }
 
 

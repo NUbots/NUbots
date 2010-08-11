@@ -27,6 +27,7 @@
 
 #include "Behaviour/BehaviourFSMProvider.h"
 class Optimiser;
+#include "Motion/Walks/WalkParameters.h"
 
 #include <vector>
 #include <string>
@@ -37,6 +38,12 @@ class WalkOptimisationProvider : public BehaviourFSMProvider
 public:
     WalkOptimisationProvider(Behaviour* manager);
     ~WalkOptimisationProvider();
+    
+    void tickOptimiser();
+    void setDuration(float time);
+    void setSpeed(float speed);
+    void setEnergy(float energy);
+    void setStability(float stability);
 protected:
     BehaviourState* nextStateCommons();
 public:
@@ -44,9 +51,18 @@ public:
     BehaviourState* m_evaluate;                 //!< the state in which the parameter evaluation is done
     BehaviourState* m_paused;                   //!< the optimisation process is paused in this state.
     
-    Optimiser* m_optimiser;                     //!< the optimiser itself
     vector<vector<float> > m_speed_points;      //!< the way points over which to evaluate to speed and efficiency of the walk parameters
     vector<vector<float> > m_stability_points;  //!< the way points over which to evaluate the stability of the walk parameters
+private:
+    WalkParameters m_parameters;                //!< the current set of walk parameters
+    Optimiser* m_optimiser;                     //!< the optimiser itself
+    
+    float calculateFitness();					//!< calculates the fitness of the current parameters from m_duration, m_speed, m_energy, and m_stability
+    float calculatePathDistance();				//!< calculates the distance of the speed evaluation path
+    bool m_first_run;							//!< a flag indicating whether this is the first call to tickOptimiser
+    float m_duration;							//!< the evaluation time in ms
+    float m_energy;								//!< the energy used during evalution of walk parameters in J
+    float m_stability;							//!< the stability of the walk parameters
 };
 
 

@@ -41,7 +41,7 @@
  */
 EvaluateSpeedOfWalkParametersState::EvaluateSpeedOfWalkParametersState(EvaluateWalkParametersState* parent)
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
         debug << "EvaluateSpeedOfWalkParametersState::EvaluateSpeedOfWalkParametersState" << endl;
     #endif
     m_parent = parent;
@@ -56,7 +56,7 @@ BehaviourState* EvaluateSpeedOfWalkParametersState::nextState()
 {   // when all of the points have been reached we progress to the stability evaluation
     if (allPointsReached())
     {
-        finaliseEvaluation();
+        finishEvaluation();
         return m_parent->m_evaluate_stability;
     }
     else
@@ -66,13 +66,13 @@ BehaviourState* EvaluateSpeedOfWalkParametersState::nextState()
 /*! @brief Do the state behaviour */
 void EvaluateSpeedOfWalkParametersState::doState()
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
         debug << "EvaluateSpeedOfWalkParametersState::doState()" << endl;
     #endif
     if (m_parent->stateChanged() or m_provider->stateChanged())
-        m_current_target_state = getStartPoint();
+        startEvaluation();
     
-    updateEvaluation();
+    tickEvaluation();
 
     lookAtGoals();
     
@@ -83,33 +83,75 @@ void EvaluateSpeedOfWalkParametersState::doState()
     m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
-/*! @brief Updates the evaluation */
-void EvaluateSpeedOfWalkParametersState::updateEvaluation()
+/*! @brief Starts the evaluation, ie resets all of the measurement variables */
+void EvaluateSpeedOfWalkParametersState::startEvaluation()
 {
-    updateSpeedEvaluation();
-    updateEfficiencyEvaluation();
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
+        debug << "EvaluateSpeedOfWalkParametersState::startEvaluation()" << endl;
+    #endif
+    m_current_target_state = getStartPoint();
+    m_trial_start_time = m_data->CurrentTime;
+    m_energy_used = 0;
+    m_previous_positions.clear();
 }
 
-/*! @brief Updates the speed evaluation */
-void EvaluateSpeedOfWalkParametersState::updateSpeedEvaluation()
-{   // the speed calculation is distance/time, but i have no measure of distance travelled
-    // distance is a constant, so the smaller the time the better
-    // however, until the trial is finished the longer the time the better
-    
-}
-
-/*! @brief Updates the efficiency evaluation */
-void EvaluateSpeedOfWalkParametersState::updateEfficiencyEvaluation()
-{   // the efficiency
-    
+/*! @brief Updates the evaluation */
+void EvaluateSpeedOfWalkParametersState::tickEvaluation()
+{
+    m_provider->setDuration(m_data->CurrentTime - m_trial_start_time);
+    updateEnergy();
 }
 
 /*! @brief Finalise the evaluation */
-void EvaluateSpeedOfWalkParametersState::finaliseEvaluation()
+void EvaluateSpeedOfWalkParametersState::finishEvaluation()
 {
+    m_parent->markSpeedEvaluationCompleted();		// This is part of a hack to short-cut the stability test.
+    m_provider->setEnergy(m_energy_used);
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "EvaluateSpeedOfWalkParametersState::finaliseEvaluation()" << endl;
+        debug << "EvaluateSpeedOfWalkParametersState::finishEvaluation() " << m_data->CurrentTime - m_trial_start_time << "ms " << m_energy_used << "J" << endl;
     #endif
+}
+
+/*! @brief Updates the energy used over the trial */
+void EvaluateSpeedOfWalkParametersState::updateEnergy()
+{
+    // There are two ways to measure the energy used (a) using joint torques or (b) using battery currents (c) using joint currents
+    vector<float> currents;
+    vector<float> battery;
+    vector<float> positions;
+    vector<float> torques;
+    
+    bool batteryavaliable = m_data->getBatteryValues(battery);
+    bool currentsavailable = m_data->getJointCurrents(NUSensorsData::BodyJoints, currents);
+    
+    m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
+    bool torquesavailable = m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
+    
+    if (batteryavaliable)
+    {
+        // This code has never been tested, but should be OK on NAO
+        float voltage = 3*(battery[2] + battery[3])/1000.0;        					// this has been hastily ported over from 2009!
+        float current = battery[1];
+        m_energy_used += voltage*current*(m_data->CurrentTime - m_previous_time)/1000;
+    }
+    else if (currentsavailable)
+    {
+        /*float voltage = 3*(battery[2] + battery[3])/1000;        					// this has been hastily ported over from 2009!
+        for (unsigned int i=0; i<currents.size(); i++)
+            m_energy_used += fabs(currents[i]*voltage);
+        m_energy_used += 21.0*(m_data->CurrentTime - m_previous_time);				// we assume for now the CPU etc draws 21W*/
+    }
+    else if (torquesavailable)
+    {
+        if (not m_previous_positions.empty())
+        {
+        	for (unsigned int i=0; i<positions.size(); i++)
+            	m_energy_used += 2*fabs(torques[i]*(positions[i] - m_previous_positions[i]));			// the factor of two here model's the gearbox efficiency
+            m_energy_used += 21.0*(m_data->CurrentTime - m_previous_time)/1000;							// we assume for now the CPU etc draws 21W
+        }
+        m_previous_positions = positions;
+    }
+    m_previous_time = m_data->CurrentTime;
 }
     
 /*! @brief Returns the starting point for the evaluation of the speed */
