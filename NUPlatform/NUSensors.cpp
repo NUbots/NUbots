@@ -349,6 +349,7 @@ void NUSensors::calculateFallSense()
     static const float RollFallingThreshold = 0.55;
     static const float ForwardFallingThreshold = 0.55;
     static const float BackwardFallingThreshold = 0.45;
+    static float fallen_time = 0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
@@ -363,7 +364,12 @@ void NUSensors::calculateFallSense()
     acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
     // check if the robot has fallen over
     vector<float> fallen(5,0);
-    if (fabs(acceleration_mag - 981) < 0.1*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+    if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        fallen_time += m_current_time - m_previous_time;
+    else
+        fallen_time = 0;
+    
+    if (fallen_time > 100)
     {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
         // We use only the angle to determine we have fallen, not the direction
         fallen[0] = Fallen;
