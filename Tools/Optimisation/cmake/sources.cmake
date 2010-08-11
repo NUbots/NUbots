@@ -20,7 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS Optimiser.h  
+SET (YOUR_SRCS Optimiser.h  Optimiser.cpp
+               Parameter.h  Parameter.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

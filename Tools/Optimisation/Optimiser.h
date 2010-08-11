@@ -25,6 +25,8 @@
 #ifndef OPTIMISER_H
 #define OPTIMISER_H
 
+class Parameter;
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -33,17 +35,17 @@ using namespace std;
 class Optimiser
 {
 public:
-    Optimiser(string name);
+    Optimiser(string name, vector<Parameter> parameters);
     ~Optimiser();
     
-    virtual vector<float>& nextParameters();
-    virtual void parametersResult(float fitness);
+    virtual vector<float> getNextParameters();
+    virtual void setParametersResult(float fitness);
+    
+    void summaryTo(ostream& stream);
 private:
     string m_name;
-    vector<float> m_next_parameters;
+    vector<Parameter> m_parameters;
 };
-
-#include "Optimiser.cpp"
 
 #endif
 

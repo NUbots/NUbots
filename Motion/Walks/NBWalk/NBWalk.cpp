@@ -206,20 +206,20 @@ void NBWalk::setWalkParameters(const WalkParameters& walkparameters)
 void NBWalk::setGait()
 {
     // copy the parameters from m_walk_parameters into m_gait
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
-    m_gait->step[0] = 1/parameters[0].Value;        // step frequency
-    m_gait->step[2] = 10*parameters[1].Value;       // step height
-    m_gait->zmp[1] = parameters[2].Value;           // zmp static fraction
-    m_gait->zmp[2] = 10*parameters[3].Value;        // zmp offset
-    m_gait->zmp[3] = 10*parameters[3].Value;        // zmp offset
-    m_gait->zmp[4] = 10*parameters[4].Value;        // zmp offset strafe
-    m_gait->zmp[5] = 10*parameters[5].Value;        // zmp offset turn
-    m_gait->step[1] = parameters[6].Value;          // double support time
-    m_gait->hack[0] = parameters[7].Value;          // hip roll hack
-    m_gait->hack[1] = parameters[7].Value;          // hip roll hack
-    m_gait->step[3] = parameters[8].Value;          // foot lift angle
-    m_gait->stance[3] = parameters[9].Value;        // forward lean
-    m_gait->stance[0] = 10*parameters[10].Value;     // torso height
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    m_gait->step[0] = 1/parameters[0].get();        // step frequency
+    m_gait->step[2] = 10*parameters[1].get();       // step height
+    m_gait->zmp[1] = parameters[2].get();           // zmp static fraction
+    m_gait->zmp[2] = 10*parameters[3].get();        // zmp offset
+    m_gait->zmp[3] = 10*parameters[3].get();        // zmp offset
+    m_gait->zmp[4] = 10*parameters[4].get();        // zmp offset strafe
+    m_gait->zmp[5] = 10*parameters[5].get();        // zmp offset turn
+    m_gait->step[1] = parameters[6].get();          // double support time
+    m_gait->hack[0] = parameters[7].get();          // hip roll hack
+    m_gait->hack[1] = parameters[7].get();          // hip roll hack
+    m_gait->step[3] = parameters[8].get();          // foot lift angle
+    m_gait->stance[3] = parameters[9].get();        // forward lean
+    m_gait->stance[0] = 10*parameters[10].get();     // torso height
     
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];

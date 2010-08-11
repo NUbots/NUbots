@@ -20,28 +20,39 @@
 */
 
 #include "Optimiser.h"
+#include "Parameter.h"
 
 #include "debug.h"
 
 /*!
  */
-Optimiser::Optimiser(std::string name)
+Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
 {
     m_name = name;
+    m_parameters = parameters;
 }
 
 Optimiser::~Optimiser()
 {
 }
 
-vector<float>& Optimiser::nextParameters()
+vector<float> Optimiser::getNextParameters()
 {
-    debug << "Optimiser::nextParameters()" << endl;
-    return m_next_parameters;
+    vector<float> parameters;
+    parameters.reserve(m_parameters.size());
+    for (size_t i=0; i<m_parameters.size(); i++)
+        parameters.push_back(m_parameters[i].get());
+
+    debug << "Optimiser::nextParameters() " << m_parameters << endl;
+    return parameters;
 }
 
-void Optimiser::parametersResult(float fitness)
+void Optimiser::setParametersResult(float fitness)
 {
     debug << "Optimiser::parameterResult(" << fitness << ")" << endl;
 }
 
+void Optimiser::summaryTo(ostream& stream)
+{
+    debug << "OptimiserSummary" << endl;
+}
