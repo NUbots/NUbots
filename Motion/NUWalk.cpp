@@ -494,10 +494,10 @@ void NUWalk::moveToInitialPosition()
 void NUWalk::applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains)
 {   // the problem is that here I can't do this in a platform independent way :(
     // so this will have to go on my TODO: implement this in a platform independent way
-    if (m_current_time - m_perturbation_start_time < 300)
+    if (m_current_time - m_perturbation_start_time < 200)
     {
-        float roll = -(m_perturbation_magnitude/500)*sin(m_perturbation_direction);
-        float pitch = -(m_perturbation_magnitude/500)*cos(m_perturbation_direction); 
+        float roll = -(m_perturbation_magnitude/2000)*sin(m_perturbation_direction);
+        float pitch = -(m_perturbation_magnitude/1000)*cos(m_perturbation_direction); 
         
         // THIS WILL ONLY WORK FOR THE NAO [Roll,Pitch,Yaw,Knee,Roll,Pitch]
         leftleg[0] += roll*(100/leftleggains[0]);

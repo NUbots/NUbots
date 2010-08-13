@@ -29,9 +29,9 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
     m_covariance[rollAngle][rollAngle] = 0.5f * 0.5f;
 
     m_processNoise = Matrix(numStates,numStates,false);
-    m_processNoise[pitchAngle][pitchAngle] = 1e-2;
+    m_processNoise[pitchAngle][pitchAngle] = 1e-3;
     m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-5;
-    m_processNoise[rollAngle][rollAngle] = 1e-2;
+    m_processNoise[rollAngle][rollAngle] = 1e-3;
     m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-5;
 
     m_initialised = true;
