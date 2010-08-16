@@ -21,6 +21,8 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS Optimiser.h  Optimiser.cpp
+			   EHCLSOptimiser.h EHCLSOptimiser.cpp	
+               PGRLOptimiser.h PGRLOptimiser.cpp	
                Parameter.h  Parameter.cpp
 )
 ####################################################################################

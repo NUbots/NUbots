@@ -105,13 +105,13 @@ vector<Parameter> WalkParameters::getAsParameters()
     
     for (size_t i=0; i<m_max_speeds.size(); i++)
     {
-        Parameter p(m_max_speeds[i], 0, m_max_speeds[i]*3); 
+        Parameter p("Velocity", m_max_speeds[i], 0, m_max_speeds[i]*3); 
         data.push_back(p);
     }
     
     for (size_t i=0; i<m_max_accelerations.size(); i++)
     {
-        Parameter p(m_max_accelerations[i], 0, m_max_accelerations[i]*3); 
+        Parameter p("Acceleration", m_max_accelerations[i], 0, m_max_accelerations[i]*3); 
         data.push_back(p);
     }
     
@@ -122,7 +122,7 @@ vector<Parameter> WalkParameters::getAsParameters()
     {
         for (size_t j=0; j<m_leg_gains[i].size(); j++)
         {
-            Parameter p(m_leg_gains[i][j], 0, 100);
+            Parameter p("Gain", m_leg_gains[i][j], 0, 100);
             data.push_back(p);
         }
     }

@@ -77,7 +77,7 @@ public:
         m_previously_getting_up = m_getting_up;
         m_data->getMotionGetupActive(m_getting_up);
         
-        if (m_parent->stateChanged())// or (m_previously_getting_up and not m_getting_up))
+        if (m_parent->stateChanged() or (m_parent->wasPreviousState(this) and m_previously_getting_up and not m_getting_up and not m_data->isFallen()))
         {
             m_parent->tickOptimiser();
             m_current_start_state = getStartState();

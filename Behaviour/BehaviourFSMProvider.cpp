@@ -95,9 +95,9 @@ void BehaviourFSMProvider::doBehaviour()
         nextstate = m_state->getNextState();
     
     // do state transition
+    m_previous_state = m_state;
     if (nextstate != m_state)
     {
-        m_previous_state = m_state;
         m_state = nextstate;
         m_state_changed = true;
     }

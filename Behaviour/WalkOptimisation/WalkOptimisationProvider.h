@@ -31,6 +31,7 @@ class Optimiser;
 
 #include <vector>
 #include <string>
+#include <fstream>
 using namespace std;
 
 class WalkOptimisationProvider : public BehaviourFSMProvider
@@ -59,10 +60,12 @@ private:
     
     float calculateFitness();					//!< calculates the fitness of the current parameters from m_duration, m_speed, m_energy, and m_stability
     float calculatePathDistance();				//!< calculates the distance of the speed evaluation path
-    bool m_first_run;							//!< a flag indicating whether this is the first call to tickOptimiser
+    int m_iteration_count;						//!< the number of times the optimiser has been ticked
     float m_duration;							//!< the evaluation time in ms
     float m_energy;								//!< the energy used during evalution of walk parameters in J
     float m_stability;							//!< the stability of the walk parameters
+    
+    ofstream m_log;
 };
 
 

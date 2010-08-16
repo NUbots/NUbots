@@ -40,13 +40,45 @@ public:
     ~Parameter();
     
     float get() const;
+    float min() const;
+    float max() const;
+    string& name();
+    string& desc();
     void set(float value);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
+    
+    friend float operator-(const Parameter& p, const float& f);
+    friend float operator-(const float& f, const Parameter& p);
+    friend float operator-(const Parameter& p1, const Parameter& p2);
+    friend float operator+(const Parameter& p, const float& f);
+    friend float operator+(const float& f, const Parameter& p);
+    friend float operator+(const Parameter& p1, const Parameter& p2);
+    friend Parameter operator+=(const Parameter& p, const float& f);
+    friend float operator*(const float& f, const Parameter& p);
+    friend float operator*(const Parameter& p, const float& f);
+    friend float operator*(const Parameter& p1, const Parameter& p2);
+    
+    friend vector<float> operator-(const vector<float>& f, const vector<Parameter>& p);
+    friend vector<float> operator-(const vector<Parameter>& p, const vector<float>& f);
+    friend vector<float> operator-(const vector<Parameter>& p1, const vector<Parameter>& p2);
+    friend vector<float> operator+(const vector<float>& f, const vector<Parameter>& p);
+    friend vector<float> operator+(const vector<Parameter>& p, const vector<float>& f);
+    friend vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2);
+    friend vector<Parameter> operator+=(const vector<Parameter>& p, const vector<float>& f);
+    friend vector<float> operator*(const vector<float>& f, const vector<Parameter>& p);
+    friend vector<float> operator*(const vector<Parameter>& p, const vector<float>& f);
+    friend vector<float> operator*(const float& f, const vector<Parameter>& p);
+    friend vector<float> operator*(const vector<Parameter>& p, const float& f);
+
+    static vector<float> getAsVector(const vector<Parameter>& p);
+    
     friend ostream& operator<< (ostream& output, const Parameter& p);
     friend ostream& operator<< (ostream& output, const vector<Parameter>& p);
+    
     friend istream& operator>> (istream& input, Parameter& p);
+    friend istream& operator>> (istream& input, vector<Parameter>& p);
 
 private:
     string Name;
@@ -55,5 +87,19 @@ private:
     float Max;
     string Description;
 };
+
+vector<float> operator+(const float& f, const vector<float>& v);
+vector<float> operator+(const vector<float>& v, const float& f);
+vector<float> operator+(const vector<float>& v1, const vector<float>& v2);
+vector<float> operator-(const float& f, const vector<float>& v);
+vector<float> operator-(const vector<float>& v, const float& f);
+vector<float> operator-(const vector<float>& v1, const vector<float>& v2);
+vector<float> operator*(const float& f, const vector<float>& v);
+vector<float> operator*(const vector<float>& v, const float& f);
+
+float norm(const vector<float>& v);
+
+ostream& operator<<(ostream& output, const vector<float>& v);
+istream& operator>>(istream& output, vector<float>& v);
 
 #endif

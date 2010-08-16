@@ -23,36 +23,93 @@
 #include "Parameter.h"
 
 #include "debug.h"
+#include "nubotdataconfig.h"
 
-/*!
+/*! @brief Constructor for abstract optimiser
+ 	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
+ 	@param parameters the initial seed for the optimisation
  */
 Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
 {
     m_name = name;
-    m_parameters = parameters;
+    m_initial_parameters = parameters;
 }
 
+/*! @brief Destructor for the abstract optimiser */
 Optimiser::~Optimiser()
 {
 }
 
-vector<float> Optimiser::getNextParameters()
+/*! @brief Stream insertion operator for optimiser. Store the entire optimiser in the given stream
+    @param o the output stream to save the optimiser to
+   	@param optimiser the optimiser to save
+*/
+ostream& operator<<(ostream& o, const Optimiser& optimiser)
 {
-    vector<float> parameters;
-    parameters.reserve(m_parameters.size());
-    for (size_t i=0; i<m_parameters.size(); i++)
-        parameters.push_back(m_parameters[i].get());
-
-    debug << "Optimiser::nextParameters() " << m_parameters << endl;
-    return parameters;
+    optimiser.toStream(o);
+    return o;
 }
 
-void Optimiser::setParametersResult(float fitness)
+/*! @brief Stream insertion operator for optimiser. Store the entire optimiser in the given stream
+    @param o the output stream to save the optimiser to
+    @param optimiser the optimiser to save
+ */
+ostream& operator<<(ostream& o, const Optimiser* optimiser)
 {
-    debug << "Optimiser::parameterResult(" << fitness << ")" << endl;
+    if (optimiser != 0)
+        o << *optimiser;
+    return o;
 }
 
-void Optimiser::summaryTo(ostream& stream)
+/*! @brief Stream extraction operator for optimiser. Load the entire optimiser from the given stream
+    @param i the input stream to load the optimiser from
+    @param optimiser the optimiser to load
+ */
+istream& operator>>(istream& i, Optimiser& optimiser)
 {
-    debug << "OptimiserSummary" << endl;
+    optimiser.fromStream(i);
+    return i;
 }
+
+/*! @brief Stream extraction operator for optimiser. Load the entire optimiser from the given stream
+    @param i the input stream to load the optimiser from
+    @param optimiser the optimiser to load
+ */
+istream& operator>>(istream& i, Optimiser* optimiser)
+{
+    if (optimiser != 0)
+        i >> *optimiser;
+    return i;
+}
+
+/*! @brief Saves the optimiser to a file called "m_name.log" */
+void Optimiser::save()
+{
+    saveAs(m_name);
+}
+
+/*! @brief Saves the optimiser to a file called "name.log" */
+void Optimiser::saveAs(string name)
+{
+    ofstream file((DATA_DIR + string("Optimisation/") + name + ".log").c_str());
+    if (file.is_open())
+    {
+        file << this;
+        file.close();
+    }
+    else
+        debug << "Optimiser::saveAs(): Failed to open file " << name + ".log" << endl;
+}
+
+/*! @brief Loads the optimiser from a file called "m_name.log". If no file is found, the optimiser continues to use the current configuration. */
+void Optimiser::load()
+{
+    string filepath = DATA_DIR + string("Optimisation/") + m_name + ".log";
+    ifstream file(filepath.c_str());
+    if (file.is_open())
+    {
+        file >> this;
+        file.close();
+    }
+}
+
