@@ -25,6 +25,7 @@
 #include "PausedWalkOptimisationState.h"
 
 #include "Tools/Optimisation/EHCLSOptimiser.h"
+#include "Tools/Optimisation/PGRLOptimiser.h"
 #include "Motion/Tools/MotionFileTools.h"
 
 #include "Behaviour/Jobs/JobList.h"
@@ -42,8 +43,8 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     #endif
     
     m_parameters.load("NBWalkStart");
-    m_optimiser = new EHCLSOptimiser("Test", m_parameters.getAsParameters());
-    
+    //m_optimiser = new EHCLSOptimiser("Test", m_parameters.getAsParameters());
+    m_optimiser = new PGRLOptimiser("PGRL", m_parameters.getAsParameters());    
     m_log.open((DATA_DIR + "/Optimisation/Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
