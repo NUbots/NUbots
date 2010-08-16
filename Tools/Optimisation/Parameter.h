@@ -55,7 +55,7 @@ public:
     friend float operator+(const Parameter& p, const float& f);
     friend float operator+(const float& f, const Parameter& p);
     friend float operator+(const Parameter& p1, const Parameter& p2);
-    friend Parameter operator+=(const Parameter& p, const float& f);
+    friend void operator+=(Parameter& p, const float& f);
     friend float operator*(const float& f, const Parameter& p);
     friend float operator*(const Parameter& p, const float& f);
     friend float operator*(const Parameter& p1, const Parameter& p2);
@@ -66,7 +66,7 @@ public:
     friend vector<float> operator+(const vector<float>& f, const vector<Parameter>& p);
     friend vector<float> operator+(const vector<Parameter>& p, const vector<float>& f);
     friend vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2);
-    friend vector<Parameter> operator+=(const vector<Parameter>& p, const vector<float>& f);
+    friend void operator+=(vector<Parameter>& p, const vector<float>& f);
     friend vector<float> operator*(const vector<float>& f, const vector<Parameter>& p);
     friend vector<float> operator*(const vector<Parameter>& p, const vector<float>& f);
     friend vector<float> operator*(const float& f, const vector<Parameter>& p);

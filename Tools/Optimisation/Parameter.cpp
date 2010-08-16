@@ -185,11 +185,9 @@ float operator+(const Parameter& p1, const Parameter& p2)
 }
 
 /*! @brief Sum assignement operator for a parameter and a float. Returns a new parameter whose value is p.Value + f */
-Parameter operator+=(const Parameter& p, const float& f)
+void operator+=(Parameter& p, const float& f)
 {
-    Parameter result = p;
-    result.Value += f;
-    return result;
+	p.set(p.Value + f);
 }
 
 /*! @brief Mulitplication operator for float and parameter. Returns the product of float and p.Value */
@@ -285,16 +283,12 @@ vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2
     }
 }
 
-vector<Parameter> operator+=(const vector<Parameter>& p, const vector<float>& f)
+void operator+=(vector<Parameter>& p, const vector<float>& f)
 {
-    if (p.size() != f.size())
-        return p;
-    else
+    if (p.size() == f.size())
     {
-        vector<Parameter> result = p;
         for (size_t i=0; i<p.size(); i++)
-            result[i] += f[i];
-        return result;
+            p[i] += f[i];
     }
 }
 
