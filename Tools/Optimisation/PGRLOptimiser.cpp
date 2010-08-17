@@ -36,8 +36,10 @@ using namespace boost::accumulators;
  */
 PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_min_step_size = 0.2;
-    m_max_step_size = 0.7;
+    m_min_step_size = 0.02;
+    m_max_step_size = 0.05;			// 0.5 is too big, 0.2 might be OK to start with, 0.1 is too big 
+    									// 0.05 is quite good. About 8.0 cm/s
+    									// 0.025 is too small
     m_epsilon = 0.015;
     m_num_per_iteration = 10;
     
@@ -145,11 +147,9 @@ vector<float> PGRLOptimiser::calculateStep()
             if (average_zero > average_plus and average_zero > average_minus)
                 A[i] = 0;
             else
-                A[i] = average_plus - average_minus;
+                A[i] = m_max_step_size*tanh(average_plus - average_minus)*(m_current_parameters[i].max() - m_current_parameters[i].min());
         }
     }
-
-    A = (m_max_step_size/norm(A))*A;
     debug << A << endl;
 }
 
