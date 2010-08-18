@@ -89,7 +89,7 @@ ActionatorPoint::ActionatorPoint(double time, const string& data)
     FloatData = 0;
     VectorData = 0;
     MatrixData = 0;
-    ThreeDimData 0;
+    ThreeDimData = 0;
     StringData = new string(data);
 }
 

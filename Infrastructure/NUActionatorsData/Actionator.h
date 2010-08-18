@@ -45,7 +45,7 @@ public:
     void preProcess();
     void postProcess(double currenttime);
     void add(double time, const float& data);
-    void add(double time, const vector<float& data);
+    void add(double time, const vector<float>& data);
     void add(double time, const vector<vector<float> >& data);
     void add(double time, const vector<vector<vector<float> > >& data);
     void add(double time, const string& data);

@@ -190,8 +190,6 @@ void NUMotion::kill()
     vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
     vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
     vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
-    vector<float> legvelocities(legpositions.size(), 1.0);
-    vector<float> armvelocities(larmpositions.size(), 1.0);
     
     // check if there is a reason it is not safe or possible to go into the crouch position
     if (m_actions == NULL)
@@ -203,39 +201,39 @@ void NUMotion::kill()
         if (m_data->getOrientation(orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
             {
-                m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime(), legpositions, legvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime(), legpositions, legvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, Platform->getTime(), larmpositions, armvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::RightArmJoints, Platform->getTime(), rarmpositions, armvelocities, 0);
+                m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), legpositions, 0);
+                m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), legpositions, 0);
+                m_actions->add(NUActionatorsData::LArm, Platform->getTime(), larmpositions, 0);
+                m_actions->add(NUActionatorsData::RArm, Platform->getTime(), rarmpositions, 0);
                 return;
             }
         // check the feet are on the ground
         if (not m_data->isOnGround())
         {
-            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime(), legpositions, legvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime(), legpositions, legvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, Platform->getTime(), larmpositions, armvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::RightArmJoints, Platform->getTime(), rarmpositions, armvelocities, 0);
+            m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), legpositions, 0);
+            m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), legpositions, 0);
+            m_actions->add(NUActionatorsData::LArm, Platform->getTime(), larmpositions, 0);
+            m_actions->add(NUActionatorsData::RArm, Platform->getTime(), rarmpositions, 0);
             return;
         }
         
         // check the stiffness is on
         vector<float> leftstiffnesses, rightstiffnesses;
-        if (m_data->getJointStiffnesses(NUSensorsData::LeftLegJoints, leftstiffnesses) and m_data->getJointStiffnesses(NUSensorsData::RightLegJoints, rightstiffnesses))
+        if (m_data->getJointStiffnesses(NUSensorsData::LLeg, leftstiffnesses) and m_data->getJointStiffnesses(NUSensorsData::RLeg, rightstiffnesses))
             if (mathGeneral::allZeros(leftstiffnesses) and mathGeneral::allZeros(rightstiffnesses))
                 return;
     }
     
     // go into safe mode
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime() + 1500, legpositions, legvelocities, 65);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime() + 1500, legpositions, legvelocities, 65);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, Platform->getTime() + 750, larmpositions, armvelocities, 30);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, Platform->getTime() + 750, rarmpositions, armvelocities, 30);
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime() + 1500, legpositions, 65);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime() + 1500, legpositions, 65);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime() + 750, larmpositions, 30);
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime() + 750, rarmpositions, 30);
     
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime() + 2000, legpositions, legvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime() + 2000, legpositions, legvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, Platform->getTime() + 2000, larmpositions, armvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, Platform->getTime() + 2000, rarmpositions, armvelocities, 0);
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime() + 2000, legpositions, 0);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime() + 2000, legpositions, 0);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime() + 2000, larmpositions, 0);
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime() + 2000, rarmpositions, 0);
 }
 
 /*! @brief Calls kill on each of the active motion providers */

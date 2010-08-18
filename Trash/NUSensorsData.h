@@ -41,7 +41,7 @@ public:
     // button ids
     static id_t MainButton;
     static id_t SecondaryButton;
-    static id_t AllButton;
+    static id_t AllButtons;
 public:
     NUSensorsData();
     ~NUSensorsData();

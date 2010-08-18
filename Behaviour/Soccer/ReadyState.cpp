@@ -48,16 +48,23 @@ void ReadyState::doStateCommons()
 {
     if (m_provider->stateChanged())
     {   // play a sound when we enter the ready state
-        m_actions->addSound(m_actions->CurrentTime, NUSounds::READY);
+        m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::READY);
     }
     // In set the chest led should be blue
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_actions->CurrentTime, 0, 0.1, 1);
+    vector<float> blue(3,0);
+    blue[1] = 0.1;
+    blue[2] = 1.0;
+    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, blue);
     
     // In set if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_actions->CurrentTime, 1, 1, 0);
+    {
+        vector<float> yellow(3,1);
+        yellow[2] = 0;
+        m_actions->add(NUActionatorsData::RightFootLed, m_actions->CurrentTime, yellow);
+    }
     else
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_actions->CurrentTime, 0, 0, 0);
+        m_actions->add(NUActionatorsData::RightFootLed, m_actions->CurrentTime, vector<float>(3,0));
 }
 
 BehaviourFSMState* ReadyState::nextStateCommons()

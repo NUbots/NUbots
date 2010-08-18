@@ -72,7 +72,7 @@ void NUHead::stopHead()
     m_is_panning = false;
     m_move_end_time = 0;
     if (m_data and m_actions)
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
+        m_actions->add(NUActionatorsData::Head, 0, vector<float>(2,0), 0);
 }
 
 /*! @brief Kills the head module
@@ -215,13 +215,13 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
         return;
 
     vector<float> sensorpositions;
-    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
+    m_data->getJointPositions(NUSensorsData::Head, sensorpositions);
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
-    m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    m_actions->add(NUActionatorsData::Head, curvetimes, curvepositions, m_default_gains);
     
     if (times.size() > 0)
         m_move_end_time = times.back();

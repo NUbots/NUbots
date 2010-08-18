@@ -149,22 +149,17 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
     #endif
     if (m_data->isFalling())
     {
-        vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-        vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), 0);
-        vector<float> velocity_lleg(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-        vector<float> velocity_rleg(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
-        
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
-        m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
-        m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
-        m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
-        m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+        m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
+        m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
+        m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
+        m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
         
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, 0, sensor_lleg, velocity_lleg, 0);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, 0, sensor_rleg, velocity_rleg, 0);
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, 0, sensor_larm, velocity_larm, 0);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, 0, sensor_rarm, velocity_rarm, 0);
+        m_actions->add(NUActionatorsData::LLeg, 0, sensor_lleg, 0);
+        m_actions->add(NUActionatorsData::RLeg, 0, sensor_rleg, 0);
+        m_actions->add(NUActionatorsData::LArm, 0, sensor_larm, 0);
+        m_actions->add(NUActionatorsData::RArm, 0, sensor_rarm, 0);
     }
 }
 

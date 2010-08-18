@@ -49,11 +49,13 @@ void PenalisedState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::PENALISED);
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
         m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 300, vector<float>(2,0)));
     }
     // In penalty the chest led should be red
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 0, 0);
+    vector<float> red(3,0);
+    red[0] = 1;
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, red);
     
     // In penalty we should not walk
     m_jobs->addMotionJob(new WalkJob(0,0,0));

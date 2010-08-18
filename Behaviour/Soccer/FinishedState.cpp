@@ -47,10 +47,10 @@ void FinishedState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_actions->CurrentTime, NUSounds::FINISHED);
+        m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::FINISHED);
         m_jobs->addMotionJob(new MotionKillJob());
     }
     // In finished the chest led should be off
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_actions->CurrentTime, 0, 0, 0);
+    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, vector<float>(3,0));
 }
 

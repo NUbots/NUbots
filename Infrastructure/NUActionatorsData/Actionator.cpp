@@ -28,12 +28,11 @@
 
 /*! @brief Constructor for an Actionator with known name and type
     @param actionatorname the name of the actionator
-    @param actionatortype the type of the actionator to be used for RTTI
  */
-Actionator::Actionator(string actionatorname, Actionatorype_t actionatortype)
+Actionator::Actionator(string actionatorname)
 {
     Name = actionatorname;
-    ActionatorType = actionatortype;
+
     m_add_points_buffer.reserve(1024);
     m_preprocess_buffer.reserve(1024);
     int err;
@@ -52,7 +51,7 @@ Actionator::~Actionator()
     @param time the time the data will be applied
     @param data the data associated with the point (single float)
  */
-void Actionator::add(double time, const float data)
+void Actionator::add(double time, const float& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -121,14 +120,14 @@ void Actionator::preProcess()
         // I need to keep the actionator points sorted based on their time.
         //      (a) I need to sort the buffer before adding the points
         //      (b) I need to search m_points for the correct place to add new point(s)
-        sort(m_preprocess_buffer.begin(), m_preprocess_buffer.end(), comparePoints);
+        sort(m_preprocess_buffer.begin(), m_preprocess_buffer.end());
         
         // because I did (a) and I choose to clear all existing points later in time
         // I can simply find the location where the first point should be inserted, and then insert ALL new points after that
         if (not m_points.empty())
         {
-            typename deque<actionator_point_t>::iterator insertposition;
-            insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front(), comparePoints);
+            deque<ActionatorPoint>::iterator insertposition;
+            insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front());
             m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
         }
         m_points.insert(m_points.end(), m_preprocess_buffer.begin(), m_preprocess_buffer.end());

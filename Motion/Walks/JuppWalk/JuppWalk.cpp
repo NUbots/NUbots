@@ -210,10 +210,10 @@ void JuppWalk::calculateGaitPhase()
     static float gaitphaseonimpact = m_gait_phase;
     m_current_time = m_data->CurrentTime;
     
-    if (m_data->footImpact(NUSensorsData::LeftFoot, leftimpacttime))
+    if (m_data->footImpact(NUSensorsData::LLeg, leftimpacttime))
         gaitphaseonimpact = m_gait_phase;
         
-    if (m_data->footImpact(NUSensorsData::RightFoot, rightimpacttime))
+    if (m_data->footImpact(NUSensorsData::RLeg, rightimpacttime))
         gaitphaseonimpact = m_gait_phase;
         
     if (m_current_time - leftimpacttime < interpolationtime)
@@ -462,14 +462,12 @@ void JuppWalk::calculateGyroFeedback()
 
 void JuppWalk::updateActionatorsData()
 {
-    static vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_leg_angles, zeroleg, m_left_leg_gains);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_leg_angles, zeroleg, m_right_leg_gains);
+    m_actions->add(NUActionatorsData::LLeg, m_current_time, m_left_leg_angles, m_left_leg_gains);
+    m_actions->add(NUActionatorsData::RLeg, m_current_time, m_right_leg_angles, m_right_leg_gains);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_arm_angles, zeroarm, m_left_arm_gains);
+        m_actions->add(NUActionatorsData::LArm, m_current_time, m_left_arm_angles, m_left_arm_gains);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_arm_angles, zeroarm, m_right_arm_gains);
+        m_actions->add(NUActionatorsData::RArm, m_current_time, m_right_arm_angles, m_right_arm_gains);
 }
 
 

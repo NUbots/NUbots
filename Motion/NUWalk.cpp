@@ -178,7 +178,7 @@ bool NUWalk::isActive()
     {
         vector<float> jointvelocities;
         float jointvelocitysum = 0.0f;
-        if(m_data->getJointVelocities(NUSensorsData::BodyJoints, jointvelocities))
+        if(m_data->getJointVelocities(NUSensorsData::Body, jointvelocities))
         {
             for (unsigned int i = 0; i < jointvelocities.size(); i++)
                 jointvelocitysum += fabs(jointvelocities[i]);
@@ -458,10 +458,10 @@ bool NUWalk::inInitialPosition()
     // get the current joint positions
     vector<float> sensor_larm, sensor_rarm;
     vector<float> sensor_lleg, sensor_rleg;
-    m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
-    m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
-    m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
-    m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+    m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
+    m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
+    m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
+    m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
     
     // compare the sensor positions to the initial positions
     return allEqual(sensor_larm, m_initial_larm, 0.15f) and allEqual(sensor_rarm, m_initial_rarm, 0.15f) and allEqual(sensor_lleg, m_initial_lleg, 0.05f) and allEqual(sensor_rleg, m_initial_rleg, 0.05f);
@@ -483,18 +483,13 @@ void NUWalk::moveToInitialPosition()
     }
     else
     {
-        vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), movespeed);
-        vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), movespeed);
-        vector<float> velocity_lleg(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), movespeed);
-        vector<float> velocity_rleg(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), movespeed);
-        
         // get the current joint positions
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
-        m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
-        m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
-        m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
-        m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+        m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
+        m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
+        m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
+        m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
         
         // compute the time required to move into the initial pose for each limb
         double time_larm = 1000*(maxDifference(sensor_larm, m_initial_larm)/movespeed);
@@ -506,15 +501,15 @@ void NUWalk::moveToInitialPosition()
         movecompletiontime = m_current_time + std::max(std::max(time_larm, time_rarm), std::max(time_lleg, time_rleg));
         
         // give the command to the actionators
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + 100, sensor_larm, velocity_larm, 40);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + 100, sensor_rarm, velocity_rarm, 40);
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + 100, sensor_lleg, velocity_lleg, 75);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + 100, sensor_rleg, velocity_rleg, 60);
+        m_actions->add(NUActionatorsData::LArm, m_current_time + 100, sensor_larm, 40);
+        m_actions->add(NUActionatorsData::RArm, m_current_time + 100, sensor_rarm, 40);
+        m_actions->add(NUActionatorsData::LLeg, m_current_time + 100, sensor_lleg, 75);
+        m_actions->add(NUActionatorsData::RLeg, m_current_time + 100, sensor_rleg, 75);
         
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time + time_larm, m_initial_larm, velocity_larm, 40);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time + time_rarm, m_initial_rarm, velocity_rarm, 40);
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time + time_lleg, m_initial_lleg, velocity_lleg, 75);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time + time_rleg, m_initial_rleg, velocity_rleg, 75);
+        m_actions->add(NUActionatorsData::LArm, m_current_time + time_larm, m_initial_larm, 40);
+        m_actions->add(NUActionatorsData::RArm, m_current_time + time_rarm, m_initial_rarm, 40);
+        m_actions->add(NUActionatorsData::LLeg, m_current_time + time_lleg, m_initial_lleg, 75);
+        m_actions->add(NUActionatorsData::RLeg, m_current_time + time_rleg, m_initial_rleg, 75);
     }
 }
 

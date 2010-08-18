@@ -26,10 +26,6 @@
 #include <fstream>
 #include <cctype>       // for tolower()
 
-NUSensorsData::id_t NUSensorsData::MainButton = -1;
-NUSensorsData::id_t NUSensorsData::SecondaryButton = -1;
-NUSensorsData::id_t NUSensorsData::AllButton = -1;
-
 /*! @brief Default constructor for NUSensorsData
  */
 NUSensorsData::NUSensorsData()
@@ -146,7 +142,7 @@ NUSensorsData::~NUSensorsData()
     @param jointid the id of the joint you want the data for
     @param position the position will be placed in this variable
  */
-bool NUSensorsData::getJointPosition(id_t jointid, float& position)
+bool NUSensorsData::getJointPosition(joint_id_t jointid, float& position)
 {
     return getJointData(JointPositions, jointid, position);
 }
@@ -156,7 +152,7 @@ bool NUSensorsData::getJointPosition(id_t jointid, float& position)
     @param jointid the id of the joint you want the data for
     @param velocity the velocity will be placed in this variable
  */
-bool NUSensorsData::getJointVelocity(id_t jointid, float& velocity)
+bool NUSensorsData::getJointVelocity(joint_id_t jointid, float& velocity)
 {
     return getJointData(JointVelocities, jointid, velocity);
 }
@@ -166,7 +162,7 @@ bool NUSensorsData::getJointVelocity(id_t jointid, float& velocity)
     @param jointid the id of the joint you want the data for
     @param acceleration the acceleration will be placed in this variable
  */
-bool NUSensorsData::getJointAcceleration(id_t jointid, float& acceleration)
+bool NUSensorsData::getJointAcceleration(joint_id_t jointid, float& acceleration)
 {
     return getJointData(JointAccelerations, jointid, acceleration);
 }
@@ -176,7 +172,7 @@ bool NUSensorsData::getJointAcceleration(id_t jointid, float& acceleration)
     @param jointid the id of the joint you want the data for
     @param target the target will be placed in this variable
  */
-bool NUSensorsData::getJointTarget(id_t jointid, float& target)
+bool NUSensorsData::getJointTarget(joint_id_t jointid, float& target)
 {
     return getJointData(JointTargets, jointid, target);
 }
@@ -186,7 +182,7 @@ bool NUSensorsData::getJointTarget(id_t jointid, float& target)
     @param jointid the id of the joint you want the data for
     @param stiffness the stiffness will be placed in this variable
  */
-bool NUSensorsData::getJointStiffness(id_t jointid, float& stiffness)
+bool NUSensorsData::getJointStiffness(joint_id_t jointid, float& stiffness)
 {
     return getJointData(JointStiffnesses, jointid, stiffness);
 }
@@ -196,7 +192,7 @@ bool NUSensorsData::getJointStiffness(id_t jointid, float& stiffness)
     @param jointid the id of the joint you want the data for
     @param current the current will be placed in this variable
  */
-bool NUSensorsData::getJointCurrent(id_t jointid, float& current)
+bool NUSensorsData::getJointCurrent(joint_id_t jointid, float& current)
 {
     return getJointData(JointCurrents, jointid, current);
 }
@@ -206,7 +202,7 @@ bool NUSensorsData::getJointCurrent(id_t jointid, float& current)
     @param jointid the id of the joint you want the data for
     @param torque the torque will be placed in this variable
  */
-bool NUSensorsData::getJointTorque(id_t jointid, float& torque)
+bool NUSensorsData::getJointTorque(joint_id_t jointid, float& torque)
 {
     return getJointData(JointTorques, jointid, torque);
 }
@@ -216,7 +212,7 @@ bool NUSensorsData::getJointTorque(id_t jointid, float& torque)
     @param jointid the id of the joint you want the data for
     @param temperature the temperature will be placed in this variable
  */
-bool NUSensorsData::getJointTemperature(id_t jointid, float& temperature)
+bool NUSensorsData::getJointTemperature(joint_id_t jointid, float& temperature)
 {
     return getJointData(JointTemperatures, jointid, temperature);
 }
@@ -225,23 +221,23 @@ bool NUSensorsData::getJointTemperature(id_t jointid, float& temperature)
  @param partid the id of the body part
  @return the number of joints
  */
-int NUSensorsData::getNumberOfJoints(id_t partid)
+int NUSensorsData::getNumberOfJoints(bodypart_id_t partid)
 {
-    if (partid == All)
+    if (partid == AllJoints)
         return m_num_joints;
-    else if (partid == Body)
+    else if (partid == BodyJoints)
         return m_num_body_joints;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         return m_num_head_joints;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         return m_num_arm_joints;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         return m_num_arm_joints;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         return m_num_torso_joints;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         return m_num_leg_joints;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         return m_num_leg_joints;
     else
     {
@@ -255,7 +251,7 @@ int NUSensorsData::getNumberOfJoints(id_t partid)
  @param bodypart the id of the body part to want the data for
  @param positions the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointPositions(id_t bodypart, vector<float>& positions)
+bool NUSensorsData::getJointPositions(bodypart_id_t bodypart, vector<float>& positions)
 {
     return getJointsData(JointPositions, bodypart, positions);
 }
@@ -265,7 +261,7 @@ bool NUSensorsData::getJointPositions(id_t bodypart, vector<float>& positions)
  @param bodypart the id of the body part to want the data for
  @param velocities the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointVelocities(id_t bodypart, vector<float>& velocities)
+bool NUSensorsData::getJointVelocities(bodypart_id_t bodypart, vector<float>& velocities)
 {
     return getJointsData(JointVelocities, bodypart, velocities);
 }
@@ -275,7 +271,7 @@ bool NUSensorsData::getJointVelocities(id_t bodypart, vector<float>& velocities)
  @param bodypart the id of the body part to want the data for
  @param accelerations the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointAccelerations(id_t bodypart, vector<float>& accelerations)
+bool NUSensorsData::getJointAccelerations(bodypart_id_t bodypart, vector<float>& accelerations)
 {
     return getJointsData(JointAccelerations, bodypart, accelerations);
 }
@@ -285,7 +281,7 @@ bool NUSensorsData::getJointAccelerations(id_t bodypart, vector<float>& accelera
  @param bodypart the id of the body part to want the data for
  @param targets the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointTargets(id_t bodypart, vector<float>& targets)
+bool NUSensorsData::getJointTargets(bodypart_id_t bodypart, vector<float>& targets)
 {
     return getJointsData(JointTargets, bodypart, targets);
 }
@@ -295,7 +291,7 @@ bool NUSensorsData::getJointTargets(id_t bodypart, vector<float>& targets)
  @param bodypart the id of the body part to want the data for
  @param stiffnesses the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointStiffnesses(id_t bodypart, vector<float>& stiffnesses)
+bool NUSensorsData::getJointStiffnesses(bodypart_id_t bodypart, vector<float>& stiffnesses)
 {
     return getJointsData(JointStiffnesses, bodypart, stiffnesses);
 }
@@ -305,7 +301,7 @@ bool NUSensorsData::getJointStiffnesses(id_t bodypart, vector<float>& stiffnesse
  @param bodypart the id of the body part to want the data for
  @param currents the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointCurrents(id_t bodypart, vector<float>& currents)
+bool NUSensorsData::getJointCurrents(bodypart_id_t bodypart, vector<float>& currents)
 {
     return getJointsData(JointCurrents, bodypart, currents);
 }
@@ -315,7 +311,7 @@ bool NUSensorsData::getJointCurrents(id_t bodypart, vector<float>& currents)
  @param bodypart the id of the body part to want the data for
  @param torques the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointTorques(id_t bodypart, vector<float>& torques)
+bool NUSensorsData::getJointTorques(bodypart_id_t bodypart, vector<float>& torques)
 {
     return getJointsData(JointTorques, bodypart, torques);
 }
@@ -325,7 +321,7 @@ bool NUSensorsData::getJointTorques(id_t bodypart, vector<float>& torques)
  @param bodypart the id of the body part to want the data for
  @param temperatures the input vector that will be updated to contain the requested data
  */
-bool NUSensorsData::getJointTemperatures(id_t bodypart, vector<float>& temperatures)
+bool NUSensorsData::getJointTemperatures(bodypart_id_t bodypart, vector<float>& temperatures)
 {
     return getJointsData(JointTemperatures, bodypart, temperatures);
 }
@@ -437,24 +433,24 @@ bool NUSensorsData::getCameraHeight(float& height)
     @param partid the id of the body part 
     @param names will be updated to contain the names of the joints in that body part
  */
-bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
+bool NUSensorsData::getJointNames(bodypart_id_t partid, vector<string>& names)
 {
-    vector<id_t> selectedjoints;
-    if (partid == All)
+    vector<joint_id_t> selectedjoints;
+    if (partid == AllJoints)
         selectedjoints = m_all_joint_ids;
-    if (partid == Body)
+    if (partid == BodyJoints)
         selectedjoints = m_body_ids;
-    else if (partid == Head)
+    else if (partid == HeadJoints)
         selectedjoints = m_head_ids;
-    else if (partid == LArm)
+    else if (partid == LeftArmJoints)
         selectedjoints = m_larm_ids;
-    else if (partid == RArm)
+    else if (partid == RightArmJoints)
         selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
+    else if (partid == TorsoJoints)
         selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
+    else if (partid == LeftLegJoints)
         selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
+    else if (partid == RightLegJoints)
         selectedjoints = m_rleg_ids;
     else
     {
@@ -473,9 +469,9 @@ bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
     @param jointid the unique joint id
     @param data the variable that will be updated with the new value
  */
-bool NUSensorsData::getJointData(sensor_t* p_sensor, id_t jointid, float& data)
+bool NUSensorsData::getJointData(sensor_t* p_sensor, joint_id_t jointid, float& data)
 {
-    if (jointid < 0 || p_sensor->IsValid == false)
+    if (jointid == NUSensorsData::SENSOR_MISSING || p_sensor->IsValid == false)
         return false;
     else
     {
@@ -489,31 +485,31 @@ bool NUSensorsData::getJointData(sensor_t* p_sensor, id_t jointid, float& data)
     @param partid the id of the body part to get the vector of data
     @param data the variable that will be updated to have the vector of data
  */
-bool NUSensorsData::getJointsData(sensor_t* p_sensor, id_t partid, vector<float>& data)
+bool NUSensorsData::getJointsData(sensor_t* p_sensor, bodypart_id_t partid, vector<float>& data)
 {
     if (p_sensor == NULL || p_sensor->IsValid == false)
         return false;
-    else if (partid == All)
+    else if (partid == AllJoints)
     {   // if we want all joints then it is easy
         data = p_sensor->Data;
         return true;
     }
     else 
     {   // if we want a subset, then its harder; use the ids lists to make a subarray
-        vector<id_t> selectedjoints;
-        if (partid == Body)
+        vector<joint_id_t> selectedjoints;
+        if (partid == BodyJoints)
             selectedjoints = m_body_ids;
-        else if (partid == Head)
+        else if (partid == HeadJoints)
             selectedjoints = m_head_ids;
-        else if (partid == LArm)
+        else if (partid == LeftArmJoints)
             selectedjoints = m_larm_ids;
-        else if (partid == RArm)
+        else if (partid == RightArmJoints)
             selectedjoints = m_rarm_ids;
-        else if (partid == Torso)
+        else if (partid == TorsoJoints)
             selectedjoints = m_torso_ids;
-        else if (partid == LLeg)
+        else if (partid == LeftLegJoints)
             selectedjoints = m_lleg_ids;
-        else if (partid == RLeg)
+        else if (partid == RightLegJoints)
             selectedjoints = m_rleg_ids;
         else
         {
@@ -759,23 +755,23 @@ bool NUSensorsData::getCompassValues(vector<float>& values)
     @param footid the id of the part of the foot you want the readings for
     @param values will be updated with the current readings for the selected foot
  */
-bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
+bool NUSensorsData::getFootSoleValues(foot_id_t footid, vector<float>& values)
 {
     if (FootSoleValues == NULL || FootSoleValues->IsValid == false)
         return false;
     else
     {
         int numfootsolesensors = FootSoleValues->Data.size();
-        if (footid == All)
+        if (footid == AllFeet)
             values = FootSoleValues->Data;
-        else if (footid == LLeg)
+        else if (footid == LeftFoot)
         {
             vector<float> leftfootvalues(numfootsolesensors/2, 0);
             for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootSoleValues->Data[i];
             values = leftfootvalues;
         }
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
         {
             vector<float> rightfootvalues(numfootsolesensors/2, 0);
             for (unsigned int i=0; i<rightfootvalues.size(); i++)
@@ -800,23 +796,23 @@ bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
     @param x the distance in cm forwards 
     @param y the distance in cm backwards
  */
-bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
+bool NUSensorsData::getFootCoP(foot_id_t footid, float& x, float& y)
 {
     if (FootCoP == NULL || FootCoP->IsValid == false)
         return false;
     else
     {
-        if (footid == LLeg)
+        if (footid == LeftFoot)
         {
             x = (*FootCoP)[0];
             y = (*FootCoP)[1];
         }
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
         {
             x = (*FootCoP)[2];
             y = (*FootCoP)[3];
         }
-        else if (footid == All)
+        else if (footid == AllFeet)
         {
             x = (*FootCoP)[4];
             y = (*FootCoP)[5];
@@ -834,23 +830,23 @@ bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
     @param footid the id of the part of the foot you want the readings for
     @param values will be updated with the current readings for the selected foot
  */
-bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
+bool NUSensorsData::getFootBumperValues(foot_id_t footid, vector<float>& values)
 {
     if (FootBumperValues == NULL || FootBumperValues->IsValid == false)
         return false;
     else
     {
         int numfootbumpersensors = FootBumperValues->Data.size();
-        if (footid == All)
+        if (footid == AllFeet)
             values = FootBumperValues->Data;
-        else if (footid == LLeg)
+        else if (footid == LeftFoot)
         {
             vector<float> leftfootvalues(numfootbumpersensors/2, 0);
             for (unsigned int i=0; i<leftfootvalues.size(); i++)
                 leftfootvalues[i] = FootBumperValues->Data[i];
             values = leftfootvalues;
         }
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
         {
             vector<float> rightfootvalues(numfootbumpersensors/2, 0);
             for (unsigned int i=0; i<rightfootvalues.size(); i++)
@@ -870,22 +866,22 @@ bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
     @param footid the id of the part of the foot you want the readings for
     @param force will be updated with the current readings for the selected foot
  */
-bool NUSensorsData::getFootForce(id_t footid, float& force)
+bool NUSensorsData::getFootForce(foot_id_t footid, float& force)
 {
     force = 0;
     if (FootForce == NULL || FootForce->IsValid == false)
         return false;
     else
     {
-        if (footid == LLeg)
+        if (footid == LeftFoot)
         {
             force = (*FootForce)[0];
         }
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
         {
             force = (*FootForce)[1];
         }
-        else if (footid == All)
+        else if (footid == AllFeet)
         {
             force = (*FootForce)[2];
         }
@@ -903,17 +899,17 @@ bool NUSensorsData::getFootForce(id_t footid, float& force)
     @param footid the id of the foot
     @param contact will be updated to true if the foot is on the ground, false if it is not on the ground
  */
-bool NUSensorsData::getFootContact(id_t footid, bool& contact)
+bool NUSensorsData::getFootContact(foot_id_t footid, bool& contact)
 {
     if (FootContact == NULL || FootContact->IsValid == false)
         return false;
     else
     {
-        if (footid == LLeg)
+        if (footid == LeftFoot)
             contact = (*FootContact)[0];
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
             contact = (*FootContact)[1];
-        else if (footid == All)
+        else if (footid == AllFeet)
             contact = (*FootContact)[2];
         else
         {
@@ -929,17 +925,17 @@ bool NUSensorsData::getFootContact(id_t footid, bool& contact)
     @param support will be updated to true if footid is supporting the robot.
     @return true if support was updated, false if invalid
  */
-bool NUSensorsData::getFootSupport(id_t footid, bool& support)
+bool NUSensorsData::getFootSupport(foot_id_t footid, bool& support)
 {
     if (FootSupport == NULL || FootSupport->IsValid == false)
         return false;
     else
     {
-        if (footid == LLeg)
+        if (footid == LeftFoot)
             support = static_cast<bool> ((*FootSupport)[0]);
-        else if (footid == RLeg)
+        else if (footid == RightFoot)
             support = static_cast<bool> ((*FootSupport)[1]);
-        else if (footid == All)
+        else if (footid == AllFeet)
             support = static_cast<bool> ((*FootSupport)[0]) and static_cast<bool> ((*FootSupport)[1]);
         else
         {
@@ -954,13 +950,13 @@ bool NUSensorsData::getFootSupport(id_t footid, bool& support)
     @param buttonid the id of the button(s) you want the readings for
     @param values will be updated with the current readings for the selected button(s)
  */
-bool NUSensorsData::getButtonValues(id_t buttonid, vector<float>& values)
+bool NUSensorsData::getButtonValues(button_id_t buttonid, vector<float>& values)
 {
     if (ButtonValues == NULL || ButtonValues->IsValid == false)
         return false;
     else
     {
-        if (buttonid == AllButton)
+        if (buttonid == AllButtons)
             values = ButtonValues->Data;
         else if (buttonid == MainButton)
             values = vector<float> (1, ButtonValues->Data[0]);
@@ -1034,18 +1030,18 @@ bool NUSensorsData::isIncapacitated()
     @param time time will be updated with the time at which the last impact on that foot occured.
     @return true if the foot hit the ground in *this* cycle, it will be false otherwise (ie it will be false the cycle after the impact; that is what the time is for ;))
  */
-bool NUSensorsData::footImpact(id_t footid, float& time)
+bool NUSensorsData::footImpact(foot_id_t footid, float& time)
 {
     if (FootImpact == NULL || FootImpact->IsValid == false)
     {
         time = 0;
         return false;
     }
-    else if (footid == LLeg)
+    else if (footid == LeftFoot)
         time = FootImpact->Data[0];
-    else if (footid == RLeg)
+    else if (footid == RightFoot)
         time = FootImpact->Data[1];
-    else if (footid == All)
+    else if (footid == AllFeet)
     {
         if (FootImpact->Data[0] > FootImpact->Data[1])              // left impact was most recent, so return it
             time = FootImpact->Data[0];
@@ -1187,7 +1183,7 @@ bool NUSensorsData::getMotionHeadCompletionTime(double& time)
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
 
-/*! @brief Sets each of the static id_t if the joint is in the list. Also sets id lists for accessing limbs. 
+/*! @brief Sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
     @param joints a vector of strings where each string is a name of a joint
  */
 void NUSensorsData::setAvailableJoints(const vector<string>& joints)

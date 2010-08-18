@@ -122,14 +122,14 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
                         sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
-                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
+                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
                 {
                     imagefile.flush();
                     sensorfile.flush();
                     m_camera->setSettings(currentSettings);
-                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
+                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
             }
             isSavingImages = job->saving();

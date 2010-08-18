@@ -70,13 +70,13 @@ void SelectBehaviourProvider::doBehaviour()
 
 void SelectBehaviourProvider::doIntroduction()
 {
-    m_actions->addSound(m_current_time, "select_behaviour.wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, "select_behaviour.wav");
     m_introduction_done = true;
 }
 
 void SelectBehaviourProvider::voiceCurrentSelection()
 {
-    m_actions->addSound(m_current_time, m_available_behaviours[m_selection_index] + ".wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, m_available_behaviours[m_selection_index] + ".wav");
 }
     
 

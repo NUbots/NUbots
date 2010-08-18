@@ -134,7 +134,7 @@ private:
     float perSec2perFrame(float value);
     float SpeedMultiplier();
     float GainMultiplier();
-    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
 
     float CalculateForwardSwingSpeed(float kickDistance);
     float CalculateSidewardSwingSpeed(float kickDistance);

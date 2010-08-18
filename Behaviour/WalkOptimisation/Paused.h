@@ -46,7 +46,7 @@ public:
         if (m_parent->m_state_changed)
         {
             m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+            vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
             m_jobs->addMotionJob(new HeadJob(m_parent->m_current_time + 500, zero));
         }
     };

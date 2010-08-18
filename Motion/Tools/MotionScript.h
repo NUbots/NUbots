@@ -74,12 +74,12 @@ public:
 protected:
     bool load();
     void setUses(NUActionatorsData* actions);
-    bool checkIfUses(const vector<NUActionatorsData::joint_id_t>& ids);
+    bool checkIfUses(const vector<int>& ids);
     void updateLastUses(NUActionatorsData* actions, const vector<vector<double> >& times);
-    double findLastUse(const vector<NUActionatorsData::joint_id_t>& ids, const vector<vector<double> >& times);
+    double findLastUse(const vector<int>& ids, const vector<vector<double> >& times);
     
     void appendReturnToStart(NUActionatorsData* actions, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
-    void appendReturnLimbToStart(const vector<NUActionatorsData::joint_id_t>& ids, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
+    void appendReturnLimbToStart(const vector<int>& ids, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
 protected:
     string m_name;                      //!< the name of the script
     bool m_is_valid;                    //!< true if the motion script file was loaded without error

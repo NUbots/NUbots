@@ -27,122 +27,70 @@
 #define NUACTIONATORSDATA_H
 
 class Actionator;
+#include "Infrastructure/NUData.h"
 
 #include <vector>
 #include <string>
 using namespace std;
 
-class NUActionatorsData
+class NUActionatorsData : public NUData
 {
 public:
-    enum actionator_id_t
-    {
-        // Joint actionators
-        HeadRoll,
-        HeadPitch,
-        HeadYaw,
-        NeckRoll,
-        NeckPitch,
-        NeckYaw,
-        LShoulderRoll,
-        LShoulderPitch,
-        LShoulderYaw,
-        LElbowPitch,
-        LElbowYaw,
-        RShoulderRoll,
-        RShoulderPitch,
-        RShoulderYaw,
-        RElbowPitch,
-        RElbowYaw,
-        TorsoRoll,
-        TorsoPitch,
-        TorsoYaw,
-        LHipRoll,
-        LHipPitch,
-        LHipYaw,
-        LKneePitch,
-        LAnkleRoll,
-        LAnklePitch,
-        RHipRoll,
-        RHipPitch,
-        RHipYaw,
-        RKneePitch,
-        RAnkleRoll,
-        RAnklePitch,
-        // Joint groups
-        AllJoints,
-        HeadJoints,
-        BodyJoints,
-        LArmJoints,
-        RArmJoints,
-        TorsoJoints,
-        LLegJoints,
-        RLegJoints,
-        // Led actionators
-        ChestLed,
-        LeftFootLed,
-        RightFootLed,
-        LeftEyeLed,
-        RightEyeLed,
-        LeftEarLed,
-        RightEarLed,
-        // Led groups
-        AllLeds,
-        // Other actionators
-        Sound,
-        Teleporter,
-        // Total number of actionators
-        NumActionators
-    }
-    
-    double CurrentTime;
+    // Led actionators
+    static id_t ChestLed;
+    static id_t LeftFootLed;
+    static id_t RightFootLed;
+    static id_t LeftEyeLed;
+    static id_t RightEyeLed;
+    static id_t LeftEarLed;
+    static id_t RightEarLed;
+    // Led groups
+    static id_t FaceLeds;
+    static id_t FeetLeds;
+    static id_t AllLeds;
+    // Other actionators
+    static id_t Sound;
+    static id_t Teleporter;
 public:
     NUActionatorsData();
     ~NUActionatorsData();
     
-    // Methods for setting which actionators are available on init
-    void setAvailableJoints(const vector<string>& jointnamess);
-    void setAvailableLeds(const vector<string>& lednames);
-    void setAvailableOtherActionators(const vector<string>& actionatornames);
+    void addActionators(const vector<string>& hardwarenames);
     
-    void preProcess();
-    void postProcess(double currenttime);
+    void preProcess(double currenttime);
+    void get(vector<float>& data);
+    void get(vector<vector<float> >& data);
+    void get(vector<vector<vector<float> > >& data);
+    void get(vector<vector<vector<vector<float> > > >& data);
+    void get(vector<string>& data);
+    void postProcess();
     
-    // Misc. get methods
-    int getNumberOfJoints(bodypart_id_t partid);
-    vector<joint_id_t>& getJointIndices(bodypart_id_t partid);
-    int getNumberOfLeds(ledgroup_id_t groupid);
+    vector<int>& getIndices(id_t actionatorid);
+    size_t getSize(id_t actionatorid);
     
-    // Get methods for NUActionators
-        // joint data for the NUActionators
-    bool getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain);
-    bool getLastJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain);
-    bool getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains);
-    bool getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains);
-        // other data for the NUActionators
-    bool getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues);
-    bool getNextSounds(bool& isvalid, double& time, vector<string>& sounds);
-        // magical data for the NUActionators
-    bool getNextTeleportation(bool& isvalid, double& time, vector<float>& data);
+    void add(id_t actionatorid, double time, float data);
+    void add(id_t actionatorid, double time, float data, float gain);
+    void add(id_t actionatorid, double time, const vector<float>& data);
+    void add(id_t actionatorid, double time, const vector<float>& data, float gain);
+    void add(id_t actionatorid, double time, const vector<float>& data, const vector<float>& gain);
+    void add(id_t actionatorid, double time, const vector<vector<float> >& data);
+    void add(id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
+    void add(id_t actionatorid, double time, const string& data);
     
-    void add(actionator_id_t actionatorid, double time, float data);
-    void add(actionator_id_t actionatorid, double time, float data, float gain);
-    void add(actionator_id_t actionatorid, double time, const vector<float>& data);
-    void add(actionator_id_t actionatorid, double time, const vector<vector<float> >& data);
-    void add(actionator_id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
-    void add(actionator_id_t actionatorid, double time, const string& data);
-    
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data);
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
-    void add(actionator_id_t actionatorid, const vector<double>& time, const vector<string>& data);
+    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data);
+    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data, float gain);
+    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
+    void add(id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
+    void add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
+    void add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(id_t actionatorid, const vector<double>& time, const vector<string>& data);
 
-    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
-    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
-    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
-    void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
+    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -151,55 +99,8 @@ public:
     friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
     
 private:
-    void addJointActionator(string actionatorname);
-    void addLedActionator(string actionatorname);
-    template <typename T> void addActionator(vector<actionator_t<T>*>& actionatorgroup, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
-    template <typename T> void addActionator(actionator_t<T>*& p_actionator, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype);
-    
-    vector<joint_id_t>& getSelectedJoints(bodypart_id_t partid);
-    vector<int>& getSelectedLeds(ledgroup_id_t groupid);
-    
-    string simplifyName(const string& input);
-    void simplifyNames(const vector<string>& input, vector<string>& output);
-    void removeColours(const vector<string>& input, vector<string>& output);
-    
-private:
-    vector<actionator_t<float>*> m_all_actionators;        //!< a vector with every float actionator
-    vector<actionator_t<string>*> m_all_string_actionators;      //!< a vector with every string actionator
-    vector<actionator_t<float>*> PositionActionators;      //!< the actionators to change the position, velocity and postion-gain
-
-    // Peripheral actionators 
-    vector<actionator_t<float>*> LedActionators;           //!< The led actionators
-    actionator_t<string>* Sound;                           //!< The sound actionator
-    
-    // Magic actionators
-    actionator_t<float>* Teleporter;                       //!< A magical actionator that teleports the robot from one location to another
-    
-    // Variables to provide fast access to body part actionator groups
-    vector<joint_id_t> m_head_ids;                  //!< a vector of joint_id_t's for each joint in the head
-    vector<joint_id_t> m_larm_ids;                  //!< a vector of joint_id_t's for each joint in the left arm
-    vector<joint_id_t> m_rarm_ids;                  //!< a vector of joint_id_t's for each joint in the right arm
-    vector<joint_id_t> m_torso_ids;                 //!< a vector of joint_id_t's for each joint in the torso
-    vector<joint_id_t> m_lleg_ids;                  //!< a vector of joint_id_t's for each joint in the left leg
-    vector<joint_id_t> m_rleg_ids;                  //!< a vector of joint_id_t's for each joint in the right leg
-    vector<joint_id_t> m_body_ids;                  //!< a vector of joint_id_t's for each joint in the body (ie all except the head)
-    vector<joint_id_t> m_all_joint_ids;             //!< a vector of joint_id_t's for every joint
-    int m_num_head_joints;                          //!< the number of joints in the head
-    int m_num_arm_joints;                           //!< the number of joints in a single arm. Note it assumes both arms are the same 
-    int m_num_torso_joints;                         //!< the number of joints in the torso
-    int m_num_leg_joints;                           //!< the number of joints in a single leg. Note it assumes both legs are the same
-    int m_num_body_joints;                          //!< the number of joints in the body
-    int m_num_joints;                               //!< the total number of joints int the robot
-    
-    // Variables to provide fast access to groups of leds
-    vector<int> m_lear_ids;                         //!< a vector of indicies into LedActionators, where each index is a member of the left ear led group
-    vector<int> m_rear_ids;                         //!< a vector of indicies into LedActionators, where each index is a member of the right ear led group                         
-    vector<int> m_leye_ids;                         //!< a vector of indicies into LedActionators, where each index is a member of the left eye led group
-    vector<int> m_reye_ids;                         //!< a vector of indicies into LedActionators, where each index is a member of the right eye led group
-    vector<int> m_chest_ids;                        //!< a vector of indicies into LedActionators, where each index is a member of the chest led group
-    vector<int> m_lfoot_ids;                        //!< a vector of indicies into LedActionators, where each index is a member of the left foot led group
-    vector<int> m_rfoot_ids;                        //!< a vector of indicies into LedActionators, where each index is a member of the right foot led group
-    vector<int> m_all_led_ids;                      //!< a vector of every index into LedActionators 
+    vector<vector<int> > m_id_to_indices;                      //!< a member to map id_t's to indices in m_actionators for each actionator in the id_t group 
+    vector<Actionator> m_actionators;                          //!< a vector containing every Actionator
 };
 
 #endif

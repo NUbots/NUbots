@@ -154,7 +154,7 @@ public:
             kickPos[1] = 1.0;
             targetPos[0] = 1.0;
             targetPos[1] = 1.0;
-            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
         }
         else if(m_provider->singleRightBumperClick())
         {
@@ -162,7 +162,7 @@ public:
             kickPos[1] = -1.0;
             targetPos[0] = -1.0;
             targetPos[1] = -1.0;
-            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
         }
 
         KickJob* kick = new KickJob(0,kickPos,targetPos);

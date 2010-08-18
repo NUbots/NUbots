@@ -141,7 +141,7 @@ void BehaviourProvider::updateButtonValues()
     if (m_data->getButtonValues(NUSensorsData::MainButton, temp) && (temp.size() >= 1))
         m_chest_state = temp[0];
     
-    if(m_data->getFootBumperValues(NUSensorsData::AllFeet, temp) && temp.size() >= 2)
+    if(m_data->getFootBumperValues(NUSensorsData::All, temp) && temp.size() >= 2)
     {
         m_left_state = temp[0];
         m_right_state = temp[1];
@@ -189,7 +189,7 @@ void BehaviourProvider::updateButtonValues()
 void BehaviourProvider::removeStiffness()
 {
     m_jobs->addMotionJob(new MotionKillJob());
-    m_actions->addSound(m_current_time, "remove_stiffness.wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, "remove_stiffness.wav");
 }
 
 /*! @brief Sets the behaviour provider to be the "SelectBehaviour" provider

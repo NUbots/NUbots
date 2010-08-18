@@ -65,10 +65,7 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
-    m_data->setAvailableJointControlMethods(m_servo_control_names);
-    m_data->setAvailableJoints(m_servo_names);
-    m_data->setAvailableLeds(m_led_names);
-    m_data->setAvailableOtherActionators(m_other_names);
+    m_data->addActionators(m_servo_names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
@@ -133,7 +130,7 @@ void NAOWebotsActionators::copyToServos()
 #endif
     
     // Positions
-    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
+    /*if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
     {
         if (m_servos.size() == isvalid.size())                          // only process the input if it has the right length
         {
@@ -180,7 +177,7 @@ void NAOWebotsActionators::copyToServos()
         }
         else
             debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
-    }
+    }*/
 }
 
 /*! @brief Copies the led values to the leds
@@ -197,6 +194,7 @@ void NAOWebotsActionators::copyToLeds()
     debug << "NAOWebotsActionators::copyToLeds()" << endl;
 #endif
     
+    /*
     if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
     {
         if (m_leds.size() == isvalid.size())
@@ -216,7 +214,7 @@ void NAOWebotsActionators::copyToLeds()
         }
         else
             debug << "NAOWebotsActionators::copyToLeds(). The input does not have the correct length, all data will be ignored!" << endl;
-    }
+    }*/
 }
 
 /*! @brief Copies the teleportation data to the teleporter (super_emitter)
@@ -229,6 +227,7 @@ void NAOWebotsActionators::copyToTeleporter()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToTeleporter()" << endl;
 #endif 
+    /*
     if (m_data->getNextTeleportation(l_isvalid, l_time, l_position))
     {
         if (l_isvalid == true)// && (l_time - m_current_time) < m_simulation_step)
@@ -254,7 +253,7 @@ void NAOWebotsActionators::copyToTeleporter()
             sprintf(buf, "move robot %s %d %f %f %f %f", team, id, l_position[0]/100.0, 35.0/100.0, -l_position[1]/100.0, l_position[2] + 3.141/2.0);
             m_teleporter->send(buf, strlen(buf) + 1);
         }
-    }
+    }*/
 }
 
 

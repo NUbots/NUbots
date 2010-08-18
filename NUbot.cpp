@@ -479,13 +479,13 @@ void NUbot::terminationHandler(int signum)
         // play sound to indicate the error
         #ifndef TARGET_OS_IS_WINDOWS
             if (signum == SIGILL)
-                Blackboard->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::ILLEGAL_INSTRUCTION);
             else if (signum == SIGSEGV)
-                Blackboard->Actions->addSound(0, NUSounds::SEG_FAULT);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::SEG_FAULT);
             else if (signum == SIGBUS)
-                Blackboard->Actions->addSound(0, NUSounds::BUS_ERROR);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::BUS_ERROR);
             else if (signum == SIGABRT)
-                Blackboard->Actions->addSound(0, NUSounds::ABORT);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::ABORT);
         #endif
         NUbot::m_this->m_platform->kill();
         NUbot::m_this->m_platform->msleep(1500);
@@ -503,7 +503,7 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
-        Blackboard->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
+        Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
         void *array[10];

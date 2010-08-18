@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUBlackboard.cpp NUBlackboard.h
+                NUData.cpp NUData.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

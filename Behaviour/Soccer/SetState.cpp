@@ -51,16 +51,19 @@ void SetState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::SET);
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::SET);
     }
     // In set the chest led should be yellow
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0.9, 1, 0.1);
+    vector<float> yellow(3,1);
+    yellow[0] = 0.9;
+    yellow[2] = 0.1;
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, yellow);
     
     // In set if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
+        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, yellow);
     else
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
+        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In set we can move the head, so track the ball if you can see it otherwise do a pan
     if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())

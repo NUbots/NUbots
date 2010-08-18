@@ -25,6 +25,22 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
+// Led actionators
+NUActionatorsData::id_t NUActionatorsData::ChestLed = -1;
+NUActionatorsData::id_t NUActionatorsData::LeftFootLed = -1;
+NUActionatorsData::id_t NUActionatorsData::RightFootLed = -1;
+NUActionatorsData::id_t NUActionatorsData::LeftEyeLed = -1;
+NUActionatorsData::id_t NUActionatorsData::RightEyeLed = -1;
+NUActionatorsData::id_t NUActionatorsData::LeftEarLed = -1;
+NUActionatorsData::id_t NUActionatorsData::RightEarLed = -1;
+// Led groups
+NUActionatorsData::id_t NUActionatorsData::FaceLeds = -1;
+NUActionatorsData::id_t NUActionatorsData::FeetLeds = -1;
+NUActionatorsData::id_t NUActionatorsData::AllLeds = -1;
+// Other actionators
+NUActionatorsData::id_t NUActionatorsData::Sound = -1;
+NUActionatorsData::id_t NUActionatorsData::Teleporter = -1;
+
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
 NUActionatorsData::NUActionatorsData()
@@ -33,391 +49,23 @@ NUActionatorsData::NUActionatorsData()
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
     CurrentTime = 0;
-    Sound = NULL;
-    Teleporter = NULL;
-    m_positionactionation = false;
-    m_torqueactionation = false;
-    
-    m_num_head_joints = 0;
-    m_num_arm_joints = 0;
-    m_num_torso_joints = 0;
-    m_num_leg_joints = 0;
-    m_num_body_joints = 0;
-    m_num_joints = 0;
+    m_id_to_indices.push_back(vector<int>(20,0));
 }
 
 /*! @brief Destroys the NUActionatorsData storage class
  */
 NUActionatorsData::~NUActionatorsData()
 {
-    for (size_t i=0; i<m_all_actionators.size(); i++)           // Note this will delete PositionActionators, TorqueActionators, LedActionators and Teleporter
-        delete m_all_actionators[i];
-    
-    for (size_t i=0; i<m_all_string_actionators.size(); i++)    // Note this will delete Sound
-        delete m_all_string_actionators[i];
 }
 
 /******************************************************************************************************************************************
  Initialisation and Availability Setting Methods
  ******************************************************************************************************************************************/
-
-
-/*! @brief Adds the joint actionators and sets each of the static joint_id_t if the joint is in the list. Also sets id lists for accessing limbs. 
- @param jointnames a vector of strings where each string is a name of a joint
+/*! @brief Adds the actionators to the NUActionatorsData listed in hardwarenames
+    @param hardwarenames a vector containing every actionator available on the robotic platform
  */
-void NUActionatorsData::setAvailableJoints(const vector<string>& jointnames)
+void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
 {
-    // NOTE: This has been copied directly from NUSensorsData; so if your changing this you probably need to change that as well!
-    vector<string> simplejointnames;
-    simplifyNames(jointnames, simplejointnames);
-    
-    for (unsigned int i=0; i<simplejointnames.size(); i++) 
-    {
-        addJointActionator(simplejointnames[i]);
-        if (simplejointnames[i].find("headyaw") != string::npos)
-        {
-            HeadYaw = i;
-            m_head_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("headpitch") != string::npos)
-        {
-            HeadPitch = i;
-            m_head_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
-        {
-            LShoulderPitch = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
-        {
-            LShoulderRoll = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
-        {
-            LElbowYaw = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lelbowroll") != string::npos)
-        {
-            LElbowRoll = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
-        {
-            RShoulderPitch = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
-        {
-            RShoulderRoll = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("relbowyaw") != string::npos)
-        {
-            RElbowYaw = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("relbowroll") != string::npos)
-        {
-            RElbowRoll = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("torsoyaw")!= string::npos)
-        {
-            TorsoYaw = i;
-            m_torso_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("torsopitch") != string::npos)
-        {
-            TorsoPitch = i;
-            m_torso_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("torsoroll") != string::npos)
-        {
-            TorsoRoll = i;
-            m_torso_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
-        {
-            LHipYawPitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhipyaw") != string::npos)
-        {
-            LHipYaw = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhippitch") != string::npos)
-        {
-            LHipPitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhiproll") != string::npos)
-        {
-            LHipRoll = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lkneepitch") != string::npos)
-        {
-            LKneePitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lanklepitch") != string::npos)
-        {
-            LAnklePitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lankleroll") != string::npos)
-        {
-            LAnkleRoll = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
-        {
-            RHipYawPitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhipyaw") != string::npos)
-        {
-            RHipYaw = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhippitch") != string::npos)
-        {
-            RHipPitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhiproll") != string::npos)
-        {
-            RHipRoll = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rkneepitch") != string::npos)
-        {
-            RKneePitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("ranklepitch") != string::npos)
-        {
-            RAnklePitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rankleroll") != string::npos)
-        {
-            RAnkleRoll = i;
-            m_rleg_ids.push_back(i);
-        }
-        else 
-        {
-            debug << "NUActionatorsData::setAvailableJoints. This platform has an unrecognised joint: " << jointnames[i] << endl;
-        }
-        
-    }
-    // add the arms, torso and legs to the body_ids
-    m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_rarm_ids.begin(), m_rarm_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_torso_ids.begin(), m_torso_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_lleg_ids.begin(), m_lleg_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_rleg_ids.begin(), m_rleg_ids.end());
-    // add the head and the body_ids to the all_joint_ids
-    m_all_joint_ids.insert(m_all_joint_ids.end(), m_head_ids.begin(), m_head_ids.end());
-    m_all_joint_ids.insert(m_all_joint_ids.end(), m_body_ids.begin(), m_body_ids.end());
-    
-    // set total numbers in each limb
-    m_num_head_joints = m_head_ids.size();
-    m_num_arm_joints = m_larm_ids.size();
-    m_num_torso_joints = m_torso_ids.size();
-    m_num_leg_joints = m_lleg_ids.size();
-    m_num_body_joints = m_body_ids.size();
-    m_num_joints = m_all_joint_ids.size();
-}
-
-/*! @brief Adds the led actionators. Maintains the m_*_ids vector for led group access
-    @param leds a vector of strings where each string is a name of a led
- */
-void NUActionatorsData::setAvailableLeds(const vector<string>& lednames)
-{
-    vector<string> simplelednames;
-    simplifyNames(lednames, simplelednames);
-    vector<string> colourlesslednames;
-    removeColours(simplelednames, colourlesslednames);
-    
-    for (unsigned int i=0; i<colourlesslednames.size(); i++) 
-    {
-        addLedActionator(colourlesslednames[i]);
-        if (colourlesslednames[i].find("lear") != string::npos || colourlesslednames[i].find("earsledleft") != string::npos)
-            m_lear_ids.push_back(i);
-        else if (colourlesslednames[i].find("rear") != string::npos || colourlesslednames[i].find("earsledright") != string::npos)
-            m_rear_ids.push_back(i);
-        else if (colourlesslednames[i].find("leye") != string::npos || colourlesslednames[i].find("faceledleft") != string::npos  || colourlesslednames[i].find("faceledredleft") != string::npos)
-            m_leye_ids.push_back(i);
-        else if (colourlesslednames[i].find("reye") != string::npos || colourlesslednames[i].find("faceledright") != string::npos || colourlesslednames[i].find("faceledredright") != string::npos)
-            m_reye_ids.push_back(i);
-        else if (colourlesslednames[i].find("chest") != string::npos || colourlesslednames[i].find("chestboardled") != string::npos || colourlesslednames[i].find("chestboardredled") != string::npos)
-            m_chest_ids.push_back(i);
-        else if (colourlesslednames[i].find("lfoot") != string::npos || colourlesslednames[i].find("lfootled") != string::npos || colourlesslednames[i].find("lfootredled") != string::npos)
-            m_lfoot_ids.push_back(i);
-        else if (colourlesslednames[i].find("rfoot") != string::npos || colourlesslednames[i].find("rfootled") != string::npos || colourlesslednames[i].find("rfootredled") != string::npos)
-            m_rfoot_ids.push_back(i);
-    }
-    
-    m_all_led_ids.insert(m_all_led_ids.end(), m_lear_ids.begin(), m_lear_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_rear_ids.begin(), m_rear_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_leye_ids.begin(), m_leye_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_reye_ids.begin(), m_reye_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_chest_ids.begin(), m_chest_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_lfoot_ids.begin(), m_lfoot_ids.end());
-    m_all_led_ids.insert(m_all_led_ids.end(), m_rfoot_ids.begin(), m_rfoot_ids.end());
-}
-
-/*! @brief Adds an actionator with the specified name and type
- 
- @param p_actionator the actionator pointer for the new actionator
- @param actionatorname the name of the actionator to be added
- @param actionatortype the type of the actionator to be added
- */
-template <> void NUActionatorsData::addActionator(actionator_t<string>*& p_actionator, string actionatorname, actionator_t<string>::actionator_type_t actionatortype)
-{
-    p_actionator = new actionator_t<string>(actionatorname, actionatortype);
-    m_all_string_actionators.push_back(p_actionator);
-}
-
-/*! @brief Adds an actionator to the actionator group with the specified name and type
- 
- @param actionatorgroup the vector of similar actionator to which this one will be added
- @param actionatorname the name of the actionator to be added
- @param actionatortype the type of the actionator to be added
- */
-template <typename T> void NUActionatorsData::addActionator(vector<actionator_t<T>*>& actionatorgroup, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype)
-{
-    actionator_t<T>* newactionator = new actionator_t<T>(actionatorname, actionatortype);
-    actionatorgroup.push_back(newactionator);
-    m_all_actionators.push_back(newactionator);
-}
-
-/*! @brief Adds an actionator with the specified name and type
- 
- @param p_actionator the actionator pointer for the new actionator
- @param actionatorname the name of the actionator to be added
- @param actionatortype the type of the actionator to be added
- */
-template <typename T> void NUActionatorsData::addActionator(actionator_t<T>*& p_actionator, string actionatorname, typename actionator_t<T>::actionator_type_t actionatortype)
-{
-    p_actionator = new actionator_t<T>(actionatorname, actionatortype);
-    m_all_actionators.push_back(p_actionator);
-}
-
-/*! @brief Sets the available actionators based on the names found in the passed in strings
- 
- @param actionators a vector of names for each of the available actionators.
- */
-void NUActionatorsData::setAvailableOtherActionators(const vector<string>& actionatornames)
-{
-    vector<string> simpleactionatornames;
-    simplifyNames(actionatornames, simpleactionatornames);
-    
-    for (unsigned int i=0; i<simpleactionatornames.size(); i++) 
-    {
-        if (simpleactionatornames[i].find("sound") != string::npos)
-            addActionator(Sound, actionatornames[i], actionator_t<string>::SOUND);
-        else if (simpleactionatornames[i].find("teleporter") != string::npos || simpleactionatornames[i].find("teleportation") != string::npos)
-            addActionator(Teleporter, actionatornames[i], actionator_t<float>::TELEPORTER);
-        else
-            debug << "NUActionatorsData::setAvailableOtherActionators. You have added an unrecognised other actionator: " << actionatornames[i] << endl;
-    }
-}
-
-/*! @brief Adds a joint actionator with the specified name
- 
- @param actionatorname the name of the actionator to be added
- */
-void NUActionatorsData::addJointActionator(string actionatorname)
-{
-    if (m_positionactionation == true)
-        addActionator(PositionActionators, actionatorname, actionator_t<>::JOINT_POSITION);
-    if (m_torqueactionation == true)
-        addActionator(TorqueActionators, actionatorname, actionator_t<>::JOINT_TORQUE);
-}
-
-/*! @brief Adds a led actionator with the specified name
- 
- @param actionatorname the name of the actionator to be added
- */
-void NUActionatorsData::addLedActionator(string actionatorname)
-{
-    addActionator(LedActionators, actionatorname, actionator_t<>::LEDS);
-}
-
-/*! @brief Simplifies a name
- 
-    The name is converted to lowercase.
-    Spaces, underscores, forward slash, backward slash and dots are removed from the name.
- 
-    @param input the name to be simplified
-    @return the simplified string
- */
-string NUActionatorsData::simplifyName(const string& input)
-{
-    string namebuffer, currentletter;
-    // compare each letter to a space and an underscore and a forward slash
-    for (unsigned int j=0; j<input.size(); j++)
-    {
-        currentletter = input.substr(j, 1);
-        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
-            namebuffer += tolower(currentletter[0]);            
-    }
-    return namebuffer;
-}
-
-/*! @brief Simplifies a vector of strings
- 
- @param input the vector of strings to be simplified
- @param ouput the vector that will be updated to contain the simplified names
- */
-void NUActionatorsData::simplifyNames(const vector<string>& input, vector<string>& output)
-{
-    vector<string> simplifiednames;
-    for (unsigned int i=0; i<input.size(); i++)
-        simplifiednames.push_back(simplifyName(input[i]));
-    output = simplifiednames;
-}
-
-/*! @brief Removes colours from a string. Also trys to only add a single actionator for LEDs at the same location but with different colours.
-    @param input the base string to pick out names which don't have colours, or add a single version without the colour
-    @param output the colourless actionatornames
-*/
-void NUActionatorsData::removeColours(const vector<string>& input, vector<string>& output)
-{
-    vector<string> outputnames;
-    
-    string previousname;
-    for (unsigned int i=0; i<input.size(); i++)
-    {
-        string temp;
-        unsigned int pos = 0;
-        pos = input[i].find("red");
-        if (pos != string::npos)
-            temp = input[i].substr(0, pos) + input[i].substr(pos+3, string::npos);
-            
-        pos = input[i].find("green");
-        if (pos != string::npos)
-            temp = input[i].substr(0, pos) + input[i].substr(pos+5, string::npos);
-        
-        pos = input[i].find("blue");
-        if (pos != string::npos)
-            temp = input[i].substr(0, pos) + input[i].substr(pos+4, string::npos);
-            
-        if (temp.compare(previousname) != 0)        // if the colourless part matches does not match previous then add it
-            outputnames.push_back(temp);
-        
-        if (temp.size() == 0)                       // if the name contains no colour then add it anyway
-            outputnames.push_back(input[i]);
-
-        previousname = temp;
-    }
-    output = outputnames;
 }
 
 /******************************************************************************************************************************************
@@ -425,337 +73,54 @@ void NUActionatorsData::removeColours(const vector<string>& input, vector<string
  ******************************************************************************************************************************************/
 /*! @brief Pre processes the data to be ready for copying to hardware communication
  */
-void NUActionatorsData::preProcess()
+void NUActionatorsData::preProcess(double currenttime)
 {
-    for (unsigned int i=0; i<m_all_actionators.size(); i++)
+    CurrentTime = currenttime;
+    /*for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->preProcess();
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
-        m_all_string_actionators[i]->preProcess();
+        m_all_string_actionators[i]->preProcess();*/
 }
 
 /*! @brief Post processes the data after sending it to the hardware communications (Remove all of the completed actionator points)
     @param currenttime all actionator points that have times before this one are assumed to have been completed, and they will be removed
  */
-void NUActionatorsData::postProcess(double currenttime)
+void NUActionatorsData::postProcess()
 {
-    CurrentTime = currenttime;
-    for (unsigned int i=0; i<m_all_actionators.size(); i++)
+    /*for (unsigned int i=0; i<m_all_actionators.size(); i++)
         m_all_actionators[i]->postProcess(currenttime);
     for (unsigned int i=0; i<m_all_string_actionators.size(); i++)
-        m_all_string_actionators[i]->postProcess(currenttime);
+        m_all_string_actionators[i]->postProcess(currenttime);*/
 }
 
-/*! @brief Returns the number of joints in the specified body part
-    @param partid the id of the body part
-    @return the number of joints
- */
-int NUActionatorsData::getNumberOfJoints(bodypart_id_t partid)
+vector<int>& NUActionatorsData::getIndices(id_t actionatorid)
 {
-    if (partid == AllJoints)
-        return m_num_joints;
-    else if (partid == BodyJoints)
-        return m_num_body_joints;
-    else if (partid == HeadJoints)
-        return m_num_head_joints;
-    else if (partid == LeftArmJoints)
-        return m_num_arm_joints;
-    else if (partid == RightArmJoints)
-        return m_num_arm_joints;
-    else if (partid == TorsoJoints)
-        return m_num_torso_joints;
-    else if (partid == LeftLegJoints)
-        return m_num_leg_joints;
-    else if (partid == RightLegJoints)
-        return m_num_leg_joints;
-    else
-    {
-        debug << "NUActionatorsData::getNumberOfJoints. UNDEFINED Body part.";
-        return 0;
-    }
+    return m_id_to_indices[0];
 }
 
-/*! @brief Returns the ids of the joints in the given body part. This is for internal use (I use it when given an entry for AllJoints to pick out sub-groups).
-    @param partid the id of the part you want indices for
-    @return a vector containing the joint_id_t's
- */
-vector<NUActionatorsData::joint_id_t>& NUActionatorsData::getJointIndices(bodypart_id_t partid)
+size_t NUActionatorsData::getSize(id_t actionatorid)
 {
-    return getSelectedJoints(partid);
+    return 0;
 }
-
-/*! @brief Returns the number of joints in the specified led group
-    @param groupid the id of the led group
-    @return the number of lights in the group
- */
-int NUActionatorsData::getNumberOfLeds(ledgroup_id_t groupid)
-{
-    if (groupid == AllLeds)
-        return m_all_led_ids.size();
-    else if (groupid == LeftEarLeds)
-        return m_lear_ids.size();
-    else if (groupid == RightEarLeds)
-        return m_rear_ids.size();
-    else if (groupid == LeftEyeLeds)
-        return m_leye_ids.size();
-    else if (groupid == RightEyeLeds)
-         return m_reye_ids.size();
-    else if (groupid == ChestLeds)
-        return m_chest_ids.size();
-    else if (groupid == LeftFootLeds)
-        return m_lfoot_ids.size();
-    else if (groupid == RightFootLeds)
-        return m_rfoot_ids.size();
-    else
-    {
-        debug << "NUActionatorsData::getNumberOfLeds. UNDEFINED led group.";
-        return 0;
-    }
-}
-
-/*! @brief Gets the next joint position for the specified joint
-    @param id the id of the joint you want the next command
-    @param time will be updated with the next command's time
-    @param position will be updated with the next command's position
-    @param velocity will be updated with the next command's gain
- */
-bool NUActionatorsData::getNextJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
-{
-    if (id == NUActionatorsData::ACTIONATOR_MISSING || PositionActionators[id]->isEmpty() || PositionActionators[id]->m_points[0].Data.size() != 3)
-        return false;
-    else 
-    {
-        time = PositionActionators[id]->m_points[0].Time;
-        position = PositionActionators[id]->m_points[0].Data[0];
-        velocity = PositionActionators[id]->m_points[0].Data[1];
-        gain = PositionActionators[id]->m_points[0].Data[2]; 
-        return true;
-    }
-}
-
-/*! @brief Gets the *last* joint position for the specified joint
-    @param id the id of the joint you want the *last* command
-    @param time will be updated with the *last* command's time
-    @param position will be updated with the *last* command's position
-    @param velocity will be updated with the *last* command's gain
- */
-bool NUActionatorsData::getLastJointPosition(joint_id_t id, double& time, float& position, float& velocity, float& gain)
-{
-    if (id == NUActionatorsData::ACTIONATOR_MISSING)
-        return false;
-    else
-    {
-        int lastindex = PositionActionators[id]->m_points.size() - 1;
-        if (lastindex >= 0 && PositionActionators[id]->m_points[lastindex].Data.size() == 3)
-        {
-            time = PositionActionators[id]->m_points[lastindex].Time;
-            position = PositionActionators[id]->m_points[lastindex].Data[0];
-            velocity = PositionActionators[id]->m_points[lastindex].Data[1];
-            gain = PositionActionators[id]->m_points[lastindex].Data[2]; 
-            return true;
-        }
-        else
-            return false;
-    }
-}
-
-/*! @brief Gets the next position control point
-    
-    @param isvalid a vector of bools that indicates whether there is a new target for each joint.
-    @param time the time each position control should be completed will be put in this vector
-    @param positions the target position for each joint will be put in this vector
-    @param velocities the target velocities for each joint will be put in this vector
-    @param gains the target gains for each joint will be put in this vector
- */
-bool NUActionatorsData::getNextJointPositions(vector<bool>& isvalid, vector<double>& time, vector<float>& positions, vector<float>& velocities, vector<float>& gains)
-{
-    static int l_num_joints = PositionActionators.size();
-    static vector<bool> l_isvalid(l_num_joints, false);
-    static vector<double> l_time(l_num_joints, 0);
-    static vector<float> l_positions(l_num_joints, 0);
-    static vector<float> l_velocities(l_num_joints, 0);
-    static vector<float> l_gains(l_num_joints, 0);
-    
-    // loop through each actionator in PostionActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<l_num_joints; i++)
-    {
-        if(PositionActionators[i]->isEmpty() || PositionActionators[i]->m_points[0].Data.size() != 3)
-        {
-            l_isvalid[i] = false;
-        }
-        else
-        {
-            l_isvalid[i] = true;
-            l_time[i] = PositionActionators[i]->m_points[0].Time;
-            l_positions[i] = PositionActionators[i]->m_points[0].Data[0];
-            l_velocities[i] = PositionActionators[i]->m_points[0].Data[1];
-            l_gains[i] = PositionActionators[i]->m_points[0].Data[2];
-        }
-    }
-    
-    // now copy the results to the output vectors
-    isvalid = l_isvalid;
-    time = l_time;
-    positions = l_positions;
-    velocities = l_velocities;
-    gains = l_gains;
-    
-    if (l_num_joints > 0)
-        return true;
-    else
-        return false;
-}
-
-/*! @brief Gets the next torque control point
- 
- @param isvalid a vector of bools that indicates whether there is a new target for each joint.
- @param time the time each torque control should be completed will be put in this vector
- @param torques the target torques for each joint will be put in this vector
- @param gains the target gains for each joint will be put in this vector
- */
-bool NUActionatorsData::getNextJointTorques(vector<bool>& isvalid, vector<double>& time, vector<float>& torques, vector<float>& gains)
-{
-    static int l_num_joints = TorqueActionators.size();
-    static vector<bool> l_isvalid(l_num_joints, false);
-    static vector<double> l_time(l_num_joints, 0);
-    static vector<float> l_torques(l_num_joints, 0);
-    static vector<float> l_gains(l_num_joints, 0);
-    
-    // loop through each actionator in TorqueActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<l_num_joints; i++)
-    {
-        if(TorqueActionators[i]->isEmpty() || TorqueActionators[i]->m_points[0].Data.size() != 2)
-        {
-            l_isvalid[i] = false;
-        }
-        else
-        {
-            l_isvalid[i] = true;
-            l_time[i] = TorqueActionators[i]->m_points[0].Time;
-            l_torques[i] = TorqueActionators[i]->m_points[0].Data[0];
-            l_gains[i] = TorqueActionators[i]->m_points[0].Data[1];
-        }
-    }
-    
-    // now copy the results to the output vectors
-    isvalid = l_isvalid;
-    time = l_time;
-    torques = l_torques;
-    gains = l_gains;
-    
-    if (l_num_joints > 0)
-        return true;
-    else
-        return false;
-}
-
-/*! @brief Gets the next led point
- 
-    @param isvalid a vector of bools that indicates whether there is a new target for each led.
-    @param time the time each led should be completed will be put in this vector
-    @param redvalues the target red value for each led will be put in this vector
-    @param greenvalues the target green value for each led will be put in this vector
-    @param bluevalues the target blue value for each led will be put in this vector
- 
-    @return return false if there are no leds on this platform
- */
-bool NUActionatorsData::getNextLeds(vector<bool>& isvalid, vector<double>& time, vector<float>& redvalues, vector<float>& greenvalues, vector<float>& bluevalues)
-{
-    static int l_num_leds = LedActionators.size();
-    static vector<bool> l_isvalid(l_num_leds, false);
-    static vector<double> l_time(l_num_leds, 0);
-    static vector<float> l_redvalues(l_num_leds, 0);
-    static vector<float> l_greenvalues(l_num_leds, 0);
-    static vector<float> l_bluevalues(l_num_leds, 0);
-    
-    // loop through each actionator in LedActionators looking for non-empty actionators with the right datalength
-    for (int i=0; i<l_num_leds; i++)
-    {
-        if(LedActionators[i]->isEmpty() || LedActionators[i]->m_points[0].Data.size() != 3)
-        {
-            l_isvalid[i] = false;
-        }
-        else
-        {
-            l_isvalid[i] = true;
-            l_time[i] = LedActionators[i]->m_points[0].Time;
-            l_redvalues[i] = LedActionators[i]->m_points[0].Data[0];
-            l_greenvalues[i] = LedActionators[i]->m_points[0].Data[1];
-            l_bluevalues[i] = LedActionators[i]->m_points[0].Data[2];
-        }
-    }
-    
-    // now copy the results to the output vectors
-    isvalid = l_isvalid;
-    time = l_time;
-    redvalues = l_redvalues;
-    greenvalues = l_greenvalues;
-    bluevalues = l_bluevalues;
-    
-    if (l_num_leds > 0)
-        return true;
-    else
-        return false;
-}
-
-/*! @brief Gets the next sound
- 
-    @param isvalid true if the data is valid, false otherwise
-    @param time the time in milliseconds the sound should be played
-    @param sound the filename of the sound to be played
-    
-    @return false if there is no next sound, true if there is a next sound
- */
-bool NUActionatorsData::getNextSounds(bool& isvalid, double& time, vector<string>& sounds)
-{
-    if (Sound == NULL || Sound->isEmpty() || Sound->m_points[0].Data.size() == 0)
-        return false;
-    else 
-    {
-        isvalid = true;
-        time = Sound->m_points[0].Time;
-        sounds = Sound->m_points[0].Data;
-        return true;
-    }
-
-}
-
-/*! @brief Gets the next teleporation command
- 
-    @param isvalid true if the data is valid, false otherwise
-    @param time the time in milliseconds the teleportation will take place :D
-    @param data the target teleportation position [x (cm), y(cm), bearing (rad)] :D
-    
- */
-bool NUActionatorsData::getNextTeleportation(bool& isvalid, double& time, vector<float>& data)
-{
-    if (Teleporter == NULL || Teleporter->isEmpty() || Teleporter->m_points[0].Data.size() != 3)
-        return false;
-    else 
-    {
-        isvalid = true;
-        time = Teleporter->m_points[0].Time;
-        data = Teleporter->m_points[0].Data;
-        return true;
-    }
-}
-
 
 /******************************************************************************************************************************************
  Set Methods
  ******************************************************************************************************************************************/
-
-// ------------------------------------------------------------------------------------------- Single time functions
 /* A single time and a single data.
     for each actionator in actionator id 
         add [time,data] to actionator
  */
-void add(actionator_id_t actionatorid, double time, float data);
+void NUActionatorsData::add(id_t actionatorid, double time, float data)
+{
+}
 
 /* A single time and a single data.
     for each actionator in actionator id 
         add [time,[data,gain]] to actionator
  */
-void add(actionator_id_t actionatorid, double time, float data, float gain);
+void NUActionatorsData::add(id_t actionatorid, double time, float data, float gain)
+{
+}
 
 /* A single time, and a vector of data 
     if actionatorid is a group
@@ -766,7 +131,18 @@ void add(actionator_id_t actionatorid, double time, float data, float gain);
     else
         add [time,data] to actionator
  */
-void add(actionator_id_t actionatorid, double time, const vector<float>& data);
+void NUActionatorsData::add(id_t actionatorid, double time, const vector<float>& data)
+{
+}
+
+/* */
+void NUActionatorsData::add(id_t actionatorid, double time, const vector<float>& data, float gain)
+{
+}
+
+void NUActionatorsData::add(id_t actionatorid, double time, const vector<float>& data, const vector<float>& gain)
+{
+}
 
 /* A single time, and a vector<vector> of data
     if actionator is a group
@@ -777,7 +153,9 @@ void add(actionator_id_t actionatorid, double time, const vector<float>& data);
     else
         add [time,data] to actionator
  */
-void add(actionator_id_t actionatorid, double time, const vector<vector<float> >& data);
+void NUActionatorsData::add(id_t actionatorid, double time, const vector<vector<float> >& data)
+{
+}
 
 /* A single time, and a vector<vector<vector>> of data
     if actionator is a group
@@ -788,13 +166,17 @@ void add(actionator_id_t actionatorid, double time, const vector<vector<float> >
     else
         add [time,data] to actionator
  */
-void add(actionator_id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
+void NUActionatorsData::add(id_t actionatorid, double time, const vector<vector<vector<float> > >& data)
+{
+}
 
 /* A single time, and a string of data
     for each actionator in actionator id 
         add [time,data] to actionator
  */
-void add(actionator_id_t actionatorid, double time, const string& data);
+void NUActionatorsData::add(id_t actionatorid, double time, const string& data)
+{
+}
 
 
 // ------------------------------------------------------------------------------------------- Vector time functions
@@ -813,7 +195,13 @@ void add(actionator_id_t actionatorid, double time, const string& data);
         else
             makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<float>& data)
+{
+}
+
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<float>& data, float gain)
+{
+}
 
 /* A vector of time and a vector of data
      if actionator is a group
@@ -828,7 +216,9 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
          else
              makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain)
+{
+}
 
 /* A vector of time and a vector<vector> of data
     if actionator is a group
@@ -846,7 +236,9 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
         else
             makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data)
+{
+}
 
 /* A vector of time and a vector<vector<vector>> of data
     if actionator is a group
@@ -864,7 +256,9 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
         else
             makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data)
+{
+}
 
 /*! A vector of time and a vector<vector<vector<vector>>> of data
      if actionator is a group
@@ -882,7 +276,9 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
          else
              makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data)
+{
+}
 
 /* A vector of time and a vector of strings
     if actionator is a group
@@ -896,7 +292,9 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
         else
             makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<double>& time, const vector<string>& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<double>& time, const vector<string>& data)
+{
+}
 
 // ------------------------------------------------------------------------------------------- Matrix time functions
 /* A matrix of time and a matrix of data
@@ -908,7 +306,17 @@ void add(actionator_id_t actionatorid, const vector<double>& time, const vector<
     else
         makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data)
+{
+}
+
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain)
+{
+}
+
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain)
+{
+}
 
 /* A matrix of time and a matrix of data
      if actionator is a group:
@@ -919,7 +327,9 @@ void add(actionator_id_t actionatorid, const vector<vector<double> >& time, cons
      else
          makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain)
+{
+}
 
 
 /* A matrix of time and a vector<vector<vector>>
@@ -931,7 +341,9 @@ void add(actionator_id_t actionatorid, const vector<vector<double> >& time, cons
     else
         makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data)
+{
+}
 
 /* A matrix of time and a vector<vector<vector<vector>>>
      if actionator is a group:
@@ -942,7 +354,9 @@ void add(actionator_id_t actionatorid, const vector<vector<double> >& time, cons
      else
          makes no sense
  */
-void add(actionator_id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
+void NUActionatorsData::add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data)
+{
+}
 
 /******************************************************************************************************************************************
  Displaying Contents and Serialisation
@@ -950,7 +364,7 @@ void add(actionator_id_t actionatorid, const vector<vector<double> >& time, cons
 
 void NUActionatorsData::summaryTo(ostream& output)
 {
-    if (m_all_actionators.size() == 0 && m_all_string_actionators.size() == 0)
+    /*if (m_all_actionators.size() == 0 && m_all_string_actionators.size() == 0)
         output << "NONE!" << endl;
     for (unsigned int i=0; i<m_all_actionators.size(); i++)
     {
@@ -961,7 +375,7 @@ void NUActionatorsData::summaryTo(ostream& output)
     {
         if (not m_all_string_actionators[i]->isEmpty())
             m_all_string_actionators[i]->summaryTo(output);
-    }
+    }*/
 }
 
 void NUActionatorsData::csvTo(ostream& output)

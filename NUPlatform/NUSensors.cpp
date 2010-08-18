@@ -290,7 +290,7 @@ void NUSensors::calculateButtonTriggers()
         prevChestState = tempData[0];
     }
     
-    if(m_data->getFootBumperValues(NUSensorsData::AllFeet, tempData) && tempData.size() >= 2)
+    if(m_data->getFootBumperValues(NUSensorsData::All, tempData) && tempData.size() >= 2)
     {
         if (tempData[0] > 0.5)
             nextLeftDuration += (m_current_time - m_previous_time);
@@ -450,7 +450,7 @@ void NUSensors::calculateCoP()
     static vector<float> cop(6, 0);
     
     vector<float> fsr;
-    if (m_data->getFootSoleValues(NUSensorsData::AllFeet, fsr) and fsr.size() == 8 and m_left_foot_hull.size() >= 4 and m_right_foot_hull.size() >= 4)
+    if (m_data->getFootSoleValues(NUSensorsData::All, fsr) and fsr.size() == 8 and m_left_foot_hull.size() >= 4 and m_right_foot_hull.size() >= 4)
     {   
         float leftfsr_sum = fsr[0] + fsr[1] + fsr[2] + fsr[3];
         int offset = 4;
@@ -481,7 +481,7 @@ void NUSensors::calculateFootSupport()
     
     // a foot is supporting if there is sufficient weight on the foot
     float force, copx, copy;
-    if (m_data->getFootForce(NUSensorsData::LeftFoot, force) and m_data->getFootCoP(NUSensorsData::LeftFoot, copx, copy))
+    if (m_data->getFootForce(NUSensorsData::LLeg, force) and m_data->getFootCoP(NUSensorsData::LLeg, copx, copy))
     {
         if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_left_foot_hull, 0.2))
             support[0] = 1.0;
@@ -494,7 +494,7 @@ void NUSensors::calculateFootSupport()
         return;
     }
     
-    if (m_data->getFootForce(NUSensorsData::RightFoot, force) and m_data->getFootCoP(NUSensorsData::RightFoot, copx, copy))
+    if (m_data->getFootForce(NUSensorsData::RLeg, force) and m_data->getFootCoP(NUSensorsData::RLeg, copx, copy))
     {
         if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_right_foot_hull, 0.2))
             support[1] = 1.0;
@@ -674,8 +674,8 @@ void NUSensors::calculateOdometry()
     bool rightFootSupport = false;
 
     float leftForce, rightForce;
-    m_data->getFootForce(NUSensorsData::LeftFoot,leftForce);
-    m_data->getFootForce(NUSensorsData::RightFoot,rightForce);
+    m_data->getFootForce(NUSensorsData::LLeg,leftForce);
+    m_data->getFootForce(NUSensorsData::RLeg,rightForce);
 
     if(leftForce > rightForce)
     {
@@ -727,11 +727,11 @@ void NUSensors::calculateKinematics()
     const double time = m_data->CurrentTime;
 
     static vector<float> leftLegJoints(6,0.0f);
-    bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
+    bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LLeg,leftLegJoints);
     static vector<float> rightLegJoints(6,0.0f);
-    bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
+    bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RLeg,rightLegJoints);
     static vector<float> headJoints(2,0.0f);
-    bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
+    bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::Head,headJoints);
 
     Matrix rightLegTransform;
     Matrix leftLegTransform;
@@ -777,8 +777,8 @@ void NUSensors::calculateKinematics()
 
 
     bool leftFootSupport = false, rightFootSupport = false;
-    m_data->getFootSupport(NUSensorsData::LeftFoot,leftFootSupport);
-    m_data->getFootSupport(NUSensorsData::RightFoot,rightFootSupport);
+    m_data->getFootSupport(NUSensorsData::LLeg,leftFootSupport);
+    m_data->getFootSupport(NUSensorsData::RLeg,rightFootSupport);
 
     // Choose support leg.
     if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)

@@ -21,7 +21,8 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUActionatorsData.cpp NUActionatorsData.h
-                actionator_t.h
+                Actionator.cpp Actionator.h
+                ActionatorPoint.cpp ActionatorPoint.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
