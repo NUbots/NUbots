@@ -47,6 +47,8 @@ EvaluateSpeedOfWalkParametersState::EvaluateSpeedOfWalkParametersState(EvaluateW
     m_parent = parent;
     m_provider = parent->m_parent;
     m_points = m_provider->m_speed_points;
+    
+    m_current_target_state = vector<float>(3,0);
 }
 
 /*! @brief Returns the desired next state in the EvaluateWalkParameters state machine 
@@ -67,7 +69,7 @@ BehaviourState* EvaluateSpeedOfWalkParametersState::nextState()
 void EvaluateSpeedOfWalkParametersState::doState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 3
-        debug << "EvaluateSpeedOfWalkParametersState::doState()" << endl;
+        debug << "EvaluateSpeedOfWalkParametersState::doState() target:[" << m_current_target_state[0] << "," << m_current_target_state[1] << "," << m_current_target_state[2] << "]" << endl;
     #endif
     if (m_parent->stateChanged() or m_provider->stateChanged())
         startEvaluation();
@@ -86,13 +88,14 @@ void EvaluateSpeedOfWalkParametersState::doState()
 /*! @brief Starts the evaluation, ie resets all of the measurement variables */
 void EvaluateSpeedOfWalkParametersState::startEvaluation()
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
-        debug << "EvaluateSpeedOfWalkParametersState::startEvaluation()" << endl;
-    #endif
     m_current_target_state = getStartPoint();
     m_trial_start_time = m_data->CurrentTime;
     m_energy_used = 0;
     m_previous_positions.clear();
+    
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
+        debug << "EvaluateSpeedOfWalkParametersState::startEvaluation() target:[" << m_current_target_state[0] << "," << m_current_target_state[1] << "," << m_current_target_state[2] << "]" << endl;
+    #endif
 }
 
 /*! @brief Updates the evaluation */
@@ -157,29 +160,19 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
 /*! @brief Returns the starting point for the evaluation of the speed */
 vector<float> EvaluateSpeedOfWalkParametersState::getStartPoint()
 {
-    float distance_from_first = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.front())[0];
-    float distance_from_last = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.back())[0];
-    if (distance_from_first < distance_from_last)
-    {
+    float distance_from_forward = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.front())[0];
+    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(reversePoint(m_points.front()))[0];
+
+    m_current_point_index = 0;
+    if (distance_from_forward <= distance_from_reverse)
         m_reverse_points = false;
-        m_current_point_index = 0;
-    }
     else
-    {
         m_reverse_points = true;
-        m_current_point_index = m_points.size()-1;
-    }
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "EvaluateSpeedOfWalkParametersState. Start point " << MotionFileTools::fromVector(m_points[m_current_point_index]) << endl;
-    #endif
+    
     if (not m_reverse_points)
         return m_points[m_current_point_index];
     else
-    {
-        vector<float> point = m_points[m_current_point_index];
-        point[2] += 3.1416;         // need to reverse the heading when going backwards
-        return point;
-    }
+        return reversePoint(m_points[m_current_point_index]);
 }
     
 /*! @brief Returns true if the current point has been reached */
@@ -195,27 +188,13 @@ bool EvaluateSpeedOfWalkParametersState::pointReached()
 /*! @brief Returns the next point in the list of way points in the predefined path */
 vector<float> EvaluateSpeedOfWalkParametersState::getNextPoint()
 {
-    if (not m_reverse_points)
-    {
-        if (m_current_point_index < m_points.size()-1)
-            m_current_point_index++;
-    }
-    else
-    {
-        if (m_current_point_index > 0)
-            m_current_point_index--;
-    }
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "EvaluateSpeedOfWalkParametersState. Next point " << MotionFileTools::fromVector(m_points[m_current_point_index]) << endl;
-    #endif
+    if (m_current_point_index < m_points.size()-1)
+        m_current_point_index++;
+
     if (not m_reverse_points)
         return m_points[m_current_point_index];
     else
-    {
-        vector<float> point = m_points[m_current_point_index];
-        point[2] += 3.1416;         // need to reverse the heading when going backwards
-        return point;
-    }
+        return reversePoint(m_points[m_current_point_index]);
 }
     
 /*! @brief Returns true if the trial path has been completed */
@@ -225,13 +204,22 @@ bool EvaluateSpeedOfWalkParametersState::allPointsReached()
         return false;
     else
     {
-        if (not m_reverse_points and m_current_point_index == m_points.size()-1)
-            return true;
-        else if (m_reverse_points and m_current_point_index == 0)
+        if (m_current_point_index == m_points.size()-1)
             return true;
         else
             return false;
     }
+}
+
+/*! @brief Returns the equivalent point on the reverse path */
+vector<float> EvaluateSpeedOfWalkParametersState::reversePoint(const vector<float>& point)
+{
+    vector<float> reverse;
+    reverse.reserve(3);
+    reverse.push_back(-point[0]);
+    reverse.push_back(-point[1]);
+    reverse.push_back(point[2] + 3.14);
+    return reverse;
 }
     
 /*! @brief Moves the head to look at the goals */
