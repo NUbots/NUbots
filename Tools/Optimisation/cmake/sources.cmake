@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS Optimiser.h  Optimiser.cpp
 			   EHCLSOptimiser.h EHCLSOptimiser.cpp	
                PGRLOptimiser.h PGRLOptimiser.cpp	
+               PSOOptimiser.h PSOOptimiser.cpp
                Parameter.h  Parameter.cpp
 )
 ####################################################################################

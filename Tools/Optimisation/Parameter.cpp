@@ -474,6 +474,20 @@ vector<float> operator*(const vector<float>& v, const float& f)
     return f*v;
 }
 
+vector<float> operator*(const vector<float>& v1, const vector<float>& v2)
+{
+    vector<float> result;
+    if (v1.size() != v2.size())
+        return result;
+    else
+    {
+        result.reserve(v1.size());
+        for (size_t i=0; i<v1.size(); i++)
+            result.push_back(v1[i]*v2[i]);
+        return result;
+    }
+}
+
 float norm(const vector<float>& v)
 {
     float sum = 0;

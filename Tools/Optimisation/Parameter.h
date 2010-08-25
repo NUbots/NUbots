@@ -96,6 +96,7 @@ vector<float> operator-(const vector<float>& v, const float& f);
 vector<float> operator-(const vector<float>& v1, const vector<float>& v2);
 vector<float> operator*(const float& f, const vector<float>& v);
 vector<float> operator*(const vector<float>& v, const float& f);
+vector<float> operator*(const vector<float>& v1, const vector<float>& v2);
 
 float norm(const vector<float>& v);
 
