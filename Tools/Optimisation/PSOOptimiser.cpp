@@ -33,9 +33,9 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
 {
     m_c1 = 0.5;
     m_c2 = 0.5;
-    m_inertia = 0.3;
+    m_inertia = 0.95;
     m_num_dimensions = parameters.size();
-    m_num_particles = 5;
+    m_num_particles = 20;
     
     srand(static_cast<unsigned int> (clock()*clock()*clock()));
 

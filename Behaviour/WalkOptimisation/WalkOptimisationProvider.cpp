@@ -70,7 +70,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     
     m_state = m_paused;
     
-    m_iteration_count = 0;
+    m_iteration_count = -1;
     m_duration = 0;
     m_energy = 0;	
     m_stability = 0;
@@ -110,18 +110,13 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
 
 void WalkOptimisationProvider::tickOptimiser()
 {
-    if (m_iteration_count == 0)
-    {	// avoid actually ticking the optimiser, the behaviour is sloppy; the first tick happens before the first set of parameters is even tested ;)
-        m_iteration_count++;
-        m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
-        return;
-    }
     m_iteration_count++;
     // save the state of the optimiser, and the walk parameters in case of hardware failure.
     m_optimiser->save();
     
     // update the optimiser and give the next set of parameters to the walk engine
-    m_optimiser->setParametersResult(calculateFitness());
+    if (m_iteration_count != 0)
+        m_optimiser->setParametersResult(calculateFitness());
     vector<float> nextparameters = m_optimiser->getNextParameters();
     m_parameters.set(nextparameters);
     m_jobs->addMotionJob(new WalkParametersJob(m_parameters));

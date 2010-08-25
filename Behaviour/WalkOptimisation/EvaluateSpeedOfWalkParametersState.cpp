@@ -56,7 +56,7 @@ EvaluateSpeedOfWalkParametersState::EvaluateSpeedOfWalkParametersState(EvaluateW
  */
 BehaviourState* EvaluateSpeedOfWalkParametersState::nextState() 
 {   // when all of the points have been reached we progress to the stability evaluation
-    if (allPointsReached())
+    if (allPointsReached() or m_data->CurrentTime - m_trial_start_time > 180000)
     {
         finishEvaluation();
         return m_parent->m_evaluate_stability;
