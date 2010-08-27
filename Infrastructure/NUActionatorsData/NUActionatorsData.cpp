@@ -26,20 +26,20 @@
 #include "debugverbositynuactionators.h"
 
 // Led actionators
-NUActionatorsData::id_t NUActionatorsData::ChestLed = -1;
-NUActionatorsData::id_t NUActionatorsData::LeftFootLed = -1;
-NUActionatorsData::id_t NUActionatorsData::RightFootLed = -1;
-NUActionatorsData::id_t NUActionatorsData::LeftEyeLed = -1;
-NUActionatorsData::id_t NUActionatorsData::RightEyeLed = -1;
-NUActionatorsData::id_t NUActionatorsData::LeftEarLed = -1;
-NUActionatorsData::id_t NUActionatorsData::RightEarLed = -1;
+NUActionatorsData::id_t NUActionatorsData::ChestLed = NUData::NumCommonIds + 0;
+NUActionatorsData::id_t NUActionatorsData::LeftFootLed = NUData::NumCommonIds + 1;
+NUActionatorsData::id_t NUActionatorsData::RightFootLed = NUData::NumCommonIds + 2;
+NUActionatorsData::id_t NUActionatorsData::LeftEyeLed = NUData::NumCommonIds + 3;
+NUActionatorsData::id_t NUActionatorsData::RightEyeLed = NUData::NumCommonIds + 4;
+NUActionatorsData::id_t NUActionatorsData::LeftEarLed = NUData::NumCommonIds + 5;
+NUActionatorsData::id_t NUActionatorsData::RightEarLed = NUData::NumCommonIds + 6;
 // Led groups
-NUActionatorsData::id_t NUActionatorsData::FaceLeds = -1;
-NUActionatorsData::id_t NUActionatorsData::FeetLeds = -1;
-NUActionatorsData::id_t NUActionatorsData::AllLeds = -1;
+NUActionatorsData::id_t NUActionatorsData::FaceLeds = NUData::NumCommonIds + 7;
+NUActionatorsData::id_t NUActionatorsData::FeetLeds = NUData::NumCommonIds + 8;
+NUActionatorsData::id_t NUActionatorsData::AllLeds = NUData::NumCommonIds + 9;
 // Other actionators
-NUActionatorsData::id_t NUActionatorsData::Sound = -1;
-NUActionatorsData::id_t NUActionatorsData::Teleporter = -1;
+NUActionatorsData::id_t NUActionatorsData::Sound = NUData::NumCommonIds + 10;
+NUActionatorsData::id_t NUActionatorsData::Teleporter = NUData::NumCommonIds + 11;
 
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
@@ -66,6 +66,11 @@ NUActionatorsData::~NUActionatorsData()
  */
 void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
 {
+    vector<string> names = simplifyNames(hardwarenames);
+    // now I need to 
+    //      - add the actionator to m_actionators
+    //      - update m_id_to_indices
+    
 }
 
 /******************************************************************************************************************************************

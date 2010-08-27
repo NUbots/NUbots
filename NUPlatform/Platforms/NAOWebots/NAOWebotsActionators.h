@@ -56,7 +56,6 @@ private:
     NAOWebotsPlatform* m_platform;                  //!< a pointer to the platform, in particular platform inherits webots::Robot so use it to access the devices
     
     // Actionators
-    static vector<string> m_servo_control_names;    //!< the names of the available joint control methods (usually position and/or torque)
     static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
     vector<webots::Servo*> m_servos;                //!< the actual webots::Servo pointers.
     static vector<string> m_led_names;              //!< the names of the leds available in webots

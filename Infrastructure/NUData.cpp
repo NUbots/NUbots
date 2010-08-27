@@ -31,39 +31,69 @@ NUData::id_t NUData::Torso = 6;
 NUData::id_t NUData::LLeg = 7;
 NUData::id_t NUData::RLeg = 8;
 
-NUData::id_t NUData::HeadRoll = -1;
-NUData::id_t NUData::HeadPitch = -1;
-NUData::id_t NUData::HeadYaw = -1;
-NUData::id_t NUData::NeckRoll = -1;
-NUData::id_t NUData::NeckPitch = -1;
-NUData::id_t NUData::NeckYaw = -1;
-NUData::id_t NUData::LShoulderRoll = -1;
-NUData::id_t NUData::LShoulderPitch = -1;
-NUData::id_t NUData::LShoulderYaw = -1;
-NUData::id_t NUData::LElbowRoll = -1;
-NUData::id_t NUData::LElbowPitch = -1;
-NUData::id_t NUData::LElbowYaw = -1;
-NUData::id_t NUData::RShoulderRoll = -1;
-NUData::id_t NUData::RShoulderPitch = -1;
-NUData::id_t NUData::RShoulderYaw = -1;
-NUData::id_t NUData::RElbowRoll = -1;
-NUData::id_t NUData::RElbowPitch = -1;
-NUData::id_t NUData::RElbowYaw = -1;
-NUData::id_t NUData::TorsoRoll = -1;
-NUData::id_t NUData::TorsoPitch = -1;
-NUData::id_t NUData::TorsoYaw = -1;
-NUData::id_t NUData::LHipRoll = -1;
-NUData::id_t NUData::LHipPitch = -1;
-NUData::id_t NUData::LHipYaw = -1;
-NUData::id_t NUData::LHipYawPitch = -1;
-NUData::id_t NUData::LKneePitch = -1;
-NUData::id_t NUData::LAnkleRoll = -1;
-NUData::id_t NUData::LAnklePitch = -1;
-NUData::id_t NUData::RHipRoll = -1;
-NUData::id_t NUData::RHipPitch = -1;
-NUData::id_t NUData::RHipYaw = -1;
-NUData::id_t NUData::RHipYawPitch = -1;
-NUData::id_t NUData::RKneePitch = -1;
-NUData::id_t NUData::RAnkleRoll = -1;
-NUData::id_t NUData::RAnklePitch = -1;
+NUData::id_t NUData::HeadRoll = 9;
+NUData::id_t NUData::HeadPitch = 10;
+NUData::id_t NUData::HeadYaw = 11;
+NUData::id_t NUData::NeckRoll = 12;
+NUData::id_t NUData::NeckPitch = 13;
+NUData::id_t NUData::NeckYaw = 14;
+NUData::id_t NUData::LShoulderRoll = 15;
+NUData::id_t NUData::LShoulderPitch = 16;
+NUData::id_t NUData::LShoulderYaw = 17;
+NUData::id_t NUData::LElbowRoll = 18;
+NUData::id_t NUData::LElbowPitch = 19;
+NUData::id_t NUData::LElbowYaw = 20;
+NUData::id_t NUData::RShoulderRoll = 21;
+NUData::id_t NUData::RShoulderPitch = 22;
+NUData::id_t NUData::RShoulderYaw = 23;
+NUData::id_t NUData::RElbowRoll = 24;
+NUData::id_t NUData::RElbowPitch = 25;
+NUData::id_t NUData::RElbowYaw = 26;
+NUData::id_t NUData::TorsoRoll = 27;
+NUData::id_t NUData::TorsoPitch = 28;
+NUData::id_t NUData::TorsoYaw = 29;
+NUData::id_t NUData::LHipRoll = 30;
+NUData::id_t NUData::LHipPitch = 31;
+NUData::id_t NUData::LHipYaw = 32;
+NUData::id_t NUData::LHipYawPitch = 33;
+NUData::id_t NUData::LKneePitch = 34;
+NUData::id_t NUData::LAnkleRoll = 35;
+NUData::id_t NUData::LAnklePitch = 36;
+NUData::id_t NUData::RHipRoll = 37;
+NUData::id_t NUData::RHipPitch = 38;
+NUData::id_t NUData::RHipYaw = 39;
+NUData::id_t NUData::RHipYawPitch = 40;
+NUData::id_t NUData::RKneePitch = 41;
+NUData::id_t NUData::RAnkleRoll = 42;
+NUData::id_t NUData::RAnklePitch = 43;
+NUData::id_t NUData::NumCommonIds = 44;
+
+/*! @brief Returns a vector containing the simplified versions of the vector containing hardware names 
+    @param hardwarenames a list of hardwarenames
+    @return a vector with the simplified names
+ */
+vector<string> NUData::simplifyNames(const vector<string>& hardwarenames)
+{
+    vector<string> simplenames;
+    for (size_t i=0; i<hardwarenames.size(); i++)
+        simplenames.push_back(getSimpleName(hardwarenames[i]));
+    return simplenames;
+}
+
+/*! @brief Returns a simplified version of the hardwarename, formatting is removed and the name is converted to lower case
+    @param hardwarename the string to simplify
+    @return the simplename
+*/
+string NUData::getSimpleName(const string& hardwarename)
+{
+    string simplename, currentletter;
+    // compare each letter to a space, an underscore, a forward slash, a backward slash and a period
+    for (unsigned int j=0; j<hardwarename.size(); j++)
+    {
+        currentletter = hardwarename.substr(j, 1);
+        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+            simplename += tolower(currentletter[0]);            
+    }
+    return simplename;
+}
 

@@ -26,6 +26,10 @@
 #ifndef NUDATA_H
 #define NUDATA_H
 
+#include <string>
+#include <vector>
+using namespace std;
+
 class NUData
 {
 public:
@@ -79,6 +83,12 @@ public:
     static id_t RAnklePitch;
     
     double CurrentTime;    
+    
+protected:
+    static id_t NumCommonIds;
+    vector<string> simplifyNames(const vector<string>& hardwarenames);
+private:
+    string getSimpleName(const string& hardwarename);
 };
 
 #endif

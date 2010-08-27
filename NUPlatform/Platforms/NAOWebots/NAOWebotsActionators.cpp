@@ -29,11 +29,6 @@ using namespace webots;
 
 #include <string.h>
 
-
-// init m_actionator_names:
-static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};
-vector<string> NAOWebotsActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
-
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
                                     string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
@@ -47,6 +42,7 @@ static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Righ
                                   string("ChestBoard/Led"), \
                                   string("LFoot/Led"), string("RFoot/Led")};
 vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+
 // init m_other_names:
 static string temp_other_names[] = {string("Teleporter"), string("Sound")};
 vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
@@ -66,6 +62,8 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     enableActionatorsInWebots();
     
     m_data->addActionators(m_servo_names);
+    m_data->addActionators(m_led_names);
+    m_data->addActionators(m_other_names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
