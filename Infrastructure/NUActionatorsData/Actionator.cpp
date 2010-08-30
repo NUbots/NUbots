@@ -19,7 +19,6 @@
 */
 
 #include "Actionator.h"
-#include "ActionatorPoint.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"

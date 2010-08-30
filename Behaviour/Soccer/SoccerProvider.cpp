@@ -101,13 +101,13 @@ void SoccerProvider::doBehaviourCommons()
     {
         vector<float> blue(3,1);
         blue[0] = 0;
-        m_actions->add(NUActionatorsData::LeftFootLed, m_current_time, blue);
+        m_actions->add(NUActionatorsData::LFootLed, m_current_time, blue);
     }
     else
     {
         vector<float> pink(3,1);
         pink[1] = 0;
-        m_actions->add(NUActionatorsData::LeftFootLed, m_current_time, pink);
+        m_actions->add(NUActionatorsData::LFootLed, m_current_time, pink);
     }
     
     // set the right eyes to indicate lost states

@@ -68,18 +68,18 @@ void PlayingState::doStateCommons()
     if (m_provider->stateChanged())
     {   // play a sound when we enter the playing state, turn the kick off light off
         m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::PLAYING);
-        m_actions->add(NUActionatorsData::RightFootLed, m_actions->CurrentTime, m_led_off);
+        m_actions->add(NUActionatorsData::RFootLed, m_actions->CurrentTime, m_led_off);
     }
     // In playing the chest led should be green
     m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, m_led_green);
     
     // set the right eye leds to indicate which state we are in
     if (m_state == m_chase_state)
-        m_actions->add(NUActionatorsData::RightEyeLed, m_actions->CurrentTime, m_led_red);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_red);
     else if (m_state == m_positioning_state)
-        m_actions->add(NUActionatorsData::RightEyeLed, m_actions->CurrentTime, m_led_green);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_green);
     else
-        m_actions->add(NUActionatorsData::RightEyeLed, m_actions->CurrentTime, m_led_off);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_off);
 }
 
 BehaviourFSMState* PlayingState::nextStateCommons()

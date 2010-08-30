@@ -37,20 +37,20 @@ class NUActionatorsData : public NUData
 {
 public:
     // Led actionators
-    static id_t ChestLed;
-    static id_t LeftFootLed;
-    static id_t RightFootLed;
-    static id_t LeftEyeLed;
-    static id_t RightEyeLed;
-    static id_t LeftEarLed;
-    static id_t RightEarLed;
+    const static id_t ChestLed;
+    const static id_t LFootLed;
+    const static id_t RFootLed;
+    const static id_t LEyeLed;
+    const static id_t REyeLed;
+    const static id_t LEarLed;
+    const static id_t REarLed;
     // Led groups
-    static id_t FaceLeds;
-    static id_t FeetLeds;
-    static id_t AllLeds;
+    const static id_t FaceLeds;
+    const static id_t FeetLeds;
+    const static id_t AllLeds;
     // Other actionators
-    static id_t Sound;
-    static id_t Teleporter;
+    const static id_t Sound;
+    const static id_t Teleporter;
 public:
     NUActionatorsData();
     ~NUActionatorsData();
@@ -99,6 +99,7 @@ public:
     friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
     
 private:
+    static vector<id_t*> m_ids;								   //!< a vector containing all of the actionator ids
     vector<vector<int> > m_id_to_indices;                      //!< a member to map id_t's to indices in m_actionators for each actionator in the id_t group 
     vector<Actionator> m_actionators;                          //!< a vector containing every Actionator
 };

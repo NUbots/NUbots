@@ -61,10 +61,10 @@ void ReadyState::doStateCommons()
     {
         vector<float> yellow(3,1);
         yellow[2] = 0;
-        m_actions->add(NUActionatorsData::RightFootLed, m_actions->CurrentTime, yellow);
+        m_actions->add(NUActionatorsData::RFootLed, m_actions->CurrentTime, yellow);
     }
     else
-        m_actions->add(NUActionatorsData::RightFootLed, m_actions->CurrentTime, vector<float>(3,0));
+        m_actions->add(NUActionatorsData::RFootLed, m_actions->CurrentTime, vector<float>(3,0));
 }
 
 BehaviourFSMState* ReadyState::nextStateCommons()

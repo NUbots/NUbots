@@ -21,70 +21,81 @@
 */
 
 #include "NUData.h"
+#include <cctype>
 
-NUData::id_t NUData::All = 0;
-NUData::id_t NUData::Head = 1;
-NUData::id_t NUData::Body = 3;
-NUData::id_t NUData::LArm = 4;
-NUData::id_t NUData::RArm = 5;
-NUData::id_t NUData::Torso = 6;
-NUData::id_t NUData::LLeg = 7;
-NUData::id_t NUData::RLeg = 8;
+#include "debug.h"
 
-NUData::id_t NUData::HeadRoll = 9;
-NUData::id_t NUData::HeadPitch = 10;
-NUData::id_t NUData::HeadYaw = 11;
-NUData::id_t NUData::NeckRoll = 12;
-NUData::id_t NUData::NeckPitch = 13;
-NUData::id_t NUData::NeckYaw = 14;
-NUData::id_t NUData::LShoulderRoll = 15;
-NUData::id_t NUData::LShoulderPitch = 16;
-NUData::id_t NUData::LShoulderYaw = 17;
-NUData::id_t NUData::LElbowRoll = 18;
-NUData::id_t NUData::LElbowPitch = 19;
-NUData::id_t NUData::LElbowYaw = 20;
-NUData::id_t NUData::RShoulderRoll = 21;
-NUData::id_t NUData::RShoulderPitch = 22;
-NUData::id_t NUData::RShoulderYaw = 23;
-NUData::id_t NUData::RElbowRoll = 24;
-NUData::id_t NUData::RElbowPitch = 25;
-NUData::id_t NUData::RElbowYaw = 26;
-NUData::id_t NUData::TorsoRoll = 27;
-NUData::id_t NUData::TorsoPitch = 28;
-NUData::id_t NUData::TorsoYaw = 29;
-NUData::id_t NUData::LHipRoll = 30;
-NUData::id_t NUData::LHipPitch = 31;
-NUData::id_t NUData::LHipYaw = 32;
-NUData::id_t NUData::LHipYawPitch = 33;
-NUData::id_t NUData::LKneePitch = 34;
-NUData::id_t NUData::LAnkleRoll = 35;
-NUData::id_t NUData::LAnklePitch = 36;
-NUData::id_t NUData::RHipRoll = 37;
-NUData::id_t NUData::RHipPitch = 38;
-NUData::id_t NUData::RHipYaw = 39;
-NUData::id_t NUData::RHipYawPitch = 40;
-NUData::id_t NUData::RKneePitch = 41;
-NUData::id_t NUData::RAnkleRoll = 42;
-NUData::id_t NUData::RAnklePitch = 43;
-NUData::id_t NUData::NumCommonIds = 44;
+int curr_id = 0;
+vector<NUData::id_t*> NUData::Ids;
+const NUData::id_t NUData::All(curr_id++, "All");
+const NUData::id_t NUData::Head(curr_id++, "Head");
+const NUData::id_t NUData::Body(curr_id++, "Body");
+const NUData::id_t NUData::LArm(curr_id++, "LArm");
+const NUData::id_t NUData::RArm(curr_id++, "RArm");
+const NUData::id_t NUData::Torso(curr_id++, "Torso");
+const NUData::id_t NUData::LLeg(curr_id++, "LLeg");
+const NUData::id_t NUData::RLeg(curr_id++, "RLeg");
 
-/*! @brief Returns a vector containing the simplified versions of the vector containing hardware names 
+const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll");
+const NUData::id_t NUData::HeadPitch(curr_id++, "HeadPitch");
+const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw");
+const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll");
+const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch");
+const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw");
+const NUData::id_t NUData::LShoulderRoll(curr_id++, "LShoulderRoll");
+const NUData::id_t NUData::LShoulderPitch(curr_id++, "LShoulderPitch");
+const NUData::id_t NUData::LShoulderYaw(curr_id++, "LShoulderYaw");
+const NUData::id_t NUData::LElbowRoll(curr_id++, "LElbowRoll");
+const NUData::id_t NUData::LElbowPitch(curr_id++, "LElbowPitch");
+const NUData::id_t NUData::LElbowYaw(curr_id++, "LElbowYaw");
+const NUData::id_t NUData::RShoulderRoll(curr_id++, "RShoulderRoll");
+const NUData::id_t NUData::RShoulderPitch(curr_id++, "RShoulderPitch");
+const NUData::id_t NUData::RShoulderYaw(curr_id++, "RShoulderYaw");
+const NUData::id_t NUData::RElbowRoll(curr_id++, "RElbowRoll");
+const NUData::id_t NUData::RElbowPitch(curr_id++, "RElbowPitch");
+const NUData::id_t NUData::RElbowYaw(curr_id++, "RElbowYaw");
+const NUData::id_t NUData::TorsoRoll(curr_id++, "TorsoRoll");
+const NUData::id_t NUData::TorsoPitch(curr_id++, "TorsoPitch");
+const NUData::id_t NUData::TorsoYaw(curr_id++, "TorsoYaw");
+const NUData::id_t NUData::LHipRoll(curr_id++, "LHipRoll");
+const NUData::id_t NUData::LHipPitch(curr_id++, "LHipPitch");
+const NUData::id_t NUData::LHipYaw(curr_id++, "LHipYaw");
+const NUData::id_t NUData::LHipYawPitch(curr_id++, "LHipYawPitch");
+const NUData::id_t NUData::LKneePitch(curr_id++, "LKneePitch");
+const NUData::id_t NUData::LAnkleRoll(curr_id++, "LAnkleRoll");
+const NUData::id_t NUData::LAnklePitch(curr_id++, "LAnklePitch");
+const NUData::id_t NUData::RHipRoll(curr_id++, "RHipRoll");
+const NUData::id_t NUData::RHipPitch(curr_id++, "RHipPitch");
+const NUData::id_t NUData::RHipYaw(curr_id++, "RHipYaw");
+const NUData::id_t NUData::RHipYawPitch(curr_id++, "RHipYawPitch");
+const NUData::id_t NUData::RKneePitch(curr_id++, "RKneePitch");
+const NUData::id_t NUData::RAnkleRoll(curr_id++, "RAnkleRoll");
+const NUData::id_t NUData::RAnklePitch(curr_id++, "RAnklePitch");
+const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds");
+
+/*! @brief Returns a vector containing the standardised versions of the vector containing hardware names 
     @param hardwarenames a list of hardwarenames
     @return a vector with the simplified names
  */
-vector<string> NUData::simplifyNames(const vector<string>& hardwarenames)
+vector<string> NUData::standardiseNames(const vector<string>& hardwarenames)
 {
     vector<string> simplenames;
     for (size_t i=0; i<hardwarenames.size(); i++)
-        simplenames.push_back(getSimpleName(hardwarenames[i]));
+    {
+        string simplename = getStandardName(hardwarenames[i]);
+        if (simplenames.empty())
+            simplenames.push_back(simplename);    
+        else if (simplename.compare(simplenames.back()) != 0)
+            simplenames.push_back(simplename);
+    }
     return simplenames;
 }
 
-/*! @brief Returns a simplified version of the hardwarename, formatting is removed and the name is converted to lower case
+/*! @brief Returns a simplified version of the hardwarename, formatting is removed.
     @param hardwarename the string to simplify
     @return the simplename
 */
-string NUData::getSimpleName(const string& hardwarename)
+string NUData::getStandardName(const string& hardwarename)
 {
     string simplename, currentletter;
     // compare each letter to a space, an underscore, a forward slash, a backward slash and a period
@@ -92,8 +103,60 @@ string NUData::getSimpleName(const string& hardwarename)
     {
         currentletter = hardwarename.substr(j, 1);
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
-            simplename += tolower(currentletter[0]);            
+            simplename += currentletter[0];            
     }
+    
+    // Replace "Left"/"Right" with L/R and move to front of name
+    int Left = simplename.find("Left");
+    int Right = simplename.find("Right");
+    if (Left != string::npos)
+    {
+        simplename.erase(Left, 4);
+        simplename.insert(0, "L");
+    }
+    if (Right != string::npos)
+    {
+        simplename.erase(Right, 5);
+        simplename.insert(0, "R");
+    }
+    
+    // Replace plurals (ears, eyes)
+    int Ears = simplename.find("Ears");
+    int Eyes = simplename.find("Eyes");
+    if (Ears != string::npos)
+        simplename.replace(Ears, 4, "Ear");
+    if (Eyes != string::npos)
+        simplename.replace(Ears, 4, "Eye");
+    
+    // Replace ChestBoard with Chest
+    int ChestBoard = simplename.find("ChestBoard");
+    if (ChestBoard != string::npos)
+        simplename.replace(ChestBoard, 10, "Chest");
+    
+    // Remove colours
+    int Red = simplename.find("Red");
+    if (Red != string::npos)
+        simplename.erase(Red, 3);
+    int Green = simplename.find("Green");
+    if (Green != string::npos)
+        simplename.erase(Green, 5);
+    int Blue = simplename.find("Blue");
+    if (Blue != string::npos)
+        simplename.erase(Blue, 4);
+    
+    // Remove everything after a number
+    int index = -1;
+    for (size_t i=simplename.size()-1; i>0; i--)
+    {
+        if (isdigit(simplename[i]) and not isdigit(simplename[i-1]))
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0)
+        simplename.erase(index);
+    
     return simplename;
 }
 

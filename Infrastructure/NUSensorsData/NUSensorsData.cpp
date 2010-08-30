@@ -24,11 +24,12 @@
 #include "debugverbositynusensors.h"
 
 #include <fstream>
-#include <cctype>       // for tolower()
 
-NUSensorsData::id_t NUSensorsData::MainButton = -1;
-NUSensorsData::id_t NUSensorsData::SecondaryButton = -1;
-NUSensorsData::id_t NUSensorsData::AllButton = -1;
+int s_curr_id = NUData::NumCommonIds.Id;
+vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
+const NUSensorsData::id_t NUSensorsData::MainButton(s_curr_id++, "MainButton", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::SecondaryButton(s_curr_id++, "SecondaryButton", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::AllButton(s_curr_id++, "AllButton", NUSensorsData::m_ids);
 
 /*! @brief Default constructor for NUSensorsData
  */
@@ -464,7 +465,7 @@ bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
     
     names.clear();
     for (unsigned int i=0; i<selectedjoints.size(); i++)
-        names.push_back(m_joint_names[selectedjoints[i]]);
+        names.push_back(selectedjoints[i].Name);
     return true;
 }
 
@@ -475,11 +476,11 @@ bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
  */
 bool NUSensorsData::getJointData(sensor_t* p_sensor, id_t jointid, float& data)
 {
-    if (jointid < 0 || p_sensor->IsValid == false)
+    if (p_sensor->IsValid == false)
         return false;
     else
     {
-        data = p_sensor->Data[jointid];
+        data = p_sensor->Data[jointid.Id];
         return true;
     }
 }
@@ -524,7 +525,7 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, id_t partid, vector<float>
         data.clear();
         data.reserve(selectedjoints.size());
         for (unsigned int i=0; i<selectedjoints.size(); i++)
-            data.push_back(p_sensor->Data[selectedjoints[i]]);
+            data.push_back(p_sensor->Data[selectedjoints[i].Id]);
         return true;
     }
     return true;
@@ -1210,7 +1211,7 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
         simplejointnames.push_back(namebuffer);
         namebuffer.clear();
     }
-    
+    /*
     for (unsigned int i=0; i<simplejointnames.size(); i++) 
     {
         if (simplejointnames[i].find("headyaw") != string::npos)
@@ -1351,6 +1352,7 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
     m_num_leg_joints = m_lleg_ids.size();
     m_num_body_joints = m_body_ids.size();
     m_num_joints = m_all_joint_ids.size();
+     */
 }
 
 /*! @brief Sets the joint positions to the given values

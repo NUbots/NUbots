@@ -33,62 +33,85 @@ using namespace std;
 class NUData
 {
 public:
-    typedef int id_t;
+    struct id_t 
+    {
+        id_t(int id, const string& name, vector<NUData::id_t*>& list = NUData::Ids) 
+        {
+            Id = id; 
+            Name = name;
+            list.push_back(this);
+        }
+        int Id;
+        string Name;
+        bool operator==(const id_t& other)
+        {
+            return Id == other.Id;
+        }
+        bool operator==(const int& other)
+        {
+            return Id == other;
+        }
+        bool operator==(const string& other)
+        {
+            return Name.find(other) != string::npos;
+        }
+    };
     
     // Common aliases
-    static id_t All;
-    static id_t Head;
-    static id_t Body;
-    static id_t LArm;
-    static id_t RArm;
-    static id_t Torso;
-    static id_t LLeg;
-    static id_t RLeg;
+    const static id_t All;
+    const static id_t Head;
+    const static id_t Body;
+    const static id_t LArm;
+    const static id_t RArm;
+    const static id_t Torso;
+    const static id_t LLeg;
+    const static id_t RLeg;
     
-    // define static members that are both sensors and actionators
-    static id_t HeadRoll;
-    static id_t HeadPitch;
-    static id_t HeadYaw;
-    static id_t NeckRoll;
-    static id_t NeckPitch;
-    static id_t NeckYaw;
-    static id_t LShoulderRoll;
-    static id_t LShoulderPitch;
-    static id_t LShoulderYaw;
-    static id_t LElbowRoll;
-    static id_t LElbowPitch;
-    static id_t LElbowYaw;
-    static id_t RShoulderRoll;
-    static id_t RShoulderPitch;
-    static id_t RShoulderYaw;
-    static id_t RElbowRoll;
-    static id_t RElbowPitch;
-    static id_t RElbowYaw;
-    static id_t TorsoRoll;
-    static id_t TorsoPitch;
-    static id_t TorsoYaw;
-    static id_t LHipRoll;
-    static id_t LHipPitch;
-    static id_t LHipYaw;
-    static id_t LHipYawPitch;
-    static id_t LKneePitch;
-    static id_t LAnkleRoll;
-    static id_t LAnklePitch;
-    static id_t RHipRoll;
-    static id_t RHipPitch;
-    static id_t RHipYaw;
-    static id_t RHipYawPitch;
-    static id_t RKneePitch;
-    static id_t RAnkleRoll;
-    static id_t RAnklePitch;
+    // define const static members that are both sensors and actionators
+    const static id_t HeadRoll;
+    const static id_t HeadPitch;
+    const static id_t HeadYaw;
+    const static id_t NeckRoll;
+    const static id_t NeckPitch;
+    const static id_t NeckYaw;
+    const static id_t LShoulderRoll;
+    const static id_t LShoulderPitch;
+    const static id_t LShoulderYaw;
+    const static id_t LElbowRoll;
+    const static id_t LElbowPitch;
+    const static id_t LElbowYaw;
+    const static id_t RShoulderRoll;
+    const static id_t RShoulderPitch;
+    const static id_t RShoulderYaw;
+    const static id_t RElbowRoll;
+    const static id_t RElbowPitch;
+    const static id_t RElbowYaw;
+    const static id_t TorsoRoll;
+    const static id_t TorsoPitch;
+    const static id_t TorsoYaw;
+    const static id_t LHipRoll;
+    const static id_t LHipPitch;
+    const static id_t LHipYaw;
+    const static id_t LHipYawPitch;
+    const static id_t LKneePitch;
+    const static id_t LAnkleRoll;
+    const static id_t LAnklePitch;
+    const static id_t RHipRoll;
+    const static id_t RHipPitch;
+    const static id_t RHipYaw;
+    const static id_t RHipYawPitch;
+    const static id_t RKneePitch;
+    const static id_t RAnkleRoll;
+    const static id_t RAnklePitch;
+    const static id_t NumCommonIds;
     
     double CurrentTime;    
     
 protected:
-    static id_t NumCommonIds;
-    vector<string> simplifyNames(const vector<string>& hardwarenames);
+    static vector<id_t*> Ids;
+    vector<string> standardiseNames(const vector<string>& hardwarenames);
 private:
-    string getSimpleName(const string& hardwarename);
+    string getStandardName(const string& hardwarename);
 };
 
 #endif

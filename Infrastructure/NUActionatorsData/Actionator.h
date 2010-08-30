@@ -28,7 +28,7 @@
 #ifndef ACTIONATOR_H
 #define ACTIONATOR_H
 
-class ActionatorPoint;
+#include "ActionatorPoint.h"
 
 #include <vector>
 #include <deque>

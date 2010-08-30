@@ -39,9 +39,9 @@ class NUSensorsData: public NUData, TimestampedData
 {
 public:
     // button ids
-    static id_t MainButton;
-    static id_t SecondaryButton;
-    static id_t AllButton;
+    const static id_t MainButton;
+    const static id_t SecondaryButton;
+    const static id_t AllButton;
 public:
     NUSensorsData();
     ~NUSensorsData();
@@ -243,6 +243,7 @@ public:
     sensor_t* Compass;                          //!< stores the bearing of the robot
     
 private:
+    static vector<id_t*> m_ids;					//!< a vector containing all of the actionator ids
     vector<sensor_t*> m_sensors;                //!< a vector of all of the sensors
     vector<id_t> m_head_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each head joint
     vector<id_t> m_larm_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each left arm joint

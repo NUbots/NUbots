@@ -25,21 +25,23 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
+int a_curr_id = NUData::NumCommonIds.Id+1;
+vector<NUActionatorsData::id_t*> NUActionatorsData::m_ids;
 // Led actionators
-NUActionatorsData::id_t NUActionatorsData::ChestLed = NUData::NumCommonIds + 0;
-NUActionatorsData::id_t NUActionatorsData::LeftFootLed = NUData::NumCommonIds + 1;
-NUActionatorsData::id_t NUActionatorsData::RightFootLed = NUData::NumCommonIds + 2;
-NUActionatorsData::id_t NUActionatorsData::LeftEyeLed = NUData::NumCommonIds + 3;
-NUActionatorsData::id_t NUActionatorsData::RightEyeLed = NUData::NumCommonIds + 4;
-NUActionatorsData::id_t NUActionatorsData::LeftEarLed = NUData::NumCommonIds + 5;
-NUActionatorsData::id_t NUActionatorsData::RightEarLed = NUData::NumCommonIds + 6;
+const NUActionatorsData::id_t NUActionatorsData::ChestLed(a_curr_id++, "ChestLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::LFootLed(a_curr_id++, "LFootLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::RFootLed(a_curr_id++, "RFootLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::LEyeLed(a_curr_id++, "LEyeLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::REyeLed(a_curr_id++, "REyeLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::LEarLed(a_curr_id++, "LEarLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::REarLed(a_curr_id++, "REarLed", NUActionatorsData::m_ids);
 // Led groups
-NUActionatorsData::id_t NUActionatorsData::FaceLeds = NUData::NumCommonIds + 7;
-NUActionatorsData::id_t NUActionatorsData::FeetLeds = NUData::NumCommonIds + 8;
-NUActionatorsData::id_t NUActionatorsData::AllLeds = NUData::NumCommonIds + 9;
+const NUActionatorsData::id_t NUActionatorsData::FaceLeds(a_curr_id++, "FaceLeds", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::FeetLeds(a_curr_id++, "FeetLeds", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::AllLeds(a_curr_id++, "AllLeds", NUActionatorsData::m_ids);
 // Other actionators
-NUActionatorsData::id_t NUActionatorsData::Sound = NUData::NumCommonIds + 10;
-NUActionatorsData::id_t NUActionatorsData::Teleporter = NUData::NumCommonIds + 11;
+const NUActionatorsData::id_t NUActionatorsData::Sound(a_curr_id++, "Sound", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::Teleporter(a_curr_id++, "Teleporter", NUActionatorsData::m_ids);
 
 /*! @brief Default constructor for a NUActionatorsData storage class.
  */
@@ -49,7 +51,12 @@ NUActionatorsData::NUActionatorsData()
     debug << "NUActionatorsData::NUActionatorsData" << endl;
 #endif
     CurrentTime = 0;
-    m_id_to_indices.push_back(vector<int>(20,0));
+    
+    m_ids.insert(m_ids.begin(), NUData::Ids.begin(), NUData::Ids.end());
+    
+    for (size_t i=0; i<m_ids.size(); i++)
+        m_actionators.push_back(Actionator(m_ids[i]->Name));
+    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
 }
 
 /*! @brief Destroys the NUActionatorsData storage class
@@ -66,7 +73,23 @@ NUActionatorsData::~NUActionatorsData()
  */
 void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
 {
-    vector<string> names = simplifyNames(hardwarenames);
+    vector<string> names = standardiseNames(hardwarenames);
+    for (size_t i=0; i<names.size(); i++)
+    {	// for each name compare it to the name of that actionator
+        for (size_t j=0; j<m_ids.size(); j++)
+        {
+            if (*(m_ids[j]) == names[i])
+                m_id_to_indices[j].push_back(j);
+        }
+        debug << names[i] << endl;
+    }
+    
+    /*for (size_t j=0; j<m_id_to_indices.size(); j++)
+    {
+        for (size_t k=0; k<m_id_to_indices[j].size(); k++)
+            debug << m_ids[m_id_to_indices[j][k]]->Name << " ";
+        debug << endl;
+    }*/
     // now I need to 
     //      - add the actionator to m_actionators
     //      - update m_id_to_indices

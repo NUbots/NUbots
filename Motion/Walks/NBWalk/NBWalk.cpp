@@ -149,22 +149,21 @@ void NBWalk::processJoints()
  */
 void NBWalk::updateNBSensors()
 {
-    static vector<float> nu_jointpositions(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_jointtemperatures(nu_jointpositions.size(), 0);
-    static vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
-    static vector<float> nb_jointtemperatures(nb_jointtemperatures.size(), 0);
-    
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::updateNBSensors()" << endl;
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NBWalk::updateNBSensors()" << endl;
+    #endif
     
     // I'll to the joints first. All I need to do is get the order right
     // Positions
-    m_data->getJointPositions(NUSensorsData::AllJoints, nu_jointpositions);
+    vector<float> nu_jointpositions;
+    m_data->getJointPositions(NUSensorsData::All, nu_jointpositions);
+    vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
     nuToNBJointOrder(nu_jointpositions, nb_jointpositions);
     nb_sensors->setBodyAngles(nb_jointpositions);
     // Temperatures
-    m_data->getJointTemperatures(NUSensorsData::AllJoints, nu_jointtemperatures);
+    vector<float> nu_jointtemperatures;
+    m_data->getJointTemperatures(NUSensorsData::All, nu_jointtemperatures);
+    vector<float> nb_jointtemperatures(nb_jointtemperatures.size(), 0);
     nuToNBJointOrder(nu_jointtemperatures, nb_jointtemperatures);
     nb_sensors->setBodyTemperatures(nb_jointtemperatures);
     
@@ -185,7 +184,7 @@ void NBWalk::updateNBSensors()
     if (orientation.size() > 1)
         angleY = orientation[1];
     
-    m_data->getFootSoleValues(NUSensorsData::AllFeet, footvalues);
+    m_data->getFootSoleValues(NUSensorsData::All, footvalues);
     m_data->getButtonValues(NUSensorsData::MainButton, buttonvalues);
     
     nb_sensors->setMotionSensors(FSR(footvalues[0], footvalues[1], footvalues[2], footvalues[3]),
@@ -347,22 +346,21 @@ void NBWalk::nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<floa
  */
 void NBWalk::updateActionatorsData()
 {
-    static vector<float> zerovel(m_data->getNumberOfJoints(NUSensorsData::AllJoints), 0);
-    static vector<float> nu_nextLeftLegJoints(m_data->getNumberOfJoints(NUSensorsData::LeftLegJoints), 0);
-    static vector<float> nu_nextRightLegJoints(m_data->getNumberOfJoints(NUSensorsData::RightLegJoints), 0);
-    static vector<float> nu_nextLeftArmJoints(m_data->getNumberOfJoints(NUSensorsData::LeftArmJoints), 0);
-    static vector<float> nu_nextRightArmJoints(m_data->getNumberOfJoints(NUSensorsData::RightArmJoints), 0);
+    static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0);
+    static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0);
+    static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0);
+    static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0);
     
     nbToNULeftLegJointOrder(nextJoints, nu_nextLeftLegJoints);
     nbToNURightLegJointOrder(nextJoints, nu_nextRightLegJoints);
     nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
     nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
     
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, Platform->getTime(), nu_nextLeftLegJoints, zerovel, 50);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, Platform->getTime(), nu_nextRightLegJoints, zerovel, 50);
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), nu_nextLeftLegJoints, 50);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), nu_nextRightLegJoints, 50);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, Platform->getTime(), nu_nextLeftArmJoints, zerovel, 30);
+        m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 30);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, Platform->getTime(), nu_nextRightArmJoints, zerovel, 30);
+        m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 30);
 }
 

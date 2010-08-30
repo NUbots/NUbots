@@ -61,9 +61,9 @@ void SetState::doState()
     
     // In set if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
-        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, yellow);
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, yellow);
     else
-        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, vector<float>(3,0));
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In set we can move the head, so track the ball if you can see it otherwise do a pan
     if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())

@@ -60,10 +60,10 @@ void InitialState::doState()
     {
         vector<float> yellow(3,1);
         yellow[2] = 0;
-        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, yellow);
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, yellow);
     }
     else
-        m_actions->add(NUActionatorsData::RightFootLed, m_data->CurrentTime, vector<float>(3,0));
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In initial if the left foot is pressed then we should swap teams
     if (m_provider->singleLeftBumperClick() or m_provider->longLeftBumperClick())
