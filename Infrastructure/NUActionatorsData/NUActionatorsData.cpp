@@ -202,8 +202,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, float data, f
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
     #endif
     // combine the data and gain into a vector
-    vector<float> d(2,0);
-    d[0] = data;
+    vector<float> d(2,data);
     d[1] = gain;
     // then just add it
     add(actionatorid, time, d);
@@ -230,17 +229,19 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     if (numids == 0)
         return;
     else if (numids == 1)
+    {	// if actionatorid is a single
         m_actionators[ids[0]].add(time, data);
+    }
     else
-    {   // if actionatorid is a group then either add elements or add vector depending on the data's size
+    {   // if actionatorid is a group
         if (data.size() == numids)
-        {
-            for (size_t i=0; i<numids; i++)
+        {	// if the data size matches the group size then assume we want each row of data given to each actionator
+            for (size_t i=0; i<numids; i++) 
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {
-            for (size_t i=0; i<numids; i++)
+        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+            for (size_t i=0; i<numids; i++) 
                 m_actionators[ids[i]].add(time, data);
         }
     }
@@ -264,9 +265,8 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     if (numids == 0)
         return;
     else if (numids > 1 and numids == data.size())
-    {
-        vector<float> d(2,0);
-        d[1] = gain;
+    {	// as we are including a gain, we must be assigning a single value from data to each actionator in a group
+        vector<float> d(2,gain);
         for (size_t i=0; i<numids; i++)
         {
             d[0] = data[i];
@@ -298,7 +298,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     if (numids == 0)
         return;
     else if (numids > 1 and numids == data.size() and numids == gain.size())
-    {
+    {	// as we are including gains, we must assign a single data,gain pair to each actionator in a group
         vector<float> d(2,0);
         for (size_t i=0; i<numids; i++)
         {
@@ -335,16 +335,18 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     if (numids == 0)
         return;
     else if (numids == 1)
+    {	// if actionatorid is a single
         m_actionators[ids[0]].add(time, data);
+    }
     else
-    {   // if actionatorid is a group then either add elements or add vector depending on the data's size
+    {   // if actionatorid is a group
         if (data.size() == numids)
-        {
+        {	// if the data size matches the group size then assume we want each row of data given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {
+        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data);
         }
@@ -372,16 +374,18 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     if (numids == 0)
         return;
     else if (numids == 1)
+    {	// if actionatorid is a single
         m_actionators[ids[0]].add(time, data);
+    }
     else
-    {   // if actionatorid is a group then either add elements or add vector depending on the data's size
+    {   // if actionatorid is a group
         if (data.size() == numids)
-        {
+        {	// if the data size matches the group size then assume we want each row of data given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {
+        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data);
         }
@@ -422,6 +426,10 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const string&
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
 
@@ -430,10 +438,8 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     else if (numids == 1)
     {   // if actionatorid is a single actionator
         if (time.size() == data.size())
-        {
             for (size_t i=0; i<time.size(); i++)
                 add(actionatorid, time[i], data[i]);
-        }
         else
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << endl;
     }
@@ -462,6 +468,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
 
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
@@ -507,6 +517,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
@@ -515,10 +529,8 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     else if (numids == 1)
     {   // if actionatorid is a single actionator
         if (time.size() == data.size() and time.size() == gain.size())
-        {
             for (size_t i=0; i<time.size(); i++)
                 add(actionatorid, time[i], data[i], gain[i]);
-        }
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
@@ -558,6 +570,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<float> >& data)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
@@ -566,10 +582,8 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     else if (numids == 1)
     {   // if actionatorid is a single
         if (time.size() == data.size())
-        {
             for (size_t i=0; i<time.size(); i++)
                 add(actionatorid, time[i], data[i]);
-        }
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
@@ -579,12 +593,12 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     else
     {   // if actionatorid is a group
         if (time.size() == data.size())
-        {
+        {	
             for (size_t i=0; i<time.size(); i++)
                 add(actionatorid, time[i], data[i]);
         }
         else if (numids == data.size())
-        {
+        {	
             for (size_t i=0; i<numids; i++)
                 add(*m_ids[ids[i]], time, data[i]);
         }
@@ -618,6 +632,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
@@ -678,6 +696,9 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
@@ -729,6 +750,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<string>& data)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
     size_t numids = ids.size();
     
