@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
 using namespace std;
 
 class ActionatorPoint 
@@ -40,17 +41,18 @@ public:
     ActionatorPoint(double time, const vector<vector<float> >& data);
     ActionatorPoint(double time, const vector<vector<vector<float> > >& data);
     ActionatorPoint(double time, const string& data);
+    ActionatorPoint(const ActionatorPoint& original);
     ~ActionatorPoint();
     
     bool operator< (const ActionatorPoint& other) const;
     friend ostream& operator<< (ostream& output, const ActionatorPoint& p);
 public:
-    double Time;                                    //!< the time the actionator point will be completed in milliseconds since epoch or program start
-    float* FloatData;                               //!< a pointer to the float data associated with the actionator point
-    vector<float>* VectorData;                      //!< a pointer to the vector data associated with the actionator point
-    vector<vector<float> >* MatrixData;             //!< a pointer to the matrix data associated with the actionator point
-    vector<vector<vector<float> > >* ThreeDimData;  //!< a pointer to the three dimensional matrix associated with the actionator point
-    string* StringData;                             //!< a pointer to the string assocaiated with the actionator point
+    double Time;                                                        //!< the time the actionator point will be completed in milliseconds since epoch or program start
+    boost::shared_ptr<float> FloatData;                                 //!< a pointer to the float data associated with the actionator point
+    boost::shared_ptr<vector<float> > VectorData;                       //!< a pointer to the vector data associated with the actionator point
+    boost::shared_ptr<vector<vector<float> > > MatrixData;              //!< a pointer to the matrix data associated with the actionator point
+    boost::shared_ptr<vector<vector<vector<float> > > > ThreeDimData;   //!< a pointer to the three dimensional matrix associated with the actionator point
+    boost::shared_ptr<string> StringData;                               //!< a pointer to the string assocaiated with the actionator point
 };
 
 #endif

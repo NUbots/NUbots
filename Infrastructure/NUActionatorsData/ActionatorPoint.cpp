@@ -22,6 +22,7 @@
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+using namespace boost;
 
 /*! @brief Constructs an ActionatorPoint that holds a single data value
     @param time the time the data will be applied
@@ -30,11 +31,7 @@
 ActionatorPoint::ActionatorPoint(double time, float data)
 {
     Time = time;
-    FloatData = new float(data);
-    VectorData = 0;
-    MatrixData = 0;
-    ThreeDimData = 0;
-    StringData = 0;
+    FloatData = shared_ptr<float>(new float(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a vector of data values
@@ -44,11 +41,7 @@ ActionatorPoint::ActionatorPoint(double time, float data)
 ActionatorPoint::ActionatorPoint(double time, const vector<float>& data)
 {
     Time = time;
-    FloatData = 0;
-    VectorData = new vector<float>(data);
-    MatrixData = 0;
-    ThreeDimData = 0;
-    StringData = 0;
+    VectorData = shared_ptr<vector<float> >(new vector<float>(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a matrix of data values
@@ -58,11 +51,7 @@ ActionatorPoint::ActionatorPoint(double time, const vector<float>& data)
 ActionatorPoint::ActionatorPoint(double time, const vector<vector<float> >& data)
 {
     Time = time;
-    FloatData = 0;
-    VectorData = 0;
-    MatrixData = new vector<vector<float> >(data);
-    ThreeDimData = 0;
-    StringData = 0;
+    MatrixData = shared_ptr<vector<vector<float> > >(new vector<vector<float> >(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a three dimensional matrix of data values
@@ -72,11 +61,7 @@ ActionatorPoint::ActionatorPoint(double time, const vector<vector<float> >& data
 ActionatorPoint::ActionatorPoint(double time, const vector<vector<vector<float> > >& data)
 {
     Time = time;
-    FloatData = 0;
-    VectorData = 0;
-    MatrixData = 0;
-    ThreeDimData = new vector<vector<vector<float> > >(data);
-    StringData = 0;
+    ThreeDimData = shared_ptr<vector<vector<vector<float> > > >(new vector<vector<vector<float> > >(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a string
@@ -86,26 +71,26 @@ ActionatorPoint::ActionatorPoint(double time, const vector<vector<vector<float> 
 ActionatorPoint::ActionatorPoint(double time, const string& data)
 {
     Time = time;
-    FloatData = 0;
-    VectorData = 0;
-    MatrixData = 0;
-    ThreeDimData = 0;
-    StringData = new string(data);
+    StringData = shared_ptr<string>(new string(data));
+}
+
+/*! @brief Copy constructor for an ActionatorPoint. 
+    @param time the time the data will be applied
+    @param data the actionator data
+ */
+ActionatorPoint::ActionatorPoint(const ActionatorPoint& original)
+{
+    Time = original.Time;
+    FloatData = original.FloatData;
+    VectorData = original.VectorData;
+    MatrixData = original.MatrixData;
+    ThreeDimData = original.ThreeDimData;
+    StringData = original.StringData;
 }
 
 /*! @brief Destroy the ActionatorPoint */
 ActionatorPoint::~ActionatorPoint()
 {
-    delete FloatData;
-    FloatData = 0;
-    delete VectorData;
-    VectorData = 0;
-    delete MatrixData;
-    MatrixData = 0;
-    delete ThreeDimData;
-    ThreeDimData = 0;
-    delete StringData;
-    StringData = 0;
 }
 
 /*! @brief operator< for comparing two points */
@@ -119,9 +104,9 @@ ostream& operator<< (ostream& output, const ActionatorPoint& p)
 {
     output << p.Time << ": ";
     /*if (p.FloatData)
-        output << p.FloatData;
+        output << *p.FloatData;
     if (p.VectorData)
-        output << p.VectorData;
+        output << *p.VectorData;
     if (p.MatrixData)
         output << p.MatrixData;
     if (p.ThreeDimData)

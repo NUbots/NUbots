@@ -161,11 +161,9 @@ bool Actionator::isEmpty()
  */
 void Actionator::summaryTo(ostream& output)
 {
-    output << Name << " ";
-    if (isEmpty())
-        output << "EMPTY" << endl;
-    else 
+    if (not isEmpty())
     {
+        output << Name << " ";
         for (unsigned int i=0; i<m_points.size(); i++)
             output << m_points[i] << " ";
         output << endl;
