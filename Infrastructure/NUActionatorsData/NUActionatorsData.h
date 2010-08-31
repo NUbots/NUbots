@@ -65,32 +65,32 @@ public:
     void get(vector<string>& data);
     void postProcess();
     
-    vector<int>& getIndices(id_t actionatorid);
-    size_t getSize(id_t actionatorid);
+    vector<int>& getIndices(const id_t& actionatorid);
+    size_t getSize(const id_t& actionatorid);
     
-    void add(id_t actionatorid, double time, float data);
-    void add(id_t actionatorid, double time, float data, float gain);
-    void add(id_t actionatorid, double time, const vector<float>& data);
-    void add(id_t actionatorid, double time, const vector<float>& data, float gain);
-    void add(id_t actionatorid, double time, const vector<float>& data, const vector<float>& gain);
-    void add(id_t actionatorid, double time, const vector<vector<float> >& data);
-    void add(id_t actionatorid, double time, const vector<vector<vector<float> > >& data);
-    void add(id_t actionatorid, double time, const string& data);
+    void add(const id_t& actionatorid, double time, float data);
+    void add(const id_t& actionatorid, double time, float data, float gain);
+    void add(const id_t& actionatorid, double time, const vector<float>& data);
+    void add(const id_t& actionatorid, double time, const vector<float>& data, float gain);
+    void add(const id_t& actionatorid, double time, const vector<float>& data, const vector<float>& gain);
+    void add(const id_t& actionatorid, double time, const vector<vector<float> >& data);
+    void add(const id_t& actionatorid, double time, const vector<vector<vector<float> > >& data);
+    void add(const id_t& actionatorid, double time, const string& data);
     
-    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data);
-    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data, float gain);
-    void add(id_t actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
-    void add(id_t actionatorid, const vector<double>& time, const vector<vector<float> >& data);
-    void add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
-    void add(id_t actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
-    void add(id_t actionatorid, const vector<double>& time, const vector<string>& data);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<float> >& data);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(const id_t& actionatorid, const vector<double>& time, const vector<string>& data);
 
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain);
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain);
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
-    void add(id_t actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
+    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -100,11 +100,24 @@ public:
 
 private:
     bool belongsToGroup(const id_t& member, const id_t& group);
+    
+    // debug tools
+    void printMap(ostream& output);
+    void printData(ostream& output);
 private:
-    static vector<id_t*> m_ids;								   //!< a vector containing all of the actionator ids
+    static vector<id_t*> m_ids;								   //!< a vector containing ALL of the actionator ids (even the ones which aren't available)
+    vector<Actionator> m_actionators;                          //!< a vector containing EVERY Actionator (even the ones which aren't avaiable)
     vector<vector<int> > m_id_to_indices;                      //!< a member to map id_t's to indices in m_actionators for each actionator in the id_t group 
-    vector<Actionator> m_actionators;                          //!< a vector containing every Actionator
+    vector<int> m_available_actionators;                       //!< a vector containing indicies for every available actionator
 };
+
+ostream& operator<<(ostream& output, const vector<float>& v);
+ostream& operator<<(ostream& output, const vector<vector<float> >& v);
+ostream& operator<<(ostream& output, const vector<vector<vector<float> > >& v);
+ostream& operator<<(ostream& output, const vector<vector<vector<vector<float> > > >& v);
+ostream& operator<<(ostream& output, const vector<double>& v);
+ostream& operator<<(ostream& output, const vector<string>& v);
+istream& operator>>(istream& output, vector<float>& v);
 
 #endif
 
