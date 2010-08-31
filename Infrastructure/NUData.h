@@ -43,15 +43,15 @@ public:
         }
         int Id;
         string Name;
-        bool operator==(const id_t& other)
+        bool operator==(const id_t& other) const
         {
             return Id == other.Id;
         }
-        bool operator==(const int& other)
+        bool operator==(const int& other) const
         {
             return Id == other;
         }
-        bool operator==(const string& other)
+        bool operator==(const string& other) const
         {
             return Name.find(other) != string::npos;
         }
@@ -110,6 +110,7 @@ public:
 protected:
     static vector<id_t*> Ids;
     vector<string> standardiseNames(const vector<string>& hardwarenames);
+    virtual bool belongsToGroup(const id_t& member, const id_t& group);
 private:
     string getStandardName(const string& hardwarename);
 };

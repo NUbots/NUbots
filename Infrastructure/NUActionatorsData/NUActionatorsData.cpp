@@ -81,19 +81,66 @@ void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
             if (*(m_ids[j]) == names[i])
                 m_id_to_indices[j].push_back(j);
         }
-        debug << names[i] << endl;
     }
     
-    /*for (size_t j=0; j<m_id_to_indices.size(); j++)
+    for (size_t i=0; i<m_ids.size(); i++)
+    {	// fill in the groups
+        for (size_t j=0; j<m_ids.size(); j++)
+        {
+            if (not m_id_to_indices[j].empty() and belongsToGroup(*m_ids[j], *m_ids[i]))
+                m_id_to_indices[i].push_back(j);
+        }
+    }
+    
+    for (size_t j=0; j<m_id_to_indices.size(); j++)
     {
+        debug << m_ids[j]->Name << "->[";
         for (size_t k=0; k<m_id_to_indices[j].size(); k++)
             debug << m_ids[m_id_to_indices[j][k]]->Name << " ";
-        debug << endl;
-    }*/
+        debug << "]" << endl;
+    }
     // now I need to 
     //      - add the actionator to m_actionators
     //      - update m_id_to_indices
     
+}
+
+/*! @brief Returns true if member belongs to group 
+    @param member the single id
+    @param group the group id
+    @return true if member belongs to group 
+ */
+bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
+{
+    bool belongstonudata = NUData::belongsToGroup(member, group);
+    if (belongstonudata)
+        return true;
+    else
+    {
+        if (group == FaceLeds)
+        {
+            if (member.Name.find("Led") != string::npos and (member.Name.find("Eye") != string::npos  or member.Name.find("Mouth") != string::npos))
+                return true;
+            else
+                return false;
+        }
+        else if (group == FeetLeds)
+        {
+            if (member.Name.find("Led") != string::npos and member.Name.find("Foot") != string::npos)
+                return true;
+            else
+                return false;
+        }
+        else if (group == AllLeds)
+        {
+            if (member.Name.find("Led") != string::npos)
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
 }
 
 /******************************************************************************************************************************************

@@ -61,9 +61,11 @@ NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simu
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
-    m_data->addActionators(m_servo_names);
-    m_data->addActionators(m_led_names);
-    m_data->addActionators(m_other_names);
+    vector<string> names;
+    names.insert(names.end(), m_servo_names.begin(), m_servo_names.end());
+    names.insert(names.end(), m_led_names.begin(), m_led_names.end());
+    names.insert(names.end(), m_other_names.begin(), m_other_names.end());
+    m_data->addActionators(names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
     debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;

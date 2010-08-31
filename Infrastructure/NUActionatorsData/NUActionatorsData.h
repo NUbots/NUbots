@@ -97,7 +97,9 @@ public:
     
     friend ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor);
     friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
-    
+
+private:
+    bool belongsToGroup(const id_t& member, const id_t& group);
 private:
     static vector<id_t*> m_ids;								   //!< a vector containing all of the actionator ids
     vector<vector<int> > m_id_to_indices;                      //!< a member to map id_t's to indices in m_actionators for each actionator in the id_t group 

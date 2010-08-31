@@ -133,6 +133,14 @@ string NUData::getStandardName(const string& hardwarename)
     if (ChestBoard != string::npos)
         simplename.replace(ChestBoard, 10, "Chest");
     
+    // Replace LFace with LEye and RFace with REye
+    int LFace = simplename.find("LFace");
+    int RFace = simplename.find("RFace");
+    if (LFace != string::npos)
+    	simplename.replace(LFace, 5, "LEye");
+    if (RFace != string::npos)
+    	simplename.replace(RFace, 5, "REye");
+    
     // Remove colours
     int Red = simplename.find("Red");
     if (Red != string::npos)
@@ -158,5 +166,65 @@ string NUData::getStandardName(const string& hardwarename)
         simplename.erase(index);
     
     return simplename;
+}
+
+/*! @brief Returns true if member belongs to group 
+ 	@param member the single id
+ 	@param group the group id
+ 	@return true if member belongs to group 
+ */
+bool NUData::belongsToGroup(const id_t& member, const id_t& group)
+{
+    if (group == All)
+    {
+        for (size_t i=RLeg.Id+1; i<Ids.size()-1; i++)
+            if (member == *Ids[i])
+                return true;
+        return false;
+    }
+    else if (group == Head)
+    {
+        if (member == HeadRoll or member == HeadPitch or member == HeadYaw or member == NeckRoll or member == NeckPitch or member == NeckYaw)
+            return true;
+        else
+            return false;
+    }
+    else if (group == Body)
+    {
+        if (belongsToGroup(member, All) and not belongsToGroup(member, Head))
+            return true;
+        else
+            return false;
+    }
+    else if (group == LArm)
+    {
+        if (member == LShoulderRoll or member == LShoulderPitch or member == LShoulderYaw or member == LElbowRoll or member == LElbowPitch or member == LElbowYaw)
+            return true;
+        else 
+            return false;
+    }
+    else if (group == RArm)
+    {
+        if (member == RShoulderRoll or member == RShoulderPitch or member == RShoulderYaw or member == RElbowRoll or member == RElbowPitch or member == RElbowYaw)
+            return true;
+        else 
+            return false;
+    }
+    else if (group == LLeg)
+    {
+        if (member == LHipRoll or member == LHipPitch or member == LHipYaw or member == LHipYawPitch or member == LKneePitch or member == LAnkleRoll or member == LAnklePitch)
+            return true;
+        else
+            return false;
+    }
+    else if (group == RLeg)
+    {
+        if (member == RHipRoll or member == RHipPitch or member == RHipYaw or member == RHipYawPitch or member == RKneePitch or member == RAnkleRoll or member == RAnklePitch)
+            return true;
+        else
+            return false;
+    }
+    else
+        return false;
 }
 
