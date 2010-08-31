@@ -35,7 +35,12 @@ class NUData
 public:
     struct id_t 
     {
-        id_t(int id, const string& name, vector<NUData::id_t*>& list = NUData::Ids) 
+        id_t()
+        {
+            Id = -1;
+            Name = "";
+        }
+        id_t(int id, const string& name, vector<NUData::id_t*>& list) 
         {
             Id = id; 
             Name = name;
