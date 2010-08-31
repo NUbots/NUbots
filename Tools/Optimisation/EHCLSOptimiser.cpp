@@ -44,8 +44,8 @@ EHCLSOptimiser::EHCLSOptimiser(std::string name, vector<Parameter> parameters) :
     m_count_since_last_improvement = 0;
     m_reset_limit = 15;
     
-    m_improvement = 1e1000;
-    m_previous_improvement = 1e1000;
+    m_improvement = 1e100;
+    m_previous_improvement = 1e100;
     
     load();
     save();
@@ -111,7 +111,7 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
     // generate phi to mutate the BestParameters
     float sigma = 0.1*exp(m_count_since_last_improvement/m_reset_limit - 1);			// 0.04
     vector<float> phi(base_parameters.size(), 0);
-    for (int i=0; i<base_parameters.size(); i++)
+    for (size_t i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(0, sigma);
     
     // mutate the BestParameters
@@ -128,7 +128,7 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
     
     // now calculate the new parameters themselves
     parameters.resize(base_parameters.size());
-    for (int i=0; i<base_parameters.size(); i++)
+    for (size_t i=0; i<base_parameters.size(); i++)
         parameters[i].set(base_parameters[i] + deltaparameters[i]);
 }
 

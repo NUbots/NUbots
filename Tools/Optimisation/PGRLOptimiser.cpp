@@ -57,7 +57,7 @@ void PGRLOptimiser::setParametersResult(float fitness)
 {
     m_fitnesses.push_back(fitness);
     m_random_policies_index++;
-    if (m_random_policies_index == m_random_policies.size())
+    if ((unsigned int) m_random_policies_index == m_random_policies.size())
     {
         debug << "fitnesses: " << m_fitnesses << endl;
         m_current_parameters += calculateStep();
@@ -78,7 +78,7 @@ void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
     m_random_policies_index = 0;
     m_fitnesses.clear();
     m_random_policies.clear();
-    for (size_t i=0; i<m_num_per_iteration; i++)
+    for (int i=0; i<m_num_per_iteration; i++)
         m_random_policies.push_back(generateRandomPolicy(seed));
     
     debug << "policies: " << endl;
@@ -151,6 +151,7 @@ vector<float> PGRLOptimiser::calculateStep()
         }
     }
     debug << A << endl;
+    return A;
 }
 
 void PGRLOptimiser::summaryTo(ostream& stream)
