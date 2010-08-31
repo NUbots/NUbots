@@ -54,7 +54,7 @@ EvaluateWalkParametersState::~EvaluateWalkParametersState()
 /*! @brief Returns the desired next state in the walk optimisation provider */
 BehaviourState* EvaluateWalkParametersState::nextState()
 {
-    if (m_data->isFallen())// or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
+    if (m_data->isFallen() or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
         return m_parent->m_generate;
     else
         return this;

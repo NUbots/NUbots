@@ -38,13 +38,23 @@ public:
     Optimiser(string name, vector<Parameter> parameters);
     ~Optimiser();
     
-    virtual vector<float> getNextParameters();
-    virtual void setParametersResult(float fitness);
+    virtual vector<float> getNextParameters() = 0;
+    virtual void setParametersResult(float fitness) = 0;
     
-    void summaryTo(ostream& stream);
-private:
+    virtual void summaryTo(ostream& stream) = 0;
+    friend ostream& operator<<(ostream& o, const Optimiser& optimser);
+    friend ostream& operator<<(ostream& o, const Optimiser* optimser);
+    friend istream& operator>>(istream& i, Optimiser& optimser);
+    friend istream& operator>>(istream& i, Optimiser* optimser);
+    void save();
+    void saveAs(string name);
+    void load();
+protected:
+    virtual void toStream(ostream& o) const = 0;
+    virtual void fromStream(istream& i) = 0;
+protected:
     string m_name;
-    vector<Parameter> m_parameters;
+    vector<Parameter> m_initial_parameters;
 };
 
 #endif

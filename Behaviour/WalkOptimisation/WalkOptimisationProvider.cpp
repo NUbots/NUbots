@@ -24,7 +24,9 @@
 #include "EvaluateWalkParametersState.h"
 #include "PausedWalkOptimisationState.h"
 
-#include "Tools/Optimisation/Optimiser.h"
+#include "Tools/Optimisation/EHCLSOptimiser.h"
+#include "Tools/Optimisation/PGRLOptimiser.h"
+#include "Tools/Optimisation/PSOOptimiser.h"
 #include "Motion/Tools/MotionFileTools.h"
 
 #include "Behaviour/Jobs/JobList.h"
@@ -41,8 +43,11 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         debug << "WalkOptimisationProvider::WalkOptimisationProvider" << endl;
     #endif
     
-    m_parameters.load("NBWalkDefault");
-    m_optimiser = new Optimiser("Test", m_parameters.getAsParameters());
+    m_parameters.load("NBWalkStart");
+    //m_optimiser = new EHCLSOptimiser("EHCLS", m_parameters.getAsParameters());
+    //m_optimiser = new PGRLOptimiser("PGRL", m_parameters.getAsParameters());    
+    m_optimiser = new PSOOptimiser("PSO", m_parameters.getAsParameters());
+    m_log.open((DATA_DIR + "/Optimisation/Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())
@@ -65,7 +70,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     
     m_state = m_paused;
     
-    m_first_run = true;
+    m_iteration_count = -1;
     m_duration = 0;
     m_energy = 0;	
     m_stability = 0;
@@ -105,15 +110,13 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
 
 void WalkOptimisationProvider::tickOptimiser()
 {
-    if (m_first_run)
-    {	// avoid actually ticking the optimiser, the behaviour is sloppy; the first tick happens before the first set of parameters is even tested ;)
-        m_first_run = false;
-        return;
-    }
+    m_iteration_count++;
     // save the state of the optimiser, and the walk parameters in case of hardware failure.
+    m_optimiser->save();
     
     // update the optimiser and give the next set of parameters to the walk engine
-    m_optimiser->setParametersResult(calculateFitness());
+    if (m_iteration_count != 0)
+        m_optimiser->setParametersResult(calculateFitness());
     vector<float> nextparameters = m_optimiser->getNextParameters();
     m_parameters.set(nextparameters);
     m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
@@ -137,26 +140,42 @@ float WalkOptimisationProvider::calculateFitness()
         m_parameters.summaryTo(debug);
         m_optimiser->summaryTo(debug);
     #endif
-    if (m_energy == 0 and m_duration == 0 and m_stability == 0)
+    float fitness = 0;
+    float speed = 0;
+    float cost = 0;
+    if (m_duration == 0 and m_stability == 0)
     {	// we have fallen over before actually reaching the start of the evaluation
-        return 0;
+        fitness = 0;
     }
     else if (m_energy == 0 and m_stability == 0)
     {	// we have fallen over during the evaluation
-        vector<float>& speeds = m_parameters.getMaxSpeeds();
-        float travelleddistance = speeds[0]*m_duration;
-        float pathdistance = calculatePathDistance();
-        float predictedfalls = pathdistance/travelleddistance;
-        return pathdistance/(pathdistance/speeds[0] + predictedfalls*10);
+        if (m_duration > 120000)
+            fitness = 0;
+        else
+        {
+            vector<float>& speeds = m_parameters.getMaxSpeeds();
+            float travelleddistance = 0.1*speeds[0]*m_duration/1000;
+            float pathdistance = calculatePathDistance();
+            float predictedfalls = pathdistance/travelleddistance;
+            fitness = pathdistance/(pathdistance/(0.1*speeds[0]) + predictedfalls*15);
+        }
     }
     else if (m_stability == 0)
     {	// we are not using the stability metric
-     	return 1000*calculatePathDistance()/m_duration;   
+        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
+        cost = 100*m_energy/(9.81*4.6*calculatePathDistance()); 	// J/Nm
+     	fitness = speed;   
     }
     else
     {	// we are not using the stability metric
-        return 1000*calculatePathDistance()/m_duration;
+        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
+        cost = 100*m_energy/(9.81*4.6*calculatePathDistance()); 	// J/Nm
+        fitness = 1000*calculatePathDistance()/m_duration;
     }
+    
+    m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl;
+    
+    return fitness;
 }
 
 /*! @brief Returns the distance in cm of the path specified by m_points 

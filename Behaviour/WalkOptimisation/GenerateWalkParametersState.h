@@ -77,14 +77,18 @@ public:
         m_previously_getting_up = m_getting_up;
         m_data->getMotionGetupActive(m_getting_up);
         
-        if (m_parent->stateChanged())// or (m_previously_getting_up and not m_getting_up))
+        if (m_parent->stateChanged() or (m_parent->wasPreviousState(this) and m_previously_getting_up and not m_getting_up and not m_data->isFallen()) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
             m_current_start_state = getStartState();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
             #endif
+            m_time_in_state = 0;
         }
+        else
+            m_time_in_state += m_data->CurrentTime - m_previous_time;
+        m_previous_time = m_data->CurrentTime;
         
         lookAtGoals();
         
@@ -96,17 +100,17 @@ private:
     {   
         vector<vector<float> >& points = m_parent->m_speed_points;
         vector<float> front = points.front();
-        vector<float> back = points.back();
+        vector<float> back = front;
+        back[0] = -back[0];
+        back[1] = -back[1];
+        back[2] += 3.14;
         
         vector<float> difference_from_front = m_field_objects->self.CalculateDifferenceFromFieldState(front);
         vector<float> difference_from_back = m_field_objects->self.CalculateDifferenceFromFieldState(back);
         
         vector<float> startpoint;
         if (difference_from_back[0] < difference_from_front[0])
-        {
             startpoint = back;
-            startpoint[2] += 3.14;
-        }
         else
             startpoint = front;
         
@@ -162,6 +166,8 @@ private:
     
     bool m_previously_getting_up;
     bool m_getting_up;
+    float m_time_in_state;
+    float m_previous_time;
 };
 
 #endif

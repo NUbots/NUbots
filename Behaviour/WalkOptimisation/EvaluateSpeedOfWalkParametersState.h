@@ -50,6 +50,7 @@ private:
     bool pointReached();
     vector<float> getNextPoint();
     bool allPointsReached();
+    vector<float> reversePoint(const vector<float>& point);
 
     void lookAtGoals();
 private:

@@ -95,7 +95,7 @@ BehaviourState* EvaluateStabilityOfWalkParametersStartState::nextState()
 /*! @brief Do the stability of walk parameters start state */
 void EvaluateStabilityOfWalkParametersStartState::doState()
 {
-    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
         debug << "EvaluateStabilityOfWalkParametersStartState::doState()" << endl;
     #endif
     if (m_parent->stateChanged() or m_parent->m_parent->stateChanged())
@@ -183,9 +183,9 @@ void EvaluateStabilityOfWalkParametersStartState::lookAtGoals()
 EvaluateStabilityOfWalkParametersRunState::EvaluateStabilityOfWalkParametersRunState(EvaluateStabilityOfWalkParametersState* parent): m_parent(parent), 
                                                                                                                                       m_provider(parent->m_provider), 
                                                                                                                                       m_PI(3.1416),
-                                                                                                                                      m_INITIAL_PERTURBATION_MAG(10),
-                                                                                                                                      m_PERTURBATION_MAG_INC(10),
-                                                                                                                                      m_PERTURBATION_INTERVAL(3)
+                                                                                                                                      m_INITIAL_PERTURBATION_MAG(30),
+                                                                                                                                      m_PERTURBATION_MAG_INC(5),
+                                                                                                                                      m_PERTURBATION_INTERVAL(1)
 {
     reset();
 }
