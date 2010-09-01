@@ -111,7 +111,6 @@ void SeeThinkThread::run()
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
                 waitForCondition();
             #endif
-            
             #ifdef USE_VISION
                 m_nubot->m_platform->updateImage();
                 *(m_nubot->m_io) << m_nubot;  //<! Raw IMAGE STREAMING (TCP)
@@ -143,7 +142,7 @@ void SeeThinkThread::run()
             #endif
             
             #if DEBUG_VERBOSITY > 0
-                m_nubot->Jobs->summaryTo(debug);
+                Blackboard->Jobs->summaryTo(debug);
             #endif
             
             #ifdef USE_VISION
