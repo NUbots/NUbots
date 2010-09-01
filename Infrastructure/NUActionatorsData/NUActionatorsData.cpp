@@ -403,22 +403,16 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const string&
         m_actionators[ids[i]].add(time, data);
 }
 
-
-// ------------------------------------------------------------------------------------------- Vector time functions
-/* A vector of time and a vector of data
-    if actionator is a group
-        if time.size matches group.size
-            if group.size matches data.size
-                add(actionatorid[i], time[i], data[i])
-            else
-                add(actionatorid[i], time[i], data)
-        else 
-            makes no sense
-    else
-        if time.size matches data.size
-            add(actionator, time[i], data[i])
-        else
-            makes no sense
+/*! @brief Adds a sequence of points to an actionatorid
+        
+        For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN].
+        For a group actionator the data needs to be formatted as either 
+            [id0, id1, ... , idN] [time0, time1, ... , timeN] [data0, data1, ... , dataN]
+            [id0, id1, ... , idN] [time0, time1, ... , timeN] data
+ 
+    @param actionatorid the id of the targetted actionator(s)
+    @param time the sequence of times in ms
+    @param data the sequence of data points
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data)
 {
@@ -460,6 +454,17 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
+/*! @brief Adds a sequence of points to an actionatorid with a gain. 
+           The size of the time and data must match, and in the case actionatorid is a group, they must also match the group size.
+ 
+     For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], gain
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN] [data0, data1, ... , dataN], gain
+     where in both cases gain is added to every point.
+ 
+    @param actionatorid the id of the targetted actionator(s)
+    @param time the sequence of times in ms
+    @param data the sequence of data points
+ */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain)
 {
     vector<int>& ids = m_id_to_indices[actionatorid.Id];
@@ -492,18 +497,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-/* A vector of time and a vector of data
-     if actionator is a group
-         if time.size matches group.size
-             if group.size matches data.size matches gain.size
-                 add(actionatorid[i], time[i], data[i], gain[i])
-             else 
-                 makes no sense
-     else
-         if time.size matches data.size matches gain.size
-             add(actionator, time[i], data[i], gain[i])
-         else
-             makes no sense
+/*! @brief Adds a sequence of [time,data,gain] points to an actionatorid
+           The size of time, data and gain must be the same, in the case that actionatorid is a group, they must also match the group size.
+    
+     For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], [gain0, gain1, ... , gainN]
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN] [data0, data1, ... , dataN], [gain0, gain1, ... , gainN]
+ 
+    @param actionatorid the id of the targetted actionator(s)
+    @param time the sequence of times in ms
+    @param data the sequence of data points
+    @param gain the sequence of gain points (%)
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain)
 {
@@ -540,21 +543,17 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-/* A vector of time and a vector<vector> of data
-    if actionator is a group
-        if times.size matches data.size
-            add(actionator (group), time[i], data[i])
-        else if group.size matches data.size
-            add(actionator[i], time, data[i])
-        else if time.size matches group.size
-            add(actionator[i], time[i], data)
-        else
-            makes no sense
-    else
-        if time.size matches data.size
-            add(actionator, time[i], data[i]
-        else
-            makes no sense
+/*! @brief Adds a sequence of [time, vector] pairs to an actionatorid
+ 
+    For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], where each data is a vector.
+    For a group actionator the data needs to
+        id [time0, time1, ... , timeN], [data0, data1, ... , dataN], so each data element is given to the group with a single time
+        [id0, id1, ... , idN] time [data0, data1, ... , dataN], so each actionator in the group receives a single data element at a sequence of times
+        [id0, id1, ... , idN] [time0, time1, ... , timeN] data, so each actionator in the group receives the same data matrix at different times 
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<float> >& data)
 {
@@ -600,21 +599,17 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-/* A vector of time and a vector<vector<vector>> of data
-    if actionator is a group
-        if times.size matches data.size
-            add(actionator (group), time[i], data[i])
-        else if group.size matches data.size
-            add(actionator[i], time, data[i])
-        else if time.size matches group.size
-            add(actionator[i], time[i], data)
-        else
-            makes no sense
-    else
-        if time.size matches data.size
-            add(actionator, time[i], data[i])
-        else
-            makes no sense
+/*! @brief Adds a sequence of [time, matrix] pairs to an actionatorid
+ 
+         For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], where each data is a vector.
+         For a group actionator the data needs to
+             id [time0, time1, ... , timeN], [data0, data1, ... , dataN], so each data element is given to the group with a single time
+             [id0, id1, ... , idN] time [data0, data1, ... , dataN], so each actionator in the group receives a single data element at a sequence of times
+             [id0, id1, ... , idN] [time0, time1, ... , timeN] data, so each actionator in the group receives the same data matrix at different times 
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data)
 {
@@ -660,21 +655,17 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-/*! A vector of time and a vector<vector<vector<vector>>> of data
-     if actionator is a group
-         if times.size matches data.size
-             add(actionator (group), time[i], data[i])
-         else if group.size matches data.size
-             add(actionator[i], time, data[i])
-         else if time.size matches group.size
-             add(actionator[i], time[i], data)
-         else
-             makes no sense
-     else
-         if time.size matches data.size
-             add(actionator, time[i], data[i])
-         else
-             makes no sense
+/*! @brief Adds a sequence of [time, matrix] pairs to an actionatorid
+ 
+     For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], where each data is a vector.
+     For a group actionator the data needs to
+         id [time0, time1, ... , timeN], [data0, data1, ... , dataN], so each data element is given to the group with a single time
+         [id0, id1, ... , idN] time [data0, data1, ... , dataN], so each actionator in the group receives a single data element at a sequence of times
+         [id0, id1, ... , idN] [time0, time1, ... , timeN] data, so each actionator in the group receives the same data matrix at different times 
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data)
 {
@@ -715,17 +706,14 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-/* A vector of time and a vector of strings
-    if actionator is a group
-        if time.size matches group.size matches data.size
-            add(actionatorid[i], time[i] , data[i]]
-        else
-            makes no sense
-    else
-        if time.size matches data.size
-            add(actionator, time[i], data[i])
-        else
-            makes no sense
+/*! @brief Adds a sequence of strings to an actionatorid
+ 
+         For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [string0, string1, ... , stringN].
+         For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN] [string0, string1, ... , stringN].
+ 
+ @param actionatorid the id of the targetted actionator(s)
+ @param time the sequence of times in ms
+ @param data the sequence of strings
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<string>& data)
 {
@@ -759,66 +747,217 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     }
 }
 
-// ------------------------------------------------------------------------------------------- Matrix time functions
-/* A matrix of time and a matrix of data
-    if actionator is a group:
-        if time.size matches group.size matches data.size
-            add(actionator[i], time[i], data[i])
-        else
-            makes no sense
-    else
-        makes no sense
+/*! @brief Adds a sequence of [vector<time>, matrix] pairs to an actionatorid
+ 
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN], 
+     so each data vector is given to the group with a single time vector
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data)
 {
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i]);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
 }
 
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain)
-{
-}
-
+/*! @brief Adds a sequence of [vector<time>, matrix] pairs with a single gain value to an actionatorid
+ 
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN], 
+     so each data vector is given to the group with a single time vector
+     
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
+    @param gain the single gain value added to each data
+ */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain)
 {
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i], gain);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
 }
 
-/* A matrix of time and a matrix of data
-     if actionator is a group:
-         if time.size matches group.size matches data.size matches gain.size
-             add(actionator[i], time[i], data[i], gain[i])
-         else
-             makes no sense
-     else
-         makes no sense
+/*! @brief Adds a sequence of [vector<time>, matrix] pairs with a single gain value to an actionatorid
+ 
+        For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN] [gain0, gain1, ..., gainN], 
+        so each data vector is given to the group with a single time vector
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
+    @param gain the sequence of gains added to each data
+ */
+void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain)
+{
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids and gain.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i], gain[i]);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
+}
+
+/*! @brief Adds a sequence of [vector<time>, matrix] pairs with a single gain value to an actionatorid
+ 
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN] [gain0, gain1, ..., gainN], 
+     so each data vector is given to the group with a single time vector
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of vectors to give to the actionator
+    @param gain the sequence of gains added to each data
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain)
 {
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids and gain.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i], gain[i]);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
 }
 
-
-/* A matrix of time and a vector<vector<vector>>
-    if actionator is a group:
-        if time.size matches group.size matches data.size
-            add(actionator[i], time[i], data[i])
-        else
-            makes no sense
-    else
-        makes no sense
+/*! @brief Adds a sequence of [vector<time>, vector<matrix>] pairs with a single gain value to an actionatorid
+ 
+     For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN]
+     so each data matrix is given to the group with a single time vector
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of matricies to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data)
 {
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i]);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
 }
 
-/* A matrix of time and a vector<vector<vector<vector>>>
-     if actionator is a group:
-         if time.size matches group.size matches data.size
-             add(actionator[i], time[i], data[i])
-         else
-             makes no sense
-     else
-         makes no sense
+/*! @brief Adds a sequence of [vector<time>, vector<matrix>] pairs with a single gain value to an actionatorid
+ 
+ For a group actionator the data needs to be formatted as [id0, id1, ... , idN] [time0, time1, ... , timeN], [data0, data1, ... , dataN]
+ so each data matrix is given to the group with a single time vector
+ 
+    @param actionatorid the id of the targetted actionator
+    @param time the sequence of times in ms
+    @param data the sequence of matricies to give to the actionator
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data)
 {
+    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    size_t numids = ids.size();
+    
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if actionatorid is a single actionator
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+    }
+    else
+    {   // if actionatorid is a group
+        if (time.size() == numids and data.size() == numids)
+        {   // if there is an entry for each member of the group
+            for (size_t i=0; i<numids; i++)
+                add(*m_ids[ids[i]], time[i], data[i]);
+        }
+        else
+        {
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+        }
+    }
 }
 
 /******************************************************************************************************************************************
@@ -917,6 +1056,19 @@ ostream& operator<<(ostream& output, const vector<vector<vector<vector<float> > 
 }
 
 ostream& operator<<(ostream& output, const vector<double>& v)
+{
+    output << "[";
+    if (not v.empty())
+    {
+    	for (size_t i=0; i<v.size()-1; i++)
+            output << v[i] << ", ";
+        output << v.back();
+    }
+    output << "]";
+	return output;
+}
+
+ostream& operator<<(ostream& output, const vector<vector<double> >& v)
 {
     output << "[";
     if (not v.empty())

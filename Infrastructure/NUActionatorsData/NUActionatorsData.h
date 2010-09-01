@@ -116,6 +116,7 @@ ostream& operator<<(ostream& output, const vector<vector<float> >& v);
 ostream& operator<<(ostream& output, const vector<vector<vector<float> > >& v);
 ostream& operator<<(ostream& output, const vector<vector<vector<vector<float> > > >& v);
 ostream& operator<<(ostream& output, const vector<double>& v);
+ostream& operator<<(ostream& output, const vector<vector<double> >& v);
 ostream& operator<<(ostream& output, const vector<string>& v);
 istream& operator>>(istream& output, vector<float>& v);
 
