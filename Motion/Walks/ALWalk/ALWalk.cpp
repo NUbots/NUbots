@@ -161,7 +161,7 @@ void ALWalk::initALConfig()
     m_al_param[0] = "WALK_TORSO_HEIGHT";
     m_al_config.arrayPush(m_al_param);
     
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
     if (m_al_config.getSize() != parameters.size() + 3)
         errorlog << "ALConfig and WalkParameter size mismatch detected. ALConfig: " << m_al_config.getSize() << " parameters: " << parameters.size() << endl;
     setWalkParameters(m_walk_parameters);
@@ -169,20 +169,20 @@ void ALWalk::initALConfig()
 
 void ALWalk::setALConfig()
 {
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
-    m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].Value));      // "WALK_STEP_MIN_PERIOD";
+    m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].get()));      // "WALK_STEP_MIN_PERIOD";
     
-    m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].Value);               // "WALK_MAX_STEP_X";
-    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].Value);             // "WALK_MAX_STEP_Y";
-    m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].Value);         // "WALK_MAX_STEP_THETA";
+    m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].get());               // "WALK_MAX_STEP_X";
+    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].get());             // "WALK_MAX_STEP_Y";
+    m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].get());         // "WALK_MAX_STEP_THETA";
     
-    m_al_config[4][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";
-    m_al_config[5][1] = 180*parameters[2].Value/3.141;                        // "WALK_MIN_TRAPEZOID";
-    m_al_config[6][1] = 180*parameters[3].Value/3.141;                        // "WALK_FOOT_ORIENTATION";
-    m_al_config[7][1] = 180*parameters[4].Value/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
-    m_al_config[8][1] = parameters[5].Value/100;                              // "WALK_TORSO_HEIGHT";
+    m_al_config[4][1] = parameters[1].get()/100.0;                            // "WALK_MAX_STEP_HEIGHT";
+    m_al_config[5][1] = 180*parameters[2].get()/3.141;                        // "WALK_MIN_TRAPEZOID";
+    m_al_config[6][1] = 180*parameters[3].get()/3.141;                        // "WALK_FOOT_ORIENTATION";
+    m_al_config[7][1] = 180*parameters[4].get()/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
+    m_al_config[8][1] = parameters[5].get()/100;                              // "WALK_TORSO_HEIGHT";
 }
 
 void ALWalk::setWalkParameters(const WalkParameters& walkparameters)

@@ -75,7 +75,7 @@ void PSOOptimiser::setParametersResult(float fitness)
 {
     debug << "PSOOptimiser::setParametersResult fitness: " << fitness << endl;
 	m_swarm_fitness.push_back(fitness);
-    if (m_swarm_fitness.size() == m_num_particles)
+    if (m_swarm_fitness.size() == (unsigned int) m_num_particles)
         updateSwarm();
 }
 
