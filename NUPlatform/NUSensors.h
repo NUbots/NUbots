@@ -55,8 +55,7 @@ protected:
     
     virtual void calculateSoftSensors();
     
-    void calculateJointVelocity();
-    void calculateJointAcceleration();
+    void calculateJointDerivatives();
     
     void calculateKinematics();
     
@@ -80,6 +79,10 @@ protected:
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
+    
+    vector<float> m_previous_joint_positions;
+    vector<float> m_previous_joint_velocities;
+    
     Kinematics* m_kinematicModel;
     OrientationUKF* m_orientationFilter;
     vector<vector<float> > m_left_foot_hull;

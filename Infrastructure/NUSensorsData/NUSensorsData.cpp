@@ -27,9 +27,55 @@
 
 int s_curr_id = NUData::NumCommonIds.Id;
 vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
+
+// kinematic sensors
+const NUSensorsData::id_t NUSensorsData::LLegTransform(s_curr_id++, "LLegTransform", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RLegTransform(s_curr_id++, "RLegTransform", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::SupportLegTransform(s_curr_id++, "SupportLegTransform", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::CameraTransform(s_curr_id++, "CameraTransform", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::CameraToGroundTransform(s_curr_id++, "CameraToGroundTransform", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::CameraHeight(s_curr_id++, "CameraHeight", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Odometry(s_curr_id++, "Odometry", NUSensorsData::m_ids);
+// balance sensors
+const NUSensorsData::id_t NUSensorsData::Accelerometer(s_curr_id++, "Accelerometer", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Gyro(s_curr_id++, "Gyro", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::GyroOffset(s_curr_id++, "GyroOffset", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Orientation(s_curr_id++, "Orientation", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Horizon(s_curr_id++, "Horizon", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Zmp(s_curr_id++, "Zmp", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Falling(s_curr_id++, "Falling", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Fallen(s_curr_id++, "Fallen", NUSensorsData::m_ids);
+// foot sensors
+const NUSensorsData::id_t NUSensorsData::FootBumper(s_curr_id++, "FootBumper", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::FootForce(s_curr_id++, "FootForce", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::FootContact(s_curr_id++, "FootContact", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::FootSupport(s_curr_id++, "FootSupport", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::FootImpact(s_curr_id++, "FootImpact", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::FootCoP(s_curr_id++, "FootCoP", NUSensorsData::m_ids);
+// button sensors
 const NUSensorsData::id_t NUSensorsData::MainButton(s_curr_id++, "MainButton", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::SecondaryButton(s_curr_id++, "SecondaryButton", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::AllButton(s_curr_id++, "AllButton", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::AllButtonTriggers(s_curr_id++, "AllButtonTriggers", NUSensorsData::m_ids);
+// distance sensors
+const NUSensorsData::id_t NUSensorsData::LDistance(s_curr_id++, "LDistance", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RDistance(s_curr_id++, "RDistance", NUSensorsData::m_ids);
+// gps sensors
+const NUSensorsData::id_t NUSensorsData::Gps(s_curr_id++, "Gps", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::Compass(s_curr_id++, "Compass", NUSensorsData::m_ids);
+// battery sensors
+const NUSensorsData::id_t NUSensorsData::BatteryVoltage(s_curr_id++, "BatteryVoltage", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::BatteryCurrent(s_curr_id++, "BatteryCurrent", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::BatteryCharge(s_curr_id++, "BatteryCharge", NUSensorsData::m_ids);
+// motion sensors
+const NUSensorsData::id_t NUSensorsData::MotionFallActive(s_curr_id++, "MotionFallActive", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionGetupActive(s_curr_id++, "MotionGetupActive", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionKickActive(s_curr_id++, "MotionKickActive", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionSaveActive(s_curr_id++, "MotionSaveActive", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionScriptActive(s_curr_id++, "MotionScriptActive", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionWalkSpeed(s_curr_id++, "MotionWalkSpeed", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionWalkMaxSpeed(s_curr_id++, "MotionWalkMaxSpeed", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::MotionHeadCompletionTime(s_curr_id++, "MotionHeadCompletionTime", NUSensorsData::m_ids);
 
 /*! @brief Default constructor for NUSensorsData
  */
@@ -40,102 +86,30 @@ NUSensorsData::NUSensorsData()
 #endif
     
     CurrentTime = 0;
-    
-    // create the sensor_t's
-    addSensor(JointPositions, string("JointPositions"), sensor_t::JOINT_POSITIONS);
-    addSensor(JointVelocities, string("JointVelocities"), sensor_t::JOINT_VELOCITIES);
-    addSensor(JointAccelerations, string("JointAccelerations"), sensor_t::JOINT_ACCELERATIONS);
-    addSensor(JointTargets, string("JointTargets"), sensor_t::JOINT_TARGETS);
-    addSensor(JointStiffnesses, string("JointStiffnesses"), sensor_t::JOINT_STIFFNESSES);
-    addSensor(JointCurrents, string("JointCurrents"), sensor_t::JOINT_CURRENTS);
-    addSensor(JointTorques, string("JointTorques"), sensor_t::JOINT_TORQUES);
-    addSensor(JointTemperatures, string("JointTemperatures"), sensor_t::JOINT_TEMPERATURES);
-
-    // Kinematic sensors
-    addSoftSensor(LeftLegTransform, string("LeftLegTransform"), sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM);
-    addSoftSensor(RightLegTransform, string("RightLegTransform"), sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM);
-    addSoftSensor(SupportLegTransform, string("SupportLegTransform"), sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM);
-    addSoftSensor(CameraTransform, string("CameraTransform"), sensor_t::KINEMATICS_CAMERA_TRANSFORM);
-    addSoftSensor(CameraToGroundTransform, string("CameraToGroundTransform"), sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM);
-
-    addSoftSensor(Odometry, string("Odometry"), sensor_t::JOINT_ODOMETRY);
-    addSoftSensor(CameraHeight, string("CameraHeight"), sensor_t::JOINT_CAMERAHEIGHT);
-    
-    // Balance Sensors:
-    addSensor(BalanceAccelerometer, string("BalanceAccelerometer"), sensor_t::BALANCE_ACCELEROMETER);
-    addSensor(BalanceGyro, string("BalanceGyro"), sensor_t::BALANCE_GYRO);
-    addSoftSensor(BalanceGyroOffset, string("BalanceGyroOffset"), sensor_t::BALANCE_GYRO_OFFSET);
-    addSoftSensor(BalanceOrientation, string("BalanceOrientation"), sensor_t::BALANCE_ORIENTATION);
-    addSensor(BalanceOrientationHardware, string("BalanceOrientationHardware"), sensor_t::BALANCE_ORIENTATION_HARDWARE);
-    addSoftSensor(BalanceHorizon, string("BalanceHorzion"), sensor_t::BALANCE_HORIZON);
-    addSoftSensor(BalanceZMP, string("BalanceZMP"), sensor_t::BALANCE_ZMP);    
-    addSoftSensor(BalanceFalling, string("BalanceFalling"), sensor_t::BALANCE_FALLING);
-    addSoftSensor(BalanceFallen, string("BalanceFallen"), sensor_t::BALANCE_FALLEN);
-    
-    // Distance Sensors:
-    addSensor(DistanceLeftValues, string("DistanceLeftValues"), sensor_t::DISTANCE_LEFT_VALUES);
-    addSensor(DistanceRightValues, string("DistanceRightValues"), sensor_t::DISTANCE_RIGHT_VALUES);
-    
-    // Foot Pressure Sensors:
-    addSensor(FootSoleValues, string("FootSoleValues"), sensor_t::FOOT_SOLE_VALUES);
-    addSensor(FootBumperValues, string("FootBumperValues"), sensor_t::FOOT_BUMPER_VALUES);
-    addSoftSensor(FootCoP, string("FootCoP"), sensor_t::FOOT_COP);
-    addSoftSensor(FootForce, string("FootForce"), sensor_t::FOOT_FORCE);
-    addSoftSensor(FootSupport, string("FootSupport"), sensor_t::FOOT_SUPPORT);
-    addSoftSensor(FootContact, string("FootContact"), sensor_t::FOOT_CONTACT);
-    addSoftSensor(FootImpact, string("FootImpact"), sensor_t::FOOT_IMPACT);
-    
-    // Buttons Sensors:
-    addSensor(ButtonValues, string("ButtonValues"), sensor_t::BUTTON_VALUES);
-    addSoftSensor(ButtonTriggers, string("ButtonTriggers"), sensor_t::BUTTON_TRIGGERS);
-    
-    // Battery Sensors:
-    addSensor(BatteryValues, string("BatteryValues"), sensor_t::BATTERY_VALUES);
-    
-    // Motion Sensors:
-    addSensor(MotionFallActive, string("MotionFallActive"), sensor_t::MOTION_FALL_ACTIVE);
-    addSensor(MotionGetupActive, string("MotionGetupActive"), sensor_t::MOTION_GETUP_ACTIVE);
-    addSensor(MotionKickActive, string("MotionKickActive"), sensor_t::MOTION_KICK_ACTIVE);
-    addSensor(MotionSaveActive, string("MotionSaveActive"), sensor_t::MOTION_SAVE_ACTIVE);
-    addSensor(MotionScriptActive, string("MotionScriptActive"), sensor_t::MOTION_SCRIPT_ACTIVE);
-    addSensor(MotionWalkSpeed, string("MotionWalkSpeed"), sensor_t::MOTION_WALK_SPEED);
-    addSensor(MotionWalkMaxSpeed, string("MotionWalkMaxSpeed"), sensor_t::MOTION_WALK_MAX_SPEED);
-    addSensor(MotionHeadCompletionTime, string("MotionHeadCompletionTime"), sensor_t::MOTION_HEAD_COMPLETION_TIME);
-
-    // GPS Sensor:
-    addSensor(GPS, string("GPS"), sensor_t::GPS_VALUES);
-    addSensor(Compass, string("Compass"), sensor_t::COMPASS_VALUES);
-}
-
-/*! @brief Adds a sensor to the class
-    @param p_sensor a pointer that will be updated to point to the new sensor
-    @param sensorname the name of the sensor
-    @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
- */
-void NUSensorsData::addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
-{
-    p_sensor = new sensor_t(sensorname, sensorid);
-    m_sensors.push_back(p_sensor);
-}
-
-/*! @brief Adds a soft sensor to the class
- @param p_sensor a pointer that will be updated to point to the new sensor
- @param sensorname the name of the sensor
- @param sensorid the id of the sensor's type (eg. sensor_t::JOINT_POSITIONS)
- */
-void NUSensorsData::addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid)
-{
-    p_sensor = new sensor_t(sensorname, sensorid, true);
-    m_sensors.push_back(p_sensor);
+    m_ids.insert(m_ids.begin(), NUData::Ids.begin(), NUData::Ids.end());
 }
 
 NUSensorsData::~NUSensorsData()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensorsData::~NUSensorsData" << endl;
-#endif
-    for (size_t i=0; i<m_sensors.size(); i++)
-        delete m_sensors[i];
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::~NUSensorsData" << endl;
+    #endif
+}
+
+void NUSensorsData::addSensors(const vector<string>& hardwarenames)
+{
+    vector<string> names = standardiseNames(hardwarenames);
+    for (size_t i=0; i<names.size(); i++)
+    {
+        for (size_t j=0; j<m_ids.size(); j++)
+        {
+            id_t& id = *(m_ids[j]);
+            if (id == names[i])
+            {
+                m_sensors.push_back(Sensor(id.Name));
+            }
+        }
+    }
 }
 
 /******************************************************************************************************************************************
@@ -149,7 +123,7 @@ NUSensorsData::~NUSensorsData()
  */
 bool NUSensorsData::getJointPosition(id_t jointid, float& position)
 {
-    return getJointData(JointPositions, jointid, position);
+    return false;
 }
 
 /*! @brief Gets the requested joint velocity. If the operation is successful true is returned, 
@@ -159,7 +133,7 @@ bool NUSensorsData::getJointPosition(id_t jointid, float& position)
  */
 bool NUSensorsData::getJointVelocity(id_t jointid, float& velocity)
 {
-    return getJointData(JointVelocities, jointid, velocity);
+    return false;
 }
 
 /*! @brief Gets the requested joint acceleration. If the operation is successful true is returned, 
@@ -169,7 +143,7 @@ bool NUSensorsData::getJointVelocity(id_t jointid, float& velocity)
  */
 bool NUSensorsData::getJointAcceleration(id_t jointid, float& acceleration)
 {
-    return getJointData(JointAccelerations, jointid, acceleration);
+    return false;
 }
 
 /*! @brief Gets the requested joint target. If the operation is successful true is returned, 
@@ -179,7 +153,7 @@ bool NUSensorsData::getJointAcceleration(id_t jointid, float& acceleration)
  */
 bool NUSensorsData::getJointTarget(id_t jointid, float& target)
 {
-    return getJointData(JointTargets, jointid, target);
+    return false;
 }
 
 /*! @brief Gets the requested joint stiffness. If the operation is successful true is returned, 
@@ -189,7 +163,7 @@ bool NUSensorsData::getJointTarget(id_t jointid, float& target)
  */
 bool NUSensorsData::getJointStiffness(id_t jointid, float& stiffness)
 {
-    return getJointData(JointStiffnesses, jointid, stiffness);
+    return false;
 }
 
 /*! @brief Gets the requested joint current. If the operation is successful true is returned, 
@@ -199,7 +173,7 @@ bool NUSensorsData::getJointStiffness(id_t jointid, float& stiffness)
  */
 bool NUSensorsData::getJointCurrent(id_t jointid, float& current)
 {
-    return getJointData(JointCurrents, jointid, current);
+    return false;
 }
 
 /*! @brief Gets the requested joint torque. If the operation is successful true is returned, 
@@ -209,7 +183,7 @@ bool NUSensorsData::getJointCurrent(id_t jointid, float& current)
  */
 bool NUSensorsData::getJointTorque(id_t jointid, float& torque)
 {
-    return getJointData(JointTorques, jointid, torque);
+    return false;
 }
 
 /*! @brief Gets the requested joint temperatures. If the operation is successful true is returned, 
@@ -219,7 +193,7 @@ bool NUSensorsData::getJointTorque(id_t jointid, float& torque)
  */
 bool NUSensorsData::getJointTemperature(id_t jointid, float& temperature)
 {
-    return getJointData(JointTemperatures, jointid, temperature);
+    return false;
 }
 
 /*! @brief Returns the number of joints in the specified body part
@@ -228,27 +202,7 @@ bool NUSensorsData::getJointTemperature(id_t jointid, float& temperature)
  */
 int NUSensorsData::getNumberOfJoints(id_t partid)
 {
-    if (partid == All)
-        return m_num_joints;
-    else if (partid == Body)
-        return m_num_body_joints;
-    else if (partid == Head)
-        return m_num_head_joints;
-    else if (partid == LArm)
-        return m_num_arm_joints;
-    else if (partid == RArm)
-        return m_num_arm_joints;
-    else if (partid == Torso)
-        return m_num_torso_joints;
-    else if (partid == LLeg)
-        return m_num_leg_joints;
-    else if (partid == RLeg)
-        return m_num_leg_joints;
-    else
-    {
-        debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
-        return 0;
-    }
+    return 0;
 }
 
 /*! @brief Gets the requested joint positions in a given body part. If the get is successful true is returned
@@ -258,7 +212,7 @@ int NUSensorsData::getNumberOfJoints(id_t partid)
  */
 bool NUSensorsData::getJointPositions(id_t bodypart, vector<float>& positions)
 {
-    return getJointsData(JointPositions, bodypart, positions);
+    return false;
 }
 
 /*! @brief Gets the requested joint velocities in a given body part. If the get is successful true is returned
@@ -268,7 +222,7 @@ bool NUSensorsData::getJointPositions(id_t bodypart, vector<float>& positions)
  */
 bool NUSensorsData::getJointVelocities(id_t bodypart, vector<float>& velocities)
 {
-    return getJointsData(JointVelocities, bodypart, velocities);
+    return false;
 }
 
 /*! @brief Gets the requested joint accelerations in a given body part. If the get is successful true is returned
@@ -278,7 +232,7 @@ bool NUSensorsData::getJointVelocities(id_t bodypart, vector<float>& velocities)
  */
 bool NUSensorsData::getJointAccelerations(id_t bodypart, vector<float>& accelerations)
 {
-    return getJointsData(JointAccelerations, bodypart, accelerations);
+    return false;
 }
 
 /*! @brief Gets the requested joint targets in a given body part. If the get is successful true is returned
@@ -288,7 +242,7 @@ bool NUSensorsData::getJointAccelerations(id_t bodypart, vector<float>& accelera
  */
 bool NUSensorsData::getJointTargets(id_t bodypart, vector<float>& targets)
 {
-    return getJointsData(JointTargets, bodypart, targets);
+    return false;
 }
 
 /*! @brief Gets the requested joint stiffnesses in a given body part. If the get is successful true is returned
@@ -298,7 +252,7 @@ bool NUSensorsData::getJointTargets(id_t bodypart, vector<float>& targets)
  */
 bool NUSensorsData::getJointStiffnesses(id_t bodypart, vector<float>& stiffnesses)
 {
-    return getJointsData(JointStiffnesses, bodypart, stiffnesses);
+    return false;
 }
 
 /*! @brief Gets the requested joint currents in a given body part. If the get is successful true is returned
@@ -308,7 +262,7 @@ bool NUSensorsData::getJointStiffnesses(id_t bodypart, vector<float>& stiffnesse
  */
 bool NUSensorsData::getJointCurrents(id_t bodypart, vector<float>& currents)
 {
-    return getJointsData(JointCurrents, bodypart, currents);
+    return false;
 }
 
 /*! @brief Gets the requested joint torques in a given body part. If the get is successful true is returned
@@ -318,7 +272,7 @@ bool NUSensorsData::getJointCurrents(id_t bodypart, vector<float>& currents)
  */
 bool NUSensorsData::getJointTorques(id_t bodypart, vector<float>& torques)
 {
-    return getJointsData(JointTorques, bodypart, torques);
+    return false;
 }
 
 /*! @brief Gets the requested joint temperatures in a given body part. If the get is successful true is returned
@@ -328,7 +282,7 @@ bool NUSensorsData::getJointTorques(id_t bodypart, vector<float>& torques)
  */
 bool NUSensorsData::getJointTemperatures(id_t bodypart, vector<float>& temperatures)
 {
-    return getJointsData(JointTemperatures, bodypart, temperatures);
+    return false;
 }
 
 /* @brief Gets the transform matrix of the left leg
@@ -336,13 +290,15 @@ bool NUSensorsData::getJointTemperatures(id_t bodypart, vector<float>& temperatu
  */
 bool NUSensorsData::getLeftLegTransform(Matrix& value)
 {
+    return false;
+    /*
     if (LeftLegTransform == NULL || LeftLegTransform->IsValid == false)
         return false;
     else
     {
         value = Matrix4x4fromVector(LeftLegTransform->Data);
         return true;
-    }
+    }*/
 }
 
 /* @brief Gets the transform matrix of the right leg
@@ -350,6 +306,8 @@ bool NUSensorsData::getLeftLegTransform(Matrix& value)
  */
 bool NUSensorsData::getRightLegTransform(Matrix& value)
 {
+    return false;
+    /*
     if (RightLegTransform == NULL || RightLegTransform->IsValid == false)
         return false;
     else
@@ -357,6 +315,7 @@ bool NUSensorsData::getRightLegTransform(Matrix& value)
         value = Matrix4x4fromVector(RightLegTransform->Data);
         return true;
     }
+     */
 }
 
 /* @brief Gets the transform matrix of the support leg
@@ -364,13 +323,15 @@ bool NUSensorsData::getRightLegTransform(Matrix& value)
  */
 bool NUSensorsData::getSupportLegTransform(Matrix& value)
 {
+    return false;
+    /*
     if (SupportLegTransform == NULL || SupportLegTransform->IsValid == false)
         return false;
     else
     {
         value = Matrix4x4fromVector(SupportLegTransform->Data);
         return true;
-    }
+    }*/
 }
 
 /* @brief Gets the transform matrix of the camera
@@ -378,13 +339,15 @@ bool NUSensorsData::getSupportLegTransform(Matrix& value)
  */
 bool NUSensorsData::getCameraTransform(Matrix& value)
 {
+    return false;
+    /*
     if (CameraTransform == NULL || CameraTransform->IsValid == false)
         return false;
     else
     {
         value = Matrix4x4fromVector(CameraTransform->Data);
         return true;
-    }
+    }*/
 }
 
 /* @brief Gets the transform matrix converting from the camera coordinates to ground based coordinates
@@ -392,13 +355,14 @@ bool NUSensorsData::getCameraTransform(Matrix& value)
  */
 bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
 {
-    if (CameraToGroundTransform == NULL || CameraToGroundTransform->IsValid == false)
+    return false;
+    /*if (CameraToGroundTransform == NULL || CameraToGroundTransform->IsValid == false)
         return false;
     else
     {
         value = Matrix4x4fromVector(CameraToGroundTransform->Data);
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the odometry data since the last call
@@ -407,6 +371,8 @@ bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
  */
 bool NUSensorsData::getOdometry(float& time, vector<float>& values)
 {
+    return false;
+    /*
     static double timeoflastcall = 0;
     if (Odometry == NULL || Odometry->IsValid == false)
         return false;
@@ -417,7 +383,12 @@ bool NUSensorsData::getOdometry(float& time, vector<float>& values)
         timeoflastcall = CurrentTime;
         Odometry->Data = vector<float> (Odometry->size(),0);
         return true;
-    }
+    }*/
+}
+
+bool NUSensorsData::getOdometryData(vector<float>& values)
+{
+    return false;
 }
 
 /* @brief Gets the height of the camera off the ground in cm
@@ -425,13 +396,15 @@ bool NUSensorsData::getOdometry(float& time, vector<float>& values)
  */
 bool NUSensorsData::getCameraHeight(float& height)
 {
+    return false;
+    /*
     if (CameraHeight == NULL || CameraHeight->IsValid == false)
         return false;
     else
     {
         height = CameraHeight->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the names of the joints in a particular body part.
@@ -440,7 +413,7 @@ bool NUSensorsData::getCameraHeight(float& height)
  */
 bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
 {
-    vector<id_t> selectedjoints;
+    /*vector<id_t> selectedjoints;
     if (partid == All)
         selectedjoints = m_all_joint_ids;
     if (partid == Body)
@@ -465,70 +438,8 @@ bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
     
     names.clear();
     for (unsigned int i=0; i<selectedjoints.size(); i++)
-        names.push_back(selectedjoints[i].Name);
-    return true;
-}
-
-/* The grunt work for getting single joint data values
-    @param p_sensor a pointer to the sensor from which the value will come
-    @param jointid the unique joint id
-    @param data the variable that will be updated with the new value
- */
-bool NUSensorsData::getJointData(sensor_t* p_sensor, id_t jointid, float& data)
-{
-    if (p_sensor->IsValid == false)
-        return false;
-    else
-    {
-        data = p_sensor->Data[jointid.Id];
-        return true;
-    }
-}
-
-/* The grunt work for getting joint vector data.
-    @param p_sensor a pointer to the sensor from which we are going to get the vector of data from
-    @param partid the id of the body part to get the vector of data
-    @param data the variable that will be updated to have the vector of data
- */
-bool NUSensorsData::getJointsData(sensor_t* p_sensor, id_t partid, vector<float>& data)
-{
-    if (p_sensor == NULL || p_sensor->IsValid == false)
-        return false;
-    else if (partid == All)
-    {   // if we want all joints then it is easy
-        data = p_sensor->Data;
-        return true;
-    }
-    else 
-    {   // if we want a subset, then its harder; use the ids lists to make a subarray
-        vector<id_t> selectedjoints;
-        if (partid == Body)
-            selectedjoints = m_body_ids;
-        else if (partid == Head)
-            selectedjoints = m_head_ids;
-        else if (partid == LArm)
-            selectedjoints = m_larm_ids;
-        else if (partid == RArm)
-            selectedjoints = m_rarm_ids;
-        else if (partid == Torso)
-            selectedjoints = m_torso_ids;
-        else if (partid == LLeg)
-            selectedjoints = m_lleg_ids;
-        else if (partid == RLeg)
-            selectedjoints = m_rleg_ids;
-        else
-        {
-            debug << "NUSensorsData::getNumberOfJoints. UNDEFINED Body part.";
-            return false;
-        }
-
-        data.clear();
-        data.reserve(selectedjoints.size());
-        for (unsigned int i=0; i<selectedjoints.size(); i++)
-            data.push_back(p_sensor->Data[selectedjoints[i].Id]);
-        return true;
-    }
-    return true;
+        names.push_back(selectedjoints[i].Name);*/
+    return false;
 }
 
 /*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
@@ -536,13 +447,15 @@ bool NUSensorsData::getJointsData(sensor_t* p_sensor, id_t partid, vector<float>
  */
 bool NUSensorsData::getAccelerometerValues(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceAccelerometer == NULL || BalanceAccelerometer->IsValid == false)
         return false;
     else
     {
         values = BalanceAccelerometer->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
@@ -550,13 +463,15 @@ bool NUSensorsData::getAccelerometerValues(vector<float>& values)
  */
 bool NUSensorsData::getHorizon(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceHorizon == NULL || BalanceHorizon->IsValid == false)
         return false;
     else
     {
         values = BalanceHorizon->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the last button trigger times for the chest button, left
@@ -565,13 +480,15 @@ bool NUSensorsData::getHorizon(vector<float>& values)
  */
 bool NUSensorsData::getButtonTriggers(vector<float>& values)
 {
+    return false;
+    /*
     if (ButtonTriggers == NULL || ButtonTriggers->IsValid == false)
         return false;
     else
     {
         values = ButtonTriggers->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the gyro values [gx, gy, gz] in rad/s
@@ -579,13 +496,15 @@ bool NUSensorsData::getButtonTriggers(vector<float>& values)
  */
 bool NUSensorsData::getGyroValues(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceGyro == NULL || BalanceGyro->IsValid == false)
         return false;
     else
     {
         values = BalanceGyro->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the gyro offset values [offsetx, offsety, offsetz]
@@ -594,6 +513,8 @@ bool NUSensorsData::getGyroValues(vector<float>& values)
  */
 bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
         return false;
     else
@@ -601,6 +522,7 @@ bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
         values = BalanceGyroOffset->Data;
         return true;
     }
+     */
 }
 
 /*! @brief Gets the gyro values after the offset and filtering is applied [gx, gy, gz]
@@ -609,6 +531,8 @@ bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
  */
 bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceGyro == NULL || BalanceGyro->IsValid == false || BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
         return false;
     else
@@ -617,7 +541,7 @@ bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
         for (size_t i=0; i<values.size(); i++)
             values[i] = BalanceGyro->Data[i] - BalanceGyroOffset->Data[i];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
@@ -625,26 +549,30 @@ bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
  */
 bool NUSensorsData::getOrientation(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceOrientation == NULL || BalanceOrientation->IsValid == false)
         return false;
     else 
     {
         values = BalanceOrientation->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the orientation [roll, pitch, yaw] in radians from the robot's hardware orientation sensor
  */
 bool NUSensorsData::getOrientationHardware(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceOrientationHardware == NULL || BalanceOrientationHardware->IsValid == false)
         return false;
     else 
     {
         values = BalanceOrientationHardware->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the zero moment point [x,y] in cm from somewhere?
@@ -652,13 +580,15 @@ bool NUSensorsData::getOrientationHardware(vector<float>& values)
  */
 bool NUSensorsData::getZMP(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceZMP == NULL || BalanceZMP->IsValid == false)
         return false;
     else 
     {
         values = BalanceZMP->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the falling sense [sum, left, right, forward, backward] 
@@ -666,13 +596,15 @@ bool NUSensorsData::getZMP(vector<float>& values)
  */
 bool NUSensorsData::getFalling(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceFalling == NULL || BalanceFalling->IsValid == false)
         return false;
     else 
     {
         values = BalanceFalling->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the fallen sense [sum, left, right, forward, backward] 
@@ -680,13 +612,15 @@ bool NUSensorsData::getFalling(vector<float>& values)
  */
 bool NUSensorsData::getFallen(vector<float>& values)
 {
+    return false;
+    /*
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)
         return false;
     else 
     {
         values = BalanceFallen->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
@@ -694,24 +628,28 @@ bool NUSensorsData::getFallen(vector<float>& values)
  */
 bool NUSensorsData::getDistanceLeftValues(vector<float>& values)
 {
+    return false;
+    /*
     if (DistanceLeftValues == NULL || DistanceLeftValues->IsValid == false)
         return false;
     else
     {
         values = DistanceLeftValues->Data;
         return true;
-    }
+    }*/
 }
 
 bool NUSensorsData::getDistanceRightValues(vector<float>& values)
 {
+    return false;
+    /*
     if (DistanceRightValues == NULL || DistanceRightValues->IsValid == false)
         return false;
     else
     {
         values = DistanceRightValues->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the battery readings [voltage (V), current (A), charge (%)]
@@ -719,13 +657,15 @@ bool NUSensorsData::getDistanceRightValues(vector<float>& values)
  */
 bool NUSensorsData::getBatteryValues(vector<float>& values)
 {
+    return false;
+    /*
     if (BatteryValues == NULL || BatteryValues->IsValid == false)
         return false;
     else
     {
         values = BatteryValues->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
@@ -733,13 +673,15 @@ bool NUSensorsData::getBatteryValues(vector<float>& values)
  */
 bool NUSensorsData::getGPSValues(vector<float>& values)
 {
+    return false;
+    /*
     if (GPS == NULL || GPS->IsValid == false)
         return false;
     else
     {
         values = GPS->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the compass reading [heading]
@@ -747,13 +689,15 @@ bool NUSensorsData::getGPSValues(vector<float>& values)
  */
 bool NUSensorsData::getCompassValues(vector<float>& values)
 {
+    return false;
+    /*
     if (Compass == NULL || Compass->IsValid == false)
         return false;
     else
     {
         values = Compass->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the foot sole pressure sensor values (order: left to right front to back) in Newtons
@@ -762,6 +706,8 @@ bool NUSensorsData::getCompassValues(vector<float>& values)
  */
 bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
 {
+    return false;
+    /*
     if (FootSoleValues == NULL || FootSoleValues->IsValid == false)
         return false;
     else
@@ -789,7 +735,7 @@ bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the centre of pressure as measured by feet sensors
@@ -803,6 +749,8 @@ bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
  */
 bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
 {
+    return false;
+    /*
     if (FootCoP == NULL || FootCoP->IsValid == false)
         return false;
     else
@@ -828,7 +776,7 @@ bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the foot bumper sensor values (order: left to right) in binary (0=off 1=on)
@@ -837,6 +785,8 @@ bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
  */
 bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
 {
+    return false;
+    /*
     if (FootBumperValues == NULL || FootBumperValues->IsValid == false)
         return false;
     else
@@ -864,7 +814,7 @@ bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the total force on the foot in Newtons
@@ -873,6 +823,8 @@ bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
  */
 bool NUSensorsData::getFootForce(id_t footid, float& force)
 {
+    return false;
+    /*
     force = 0;
     if (FootForce == NULL || FootForce->IsValid == false)
         return false;
@@ -897,7 +849,7 @@ bool NUSensorsData::getFootForce(id_t footid, float& force)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the whether footid is in contact with the ground
@@ -906,6 +858,8 @@ bool NUSensorsData::getFootForce(id_t footid, float& force)
  */
 bool NUSensorsData::getFootContact(id_t footid, bool& contact)
 {
+    return false;
+    /*
     if (FootContact == NULL || FootContact->IsValid == false)
         return false;
     else
@@ -922,7 +876,7 @@ bool NUSensorsData::getFootContact(id_t footid, bool& contact)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the total force on the foot in Newtons
@@ -932,6 +886,8 @@ bool NUSensorsData::getFootContact(id_t footid, bool& contact)
  */
 bool NUSensorsData::getFootSupport(id_t footid, bool& support)
 {
+    return false;
+    /*
     if (FootSupport == NULL || FootSupport->IsValid == false)
         return false;
     else
@@ -948,7 +904,7 @@ bool NUSensorsData::getFootSupport(id_t footid, bool& support)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the button values (order: importance) in binary (0=off 1=on)
@@ -957,6 +913,8 @@ bool NUSensorsData::getFootSupport(id_t footid, bool& support)
  */
 bool NUSensorsData::getButtonValues(id_t buttonid, vector<float>& values)
 {
+    return false;
+    /*
     if (ButtonValues == NULL || ButtonValues->IsValid == false)
         return false;
     else
@@ -978,7 +936,7 @@ bool NUSensorsData::getButtonValues(id_t buttonid, vector<float>& values)
             return false;
         }
         return true;
-    }
+    }*/
 }
 
 /******************************************************************************************************************************************
@@ -989,45 +947,53 @@ bool NUSensorsData::getButtonValues(id_t buttonid, vector<float>& values)
  */
 bool NUSensorsData::isFalling()
 {
+    return false;
+    /*
     if (BalanceFalling == NULL || BalanceFalling->IsValid == false)       // if there is no balance sensor it is impossible to tell it is falling over
         return false;       
     else if (BalanceFalling->Data[0] > 0)
         return true;
     else
-        return false;
+        return false;*/
 }
 
 /*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
  */
 bool NUSensorsData::isFallen()
 {
+    return false;
+    /*
     if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
         return false;       
     else if (BalanceFallen->Data[0] > 0)
         return true;
     else
-        return false;
+        return false;*/
 }
 
 /*! @brief Returns true if the robot is on the ground, false otherwise
  */
 bool NUSensorsData::isOnGround()
 {
+    return false;
+    /*
     if (FootContact == NULL || FootContact->IsValid == false)
         return true;
     else if (FootContact->Data[2] > 0)
         return true;
     else
-        return false;
+        return false;*/
 }
 
 /*! @brief Returns true if the robot is currently incapacitated. A robot is incapacitated if it is falling, fallen, not on the ground or getting up
  */
 bool NUSensorsData::isIncapacitated()
 {
+    return false;
+    /*
     bool gettingup = false;
     getMotionGetupActive(gettingup);
-    return isFalling() or isFallen() or not isOnGround() or gettingup;
+    return isFalling() or isFallen() or not isOnGround() or gettingup;*/
 }
 
 /*! @brief Returns true has impacted in the ground in this cycle
@@ -1037,6 +1003,8 @@ bool NUSensorsData::isIncapacitated()
  */
 bool NUSensorsData::footImpact(id_t footid, float& time)
 {
+    return false;
+    /*
     if (FootImpact == NULL || FootImpact->IsValid == false)
     {
         time = 0;
@@ -1061,7 +1029,7 @@ bool NUSensorsData::footImpact(id_t footid, float& time)
         return true;
     else
         return false;
-
+     */
 }
 
 /*! @brief Get whether the fall motion module is active
@@ -1070,13 +1038,15 @@ bool NUSensorsData::footImpact(id_t footid, float& time)
  */
 bool NUSensorsData::getMotionFallActive(bool& active)
 {
+    return false;
+    /*
     if (not MotionFallActive->IsValid)
         return false;
     else
     {
         active = MotionFallActive->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get whether the getup motion module is active
@@ -1085,13 +1055,15 @@ bool NUSensorsData::getMotionFallActive(bool& active)
  */
 bool NUSensorsData::getMotionGetupActive(bool& active)
 {
+    return false;
+    /*
     if (not MotionGetupActive->IsValid)
         return false;
     else
     {
         active = MotionGetupActive->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get whether the kick motion module is active
@@ -1100,13 +1072,15 @@ bool NUSensorsData::getMotionGetupActive(bool& active)
  */
 bool NUSensorsData::getMotionKickActive(bool& active)
 {
+    return false;
+    /*
     if (not MotionKickActive->IsValid)
         return false;
     else
     {
         active = MotionKickActive->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get whether the save motion module is active
@@ -1115,13 +1089,15 @@ bool NUSensorsData::getMotionKickActive(bool& active)
  */
 bool NUSensorsData::getMotionSaveActive(bool& active)
 {
+    return false;
+    /*
     if (not MotionSaveActive->IsValid)
         return false;
     else
     {
         active = MotionSaveActive->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get whether the script motion module is active
@@ -1130,13 +1106,15 @@ bool NUSensorsData::getMotionSaveActive(bool& active)
  */
 bool NUSensorsData::getMotionScriptActive(bool& active)
 {
+    return false;
+    /*
     if (not MotionSaveActive->IsValid)
         return false;
     else
     {
         active = MotionSaveActive->Data[0];
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get current walk speed [cm/s, cm/s, rad/s]
@@ -1145,13 +1123,15 @@ bool NUSensorsData::getMotionScriptActive(bool& active)
  */
 bool NUSensorsData::getMotionWalkSpeed(vector<float>& speed)
 {
+    return false;
+    /*
     if (not MotionWalkSpeed->IsValid)
         return false;
     else
     {
         speed = MotionWalkSpeed->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Gets the current walk maximum speed as [x cm/s, y cm/s yaw rad/s]
@@ -1160,13 +1140,15 @@ bool NUSensorsData::getMotionWalkSpeed(vector<float>& speed)
  */
 bool NUSensorsData::getMotionWalkMaxSpeed(vector<float>& speed)
 {
+    return false;
+    /*
     if (not MotionWalkMaxSpeed->IsValid)
         return false;
     else
     {
         speed = MotionWalkMaxSpeed->Data;
         return true;
-    }
+    }*/
 }
 
 /*! @brief Get the current head completion time 
@@ -1175,184 +1157,63 @@ bool NUSensorsData::getMotionWalkMaxSpeed(vector<float>& speed)
  */
 bool NUSensorsData::getMotionHeadCompletionTime(double& time)
 {
+    return false;
+    /*
     if (not MotionHeadCompletionTime->IsValid)
         return false;
     else
     {
         time = MotionHeadCompletionTime->Data[0];
         return true;
-    }
+    }*/
 }
 
 /******************************************************************************************************************************************
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
 
-/*! @brief Sets each of the static id_t if the joint is in the list. Also sets id lists for accessing limbs. 
-    @param joints a vector of strings where each string is a name of a joint
- */
-void NUSensorsData::setAvailableJoints(const vector<string>& joints)
+void NUSensorsData::set(const id_t& id, double time, const float& data)
 {
-    m_joint_names = joints;
-    // NOTE: This function is the same as setAvailableJoints in NUActionatorsData; so if you change this you probably want to change that too
-    // first convert everything to lower case and remove whitespace and underscores
-    vector<string> simplejointnames;
-    string namebuffer, currentname, currentletter;
-    for (unsigned int i=0; i<joints.size(); i++)
-    {
-        currentname = joints[i];
-        // compare each letter to a space and an underscore
-        for (unsigned int j=0; j<currentname.size(); j++)
-        {
-            currentletter = currentname.substr(j, 1);
-            if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0)     // if it is neither then add the lower case version
-                namebuffer += tolower(currentletter[0]);            
-        }
-        simplejointnames.push_back(namebuffer);
-        namebuffer.clear();
-    }
-    /*
-    for (unsigned int i=0; i<simplejointnames.size(); i++) 
-    {
-        if (simplejointnames[i].find("headyaw") != string::npos)
-        {
-            HeadYaw = i;
-            m_head_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("headpitch") != string::npos)
-        {
-            HeadPitch = i;
-            m_head_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lshoulderpitch") != string::npos)
-        {
-            LShoulderPitch = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lshoulderroll") != string::npos)
-        {
-            LShoulderRoll = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lelbowyaw") != string::npos)
-        {
-            LElbowYaw = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lelbowroll") != string::npos)
-        {
-            LElbowRoll = i;
-            m_larm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rshoulderpitch") != string::npos)
-        {
-            RShoulderPitch = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rshoulderroll") != string::npos)
-        {
-            RShoulderRoll = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("relbowyaw") != string::npos)
-        {
-            RElbowYaw = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("relbowroll") != string::npos)
-        {
-            RElbowRoll = i;
-            m_rarm_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhipyawpitch") != string::npos)
-        {
-            LHipYawPitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhipyaw") != string::npos)
-        {
-            LHipYaw = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhippitch") != string::npos)
-        {
-            LHipPitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lhiproll") != string::npos)
-        {
-            LHipRoll = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lkneepitch") != string::npos)
-        {
-            LKneePitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lanklepitch") != string::npos)
-        {
-            LAnklePitch = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("lankleroll") != string::npos)
-        {
-            LAnkleRoll = i;
-            m_lleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhipyawpitch") != string::npos)
-        {
-            RHipYawPitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhipyaw") != string::npos)
-        {
-            RHipYaw = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhippitch") != string::npos)
-        {
-            RHipPitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rhiproll") != string::npos)
-        {
-            RHipRoll = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rkneepitch") != string::npos)
-        {
-            RKneePitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("ranklepitch") != string::npos)
-        {
-            RAnklePitch = i;
-            m_rleg_ids.push_back(i);
-        }
-        else if (simplejointnames[i].find("rankleroll") != string::npos)
-        {
-            RAnkleRoll = i;
-            m_rleg_ids.push_back(i);
-        }
-    }
-    // add the arms, torso and legs to the body_ids
-    m_body_ids.insert(m_body_ids.end(), m_larm_ids.begin(), m_larm_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_rarm_ids.begin(), m_rarm_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_torso_ids.begin(), m_torso_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_lleg_ids.begin(), m_lleg_ids.end());
-    m_body_ids.insert(m_body_ids.end(), m_rleg_ids.begin(), m_rleg_ids.end());
-    // add the head and the body_ids to the all_joint_ids
-    m_all_joint_ids.insert(m_all_joint_ids.end(), m_head_ids.begin(), m_head_ids.end());
-    m_all_joint_ids.insert(m_all_joint_ids.end(), m_body_ids.begin(), m_body_ids.end());
-    
-    // set total numbers in each limb
-    m_num_head_joints = m_head_ids.size();
-    m_num_arm_joints = m_larm_ids.size();
-    m_num_torso_joints = m_torso_ids.size();
-    m_num_leg_joints = m_lleg_ids.size();
-    m_num_body_joints = m_body_ids.size();
-    m_num_joints = m_all_joint_ids.size();
-     */
+}
+
+void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> >& data)
+{
+}
+
+void NUSensorsData::set(const id_t& id, double time, const string& data)
+{
+}
+
+void NUSensorsData::setAsInvalid(const id_t& id)
+{
+}
+
+void NUSensorsData::setVelocity(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::setAcceleration(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::setTarget(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::setStiffness(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::setCurrent(const id_t& id, double time, const vector<float>& data)
+{
+}
+
+void NUSensorsData::setTemperature(const id_t& id, double time, const vector<float>& data)
+{
 }
 
 /*! @brief Sets the joint positions to the given values
@@ -1362,7 +1223,7 @@ void NUSensorsData::setAvailableJoints(const vector<string>& joints)
  */
 void NUSensorsData::setJointPositions(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointPositions, time, data, iscalculated);
+    //setData(JointPositions, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint velocities to the given values
@@ -1372,7 +1233,7 @@ void NUSensorsData::setJointPositions(double time, const vector<float>& data, bo
  */
 void NUSensorsData::setJointVelocities(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointVelocities, time, data, iscalculated);
+    //setData(JointVelocities, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint accelerations to the given values
@@ -1382,7 +1243,7 @@ void NUSensorsData::setJointVelocities(double time, const vector<float>& data, b
  */
 void NUSensorsData::setJointAccelerations(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointAccelerations, time, data, iscalculated);
+    //setData(JointAccelerations, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint targets to the given values
@@ -1392,7 +1253,7 @@ void NUSensorsData::setJointAccelerations(double time, const vector<float>& data
  */
 void NUSensorsData::setJointTargets(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointTargets, time, data, iscalculated);
+    //setData(JointTargets, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint stiffnesses to the given values
@@ -1402,7 +1263,7 @@ void NUSensorsData::setJointTargets(double time, const vector<float>& data, bool
  */
 void NUSensorsData::setJointStiffnesses(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointStiffnesses, time, data, iscalculated);
+    //setData(JointStiffnesses, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint currents to the given values
@@ -1412,7 +1273,7 @@ void NUSensorsData::setJointStiffnesses(double time, const vector<float>& data, 
  */
 void NUSensorsData::setJointCurrents(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointCurrents, time, data, iscalculated);
+    //setData(JointCurrents, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint torques to the given values
@@ -1422,7 +1283,7 @@ void NUSensorsData::setJointCurrents(double time, const vector<float>& data, boo
  */
 void NUSensorsData::setJointTorques(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointTorques, time, data, iscalculated);
+    //setData(JointTorques, time, data, iscalculated);
 }
 
 /*! @brief Sets the joint temperature to the given values
@@ -1432,7 +1293,7 @@ void NUSensorsData::setJointTorques(double time, const vector<float>& data, bool
  */
 void NUSensorsData::setJointTemperatures(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(JointTemperatures, time, data, iscalculated);
+    //setData(JointTemperatures, time, data, iscalculated);
 }
 
 /*! @brief Sets the accelerometer to the given values
@@ -1442,7 +1303,7 @@ void NUSensorsData::setJointTemperatures(double time, const vector<float>& data,
  */
 void NUSensorsData::setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(BalanceAccelerometer, time, data, iscalculated);
+    //setData(BalanceAccelerometer, time, data, iscalculated);
 }
 
 /*! @brief Sets the gyro to the given values
@@ -1452,7 +1313,7 @@ void NUSensorsData::setBalanceAccelerometer(double time, const vector<float>& da
  */
 void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(BalanceGyro, time, data, iscalculated);
+    //setData(BalanceGyro, time, data, iscalculated);
 }
 
 /*! @brief Sets the hardware measurement of the robot's orientation
@@ -1462,7 +1323,7 @@ void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool 
  */
 void NUSensorsData::setBalanceOrientationHardware(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(BalanceOrientationHardware, time, data, iscalculated);
+    //setData(BalanceOrientationHardware, time, data, iscalculated);
 }
 
 /*! @brief Sets the left distance values to the given values
@@ -1472,8 +1333,9 @@ void NUSensorsData::setBalanceOrientationHardware(double time, const vector<floa
  */
 void NUSensorsData::setDistanceLeftValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(DistanceLeftValues, time, data, iscalculated);
+    //setData(DistanceLeftValues, time, data, iscalculated);
 }
+
 /*! @brief Sets the right distance values to the given values
     @param time the time the data was collected in milliseconds
     @param data the new distance values
@@ -1481,7 +1343,7 @@ void NUSensorsData::setDistanceLeftValues(double time, const vector<float>& data
  */
 void NUSensorsData::setDistanceRightValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(DistanceRightValues, time, data, iscalculated);
+    //setData(DistanceRightValues, time, data, iscalculated);
 }
 
 /*! @brief Sets the foot sole values to the given values
@@ -1491,7 +1353,7 @@ void NUSensorsData::setDistanceRightValues(double time, const vector<float>& dat
  */
 void NUSensorsData::setFootSoleValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(FootSoleValues, time, data, iscalculated);
+    //setData(FootSoleValues, time, data, iscalculated);
 }
 
 /*! @brief Sets the foot bumper to the given values
@@ -1501,7 +1363,7 @@ void NUSensorsData::setFootSoleValues(double time, const vector<float>& data, bo
  */
 void NUSensorsData::setFootBumperValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(FootBumperValues, time, data, iscalculated);
+    //setData(FootBumperValues, time, data, iscalculated);
 }
 
 /*! @brief Sets the button values to the given values
@@ -1511,7 +1373,7 @@ void NUSensorsData::setFootBumperValues(double time, const vector<float>& data, 
  */
 void NUSensorsData::setButtonValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(ButtonValues, time, data, iscalculated);
+    //setData(ButtonValues, time, data, iscalculated);
 }
 
 /*! @brief Sets the battery to the given values
@@ -1521,7 +1383,7 @@ void NUSensorsData::setButtonValues(double time, const vector<float>& data, bool
  */
 void NUSensorsData::setBatteryValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(BatteryValues, time, data, iscalculated);
+    //setData(BatteryValues, time, data, iscalculated);
 }
 
 /*! @brief Sets whether the fall engine is active
@@ -1530,9 +1392,9 @@ void NUSensorsData::setBatteryValues(double time, const vector<float>& data, boo
  */ 
 void NUSensorsData::setMotionFallActive(double time, bool active)
 {
-    vector<float> data(1,0);
-    data[0] = active;
-    setData(MotionFallActive, time, data, false);
+    //vector<float> data(1,0);
+    //data[0] = active;
+    //setData(MotionFallActive, time, data, false);
 }
 
 /*! @brief Sets whether the getup engine is active
@@ -1541,9 +1403,9 @@ void NUSensorsData::setMotionFallActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionGetupActive(double time, bool active)
 {
-    vector<float> data(1,0);
-    data[0] = active;
-    setData(MotionGetupActive, time, data, false);
+    //vector<float> data(1,0);
+    //data[0] = active;
+    //setData(MotionGetupActive, time, data, false);
 }
 
 /*! @brief Sets whether the kick engine is active
@@ -1552,9 +1414,9 @@ void NUSensorsData::setMotionGetupActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionKickActive(double time, bool active)
 {
-    vector<float> data(1,0);
-    data[0] = active;
-    setData(MotionKickActive, time, data, false);
+    //vector<float> data(1,0);
+    //data[0] = active;
+    //setData(MotionKickActive, time, data, false);
 }
 
 /*! @brief Sets whether the save engine is active
@@ -1563,9 +1425,9 @@ void NUSensorsData::setMotionKickActive(double time, bool active)
  */ 
 void NUSensorsData::setMotionSaveActive(double time, bool active)
 {
-    vector<float> data(1,0);
-    data[0] = active;
-    setData(MotionSaveActive, time, data, false);
+    //vector<float> data(1,0);
+    //data[0] = active;
+    //setData(MotionSaveActive, time, data, false);
 }
 
 /*! @brief Sets whether the script engine is active
@@ -1574,9 +1436,9 @@ void NUSensorsData::setMotionSaveActive(double time, bool active)
  */
 void NUSensorsData::setMotionScriptActive(double time, bool active)
 {
-    vector<float> data(1,0);
-    data[0] = active;
-    setData(MotionScriptActive, time, data, false);
+    //vector<float> data(1,0);
+    //data[0] = active;
+    //setData(MotionScriptActive, time, data, false);
 }
 
 /*! @brief Sets the current walk speed 
@@ -1585,7 +1447,7 @@ void NUSensorsData::setMotionScriptActive(double time, bool active)
  */
 void NUSensorsData::setMotionWalkSpeed(double time, vector<float>& speed)
 {
-    setData(MotionWalkSpeed, time, speed, false);
+    //setData(MotionWalkSpeed, time, speed, false);
 }
 
 /*! @brief Sets the current walk speed 
@@ -1594,7 +1456,7 @@ void NUSensorsData::setMotionWalkSpeed(double time, vector<float>& speed)
  */
 void NUSensorsData::setMotionWalkMaxSpeed(double time, vector<float>& speed)
 {
-    setData(MotionWalkMaxSpeed, time, speed, false);
+    //setData(MotionWalkMaxSpeed, time, speed, false);
 }
 
 /*! @brief Sets the completion time of the current head movement
@@ -1603,9 +1465,9 @@ void NUSensorsData::setMotionWalkMaxSpeed(double time, vector<float>& speed)
  */
 void NUSensorsData::setMotionHeadCompletionTime(double time, double completiontime)
 {
-    vector<float> ct(1,0);
-    ct[0] = completiontime;
-    setData(MotionHeadCompletionTime, time, ct, false);
+    //vector<float> ct(1,0);
+    //ct[0] = completiontime;
+    //setData(MotionHeadCompletionTime, time, ct, false);
 }
 
 /*! @brief Sets the GPS coordinates to the given values
@@ -1615,7 +1477,7 @@ void NUSensorsData::setMotionHeadCompletionTime(double time, double completionti
  */
 void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(GPS, time, data, iscalculated);
+    //setData(GPS, time, data, iscalculated);
 }
 
 /*! @brief Sets the compass coordinates to the given values
@@ -1625,19 +1487,7 @@ void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool is
  */
 void NUSensorsData::setCompassValues(double time, const vector<float>& data, bool iscalculated)
 {
-    setData(Compass, time, data, iscalculated);
-}
-
-/* @brief Sets the data of the given sensor to the given data
-   @param p_sensor a pointer to the sensor to be updated
-   @param time the time the data was collected
-   @param data the new data to be stored in p_sensor
-   @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated)
-{
-    CurrentTime = time;
-    p_sensor->setData(time, data, iscalculated);
+    //setData(Compass, time, data, iscalculated);
 }
 
 /******************************************************************************************************************************************
@@ -1650,7 +1500,7 @@ void NUSensorsData::setData(sensor_t* p_sensor, double time, const vector<float>
 void NUSensorsData::summaryTo(ostream& output) const
 {
     for (unsigned int i=0; i<m_sensors.size(); i++)
-        m_sensors[i]->summaryTo(output);
+        m_sensors[i].summaryTo(output);
 }
 
 /*! @todo Implement this function
@@ -1670,17 +1520,17 @@ int NUSensorsData::size() const
  */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {
-    output << p_data.size() << " ";
+    /*output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
         output << *p_data.m_sensors[i];
-    return output;
+    return output;*/
 }
 
 /*! @brief Get the entire contents of the NUSensorsData class from a stream
  */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
-    p_data.m_sensors.clear();
+    /*p_data.m_sensors.clear();
     int numsensors;
     sensor_t insensor;
     sensor_t* sensor;
@@ -1696,151 +1546,7 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
         if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
     }
     p_data.CurrentTime = lastUpdateTime;
-    return input;
-}
-
-/*! @brief A helper function to update a named sensor pointer based on the id of p_sensor
-    @param p_sensor the p_sensor->SensorID will be used to update one of the named pointers to point to p_sensor
- */
-void NUSensorsData::updateNamedSensorPointer(sensor_t* p_sensor)
-{
-    switch (p_sensor->SensorID) 
-    {
-        case sensor_t::JOINT_POSITIONS:
-            JointPositions = p_sensor;
-            break;
-        case sensor_t::JOINT_VELOCITIES:
-            JointVelocities = p_sensor;
-            break;
-        case sensor_t::JOINT_ACCELERATIONS:
-            JointAccelerations = p_sensor;
-            break;
-        case sensor_t::JOINT_TARGETS:
-            JointTargets = p_sensor;
-            break;
-        case sensor_t::JOINT_STIFFNESSES:
-            JointStiffnesses = p_sensor;
-            break;
-        case sensor_t::JOINT_CURRENTS:
-            JointCurrents = p_sensor;
-            break;
-        case sensor_t::JOINT_TORQUES:
-            JointTorques = p_sensor;
-            break;
-        case sensor_t::JOINT_TEMPERATURES:
-            JointTemperatures = p_sensor;
-            break;
-        case sensor_t::KINEMATICS_LEFT_LEG_TRANSFORM:
-            LeftLegTransform = p_sensor;
-            break;
-        case sensor_t::KINEMATICS_RIGHT_LEG_TRANSFORM:
-            RightLegTransform = p_sensor;
-            break;
-        case sensor_t::KINEMATICS_SUPPORT_LEG_TRANSFORM:
-            SupportLegTransform = p_sensor;
-            break;
-        case sensor_t::KINEMATICS_CAMERA_TRANSFORM:
-            CameraTransform = p_sensor;
-            break;
-        case sensor_t::KINEMATICS_CAMERA_TO_GROUND_TRANSFORM:
-            CameraToGroundTransform = p_sensor;
-            break;
-        case sensor_t::JOINT_ODOMETRY:
-            Odometry = p_sensor;
-            break;
-        case sensor_t::JOINT_CAMERAHEIGHT:
-            CameraHeight = p_sensor;
-            break;
-        case sensor_t::BALANCE_ACCELEROMETER:
-            BalanceAccelerometer = p_sensor;
-            break;
-        case sensor_t::BALANCE_GYRO:
-            BalanceGyro = p_sensor;
-            break;
-        case sensor_t::BALANCE_GYRO_OFFSET:
-            BalanceGyroOffset = p_sensor;
-            break;
-        case sensor_t::BALANCE_ORIENTATION:
-            BalanceOrientation = p_sensor;
-            break;
-        case sensor_t::BALANCE_HORIZON:
-            BalanceHorizon = p_sensor;
-            break;
-        case sensor_t::BALANCE_ZMP:
-            BalanceZMP = p_sensor;
-            break;
-        case sensor_t::BALANCE_FALLING:
-            BalanceFalling = p_sensor;
-            break;
-        case sensor_t::BALANCE_FALLEN:
-            BalanceFallen = p_sensor;
-            break;
-        case sensor_t::DISTANCE_LEFT_VALUES:
-            DistanceLeftValues = p_sensor;
-            break;
-	case sensor_t::DISTANCE_RIGHT_VALUES:
-            DistanceRightValues = p_sensor;
-            break;
-        case sensor_t::FOOT_SOLE_VALUES:
-            FootSoleValues = p_sensor;
-            break;
-        case sensor_t::FOOT_BUMPER_VALUES:
-            FootBumperValues = p_sensor;
-            break;
-        case sensor_t::FOOT_COP:
-            FootCoP = p_sensor;
-            break;
-        case sensor_t::FOOT_FORCE:
-            FootForce = p_sensor;
-            break;
-        case sensor_t::FOOT_CONTACT:
-            FootContact = p_sensor;
-            break;
-        case sensor_t::FOOT_SUPPORT:
-            FootSupport = p_sensor;
-            break;
-        case sensor_t::FOOT_IMPACT:
-            FootImpact = p_sensor;
-            break;
-        case sensor_t::BUTTON_VALUES:
-            ButtonValues = p_sensor;
-            break;
-        case sensor_t::BUTTON_TRIGGERS:
-            ButtonTriggers = p_sensor;
-            break;
-        case sensor_t::BATTERY_VALUES:
-            BatteryValues = p_sensor;
-            break;
-        case sensor_t::MOTION_FALL_ACTIVE:
-            MotionFallActive = p_sensor;
-            break;
-        case sensor_t::MOTION_GETUP_ACTIVE:
-            MotionGetupActive = p_sensor;
-            break;
-        case sensor_t::MOTION_KICK_ACTIVE:
-            MotionKickActive = p_sensor;
-            break;
-        case sensor_t::MOTION_SAVE_ACTIVE:
-            MotionSaveActive = p_sensor;
-            break;
-        case sensor_t::MOTION_SCRIPT_ACTIVE:
-            MotionScriptActive = p_sensor;
-            break;
-        case sensor_t::MOTION_WALK_SPEED:
-            MotionWalkSpeed = p_sensor;
-            break;
-        case sensor_t::MOTION_WALK_MAX_SPEED:
-            MotionWalkMaxSpeed = p_sensor;
-            break;            
-        case sensor_t::MOTION_HEAD_COMPLETION_TIME:
-            MotionHeadCompletionTime = p_sensor;
-            break;
-        case sensor_t::GPS_VALUES:
-            GPS = p_sensor;
-            break;
-        default:
-            break;
-    }
+    return input;*/
 }
 
 

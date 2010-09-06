@@ -26,7 +26,7 @@
 #ifndef NUSENSORSDATA_H
 #define NUSENSORSDATA_H
 
-#include "sensor_t.h"
+#include "Sensor.h"
 #include "Infrastructure/NUData.h"
 
 #include <vector>
@@ -38,13 +38,59 @@ using namespace std;
 class NUSensorsData: public NUData, TimestampedData
 {
 public:
-    // button ids
+    // kinematic sensors
+    const static id_t LLegTransform;
+    const static id_t RLegTransform;
+    const static id_t SupportLegTransform;
+    const static id_t CameraTransform;
+    const static id_t CameraToGroundTransform;
+    const static id_t CameraHeight;
+    const static id_t Odometry;
+    // balance sensors
+    const static id_t Accelerometer;
+    const static id_t Gyro;
+    const static id_t GyroOffset;
+    const static id_t Orientation;
+    const static id_t Horizon;
+    const static id_t Zmp;
+    const static id_t Falling;
+    const static id_t Fallen;
+    // foot sensors
+    const static id_t FootBumper;
+    const static id_t FootForce;
+    const static id_t FootContact;
+    const static id_t FootSupport;
+    const static id_t FootImpact;
+    const static id_t FootCoP;
+    // button sensors
     const static id_t MainButton;
     const static id_t SecondaryButton;
     const static id_t AllButton;
+    const static id_t AllButtonTriggers;
+    // distance sensors
+    const static id_t LDistance;
+    const static id_t RDistance;
+    // gps sensors
+    const static id_t Gps;
+    const static id_t Compass;
+    // battery sensors
+    const static id_t BatteryVoltage;
+    const static id_t BatteryCurrent;
+    const static id_t BatteryCharge;
+    // motion sensors
+    const static id_t MotionFallActive;
+    const static id_t MotionGetupActive;
+    const static id_t MotionKickActive;
+    const static id_t MotionSaveActive;
+    const static id_t MotionScriptActive;
+    const static id_t MotionWalkSpeed;
+    const static id_t MotionWalkMaxSpeed;
+    const static id_t MotionHeadCompletionTime;
 public:
     NUSensorsData();
     ~NUSensorsData();
+    
+    void addSensors(const vector<string>& hardwarenames);
     
     // Get methods for a single joint at a time
     bool getJointPosition(id_t jointid, float& position);
@@ -76,6 +122,7 @@ public:
     bool getCameraToGroundTransform(Matrix& value);
 
     bool getOdometry(float& time, vector<float>& values);
+    bool getOdometryData(vector<float>& values);
     bool getCameraHeight(float& height);
     
     // Get methods for the other sensors
@@ -122,9 +169,22 @@ public:
     bool getMotionWalkMaxSpeed(vector<float>& speed);
     bool getMotionHeadCompletionTime(double& time);
     
-    void setAvailableJoints(const vector<string>& joints);
-    
     // Set methods for joints
+    void set(const id_t& id, double time, const float& data);
+    void set(const id_t& id, double time, const vector<float>& data);
+    void set(const id_t& id, double time, const vector<vector<float> >& data);
+    void set(const id_t& id, double time, const string& data);
+    
+    void setVelocity(const id_t& id, double time, const vector<float>& data);
+    void setAcceleration(const id_t& id, double time, const vector<float>& data);
+    void setTarget(const id_t& id, double time, const vector<float>& data);
+    void setStiffness(const id_t& id, double time, const vector<float>& data);
+    void setCurrent(const id_t& id, double time, const vector<float>& data);
+    void setTemperature(const id_t& id, double time, const vector<float>& data);
+    
+    void setAsInvalid(const id_t& id);
+    
+    
     void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
     void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
     void setJointAccelerations(double time, const vector<float>& data, bool iscalculated = false);
@@ -165,101 +225,12 @@ public:
     
     int size() const;
     double GetTimestamp() const {return CurrentTime;};
-private:
-    void addSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
-    void addSoftSensor(sensor_t*& p_sensor, string sensorname, sensor_t::sensor_id_t sensorid);
-    
-    bool getJointData(sensor_t* p_sensor, id_t jointid, float& data);
-    bool getJointsData(sensor_t* p_sensor, id_t bodypartid, vector<float>& data);
-    
-    void setData(sensor_t* p_sensor, double time, const vector<float>& data, bool iscalculated = false);
-    
-    void updateNamedSensorPointer(sensor_t* p_sensor);
 public:
     double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
-    // NAMED SENSORS
-    // Proprioception Sensors:
-    sensor_t* JointPositions;                   //!< stores the joint position sensors (in radians)
-    sensor_t* JointVelocities;                  //!< stores the joint velocity sensors (in rad/s)
-    sensor_t* JointAccelerations;               //!< stores the joint acceleration sensors (in rad/s/s)
-    sensor_t* JointTargets;                     //!< stores the joint position targets (in radians)
-    sensor_t* JointStiffnesses;                 //!< stores the joint stiffness values (as a percent)
-    sensor_t* JointCurrents;                    //!< stores the joint motor current sensors (in A)
-    sensor_t* JointTorques;                     //!< stores the joint torques (in Nm)
-    sensor_t* JointTemperatures;                //!< stores the joint temperatures (in degrees C)
-    
-    sensor_t* LeftLegTransform;                 //!< stores the transform matrix from origin to the left leg
-    sensor_t* RightLegTransform;                //!< stores the transform matrix from origin to the right leg
-    sensor_t* SupportLegTransform;              //!< stores the transform matrix from origin to the support leg
-    sensor_t* CameraTransform;                  //!< stores the transform matrix from origin to the camera
-    sensor_t* CameraToGroundTransform;          //!< stores the transform matrix from the camera to the ground
-
-    sensor_t* Odometry;                         //!< stores the movement in the [x (cm), y (cm),yaw (rad)] calculated from proprioception
-    sensor_t* CameraHeight;                     //!< stores the height of the camera from the ground (cm) calculate from proprioception
-    
-    // Balance Sensors:
-    sensor_t* BalanceAccelerometer;             //!< stores the sensor measurements for the linear acceleration of the torso in cm/s/s
-    sensor_t* BalanceGyro;                      //!< stores the sensor measurements for the radial velocities of the torso in rad/s
-    sensor_t* BalanceGyroOffset;                //!< stores the offsets for gyros
-    sensor_t* BalanceOrientation;               //!< stores the robot's measured orientation (roll, pitch, yaw) rad
-    sensor_t* BalanceOrientationHardware;       //!< stores the robot's hardware [roll, pitch, yaw] radians
-    sensor_t* BalanceHorizon;                   //!< stores the Horizon line (A,B,C) Ax+ By +C =0
-    sensor_t* BalanceZMP;                       //!< stores the robot's measured ZMP (x,y)
-    sensor_t* BalanceFalling;                   //!< stores whether the robot is falling (sum, left, right, forward, backward)
-    sensor_t* BalanceFallen;                    //!< stores whether the robot has fallen (sum, left, right, forward, backward)
-    
-    // Distance Sensors:
-    sensor_t* DistanceLeftValues;                   //!< stores the ultrasonic left distance to obstacle measurements in cm
-    sensor_t* DistanceRightValues;                   //!< stores the ultrasonic left distance to obstacle measurements in cm
-    
-    // Foot Pressure Sensors:
-    sensor_t* FootSoleValues;                   //!< stores the foot force in Newtons
-    sensor_t* FootBumperValues;                 //!< stores the foot bumper values; 0 for off, 1 for pressed
-    sensor_t* FootCoP;                          //!< stores the foot centre of pressure as [lx, ly, rx, ry, x, y]
-    sensor_t* FootForce;                        //!< stores the force on each of the feet in Newtons  as [l, r, both]
-    sensor_t* FootContact;                      //!< stores whether each foot has contact with something (presumably the ground)
-    sensor_t* FootSupport;                      //!< stores the whether each foot is supporting the robot as [l, r, both]
-    sensor_t* FootImpact;                       //!< detects the time at which each foot last impacted with the ground
-    
-    // Buttons Sensors:
-    sensor_t* ButtonValues;                     //!< stores the button values; 0 for unpressed, 1 for pressed
-    sensor_t* ButtonTriggers;                   //!< stores the time since that last edge trigger for the button.
-
-    // Battery Sensors:
-    sensor_t* BatteryValues;                    //!< stores the battery values in Volts, Amperes and Watts
-    
-    // Motion Sensors:
-    sensor_t* MotionFallActive;                 //!< stores whether the fall protection is currently active
-    sensor_t* MotionGetupActive;                //!< stores whether the getup is currently active
-    sensor_t* MotionKickActive;                 //!< stores whether the kick is currently active
-    sensor_t* MotionSaveActive;                 //!< stores whether the save is currently active
-    sensor_t* MotionScriptActive;               //!< stores whether the script engine is active
-    sensor_t* MotionWalkSpeed;                  //!< stores the current speeds [cm/s cm/s rad/s] of the walk engine
-    sensor_t* MotionWalkMaxSpeed;               //!< stores the current maximum speeds of the walk engine
-    sensor_t* MotionHeadCompletionTime;         //!< stores the completion time of the last head movement
-    
-    // GPS Sensors
-    sensor_t* GPS;                              //!< stores the gps position of the robot
-    sensor_t* Compass;                          //!< stores the bearing of the robot
     
 private:
     static vector<id_t*> m_ids;					//!< a vector containing all of the actionator ids
-    vector<sensor_t*> m_sensors;                //!< a vector of all of the sensors
-    vector<id_t> m_head_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each head joint
-    vector<id_t> m_larm_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each left arm joint
-    vector<id_t> m_rarm_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each right arm joint
-    vector<id_t> m_torso_ids;             //!< a vector of id_t (index into sensor_t Joint*->Data) for each torso joint
-    vector<id_t> m_lleg_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each left leg joint
-    vector<id_t> m_rleg_ids;              //!< a vector of id_t (index into sensor_t Joint*->Data) for each right leg joint
-    vector<id_t> m_body_ids;
-    vector<id_t> m_all_joint_ids;
-    vector<string> m_joint_names;
-    int m_num_head_joints;
-    int m_num_arm_joints;
-    int m_num_torso_joints;
-    int m_num_leg_joints;
-    int m_num_body_joints;
-    int m_num_joints;
+    vector<Sensor> m_sensors;                //!< a vector of all of the sensors
 };  
 
 #endif

@@ -100,25 +100,17 @@ public:
 
 private:
     bool belongsToGroup(const id_t& member, const id_t& group);
+    vector<int>& mapIdToIndices(const id_t& id);
     
     // debug tools
     void printMap(ostream& output);
     void printData(ostream& output);
 private:
     static vector<id_t*> m_ids;								   //!< a vector containing ALL of the actionator ids (even the ones which aren't available)
-    vector<Actionator> m_actionators;                          //!< a vector containing EVERY Actionator (even the ones which aren't avaiable)
     vector<vector<int> > m_id_to_indices;                      //!< a member to map id_t's to indices in m_actionators for each actionator in the id_t group 
-    vector<int> m_available_actionators;                       //!< a vector containing indicies for every available actionator
+    vector<Actionator> m_actionators;                          //!< a vector containing ALL actionators (even the ones which aren't available)
+    vector<int> m_available_actionators;                       //!< a vector containing the index into m_actionators of every available actionator
 };
-
-ostream& operator<<(ostream& output, const vector<float>& v);
-ostream& operator<<(ostream& output, const vector<vector<float> >& v);
-ostream& operator<<(ostream& output, const vector<vector<vector<float> > >& v);
-ostream& operator<<(ostream& output, const vector<vector<vector<vector<float> > > >& v);
-ostream& operator<<(ostream& output, const vector<double>& v);
-ostream& operator<<(ostream& output, const vector<vector<double> >& v);
-ostream& operator<<(ostream& output, const vector<string>& v);
-istream& operator>>(istream& output, vector<float>& v);
 
 #endif
 

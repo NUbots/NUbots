@@ -24,6 +24,8 @@
 
 #include <sstream>
 
+#include "Tools/Math/StlVector.h"
+
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
@@ -55,10 +57,10 @@ NUActionatorsData::NUActionatorsData()
     CurrentTime = 0;
     
     m_ids.insert(m_ids.begin(), NUData::Ids.begin(), NUData::Ids.end());
+    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
     
     for (size_t i=0; i<m_ids.size(); i++)
         m_actionators.push_back(Actionator(m_ids[i]->Name));
-    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
 }
 
 /*! @brief Destroys the NUActionatorsData storage class
@@ -77,13 +79,14 @@ void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
 {
     vector<string> names = standardiseNames(hardwarenames);
     for (size_t i=0; i<names.size(); i++)
-    {	// for each name compare it to the name of that actionator
+    {	// for each name compare it to the name of every id
         for (size_t j=0; j<m_ids.size(); j++)
         {
-            if (*(m_ids[j]) == names[i])
-            {
-                m_id_to_indices[j].push_back(j);
-                m_available_actionators.push_back(j);
+            id_t& id = *(m_ids[j]);
+            if (id == names[i])
+            {   // if the name matches the id, then add the actionator to m_available_actionators and update the map
+                m_available_actionators.push_back(id.Id);
+                m_id_to_indices[id.Id].push_back(id.Id);
             }
         }
     }
@@ -175,6 +178,15 @@ size_t NUActionatorsData::getSize(const id_t& actionatorid)
 /******************************************************************************************************************************************
  Set Methods
  ******************************************************************************************************************************************/
+
+/*! @brief Returns a list of indices into m_actionators so that the actionators under id can be accessed
+    @param id the id of the actionator(s) to get the indicies for
+ */
+vector<int>& NUActionatorsData::mapIdToIndices(const id_t& id)
+{
+    return m_id_to_indices[id.Id];
+}
+
 /*! @brief Adds a single [time, data] point to the actionatorid
     @param actionatorid the id of the actionator to add the data
     @param time the time in ms associated with the data
@@ -185,7 +197,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, float data)
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     for (size_t i=0; i<ids.size(); i++)
         m_actionators[ids[i]].add(time, data);
 }
@@ -224,7 +236,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -260,7 +272,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -293,7 +305,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -330,7 +342,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << ",...)" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -369,7 +381,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << ",...)" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -402,7 +414,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const string&
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     for (size_t i=0; i<ids.size(); i++)
         m_actionators[ids[i]].add(time, data);
 }
@@ -424,7 +436,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
 
     if (numids == 0)
@@ -477,7 +489,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -524,7 +536,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -573,7 +585,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -631,7 +643,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -690,7 +702,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -742,7 +754,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -783,7 +795,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -819,7 +831,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -855,7 +867,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -891,7 +903,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -926,7 +938,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -961,7 +973,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  */
 void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data)
 {
-    vector<int>& ids = m_id_to_indices[actionatorid.Id];
+    vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -1025,119 +1037,6 @@ ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
 istream& operator>> (istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
-    return input;
-}
-
-ostream& operator<<(ostream& output, const vector<float>& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<vector<float> >& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<vector<vector<float> > >& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<vector<vector<vector<float> > > >& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<double>& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<vector<double> >& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<string>& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-istream& operator>>(istream& input, vector<float>& v)
-{
-    string wholevector;
-    // get all of the data between [ ... ]
-    input.ignore(128, '[');
-    getline(input, wholevector, ']');
-    
-    v.clear();
-    stringstream ss(wholevector);
-    float floatBuffer;
-    
-    // now split the data based on the commas
-    while (not ss.eof())
-    {
-        ss >> floatBuffer;
-        ss.ignore(128, ',');
-        v.push_back(floatBuffer);
-    }
-    
     return input;
 }
 
