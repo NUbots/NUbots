@@ -212,19 +212,21 @@ void NBWalk::setGait()
     m_gait->zmp[1] = parameters[2].get();           // zmp static fraction
     m_gait->zmp[2] = 10*parameters[3].get();        // zmp offset
     m_gait->zmp[3] = 10*parameters[3].get();        // zmp offset
-    m_gait->zmp[4] = 10*parameters[4].get();        // zmp offset strafe
-    m_gait->zmp[5] = 10*parameters[5].get();        // zmp offset turn
-    m_gait->step[1] = parameters[6].get();          // double support time
-    m_gait->hack[0] = parameters[7].get();          // hip roll hack
-    m_gait->hack[1] = parameters[7].get();          // hip roll hack
-    m_gait->step[3] = parameters[8].get();          // foot lift angle
-    m_gait->stance[3] = parameters[9].get();        // forward lean
-    m_gait->stance[0] = 10*parameters[10].get();     // torso height
+    m_gait->sensor[1] = parameters[4].get();        // sensor angle x gamma
+    m_gait->sensor[2] = parameters[5].get();        // sensor angle y gamma
+    m_gait->sensor[3] = parameters[6].get();        // sensor x spring constant
+    m_gait->sensor[4] = parameters[7].get();        // sensor y spring constant
+    m_gait->step[1] = parameters[8].get();          // double support time
+    m_gait->hack[0] = parameters[9].get();          // hip roll hack
+    m_gait->hack[1] = parameters[9].get();          // hip roll hack
+    m_gait->step[3] = parameters[10].get();          // foot lift angle
+    m_gait->stance[3] = parameters[11].get();        // forward lean
+    m_gait->stance[0] = 10*parameters[12].get();     // torso height
     
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];
     m_gait->step[5] = -10*maxspeeds[0];
-    m_gait->step[6] = 20*maxspeeds[1];
+    m_gait->step[6] = 10*maxspeeds[1];
     m_gait->step[7] = 2*maxspeeds[2];
     
     vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
