@@ -81,35 +81,32 @@ const NUSensorsData::id_t NUSensorsData::MotionHeadCompletionTime(s_curr_id++, "
  */
 NUSensorsData::NUSensorsData()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
+#if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
     
     CurrentTime = 0;
-    m_ids.insert(m_ids.begin(), NUData::Ids.begin(), NUData::Ids.end());
+    
+    m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+    m_ids_copy = m_ids;
+    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
+
+    for (size_t i=0; i<m_ids.size(); i++)
+        m_sensors.push_back(Sensor(m_ids[i]->Name));
 }
 
 NUSensorsData::~NUSensorsData()
 {
-    #if DEBUG_NUSENSORS_VERBOSITY > 4
+    #if DEBUG_NUSENSORS_VERBOSITY > 0
         debug << "NUSensorsData::~NUSensorsData" << endl;
     #endif
 }
 
 void NUSensorsData::addSensors(const vector<string>& hardwarenames)
 {
-    vector<string> names = standardiseNames(hardwarenames);
-    for (size_t i=0; i<names.size(); i++)
-    {
-        for (size_t j=0; j<m_ids.size(); j++)
-        {
-            id_t& id = *(m_ids[j]);
-            if (id == names[i])
-            {
-                m_sensors.push_back(Sensor(id.Name));
-            }
-        }
-    }
+    addDevices(hardwarenames);
+    // That call is not going to add most of the sensors that you want, I could make it so that it would, but I don't think I want it to.
+    // I don't think it is really necessary to have this at all.
 }
 
 /******************************************************************************************************************************************

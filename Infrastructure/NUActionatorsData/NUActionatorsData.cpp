@@ -56,7 +56,8 @@ NUActionatorsData::NUActionatorsData()
     #endif
     CurrentTime = 0;
     
-    m_ids.insert(m_ids.begin(), NUData::Ids.begin(), NUData::Ids.end());
+    m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+    m_ids_copy = m_ids;
     m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
     
     for (size_t i=0; i<m_ids.size(); i++)
@@ -77,33 +78,7 @@ NUActionatorsData::~NUActionatorsData()
  */
 void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
 {
-    vector<string> names = standardiseNames(hardwarenames);
-    for (size_t i=0; i<names.size(); i++)
-    {	// for each name compare it to the name of every id
-        for (size_t j=0; j<m_ids.size(); j++)
-        {
-            id_t& id = *(m_ids[j]);
-            if (id == names[i])
-            {   // if the name matches the id, then add the actionator to m_available_actionators and update the map
-                m_available_actionators.push_back(id.Id);
-                m_id_to_indices[id.Id].push_back(id.Id);
-            }
-        }
-    }
-    
-    for (size_t i=0; i<m_ids.size(); i++)
-    {	// fill in the groups
-        for (size_t j=0; j<m_ids.size(); j++)
-        {
-            if (not m_id_to_indices[j].empty() and belongsToGroup(*m_ids[j], *m_ids[i]))
-                m_id_to_indices[i].push_back(j);
-        }
-    }
-    
-    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUActionatorsData::addActionators:" << endl;
-        printMap(debug);
-    #endif
+    addDevices(hardwarenames);
 }
 
 /*! @brief Returns true if member belongs to group (this function extends the NUData::belongsToGroup)
@@ -152,8 +127,8 @@ bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
 void NUActionatorsData::preProcess(double currenttime)
 {
     CurrentTime = currenttime;
-    for (size_t i=0; i<m_available_actionators.size(); i++)
-        m_actionators[m_available_actionators[i]].preProcess();
+    for (size_t i=0; i<m_available_ids.size(); i++)
+        m_actionators[m_available_ids[i]].preProcess();
 }
 
 /*! @brief Post processes the data after sending it to the hardware communications (Remove all of the completed actionator points)
@@ -161,8 +136,8 @@ void NUActionatorsData::preProcess(double currenttime)
  */
 void NUActionatorsData::postProcess()
 {
-    for (size_t i=0; i<m_available_actionators.size(); i++)
-        m_actionators[m_available_actionators[i]].postProcess(CurrentTime);
+    for (size_t i=0; i<m_available_ids.size(); i++)
+        m_actionators[m_available_ids[i]].postProcess(CurrentTime);
 }
 
 vector<int>& NUActionatorsData::getIndices(const id_t& actionatorid)
@@ -178,14 +153,6 @@ size_t NUActionatorsData::getSize(const id_t& actionatorid)
 /******************************************************************************************************************************************
  Set Methods
  ******************************************************************************************************************************************/
-
-/*! @brief Returns a list of indices into m_actionators so that the actionators under id can be accessed
-    @param id the id of the actionator(s) to get the indicies for
- */
-vector<int>& NUActionatorsData::mapIdToIndices(const id_t& id)
-{
-    return m_id_to_indices[id.Id];
-}
 
 /*! @brief Adds a single [time, data] point to the actionatorid
     @param actionatorid the id of the actionator to add the data
@@ -1001,31 +968,10 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  Displaying Contents and Serialisation
  ******************************************************************************************************************************************/
 
-void NUActionatorsData::printMap(ostream& output)
-{
-    for (size_t j=0; j<m_id_to_indices.size(); j++)
-    {
-        output << m_ids[j]->Name << "->[";
-        for (size_t k=0; k<m_id_to_indices[j].size(); k++)
-            output << m_ids[m_id_to_indices[j][k]]->Name << " ";
-        output << "]" << endl;
-    }
-}
-
-void NUActionatorsData::printData(ostream& output)
-{
-    for (unsigned int i=0; i<m_available_actionators.size(); i++)
-        m_actionators[m_available_actionators[i]].summaryTo(output);
-}
-
 void NUActionatorsData::summaryTo(ostream& output)
 {
-    printData(output);
-}
-
-void NUActionatorsData::csvTo(ostream& output)
-{
-    //! @todo TODO: implement this function    
+    for (unsigned int i=0; i<m_available_ids.size(); i++)
+        m_actionators[m_available_ids[i]].summaryTo(output);
 }
 
 ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)

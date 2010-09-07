@@ -71,8 +71,9 @@ public:
     const static id_t Torso;
     const static id_t LLeg;
     const static id_t RLeg;
+    const static id_t NumCommonGroupIds;                //!< internal use only
     
-    // define const static members that are both sensors and actionators
+    // define const static ids for the joints which are both sensors and actionators
     const static id_t HeadRoll;
     const static id_t HeadPitch;
     const static id_t HeadYaw;
@@ -108,16 +109,31 @@ public:
     const static id_t RKneePitch;
     const static id_t RAnkleRoll;
     const static id_t RAnklePitch;
-    const static id_t NumCommonIds;
+    const static id_t NumJointIds;                      //!< internal use only
+    
+    // define const static ids for devices that are both sensors and actionators
+    const static id_t NumCommonIds;                     //!< internal use only
     
     double CurrentTime;    
     
 protected:
-    static vector<id_t*> Ids;
-    vector<string> standardiseNames(const vector<string>& hardwarenames);
+    static vector<id_t*> m_common_ids;
+    vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
+    vector<vector<int> > m_id_to_indices;
+    vector<int> m_available_ids;
+    
+protected:
+    void addDevices(const vector<string>& hardwarenames);
+    
     virtual bool belongsToGroup(const id_t& member, const id_t& group);
+    
+    vector<int>& mapIdToIndices(const id_t& id);
+    
+    // debug tools
+    void printMap(ostream& output);
 private:
     string getStandardName(const string& hardwarename);
+    vector<string> standardiseNames(const vector<string>& hardwarenames);
 };
 
 #endif

@@ -227,7 +227,7 @@ public:
     double GetTimestamp() const {return CurrentTime;};
 public:
     double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
-    
+
 private:
     static vector<id_t*> m_ids;					//!< a vector containing all of the actionator ids
     vector<Sensor> m_sensors;                //!< a vector of all of the sensors

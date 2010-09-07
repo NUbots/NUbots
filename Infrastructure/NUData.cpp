@@ -21,57 +21,101 @@
 */
 
 #include "NUData.h"
+#include <algorithm>
 #include <cctype>
 
 #include "debug.h"
+#include "debugverbositynuactionators.h"
+#include "debugverbositynusensors.h"
 
 int curr_id = 0;
-vector<NUData::id_t*> NUData::Ids;
-const NUData::id_t NUData::All(curr_id++, "All", NUData::Ids);
-const NUData::id_t NUData::Head(curr_id++, "Head", NUData::Ids);
-const NUData::id_t NUData::Body(curr_id++, "Body", NUData::Ids);
-const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::Ids);
-const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::Ids);
-const NUData::id_t NUData::Torso(curr_id++, "Torso", NUData::Ids);
-const NUData::id_t NUData::LLeg(curr_id++, "LLeg", NUData::Ids);
-const NUData::id_t NUData::RLeg(curr_id++, "RLeg", NUData::Ids);
+vector<NUData::id_t*> NUData::m_common_ids;
+const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);
+const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);
+const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);
+const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);
+const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);
+const NUData::id_t NUData::Torso(curr_id++, "Torso", NUData::m_common_ids);
+const NUData::id_t NUData::LLeg(curr_id++, "LLeg", NUData::m_common_ids);
+const NUData::id_t NUData::RLeg(curr_id++, "RLeg", NUData::m_common_ids);
+const NUData::id_t NUData::NumCommonGroupIds(curr_id++, "NumCommonGroupIds", NUData::m_common_ids);
 
-const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::Ids);
-const NUData::id_t NUData::HeadPitch(curr_id++, "HeadPitch", NUData::Ids);
-const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::Ids);
-const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::Ids);
-const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::Ids);
-const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::Ids);
-const NUData::id_t NUData::LShoulderRoll(curr_id++, "LShoulderRoll", NUData::Ids);
-const NUData::id_t NUData::LShoulderPitch(curr_id++, "LShoulderPitch", NUData::Ids);
-const NUData::id_t NUData::LShoulderYaw(curr_id++, "LShoulderYaw", NUData::Ids);
-const NUData::id_t NUData::LElbowRoll(curr_id++, "LElbowRoll", NUData::Ids);
-const NUData::id_t NUData::LElbowPitch(curr_id++, "LElbowPitch", NUData::Ids);
-const NUData::id_t NUData::LElbowYaw(curr_id++, "LElbowYaw", NUData::Ids);
-const NUData::id_t NUData::RShoulderRoll(curr_id++, "RShoulderRoll", NUData::Ids);
-const NUData::id_t NUData::RShoulderPitch(curr_id++, "RShoulderPitch", NUData::Ids);
-const NUData::id_t NUData::RShoulderYaw(curr_id++, "RShoulderYaw", NUData::Ids);
-const NUData::id_t NUData::RElbowRoll(curr_id++, "RElbowRoll", NUData::Ids);
-const NUData::id_t NUData::RElbowPitch(curr_id++, "RElbowPitch", NUData::Ids);
-const NUData::id_t NUData::RElbowYaw(curr_id++, "RElbowYaw", NUData::Ids);
-const NUData::id_t NUData::TorsoRoll(curr_id++, "TorsoRoll", NUData::Ids);
-const NUData::id_t NUData::TorsoPitch(curr_id++, "TorsoPitch", NUData::Ids);
-const NUData::id_t NUData::TorsoYaw(curr_id++, "TorsoYaw", NUData::Ids);
-const NUData::id_t NUData::LHipRoll(curr_id++, "LHipRoll", NUData::Ids);
-const NUData::id_t NUData::LHipPitch(curr_id++, "LHipPitch", NUData::Ids);
-const NUData::id_t NUData::LHipYaw(curr_id++, "LHipYaw", NUData::Ids);
-const NUData::id_t NUData::LHipYawPitch(curr_id++, "LHipYawPitch", NUData::Ids);
-const NUData::id_t NUData::LKneePitch(curr_id++, "LKneePitch", NUData::Ids);
-const NUData::id_t NUData::LAnkleRoll(curr_id++, "LAnkleRoll", NUData::Ids);
-const NUData::id_t NUData::LAnklePitch(curr_id++, "LAnklePitch", NUData::Ids);
-const NUData::id_t NUData::RHipRoll(curr_id++, "RHipRoll", NUData::Ids);
-const NUData::id_t NUData::RHipPitch(curr_id++, "RHipPitch", NUData::Ids);
-const NUData::id_t NUData::RHipYaw(curr_id++, "RHipYaw", NUData::Ids);
-const NUData::id_t NUData::RHipYawPitch(curr_id++, "RHipYawPitch", NUData::Ids);
-const NUData::id_t NUData::RKneePitch(curr_id++, "RKneePitch", NUData::Ids);
-const NUData::id_t NUData::RAnkleRoll(curr_id++, "RAnkleRoll", NUData::Ids);
-const NUData::id_t NUData::RAnklePitch(curr_id++, "RAnklePitch", NUData::Ids);
-const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds", NUData::Ids);
+const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::m_common_ids);
+const NUData::id_t NUData::HeadPitch(curr_id++, "HeadPitch", NUData::m_common_ids);
+const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::m_common_ids);
+const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::m_common_ids);
+const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::m_common_ids);
+const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::m_common_ids);
+const NUData::id_t NUData::LShoulderRoll(curr_id++, "LShoulderRoll", NUData::m_common_ids);
+const NUData::id_t NUData::LShoulderPitch(curr_id++, "LShoulderPitch", NUData::m_common_ids);
+const NUData::id_t NUData::LShoulderYaw(curr_id++, "LShoulderYaw", NUData::m_common_ids);
+const NUData::id_t NUData::LElbowRoll(curr_id++, "LElbowRoll", NUData::m_common_ids);
+const NUData::id_t NUData::LElbowPitch(curr_id++, "LElbowPitch", NUData::m_common_ids);
+const NUData::id_t NUData::LElbowYaw(curr_id++, "LElbowYaw", NUData::m_common_ids);
+const NUData::id_t NUData::RShoulderRoll(curr_id++, "RShoulderRoll", NUData::m_common_ids);
+const NUData::id_t NUData::RShoulderPitch(curr_id++, "RShoulderPitch", NUData::m_common_ids);
+const NUData::id_t NUData::RShoulderYaw(curr_id++, "RShoulderYaw", NUData::m_common_ids);
+const NUData::id_t NUData::RElbowRoll(curr_id++, "RElbowRoll", NUData::m_common_ids);
+const NUData::id_t NUData::RElbowPitch(curr_id++, "RElbowPitch", NUData::m_common_ids);
+const NUData::id_t NUData::RElbowYaw(curr_id++, "RElbowYaw", NUData::m_common_ids);
+const NUData::id_t NUData::TorsoRoll(curr_id++, "TorsoRoll", NUData::m_common_ids);
+const NUData::id_t NUData::TorsoPitch(curr_id++, "TorsoPitch", NUData::m_common_ids);
+const NUData::id_t NUData::TorsoYaw(curr_id++, "TorsoYaw", NUData::m_common_ids);
+const NUData::id_t NUData::LHipRoll(curr_id++, "LHipRoll", NUData::m_common_ids);
+const NUData::id_t NUData::LHipPitch(curr_id++, "LHipPitch", NUData::m_common_ids);
+const NUData::id_t NUData::LHipYaw(curr_id++, "LHipYaw", NUData::m_common_ids);
+const NUData::id_t NUData::LHipYawPitch(curr_id++, "LHipYawPitch", NUData::m_common_ids);
+const NUData::id_t NUData::LKneePitch(curr_id++, "LKneePitch", NUData::m_common_ids);
+const NUData::id_t NUData::LAnkleRoll(curr_id++, "LAnkleRoll", NUData::m_common_ids);
+const NUData::id_t NUData::LAnklePitch(curr_id++, "LAnklePitch", NUData::m_common_ids);
+const NUData::id_t NUData::RHipRoll(curr_id++, "RHipRoll", NUData::m_common_ids);
+const NUData::id_t NUData::RHipPitch(curr_id++, "RHipPitch", NUData::m_common_ids);
+const NUData::id_t NUData::RHipYaw(curr_id++, "RHipYaw", NUData::m_common_ids);
+const NUData::id_t NUData::RHipYawPitch(curr_id++, "RHipYawPitch", NUData::m_common_ids);
+const NUData::id_t NUData::RKneePitch(curr_id++, "RKneePitch", NUData::m_common_ids);
+const NUData::id_t NUData::RAnkleRoll(curr_id++, "RAnkleRoll", NUData::m_common_ids);
+const NUData::id_t NUData::RAnklePitch(curr_id++, "RAnklePitch", NUData::m_common_ids);
+const NUData::id_t NUData::NumJointIds(curr_id++, "NumJointIds", NUData::m_common_ids);
+
+const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds", NUData::m_common_ids);
+
+
+void NUData::addDevices(const vector<string>& hardwarenames)
+{
+    vector<string> names = standardiseNames(hardwarenames);
+    vector<id_t*>& ids = m_ids_copy;
+    for (size_t i=0; i<names.size(); i++)
+    {	// for each name compare it to the name of every id
+        for (size_t j=0; j<ids.size(); j++)
+        {
+            id_t& id = *(ids[j]);
+            if (id == names[i])
+            {   // if the name matches the id, then add the actionator to m_available_ids and update the map
+                if (find(m_available_ids.begin(), m_available_ids.end(), id.Id) == m_available_ids.end())
+                    m_available_ids.push_back(id.Id);
+                if (find(m_id_to_indices[id.Id].begin(), m_id_to_indices[id.Id].end(), id.Id) == m_id_to_indices[id.Id].end())
+                    m_id_to_indices[id.Id].push_back(id.Id);
+            }
+        }
+    }
+    
+    for (size_t i=0; i<ids.size(); i++)
+    {	// fill in the groups
+        for (size_t j=0; j<ids.size(); j++)
+        {
+            if (not m_id_to_indices[j].empty() and belongsToGroup(*ids[j], *ids[i]))
+            {
+                if (find(m_id_to_indices[i].begin(), m_id_to_indices[i].end(), j) == m_id_to_indices[i].end())
+                    m_id_to_indices[i].push_back(j);
+            }
+        }
+    }
+    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0 or DEBUG_NUSENSORS_VERBOSITY > 0
+        debug << "NUData::addDevices:" << endl;
+        printMap(debug);
+    #endif
+}
 
 /*! @brief Returns a vector containing the standardised versions of the vector containing hardware names 
     @param hardwarenames a list of hardwarenames
@@ -177,8 +221,8 @@ bool NUData::belongsToGroup(const id_t& member, const id_t& group)
 {
     if (group == All)
     {
-        for (size_t i=RLeg.Id+1; i<Ids.size()-1; i++)
-            if (member == *Ids[i])
+        for (size_t i=RLeg.Id+1; i<m_common_ids.size()-1; i++)
+            if (member == *m_common_ids[i])
                 return true;
         return false;
     }
@@ -226,5 +270,24 @@ bool NUData::belongsToGroup(const id_t& member, const id_t& group)
     }
     else
         return false;
+}
+
+/*! @brief Returns a list of indices into m_sensors/m_actionators so that the sensors/actionators under id can be accessed
+    @param id the id of the sensor/actionator(s) to get the indicies for
+ */
+vector<int>& NUData::mapIdToIndices(const id_t& id)
+{
+    return m_id_to_indices[id.Id];
+}
+
+void NUData::printMap(ostream& output)
+{
+    for (size_t j=0; j<m_id_to_indices.size(); j++)
+    {
+        output << m_ids_copy[j]->Name << "->[";
+        for (size_t k=0; k<m_id_to_indices[j].size(); k++)
+            output << m_ids_copy[m_id_to_indices[j][k]]->Name << " ";
+        output << "]" << endl;
+    }
 }
 
