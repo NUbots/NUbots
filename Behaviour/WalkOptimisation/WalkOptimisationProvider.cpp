@@ -42,12 +42,24 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
         debug << "WalkOptimisationProvider::WalkOptimisationProvider" << endl;
     #endif
+    fstream id_file((DATA_DIR + "/Optimisation/Count.txt").c_str());
+    stringstream id;
+    if (id_file.is_open())
+    {
+        int instance_id = 0;
+        id_file >> instance_id;
+        instance_id++;
+        id_file.seekp(0);
+        id_file << instance_id;
+        id << instance_id;
+        id_file.close();
+    } 
     
     m_parameters.load("NBWalkStart");
-    //m_optimiser = new EHCLSOptimiser("EHCLS", m_parameters.getAsParameters());
+    m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", m_parameters.getAsParameters());
     //m_optimiser = new PGRLOptimiser("PGRL", m_parameters.getAsParameters());    
-    m_optimiser = new PSOOptimiser("PSO", m_parameters.getAsParameters());
-    m_log.open((DATA_DIR + "/Optimisation/Log.log").c_str());
+    //m_optimiser = new PSOOptimiser("PSO", m_parameters.getAsParameters());
+    m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())
@@ -60,6 +72,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         #if DEBUG_BEHAVIOUR_VERBOSITY > 0
             debug << "WalkOptimisationProvider::m_stability_points " << MotionFileTools::fromMatrix(m_stability_points) << endl;
         #endif
+        points_file.close();
     }
     else
         errorlog << "WalkOptimisationProvider::WalkOptimsationProvider. Unable to load WalkPoints.cfg" << endl;
@@ -173,7 +186,7 @@ float WalkOptimisationProvider::calculateFitness()
         fitness = 1000*calculatePathDistance()/m_duration;
     }
     
-    m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl;
+    m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl << flush;
     
     return fitness;
 }

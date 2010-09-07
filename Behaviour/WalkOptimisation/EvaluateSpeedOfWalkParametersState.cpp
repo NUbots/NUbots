@@ -179,7 +179,7 @@ vector<float> EvaluateSpeedOfWalkParametersState::getStartPoint()
 bool EvaluateSpeedOfWalkParametersState::pointReached()
 {
     vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
-    if (difference[0] < 10)
+    if (difference[0] < 10 and fabs(difference[2]) < 0.2)
         return true;
     else
         return false;
