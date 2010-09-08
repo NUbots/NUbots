@@ -45,6 +45,8 @@ public:
     void setSpeed(float speed);
     void setEnergy(float energy);
     void setStability(float stability);
+    
+    float stoppingDistance();
 protected:
     BehaviourState* nextStateCommons();
 public:

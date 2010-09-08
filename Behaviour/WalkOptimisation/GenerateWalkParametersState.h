@@ -61,9 +61,11 @@ public:
     
     ~GenerateWalkParametersState() {};
     BehaviourState* nextState()
-    {   // progress to the evaluation state when we are in position AND lined up
+    {   // progress to the evaluation state when we are in position AND lined up AND stopped
         vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_start_state);
-        if (difference[0] < 5 and fabs(difference[2]) < 0.2)
+        vector<float> speed;
+        m_data->getMotionWalkSpeed(speed);
+        if (difference[0] < 5 and fabs(difference[2]) < 0.2 and norm(speed) < 4)
             return m_parent->m_evaluate;
         else
             return this;
@@ -92,7 +94,7 @@ public:
         
         lookAtGoals();
         
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 5, 50, 9000);
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 0, m_parent->stoppingDistance(), 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 private:

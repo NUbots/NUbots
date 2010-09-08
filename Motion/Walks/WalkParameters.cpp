@@ -104,14 +104,13 @@ vector<Parameter> WalkParameters::getAsParameters()
     data.reserve(size());
     
     // Need to hand-code the maximum speeds
-    data.push_back(Parameter("Velocity", m_max_speeds[0], 0, 50));
-    data.push_back(Parameter("Velocity", m_max_speeds[1], 0, 40));
+    data.push_back(Parameter("Velocity", m_max_speeds[0], 0, 70));
+    data.push_back(Parameter("Velocity", m_max_speeds[1], 0, 70));
     data.push_back(Parameter("Velocity", m_max_speeds[2], 0, 2));
-    
-    // Also need to hand-code the maximum accelerations
-    data.push_back(Parameter("Acceleration", m_max_accelerations[0], 0, 50));
-    data.push_back(Parameter("Acceleration", m_max_accelerations[1], 0, 40));
-    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0, 2));
+
+    data.push_back(Parameter("Acceleration", m_max_accelerations[0], 0, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[1], 0, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0, 4));
     
     for (size_t i=0; i<m_parameters.size(); i++)
         data.push_back(m_parameters[i]);

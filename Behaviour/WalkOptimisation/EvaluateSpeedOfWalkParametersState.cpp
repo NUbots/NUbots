@@ -81,7 +81,7 @@ void EvaluateSpeedOfWalkParametersState::doState()
     if (pointReached())
         m_current_target_state = getNextPoint();
     
-    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 9000);
+    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, m_provider->stoppingDistance(), 9000);
     m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
@@ -204,7 +204,9 @@ bool EvaluateSpeedOfWalkParametersState::allPointsReached()
         return false;
     else
     {
-        if (m_current_point_index == m_points.size()-1)
+        vector<float> speed;
+        m_data->getMotionWalkSpeed(speed);
+        if (norm(speed) < 4 and m_current_point_index == m_points.size()-1)
             return true;
         else
             return false;

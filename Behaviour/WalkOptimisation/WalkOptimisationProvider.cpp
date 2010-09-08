@@ -220,3 +220,12 @@ void WalkOptimisationProvider::setStability(float stability)
     m_stability = stability;
 }
 
+/*! @brief Returns the distance required to stop for the current walk parameters */
+float WalkOptimisationProvider::stoppingDistance()
+{
+    vector<float>& speeds = m_parameters.getMaxSpeeds();
+    vector<float>& accels = m_parameters.getMaxAccelerations();
+    return pow(1.1*speeds[0],2)/(2*accels[0]);              // s = u^2/2a with a 10% margin for error
+    
+}
+
