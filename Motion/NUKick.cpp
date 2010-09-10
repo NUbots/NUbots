@@ -728,14 +728,14 @@ bool NUKick::doPreKick()
     bool validData = true;
     vector<float>leftJoints;
     vector<float>rightJoints;
-    validData = validData && m_data->getJointPositions(NUSensorsData::LLeg,leftJoints);
-    validData = validData && m_data->getJointPositions(NUSensorsData::RLeg,rightJoints);
+    validData = validData && m_data->getPosition(NUSensorsData::LLeg,leftJoints);
+    validData = validData && m_data->getPosition(NUSensorsData::RLeg,rightJoints);
     validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
 
     vector<float> leftArmJoints;
     vector<float> rightArmJoints;
-    validData = validData && m_data->getJointPositions(NUSensorsData::LArm,leftArmJoints);
-    validData = validData && m_data->getJointPositions(NUSensorsData::RArm,rightArmJoints);
+    validData = validData && m_data->getPosition(NUSensorsData::LArm,leftArmJoints);
+    validData = validData && m_data->getPosition(NUSensorsData::RArm,rightArmJoints);
 
     if(!m_stateCommandGiven && validData)
     {
@@ -824,8 +824,8 @@ bool NUKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, 
 
     vector<float>leftJoints;
     vector<float>rightJoints;
-    validData = validData && m_data->getJointTargets(NUSensorsData::LLeg,leftJoints);
-    validData = validData && m_data->getJointTargets(NUSensorsData::RLeg,rightJoints);
+    validData = validData && m_data->getTarget(NUSensorsData::LLeg,leftJoints);
+    validData = validData && m_data->getTarget(NUSensorsData::RLeg,rightJoints);
     validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
 
     if(validData)
@@ -901,8 +901,8 @@ bool NUKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeight
 
     vector<float>targetLegPositions;
     vector<float>otherLegPositions;
-    validData = validData && m_data->getJointPositions(targetLeg, targetLegPositions);
-    validData = validData && m_data->getJointPositions(otherLeg, otherLegPositions);
+    validData = validData && m_data->getPosition(targetLeg, targetLegPositions);
+    validData = validData && m_data->getPosition(otherLeg, otherLegPositions);
 
     validData = validData && (targetLegPositions.size() >= 6) && (otherLegPositions.size() >= 6);
 
@@ -990,9 +990,9 @@ bool NUKick::LiftKickingLeg(legId_t p_kickingLeg, float speed)
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
     vector<float>supportLegPositions;
-    validData = validData && m_data->getJointTargets(kickingLeg,kickLegJoints);
-    validData = validData && m_data->getJointPositions(kickingLeg,kickLegPositions);
-    validData = validData && m_data->getJointPositions(supportLeg,supportLegPositions);
+    validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
+    validData = validData && m_data->getPosition(supportLeg,supportLegPositions);
 
     validData = validData && (kickLegJoints.size() >= 6);
     static vector<float>kickLegTargets;
@@ -1037,8 +1037,8 @@ bool NUKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
 
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
-    validData = validData && m_data->getJointTargets(kickingLeg,kickLegJoints);
-    validData = validData && m_data->getJointPositions(kickingLeg,kickLegPositions);
+    validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
     validData = validData && (kickLegJoints.size() >= 6) && (kickLegPositions.size() >= 6);
 
     static vector<float>kickLegTargets;
@@ -1135,7 +1135,7 @@ bool NUKick::BalanceCoP(legId_t p_supportLeg, float targetX, float targetY)
     if(validData && supportFootContact)
     {
         vector<float>supportLegJoints;
-        validData = validData && m_data->getJointTargets(supportLeg,supportLegJoints);
+        validData = validData && m_data->getTarget(supportLeg,supportLegJoints);
         validData = validData && (supportLegJoints.size() >= 6);
         float copx(0.0f),copy(0.0f);
         float force(0.0f);
@@ -1263,8 +1263,8 @@ bool NUKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
 
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
-    validData = validData && m_data->getJointTargets(kickingLeg,kickLegJoints);
-    validData = validData && m_data->getJointPositions(kickingLeg,kickLegPositions);
+    validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
     validData = validData && (kickLegJoints.size() >= 6);
     vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
     float deltaX = xPos - footPosition[0];
@@ -1321,8 +1321,8 @@ bool NUKick::AlignYposition(legId_t p_kickingLeg, float speed, float yPos)
 
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
-    validData = validData && m_data->getJointTargets(kickingLeg,kickLegJoints);
-    validData = validData && m_data->getJointPositions(kickingLeg,kickLegPositions);
+    validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
     validData = validData && (kickLegJoints.size() >= 6);
     vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
     float deltaY = yPos - footPosition[1];
@@ -1387,8 +1387,8 @@ void NUKick::MoveArmsToKickPose(legId_t leadingArmleg, float speed)
 
     bool validData = true;
     vector<float> leadingArmPositions,trailingArmPositions;
-    validData = validData && m_data->getJointPositions(leadingArm,leadingArmPositions);
-    validData = validData && m_data->getJointPositions(trailingArm,trailingArmPositions);
+    validData = validData && m_data->getPosition(leadingArm,leadingArmPositions);
+    validData = validData && m_data->getPosition(trailingArm,trailingArmPositions);
 
     if(validData)
     {
@@ -1444,7 +1444,7 @@ bool NUKick::SwingLegForward(legId_t p_kickingLeg, float speed)
     if(!validData) return false;
 
     vector<float>kickingLegJoints;
-    validData = validData && m_data->getJointPositions(kickingLeg,kickingLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickingLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
     const float targetHipPitch = -1.0;
@@ -1518,8 +1518,8 @@ bool NUKick::SwingLegSideward(legId_t p_kickingLeg, float speed)
     if(!validData) return false;
 
     vector<float>kickingLegJoints, supportLegJoints;
-    validData = validData && m_data->getJointPositions(kickingLeg,kickingLegJoints);
-    validData = validData && m_data->getJointPositions(supportLeg,supportLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickingLegJoints);
+    validData = validData && m_data->getPosition(supportLeg,supportLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
     static vector<float> swingTargets;
@@ -1574,9 +1574,9 @@ bool NUKick::LowerLeg(legId_t p_kickingLeg, float speed)
     vector<float>kickLegJoints;
     vector<float>kickLegPositions;
     vector<float>supportLegPositions;
-    validData = validData && m_data->getJointTargets(kickingLeg,kickLegJoints);
-    validData = validData && m_data->getJointPositions(kickingLeg,kickLegPositions);
-    validData = validData && m_data->getJointTargets(supportLeg,supportLegPositions);
+    validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
+    validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
+    validData = validData && m_data->getTarget(supportLeg,supportLegPositions);
 
     validData = validData && (kickLegJoints.size() >= 6);
 

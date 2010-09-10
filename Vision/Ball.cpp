@@ -240,7 +240,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
         }
 
         float headElevation = 0.0;
-        vision->getSensorsData()->getJointPosition(NUSensorsData::HeadPitch,headElevation);
+        vision->getSensorsData()->getPosition(NUSensorsData::HeadPitch,headElevation);
 
         if(!(tempSegement->getEndPoint().y >= height-buffer || tempSegement->getEndPoint().x >= width-buffer) &&  headElevation < 0.3)
         {

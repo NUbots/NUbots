@@ -31,6 +31,8 @@ class NAOWebotsPlatform : public NUPlatform, public webots::JRobot
 public:
     NAOWebotsPlatform(int argc, const char *argv[]);
     ~NAOWebotsPlatform();
+    
+    double getTime();
 protected:
     void initName();
     void initNumber();

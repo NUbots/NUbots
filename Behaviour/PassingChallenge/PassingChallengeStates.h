@@ -148,7 +148,7 @@ protected:
             m_jobs->addMotionJob(new HeadPanJob(ball));
         
         bool iskicking;
-        m_data->getMotionKickActive(iskicking);
+        m_data->get(NUSensorsData::MotionKickActive, iskicking);
         float bearing_to_goal;
         if (m_game_info->getPlayerNumber() == 2)
             bearing_to_goal = BehaviourPotentials::getBearingToOwnGoal(m_field_objects, m_game_info);

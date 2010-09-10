@@ -38,35 +38,39 @@ using namespace std;
 class NUSensorsData: public NUData, TimestampedData
 {
 public:
+    // end effector sensors
+    const static id_t LArmEndEffector;                  // internal use only: Compactly stores the Bumper, Force, Contact, Support, Impact and Centre of Pressure of the end effector
+    const static id_t RArmEndEffector;                  // internal use only                  
+    const static id_t LLegEndEffector;                  // internal use only
+    const static id_t RLegEndEffector;                  // internal use only
     // kinematic sensors
-    const static id_t LLegTransform;
-    const static id_t RLegTransform;
-    const static id_t SupportLegTransform;
-    const static id_t CameraTransform;
-    const static id_t CameraToGroundTransform;
+    const static id_t LLegTransform;                    // internal use only
+    const static id_t RLegTransform;                    // internal use only
+    const static id_t SupportLegTransform;              // internal use only
+    const static id_t CameraTransform;                  // internal use only
+    const static id_t CameraToGroundTransform;          // internal use only
     const static id_t CameraHeight;
     const static id_t Odometry;
     // balance sensors
     const static id_t Accelerometer;
-    const static id_t Gyro;
-    const static id_t GyroOffset;
+    const static id_t Gyro;                             // raw gyro readings
+    const static id_t GyroOffset;                       // gyro offset such that the filtered gyro values are gyro - gyro_offset
     const static id_t Orientation;
     const static id_t Horizon;
     const static id_t Zmp;
-    const static id_t Falling;
-    const static id_t Fallen;
-    // foot sensors
-    const static id_t FootBumper;
-    const static id_t FootForce;
-    const static id_t FootContact;
-    const static id_t FootSupport;
-    const static id_t FootImpact;
-    const static id_t FootCoP;
+    const static id_t Falling;                          // Compactly stores Falling, Falling Left, Falling Right, Falling Forward, Falling Backward
+    const static id_t Fallen;                           // Compactly stores Fallen, Fallen Left, Fallen Right, Fallen Forward, Fallen Backward
+    // touch sensors
+    const static id_t LHandTouch;                       // internal use only: Stores raw force readings from hardware array in left hand
+    const static id_t RHandTouch;                       // internal use only: Stores raw force readings from hardware array in right hand
+    const static id_t LFootTouch;                       // internal use only: Stores raw force readings from hardware array in left foot
+    const static id_t RFootTouch;                       // internal use only: Stores raw force readings from hardware array in right foot
     // button sensors
     const static id_t MainButton;
-    const static id_t SecondaryButton;
-    const static id_t AllButton;
-    const static id_t AllButtonTriggers;
+    const static id_t LeftButton;
+    const static id_t RightButton;
+    const static id_t AllButton;                    // TODO: this is exceedingly difficult at the moment because I don't know how to make groups for sensors yet :(
+    const static id_t AllButtonDurations;
     // distance sensors
     const static id_t LDistance;
     const static id_t RDistance;
@@ -86,72 +90,87 @@ public:
     const static id_t MotionWalkSpeed;
     const static id_t MotionWalkMaxSpeed;
     const static id_t MotionHeadCompletionTime;
+    
+    enum JointSensorIndices 
+    {   // indices into the single joint vector
+        PositionId = 0,
+        VelocityId = 1,
+        AccelerationId = 2,
+        TargetId = 3,
+        StiffnessId = 4,
+        CurrentId = 5,
+        TorqueId = 6,
+        TemperatureId = 7,
+        NumJointSensorIndices = 8
+    };
+    enum EndEffectorIndices
+    {   // indices into a single end effector vector
+        Bumper = 0,
+        Force = 1,
+        Contact = 2, 
+        Support = 3, 
+        Impact = 4, 
+        CoP = 5,
+        NumEndEffectorIndices = 6
+    };
 public:
     NUSensorsData();
     ~NUSensorsData();
     
     void addSensors(const vector<string>& hardwarenames);
     
-    // Get methods for a single joint at a time
-    bool getJointPosition(id_t jointid, float& position);
-    bool getJointVelocity(id_t jointid, float& velocity);
-    bool getJointAcceleration(id_t jointid, float& acceleration);
-    bool getJointTarget(id_t jointid, float& target);
-    bool getJointStiffness(id_t jointid, float& stiffness);
-    bool getJointCurrent(id_t jointid, float& current);
-    bool getJointTorque(id_t jointid, float& torque);
-    bool getJointTemperature(id_t jointid, float& temperature);
+    // Get methods for joint information
+    bool getPosition(const id_t id, float& data);
+    bool getPosition(const id_t id, vector<float>& data);
+    bool getVelocity(const id_t id, float& data);
+    bool getVelocity(const id_t id, vector<float>& data);
+    bool getAcceleration(const id_t id, float& data);
+    bool getAcceleration(const id_t id, vector<float>& data);
+    bool getTarget(const id_t id, float& data);
+    bool getTarget(const id_t id, vector<float>& data);
+    bool getStiffness(const id_t id, float& data);
+    bool getStiffness(const id_t id, vector<float>& data);
+    bool getCurrent(const id_t id, float& data);
+    bool getCurrent(const id_t id, vector<float>& data);
+    bool getTorque(const id_t id, float& data);
+    bool getTorque(const id_t id, vector<float>& data);
+    bool getTemperature(const id_t id, float& data);
+    bool getTemperature(const id_t id, vector<float>& data);
+                     
+    bool getEndPosition(const id_t id, vector<float>& data);
+    bool getCameraHeight(float& data);
+    bool getHorizon(vector<float>& data);
+    bool getOdometry(vector<float>& data);
     
-    // Get methods for a limb of joints (the limb can also be body and all)
-    int getNumberOfJoints(id_t partid);
-    bool getJointPositions(id_t bodypart, vector<float>& positions);
-    bool getJointVelocities(id_t bodypart, vector<float>& velocities);
-    bool getJointAccelerations(id_t bodypart, vector<float>& accelerations);
-    bool getJointTargets(id_t bodypart, vector<float>& targets);
-    bool getJointStiffnesses(id_t bodypart, vector<float>& stiffnesses);
-    bool getJointCurrents(id_t bodypart, vector<float>& currents);
-    bool getJointTorques(id_t bodypart, vector<float>& torques);
-    bool getJointTemperatures(id_t bodypart, vector<float>& temperatures);
-    bool getJointNames(id_t bodypart, vector<string>& names);
+    bool getAccelerometer(vector<float>& data);
+    bool getGyro(vector<float>& data);
+    bool getOrientation(vector<float>& data);
+    bool getFalling(vector<float>& data);
+    bool getFallen(vector<float>& data);
     
-    // Get methods for soft proprioception
-    bool getLeftLegTransform(Matrix& value);
-    bool getRightLegTransform(Matrix& value);
-    bool getSupportLegTransform(Matrix& value);
-    bool getCameraTransform(Matrix& value);
-    bool getCameraToGroundTransform(Matrix& value);
+    bool getBumper(const id_t& id, float& data);
+    bool getForce(const id_t& id, float& data);
+    bool getContact(const id_t& id, float& data);
+    bool getSupport(const id_t& id, float& data);
+    bool getImpact(const id_t& id, float& data);
+    bool getZmp(const id_t& id, vector<float>& data);
+    bool getCoP(const id_t& id, vector<float>& data);
+    
+    bool getButton(const id_t& id, float& data);
+    bool getButton(const id_t& id, vector<float>& data);
+    bool getButtonDuration(const id_t& id, float& data);
+    bool getButtonDuration(const id_t& id, vector<float>& data);
+    
+    bool getDistance(const id_t& id, float& data);
+    bool getDistance(const id_t& id, vector<float>& data);
+    
+    bool getGps(vector<float>& data);
+    bool getCompass(vector<float>& data);
+    
+    bool getBatteryVoltage(float& data);
+    bool getBatteryCurrent(float& data);
+    bool getBatteryCharge(float& data);
 
-    bool getOdometry(float& time, vector<float>& values);
-    bool getOdometryData(vector<float>& values);
-    bool getCameraHeight(float& height);
-    
-    // Get methods for the other sensors
-    bool getAccelerometerValues(vector<float>& values);
-    bool getGyroValues(vector<float>& values);
-    bool getGyroOffsetValues(vector<float>& values);
-    bool getGyroFilteredValues(vector<float>& values);
-    bool getOrientation(vector<float>& values);
-    bool getOrientationHardware(vector<float>& values);
-    bool getHorizon(vector<float>& values);
-    bool getButtonTriggers(vector<float>& values);
-    bool getZMP(vector<float>& values);
-    bool getFalling(vector<float>& values);
-    bool getFallen(vector<float>& values);
-    bool getDistanceLeftValues(vector<float>& values);
-    bool getDistanceRightValues(vector<float>& values);
-    bool getBatteryValues(vector<float>& values);
-    bool getGPSValues(vector<float>& values);
-    bool getCompassValues(vector<float>& values);
-    
-    // Get methods for foot pressure sensors
-    bool getFootSoleValues(id_t footid, vector<float>& values);
-    bool getFootBumperValues(id_t footid, vector<float>& values);
-    bool getFootCoP(id_t footid, float& x, float& y);
-    bool getFootForce(id_t footid, float& force);
-    bool getFootContact(id_t footid, bool& contact);
-    bool getFootSupport(id_t footid, bool& support);
-    bool getButtonValues(id_t buttonid, vector<float>& values);
-    
     // Common sub-get methods
     bool isFalling();
     bool isFallen();
@@ -159,63 +178,21 @@ public:
     bool isIncapacitated();
     bool footImpact(id_t footid, float& time);
     
-    // Motion sensor get methods
-    bool getMotionFallActive(bool& active);
-    bool getMotionGetupActive(bool& active);
-    bool getMotionKickActive(bool& active);
-    bool getMotionSaveActive(bool& active);
-    bool getMotionScriptActive(bool& active);
-    bool getMotionWalkSpeed(vector<float>& speed);
-    bool getMotionWalkMaxSpeed(vector<float>& speed);
-    bool getMotionHeadCompletionTime(double& time);
+    // Get Methods (generic) internal use only
+    bool get(const id_t& id, bool& data);
+    bool get(const id_t& id, float& data);
+    bool get(const id_t& id, double& data);
+    bool get(const id_t& id, vector<float>& data);
+    bool get(const id_t& id, vector<vector<float> >& data);
+    bool get(const id_t& id, string& data);
     
-    // Set methods for joints
+    // Set methods
+    void set(const id_t& id, double time, bool data);
     void set(const id_t& id, double time, const float& data);
     void set(const id_t& id, double time, const vector<float>& data);
     void set(const id_t& id, double time, const vector<vector<float> >& data);
     void set(const id_t& id, double time, const string& data);
-    
-    void setVelocity(const id_t& id, double time, const vector<float>& data);
-    void setAcceleration(const id_t& id, double time, const vector<float>& data);
-    void setTarget(const id_t& id, double time, const vector<float>& data);
-    void setStiffness(const id_t& id, double time, const vector<float>& data);
-    void setCurrent(const id_t& id, double time, const vector<float>& data);
-    void setTemperature(const id_t& id, double time, const vector<float>& data);
-    
     void setAsInvalid(const id_t& id);
-    
-    
-    void setJointPositions(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointVelocities(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointAccelerations(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointTargets(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointStiffnesses(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointCurrents(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointTorques(double time, const vector<float>& data, bool iscalculated = false);
-    void setJointTemperatures(double time, const vector<float>& data, bool iscalculated = false);
-    
-    // Set methods for other sensors
-    void setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated = false);
-    void setBalanceGyro(double time, const vector<float>& data, bool iscalculated = false);
-    void setBalanceOrientationHardware(double time, const vector<float>& data, bool iscalculated = false);
-    void setDistanceLeftValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setDistanceRightValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setFootSoleValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setFootBumperValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setButtonValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setBatteryValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setGPSValues(double time, const vector<float>& data, bool iscalculated = false);
-    void setCompassValues(double time, const vector<float>& data, bool iscalculated = false);
-    
-    // Set methods for motion 'sensors'
-    void setMotionFallActive(double time, bool active);
-    void setMotionGetupActive(double time, bool active);
-    void setMotionKickActive(double time, bool active);
-    void setMotionSaveActive(double time, bool active);
-    void setMotionScriptActive(double time, bool active);
-    void setMotionWalkSpeed(double time, vector<float>& speed);
-    void setMotionWalkMaxSpeed(double time, vector<float>& speed);
-    void setMotionHeadCompletionTime(double time, double completiontime);
     
     void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
@@ -225,6 +202,10 @@ public:
     
     int size() const;
     double GetTimestamp() const {return CurrentTime;};
+private:
+    bool getJointData(const id_t& id, const JointSensorIndices& in, float& data);
+    bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);
+    bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data);
 public:
     double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
 

@@ -162,7 +162,7 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
             times[i][j] = times[i][j]/m_playspeed + m_play_start_time;
     
     vector<float> sensorpositions;
-    data->getJointPositions(NUSensorsData::All, sensorpositions);
+    data->getPosition(NUSensorsData::All, sensorpositions);
     if (m_return_to_start)
         appendReturnToStart(actions, times, m_positions, sensorpositions);
     

@@ -198,7 +198,7 @@ void NUMotion::kill()
     {
         // check the orientation
         vector<float> orientation;
-        if (m_data->getOrientation(orientation))
+        if (m_data->get(NUSensorsData::Orientation, orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
             {
                 m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), legpositions, 0);
@@ -219,7 +219,7 @@ void NUMotion::kill()
         
         // check the stiffness is on
         vector<float> leftstiffnesses, rightstiffnesses;
-        if (m_data->getJointStiffnesses(NUSensorsData::LLeg, leftstiffnesses) and m_data->getJointStiffnesses(NUSensorsData::RLeg, rightstiffnesses))
+        if (m_data->getStiffness(NUSensorsData::LLeg, leftstiffnesses) and m_data->getStiffness(NUSensorsData::RLeg, rightstiffnesses))
             if (mathGeneral::allZeros(leftstiffnesses) and mathGeneral::allZeros(rightstiffnesses))
                 return;
     }
@@ -593,37 +593,37 @@ void NUMotion::process(MotionFreezeJob* job)
 /*! @brief Updates the motion sensors in NUSensorsData */
 void NUMotion::updateMotionSensors()
 {
-    m_data->setMotionFallActive(m_current_time, m_fall_protection->enabled() and m_data->isFalling());
-    m_data->setMotionGetupActive(m_current_time, m_getup->isActive());
+    m_data->set(NUSensorsData::MotionFallActive, m_current_time, m_fall_protection->enabled() and m_data->isFalling());
+    m_data->set(NUSensorsData::MotionGetupActive, m_current_time, m_getup->isActive());
     #ifdef USE_KICK
-        m_data->setMotionKickActive(m_current_time, m_kick->isActive());
+        m_data->set(NUSensorsData::MotionKickActive, m_current_time, m_kick->isActive());
     #else
-        m_data->setMotionKickActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionKickActive, m_current_time, false);
     #endif
     #ifdef USE_SAVE
-        m_data->setMotionSaveActive(m_current_time, m_save->isActive());
+        m_data->set(NUSensorsData::MotionSaveActive, m_current_time, m_save->isActive());
     #else
-        m_data->setMotionSaveActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionSaveActive, m_current_time, false);
     #endif
     #ifdef USE_SCRIPT
-        m_data->setMotionScriptActive(m_current_time, m_script->isActive());
+        m_data->set(NUSensorsData::MotionScriptActive, m_current_time, m_script->isActive());
     #else
-        m_data->setMotionScriptActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionScriptActive, m_current_time, false);
     #endif
     #ifdef USE_WALK
         vector<float> speed;
         m_walk->getCurrentSpeed(speed);
-        m_data->setMotionWalkSpeed(m_current_time, speed);
+        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, speed);
         m_walk->getMaximumSpeed(speed);
-        m_data->setMotionWalkMaxSpeed(m_current_time, speed);
+        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, speed);
     #else
-        m_data->setMotionWalkSpeed(m_current_time, vector<float> (3,0));
-        m_data->setMotionWalkMaxSpeed(m_current_time, vector<float> (3, 0.1));
+        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, vector<float> (3,0));
+        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, vector<float> (3, 0.1));
     #endif
     #ifdef USE_HEAD
-        m_data->setMotionHeadCompletionTime(m_current_time, m_head->getCompletionTime());
+        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, static_cast<float>(m_head->getCompletionTime()));
     #else
-        m_data->setMotionHeadCompletionTime(m_current_time, 0);
+        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, 0);
     #endif
 }
 

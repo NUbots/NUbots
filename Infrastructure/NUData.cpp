@@ -35,9 +35,13 @@ const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);
 const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);
 const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);
 const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);
+const NUData::id_t NUData::LHand(curr_id++, "LHand", NUData::m_common_ids);
+const NUData::id_t NUData::RHand(curr_id++, "RHand", NUData::m_common_ids);
 const NUData::id_t NUData::Torso(curr_id++, "Torso", NUData::m_common_ids);
 const NUData::id_t NUData::LLeg(curr_id++, "LLeg", NUData::m_common_ids);
 const NUData::id_t NUData::RLeg(curr_id++, "RLeg", NUData::m_common_ids);
+const NUData::id_t NUData::LFoot(curr_id++, "LFoot", NUData::m_common_ids);
+const NUData::id_t NUData::RFoot(curr_id++, "RFoot", NUData::m_common_ids);
 const NUData::id_t NUData::NumCommonGroupIds(curr_id++, "NumCommonGroupIds", NUData::m_common_ids);
 
 const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::m_common_ids);
@@ -278,6 +282,16 @@ bool NUData::belongsToGroup(const id_t& member, const id_t& group)
 vector<int>& NUData::mapIdToIndices(const id_t& id)
 {
     return m_id_to_indices[id.Id];
+}
+
+vector<NUData::id_t*> NUData::mapIdToIds(const id_t& id)
+{
+    vector<int>& indicies = mapIdToIndices(id);
+    vector<id_t*> ids;
+    ids.reserve(indicies.size());
+    for (size_t i=0; i<indicies.size(); i++)
+        ids.push_back(m_ids_copy[indicies[i]]);
+    return ids;
 }
 
 void NUData::printMap(ostream& output)

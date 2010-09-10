@@ -88,8 +88,8 @@ public:
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            m_provider->m_data->getPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
             float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
@@ -103,9 +103,9 @@ public:
                 vector<float> temp;
                 float leftobstacle = 255;
                 float rightobstacle = 255;
-                if (m_data->getDistanceLeftValues(temp))
+                if (m_data->get(NUSensorsData::LDistance, temp))
                     leftobstacle = temp[0];
-                if (m_data->getDistanceRightValues(temp))
+                if (m_data->get(NUSensorsData::RDistance, temp))
                     rightobstacle = temp[0];
                 
                 if (leftobstacle < 50)
@@ -162,8 +162,8 @@ public:
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            m_provider->m_data->getPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getPosition(NUSensorsData::HeadYaw, headyaw);
             
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
@@ -183,9 +183,9 @@ public:
             float leftobstacle = 255;
             float rightobstacle = 255;
             
-            if (m_data->getDistanceLeftValues(temp))
+            if (m_data->get(NUSensorsData::LDistance, temp))
                 leftobstacle = temp[0];
-            if (m_data->getDistanceRightValues(temp))
+            if (m_data->get(NUSensorsData::RDistance, temp))
                 rightobstacle = temp[0];
             
             if (leftobstacle < 50)

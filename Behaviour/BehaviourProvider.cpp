@@ -148,7 +148,7 @@ void BehaviourProvider::updateButtonValues()
     }
     
     // Get the durations of the last press
-    if (m_data->getButtonTriggers(temp) and temp.size() >= 3)
+    if (m_data->get(NUSensorsData::AllButtonTriggers, temp) and temp.size() >= 3)
     {
         // update the circular buffers on negative edges
         if (m_chest_state < m_chest_previous_state)

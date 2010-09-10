@@ -106,7 +106,7 @@ public:
     BehaviourState* nextState()
     {
         bool kickActive = false;
-        m_provider->m_data->getMotionKickActive(kickActive);
+        m_provider->m_data->get(NUSensorsData::MotionKickActive, kickActive);
         bool kickFinished = m_kickActivePrev && !kickActive;
         m_kickActivePrev = kickActive;
         bool ballvisible = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 500.0f;

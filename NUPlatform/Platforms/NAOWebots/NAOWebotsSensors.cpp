@@ -62,6 +62,9 @@ NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_s
     getSensorsFromWebots();
     enableSensorsInWebots();
     m_data->addSensors(m_servo_names);
+    m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
+    m_previous_positions = vector<float>(m_servo_names.size(), 0);
+    m_previous_velocities = vector<float>(m_servo_names.size(), 0);
 }
 
 /*! @brief Gets pointers to each of the sensors in the simulated NAO
@@ -157,36 +160,26 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
  */
 void NAOWebotsSensors::copyFromJoints()
 {
-    static vector<float> positiondata(m_servos.size(), 0);
-    static vector<float> velocitydata(m_servos.size(), 0);
-    static vector<float> accelerationdata(m_servos.size(), 0);
-    static vector<float> targetdata(m_servos.size(), 0);
-    static vector<float> stiffnessdata(m_servos.size(), 0);
-    static vector<float> torquedata(m_servos.size(), 0);
-    
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromJoints()" << endl;
-#endif
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NAOWebotsSensors::copyFromJoints()" << endl;
+    #endif
 
-    // Copy joint positions
+    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    float delta_t = 1000*(m_current_time - m_previous_time);
     for (size_t i=0; i<m_servos.size(); i++)
-        positiondata[i] = m_servos[i]->getPosition();
-    m_data->setJointPositions(m_current_time, positiondata);
-    
-    // Copy joint targets
-    for (size_t i=0; i<m_servos.size(); i++)
-        targetdata[i] = ((JServo*) m_servos[i])->getTargetPosition();
-    m_data->setJointTargets(m_current_time, targetdata);
-    
-    // Copy joint stiffnesses
-    for (size_t i=0; i<m_servos.size(); i++)
-        stiffnessdata[i] = ((JServo*) m_servos[i])->getTargetGain();
-    m_data->setJointStiffnesses(m_current_time, stiffnessdata);
-    
-    // Copy joint torques
-    for (size_t i=0; i<m_servos.size(); i++)
-        torquedata[i] = m_servos[i]->getMotorForceFeedback();
-    m_data->setJointTorques(m_current_time, torquedata);
+    {
+        JServo* s = static_cast<JServo*>(m_servos[i]);
+        joint[NUSensorsData::PositionId] = s->getPosition();           
+        joint[NUSensorsData::VelocityId] = (joint[0] - m_previous_positions[i])/delta_t;    
+        joint[NUSensorsData::AccelerationId] = (joint[1] - m_previous_velocities[i])/delta_t;
+        joint[NUSensorsData::TargetId] = s->getTargetPosition();       
+        joint[NUSensorsData::StiffnessId] = s->getTargetGain();        
+        joint[NUSensorsData::TorqueId] = s->getMotorForceFeedback();   
+        m_data->set(*m_joint_ids[i], m_current_time, joint);
+        
+        m_previous_positions[i] = joint[0];
+        m_previous_velocities[i] = joint[1];
+    }
 }
 
 /*! @brief Copies the accelerometer and gyro data into m_data
@@ -206,12 +199,12 @@ void NAOWebotsSensors::copyFromAccelerometerAndGyro()
     buffer = m_accelerometer->getValues();
     for (size_t i=0; i<numdimensions; i++)
         accelerometerdata[i] = -100*buffer[i];       // convert from m/s/s to cm/s/s, and swap sign as it is incorrect in webots
-    m_data->setBalanceAccelerometer(m_current_time, accelerometerdata);
+    m_data->set(NUSensorsData::Accelerometer, m_current_time, accelerometerdata);
     // Copy gyro [gx, gy, gz]
     buffer = m_gyro->getValues();
     for (size_t i=0; i<numdimensions; i++)
         gyrodata[i] = buffer[i];
-    m_data->setBalanceGyro(m_current_time, gyrodata);
+    m_data->set(NUSensorsData::Gyro, m_current_time, gyrodata);
 }
 
 /*! @brief Copies the distance data into m_data
@@ -242,8 +235,8 @@ void NAOWebotsSensors::copyFromDistance()
             rightdistance[0] = d;
     }
     
-    m_data->setDistanceLeftValues(m_current_time, leftdistance);
-    m_data->setDistanceRightValues(m_current_time, rightdistance);
+    m_data->set(NUSensorsData::LDistance, m_current_time, leftdistance);
+    m_data->set(NUSensorsData::RDistance, m_current_time, rightdistance);
 }
 
 /*! @brief Copies the foot sole pressure data into m_data
@@ -259,7 +252,7 @@ void NAOWebotsSensors::copyFromFootSole()
     // Copy foot sole readings
     for (size_t i=0; i<m_foot_sole_sensors.size(); i++)
         footsoledata[i] = m_foot_sole_sensors[i]->getValue();
-    m_data->setFootSoleValues(m_current_time, footsoledata);
+    m_data->set(NUSensorsData::FootSole, m_current_time, footsoledata);
 }
 
 /*! @brief Copies the foot bumper data into m_data
@@ -275,7 +268,7 @@ void NAOWebotsSensors::copyFromFootBumper()
     // Copy foot bumper readings
     for (size_t i=0; i<m_foot_bumper_sensors.size(); i++)
         footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
-    m_data->setFootBumperValues(m_current_time, footbumperdata);
+    m_data->set(NUSensorsData::FootBumper, m_current_time, footbumperdata);
 }
 
 /*! @brief Copies the gps data into m_data
@@ -296,7 +289,7 @@ void NAOWebotsSensors::copyFromGPS()
         gpsdata[0] = 100*buffer[0];                // the data from webots is: [x, z, -y]
         gpsdata[1] = -100*buffer[2];
         gpsdata[2] = 100*buffer[1];
-        m_data->setGPSValues(m_current_time, gpsdata);
+        m_data->set(NUSensorsData::Gps, m_current_time, gpsdata);
     }
 }
 
@@ -315,7 +308,7 @@ void NAOWebotsSensors::copyFromCompass()
         
         buffer = m_compass->getValues();
         compassdata[0] = atan2(buffer[0], buffer[1]);
-        m_data->setCompassValues(m_current_time, compassdata);
+        m_data->set(NUSensorsData::Compass, m_current_time, compassdata);
     }
 }
 

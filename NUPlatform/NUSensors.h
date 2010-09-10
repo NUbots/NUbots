@@ -55,8 +55,6 @@ protected:
     
     virtual void calculateSoftSensors();
     
-    void calculateJointDerivatives();
-    
     void calculateKinematics();
     
     void calculateOrientation();

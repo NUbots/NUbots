@@ -68,9 +68,13 @@ public:
     const static id_t Body;
     const static id_t LArm;
     const static id_t RArm;
+    const static id_t LHand;
+    const static id_t RHand;
     const static id_t Torso;
     const static id_t LLeg;
     const static id_t RLeg;
+    const static id_t LFoot;
+    const static id_t RFoot;
     const static id_t NumCommonGroupIds;                //!< internal use only
     
     // define const static ids for the joints which are both sensors and actionators
@@ -116,6 +120,7 @@ public:
     
     double CurrentTime;    
     
+    vector<id_t*> mapIdToIds(const id_t& id);
 protected:
     static vector<id_t*> m_common_ids;
     vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)

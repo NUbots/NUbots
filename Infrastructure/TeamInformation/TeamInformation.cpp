@@ -135,8 +135,8 @@ float TeamInformation::getTimeToBall()
     else if ((not ball.lost() and not self.lost()) or m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
     {   // if neither the ball or self are lost or if we can see the ball then we can chase.
         vector<float> walkspeed, maxspeed;
-        m_data->getMotionWalkSpeed(walkspeed);
-        m_data->getMotionWalkMaxSpeed(maxspeed);
+        m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
+        m_data->get(NUSensorsData::MotionWalkMaxSpeed, maxspeed);
         
         // Add time for the movement to the ball
         time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];

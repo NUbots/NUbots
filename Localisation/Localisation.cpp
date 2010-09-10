@@ -113,13 +113,13 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     }
     
     vector<float> gps;
-    if (m_sensor_data->getGPSValues(gps))
+    if (m_sensor_data->get(NUSensorsData::Gps, gps))
     {   // have GPS use it to check localisation performance
         // x = gps[0]; y = gps[1]; z = gps[2];
     }
     
     vector<float> compass;
-    if (m_sensor_data->getCompassValues(compass))
+    if (m_sensor_data->get(NUSensorsData::Compass, compass))
     {   // have Compass use it to check localisation performance
         // heading = compass[0];
     }

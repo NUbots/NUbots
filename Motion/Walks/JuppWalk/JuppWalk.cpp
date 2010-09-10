@@ -431,7 +431,7 @@ void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 void JuppWalk::calculateGyroFeedback()
 {
     static vector<float> values;        // [vx, vy, vz]
-    m_data->getGyroValues(values);
+    m_data->get(NUSensorsData::Gyro, values);
 
     static const float roll_threshold = 0.10;
     static const float pitch_threshold = 0.10;          

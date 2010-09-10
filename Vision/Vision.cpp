@@ -191,10 +191,8 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     vector <float> horizonInfo;
 
 
-    if(m_sensor_data->getHorizon(horizonInfo))
-    {
+    if(m_sensor_data->get(NUSensorsData::Horizon, horizonInfo))
         m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
-    }
     else
     {
         #if DEBUG_VISION_VERBOSITY > 5

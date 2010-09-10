@@ -20,14 +20,21 @@
  */
 
 #include "NUSensorsData.h"
+
+#include "Tools/Math/StlVector.h"
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
 #include <fstream>
 
-int s_curr_id = NUData::NumCommonIds.Id;
+int s_curr_id = NUData::NumCommonIds.Id+1;
 vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
 
+// end effector sensors
+const NUSensorsData::id_t NUSensorsData::LArmEndEffector(s_curr_id++, "LArmEndEffector", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RArmEndEffector(s_curr_id++, "RArmEndEffector", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::LLegEndEffector(s_curr_id++, "LLegEndEffector", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::CameraTransform(s_curr_id++, "RLegEndEffector", NUSensorsData::m_ids);
 // kinematic sensors
 const NUSensorsData::id_t NUSensorsData::LLegTransform(s_curr_id++, "LLegTransform", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RLegTransform(s_curr_id++, "RLegTransform", NUSensorsData::m_ids);
@@ -45,18 +52,17 @@ const NUSensorsData::id_t NUSensorsData::Horizon(s_curr_id++, "Horizon", NUSenso
 const NUSensorsData::id_t NUSensorsData::Zmp(s_curr_id++, "Zmp", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Falling(s_curr_id++, "Falling", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Fallen(s_curr_id++, "Fallen", NUSensorsData::m_ids);
-// foot sensors
-const NUSensorsData::id_t NUSensorsData::FootBumper(s_curr_id++, "FootBumper", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::FootForce(s_curr_id++, "FootForce", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::FootContact(s_curr_id++, "FootContact", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::FootSupport(s_curr_id++, "FootSupport", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::FootImpact(s_curr_id++, "FootImpact", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::FootCoP(s_curr_id++, "FootCoP", NUSensorsData::m_ids);
+// touch sensors
+const NUSensorsData::id_t NUSensorsData::LHandTouch(s_curr_id++, "LHandTouch", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RHandTouch(s_curr_id++, "RHandTouch", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::LFootTouch(s_curr_id++, "LFootTouch", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RFootTouch(s_curr_id++, "RFootTouch", NUSensorsData::m_ids);
 // button sensors
 const NUSensorsData::id_t NUSensorsData::MainButton(s_curr_id++, "MainButton", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::SecondaryButton(s_curr_id++, "SecondaryButton", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::LeftButton(s_curr_id++, "LeftButton", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RightButton(s_curr_id++, "RightButton", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::AllButton(s_curr_id++, "AllButton", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::AllButtonTriggers(s_curr_id++, "AllButtonTriggers", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::AllButtonDurations(s_curr_id++, "AllButtonDurations", NUSensorsData::m_ids);
 // distance sensors
 const NUSensorsData::id_t NUSensorsData::LDistance(s_curr_id++, "LDistance", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RDistance(s_curr_id++, "RDistance", NUSensorsData::m_ids);
@@ -104,182 +110,531 @@ NUSensorsData::~NUSensorsData()
 
 void NUSensorsData::addSensors(const vector<string>& hardwarenames)
 {
+    // the model we use for sensors, is that every sensor is 'available', but the data may be invalid.
+    for (size_t i=NumCommonIds.Id; i<m_ids.size(); i++)
+        m_id_to_indices[i].push_back(i);
+    
+    // the addDevices function will just setup the groups for the joints
     addDevices(hardwarenames);
-    // That call is not going to add most of the sensors that you want, I could make it so that it would, but I don't think I want it to.
-    // I don't think it is really necessary to have this at all.
 }
 
 /******************************************************************************************************************************************
                                                                                                                                 Get Methods
  ******************************************************************************************************************************************/
 
-/*! @brief Gets the requested joint position. If the operation is successful true is returned, 
-           otherwise false is returned and position is unchanged
-    @param jointid the id of the joint you want the data for
-    @param position the position will be placed in this variable
+/*! @brief Gets the joint position
+    @param id the id of the joint
+    @param data will be updated with the angle
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointPosition(id_t jointid, float& position)
+bool NUSensorsData::getPosition(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, PositionId, data);
 }
 
-/*! @brief Gets the requested joint velocity. If the operation is successful true is returned, 
-           otherwise false is returned and velocity is unchanged
-    @param jointid the id of the joint you want the data for
-    @param velocity the velocity will be placed in this variable
+/*! @brief Gets the joint positions
+    @param id the id of the group of joints
+    @param data will be updated with the joint angles
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointVelocity(id_t jointid, float& velocity)
+bool NUSensorsData::getPosition(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, PositionId, data);
 }
 
-/*! @brief Gets the requested joint acceleration. If the operation is successful true is returned, 
-           otherwise false is returned and acceleration is unchanged
-    @param jointid the id of the joint you want the data for
-    @param acceleration the acceleration will be placed in this variable
+/*! @brief Gets the joint velocity
+    @param id the id of the joint
+    @param data will be updated with joint velocity
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointAcceleration(id_t jointid, float& acceleration)
+bool NUSensorsData::getVelocity(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, VelocityId, data);
 }
 
-/*! @brief Gets the requested joint target. If the operation is successful true is returned, 
-           otherwise false is returned and target is unchanged
-    @param jointid the id of the joint you want the data for
-    @param target the target will be placed in this variable
+/*! @brief Gets the joint velocities
+    @param id the id of the group of joints
+    @param data will be updated with joint velocities
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTarget(id_t jointid, float& target)
+bool NUSensorsData::getVelocity(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, VelocityId, data);
 }
 
-/*! @brief Gets the requested joint stiffness. If the operation is successful true is returned, 
-           otherwise false is returned and stiffness is unchanged
-    @param jointid the id of the joint you want the data for
-    @param stiffness the stiffness will be placed in this variable
+/*! @brief Gets the joint acceleration
+    @param id the id of the joint
+    @param data will be updated with joint acceleration
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointStiffness(id_t jointid, float& stiffness)
+bool NUSensorsData::getAcceleration(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, AccelerationId, data);
 }
 
-/*! @brief Gets the requested joint current. If the operation is successful true is returned, 
-           otherwise false is returned and current is unchanged
-    @param jointid the id of the joint you want the data for
-    @param current the current will be placed in this variable
+/*! @brief Gets the joint accelerations
+    @param id the id of the group of joints
+    @param data will be updated with joint accelerations
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointCurrent(id_t jointid, float& current)
+bool NUSensorsData::getAcceleration(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, AccelerationId, data);
 }
 
-/*! @brief Gets the requested joint torque. If the operation is successful true is returned, 
-           otherwise false is returned and torque is unchanged
-    @param jointid the id of the joint you want the data for
-    @param torque the torque will be placed in this variable
+/*! @brief Gets the joint target
+    @param id the id of the joint
+    @param data will be updated with joint target
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTorque(id_t jointid, float& torque)
+bool NUSensorsData::getTarget(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, TargetId, data);
 }
 
-/*! @brief Gets the requested joint temperatures. If the operation is successful true is returned, 
-           otherwise false is returned and temperatures is unchanged
-    @param jointid the id of the joint you want the data for
-    @param temperature the temperature will be placed in this variable
+/*! @brief Gets the joint targets
+    @param id the id of the group of joints
+    @param data will be updated with joint targets
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTemperature(id_t jointid, float& temperature)
+bool NUSensorsData::getTarget(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, TargetId, data);
 }
 
-/*! @brief Returns the number of joints in the specified body part
- @param partid the id of the body part
- @return the number of joints
+/*! @brief Gets the joint stiffness
+    @param id the id of the joint
+    @param data will be updated with joint stiffness
+    @return true if valid, false if invalid
  */
-int NUSensorsData::getNumberOfJoints(id_t partid)
+bool NUSensorsData::getStiffness(const id_t id, float& data)
 {
-    return 0;
+    return getJointData(id, StiffnessId, data);
 }
 
-/*! @brief Gets the requested joint positions in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param positions the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint stiffnesses
+    @param id the id of the group of joints
+    @param data will be updated with joint stiffnesses
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointPositions(id_t bodypart, vector<float>& positions)
+bool NUSensorsData::getStiffness(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, StiffnessId, data);
 }
 
-/*! @brief Gets the requested joint velocities in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param velocities the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint current
+    @param id the id of the joint
+    @param data will be updated with joint current
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointVelocities(id_t bodypart, vector<float>& velocities)
+bool NUSensorsData::getCurrent(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, CurrentId, data);
 }
 
-/*! @brief Gets the requested joint accelerations in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param accelerations the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint currents
+    @param id the id of the group of joints
+    @param data will be updated with joint currents
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointAccelerations(id_t bodypart, vector<float>& accelerations)
+bool NUSensorsData::getCurrent(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, CurrentId, data);
 }
 
-/*! @brief Gets the requested joint targets in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param targets the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint torque
+    @param id the id of the joint
+    @param data will be updated with joint torque
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTargets(id_t bodypart, vector<float>& targets)
+bool NUSensorsData::getTorque(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, TorqueId, data);
 }
 
-/*! @brief Gets the requested joint stiffnesses in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param stiffnesses the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint torques
+    @param id the id of the group of joints
+    @param data will be updated with joint torques
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointStiffnesses(id_t bodypart, vector<float>& stiffnesses)
+bool NUSensorsData::getTorque(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, TorqueId, data);
 }
 
-/*! @brief Gets the requested joint currents in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param currents the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint temperature
+    @param id the id of the joint
+    @param data will be updated with joint temperature
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointCurrents(id_t bodypart, vector<float>& currents)
+bool NUSensorsData::getTemperature(const id_t id, float& data)
 {
-    return false;
+    return getJointData(id, TemperatureId, data);
 }
 
-/*! @brief Gets the requested joint torques in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param torques the input vector that will be updated to contain the requested data
+/*! @brief Gets the joint temperatures
+    @param id the id of the group of joints
+    @param data will be updated with joint temperatures
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTorques(id_t bodypart, vector<float>& torques)
+bool NUSensorsData::getTemperature(const id_t id, vector<float>& data)
 {
-    return false;
+    return getJointData(id, TemperatureId, data);
 }
 
-/*! @brief Gets the requested joint temperatures in a given body part. If the get is successful true is returned
- otherwise false is returned, and the input variable is left unchanged.
- @param bodypart the id of the body part to want the data for
- @param temperatures the input vector that will be updated to contain the requested data
+/*! @brief Gets the position of an end effector
+    @param id the id of the end effector
+    @param data will be updated with the position
+    @return true if valid, false if invalid
  */
-bool NUSensorsData::getJointTemperatures(id_t bodypart, vector<float>& temperatures)
+bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data)
 {
-    return false;
+    if (id == LArm or id == LHand or id == LArmEndEffector)
+        return false;
+    else if (id == RArm or id == RHand or id == RArmEndEffector)
+        return false;
+    else if (id == LLeg or id == LLeg or id == LLegEndEffector)
+    {
+        vector<float>& leftlegtransform;
+        bool successful = get(LLegTransform, leftlegtransform);
+        if (successful
+    }
+}
+
+bool NUSensorsData::getCameraHeight(float& data)
+{
+    return get(CameraHeight, data);
+}
+
+bool NUSensorsData::getHorizon(vector<float>& data)
+{
+    return get(Horizon, data);
+}
+
+bool NUSensorsData::getOdometry(vector<float>& data)
+{
+    bool successful = get(Odometry, data);
+    if (successful)
+        set(Odometry, vector<float> (data.size(), 0));
+    return successful;
+}
+
+bool NUSensorsData::getAccelerometer(vector<float>& data)
+{
+    get(Accelerometer, data);
+}
+
+bool NUSensorsData::getGyro(vector<float>& data)
+{
+    vector<float> gyro, offset; 
+    bool successful = get(Gyro, gyro);
+    successful &= get(GyroOffset, offset);
+    if (successful)
+        data = gyro - offset;
+    return successful;
+}
+
+bool NUSensorsData::getOrientation(vector<float>& data)
+{
+    return get(Orientation, data);
+}
+
+bool NUSensorsData::getFalling(vector<float>& data)
+{
+    return get(Falling, data);
+}
+
+bool NUSensorsData::getFallen(vector<float>& data)
+{
+    return get(Fallen, data);
+}
+
+bool NUSensorsData::getBumper(const id_t& id, float& data)
+{
+    
+    
+    
+}
+
+bool NUSensorsData::getForce(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getContact(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getSupport(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getImpact(const id_t& id, float& data)
+{
+    
+}
+
+bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
+{
+}
+
+bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
+{
+}
+
+bool NUSensorsData::getButton(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getButton(const id_t& id, vector<float>& data)
+{
+}
+
+bool NUSensorsData::getButtonDuration(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getButtonDuration(const id_t& id, vector<float>& data)
+{
+}
+
+bool NUSensorsData::getDistance(const id_t& id, float& data)
+{
+}
+
+bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
+{
+}
+
+bool NUSensorsData::getGps(vector<float>& data)
+{
+}
+
+bool NUSensorsData::getCompass(vector<float>& data)
+{
+}
+
+bool NUSensorsData::getBatteryVoltage(float& data)
+{
+}
+
+bool NUSensorsData::getBatteryCurrent(float& data)
+{
+}
+
+bool NUSensorsData::getBatteryCharge(float& data)
+{
+}
+
+/*! @brief Gets boolean sensor reading for id
+    @param id the id of the sensor
+    @param data will be updated with the sensor reading
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, bool& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    float floatBuffer;
+    if (ids.size() == 1)
+    {
+        bool successful = m_sensors[ids[0]].get(floatBuffer);
+        data = static_cast<bool>(floatBuffer);
+        return successful;
+    }
+    else
+        return false;
+}
+
+/*! @brief Gets float sensor reading for id
+    @param id the id of the sensor
+    @param data will be updated with the sensor reading
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, float& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    if (ids.size() == 1)
+        return m_sensors[ids[0]].get(data);
+    else
+        return false;
+}
+
+/*! @brief Gets double sensor reading for id
+    @param id the id of the sensor
+    @param data will be updated with the sensor reading
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, double& data)
+{
+    float floatBuffer;
+    bool successful = get(id, floatBuffer);
+    data = static_cast<double>(floatBuffer);
+    return successful;
+}
+
+/*! @brief Gets vector of sensor readings for id. If id is a group then each element in data will be a float from each member of the group.
+    @param id the id of the sensor(s)
+    @param data will be updated with the sensor reading(s)
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, vector<float>& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return false;
+    else if (numids == 1)
+        return m_sensors[ids[0]].get(data);
+    else
+    {
+        data.clear();
+        data.reserve(numids);
+        bool successful = true;
+        float floatBuffer;
+        for (size_t i=0; i<ids.size(); i++)
+        {
+            successful &= m_sensors[ids[i]].get(floatBuffer);
+            data.push_back(floatBuffer);
+        }
+        return successful;
+    }
+}
+
+/*! @brief Gets matrix of sensor readings for id. If id is a group then each element in data will be a vector from each member of the group.
+    @param id the id of the sensor(s)
+    @param data will be updated with the sensor reading(s)
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return false;
+    else if (numids == 1)
+        return m_sensors[ids[0]].get(data);
+    else
+    {
+        data.clear();
+        data.reserve(numids);
+        bool successful = true;
+        vector<float> vectorBuffer;
+        for (size_t i=0; i<ids.size(); i++)
+        {
+            successful &= m_sensors[ids[i]].get(vectorBuffer);
+            data.push_back(vectorBuffer);
+        }
+        return successful;
+    }
+}
+
+/*! @brief Gets string sensor reading for id
+    @param id the id of the sensor
+    @param data will be updated with the sensor reading
+    @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::get(const id_t& id, string& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    if (ids.size() == 1)
+        return m_sensors[ids[0]].get(data);
+    else
+        return false;
+}
+
+/* Gets a single type of joint sensor information, eg. a Temperature.
+   @param id the id of the group of joints
+   @param in the index into a joint sensor vector for the desired type of information
+   @param data will be updated the the sensor readings
+   @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, float& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    if (ids.size() == 1)
+    {
+        vector<float> vectorBuffer;
+        if (m_sensors[ids[0]].get(vectorBuffer))
+        {
+            data = vectorBuffer[in];
+            if (isnan(data))
+                return false;
+            else
+                return true;
+        }
+        else
+            return false;
+    }
+    else
+        return false;
+}
+
+/* Gets a vector of a single type of joint sensor information, eg. a vector of Temperatures.
+   @param id the id of the group of joints
+   @param in the index into a joint sensor vector for the desired type of information
+   @param data will be updated the the sensor readings
+   @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data)
+{
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids <= 1)
+        return false;
+    else
+    {
+        data.clear();
+        data.reserve(numids);
+        bool successful = true;
+        vector<float> vectorBuffer;
+        float floatBuffer;
+        for (size_t i=0; i<numids; i++)
+        {
+            successful &= m_sensors[ids[i]].get(vectorBuffer);
+            floatBuffer = vectorBuffer[in];
+            successful & = not isnan(floatBuffer);
+            data.push_back(floatBuffer);
+        }
+        return successful;
+    }
+}
+
+/* Gets a single type of end effector information, eg. a bumper value
+   @param id the id of the end effector
+   @param in the index into a end effector sensor vector for the desired type of information
+   @param data will be updated the the sensor readings
+   @return true if the data is valid, false otherwise
+ */
+bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data)
+{
+    // map similar ids to the proper EndEffector ids
+    id_t& e_id = id;
+    if (e_id == LArm or e_id == LHand)
+        e_id = LArmEndEffector;
+    else if (e_id == RArm or e_id == RHand)
+        e_id = RArmEndEffector;
+    else if (e_id == LLeg or e_id == LFoot)
+        e_id = LLegEndEffector;
+    else if (e_id == RLeg or e_id == RFoot)
+        e_id = RLegEndEffector;
+    
+    // proceed as usual with the proper end effector id
+    vector<int>& ids = mapIdToIndices(e_id);
+    if (ids.size() == 1)
+    {
+        vector<float> vectorBuffer;
+        if (m_sensors[ids[0]].get(vectorBuffer))
+        {
+            data = vectorBuffer[in];
+            if (isnan(data))
+                return false;
+            else
+                return true;
+        }
+        else
+            return false;
+    }
+    else
+        return false;
 }
 
 /* @brief Gets the transform matrix of the left leg
@@ -362,578 +717,9 @@ bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
     }*/
 }
 
-/*! @brief Gets the odometry data since the last call
-    @param time the time of the last call
-    @param values will be updated with the odometry [x (cm), y(cm), yaw(rad)] since time
- */
-bool NUSensorsData::getOdometry(float& time, vector<float>& values)
-{
-    return false;
-    /*
-    static double timeoflastcall = 0;
-    if (Odometry == NULL || Odometry->IsValid == false)
-        return false;
-    else
-    {
-        time = timeoflastcall;
-        values = Odometry->Data;
-        timeoflastcall = CurrentTime;
-        Odometry->Data = vector<float> (Odometry->size(),0);
-        return true;
-    }*/
-}
-
 bool NUSensorsData::getOdometryData(vector<float>& values)
 {
     return false;
-}
-
-/* @brief Gets the height of the camera off the ground in cm
-   @param height will be updated with the height of the camera from the ground
- */
-bool NUSensorsData::getCameraHeight(float& height)
-{
-    return false;
-    /*
-    if (CameraHeight == NULL || CameraHeight->IsValid == false)
-        return false;
-    else
-    {
-        height = CameraHeight->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Gets the names of the joints in a particular body part.
-    @param partid the id of the body part 
-    @param names will be updated to contain the names of the joints in that body part
- */
-bool NUSensorsData::getJointNames(id_t partid, vector<string>& names)
-{
-    /*vector<id_t> selectedjoints;
-    if (partid == All)
-        selectedjoints = m_all_joint_ids;
-    if (partid == Body)
-        selectedjoints = m_body_ids;
-    else if (partid == Head)
-        selectedjoints = m_head_ids;
-    else if (partid == LArm)
-        selectedjoints = m_larm_ids;
-    else if (partid == RArm)
-        selectedjoints = m_rarm_ids;
-    else if (partid == Torso)
-        selectedjoints = m_torso_ids;
-    else if (partid == LLeg)
-        selectedjoints = m_lleg_ids;
-    else if (partid == RLeg)
-        selectedjoints = m_rleg_ids;
-    else
-    {
-        errorlog << "NUSensorsData::getJointNames. UNDEFINED Body part.";
-        return false;
-    }
-    
-    names.clear();
-    for (unsigned int i=0; i<selectedjoints.size(); i++)
-        names.push_back(selectedjoints[i].Name);*/
-    return false;
-}
-
-/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
-    @param values will be updated with the current accelerometer readings
- */
-bool NUSensorsData::getAccelerometerValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceAccelerometer == NULL || BalanceAccelerometer->IsValid == false)
-        return false;
-    else
-    {
-        values = BalanceAccelerometer->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the accelerometer values [ax, ay, az] in cm/s/s
-    @param values will be updated with the current accelerometer readings
- */
-bool NUSensorsData::getHorizon(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceHorizon == NULL || BalanceHorizon->IsValid == false)
-        return false;
-    else
-    {
-        values = BalanceHorizon->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the last button trigger times for the chest button, left
-            foot bumper and right foot bumper.
-    @param values will be updated with the current utton trigger times.
- */
-bool NUSensorsData::getButtonTriggers(vector<float>& values)
-{
-    return false;
-    /*
-    if (ButtonTriggers == NULL || ButtonTriggers->IsValid == false)
-        return false;
-    else
-    {
-        values = ButtonTriggers->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the gyro values [gx, gy, gz] in rad/s
-    @param values will be updated with the current gyro readings
- */
-bool NUSensorsData::getGyroValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceGyro == NULL || BalanceGyro->IsValid == false)
-        return false;
-    else
-    {
-        values = BalanceGyro->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the gyro offset values [offsetx, offsety, offsetz]
-    @param values will be updated with the current estimate of the gyro offset
-    @return returns true if the values are valid false otherwise
- */
-bool NUSensorsData::getGyroOffsetValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
-        return false;
-    else
-    {
-        values = BalanceGyroOffset->Data;
-        return true;
-    }
-     */
-}
-
-/*! @brief Gets the gyro values after the offset and filtering is applied [gx, gy, gz]
-    @param values will be updated with the current estimate of the gyro
-    @return returns true if the values are valid false otherwise
- */
-bool NUSensorsData::getGyroFilteredValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceGyro == NULL || BalanceGyro->IsValid == false || BalanceGyroOffset == NULL || BalanceGyroOffset->IsValid == false)
-        return false;
-    else
-    {
-        values = vector<float>(3,0);
-        for (size_t i=0; i<values.size(); i++)
-            values[i] = BalanceGyro->Data[i] - BalanceGyroOffset->Data[i];
-        return true;
-    }*/
-}
-
-/*! @brief Gets the orientation [roll, pitch, yaw] in radians of the robot's torso
-    @param values will be updated with the current orientation estimate
- */
-bool NUSensorsData::getOrientation(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceOrientation == NULL || BalanceOrientation->IsValid == false)
-        return false;
-    else 
-    {
-        values = BalanceOrientation->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the orientation [roll, pitch, yaw] in radians from the robot's hardware orientation sensor
- */
-bool NUSensorsData::getOrientationHardware(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceOrientationHardware == NULL || BalanceOrientationHardware->IsValid == false)
-        return false;
-    else 
-    {
-        values = BalanceOrientationHardware->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the zero moment point [x,y] in cm from somewhere?
-    @param values will be updated with the current ZMP estimate
- */
-bool NUSensorsData::getZMP(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceZMP == NULL || BalanceZMP->IsValid == false)
-        return false;
-    else 
-    {
-        values = BalanceZMP->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the falling sense [sum, left, right, forward, backward] 
-    @param values will be updated with the current falling measurements [sum, left, right, forward, backward]
- */
-bool NUSensorsData::getFalling(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)
-        return false;
-    else 
-    {
-        values = BalanceFalling->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the fallen sense [sum, left, right, forward, backward] 
-    @param values will be updated with the current fallen measurements [sum, left, right, forward, backward]
- */
-bool NUSensorsData::getFallen(vector<float>& values)
-{
-    return false;
-    /*
-    if (BalanceFallen == NULL || BalanceFallen->IsValid == false)
-        return false;
-    else 
-    {
-        values = BalanceFallen->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the distance sensor readings (sensors from left to right) in centimeters
-    @param values will be updated with the current distance readings
- */
-bool NUSensorsData::getDistanceLeftValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (DistanceLeftValues == NULL || DistanceLeftValues->IsValid == false)
-        return false;
-    else
-    {
-        values = DistanceLeftValues->Data;
-        return true;
-    }*/
-}
-
-bool NUSensorsData::getDistanceRightValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (DistanceRightValues == NULL || DistanceRightValues->IsValid == false)
-        return false;
-    else
-    {
-        values = DistanceRightValues->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the battery readings [voltage (V), current (A), charge (%)]
-    @param values will be updated with the current battery sensor values
- */
-bool NUSensorsData::getBatteryValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (BatteryValues == NULL || BatteryValues->IsValid == false)
-        return false;
-    else
-    {
-        values = BatteryValues->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the GPS readings [x (cm), y(cm), z (cm)]
-    @param values will be updated with the gps coordinates of the robot [x (cm), y (cm), z (cm)]
- */
-bool NUSensorsData::getGPSValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (GPS == NULL || GPS->IsValid == false)
-        return false;
-    else
-    {
-        values = GPS->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the compass reading [heading]
-    @param values will be updated with the compass reading
- */
-bool NUSensorsData::getCompassValues(vector<float>& values)
-{
-    return false;
-    /*
-    if (Compass == NULL || Compass->IsValid == false)
-        return false;
-    else
-    {
-        values = Compass->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the foot sole pressure sensor values (order: left to right front to back) in Newtons
-    @param footid the id of the part of the foot you want the readings for
-    @param values will be updated with the current readings for the selected foot
- */
-bool NUSensorsData::getFootSoleValues(id_t footid, vector<float>& values)
-{
-    return false;
-    /*
-    if (FootSoleValues == NULL || FootSoleValues->IsValid == false)
-        return false;
-    else
-    {
-        int numfootsolesensors = FootSoleValues->Data.size();
-        if (footid == All)
-            values = FootSoleValues->Data;
-        else if (footid == LLeg)
-        {
-            vector<float> leftfootvalues(numfootsolesensors/2, 0);
-            for (unsigned int i=0; i<leftfootvalues.size(); i++)
-                leftfootvalues[i] = FootSoleValues->Data[i];
-            values = leftfootvalues;
-        }
-        else if (footid == RLeg)
-        {
-            vector<float> rightfootvalues(numfootsolesensors/2, 0);
-            for (unsigned int i=0; i<rightfootvalues.size(); i++)
-                rightfootvalues[i] = FootSoleValues->Data[i + numfootsolesensors/2];
-            values = rightfootvalues;
-        }
-        else
-        {
-            debug << "NUSensorsData::getFootSoleValues(). Unknown foot id." << endl;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the centre of pressure as measured by feet sensors
- 
-    If a single foot is requested the x and y positions are relative to the position of the ankle on the foot.
-    If the CoP for both feet is requested the x and y positions are relative to the torso
- 
-    @param footid LeftFoot, RightFoot, AllFeet
-    @param x the distance in cm forwards 
-    @param y the distance in cm backwards
- */
-bool NUSensorsData::getFootCoP(id_t footid, float& x, float& y)
-{
-    return false;
-    /*
-    if (FootCoP == NULL || FootCoP->IsValid == false)
-        return false;
-    else
-    {
-        if (footid == LLeg)
-        {
-            x = (*FootCoP)[0];
-            y = (*FootCoP)[1];
-        }
-        else if (footid == RLeg)
-        {
-            x = (*FootCoP)[2];
-            y = (*FootCoP)[3];
-        }
-        else if (footid == All)
-        {
-            x = (*FootCoP)[4];
-            y = (*FootCoP)[5];
-        }
-        else
-        {
-            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the foot bumper sensor values (order: left to right) in binary (0=off 1=on)
-    @param footid the id of the part of the foot you want the readings for
-    @param values will be updated with the current readings for the selected foot
- */
-bool NUSensorsData::getFootBumperValues(id_t footid, vector<float>& values)
-{
-    return false;
-    /*
-    if (FootBumperValues == NULL || FootBumperValues->IsValid == false)
-        return false;
-    else
-    {
-        int numfootbumpersensors = FootBumperValues->Data.size();
-        if (footid == All)
-            values = FootBumperValues->Data;
-        else if (footid == LLeg)
-        {
-            vector<float> leftfootvalues(numfootbumpersensors/2, 0);
-            for (unsigned int i=0; i<leftfootvalues.size(); i++)
-                leftfootvalues[i] = FootBumperValues->Data[i];
-            values = leftfootvalues;
-        }
-        else if (footid == RLeg)
-        {
-            vector<float> rightfootvalues(numfootbumpersensors/2, 0);
-            for (unsigned int i=0; i<rightfootvalues.size(); i++)
-                rightfootvalues[i] = FootBumperValues->Data[i + numfootbumpersensors/2];
-            values = rightfootvalues;
-        }
-        else
-        {
-            debug << "NUSensorsData::getFootBumperValues(). Unknown foot id." << endl;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the total force on the foot in Newtons
-    @param footid the id of the part of the foot you want the readings for
-    @param force will be updated with the current readings for the selected foot
- */
-bool NUSensorsData::getFootForce(id_t footid, float& force)
-{
-    return false;
-    /*
-    force = 0;
-    if (FootForce == NULL || FootForce->IsValid == false)
-        return false;
-    else
-    {
-        if (footid == LLeg)
-        {
-            force = (*FootForce)[0];
-        }
-        else if (footid == RLeg)
-        {
-            force = (*FootForce)[1];
-        }
-        else if (footid == All)
-        {
-            force = (*FootForce)[2];
-        }
-        else
-        {
-            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
-            force = 0;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the whether footid is in contact with the ground
-    @param footid the id of the foot
-    @param contact will be updated to true if the foot is on the ground, false if it is not on the ground
- */
-bool NUSensorsData::getFootContact(id_t footid, bool& contact)
-{
-    return false;
-    /*
-    if (FootContact == NULL || FootContact->IsValid == false)
-        return false;
-    else
-    {
-        if (footid == LLeg)
-            contact = (*FootContact)[0];
-        else if (footid == RLeg)
-            contact = (*FootContact)[1];
-        else if (footid == All)
-            contact = (*FootContact)[2];
-        else
-        {
-            debug << "NUSensorsData::getFootContact(). Unknown foot id." << endl;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the total force on the foot in Newtons
-    @param footid the id of the part of the foot you want the readings for
-    @param support will be updated to true if footid is supporting the robot.
-    @return true if support was updated, false if invalid
- */
-bool NUSensorsData::getFootSupport(id_t footid, bool& support)
-{
-    return false;
-    /*
-    if (FootSupport == NULL || FootSupport->IsValid == false)
-        return false;
-    else
-    {
-        if (footid == LLeg)
-            support = static_cast<bool> ((*FootSupport)[0]);
-        else if (footid == RLeg)
-            support = static_cast<bool> ((*FootSupport)[1]);
-        else if (footid == All)
-            support = static_cast<bool> ((*FootSupport)[0]) and static_cast<bool> ((*FootSupport)[1]);
-        else
-        {
-            debug << "NUSensorsData::getFootForce(). Unknown foot id." << endl;
-            return false;
-        }
-        return true;
-    }*/
-}
-
-/*! @brief Gets the button values (order: importance) in binary (0=off 1=on)
-    @param buttonid the id of the button(s) you want the readings for
-    @param values will be updated with the current readings for the selected button(s)
- */
-bool NUSensorsData::getButtonValues(id_t buttonid, vector<float>& values)
-{
-    return false;
-    /*
-    if (ButtonValues == NULL || ButtonValues->IsValid == false)
-        return false;
-    else
-    {
-        if (buttonid == AllButton)
-            values = ButtonValues->Data;
-        else if (buttonid == MainButton)
-            values = vector<float> (1, ButtonValues->Data[0]);
-        else if (buttonid == SecondaryButton)
-        {
-            if (ButtonValues->Data.size() > 1)
-                values = vector<float> (1, ButtonValues->Data[1]);
-            else
-                return false;
-        }
-        else
-        {
-            debug << "NUSensorsData::getButtonValues(). Unknown button id." << endl;
-            return false;
-        }
-        return true;
-    }*/
 }
 
 /******************************************************************************************************************************************
@@ -1029,464 +815,119 @@ bool NUSensorsData::footImpact(id_t footid, float& time)
      */
 }
 
-/*! @brief Get whether the fall motion module is active
-    @param active will be updated to true if the fall module is active
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionFallActive(bool& active)
-{
-    return false;
-    /*
-    if (not MotionFallActive->IsValid)
-        return false;
-    else
-    {
-        active = MotionFallActive->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Get whether the getup motion module is active
-    @param active will be updated to true if the getup module is active
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionGetupActive(bool& active)
-{
-    return false;
-    /*
-    if (not MotionGetupActive->IsValid)
-        return false;
-    else
-    {
-        active = MotionGetupActive->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Get whether the kick motion module is active
-    @param active will be updated to true if the kick module is active
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionKickActive(bool& active)
-{
-    return false;
-    /*
-    if (not MotionKickActive->IsValid)
-        return false;
-    else
-    {
-        active = MotionKickActive->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Get whether the save motion module is active
-    @param active will be updated to true if the save module is active
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionSaveActive(bool& active)
-{
-    return false;
-    /*
-    if (not MotionSaveActive->IsValid)
-        return false;
-    else
-    {
-        active = MotionSaveActive->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Get whether the script motion module is active
-    @param active will be updated to true if the script module is active
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionScriptActive(bool& active)
-{
-    return false;
-    /*
-    if (not MotionSaveActive->IsValid)
-        return false;
-    else
-    {
-        active = MotionSaveActive->Data[0];
-        return true;
-    }*/
-}
-
-/*! @brief Get current walk speed [cm/s, cm/s, rad/s]
-    @param speed will be updated with the current commanded walk speed
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionWalkSpeed(vector<float>& speed)
-{
-    return false;
-    /*
-    if (not MotionWalkSpeed->IsValid)
-        return false;
-    else
-    {
-        speed = MotionWalkSpeed->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Gets the current walk maximum speed as [x cm/s, y cm/s yaw rad/s]
-    @param speed will be updated with the current max walk speed
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionWalkMaxSpeed(vector<float>& speed)
-{
-    return false;
-    /*
-    if (not MotionWalkMaxSpeed->IsValid)
-        return false;
-    else
-    {
-        speed = MotionWalkMaxSpeed->Data;
-        return true;
-    }*/
-}
-
-/*! @brief Get the current head completion time 
-    @param time will be updated with the current head completion time
-    @return true if the data is valid
- */
-bool NUSensorsData::getMotionHeadCompletionTime(double& time)
-{
-    return false;
-    /*
-    if (not MotionHeadCompletionTime->IsValid)
-        return false;
-    else
-    {
-        time = MotionHeadCompletionTime->Data[0];
-        return true;
-    }*/
-}
-
 /******************************************************************************************************************************************
                                                                                                                                 Set Methods
  ******************************************************************************************************************************************/
 
+/*! @brief Sets the current sensor reading for id
+    @param id the id of the targetted sensor
+    @param time the time in ms the value was captured
+    @param data the data
+ */
+void NUSensorsData::set(const id_t& id, double time, bool data)
+{
+    set(id, time, static_cast<float>(data));
+}
+
+/*! @brief Sets the current sensor reading for id
+    @param id the id of the targetted sensor
+    @param time the time in ms the value was captured
+    @param data the data
+ */
 void NUSensorsData::set(const id_t& id, double time, const float& data)
 {
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    for (size_t i=0; i<ids.size(); i++)
+        m_sensors[ids[i]].set(time, data);
 }
 
+/*! @brief Sets the current sensor reading for id. If id is a group the each element of data will be given to each member of the group
+    @param id the id of the targetted sensor
+    @param time the time in ms the value was captured
+    @param data the data
+ */
 void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
 {
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if id is a single sensor
+        m_sensors[ids[0]].set(time, data);
+    }
+    else if (numids == data.size())
+    {   // if id is a group of sensors
+        for (size_t i=0; i<numids; i++)
+            m_sensors[ids[i]].set(time, data[i]);
+    }
+    else
+    {
+        debug << "NUSensors::set(" << id.Name << "," << time << "," << data << "). The data is incorrectly formatted. ";
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+    }
 }
 
+/*! @brief Sets the current sensor reading for id. If id is a group the each element of data will be given to each member of the group
+    @param id the id of the targetted sensor
+    @param time the time in ms the value was captured
+    @param data the data
+ */
 void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> >& data)
 {
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if id is a single sensor
+        m_sensors[ids[0]].set(time, data);
+    }
+    else if (numids == data.size())
+    {   // if id is a group of sensors
+        for (size_t i=0; i<numids; i++)
+            m_sensors[ids[i]].set(time, data[i]);
+    }
+    else
+    {
+        debug << "NUSensors::set(" << id.Name << "," << time << "," << data << "). The data is incorrectly formatted. ";
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+    }
 }
 
+/*! @brief Sets the current sensor reading for id
+    @param id the id of the targetted sensor
+    @param time the time in ms the value was captured
+    @param data the data
+ */
 void NUSensorsData::set(const id_t& id, double time, const string& data)
 {
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::set(" << id.Name << "," << time << ",\"" << data << "\")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    for (size_t i=0; i<ids.size(); i++)
+        m_sensors[ids[i]].set(time, data);
 }
 
+/*! @brief Sets the readings for sensor id to be invalid 
+    @param id the id of the targetted sensor
+ */
 void NUSensorsData::setAsInvalid(const id_t& id)
 {
+    vector<int>& ids = mapIdToIndices(id);
+    for (size_t i=0; i<ids.size(); i++)
+        m_sensors[ids[i]].setAsInvalid();
 }
-
-void NUSensorsData::setVelocity(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-void NUSensorsData::setAcceleration(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-void NUSensorsData::setTarget(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-void NUSensorsData::setStiffness(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-void NUSensorsData::setCurrent(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-void NUSensorsData::setTemperature(const id_t& id, double time, const vector<float>& data)
-{
-}
-
-/*! @brief Sets the joint positions to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint position values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointPositions(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointPositions, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint velocities to the given values
-     @param time the time the data was collected in milliseconds
-     @param data the new joint velocities values
-     @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointVelocities(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointVelocities, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint accelerations to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint accelerations values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointAccelerations(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointAccelerations, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint targets to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint targets values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointTargets(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointTargets, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint stiffnesses to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint stiffnesses values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointStiffnesses(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointStiffnesses, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint currents to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint currents values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointCurrents(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointCurrents, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint torques to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint torques values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointTorques(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointTorques, time, data, iscalculated);
-}
-
-/*! @brief Sets the joint temperature to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new joint temperature values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setJointTemperatures(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(JointTemperatures, time, data, iscalculated);
-}
-
-/*! @brief Sets the accelerometer to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new accelerometer values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setBalanceAccelerometer(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(BalanceAccelerometer, time, data, iscalculated);
-}
-
-/*! @brief Sets the gyro to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the gyro values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setBalanceGyro(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(BalanceGyro, time, data, iscalculated);
-}
-
-/*! @brief Sets the hardware measurement of the robot's orientation
-    @param time the time the data was collected in milliseconds
-    @param data the orientation measurement
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setBalanceOrientationHardware(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(BalanceOrientationHardware, time, data, iscalculated);
-}
-
-/*! @brief Sets the left distance values to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new distance values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setDistanceLeftValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(DistanceLeftValues, time, data, iscalculated);
-}
-
-/*! @brief Sets the right distance values to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new distance values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setDistanceRightValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(DistanceRightValues, time, data, iscalculated);
-}
-
-/*! @brief Sets the foot sole values to the given values
- @param time the time the data was collected in milliseconds
- @param data the new foot sole values values
- @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setFootSoleValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(FootSoleValues, time, data, iscalculated);
-}
-
-/*! @brief Sets the foot bumper to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new foot bumper values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setFootBumperValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(FootBumperValues, time, data, iscalculated);
-}
-
-/*! @brief Sets the button values to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the new button values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setButtonValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(ButtonValues, time, data, iscalculated);
-}
-
-/*! @brief Sets the battery to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the battery values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setBatteryValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(BatteryValues, time, data, iscalculated);
-}
-
-/*! @brief Sets whether the fall engine is active
-    @param time the timestamp
-    @param active true if fall is active
- */ 
-void NUSensorsData::setMotionFallActive(double time, bool active)
-{
-    //vector<float> data(1,0);
-    //data[0] = active;
-    //setData(MotionFallActive, time, data, false);
-}
-
-/*! @brief Sets whether the getup engine is active
-    @param time the timestamp
-    @param active true if getup is active
- */ 
-void NUSensorsData::setMotionGetupActive(double time, bool active)
-{
-    //vector<float> data(1,0);
-    //data[0] = active;
-    //setData(MotionGetupActive, time, data, false);
-}
-
-/*! @brief Sets whether the kick engine is active
-    @param time the timestamp
-    @param active true if kick is active
- */ 
-void NUSensorsData::setMotionKickActive(double time, bool active)
-{
-    //vector<float> data(1,0);
-    //data[0] = active;
-    //setData(MotionKickActive, time, data, false);
-}
-
-/*! @brief Sets whether the save engine is active
-    @param time the timestamp
-    @param active true if save is active
- */ 
-void NUSensorsData::setMotionSaveActive(double time, bool active)
-{
-    //vector<float> data(1,0);
-    //data[0] = active;
-    //setData(MotionSaveActive, time, data, false);
-}
-
-/*! @brief Sets whether the script engine is active
-    @param time the timestamp
-    @param active true if script is active
- */
-void NUSensorsData::setMotionScriptActive(double time, bool active)
-{
-    //vector<float> data(1,0);
-    //data[0] = active;
-    //setData(MotionScriptActive, time, data, false);
-}
-
-/*! @brief Sets the current walk speed 
-    @param time the timestamp
-    @param speed [x,y,yaw]
- */
-void NUSensorsData::setMotionWalkSpeed(double time, vector<float>& speed)
-{
-    //setData(MotionWalkSpeed, time, speed, false);
-}
-
-/*! @brief Sets the current walk speed 
-    @param time the timestamp
-    @param speed the maximum speeds of [x,y,yaw]
- */
-void NUSensorsData::setMotionWalkMaxSpeed(double time, vector<float>& speed)
-{
-    //setData(MotionWalkMaxSpeed, time, speed, false);
-}
-
-/*! @brief Sets the completion time of the current head movement
-    @param time the time the data was set in milliseconds
-    @param completiontime the head movement completion time
- */
-void NUSensorsData::setMotionHeadCompletionTime(double time, double completiontime)
-{
-    //vector<float> ct(1,0);
-    //ct[0] = completiontime;
-    //setData(MotionHeadCompletionTime, time, ct, false);
-}
-
-/*! @brief Sets the GPS coordinates to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the GPS values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setGPSValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(GPS, time, data, iscalculated);
-}
-
-/*! @brief Sets the compass coordinates to the given values
-    @param time the time the data was collected in milliseconds
-    @param data the Compass values
-    @param iscalculated set this to true if the data has been calculated, false otherwise
- */
-void NUSensorsData::setCompassValues(double time, const vector<float>& data, bool iscalculated)
-{
-    //setData(Compass, time, data, iscalculated);
-}
-
 /******************************************************************************************************************************************
                                                                                                       Displaying Contents and Serialisation
  ******************************************************************************************************************************************/

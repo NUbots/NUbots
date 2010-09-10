@@ -52,6 +52,11 @@ NAOWebotsPlatform::~NAOWebotsPlatform()
 {
 }
 
+double NAOWebotsPlatform::getTime()
+{
+    return JRobot::getTime()*1000;
+}
+
 /*! @brief Initialises the NUPlatform's name
     Sets m_name.
  */

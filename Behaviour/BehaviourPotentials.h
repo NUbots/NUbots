@@ -270,9 +270,9 @@ public:
         vector<float> temp;
         float leftobstacle = 255;
         float rightobstacle = 255;
-        if (sensors->getDistanceLeftValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
             leftobstacle = temp[0];
-        if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
             rightobstacle = temp[0];
         
         if (fabs(speed[1]) > mathGeneral::PI/2)

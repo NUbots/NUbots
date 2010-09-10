@@ -215,7 +215,7 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
         return;
 
     vector<float> sensorpositions;
-    m_data->getJointPositions(NUSensorsData::Head, sensorpositions);
+    m_data->getPosition(NUSensorsData::Head, sensorpositions);
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
@@ -364,12 +364,12 @@ void NUHead::getSensorValues()
         m_camera_height = 46;
     
     vector<float> orientation;
-    m_data->getOrientation(orientation);
+    m_data->get(NUSensorsData::Orientation, orientation);
     if (orientation.size() > 2)
         m_body_pitch = orientation[1];
     
-    m_data->getJointPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
-    m_data->getJointPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
+    m_data->getPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
+    m_data->getPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
 }
 
 /*! @brief Calculates evenly spaced pitch values to pan at based on the camera field of view

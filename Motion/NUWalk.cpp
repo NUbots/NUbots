@@ -178,7 +178,7 @@ bool NUWalk::isActive()
     {
         vector<float> jointvelocities;
         float jointvelocitysum = 0.0f;
-        if(m_data->getJointVelocities(NUSensorsData::Body, jointvelocities))
+        if(m_data->getVelocity(NUSensorsData::Body, jointvelocities))
         {
             for (unsigned int i = 0; i < jointvelocities.size(); i++)
                 jointvelocitysum += fabs(jointvelocities[i]);
@@ -458,10 +458,10 @@ bool NUWalk::inInitialPosition()
     // get the current joint positions
     vector<float> sensor_larm, sensor_rarm;
     vector<float> sensor_lleg, sensor_rleg;
-    m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
-    m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
-    m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
-    m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
+    m_data->getPosition(NUSensorsData::LArm, sensor_larm);
+    m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
+    m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
+    m_data->getPosition(NUSensorsData::RLeg, sensor_rleg);
     
     // compare the sensor positions to the initial positions
     return allEqual(sensor_larm, m_initial_larm, 0.15f) and allEqual(sensor_rarm, m_initial_rarm, 0.15f) and allEqual(sensor_lleg, m_initial_lleg, 0.05f) and allEqual(sensor_rleg, m_initial_rleg, 0.05f);
@@ -486,10 +486,10 @@ void NUWalk::moveToInitialPosition()
         // get the current joint positions
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
-        m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
-        m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
-        m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
-        m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
+        m_data->getPosition(NUSensorsData::LArm, sensor_larm);
+        m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
+        m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
+        m_data->getPosition(NUSensorsData::RLeg, sensor_rleg);
         
         // compute the time required to move into the initial pose for each limb
         double time_larm = 1000*(maxDifference(sensor_larm, m_initial_larm)/movespeed);

@@ -28,6 +28,7 @@
 #define NAOWEBOTSSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "Infrastructure/NUData.h"
 #include "NAOWebotsPlatform.h"
 
 #include <vector>
@@ -75,6 +76,10 @@ private:
     vector<webots::TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
     webots::GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
     webots::Compass* m_compass;                                 //!< a pointer to the compass module of the robot available for testing (only in PRO)
+    
+    vector<NUData::id_t*> m_joint_ids;
+    vector<float> m_previous_positions;
+    vector<float> m_previous_velocities;
 };
 
 #endif

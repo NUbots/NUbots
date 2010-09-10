@@ -93,7 +93,7 @@ protected:
         // grab the pan end time
         if (not m_pan_started and m_time_in_state > 100)
         {
-            if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
+            if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;
         }
         
@@ -159,7 +159,7 @@ protected:
         {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
             vector<float> walkspeed;
-            if (m_data->getMotionWalkSpeed(walkspeed) and walkspeed[2] != 0)        
+            if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
                 m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
             else
                 m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;

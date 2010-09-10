@@ -83,7 +83,7 @@ protected:
         // grab the pan end time
         if (not m_pan_started and m_time_in_state > 200)
         {
-            if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
+            if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;
         }
     }

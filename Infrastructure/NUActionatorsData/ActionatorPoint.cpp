@@ -20,6 +20,8 @@
 
 #include "ActionatorPoint.h"
 
+#include "Tools/Math/StlVector.h"
+
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 using namespace boost;
@@ -103,7 +105,7 @@ bool ActionatorPoint::operator< (const ActionatorPoint& other) const
 ostream& operator<< (ostream& output, const ActionatorPoint& p)
 {
     output << p.Time << ": ";
-    /*if (p.FloatData)
+    if (p.FloatData)
         output << *p.FloatData;
     if (p.VectorData)
         output << *p.VectorData;
@@ -111,8 +113,8 @@ ostream& operator<< (ostream& output, const ActionatorPoint& p)
         output << p.MatrixData;
     if (p.ThreeDimData)
         output << p.ThreeDimData;
-    if (p.String)
-        output << p.String;*/
+    if (p.StringData)
+        output << p.StringData;
     return output;
 }
 

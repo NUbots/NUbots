@@ -55,7 +55,7 @@ public:
     
     // Time functions
     virtual long double getPosixTimeStamp();
-    double getTime();
+    virtual double getTime();
     double getRealTime();
     double getProcessTime();
     double getThreadTime();

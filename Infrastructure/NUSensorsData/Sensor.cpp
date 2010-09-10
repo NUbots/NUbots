@@ -37,6 +37,66 @@ Sensor::Sensor(string sensorname)
     ValidString = false;
 }
 
+/*! @brief Gets float sensor reading, returns true if sucessful, false otherwise 
+    @param data will be updated with reading
+    @return true if valid sensor reading, false otherwise
+ */
+bool Sensor::get(float& data)
+{
+    if (ValidFloat)
+    {
+        data = FloatData;
+        return true;
+    }
+    else
+        return false;
+}
+
+/*! @brief Gets vector sensor reading, returns true if sucessful, false otherwise 
+    @param data will be updated with reading
+    @return true if valid sensor reading, false otherwise
+ */
+bool Sensor::get(vector<float>& data)
+{
+    if (ValidVector)
+    {
+        data = VectorData;
+        return true;
+    }
+    else
+        return false;
+}
+
+/*! @brief Gets matrix sensor reading, returns true if sucessful, false otherwise 
+    @param data will be updated with reading
+    @return true if valid sensor reading, false otherwise
+ */
+bool Sensor::get(vector<vector<float> >& data)
+{
+    if (ValidMatrix)
+    {
+        data = MatrixData;
+        return true;
+    }
+    else
+        return false;
+}
+
+/*! @brief Gets string sensor reading, returns true if sucessful, false otherwise 
+    @param data will be updated with reading
+    @return true if valid sensor reading, false otherwise
+ */
+bool Sensor::get(string& data)
+{
+    if (ValidString)
+    {
+        data = StringData;
+        return true;
+    }
+    else
+        return false;
+}
+
 /*! @brief Updates the sensors data
     @param time the time in milliseconds the data was captured
     @param data the new sensor data
@@ -91,6 +151,14 @@ void Sensor::set(double time, const string& data)
     ValidFloat = false;
     ValidVector = false;
     ValidMatrix = false;
+}
+
+void Sensor::setAsInvalid()
+{
+    ValidFloat = false;
+    ValidVector = false;
+    ValidMatrix = false;
+    ValidString = false;
 }
 
 /*! @brief Provides a text summary of the contents of the Sensor

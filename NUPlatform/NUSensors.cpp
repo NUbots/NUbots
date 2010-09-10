@@ -48,7 +48,7 @@ NUSensors::NUSensors()
     debug << "NUSensors::NUSensors" << endl;
 #endif
     m_current_time = Platform->getTime();
-    m_previous_time = 0;
+    m_previous_time = -1000;
     m_data = new NUSensorsData();
 	m_kinematicModel = new Kinematics();
 	m_kinematicModel->LoadModel("None");
@@ -89,6 +89,7 @@ void NUSensors::update()
     debug << "NUSensors::update()" << endl;
 #endif
     m_current_time = Platform->getTime();
+    m_data->CurrentTime = m_current_time;
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
     
@@ -126,8 +127,6 @@ void NUSensors::copyFromHardwareCommunications()
 
 void NUSensors::calculateSoftSensors()
 {
-    calculateJointDerivatives();
-    
     calculateKinematics();
     calculateOrientation();
     calculateHorizon();
@@ -142,33 +141,6 @@ void NUSensors::calculateSoftSensors()
     calculateFallSense();
 }
 
-void NUSensors::calculateJointDerivatives()
-{
-    #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensors::calculateJointDerivatives()" << endl;
-    #endif
-    vector<float> positions, velocities, accelerations;
-    m_data->getJointPositions(NUSensorsData::All, positions);
-    if (m_previous_time != 0)
-    {
-        size_t numjoints = positions.size();
-        velocities.reserve(numjoints);
-        accelerations.reserve(numjoints);
-        float delta_t = (m_current_time - m_previous_time)/1000.0;
-        
-        for (size_t i=0; i<numjoints; i++)
-        {
-            velocities.push_back((positions[i] - m_previous_joint_positions[i])/delta_t);
-            accelerations.push_back((velocities[i] - m_previous_joint_velocities[i])/delta_t);
-        }
-    }
-    m_data->setVelocity(NUSensorsData::All, m_current_time, velocities);
-    m_data->setAcceleration(NUSensorsData::All, m_current_time, accelerations);
-    
-    m_previous_joint_positions = positions;
-    m_previous_joint_velocities = velocities;
-}
-
 /*! @brief Updates the orientation estimate using the current sensor data
  */
 void NUSensors::calculateOrientation()
@@ -181,7 +153,7 @@ void NUSensors::calculateOrientation()
     static vector<float> gyros(3, 0.0f);
     static vector<float> gyroOffset(3, 0.0f);
     
-    if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
+    if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
         if(!m_orientationFilter->Initialised())
         {
@@ -227,9 +199,9 @@ void NUSensors::calculateHorizon()
     Horizon HorizonLine;
     vector<float> orientation;
     float headYaw, headPitch;
-    bool validdata = m_data->getOrientation(orientation);
-    validdata &= m_data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-    validdata &= m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    bool validdata = m_data->get(NUSensorsData::Orientation, orientation);
+    validdata &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
+    validdata &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
     int camera = 1;
 
     if (validdata)
@@ -258,9 +230,10 @@ void NUSensors::calculateButtonTriggers()
     static float prevLeftState = 0;
     static float prevRightState = 0;
     
-	vector<float> tempData;
-    if (m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
+	vector<float> buttons(3,0);
+    if (m_data->get(NUSensorsData::MainButton, buttons[0]) and m_data->get(NUSensorsData::LeftButton, buttons[1]) and m_data-get(NUSensorsData::RightButton, buttons[2]))
     {
+//        for (size_t i=0; i<buttons.size()
         if (tempData[0] > 0.5)
             nextChestDuration += (m_current_time - m_previous_time);
         else if (prevChestState > 0.5)
@@ -271,7 +244,8 @@ void NUSensors::calculateButtonTriggers()
         prevChestState = tempData[0];
     }
     
-    if(m_data->getFootBumperValues(NUSensorsData::All, tempData) && tempData.size() >= 2)
+    
+    if(m_data->get(NUSensorsData::LeftButton, left) && tempData.size() >= 2)
     {
         if (tempData[0] > 0.5)
             nextLeftDuration += (m_current_time - m_previous_time);
@@ -327,8 +301,7 @@ void NUSensors::calculateFallSense()
     static vector<float> falling(5,0);
     static vector<float> fallen(5,0);
     
-    m_data->getOrientation(orientation);
-    m_data->getGyroFilteredValues(angularvelocity);
+    m_data->get(NUSensorsData::Orientation, orientation);
     
     // check if fallen left
     if (orientation[0] < -RollFallenThreshold)
@@ -617,7 +590,7 @@ void NUSensors::calculateOdometry()
     if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
     float hipYawPitch;
-    m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
+    bool yawPositionOk = m_data->getPosition(NUSensorsData::LHipYawPitch, hipYawPitch);
 
     const int arrayWidth = 4;
     const int translationCol = 3;
@@ -643,7 +616,7 @@ void NUSensors::calculateOdometry()
         rightPositionOk = true;
     }
 
-    if(!rightPositionOk || !leftPositionOk) return;
+    if(!rightPositionOk or !leftPositionOk or !yawPositionOk) return;
 
     bool leftFootSupport = false;
     bool rightFootSupport = false;
@@ -702,11 +675,11 @@ void NUSensors::calculateKinematics()
     const double time = m_data->CurrentTime;
 
     static vector<float> leftLegJoints(6,0.0f);
-    bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LLeg,leftLegJoints);
+    bool leftLegJointsSuccess = m_data->getPosition(NUSensorsData::LLeg, leftLegJoints);
     static vector<float> rightLegJoints(6,0.0f);
-    bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RLeg,rightLegJoints);
+    bool rightLegJointsSuccess = m_data->getPosition(NUSensorsData::RLeg, rightLegJoints);
     static vector<float> headJoints(2,0.0f);
-    bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::Head,headJoints);
+    bool headJointsSuccess = m_data->getPosition(NUSensorsData::Head, headJoints);
 
     Matrix rightLegTransform;
     Matrix leftLegTransform;

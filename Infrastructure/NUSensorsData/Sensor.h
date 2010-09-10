@@ -37,10 +37,17 @@ class Sensor
 {
 public:
     Sensor(string sensorname);
+    
+    bool get(float& data);
+    bool get(vector<float>& data);
+    bool get(vector<vector<float> >& data);
+    bool get(string& data);
+    
     void set(double time, const float& data);
     void set(double time, const vector<float>& data);
     void set(double time, const vector<vector<float> >& data);
     void set(double time, const string& data);
+    void setAsInvalid();
     
     void summaryTo(ostream& output) const;
     

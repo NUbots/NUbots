@@ -151,10 +151,10 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
     {
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
-        m_data->getJointPositions(NUSensorsData::LArm, sensor_larm);
-        m_data->getJointPositions(NUSensorsData::RArm, sensor_rarm);
-        m_data->getJointPositions(NUSensorsData::LLeg, sensor_lleg);
-        m_data->getJointPositions(NUSensorsData::RLeg, sensor_rleg);
+        m_data->getPosition(NUSensorsData::LArm, sensor_larm);
+        m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
+        m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
+        m_data->getPosition(NUSensorsData::RLeg, sensor_rleg);
         
         m_actions->add(NUActionatorsData::LLeg, 0, sensor_lleg, 0);
         m_actions->add(NUActionatorsData::RLeg, 0, sensor_rleg, 0);
