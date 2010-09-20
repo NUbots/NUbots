@@ -37,11 +37,10 @@ using namespace boost::accumulators;
 PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_min_step_size = 0.02;
-    m_max_step_size = 0.05;			// 0.5 is too big, 0.2 might be OK to start with, 0.1 is too big 
-    									// 0.05 is quite good. About 8.0 cm/s
-    									// 0.025 is too small
-    m_epsilon = 0.015;
-    m_num_per_iteration = 10;
+    
+    m_max_step_size = 0.02;		    // Tune this	
+    m_epsilon = 0.015;              // Tune this
+    m_num_per_iteration = 5;       // Tune this
     
     srand(static_cast<unsigned int> (clock()*clock()*clock()));
     m_current_parameters = parameters;
@@ -59,7 +58,6 @@ void PGRLOptimiser::setParametersResult(float fitness)
     m_random_policies_index++;
     if ((unsigned int) m_random_policies_index == m_random_policies.size())
     {
-        debug << "fitnesses: " << m_fitnesses << endl;
         m_current_parameters += calculateStep();
         generateRandomPolices(m_current_parameters);
     }
@@ -81,7 +79,6 @@ void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
     for (int i=0; i<m_num_per_iteration; i++)
         m_random_policies.push_back(generateRandomPolicy(seed));
     
-    debug << "policies: " << endl;
     for (size_t i=0; i<m_random_policies.size(); i++)
         debug << m_random_policies[i] << endl;
 }
@@ -142,15 +139,12 @@ vector<float> PGRLOptimiser::calculateStep()
             average_zero = mean(accum_zero);
             average_plus = mean(accum_plus);
             
-            debug << "dim:" << i << " minus:" << average_minus << " average_zero:" << average_zero << " average_plus:" << average_plus << endl;
-            
             if (average_zero > average_plus and average_zero > average_minus)
                 A[i] = 0;
             else
                 A[i] = m_max_step_size*tanh(average_plus - average_minus)*(m_current_parameters[i].max() - m_current_parameters[i].min());
         }
     }
-    debug << A << endl;
     return A;
 }
 

@@ -56,8 +56,8 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     } 
     
     m_parameters.load("NBWalkStart");
-    m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", m_parameters.getAsParameters());
-    //m_optimiser = new PGRLOptimiser("PGRL", m_parameters.getAsParameters());    
+    //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", m_parameters.getAsParameters());
+    m_optimiser = new PGRLOptimiser(id.str() + "PGRL", m_parameters.getAsParameters());    
     //m_optimiser = new PSOOptimiser("PSO", m_parameters.getAsParameters());
     m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
     
