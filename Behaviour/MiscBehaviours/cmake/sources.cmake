@@ -22,6 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  SelectBehaviourProvider.cpp SelectBehaviourProvider.h
                 VisionCalibrationProvider.cpp VisionCalibrationProvider.h
+		PoseProvider.cpp PoseProvider.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
