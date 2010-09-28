@@ -38,9 +38,9 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
 {
     m_min_step_size = 0.02;
     
-    m_max_step_size = 0.02;		    // Tune this	
-    m_epsilon = 0.015;              // Tune this
-    m_num_per_iteration = 5;       // Tune this
+    m_max_step_size = 0.03;		    // Tune this 0.03	
+    m_epsilon = 0.015;              // Tune this 0.015
+    m_num_per_iteration = 5;        // Tune this 5
     
     srand(static_cast<unsigned int> (clock()*clock()*clock()));
     m_current_parameters = parameters;
