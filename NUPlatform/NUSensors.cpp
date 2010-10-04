@@ -253,23 +253,22 @@ void NUSensors::calculateHorizon()
     debug << "NUSensors::calculateHorizon()" << endl;
 #endif
     Horizon HorizonLine;
-    float bodyPitch;
-    float bodyRoll;
-    bodyRoll = m_data->BalanceOrientation->Data[0];
-    bodyPitch = m_data->BalanceOrientation->Data[1];
-    float headYaw;
-    m_data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-    float headPitch;
-    m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    vector<float> orientation;
+    float headYaw, headPitch;
+    bool validdata = m_data->getOrientation(orientation);
+    validdata &= m_data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
+    validdata &= m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
     int camera = 1;
-
-    HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
-    vector<float> line;
-    line.reserve(3);
-    line.push_back(HorizonLine.getA());
-    line.push_back(HorizonLine.getB());
-    line.push_back(HorizonLine.getC());
-    m_data->BalanceHorizon->setData(m_current_time, line, true );
+    if (validdata)
+    {
+        HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
+        vector<float> line;
+        line.reserve(3);
+        line.push_back(HorizonLine.getA());
+        line.push_back(HorizonLine.getB());
+        line.push_back(HorizonLine.getC());
+        m_data->BalanceHorizon->setData(m_current_time, line, true );
+    }
 }
 
 
@@ -357,10 +356,12 @@ void NUSensors::calculateFallSense()
     float acceleration_mag;
     vector<float> orientation;
     vector<float> angularvelocity;
-    m_data->getAccelerometerValues(acceleration);
-    m_data->getOrientation(orientation);
-    m_data->getGyroFilteredValues(angularvelocity);
+    bool validdata = m_data->getAccelerometerValues(acceleration);
+    validdata &= m_data->getOrientation(orientation);
+    validdata &= m_data->getGyroFilteredValues(angularvelocity);
     
+    if (not validdata)
+        return;
     acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
     // check if the robot has fallen over
     vector<float> fallen(5,0);
