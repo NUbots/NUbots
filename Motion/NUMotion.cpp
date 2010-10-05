@@ -622,8 +622,9 @@ void NUMotion::updateMotionSensors()
         m_walk->getMaximumSpeed(speed);
         m_data->setMotionWalkMaxSpeed(m_current_time, speed);
     #else
-        m_data->setMotionWalkSpeed(m_current_time, vector<float> (3,0));
-        m_data->setMotionWalkMaxSpeed(m_current_time, vector<float> (3, 0.1));
+        vector<float> zeros(3,0);
+        m_data->setMotionWalkSpeed(m_current_time, zeros);
+        m_data->setMotionWalkMaxSpeed(m_current_time, zeros);
     #endif
     #ifdef USE_HEAD
         m_data->setMotionHeadCompletionTime(m_current_time, m_head->getCompletionTime());

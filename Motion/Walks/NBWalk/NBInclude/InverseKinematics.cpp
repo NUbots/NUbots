@@ -3,6 +3,7 @@
 #include "InverseKinematics.h"
 
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 #define USE_ANALYTIC_IK
 //#define DEBUG_IK
@@ -67,12 +68,15 @@ const Kinematics::IKLegResult
 #else
     #error "JACOBIAN IK NOT SETUP RIGHT NOW"
 #endif
-    if(result.outcome != Kinematics::SUCCESS){
-        debug << "IK ERROR with leg"<<chainID <<" :"
-             <<"    tried to put foot to "<<footGoal
-             << "      with orientation  "<<footOrientation<<endl
-             <<"    tried to put body to "<<bodyGoal
-             << "      with orientation  "<<bodyOrientation<<endl;
+    if(result.outcome != Kinematics::SUCCESS)
+    {
+         #if DEBUG_NUMOTION_VERBOSITY > 0
+            debug << "IK ERROR with leg"<<chainID <<" :"
+                 <<"    tried to put foot to "<<footGoal
+                 << "      with orientation  "<<footOrientation<<endl
+                 <<"    tried to put body to "<<bodyGoal
+                 << "      with orientation  "<<bodyOrientation<<endl;
+         #endif
     }
     return result;
 

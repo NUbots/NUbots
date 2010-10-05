@@ -22,6 +22,8 @@
 #include "EHCLSOptimiser.h"
 #include "Parameter.h"
 
+#include "NUPlatform/NUSystem.h"
+
 #include <boost/random.hpp>
 
 #include "debug.h"
@@ -46,7 +48,10 @@ EHCLSOptimiser::EHCLSOptimiser(std::string name, vector<Parameter> parameters) :
     m_improvement = 1e100;
     m_previous_improvement = 1e100;
     
-    // for NBWalk 0.125, 5, 0.98 is the best combination of parameters
+    // for NBWalk in Webots 0.125, 5, 0.98 is the best combination of parameters
+    // The algorithm appears to work best when the reset limit is low, this means we only search
+    // along the direction of the last improvement for a short time. The reset fraction is high
+    // so we don't back track to far     
     m_neta = 0.125;               // tune this parameter
     m_reset_limit = 5;            // tune this parameter
     m_reset_fraction = 0.98;      // tune this parameter
@@ -140,7 +145,7 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
  */
 float EHCLSOptimiser::normalDistribution(float mean, float sigma)
 {
-    static unsigned int seed = clock()*clock()*clock();          // I am hoping that at least one of the three calls is different for each process
+    static unsigned int seed = 1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime();          // I am hoping that at least one of the three calls is different for each process
     static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
     static boost::normal_distribution<float> distribution(0,1);
     static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);

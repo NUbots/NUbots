@@ -32,6 +32,8 @@
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
 
+#include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 #include "nubotdataconfig.h"
@@ -49,16 +51,18 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         int instance_id = 0;
         id_file >> instance_id;
         instance_id++;
-        id_file.seekp(0);
-        id_file << instance_id;
         id << instance_id;
+        id_file.seekp(0, fstream::beg);
+        id_file << instance_id << endl;
         id_file.close();
     } 
     
     m_parameters.load("NBWalkStart");
-    //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", m_parameters.getAsParameters());
-    m_optimiser = new PGRLOptimiser(id.str() + "PGRL", m_parameters.getAsParameters());    
-    //m_optimiser = new PSOOptimiser("PSO", m_parameters.getAsParameters());
+    vector<Parameter> parameters = m_parameters.getAsParameters();
+    parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
+    //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
+    //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
+    m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
     m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
@@ -100,6 +104,9 @@ WalkOptimisationProvider::~WalkOptimisationProvider()
 
 BehaviourState* WalkOptimisationProvider::nextStateCommons()
 {
+    if (nusystem->getTime() > 20*60*60*1e3)
+        exit(1);
+
     while (m_game_info->getCurrentState() != GameInformation::PlayingState)
         m_game_info->doManualStateChange();
     

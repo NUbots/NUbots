@@ -22,6 +22,8 @@
 #include "PGRLOptimiser.h"
 #include "Parameter.h"
 
+#include "NUPlatform/NUSystem.h"
+
 #include <cstdlib>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
@@ -38,11 +40,16 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
 {
     m_min_step_size = 0.02;
     
-    m_max_step_size = 0.02;		    // Tune this	
-    m_epsilon = 0.015;              // Tune this
-    m_num_per_iteration = 5;       // Tune this
+    // I really like this algorithm, but it converges too slowly
+    // Setting the stepsize higher doesn't improve it as much as it does with the hill-climb
+    // It appears setting epsilon to be equal to the step size improves the algorithm
+    // This effectively means we are calculating the gradient using a step size equivalent to the maximum possible step size
     
-    srand(static_cast<unsigned int> (clock()*clock()*clock()));
+    m_max_step_size = 0.03;        // Tune this	
+    m_epsilon = 0.03;              // Tune this
+    m_num_per_iteration = 10;      // Tune this
+    
+    srand(static_cast<unsigned int> (1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime()));
     m_current_parameters = parameters;
     generateRandomPolices(m_current_parameters);
 }
