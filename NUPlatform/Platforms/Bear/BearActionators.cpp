@@ -35,8 +35,8 @@ vector<string> BearActionators::m_servo_control_names(temp_servo_control_names, 
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
                                     string("TorsoPitch"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
+                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), \
+                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), \
                                     string("TorsoRoll"), string("TorsoYaw"), \
                                     string("LHipRoll"),  string("LHipPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
                                     string("RHipRoll"),  string("RHipPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
@@ -85,9 +85,11 @@ void BearActionators::copyToHardwareCommunications()
         {
             if (isvalid[i])
             {
-                float speed = 440*fabs(position[i] - JointPositions[i])/(time[i] - m_current_time);     
-                cout << i << " " << position[i] << " " << speed << endl;
-                m_motors->updateControl(Motors::IndexToMotorID[i], position[i], speed, -1);
+                // 195.379 converts radians to motor units, and Motors::DefaultPositions are the calibrated zero positions
+                float motorposition = Motors::MotorSigns[i]*position[i]*195.379 + Motors::DefaultPositions[i];                  
+                float speed = 1000*fabs(motorposition - JointPositions[i])/(time[i] - m_current_time);     
+                
+                m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, speed, -1);
             }
         }
     }

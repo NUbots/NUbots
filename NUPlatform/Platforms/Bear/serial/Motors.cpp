@@ -33,7 +33,9 @@ unsigned char Motors::MotorIDToIndex[MOTORS_MAX_ID+1] = {-1, -1, 10, 9, 4, 7, 3,
 unsigned char Motors::LowerBodyIndexToMotorID[MOTORS_NUM_LOWER_MOTORS] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
 unsigned char Motors::UpperBodyIndexToMotorID[MOTORS_NUM_UPPER_MOTORS] = {};
 
+//                                                               HP    HY    TP   LSR   LSP   LEP   RSR   RSP   REP    TR    TY   LHR   LHP    LK   LAR   LAP   RHR   RHP    RK   RAR   RAP
 //                                                                0    1     2     3     4     5     6     7     8    9     10    11    12    13    14    15    16    17    18    19    20  
+char Motors::MotorSigns[MOTORS_NUM_MOTORS] =                   { -1,    1,    1,   -1,    1,    1,   -1,   -1,   -1,   -1,    1,   -1,    1,    1,    1,    1,   -1,   -1,   -1,    1,   -1}; 
 unsigned short Motors::DefaultPositions[MOTORS_NUM_MOTORS] =   {499,  481,  374,  709,  526,  612,  318,  500,  412,  525,  528,  657,  372,  390,  773,  653,  563,  642,  650,  500,  389}; 
 unsigned short Motors::DefaultSpeeds[MOTORS_NUM_MOTORS] =      {100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100}; 
 // Compliance Settings. Remember the slope has to be a power of 2, and cannot be changed online without producing jerk
@@ -57,7 +59,7 @@ Motors::Motors()
     initRequestMessages();
     initSerial();
     initReturnDelays();
-    //initControlTables();  //<-- I don't need to change this, however, occasionally the motor does resort back to 57k baud rate
+    initControlTables();  //<-- I don't need to change this, however, occasionally the motor does resort back to 57k baud rate
     initSlopes();
     initMargins();
     // initPunches(); the punch is now used as a control variable

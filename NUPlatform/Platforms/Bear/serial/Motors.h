@@ -148,12 +148,12 @@ class Motors
    
    public:
       static unsigned char MotorIDToLowerBody[];
-      static char MotorIDToSign[];
       static unsigned char LowerBodyIndexToMotorID[];
       static unsigned char UpperBodyIndexToMotorID[];
       static unsigned char IndexToMotorID[];
       static unsigned char MotorIDToIndex[];  
       
+      static char MotorSigns[];
       static unsigned short DefaultPositions[];
       static unsigned short DefaultSpeeds[];
    

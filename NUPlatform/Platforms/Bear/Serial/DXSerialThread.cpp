@@ -67,8 +67,4 @@ void DXSerialThread::periodicFunction()
     
     if (m_sensor_thread)
         m_sensor_thread->startLoop();
-    
-    for (int i=0; i<MOTORS_NUM_MOTORS; i++)
-        cout << (int) JointPositions[i] << ", ";
-    cout << endl;
 }
