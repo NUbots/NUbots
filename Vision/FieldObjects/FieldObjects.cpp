@@ -266,22 +266,19 @@ std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
         output << p_fob.ambiguousFieldObjects[i];
     return output;
 }
-#include <qdebug.h>
+
 std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
 {
-    qDebug() << "Reading in Self";
     input >> p_fob.self;
 
     int size;
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
-    qDebug() << "Reading in " << size << " stationary objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.stationaryFieldObjects[i];
     }
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
-    qDebug() << "Reading in " << size << " mobile objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.mobileFieldObjects[i];
@@ -289,7 +286,6 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
     p_fob.ambiguousFieldObjects.resize(size);
-    qDebug() << "Reading in " << size << " ambiguous objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.ambiguousFieldObjects[i];
