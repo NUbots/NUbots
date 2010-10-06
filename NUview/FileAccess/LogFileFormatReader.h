@@ -8,6 +8,7 @@
 class Localisation;
 class NUSensorsData;
 class NUimage;
+class LocWmFrame;
 
 class LogFileFormatReader : public QObject
 {
@@ -35,6 +36,7 @@ public:
 
 signals:
     void LocalisationDataChanged(const Localisation*);
+    void LocalisationFrameChanged(const LocWmFrame*);
     void rawImageChanged(const NUimage*);
     void sensorDataChanged(const float*,const float*,const float*);
     void sensorDataChanged(NUSensorsData*);
