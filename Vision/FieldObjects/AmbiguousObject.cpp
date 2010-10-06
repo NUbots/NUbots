@@ -41,10 +41,12 @@ void AmbiguousObject::setVisibility(bool newIsVisible)
 
 std::ostream& operator<< (std::ostream& output, const AmbiguousObject& p_amb)
 {
+    int size;
     output << *static_cast<const Object*>(&p_amb);
-    output << p_amb.PossibleObjectIDs.size() << ' ';
-    for(int i = 0; i < p_amb.PossibleObjectIDs.size(); i++)
-        output << p_amb.PossibleObjectIDs[i] << ' ';
+    size = p_amb.PossibleObjectIDs.size();
+    output.write(reinterpret_cast<const char*>(&size), sizeof(size));
+    for(int i = 0; i < size; i++)
+        output.write(reinterpret_cast<const char*>(&p_amb.PossibleObjectIDs[i]), sizeof(p_amb.PossibleObjectIDs[i]));
     return output;
 }
 
@@ -53,11 +55,11 @@ std::istream& operator>> (std::istream& input, AmbiguousObject& p_amb)
     input >> *static_cast<Object*>(&p_amb);
     unsigned int numEntries;
     int id;
-    input >> numEntries;
+    input.read(reinterpret_cast<char*>(&numEntries), sizeof(numEntries));
     p_amb.PossibleObjectIDs.clear();
     for(int i = 0; i < numEntries; i++)
     {
-        input >> id;
+        input.read(reinterpret_cast<char*>(&id), sizeof(id));
         p_amb.PossibleObjectIDs.push_back(id);
     }
     return input;

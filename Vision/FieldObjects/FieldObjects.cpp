@@ -1,6 +1,7 @@
 #include "FieldObjects.h"
 #include <string>
 #include <debug.h>
+
 FieldObjects::FieldObjects()
 {
         InitStationaryFieldObjects();
@@ -247,42 +248,48 @@ void FieldObjects::InitMobileFieldObjects()
 
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 {
+    int size;
     output << p_fob.self;
-    output << p_fob.stationaryFieldObjects.size() << ' ';
+    size = p_fob.stationaryFieldObjects.size();
+    output.write(reinterpret_cast<const char*>(&size), sizeof(size));
     for(unsigned int i=0; i < p_fob.stationaryFieldObjects.size(); i++)
         output << p_fob.stationaryFieldObjects[i];
 
-    output << p_fob.mobileFieldObjects.size() << ' ';
+    size = p_fob.mobileFieldObjects.size();
+    output.write(reinterpret_cast<const char*>(&size), sizeof(size));
     for(unsigned int i=0; i < p_fob.mobileFieldObjects.size(); i++)
         output << p_fob.mobileFieldObjects[i];
 
-    output << p_fob.ambiguousFieldObjects.size() << ' ';
+    size = p_fob.ambiguousFieldObjects.size();
+    output.write(reinterpret_cast<const char*>(&size), sizeof(size));
     for(unsigned int i=0; i < p_fob.ambiguousFieldObjects.size(); i++)
         output << p_fob.ambiguousFieldObjects[i];
-    output << endl;
     return output;
 }
-
+#include <qdebug.h>
 std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
 {
+    qDebug() << "Reading in Self";
     input >> p_fob.self;
 
     int size;
-
-    input >> size;
+    input.read(reinterpret_cast<char*>(&size), sizeof(size));
+    qDebug() << "Reading in " << size << " stationary objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.stationaryFieldObjects[i];
     }
 
-    input >> size;
+    input.read(reinterpret_cast<char*>(&size), sizeof(size));
+    qDebug() << "Reading in " << size << " mobile objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.mobileFieldObjects[i];
     }
 
-    input >> size;
+    input.read(reinterpret_cast<char*>(&size), sizeof(size));
     p_fob.ambiguousFieldObjects.resize(size);
+    qDebug() << "Reading in " << size << " ambiguous objects";
     for(int i=0; i < size; i++)
     {
         input >> p_fob.ambiguousFieldObjects[i];
