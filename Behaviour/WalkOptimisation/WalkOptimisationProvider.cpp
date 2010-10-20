@@ -57,12 +57,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("NBWalkStart");
+    m_parameters.load("NBWalkSpeedWithStiffnessPSO6Cost");
     vector<Parameter> parameters = m_parameters.getAsParameters();
-    parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
+    //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
     //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
-    m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
+    //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
+    m_optimiser = NULL;    
     m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
@@ -132,13 +133,20 @@ void WalkOptimisationProvider::tickOptimiser()
 {
     m_iteration_count++;
     // save the state of the optimiser, and the walk parameters in case of hardware failure.
-    m_optimiser->save();
+    if (m_optimiser)
+        m_optimiser->save();
     
     // update the optimiser and give the next set of parameters to the walk engine
     if (m_iteration_count != 0)
-        m_optimiser->setParametersResult(calculateFitness());
-    vector<float> nextparameters = m_optimiser->getNextParameters();
-    m_parameters.set(nextparameters);
+    {
+        float fitness = calculateFitness();
+        if (m_optimiser)
+        {            
+            m_optimiser->setParametersResult(fitness);
+            vector<float> nextparameters = m_optimiser->getNextParameters();
+            m_parameters.set(nextparameters);
+        }
+    }
     m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
     
     // reset the fitness
@@ -149,7 +157,8 @@ void WalkOptimisationProvider::tickOptimiser()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
         debug << "WalkOptimisationProvider::tickOptimiser" << endl;
         m_parameters.summaryTo(debug);
-        m_optimiser->summaryTo(debug);
+        if (m_optimiser)
+            m_optimiser->summaryTo(debug);
     #endif
 }
 
@@ -158,41 +167,43 @@ float WalkOptimisationProvider::calculateFitness()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
         debug << "WalkOptimisationProvider::calculateFitness() " << m_duration << " " << m_energy << " " << m_stability << endl;
         m_parameters.summaryTo(debug);
-        m_optimiser->summaryTo(debug);
+        if (m_optimiser)
+            m_optimiser->summaryTo(debug);
     #endif
     float fitness = 0;
     float speed = 0;
     float cost = 0;
     if (m_duration == 0 and m_stability == 0)
     {	// we have fallen over before actually reaching the start of the evaluation
-        fitness = 0;
+        cost = 1000;        
+        speed = 0;
     }
     else if (m_energy == 0 and m_stability == 0)
     {	// we have fallen over during the evaluation
-        if (m_duration > 120000)
-            fitness = 0;
-        else
-        {
-            vector<float>& speeds = m_parameters.getMaxSpeeds();
-            float travelleddistance = 0.1*speeds[0]*m_duration/1000;
-            float pathdistance = calculatePathDistance();
-            float predictedfalls = pathdistance/travelleddistance;
-            fitness = pathdistance/(pathdistance/(0.1*speeds[0]) + predictedfalls*15);
-        }
+        vector<float>& speeds = m_parameters.getMaxSpeeds();
+        float travelleddistance = 0.1*speeds[0]*m_duration/1000;
+        float pathdistance = calculatePathDistance();
+        travelleddistance = min(travelleddistance, pathdistance);
+        float predictedfalls = pathdistance/travelleddistance;
+        
+        cost = 100*(3000 + predictedfalls*(9.81*4.6*0.3)*4)/(9.81*4.6*travelleddistance);            // note: m_energy=0, so i cant use that in the metric
+        speed = pathdistance/(pathdistance/1.5 + predictedfalls*15);
     }
     else if (m_stability == 0)
     {	// we are not using the stability metric
-        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
         cost = 100*m_energy/(9.81*4.6*calculatePathDistance()); 	// J/Nm
-     	fitness = speed;   
+        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     else
     {	// we are not using the stability metric
-        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
         cost = 100*m_energy/(9.81*4.6*calculatePathDistance()); 	// J/Nm
-        fitness = 1000*calculatePathDistance()/m_duration;
+        speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     
+    //fitness = speed;
+    //fitness = 1000 - cost;          // the optimisers all try to maximise the fitness, and they do not work with negative numbers
+    fitness = 180/(4+cost);    
+
     m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl << flush;
     
     return fitness;
@@ -232,7 +243,9 @@ float WalkOptimisationProvider::stoppingDistance()
 {
     vector<float>& speeds = m_parameters.getMaxSpeeds();
     vector<float>& accels = m_parameters.getMaxAccelerations();
-    return pow(1.1*speeds[0],2)/(2*accels[0]);              // s = u^2/2a with a 10% margin for error
+    float xd = pow(1.1*speeds[0],2)/(2*accels[0]);          // s = u^2/2a with a 10% margin for error
+    float yd = pow(1.1*speeds[1],2)/(2*accels[1]);
+    return sqrt(xd*xd + yd*yd);              
     
 }
 
