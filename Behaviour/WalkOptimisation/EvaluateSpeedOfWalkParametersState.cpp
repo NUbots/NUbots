@@ -92,6 +92,7 @@ void EvaluateSpeedOfWalkParametersState::startEvaluation()
     m_trial_start_time = m_data->CurrentTime;
     m_energy_used = 0;
     m_previous_positions.clear();
+    m_previous_time = 0;
     
     #if DEBUG_BEHAVIOUR_VERBOSITY > 3
         debug << "EvaluateSpeedOfWalkParametersState::startEvaluation() target:[" << m_current_target_state[0] << "," << m_current_target_state[1] << "," << m_current_target_state[2] << "]" << endl;
@@ -134,8 +135,9 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
     {
         // This code has never been tested, but should be OK on NAO
         float voltage = 3*(battery[2] + battery[3])/1000.0;        					// this has been hastily ported over from 2009!
-        float current = battery[1];
-        m_energy_used += voltage*current*(m_data->CurrentTime - m_previous_time)/1000;
+        float current = -battery[1];
+        if (m_previous_time != 0)
+            m_energy_used += voltage*current*(m_data->CurrentTime - m_previous_time)/1000;
     }
     else if (currentsavailable)
     {
@@ -204,9 +206,7 @@ bool EvaluateSpeedOfWalkParametersState::allPointsReached()
         return false;
     else
     {
-        vector<float> speed;
-        m_data->getMotionWalkSpeed(speed);
-        if (norm(speed) < 4 and m_current_point_index == m_points.size()-1)
+        if (m_current_point_index == m_points.size()-1)
             return true;
         else
             return false;

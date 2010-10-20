@@ -40,11 +40,6 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
 {
     m_min_step_size = 0.02;
     
-    // I really like this algorithm, but it converges too slowly
-    // Setting the stepsize higher doesn't improve it as much as it does with the hill-climb
-    // It appears setting epsilon to be equal to the step size improves the algorithm
-    // This effectively means we are calculating the gradient using a step size equivalent to the maximum possible step size
-    
     m_max_step_size = 0.03;        // Tune this	
     m_epsilon = 0.03;              // Tune this
     m_num_per_iteration = 10;      // Tune this
