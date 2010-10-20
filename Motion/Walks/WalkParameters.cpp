@@ -188,7 +188,7 @@ vector<vector<float> >& WalkParameters::getLegGains()
  */
 void WalkParameters::set(const vector<float>& data)
 {
-    if (data.size() != size())
+    if (data.size() < m_max_speeds.size() + m_max_accelerations.size() + m_parameters.size())
         return;
     else
     {
@@ -201,16 +201,21 @@ void WalkParameters::set(const vector<float>& data)
         for (size_t i=0; i<m_max_accelerations.size(); i++)
             m_max_accelerations[i] = data[i+offset];
         offset += m_max_accelerations.size();
-        
+
         for (size_t i=0; i<m_parameters.size(); i++)
             m_parameters[i].set(data[i+offset]);
         offset += m_parameters.size();
         
-        for (size_t i=0; i<m_leg_gains.size(); i++)
+        if (data.size() < size())               // check if the new parameters includes stiffnesses for the legs, 
+            return;
+        else
         {
-            for (size_t j=0; j<m_leg_gains[i].size(); j++)
-                m_leg_gains[i][j] = data[offset+j];
-            offset += m_leg_gains[i].size();
+            for (size_t i=0; i<m_leg_gains.size(); i++)
+            {
+                for (size_t j=0; j<m_leg_gains[i].size(); j++)
+                    m_leg_gains[i][j] = data[offset+j];
+                offset += m_leg_gains[i].size();
+            }
         }
     }
 }

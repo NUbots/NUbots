@@ -34,6 +34,7 @@ IF(NUBOT_USE_MOTION)
 	LIST(APPEND NUBOT_DIRS Motion)
 ELSE()
     LIST(APPEND NUBOT_SRCS ../Motion/Walks/WalkParameters.cpp ../Motion/Walks/WalkParameters.h)
+    LIST(APPEND NUBOT_DIRS Motion/Tools)
 ENDIF()
 
 # list the top-level files here
