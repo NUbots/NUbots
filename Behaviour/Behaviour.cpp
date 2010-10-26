@@ -29,6 +29,8 @@
 #include "WalkOptimisation/WalkOptimisationProvider.h"
 #include "Kicker/KickerProvider.h"
 #include "PassingChallenge/PassingChallengeProvider.h"
+#include "MiscBehaviours/PoseProvider.h"
+#include "MiscBehaviours/ScriptedPoseProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -101,6 +103,11 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new WalkOptimisationProvider(this);
     else if (name.find("kicker") != string::npos)
         return new KickerProvider(this);
+    else if (name.compare("scriptedpose") == 0)
+        return new ScriptedPoseProvider(this);
+    else if (name.compare("pose") == 0)
+        return new PoseProvider(this);
+
     else
         return NULL;
 }

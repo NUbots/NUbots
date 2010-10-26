@@ -145,8 +145,8 @@ NUMotion::~NUMotion()
  */
 void NUMotion::stop()
 {
-    m_killed = true;
-    m_last_kill_time = m_current_time;
+    //m_killed = true;
+    //m_last_kill_time = m_current_time;
     m_fall_protection->stop();
     m_getup->stop();
     #ifdef USE_HEAD
