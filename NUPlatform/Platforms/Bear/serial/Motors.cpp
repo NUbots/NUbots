@@ -36,7 +36,7 @@ unsigned char Motors::UpperBodyIndexToMotorID[MOTORS_NUM_UPPER_MOTORS] = {};
 //                                                               HP    HY    TP   LSR   LSP   LEP   RSR   RSP   REP    TR    TY   LHR   LHP    LK   LAR   LAP   RHR   RHP    RK   RAR   RAP
 //                                                                0    1     2     3     4     5     6     7     8    9     10    11    12    13    14    15    16    17    18    19    20  
 char Motors::MotorSigns[MOTORS_NUM_MOTORS] =                   { -1,    1,    1,   -1,    1,    1,   -1,   -1,   -1,   -1,    1,   -1,    1,    1,    1,    1,   -1,   -1,   -1,    1,   -1}; 
-unsigned short Motors::DefaultPositions[MOTORS_NUM_MOTORS] =   {499,  481,  374,  709,  526,  612,  318,  500,  412,  525,  528,  657,  372,  390,  773,  653,  563,  642,  650,  500,  389}; 
+unsigned short Motors::DefaultPositions[MOTORS_NUM_MOTORS] =   {499,  481,  374,  709,  526,  612,  318,  500,  412,  525,  528,  657,  372,  531,  773,  508,  563,  642,  514,  500,  519}; 
 unsigned short Motors::DefaultSpeeds[MOTORS_NUM_MOTORS] =      {100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100}; 
 // Compliance Settings. Remember the slope has to be a power of 2, and cannot be changed online without producing jerk
 unsigned char Motors::DefaultSlopes[MOTORS_NUM_MOTORS] =       {006,  006,  005,  005,  004,  006,  005,  004,  006,  006,  006,  005,  005,  006,  007,  006,  005,  005,  006,  007,  006}; 

@@ -62,7 +62,7 @@ void BearWalk::doWalk()
     calculateGaitPhase();
     
     // foot lifting
-    float shortening = 0.20;
+    float shortening = 0.1;
     float shortening_duration = 0.25;
     float lb_phase = m_gait_phase - (0.25 - shortening_duration)/2;
     if (lb_phase < 0)
@@ -90,31 +90,41 @@ void BearWalk::doWalk()
     if (rf_phase < shortening_duration)
         alpha_rf = 1 + shortening*0.5*(cos(2*M_PI*rf_phase/shortening_duration) - 1);
     
+    // ankle pushing
+    float push = 1.2;
+    float push_duration = 0.1;
+    float lb_push = 0;
+    float rb_push = 0;
+    if (lb_phase < push_duration or lb_phase > 1 - push_duration)
+        lb_push = push*0.5*(1- cos(M_PI*lb_phase/push_duration - M_PI));
+    if (rb_phase < push_duration or rb_phase > 1 - push_duration)
+        rb_push = push*0.5*(1- cos(M_PI*rb_phase/push_duration - M_PI));
+    
     // leg movement
-    float forward_amp = 0.35;
-    float lb_pitch = 0;
-    float lf_pitch = 0;
-    float rb_pitch = 0;
-    float rf_pitch = 0;
+    float forward_amp = 0.5;
+    float lb_pitch = -0.2;
+    float lf_pitch = 0.0;
+    float rb_pitch = -0.2;
+    float rf_pitch = 0.0;
     if (lb_phase < shortening_duration)
-        lb_pitch = forward_amp - (2*forward_amp/shortening_duration)*lb_phase;
+        lb_pitch += forward_amp - (2*forward_amp/shortening_duration)*lb_phase;
     else
-        lb_pitch = (2*forward_amp/(1-shortening_duration))*(lb_phase - shortening_duration) - forward_amp;
+        lb_pitch += (2*forward_amp/(1-shortening_duration))*(lb_phase - shortening_duration) - forward_amp;
     
     if (rb_phase < shortening_duration)
-        rb_pitch = forward_amp - (2*forward_amp/shortening_duration)*rb_phase;
+        rb_pitch += forward_amp - (2*forward_amp/shortening_duration)*rb_phase;
     else
-        rb_pitch = (2*forward_amp/(1-shortening_duration))*(rb_phase - shortening_duration) - forward_amp;
+        rb_pitch += (2*forward_amp/(1-shortening_duration))*(rb_phase - shortening_duration) - forward_amp;
     
     if (lf_phase < shortening_duration)
-        lf_pitch = forward_amp - (2*forward_amp/shortening_duration)*lf_phase;
+        lf_pitch += forward_amp - (2*forward_amp/shortening_duration)*lf_phase;
     else
-        lf_pitch = (2*forward_amp/(1-shortening_duration))*(lf_phase - shortening_duration) - forward_amp;
+        lf_pitch += (2*forward_amp/(1-shortening_duration))*(lf_phase - shortening_duration) - forward_amp;
         
     if (rf_phase < shortening_duration)
-        rf_pitch = forward_amp - (2*forward_amp/shortening_duration)*rf_phase;
+        rf_pitch += forward_amp - (2*forward_amp/shortening_duration)*rf_phase;
     else
-        rf_pitch = (2*forward_amp/(1-shortening_duration))*(rf_phase - shortening_duration) - forward_amp;
+        rf_pitch += (2*forward_amp/(1-shortening_duration))*(rf_phase - shortening_duration) - forward_amp;
     
     m_left_front_angles[1] = acos(alpha_lf) + lf_pitch;
     m_left_front_angles[2] = -2*acos(alpha_lf);
@@ -122,18 +132,13 @@ void BearWalk::doWalk()
     m_right_front_angles[1] = acos(alpha_rf) + rf_pitch;
     m_right_front_angles[2] = -2*acos(alpha_rf);
     
-    m_left_back_angles[1] = -1.5*acos(alpha_lb) + lb_pitch;
+    m_left_back_angles[1] = -acos(alpha_lb) + lb_pitch;
     m_left_back_angles[2] = 2*acos(alpha_lb);
-    m_left_back_angles[4] = -acos(alpha_lb) - lb_pitch;
+    m_left_back_angles[4] = -acos(alpha_lb) - lb_pitch + lb_push;
     
-    m_right_back_angles[1] = -1.5*acos(alpha_rb) + rb_pitch;
+    m_right_back_angles[1] = -acos(alpha_rb) + rb_pitch;
     m_right_back_angles[2] = 2*acos(alpha_rb);
-    m_right_back_angles[4] = -acos(alpha_rb) - rb_pitch;
-    
-    /*if (lb_phase < 0.25)
-        m_right_back_angles[4] += 0.2;
-    if (rb_phase < 0.25)
-        m_right_back_angles[4] += 0.2;*/
+    m_right_back_angles[4] = -acos(alpha_rb) - rb_pitch + rb_push;
     
     // weight shifting
     float shift_duration = 0.1;
@@ -191,7 +196,7 @@ void BearWalk::doWalk()
 
 void BearWalk::calculateGaitPhase()
 {
-    double f = 0.30;         // TODO: load the step frequency here from m_walk_parameters
+    double f = 0.6;         // TODO: load the step frequency here from m_walk_parameters
     
     double dt = (m_current_time - m_previous_time)/1000;
     if (dt < 0.2)
