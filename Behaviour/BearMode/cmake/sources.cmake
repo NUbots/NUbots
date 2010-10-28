@@ -20,28 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
-                BehaviourFSMProvider.cpp BehaviourFSMProvider.h
-                BehaviourState.cpp BehaviourState.h
-                BehaviourFSMState.cpp BehaviourFSMState.h
-                BehaviourPotentials.h
-                Behaviour.cpp Behaviour.h
-                GameInformation.cpp GameInformation.h
-                TeamInformation.cpp TeamInformation.h
+SET (YOUR_SRCS  BearModeProvider.cpp BearModeProvider.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Jobs
-                Soccer
-                ChaseBall
-                MiscBehaviours
-                WalkOptimisation
-                Kicker
-                PassingChallenge
+SET (YOUR_DIRS  
 )
-IF(${TARGET_ROBOT} STREQUAL BEAR)
-    LIST(APPEND YOUR_DIRS BearMode)
-ENDIF()
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
