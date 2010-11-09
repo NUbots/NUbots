@@ -21,6 +21,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     perspective = true;
     drawRobotModel = true;
     drawSigmaPoints = true;
+    drawBestModelOnly = false;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
@@ -90,6 +91,10 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             break;
         case Qt::Key_K:
             drawRobotModel = !drawRobotModel;
+            update();
+            break;
+        case Qt::Key_B:
+            drawBestModelOnly = !drawBestModelOnly;
             update();
             break;
         default:
@@ -442,20 +447,27 @@ void locWmGlDisplay::DrawModel(const KF& model)
 
 void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
 {
-    QString displayString("Model %1 (%2%)");
-    for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
+    if(drawBestModelOnly)
     {
-        const KF model = localisation.getModel(modelID);
-        if(model.isActive)
+        const KF model = localisation.getBestModel();
+        DrawModel(model);
+    }
+    else
+    {
+        QString displayString("Model %1 (%2%)");
+        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
         {
-            DrawModel(model);
-            glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
-            glColor4ub(255,255,255,255);
-            renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
-            glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+            const KF model = localisation.getModel(modelID);
+            if(model.isActive)
+            {
+                DrawModel(model);
+                glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+                glColor4ub(255,255,255,255);
+                renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
+                glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+            }
         }
     }
-
 }
 
 void locWmGlDisplay::drawStationaryObjectLabel(const StationaryObject& object)

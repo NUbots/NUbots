@@ -9,5 +9,6 @@
 #define VISION_PORT         14938
 #define JOBS_PORT           15338
 #define	LOCWM_PORT			16789
+#define SSLVISION_PORT		15884
 
 #endif

@@ -362,14 +362,26 @@ std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const Mo
 
 std::ostream& operator<< (std::ostream& output, const Self& p_self)
 {
-    output << p_self.WorldModelLocation.x << ' ' << p_self.WorldModelLocation.y << ' ' << p_self.WorldModelLocation.z << ' ';
-    output << p_self.WorldModelLocationError.x << ' ' << p_self.WorldModelLocationError.y << ' ' << p_self.WorldModelLocationError.z << ' ';
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocation.x), sizeof(p_self.WorldModelLocation.x));
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocation.y), sizeof(p_self.WorldModelLocation.y));
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocation.z), sizeof(p_self.WorldModelLocation.z));
+
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocationError.x), sizeof(p_self.WorldModelLocationError.x));
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocationError.y), sizeof(p_self.WorldModelLocationError.y));
+    output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocationError.z), sizeof(p_self.WorldModelLocationError.z));
+
     return output;
 }
 
 std::istream& operator>> (std::istream& input, Self& p_self)
 {
-    input >> p_self.WorldModelLocation.x >> p_self.WorldModelLocation.y >> p_self.WorldModelLocation.z;
-    input >> p_self.WorldModelLocationError.x >> p_self.WorldModelLocationError.y >> p_self.WorldModelLocationError.z;
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocation.x), sizeof(p_self.WorldModelLocation.x));
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocation.y), sizeof(p_self.WorldModelLocation.y));
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocation.z), sizeof(p_self.WorldModelLocation.z));
+
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocationError.x), sizeof(p_self.WorldModelLocationError.x));
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocationError.y), sizeof(p_self.WorldModelLocationError.y));
+    input.read(reinterpret_cast<char*>(&p_self.WorldModelLocationError.z), sizeof(p_self.WorldModelLocationError.z));
+
     return input;
 }

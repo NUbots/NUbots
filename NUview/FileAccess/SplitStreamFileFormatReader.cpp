@@ -21,7 +21,7 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
     m_extension = ".strm";
-    m_knownDataTypes << "image" << "sensor" << "locwm" << "object";
+    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame";
 }
 
 std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& directory)
@@ -116,6 +116,16 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
                 if(successIndicator)
                 {
                     qDebug() << locwmReader.TotalFrames() << "locwm frames found.";
+                }
+            }
+            if(temp.compare(QString("locwmframe"),Qt::CaseInsensitive) == 0)
+            {
+                qDebug() << "Opening " << (*fileIt).filePath();
+                successIndicator = locmframeReader.OpenFile((*fileIt).filePath().toStdString());
+                qDebug() << successIndicator;
+                if(successIndicator)
+                {
+                    qDebug() << locmframeReader.TotalFrames() << "locwm frames found.";
                 }
             }
         }

@@ -128,26 +128,66 @@ void Object::updateEstimatedRelativeVariables(float distance, float bearing, flo
 
 std::ostream& operator<< (std::ostream& output, const Object& p_obj)
 {
-    output << p_obj.ID << ' ';
-    output << p_obj.measuredRelativePosition.x << ' ' << p_obj.measuredRelativePosition.y << ' ' << p_obj.measuredRelativePosition.z << ' ';
-    output << p_obj.relativeMeasurementError.x << ' ' << p_obj.relativeMeasurementError.y << ' ' << p_obj.relativeMeasurementError.z << ' ';
-    output << p_obj.estimatedRelativeLocation.x << ' ' << p_obj.estimatedRelativeLocation.y << ' ' << p_obj.estimatedRelativeLocation.z << ' ';
-    output << p_obj.imagePositionAngle.x << ' ' << p_obj.imagePositionAngle.y << ' ';
-    output << p_obj.imagePosition.x << ' ' << p_obj.imagePosition.y << ' ';
-    output << p_obj.sizeOnScreen.x << ' ' << p_obj.sizeOnScreen.y << ' ';
-    output << p_obj.timeLastSeen << ' ' << p_obj.timeSinceLastSeen << ' ' << p_obj.timeSeen << ' ' << p_obj.previousFrameTimestamp << ' ' << p_obj.isVisible << ' ';
+    output.write(reinterpret_cast<const char*>(&p_obj.ID), sizeof(p_obj.ID));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.measuredRelativePosition.x), sizeof(p_obj.measuredRelativePosition.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.measuredRelativePosition.y), sizeof(p_obj.measuredRelativePosition.y));
+    output.write(reinterpret_cast<const char*>(&p_obj.measuredRelativePosition.z), sizeof(p_obj.measuredRelativePosition.z));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.relativeMeasurementError.x), sizeof(p_obj.relativeMeasurementError.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.relativeMeasurementError.y), sizeof(p_obj.relativeMeasurementError.y));
+    output.write(reinterpret_cast<const char*>(&p_obj.relativeMeasurementError.z), sizeof(p_obj.relativeMeasurementError.z));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.estimatedRelativeLocation.x), sizeof(p_obj.estimatedRelativeLocation.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.estimatedRelativeLocation.y), sizeof(p_obj.estimatedRelativeLocation.y));
+    output.write(reinterpret_cast<const char*>(&p_obj.estimatedRelativeLocation.z), sizeof(p_obj.estimatedRelativeLocation.z));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.imagePositionAngle.x), sizeof(p_obj.imagePositionAngle.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.imagePositionAngle.y), sizeof(p_obj.imagePositionAngle.y));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.imagePosition.x), sizeof(p_obj.imagePosition.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.imagePosition.y), sizeof(p_obj.imagePosition.y));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.sizeOnScreen.x), sizeof(p_obj.sizeOnScreen.x));
+    output.write(reinterpret_cast<const char*>(&p_obj.sizeOnScreen.y), sizeof(p_obj.sizeOnScreen.y));
+
+    output.write(reinterpret_cast<const char*>(&p_obj.timeLastSeen), sizeof(p_obj.timeLastSeen));
+    output.write(reinterpret_cast<const char*>(&p_obj.timeSinceLastSeen), sizeof(p_obj.timeSinceLastSeen));
+    output.write(reinterpret_cast<const char*>(&p_obj.timeSeen), sizeof(p_obj.timeSeen));
+    output.write(reinterpret_cast<const char*>(&p_obj.previousFrameTimestamp), sizeof(p_obj.previousFrameTimestamp));
+    output.write(reinterpret_cast<const char*>(&p_obj.isVisible), sizeof(p_obj.isVisible));
     return output;
 }
 
 std::istream& operator>> (std::istream& input, Object& p_obj)
 {
-    input >> p_obj.ID;
-    input >> p_obj.measuredRelativePosition.x >> p_obj.measuredRelativePosition.y >> p_obj.measuredRelativePosition.z;
-    input >> p_obj.relativeMeasurementError.x >> p_obj.relativeMeasurementError.y >> p_obj.relativeMeasurementError.z;
-    input >> p_obj.estimatedRelativeLocation.x >> p_obj.estimatedRelativeLocation.y >> p_obj.estimatedRelativeLocation.z;
-    input >> p_obj.imagePositionAngle.x >> p_obj.imagePositionAngle.y;
-    input >> p_obj.imagePosition.x >> p_obj.imagePosition.y;
-    input >> p_obj.sizeOnScreen.x >> p_obj.sizeOnScreen.y;
-    input >> p_obj.timeLastSeen >> p_obj.timeSinceLastSeen >> p_obj.timeSeen >> p_obj.previousFrameTimestamp >> p_obj.isVisible;
+    input.read(reinterpret_cast<char*>(&p_obj.ID), sizeof(p_obj.ID));
+
+    input.read(reinterpret_cast<char*>(&p_obj.measuredRelativePosition.x), sizeof(p_obj.measuredRelativePosition.x));
+    input.read(reinterpret_cast<char*>(&p_obj.measuredRelativePosition.y), sizeof(p_obj.measuredRelativePosition.y));
+    input.read(reinterpret_cast<char*>(&p_obj.measuredRelativePosition.z), sizeof(p_obj.measuredRelativePosition.z));
+
+    input.read(reinterpret_cast<char*>(&p_obj.relativeMeasurementError.x), sizeof(p_obj.relativeMeasurementError.x));
+    input.read(reinterpret_cast<char*>(&p_obj.relativeMeasurementError.y), sizeof(p_obj.relativeMeasurementError.y));
+    input.read(reinterpret_cast<char*>(&p_obj.relativeMeasurementError.z), sizeof(p_obj.relativeMeasurementError.z));
+
+    input.read(reinterpret_cast<char*>(&p_obj.estimatedRelativeLocation.x), sizeof(p_obj.estimatedRelativeLocation.x));
+    input.read(reinterpret_cast<char*>(&p_obj.estimatedRelativeLocation.y), sizeof(p_obj.estimatedRelativeLocation.y));
+    input.read(reinterpret_cast<char*>(&p_obj.estimatedRelativeLocation.z), sizeof(p_obj.estimatedRelativeLocation.z));
+
+    input.read(reinterpret_cast<char*>(&p_obj.imagePositionAngle.x), sizeof(p_obj.imagePositionAngle.x));
+    input.read(reinterpret_cast<char*>(&p_obj.imagePositionAngle.y), sizeof(p_obj.imagePositionAngle.y));
+
+    input.read(reinterpret_cast<char*>(&p_obj.imagePosition.x), sizeof(p_obj.imagePosition.x));
+    input.read(reinterpret_cast<char*>(&p_obj.imagePosition.y), sizeof(p_obj.imagePosition.y));
+
+    input.read(reinterpret_cast<char*>(&p_obj.sizeOnScreen.x), sizeof(p_obj.sizeOnScreen.x));
+    input.read(reinterpret_cast<char*>(&p_obj.sizeOnScreen.y), sizeof(p_obj.sizeOnScreen.y));
+
+    input.read(reinterpret_cast<char*>(&p_obj.timeLastSeen), sizeof(p_obj.timeLastSeen));
+    input.read(reinterpret_cast<char*>(&p_obj.timeSinceLastSeen), sizeof(p_obj.timeSinceLastSeen));
+    input.read(reinterpret_cast<char*>(&p_obj.timeSeen), sizeof(p_obj.timeSeen));
+    input.read(reinterpret_cast<char*>(&p_obj.previousFrameTimestamp), sizeof(p_obj.previousFrameTimestamp));
+    input.read(reinterpret_cast<char*>(&p_obj.isVisible), sizeof(p_obj.isVisible));
     return input;
 }
