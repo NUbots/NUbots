@@ -67,7 +67,7 @@ NUIO::NUIO(NUbot* nubot)
         m_jobs_port = new JobPort(m_nubot->Jobs);
     #endif
     #ifdef USE_NETWORK_SSLVISION
-        m_ssl_vision_port = new SSLVisionPort(m_nubot->SensorData,m_nubot->TeamInfo, SSLVISION_PORT);
+        m_ssl_vision_port = new SSLVisionPort(m_nubot->SensorData, m_nubot->TeamInfo, SSLVISION_PORT);
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);

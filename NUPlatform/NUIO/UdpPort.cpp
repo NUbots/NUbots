@@ -177,14 +177,13 @@ void UdpPort::run()
             m_time_last_receive = nusystem->getTime();
             stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
-            handleNewData(buffer);
             #if DEBUG_NETWORK_VERBOSITY > 4
-                debug << "UdpPort::run(). Received ";
                 string s = buffer.str();
                 for (size_t i=0; i<s.size(); i++)
                     debug << s[i];
                 debug << endl;
             #endif
+            handleNewData(buffer);
         }
     }
     return;

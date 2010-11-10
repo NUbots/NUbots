@@ -399,11 +399,11 @@ std::vector<float> Kinematics::calculateInverseKinematicsLegPrimary(const Matrix
 {
     Matrix Foot2Torso = desiredPose;
     float legOffset = 0.0f;
-    if(theFoot = leftFoot)
+    if(theFoot == leftFoot)
     {
         legOffset = m_hipOffsetY;
     }
-    else if(theFoot = rightFoot)
+    else if(theFoot == rightFoot)
     {
         legOffset = -m_hipOffsetY;
     }
