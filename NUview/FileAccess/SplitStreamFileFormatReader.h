@@ -5,6 +5,7 @@
 #include "Tools/Image/NUimage.h"
 #include "Localisation/Localisation.h"
 #include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Localisation/LocWmFrame.h"
 #include <QDir>
 
 class SplitStreamFileFormatReader: public LogFileFormatReader
@@ -44,6 +45,7 @@ protected:
     StreamFileReader<NUimage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
     StreamFileReader<Localisation> locwmReader;
+    StreamFileReader<LocWmFrame> locmframeReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;

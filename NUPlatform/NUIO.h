@@ -33,6 +33,7 @@ class GameControllerPort;
 class TeamPort;
 class JobPort;
 class TcpPort;
+class SSLVisionPort;
 
 class JobList;
 class GameInformation;
@@ -65,6 +66,7 @@ protected:
     TcpPort* m_vision_port;
     JobPort* m_jobs_port;
     TcpPort* m_localisation_port;
+	SSLVisionPort* m_ssl_vision_port;
 };
 
 #endif

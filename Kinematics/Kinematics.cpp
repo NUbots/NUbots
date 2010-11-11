@@ -360,14 +360,14 @@ double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransfor
     return result[2][0];
 }
 
-float Kinematics::CalculateRadialLegLength(const vector<float>& legJoints)
+float Kinematics::CalculateRadialLegLength(const std::vector<float>& legJoints)
 {
     float kneeAngle = legJoints[3];
     // Using law of cosines.
     return sqrt( pow(m_thighLength,2) + pow(m_tibiaLength,2) - 2*m_thighLength*m_tibiaLength*cos(mathGeneral::PI/2.0f - kneeAngle));
 }
 
-float Kinematics::CalculateHipPitchAngleForRelYPosition(const vector<float>& legJoints, float relYPos)
+float Kinematics::CalculateHipPitchAngleForRelYPosition(const std::vector<float>& legJoints, float relYPos)
 {
     float radialLegLength = CalculateRadialLegLength(legJoints);
     return asin(relYPos / radialLegLength);
@@ -393,4 +393,46 @@ Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMa
     returnResult.x = result[0][0];
     returnResult.y = result[1][0];
     return returnResult;
+}
+
+std::vector<float> Kinematics::calculateInverseKinematicsLegPrimary(const Matrix& desiredPose, Effector theFoot)
+{
+    Matrix Foot2Torso = desiredPose;
+    float legOffset = 0.0f;
+    if(theFoot = leftFoot)
+    {
+        legOffset = m_hipOffsetY;
+    }
+    else if(theFoot = rightFoot)
+    {
+        legOffset = -m_hipOffsetY;
+    }
+    Matrix Foot2Hip = Translation(0.0f,legOffset,0.0f) * Foot2Torso;
+    Matrix Foot2HipOrth = RotX(mathGeneral::deg2rad(45.0f)) * Foot2Hip;
+    Matrix HipOrth2Foot = InverseMatrix(Foot2HipOrth);
+    float transx = HipOrth2Foot[0][3];
+    float transy = HipOrth2Foot[1][3];
+    float transz = HipOrth2Foot[2][3];
+    float translationVectorLength = sqrt(pow(transx,2) + pow(transy,2) + pow(transz,2));
+    float kneeInterior = acos((pow(m_thighLength,2) + pow(m_tibiaLength,2) - pow(translationVectorLength,2)) / (2 * m_thighLength * m_tibiaLength));
+    float kneeAngle = mathGeneral::PI - kneeInterior;
+
+    float footPitch1 = acos((pow(m_tibiaLength,2) + pow(translationVectorLength,2) - pow(m_thighLength,2)) / (2*m_tibiaLength*translationVectorLength));
+    float footPitch2 = atan2(transx,sqrt(pow(transy,2) + pow(transz,2)));
+    float footPitchAngle = footPitch1 + footPitch2;
+    float footRollAngle = atan2(transy, transz);
+
+    Matrix Thigh2Foot = RotX(footRollAngle) * RotY(footPitchAngle) * Translation(0.0f,0.0f,m_tibiaLength) * RotY(kneeAngle) * Translation(0.0f,0.0f,m_thighLength);
+    Matrix HipOrth2Thigh = InverseMatrix(Thigh2Foot) * HipOrth2Foot;
+    float hipRollAngle = acos(HipOrth2Thigh[2][1]) - mathGeneral::PI / 4.0f;
+    float hipYawAngle = atan2(-HipOrth2Thigh[0][1],HipOrth2Thigh[1][1]);
+    float hipPitchAngle = atan2(-HipOrth2Thigh[2][0],HipOrth2Thigh[2][2]);
+    std::vector<float> resultingAngles(6,0.0f);
+    resultingAngles[0] = hipRollAngle;
+    resultingAngles[1] = hipPitchAngle;
+    resultingAngles[2] = hipYawAngle;
+    resultingAngles[3] = kneeAngle;
+    resultingAngles[4] = footRollAngle;
+    resultingAngles[5] = footPitchAngle;
+    return resultingAngles;
 }

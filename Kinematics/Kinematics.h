@@ -97,6 +97,8 @@ public:
     float CalculateHipPitchAngleForRelYPosition(const std::vector<float>& legJoints, float relYPos);
     static Vector2<float> TransformPositionToFoot(const Matrix& FootTransformMatrix, Vector2<float> position);
 
+    std::vector<float> calculateInverseKinematicsLegPrimary(const Matrix& desiredPose, Effector theFoot);
+
     float getFootInnerWidth() {return m_footInnerWidth;}
     float getFootOuterWidth() {return m_footOuterWidth;}
     float getFootForwardLength() {return m_footForwardLength;}
