@@ -45,10 +45,13 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
     m_num_per_iteration = 10;      // Tune this
     
     srand(static_cast<unsigned int> (1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime()));
-    m_current_parameters = parameters;
-    generateRandomPolices(m_current_parameters);
-    
+
     load();
+    if (m_current_parameters.empty())
+    {
+        m_current_parameters = parameters;
+        generateRandomPolices(m_current_parameters);
+    }
     save();
 }
 

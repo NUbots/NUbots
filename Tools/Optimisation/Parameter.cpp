@@ -530,15 +530,18 @@ istream& operator>>(istream& input, vector<float>& v)
     getline(input, wholevector, ']');
     
     v.clear();
-    stringstream ss(wholevector);
-    float floatBuffer;
-    
-    // now split the data based on the commas
-    while (not ss.eof())
+    if (wholevector.size() > 0)
     {
-        ss >> floatBuffer;
-        ss.ignore(128, ',');
-        v.push_back(floatBuffer);
+        stringstream ss(wholevector);
+        float floatBuffer;
+        
+        // now split the data based on the commas
+        while (not ss.eof())
+        {
+            ss >> floatBuffer;
+            ss.ignore(128, ',');
+            v.push_back(floatBuffer);
+        }
     }
     
     return input;
@@ -550,12 +553,16 @@ istream& operator>>(istream& input, vector<vector<float> >& v)
     getline(input, buffer);
     stringstream ss(buffer);
     ss.ignore(128, '[');
+
     while(getline(ss, buffer, ']'))
     {
-        vector<float> e;
-        ss >> e;
-        v.push_back(e);
-        ss.ignore(128, '[');
+        if (buffer.size() > 0)
+        {
+            vector<float> e;
+            stringstream sss(buffer);
+            sss >> e;
+            v.push_back(e);
+        }
     }
     return input;
 }

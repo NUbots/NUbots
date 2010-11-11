@@ -59,7 +59,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     
     m_parameters.load("NBWalkStart");
     vector<Parameter> parameters = m_parameters.getAsParameters();
-    parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
+    //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
     m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
     //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
@@ -201,8 +201,8 @@ float WalkOptimisationProvider::calculateFitness()
     }
     
     //fitness = speed;                      // speed--based fitness
-    //fitness = 180/(4+cost);                 // cost--based fitness
-    fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
+    fitness = 180/(4+cost);                 // cost--based fitness
+    //fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
     m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl << flush;
     
     return fitness;
