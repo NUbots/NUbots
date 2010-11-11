@@ -57,13 +57,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("NBWalkSpeedWithStiffnessPSO6Cost");
+    m_parameters.load("NBWalkStart");
     vector<Parameter> parameters = m_parameters.getAsParameters();
-    //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
+    parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
     //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
-    //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
-    m_optimiser = NULL;    
+    m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
+    //m_optimiser = NULL;    
     m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
@@ -200,10 +200,9 @@ float WalkOptimisationProvider::calculateFitness()
         speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     
-    //fitness = speed;
-    //fitness = 1000 - cost;          // the optimisers all try to maximise the fitness, and they do not work with negative numbers
-    fitness = 180/(4+cost);    
-
+    //fitness = speed;                      // speed--based fitness
+    //fitness = 180/(4+cost);                 // cost--based fitness
+    fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
     m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl << flush;
     
     return fitness;
