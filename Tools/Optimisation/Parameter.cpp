@@ -509,6 +509,19 @@ ostream& operator<<(ostream& output, const vector<float>& v)
 	return output;
 }
 
+ostream& operator<<(ostream& output, const vector<vector<float> >& v)
+{
+    output << "[";
+    if (not v.empty())
+    {
+        for (size_t i=0; i<v.size()-1; i++)
+            output << v[i] << ",";
+        output << v.back();
+    }
+    output << "]";
+    return output;
+}
+
 istream& operator>>(istream& input, vector<float>& v)
 {
     string wholevector;
@@ -530,3 +543,20 @@ istream& operator>>(istream& input, vector<float>& v)
     
     return input;
 }
+
+istream& operator>>(istream& input, vector<vector<float> >& v)
+{
+    string buffer;
+    getline(input, buffer);
+    stringstream ss(buffer);
+    ss.ignore(128, '[');
+    while(getline(ss, buffer, ']'))
+    {
+        vector<float> e;
+        ss >> e;
+        v.push_back(e);
+        ss.ignore(128, '[');
+    }
+    return input;
+}
+

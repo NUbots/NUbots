@@ -57,14 +57,14 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("NBWalkSpeedWithStiffnessPSO6Cost");
+    m_parameters.load("ALWalkAldebaran");
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
-    //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
+    m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
     //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
-    m_optimiser = NULL;    
-    m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str());
+    //m_optimiser = NULL;    
+    m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str(), fstream::out | fstream::app);
     
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())

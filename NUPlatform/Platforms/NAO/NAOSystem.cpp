@@ -111,7 +111,7 @@ void NAOSystem::displayBatteryState(NUSensorsData* data, NUActionatorsData* acti
             }
         }
     }
-    if (charge < 0.15 and current < 0)
+    if (charge < 0.03 and current < 0)
         voiceLowBattery(actions);
     
     m_battery_state_previous_time = m_current_time;

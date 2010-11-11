@@ -47,6 +47,9 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
     srand(static_cast<unsigned int> (1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime()));
     m_current_parameters = parameters;
     generateRandomPolices(m_current_parameters);
+    
+    load();
+    save();
 }
 
 /*! @brief Destructor for the abstract optimiser */
@@ -156,9 +159,24 @@ void PGRLOptimiser::summaryTo(ostream& stream)
 
 void PGRLOptimiser::toStream(ostream& o) const
 {
+    o << m_min_step_size << " " << m_max_step_size << " " << m_epsilon << " " << m_num_per_iteration << endl;
+    
+    o << m_random_policies_index << endl;
+    o << m_current_parameters << endl;
+    o << m_random_policies << endl;
+    o << m_fitnesses << endl;
 }
 
 void PGRLOptimiser::fromStream(istream& i)
 {
+    i >> m_min_step_size;
+    i >> m_max_step_size;
+    i >> m_epsilon;
+    i >> m_num_per_iteration;
+    
+    i >> m_random_policies_index;
+    i >> m_current_parameters;
+    i >> m_random_policies;
+    i >> m_fitnesses;
 }
 

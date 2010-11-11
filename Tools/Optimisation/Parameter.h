@@ -101,6 +101,8 @@ vector<float> operator*(const vector<float>& v1, const vector<float>& v2);
 float norm(const vector<float>& v);
 
 ostream& operator<<(ostream& output, const vector<float>& v);
-istream& operator>>(istream& output, vector<float>& v);
+ostream& operator<<(ostream& output, const vector<vector<float> >& v);
+istream& operator>>(istream& input, vector<float>& v);
+istream& operator>>(istream& input, vector<vector<float> >& v);
 
 #endif

@@ -55,8 +55,9 @@ public:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState::GenerateWalkParametersState" << endl;
         #endif
-        m_getting_up = false;
-        m_previously_getting_up = false;
+        m_fallen = false;
+        m_previously_fallen = false;
+        m_time_in_state = 0;
     }
     
     ~GenerateWalkParametersState() {};
@@ -76,16 +77,18 @@ public:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState" << endl;
         #endif
-        m_previously_getting_up = m_getting_up;
-        m_data->getMotionGetupActive(m_getting_up);
+        m_previously_fallen = m_fallen;
+        m_fallen = m_data->isFallen();
         
-        if (m_parent->stateChanged() or (m_parent->wasPreviousState(this) and m_previously_getting_up and not m_getting_up and not m_data->isFallen()) or m_time_in_state > 120000)
+        if (m_parent->stateChanged() or (not m_previously_fallen and m_fallen) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
             m_current_start_state = getStartState();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
             #endif
+            m_previously_fallen = false;
+            m_fallen = true;
             m_time_in_state = 0;
         }
         else
@@ -166,8 +169,8 @@ private:
 private:
     vector<float> m_current_start_state;
     
-    bool m_previously_getting_up;
-    bool m_getting_up;
+    bool m_previously_fallen;
+    bool m_fallen;
     float m_time_in_state;
     float m_previous_time;
 };
