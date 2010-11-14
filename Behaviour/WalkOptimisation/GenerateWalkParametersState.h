@@ -57,6 +57,7 @@ public:
         #endif
         m_getting_up = false;
         m_previously_getting_up = false;
+        m_time_not_getting_up = 0;
         m_time_in_state = 0;
         m_current_start_state = vector<float>(3);
     }
@@ -81,7 +82,7 @@ public:
         m_previously_getting_up = m_getting_up;
         m_data->getMotionGetupActive(m_getting_up);
         
-        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up) or m_time_in_state > 120000)
+        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up and m_time_not_getting_up > 3000) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
@@ -92,6 +93,10 @@ public:
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
+        if (m_getting_up)
+            m_time_not_getting_up = 0;
+        else
+            m_time_not_getting_up += m_data->CurrentTime - m_previous_time;
         
         lookAtGoals();
         
@@ -170,6 +175,7 @@ private:
     
     bool m_previously_getting_up;
     bool m_getting_up;
+    float m_time_not_getting_up;
     float m_time_in_state;
     float m_previous_time;
 };
