@@ -55,9 +55,10 @@ public:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState::GenerateWalkParametersState" << endl;
         #endif
-        m_fallen = false;
-        m_previously_fallen = false;
+        m_getting_up = false;
+        m_previously_getting_up = false;
         m_time_in_state = 0;
+        m_current_start_state = vector<float>(3);
     }
     
     ~GenerateWalkParametersState() {};
@@ -77,18 +78,15 @@ public:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
             debug << "GenerateWalkParametersState" << endl;
         #endif
-        m_previously_fallen = m_fallen;
-        m_fallen = m_data->isFallen();
+        m_previously_getting_up = m_getting_up;
+        m_data->getMotionGetupActive(m_getting_up);
         
-        if (m_parent->stateChanged() or (not m_previously_fallen and m_fallen) or m_time_in_state > 120000)
+        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
-            m_current_start_state = getStartState();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
             #endif
-            m_previously_fallen = false;
-            m_fallen = true;
             m_time_in_state = 0;
         }
         else
@@ -97,6 +95,7 @@ public:
         
         lookAtGoals();
         
+        m_current_start_state = getStartState();
         vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 0, 2*m_parent->stoppingDistance(), 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
@@ -169,8 +168,8 @@ private:
 private:
     vector<float> m_current_start_state;
     
-    bool m_previously_fallen;
-    bool m_fallen;
+    bool m_previously_getting_up;
+    bool m_getting_up;
     float m_time_in_state;
     float m_previous_time;
 };

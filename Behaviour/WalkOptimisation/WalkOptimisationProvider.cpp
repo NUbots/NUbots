@@ -66,6 +66,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     //m_optimiser = NULL;    
     m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str(), fstream::out | fstream::app);
     
+    if (m_optimiser)
+        m_parameters.set(m_optimiser->getNextParameters());
+
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "Initial Parameters: " << m_parameters << endl;
+    #endif
+    
     ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
     if (points_file.is_open())
     {
@@ -88,7 +95,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     
     m_state = m_paused;
     
-    m_iteration_count = -1;
+    m_iteration_count = 0;
     m_duration = 0;
     m_energy = 0;	
     m_stability = 0;
@@ -122,30 +129,31 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
         else
             return m_state;
     #else
-        if (m_state == m_paused)
+        if (m_state == m_paused and nusystem->getTime() > 1000)
             return m_generate;
         else
             return m_state;
     #endif
 }
 
+void WalkOptimisationProvider::doBehaviourCommons()
+{;
+    if (m_previous_state == m_paused and m_state == m_generate)
+        m_jobs->addMotionJob(new WalkParametersJob(m_parameters)); 
+}
+
 void WalkOptimisationProvider::tickOptimiser()
-{
-    m_iteration_count++;
-    // save the state of the optimiser, and the walk parameters in case of hardware failure.
-    if (m_optimiser)
-        m_optimiser->save();
-    
+{    
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+        debug << "WalkOptimisationProvider::tickOptimiser" << endl;
+    #endif 
     // update the optimiser and give the next set of parameters to the walk engine
-    if (m_iteration_count != 0)
-    {
-        float fitness = calculateFitness();
-        if (m_optimiser)
-        {            
-            m_optimiser->setParametersResult(fitness);
-            vector<float> nextparameters = m_optimiser->getNextParameters();
-            m_parameters.set(nextparameters);
-        }
+    float fitness = calculateFitness();
+    if (m_optimiser)
+    {            
+        m_optimiser->setParametersResult(fitness);
+        vector<float> nextparameters = m_optimiser->getNextParameters();
+        m_parameters.set(nextparameters);
     }
     m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
     
@@ -155,11 +163,15 @@ void WalkOptimisationProvider::tickOptimiser()
     m_stability = 0;
     
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "WalkOptimisationProvider::tickOptimiser" << endl;
         m_parameters.summaryTo(debug);
         if (m_optimiser)
             m_optimiser->summaryTo(debug);
     #endif
+
+    // save the state of the optimiser, and the walk parameters in case of hardware failure.
+    if (m_optimiser)
+        m_optimiser->save();
+    m_iteration_count++;
 }
 
 float WalkOptimisationProvider::calculateFitness()

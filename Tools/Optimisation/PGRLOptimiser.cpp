@@ -101,7 +101,12 @@ vector<float> PGRLOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
     for (size_t i=0; i<seed.size(); i++)
     {
         float epslion = m_epsilon*(seed[i].max() - seed[i].min());
-        newpolicy.push_back(seed[i] + getRandomDirection()*epslion);
+        float value = seed[i] + getRandomDirection()*epslion;
+        if (value < seed[i].min())
+            value = seed[i].min();
+        else if (value > seed[i].max())
+            value = seed[i].max();
+        newpolicy.push_back(value);
     }
     return newpolicy;
 }

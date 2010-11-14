@@ -49,6 +49,7 @@ public:
     float stoppingDistance();
 protected:
     BehaviourState* nextStateCommons();
+    void doBehaviourCommons();
 public:
     BehaviourState* m_generate;                 //!< the state in which the parameter generation is done, and preparations for its evaluation
     BehaviourState* m_evaluate;                 //!< the state in which the parameter evaluation is done
