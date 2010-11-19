@@ -66,10 +66,11 @@ Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision
     float bearing = vision->CalculateBearing(point->x);
     float elevation = vision->CalculateElevation(point->y);
 
-    Matrix camera2groundTransform;
-    bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     if(isOK == true)
     {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
         Vector3<float> result;
         result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
         relativePoint.x = result[0]; //DISTANCE

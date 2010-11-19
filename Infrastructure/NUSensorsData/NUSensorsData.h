@@ -7,7 +7,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,11 +28,10 @@
 
 #include "Sensor.h"
 #include "Infrastructure/NUData.h"
+#include "Tools/FileFormats/TimestampedData.h"
 
 #include <vector>
 #include <string>
-#include "Tools/Math/Matrix.h"
-#include "Tools/FileFormats/TimestampedData.h"
 using namespace std;
 
 class NUSensorsData: public NUData, TimestampedData
@@ -40,7 +39,7 @@ class NUSensorsData: public NUData, TimestampedData
 public:
     // end effector sensors
     const static id_t LArmEndEffector;                  // internal use only: Compactly stores the Bumper, Force, Contact, Support, Impact and Centre of Pressure of the end effector
-    const static id_t RArmEndEffector;                  // internal use only                  
+    const static id_t RArmEndEffector;                  // internal use only: If an end effector does not have a particular sub-sensor, then it will be NaN (like the joint informations).                  
     const static id_t LLegEndEffector;                  // internal use only
     const static id_t RLegEndEffector;                  // internal use only
     // kinematic sensors
@@ -66,14 +65,13 @@ public:
     const static id_t LFootTouch;                       // internal use only: Stores raw force readings from hardware array in left foot
     const static id_t RFootTouch;                       // internal use only: Stores raw force readings from hardware array in right foot
     // button sensors
-    const static id_t MainButton;
-    const static id_t LeftButton;
-    const static id_t RightButton;
-    const static id_t AllButton;                    // TODO: this is exceedingly difficult at the moment because I don't know how to make groups for sensors yet :(
-    const static id_t AllButtonDurations;
+    const static id_t MainButton;						// Compactly stores the [state, duration] for the main button
+    const static id_t LeftButton;						// Compactly stores the [state, duration] for the left button
+    const static id_t RightButton;						// Compactly stores the [state, duration] for the right button
     // distance sensors
-    const static id_t LDistance;
-    const static id_t RDistance;
+    const static id_t LDistance;						// Leftward facing ultrasonic sensor
+    const static id_t RDistance;						// Rightward facing ultrasonic sensor
+    const static id_t LaserDistance;					// Laser scanner or similar sensor (infrared array, 2d laser, 3d laser/infrared)
     // gps sensors
     const static id_t Gps;
     const static id_t Compass;
@@ -105,13 +103,26 @@ public:
     };
     enum EndEffectorIndices
     {   // indices into a single end effector vector
-        Bumper = 0,
-        Force = 1,
-        Contact = 2, 
-        Support = 3, 
-        Impact = 4, 
-        CoP = 5,
-        NumEndEffectorIndices = 6
+        BumperId = 0,
+        ForceId = 1,
+        ContactId = 2, 
+        SupportId = 3, 
+        ImpactId = 4, 
+        CoPXId = 5,
+        CoPYId = 6,
+        EndPositionXId = 7,
+        EndPositionYId = 8, 
+        EndPositionZId = 9,
+        EndPositionRollId = 10,
+        EndPositionPitchId = 11,
+        EndPositionYawId = 12,
+        NumEndEffectorIndices = 13
+    };
+    enum ButtonSensorIndices
+    {	// indices into a single button vector
+        StateId = 0,	
+        DurationId = 1,
+        NumButtonIndices = 3
     };
 public:
     NUSensorsData();
@@ -136,36 +147,36 @@ public:
     bool getTorque(const id_t id, vector<float>& data);
     bool getTemperature(const id_t id, float& data);
     bool getTemperature(const id_t id, vector<float>& data);
-                     
+    
+    // Get methods for end effector information
+    bool getBumper(const id_t& id, float& data);
+    bool getForce(const id_t& id, float& data);
+    bool getContact(const id_t& id, bool& data);
+    bool getSupport(const id_t& id, bool& data);
+    bool getImpact(const id_t& id, float& data);
+    bool getCoP(const id_t& id, vector<float>& data);
     bool getEndPosition(const id_t id, vector<float>& data);
+    
+    // Get methods for kinematic based information
     bool getCameraHeight(float& data);
     bool getHorizon(vector<float>& data);
     bool getOdometry(vector<float>& data);
     
+    // Get methods for balance information
     bool getAccelerometer(vector<float>& data);
     bool getGyro(vector<float>& data);
     bool getOrientation(vector<float>& data);
     bool getFalling(vector<float>& data);
     bool getFallen(vector<float>& data);
-    
-    bool getBumper(const id_t& id, float& data);
-    bool getForce(const id_t& id, float& data);
-    bool getContact(const id_t& id, float& data);
-    bool getSupport(const id_t& id, float& data);
-    bool getImpact(const id_t& id, float& data);
     bool getZmp(const id_t& id, vector<float>& data);
-    bool getCoP(const id_t& id, vector<float>& data);
     
-    bool getButton(const id_t& id, float& data);
-    bool getButton(const id_t& id, vector<float>& data);
-    bool getButtonDuration(const id_t& id, float& data);
-    bool getButtonDuration(const id_t& id, vector<float>& data);
-    
-    bool getDistance(const id_t& id, float& data);
-    bool getDistance(const id_t& id, vector<float>& data);
-    
+    // Get methods for other sensors
     bool getGps(vector<float>& data);
     bool getCompass(vector<float>& data);
+    bool getDistance(const id_t& id, vector<vector<float> >& data);
+    
+    bool getButton(const id_t& id, float& data);
+    bool getButtonDuration(const id_t& id, float& data);
     
     bool getBatteryVoltage(float& data);
     bool getBatteryCurrent(float& data);
@@ -176,7 +187,6 @@ public:
     bool isFallen();
     bool isOnGround();
     bool isIncapacitated();
-    bool footImpact(id_t footid, float& time);
     
     // Get Methods (generic) internal use only
     bool get(const id_t& id, bool& data);
@@ -186,13 +196,15 @@ public:
     bool get(const id_t& id, vector<vector<float> >& data);
     bool get(const id_t& id, string& data);
     
-    // Set methods
+    // Set methods (generic) internal use only
     void set(const id_t& id, double time, bool data);
     void set(const id_t& id, double time, const float& data);
     void set(const id_t& id, double time, const vector<float>& data);
     void set(const id_t& id, double time, const vector<vector<float> >& data);
     void set(const id_t& id, double time, const string& data);
-    void setAsInvalid(const id_t& id);
+    void setAsInvalid(const id_t& id);    
+    void modify(const id_t& id, int start, double time, const float& data);
+    void modify(const id_t& id, int start, double time, const vector<float>& data);
     
     void summaryTo(ostream& output) const;
     void csvTo(ostream& output);
@@ -206,11 +218,12 @@ private:
     bool getJointData(const id_t& id, const JointSensorIndices& in, float& data);
     bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);
     bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data);
+    bool getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data);
 public:
-    double CurrentTime;                         //!< stores the most recent time sensors were updated in milliseconds
+    double CurrentTime;                      //!< stores the most recent time sensors were updated in milliseconds
 
 private:
-    static vector<id_t*> m_ids;					//!< a vector containing all of the actionator ids
+    static vector<id_t*> m_ids;				 //!< a vector containing all of the actionator ids
     vector<Sensor> m_sensors;                //!< a vector of all of the sensors
 };  
 
