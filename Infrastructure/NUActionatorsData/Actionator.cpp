@@ -46,11 +46,112 @@ Actionator::~Actionator()
     pthread_mutex_destroy(&m_lock);
 }
 
+/*! @brief Attempts to get the next float data for this actionator. If there is none, return false.
+ 	@param time will be updated with the time associated with the data
+ 	@param data will be updated 
+ 	@return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, float& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.FloatData)
+        {
+        	time = p.Time;
+    		data = *(p.FloatData);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*! @brief Attempts to get the next float data for this actionator. If there is none, return false.
+    @param time will be updated with the time associated with the data
+    @param data will be updated 
+    @return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, vector<float>& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.VectorData)
+        {
+        	time = p.Time;
+    		data = *(p.VectorData);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*! @brief Attempts to get the next float data for this actionator. If there is none, return false.
+    @param time will be updated with the time associated with the data
+    @param data will be updated 
+    @return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, vector<vector<float> >& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.MatrixData)
+        {
+        	time = p.Time;
+    		data = *(p.MatrixData);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*! @brief Attempts to get the next float data for this actionator. If there is none, return false.
+    @param time will be updated with the time associated with the data
+    @param data will be updated 
+    @return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, vector<vector<vector<float> > >& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.ThreeDimData)
+        {
+        	time = p.Time;
+    		data = *(p.ThreeDimData);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*! @brief Attempts to get the next float data for this actionator. If there is none, return false.
+    @param time will be updated with the time associated with the data
+    @param data will be updated 
+    @return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, string& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.StringData)
+        {
+        	time = p.Time;
+    		data = *(p.StringData);
+            return true;
+        }
+    }
+    return false;
+}
+
+
 /*! @brief Add an actionator point to the actionator
     @param time the time the data will be applied
     @param data the data associated with the point (single float)
  */
-void Actionator::add(double time, const float& data)
+void Actionator::add(const double& time, const float& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -60,7 +161,7 @@ void Actionator::add(double time, const float& data)
     @param time the time the data will be applied
     @param data the data associated with the point (vector of float)
  */
-void Actionator::add(double time, const vector<float>& data)
+void Actionator::add(const double& time, const vector<float>& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -70,7 +171,7 @@ void Actionator::add(double time, const vector<float>& data)
     @param time the time the data will be applied
     @param data the data associated with the point (matrix of float)
  */
-void Actionator::add(double time, const vector<vector<float> >& data)
+void Actionator::add(const double& time, const vector<vector<float> >& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -80,7 +181,7 @@ void Actionator::add(double time, const vector<vector<float> >& data)
     @param time the time the data will be applied
     @param data the data associated with the point (3d matrix of float)
  */
-void Actionator::add(double time, const vector<vector<vector<float> > >& data)
+void Actionator::add(const double& time, const vector<vector<vector<float> > >& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -90,7 +191,7 @@ void Actionator::add(double time, const vector<vector<vector<float> > >& data)
     @param time the time the data will be applied
     @param data the data associated with the point
  */
-void Actionator::add(double time, const string& data)
+void Actionator::add(const double& time, const string& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -145,13 +246,6 @@ void Actionator::postProcess(double currenttime)
         m_points.pop_front();
 }
 
-/*! @brief Returns true if there are no points in the queue, false if there are point to be applied
- */
-bool Actionator::isEmpty()
-{
-    return m_points.empty();
-}
-
 /*! @brief Provides a text summary of the contents of the Actionator
  
  The idea is to use this function when writing to a debug log. I guarentee that the 
@@ -161,7 +255,7 @@ bool Actionator::isEmpty()
  */
 void Actionator::summaryTo(ostream& output)
 {
-    if (not isEmpty())
+    if (not empty())
     {
         output << Name << " ";
         for (unsigned int i=0; i<m_points.size(); i++)

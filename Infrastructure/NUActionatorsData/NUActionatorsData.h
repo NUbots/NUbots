@@ -58,11 +58,8 @@ public:
     void addActionators(const vector<string>& hardwarenames);
     
     void preProcess(double currenttime);
-    void get(vector<float>& data);
-    void get(vector<vector<float> >& data);
-    void get(vector<vector<vector<float> > >& data);
-    void get(vector<vector<vector<vector<float> > > >& data);
-    void get(vector<string>& data);
+    void getNextServos(vector<float>& positions, vector<float>& gains);
+    void getNextLeds(vector<vector<float> >& leds);
     void postProcess();
     
     vector<int>& getIndices(const id_t& actionatorid);
@@ -99,6 +96,7 @@ public:
 
 private:
     bool belongsToGroup(const id_t& member, const id_t& group);
+    float interpolate(const double& time, const float& current, const float& target);
 
 private:
     static vector<id_t*> m_ids;								   //!< a vector containing ALL of the actionator ids (even the ones which aren't available)

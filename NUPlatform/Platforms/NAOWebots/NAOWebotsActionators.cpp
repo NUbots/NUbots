@@ -21,6 +21,8 @@
 
 #include "NAOWebotsActionators.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+
+#include "Tools/Math/StlVector.h"
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
@@ -118,103 +120,39 @@ void NAOWebotsActionators::copyToHardwareCommunications()
  */
 void NAOWebotsActionators::copyToServos()
 {
-    static vector<bool> isvalid;            
-    static vector<double> times;
     static vector<float> positions;
-    static vector<float> velocities;
-    static vector<float> torques;
     static vector<float> gains;
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToServos()" << endl;
-#endif
-    
-    // Positions
-    /*if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
+    m_data->getNextServos(positions, gains);
+    for (size_t i=0; i<m_servos.size(); i++)
     {
-        if (m_servos.size() == isvalid.size())                          // only process the input if it has the right length
-        {
-            for (int i=0; i<m_servos.size(); i++)
-            {
-                if (isvalid[i] == true)     // I need to put in a bit of a hack here, because Webots actually allows for left and right hip yaw 
-                {
-                    if (i == NUActionatorsData::RHipYawPitch)
-                        positions[i] = positions[NUActionatorsData::LHipYawPitch];
-                    
-                    JServo* jservo = (JServo*) m_servos[i];
-                    if (times[i] >= m_current_time)
-                    {
-                        float c = jservo->getPosition();           // i think I am allowed to do this right? I ought to be I am only emulating (time, position) available on other platforms!
-                        float dt = times[i] - m_current_time;
-                        float v = 1000*(positions[i] - c)/dt;
-                        jservo->setGain(gains[i]);
-                        jservo->setVelocity(v);
-                        jservo->setPosition(positions[i]);
-                    }
-                    else
-                    {   // the command has already past, we should get there as fast as possible
-                        jservo->setGain(gains[i]);
-                        jservo->setVelocity(jservo->getMaxVelocity());
-                        jservo->setPosition(positions[i]);
-                    }
-                }
-            }
-        }
-        else
-            debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
-
+        JServo* jservo = (JServo*) m_servos[i];
+        jservo->setGain(gains[i]);
+        jservo->setVelocity(jservo->getMaxVelocity());
+        jservo->setPosition(positions[i]);
     }
-    // Torques
-    if (m_data->getNextJointTorques(isvalid, times, torques, gains))
-    {
-        if (m_servos.size() == isvalid.size())
-        {
-            for (int i=0; i<m_servos.size(); i++)
-            {
-                if (isvalid[i] == true)
-                    m_servos[i]->setForce(torques[i]);          // I think this is broken in webots!
-            }
-        }
-        else
-            debug << "NAOWebotsActionators::copyToServos(). The input does not have the correct length, all data will be ignored!" << endl;
-    }*/
 }
 
 /*! @brief Copies the led values to the leds
  */
 void NAOWebotsActionators::copyToLeds()
 {
-    static vector<bool> isvalid;
-    static vector<double> times;
-    static vector<float> redvalues;
-    static vector<float> greenvalues;
-    static vector<float> bluevalues;
+    static vector<vector<float> > ledvalues;
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToLeds()" << endl;
 #endif
     
-    /*
-    if (m_data->getNextLeds(isvalid, times, redvalues, greenvalues, bluevalues))
+    m_data->getNextLeds(ledvalues);
+    for (size_t i=0; i<m_leds.size(); i++)
     {
-        if (m_leds.size() == isvalid.size())
-        {
-            for (int i=0; i<m_leds.size(); i++)
-            {
-                if (isvalid[i] == true)
-                {
-                    unsigned char bgr[3];
-                    bgr[2] = static_cast<unsigned char> (255*redvalues[i]);
-                    bgr[1] = static_cast<unsigned char> (255*greenvalues[i]);
-                    bgr[0] = static_cast<unsigned char> (255*bluevalues[i]);
-                    int ledvalue = *reinterpret_cast<int*> (&bgr);
-                    m_leds[i]->set(ledvalue);
-                }
-            }
-        }
-        else
-            debug << "NAOWebotsActionators::copyToLeds(). The input does not have the correct length, all data will be ignored!" << endl;
-    }*/
+        unsigned char bgr[3];
+        bgr[2] = static_cast<unsigned char> (255*ledvalues[i][0]);
+        bgr[1] = static_cast<unsigned char> (255*ledvalues[i][1]);
+        bgr[0] = static_cast<unsigned char> (255*ledvalues[i][2]);
+        int ledvalue = *reinterpret_cast<int*> (&bgr);
+        m_leds[i]->set(ledvalue);
+    }
 }
 
 /*! @brief Copies the teleportation data to the teleporter (super_emitter)

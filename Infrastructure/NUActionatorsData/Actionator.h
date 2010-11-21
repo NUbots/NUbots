@@ -44,14 +44,20 @@ public:
     
     void preProcess();
     void postProcess(double currenttime);
-    void add(double time, const float& data);
-    void add(double time, const vector<float>& data);
-    void add(double time, const vector<vector<float> >& data);
-    void add(double time, const vector<vector<vector<float> > >& data);
-    void add(double time, const string& data);
     
+    bool get(double& time, float& data);
+    bool get(double& time, vector<float>& data);
+    bool get(double& time, vector<vector<float> >& data);
+    bool get(double& time, vector<vector<vector<float> > >& data);
+    bool get(double& time, string& data);
     
-    bool isEmpty();
+    void add(const double& time, const float& data);
+    void add(const double& time, const vector<float>& data);
+    void add(const double& time, const vector<vector<float> >& data);
+    void add(const double& time, const vector<vector<vector<float> > >& data);
+    void add(const double& time, const string& data);
+    
+    bool empty();
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
@@ -62,13 +68,20 @@ private:
     void addToBuffer(const ActionatorPoint& p);
 public:
     string Name;                                     //!< the name of the actionator
-    deque<ActionatorPoint> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
 private:
+    deque<ActionatorPoint> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
     vector<ActionatorPoint> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
     vector<ActionatorPoint> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
     
     pthread_mutex_t m_lock;                          //!< lock for m_add_points_buffer
 };
+
+/*! @brief Returns true if there are no points in the queue, false if there are point to be applied
+ */
+inline bool Actionator::empty()
+{
+    return m_points.empty();
+}
 
 #endif
 

@@ -36,11 +36,11 @@ using namespace std;
 class ActionatorPoint 
 {
 public:
-    ActionatorPoint(double time, const float data);
-    ActionatorPoint(double time, const vector<float>& data);
-    ActionatorPoint(double time, const vector<vector<float> >& data);
-    ActionatorPoint(double time, const vector<vector<vector<float> > >& data);
-    ActionatorPoint(double time, const string& data);
+    ActionatorPoint(const double& time, const float& data);
+    ActionatorPoint(const double& time, const vector<float>& data);
+    ActionatorPoint(const double& time, const vector<vector<float> >& data);
+    ActionatorPoint(const double& time, const vector<vector<vector<float> > >& data);
+    ActionatorPoint(const double& time, const string& data);
     ActionatorPoint(const ActionatorPoint& original);
     ~ActionatorPoint();
     

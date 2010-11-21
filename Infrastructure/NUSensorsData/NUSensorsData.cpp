@@ -92,6 +92,7 @@ NUSensorsData::NUSensorsData()
 #endif
     
     CurrentTime = 0;
+    PreviousTime = 0;
     
     m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
     m_ids_copy = m_ids;

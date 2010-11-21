@@ -42,17 +42,15 @@ PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)
     
     m_state = m_chase_state;
     
-    m_chase_led_indices.push_back(3);
-    m_chase_led_indices.push_back(4);
-    m_led_on = vector<vector<float> >(1, vector<float>(3,1.0f));
-    m_led_off = vector<vector<float> >(1, vector<float>(3,0.0f));
+    m_led_on = vector<float>(3,1.0f);
+    m_led_off = vector<float>(3,0.0f);
     m_led_red = m_led_off;
-    m_led_red[0][0] = 1;
+    m_led_red[0] = 1;
     m_led_green = m_led_off;
-    m_led_green[0][1] = 1;
+    m_led_green[1] = 1;
     m_led_yellow = m_led_off;
-    m_led_yellow[0][0] = 1;
-    m_led_yellow[0][1] = 1;
+    m_led_yellow[0] = 1;
+    m_led_yellow[1] = 1;
 }
 
 PlayingState::~PlayingState()

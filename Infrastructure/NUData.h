@@ -135,6 +135,7 @@ public:
     const static id_t NumCommonIds;                 //!< internal use only
     
     double CurrentTime;    
+    double PreviousTime;
     
     vector<id_t*> mapIdToIds(const id_t& id);
 protected:

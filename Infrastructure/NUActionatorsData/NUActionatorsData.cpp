@@ -22,6 +22,9 @@
 #include "NUActionatorsData.h"
 #include "Actionator.h"
 
+#include "Infrastructure/NUBlackboard.h"			// need the blackboard and the sensors to do the interpolation
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+
 #include <sstream>
 
 #include "Tools/Math/StlVector.h"
@@ -32,13 +35,13 @@
 int a_curr_id = NUData::NumCommonIds.Id+1;
 vector<NUActionatorsData::id_t*> NUActionatorsData::m_ids;
 // Led actionators
+const NUActionatorsData::id_t NUActionatorsData::LEarLed(a_curr_id++, "LEarLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::REarLed(a_curr_id++, "REarLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::LEyeLed(a_curr_id++, "LEyeLed", NUActionatorsData::m_ids);
+const NUActionatorsData::id_t NUActionatorsData::REyeLed(a_curr_id++, "REyeLed", NUActionatorsData::m_ids);
 const NUActionatorsData::id_t NUActionatorsData::ChestLed(a_curr_id++, "ChestLed", NUActionatorsData::m_ids);
 const NUActionatorsData::id_t NUActionatorsData::LFootLed(a_curr_id++, "LFootLed", NUActionatorsData::m_ids);
 const NUActionatorsData::id_t NUActionatorsData::RFootLed(a_curr_id++, "RFootLed", NUActionatorsData::m_ids);
-const NUActionatorsData::id_t NUActionatorsData::LEyeLed(a_curr_id++, "LEyeLed", NUActionatorsData::m_ids);
-const NUActionatorsData::id_t NUActionatorsData::REyeLed(a_curr_id++, "REyeLed", NUActionatorsData::m_ids);
-const NUActionatorsData::id_t NUActionatorsData::LEarLed(a_curr_id++, "LEarLed", NUActionatorsData::m_ids);
-const NUActionatorsData::id_t NUActionatorsData::REarLed(a_curr_id++, "REarLed", NUActionatorsData::m_ids);
 // Led groups
 const NUActionatorsData::id_t NUActionatorsData::FaceLeds(a_curr_id++, "FaceLeds", NUActionatorsData::m_ids);
 const NUActionatorsData::id_t NUActionatorsData::FeetLeds(a_curr_id++, "FeetLeds", NUActionatorsData::m_ids);
@@ -55,6 +58,7 @@ NUActionatorsData::NUActionatorsData()
         debug << "NUActionatorsData::NUActionatorsData" << endl;
     #endif
     CurrentTime = 0;
+    PreviousTime = 0;
     
     m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
     m_ids_copy = m_ids;
@@ -88,14 +92,15 @@ void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
  */
 bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
 {
-    bool belongstonudata = NUData::belongsToGroup(member, group);
-    if (belongstonudata)
+    if (member == group or member == FaceLeds or member == FeetLeds or member == AllLeds)			// we careful not to add ids for groups to groups
+        return false;
+    else if (NUData::belongsToGroup(member, group))
         return true;
     else
     {
         if (group == FaceLeds)
         {
-            if (member.Name.find("Led") != string::npos and (member.Name.find("Eye") != string::npos  or member.Name.find("Mouth") != string::npos))
+            if (member.Name.find("Led") != string::npos and (member.Name.find("Eye") != string::npos or member.Name.find("Mouth") != string::npos))
                 return true;
             else
                 return false;
@@ -126,6 +131,7 @@ bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
  */
 void NUActionatorsData::preProcess(double currenttime)
 {
+    PreviousTime = CurrentTime;
     CurrentTime = currenttime;
     for (size_t i=0; i<m_available_ids.size(); i++)
         m_actionators[m_available_ids[i]].preProcess();
@@ -140,8 +146,113 @@ void NUActionatorsData::postProcess()
         m_actionators[m_available_ids[i]].postProcess(CurrentTime);
 }
 
+/*! @brief Gets the target positions and gains for the servos.
+ 	@param positions will be updated with the positions for the next cycle
+ 	@param gains will be updated with the gains for the next cycle
+ */
+void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& gains)
+{
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NUActionatorsData::getNextServos" << endl;
+    #endif
+    // get the sensor positions and gains
+    vector<float> positions_current, gains_current;
+    Blackboard->Sensors->getPosition(All, positions_current);
+    Blackboard->Sensors->getStiffness(All, gains_current);
+    
+    // check that positions and gains are of the correct size; if they are not then 'resize' them
+    if (positions.size() != positions_current.size())
+        positions = positions_current;
+    if (gains.size() != gains_current.size())
+        gains = gains_current;
+
+    // now do the interpolation for each joint that has new data
+    vector<int>& ids = mapIdToIndices(All); 
+    for (int i=0; i<ids.size(); i++)
+    {
+        Actionator& a = m_actionators[ids[i]];
+        if (not a.empty())
+        {
+            double time;
+            float position;
+            if (a.get(time, position))
+                positions[i] = interpolate(time, positions_current[i], position);
+            else
+            {
+                vector<float> positiongain;
+                if (a.get(time, positiongain))
+                {
+                    positions[i] = interpolate(time, positions_current[i], positiongain[0]);
+                    gains[i] = interpolate(time, gains_current[i], positiongain[1]);
+                }
+            }
+        }
+        #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+            debug << a.Name << " [" << positions[i] << "," << gains[i] << "]" << endl;
+        #endif
+    }
+}
+
+/*! @brief Gets the target [rgb] values for each led
+ 	@param leds will be updated with the [rgb] values for the next cycle
+ */
+void NUActionatorsData::getNextLeds(vector<vector<float> >& leds)
+{
+	// since we have no led 'sensors' we just assume they are exactly what I set them to be
+    
+    // check that leds is the right size; if not 'resize' them
+    vector<int>& ids = mapIdToIndices(AllLeds);
+	if (leds.size() != ids.size())
+        leds = vector<vector<float> >(ids.size(), vector<float>(3,0));
+    
+    for (int i=0; i<ids.size(); i++)
+    {
+        Actionator& a = m_actionators[ids[i]];
+        if (not a.empty())
+        {
+            double time;
+            float luminance;
+            if (a.get(time, luminance))
+            {
+                float l = interpolate(time, leds[i][0], luminance);
+                leds[i][0] = l;			// if the actionator stores a float; assume we want each colour to be set to that value
+                leds[i][1] = l;
+                leds[i][2] = l;
+            }
+            else
+            {
+                vector<float> rgb;
+                if (a.get(time, rgb))
+                {
+                    leds[i][0] = interpolate(time, leds[i][0], rgb[0]);
+                    leds[i][1] = interpolate(time, leds[i][1], rgb[1]);
+                    leds[i][2] = interpolate(time, leds[i][2], rgb[2]);
+                }
+            }
+        }
+        #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+            debug << a.Name << " " << leds[i] << endl;
+        #endif
+    }
+}
+
+/*! @brief Interpolates the target value, producing the target for the next time cycle
+ 	@param time the timestamp (ms) to reach the target value
+ 	@param current the current value of the actionator
+ 	@param target the target actionator value
+ 	@return the interpolate actionator value for the next time step
+ */
+float NUActionatorsData::interpolate(const double& time, const float& current, const float& target)
+{
+    if (time - CurrentTime > CurrentTime - PreviousTime and CurrentTime - PreviousTime != 0)
+        return current + ((target - current)/(time - CurrentTime))*(CurrentTime - PreviousTime);
+    else
+        return target;
+}
+
 vector<int>& NUActionatorsData::getIndices(const id_t& actionatorid)
 {
+    // TODO: I don't know how to implement this function, nor do I know if I need it anymore
     return m_id_to_indices[0];
 }
 
@@ -307,7 +418,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
 void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<vector<float> >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << ",...)" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
@@ -346,7 +457,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
 void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<vector<vector<float> > >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << ",...)" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
     vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();

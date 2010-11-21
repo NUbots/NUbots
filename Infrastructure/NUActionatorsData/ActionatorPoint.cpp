@@ -30,7 +30,7 @@ using namespace boost;
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(double time, float data)
+ActionatorPoint::ActionatorPoint(const double& time, const float& data)
 {
     Time = time;
     FloatData = shared_ptr<float>(new float(data));
@@ -40,7 +40,7 @@ ActionatorPoint::ActionatorPoint(double time, float data)
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(double time, const vector<float>& data)
+ActionatorPoint::ActionatorPoint(const double& time, const vector<float>& data)
 {
     Time = time;
     VectorData = shared_ptr<vector<float> >(new vector<float>(data));
@@ -50,7 +50,7 @@ ActionatorPoint::ActionatorPoint(double time, const vector<float>& data)
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(double time, const vector<vector<float> >& data)
+ActionatorPoint::ActionatorPoint(const double& time, const vector<vector<float> >& data)
 {
     Time = time;
     MatrixData = shared_ptr<vector<vector<float> > >(new vector<vector<float> >(data));
@@ -60,7 +60,7 @@ ActionatorPoint::ActionatorPoint(double time, const vector<vector<float> >& data
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(double time, const vector<vector<vector<float> > >& data)
+ActionatorPoint::ActionatorPoint(const double& time, const vector<vector<vector<float> > >& data)
 {
     Time = time;
     ThreeDimData = shared_ptr<vector<vector<vector<float> > > >(new vector<vector<vector<float> > >(data));
@@ -70,7 +70,7 @@ ActionatorPoint::ActionatorPoint(double time, const vector<vector<vector<float> 
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(double time, const string& data)
+ActionatorPoint::ActionatorPoint(const double& time, const string& data)
 {
     Time = time;
     StringData = shared_ptr<string>(new string(data));

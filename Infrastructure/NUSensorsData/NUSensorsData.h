@@ -196,6 +196,8 @@ public:
     bool get(const id_t& id, vector<vector<float> >& data);
     bool get(const id_t& id, string& data);
     
+    
+    
     // Set methods (generic) internal use only
     void set(const id_t& id, double time, bool data);
     void set(const id_t& id, double time, const float& data);
