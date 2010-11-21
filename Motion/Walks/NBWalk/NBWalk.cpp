@@ -156,26 +156,28 @@ void NBWalk::updateNBSensors()
     // I'll to the joints first. All I need to do is get the order right
     // Positions
     vector<float> nu_jointpositions;
-    m_data->getJointPositions(NUSensorsData::All, nu_jointpositions);
+    m_data->getPosition(NUSensorsData::All, nu_jointpositions);
     vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
     nuToNBJointOrder(nu_jointpositions, nb_jointpositions);
     nb_sensors->setBodyAngles(nb_jointpositions);
     // Temperatures
     vector<float> nu_jointtemperatures;
-    m_data->getJointTemperatures(NUSensorsData::All, nu_jointtemperatures);
-    vector<float> nb_jointtemperatures(nb_jointtemperatures.size(), 0);
+    m_data->getTemperature(NUSensorsData::All, nu_jointtemperatures);
+    vector<float> nb_jointtemperatures(nu_jointtemperatures.size(), 0);
     nuToNBJointOrder(nu_jointtemperatures, nb_jointtemperatures);
     nb_sensors->setBodyTemperatures(nb_jointtemperatures);
     
     // Now to the other sensors!
-    static vector<float> accelvalues;
-    static vector<float> gyrovalues;
-    static vector<float> orientation;
-    static vector<float> footvalues;
-    static vector<float> buttonvalues;
-    m_data->getAccelerometerValues(accelvalues);
-    m_data->getGyroValues(gyrovalues);
+    static vector<float> accelvalues(3,0);
+    static vector<float> gyrovalues(2,0);
+    static vector<float> orientation(2,0);
+    static vector<float> lfootvalues(4,0);
+    static vector<float> rfootvalues(4,0);
+    m_data->getAccelerometer(accelvalues);
+    m_data->getGyro(gyrovalues);
     m_data->getOrientation(orientation);
+    m_data->get(NUSensorsData::LFootTouch, lfootvalues);
+    m_data->get(NUSensorsData::RFootTouch, rfootvalues);
 
     float angleX = 0;
     if (orientation.size() > 0)
@@ -184,11 +186,8 @@ void NBWalk::updateNBSensors()
     if (orientation.size() > 1)
         angleY = orientation[1];
     
-    m_data->getFootSoleValues(NUSensorsData::All, footvalues);
-    m_data->getButtonValues(NUSensorsData::MainButton, buttonvalues);
-    
-    nb_sensors->setMotionSensors(FSR(footvalues[0], footvalues[1], footvalues[2], footvalues[3]),
-                                 FSR(footvalues[4], footvalues[5], footvalues[6], footvalues[7]),
+    nb_sensors->setMotionSensors(FSR(lfootvalues[0], lfootvalues[1], lfootvalues[2], lfootvalues[3]),
+                                 FSR(rfootvalues[0], rfootvalues[1], rfootvalues[2], rfootvalues[3]),
                                  0,                                                             // no button in webots
                                  Inertial(-accelvalues[0]/100.0, -accelvalues[1]/100.0, -accelvalues[2]/100.0,
                                           gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY),

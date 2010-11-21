@@ -503,13 +503,13 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
-        Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
-        void *array[10];
+        Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::UNHANDLED_EXCEPTION);
+        void *array[20];
         size_t size;
         char **strings;
-        size = backtrace(array, 10);
+        size = backtrace(array, 20);
         strings = backtrace_symbols(array, size);
         for (size_t i=0; i<size; i++)
             errorlog << strings[i] << endl;

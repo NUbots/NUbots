@@ -24,6 +24,9 @@
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
+
+#include <limits>
+using namespace std;
 using namespace webots;
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
@@ -164,7 +167,7 @@ void NAOWebotsSensors::copyFromJoints()
         debug << "NAOWebotsSensors::copyFromJoints()" << endl;
     #endif
 
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    vector<float> joint(NUSensorsData::NumJointSensorIndices, numeric_limits<float>::quiet_NaN());
     float delta_t = 1000*(m_current_time - m_previous_time);
     for (size_t i=0; i<m_servos.size(); i++)
     {
@@ -243,32 +246,34 @@ void NAOWebotsSensors::copyFromDistance()
  */
 void NAOWebotsSensors::copyFromFootSole()
 {
-    static vector<float> footsoledata(m_foot_sole_sensors.size(), 0);
+    static vector<float> lfootsoledata(m_foot_sole_sensors.size()/2, 0);
+    static vector<float> rfootsoledata(m_foot_sole_sensors.size()/2, 0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NAOWebotsSensors::copyFromFootSole()" << endl;
 #endif
     
     // Copy foot sole readings
-    for (size_t i=0; i<m_foot_sole_sensors.size(); i++)
-        footsoledata[i] = m_foot_sole_sensors[i]->getValue();
-    m_data->set(NUSensorsData::FootSole, m_current_time, footsoledata);
+    size_t midpoint = m_foot_sole_sensors.size()/2;
+    for (size_t i=0; i<midpoint; i++)
+        lfootsoledata[i] = m_foot_sole_sensors[i]->getValue();
+    for (size_t i=midpoint; i<m_foot_sole_sensors.size(); i++)
+        rfootsoledata[i-midpoint] = m_foot_sole_sensors[i]->getValue();
+    m_data->set(NUSensorsData::LFootTouch, m_current_time, lfootsoledata);
+    m_data->set(NUSensorsData::RFootTouch, m_current_time, rfootsoledata);
 }
 
 /*! @brief Copies the foot bumper data into m_data
  */
 void NAOWebotsSensors::copyFromFootBumper()
 {
-    static vector<float> footbumperdata(m_foot_bumper_sensors.size(), 0);
-    
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromFootBumper()" << endl;
-#endif
-    
-    // Copy foot bumper readings
-    for (size_t i=0; i<m_foot_bumper_sensors.size(); i++)
-        footbumperdata[i] = m_foot_bumper_sensors[i]->getValue();
-    m_data->set(NUSensorsData::FootBumper, m_current_time, footbumperdata);
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NAOWebotsSensors::copyFromFootBumper()" << endl;
+    #endif
+    float leftbumper = m_foot_bumper_sensors[0]->getValue() + m_foot_bumper_sensors[1]->getValue();
+    float rightbumper =  m_foot_bumper_sensors[2]->getValue() + m_foot_bumper_sensors[3]->getValue();
+    m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::BumperId, m_current_time, leftbumper);
+    m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::BumperId, m_current_time, rightbumper);
 }
 
 /*! @brief Copies the gps data into m_data

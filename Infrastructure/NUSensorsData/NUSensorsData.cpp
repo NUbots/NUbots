@@ -20,12 +20,13 @@
  */
 
 #include "NUSensorsData.h"
-
 #include "Tools/Math/StlVector.h"
+
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
 #include <fstream>
+#include <limits>
 
 int s_curr_id = NUData::NumCommonIds.Id+1;
 vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
@@ -34,7 +35,7 @@ vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
 const NUSensorsData::id_t NUSensorsData::LArmEndEffector(s_curr_id++, "LArmEndEffector", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RArmEndEffector(s_curr_id++, "RArmEndEffector", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::LLegEndEffector(s_curr_id++, "LLegEndEffector", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::CameraTransform(s_curr_id++, "RLegEndEffector", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::RLegEndEffector(s_curr_id++, "RLegEndEffector", NUSensorsData::m_ids);
 // kinematic sensors
 const NUSensorsData::id_t NUSensorsData::LLegTransform(s_curr_id++, "LLegTransform", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RLegTransform(s_curr_id++, "RLegTransform", NUSensorsData::m_ids);
@@ -61,11 +62,10 @@ const NUSensorsData::id_t NUSensorsData::RFootTouch(s_curr_id++, "RFootTouch", N
 const NUSensorsData::id_t NUSensorsData::MainButton(s_curr_id++, "MainButton", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::LeftButton(s_curr_id++, "LeftButton", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RightButton(s_curr_id++, "RightButton", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::AllButton(s_curr_id++, "AllButton", NUSensorsData::m_ids);
-const NUSensorsData::id_t NUSensorsData::AllButtonDurations(s_curr_id++, "AllButtonDurations", NUSensorsData::m_ids);
 // distance sensors
 const NUSensorsData::id_t NUSensorsData::LDistance(s_curr_id++, "LDistance", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::RDistance(s_curr_id++, "RDistance", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::LaserDistance(s_curr_id++, "LaserDistance", NUSensorsData::m_ids);
 // gps sensors
 const NUSensorsData::id_t NUSensorsData::Gps(s_curr_id++, "Gps", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Compass(s_curr_id++, "Compass", NUSensorsData::m_ids);
@@ -119,7 +119,7 @@ void NUSensorsData::addSensors(const vector<string>& hardwarenames)
 }
 
 /******************************************************************************************************************************************
-                                                                                                                                Get Methods
+                                                                                                          Get Methods For Joint Information
  ******************************************************************************************************************************************/
 
 /*! @brief Gets the joint position
@@ -282,48 +282,154 @@ bool NUSensorsData::getTemperature(const id_t id, vector<float>& data)
     return getJointData(id, TemperatureId, data);
 }
 
-/*! @brief Gets the position of an end effector
+/******************************************************************************************************************************************
+                                                                                                   Get Methods For End Effector Information
+ ******************************************************************************************************************************************/
+
+/*! @brief Gets the bumper value for the end effector
     @param id the id of the end effector
-    @param data will be updated with the position
+    @param data will be updated with bumper value
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getBumper(const id_t& id, float& data)
+{
+    return getEndEffectorData(id, BumperId, data);
+}
+
+/*! @brief Gets the total force on the end effector
+    @param id the id of the end effector
+    @param data will be updated with force value
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getForce(const id_t& id, float& data)
+{
+    return getEndEffectorData(id, ForceId, data);
+}
+
+/*! @brief Gets the contact (touching something or not) value for the end effector
+    @param id the id of the end effector
+    @param data will be updated with contact value (0 means no contact, 1 means there is contact (with the ground))
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getContact(const id_t& id, bool& data)
+{
+    float buffer;
+    bool successful = getEndEffectorData(id, ContactId, buffer);
+    data = static_cast<bool>(buffer);
+    return successful;
+}
+
+/*! @brief Gets the support (supporting the robot) value for the end effector
+    @param id the id of the end effector
+    @param data will be updated with support value (0 means this end effector is not supporting the robot, 1 means it is)
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getSupport(const id_t& id, bool& data)
+{
+    float buffer;
+    bool successful = getEndEffectorData(id, SupportId, buffer);
+    data = static_cast<bool>(buffer);
+    return successful;
+}
+
+/*! @brief Gets the impact time for the end effector
+    @param id the id of the end effector
+    @param data will be updated with impact time (timestamp in ms)
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getImpact(const id_t& id, float& data)
+{
+    return getEndEffectorData(id, ImpactId, data);
+}
+
+/*! @brief Gets the centre of pressure for the end effector
+    @param id the id of the end effector
+    @param data will be updated with centre of presssure [x(cm), y(cm)]
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
+{
+    data = vector<float>(2);
+    bool successful = true;
+    successful &= getEndEffectorData(id, CoPXId, data[0]);
+    successful &= getEndEffectorData(id, CoPXId, data[1]);
+    return successful;
+}
+
+
+/*! @brief Gets the position of an end effector. For example to get the position of the left leg use getEndPosition(NUSensorsData::LLeg, data)
+    @param id the id of the end effector
+    @param data will be updated with the position [x, y, z, roll, pitch, yaw]
     @return true if valid, false if invalid
  */
 bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data)
 {
-    if (id == LArm or id == LHand or id == LArmEndEffector)
-        return false;
-    else if (id == RArm or id == RHand or id == RArmEndEffector)
-        return false;
-    else if (id == LLeg or id == LLeg or id == LLegEndEffector)
-    {
-        vector<float>& leftlegtransform;
-        bool successful = get(LLegTransform, leftlegtransform);
-        if (successful
-    }
+    data = vector<float>(6);
+    bool successful = true;
+    successful &= getEndEffectorData(id, EndPositionXId, data[0]);
+    successful &= getEndEffectorData(id, EndPositionYId, data[1]);
+    successful &= getEndEffectorData(id, EndPositionZId, data[2]);
+    successful &= getEndEffectorData(id, EndPositionRollId, data[3]);
+    successful &= getEndEffectorData(id, EndPositionPitchId, data[4]);
+    successful &= getEndEffectorData(id, EndPositionYawId, data[5]);
+    return successful;
 }
 
+/******************************************************************************************************************************************
+                                                                                                      Get Methods For Kinematic Information
+ ******************************************************************************************************************************************/
+
+/*! @brief Get the camera height in cm 
+ 	@param data will be update with the height in cm
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getCameraHeight(float& data)
 {
     return get(CameraHeight, data);
 }
 
+/*! @brief Gets the horizon line [A, B, C] where Ax + By = C is the equation of the horizon line
+ 	@param data will be updated with the [A, B, C] of the line
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getHorizon(vector<float>& data)
 {
     return get(Horizon, data);
 }
 
+/*! @brief Gets the current odometry data [delta_x (cm), delta_y (cm), delta_yaw (rad)]
+ 	@param data will be updated with the current odometry data [delta_x (cm), delta_y (cm), delta_yaw (rad)] since the last call to getOdometryData
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getOdometry(vector<float>& data)
 {
-    bool successful = get(Odometry, data);
-    if (successful)
-        set(Odometry, vector<float> (data.size(), 0));
-    return successful;
+    const static vector<float> zeros(3,0);
+    if (get(Odometry, data))
+    {
+        set(Odometry, CurrentTime, zeros);			// reset the current odometry value
+        return true;
+    }
+    else
+        return false;
 }
 
+/******************************************************************************************************************************************
+                                                                                                        Get Methods For Balance Information
+ ******************************************************************************************************************************************/
+
+/*! @brief Get the accelerometer data [x(cm/s/s), y(cm/s/s), z(cm/s/s)] 
+    @param data will be update with the [x(cm/s/s), y(cm/s/s), z(cm/s/s)] 
+    @return true if valid, false if invalid
+ */
 bool NUSensorsData::getAccelerometer(vector<float>& data)
 {
     get(Accelerometer, data);
 }
 
+/*! @brief Get the gyro data [roll(rad/s), pitch(rad/s), yaw(rad/s)] after the gyro offset has been applied
+    @param data will be update with the [roll(rad/s), pitch(rad/s), yaw(rad/s)]
+    @return true if valid, false if invalid
+ */
 bool NUSensorsData::getGyro(vector<float>& data)
 {
     vector<float> gyro, offset; 
@@ -334,96 +440,138 @@ bool NUSensorsData::getGyro(vector<float>& data)
     return successful;
 }
 
+/*! @brief Gets the orientation of the torso relative to the gravity vector [x(rad), y(rad), z(rad)]
+ 	@param data will be updated with the [x(rad), y(rad), z(rad)]
+ 	@return true is valid, false if invalid
+ */
 bool NUSensorsData::getOrientation(vector<float>& data)
 {
     return get(Orientation, data);
 }
 
+/*! @brief Gets the falling vector [total, left, right, forward, backward] where each will be 0 if not falling, and 1 if falling in that direction
+ 	@param data will be updated with the [total, left, right, forward, backward]
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getFalling(vector<float>& data)
 {
     return get(Falling, data);
 }
 
+/*! @brief Gets the fallen vector [total, left, right, forward, backward] where each will be 0 if not fallen, and 1 if fallen in that direction
+ 	@param data will be updated with the [total, left, right, forward, backward]
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getFallen(vector<float>& data)
 {
     return get(Fallen, data);
 }
 
-bool NUSensorsData::getBumper(const id_t& id, float& data)
-{
-    
-    
-    
-}
-
-bool NUSensorsData::getForce(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getContact(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getSupport(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getImpact(const id_t& id, float& data)
-{
-    
-}
-
+/*! @brief Gets the zmp [x(cm), y(cm)]
+ 	@param id the id of the zmp you want (All/Body, LFoot, RFoot)
+ 	@param data will be updated with the [x(cm), y(cm)]
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
 {
+    // TODO: this isn't right, it will always return the 'all' zmp.
+    return get(Zmp, data);
 }
 
-bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
-{
-}
+/******************************************************************************************************************************************
+                                                                                                  Get Methods For Other Sensors Information
+ ******************************************************************************************************************************************/
 
-bool NUSensorsData::getButton(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getButton(const id_t& id, vector<float>& data)
-{
-}
-
-bool NUSensorsData::getButtonDuration(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getButtonDuration(const id_t& id, vector<float>& data)
-{
-}
-
-bool NUSensorsData::getDistance(const id_t& id, float& data)
-{
-}
-
-bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
-{
-}
-
+/*! @brief Gets the Gps data [x(cm), y(cm), z(cm)] relative to the centre of the 'field'
+ 	@param data will be updated with the [x(cm), y(cm), z(cm)]
+ 	@return true if valid, false if invalid
+ */
 bool NUSensorsData::getGps(vector<float>& data)
 {
+    return get(Gps, data);
 }
 
+/*! @brief Gets the Compass value 0 being 'north' or towards the yellow goal in radians
+    @param data will be updated with the bearing
+    @return true if valid, false if invalid
+ */
 bool NUSensorsData::getCompass(vector<float>& data)
 {
+    return get(Compass, data);
 }
 
+/*! @brief Gets the distance data from the selected sensor.
+ 
+ 	For an ultrasonic sensor; the data will be formatted as follows:
+ 		[[angle_min, angle_max], [echo0,echo1,echo2,....]] where angle_min and angle_max specify the size of the ulrasonic's detection cone
+ 
+ 	For a 2d laser scanner or infrared array the data will be formatted as follows:
+ 		[[angle0,distance0],[angle1,distance1], ... , [angleN,distanceN]] where there are N sensors in the array
+ 
+ 	For a 3d laser scanner or infrared array the data will be formatted as follows:
+ 		[[angleX0,angleY0,distance0],[angleX1,angleY1,distance1], ... , [angleXN,angleYN,distanceN]] where there are N sensors in the array
+ 
+ 	@param id the id of the distance sensor you want
+ 	@param data will be updated the distances
+ 	@return true if the data is valid, false if not
+ */
+bool NUSensorsData::getDistance(const id_t& id, vector<vector<float> >& data)
+{
+    if (id < LDistance or id > LaserDistance)		// check the id is for a distance sensor
+        return false;
+	return get(id, data);
+}
+
+/*! @brief Gets the button value (0 when not pressed, 1 when pressed)
+    @param id the id of the button you want
+    @param data will be updated with the value
+    @return true if valid, false if invalid
+ */
+bool NUSensorsData::getButton(const id_t& id, float& data)
+{
+    return getButtonData(id, StateId, data);
+}
+
+/*! @brief Gets the duration the button was last depressed for in ms
+ 	@param id the id of the button you want
+ 	@param data will be updated with the duration
+ 	@return true if valid, false if invalid
+ */
+bool NUSensorsData::getButtonDuration(const id_t& id, float& data)
+{
+    return getButtonData(id, DurationId, data);
+}
+
+/*! @brief Gets the battery voltage in Volts
+ 	@param data will be updated with the voltage
+ 	@return true is valid, false if invalid
+ */
 bool NUSensorsData::getBatteryVoltage(float& data)
 {
+    return get(BatteryVoltage, data);
 }
 
+/*! @brief Gets the battery current in Amperes
+    @param data will be updated with the current
+    @return true is valid, false if invalid
+ */
 bool NUSensorsData::getBatteryCurrent(float& data)
 {
+    return get(BatteryCurrent, data);
 }
 
+/*! @brief Gets the battery charge in %
+    @param data will be updated with the percent charged
+    @return true is valid, false if invalid
+ */
 bool NUSensorsData::getBatteryCharge(float& data)
 {
+    return get(BatteryCharge, data);
 }
+
+/******************************************************************************************************************************************
+                                                                                                          Get Methods For Internal Use Only
+ ******************************************************************************************************************************************/
 
 /*! @brief Gets boolean sensor reading for id
     @param id the id of the sensor
@@ -541,7 +689,7 @@ bool NUSensorsData::get(const id_t& id, string& data)
         return false;
 }
 
-/* Gets a single type of joint sensor information, eg. a Temperature.
+/* Gets a single type of joint sensor information, eg. a Temperature with getJointData(NUSensorsData::HeadPitch, NUSensorsData::TemperatureId, data)
    @param id the id of the group of joints
    @param in the index into a joint sensor vector for the desired type of information
    @param data will be updated the the sensor readings
@@ -549,13 +697,20 @@ bool NUSensorsData::get(const id_t& id, string& data)
  */
 bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, float& data)
 {
+    if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
+        return false;
+    
     vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
     {
         vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
-            data = vectorBuffer[in];
+            if (in < vectorBuffer.size())
+            	data = vectorBuffer[in];
+            else
+                data = numeric_limits<float>::quiet_NaN();
+            
             if (isnan(data))
                 return false;
             else
@@ -568,7 +723,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
         return false;
 }
 
-/* Gets a vector of a single type of joint sensor information, eg. a vector of Temperatures.
+/* Gets a vector of a single type of joint sensor information, eg. a vector of Temperatures with getJointData(NUSensorsData::RLeg, NUSensorsData:TemperatureId, data).
    @param id the id of the group of joints
    @param in the index into a joint sensor vector for the desired type of information
    @param data will be updated the the sensor readings
@@ -576,6 +731,9 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
  */
 bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data)
 {
+    if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
+        return false;
+    
     vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids <= 1)
@@ -590,15 +748,18 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
         for (size_t i=0; i<numids; i++)
         {
             successful &= m_sensors[ids[i]].get(vectorBuffer);
-            floatBuffer = vectorBuffer[in];
-            successful & = not isnan(floatBuffer);
+            if (in < vectorBuffer.size())
+                floatBuffer = vectorBuffer[in];
+            else
+                floatBuffer = numeric_limits<float>::quiet_NaN();
+            successful &= not isnan(floatBuffer);
             data.push_back(floatBuffer);
         }
         return successful;
     }
 }
 
-/* Gets a single type of end effector information, eg. a bumper value
+/* Gets a single type of end effector information, eg. a bumper value with getEndEffectorData(NUSensorsData::LArm, NUSensorsData::BumperId, data)
    @param id the id of the end effector
    @param in the index into a end effector sensor vector for the desired type of information
    @param data will be updated the the sensor readings
@@ -607,7 +768,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
 bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data)
 {
     // map similar ids to the proper EndEffector ids
-    id_t& e_id = id;
+    id_t e_id = id;
     if (e_id == LArm or e_id == LHand)
         e_id = LArmEndEffector;
     else if (e_id == RArm or e_id == RHand)
@@ -617,6 +778,9 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
     else if (e_id == RLeg or e_id == RFoot)
         e_id = RLegEndEffector;
     
+    if (e_id != LLegEndEffector and e_id != RLegEndEffector)		// check the id is valid
+        return false;
+    
     // proceed as usual with the proper end effector id
     vector<int>& ids = mapIdToIndices(e_id);
     if (ids.size() == 1)
@@ -624,7 +788,10 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
-            data = vectorBuffer[in];
+            if (in < vectorBuffer.size())
+            	data = vectorBuffer[in];
+            else
+                data = numeric_limits<float>::quiet_NaN();
             if (isnan(data))
                 return false;
             else
@@ -637,89 +804,39 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         return false;
 }
 
-/* @brief Gets the transform matrix of the left leg
-   @param value will be updated with the left leg transform
+/* Gets a single type button information, eg. a button state value with getButtonData(NUSensorsData::MainButton, NUSensorsData::StateId, data)
+    @param id the id of the button
+    @param in the index into a button sensor vector for the desired type of information
+    @param data will be updated the the sensor readings
+    @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getLeftLegTransform(Matrix& value)
+bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data)
 {
-    return false;
-    /*
-    if (LeftLegTransform == NULL || LeftLegTransform->IsValid == false)
+    if (id < MainButton or id > RightButton)			// check the id is for a button sensor
         return false;
-    else
+    
+    vector<int>& ids = mapIdToIndices(id);
+    if (ids.size() == 1)
     {
-        value = Matrix4x4fromVector(LeftLegTransform->Data);
-        return true;
-    }*/
-}
-
-/* @brief Gets the transform matrix of the right leg
-   @param value will be updated with the right leg transform
- */
-bool NUSensorsData::getRightLegTransform(Matrix& value)
-{
-    return false;
-    /*
-    if (RightLegTransform == NULL || RightLegTransform->IsValid == false)
-        return false;
-    else
-    {
-        value = Matrix4x4fromVector(RightLegTransform->Data);
-        return true;
+        vector<float> vectorBuffer;
+        if (m_sensors[ids[0]].get(vectorBuffer))
+        {
+            if (in < vectorBuffer.size())
+            	data = vectorBuffer[in];
+            else
+                data = numeric_limits<float>::quiet_NaN();
+            if (isnan(data))
+                return false;
+            else
+                return true;
+        }
+        else
+            return false;
     }
-     */
-}
-
-/* @brief Gets the transform matrix of the support leg
-   @param value will be updated with the support leg transform
- */
-bool NUSensorsData::getSupportLegTransform(Matrix& value)
-{
-    return false;
-    /*
-    if (SupportLegTransform == NULL || SupportLegTransform->IsValid == false)
-        return false;
     else
-    {
-        value = Matrix4x4fromVector(SupportLegTransform->Data);
-        return true;
-    }*/
-}
-
-/* @brief Gets the transform matrix of the camera
-   @param value will be updated with the camera transform
- */
-bool NUSensorsData::getCameraTransform(Matrix& value)
-{
-    return false;
-    /*
-    if (CameraTransform == NULL || CameraTransform->IsValid == false)
         return false;
-    else
-    {
-        value = Matrix4x4fromVector(CameraTransform->Data);
-        return true;
-    }*/
-}
-
-/* @brief Gets the transform matrix converting from the camera coordinates to ground based coordinates
-   @param value will be updated with the camera to ground transform
- */
-bool NUSensorsData::getCameraToGroundTransform(Matrix& value)
-{
-    return false;
-    /*if (CameraToGroundTransform == NULL || CameraToGroundTransform->IsValid == false)
-        return false;
-    else
-    {
-        value = Matrix4x4fromVector(CameraToGroundTransform->Data);
-        return true;
-    }*/
-}
-
-bool NUSensorsData::getOdometryData(vector<float>& values)
-{
-    return false;
+    
+    return get(id, data);
 }
 
 /******************************************************************************************************************************************
@@ -730,89 +847,42 @@ bool NUSensorsData::getOdometryData(vector<float>& values)
  */
 bool NUSensorsData::isFalling()
 {
-    return false;
-    /*
-    if (BalanceFalling == NULL || BalanceFalling->IsValid == false)       // if there is no balance sensor it is impossible to tell it is falling over
-        return false;       
-    else if (BalanceFalling->Data[0] > 0)
+    vector<float> temp;
+    if (get(Falling, temp) and temp[0] > 0)
         return true;
     else
-        return false;*/
+        return false;
 }
 
 /*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
  */
 bool NUSensorsData::isFallen()
 {
-    return false;
-    /*
-    if (BalanceFallen == NULL || BalanceFallen->IsValid == false)       // if there is no balance sensor it is impossible to tell it has fallen over
-        return false;       
-    else if (BalanceFallen->Data[0] > 0)
+    vector<float> temp;
+    if (get(Fallen, temp) and temp[0] > 0)
         return true;
     else
-        return false;*/
+        return false;
 }
 
 /*! @brief Returns true if the robot is on the ground, false otherwise
  */
 bool NUSensorsData::isOnGround()
 {
-    return false;
-    /*
-    if (FootContact == NULL || FootContact->IsValid == false)
-        return true;
-    else if (FootContact->Data[2] > 0)
+    float lf, rf;
+    if (getEndEffectorData(LFoot, ContactId, lf) and getEndEffectorData(RFoot, ContactId, rf) and (lf > 0 or rf > 0))
         return true;
     else
-        return false;*/
+        return false;
 }
 
 /*! @brief Returns true if the robot is currently incapacitated. A robot is incapacitated if it is falling, fallen, not on the ground or getting up
  */
 bool NUSensorsData::isIncapacitated()
 {
-    return false;
-    /*
     bool gettingup = false;
-    getMotionGetupActive(gettingup);
-    return isFalling() or isFallen() or not isOnGround() or gettingup;*/
-}
-
-/*! @brief Returns true has impacted in the ground in this cycle
-    @param footid the foot you want to know about
-    @param time time will be updated with the time at which the last impact on that foot occured.
-    @return true if the foot hit the ground in *this* cycle, it will be false otherwise (ie it will be false the cycle after the impact; that is what the time is for ;))
- */
-bool NUSensorsData::footImpact(id_t footid, float& time)
-{
-    return false;
-    /*
-    if (FootImpact == NULL || FootImpact->IsValid == false)
-    {
-        time = 0;
-        return false;
-    }
-    else if (footid == LLeg)
-        time = FootImpact->Data[0];
-    else if (footid == RLeg)
-        time = FootImpact->Data[1];
-    else if (footid == All)
-    {
-        if (FootImpact->Data[0] > FootImpact->Data[1])              // left impact was most recent, so return it
-            time = FootImpact->Data[0];
-        else
-            time = FootImpact->Data[1];
-    }
-    else
-        return false;
-        
-    
-    if (CurrentTime - time <= 0.1) 
-        return true;
-    else
-        return false;
-     */
+    get(MotionGetupActive, gettingup);
+    return isFalling() or isFallen() or not isOnGround() or gettingup;
 }
 
 /******************************************************************************************************************************************
@@ -928,6 +998,54 @@ void NUSensorsData::setAsInvalid(const id_t& id)
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].setAsInvalid();
 }
+
+/*! @brief Modifies existing sensor data. This is especially for updating 'packed' sensors.
+ 	@param id the id of the targetted sensor
+  	@param start the index in the packed sensor the new data should be placed (This should be from the JointSensorIndices, EndEffectorIndices, ButtonSensorIndices)
+ 	@param time the time is ms the new data was captured
+ 	@param data the new data
+ */
+void NUSensorsData::modify(const id_t& id, int start, double time, const float& data)
+{
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    for (size_t i=0; i<ids.size(); i++)
+        m_sensors[ids[i]].modify(time, start, data);
+}
+
+/*! @brief Modifies existing sensor data. This is especially for updating 'packed' sensors.
+    @param id the id of the targetted sensor
+    @param start the index in the packed sensor the new data should be placed (This should be from the JointSensorIndices, EndEffectorIndices, ButtonSensorIndices)
+    @param time the time is ms the new data was captured
+    @param data the new data
+ */
+void NUSensorsData::modify(const id_t& id, int start, double time, const vector<float>& data)
+{
+    #if DEBUG_NUSENSORS_VERBOSITY > 4
+        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
+    #endif
+    vector<int>& ids = mapIdToIndices(id);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {   // if id is a single sensor
+        m_sensors[ids[0]].modify(time, start, data);
+    }
+    else if (numids == data.size())
+    {   // if id is a group of sensors
+        for (size_t i=0; i<numids; i++)
+            m_sensors[ids[i]].modify(time, start, data[i]);
+    }
+    else
+    {
+        debug << "NUSensors::modify(" << id.Name << "," << time << "," << start << "," << data << "). The data is incorrectly formatted. ";
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+    }
+}
+
 /******************************************************************************************************************************************
                                                                                                       Displaying Contents and Serialisation
  ******************************************************************************************************************************************/

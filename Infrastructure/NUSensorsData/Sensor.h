@@ -49,6 +49,9 @@ public:
     void set(double time, const string& data);
     void setAsInvalid();
     
+    void modify(double time, int start, const float& data);
+    void modify(double time, int start, const vector<float>& data);
+    
     void summaryTo(ostream& output) const;
     
     friend ostream& operator<< (ostream& output, const Sensor& p_sensor);

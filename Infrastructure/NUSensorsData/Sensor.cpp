@@ -2,7 +2,7 @@
     @brief Implementation of a single set of sensor class
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@ Sensor::Sensor(string sensorname)
     ValidVector = false;
     ValidMatrix = false;
     ValidString = false;
+    
+    VectorData.reserve(128);
+    MatrixData.reserve(64);
 }
 
 /*! @brief Gets float sensor reading, returns true if sucessful, false otherwise 
@@ -153,12 +156,62 @@ void Sensor::set(double time, const string& data)
     ValidMatrix = false;
 }
 
+/*! @brief Sets all of the sensor data as being invalid */
 void Sensor::setAsInvalid()
 {
     ValidFloat = false;
     ValidVector = false;
     ValidMatrix = false;
     ValidString = false;
+}
+
+/*! @brief Modify existing vector sensor data. This is especially for packed sensors which are share the same Sensor instance.
+ 	@param time the new sensor data time in ms
+ 	@param start the position in which the new data will be inserted 
+ 	@param data the data to insert 
+ */
+void Sensor::modify(double time, int start, const float& data)
+{
+    Time = time;
+    if (ValidVector)
+    {
+        size_t s = VectorData.size();
+        if (start < s)
+        	VectorData[start] = data;
+        else if (s == start)
+            VectorData.push_back(data);
+    }
+    else if (start == 0)
+    {
+        ValidVector = true;
+        VectorData = vector<float>(1, data);
+	}
+}
+
+/*! @brief Modify existing vector sensor data. This is especially for packed sensors which are share the same Sensor instance.
+ 	@param time the new sensor data time in ms
+ 	@param start the first position in which the new data will be inserted 
+ 	@param data the data to insert 
+ */
+void Sensor::modify(double time, int start, const vector<float>& data)
+{
+    Time = time;
+    if (ValidVector)
+    {
+        for (size_t i=0; i<data.size(); i++)
+        {
+            size_t s = VectorData.size();
+            if (start+i < s)
+                VectorData[start+i] = data[i];
+            else if (s == start+i)
+                VectorData.push_back(data[i]);
+        }
+    }
+    else if (start == 0)
+    {
+        ValidVector = true;
+        VectorData = data;
+	}
 }
 
 /*! @brief Provides a text summary of the contents of the Sensor

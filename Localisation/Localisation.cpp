@@ -103,9 +103,8 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     if(doProcessing == false)
         return;
     
-    float odo_time;
     vector<float> odo;
-    if (m_sensor_data->getOdometry(odo_time, odo))
+    if (m_sensor_data->getOdometry(odo))
     {
         odomForward = odo[0];
         odomLeft = odo[1];

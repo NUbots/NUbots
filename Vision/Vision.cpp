@@ -2131,10 +2131,12 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         visualSphericalPosition[0] = distance;
         visualSphericalPosition[1] = bearing;
         visualSphericalPosition[2] = elevation;
-        Matrix cameraTransform;
-        bool isOK = getSensorsData()->getCameraTransform(cameraTransform);
+        
+        vector<float> ctvector;
+        bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
         if(isOK == true)
         {
+            Matrix cameraTransform = Matrix4x4fromVector(ctvector);
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
 
         }
@@ -2219,13 +2221,13 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": Blue Robot: get transform";
-            Matrix camera2groundTransform;
-            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
+            bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
             if(isOK == true)
             {
-
+                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
@@ -2254,12 +2256,13 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": pink Robot: get transform";
-            Matrix camera2groundTransform;
-            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
+            bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
             if(isOK == true)
             {
+                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6

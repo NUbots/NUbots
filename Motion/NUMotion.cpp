@@ -413,7 +413,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (isCurrentProvider(m_current_leg_provider) and m_current_leg_provider != m_current_arm_provider and m_current_leg_provider != m_current_head_provider)
         m_current_leg_provider->process(data, actions);
-    
+	
     m_previous_time = m_current_time;
 }
 
@@ -623,7 +623,7 @@ void NUMotion::updateMotionSensors()
     #ifdef USE_HEAD
         m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, static_cast<float>(m_head->getCompletionTime()));
     #else
-        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, 0);
+        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, 0.0f);
     #endif
 }
 

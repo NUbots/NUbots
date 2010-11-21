@@ -60,30 +60,46 @@ public:
         {
             return Name.find(other) != string::npos;
         }
+        bool operator!=(const id_t& other) const
+        {
+            return Id != other.Id;
+        }
+        bool operator!=(const int& other) const
+        {
+            return Id != other;
+        }
+        bool operator<(const id_t& other) const
+        {
+            return Id < other.Id;
+        }
+        bool operator>(const id_t& other) const
+        {
+            return Id > other.Id;
+        }
     };
     
     // Common aliases
-    const static id_t All;
-    const static id_t Head;
-    const static id_t Body;
-    const static id_t LArm;
-    const static id_t RArm;
-    const static id_t LHand;
-    const static id_t RHand;
-    const static id_t Torso;
-    const static id_t LLeg;
-    const static id_t RLeg;
-    const static id_t LFoot;
-    const static id_t RFoot;
-    const static id_t NumCommonGroupIds;                //!< internal use only
+    const static id_t All;							//!< alias for 'all', can be used in a number of ways for getting all sensors or actionators in a group
+    const static id_t Head;							//!< alias for 'head', can be used to get sensors or actionators in the head
+    const static id_t Body;							//!< alias for 'body', this is always 'all' - 'head'
+    const static id_t LArm;							//!< alias for the left arm
+    const static id_t RArm;							//!< alias for the right arm
+    const static id_t LHand;						//!< alias for the left hand
+    const static id_t RHand;						//!< alias for the right hand
+    const static id_t Torso;						//!< alias for the torso
+    const static id_t LLeg;							//!< alias for the left leg
+    const static id_t RLeg;							//!< alias for the right leg
+    const static id_t LFoot;						//!< alias for the left foot
+    const static id_t RFoot;						//!< alias for the right foot
+    const static id_t NumCommonGroupIds;            //!< internal use only
     
     // define const static ids for the joints which are both sensors and actionators
-    const static id_t HeadRoll;
-    const static id_t HeadPitch;
-    const static id_t HeadYaw;
-    const static id_t NeckRoll;
-    const static id_t NeckPitch;
-    const static id_t NeckYaw;
+    const static id_t HeadRoll;						//!< the head roll joint
+    const static id_t HeadPitch;					//!< the head pitch joint
+    const static id_t HeadYaw;						//!< the head yaw joint
+    const static id_t NeckRoll;						//!< the neck roll joint
+    const static id_t NeckPitch;					//!< the neck pitch joint
+    const static id_t NeckYaw;						//!< the neck yaw joint
     const static id_t LShoulderRoll;
     const static id_t LShoulderPitch;
     const static id_t LShoulderYaw;
@@ -113,10 +129,10 @@ public:
     const static id_t RKneePitch;
     const static id_t RAnkleRoll;
     const static id_t RAnklePitch;
-    const static id_t NumJointIds;                      //!< internal use only
+    const static id_t NumJointIds;                 	//!< internal use only
     
     // define const static ids for devices that are both sensors and actionators
-    const static id_t NumCommonIds;                     //!< internal use only
+    const static id_t NumCommonIds;                 //!< internal use only
     
     double CurrentTime;    
     

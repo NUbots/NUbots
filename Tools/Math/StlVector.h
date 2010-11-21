@@ -24,9 +24,18 @@
 
 #include <iostream>
 #include <sstream>
+#include <cmath>
 using namespace std;
 
 // ----------------------------------------------------------------------------------------------------------------------------- Serialisation
+/*! @brief Overloaded stream insertion operator for an stl vector. 
+ 
+     Data will be written as ASCII in the following format [1.222, 2.333, -3.4444].
+     Matricies are also supported with this templated function, they will be written as [[1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444]]
+ 
+    @param output the stream the stl will be written to
+    @param v the vector to write
+ */
 template<typename T> ostream& operator<<(ostream& output, const vector<T>& v)
 {
     output << "[";
@@ -40,6 +49,10 @@ template<typename T> ostream& operator<<(ostream& output, const vector<T>& v)
 	return output;
 }
 
+/*! @brief Overloaded stream extraction operator for an stl vector. The vector in the stream needs to be formated as [1.222, 2.333, -3.4444].
+    @param input the stream the vector will be read from
+    @param v the vector from the stream will be placed here
+ */
 template<typename T> istream& operator>>(istream& input, vector<T>& v)
 {
     string wholevector;
@@ -48,27 +61,33 @@ template<typename T> istream& operator>>(istream& input, vector<T>& v)
     getline(input, wholevector, ']');
     
     v.clear();
-    stringstream ss(wholevector);
-    T buffer;
-    
-    // now split the data based on the commas
-    while (ss.good())
+    if (wholevector.size() > 0)
     {
-        ss >> buffer;
-        ss.ignore(128, ',');
-        v.push_back(buffer);
-    }
+    	stringstream ss(wholevector);
+    	T buffer;
     
+        // now split the data based on the commas
+        while (ss.good())
+        {
+            ss >> buffer;
+            ss.ignore(128, ',');
+            v.push_back(buffer);
+        }
+    }
     return input;
 }
 
+/*! @brief Overloaded stream extraction operator for an stl vector. The vector in the stream needs to be formated as [[1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444]].
+    @param input the stream the vector will be read from
+    @param v the vector from the stream will be placed here
+ */
 template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
 {
+    stringstream wholematrix;
     v.clear();
     
     // read everything between '[' and the matching ']'
     input.ignore(128, '[');
-    stringstream wholematrix;
     char c;
     int brackets = 1;
     while (brackets != 0)
@@ -87,9 +106,109 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
         wholematrix >> buffer;
         v.push_back(buffer);
     }
+    return input;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------- Math
+// NOTE. This stl vector math has been taken from the new Parameter.cpp included with the completed walk optimisation code.
+//       The commit id is 0b6d5ad3c68e7761f9b5
+// TODO: check that the vector math has not been updated before merging in the 2011 code
+
+inline vector<float> operator+(const float& f, const vector<float>& v)
+{
+    vector<float> result;
+    result.reserve(v.size());
+    for (size_t i=0; i<v.size(); i++)
+        result.push_back(f + v[i]);
+    return result;
+}
+
+inline vector<float> operator+(const vector<float>& v, const float& f)
+{
+    return f + v;
+}
+
+inline vector<float> operator+(const vector<float>& v1, const vector<float>& v2)
+{
+    vector<float> result;
+    if (v1.size() != v2.size())
+        return result;
+    else
+    {
+        result.reserve(v1.size());
+        for (size_t i=0; i<v1.size(); i++)
+            result.push_back(v1[i] + v2[i]);
+        return result;
+    }
+}
+
+inline vector<float> operator-(const float& f, const vector<float>& v)
+{
+    vector<float> result;
+    result.reserve(v.size());
+    for (size_t i=0; i<v.size(); i++)
+        result.push_back(f - v[i]);
+    return result;
+}
+
+inline vector<float> operator-(const vector<float>& v, const float& f)
+{
+    vector<float> result;
+    result.reserve(v.size());
+    for (size_t i=0; i<v.size(); i++)
+        result.push_back(v[i] - f);
+    return result;
+}
+
+inline vector<float> operator-(const vector<float>& v1, const vector<float>& v2)
+{
+    vector<float> result;
+    if (v1.size() != v2.size())
+        return result;
+    else
+    {
+        result.reserve(v1.size());
+        for (size_t i=0; i<v1.size(); i++)
+            result.push_back(v1[i] - v2[i]);
+        return result;
+    }
+}
+
+inline vector<float> operator*(const float& f, const vector<float>& v)
+{
+    vector<float> result;
+    result.reserve(v.size());
+    for (size_t i=0; i<v.size(); i++)
+        result.push_back(f*v[i]);
+    return result;
+}
+
+inline vector<float> operator*(const vector<float>& v, const float& f)
+{
+    return f*v;
+}
+
+inline vector<float> operator*(const vector<float>& v1, const vector<float>& v2)
+{
+    vector<float> result;
+    if (v1.size() != v2.size())
+        return result;
+    else
+    {
+        result.reserve(v1.size());
+        for (size_t i=0; i<v1.size(); i++)
+            result.push_back(v1[i]*v2[i]);
+        return result;
+    }
+}
+
+inline float norm(const vector<float>& v)
+{
+    float sum = 0;
+    for (size_t i=0; i<v.size(); i++)
+        sum += pow(v[i], 2);
+    return sqrt(sum);
+}
 
 #endif
 

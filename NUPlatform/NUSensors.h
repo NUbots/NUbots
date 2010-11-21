@@ -59,7 +59,7 @@ protected:
     
     void calculateOrientation();
     void calculateHorizon();
-    void calculateButtonTriggers();
+    void calculateButtonDurations();
     
     void calculateFootForce();
     void calculateCoP();

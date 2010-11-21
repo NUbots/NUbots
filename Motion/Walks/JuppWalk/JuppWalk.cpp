@@ -209,12 +209,6 @@ void JuppWalk::calculateGaitPhase()
     static const float interpolationtime = 1000*m_step_frequency/4.0;
     static float gaitphaseonimpact = m_gait_phase;
     m_current_time = m_data->CurrentTime;
-    
-    if (m_data->footImpact(NUSensorsData::LLeg, leftimpacttime))
-        gaitphaseonimpact = m_gait_phase;
-        
-    if (m_data->footImpact(NUSensorsData::RLeg, rightimpacttime))
-        gaitphaseonimpact = m_gait_phase;
         
     if (m_current_time - leftimpacttime < interpolationtime)
     {
