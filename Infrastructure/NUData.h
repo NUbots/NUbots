@@ -148,6 +148,7 @@ protected:
     void addDevices(const vector<string>& hardwarenames);
     
     virtual bool belongsToGroup(const id_t& member, const id_t& group);
+    virtual bool belongsToGroup(const string& name, const id_t& group);
     
     vector<int>& mapIdToIndices(const id_t& id);
     
@@ -156,6 +157,7 @@ protected:
 private:
     string getStandardName(const string& hardwarename);
     vector<string> standardiseNames(const vector<string>& hardwarenames);
+    template<typename T> bool t_belongsToGroup(const T& member, const id_t& group);
 };
 
 #endif

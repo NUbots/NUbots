@@ -92,29 +92,68 @@ void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
  */
 bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
 {
-    if (member == group or member == FaceLeds or member == FeetLeds or member == AllLeds)			// we careful not to add ids for groups to groups
+	if (member == group or FaceLeds == member or FeetLeds == member or AllLeds == member)			// we careful not to add ids for groups to groups
         return false;
     else if (NUData::belongsToGroup(member, group))
         return true;
     else
     {
-        if (group == FaceLeds)
+        if (FaceLeds == group)
         {
             if (member.Name.find("Led") != string::npos and (member.Name.find("Eye") != string::npos or member.Name.find("Mouth") != string::npos))
                 return true;
             else
                 return false;
         }
-        else if (group == FeetLeds)
+        else if (FeetLeds == group)
         {
             if (member.Name.find("Led") != string::npos and member.Name.find("Foot") != string::npos)
                 return true;
             else
                 return false;
         }
-        else if (group == AllLeds)
+        else if (AllLeds == group)
         {
             if (member.Name.find("Led") != string::npos)
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+}
+
+/*! @brief Returns true if member belongs to group (this function extends the NUData::belongsToGroup)
+    @param member the name of single id. The name is case sensitive
+    @param group the group id
+    @return true if member belongs to group 
+ */
+bool NUActionatorsData::belongsToGroup(const string& member, const id_t& group)
+{
+	if (group == member or FaceLeds == member or FeetLeds == member or AllLeds == member)			// we careful not to add ids for groups to groups
+        return false;
+    else if (NUData::belongsToGroup(member, group))
+        return true;
+    else
+    {
+        if (FaceLeds == group)
+        {
+            if (member.find("Led") != string::npos and (member.find("Eye") != string::npos or member.find("Mouth") != string::npos))
+                return true;
+            else
+                return false;
+        }
+        else if (FeetLeds == group)
+        {
+            if (member.find("Led") != string::npos and member.find("Foot") != string::npos)
+                return true;
+            else
+                return false;
+        }
+        else if (AllLeds == group)
+        {
+            if (member.find("Led") != string::npos)
                 return true;
             else
                 return false;
@@ -254,12 +293,17 @@ float NUActionatorsData::interpolate(const double& time, const float& current, c
         return target;
 }
 
-vector<int>& NUActionatorsData::getIndices(const id_t& actionatorid)
+/*! @brief Returns true if a member named name belongs to the group
+ 	@param name the name of the potential member. The name is case sensitive
+ 	@param group the id_t of the group
+ 	@return true if it is a member of group, false otherwise
+ */
+bool NUActionatorsData::isMemberOfGroup(const string& name, const id_t& group)
 {
-    // TODO: I don't know how to implement this function, nor do I know if I need it anymore
-    return m_id_to_indices[0];
+    return belongsToGroup(name, group);
 }
 
+/*! @brief Returns the number of actionators in actionatorid. Useful for determining, for example, the number of joints in a leg */
 size_t NUActionatorsData::getSize(const id_t& actionatorid)
 {
     return m_id_to_indices[actionatorid.Id].size();;

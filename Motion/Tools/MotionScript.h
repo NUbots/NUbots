@@ -73,46 +73,57 @@ public:
     friend istream& operator>> (istream& input, MotionScript* p_script);
 protected:
     bool load();
-    void setUses(NUActionatorsData* actions);
+    void setUses();
     bool checkIfUses(const vector<int>& ids);
-    void updateLastUses(NUActionatorsData* actions, const vector<vector<double> >& times);
+    void updateLastUses(const vector<vector<double> >& times);
     double findLastUse(const vector<int>& ids, const vector<vector<double> >& times);
     
-    void appendReturnToStart(NUActionatorsData* actions, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
+    void appendReturnToStart(vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
     void appendReturnLimbToStart(const vector<int>& ids, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions);
 protected:
-    string m_name;                      //!< the name of the script
-    bool m_is_valid;                    //!< true if the motion script file was loaded without error
+    string m_name;                      		//!< the name of the script
+    bool m_is_valid;                    		//!< true if the motion script file was loaded without error
     
-    bool m_uses_set;                    //!< true if the m_uses_* have been set
-    double m_uses_last;                 //!< the time in ms from the begining of the script that the script stops using all joints
-    bool m_uses_head;                   //!< true if the script uses any of the head joints
-    double m_uses_last_head;            //!< the time in ms from the begining of the script that the script uses the head
-    bool m_uses_larm;                   //!< true if the script uses any of the left arm joints
-    double m_uses_last_larm;            //!< the time in ms from the begining of the script that the script uses the left arm
-    bool m_uses_rarm;                   //!< true if the script uses any of the right arm joints
-    double m_uses_last_rarm;            //!< the time in ms from the begining of the script that the script uses the right arm
-    bool m_uses_lleg;                   //!< true if the script uses any of the left leg joints
-    double m_uses_last_lleg;            //!< the time in ms from the begining of the script that the script uses the left leg
-    bool m_uses_rleg;                   //!< true if the script uses any of the right leg joints
-    double m_uses_last_rleg;            //!< the time in ms from the begining of the script that the script uses the right leg
+    // a bunch of variables to keep track of when a script uses each limb
+    double m_uses_last;                 		//!< the time in ms from the begining of the script that the script stops using all joints
+    
+    vector<int> m_head_indices;					//!< a list containing columns corresponding to head joints in the position matrix
+    bool m_uses_head;                   		//!< true if the script uses any of the head joints
+    double m_uses_last_head;            		//!< the time in ms from the begining of the script that the script uses the head
+    
+    vector<int> m_larm_indices;					//!< a list containing columns corresponding to larm joints in the position matrix
+    bool m_uses_larm;                   		//!< true if the script uses any of the left arm joints
+    double m_uses_last_larm;            		//!< the time in ms from the begining of the script that the script uses the left arm
+    
+    vector<int> m_rarm_indices;					//!< a list containing columns corresponding to rarm joints in the position matrix
+    bool m_uses_rarm;                   		//!< true if the script uses any of the right arm joints
+    double m_uses_last_rarm;            		//!< the time in ms from the begining of the script that the script uses the right arm
+	
+    vector<int> m_lleg_indices;					//!< a list containing columns corresponding to lleg joints in the position matrix
+    bool m_uses_lleg;                   		//!< true if the script uses any of the left leg joints
+    double m_uses_last_lleg;            		//!< the time in ms from the begining of the script that the script uses the left leg
+    
+    vector<int> m_rleg_indices;					//!< a list containing columns corresponding to rleg joints in the position matrix
+    bool m_uses_rleg;                   		//!< true if the script uses any of the right leg joints
+    double m_uses_last_rleg;            		//!< the time in ms from the begining of the script that the script uses the right leg
 
+    // play speed
     float m_playspeed;
     double m_play_start_time;
     
     // original script data
-    vector<string> m_labels;             //!< the labels for each row
-    float m_smoothness;                  //!< the smoothness loaded from the script file
-    bool m_return_to_start;              //!< a flag to specify whether the script should return to the position when the script started playing
-    vector<vector<double> > m_times;     //!< the times read in from the script file
-    vector<vector<float> > m_positions;  //!< the positions read in from the script file
-    vector<vector<float> > m_gains;      //!< the gains read in from the script file
+    vector<string> m_labels;             		//!< the labels for each row
+    float m_smoothness;                  		//!< the smoothness loaded from the script file
+    bool m_return_to_start;              		//!< a flag to specify whether the script should return to the position when the script started playing
+    vector<vector<double> > m_times;     		//!< the times read in from the script file
+    vector<vector<float> > m_positions;  		//!< the positions read in from the script file
+    vector<vector<float> > m_gains;      		//!< the gains read in from the script file
     
-    // smoothed script data (these curves are only valid for a playspeed of 1)
-    vector<vector<double> > m_curvetimes;
-    vector<vector<float> > m_curvepositions;
-    vector<vector<float> > m_curvevelocities;
-    vector<vector<float> > m_curvegains;
+    // smoothed script data
+    vector<vector<double> > m_curvetimes;		//!< the times to be given to the actionators
+    vector<vector<float> > m_curvepositions;	//!< the positions to be given to the actionators
+    vector<vector<float> > m_curvevelocities;	//!< the velocities
+    vector<vector<float> > m_curvegains;		//!< the gains to be given to the actionators
 };
 
 #endif

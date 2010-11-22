@@ -21,9 +21,12 @@
 
 #include "MotionScript.h"
 #include "MotionFileTools.h"
+#include "Tools/Math/StlVector.h"
 #include "MotionCurves.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/NUBlackboard.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -42,7 +45,7 @@ MotionScript::MotionScript(string filename)
 {
     m_name = filename;
     m_is_valid = load();
-    m_uses_set = false;         // we can't set the m_uses_* because we don't have access to data or actions here
+	setUses();
     m_play_start_time = 0;
 }
 
@@ -153,8 +156,6 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
 {
     if (not m_is_valid)
         return;
-    if (not m_uses_set)
-        setUses(actions);
     
     m_play_start_time = data->CurrentTime + 100;        // I add 100ms here because it can take upto 100ms to calculate a long and detailed motion curve
     vector<vector<double> > times = m_times;
@@ -165,9 +166,9 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
     vector<float> sensorpositions;
     data->getPosition(NUSensorsData::All, sensorpositions);
     if (m_return_to_start)
-        appendReturnToStart(actions, times, m_positions, sensorpositions);
+        appendReturnToStart(times, m_positions, sensorpositions);
     
-    updateLastUses(actions, times);
+    updateLastUses(times);
     
     MotionCurves::calculate(m_play_start_time, times, sensorpositions, m_positions, m_gains, m_smoothness, 10, m_curvetimes, m_curvepositions, m_curvevelocities, m_curvegains);
     actions->add(NUActionatorsData::All, m_curvetimes, m_curvepositions, m_curvegains);
@@ -271,17 +272,35 @@ bool MotionScript::load()
     }
 }
 
-
-void MotionScript::setUses(NUActionatorsData* actions)
+/*! @brief Sets all of the variables to keep track of when a script requires each limb.
+ */
+void MotionScript::setUses()
 {
-    m_uses_head = checkIfUses(actions->getIndices(NUActionatorsData::Head)); 
-    m_uses_larm = checkIfUses(actions->getIndices(NUActionatorsData::LArm));
-    m_uses_rarm = checkIfUses(actions->getIndices(NUActionatorsData::RArm));
-    m_uses_lleg = checkIfUses(actions->getIndices(NUActionatorsData::LLeg));
-    m_uses_rleg = checkIfUses(actions->getIndices(NUActionatorsData::RLeg));
-    updateLastUses(actions, m_times);
+    for (size_t i=1; i<m_labels.size(); i++)
+    {
+        int index = i-1;		// the first label is the time
+        if (Blackboard->Actions->isMemberOfGroup(m_labels[i], NUActionatorsData::Head))
+            m_head_indices.push_back(index);
+        
+        if (Blackboard->Actions->isMemberOfGroup(m_labels[i], NUActionatorsData::LArm))
+            m_larm_indices.push_back(index);
+        
+        if (Blackboard->Actions->isMemberOfGroup(m_labels[i], NUActionatorsData::RArm))
+            m_rarm_indices.push_back(index);
+        
+        if (Blackboard->Actions->isMemberOfGroup(m_labels[i], NUActionatorsData::LLeg))
+            m_lleg_indices.push_back(index);
+        
+        if (Blackboard->Actions->isMemberOfGroup(m_labels[i], NUActionatorsData::RLeg))
+            m_rleg_indices.push_back(index);
+    }
     
-    m_uses_set = true;
+    m_uses_head = checkIfUses(m_head_indices); 
+    m_uses_larm = checkIfUses(m_larm_indices);
+    m_uses_rarm = checkIfUses(m_rarm_indices);
+    m_uses_lleg = checkIfUses(m_lleg_indices);
+    m_uses_rleg = checkIfUses(m_rleg_indices);
+    updateLastUses(m_times);
 }
 
 bool MotionScript::checkIfUses(const vector<int>& ids)
@@ -294,25 +313,13 @@ bool MotionScript::checkIfUses(const vector<int>& ids)
     return false;
 }
 
-double MotionScript::findLastUse(const vector<int>& ids, const vector<vector<double> >& times)
+void MotionScript::updateLastUses(const vector<vector<double> >& times)
 {
-    double lastuse = 0;
-    for (size_t i=0; i<ids.size(); i++)
-    {
-        if (not times[ids[i]].empty() and times[ids[i]].back() > lastuse)
-            lastuse = times[ids[i]].back();
-    }
-    return lastuse;
-}
-
-
-void MotionScript::updateLastUses(NUActionatorsData* actions, const vector<vector<double> >& times)
-{
-    m_uses_last_head = findLastUse(actions->getIndices(NUActionatorsData::Head), times);
-    m_uses_last_larm = findLastUse(actions->getIndices(NUActionatorsData::LArm), times);
-    m_uses_last_rarm = findLastUse(actions->getIndices(NUActionatorsData::RArm), times);
-    m_uses_last_lleg = findLastUse(actions->getIndices(NUActionatorsData::LLeg), times);
-    m_uses_last_rleg = findLastUse(actions->getIndices(NUActionatorsData::RLeg), times);
+    m_uses_last_head = findLastUse(m_head_indices, times);
+    m_uses_last_larm = findLastUse(m_larm_indices, times);
+    m_uses_last_rarm = findLastUse(m_rarm_indices, times);
+    m_uses_last_lleg = findLastUse(m_lleg_indices, times);
+    m_uses_last_rleg = findLastUse(m_rleg_indices, times);
     
     m_uses_last = m_uses_last_head;
     if (m_uses_last_larm > m_uses_last)
@@ -326,37 +333,34 @@ void MotionScript::updateLastUses(NUActionatorsData* actions, const vector<vecto
 }
 
 
-void MotionScript::appendReturnToStart(NUActionatorsData* actions, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions)
+double MotionScript::findLastUse(const vector<int>& ids, const vector<vector<double> >& times)
+{
+    double lastuse = 0;
+    for (size_t i=0; i<ids.size(); i++)
+    {
+        if (not times[ids[i]].empty() and times[ids[i]].back() > lastuse)
+            lastuse = times[ids[i]].back();
+    }
+    return lastuse;
+}
+
+
+void MotionScript::appendReturnToStart(vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions)
 {
     if (m_uses_head)
-    {
-        vector<int>& headids = actions->getIndices(NUActionatorsData::Head);
-        appendReturnLimbToStart(headids, times, positions, sensorpositions);
-    }
+        appendReturnLimbToStart(m_head_indices, times, positions, sensorpositions);
     
     if (m_uses_larm)
-    {
-        vector<int>& larmids = actions->getIndices(NUActionatorsData::LArm);
-        appendReturnLimbToStart(larmids, times, positions, sensorpositions);
-    }
+        appendReturnLimbToStart(m_larm_indices, times, positions, sensorpositions);
     
     if (m_uses_rarm)
-    {
-        vector<int>& rarmids = actions->getIndices(NUActionatorsData::RArm);
-        appendReturnLimbToStart(rarmids, times, positions, sensorpositions);
-    }
+        appendReturnLimbToStart(m_rarm_indices, times, positions, sensorpositions);
     
     if (m_uses_lleg)
-    {
-        vector<int>& llegids = actions->getIndices(NUActionatorsData::LLeg);
-        appendReturnLimbToStart(llegids, times, positions, sensorpositions);
-    }
+        appendReturnLimbToStart(m_lleg_indices, times, positions, sensorpositions);
     
     if (m_uses_rleg)
-    {
-        vector<int>& rlegids = actions->getIndices(NUActionatorsData::RLeg);
-        appendReturnLimbToStart(rlegids, times, positions, sensorpositions);
-    }
+        appendReturnLimbToStart(m_rleg_indices, times, positions, sensorpositions);
 }
 
 void MotionScript::appendReturnLimbToStart(const vector<int>& ids, vector<vector<double> >& times, vector<vector<float> >& positions, const vector<float>& sensorpositions)

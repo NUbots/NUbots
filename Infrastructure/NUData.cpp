@@ -223,16 +223,36 @@ string NUData::getStandardName(const string& hardwarename)
  */
 bool NUData::belongsToGroup(const id_t& member, const id_t& group)
 {
+    return t_belongsToGroup<id_t>(member, group);
+}
+
+/*! @brief Returns true if member belongs to group 
+    @param member the name of a single id. The name is case sensitive.
+    @param group the group id
+    @return true if member belongs to group 
+ */
+bool NUData::belongsToGroup(const string& name, const id_t& group)
+{
+    return t_belongsToGroup<string>(name, group);
+}
+
+/*! @brief A templated function to determine whether a member belongs to a particular group
+ 	@param member the single sensornator
+ 	@param group the group of sensornators you want to see if member belongs to
+ 	@return true if member belongs to group, false otherwise
+ */
+template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& group)
+{
     if (group == All)
     {
         for (size_t i=RLeg.Id+1; i<m_common_ids.size()-1; i++)
-            if (member == *m_common_ids[i])
+            if (*m_common_ids[i] == member)
                 return true;
         return false;
     }
     else if (group == Head)
     {
-        if (member == HeadRoll or member == HeadPitch or member == HeadYaw or member == NeckRoll or member == NeckPitch or member == NeckYaw)
+        if (HeadRoll == member or HeadPitch == member or HeadYaw == member or NeckRoll == member or NeckPitch == member or NeckYaw == member)
             return true;
         else
             return false;
@@ -246,28 +266,28 @@ bool NUData::belongsToGroup(const id_t& member, const id_t& group)
     }
     else if (group == LArm)
     {
-        if (member == LShoulderRoll or member == LShoulderPitch or member == LShoulderYaw or member == LElbowRoll or member == LElbowPitch or member == LElbowYaw)
+        if (LShoulderRoll == member or LShoulderPitch == member or LShoulderYaw == member or LElbowRoll == member or LElbowPitch == member or LElbowYaw == member)
             return true;
         else 
             return false;
     }
     else if (group == RArm)
     {
-        if (member == RShoulderRoll or member == RShoulderPitch or member == RShoulderYaw or member == RElbowRoll or member == RElbowPitch or member == RElbowYaw)
+        if (RShoulderRoll == member or RShoulderPitch == member or RShoulderYaw == member or RElbowRoll == member or RElbowPitch == member or RElbowYaw == member)
             return true;
         else 
             return false;
     }
     else if (group == LLeg)
     {
-        if (member == LHipRoll or member == LHipPitch or member == LHipYaw or member == LHipYawPitch or member == LKneePitch or member == LAnkleRoll or member == LAnklePitch)
+        if (LHipRoll == member or LHipPitch == member or LHipYaw == member or LHipYawPitch == member or LKneePitch == member or LAnkleRoll == member or LAnklePitch == member)
             return true;
         else
             return false;
     }
     else if (group == RLeg)
     {
-        if (member == RHipRoll or member == RHipPitch or member == RHipYaw or member == RHipYawPitch or member == RKneePitch or member == RAnkleRoll or member == RAnklePitch)
+        if (RHipRoll == member or RHipPitch == member or RHipYaw == member or RHipYawPitch == member or RKneePitch == member or RAnkleRoll == member or RAnklePitch == member)
             return true;
         else
             return false;

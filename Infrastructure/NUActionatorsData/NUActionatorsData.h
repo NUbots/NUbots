@@ -62,7 +62,7 @@ public:
     void getNextLeds(vector<vector<float> >& leds);
     void postProcess();
     
-    vector<int>& getIndices(const id_t& actionatorid);
+    bool isMemberOfGroup(const string& name, const id_t& group);
     size_t getSize(const id_t& actionatorid);
     
     void add(const id_t& actionatorid, double time, float data);
@@ -96,6 +96,7 @@ public:
 
 private:
     bool belongsToGroup(const id_t& member, const id_t& group);
+    bool belongsToGroup(const string& member, const id_t& group);
     float interpolate(const double& time, const float& current, const float& target);
 
 private:
