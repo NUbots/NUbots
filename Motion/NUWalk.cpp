@@ -471,7 +471,7 @@ bool NUWalk::inInitialPosition()
  */
 void NUWalk::moveToInitialPosition()
 {
-    static const float movespeed = 0.7;
+    static const float movespeed = 1.5;
     static double movecompletiontime = -100;
     if (movecompletiontime >= m_current_time)                // if there is already a move happening let it finish
         return; 

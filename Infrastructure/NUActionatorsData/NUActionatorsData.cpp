@@ -171,10 +171,10 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
     for (int i=0; i<ids.size(); i++)
     {
         Actionator& a = m_actionators[ids[i]];
+        double time;
+        float position;
         if (not a.empty())
         {
-            double time;
-            float position;
             if (a.get(time, position))
                 positions[i] = interpolate(time, positions_current[i], position);
             else
@@ -182,13 +182,14 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                 vector<float> positiongain;
                 if (a.get(time, positiongain))
                 {
-                    positions[i] = interpolate(time, positions_current[i], positiongain[0]);
+                    position = positiongain[0];
+                    positions[i] = interpolate(time, positions_current[i], position);
                     gains[i] = interpolate(time, gains_current[i], positiongain[1]);
                 }
             }
         }
         #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-            debug << a.Name << " [" << positions[i] << "," << gains[i] << "]" << endl;
+            debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: [" << time - CurrentTime << "," << position << "]" << endl;
         #endif
     }
 }
@@ -198,6 +199,9 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
  */
 void NUActionatorsData::getNextLeds(vector<vector<float> >& leds)
 {
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NUActionatorsData::getNextLeds" << endl;
+    #endif
 	// since we have no led 'sensors' we just assume they are exactly what I set them to be
     
     // check that leds is the right size; if not 'resize' them

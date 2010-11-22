@@ -33,7 +33,7 @@ JServo::JServo(const std::string &name) : webots::Servo(name)
     m_target_velocity = 10;
     m_target_position = 0;
     m_target_force = 0;
-    m_target_gain = 10;                 // according to webots documentation 10 is default
+    m_target_gain = 100;
     
     // There is nothing in the Webots API to make this easy, so Ill have to do it the hard way
     if (name.compare("HeadYaw") == 0 || name.compare("LShoulderPitch") == 0 || name.compare("RShoulderPitch") == 0 || name.compare("LElbowYaw") == 0 || name.compare("RElbowYaw") == 0)

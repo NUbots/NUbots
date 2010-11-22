@@ -85,7 +85,6 @@ void NAOWebotsActionators::getActionatorsFromWebots(NAOWebotsPlatform* platform)
     // Get the leds
     for (int i=0; i<m_led_names.size(); i++)
         m_leds.push_back(platform->getLED(m_led_names[i]));
-    //! @todo TODO: get the sound from webots
     // Get the teleporter
     m_teleporter = platform->getEmitter("super_emitter");
 }
