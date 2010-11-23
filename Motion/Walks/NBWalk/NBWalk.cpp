@@ -206,25 +206,27 @@ void NBWalk::setWalkParameters(const WalkParameters& walkparameters)
 void NBWalk::setGait()
 {
     // copy the parameters from m_walk_parameters into m_gait
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
-    m_gait->step[0] = 1/parameters[0].Value;        // step frequency
-    m_gait->step[2] = 10*parameters[1].Value;       // step height
-    m_gait->zmp[1] = parameters[2].Value;           // zmp static fraction
-    m_gait->zmp[2] = 10*parameters[3].Value;        // zmp offset
-    m_gait->zmp[3] = 10*parameters[3].Value;        // zmp offset
-    m_gait->zmp[4] = 10*parameters[4].Value;        // zmp offset strafe
-    m_gait->zmp[5] = 10*parameters[5].Value;        // zmp offset turn
-    m_gait->step[1] = parameters[6].Value;          // double support time
-    m_gait->hack[0] = parameters[7].Value;          // hip roll hack
-    m_gait->hack[1] = parameters[7].Value;          // hip roll hack
-    m_gait->step[3] = parameters[8].Value;          // foot lift angle
-    m_gait->stance[3] = parameters[9].Value;        // forward lean
-    m_gait->stance[0] = 10*parameters[10].Value;     // torso height
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    m_gait->step[0] = 1/parameters[0].get();        // step frequency
+    m_gait->step[2] = 10*parameters[1].get();       // step height
+    m_gait->zmp[1] = parameters[2].get();           // zmp static fraction
+    m_gait->zmp[2] = 10*parameters[3].get();        // zmp offset
+    m_gait->zmp[3] = 10*parameters[3].get();        // zmp offset
+    m_gait->sensor[1] = parameters[4].get();        // sensor angle x gamma
+    m_gait->sensor[2] = parameters[5].get();        // sensor angle y gamma
+    m_gait->sensor[3] = parameters[6].get();        // sensor x spring constant
+    m_gait->sensor[4] = parameters[7].get();        // sensor y spring constant
+    m_gait->step[1] = parameters[8].get();          // double support time
+    m_gait->hack[0] = parameters[9].get();          // hip roll hack
+    m_gait->hack[1] = parameters[9].get();          // hip roll hack
+    m_gait->step[3] = parameters[10].get();          // foot lift angle
+    m_gait->stance[3] = parameters[11].get();        // forward lean
+    m_gait->stance[0] = 10*parameters[12].get();     // torso height
     
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];
     m_gait->step[5] = -10*maxspeeds[0];
-    m_gait->step[6] = 20*maxspeeds[1];
+    m_gait->step[6] = 10*maxspeeds[1];
     m_gait->step[7] = 2*maxspeeds[2];
     
     vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
@@ -350,16 +352,21 @@ void NBWalk::updateActionatorsData()
     static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0);
     static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0);
     
+    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
+    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
+    
     nbToNULeftLegJointOrder(nextJoints, nu_nextLeftLegJoints);
     nbToNURightLegJointOrder(nextJoints, nu_nextRightLegJoints);
     nbToNULeftArmJointOrder(nextJoints, nu_nextLeftArmJoints);
     nbToNURightArmJointOrder(nextJoints, nu_nextRightArmJoints);
     
-    m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), nu_nextLeftLegJoints, 50);
-    m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), nu_nextRightLegJoints, 50);
+    applyPerturbation(nu_nextLeftLegJoints, leggains[0], nu_nextRightLegJoints, leggains[0]);
+    
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), nu_nextLeftLegJoints, leggains[0]);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), nu_nextRightLegJoints, leggains[0]);
     if (m_larm_enabled)
-        m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 30);
+        m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, armgains[0]);
     if (m_rarm_enabled)
-        m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 30);
+        m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, armgains[0]);
 }
 

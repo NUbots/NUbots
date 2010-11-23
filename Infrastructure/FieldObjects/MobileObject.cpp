@@ -112,22 +112,47 @@ void MobileObject::updateIsLost(bool islost)
 std::ostream& operator<< (std::ostream& output, const MobileObject& p_mob)
 {
     output << *static_cast<const Object*>(&p_mob);
-    output << p_mob.estimatedFieldLocationError.x << ' ' << p_mob.estimatedFieldLocationError.y << ' ';
-    output << p_mob.estimatedVelocity.x << ' ' << p_mob.estimatedVelocity.y << ' ';
-    output << p_mob.estimatedVelocityError.x << ' ' << p_mob.estimatedVelocityError.y << ' ';
-    output << p_mob.sharedCovariance[0][0] << ' ' << p_mob.sharedCovariance[0][1] << ' ' << p_mob.sharedCovariance[1][0] << ' ' << p_mob.sharedCovariance[1][1] << ' ';
-    output << p_mob.isLost << ' ';
+
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedFieldLocationError.x), sizeof(p_mob.estimatedFieldLocationError.x));
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedFieldLocationError.y), sizeof(p_mob.estimatedFieldLocationError.y));
+
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedVelocity.x), sizeof(p_mob.estimatedVelocity.x));
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedVelocity.x), sizeof(p_mob.estimatedVelocity.x));
+
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedVelocityError.x), sizeof(p_mob.estimatedVelocityError.x));
+    output.write(reinterpret_cast<const char*>(&p_mob.estimatedVelocityError.y), sizeof(p_mob.estimatedVelocityError.y));
+
+    output.write(reinterpret_cast<const char*>(&p_mob.sharedCovariance[0][0]), sizeof(p_mob.sharedCovariance[0][0]));
+    output.write(reinterpret_cast<const char*>(&p_mob.sharedCovariance[0][1]), sizeof(p_mob.sharedCovariance[0][1]));
+    output.write(reinterpret_cast<const char*>(&p_mob.sharedCovariance[1][0]), sizeof(p_mob.sharedCovariance[1][0]));
+    output.write(reinterpret_cast<const char*>(&p_mob.sharedCovariance[1][1]), sizeof(p_mob.sharedCovariance[1][1]));
+
+    output.write(reinterpret_cast<const char*>(&p_mob.isLost), sizeof(p_mob.isLost));
+
     return output;
 }
 
 std::istream& operator>> (std::istream& input, MobileObject& p_mob)
 {
     input >> *static_cast<Object*>(&p_mob);
-    input >> p_mob.estimatedFieldLocationError.x >> p_mob.estimatedFieldLocationError.y;
-    input >> p_mob.estimatedVelocity.x >> p_mob.estimatedVelocity.y;
-    input >> p_mob.estimatedVelocityError.x >> p_mob.estimatedVelocityError.y;
+
     p_mob.sharedCovariance = Matrix(2,2,false);
-    input >> p_mob.sharedCovariance[0][0] >> p_mob.sharedCovariance[0][1] >> p_mob.sharedCovariance[1][0] >> p_mob.sharedCovariance[1][1];
-    input >> p_mob.isLost;
+
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedFieldLocationError.x), sizeof(p_mob.estimatedFieldLocationError.x));
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedFieldLocationError.y), sizeof(p_mob.estimatedFieldLocationError.y));
+
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedVelocity.x), sizeof(p_mob.estimatedVelocity.x));
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedVelocity.x), sizeof(p_mob.estimatedVelocity.x));
+
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedVelocityError.x), sizeof(p_mob.estimatedVelocityError.x));
+    input.read(reinterpret_cast<char*>(&p_mob.estimatedVelocityError.y), sizeof(p_mob.estimatedVelocityError.y));
+
+    input.read(reinterpret_cast<char*>(&p_mob.sharedCovariance[0][0]), sizeof(p_mob.sharedCovariance[0][0]));
+    input.read(reinterpret_cast<char*>(&p_mob.sharedCovariance[0][1]), sizeof(p_mob.sharedCovariance[0][1]));
+    input.read(reinterpret_cast<char*>(&p_mob.sharedCovariance[1][0]), sizeof(p_mob.sharedCovariance[1][0]));
+    input.read(reinterpret_cast<char*>(&p_mob.sharedCovariance[1][1]), sizeof(p_mob.sharedCovariance[1][1]));
+
+    input.read(reinterpret_cast<char*>(&p_mob.isLost), sizeof(p_mob.isLost));
+
     return input;
 }

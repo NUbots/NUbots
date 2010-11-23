@@ -73,6 +73,7 @@ public:
     void add(const id_t& actionatorid, double time, const vector<vector<float> >& data);
     void add(const id_t& actionatorid, double time, const vector<vector<vector<float> > >& data);
     void add(const id_t& actionatorid, double time, const string& data);
+    void add(const id_t& actionatorid, double time, const vector<string>& data);
     
     void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data);
     void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain);

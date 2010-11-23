@@ -126,7 +126,7 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     // Construct the target address (we set the address to broadcast on the local subnet by default)
     m_target_address.sin_family = AF_INET;                              // host byte order
     m_target_address.sin_port = htons(m_port_number);                   // short, network byte order
-    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFFFF0000;      // being careful here to broadcast only to the local subnet
+    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
     memset(m_target_address.sin_zero, '\0', sizeof m_target_address.sin_zero);
     
     // Bind the socket to this address
@@ -173,14 +173,13 @@ void UdpPort::run()
             #endif
             stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
-            handleNewData(buffer);
             #if DEBUG_NETWORK_VERBOSITY > 4
-                debug << "UdpPort::run(). Received ";
                 string s = buffer.str();
                 for (size_t i=0; i<s.size(); i++)
                     debug << s[i];
                 debug << endl;
             #endif
+            handleNewData(buffer);
         }
     }
     return;

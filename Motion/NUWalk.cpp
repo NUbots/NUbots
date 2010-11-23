@@ -20,11 +20,13 @@
  */
 
 #include "NUWalk.h"
+
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkToPointJob.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkParametersJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkPerturbationJob.h"
 
 #include "walkconfig.h"
 #ifdef USE_JWALK
@@ -88,14 +90,13 @@ NUWalk::NUWalk(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvid
     m_speed_y = 0;                                //!< the current y speed in cm/s
     m_speed_yaw = 0;                              //!< the current rotation speed in rad/s
     
-    m_point_time = 0;                             //!< the desired time to reach the current target point in milliseconds from now
-    m_point_x = 0;                                //!< the current target point's x position in cm
-    m_point_y = 0;                                //!< the current target point's y position in cm
-    m_point_theta = 0;                            //!< the current target point's final orientation relative to the current in radians
-    
     m_walk_enabled = false;
     m_larm_enabled = true;
     m_rarm_enabled = true;
+    
+    m_perturbation_start_time = -1000;
+    m_perturbation_magnitude = 0;
+    m_perturbation_direction = 0;
 }
 
 /*! @brief Destructor for motion module
@@ -172,7 +173,7 @@ bool NUWalk::isActive()
 {   
     if (not m_walk_enabled)
         return false;
-    else if (m_target_speed_x != 0 or m_target_speed_y != 0 or m_target_speed_yaw != 0)
+    else if (m_speed_x != 0 or m_speed_y != 0 or m_speed_yaw != 0)
         return true;
     else 
     {
@@ -186,10 +187,7 @@ bool NUWalk::isActive()
         if (jointvelocitysum > 0.4)
             return true;
         else
-        {
-            kill();
             return false;
-        }
     }
 
 }
@@ -265,14 +263,7 @@ void NUWalk::process(WalkJob* job, bool currentprovider)
  */
 void NUWalk::process(WalkToPointJob* job, bool currentprovider)
 {
-    if (not currentprovider)
-        return;
-    double time;
-    vector<float> position;
-    job->getPosition(time, position);
-    if (not m_walk_enabled and not allZeros(position))
-        enableWalk();
-    setTargetPoint(time, position);
+    errorlog << "NUWalk::process(WalkToPointJob) is no longer supported. Your job has been discarded!" << endl;
 }
 
 /*! @brief Process a walk parameters job
@@ -283,6 +274,16 @@ void NUWalk::process(WalkParametersJob* job)
     WalkParameters parameters;
     job->getWalkParameters(parameters);                
     setWalkParameters(parameters);
+}
+
+/*! @brief Process a walk perturbation job
+    @param job the walk perturbation job to be processed
+ */
+void NUWalk::process(WalkPerturbationJob* job)
+{
+    m_perturbation_start_time = m_current_time;
+    m_perturbation_magnitude = job->getMagnitude();
+    m_perturbation_direction = job->getDirection();
 }
 
 /*! @brief Sets m_target_speed_x, m_target_speed_y and m_target_speed_yaw.
@@ -310,8 +311,8 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
         rot_speed = sign(rot_speed)*maxspeeds[2];
     
     float rot_frac = fabs(rot_speed)/maxspeeds[2];
-    const float clip_threshold = 0.25;
-    const float min_trans = 0.25;
+    const float clip_threshold = 0.4;
+    const float min_trans = 0.4;
     if (rot_frac > clip_threshold)
     {   // if the rotation speed is high then clip the trans_speed
         trans_speed = trans_speed*(1 + ((min_trans - 1)/(1 - clip_threshold))*(rot_frac - clip_threshold));
@@ -392,39 +393,6 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
 void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
 {
     maxspeeds = m_walk_parameters.getMaxSpeeds();
-}
-
-/*! @brief Walk to the given point by the given time
- 
-    Use this function to make use of the internal path planning algorithms. These algorithms are purely time-based and
-    consequently they will try to get to the given point as fast as possible.
-    To instruct the robot to move as fast as possible, just put in a small time value, the speed will be clipped internally.
-    To instruct the robot to stop specify all coordinates to be zero. Alternatively, the robot will stop if no
-    walk command has been issued in the last second.
- 
-    @warning Don't think that you can use this function to queue up points to walk to, or
-             even that you can just call this function once and expect the robot to magically
-             walk to the point. You need to call this function at every behaviour iteration with new
-             data so that localisation feedback is used to walk to the point.
- 
-    @param time the desired time to reach the given point (ms)
-    @param x the desired relative target [x (cm), y (cm), theta (rad)]
- */
-void NUWalk::setTargetPoint(double time, const vector<float>& position)
-{
-    m_point_time = time;
-    if (position.size() == 3)
-    {
-        m_point_x = position[0];
-        m_point_y = position[1];
-        m_point_theta = position[2];
-    }
-    else if (position.size() == 2)
-    {
-        m_point_x = position[0];
-        m_point_y = position[1];
-        m_point_theta = 0;
-    }
 }
 
 /*! @brief Sets the walk parameters to those specified in the variable
@@ -510,6 +478,28 @@ void NUWalk::moveToInitialPosition()
         m_actions->add(NUActionatorsData::RArm, m_current_time + time_rarm, m_initial_rarm, 40);
         m_actions->add(NUActionatorsData::LLeg, m_current_time + time_lleg, m_initial_lleg, 75);
         m_actions->add(NUActionatorsData::RLeg, m_current_time + time_rleg, m_initial_rleg, 75);
+    }
+}
+
+/*! @brief Applies m_perturbation_magnitude and m_perturbation_direction to the leftleg and rightleg vectors in place
+    @param leftleg a vector of joint values for the left leg
+    @param rightleg a vector of joint values for the right leg
+ */
+void NUWalk::applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains)
+{   // the problem is that here I can't do this in a platform independent way :(
+    // so this will have to go on my TODO: implement this in a platform independent way
+    if (m_current_time - m_perturbation_start_time < 200)
+    {
+        float roll = -(m_perturbation_magnitude/2000)*sin(m_perturbation_direction);
+        float pitch = -(m_perturbation_magnitude/1000)*cos(m_perturbation_direction); 
+        
+        // THIS WILL ONLY WORK FOR THE NAO [Roll,Pitch,Yaw,Knee,Roll,Pitch]
+        leftleg[0] += roll*(100/leftleggains[0]);
+        leftleg[4] -= roll*(100/leftleggains[4]);
+        rightleg[0] += roll*(100/rightleggains[0]);
+        rightleg[4] -= roll*(100/rightleggains[4]);
+        leftleg[5] += pitch*(100/leftleggains[5]);
+        rightleg[5] += pitch*(100/rightleggains[5]);
     }
 }
 

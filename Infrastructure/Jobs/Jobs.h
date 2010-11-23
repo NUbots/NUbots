@@ -45,6 +45,7 @@
 #include "MotionJobs/WalkJob.h"
 #include "MotionJobs/WalkToPointJob.h"
 #include "MotionJobs/WalkParametersJob.h"
+#include "MotionJobs/WalkPerturbationJob.h"
 #include "MotionJobs/MotionKillJob.h"
 #include "MotionJobs/MotionFreezeJob.h"
 

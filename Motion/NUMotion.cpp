@@ -145,8 +145,8 @@ NUMotion::~NUMotion()
  */
 void NUMotion::stop()
 {
-    m_killed = true;
-    m_last_kill_time = m_current_time;
+    //m_killed = true;
+    //m_last_kill_time = m_current_time;
     m_fall_protection->stop();
     m_getup->stop();
     #ifdef USE_HEAD
@@ -284,7 +284,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     else if (m_fall_protection->enabled() and m_data->isFalling())
     {
-        if (m_current_leg_provider != m_fall_protection)
+        if (m_current_leg_provider != m_getup and m_current_leg_provider != m_fall_protection)
             killActiveProviders();          // fast hard kill on active providers if falling
         
         m_next_head_provider = m_fall_protection;
@@ -447,8 +447,10 @@ void NUMotion::process(JobList* jobs)
                 m_walk->process(reinterpret_cast<WalkToPointJob*> (*it), canProcessJobs(m_walk));
                 break;
             case Job::MOTION_WALK_PARAMETERS:
-                next_provider = m_walk;
                 m_walk->process(reinterpret_cast<WalkParametersJob*> (*it));
+                break;
+            case Job::MOTION_WALK_PERTURBATION:
+                m_walk->process(reinterpret_cast<WalkPerturbationJob*> (*it));
                 break;
         #endif
         #ifdef USE_KICK

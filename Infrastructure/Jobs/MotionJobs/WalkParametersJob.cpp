@@ -45,7 +45,9 @@ WalkParametersJob::WalkParametersJob(istream& input) : MotionJob(Job::MOTION_WAL
  */
 WalkParametersJob::~WalkParametersJob()
 {
-    debug << "WalkParametersJob::~WalkParametersJob()" << endl;
+    #if DEBUG_JOBS_VERBOSITY > 0
+        debug << "WalkParametersJob::~WalkParametersJob()" << endl;
+    #endif
 }
 
 /*! @brief Sets the walk parameters of the job.

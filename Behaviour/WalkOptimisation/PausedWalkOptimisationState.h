@@ -1,5 +1,5 @@
-/*! @file SearchForBlueGoal.h
-    @brief Search for a field object
+/*! @file PausedWalkOptimisationState.h
+    @brief A state where the walk optimisation is paused
 
     @author Jason Kulk
  
@@ -19,36 +19,36 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SEARCHFORBLUEGOAL_H
-#define SEARCHFORBLUEGOAL_H
+#ifndef PAUSEDWALKOPTIMISATIONSTATE_H
+#define PAUSEDWALKOPTIMISATIONSTATE_H
 
-#include "Behaviour/BehaviourState.h"
 #include "WalkOptimisationProvider.h"
-#include "SearchForObject.h"
+#include "WalkOptimisationState.h"
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
-#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 #include "debug.h"
 
-class SearchForBlueGoal : public SearchForObject
+class PausedWalkOptimisationState : public WalkOptimisationState
 {
 public:
-    SearchForBlueGoal(WalkOptimisationProvider* parent) : SearchForObject(parent, FieldObjects::FO_BLUE_RIGHT_GOALPOST, -1) {};
-    virtual ~SearchForBlueGoal() {};
-    virtual BehaviourState* nextState()
+    PausedWalkOptimisationState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent) {};
+    virtual ~PausedWalkOptimisationState() {};
+    virtual BehaviourState* nextState() {return this;};
+    virtual void doState()
     {
-        if (isTargetVisible())
+        if (m_parent->stateChanged())
         {
-            debug << "SearchForBlueGoal -> ChaseBlueGoal" << endl;
-            return m_parent->m_chase_blue_goal;
+            m_jobs->addMotionJob(new WalkJob(0,0,0));
+            vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+            m_jobs->addMotionJob(new HeadJob(m_actions->CurrentTime + 500, zero));
         }
-        else
-            return this;
     };
 };
 

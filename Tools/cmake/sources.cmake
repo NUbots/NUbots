@@ -29,6 +29,7 @@ Math
 FileFormats
 Profiling
 Threading
+Optimisation
 )
 ####################################################################################
 

@@ -545,6 +545,20 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const string&
         m_actionators[ids[i]].add(time, data);
 }
 
+/*! @brief Adds a list of sounds to be played one after the other [time, [sounds]]
+    @param actionatorid the id of the actionator to add the data
+    @param time the time in ms associated with the data
+    @param data the data
+ */
+void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<string>& data)
+{
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+    #endif
+    for (size_t i=0; i<data.size(); i++)
+        add(actionatorid, time, data[i]);
+}
+
 /*! @brief Adds a sequence of points to an actionatorid
         
         For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN].

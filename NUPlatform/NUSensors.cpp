@@ -282,42 +282,63 @@ void NUSensors::calculateZMP()
 void NUSensors::calculateFallSense()
 {
     static const float Fallen = 1.0;
-    static const float RollFallenThreshold = 1.1;       // approx. 60 deg. The falling threshold will be approx 30 deg
-    static const float PitchFallenThreshold = 1.22;     // approx. 70 deg.
+    static const float Falling = 1.0;
+    static const float FallenThreshold = 1.1;  
+    static const float RollFallingThreshold = 0.55;
+    static const float ForwardFallingThreshold = 0.55;
+    static const float BackwardFallingThreshold = 0.45;
+    static float fallen_time = 0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
+    
+    vector<float> acceleration;
+    vector<float> orientation;
+    m_data->getAccelerometer(acceleration);
+    m_data->getOrientation(orientation);
+    
+    float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
     // check if the robot has fallen over
-    static vector<float> orientation(3,0);
-    static vector<float> angularvelocity(3,0);
-    static vector<float> falling(5,0);
-    static vector<float> fallen(5,0);
+    vector<float> fallen(5,0);
+    if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        fallen_time += m_current_time - m_previous_time;
+    else
+        fallen_time = 0;
     
-    m_data->get(NUSensorsData::Orientation, orientation);
-    
-    // check if fallen left
-    if (orientation[0] < -RollFallenThreshold)
-        fallen[1] = Fallen;
-    else
-        fallen[1] = 0.0;
-    // check if fallen right
-    if (orientation[0] > RollFallenThreshold)
-        fallen[2] = Fallen;
-    else
-        fallen[2] = 0.0;
-    // check if fallen forward
-    if (orientation[1] > PitchFallenThreshold)
-        fallen[3] = Fallen;
-    else
-        fallen[3] = 0.0;
-    // check if fallen backward
-    if (orientation[1] < -PitchFallenThreshold)
-        fallen[4] = Fallen;
-    else
-        fallen[4] = 0.0;
-    fallen[0] = fallen[1] + fallen[2] + fallen[3] + fallen[4];
+    if (fallen_time > 100)
+    {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
+        // We use only the angle to determine we have fallen, not the direction
+        fallen[0] = Fallen;
+        if (fabs(acceleration[0]) > fabs(acceleration[1]))
+        {   
+            if (acceleration[0] > 0)
+                fallen[3] = Fallen;
+            else
+                fallen[4] = Fallen;
+        }
+        else
+        {
+            if (acceleration[1] > 0)
+                fallen[1] = Fallen;
+            else
+                fallen[2] = Fallen;
+        }
+    }
     m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
+    
     // check if the robot is falling over
+    vector<float> falling(5,0);
+    if (not fallen[0])
+    {
+        if (orientation[0] < -RollFallingThreshold)
+            falling[1] = Falling;
+        if (orientation[0] > RollFallingThreshold)
+            falling[2] = Falling;
+        if (orientation[1] > ForwardFallingThreshold)
+            falling[3] = Falling;
+        if (orientation[1] < -BackwardFallingThreshold)
+            falling[4] = Falling;
+    }
     falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
     m_data->set(NUSensorsData::Falling, m_current_time, falling);
 }
@@ -333,6 +354,11 @@ void NUSensors::calculateFootForce()
     debug << "NUSensors::calculateFootForce()" << endl;
 #endif
     const float MINIMUM_CONTACT_FORCE = 3;          // If we register a force less than 3N (approx. 300g)
+    static float leftforcesum = 0;
+    static float rightforcesum = 0;
+    static int forcecount = 0;
+    static float leftforceaverage = 0;
+    static float rightforceaverage = 0;
     
     vector<float> leftcontactvalues, rightcontactvalues;
     if (m_data->get(NUSensorsData::LFootTouch, leftcontactvalues) and m_data->get(NUSensorsData::RFootTouch, rightcontactvalues))
@@ -348,11 +374,6 @@ void NUSensors::calculateFootForce()
         
         // Now I attempt to compensate for uncalibrated foot sensors by using the long term averages, to scale each foot
         // I assume that the force on the left and right foot over time should be the same.
-        static float leftforcesum = 0;
-        static float rightforcesum = 0;
-        static int forcecount = 0;
-        static float leftforceaverage = 0;
-        static float rightforceaverage = 0;
         
         if (totalleft + totalright > MINIMUM_CONTACT_FORCE)
         {   // only use forces which exceed a minimum contact force
@@ -364,8 +385,8 @@ void NUSensors::calculateFootForce()
             
             if (forcecount > 500)
             {   // only scale using the long term averages, if we have enough data
-                totalleft *= (leftforceaverage + rightforceaverage)/leftforceaverage;
-                totalright *= (leftforceaverage + rightforceaverage)/rightforceaverage;
+                totalleft *= (leftforceaverage + rightforceaverage)/(2*leftforceaverage);
+                totalright *= (leftforceaverage + rightforceaverage)/(2*rightforceaverage);
             }
             
             if (forcecount > 5000)
@@ -574,7 +595,7 @@ void NUSensors::calculateOdometry()
     debug << "NUSensors::calculateOdometry()" << endl;
 #endif
 
-    const float turnMultiplier = 0.8;       // sd: 0.1rad (0.032 rad/rad). Measured on 12/6/2010 with ALWalkCrab
+    const float turnMultiplier = 0.7;       // sd: 0.1rad (0.032 rad/rad). Measured on 12/6/2010 with ALWalkCrab
     const float xMultiplier = 1.0;         // 1.35 sd: 7.9cm (0.023 cm/cm). Measured on 12/6/2010 with ALWalkCrab
     const float yMultiplier = -1.09;        // 1.48 sd: 4.2cm (0.021 cm/cm). Measured on 12/6/2010 with ALWalkCrab
 

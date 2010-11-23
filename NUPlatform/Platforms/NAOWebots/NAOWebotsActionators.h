@@ -30,10 +30,6 @@
 #include "NUPlatform/NUActionators.h"
 #include "NAOWebotsPlatform.h"
 
-class webots::Servo;
-class webots::LED;
-class webots::Emitter;
-
 class NAOWebotsActionators : public NUActionators
 {
 public:

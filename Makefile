@@ -17,7 +17,7 @@ CUR_DIR = $(shell pwd)
 
 # Make directories
 MAKE_DIR = $(CUR_DIR)/Make
-MAKE_OPTIONS = --no-print-directory -j 4
+MAKE_OPTIONS = --no-print-directory -j 8
 
 # Build directories
 NAO_BUILD_DIR = Build/NAO

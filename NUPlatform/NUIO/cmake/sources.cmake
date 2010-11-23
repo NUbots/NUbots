@@ -26,6 +26,8 @@ SET (YOUR_SRCS  UdpPort.cpp UdpPort.h
                 JobPort.cpp JobPort.h
                 TeamPort.cpp TeamPort.h
                 TeamTransmissionThread.cpp TeamTransmissionThread.h
+                SSLVisionPort.cpp SSLVisionPort.h
+                SSLVisionPacket.cpp SSLVisionPacket.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

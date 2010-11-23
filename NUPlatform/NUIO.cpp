@@ -25,6 +25,7 @@
 #include "NUIO/GameControllerPort.h"
 #include "NUIO/TeamPort.h"
 #include "NUIO/JobPort.h"
+#include "NUIO/SSLVisionPort.h"
 
 #include "NUIO/TcpPort.h"
 #include "NUIO/RoboCupGameControlData.h"
@@ -65,6 +66,9 @@ NUIO::NUIO(NUbot* nubot)
     #endif
     #ifdef USE_NETWORK_JOBS
         m_jobs_port = new JobPort(Blackboard->Jobs);
+    #endif
+    #ifdef USE_NETWORK_SSLVISION
+        m_ssl_vision_port = new SSLVisionPort(Blackboard->Sensors, Blackboard->TeamInfo, SSLVISION_PORT);
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
@@ -114,6 +118,8 @@ NUIO::~NUIO()
         delete m_jobs_port;
     if(m_localisation_port != NULL)
         delete m_localisation_port;
+    if(m_ssl_vision_port != NULL)
+        delete m_ssl_vision_port;
 }
 
 /*! @brief Stream insertion operator for a JobList

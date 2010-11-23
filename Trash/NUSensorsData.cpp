@@ -90,6 +90,7 @@ NUSensorsData::NUSensorsData()
     // Motion Sensors:
     addSensor(MotionFallActive, string("MotionFallActive"), sensor_t::MOTION_FALL_ACTIVE);
     addSensor(MotionGetupActive, string("MotionGetupActive"), sensor_t::MOTION_GETUP_ACTIVE);
+    addSensor(MotionWalkActive, string("MotionWalkActive"), sensor_t::MOTION_WALK_ACTIVE);
     addSensor(MotionKickActive, string("MotionKickActive"), sensor_t::MOTION_KICK_ACTIVE);
     addSensor(MotionSaveActive, string("MotionSaveActive"), sensor_t::MOTION_SAVE_ACTIVE);
     addSensor(MotionScriptActive, string("MotionScriptActive"), sensor_t::MOTION_SCRIPT_ACTIVE);
@@ -1089,6 +1090,21 @@ bool NUSensorsData::getMotionGetupActive(bool& active)
     }
 }
 
+/*! @brief Get whether the walk motion module is active
+    @param active will be updated to true if the walk module is active
+    @return true if the data is valid
+ */
+bool NUSensorsData::getMotionWalkActive(bool& active)
+{
+    if (not MotionWalkActive->IsValid)
+        return false;
+    else
+    {
+        active = MotionWalkActive->Data[0];
+        return true;
+    }
+}
+
 /*! @brief Get whether the kick motion module is active
     @param active will be updated to true if the kick module is active
     @return true if the data is valid
@@ -1538,6 +1554,13 @@ void NUSensorsData::setMotionGetupActive(double time, bool active)
     vector<float> data(1,0);
     data[0] = active;
     setData(MotionGetupActive, time, data, false);
+}
+
+void NUSensorsData::setMotionWalkActive(double time, bool active)
+{
+    vector<float> data(1,0);
+    data[0] = active;
+    setData(MotionWalkActive, time, data, false);
 }
 
 /*! @brief Sets whether the kick engine is active

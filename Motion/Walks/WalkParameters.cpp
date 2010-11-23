@@ -26,47 +26,6 @@
 #include "debugverbositynumotion.h"
 #include "nubotdataconfig.h"
 
-/*! @brief Prints a human-readble version of the walk parameter */
-void WalkParameters::Parameter::summaryTo(ostream& output) 
-{
-    output << Value;
-}
-
-/*! @brief Prints comma separated parameter */
-void WalkParameters::Parameter::csvTo(ostream& output)
-{   // Caution. Changing this function may break the walk optimiser
-    output << Value << ", ";
-}
-
-ostream& operator<< (ostream& output, const WalkParameters::Parameter& p) 
-{   
-    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
-    return output;
-}
-
-istream& operator>> (istream& input, WalkParameters::Parameter& p)
-{
-    // read in the parameter name
-    getline(input, p.Name, ':');
-    if (p.Name[p.Name.size() - 1] == ':')
-        p.Name.resize(p.Name.size() - 1);
-    
-    // read in the value [min, max]
-    input >> p.Value;
-    input.ignore(10, '[');
-    input >> p.Min;
-    input.ignore(10, ',');
-    input >> p.Max;
-    input.ignore(10, ']');
-    
-    // read in the rest of the line and call it the description
-    char charbuffer[500];
-    input.getline(charbuffer, 500);
-    p.Description = string(charbuffer);
-    
-    return input;
-};
-
 /*! @brief Construct a walk parameter set with no parameters
  */
 WalkParameters::WalkParameters()
@@ -112,6 +71,62 @@ WalkParameters::~WalkParameters()
 {
 }
 
+/*! @brief Gets all of the values of every interesting walk parameter.
+    @return a vector of floats containing all of the values of all of the interesting walk parameters.
+ */
+vector<float> WalkParameters::getAsVector()
+{
+    vector<float> data;
+    data.reserve(size());
+    
+    for (size_t i=0; i<m_max_speeds.size(); i++)
+        data.push_back(m_max_speeds[i]);
+    
+    for (size_t i=0; i<m_max_accelerations.size(); i++)
+        data.push_back(m_max_accelerations[i]);
+    
+    for (size_t i=0; i<m_parameters.size(); i++)
+        data.push_back(m_parameters[i].get());
+    
+    for (size_t i=0; i<m_leg_gains.size(); i++)
+        for (size_t j=0; j<m_leg_gains[i].size(); j++)
+            data.push_back(m_leg_gains[i][j]);
+    
+    return data;
+}
+
+/*! @brief Gets all of the values of every interesting walk parameter.
+    @return a vector of floats containing all of the values of all of the interesting walk parameters.
+ */
+vector<Parameter> WalkParameters::getAsParameters()
+{
+    vector<Parameter> data;
+    data.reserve(size());
+    
+    // Need to hand-code the maximum speeds
+    data.push_back(Parameter("Velocity", m_max_speeds[0], 5, 70));
+    data.push_back(Parameter("Velocity", m_max_speeds[1], 2.5, 70));
+    data.push_back(Parameter("Velocity", m_max_speeds[2], 0.5, 2));
+
+    data.push_back(Parameter("Acceleration", m_max_accelerations[0], 5, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[1], 2.5, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0.5, 4));
+    
+    for (size_t i=0; i<m_parameters.size(); i++)
+        data.push_back(m_parameters[i]);
+    
+    for (size_t i=0; i<m_leg_gains.size(); i++)
+    {
+        for (size_t j=0; j<m_leg_gains[i].size(); j++)
+        {
+            Parameter p("Gain", m_leg_gains[i][j], 25, 100);
+            data.push_back(p);
+        }
+    }
+    
+    return data;
+}
+
 /*! @brief Returns the walk parameter set's name
     @return the walk parameter name
  */
@@ -139,7 +154,7 @@ vector<float>& WalkParameters::getMaxAccelerations()
 /*! @brief Gets the walk engine parameters stored here
  @return the walk engine parameters stored in this object
  */
-vector<WalkParameters::Parameter>& WalkParameters::getParameters()
+vector<Parameter>& WalkParameters::getParameters()
 {
     return m_parameters;
 }
@@ -166,6 +181,43 @@ vector<vector<float> >& WalkParameters::getTorsoGains()
 vector<vector<float> >& WalkParameters::getLegGains()
 {
     return m_leg_gains;
+}
+
+/*! @brief Sets all of the interesting walk parameters with the given values
+    @param data, a vector containing all of the new and interesting walk parameters
+ */
+void WalkParameters::set(const vector<float>& data)
+{
+    if (data.size() < m_max_speeds.size() + m_max_accelerations.size() + m_parameters.size())
+        return;
+    else
+    {
+        size_t offset = 0;
+        
+        for (size_t i=0; i<m_max_speeds.size(); i++)
+            m_max_speeds[i] = data[i+offset];
+        offset += m_max_speeds.size();
+        
+        for (size_t i=0; i<m_max_accelerations.size(); i++)
+            m_max_accelerations[i] = data[i+offset];
+        offset += m_max_accelerations.size();
+
+        for (size_t i=0; i<m_parameters.size(); i++)
+            m_parameters[i].set(data[i+offset]);
+        offset += m_parameters.size();
+        
+        if (data.size() < size())               // check if the new parameters includes stiffnesses for the legs, 
+            return;
+        else
+        {
+            for (size_t i=0; i<m_leg_gains.size(); i++)
+            {
+                for (size_t j=0; j<m_leg_gains[i].size(); j++)
+                    m_leg_gains[i][j] = data[offset+j];
+                offset += m_leg_gains[i].size();
+            }
+        }
+    }
 }
 
 /*! @brief Sets the walk parameter set's name
@@ -289,8 +341,9 @@ void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numga
 void WalkParameters::summaryTo(ostream& output)
 {
     output << m_name << " WalkParameters: ";
-    for (int i=0; i<size(); i++)
-        output << (*this)[i] << " ";
+    vector<float> temp = getAsVector();
+    for (int i=0; i<temp.size(); i++)
+        output << temp[i] << " ";
     output << endl;
 }
 
@@ -298,23 +351,9 @@ void WalkParameters::summaryTo(ostream& output)
  */
 void WalkParameters::csvTo(ostream& output)
 {
-    for (int i=0; i<size(); i++)
-        output << (*this)[i] << ", ";
-}
-
-/*! @brief Attempts to load a set of parameters from a file created using csvTo
- */
-void WalkParameters::csvFrom(istream& input)
-{
-    // this isn't the most robust get from csv in the world but it will do for tonight.
-    // (it assumes that the walk_parameters has already been initialised, and will
-    // only overwrite the usual parameters, the rest are left alone.
-    for (int i=0; i<size(); i++)
-    {
-        input >> (*this)[i];
-        input.ignore(2, ',');
-    }
-    
+    vector<float> temp = getAsVector();
+    for (int i=0; i<temp.size(); i++)
+        output << temp[i] << ", ";
 }
 
 /*! @brief Saves the entire contents of the WalkParameters class in the stream
@@ -353,7 +392,7 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
     
     input.ignore(10,'\n');
     
-    WalkParameters::Parameter p;
+    Parameter p;
     p_walkparameters.m_parameters.clear();
     
     int beforepeek = input.tellg();
@@ -441,51 +480,9 @@ void WalkParameters::load(const string& name)
     file.close();
 }
 
-/*! @brief Overloading subscript operator has been designed to be used by a walk optimiser.
-           In that only parameters relevant to an optimiser are returned.
+/*! @brief Returns the size of the WalkParameters, this is the number of interesting walk parameters
  */
-float& WalkParameters::operator[] (const int index)
+size_t WalkParameters::size() const
 {
-    // I have written this function with the assumption that I don't want to optimise the arm or torso gains
-    // Furthermore, that I only want to optimise the speed in the forward direction (for now)
-    static int nummaxspeedsused = 1;
-    static int nummaxaccelsused = 1;
-    if (m_max_speeds.size() == 0)
-        nummaxspeedsused = 0;
-    else
-        nummaxspeedsused = 1;
-    if (m_max_accelerations.size() == 0)
-        nummaxaccelsused = 0;
-    else
-        nummaxaccelsused = 1;
-    
-    int numwalkparameters = m_parameters.size();
-    if (index < nummaxspeedsused)
-        return m_max_speeds[index];
-    else if (index < nummaxspeedsused + nummaxaccelsused)
-        return m_max_accelerations[index - nummaxspeedsused];
-    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused)
-        return m_parameters[index - nummaxspeedsused - nummaxaccelsused].Value;
-    else if (index < numwalkparameters + nummaxspeedsused + nummaxaccelsused + int(m_num_leg_gains))
-        return m_leg_gains[(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)/m_leg_gains[0].size()][(index - numwalkparameters - nummaxspeedsused - nummaxaccelsused)%m_leg_gains[0].size()];
-    else
-        return m_max_speeds[0];
-}
-
-/*! @brief Returns the size of the WalkParameters, that is the number of elements stored here that are relevant to an optimiser
- */
-int WalkParameters::size() const
-{
-    static int nummaxspeedsused = 1;
-    static int nummaxaccelsused = 1;
-    if (m_max_speeds.size() == 0)
-        nummaxspeedsused = 0;
-    else
-        nummaxspeedsused = 1;
-    if (m_max_accelerations.size() == 0)
-        nummaxaccelsused = 0;
-    else
-        nummaxaccelsused = 1;
-
-    return m_parameters.size() + m_num_leg_gains + nummaxspeedsused + nummaxaccelsused;
+    return m_max_speeds.size() + m_max_accelerations.size() + m_parameters.size() + m_num_leg_gains;
 }

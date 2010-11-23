@@ -25,10 +25,11 @@ SET (YOUR_SRCS  pose2d.h
                odometryMotionModel.cpp odometryMotionModel.h
                KF.cpp KF.h
                Localisation.cpp Localisation.h
+		LocWmFrame
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  	
+SET (YOUR_DIRS
 )
 ####################################################################################
 

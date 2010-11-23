@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include "nubotdataconfig.h"
+#include "nubotconfig.h"
 
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
@@ -45,11 +46,11 @@ const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 // Object distance measurement error weightings (Constant)
 const float Localisation::R_obj_theta = 0.0316f*0.0316f;        // (0.01 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
+const float Localisation::R_obj_range_relative = 0.15f*0.15f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float Localisation::sdTwoObjectAngle = (float) 0.003; //Small! error in angle difference is normally very small
+const float Localisation::sdTwoObjectAngle = (float) 0.02; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
@@ -111,17 +112,15 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
         odomTurn = odo[2];
     }
     
-    vector<float> gps;
-    if (m_sensor_data->get(NUSensorsData::Gps, gps))
-    {   // have GPS use it to check localisation performance
-        // x = gps[0]; y = gps[1]; z = gps[2];
+    vector<float> gps, compass;
+    if (m_sensor_data->getGps(gps) and m_sensor_data->getCompass(compass))
+    {   
+        #ifndef USE_VISION
+            m_objects->self.updateLocationOfSelf(gps[0], gps[1], compass[0], 0.1, 0.1, 0.01, false);
+            return;
+        #endif
     }
-    
-    vector<float> compass;
-    if (m_sensor_data->get(NUSensorsData::Compass, compass))
-    {   // have Compass use it to check localisation performance
-        // heading = compass[0];
-    }
+
     // perform odometry update and change the variance of the model
     doTimeUpdate((-odomForward), odomLeft, odomTurn);
     ProcessObjects();

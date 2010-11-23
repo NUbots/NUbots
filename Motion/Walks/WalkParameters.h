@@ -32,6 +32,8 @@
 #ifndef WALKPARAMETERS_H
 #define WALKPARAMETERS_H
 
+#include "Tools/Optimisation/Parameter.h"
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -41,49 +43,24 @@ using namespace std;
 class WalkParameters
 {
 public:
-    class Parameter 
-    {
-    public:
-        Parameter() {Value = 0; Min = 0; Max = 0;}
-        Parameter(float value, float min, float max) {Name = "Noname"; Description = "None"; Value = value; Min = min; Max = max;}
-        Parameter(string name, float value, float min, float max) {Name = name; Description = "None"; Value = value; Min = min; Max = max;}
-        Parameter(string name, float value, float min, float max, string desc) {Name = name; Description = desc; Value = value; Min = min; Max = max;}
-        ~Parameter() {}
-        
-        string Name;
-        float Value;
-        float Min;
-        float Max;
-        string Description;
-        void setName(const string& name) {Name = name;};
-        void setValue(float value)
-        {
-            if (value < Min) Value = Min;
-            else if (value > Max) Value = Max;
-            else Value = Max;
-        };
-        void setDescription(const string& desc) {Description = desc;};
-        void summaryTo(ostream& output);
-        void csvTo(ostream& output);
-        friend ostream& operator<< (ostream& output, const Parameter& p);
-        friend istream& operator>> (istream& input, Parameter& p);
-    };
-public:
     WalkParameters();
     WalkParameters(const string& name);
     WalkParameters(const string& name, const vector<float>& maxspeeds, const vector<float>& maxaccels, const vector<Parameter>& parameters, const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains);
     ~WalkParameters();
     
     // get methods
+    vector<float> getAsVector();
+    vector<Parameter> getAsParameters();
     string& getName();
     vector<float>& getMaxSpeeds();
     vector<float>& getMaxAccelerations();
-    vector<WalkParameters::Parameter>& getParameters();
+    vector<Parameter>& getParameters();
     vector<vector<float> >& getArmGains();
     vector<vector<float> >& getTorsoGains();
     vector<vector<float> >& getLegGains();
     
     // set methods
+    void set(const vector<float>& data);
     void setName(const string& name);
     void setMaxSpeeds(const vector<float>& maxspeeds);
     void setMaxAccelerations(const vector<float>& maxaccels);
@@ -95,21 +72,17 @@ public:
     // display methods
     void summaryTo(ostream& output);
     void csvTo(ostream& output);
-    void csvFrom(istream& input);
     
     // serialisation
     friend ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters);
     friend ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters);
     friend istream& operator>> (istream& input, WalkParameters& p_walkparameters);
     friend istream& operator>> (istream& input, WalkParameters* p_walkparameters);
-    
     void save();
     void saveAs(const string& name);
     void load(const string& name);
     
-    // operator overloading
-    float& operator[] (const int index);
-    int size() const;
+    size_t size() const;
 private:
     void setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains);
 public:

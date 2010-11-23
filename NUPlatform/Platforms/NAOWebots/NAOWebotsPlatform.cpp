@@ -27,6 +27,7 @@
 
 #include "debug.h"
 #include "debugverbositynuplatform.h"
+#include "nubotconfig.h"
 
 #include <string.h>
 #include <iostream>
@@ -43,7 +44,11 @@ NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[]) : m_argc(argc
     #endif
     init();
     
-    m_camera = new NAOWebotsCamera(this);
+    #ifdef USE_VISION
+        m_camera = new NAOWebotsCamera(this);
+    #else
+        m_camera = 0;
+    #endif
     m_sensors = new NAOWebotsSensors(this);
     m_actionators = new NAOWebotsActionators(this);
 }
