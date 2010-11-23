@@ -109,10 +109,7 @@ private:
     {   
         vector<vector<float> >& points = m_parent->m_speed_points;
         vector<float> front = points.front();
-        vector<float> back = front;
-        back[0] = -back[0];
-        back[1] = -back[1];
-        back[2] += 3.14;
+        vector<float> back = points.back();
         
         vector<float> difference_from_front = m_field_objects->self.CalculateDifferenceFromFieldState(front);
         vector<float> difference_from_back = m_field_objects->self.CalculateDifferenceFromFieldState(back);

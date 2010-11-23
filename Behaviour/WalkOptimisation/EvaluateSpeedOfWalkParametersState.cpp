@@ -163,7 +163,7 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
 vector<float> EvaluateSpeedOfWalkParametersState::getStartPoint()
 {
     float distance_from_forward = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.front())[0];
-    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(reversePoint(m_points.front()))[0];
+    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.back())[0];
 
     m_current_point_index = 0;
     if (distance_from_forward <= distance_from_reverse)
@@ -216,11 +216,14 @@ bool EvaluateSpeedOfWalkParametersState::allPointsReached()
 /*! @brief Returns the equivalent point on the reverse path */
 vector<float> EvaluateSpeedOfWalkParametersState::reversePoint(const vector<float>& point)
 {
-    vector<float> reverse;
-    reverse.reserve(3);
-    reverse.push_back(-point[0]);
-    reverse.push_back(-point[1]);
-    reverse.push_back(point[2] + 3.14);
+    vector<float> reverse = m_points[(m_points.size()-1) - m_current_point_index];
+    if (m_current_point_index == 0 or m_current_point_index == m_points.size()-1)
+        return reverse;
+    else
+    {
+        reverse[2] += 3.14;
+        return reverse;
+    }
     return reverse;
 }
     
