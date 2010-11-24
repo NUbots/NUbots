@@ -31,6 +31,7 @@
 
 #include "Behaviour/Jobs/JobList.h"
 #include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
+#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
 
 #include "NUPlatform/NUSystem.h"
 
@@ -57,7 +58,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("NBWalkStart");
+    m_parameters.load("ALWalkAldebaran");
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
@@ -112,23 +113,19 @@ WalkOptimisationProvider::~WalkOptimisationProvider()
 
 BehaviourState* WalkOptimisationProvider::nextStateCommons()
 {
-    if (nusystem->getTime() > 20*60*60*1e3)
-        exit(1);
 
     while (m_game_info->getCurrentState() != GameInformation::PlayingState)
         m_game_info->doManualStateChange();
     
     #ifndef TARGET_IS_NAOWEBOTS    
-        if (singleChestClick() or longChestClick())
-        {
-            if (m_state == m_paused)
-                return m_generate;
-            else
-                return m_paused;
-        }
+        if (m_state == m_paused and nusystem->getTime() > 5000)
+            return m_generate;
         else
             return m_state;
     #else
+        if (nusystem->getTime() > 20*60*60*1e3)
+            exit(1);
+        
         if (m_state == m_paused and nusystem->getTime() > 1000)
             return m_generate;
         else
@@ -140,6 +137,7 @@ void WalkOptimisationProvider::doBehaviourCommons()
 {;
     if (m_previous_state == m_paused and m_state == m_generate)
         m_jobs->addMotionJob(new WalkParametersJob(m_parameters)); 
+    m_jobs->addMotionJob(new HeadJob(0,vector<float>(2,0)));
 }
 
 void WalkOptimisationProvider::tickOptimiser()

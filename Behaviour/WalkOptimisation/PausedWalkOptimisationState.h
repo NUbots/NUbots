@@ -41,12 +41,9 @@ public:
     virtual BehaviourState* nextState() {return this;};
     virtual void doState()
     {
-        if (m_parent->stateChanged())
-        {
-            m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-            m_jobs->addMotionJob(new HeadJob(m_actions->CurrentTime + 500, zero));
-        }
+        m_jobs->addMotionJob(new WalkJob(0,0,0));
+        vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+        m_jobs->addMotionJob(new HeadJob(m_actions->CurrentTime + 500, zero));
     };
 };
 

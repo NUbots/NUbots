@@ -40,7 +40,7 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
 {
     m_min_step_size = 0.02;
     
-    m_max_step_size = 0.03;        // Tune this	
+    m_max_step_size = 0.05;        // Tune this	
     m_epsilon = 0.03;              // Tune this
     m_num_per_iteration = 10;      // Tune this
     

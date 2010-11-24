@@ -106,7 +106,26 @@ void ALWalk::doWalk()
     #endif
     // give the target speed to the walk engine
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
-    m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
+    
+    float x = m_speed_x/maxspeeds[0];
+    if (x > 1)
+        x = 1;
+    else if (x < -1)
+        x = -1;
+    
+    float y = m_speed_y/maxspeeds[1];
+    if (y > 1)
+        y = 1;
+    else if (y < -1)
+        y = -1;
+    
+    float yaw = m_speed_yaw/maxspeeds[2];
+    if (yaw > 1)
+        yaw = 1;
+    else if (yaw < -1)
+        yaw = -1;
+    
+    m_al_motion->setWalkTargetVelocity(x, y, yaw, 1);
     
     // handle the joint stiffnesses
     static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
