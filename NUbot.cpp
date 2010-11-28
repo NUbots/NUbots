@@ -333,7 +333,6 @@ void NUbot::run()
         {
             periodicSleep(33);
             m_seethink_thread->startLoop();
-            m_seethink_thread->waitForLoopCompletion();
         }
     #endif
 #endif

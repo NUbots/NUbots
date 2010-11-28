@@ -40,7 +40,7 @@ using namespace std;
 Behaviour::Behaviour()
 {
     #ifndef TARGET_IS_NAOWEBOTS
-        m_behaviour = new SoccerProvider(this);
+        m_behaviour = new WalkOptimisationProvider(this);
     #else
         // For Webots, create the behaviour you want to run here 
         m_behaviour = new WalkOptimisationProvider(this);
@@ -68,8 +68,14 @@ Behaviour::~Behaviour()
 */
 void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+        debug << "Behaviour::process()" << endl;
+    #endif
     if (m_next_behaviour != NULL)
     {
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "Behaviour::process() is swaping the behaviour provider" << endl;
+        #endif
         delete m_behaviour;
         m_behaviour = m_next_behaviour;
         m_next_behaviour = NULL;

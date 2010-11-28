@@ -74,7 +74,7 @@ ConditionalThread::~ConditionalThread()
 void ConditionalThread::startLoop()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::startLoop() " << m_name << endl;
+        debug << "ConditionalThread::startLoop() " << m_name << " at " << nusystem->getTime() << endl;
     #endif
     int err = 0;
     err = pthread_mutex_trylock(&m_running_mutex);
@@ -97,9 +97,15 @@ void ConditionalThread::startLoop()
  */
 void ConditionalThread::waitForCondition()
 {
+    #if DEBUG_THREADING_VERBOSITY > 2
+        debug << "ConditionalThread: " << m_name << " is waiting for condition at " << nusystem->getTime() << endl;
+    #endif
     pthread_mutex_lock(&m_condition_mutex);
     pthread_cond_wait(&m_condition, &m_condition_mutex);
     pthread_mutex_unlock(&m_condition_mutex);
+    #if DEBUG_THREADING_VERBOSITY > 2
+        debug << "ConditionalThread: " << m_name << " has finished waiting for condition at " << nusystem->getTime() << endl;
+    #endif
 }
 
 /*! @brief Unlocks the m_running_mutex, consequently allowing the main loop to be started again with startLoop()
@@ -122,7 +128,7 @@ void ConditionalThread::waitForLoopCompletion()
     #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << nusystem->getTime() << endl;
     #endif
-    pthread_mutex_lock(&m_running_mutex);            // block if motion thread is STILL running
+    pthread_mutex_lock(&m_running_mutex);            // block if thread is STILL running
     pthread_mutex_unlock(&m_running_mutex);
     #if DEBUG_THREADING_VERBOSITY > 2
         debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << nusystem->getTime() << endl;
