@@ -28,7 +28,7 @@
 #include <fstream>
 #include <limits>
 
-int s_curr_id = NUData::NumCommonIds.Id+1;
+int s_curr_id = NUData::m_num_common_ids+1; 
 vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
 
 // end effector sensors
@@ -85,7 +85,7 @@ const NUSensorsData::id_t NUSensorsData::MotionHeadCompletionTime(s_curr_id++, "
 
 /*! @brief Default constructor for NUSensorsData
  */
-NUSensorsData::NUSensorsData()
+NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensorsData::NUSensorsData" << endl;
@@ -424,7 +424,7 @@ bool NUSensorsData::getOdometry(vector<float>& data)
  */
 bool NUSensorsData::getAccelerometer(vector<float>& data)
 {
-    get(Accelerometer, data);
+    return get(Accelerometer, data);
 }
 
 /*! @brief Get the gyro data [roll(rad/s), pitch(rad/s), yaw(rad/s)] after the gyro offset has been applied
@@ -1079,8 +1079,8 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {
     /*output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
-        output << *p_data.m_sensors[i];
-    return output;*/
+        output << *p_data.m_sensors[i];*/
+    return output;
 }
 
 /*! @brief Get the entire contents of the NUSensorsData class from a stream
@@ -1102,8 +1102,8 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
         p_data.updateNamedSensorPointer(sensor);
         if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
     }
-    p_data.CurrentTime = lastUpdateTime;
-    return input;*/
+    p_data.CurrentTime = lastUpdateTime;*/
+    return input;
 }
 
 

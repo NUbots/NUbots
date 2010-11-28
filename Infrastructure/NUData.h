@@ -58,7 +58,7 @@ public:
         }
         bool operator==(const string& other) const
         {
-            return Name.find(other) != string::npos;
+            return other.find(Name) != string::npos;
         }
         bool operator!=(const id_t& other) const
         {
@@ -117,15 +117,15 @@ public:
     const static id_t TorsoYaw;
     const static id_t LHipRoll;
     const static id_t LHipPitch;
-    const static id_t LHipYaw;
     const static id_t LHipYawPitch;
+    const static id_t LHipYaw;
     const static id_t LKneePitch;
     const static id_t LAnkleRoll;
     const static id_t LAnklePitch;
     const static id_t RHipRoll;
     const static id_t RHipPitch;
-    const static id_t RHipYaw;
     const static id_t RHipYawPitch;
+    const static id_t RHipYaw;
     const static id_t RKneePitch;
     const static id_t RAnkleRoll;
     const static id_t RAnklePitch;
@@ -133,6 +133,7 @@ public:
     
     // define const static ids for devices that are both sensors and actionators
     const static id_t NumCommonIds;                 //!< internal use only
+    const static int m_num_common_ids = 49;			//!< this *MUST* be manually updated to match NumCommonIds.Id
     
     double CurrentTime;    
     double PreviousTime;
@@ -159,6 +160,7 @@ private:
     vector<string> standardiseNames(const vector<string>& hardwarenames);
     template<typename T> bool t_belongsToGroup(const T& member, const id_t& group);
 };
+
 
 #endif
 

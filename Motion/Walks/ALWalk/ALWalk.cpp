@@ -112,23 +112,23 @@ void ALWalk::doWalk()
     m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
     
     // handle the joint stiffnesses
-    static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
-    static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
+    static vector<float> legnan(m_actions->getSize(NUActionatorsData::LLeg), NAN);
+    static vector<float> armnan(m_actions->getSize(NUActionatorsData::LArm), NAN);
     
     // voltage stablise the gains for the legs
-    vector<float> battery;
-    if (m_data->getBatteryValues(battery))
+    float voltage;
+    if (m_data->getBatteryVoltage(voltage))
     {   // this has been hastily ported over from 2009!
-        float voltagestablisation = 24654.0/(3*(battery[2] + battery[3]));        // the battery voltage in mV
+        float voltagestablisation = 24.654/voltage;
         for (size_t i=0; i<leggains.size(); i++)
             leggains[i] *= voltagestablisation;
     }
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
+    m_actions->add(NUActionatorsData::LLeg, m_data->CurrentTime, legnan, leggains);
+    m_actions->add(NUActionatorsData::RLeg, m_data->CurrentTime, legnan, leggains);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
+        m_actions->add(NUActionatorsData::LArm, m_data->CurrentTime, armnan, m_walk_parameters.getArmGains()[0]);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
+        m_actions->add(NUActionatorsData::RArm, m_data->CurrentTime, armnan, m_walk_parameters.getArmGains()[0]);
 }
 
 /*! @brief Sets whether the arms are allowed to be moved by the walk engine

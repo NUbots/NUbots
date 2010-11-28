@@ -17,7 +17,6 @@ CUR_DIR = $(shell pwd)
 
 # Make directories
 MAKE_DIR = $(CUR_DIR)/Make
-MAKE_OPTIONS = --no-print-directory -j 8
 
 # Build directories
 NAO_BUILD_DIR = Build/NAO
@@ -74,6 +73,15 @@ ifeq ($(SYSTEM), windows32)
 else
 	CCMAKE = ccmake
 endif
+
+# to take advantage of multicore computers
+ifeq ($(SYSTEM), Linux)
+	NPROCS := $(shell grep -c ^processor /proc/cpuinfo)
+endif
+ifeq ($(SYSTEM), Darwin)
+	NPROCS := $(shell system_profiler | awk '/Number Of CPUs/{print $4}{next;}')
+endif
+MAKE_OPTIONS = --no-print-directory -j $(NPROCS)
 
 
 default_target: NAOWebots

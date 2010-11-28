@@ -32,7 +32,7 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
-int a_curr_id = NUData::NumCommonIds.Id+1;
+int a_curr_id = NUData::m_num_common_ids+1;
 vector<NUActionatorsData::id_t*> NUActionatorsData::m_ids;
 // Led actionators
 const NUActionatorsData::id_t NUActionatorsData::LEarLed(a_curr_id++, "LEarLed", NUActionatorsData::m_ids);

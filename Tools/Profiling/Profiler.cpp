@@ -103,7 +103,7 @@ ostream& operator<<(ostream& output, Profiler& profiler)
 {
     if (not profiler.m_split_names.empty())
     {
-        output << profiler.m_name << " Profiler: ";
+        output << profiler.m_name << " " << profiler.m_split_thread_times.back() - profiler.m_start_thread_time << ": ";
         for (size_t i=0; i<profiler.m_split_names.size(); i++)
         {
             output << profiler.m_split_names[i] << ": [t:" << profiler.m_diff_thread_times[i] << " p:" << profiler.m_diff_process_times[i] << "] ";

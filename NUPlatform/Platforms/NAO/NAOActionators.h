@@ -50,8 +50,6 @@ private:
     void copyToHardwareCommunications();
     
 private:
-    static vector<string> m_servo_control_names;
-    static vector<string> m_servo_names;
     static vector<string> m_servo_position_names;
     static unsigned int m_num_servo_positions;
     static vector<string> m_servo_stiffness_names;

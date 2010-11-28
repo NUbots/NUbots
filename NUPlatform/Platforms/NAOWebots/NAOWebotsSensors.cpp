@@ -169,22 +169,23 @@ void NAOWebotsSensors::copyFromJoints()
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NAOWebotsSensors::copyFromJoints()" << endl;
     #endif
+    static float NaN = numeric_limits<float>::quiet_NaN();
 
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, numeric_limits<float>::quiet_NaN());
+    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = 1000*(m_current_time - m_previous_time);
     for (size_t i=0; i<m_servos.size(); i++)
     {
         JServo* s = static_cast<JServo*>(m_servos[i]);
         joint[NUSensorsData::PositionId] = s->getPosition();           
-        joint[NUSensorsData::VelocityId] = (joint[0] - m_previous_positions[i])/delta_t;    
-        joint[NUSensorsData::AccelerationId] = (joint[1] - m_previous_velocities[i])/delta_t;
+        joint[NUSensorsData::VelocityId] = (joint[NUSensorsData::PositionId] - m_previous_positions[i])/delta_t;    
+        joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
         joint[NUSensorsData::TargetId] = s->getTargetPosition();       
         joint[NUSensorsData::StiffnessId] = s->getTargetGain();        
         joint[NUSensorsData::TorqueId] = s->getMotorForceFeedback();   
         m_data->set(*m_joint_ids[i], m_current_time, joint);
         
-        m_previous_positions[i] = joint[0];
-        m_previous_velocities[i] = joint[1];
+        m_previous_positions[i] = joint[NUSensorsData::PositionId];
+        m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
     }
 }
 

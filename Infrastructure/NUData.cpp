@@ -30,26 +30,26 @@
 
 int curr_id = 0;
 vector<NUData::id_t*> NUData::m_common_ids;
-const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);
-const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);
-const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);
-const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);
-const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);
+const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);							//0
+const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);	
+const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);	
+const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);	
+const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);	
 const NUData::id_t NUData::LHand(curr_id++, "LHand", NUData::m_common_ids);
 const NUData::id_t NUData::RHand(curr_id++, "RHand", NUData::m_common_ids);
 const NUData::id_t NUData::Torso(curr_id++, "Torso", NUData::m_common_ids);
 const NUData::id_t NUData::LLeg(curr_id++, "LLeg", NUData::m_common_ids);
 const NUData::id_t NUData::RLeg(curr_id++, "RLeg", NUData::m_common_ids);
 const NUData::id_t NUData::LFoot(curr_id++, "LFoot", NUData::m_common_ids);
-const NUData::id_t NUData::RFoot(curr_id++, "RFoot", NUData::m_common_ids);
+const NUData::id_t NUData::RFoot(curr_id++, "RFoot", NUData::m_common_ids);						//11
 const NUData::id_t NUData::NumCommonGroupIds(curr_id++, "NumCommonGroupIds", NUData::m_common_ids);
 
-const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::m_common_ids);
+const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::m_common_ids);				//13
 const NUData::id_t NUData::HeadPitch(curr_id++, "HeadPitch", NUData::m_common_ids);
-const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::m_common_ids);
-const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::m_common_ids);
-const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::m_common_ids);
-const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::m_common_ids);
+const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::m_common_ids);		
+const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::m_common_ids);	
+const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::m_common_ids);	
+const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::m_common_ids);		
 const NUData::id_t NUData::LShoulderRoll(curr_id++, "LShoulderRoll", NUData::m_common_ids);
 const NUData::id_t NUData::LShoulderPitch(curr_id++, "LShoulderPitch", NUData::m_common_ids);
 const NUData::id_t NUData::LShoulderYaw(curr_id++, "LShoulderYaw", NUData::m_common_ids);
@@ -67,38 +67,42 @@ const NUData::id_t NUData::TorsoPitch(curr_id++, "TorsoPitch", NUData::m_common_
 const NUData::id_t NUData::TorsoYaw(curr_id++, "TorsoYaw", NUData::m_common_ids);
 const NUData::id_t NUData::LHipRoll(curr_id++, "LHipRoll", NUData::m_common_ids);
 const NUData::id_t NUData::LHipPitch(curr_id++, "LHipPitch", NUData::m_common_ids);
-const NUData::id_t NUData::LHipYaw(curr_id++, "LHipYaw", NUData::m_common_ids);
 const NUData::id_t NUData::LHipYawPitch(curr_id++, "LHipYawPitch", NUData::m_common_ids);
+const NUData::id_t NUData::LHipYaw(curr_id++, "LHipYaw", NUData::m_common_ids);
 const NUData::id_t NUData::LKneePitch(curr_id++, "LKneePitch", NUData::m_common_ids);
 const NUData::id_t NUData::LAnkleRoll(curr_id++, "LAnkleRoll", NUData::m_common_ids);
 const NUData::id_t NUData::LAnklePitch(curr_id++, "LAnklePitch", NUData::m_common_ids);
 const NUData::id_t NUData::RHipRoll(curr_id++, "RHipRoll", NUData::m_common_ids);
 const NUData::id_t NUData::RHipPitch(curr_id++, "RHipPitch", NUData::m_common_ids);
-const NUData::id_t NUData::RHipYaw(curr_id++, "RHipYaw", NUData::m_common_ids);
 const NUData::id_t NUData::RHipYawPitch(curr_id++, "RHipYawPitch", NUData::m_common_ids);
+const NUData::id_t NUData::RHipYaw(curr_id++, "RHipYaw", NUData::m_common_ids);
 const NUData::id_t NUData::RKneePitch(curr_id++, "RKneePitch", NUData::m_common_ids);
 const NUData::id_t NUData::RAnkleRoll(curr_id++, "RAnkleRoll", NUData::m_common_ids);
 const NUData::id_t NUData::RAnklePitch(curr_id++, "RAnklePitch", NUData::m_common_ids);
-const NUData::id_t NUData::NumJointIds(curr_id++, "NumJointIds", NUData::m_common_ids);
+const NUData::id_t NUData::NumJointIds(curr_id++, "NumJointIds", NUData::m_common_ids);			//48
 
-const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds", NUData::m_common_ids);
-
+const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds", NUData::m_common_ids);		//49 Remember that m_num_common_ids needs to be manually set to this value
 
 void NUData::addDevices(const vector<string>& hardwarenames)
 {
     vector<string> names = standardiseNames(hardwarenames);
     vector<id_t*>& ids = m_ids_copy;
+    
     for (size_t i=0; i<names.size(); i++)
     {	// for each name compare it to the name of every id
-        for (size_t j=0; j<ids.size(); j++)
+        for (size_t j=NumCommonGroupIds.Id+1; j<ids.size(); j++)
         {
             id_t& id = *(ids[j]);
             if (id == names[i])
             {   // if the name matches the id, then add the actionator to m_available_ids and update the map
+                #if DEBUG_NUSENSORS_VERBOSITY > 4 or DEBUG_NUACTIONATORS_VERBOSITY > 4
+                    debug << id.Name << " == " << names[i] << endl;
+                #endif
                 if (find(m_available_ids.begin(), m_available_ids.end(), id.Id) == m_available_ids.end())
                     m_available_ids.push_back(id.Id);
                 if (find(m_id_to_indices[id.Id].begin(), m_id_to_indices[id.Id].end(), id.Id) == m_id_to_indices[id.Id].end())
                     m_id_to_indices[id.Id].push_back(id.Id);
+                break;
             }
         }
     }
@@ -147,7 +151,7 @@ string NUData::getStandardName(const string& hardwarename)
 {
     string simplename, currentletter;
     // compare each letter to a space, an underscore, a forward slash, a backward slash and a period
-    for (unsigned int j=0; j<hardwarename.size(); j++)
+    for (size_t j=0; j<hardwarename.size(); j++)
     {
         currentletter = hardwarename.substr(j, 1);
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
@@ -155,8 +159,8 @@ string NUData::getStandardName(const string& hardwarename)
     }
     
     // Replace "Left"/"Right" with L/R and move to front of name
-    int Left = simplename.find("Left");
-    int Right = simplename.find("Right");
+    unsigned int Left = simplename.find("Left");
+    unsigned int Right = simplename.find("Right");
     if (Left != string::npos)
     {
         simplename.erase(Left, 4);
@@ -169,34 +173,34 @@ string NUData::getStandardName(const string& hardwarename)
     }
     
     // Replace plurals (ears, eyes)
-    int Ears = simplename.find("Ears");
-    int Eyes = simplename.find("Eyes");
+    unsigned int Ears = simplename.find("Ears");
+    unsigned int Eyes = simplename.find("Eyes");
     if (Ears != string::npos)
         simplename.replace(Ears, 4, "Ear");
     if (Eyes != string::npos)
         simplename.replace(Ears, 4, "Eye");
     
     // Replace ChestBoard with Chest
-    int ChestBoard = simplename.find("ChestBoard");
+    unsigned int ChestBoard = simplename.find("ChestBoard");
     if (ChestBoard != string::npos)
         simplename.replace(ChestBoard, 10, "Chest");
     
     // Replace LFace with LEye and RFace with REye
-    int LFace = simplename.find("LFace");
-    int RFace = simplename.find("RFace");
+    unsigned int LFace = simplename.find("LFace");
+    unsigned int RFace = simplename.find("RFace");
     if (LFace != string::npos)
     	simplename.replace(LFace, 5, "LEye");
     if (RFace != string::npos)
     	simplename.replace(RFace, 5, "REye");
     
     // Remove colours
-    int Red = simplename.find("Red");
+    unsigned int Red = simplename.find("Red");
     if (Red != string::npos)
         simplename.erase(Red, 3);
-    int Green = simplename.find("Green");
+    unsigned int Green = simplename.find("Green");
     if (Green != string::npos)
         simplename.erase(Green, 5);
-    int Blue = simplename.find("Blue");
+    unsigned int Blue = simplename.find("Blue");
     if (Blue != string::npos)
         simplename.erase(Blue, 4);
     
@@ -245,7 +249,7 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
 {
     if (group == All)
     {
-        for (size_t i=RLeg.Id+1; i<m_common_ids.size()-1; i++)
+        for (int i=NumCommonGroupIds.Id+1; i<NumCommonIds.Id; i++)
             if (*m_common_ids[i] == member)
                 return true;
         return false;

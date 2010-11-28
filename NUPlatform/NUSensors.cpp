@@ -297,50 +297,58 @@ void NUSensors::calculateFallSense()
     m_data->getAccelerometer(acceleration);
     m_data->getOrientation(orientation);
     
-    float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-    // check if the robot has fallen over
-    vector<float> fallen(5,0);
-    if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
-        fallen_time += m_current_time - m_previous_time;
-    else
-        fallen_time = 0;
-    
-    if (fallen_time > 100)
-    {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
-        // We use only the angle to determine we have fallen, not the direction
-        fallen[0] = Fallen;
-        if (fabs(acceleration[0]) > fabs(acceleration[1]))
-        {   
-            if (acceleration[0] > 0)
-                fallen[3] = Fallen;
-            else
-                fallen[4] = Fallen;
-        }
-        else
-        {
-            if (acceleration[1] > 0)
-                fallen[1] = Fallen;
-            else
-                fallen[2] = Fallen;
-        }
-    }
-    m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
-    
-    // check if the robot is falling over
-    vector<float> falling(5,0);
-    if (not fallen[0])
+    if (m_data->getAccelerometer(acceleration) and m_data->getOrientation(orientation))
     {
-        if (orientation[0] < -RollFallingThreshold)
-            falling[1] = Falling;
-        if (orientation[0] > RollFallingThreshold)
-            falling[2] = Falling;
-        if (orientation[1] > ForwardFallingThreshold)
-            falling[3] = Falling;
-        if (orientation[1] < -BackwardFallingThreshold)
-            falling[4] = Falling;
+        float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
+        // check if the robot has fallen over
+        vector<float> fallen(5,0);
+        if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+            fallen_time += m_current_time - m_previous_time;
+        else
+            fallen_time = 0;
+        
+        if (fallen_time > 100)
+        {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
+            // We use only the angle to determine we have fallen, not the direction
+            fallen[0] = Fallen;
+            if (fabs(acceleration[0]) > fabs(acceleration[1]))
+            {   
+                if (acceleration[0] > 0)
+                    fallen[3] = Fallen;
+                else
+                    fallen[4] = Fallen;
+            }
+            else
+            {
+                if (acceleration[1] > 0)
+                    fallen[1] = Fallen;
+                else
+                    fallen[2] = Fallen;
+            }
+        }
+        m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
+    
+        // check if the robot is falling over
+        vector<float> falling(5,0);
+        if (not fallen[0])
+        {
+            if (orientation[0] < -RollFallingThreshold)
+                falling[1] = Falling;
+            if (orientation[0] > RollFallingThreshold)
+                falling[2] = Falling;
+            if (orientation[1] > ForwardFallingThreshold)
+                falling[3] = Falling;
+            if (orientation[1] < -BackwardFallingThreshold)
+                falling[4] = Falling;
+        }
+        falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
+        m_data->set(NUSensorsData::Falling, m_current_time, falling);
     }
-    falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
-    m_data->set(NUSensorsData::Falling, m_current_time, falling);
+    else
+    {
+        m_data->setAsInvalid(NUSensorsData::Fallen);
+        m_data->setAsInvalid(NUSensorsData::Falling);
+    }
 }
 
 /*! @brief Calculates the total force in Newtons on each foot

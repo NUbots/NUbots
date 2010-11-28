@@ -26,184 +26,183 @@
 using namespace std;
 
 #define DN_PREFIX                  string("Device/SubDeviceList/")
-#define DN_POSTFIX                 string("/Sensor/Value")
+#define SN_POSTFIX                 string("/Sensor/Value")
+#define AN_POSTFIX				   string("/Actuator/Value")
 
 // Position
-#define HEAD_YAW_POSITION          string("HeadYaw/Position")
-#define HEAD_PITCH_POSITION        string("HeadPitch/Position")
-#define L_SHOULDER_ROLL_POSITION   string("LShoulderRoll/Position")
-#define L_SHOULDER_PITCH_POSITION  string("LShoulderPitch/Position")
-#define L_ELBOW_YAW_POSITION       string("LElbowYaw/Position") 
-#define L_ELBOW_ROLL_POSITION      string("LElbowRoll/Position")
-#define R_SHOULDER_ROLL_POSITION   string("RShoulderRoll/Position")
-#define R_SHOULDER_PITCH_POSITION  string("RShoulderPitch/Position")
-#define R_ELBOW_YAW_POSITION       string("RElbowYaw/Position") 
-#define R_ELBOW_ROLL_POSITION      string("RElbowRoll/Position")
-#define L_HIP_YAWPITCH_POSITION    string("LHipYawPitch/Position") 
-#define L_HIP_ROLL_POSITION        string("LHipRoll/Position") 
-#define L_HIP_PITCH_POSITION       string("LHipPitch/Position")
-#define L_KNEE_PITCH_POSITION      string("LKneePitch/Position")
-#define L_ANKLE_PITCH_POSITION     string("LAnklePitch/Position") 
-#define L_ANKLE_ROLL_POSITION      string("LAnkleRoll/Position")
-#define R_HIP_YAWPITCH_POSITION    string("RHipYawPitch/Position")
-#define R_HIP_ROLL_POSITION        string("RHipRoll/Position") 
-#define R_HIP_PITCH_POSITION       string("RHipPitch/Position")
-#define R_KNEE_PITCH_POSITION      string("RKneePitch/Position")
-#define R_ANKLE_PITCH_POSITION     string("RAnklePitch/Position") 
-#define R_ANKLE_ROLL_POSITION      string("RAnkleRoll/Position")
+#define HEAD_YAW_POSITION          DN_PREFIX + string("HeadYaw/Position") + SN_POSTFIX
+#define HEAD_PITCH_POSITION        DN_PREFIX + string("HeadPitch/Position") + SN_POSTFIX
+#define L_SHOULDER_ROLL_POSITION   DN_PREFIX + string("LShoulderRoll/Position") + SN_POSTFIX
+#define L_SHOULDER_PITCH_POSITION  DN_PREFIX + string("LShoulderPitch/Position") + SN_POSTFIX
+#define L_ELBOW_YAW_POSITION       DN_PREFIX + string("LElbowYaw/Position") + SN_POSTFIX
+#define L_ELBOW_ROLL_POSITION      DN_PREFIX + string("LElbowRoll/Position") + SN_POSTFIX
+#define R_SHOULDER_ROLL_POSITION   DN_PREFIX + string("RShoulderRoll/Position") + SN_POSTFIX
+#define R_SHOULDER_PITCH_POSITION  DN_PREFIX + string("RShoulderPitch/Position") + SN_POSTFIX
+#define R_ELBOW_YAW_POSITION       DN_PREFIX + string("RElbowYaw/Position") + SN_POSTFIX 
+#define R_ELBOW_ROLL_POSITION      DN_PREFIX + string("RElbowRoll/Position") + SN_POSTFIX
+#define L_HIP_YAWPITCH_POSITION    DN_PREFIX + string("LHipYawPitch/Position") + SN_POSTFIX 
+#define L_HIP_ROLL_POSITION        DN_PREFIX + string("LHipRoll/Position") + SN_POSTFIX 
+#define L_HIP_PITCH_POSITION       DN_PREFIX + string("LHipPitch/Position") + SN_POSTFIX
+#define L_KNEE_PITCH_POSITION      DN_PREFIX + string("LKneePitch/Position") + SN_POSTFIX
+#define L_ANKLE_PITCH_POSITION     DN_PREFIX + string("LAnklePitch/Position") + SN_POSTFIX 
+#define L_ANKLE_ROLL_POSITION      DN_PREFIX + string("LAnkleRoll/Position") + SN_POSTFIX
+#define R_HIP_YAWPITCH_POSITION    DN_PREFIX + string("RHipYawPitch/Position") + SN_POSTFIX
+#define R_HIP_ROLL_POSITION        DN_PREFIX + string("RHipRoll/Position") + SN_POSTFIX 
+#define R_HIP_PITCH_POSITION       DN_PREFIX + string("RHipPitch/Position") + SN_POSTFIX
+#define R_KNEE_PITCH_POSITION      DN_PREFIX + string("RKneePitch/Position") + SN_POSTFIX
+#define R_ANKLE_PITCH_POSITION     DN_PREFIX + string("RAnklePitch/Position") + SN_POSTFIX 
+#define R_ANKLE_ROLL_POSITION      DN_PREFIX + string("RAnkleRoll/Position") + SN_POSTFIX
 
 // Current
-#define HEAD_YAW_CURRENT          string("HeadYaw/ElectricCurrent")
-#define HEAD_PITCH_CURRENT        string("HeadPitch/ElectricCurrent")
-#define L_SHOULDER_ROLL_CURRENT   string("LShoulderRoll/ElectricCurrent")
-#define L_SHOULDER_PITCH_CURRENT  string("LShoulderPitch/ElectricCurrent")
-#define L_ELBOW_YAW_CURRENT       string("LElbowYaw/ElectricCurrent") 
-#define L_ELBOW_ROLL_CURRENT      string("LElbowRoll/ElectricCurrent")
-#define R_SHOULDER_ROLL_CURRENT   string("RShoulderRoll/ElectricCurrent")
-#define R_SHOULDER_PITCH_CURRENT  string("RShoulderPitch/ElectricCurrent")
-#define R_ELBOW_YAW_CURRENT       string("RElbowYaw/ElectricCurrent") 
-#define R_ELBOW_ROLL_CURRENT      string("RElbowRoll/ElectricCurrent")
-#define L_HIP_YAWPITCH_CURRENT    string("LHipYawPitch/ElectricCurrent") 
-#define L_HIP_ROLL_CURRENT        string("LHipRoll/ElectricCurrent") 
-#define L_HIP_PITCH_CURRENT       string("LHipPitch/ElectricCurrent")
-#define L_KNEE_PITCH_CURRENT      string("LKneePitch/ElectricCurrent")
-#define L_ANKLE_PITCH_CURRENT     string("LAnklePitch/ElectricCurrent") 
-#define L_ANKLE_ROLL_CURRENT      string("LAnkleRoll/ElectricCurrent")
-#define R_HIP_YAWPITCH_CURRENT    string("LHipYawPitch/ElectricCurrent")
-#define R_HIP_ROLL_CURRENT        string("RHipRoll/ElectricCurrent") 
-#define R_HIP_PITCH_CURRENT       string("RHipPitch/ElectricCurrent")
-#define R_KNEE_PITCH_CURRENT      string("RKneePitch/ElectricCurrent")
-#define R_ANKLE_PITCH_CURRENT     string("RAnklePitch/ElectricCurrent") 
-#define R_ANKLE_ROLL_CURRENT      string("RAnkleRoll/ElectricCurrent")
+#define HEAD_YAW_CURRENT          DN_PREFIX + string("HeadYaw/ElectricCurrent") + SN_POSTFIX
+#define HEAD_PITCH_CURRENT        DN_PREFIX + string("HeadPitch/ElectricCurrent") + SN_POSTFIX
+#define L_SHOULDER_ROLL_CURRENT   DN_PREFIX + string("LShoulderRoll/ElectricCurrent") + SN_POSTFIX
+#define L_SHOULDER_PITCH_CURRENT  DN_PREFIX + string("LShoulderPitch/ElectricCurrent") + SN_POSTFIX
+#define L_ELBOW_YAW_CURRENT       DN_PREFIX + string("LElbowYaw/ElectricCurrent") + SN_POSTFIX
+#define L_ELBOW_ROLL_CURRENT      DN_PREFIX + string("LElbowRoll/ElectricCurrent") + SN_POSTFIX
+#define R_SHOULDER_ROLL_CURRENT   DN_PREFIX + string("RShoulderRoll/ElectricCurrent") + SN_POSTFIX
+#define R_SHOULDER_PITCH_CURRENT  DN_PREFIX + string("RShoulderPitch/ElectricCurrent") + SN_POSTFIX
+#define R_ELBOW_YAW_CURRENT       DN_PREFIX + string("RElbowYaw/ElectricCurrent") + SN_POSTFIX
+#define R_ELBOW_ROLL_CURRENT      DN_PREFIX + string("RElbowRoll/ElectricCurrent") + SN_POSTFIX
+#define L_HIP_YAWPITCH_CURRENT    DN_PREFIX + string("LHipYawPitch/ElectricCurrent") + SN_POSTFIX
+#define L_HIP_ROLL_CURRENT        DN_PREFIX + string("LHipRoll/ElectricCurrent") + SN_POSTFIX
+#define L_HIP_PITCH_CURRENT       DN_PREFIX + string("LHipPitch/ElectricCurrent") + SN_POSTFIX
+#define L_KNEE_PITCH_CURRENT      DN_PREFIX + string("LKneePitch/ElectricCurrent") + SN_POSTFIX
+#define L_ANKLE_PITCH_CURRENT     DN_PREFIX + string("LAnklePitch/ElectricCurrent") + SN_POSTFIX
+#define L_ANKLE_ROLL_CURRENT      DN_PREFIX + string("LAnkleRoll/ElectricCurrent") + SN_POSTFIX
+#define R_HIP_YAWPITCH_CURRENT    DN_PREFIX + string("LHipYawPitch/ElectricCurrent") + SN_POSTFIX
+#define R_HIP_ROLL_CURRENT        DN_PREFIX + string("RHipRoll/ElectricCurrent") + SN_POSTFIX
+#define R_HIP_PITCH_CURRENT       DN_PREFIX + string("RHipPitch/ElectricCurrent") + SN_POSTFIX
+#define R_KNEE_PITCH_CURRENT      DN_PREFIX + string("RKneePitch/ElectricCurrent") + SN_POSTFIX
+#define R_ANKLE_PITCH_CURRENT     DN_PREFIX + string("RAnklePitch/ElectricCurrent") + SN_POSTFIX
+#define R_ANKLE_ROLL_CURRENT      DN_PREFIX + string("RAnkleRoll/ElectricCurrent") + SN_POSTFIX
 
 // Actuator Target
-#define HEAD_YAW_TARGET          string("HeadYaw/Position/Actuator/Value")
-#define HEAD_PITCH_TARGET        string("HeadPitch/Position/Actuator/Value")
-#define L_SHOULDER_ROLL_TARGET   string("LShoulderRoll/Position/Actuator/Value")
-#define L_SHOULDER_PITCH_TARGET  string("LShoulderPitch/Position/Actuator/Value")
-#define L_ELBOW_YAW_TARGET       string("LElbowYaw/Position/Actuator/Value") 
-#define L_ELBOW_ROLL_TARGET      string("LElbowRoll/Position/Actuator/Value")
-#define R_SHOULDER_ROLL_TARGET   string("RShoulderRoll/Position/Actuator/Value")
-#define R_SHOULDER_PITCH_TARGET  string("RShoulderPitch/Position/Actuator/Value")
-#define R_ELBOW_YAW_TARGET       string("RElbowYaw/Position/Actuator/Value") 
-#define R_ELBOW_ROLL_TARGET      string("RElbowRoll/Position/Actuator/Value")
-#define L_HIP_YAWPITCH_TARGET    string("LHipYawPitch/Position/Actuator/Value") 
-#define L_HIP_ROLL_TARGET        string("LHipRoll/Position/Actuator/Value") 
-#define L_HIP_PITCH_TARGET       string("LHipPitch/Position/Actuator/Value")
-#define L_KNEE_PITCH_TARGET      string("LKneePitch/Position/Actuator/Value")
-#define L_ANKLE_PITCH_TARGET     string("LAnklePitch/Position/Actuator/Value") 
-#define L_ANKLE_ROLL_TARGET      string("LAnkleRoll/Position/Actuator/Value")
-#define R_HIP_YAWPITCH_TARGET    string("LHipYawPitch/Position/Actuator/Value")
-#define R_HIP_ROLL_TARGET        string("RHipRoll/Position/Actuator/Value") 
-#define R_HIP_PITCH_TARGET       string("RHipPitch/Position/Actuator/Value")
-#define R_KNEE_PITCH_TARGET      string("RKneePitch/Position/Actuator/Value")
-#define R_ANKLE_PITCH_TARGET     string("RAnklePitch/Position/Actuator/Value") 
-#define R_ANKLE_ROLL_TARGET      string("RAnkleRoll/Position/Actuator/Value")
+#define HEAD_YAW_TARGET          DN_PREFIX + string("HeadYaw/Position") + AN_POSTFIX
+#define HEAD_PITCH_TARGET        DN_PREFIX + string("HeadPitch/Position") + AN_POSTFIX
+#define L_SHOULDER_ROLL_TARGET   DN_PREFIX + string("LShoulderRoll/Position") + AN_POSTFIX
+#define L_SHOULDER_PITCH_TARGET  DN_PREFIX + string("LShoulderPitch/Position") + AN_POSTFIX
+#define L_ELBOW_YAW_TARGET       DN_PREFIX + string("LElbowYaw/Position") + AN_POSTFIX 
+#define L_ELBOW_ROLL_TARGET      DN_PREFIX + string("LElbowRoll/Position") + AN_POSTFIX
+#define R_SHOULDER_ROLL_TARGET   DN_PREFIX + string("RShoulderRoll/Position") + AN_POSTFIX
+#define R_SHOULDER_PITCH_TARGET  DN_PREFIX + string("RShoulderPitch/Position") + AN_POSTFIX
+#define R_ELBOW_YAW_TARGET       DN_PREFIX + string("RElbowYaw/Position") + AN_POSTFIX 
+#define R_ELBOW_ROLL_TARGET      DN_PREFIX + string("RElbowRoll/Position") + AN_POSTFIX
+#define L_HIP_YAWPITCH_TARGET    DN_PREFIX + string("LHipYawPitch/Position") + AN_POSTFIX 
+#define L_HIP_ROLL_TARGET        DN_PREFIX + string("LHipRoll/Position") + AN_POSTFIX 
+#define L_HIP_PITCH_TARGET       DN_PREFIX + string("LHipPitch/Position") + AN_POSTFIX
+#define L_KNEE_PITCH_TARGET      DN_PREFIX + string("LKneePitch/Position") + AN_POSTFIX
+#define L_ANKLE_PITCH_TARGET     DN_PREFIX + string("LAnklePitch/Position") + AN_POSTFIX 
+#define L_ANKLE_ROLL_TARGET      DN_PREFIX + string("LAnkleRoll/Position") + AN_POSTFIX
+#define R_HIP_YAWPITCH_TARGET    DN_PREFIX + string("LHipYawPitch/Position") + AN_POSTFIX
+#define R_HIP_ROLL_TARGET        DN_PREFIX + string("RHipRoll/Position") + AN_POSTFIX 
+#define R_HIP_PITCH_TARGET       DN_PREFIX + string("RHipPitch/Position") + AN_POSTFIX
+#define R_KNEE_PITCH_TARGET      DN_PREFIX + string("RKneePitch/Position") + AN_POSTFIX
+#define R_ANKLE_PITCH_TARGET     DN_PREFIX + string("RAnklePitch/Position") + AN_POSTFIX 
+#define R_ANKLE_ROLL_TARGET      DN_PREFIX + string("RAnkleRoll/Position") + AN_POSTFIX
 
 // Actuator Target
-#define HEAD_YAW_HARDNESS          string("HeadYaw/Hardness/Actuator/Value")
-#define HEAD_PITCH_HARDNESS        string("HeadPitch/Hardness/Actuator/Value")
-#define L_SHOULDER_ROLL_HARDNESS   string("LShoulderRoll/Hardness/Actuator/Value")
-#define L_SHOULDER_PITCH_HARDNESS  string("LShoulderPitch/Hardness/Actuator/Value")
-#define L_ELBOW_YAW_HARDNESS       string("LElbowYaw/Hardness/Actuator/Value") 
-#define L_ELBOW_ROLL_HARDNESS      string("LElbowRoll/Hardness/Actuator/Value")
-#define R_SHOULDER_ROLL_HARDNESS   string("RShoulderRoll/Hardness/Actuator/Value")
-#define R_SHOULDER_PITCH_HARDNESS  string("RShoulderPitch/Hardness/Actuator/Value")
-#define R_ELBOW_YAW_HARDNESS       string("RElbowYaw/Hardness/Actuator/Value") 
-#define R_ELBOW_ROLL_HARDNESS      string("RElbowRoll/Hardness/Actuator/Value")
-#define L_HIP_YAWPITCH_HARDNESS    string("LHipYawPitch/Hardness/Actuator/Value") 
-#define L_HIP_ROLL_HARDNESS        string("LHipRoll/Hardness/Actuator/Value") 
-#define L_HIP_PITCH_HARDNESS       string("LHipPitch/Hardness/Actuator/Value")
-#define L_KNEE_PITCH_HARDNESS      string("LKneePitch/Hardness/Actuator/Value")
-#define L_ANKLE_PITCH_HARDNESS     string("LAnklePitch/Hardness/Actuator/Value") 
-#define L_ANKLE_ROLL_HARDNESS      string("LAnkleRoll/Hardness/Actuator/Value")
-#define R_HIP_YAWPITCH_HARDNESS    string("LHipYawPitch/Hardness/Actuator/Value")
-#define R_HIP_ROLL_HARDNESS        string("RHipRoll/Hardness/Actuator/Value") 
-#define R_HIP_PITCH_HARDNESS       string("RHipPitch/Hardness/Actuator/Value")
-#define R_KNEE_PITCH_HARDNESS      string("RKneePitch/Hardness/Actuator/Value")
-#define R_ANKLE_PITCH_HARDNESS     string("RAnklePitch/Hardness/Actuator/Value") 
-#define R_ANKLE_ROLL_HARDNESS      string("RAnkleRoll/Hardness/Actuator/Value")
+#define HEAD_YAW_HARDNESS          DN_PREFIX + string("HeadYaw/Hardness") + AN_POSTFIX
+#define HEAD_PITCH_HARDNESS        DN_PREFIX + string("HeadPitch/Hardness") + AN_POSTFIX
+#define L_SHOULDER_ROLL_HARDNESS   DN_PREFIX + string("LShoulderRoll/Hardness") + AN_POSTFIX
+#define L_SHOULDER_PITCH_HARDNESS  DN_PREFIX + string("LShoulderPitch/Hardness") + AN_POSTFIX
+#define L_ELBOW_YAW_HARDNESS       DN_PREFIX + string("LElbowYaw/Hardness") + AN_POSTFIX 
+#define L_ELBOW_ROLL_HARDNESS      DN_PREFIX + string("LElbowRoll/Hardness") + AN_POSTFIX
+#define R_SHOULDER_ROLL_HARDNESS   DN_PREFIX + string("RShoulderRoll/Hardness") + AN_POSTFIX
+#define R_SHOULDER_PITCH_HARDNESS  DN_PREFIX + string("RShoulderPitch/Hardness") + AN_POSTFIX
+#define R_ELBOW_YAW_HARDNESS       DN_PREFIX + string("RElbowYaw/Hardness") + AN_POSTFIX 
+#define R_ELBOW_ROLL_HARDNESS      DN_PREFIX + string("RElbowRoll/Hardness") + AN_POSTFIX
+#define L_HIP_YAWPITCH_HARDNESS    DN_PREFIX + string("LHipYawPitch/Hardness") + AN_POSTFIX 
+#define L_HIP_ROLL_HARDNESS        DN_PREFIX + string("LHipRoll/Hardness") + AN_POSTFIX 
+#define L_HIP_PITCH_HARDNESS       DN_PREFIX + string("LHipPitch/Hardness") + AN_POSTFIX
+#define L_KNEE_PITCH_HARDNESS      DN_PREFIX + string("LKneePitch/Hardness") + AN_POSTFIX
+#define L_ANKLE_PITCH_HARDNESS     DN_PREFIX + string("LAnklePitch/Hardness") + AN_POSTFIX 
+#define L_ANKLE_ROLL_HARDNESS      DN_PREFIX + string("LAnkleRoll/Hardness") + AN_POSTFIX
+#define R_HIP_YAWPITCH_HARDNESS    DN_PREFIX + string("LHipYawPitch/Hardness") + AN_POSTFIX
+#define R_HIP_ROLL_HARDNESS        DN_PREFIX + string("RHipRoll/Hardness") + AN_POSTFIX 
+#define R_HIP_PITCH_HARDNESS       DN_PREFIX + string("RHipPitch/Hardness") + AN_POSTFIX
+#define R_KNEE_PITCH_HARDNESS      DN_PREFIX + string("RKneePitch/Hardness") + AN_POSTFIX
+#define R_ANKLE_PITCH_HARDNESS     DN_PREFIX + string("RAnklePitch/Hardness") + AN_POSTFIX 
+#define R_ANKLE_ROLL_HARDNESS      DN_PREFIX + string("RAnkleRoll/Hardness") + AN_POSTFIX
 
 // Temperature
-#define HEAD_YAW_TEMPERATURE          string("HeadYaw/Temperature")
-#define HEAD_PITCH_TEMPERATURE        string("HeadPitch/Temperature")
-#define L_SHOULDER_ROLL_TEMPERATURE   string("LShoulderRoll/Temperature")
-#define L_SHOULDER_PITCH_TEMPERATURE  string("LShoulderPitch/Temperature")
-#define L_ELBOW_YAW_TEMPERATURE       string("LElbowYaw/Temperature") 
-#define L_ELBOW_ROLL_TEMPERATURE      string("LElbowRoll/Temperature")
-#define R_SHOULDER_ROLL_TEMPERATURE   string("RShoulderRoll/Temperature")
-#define R_SHOULDER_PITCH_TEMPERATURE  string("RShoulderPitch/Temperature")
-#define R_ELBOW_YAW_TEMPERATURE       string("RElbowYaw/Temperature") 
-#define R_ELBOW_ROLL_TEMPERATURE      string("RElbowRoll/Temperature")
-#define L_HIP_YAWPITCH_TEMPERATURE    string("LHipYawPitch/Temperature") 
-#define L_HIP_ROLL_TEMPERATURE        string("LHipRoll/Temperature") 
-#define L_HIP_PITCH_TEMPERATURE       string("LHipPitch/Temperature")
-#define L_KNEE_PITCH_TEMPERATURE      string("LKneePitch/Temperature")
-#define L_ANKLE_PITCH_TEMPERATURE     string("LAnklePitch/Temperature") 
-#define L_ANKLE_ROLL_TEMPERATURE      string("LAnkleRoll/Temperature")
-#define R_HIP_YAWPITCH_TEMPERATURE    string("LHipYawPitch/Temperature")
-#define R_HIP_ROLL_TEMPERATURE        string("RHipRoll/Temperature") 
-#define R_HIP_PITCH_TEMPERATURE       string("RHipPitch/Temperature")
-#define R_KNEE_PITCH_TEMPERATURE      string("RKneePitch/Temperature")
-#define R_ANKLE_PITCH_TEMPERATURE     string("RAnklePitch/Temperature") 
-#define R_ANKLE_ROLL_TEMPERATURE      string("RAnkleRoll/Temperature")
+#define HEAD_YAW_TEMPERATURE          DN_PREFIX + string("HeadYaw/Temperature") + SN_POSTFIX
+#define HEAD_PITCH_TEMPERATURE        DN_PREFIX + string("HeadPitch/Temperature") + SN_POSTFIX
+#define L_SHOULDER_ROLL_TEMPERATURE   DN_PREFIX + string("LShoulderRoll/Temperature") + SN_POSTFIX
+#define L_SHOULDER_PITCH_TEMPERATURE  DN_PREFIX + string("LShoulderPitch/Temperature") + SN_POSTFIX
+#define L_ELBOW_YAW_TEMPERATURE       DN_PREFIX + string("LElbowYaw/Temperature") + SN_POSTFIX
+#define L_ELBOW_ROLL_TEMPERATURE      DN_PREFIX + string("LElbowRoll/Temperature") + SN_POSTFIX
+#define R_SHOULDER_ROLL_TEMPERATURE   DN_PREFIX + string("RShoulderRoll/Temperature") + SN_POSTFIX
+#define R_SHOULDER_PITCH_TEMPERATURE  DN_PREFIX + string("RShoulderPitch/Temperature") + SN_POSTFIX
+#define R_ELBOW_YAW_TEMPERATURE       DN_PREFIX + string("RElbowYaw/Temperature") + SN_POSTFIX
+#define R_ELBOW_ROLL_TEMPERATURE      DN_PREFIX + string("RElbowRoll/Temperature") + SN_POSTFIX
+#define L_HIP_YAWPITCH_TEMPERATURE    DN_PREFIX + string("LHipYawPitch/Temperature") + SN_POSTFIX
+#define L_HIP_ROLL_TEMPERATURE        DN_PREFIX + string("LHipRoll/Temperature") + SN_POSTFIX
+#define L_HIP_PITCH_TEMPERATURE       DN_PREFIX + string("LHipPitch/Temperature") + SN_POSTFIX
+#define L_KNEE_PITCH_TEMPERATURE      DN_PREFIX + string("LKneePitch/Temperature") + SN_POSTFIX
+#define L_ANKLE_PITCH_TEMPERATURE     DN_PREFIX + string("LAnklePitch/Temperature") + SN_POSTFIX
+#define L_ANKLE_ROLL_TEMPERATURE      DN_PREFIX + string("LAnkleRoll/Temperature") + SN_POSTFIX
+#define R_HIP_YAWPITCH_TEMPERATURE    DN_PREFIX + string("LHipYawPitch/Temperature") + SN_POSTFIX
+#define R_HIP_ROLL_TEMPERATURE        DN_PREFIX + string("RHipRoll/Temperature") + SN_POSTFIX
+#define R_HIP_PITCH_TEMPERATURE       DN_PREFIX + string("RHipPitch/Temperature") + SN_POSTFIX
+#define R_KNEE_PITCH_TEMPERATURE      DN_PREFIX + string("RKneePitch/Temperature") + SN_POSTFIX
+#define R_ANKLE_PITCH_TEMPERATURE     DN_PREFIX + string("RAnklePitch/Temperature") + SN_POSTFIX
+#define R_ANKLE_ROLL_TEMPERATURE      DN_PREFIX + string("RAnkleRoll/Temperature") + SN_POSTFIX
 
 // Balance
-#define ACCEL_X                  string("InertialSensor/AccX")
-#define ACCEL_Y                  string("InertialSensor/AccY") 
-#define ACCEL_Z                  string("InertialSensor/AccZ")
-#define ANGLE_X                  string("InertialSensor/AngleX")
-#define ANGLE_Y                  string("InertialSensor/AngleY")
-#define GYRO_X                   string("InertialSensor/GyrX")
-#define GYRO_Y                   string("InertialSensor/GyrY") 
+#define ACCEL_X                  		DN_PREFIX + string("InertialSensor/AccX") + SN_POSTFIX
+#define ACCEL_Y                  		DN_PREFIX + string("InertialSensor/AccY") + SN_POSTFIX
+#define ACCEL_Z                  		DN_PREFIX + string("InertialSensor/AccZ") + SN_POSTFIX
+#define ANGLE_X                  		DN_PREFIX + string("InertialSensor/AngleX") + SN_POSTFIX
+#define ANGLE_Y                  		DN_PREFIX + string("InertialSensor/AngleY") + SN_POSTFIX
+#define GYRO_X                   		DN_PREFIX + string("InertialSensor/GyrX") + SN_POSTFIX
+#define GYRO_Y                   		DN_PREFIX + string("InertialSensor/GyrY") + SN_POSTFIX
 
 // Touch
-#define L_FSR_FL                 string("LFoot/FSR/FrontLeft")
-#define L_FSR_FR                 string("LFoot/FSR/FrontRight")
-#define L_FSR_BL                 string("LFoot/FSR/RearLeft")
-#define L_FSR_BR                 string("LFoot/FSR/RearRight")
-#define L_BUMP_L                 string("LFoot/Bumper/Left")
-#define L_BUMP_R                 string("LFoot/Bumper/Right")
-#define R_FSR_FL                 string("RFoot/FSR/FrontLeft")
-#define R_FSR_FR                 string("RFoot/FSR/FrontRight")
-#define R_FSR_BL                 string("RFoot/FSR/RearLeft")
-#define R_FSR_BR                 string("RFoot/FSR/RearRight")
-#define R_BUMP_L                 string("RFoot/Bumper/Left")
-#define R_BUMP_R                 string("RFoot/Bumper/Right")
-#define CHEST_BUTTON             string("ChestBoard/Button")
-#define SIMPLE_CLICK             string("ALWatchDog/SimpleClickOccured")
-#define DOUBLE_CLICK             string("ALWatchDog/DoubleClickOccured")
-#define TRIPLE_CLICK             string("ALWatchDog/TripleClickOccured")
+#define L_FSR_FL                 		DN_PREFIX + string("LFoot/FSR/FrontLeft") + SN_POSTFIX
+#define L_FSR_FR                 		DN_PREFIX + string("LFoot/FSR/FrontRight") + SN_POSTFIX
+#define L_FSR_BL                 		DN_PREFIX + string("LFoot/FSR/RearLeft") + SN_POSTFIX
+#define L_FSR_BR                 		DN_PREFIX + string("LFoot/FSR/RearRight") + SN_POSTFIX
+#define L_BUMP_L                 		DN_PREFIX + string("LFoot/Bumper/Left") + SN_POSTFIX
+#define L_BUMP_R                 		DN_PREFIX + string("LFoot/Bumper/Right") + SN_POSTFIX
+#define R_FSR_FL                 		DN_PREFIX + string("RFoot/FSR/FrontLeft") + SN_POSTFIX
+#define R_FSR_FR                 		DN_PREFIX + string("RFoot/FSR/FrontRight") + SN_POSTFIX
+#define R_FSR_BL                 		DN_PREFIX + string("RFoot/FSR/RearLeft") + SN_POSTFIX
+#define R_FSR_BR                 		DN_PREFIX + string("RFoot/FSR/RearRight") + SN_POSTFIX
+#define R_BUMP_L                 		DN_PREFIX + string("RFoot/Bumper/Left") + SN_POSTFIX
+#define R_BUMP_R                 		DN_PREFIX + string("RFoot/Bumper/Right") + SN_POSTFIX
+#define CHEST_BUTTON             		DN_PREFIX + string("ChestBoard/Button") + SN_POSTFIX
 
 // Battery
-#define CHARGE                   string("Battery/Charge")
-#define CURRENT                  string("Battery/Current")
-#define VOLTAGE_MIN              string("Battery/Charge/Sensor/CellVoltageMin")
-#define VOLTAGE_MAX              string("Battery/Charge/Sensor/CellVoltageMax")
-#define TEMPERATURE              string("Battery/Temperature")
+#define CHARGE                   		DN_PREFIX + string("Battery/Charge") + SN_POSTFIX
+#define CURRENT                  		DN_PREFIX + string("Battery/Current") + SN_POSTFIX
+#define VOLTAGE_MIN              		DN_PREFIX + string("Battery/Charge/Sensor/CellVoltageMin")
+#define VOLTAGE_MAX              		DN_PREFIX + string("Battery/Charge/Sensor/CellVoltageMax")
+#define TEMPERATURE              		DN_PREFIX + string("Battery/Temperature") + SN_POSTFIX
 
 // Distance (ultrasonic and infrared sensors)
-#define US_DISTANCE_LEFT_VALUE0              string("US/Left")
-#define US_DISTANCE_LEFT_VALUE1              string("US/Left1")
-#define US_DISTANCE_LEFT_VALUE2              string("US/Left2")
-#define US_DISTANCE_LEFT_VALUE3              string("US/Left3")
-#define US_DISTANCE_LEFT_VALUE4              string("US/Left4")
-#define US_DISTANCE_LEFT_VALUE5              string("US/Left5")
-#define US_DISTANCE_LEFT_VALUE6              string("US/Left6")
-#define US_DISTANCE_LEFT_VALUE7              string("US/Left7")
-#define US_DISTANCE_LEFT_VALUE8              string("US/Left8")
-#define US_DISTANCE_LEFT_VALUE9              string("US/Left9")
+#define US_DISTANCE_LEFT_VALUE0         DN_PREFIX + string("US/Left") + SN_POSTFIX
+#define US_DISTANCE_LEFT_VALUE1         DN_PREFIX + string("US/Left") + SN_POSTFIX + "1"
+#define US_DISTANCE_LEFT_VALUE2         DN_PREFIX + string("US/Left") + SN_POSTFIX + "2"
+#define US_DISTANCE_LEFT_VALUE3         DN_PREFIX + string("US/Left") + SN_POSTFIX + "3"
+#define US_DISTANCE_LEFT_VALUE4         DN_PREFIX + string("US/Left") + SN_POSTFIX + "4"
+#define US_DISTANCE_LEFT_VALUE5         DN_PREFIX + string("US/Left") + SN_POSTFIX + "5"
+#define US_DISTANCE_LEFT_VALUE6         DN_PREFIX + string("US/Left") + SN_POSTFIX + "6"
+#define US_DISTANCE_LEFT_VALUE7         DN_PREFIX + string("US/Left") + SN_POSTFIX + "7"
+#define US_DISTANCE_LEFT_VALUE8         DN_PREFIX + string("US/Left") + SN_POSTFIX + "8"
+#define US_DISTANCE_LEFT_VALUE9         DN_PREFIX + string("US/Left") + SN_POSTFIX + "9"
 
-#define US_DISTANCE_RIGHT_VALUE0              string("US/Right")
-#define US_DISTANCE_RIGHT_VALUE1              string("US/Right1")
-#define US_DISTANCE_RIGHT_VALUE2              string("US/Right2")
-#define US_DISTANCE_RIGHT_VALUE3              string("US/Right3")
-#define US_DISTANCE_RIGHT_VALUE4              string("US/Right4")
-#define US_DISTANCE_RIGHT_VALUE5              string("US/Right5")
-#define US_DISTANCE_RIGHT_VALUE6              string("US/Right6")
-#define US_DISTANCE_RIGHT_VALUE7              string("US/Right7")
-#define US_DISTANCE_RIGHT_VALUE8              string("US/Right8")
-#define US_DISTANCE_RIGHT_VALUE9              string("US/Right9")
+#define US_DISTANCE_RIGHT_VALUE0        DN_PREFIX + string("US/Right") + SN_POSTFIX
+#define US_DISTANCE_RIGHT_VALUE1        DN_PREFIX + string("US/Right") + SN_POSTFIX + "1"
+#define US_DISTANCE_RIGHT_VALUE2        DN_PREFIX + string("US/Right") + SN_POSTFIX + "2"
+#define US_DISTANCE_RIGHT_VALUE3        DN_PREFIX + string("US/Right") + SN_POSTFIX + "3"
+#define US_DISTANCE_RIGHT_VALUE4        DN_PREFIX + string("US/Right") + SN_POSTFIX + "4"
+#define US_DISTANCE_RIGHT_VALUE5        DN_PREFIX + string("US/Right") + SN_POSTFIX + "5"
+#define US_DISTANCE_RIGHT_VALUE6        DN_PREFIX + string("US/Right") + SN_POSTFIX + "6"
+#define US_DISTANCE_RIGHT_VALUE7        DN_PREFIX + string("US/Right") + SN_POSTFIX + "7"
+#define US_DISTANCE_RIGHT_VALUE8        DN_PREFIX + string("US/Right") + SN_POSTFIX + "8"
+#define US_DISTANCE_RIGHT_VALUE9        DN_PREFIX + string("US/Right") + SN_POSTFIX + "9"
 
 
 #endif
+
