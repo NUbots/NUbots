@@ -131,7 +131,7 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
     m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
     bool torquesavailable = m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
     
-    if (batteryavaliable)
+    if (false and batteryavaliable)
     {
         // This code has never been tested, but should be OK on NAO
         float voltage = 3*(battery[2] + battery[3])/1000.0;        					// this has been hastily ported over from 2009!
@@ -141,10 +141,13 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
     }
     else if (currentsavailable)
     {
-        /*float voltage = 3*(battery[2] + battery[3])/1000;        					// this has been hastily ported over from 2009!
-        for (unsigned int i=0; i<currents.size(); i++)
-            m_energy_used += fabs(currents[i]*voltage);
-        m_energy_used += 21.0*(m_data->CurrentTime - m_previous_time);				// we assume for now the CPU etc draws 21W*/
+        if (m_previous_time != 0)
+        {
+            float voltage = 3*(battery[2] + battery[3])/1000;                               // this has been hastily ported over from 2009!
+            for (unsigned int i=0; i<currents.size(); i++)
+                m_energy_used += 0.69*fabs(currents[i]*voltage)*(m_data->CurrentTime - m_previous_time)/1000;       // the 0.69 is a fudge factor to make the current sum match the battery current
+            m_energy_used += 17.3*(m_data->CurrentTime - m_previous_time)/1000;				// we assume for now the CPU etc draws 17.3W
+        }
     }
     else if (torquesavailable)
     {

@@ -49,6 +49,8 @@ HEADERS += ui_mainwindow.h \
     ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
+    ../Motion/Walks/WalkParameters.h \
+    ../Tools/Optimisation/Parameter.h \
     KickWidget.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
@@ -168,6 +170,7 @@ SOURCES += mainwindow.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \

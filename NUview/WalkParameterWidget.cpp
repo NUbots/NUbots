@@ -23,6 +23,7 @@
 
 #include "Behaviour/Jobs.h"
 #include "NUviewIO/NUviewIO.h"
+#include "Tools/Optimisation/Parameter.h"
 #include "debug.h"
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
@@ -42,7 +43,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
 
 void WalkParameterWidget::createWidgets()
 {    
-    vector<WalkParameters::Parameter>& params = m_walk_parameters.getParameters();
+    vector<Parameter>& params = m_walk_parameters.getParameters();
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     // Shift Amplitude
@@ -66,8 +67,8 @@ void WalkParameterWidget::createWidgets()
     shiftFrequencySpinBox->setMaximum(shiftFrequencySlider->maximum());
     if (params.size() > 0)
     {
-        shiftFrequencySlider->setValue(params[0].Value*10);
-        shiftFrequencySpinBox->setValue(params[0].Value*10);
+        shiftFrequencySlider->setValue(params[0].get()*10);
+        shiftFrequencySpinBox->setValue(params[0].get()*10);
     }
     
     // Phase Offset
@@ -275,11 +276,11 @@ WalkParameterWidget::~WalkParameterWidget()
 void WalkParameterWidget::walkParameterChanged()
 {
     m_walk_parameters.load("ALWalkTest");
-    vector<WalkParameters::Parameter>& params = m_walk_parameters.getParameters();
+    vector<Parameter>& params = m_walk_parameters.getParameters();
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
 
     if (params.size() > 0)
-        params[0].Value = shiftFrequencySlider->value()/10.0;
+        params[0].set(shiftFrequencySlider->value()/10.0);
     
     if (maxspeeds.size() > 2)
     {
