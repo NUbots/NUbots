@@ -35,10 +35,11 @@
 
 class NAOActionators : public NUActionators
 {
-#define ALIAS_POSITION "PositionActionators"
-#define ALIAS_STIFFNESS "StiffnessActionators"
-#define ALIAS_LED "LedActionators"
-#define ALIAS_ALL "AllActionators"
+#define ALIAS_POSITION "NUP"
+#define ALIAS_STIFFNESS "NUS"
+#define ALIAS_POSITION_AND_STIFFNESS "NUPS"
+#define ALIAS_LED "NUL"
+#define ALIAS_ALL "NUA"
 public:
     NAOActionators();
     ~NAOActionators();
@@ -74,7 +75,7 @@ private:
     
     DCMProxy* m_al_dcm;
     double m_al_time_offset;
-    ALValue m_position_command, m_stiffness_command, m_led_command, m_actionator_command;
+    ALValue m_position_command, m_stiffness_command, m_positionstiffness_command, m_led_command, m_actionator_command;
 };
 
 #endif

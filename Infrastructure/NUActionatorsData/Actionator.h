@@ -50,12 +50,14 @@ public:
     bool get(double& time, vector<vector<float> >& data);
     bool get(double& time, vector<vector<vector<float> > >& data);
     bool get(double& time, string& data);
+    bool get(double& time, vector<string>& data);
     
     void add(const double& time, const float& data);
     void add(const double& time, const vector<float>& data);
     void add(const double& time, const vector<vector<float> >& data);
     void add(const double& time, const vector<vector<vector<float> > >& data);
     void add(const double& time, const string& data);
+    void add(const double& time, const vector<string>& data);
     
     bool empty();
     

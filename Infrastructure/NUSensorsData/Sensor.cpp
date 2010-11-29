@@ -181,6 +181,13 @@ void Sensor::modify(double time, int start, const float& data)
         else if (s == start)
             VectorData.push_back(data);
     }
+    else if (ValidFloat)
+    {
+        ValidFloat = false;
+        ValidVector = true;
+        VectorData = vector<float>(2, FloatData);
+        VectorData[1] = data;
+    }
     else if (start == 0)
     {
         ValidVector = true;

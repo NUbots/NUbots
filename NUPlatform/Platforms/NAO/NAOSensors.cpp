@@ -200,7 +200,7 @@ void NAOSensors::copyFromJoints()
         joint[vel_id] = (joint[pos_id] - m_previous_positions[i])/delta_t;    
         joint[acc_id] = (joint[vel_id] - m_previous_velocities[i])/delta_t;
         joint[tar_id] = m_buffer_targets[i];       
-        joint[sti_id] = m_buffer_stiffnesses[i];        
+        joint[sti_id] = 100*m_buffer_stiffnesses[i];        
         joint[cur_id] = m_buffer_currents[i];
         joint[tem_id] = m_buffer_temperatures[i];
         m_data->set(*m_joint_ids[i], m_current_time, joint);
@@ -269,9 +269,9 @@ void NAOSensors::copyFromFeet()
 void NAOSensors::copyFromButtons()
 {
     m_al_button_access->GetValues(m_buffer_buttons);
-    m_data->set(NUSensorsData::MainButton, m_current_time, m_buffer_buttons[0]);
-    m_data->set(NUSensorsData::LeftButton, m_current_time, m_buffer_foot_bumper[0] + m_buffer_foot_bumper[1]);
-    m_data->set(NUSensorsData::RightButton, m_current_time, m_buffer_foot_bumper[2] + m_buffer_foot_bumper[3]);
+    m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, m_buffer_buttons[0]);
+    m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, m_buffer_foot_bumper[0] + m_buffer_foot_bumper[1]);
+    m_data->modify(NUSensorsData::RightButton, NUSensorsData::StateId, m_current_time, m_buffer_foot_bumper[2] + m_buffer_foot_bumper[3]);
 }
 
 void NAOSensors::copyFromBattery()

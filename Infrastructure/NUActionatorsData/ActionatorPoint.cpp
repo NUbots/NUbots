@@ -76,6 +76,16 @@ ActionatorPoint::ActionatorPoint(const double& time, const string& data)
     StringData = shared_ptr<string>(new string(data));
 }
 
+/*! @brief Constructs an ActionatorPoint that holds a vector of strings
+    @param time the time the data will be applied
+    @param data the actionator data
+ */
+ActionatorPoint::ActionatorPoint(const double& time, const vector<string>& data)
+{
+    Time = time;
+    VectorStringData = shared_ptr<vector<string> >(new vector<string>(data));
+}
+
 /*! @brief Copy constructor for an ActionatorPoint. 
     @param time the time the data will be applied
     @param data the actionator data
@@ -88,6 +98,7 @@ ActionatorPoint::ActionatorPoint(const ActionatorPoint& original)
     MatrixData = original.MatrixData;
     ThreeDimData = original.ThreeDimData;
     StringData = original.StringData;
+    VectorStringData = original.VectorStringData;
 }
 
 /*! @brief Destroy the ActionatorPoint */
@@ -115,6 +126,8 @@ ostream& operator<< (ostream& output, const ActionatorPoint& p)
         output << p.ThreeDimData;
     if (p.StringData)
         output << p.StringData;
+    if (p.VectorStringData)
+        output << p.VectorStringData;
     return output;
 }
 

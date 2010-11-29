@@ -50,7 +50,7 @@ void PenalisedState::doState()
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
         m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
-        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 300, vector<float>(2,0)));
+        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 1000, vector<float>(2,0)));
     }
     // In penalty the chest led should be red
     vector<float> red(3,0);

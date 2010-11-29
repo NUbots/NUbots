@@ -234,7 +234,6 @@ void NUSensors::calculateButtonDurations()
         prevMainState = buttonvalue;
     }
     
-    
     if(m_data->get(NUSensorsData::LeftButton, buttonvalue))
     {
         if (buttonvalue > 0.5)
@@ -253,7 +252,7 @@ void NUSensors::calculateButtonDurations()
             nextRightDuration += (m_current_time - m_previous_time);
         else if (prevRightState > 0.5)
         {   // if this is a negative edge update the last press duration
-            m_data->modify(NUSensorsData::LeftButton, NUSensorsData::DurationId, m_current_time, nextRightDuration);
+            m_data->modify(NUSensorsData::RightButton, NUSensorsData::DurationId, m_current_time, nextRightDuration);
             nextRightDuration = 0;
         }
         prevRightState = buttonvalue;

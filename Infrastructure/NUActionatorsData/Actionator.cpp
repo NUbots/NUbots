@@ -146,6 +146,26 @@ bool Actionator::get(double& time, string& data)
     return false;
 }
 
+/*! @brief Attempts to get the next vector of string data for this actionator. If there is none, return false.
+    @param time will be updated with the time associated with the data
+    @param data will be updated 
+    @return true if time,data were successfully updated, false otherwise
+ */
+bool Actionator::get(double& time, vector<string>& data)
+{
+    if (not empty())
+    {
+        ActionatorPoint& p = m_points[0];
+        if (p.VectorStringData)
+        {
+        	time = p.Time;
+    		data = *(p.VectorStringData);
+            return true;
+        }
+    }
+    return false;
+}
+
 
 /*! @brief Add an actionator point to the actionator
     @param time the time the data will be applied
@@ -192,6 +212,16 @@ void Actionator::add(const double& time, const vector<vector<vector<float> > >& 
     @param data the data associated with the point
  */
 void Actionator::add(const double& time, const string& data)
+{
+    ActionatorPoint p(time, data);
+    addToBuffer(p);
+}
+
+/*! @brief Add an actionator point to the actionator
+    @param time the time the data will be applied
+    @param data the data associated with the point
+ */
+void Actionator::add(const double& time, const vector<string>& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);

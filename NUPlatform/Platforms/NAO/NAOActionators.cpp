@@ -26,6 +26,7 @@
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+#include "Tools/Profiling/Profiler.h"
 
 #include <limits>
 using namespace std;
@@ -139,6 +140,16 @@ void NAOActionators::getActionatorsFromAldebaran()
         debug << param.toString(VerbosityMini) << endl;
     #endif
     
+    param[0] = ALIAS_POSITION_AND_STIFFNESS;
+    vector<string> positionstiffness_names;
+	positionstiffness_names.insert(positionstiffness_names.end(), m_servo_position_names.begin(), m_servo_position_names.end());
+    positionstiffness_names.insert(positionstiffness_names.end(), m_servo_stiffness_names.begin(), m_servo_stiffness_names.end());
+    param[1] = positionstiffness_names;
+    param = m_al_dcm->createAlias(param);
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << param.toString(VerbosityMini) << endl;
+    #endif
+    
     param[0] = ALIAS_ALL;
     m_actionator_names.insert(m_actionator_names.end(), m_servo_position_names.begin(), m_servo_position_names.end());
     m_actionator_names.insert(m_actionator_names.end(), m_servo_stiffness_names.begin(), m_servo_stiffness_names.end());
@@ -180,161 +191,150 @@ void NAOActionators::createALDCMCommands()
 {
     createALDCMCommand(ALIAS_POSITION, m_position_command, m_num_servo_positions);
     createALDCMCommand(ALIAS_STIFFNESS, m_stiffness_command, m_num_servo_stiffnesses);
-    createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);
+    createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);   
+    createALDCMCommand(ALIAS_POSITION_AND_STIFFNESS, m_positionstiffness_command, m_num_servo_positions + m_num_servo_stiffnesses);
     createALDCMCommand(ALIAS_ALL, m_actionator_command, m_num_actionators);
 }
 
 void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators)
 {
     // The format for a command to the DCM in alias mode is the following:
-    // [AliasName, "ClearAfter", "time-mixed",[actionator0, actionator1, ... , actionatorn]]
-    //      where each actionator is [[command0, dcmtime0, importance0], [command1, dcmtime1, importance1], ...]
-    // However, as we only ever give the dcm one command at a time, an actionator is always [[command0, dcmtime0, importance0]]
+    // [AliasName, "ClearAfter", "time-separate", 1 (importance), [[time]], [actionator0, actionator1, ... , actionatorn]]    
+    //		where each actionator is [command0, command1, ..]. However, we send only a single command at a time, so its just [command]
     ALValue l_command;
     
-    // time-mixed mode always has a command length of 4
-    l_command.arraySetSize(4);
-    l_command[0] = p_name;
-    l_command[1] = "ClearAfter";
-    l_command[2] = "time-mixed";
+    // time-separate mode always has a command length of 6
+    l_command.arraySetSize(6);
+    l_command[0] = string(p_name);					// AliasName
+    l_command[1] = string("ClearAfter");			// Update mode
+    l_command[2] = string("time-separate");			// Command format	
+    l_command[3] = 0;								// Importance level
+    l_command[4].arraySetSize(1);
+    l_command[4][0] = m_al_dcm->getTime(0);			// Time
+    l_command[5].arraySetSize(numactionators);		// Actual actionator data
     
-    ALValue actionators;
-    actionators.arraySetSize(numactionators);
-    ALValue points;             // the list of commands for each actionator
-    points.arraySetSize(1);     // we always send only one command 
-    ALValue point;              // the actionator value
-    point.arraySetSize(2);      // a actionator point is always [value, dcmtime]
     for (unsigned int i=0; i<numactionators; i++)
     {
-        point[0] = 0.0f;                      // value
-        point[1] = m_al_dcm->getTime(0);     // time
-        points[0] = point;
-        actionators[i] = points;
+        l_command[5][i].arraySetSize(1);
+        l_command[5][i][0] = 0.0f;					// The single actionator value
     }
-    l_command[3] = actionators;
+    
     p_command = l_command;
 }
 
 /*! @brief Copies the commands stored in the NUActionators to the ALDcm.
  
-    As of 8/4/2010 this function uses 17% of the CPU
+    As of 8/4/2010 this function takes 1.7ms to complete
+ 	As of 28/11/2010 this function takes about 1.55ms to complete (time-mixed)
+ 	As of 29/11/2010 this function takes about 1.0ms to complete (time-separate) 
+ 	As of 29/11/2020 this function takes about 0.50ms to complete (time-separate, leds at 0.25 dcm rate)
  */
 void NAOActionators::copyToHardwareCommunications()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "NAOActionators::copyToHardwareCommunications()" << endl;
-#endif
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    m_data->summaryTo(debug);
-#endif
-    
-    /*static vector<bool> isvalid;
-    static vector<double> times;
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NAOActionators::copyToHardwareCommunications()" << endl;
+    #endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        m_data->summaryTo(debug);
+    #endif
     
     static vector<float> positions;
-    static vector<float> velocities;
     static vector<float> gains;
     
-    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
+    m_data->getNextServos(positions, gains);
+    
+    int time = m_al_dcm->getTime(0);
+    m_position_command[4][0] = time;
+    m_stiffness_command[4][0] = time;
+    
+    size_t n = positions.size();
+    for (size_t i=0; i<n; i++)
     {
-        if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
+        m_position_command[5][i][0] = positions[i];
+        m_stiffness_command[5][i][0] = gains[i]/100.0;
+    }
+    m_al_dcm->setAlias(m_position_command);
+    m_al_dcm->setAlias(m_stiffness_command);
+    
+    static vector<vector<float> > ledvalues;
+    static unsigned int count = 0;
+    if (count%5 == 0)
+    {
+        m_data->getNextLeds(ledvalues);
+     	
+        m_led_command[4][0] = time;
+        
+        /*for (size_t i=0; i<ledvalues.size(); i++)
         {
-            for (unsigned int i=0; i<m_num_servo_positions; i++)
+            unsigned int dcmoffset = 0;
+            unsigned int actoffset = 0;
+            unsigned int ledoffset = 2*m_num_servo_positions;
+            
+            // On the NAO the ears only have blue leds
+            for (unsigned int i=0; i<m_num_earleds; i++)
             {
-                if (isvalid[i] == true)
-                {
-                    int time = static_cast<int> (times[i] + m_al_time_offset);
-                    m_actionator_command[3][i][0][0] = positions[i];
-                    m_actionator_command[3][i+m_num_servo_positions][0][0] = gains[i]/100.0;
-                    m_actionator_command[3][i][0][1] = time; 
-                    m_actionator_command[3][i+m_num_servo_positions][0][1] = time;
-                }
-                else
-                {
-                    m_actionator_command[3][i][0][0] = NAN;
-                    m_actionator_command[3][i+m_num_servo_positions][0][0] = NAN;
-                }
+                int j = i + ledoffset;
+                m_actionator_command[3][j][0][0] = ledvalues[i][2];
+                m_actionator_command[3][j][0][1] = time;
             }
-        }
-        else
-            errorlog << "NAOActionators::copyToHardwareCommunications(). The positions do not have the correct length, all data will be ignored!" << endl;
+            dcmoffset = actoffset = m_num_earleds;
+            
+            // On the NAO the eyes are red, green and blue leds 
+            unsigned int num = m_num_eyeleds/3;
+            for (unsigned int i=0; i<num; i++)
+            {
+                int j = 3*i + dcmoffset + ledoffset;
+                int k = i + actoffset;
+                m_actionator_command[3][j][0][0] = ledvalues[k][0];
+                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
+                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
+                m_actionator_command[3][j][0][1] = time;
+                m_actionator_command[3][j+1][0][1] = time;
+                m_actionator_command[3][j+2][0][1] = time;
+            }
+            dcmoffset += m_num_eyeleds;
+            actoffset += m_num_eyeleds/3;
+            
+            // On the NAO the chest has a red, green and blue led
+            num = m_num_chestleds/3;
+            for (unsigned int i=0; i<num; i++)
+            {
+                int j = 3*i + dcmoffset + ledoffset;
+                int k = i + actoffset;
+                m_actionator_command[3][j][0][0] = ledvalues[k][0];
+                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
+                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
+                m_actionator_command[3][j][0][1] = time;
+                m_actionator_command[3][j+1][0][1] = time;
+                m_actionator_command[3][j+2][0][1] = time;
+            }
+            dcmoffset += m_num_chestleds;
+            actoffset += m_num_chestleds/3;
+            
+            // On the NAO the feet each have red, green and blue leds
+            num = m_num_footleds/3;
+            for (unsigned int i=0; i<num; i++)
+            {
+                int j = 3*i + dcmoffset + ledoffset;
+                int k = i + actoffset;
+                m_actionator_command[3][j][0][0] = ledvalues[k][0];
+                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
+                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
+                m_actionator_command[3][j][0][1] = time;
+                m_actionator_command[3][j+1][0][1] = time;
+                m_actionator_command[3][j+2][0][1] = time;
+            }
+        }*/
+        m_al_dcm->setAlias(m_led_command);
     }
-    
-    static vector<float> redleds, greenleds, blueleds;
-    
-    if (m_data->getNextLeds(isvalid, times, redleds, greenleds, blueleds))
-    {
-        unsigned int dcmoffset = 0;
-        unsigned int actoffset = 0;
-        unsigned int ledoffset = 2*m_num_servo_positions;
-        
-        // On the NAO the ears only have blue leds
-        for (unsigned int i=0; i<m_num_earleds; i++)
-        {
-            int j = i + ledoffset;
-            int time = static_cast<int> (times[i] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = blueleds[i];
-            m_actionator_command[3][j][0][1] = time;
-        }
-        dcmoffset = actoffset = m_num_earleds;
-        
-        // On the NAO the eyes are red, green and blue leds 
-        unsigned int num = m_num_eyeleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-        dcmoffset += m_num_eyeleds;
-        actoffset += m_num_eyeleds/3;
-        
-        // On the NAO the chest has a red, green and blue led
-        num = m_num_chestleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-        dcmoffset += m_num_chestleds;
-        actoffset += m_num_chestleds/3;
-        
-        // On the NAO the feet each have red, green and blue leds
-        num = m_num_footleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-    }
-    
-    // Setting the alias for stiffness, position and leds separately takes 1.05ms
-    m_al_dcm->setAlias(m_actionator_command);
+    count++;
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << m_actionator_command.toString(VerbosityMini) << endl;
+        debug << m_position_command.toString(VerbosityMini) << endl;
+    	debug << m_stiffness_command.toString(VerbosityMini) << endl;
+        debug << m_led_command.toString(VerbosityMini) << endl;
     #endif
-    */
+
     copyToSound();
 }
 

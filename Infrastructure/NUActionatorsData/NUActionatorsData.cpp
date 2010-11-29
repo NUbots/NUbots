@@ -196,7 +196,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
     #endif
     // get the sensor positions and gains
     vector<float> positions_current, gains_current;
-    Blackboard->Sensors->getPosition(All, positions_current);
+    Blackboard->Sensors->getTarget(All, positions_current);
     Blackboard->Sensors->getStiffness(All, gains_current);
     
     // check that positions and gains are of the correct size; if they are not then 'resize' them
@@ -226,10 +226,10 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                     gains[i] = interpolate(time, gains_current[i], positiongain[1]);
                 }
             }
+            #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: [" << time - CurrentTime << "," << position << "]" << endl;
+            #endif
         }
-        #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-            debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: [" << time - CurrentTime << "," << position << "]" << endl;
-        #endif
     }
 }
 
@@ -276,6 +276,28 @@ void NUActionatorsData::getNextLeds(vector<vector<float> >& leds)
         #if DEBUG_NUACTIONATORS_VERBOSITY > 0
             debug << a.Name << " " << leds[i] << endl;
         #endif
+    }
+}
+
+/*! @brief Gets the a list of sounds to be added to the sound queue in this cycle
+    @param sounds will be updated
+ */
+void NUActionatorsData::getNextSounds(vector<string>& sounds)
+{
+    sounds.clear();
+    
+    double time;
+    string nextsound;
+    vector<string> nextsounds;
+    if (m_actionators[Sound.Id].get(time, nextsound))
+    {
+        if (time <= CurrentTime)
+            sounds.push_back(nextsound);
+    }
+    else if (m_actionators[Sound.Id].get(time, nextsounds))
+    {
+        if (time <= CurrentTime)
+            sounds = nextsounds;
     }
 }
 
@@ -555,8 +577,27 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
     #endif
-    for (size_t i=0; i<data.size(); i++)
-        add(actionatorid, time, data[i]);
+    vector<int>& ids = mapIdToIndices(actionatorid);
+    size_t numids = ids.size();
+    if (numids == 0)
+        return;
+    else if (numids == 1)
+    {	// if actionatorid is a single
+        m_actionators[ids[0]].add(time, data);
+    }
+    else
+    {   // if actionatorid is a group
+        if (data.size() == numids)
+        {	// if the data size matches the group size then assume we want each row of data given to each actionator
+            for (size_t i=0; i<numids; i++) 
+                m_actionators[ids[i]].add(time, data[i]);
+        }
+        else
+        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+            for (size_t i=0; i<numids; i++) 
+                m_actionators[ids[i]].add(time, data);
+        }
+    }
 }
 
 /*! @brief Adds a sequence of points to an actionatorid

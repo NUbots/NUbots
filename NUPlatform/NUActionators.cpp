@@ -30,18 +30,18 @@
 
 NUActionators::NUActionators()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::NUActionators" << endl;
-#endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::NUActionators" << endl;
+    #endif
     m_data = new NUActionatorsData();
     m_sound_thread = new NUSoundThread();
 }
 
 NUActionators::~NUActionators()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::~NUActionators" << endl;
-#endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::~NUActionators" << endl;
+    #endif
     delete m_sound_thread;
     m_sound_thread = 0;
 }
@@ -52,12 +52,16 @@ NUActionators::~NUActionators()
  */
 void NUActionators::process(NUActionatorsData* data)
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::process" << endl;
-#endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::process" << endl;
+    #endif
     m_data->preProcess(Platform->getTime());
     copyToHardwareCommunications();
     m_data->postProcess();
+    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        m_data->summaryTo(debug);
+    #endif
 }
 
 /*! @brief Returns a pointer to the NUActionatorsData object used to store actions for the hardware */
@@ -70,15 +74,8 @@ NUActionatorsData* NUActionators::getNUActionatorsData()
  */
 void NUActionators::copyToSound()
 {
-    /*bool l_isvalid;
-    double l_time;
-    vector<string> l_strings;
-    if (m_data->getNextSounds(l_isvalid, l_time, l_strings))
-    {
-        if (l_time < m_current_time)
-        {
-            for (unsigned int i=0; i<l_strings.size(); i++)
-                m_sound_thread->pushBack(l_strings[i]);
-        }
-    }*/
+    vector<string> sounds;
+    m_data->getNextSounds(sounds);
+    for (unsigned int i=0; i<sounds.size(); i++)
+        m_sound_thread->pushBack(sounds[i]);
 }
