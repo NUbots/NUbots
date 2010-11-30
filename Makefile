@@ -79,7 +79,7 @@ ifeq ($(SYSTEM), Linux)
 	NPROCS := $(shell grep -c ^processor /proc/cpuinfo)
 endif
 ifeq ($(SYSTEM), Darwin)
-	NPROCS := $(shell system_profiler | awk '/Number Of CPUs/{print $4}{next;}')
+	NPROCS := $(shell system_profiler SPHardwareDataType | awk '/Total Number Of Cores:/{print $$5}')
 endif
 MAKE_OPTIONS = --no-print-directory -j $(NPROCS)
 
