@@ -59,7 +59,7 @@ public:
     
     void preProcess(double currenttime);
     void getNextServos(vector<float>& positions, vector<float>& gains);
-    void getNextLeds(vector<vector<float> >& leds);
+    void getNextLeds(vector<vector<vector<float> > >& leds);
     void getNextSounds(vector<string>& sounds);
     void postProcess();
     

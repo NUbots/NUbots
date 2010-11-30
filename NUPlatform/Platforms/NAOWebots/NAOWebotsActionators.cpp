@@ -136,7 +136,7 @@ void NAOWebotsActionators::copyToServos()
  */
 void NAOWebotsActionators::copyToLeds()
 {
-    static vector<vector<float> > ledvalues;
+    static vector<vector<vector<float> > > ledvalues;
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "NAOWebotsActionators::copyToLeds()" << endl;
@@ -146,9 +146,9 @@ void NAOWebotsActionators::copyToLeds()
     for (size_t i=0; i<m_leds.size(); i++)
     {
         unsigned char bgr[3];
-        bgr[2] = static_cast<unsigned char> (255*ledvalues[i][0]);
-        bgr[1] = static_cast<unsigned char> (255*ledvalues[i][1]);
-        bgr[0] = static_cast<unsigned char> (255*ledvalues[i][2]);
+        bgr[2] = static_cast<unsigned char> (255*ledvalues[i][0][0]);
+        bgr[1] = static_cast<unsigned char> (255*ledvalues[i][0][1]);
+        bgr[0] = static_cast<unsigned char> (255*ledvalues[i][0][2]);
         int ledvalue = *reinterpret_cast<int*> (&bgr);
         m_leds[i]->set(ledvalue);
     }

@@ -92,10 +92,32 @@ NAOActionators::NAOActionators()
     names.insert(names.end(), m_other_names.begin(), m_other_names.end());
     m_data->addActionators(names);
     
-#if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
-    m_data->summaryTo(debug);
-#endif
+    // Ears
+    vector<float> lear(10, 0);
+    vector<float> rear(10, 0);
+    m_data->add(NUActionatorsData::LEarLed, 5000, lear);
+    m_data->add(NUActionatorsData::REarLed, 5000, rear);
+    
+    for (size_t i=0; i<lear.size(); i++)
+    {
+        lear[i] = 1;
+        m_data->add(NUActionatorsData::LEarLed, 5000 + i*200, lear);
+        rear[i] = 1;
+        m_data->add(NUActionatorsData::REarLed, 5000 + i*200, rear);
+    }
+    
+    vector<float> blue(3,0);
+    blue[2] = 1;
+    m_data->add(NUActionatorsData::LEyeLed, 5000, blue);
+    m_data->add(NUActionatorsData::REyeLed, 5000, blue);
+    m_data->add(NUActionatorsData::ChestLed, 5000, blue);
+    m_data->add(NUActionatorsData::LFootLed, 5000, blue);
+    m_data->add(NUActionatorsData::RFootLed, 5000, blue);
+    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
+        m_data->summaryTo(debug);
+    #endif
 }
 
 NAOActionators::~NAOActionators()
@@ -180,7 +202,7 @@ void NAOActionators::startUltrasonics()
     params.arraySetSize(1);
     param.arraySetSize(2);
     param[0] = 68.0;                    // left/right periodic mode = 64.0 + 4.0
-    param[1] = m_al_dcm->getTime(0);
+    param[1] = m_al_dcm->getTime(5000);
     params[0] = param;
     command[2] = params;
     
@@ -256,77 +278,93 @@ void NAOActionators::copyToHardwareCommunications()
     m_al_dcm->setAlias(m_position_command);
     m_al_dcm->setAlias(m_stiffness_command);
     
-    static vector<vector<float> > ledvalues;
+    static vector<vector<vector<float> > > ledvalues;
+    m_data->getNextLeds(ledvalues);
+    
+    m_led_command[4][0] = time;
+    
+    // On the NAO the ears have an array of 10 blue leds
+    size_t num_lear = ledvalues[0].size();
+    size_t num_rear = ledvalues[1].size();
+    size_t num_nao_ear = m_num_earleds/2;
+    if (num_lear >= num_nao_ear and num_rear >= num_nao_ear)
+    {
+        for (size_t i=0; i<num_nao_ear; i++)
+            m_led_command[5][i][0] = ledvalues[0][i][2];
+        for (size_t i=0; i<num_nao_ear; i++)
+            m_led_command[5][i+num_nao_ear][0] = ledvalues[1][i][2];
+    }
+    else
+    {
+        for (size_t i=0; i<m_num_earleds/2; i++)
+            m_led_command[5][i][0] = ledvalues[0][0][2];
+        for (size_t i=m_num_earleds/2; i<m_num_earleds; i++)
+            m_led_command[5][i][0] = ledvalues[1][0][2];
+    }
+    
+    size_t com_offset = m_num_earleds;
+    // On the NAO the eyes have an array of 8 multi-colour leds
+    size_t num_leye = ledvalues[2].size();
+    size_t num_reye = ledvalues[3].size();
+    size_t num_nao_eye = m_num_eyeleds/6;
+    if (num_leye >= num_nao_eye and num_reye >= num_nao_eye)
+    {
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[2][i][0];
+            m_led_command[5][j+1][0] = ledvalues[2][i][1];
+            m_led_command[5][j+2][0] = ledvalues[2][i][2];
+        }
+        com_offset += num_nao_eye*3;
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[3][i][0];
+            m_led_command[5][j+1][0] = ledvalues[3][i][1];
+            m_led_command[5][j+2][0] = ledvalues[3][i][2];
+        }
+    }
+    else
+    {
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[2][0][0];
+            m_led_command[5][j+1][0] = ledvalues[2][0][1];
+            m_led_command[5][j+2][0] = ledvalues[2][0][2];
+        }
+        com_offset += num_nao_eye*3;
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[3][0][0];
+            m_led_command[5][j+1][0] = ledvalues[3][0][1];
+            m_led_command[5][j+2][0] = ledvalues[3][0][2];
+        }
+        com_offset += num_nao_eye*3;
+    }
+    
+    // On the NAO the chest led is a single multicolour led
+    m_led_command[5][com_offset][0] = ledvalues[4][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[4][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[4][0][2];
+    
+    com_offset += 3;
+    // On the NAO the feet leds are single multicolour leds
+    m_led_command[5][com_offset][0] = ledvalues[5][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[5][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[5][0][2];
+    
+    com_offset += 3;
+    m_led_command[5][com_offset][0] = ledvalues[6][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[6][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[6][0][2];
+
+    // To save a bit of CPU we only set the leds every 5th dcm cycle (you still need to call getNextLeds every frame or you will lose data)
     static unsigned int count = 0;
     if (count%5 == 0)
-    {
-        m_data->getNextLeds(ledvalues);
-     	
-        m_led_command[4][0] = time;
-        
-        /*for (size_t i=0; i<ledvalues.size(); i++)
-        {
-            unsigned int dcmoffset = 0;
-            unsigned int actoffset = 0;
-            unsigned int ledoffset = 2*m_num_servo_positions;
-            
-            // On the NAO the ears only have blue leds
-            for (unsigned int i=0; i<m_num_earleds; i++)
-            {
-                int j = i + ledoffset;
-                m_actionator_command[3][j][0][0] = ledvalues[i][2];
-                m_actionator_command[3][j][0][1] = time;
-            }
-            dcmoffset = actoffset = m_num_earleds;
-            
-            // On the NAO the eyes are red, green and blue leds 
-            unsigned int num = m_num_eyeleds/3;
-            for (unsigned int i=0; i<num; i++)
-            {
-                int j = 3*i + dcmoffset + ledoffset;
-                int k = i + actoffset;
-                m_actionator_command[3][j][0][0] = ledvalues[k][0];
-                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
-                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
-                m_actionator_command[3][j][0][1] = time;
-                m_actionator_command[3][j+1][0][1] = time;
-                m_actionator_command[3][j+2][0][1] = time;
-            }
-            dcmoffset += m_num_eyeleds;
-            actoffset += m_num_eyeleds/3;
-            
-            // On the NAO the chest has a red, green and blue led
-            num = m_num_chestleds/3;
-            for (unsigned int i=0; i<num; i++)
-            {
-                int j = 3*i + dcmoffset + ledoffset;
-                int k = i + actoffset;
-                m_actionator_command[3][j][0][0] = ledvalues[k][0];
-                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
-                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
-                m_actionator_command[3][j][0][1] = time;
-                m_actionator_command[3][j+1][0][1] = time;
-                m_actionator_command[3][j+2][0][1] = time;
-            }
-            dcmoffset += m_num_chestleds;
-            actoffset += m_num_chestleds/3;
-            
-            // On the NAO the feet each have red, green and blue leds
-            num = m_num_footleds/3;
-            for (unsigned int i=0; i<num; i++)
-            {
-                int j = 3*i + dcmoffset + ledoffset;
-                int k = i + actoffset;
-                m_actionator_command[3][j][0][0] = ledvalues[k][0];
-                m_actionator_command[3][j+1][0][0] = ledvalues[k][1];
-                m_actionator_command[3][j+2][0][0] = ledvalues[k][2];
-                m_actionator_command[3][j][0][1] = time;
-                m_actionator_command[3][j+1][0][1] = time;
-                m_actionator_command[3][j+2][0][1] = time;
-            }
-        }*/
         m_al_dcm->setAlias(m_led_command);
-    }
     count++;
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4

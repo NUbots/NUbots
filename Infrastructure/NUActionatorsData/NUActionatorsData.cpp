@@ -207,7 +207,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
 
     // now do the interpolation for each joint that has new data
     vector<int>& ids = mapIdToIndices(All); 
-    for (int i=0; i<ids.size(); i++)
+    for (size_t i=0; i<ids.size(); i++)
     {
         Actionator& a = m_actionators[ids[i]];
         double time;
@@ -233,10 +233,19 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
     }
 }
 
-/*! @brief Gets the target [rgb] values for each led
+/*! @brief Gets the target values for each led
+ 
+ 	The led values will be formatted as follows;
+ 		[[LEarLed], [REarLed], [LEyeLed], [REyeLed], [ChestLed], [LFootLed], [RFootLed]]
+ 	where each led is given a list
+ 		[[r,g,b],[r,g,b],[r,g,b]....]
+ 
+ 	The platform decides on whether some of the led groups are missing, and what to do when the size of
+ 	the list for a particular group does not match the actual size.
+ 
  	@param leds will be updated with the [rgb] values for the next cycle
  */
-void NUActionatorsData::getNextLeds(vector<vector<float> >& leds)
+void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "NUActionatorsData::getNextLeds" << endl;
@@ -246,30 +255,70 @@ void NUActionatorsData::getNextLeds(vector<vector<float> >& leds)
     // check that leds is the right size; if not 'resize' them
     vector<int>& ids = mapIdToIndices(AllLeds);
 	if (leds.size() != ids.size())
-        leds = vector<vector<float> >(ids.size(), vector<float>(3,0));
+        leds = vector<vector<vector<float> > >(ids.size(), vector<vector<float> >(1, vector<float>(3,0)));
     
-    for (int i=0; i<ids.size(); i++)
+    for (size_t i=0; i<ids.size(); i++)
     {
         Actionator& a = m_actionators[ids[i]];
         if (not a.empty())
         {
             double time;
+            vector<vector<float> >& target_led = leds[i];
             float luminance;
             if (a.get(time, luminance))
-            {
-                float l = interpolate(time, leds[i][0], luminance);
-                leds[i][0] = l;			// if the actionator stores a float; assume we want each colour to be set to that value
-                leds[i][1] = l;
-                leds[i][2] = l;
+            {	// if the led actionator stores a single value, assume it is a brightness
+                float current = (target_led[0][0] + target_led[0][1] + target_led[0][2])/3;				// calculate the current brightness as the average
+                vector<float> interpolated_led(3, interpolate(time, current, luminance));				// interpolate the brightness as usual
+                target_led.resize(1);																	// resize the leds to have only a single rgb value
+                target_led[0] = interpolated_led;
             }
             else
-            {
-                vector<float> rgb;
-                if (a.get(time, rgb))
+            {	// if the led actionator stores a vector<float> it could be 
+                //		a single multi-colour led or,
+                //		a list of single coloured leds (if the array has exactly three leds then LOL)
+                vector<float> value;
+                if (a.get(time, value))
                 {
-                    leds[i][0] = interpolate(time, leds[i][0], rgb[0]);
-                    leds[i][1] = interpolate(time, leds[i][1], rgb[1]);
-                    leds[i][2] = interpolate(time, leds[i][2], rgb[2]);
+                    if (value.size() == 3)
+                    {	// Assume value specifies the colour of a single multi-colour led
+                        vector<float> interpolated_led(3,0);
+                        interpolated_led[0] = interpolate(time, target_led[0][0], value[0]);
+                        interpolated_led[1] = interpolate(time, target_led[0][1], value[1]);
+                        interpolated_led[2] = interpolate(time, target_led[0][2], value[2]);
+                        target_led.resize(1);
+                        target_led[0] = interpolated_led;
+                    }
+                    else
+                    {	// Assume value specifies the brightness for an array of single colour leds
+                        if (target_led.size() != value.size())
+                            target_led.resize(value.size(), vector<float>(3,0));
+                        
+                        for (size_t i=0; i<value.size(); i++)
+                        {
+                            float current = (target_led[i][0] + target_led[i][1] + target_led[i][2])/3;
+                            vector<float> interpolated_led(3, interpolate(time, current, value[i]));
+                            target_led[i] = interpolated_led;
+                        }
+                    }
+                }
+                else
+                {
+                    // if the led actionator stores a vector<vector<float> > it can only be an array of multi-colour leds
+                    vector<vector<float> > matrix;
+                    if (a.get(time, matrix))
+                    {	
+                        if (target_led.size() != matrix.size())
+                            target_led.resize(matrix.size(), vector<float>(3,0));
+                        
+                        for (size_t i=0; i<matrix.size(); i++)
+                        {
+                            vector<float> interpolated_led(3,0);
+                            interpolated_led[0] = interpolate(time, target_led[i][0], matrix[i][0]);
+                            interpolated_led[1] = interpolate(time, target_led[i][1], matrix[i][1]);
+                            interpolated_led[2] = interpolate(time, target_led[i][2], matrix[i][2]);
+                            target_led[i] = interpolated_led;
+                        }
+                    }
                 }
             }
         }
@@ -309,10 +358,16 @@ void NUActionatorsData::getNextSounds(vector<string>& sounds)
  */
 float NUActionatorsData::interpolate(const double& time, const float& current, const float& target)
 {
-    if (time - CurrentTime > CurrentTime - PreviousTime and CurrentTime - PreviousTime != 0)
-        return current + ((target - current)/(time - CurrentTime))*(CurrentTime - PreviousTime);
+    float dT = CurrentTime - PreviousTime;
+    if (dT > 0 and dT < 500)
+    {
+        if (time - CurrentTime > dT)
+            return current + ((target - current)/(time - CurrentTime))*dT;
+        else
+            return target;
+    }
     else
-        return target;
+        return current;
 }
 
 /*! @brief Returns true if a member named name belongs to the group

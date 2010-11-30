@@ -43,7 +43,7 @@ Behaviour::Behaviour()
         m_behaviour = new SoccerProvider(this);
     #else
         // For Webots, create the behaviour you want to run here 
-        m_behaviour = new WalkOptimisationProvider(this);
+        m_behaviour = new SoccerProvider(this);
     #endif
     m_next_behaviour = NULL;
 }
