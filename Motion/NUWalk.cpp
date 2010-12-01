@@ -221,9 +221,9 @@ bool NUWalk::isUsingLegs()
 */
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-#if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << endl;
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << endl;
+    #endif
     if (actions == NULL || data == NULL)
         return;
     m_data = data;
@@ -401,6 +401,9 @@ void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
  */
 void NUWalk::setWalkParameters(const WalkParameters& walkparameters)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::setWalkParameters(" << walkparameters << ")" << endl;
+    #endif
     m_walk_parameters = walkparameters;
 }
 
