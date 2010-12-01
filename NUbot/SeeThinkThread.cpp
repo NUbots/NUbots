@@ -28,6 +28,8 @@
 #include "NUPlatform/NUIO.h"
 #include "NUbot.h"
 #include "SeeThinkThread.h"
+#include "Localisation/LocWmFrame.h"
+#include "nubotdataconfig.h"
 
 
 #ifdef USE_VISION
@@ -73,7 +75,14 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     #if DEBUG_VERBOSITY > 0
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
-    m_nubot = nubot; 
+    m_nubot = nubot;
+
+
+    m_locwmfile.open((string(DATA_DIR) + string("locfrm.strm")).c_str());
+    debug << "Opening file: " << (string(DATA_DIR) + string("locfrm.strm")).c_str() << " ... ";
+    if(m_locwmfile.is_open()) debug << "Success.";
+    else debug << "Failed.";
+    debug << std::endl;
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -82,6 +91,7 @@ SeeThinkThread::~SeeThinkThread()
         debug << "SeeThinkThread::~SeeThinkThread()" << endl;
     #endif
     stop();
+    m_locwmfile.close();
 }
 
 /*! @brief The sense->move main loop
@@ -128,6 +138,8 @@ void SeeThinkThread::run()
             #endif
 
             #ifdef USE_LOCALISATION
+                LocWmFrame locframe(m_nubot->m_localisation,m_nubot->SensorData, m_nubot->Objects);
+                m_locwmfile << locframe;
                 m_nubot->m_localisation->process(m_nubot->SensorData, m_nubot->Objects, m_nubot->GameInfo, m_nubot->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("localisation");
