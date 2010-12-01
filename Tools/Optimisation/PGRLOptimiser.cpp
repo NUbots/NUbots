@@ -22,7 +22,7 @@
 #include "PGRLOptimiser.h"
 #include "Parameter.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include <cstdlib>
 #include <boost/accumulators/accumulators.hpp>
@@ -44,7 +44,7 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
     m_epsilon = 0.03;              // Tune this
     m_num_per_iteration = 10;      // Tune this
     
-    srand(static_cast<unsigned int> (1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime()));
+    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
 
     load();
     if (m_current_parameters.empty())

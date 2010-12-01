@@ -31,8 +31,8 @@ class NUActionatorsData;
 
 class HeadJob;
 class HeadTrackJob;
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
 
 #include <vector>
 

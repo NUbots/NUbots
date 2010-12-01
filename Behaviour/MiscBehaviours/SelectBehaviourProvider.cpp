@@ -22,8 +22,8 @@
 #include "SelectBehaviourProvider.h"
 #include "../Behaviour.h"
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -70,13 +70,13 @@ void SelectBehaviourProvider::doBehaviour()
 
 void SelectBehaviourProvider::doIntroduction()
 {
-    m_actions->addSound(m_current_time, "select_behaviour.wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, "select_behaviour.wav");
     m_introduction_done = true;
 }
 
 void SelectBehaviourProvider::voiceCurrentSelection()
 {
-    m_actions->addSound(m_current_time, m_available_behaviours[m_selection_index] + ".wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, m_available_behaviours[m_selection_index] + ".wav");
 }
     
 

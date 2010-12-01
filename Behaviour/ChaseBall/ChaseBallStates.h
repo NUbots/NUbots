@@ -25,19 +25,19 @@
 #include "Behaviour/BehaviourState.h"
 #include "ChaseBallProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/KickJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/Jobs/MotionJobs/KickJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
 
 #include "debug.h"
 
@@ -88,8 +88,8 @@ public:
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            m_provider->m_data->getPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getPosition(NUSensorsData::HeadYaw, headyaw);
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
             float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
@@ -103,9 +103,9 @@ public:
                 vector<float> temp;
                 float leftobstacle = 255;
                 float rightobstacle = 255;
-                if (m_data->getDistanceLeftValues(temp))
+                if (m_data->get(NUSensorsData::LDistance, temp))
                     leftobstacle = temp[0];
-                if (m_data->getDistanceRightValues(temp))
+                if (m_data->get(NUSensorsData::RDistance, temp))
                     rightobstacle = temp[0];
                 
                 if (leftobstacle < 50)
@@ -162,8 +162,8 @@ public:
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             float headyaw, headpitch;
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadPitch,headpitch);
-            m_provider->m_data->getJointPosition(NUSensorsData::HeadYaw, headyaw);
+            m_provider->m_data->getPosition(NUSensorsData::HeadPitch,headpitch);
+            m_provider->m_data->getPosition(NUSensorsData::HeadYaw, headyaw);
             
             float measureddistance = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance();
             float balldistance = measureddistance * cos(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation());
@@ -183,9 +183,9 @@ public:
             float leftobstacle = 255;
             float rightobstacle = 255;
             
-            if (m_data->getDistanceLeftValues(temp))
+            if (m_data->get(NUSensorsData::LDistance, temp))
                 leftobstacle = temp[0];
-            if (m_data->getDistanceRightValues(temp))
+            if (m_data->get(NUSensorsData::RDistance, temp))
                 rightobstacle = temp[0];
             
             if (leftobstacle < 50)

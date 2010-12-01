@@ -29,11 +29,17 @@
 #include "Tools/Optimisation/PSOOptimiser.h"
 #include "Motion/Tools/MotionFileTools.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/MotionJobs/WalkParametersJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "NUPlatform/NUPlatform.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkParametersJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -118,15 +124,15 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
         m_game_info->doManualStateChange();
     
     #ifndef TARGET_IS_NAOWEBOTS    
-        if (m_state == m_paused and nusystem->getTime() > 5000)
+        if (m_state == m_paused and Platform->getTime() > 5000)
             return m_generate;
         else
             return m_state;
     #else
-        if (nusystem->getTime() > 20*60*60*1e3)
+        if (Platform->getTime() > 20*60*60*1e3)
             exit(1);
         
-        if (m_state == m_paused and nusystem->getTime() > 1000)
+        if (m_state == m_paused and Platform->getTime() > 1000)
             return m_generate;
         else
             return m_state;

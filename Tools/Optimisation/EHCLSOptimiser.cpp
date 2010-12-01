@@ -22,7 +22,7 @@
 #include "EHCLSOptimiser.h"
 #include "Parameter.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include <boost/random.hpp>
 
@@ -145,7 +145,7 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
  */
 float EHCLSOptimiser::normalDistribution(float mean, float sigma)
 {
-    static unsigned int seed = 1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime();          // I am hoping that at least one of the three calls is different for each process
+    static unsigned int seed = 1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime();          // I am hoping that at least one of the three calls is different for each process
     static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
     static boost::normal_distribution<float> distribution(0,1);
     static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);

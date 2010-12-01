@@ -23,14 +23,14 @@
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
 PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -49,11 +49,13 @@ void PenalisedState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::PENALISED);
-        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 300, vector<float>(2,0)));
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
+        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 1000, vector<float>(2,0)));
     }
     // In penalty the chest led should be red
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 1, 0, 0);
+    vector<float> red(3,0);
+    red[0] = 1;
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, red);
     
     // In penalty we should not walk
     m_jobs->addMotionJob(new WalkJob(0,0,0));

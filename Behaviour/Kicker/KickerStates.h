@@ -25,19 +25,19 @@
 #include "Behaviour/BehaviourState.h"
 #include "KickerProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/KickJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/Jobs/MotionJobs/KickJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "debug.h"
@@ -106,7 +106,7 @@ public:
     BehaviourState* nextState()
     {
         bool kickActive = false;
-        m_provider->m_data->getMotionKickActive(kickActive);
+        m_provider->m_data->get(NUSensorsData::MotionKickActive, kickActive);
         bool kickFinished = m_kickActivePrev && !kickActive;
         m_kickActivePrev = kickActive;
         bool ballvisible = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 500.0f;
@@ -154,7 +154,7 @@ public:
             kickPos[1] = 1.0;
             targetPos[0] = 1.0;
             targetPos[1] = 1.0;
-            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
         }
         else if(m_provider->singleRightBumperClick())
         {
@@ -162,7 +162,7 @@ public:
             kickPos[1] = -1.0;
             targetPos[0] = -1.0;
             targetPos[1] = -1.0;
-            m_actions->addSound(m_actions->CurrentTime, NUSounds::SET);
+            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
         }
 
         KickJob* kick = new KickJob(0,kickPos,targetPos);

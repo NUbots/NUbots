@@ -23,14 +23,14 @@
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 InitialState::InitialState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -49,17 +49,21 @@ void InitialState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_data->CurrentTime, NUSounds::INITIAL);
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::INITIAL);
         m_jobs->addMotionJob(new MotionKillJob());
     }
     // In inital the chest led should be off
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_data->CurrentTime, 0, 0, 0);
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In initial if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 1, 1, 0);
+    {
+        vector<float> yellow(3,1);
+        yellow[2] = 0;
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, yellow);
+    }
     else
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_data->CurrentTime, 0, 0, 0);
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In initial if the left foot is pressed then we should swap teams
     if (m_provider->singleLeftBumperClick() or m_provider->longLeftBumperClick())

@@ -29,14 +29,14 @@
 
 #include "NUPlatform/NUCamera.h"
 #include "NUPlatform/NUCamera/CameraSettings.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 class NAOCamera : public NUCamera
 {
 public:
     NAOCamera();
     ~NAOCamera();
-    NUimage* grabNewImage();
+    NUImage* grabNewImage();
     void setSettings(const CameraSettings& newset);
 
 private:
@@ -63,7 +63,7 @@ private:
     bool capturedNew();
     const unsigned char* getImage() const;
     double getTimeStamp() const;
-    NUimage currentBufferedImage;
+    NUImage currentBufferedImage;
 
 };
 

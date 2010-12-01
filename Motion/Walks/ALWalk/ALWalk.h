@@ -26,8 +26,8 @@
 #define ALWALK_H
 
 #include "Motion/NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class NUSensorsData;
+class NUActionatorsData;
 
 #include <almotionproxy.h>
 #include <string>

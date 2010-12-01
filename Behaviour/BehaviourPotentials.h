@@ -24,9 +24,9 @@
 #ifndef BEHAVIOUR_POTENTIALS_H
 #define BEHAVIOUR_POTENTIALS_H
 
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"
@@ -274,9 +274,9 @@ public:
         vector<float> temp;
         float leftobstacle = 255;
         float rightobstacle = 255;
-        if (sensors->getDistanceLeftValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
             leftobstacle = temp[0];
-        if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
             rightobstacle = temp[0];
         
         if (fabs(speed[1]) > mathGeneral::PI/2)

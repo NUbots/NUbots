@@ -5,7 +5,7 @@
 #include "CornerPoint.h"
 #include "ClassifiedSection.h"
 #include "TransitionSegment.h"
-#include "FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include <iostream>
 
 class Vision;

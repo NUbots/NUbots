@@ -5,7 +5,7 @@
 */
 #ifndef LUTTOOLS_H_DEFINED
 #define LUTTOOLS_H_DEFINED
-#include "Tools/Image/Pixel.h"
+#include "Infrastructure/NUImage/Pixel.h"
 /*!
   @brief Class contains functions used to load a colour lookup table from a file and also save a colour
          lookup table to a file.

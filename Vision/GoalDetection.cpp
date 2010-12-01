@@ -5,7 +5,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "Tools/Math/General.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Kinematics.h"
 //#include <QDebug>
 using namespace mathGeneral;
@@ -958,10 +958,14 @@ float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision
     float bearing = vision->CalculateBearing(MiddleX);
     float elevation = vision->CalculateElevation(BottomY);
 
-    Matrix camera2groundTransform;
-    bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
+    //! @todo TODO: the camera to ground transform is going to be made private in a future release.
+    // I think Kinematics::DistanceToPoint should be a friend with the sensor data, and get the transform itself
+    // Also will need to be updated when the sensor data can properly store kinematic data
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
     if(isOK == true)
     {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
         Vector3<float> result;
         result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
         D2Pdistance = result[0];
@@ -1016,10 +1020,15 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     viewPosition.y = GoalPost->getCentreY();
     Vector3 <float> transformedSphericalPosition;
     Vector2<float> screenPositionAngle(sphericalPosition[1], sphericalPosition[2]);
-    Matrix cameraTransform;
-    bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
+    
+    //! @todo TODO: the camera to ground transform is going to be made private in a future release.
+    // I think Kinematics::DistanceToPoint should be a friend with the sensor data, and get the transform itself
+    // Also will need to be updated when the sensor data can properly store kinematic data
+    vector<float> ctvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
     if(isOK == true)
     {
+        Matrix cameraTransform = Matrix4x4fromVector(ctvector);
         transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
     }
 
@@ -1200,10 +1209,12 @@ void GoalDetection::AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects
     viewPosition.y = GoalPost->getCentreY();
     Vector3 <float> transformedSphericalPosition;
     Vector2<float> screenPositionAngle(sphericalPosition[1], sphericalPosition[2]);
-    Matrix cameraTransform;
-    bool isOK = vision->getSensorsData()->getCameraTransform(cameraTransform);
+    
+    vector<float> ctvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
     if(isOK == true)
     {
+        Matrix cameraTransform = Matrix4x4fromVector(ctvector);
         transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
     }
 

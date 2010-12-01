@@ -21,7 +21,7 @@
 
 #include "GameControllerPort.h"
 #include "RoboCupGameControlData.h"
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
 #include "debug.h"
 #include "debugverbositynetwork.h"

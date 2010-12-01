@@ -22,8 +22,8 @@
 #include "ChaseState.h"
 #include "ChaseStates.h"
 
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 #include "debug.h"

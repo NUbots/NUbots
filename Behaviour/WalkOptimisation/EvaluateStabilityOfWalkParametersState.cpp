@@ -23,13 +23,14 @@
 #include "WalkOptimisationProvider.h"
 #include "EvaluateWalkParametersState.h"
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkPerturbationJob.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkPerturbationJob.h"
+#include "Behaviour/BehaviourPotentials.h"
 
 #include "Behaviour/BehaviourPotentials.h"
 #include "Motion/Tools/MotionFileTools.h"
@@ -203,7 +204,7 @@ void EvaluateStabilityOfWalkParametersRunState::doState()
     #endif
     if (m_parent->stateChanged())
         reset();
-    float previousleft = m_left_impact_time;
+    /*float previousleft = m_left_impact_time;
     float previousright = m_right_impact_time;
     m_data->footImpact(NUSensorsData::LeftFoot, m_left_impact_time);
     m_data->footImpact(NUSensorsData::RightFoot, m_right_impact_time);
@@ -214,7 +215,7 @@ void EvaluateStabilityOfWalkParametersRunState::doState()
     if (m_step_count%m_PERTURBATION_INTERVAL == 0 and m_step_count > 3)
         doPerturbation();
     
-    m_jobs->addMotionJob(new WalkJob(1, -0.785, 0));
+    m_jobs->addMotionJob(new WalkJob(1, -0.785, 0));*/
 }
 
 /*! @brief Resets all of the trial variables */

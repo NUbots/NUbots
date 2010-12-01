@@ -28,6 +28,7 @@
 #define NAOWEBOTSSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "Infrastructure/NUData.h"
 #include "NAOWebotsPlatform.h"
 
 #include <vector>
@@ -36,8 +37,7 @@
 using namespace std;
 
 #include "webots/Robot.hpp"
-#include "JWebots/JRobot.h"
-using namespace webots;
+#include "NUPlatform/Platforms/Webots/JRobot.h"
 
 
 class NAOWebotsSensors : public NUSensors
@@ -60,22 +60,26 @@ private:
     void copyFromCompass();
     
 private:
-    const int m_simulation_step;                        //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
+    const int m_simulation_step;                                //!< the refresh period of the sensor data in milliseconds. Robotstadium's timestep is fixed at 40ms
     
-    NAOWebotsPlatform* m_platform;                      //!< a pointer to the platform, in particular in webots this inherits from webots::Robot so use it to access devices
+    NAOWebotsPlatform* m_platform;                              //!< a pointer to the platform, in particular in webots this inherits from webots::Robot so use it to access devices
     // Sensors
-    static vector<string> m_servo_names;                //!< a vector of the names of each servo in the Webot NAO
-    vector<Servo*> m_servos;                            //!< a vector containing pointers to each of the servos in the Webot NAO.
-    Accelerometer* m_accelerometer;                     //!< a pointer to the robot's accelerometer
-    Gyro* m_gyro;                                       //!< a pointer to the robot's gyrometer
-    static vector<string> m_distance_names;             //!< a vector of the names of each of the distance sensors in Webot NAO
-    vector<DistanceSensor*> m_distance_sensors;         //!< a vector containing pointers to each of the distance sensors in the Webot NAO
-    static vector<string> m_foot_sole_names;            //!< a vector of the names of each of the foot touch sensors in Webot NAO
-    vector<TouchSensor*> m_foot_sole_sensors;           //!< a vector of pointers to each of the foot force sensors in the Webot NAO
-    static vector<string> m_foot_bumper_names;          //!< a vector of the foot bumper names
-    vector<TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
-    GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
-    Compass* m_compass;                                 //!< a pointer to the compass module of the robot available for testing (only in PRO)
+    static vector<string> m_servo_names;                        //!< a vector of the names of each servo in the Webot NAO
+    vector<webots::Servo*> m_servos;                           //!< a vector containing pointers to each of the servos in the Webot NAO.
+    webots::Accelerometer* m_accelerometer;                     //!< a pointer to the robot's accelerometer
+    webots::Gyro* m_gyro;                                       //!< a pointer to the robot's gyrometer
+    static vector<string> m_distance_names;                     //!< a vector of the names of each of the distance sensors in Webot NAO
+    vector<webots::DistanceSensor*> m_distance_sensors;         //!< a vector containing pointers to each of the distance sensors in the Webot NAO
+    static vector<string> m_foot_sole_names;                    //!< a vector of the names of each of the foot touch sensors in Webot NAO
+    vector<webots::TouchSensor*> m_foot_sole_sensors;           //!< a vector of pointers to each of the foot force sensors in the Webot NAO
+    static vector<string> m_foot_bumper_names;                  //!< a vector of the foot bumper names
+    vector<webots::TouchSensor*> m_foot_bumper_sensors;         //!< a vector of pointers to buttons
+    webots::GPS* m_gps;                                         //!< a pointer to the gps module of the robot available for testing!
+    webots::Compass* m_compass;                                 //!< a pointer to the compass module of the robot available for testing (only in PRO)
+    
+    vector<NUData::id_t*> m_joint_ids;
+    vector<float> m_previous_positions;
+    vector<float> m_previous_velocities;
 };
 
 #endif

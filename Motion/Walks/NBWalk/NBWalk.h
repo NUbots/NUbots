@@ -36,10 +36,9 @@
 #define NBWALK_H
 
 #include "Motion/NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-
 #include "WalkProvider.h"
+class NUSensorsData;
+class NUActionatorsData;
 
 #include <vector>
 #include <fstream>
