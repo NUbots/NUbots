@@ -1,7 +1,7 @@
 #include "Localisation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "Tools/Math/General.h"
 #include <string>
@@ -104,20 +104,20 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     if(doProcessing == false)
         return;
     
-    float odo_time;
     vector<float> odo;
-    if (m_sensor_data->getOdometry(odo_time, odo))
+    if (m_sensor_data->getOdometry(odo))
     {
         odomForward = odo[0];
         odomLeft = odo[1];
         odomTurn = odo[2];
     }
     
-    vector<float> gps, compass;
-    if (m_sensor_data->getGPSValues(gps) and m_sensor_data->getCompassValues(compass))
+    vector<float> gps;
+    float compass;
+    if (m_sensor_data->getGps(gps) and m_sensor_data->getCompass(compass))
     {   
         #ifndef USE_VISION
-            m_objects->self.updateLocationOfSelf(gps[0], gps[1], compass[0], 0.1, 0.1, 0.01, false);
+            m_objects->self.updateLocationOfSelf(gps[0], gps[1], compass, 0.1, 0.1, 0.01, false);
             return;
         #endif
     }

@@ -23,21 +23,22 @@
 
 // ---------------------------------------------------------------- Compulsory header files
 #include "NUPlatform/NUPlatform.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
-#include "Behaviour/Jobs.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/Jobs.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "debugverbositynubot.h"
 #include "debug.h"
 
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
+    #include "Infrastructure/NUImage/NUImage.h"
     #include "Vision/Vision.h"
 #endif
 
@@ -101,13 +102,70 @@ NUbot* NUbot::m_this = NULL;
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
-    NUbot::m_this = this;
-    connectErrorHandling();
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Constructing NUPlatform." << endl;
+        debug << "NUbot::NUbot()." << endl;
+    #endif
+    NUbot::m_this = this;
+    
+    createErrorHandling();
+    createPlatform(argc, argv);
+    createBlackboard();
+    createNetwork();
+    createModules();
+    createThreads();
+    
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::NUbot(). Finished." << endl;
+    #endif
+}
+
+/*! @brief Destructor for the nubot
+ */
+NUbot::~NUbot()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::~NUbot()." << endl;
     #endif
     
-    // --------------------------------- construct the platform
+    #ifdef USE_MOTION
+        m_motion->kill();
+        m_platform->kill();
+        m_platform->msleep(1500);
+    #endif
+    
+    destroyThreads();
+    destroyModules();
+    destroyNetwork();
+    destroyBlackboard();
+    destroyPlatform();
+    
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::~NUbot(). Finished!" << endl;
+    #endif
+}
+
+/*! @brief Connects error signals with the termination handler
+ */
+void NUbot::createErrorHandling()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::createErrorHandling()." << endl;
+    #endif
+    #ifndef TARGET_OS_IS_WINDOWS
+        signal(SIGILL, terminationHandler);
+        signal(SIGSEGV, terminationHandler);
+        signal(SIGBUS, terminationHandler); 
+        signal(SIGABRT, terminationHandler);
+    #endif
+}
+
+/*! @brief Creates the Platform (Robot hardware interface) */
+void NUbot::createPlatform(int argc, const char *argv[])
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::createPlatform()." << endl;
+    #endif
+    
     #if defined(TARGET_IS_NAOWEBOTS)
         m_platform = new NAOWebotsPlatform(argc, argv);
     #elif defined(TARGET_IS_NAO)
@@ -115,22 +173,56 @@ NUbot::NUbot(int argc, const char *argv[])
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
     #endif
-    
-    // --------------------------------- construct the public storage
-    Image = NULL;
-    SensorData = m_platform->sensors->getData();
-    Actions = m_platform->actionators->getActions();
-    Objects = new FieldObjects();
-    Jobs = new JobList();
-    GameInfo = new GameInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions);
-    TeamInfo = new TeamInformation(m_platform->getPlayerNumber(), m_platform->getTeamNumber(), SensorData, Actions, Objects);
-    
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Public storage pointers:" << endl;
-        debug << "SensorData: " << (void*)SensorData << " Actions: " << (void*)Actions << " Objects: " << (void*)Objects << " Jobs: " << (void*)Jobs << endl;
-    #endif
+}
 
-    // --------------------------------- construct the io
+/*! @brief Destroys the Platform, aka delete the m_platform */
+void NUbot::destroyPlatform()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::destroyPlatform()." << endl;
+    #endif
+    
+    delete m_platform;
+    m_platform = 0;
+}
+
+/*! @brief Creates the Blackboard (the public data storage class) 
+ 
+    This sets the m_blackboard and also set the global pointer Blackboard. Use the global, to access the blackboard
+ */
+void NUbot::createBlackboard()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::createBlackboard()." << endl;
+    #endif
+    
+    m_blackboard = new NUBlackboard();
+    m_blackboard->add(m_platform->getNUSensorsData());
+    m_blackboard->add(m_platform->getNUActionatorsData());
+    m_blackboard->add(new FieldObjects());
+    m_blackboard->add(new JobList());
+    m_blackboard->add(new GameInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
+    m_blackboard->add(new TeamInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
+}
+
+/*! @brief Destroys the Blackboard, aka delete the m_blackboard */
+void NUbot::destroyBlackboard()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::destroyBlackboard()." << endl;
+    #endif
+    
+    delete m_blackboard;
+    m_blackboard = 0;
+}
+
+/*! @brief Creates the Network */
+void NUbot::createNetwork()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::createNetwork()." << endl;
+    #endif
+    
     #if defined(TARGET_IS_NAOWEBOTS)
         m_io = new NAOWebotsIO(this, dynamic_cast<NAOWebotsPlatform*>(m_platform));
     #elif defined(TARGET_IS_NAO)
@@ -138,48 +230,72 @@ NUbot::NUbot(int argc, const char *argv[])
     #elif defined(TARGET_IS_CYCLOID)
         m_io = new CycloidIO(this);
     #endif
-    
+}
+
+/*! @brief Destroys the Network, aka delete the m_io */
+void NUbot::destroyNetwork()
+{
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Constructing modules." << endl;
+        debug << "NUbot::destroyNetwork()." << endl;
     #endif
     
-    // --------------------------------- construct each enabled module 
+    delete m_io;
+    m_io = 0;
+}
+
+/*! @brief Creates the Modules, this includes Vision, Localisation, Behaviour and Motion */
+void NUbot::createModules()
+{
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::createModules()." << endl;
+    #endif
+    
     #ifdef USE_VISION
         m_vision = new Vision();
     #endif
-    
+        
     #ifdef USE_LOCALISATION
         #if defined(TARGET_IS_NAOWEBOTS)
-            m_localisation = new Localisation(m_platform->getPlayerNumber());
+            m_localisation = new Localisation(Platform->getRobotNumber());
         #else
             m_localisation = new Localisation();
         #endif // defined(TARGET_IS_NAOWEBOTS)
     #endif
-    
+        
     #ifdef USE_BEHAVIOUR
         m_behaviour = new Behaviour();
     #endif
-    
+        
     #ifdef USE_MOTION
-        m_motion = new NUMotion(SensorData, Actions);
+        m_motion = new NUMotion(m_blackboard->Sensors, m_blackboard->Actions);
     #endif
-    
-    createThreads();
-    
-#if DEBUG_NUBOT_VERBOSITY > 0
-    debug << "NUbot::NUbot(). Finished." << endl;
-#endif
 }
 
-/*! @brief Connects error and signal handlers with the appropriate functions
- */
-void NUbot::connectErrorHandling()
+/*! @brief Destroys all of the modules, aka delete m_vision, m_localisation, m_behaviour, m_motion */
+void NUbot::destroyModules()
 {
-    #ifndef TARGET_OS_IS_WINDOWS
-        signal(SIGILL, terminationHandler);
-        signal(SIGSEGV, terminationHandler);
-        signal(SIGBUS, terminationHandler); 
-        signal(SIGABRT, terminationHandler);
+    #if DEBUG_NUBOT_VERBOSITY > 0
+        debug << "NUbot::destroyModules()." << endl;
+    #endif
+    
+    #ifdef USE_VISION
+        delete m_vision;
+        m_vision = 0;
+    #endif
+        
+    #ifdef USE_LOCALISATION
+        delete m_localisation;
+        m_localisation = 0;
+    #endif
+        
+    #ifdef USE_BEHAVIOUR
+        delete m_behaviour;
+        m_behaviour = 0;
+    #endif
+        
+    #ifdef USE_MOTION
+        delete m_motion;
+        m_motion = 0;
     #endif
 }
 
@@ -212,77 +328,32 @@ void NUbot::createThreads()
 #endif
 }
 
-/*! @brief Destructor for the nubot
- */
-NUbot::~NUbot()
+/*! @brief Destroys the nubot's threads */
+void NUbot::destroyThreads()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot()." << endl;
+        debug << "NUbot::destroyThreads()." << endl;
     #endif
     
-    #ifdef USE_MOTION
-        NUbot::m_this->m_motion->kill();
-        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-        NUSystem::msleep(1500);
-    #endif
-
-    // --------------------------------- delete threads
     #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
-        if (m_seethink_thread != NULL)
-            delete m_seethink_thread;
+        m_seethink_thread->stop();
     #endif
-    if (m_sensemove_thread != NULL)
-        delete m_sensemove_thread;
-    if (m_watchdog_thread != NULL)
+    #ifndef TARGET_IS_NAOWEBOTS
+        m_watchdog_thread->stop();
+    #endif
+    m_sensemove_thread->stop();
+    
+    #ifndef TARGET_IS_NAOWEBOTS
         delete m_watchdog_thread;
-    
-    
-    // --------------------------------- delete modules
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Deleting Modules" << endl;
+        m_watchdog_thread = 0;
     #endif
     
-    if (m_platform != NULL)
-        delete m_platform;
-    #ifdef USE_VISION
-        if (m_vision != NULL)
-            delete m_vision;
-    #endif
-    #ifdef USE_LOCALISATION
-        if (m_localisation != NULL)
-            delete m_localisation;
-    #endif
-    #ifdef USE_BEHAVIOUR
-        if (m_behaviour != NULL)
-            delete m_behaviour;
-    #endif
-    #ifdef USE_MOTION
-        if (m_motion != NULL)
-            delete m_motion;
-    #endif
-    if (m_io != NULL)
-        delete m_io;
+    delete m_sensemove_thread;
+    m_sensemove_thread = 0;
     
-    // --------------------------------- delete public storage variables
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Deleting Public Storage" << endl;
-    #endif
-    
-    if (Image != NULL)
-        delete Image;
-    if (SensorData != NULL)
-        delete SensorData;
-    if (Actions != NULL)
-        delete Actions;
-    if (Jobs != NULL)
-        delete Jobs;
-    if (GameInfo != NULL)
-        delete GameInfo;
-    if (TeamInfo != NULL)
-        delete TeamInfo;
-    
-    #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Finished!" << endl;
+    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+        delete m_seethink_thread;
+        m_seethink_thread = 0;
     #endif
 }
 
@@ -307,7 +378,7 @@ void NUbot::run()
     int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
-        previoussimtime = nusystem->getTime();
+        previoussimtime = Platform->getTime();
         webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
             m_sensemove_thread->startLoop();
@@ -340,12 +411,12 @@ void NUbot::run()
 
 void NUbot::periodicSleep(int period)
 {
-    static double starttime = nusystem->getTime();
-    double timenow = nusystem->getTime();
+    static double starttime = Platform->getTime();
+    double timenow = Platform->getTime();
     double requiredsleeptime = period - (timenow - starttime);
     if (requiredsleeptime > 0)
-        NUSystem::msleep(requiredsleeptime);
-    starttime = nusystem->getTime();
+        Platform->msleep(requiredsleeptime);
+    starttime = Platform->getTime();
 }
 
 /*! @brief Handles unexpected termination signals
@@ -402,24 +473,21 @@ void NUbot::terminationHandler(int signum)
         // safely kill motion
         #ifdef USE_MOTION
             NUbot::m_this->m_motion->kill();
-            NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
         #endif
         
         // play sound to indicate the error
         #ifndef TARGET_OS_IS_WINDOWS
             if (signum == SIGILL)
-                NUbot::m_this->Actions->addSound(0, NUSounds::ILLEGAL_INSTRUCTION);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::ILLEGAL_INSTRUCTION);
             else if (signum == SIGSEGV)
-                NUbot::m_this->Actions->addSound(0, NUSounds::SEG_FAULT);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::SEG_FAULT);
             else if (signum == SIGBUS)
-                NUbot::m_this->Actions->addSound(0, NUSounds::BUS_ERROR);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::BUS_ERROR);
             else if (signum == SIGABRT)
-                NUbot::m_this->Actions->addSound(0, NUSounds::ABORT);
+                Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::ABORT);
         #endif
-        NUbot::m_this->m_platform->actionators->process(NUbot::m_this->Actions);
-        
-        // sleep for a little bit so that the above things finish executing
-        NUSystem::msleep(1500);
+        NUbot::m_this->m_platform->kill();
+        NUbot::m_this->m_platform->msleep(1500);
     }
     #ifndef TARGET_OS_IS_WINDOWS
         signal(signum, SIG_DFL);
@@ -434,13 +502,13 @@ void NUbot::unhandledExceptionHandler(exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
-        NUbot::m_this->Actions->addSound(0, NUSounds::UNHANDLED_EXCEPTION);
         errorlog << "UNHANDLED EXCEPTION. " << endl;
         debug << "UNHANDLED EXCEPTION. " << endl; 
-        void *array[10];
+        Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::UNHANDLED_EXCEPTION);
+        void *array[20];
         size_t size;
         char **strings;
-        size = backtrace(array, 10);
+        size = backtrace(array, 20);
         strings = backtrace_symbols(array, size);
         for (size_t i=0; i<size; i++)
             errorlog << strings[i] << endl;

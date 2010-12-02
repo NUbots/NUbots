@@ -22,9 +22,6 @@
 #include "QueueThread.h"
 #include "debug.h"
 #include "debugverbositythreading.h"
-#if DEBUG_THREADING_VERBOSITY > 2
-    #include "NUPlatform/NUSystem.h"
-#endif
 
 using namespace std;
 
@@ -68,7 +65,7 @@ template <typename T>
 void QueueThread<T>::pushBack(T newdata)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "QueueThread::pushBack(" << newdata<< ") " << m_name << endl;
+        debug << "QueueThread::pushBack(" << newdata << ") " << m_name << endl;
     #endif
     m_queue.push_back(newdata);
     

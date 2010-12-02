@@ -20,8 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  sensor_t.h sensor_t.cpp
-                NUSensorsData.cpp NUSensorsData.h
+SET (YOUR_SRCS  
+)
+####################################################################################
+########## List your subdirectories here! ##########################################
+SET (YOUR_DIRS
 )
 ####################################################################################
 

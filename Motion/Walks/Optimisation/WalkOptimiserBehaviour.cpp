@@ -488,7 +488,7 @@ void WalkOptimiserBehaviour::pushBackward()
  @param id the id of the joint to attack
  @param offset the offset in radians applied to the joint (low stiffnesses will automatically be compensated for)
  */
-void WalkOptimiserBehaviour::pushJoint(NUSensorsData::joint_id_t id, float offset)
+void WalkOptimiserBehaviour::pushJoint(NUSensorsData::id_t id, float offset)
 {
     static double time = 0;
     static float target = 0;

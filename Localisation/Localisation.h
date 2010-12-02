@@ -2,10 +2,10 @@
 #define LOCWM_H_DEFINED
 #include "KF.h"
 
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 class NUSensorsData;
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include "debug.h"
 #include "debugverbositylocalisation.h"

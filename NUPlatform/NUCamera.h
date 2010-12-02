@@ -23,7 +23,7 @@
 #define NUCAMERA_H
 
 #include "NUPlatform/NUActionators.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "NUCamera/CameraSettings.h"
 
 class NUCamera
@@ -32,7 +32,7 @@ public:
     static float CameraOffset;
 public:
     virtual ~NUCamera();
-    virtual NUimage* grabNewImage() = 0;
+    virtual NUImage* grabNewImage() = 0;
     virtual void setSettings(const CameraSettings& newset) = 0;
     CameraSettings getSettings(){return settings;};
     

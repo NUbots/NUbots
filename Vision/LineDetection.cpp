@@ -17,7 +17,7 @@
 
 //For distance to Point:
 #include "../Kinematics/Kinematics.h"
-#include "../NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 //#include <QDebug>
 //#include "debug.h"
@@ -2003,10 +2003,11 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
     *bearing = vision->CalculateBearing(cx);
     *elevation = vision->CalculateElevation(cy);
 
-    Matrix camera2groundTransform;
-    bool isOK = sensorsData->getCameraToGroundTransform(camera2groundTransform);
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
     if(isOK == true)
     {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
         Vector3<float> result;
         result = Kinematics::DistanceToPoint(camera2groundTransform, *bearing, *elevation);
         *distance = result[0];

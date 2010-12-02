@@ -21,19 +21,18 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUPlatform.cpp NUPlatform.h
-                NUCamera.cpp NUCamera.h
-                NUActionators.cpp NUActionators.h
                 NUSensors.cpp NUSensors.h
-                NUSystem.cpp NUSystem.h
-		NUIO.cpp
+                NUActionators.cpp NUActionators.h
+                NUCamera.cpp NUCamera.h
+                NUIO.cpp NUIO.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  NUCamera
+SET (YOUR_DIRS  Platforms
                 NUSensors
                 NUActionators	
-                NUSystem	
-		NUIO
+                NUCamera
+                NUIO
 )
 ####################################################################################
 

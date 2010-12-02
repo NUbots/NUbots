@@ -23,7 +23,7 @@
 #include "debug.h"
 #include "debugverbositythreading.h"
 #if DEBUG_THREADING_VERBOSITY > 2
-    #include "NUPlatform/NUSystem.h"
+    #include "NUPlatform/NUPlatform.h"
 #endif
 
 using namespace std;
@@ -116,7 +116,7 @@ void ConditionalThread::waitForCondition()
 void ConditionalThread::onLoopCompleted()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::loopCompleted() " << m_name << " at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::loopCompleted() " << m_name << " at " << Platform->getTime() << endl;
     #endif
     pthread_mutex_unlock(&m_running_mutex);
 }
@@ -126,11 +126,11 @@ void ConditionalThread::onLoopCompleted()
 void ConditionalThread::waitForLoopCompletion()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << Platform->getTime() << endl;
     #endif
     pthread_mutex_lock(&m_running_mutex);            // block if thread is STILL running
     pthread_mutex_unlock(&m_running_mutex);
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << nusystem->getTime() << endl;
+        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << Platform->getTime() << endl;
     #endif
 }

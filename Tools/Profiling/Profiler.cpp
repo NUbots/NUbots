@@ -20,7 +20,8 @@
 */
 
 #include "Profiler.h"
-#include "NUPlatform/NUSystem.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 
@@ -40,12 +41,9 @@ Profiler::~Profiler()
  */
 void Profiler::start()
 {
-    if (nusystem)
-    {
-        m_start_thread_time = nusystem->getThreadTime();
-        m_start_process_time = nusystem->getProcessTime();
-        m_start_real_time = nusystem->getRealTime();
-    }
+    m_start_thread_time = Platform->getThreadTime();
+    m_start_process_time = Platform->getProcessTime();
+    m_start_real_time = Platform->getRealTime();
 }
 
 /*! @brief Stops the profiler
@@ -60,9 +58,9 @@ void Profiler::stop()
  */
 void Profiler::split(std::string name)
 {
-    double threadtime = nusystem->getThreadTime();
-    double processtime = nusystem->getProcessTime();
-    double realtime = nusystem->getRealTime();
+    double threadtime = Platform->getThreadTime();
+    double processtime = Platform->getProcessTime();
+    double realtime = Platform->getRealTime();
 
     if (m_split_names.empty())
     {   // if it is the first split, then we time is the difference from the start
@@ -105,7 +103,7 @@ ostream& operator<<(ostream& output, Profiler& profiler)
 {
     if (not profiler.m_split_names.empty())
     {
-        output << profiler.m_name << " Profiler: ";
+        output << profiler.m_name << " " << profiler.m_split_thread_times.back() - profiler.m_start_thread_time << ": ";
         for (size_t i=0; i<profiler.m_split_names.size(); i++)
         {
             output << profiler.m_split_names[i] << ": [t:" << profiler.m_diff_thread_times[i] << " p:" << profiler.m_diff_process_times[i] << "] ";

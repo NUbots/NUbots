@@ -22,7 +22,7 @@
 #include "PSOOptimiser.h"
 #include "Parameter.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 #include "nubotdataconfig.h"
@@ -40,7 +40,7 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
     m_seed_fraction = 0;    // tune this: having this set to anything but 0 puts too large a restriction on the particles
     m_num_dimensions = parameters.size();
     
-    srand(static_cast<unsigned int> (1e6*nusystem->getRealTime()*nusystem->getRealTime()*nusystem->getRealTime()));
+    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
 
     initSwarm();
 }
