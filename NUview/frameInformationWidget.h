@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class QLabel;
-class NUimage;
+class NUImage;
 class QGridLayout;
 
 class frameInformationWidget : public QWidget
@@ -17,7 +17,7 @@ signals:
 
 public slots:
     void setFrameSource(QString sourceName);
-    void setRawImage(const NUimage* image);
+    void setRawImage(const NUImage* image);
     void setImageResolution(int imageWidth, int imageHeight);
     void setTimestamp(double timestamp);
 private:

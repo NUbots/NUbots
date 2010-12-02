@@ -21,9 +21,10 @@
 
 
 #include "NUviewIO/NUviewIO.h"
-#include "Behaviour/Jobs.h"
-#include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/Jobs/Jobs.h"
+#include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 #include "NUPlatform/NUCamera/CameraSettings.h"
 #include "debug.h"
 
@@ -430,7 +431,7 @@ void cameraSettingsWidget::readPendingData()
      //(*nuio) >> m_job_list;
 
         static list<Job*>::iterator it;     // the iterator over the motion jobs
-        for (it = nuio->m_jobs->camera_begin(); it !=nuio->m_jobs->camera_end(); ++it)
+        for (it = Blackboard->Jobs->camera_begin(); it !=Blackboard->Jobs->camera_end(); ++it)
         {
            // debug  << "Vision::Process - Processing Job" << endl;
             if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
@@ -456,7 +457,7 @@ void cameraSettingsWidget::readPendingData()
                 }
             }
         }
-        nuio->m_jobs->clear();
+        Blackboard->Jobs->clear();
 
 }
 

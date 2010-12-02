@@ -2,7 +2,7 @@
 #include <QLabel>
 #include <QString>
 #include <QGridLayout>
-#include <Tools/Image/NUimage.h>
+#include <Infrastructure/NUImage/NUImage.h>
 
 
 frameInformationWidget::frameInformationWidget(QWidget *parent) :
@@ -43,7 +43,7 @@ void frameInformationWidget::setFrameSource(QString sourceName)
 }
 
 
-void frameInformationWidget::setRawImage(const NUimage* image)
+void frameInformationWidget::setRawImage(const NUImage* image)
 {
     setImageResolution(image->getWidth(), image->getHeight());
     setTimestamp(image->m_timestamp);

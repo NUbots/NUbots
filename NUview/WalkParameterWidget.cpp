@@ -21,7 +21,7 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
-#include "Behaviour/Jobs.h"
+#include "Infrastructure/Jobs/Jobs.h"
 #include "NUviewIO/NUviewIO.h"
 #include "Tools/Optimisation/Parameter.h"
 #include "debug.h"

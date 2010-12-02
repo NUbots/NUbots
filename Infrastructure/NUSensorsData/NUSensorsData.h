@@ -34,7 +34,7 @@
 #include <string>
 using namespace std;
 
-class NUSensorsData: public NUData, TimestampedData
+class NUSensorsData: public NUData, public TimestampedData
 {
 public:
     // end effector sensors

@@ -1,7 +1,9 @@
 #ifndef RoboCupGameControlData_h
 #define RoboCupGameControlData_h
 
-typedef unsigned char  uint8;
+#ifndef uint8
+    typedef unsigned char  uint8;
+#endif
 typedef unsigned short uint16;
 typedef unsigned int   uint32;
 

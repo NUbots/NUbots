@@ -41,12 +41,12 @@
 #include "Tools/Math/Vector2.h"
 #include "Vision/TransitionSegment.h"
 #include "Tools/Math/LSFittedLine.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "localisationwidget.h"
 #include "Vision/ObjectCandidate.h"
 #include "Vision/CornerPoint.h"
 
-class NUimage;
+class NUImage;
 class ClassifiedImage;
 class Line;
 class LinePoint;
@@ -80,13 +80,13 @@ public:
           @brief Accepts a new raw image and maps it to the default display layer.
           @param newImage The new raw image.
           */
-        void setRawImage(const NUimage* newImage){writeNUimageToDisplay(newImage, GLDisplay::rawImage);};
+        void setRawImage(const NUImage* newImage){writeNUImageToDisplay(newImage, GLDisplay::rawImage);};
         /*!
           @brief Accepts a new raw image and maps it to display instructions.
           @param newImage The new raw image.
           @param displayId The id of the display layer to write to.
           */
-        void writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId);
+        void writeNUImageToDisplay(const NUImage* newImage, GLDisplay::display displayId);
         /*!
           @brief Accepts a new classified image and maps it to display instructions.
           @param newImage The new classified image.

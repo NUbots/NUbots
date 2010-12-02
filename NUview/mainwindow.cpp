@@ -14,6 +14,15 @@
 #include <QTabWidget>
 #include <QImage>
 #include <typeinfo>
+
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "NUviewIO/NUviewIO.h"
 
 #include "frameInformationWidget.h"
@@ -30,6 +39,16 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "NUview is starting in: MainWindow.cpp";
     debug.open("debug.log");
     errorlog.open("error.log");
+
+    m_platform = new NUPlatform();                      // you could make the arguement that NUView should have its own platform, for now we just use a 'blank' one
+    m_blackboard = new NUBlackboard();
+    m_blackboard->add(new NUSensorsData());
+    m_blackboard->add(new NUActionatorsData());
+    m_blackboard->add(new FieldObjects());
+    m_blackboard->add(new JobList());
+    m_blackboard->add(new GameInformation(0, 0));
+    m_blackboard->add(new TeamInformation(0, 0));
+    
     m_nuview_io = new NUviewIO();
 
     // create mdi workspace

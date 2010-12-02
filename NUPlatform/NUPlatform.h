@@ -45,6 +45,7 @@ class NUCamera;
 class NUPlatform
 {
 public:
+    NUPlatform();
     virtual ~NUPlatform();
  
     // Robot Identity functions
@@ -73,7 +74,6 @@ public:
     
     void kill();
 protected:
-    NUPlatform();
     void init();
     virtual void initName();
     virtual void initNumber();
