@@ -142,11 +142,16 @@ void NUSensors::calculateOrientation()
     debug << "NUSensors::calculateOrientation()" << endl;
 #endif
     static vector<float> orientation(3, 0.0f);
+    static vector<float> orientationhardware(3, 0.0f);
     static vector<float> acceleration(3, 0.0f);
     static vector<float> gyros(3, 0.0f);
     static vector<float> gyroOffset(3, 0.0f);
     
-    if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
+    if (m_data->get(NUSensorsData::OrientationHardware, orientationhardware))
+    {
+        m_data->set(NUSensorsData::Orientation, m_current_time, orientationhardware);
+    }
+    else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
         if(!m_orientationFilter->Initialised())
         {

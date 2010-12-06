@@ -54,9 +54,10 @@ public:
     const static id_t Accelerometer;
     const static id_t Gyro;                             // raw gyro readings
     const static id_t GyroOffset;                       // gyro offset such that the filtered gyro values are gyro - gyro_offset
-    const static id_t Orientation;
-    const static id_t Horizon;
-    const static id_t Zmp;
+    const static id_t Orientation;                      // orientation sensor
+    const static id_t OrientationHardware;              // a hardware orientation sensor
+    const static id_t Horizon;                          // a sensor for the horizon line
+    const static id_t Zmp;                              // a zero moment point sensor
     const static id_t Falling;                          // Compactly stores Falling, Falling Left, Falling Right, Falling Forward, Falling Backward
     const static id_t Fallen;                           // Compactly stores Fallen, Fallen Left, Fallen Right, Fallen Forward, Fallen Backward
     // touch sensors

@@ -49,6 +49,7 @@ const NUSensorsData::id_t NUSensorsData::Accelerometer(s_curr_id++, "Acceleromet
 const NUSensorsData::id_t NUSensorsData::Gyro(s_curr_id++, "Gyro", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::GyroOffset(s_curr_id++, "GyroOffset", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Orientation(s_curr_id++, "Orientation", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::OrientationHardware(s_curr_id++, "OrientationHardware", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Horizon(s_curr_id++, "Horizon", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Zmp(s_curr_id++, "Zmp", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Falling(s_curr_id++, "Falling", NUSensorsData::m_ids);

@@ -228,7 +228,7 @@ void NAOSensors::copyFromAccelerometerAndGyro()
     
     m_data->set(NUSensorsData::Accelerometer, m_current_time, m_buffer_accelerometer);
     m_data->set(NUSensorsData::Gyro, m_current_time, m_buffer_gyrometer); 
-    m_data->set(NUSensorsData::Orientation, m_current_time, m_buffer_orientation);   
+    m_data->set(NUSensorsData::OrientationHardware, m_current_time, m_buffer_orientation);   
 }
 
 void NAOSensors::copyFromDistance()
