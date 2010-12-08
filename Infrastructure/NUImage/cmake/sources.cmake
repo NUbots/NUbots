@@ -23,7 +23,7 @@ ENDIF()
 SET (YOUR_SRCS
 BresenhamLine.cpp
 ClassifiedImage.cpp
-NUimage.cpp
+NUImage.cpp
 #JpegSaver.cpp  
 )
 ####################################################################################
