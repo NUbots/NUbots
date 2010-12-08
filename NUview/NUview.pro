@@ -41,7 +41,7 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Horizon.h \
     openglmanager.h \
     GLDisplay.h \
-    ../Infrastructure/NUImage/NUimage.h \
+    ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ClassifiedImage.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \

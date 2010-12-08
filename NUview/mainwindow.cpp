@@ -340,24 +340,24 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
 
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), frameInfo, SLOT(setRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)), frameInfo, SLOT(setRawImage(const NUImage*)));
 
     connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
     connect(&LogReader,SIGNAL(fileOpened(QString)),frameInfo, SLOT(setFrameSource(QString)));
     connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
     connect(&LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)),&virtualRobot, SLOT(setRawImage(const NUImage*)));
     connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
+    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
 
-    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&glManager, SLOT(setRawImage(const NUimage*)));
-    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)), this, SLOT(updateSelection()));
-    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(setRawImage(const NUimage*)));
-    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUimage*)),&virtualRobot, SLOT(processVisionFrame()));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),&virtualRobot, SLOT(setRawImage(const NUImage*)));
+    connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),&virtualRobot, SLOT(processVisionFrame()));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     // Setup navigation control enabling/disabling
@@ -368,7 +368,7 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(setFrameAvailable(bool)),selectFrameAction, SLOT(setEnabled(bool)));
 
     // Connect the virtual robot to the opengl manager.
-    connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUimage*,GLDisplay::display)),&glManager, SLOT(writeNUimageToDisplay(const NUimage*,GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUImage*,GLDisplay::display)),&glManager, SLOT(writeNUImageToDisplay(const NUImage*,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
