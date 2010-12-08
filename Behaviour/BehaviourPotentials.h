@@ -24,9 +24,9 @@
 #ifndef BEHAVIOUR_POTENTIALS_H
 #define BEHAVIOUR_POTENTIALS_H
 
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/GameInformation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"
@@ -76,7 +76,11 @@ public:
             result[1] = bearing;
             // calculate the rotational speed
             if (distance < turningdistance)
-                result[2] = 0.8*heading;
+            {
+                if (fabs(heading) > 2.5)
+                    heading = fabs(heading);
+                result[2] = 0.5*heading;
+            }
             else
                 result[2] = 0.5*bearing;
             return result;
@@ -129,7 +133,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 14.5, float stoppingdistance = 65)
+    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 13.0, float stoppingdistance = 65)
     {
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
@@ -207,18 +211,18 @@ public:
             float around_rotation;
             if (distance < 1.5*stoppingdistance)
             {   // if we are close enough to worry about the heading
-                const float heading_gain = 0.5;
-                const float heading_threshold = mathGeneral::PI;
+                const float heading_gain = 0.7;
+                const float heading_threshold = mathGeneral::PI/2;
                 if (fabs(heading) < heading_threshold)
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);
                 else
                     around_speed = heading_gain;
-                if (fabs(heading) > 2.0)
+                if (fabs(heading) > 2.5)
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                 
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*9/distance;
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*11/distance;        // 11 is rough speed in cm/s
             }
             else
             {
@@ -270,9 +274,9 @@ public:
         vector<float> temp;
         float leftobstacle = 255;
         float rightobstacle = 255;
-        if (sensors->getDistanceLeftValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
             leftobstacle = temp[0];
-        if (sensors->getDistanceRightValues(temp) and temp.size() > 0)
+        if (sensors->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
             rightobstacle = temp[0];
         
         if (fabs(speed[1]) > mathGeneral::PI/2)

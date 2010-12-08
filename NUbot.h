@@ -29,11 +29,11 @@
 #include "targetconfig.h"
 #include "nubotconfig.h"
 
+class NUBlackboard;
 class NUPlatform;
 class NUIO;
 
 #ifdef USE_VISION
-    class NUimage;
     class Vision;
 #endif
 
@@ -48,13 +48,6 @@ class NUIO;
 #ifdef USE_MOTION
     class NUMotion;
 #endif
-
-class NUSensorsData;
-class NUActionatorsData;
-class FieldObjects;
-class JobList;
-class GameInformation;
-class TeamInformation;
 
 #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
     class SeeThinkThread;
@@ -77,27 +70,25 @@ public:
 #endif
     
 private:
-    void connectErrorHandling();
+    void createErrorHandling();
+    void createPlatform(int argc, const char *argv[]);
+    void destroyPlatform();
+    void createBlackboard();
+    void destroyBlackboard();
+    void createNetwork();
+    void destroyNetwork();
+    void createModules();
+    void destroyModules();
+    void createThreads();
+    void destroyThreads();
+    
+    void periodicSleep(int period);
     static void terminationHandler(int signum);
     void unhandledExceptionHandler(std::exception& e);
-    
-    void createThreads();
-    void periodicSleep(int period);
-    
-public:
-    #ifdef USE_VISION
-        NUimage* Image;
-    #endif
-    NUSensorsData* SensorData;
-    NUActionatorsData* Actions;
-    FieldObjects* Objects;
-    JobList* Jobs;
-    GameInformation* GameInfo;
-    TeamInformation* TeamInfo;
-    
 private:
     static NUbot* m_this;                 //!< a pointer to the last instance of a NUbot
     NUPlatform* m_platform;               //!< interface to robot platform
+    NUBlackboard* m_blackboard;           //!< a pointer to the public store
     #ifdef USE_VISION
         Vision* m_vision;                 //!< vision module
     #endif

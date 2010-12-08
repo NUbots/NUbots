@@ -48,7 +48,7 @@ int LogFileReader::openFile(QString fileName)
     {
         if(currentFileReader->fileGood())
         {
-            connect(currentFileReader,SIGNAL(rawImageChanged(const NUimage*)), this, SIGNAL(rawImageChanged(const NUimage*)));
+            connect(currentFileReader,SIGNAL(rawImageChanged(const NUImage*)), this, SIGNAL(rawImageChanged(const NUImage*)));
             connect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
             connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
                     this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));

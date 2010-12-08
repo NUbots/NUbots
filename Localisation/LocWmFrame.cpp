@@ -1,7 +1,9 @@
 #include "LocWmFrame.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
 #include "Localisation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+
 LocWmFrame::LocWmFrame(): m_buffered(true)
 {
     m_loc = new Localisation();

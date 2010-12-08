@@ -1,8 +1,8 @@
 /*! @file WalkOptimisationProvider.h
-    @brief Declaration of simple chase ball behaviour for testing and demonstration purposes 
+    @brief Declaration of walk optimisation behaviour for testing and demonstration purposes 
  
     @class WalkOptimisationProvider
-    @brief A simple chase ball behaviour for testing and demonstration purposes 
+    @brief A walk optimisation behaviour provider
 
     @author Jason Kulk
  
@@ -26,35 +26,49 @@
 #define WALKOPTIMISATIONBEHAVIOUR_H
 
 #include "Behaviour/BehaviourFSMProvider.h"
-class ChaseBlueGoal;
-class ChaseYellowGoal;
-class SearchForBlueGoal;
-class SearchForYellowGoal;
-class Paused;
+class Optimiser;
+#include "Motion/Walks/WalkParameters.h"
 
 #include <vector>
 #include <string>
+#include <fstream>
+using namespace std;
 
 class WalkOptimisationProvider : public BehaviourFSMProvider
 {
 public:
     WalkOptimisationProvider(Behaviour* manager);
     ~WalkOptimisationProvider();
+    
+    void tickOptimiser();
+    void setDuration(float time);
+    void setSpeed(float speed);
+    void setEnergy(float energy);
+    void setStability(float stability);
+    
+    float stoppingDistance();
 protected:
     BehaviourState* nextStateCommons();
+    void doBehaviourCommons();
+public:
+    BehaviourState* m_generate;                 //!< the state in which the parameter generation is done, and preparations for its evaluation
+    BehaviourState* m_evaluate;                 //!< the state in which the parameter evaluation is done
+    BehaviourState* m_paused;                   //!< the optimisation process is paused in this state.
+    
+    vector<vector<float> > m_speed_points;      //!< the way points over which to evaluate to speed and efficiency of the walk parameters
+    vector<vector<float> > m_stability_points;  //!< the way points over which to evaluate the stability of the walk parameters
 private:
-    friend class ChaseObject;
-    friend class SearchForObject;
-    friend class ChaseBlueGoal;
-    BehaviourState* m_chase_blue_goal;
-    friend class ChaseYellowGoal;
-    BehaviourState* m_chase_yellow_goal;
-    friend class SearchForBlueGoal;
-    BehaviourState* m_search_blue_goal;
-    friend class SearchForYellowGoal;
-    BehaviourState* m_search_yellow_goal;
-    friend class Paused;
-    BehaviourState* m_paused;
+    WalkParameters m_parameters;                //!< the current set of walk parameters
+    Optimiser* m_optimiser;                     //!< the optimiser itself
+    
+    float calculateFitness();					//!< calculates the fitness of the current parameters from m_duration, m_speed, m_energy, and m_stability
+    float calculatePathDistance();				//!< calculates the distance of the speed evaluation path
+    int m_iteration_count;						//!< the number of times the optimiser has been ticked
+    float m_duration;							//!< the evaluation time in ms
+    float m_energy;								//!< the energy used during evalution of walk parameters in J
+    float m_stability;							//!< the stability of the walk parameters
+    
+    ofstream m_log;
 };
 
 

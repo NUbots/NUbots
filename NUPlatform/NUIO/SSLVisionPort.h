@@ -33,7 +33,7 @@ class TeamInformation;
 class SSLVisionPort : public UdpPort
 {
 public:
-    SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teamInfo, int portnumber, bool ignoreself = true);
+    SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teaminfo, int portnumber, bool ignoreself = true);
     ~SSLVisionPort();
     
 private:
@@ -41,9 +41,10 @@ private:
     void writePacketToSensors(SSLVisionPacket* packet, NUSensorsData* sensors);
 public:
 private:
-    TeamInformation* m_team_information;
     NUSensorsData* m_sensor_data;
+    TeamInformation* m_team_info;
     SSLVisionPacket* m_packet;
+    int m_ssl_id;
 };
 
 #endif

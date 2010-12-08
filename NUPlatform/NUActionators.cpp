@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -20,53 +20,52 @@
  */
 
 #include "NUActionators.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSoundThread.h"
-#include "NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
 NUActionators::NUActionators()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::NUActionators" << endl;
-#endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::NUActionators" << endl;
+    #endif
     m_data = new NUActionatorsData();
     m_sound_thread = new NUSoundThread();
 }
 
 NUActionators::~NUActionators()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::~NUActionators" << endl;
-#endif
-    if (m_data != NULL)
-        delete m_data;
-    if (m_sound_thread != NULL)
-        delete m_sound_thread;
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::~NUActionators" << endl;
+    #endif
+    delete m_sound_thread;
+    m_sound_thread = 0;
 }
 
 /*! @brief Processes the NUActionatorsData and sends the actions to the hardware
  
     @param data a pointer to the NUActionatorsData to be sent to the hardware
  */
-void NUActionators::process(NUActionatorsData*& data)
+void NUActionators::process(NUActionatorsData* data)
 {
-    if (data == NULL)       // if the passed in pointer is NULL, then we need to set it to be equal to the internal NUActionatorsData
-        data = m_data;
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NUActionators::process" << endl;
-#endif
-    m_current_time = nusystem->getTime();
-    m_data->preProcess();
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << "NUActionators::process" << endl;
+    #endif
+    m_data->preProcess(Platform->getTime());
     copyToHardwareCommunications();
-    m_data->postProcess(m_current_time);
+    m_data->postProcess();
+    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        m_data->summaryTo(debug);
+    #endif
 }
 
-/*! @brief Returns the actions storage class
- */
-NUActionatorsData* NUActionators::getActions()
+/*! @brief Returns a pointer to the NUActionatorsData object used to store actions for the hardware */
+NUActionatorsData* NUActionators::getNUActionatorsData()
 {
     return m_data;
 }
@@ -75,15 +74,8 @@ NUActionatorsData* NUActionators::getActions()
  */
 void NUActionators::copyToSound()
 {
-    bool l_isvalid;
-    double l_time;
-    vector<string> l_strings;
-    if (m_data->getNextSounds(l_isvalid, l_time, l_strings))
-    {
-        if (l_time < m_current_time)
-        {
-            for (unsigned int i=0; i<l_strings.size(); i++)
-                m_sound_thread->pushBack(l_strings[i]);
-        }
-    }
+    vector<string> sounds;
+    m_data->getNextSounds(sounds);
+    for (unsigned int i=0; i<sounds.size(); i++)
+        m_sound_thread->pushBack(sounds[i]);
 }

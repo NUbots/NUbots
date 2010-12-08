@@ -5,7 +5,7 @@
 #include <QtGui/QMainWindow>
 #include "classificationwidget.h"
 #include "connectionwidget.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "virtualnubot.h"
 #include "GLDisplay.h"
 #include "openglmanager.h"
@@ -26,6 +26,8 @@ class QTabsWidget;
 class cameraSettingsWidget;
 class frameInformationWidget;
 
+class NUPlatform;
+class NUBlackboard;
 class NUviewIO;
 class BonjourServiceResolver;
 
@@ -101,6 +103,8 @@ protected slots:
 private:
     //! Virtual robot, does data storage and robot based processing.
     virtualNUbot virtualRobot;
+    NUPlatform* m_platform;
+    NUBlackboard* m_blackboard;
     NUviewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;

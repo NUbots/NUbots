@@ -20,7 +20,7 @@
  */
 
 #include "TeamPort.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "TeamTransmissionThread.h"
 
 #include "debug.h"

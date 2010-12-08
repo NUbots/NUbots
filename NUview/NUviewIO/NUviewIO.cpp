@@ -20,25 +20,22 @@
  */
 
 #include "NUviewIO.h"
-#include "NUPlatform/NUSystem.h"
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
-#include "Behaviour/Jobs/JobList.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
 using namespace std;
 
 NUviewIO* nuio;
-NUSystem* NUviewIO::m_nusystem = new NUSystem();
-GameInformation* NUviewIO::m_gameinfo = new GameInformation(0,0, NULL, NULL);
-TeamInformation* NUviewIO::m_teaminfo = new TeamInformation(0, 0, NULL, NULL, NULL);
-JobList* NUviewIO::m_jobs = new JobList();
 
-NUviewIO::NUviewIO(): NUIO(m_gameinfo, m_teaminfo, m_jobs)
+NUviewIO::NUviewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboard->Jobs)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUviewIO::NUviewIO(" << static_cast<void*>(m_gameinfo) << ", " << static_cast<void*>(m_teaminfo) << ", " << static_cast<void*>(m_jobs) << ")" << endl;
+    debug << "NUviewIO::NUviewIO(" << static_cast<void*>(Blackboard->GameInfo) << ", " << static_cast<void*>(Blackboard->TeamInfo) << ", " << static_cast<void*>(Blackboard->Jobs) << ")" << endl;
 #endif
     if (nuio == NULL)
         nuio = this;
@@ -49,7 +46,5 @@ NUviewIO::~NUviewIO()
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUviewIO::~NUviewIO()" << endl;
 #endif
-    if (m_nusystem != NULL)
-        delete m_nusystem;
 }
 

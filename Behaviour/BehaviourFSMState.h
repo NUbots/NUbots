@@ -47,7 +47,10 @@ protected:
         m_previous_state = 0;
         m_state_changed = true;
     };
-    virtual BehaviourFSMState* nextState() = 0;
+    virtual BehaviourState* nextState()
+    {
+        return this;
+    };
     void doState();
     virtual void doStateCommons() {};
     virtual BehaviourState* nextStateCommons()

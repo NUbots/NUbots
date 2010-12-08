@@ -21,50 +21,46 @@
 
 #include "NAOActionators.h"
 #include "NAOActionatorNames.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+#include "Tools/Profiling/Profiler.h"
 
-// init m_actionator_names:
-static string temp_servo_control_names[] = {string("JointPositions")};
-vector<string> NAOActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
-
-// init m_servo_names:
-static string temp_servo_names[] = {HEAD_PITCH, HEAD_YAW, L_SHOULDER_ROLL, L_SHOULDER_PITCH, L_ELBOW_ROLL, L_ELBOW_YAW, R_SHOULDER_ROLL, R_SHOULDER_PITCH, R_ELBOW_ROLL, R_ELBOW_YAW, L_HIP_ROLL, L_HIP_PITCH, L_HIP_YAWPITCH, L_KNEE_PITCH, L_ANKLE_ROLL, L_ANKLE_PITCH, R_HIP_ROLL, R_HIP_PITCH, R_HIP_YAWPITCH, R_KNEE_PITCH, R_ANKLE_ROLL, R_ANKLE_PITCH};
-vector<string> NAOActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+#include <limits>
+using namespace std;
 
 // init m_servo_position_names:
-static string temp_servo_position_names[] = {DN_HEAD_PITCH_POSITION, DN_HEAD_YAW_POSITION, DN_L_SHOULDER_ROLL_POSITION, DN_L_SHOULDER_PITCH_POSITION, DN_L_ELBOW_ROLL_POSITION, DN_L_ELBOW_YAW_POSITION, DN_R_SHOULDER_ROLL_POSITION, DN_R_SHOULDER_PITCH_POSITION, DN_R_ELBOW_ROLL_POSITION, DN_R_ELBOW_YAW_POSITION, DN_L_HIP_ROLL_POSITION, DN_L_HIP_PITCH_POSITION, DN_L_HIP_YAWPITCH_POSITION, DN_L_KNEE_PITCH_POSITION, DN_L_ANKLE_ROLL_POSITION, DN_L_ANKLE_PITCH_POSITION, DN_R_HIP_ROLL_POSITION, DN_R_HIP_PITCH_POSITION, DN_R_HIP_YAWPITCH_POSITION, DN_R_KNEE_PITCH_POSITION, DN_R_ANKLE_ROLL_POSITION, DN_R_ANKLE_PITCH_POSITION};
+static string temp_servo_position_names[] = {HEAD_PITCH_POSITION, HEAD_YAW_POSITION, L_SHOULDER_ROLL_POSITION, L_SHOULDER_PITCH_POSITION, L_ELBOW_ROLL_POSITION, L_ELBOW_YAW_POSITION, R_SHOULDER_ROLL_POSITION, R_SHOULDER_PITCH_POSITION, R_ELBOW_ROLL_POSITION, R_ELBOW_YAW_POSITION, L_HIP_ROLL_POSITION, L_HIP_PITCH_POSITION, L_HIP_YAWPITCH_POSITION, L_KNEE_PITCH_POSITION, L_ANKLE_ROLL_POSITION, L_ANKLE_PITCH_POSITION, R_HIP_ROLL_POSITION, R_HIP_PITCH_POSITION, R_HIP_YAWPITCH_POSITION, R_KNEE_PITCH_POSITION, R_ANKLE_ROLL_POSITION, R_ANKLE_PITCH_POSITION};
 vector<string> NAOActionators::m_servo_position_names(temp_servo_position_names, temp_servo_position_names + sizeof(temp_servo_position_names)/sizeof(*temp_servo_position_names));
 unsigned int NAOActionators::m_num_servo_positions = NAOActionators::m_servo_position_names.size();
 
 // init m_servo_stiffness_names:
-static string temp_servo_stiffness_names[] = {DN_HEAD_PITCH_HARDNESS, DN_HEAD_YAW_HARDNESS, DN_L_SHOULDER_ROLL_HARDNESS, DN_L_SHOULDER_PITCH_HARDNESS, DN_L_ELBOW_ROLL_HARDNESS, DN_L_ELBOW_YAW_HARDNESS, DN_R_SHOULDER_ROLL_HARDNESS, DN_R_SHOULDER_PITCH_HARDNESS, DN_R_ELBOW_ROLL_HARDNESS, DN_R_ELBOW_YAW_HARDNESS, DN_L_HIP_ROLL_HARDNESS, DN_L_HIP_PITCH_HARDNESS, DN_L_HIP_YAWPITCH_HARDNESS, DN_L_KNEE_PITCH_HARDNESS, DN_L_ANKLE_ROLL_HARDNESS, DN_L_ANKLE_PITCH_HARDNESS, DN_R_HIP_ROLL_HARDNESS, DN_R_HIP_PITCH_HARDNESS, DN_R_HIP_YAWPITCH_HARDNESS, DN_R_KNEE_PITCH_HARDNESS, DN_R_ANKLE_ROLL_HARDNESS, DN_R_ANKLE_PITCH_HARDNESS};
+static string temp_servo_stiffness_names[] = {HEAD_PITCH_HARDNESS, HEAD_YAW_HARDNESS, L_SHOULDER_ROLL_HARDNESS, L_SHOULDER_PITCH_HARDNESS, L_ELBOW_ROLL_HARDNESS, L_ELBOW_YAW_HARDNESS, R_SHOULDER_ROLL_HARDNESS, R_SHOULDER_PITCH_HARDNESS, R_ELBOW_ROLL_HARDNESS, R_ELBOW_YAW_HARDNESS, L_HIP_ROLL_HARDNESS, L_HIP_PITCH_HARDNESS, L_HIP_YAWPITCH_HARDNESS, L_KNEE_PITCH_HARDNESS, L_ANKLE_ROLL_HARDNESS, L_ANKLE_PITCH_HARDNESS, R_HIP_ROLL_HARDNESS, R_HIP_PITCH_HARDNESS, R_HIP_YAWPITCH_HARDNESS, R_KNEE_PITCH_HARDNESS, R_ANKLE_ROLL_HARDNESS, R_ANKLE_PITCH_HARDNESS};
 vector<string> NAOActionators::m_servo_stiffness_names(temp_servo_stiffness_names, temp_servo_stiffness_names + sizeof(temp_servo_stiffness_names)/sizeof(*temp_servo_stiffness_names));
 unsigned int NAOActionators::m_num_servo_stiffnesses = NAOActionators::m_servo_stiffness_names.size();
 
 // init m_earled_names:
-static string temp_earled_names[] = {  DN_LED_EAR_LEFT_0DEG, DN_LED_EAR_LEFT_36DEG, DN_LED_EAR_LEFT_72DEG, DN_LED_EAR_LEFT_108DEG, DN_LED_EAR_LEFT_144DEG, DN_LED_EAR_LEFT_180DEG, DN_LED_EAR_LEFT_216DEG, DN_LED_EAR_LEFT_252DEG, DN_LED_EAR_LEFT_288DEG, DN_LED_EAR_LEFT_324DEG, \
-                                       DN_LED_EAR_RIGHT_0DEG, DN_LED_EAR_RIGHT_36DEG, DN_LED_EAR_RIGHT_72DEG, DN_LED_EAR_RIGHT_108DEG, DN_LED_EAR_RIGHT_144DEG, DN_LED_EAR_RIGHT_180DEG, DN_LED_EAR_RIGHT_216DEG, DN_LED_EAR_RIGHT_252DEG, DN_LED_EAR_RIGHT_288DEG, DN_LED_EAR_RIGHT_324DEG};
+static string temp_earled_names[] = {  LED_EAR_LEFT_0DEG, LED_EAR_LEFT_36DEG, LED_EAR_LEFT_72DEG, LED_EAR_LEFT_108DEG, LED_EAR_LEFT_144DEG, LED_EAR_LEFT_180DEG, LED_EAR_LEFT_216DEG, LED_EAR_LEFT_252DEG, LED_EAR_LEFT_288DEG, LED_EAR_LEFT_324DEG, \
+                                       LED_EAR_RIGHT_0DEG, LED_EAR_RIGHT_36DEG, LED_EAR_RIGHT_72DEG, LED_EAR_RIGHT_108DEG, LED_EAR_RIGHT_144DEG, LED_EAR_RIGHT_180DEG, LED_EAR_RIGHT_216DEG, LED_EAR_RIGHT_252DEG, LED_EAR_RIGHT_288DEG, LED_EAR_RIGHT_324DEG};
 vector<string> NAOActionators::m_earled_names(temp_earled_names, temp_earled_names + sizeof(temp_earled_names)/sizeof(*temp_earled_names));
 unsigned int NAOActionators::m_num_earleds = NAOActionators::m_earled_names.size();
 
 // init m_eyeled_names:
-static string temp_eyeled_names[] = {  DN_LED_EYE_LEFT_RED_0DEG, DN_LED_EYE_LEFT_GREEN_0DEG, DN_LED_EYE_LEFT_BLUE_0DEG, DN_LED_EYE_LEFT_RED_45DEG, DN_LED_EYE_LEFT_GREEN_45DEG, DN_LED_EYE_LEFT_BLUE_45DEG, DN_LED_EYE_LEFT_RED_90DEG, DN_LED_EYE_LEFT_GREEN_90DEG, DN_LED_EYE_LEFT_BLUE_90DEG, DN_LED_EYE_LEFT_RED_135DEG, DN_LED_EYE_LEFT_GREEN_135DEG, DN_LED_EYE_LEFT_BLUE_135DEG, DN_LED_EYE_LEFT_RED_180DEG, DN_LED_EYE_LEFT_GREEN_180DEG, DN_LED_EYE_LEFT_BLUE_180DEG, DN_LED_EYE_LEFT_RED_225DEG, DN_LED_EYE_LEFT_GREEN_225DEG, DN_LED_EYE_LEFT_BLUE_225DEG, DN_LED_EYE_LEFT_RED_270DEG, DN_LED_EYE_LEFT_GREEN_270DEG, DN_LED_EYE_LEFT_BLUE_270DEG, DN_LED_EYE_LEFT_RED_315DEG, DN_LED_EYE_LEFT_GREEN_315DEG, DN_LED_EYE_LEFT_BLUE_315DEG, \
-                                       DN_LED_EYE_RIGHT_RED_0DEG, DN_LED_EYE_RIGHT_GREEN_0DEG, DN_LED_EYE_RIGHT_BLUE_0DEG, DN_LED_EYE_RIGHT_RED_45DEG, DN_LED_EYE_RIGHT_GREEN_45DEG, DN_LED_EYE_RIGHT_BLUE_45DEG, DN_LED_EYE_RIGHT_RED_90DEG, DN_LED_EYE_RIGHT_GREEN_90DEG, DN_LED_EYE_RIGHT_BLUE_90DEG, DN_LED_EYE_RIGHT_RED_135DEG, DN_LED_EYE_RIGHT_GREEN_135DEG, DN_LED_EYE_RIGHT_BLUE_135DEG, DN_LED_EYE_RIGHT_RED_180DEG, DN_LED_EYE_RIGHT_GREEN_180DEG, DN_LED_EYE_RIGHT_BLUE_180DEG, DN_LED_EYE_RIGHT_RED_225DEG, DN_LED_EYE_RIGHT_GREEN_225DEG, DN_LED_EYE_RIGHT_BLUE_225DEG, DN_LED_EYE_RIGHT_RED_270DEG, DN_LED_EYE_RIGHT_GREEN_270DEG, DN_LED_EYE_RIGHT_BLUE_270DEG, DN_LED_EYE_RIGHT_RED_315DEG, DN_LED_EYE_RIGHT_GREEN_315DEG, DN_LED_EYE_RIGHT_BLUE_315DEG};
+static string temp_eyeled_names[] = {  LED_EYE_LEFT_RED_0DEG, LED_EYE_LEFT_GREEN_0DEG, LED_EYE_LEFT_BLUE_0DEG, LED_EYE_LEFT_RED_45DEG, LED_EYE_LEFT_GREEN_45DEG, LED_EYE_LEFT_BLUE_45DEG, LED_EYE_LEFT_RED_90DEG, LED_EYE_LEFT_GREEN_90DEG, LED_EYE_LEFT_BLUE_90DEG, LED_EYE_LEFT_RED_135DEG, LED_EYE_LEFT_GREEN_135DEG, LED_EYE_LEFT_BLUE_135DEG, LED_EYE_LEFT_RED_180DEG, LED_EYE_LEFT_GREEN_180DEG, LED_EYE_LEFT_BLUE_180DEG, LED_EYE_LEFT_RED_225DEG, LED_EYE_LEFT_GREEN_225DEG, LED_EYE_LEFT_BLUE_225DEG, LED_EYE_LEFT_RED_270DEG, LED_EYE_LEFT_GREEN_270DEG, LED_EYE_LEFT_BLUE_270DEG, LED_EYE_LEFT_RED_315DEG, LED_EYE_LEFT_GREEN_315DEG, LED_EYE_LEFT_BLUE_315DEG, \
+                                       LED_EYE_RIGHT_RED_0DEG, LED_EYE_RIGHT_GREEN_0DEG, LED_EYE_RIGHT_BLUE_0DEG, LED_EYE_RIGHT_RED_45DEG, LED_EYE_RIGHT_GREEN_45DEG, LED_EYE_RIGHT_BLUE_45DEG, LED_EYE_RIGHT_RED_90DEG, LED_EYE_RIGHT_GREEN_90DEG, LED_EYE_RIGHT_BLUE_90DEG, LED_EYE_RIGHT_RED_135DEG, LED_EYE_RIGHT_GREEN_135DEG, LED_EYE_RIGHT_BLUE_135DEG, LED_EYE_RIGHT_RED_180DEG, LED_EYE_RIGHT_GREEN_180DEG, LED_EYE_RIGHT_BLUE_180DEG, LED_EYE_RIGHT_RED_225DEG, LED_EYE_RIGHT_GREEN_225DEG, LED_EYE_RIGHT_BLUE_225DEG, LED_EYE_RIGHT_RED_270DEG, LED_EYE_RIGHT_GREEN_270DEG, LED_EYE_RIGHT_BLUE_270DEG, LED_EYE_RIGHT_RED_315DEG, LED_EYE_RIGHT_GREEN_315DEG, LED_EYE_RIGHT_BLUE_315DEG};
 vector<string> NAOActionators::m_eyeled_names(temp_eyeled_names, temp_eyeled_names + sizeof(temp_eyeled_names)/sizeof(*temp_eyeled_names));
 unsigned int NAOActionators::m_num_eyeleds = NAOActionators::m_eyeled_names.size();
 
 // init m_chestled_names
-static string temp_chestled_names[] = { DN_LED_CHEST_RED, DN_LED_CHEST_GREEN, DN_LED_CHEST_BLUE};
+static string temp_chestled_names[] = { LED_CHEST_RED, LED_CHEST_GREEN, LED_CHEST_BLUE};
 vector<string> NAOActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
 unsigned int NAOActionators::m_num_chestleds = NAOActionators::m_chestled_names.size();
 
 // init m_footled_names
-static string temp_footled_names[] = {  DN_LED_FOOT_LEFT_RED, DN_LED_FOOT_LEFT_GREEN, DN_LED_FOOT_LEFT_BLUE, \
-                                        DN_LED_FOOT_RIGHT_RED, DN_LED_FOOT_RIGHT_GREEN, DN_LED_FOOT_RIGHT_BLUE};
+static string temp_footled_names[] = {  LED_FOOT_LEFT_RED, LED_FOOT_LEFT_GREEN, LED_FOOT_LEFT_BLUE, \
+                                        LED_FOOT_RIGHT_RED, LED_FOOT_RIGHT_GREEN, LED_FOOT_RIGHT_BLUE};
 vector<string> NAOActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
 unsigned int NAOActionators::m_num_footleds = NAOActionators::m_footled_names.size();
 
@@ -87,48 +83,41 @@ NAOActionators::NAOActionators()
     
     getActionatorsFromAldebaran();
     
-    m_data->setAvailableJointControlMethods(m_servo_control_names);
-    m_data->setAvailableJoints(m_servo_position_names);
-    m_data->setAvailableLeds(m_led_names);
-    m_data->setAvailableOtherActionators(m_other_names);
+	vector<string> names;
+    names.insert(names.end(), m_servo_position_names.begin(), m_servo_position_names.end());
+    names.insert(names.end(), m_earled_names.begin(), m_earled_names.end());
+    names.insert(names.end(), m_eyeled_names.begin(), m_eyeled_names.end());
+    names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
+    names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
+    names.insert(names.end(), m_other_names.begin(), m_other_names.end());
+    m_data->addActionators(names);
     
-    /*double time = nusystem->getTime();
-    vector<float> rgb(3,0);
-    vector<vector<float> > allleds;
-    allleds.push_back(rgb);
+    // Ears
+    vector<float> lear(10, 0);
+    vector<float> rear(10, 0);
+    m_data->add(NUActionatorsData::LEarLed, 5000, lear);
+    m_data->add(NUActionatorsData::REarLed, 5000, rear);
     
-    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 500, allleds);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 1000, allleds);
+    for (size_t i=0; i<lear.size(); i++)
+    {
+        lear[i] = 1;
+        m_data->add(NUActionatorsData::LEarLed, 5000 + i*200, lear);
+        rear[i] = 1;
+        m_data->add(NUActionatorsData::REarLed, 5000 + i*200, rear);
+    }
     
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 1500, allleds);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 2000, allleds);
+    vector<float> blue(3,0);
+    blue[2] = 1;
+    m_data->add(NUActionatorsData::LEyeLed, 5000, blue);
+    m_data->add(NUActionatorsData::REyeLed, 5000, blue);
+    m_data->add(NUActionatorsData::ChestLed, 5000, blue);
+    m_data->add(NUActionatorsData::LFootLed, 5000, blue);
+    m_data->add(NUActionatorsData::RFootLed, 5000, blue);
     
-    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 2500, allleds);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 3000, allleds);
-    
-    allleds[0][0] = 1.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // red
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 3500, allleds);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 4000, allleds);
-    
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 1.0;        // blue
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 4500, allleds);
-    allleds[0][0] = 0.0; allleds[0][1] = 0.0; allleds[0][2] = 0.0;        // off
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 5000, allleds);
-    
-    allleds[0][0] = 0.0; allleds[0][1] = 1.0; allleds[0][2] = 0.0;        // green
-    m_data->addLeds(NUActionatorsData::AllLeds, time + 5500, allleds);*/
-    
-#if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
-    m_data->summaryTo(debug);
-#endif
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
+        m_data->summaryTo(debug);
+    #endif
 }
 
 NAOActionators::~NAOActionators()
@@ -141,7 +130,7 @@ void NAOActionators::getActionatorsFromAldebaran()
     debug << "NAOActionators::getActionatorsFromALDCM()" << endl;
 #endif
     m_al_dcm = new DCMProxy(NUNAO::m_broker);
-    m_al_time_offset = m_al_dcm->getTime(0) - nusystem->getTime();       // so when talking to motors use time + m_al_time_offset
+    m_al_time_offset = m_al_dcm->getTime(0) - Platform->getTime();       // so when talking to motors use time + m_al_time_offset
     
     // Create actionator aliases
     ALValue param;
@@ -168,6 +157,16 @@ void NAOActionators::getActionatorsFromAldebaran()
     m_led_names.insert(m_led_names.end(), m_footled_names.begin(), m_footled_names.end());
     m_num_leds = m_led_names.size();
     param[1] = m_led_names;
+    param = m_al_dcm->createAlias(param);
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << param.toString(VerbosityMini) << endl;
+    #endif
+    
+    param[0] = ALIAS_POSITION_AND_STIFFNESS;
+    vector<string> positionstiffness_names;
+	positionstiffness_names.insert(positionstiffness_names.end(), m_servo_position_names.begin(), m_servo_position_names.end());
+    positionstiffness_names.insert(positionstiffness_names.end(), m_servo_stiffness_names.begin(), m_servo_stiffness_names.end());
+    param[1] = positionstiffness_names;
     param = m_al_dcm->createAlias(param);
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << param.toString(VerbosityMini) << endl;
@@ -203,7 +202,7 @@ void NAOActionators::startUltrasonics()
     params.arraySetSize(1);
     param.arraySetSize(2);
     param[0] = 68.0;                    // left/right periodic mode = 64.0 + 4.0
-    param[1] = m_al_dcm->getTime(0);
+    param[1] = m_al_dcm->getTime(5000);
     params[0] = param;
     command[2] = params;
     
@@ -214,161 +213,166 @@ void NAOActionators::createALDCMCommands()
 {
     createALDCMCommand(ALIAS_POSITION, m_position_command, m_num_servo_positions);
     createALDCMCommand(ALIAS_STIFFNESS, m_stiffness_command, m_num_servo_stiffnesses);
-    createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);
+    createALDCMCommand(ALIAS_LED, m_led_command, m_num_leds);   
+    createALDCMCommand(ALIAS_POSITION_AND_STIFFNESS, m_positionstiffness_command, m_num_servo_positions + m_num_servo_stiffnesses);
     createALDCMCommand(ALIAS_ALL, m_actionator_command, m_num_actionators);
 }
 
 void NAOActionators::createALDCMCommand(const char* p_name, ALValue& p_command, unsigned int numactionators)
 {
     // The format for a command to the DCM in alias mode is the following:
-    // [AliasName, "ClearAfter", "time-mixed",[actionator0, actionator1, ... , actionatorn]]
-    //      where each actionator is [[command0, dcmtime0, importance0], [command1, dcmtime1, importance1], ...]
-    // However, as we only ever give the dcm one command at a time, an actionator is always [[command0, dcmtime0, importance0]]
+    // [AliasName, "ClearAfter", "time-separate", 1 (importance), [[time]], [actionator0, actionator1, ... , actionatorn]]    
+    //		where each actionator is [command0, command1, ..]. However, we send only a single command at a time, so its just [command]
     ALValue l_command;
     
-    // time-mixed mode always has a command length of 4
-    l_command.arraySetSize(4);
-    l_command[0] = p_name;
-    l_command[1] = "ClearAfter";
-    l_command[2] = "time-mixed";
+    // time-separate mode always has a command length of 6
+    l_command.arraySetSize(6);
+    l_command[0] = string(p_name);					// AliasName
+    l_command[1] = string("ClearAfter");			// Update mode
+    l_command[2] = string("time-separate");			// Command format	
+    l_command[3] = 0;								// Importance level
+    l_command[4].arraySetSize(1);
+    l_command[4][0] = m_al_dcm->getTime(0);			// Time
+    l_command[5].arraySetSize(numactionators);		// Actual actionator data
     
-    ALValue actionators;
-    actionators.arraySetSize(numactionators);
-    ALValue points;             // the list of commands for each actionator
-    points.arraySetSize(1);     // we always send only one command 
-    ALValue point;              // the actionator value
-    point.arraySetSize(2);      // a actionator point is always [value, dcmtime]
     for (unsigned int i=0; i<numactionators; i++)
     {
-        point[0] = 0.0f;                      // value
-        point[1] = m_al_dcm->getTime(0);     // time
-        points[0] = point;
-        actionators[i] = points;
+        l_command[5][i].arraySetSize(1);
+        l_command[5][i][0] = 0.0f;					// The single actionator value
     }
-    l_command[3] = actionators;
+    
     p_command = l_command;
 }
 
 /*! @brief Copies the commands stored in the NUActionators to the ALDcm.
  
-    As of 8/4/2010 this function uses 17% of the CPU
+    As of 8/4/2010 this function takes 1.7ms to complete
+ 	As of 28/11/2010 this function takes about 1.55ms to complete (time-mixed)
+ 	As of 29/11/2010 this function takes about 1.0ms to complete (time-separate) 
+ 	As of 29/11/2020 this function takes about 0.50ms to complete (time-separate, leds at 0.25 dcm rate)
  */
 void NAOActionators::copyToHardwareCommunications()
 {
-#if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "NAOActionators::copyToHardwareCommunications()" << endl;
-#endif
-#if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    m_data->summaryTo(debug);
-#endif
-    
-    static vector<bool> isvalid;
-    static vector<double> times;
-    
-    static vector<float> positions;
-    static vector<float> velocities;
-    static vector<float> gains;
-    
-    if (m_data->getNextJointPositions(isvalid, times, positions, velocities, gains))
-    {
-        if (m_num_servo_positions == isvalid.size())                          // only process the input if it has the right length
-        {
-            for (unsigned int i=0; i<m_num_servo_positions; i++)
-            {
-                if (isvalid[i] == true)
-                {
-                    int time = static_cast<int> (times[i] + m_al_time_offset);
-                    m_actionator_command[3][i][0][0] = positions[i];
-                    m_actionator_command[3][i+m_num_servo_positions][0][0] = gains[i]/100.0;
-                    m_actionator_command[3][i][0][1] = time; 
-                    m_actionator_command[3][i+m_num_servo_positions][0][1] = time;
-                }
-                else
-                {
-                    m_actionator_command[3][i][0][0] = NAN;
-                    m_actionator_command[3][i+m_num_servo_positions][0][0] = NAN;
-                }
-            }
-        }
-        else
-            errorlog << "NAOActionators::copyToHardwareCommunications(). The positions do not have the correct length, all data will be ignored!" << endl;
-    }
-    
-    static vector<float> redleds, greenleds, blueleds;
-    
-    if (m_data->getNextLeds(isvalid, times, redleds, greenleds, blueleds))
-    {
-        unsigned int dcmoffset = 0;
-        unsigned int actoffset = 0;
-        unsigned int ledoffset = 2*m_num_servo_positions;
-        
-        // On the NAO the ears only have blue leds
-        for (unsigned int i=0; i<m_num_earleds; i++)
-        {
-            int j = i + ledoffset;
-            int time = static_cast<int> (times[i] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = blueleds[i];
-            m_actionator_command[3][j][0][1] = time;
-        }
-        dcmoffset = actoffset = m_num_earleds;
-        
-        // On the NAO the eyes are red, green and blue leds 
-        unsigned int num = m_num_eyeleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-        dcmoffset += m_num_eyeleds;
-        actoffset += m_num_eyeleds/3;
-        
-        // On the NAO the chest has a red, green and blue led
-        num = m_num_chestleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-        dcmoffset += m_num_chestleds;
-        actoffset += m_num_chestleds/3;
-        
-        // On the NAO the feet each have red, green and blue leds
-        num = m_num_footleds/3;
-        for (unsigned int i=0; i<num; i++)
-        {
-            int j = 3*i + dcmoffset + ledoffset;
-            int k = i + actoffset;
-            int time = static_cast<int> (times[k] + m_al_time_offset);
-            m_actionator_command[3][j][0][0] = redleds[k];
-            m_actionator_command[3][j+1][0][0] = greenleds[k];
-            m_actionator_command[3][j+2][0][0] = blueleds[k];
-            m_actionator_command[3][j][0][1] = time;
-            m_actionator_command[3][j+1][0][1] = time;
-            m_actionator_command[3][j+2][0][1] = time;
-        }
-    }
-    
-    // Setting the alias for stiffness, position and leds separately takes 1.05ms
-    m_al_dcm->setAlias(m_actionator_command);
-    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+        debug << "NAOActionators::copyToHardwareCommunications()" << endl;
+    #endif
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << m_actionator_command.toString(VerbosityMini) << endl;
+        m_data->summaryTo(debug);
     #endif
     
+    static vector<float> positions;
+    static vector<float> gains;
+    
+    m_data->getNextServos(positions, gains);
+    
+    int time = m_al_dcm->getTime(0);
+    m_position_command[4][0] = time;
+    m_stiffness_command[4][0] = time;
+    
+    size_t n = positions.size();
+    for (size_t i=0; i<n; i++)
+    {
+        m_position_command[5][i][0] = positions[i];
+        m_stiffness_command[5][i][0] = gains[i]/100.0;
+    }
+    m_al_dcm->setAlias(m_position_command);
+    m_al_dcm->setAlias(m_stiffness_command);
+    
+    static vector<vector<vector<float> > > ledvalues;
+    m_data->getNextLeds(ledvalues);
+    
+    m_led_command[4][0] = time;
+    
+    // On the NAO the ears have an array of 10 blue leds
+    size_t num_lear = ledvalues[0].size();
+    size_t num_rear = ledvalues[1].size();
+    size_t num_nao_ear = m_num_earleds/2;
+    if (num_lear >= num_nao_ear and num_rear >= num_nao_ear)
+    {
+        for (size_t i=0; i<num_nao_ear; i++)
+            m_led_command[5][i][0] = ledvalues[0][i][2];
+        for (size_t i=0; i<num_nao_ear; i++)
+            m_led_command[5][i+num_nao_ear][0] = ledvalues[1][i][2];
+    }
+    else
+    {
+        for (size_t i=0; i<m_num_earleds/2; i++)
+            m_led_command[5][i][0] = ledvalues[0][0][2];
+        for (size_t i=m_num_earleds/2; i<m_num_earleds; i++)
+            m_led_command[5][i][0] = ledvalues[1][0][2];
+    }
+    
+    size_t com_offset = m_num_earleds;
+    // On the NAO the eyes have an array of 8 multi-colour leds
+    size_t num_leye = ledvalues[2].size();
+    size_t num_reye = ledvalues[3].size();
+    size_t num_nao_eye = m_num_eyeleds/6;
+    if (num_leye >= num_nao_eye and num_reye >= num_nao_eye)
+    {
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[2][i][0];
+            m_led_command[5][j+1][0] = ledvalues[2][i][1];
+            m_led_command[5][j+2][0] = ledvalues[2][i][2];
+        }
+        com_offset += num_nao_eye*3;
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[3][i][0];
+            m_led_command[5][j+1][0] = ledvalues[3][i][1];
+            m_led_command[5][j+2][0] = ledvalues[3][i][2];
+        }
+    }
+    else
+    {
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[2][0][0];
+            m_led_command[5][j+1][0] = ledvalues[2][0][1];
+            m_led_command[5][j+2][0] = ledvalues[2][0][2];
+        }
+        com_offset += num_nao_eye*3;
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[3][0][0];
+            m_led_command[5][j+1][0] = ledvalues[3][0][1];
+            m_led_command[5][j+2][0] = ledvalues[3][0][2];
+        }
+        com_offset += num_nao_eye*3;
+    }
+    
+    // On the NAO the chest led is a single multicolour led
+    m_led_command[5][com_offset][0] = ledvalues[4][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[4][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[4][0][2];
+    
+    com_offset += 3;
+    // On the NAO the feet leds are single multicolour leds
+    m_led_command[5][com_offset][0] = ledvalues[5][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[5][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[5][0][2];
+    
+    com_offset += 3;
+    m_led_command[5][com_offset][0] = ledvalues[6][0][0];
+    m_led_command[5][com_offset+1][0] = ledvalues[6][0][1];
+    m_led_command[5][com_offset+2][0] = ledvalues[6][0][2];
+
+    // To save a bit of CPU we only set the leds every 5th dcm cycle (you still need to call getNextLeds every frame or you will lose data)
+    static unsigned int count = 0;
+    if (count%5 == 0)
+        m_al_dcm->setAlias(m_led_command);
+    count++;
+    
+    #if DEBUG_NUACTIONATORS_VERBOSITY > 4
+        debug << m_position_command.toString(VerbosityMini) << endl;
+    	debug << m_stiffness_command.toString(VerbosityMini) << endl;
+        debug << m_led_command.toString(VerbosityMini) << endl;
+    #endif
+
     copyToSound();
 }
 

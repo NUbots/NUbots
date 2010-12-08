@@ -4,11 +4,11 @@
 #include <QObject>
 #include <QImage>
 #include "Tools/FileFormats/NUbotImage.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Vision/ClassificationColours.h"
 #include "classificationwidget.h"
 #include "Kinematics/Horizon.h"
-#include "Tools/Image/ClassifiedImage.h"
+#include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "GLDisplay.h"
 #include "Vision/Vision.h"
 #include "Tools/Math/LSFittedLine.h"
@@ -18,6 +18,8 @@
 #include <fstream>
 #include "FileAccess/LogFileReader.h"
 #include "debugverbositynetwork.h"
+
+class NUBlackboard;
 
 #define uint8 unsigned char
 
@@ -58,7 +60,7 @@ public slots:
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);
 
-    void setRawImage(const NUimage* image);
+    void setRawImage(const NUImage* image);
     void setSensorData(const float* joint, const float* balance, const float* touch);
     void setSensorData(NUSensorsData* NUSensorsData);
     void setCamera(int newCamera){cameraNumber = newCamera;};
@@ -66,7 +68,7 @@ public slots:
     void processVisionFrame();
 
 signals:
-    void imageDisplayChanged(const NUimage* updatedImage, GLDisplay::display displayId);
+    void imageDisplayChanged(const NUImage* updatedImage, GLDisplay::display displayId);
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     void cornerPointsDisplayChanged(std::vector< CornerPoint> corners, GLDisplay::display displayId );
@@ -90,23 +92,24 @@ private:
     };
 
 
-    void processVisionFrame(const NUimage* image);
+    void processVisionFrame(const NUImage* image);
     void processVisionFrame(ClassifiedImage& image);
 
-    void generateClassifiedImage(const NUimage* yuvImage);
+    void generateClassifiedImage(const NUImage* yuvImage);
     ClassIndex::Colour getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour);
 
     unsigned char* classificationTable;
     unsigned char* tempLut;
     bool autoSoftColour;
     // Data Storage
-    const NUimage* rawImage;
+    const NUImage* rawImage;
 
     ClassifiedImage classImage, previewClassImage;
     Vision vision;
     FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;
+    NUBlackboard* m_blackboard;
     NUSensorsData* sensorsData;
     //TODO: these should change later..
     //float jointSensors[100];

@@ -23,8 +23,12 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include "SSLVisionPacket.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+
+#include "nubotdataconfig.h"
+#include "Motion/Tools/MotionFileTools.h"
+#include "Tools/Math/General.h"
 
 #include <string>
 
@@ -32,11 +36,17 @@
     @param nubotteaminformation the public nubot team information class
     @param portnumber the port number to broadcast on, and listen on
  */
-SSLVisionPort::SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teamInfo, int portnumber, bool ignoreself): UdpPort(std::string("SSLVisionPort"), portnumber, ignoreself)
+SSLVisionPort::SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teaminfo, int portnumber, bool ignoreself): UdpPort(std::string("SSLVisionPort"), portnumber, ignoreself)
 {
     m_sensor_data = nubotsensors;
-    m_team_information = teamInfo;
+    m_team_info = teaminfo;
     m_packet = new SSLVisionPacket();
+    ifstream idfile((string(CONFIG_DIR) + string("SslId.cfg")).c_str());      // the ssl id is stored in a config file
+    if (idfile.is_open())                                                     // Use that if it exists, otherwise use the player number
+        m_ssl_id = static_cast<int>(MotionFileTools::toFloat(idfile));
+    else
+        m_ssl_id = m_team_info->getPlayerNumber();
+    idfile.close();
 }
 
 /*! @brief Closes the job port
@@ -52,42 +62,48 @@ SSLVisionPort::~SSLVisionPort()
 void SSLVisionPort::handleNewData(std::stringstream& buffer)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "SSLVisionPort::handleNewData()." << std::endl;
+        debug << "SSLVisionPort::handleNewData()." << std::endl;
     #endif
     string s_buffer = buffer.str();
-//    if (s_buffer.size() == sizeof(SSLVisionPacket))
-//    {   // discard team packets that are the wrong size
-        buffer >> (*m_packet);
-        writePacketToSensors(m_packet, m_sensor_data);
-//    }
-//    else
-//        debug << "SSLVisionPort::handleNewData(). The received packet does not have the correct length: " << s_buffer.size() << " instead of " << sizeof(TeamPacket) << std::endl;
+    buffer >> (*m_packet);
+    writePacketToSensors(m_packet, m_sensor_data);
 }
+
+/*! @brief Writes the position information in the packet into the gps and compass sensors in NUSensorsData
+    @param packet the sslvisionpacket just received
+    @param sensors a pointer to the NUSensorsData
+ */
 void SSLVisionPort::writePacketToSensors(SSLVisionPacket* packet, NUSensorsData* sensors)
 {
     if(packet->robots.size() > 0)
     {
         for(unsigned int i = 0; i < packet->robots.size(); i++)
         {
-            if(packet->robots[i].id == m_team_information->getPlayerNumber())
+            if(packet->robots[i].id == m_ssl_id)
             {
                 double currTime = sensors->CurrentTime;
                 // Position Data
                 std::vector<float> gpsData(2,0.0f);
                 gpsData[0] = packet->robots[i].location.x;
                 gpsData[1] = packet->robots[i].location.y;
-                sensors->setGPSValues(currTime,gpsData,false);
+                sensors->set(NUSensorsData::Gps, currTime, gpsData);
 
                 // Orientation Data
-                std::vector<float> compassData(1,0.0f);
-                compassData[0] = packet->robots[i].heading;
-                sensors->setCompassValues(currTime,compassData,false);
-                debug << "SSLVisionPort. Position data received - gps: (" << gpsData[0] << "," << gpsData[1];
-                debug << ") Heading: " << compassData[0] << std::endl;
+                float compassData;
+                float headyaw;
+                sensors->getPosition(NUSensorsData::HeadYaw, headyaw);
+                compassData = mathGeneral::normaliseAngle(packet->robots[i].heading - headyaw);           // as the marker is attached to the head, subtract the head yaw position
+                sensors->set(NUSensorsData::Compass, currTime, compassData);
+                #if DEBUG_NETWORK_VERBOSITY > 0
+                    debug << "SSLVisionPort. Position data received - gps: (" << gpsData[0] << "," << gpsData[1];
+                    debug << ") Heading: " << compassData << std::endl;
+                #endif
             }
             else
             {
-                debug << "SSLVisionPort. Data For Player " << packet->robots[i].id << " received." << endl;
+                #if DEBUG_NETWORK_VERBOSITY > 0
+                    debug << "SSLVisionPort. Data For Player " << packet->robots[i].id << " received." << endl;
+                #endif
             }
         }
     }

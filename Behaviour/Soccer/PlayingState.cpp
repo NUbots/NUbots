@@ -27,10 +27,10 @@
 
 #include "SoccerProvider.h"
 
-#include "Behaviour/GameInformation.h"
-#include "Behaviour/TeamInformation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
 PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)
@@ -42,17 +42,15 @@ PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)
     
     m_state = m_chase_state;
     
-    m_chase_led_indices.push_back(3);
-    m_chase_led_indices.push_back(4);
-    m_led_on = vector<vector<float> >(1, vector<float>(3,1.0f));
-    m_led_off = vector<vector<float> >(1, vector<float>(3,0.0f));
+    m_led_on = vector<float>(3,1.0f);
+    m_led_off = vector<float>(3,0.0f);
     m_led_red = m_led_off;
-    m_led_red[0][0] = 1;
+    m_led_red[0] = 1;
     m_led_green = m_led_off;
-    m_led_green[0][1] = 1;
+    m_led_green[1] = 1;
     m_led_yellow = m_led_off;
-    m_led_yellow[0][0] = 1;
-    m_led_yellow[0][1] = 1;
+    m_led_yellow[0] = 1;
+    m_led_yellow[1] = 1;
 }
 
 PlayingState::~PlayingState()
@@ -67,19 +65,19 @@ void PlayingState::doStateCommons()
 {
     if (m_provider->stateChanged())
     {   // play a sound when we enter the playing state, turn the kick off light off
-        m_actions->addSound(m_actions->CurrentTime, NUSounds::PLAYING);
-        m_actions->addLeds(NUActionatorsData::RightFootLeds, m_actions->CurrentTime, 0, 0, 0);
+        m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::PLAYING);
+        m_actions->add(NUActionatorsData::RFootLed, m_actions->CurrentTime, m_led_off);
     }
     // In playing the chest led should be green
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_actions->CurrentTime, 0.1, 1, 0.1);
+    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, m_led_green);
     
     // set the right eye leds to indicate which state we are in
     if (m_state == m_chase_state)
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_chase_led_indices, m_actions->CurrentTime, m_led_red);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_red);
     else if (m_state == m_positioning_state)
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_chase_led_indices, m_actions->CurrentTime, m_led_green);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_green);
     else
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_chase_led_indices, m_actions->CurrentTime, m_led_off);
+        m_actions->add(NUActionatorsData::REyeLed, m_actions->CurrentTime, m_led_off);
 }
 
 BehaviourFSMState* PlayingState::nextStateCommons()

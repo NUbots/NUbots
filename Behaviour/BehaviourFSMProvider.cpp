@@ -23,9 +23,9 @@
 #include "Behaviour.h"
 #include "BehaviourState.h"
 
-#include "Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -95,9 +95,9 @@ void BehaviourFSMProvider::doBehaviour()
         nextstate = m_state->getNextState();
     
     // do state transition
+    m_previous_state = m_state;
     if (nextstate != m_state)
     {
-        m_previous_state = m_state;
         m_state = nextstate;
         m_state_changed = true;
     }

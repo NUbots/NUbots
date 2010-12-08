@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ModulePreference name="aldebaran-robotics.com@DCM" xmlns="http://www.aldebaran-robotics.com/ns/ALPreference" schemaLocation="ModulePreference.xsd">
+
+    <Preference name="CycleTime" description="Last time in ms between 2 updates" type="int" value="0"/>
+    <Preference name="Time" description="Absolute time for the DCM" type="int" value="0"/>
+    <Preference name="TargetCycleMinWait" description="Minimum wait between two query" type="int" value="8000"/>
+    <Preference name="TargetCycleTime" description="Update time in ms 
+wanted between two updates" type="int" value="20"/>
+    <Preference name="CycleTimeWarning" description="Min value in ms between 2 updates when a warning is logged" type="int" value="50"/>
+    <Preference name="HeatLogPath" description="Path for the I2C file" type="string" value="temperatureLog"/>
+    <Preference name="I2Cpath" description="Path for the I2C file" type="string" value="/dev/i2c-0"/>
+    <Preference name="Realtime" description="realtime for the dcm" type="int" value="1"/>
+    <Preference name="RealtimePriority" description="the realtime priority" type="int" value="60"/>
+   <Preference name="hardnessMode" description="hardness mode for motor board" type="string" value="pwm_mode"/>
+</ModulePreference>

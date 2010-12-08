@@ -20,11 +20,10 @@
  */
 
 #include "UdpPort.h"
-#include "NUPlatform/NUSystem.h"
-#include "debug.h"
-#include "debugverbositynetwork.h"
 
 #include "targetconfig.h"
+#include "debug.h"
+#include "debugverbositynetwork.h"
 
 #ifndef WIN32
     #include <sys/ioctl.h>
@@ -127,14 +126,12 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     // Construct the target address (we set the address to broadcast on the local subnet by default)
     m_target_address.sin_family = AF_INET;                              // host byte order
     m_target_address.sin_port = htons(m_port_number);                   // short, network byte order
-    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFFFFFF00;      // being careful here to broadcast only to the local subnet
+    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
     memset(m_target_address.sin_zero, '\0', sizeof m_target_address.sin_zero);
     
     // Bind the socket to this address
     if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
         errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << endl;
-
-    m_time_last_receive = 0;
     
     pthread_mutex_init(&m_socket_mutex, NULL);
     
@@ -174,17 +171,15 @@ void UdpPort::run()
             #if DEBUG_NETWORK_VERBOSITY > 0
                 debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            m_time_last_receive = nusystem->getTime();
             stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
-            handleNewData(buffer);
             #if DEBUG_NETWORK_VERBOSITY > 4
-                debug << "UdpPort::run(). Received ";
                 string s = buffer.str();
                 for (size_t i=0; i<s.size(); i++)
                     debug << s[i];
                 debug << endl;
             #endif
+            handleNewData(buffer);
         }
     }
     return;

@@ -22,13 +22,13 @@
 #include "BehaviourProvider.h"
 #include "Behaviour.h"
 
-#include "Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -136,36 +136,32 @@ void BehaviourProvider::updateButtonValues()
     m_left_previous_state = m_left_state;
     m_right_previous_state = m_right_state;
     
-    vector<float> temp;
     // Get the button state values
-    if (m_data->getButtonValues(NUSensorsData::MainButton, temp) && (temp.size() >= 1))
-        m_chest_state = temp[0];
+	m_data->getButton(NUSensorsData::MainButton, m_chest_state);
+	m_data->getButton(NUSensorsData::LeftButton, m_left_state);
+	m_data->getButton(NUSensorsData::RightButton, m_right_state);
     
-    if(m_data->getFootBumperValues(NUSensorsData::AllFeet, temp) && temp.size() >= 2)
+    // update the circular buffers on negative edges
+    if (m_chest_state < m_chest_previous_state)
     {
-        m_left_state = temp[0];
-        m_right_state = temp[1];
+        m_chest_times.push_back(m_current_time);
+        float chest_duration;
+        if (m_data->getButtonDuration(NUSensorsData::MainButton, chest_duration))
+            m_chest_durations.push_back(chest_duration);
     }
-    
-    // Get the durations of the last press
-    if (m_data->getButtonTriggers(temp) and temp.size() >= 3)
+    if (m_left_state < m_left_previous_state)
     {
-        // update the circular buffers on negative edges
-        if (m_chest_state < m_chest_previous_state)
-        {
-            m_chest_times.push_back(m_current_time);
-            m_chest_durations.push_back(temp[0]);
-        }
-        if (m_left_state < m_left_previous_state)
-        {
-            m_left_times.push_back(m_current_time);
-            m_left_durations.push_back(temp[1]);
-        }
-        if (m_right_state < m_right_previous_state)
-        {
-            m_right_times.push_back(m_current_time);
-            m_right_durations.push_back(temp[2]);
-        }
+        m_left_times.push_back(m_current_time);
+        float left_duration;
+        if (m_data->getButtonDuration(NUSensorsData::LeftButton, left_duration))
+            m_left_durations.push_back(left_duration);
+    }
+    if (m_right_state < m_right_previous_state)
+    {
+        m_right_times.push_back(m_current_time);
+        float right_duration;
+        if (m_data->getButtonDuration(NUSensorsData::RightButton, right_duration))
+            m_right_durations.push_back(right_duration);
     }
     
     // A double chest click always starts saving images not matter which behaviour
@@ -189,7 +185,7 @@ void BehaviourProvider::updateButtonValues()
 void BehaviourProvider::removeStiffness()
 {
     m_jobs->addMotionJob(new MotionKillJob());
-    m_actions->addSound(m_current_time, "remove_stiffness.wav");
+    m_actions->add(NUActionatorsData::Sound, m_current_time, "remove_stiffness.wav");
 }
 
 /*! @brief Sets the behaviour provider to be the "SelectBehaviour" provider

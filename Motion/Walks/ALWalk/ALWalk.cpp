@@ -21,8 +21,11 @@
 
 #include "ALWalk.h"
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/Platforms/NAO/NUNAO.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -106,26 +109,45 @@ void ALWalk::doWalk()
     #endif
     // give the target speed to the walk engine
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
-    m_al_motion->setWalkTargetVelocity(m_speed_x/maxspeeds[0], m_speed_y/maxspeeds[1], m_speed_yaw/maxspeeds[2], 1);
+    
+    float x = m_speed_x/maxspeeds[0];
+    if (x > 1)
+        x = 1;
+    else if (x < -1)
+        x = -1;
+    
+    float y = m_speed_y/maxspeeds[1];
+    if (y > 1)
+        y = 1;
+    else if (y < -1)
+        y = -1;
+    
+    float yaw = m_speed_yaw/maxspeeds[2];
+    if (yaw > 1)
+        yaw = 1;
+    else if (yaw < -1)
+        yaw = -1;
+    
+    m_al_motion->setWalkTargetVelocity(x, y, yaw, 1);
     
     // handle the joint stiffnesses
-    static vector<float> legnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), NAN);
-    static vector<float> armnan(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), NAN);
+    static vector<float> legnan(m_actions->getSize(NUActionatorsData::LLeg), NAN);
+    static vector<float> armnan(m_actions->getSize(NUActionatorsData::LArm), NAN);
     
     // voltage stablise the gains for the legs
-    vector<float> battery;
-    if (m_data->getBatteryValues(battery))
+    float voltage;
+    if (m_data->getBatteryVoltage(voltage))
     {   // this has been hastily ported over from 2009!
-        float voltagestablisation = 24654.0/(3*(battery[2] + battery[3]));        // the battery voltage in mV
+        float voltagestablisation = 24.654/voltage;
         for (size_t i=0; i<leggains.size(); i++)
             leggains[i] *= voltagestablisation;
     }
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_data->CurrentTime, legnan, legnan, leggains);
+    m_actions->add(NUActionatorsData::LLeg, m_data->CurrentTime, legnan, leggains);
+    m_actions->add(NUActionatorsData::RLeg, m_data->CurrentTime, legnan, leggains);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
+        m_actions->add(NUActionatorsData::LArm, m_data->CurrentTime, armnan, m_walk_parameters.getArmGains()[0]);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_data->CurrentTime, armnan, armnan, m_walk_parameters.getArmGains()[0]);
+        m_actions->add(NUActionatorsData::RArm, m_data->CurrentTime, armnan, m_walk_parameters.getArmGains()[0]);
 }
 
 /*! @brief Sets whether the arms are allowed to be moved by the walk engine
@@ -161,7 +183,7 @@ void ALWalk::initALConfig()
     m_al_param[0] = "WALK_TORSO_HEIGHT";
     m_al_config.arrayPush(m_al_param);
     
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
     if (m_al_config.getSize() != parameters.size() + 3)
         errorlog << "ALConfig and WalkParameter size mismatch detected. ALConfig: " << m_al_config.getSize() << " parameters: " << parameters.size() << endl;
     setWalkParameters(m_walk_parameters);
@@ -169,20 +191,20 @@ void ALWalk::initALConfig()
 
 void ALWalk::setALConfig()
 {
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
-    m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].Value));      // "WALK_STEP_MIN_PERIOD";
+    m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].get()));      // "WALK_STEP_MIN_PERIOD";
     
-    m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].Value);               // "WALK_MAX_STEP_X";
-    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].Value);             // "WALK_MAX_STEP_Y";
-    m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].Value);         // "WALK_MAX_STEP_THETA";
+    m_al_config[1][1] = maxspeeds[0]/(100*parameters[0].get());               // "WALK_MAX_STEP_X";
+    m_al_config[2][1] = 2*maxspeeds[1]/(100*parameters[0].get());             // "WALK_MAX_STEP_Y";
+    m_al_config[3][1] = 180*maxspeeds[2]/(3.141*parameters[0].get());         // "WALK_MAX_STEP_THETA";
     
-    m_al_config[4][1] = parameters[1].Value/100.0;                            // "WALK_MAX_STEP_HEIGHT";
-    m_al_config[5][1] = 180*parameters[2].Value/3.141;                        // "WALK_MIN_TRAPEZOID";
-    m_al_config[6][1] = 180*parameters[3].Value/3.141;                        // "WALK_FOOT_ORIENTATION";
-    m_al_config[7][1] = 180*parameters[4].Value/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
-    m_al_config[8][1] = parameters[5].Value/100;                              // "WALK_TORSO_HEIGHT";
+    m_al_config[4][1] = parameters[1].get()/100.0;                            // "WALK_MAX_STEP_HEIGHT";
+    m_al_config[5][1] = 180*parameters[2].get()/3.141;                        // "WALK_MIN_TRAPEZOID";
+    m_al_config[6][1] = 180*parameters[3].get()/3.141;                        // "WALK_FOOT_ORIENTATION";
+    m_al_config[7][1] = 180*parameters[4].get()/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
+    m_al_config[8][1] = parameters[5].get()/100;                              // "WALK_TORSO_HEIGHT";
 }
 
 void ALWalk::setWalkParameters(const WalkParameters& walkparameters)

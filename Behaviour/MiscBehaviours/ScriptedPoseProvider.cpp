@@ -21,13 +21,13 @@
 
 #include "ScriptedPoseProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/MotionFreezeJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 
 #include <math.h>
@@ -82,15 +82,13 @@ void ScriptedPoseProvider::doSelectedMotion()
     //Initialisation: First 50 Frames, will be used to stand up
     if (isStart < 50)
     {
-        vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, 50);
+        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
-	isStart++;
-	//! @todo TODO: If we are not standing up, then we should stand up (probably need a stand-up job, or set the walk speed non-zero for a little bit)
+		isStart++;
     }
     else if (isStart < 200)
     {
-        //m_jobs->addMotionJob(new WalkJob(0.0,0.0,0.0));
         m_jobs->addMotionJob(new MotionFreezeJob());
     	isStart++;
     }

@@ -23,8 +23,9 @@
 #include "NUbot.h"
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
 
@@ -99,17 +100,17 @@ void SenseMoveThread::run()
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.start();
             #endif
-            m_nubot->SensorData = m_nubot->m_platform->sensors->update();
+            m_nubot->m_platform->updateSensors();
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.split("sensors");
             #endif
             #ifdef USE_MOTION
-                m_nubot->m_motion->process(m_nubot->SensorData, m_nubot->Actions);
+                m_nubot->m_motion->process(Blackboard->Sensors, Blackboard->Actions);
                 #ifdef THREAD_SENSEMOVE_PROFILE
                     prof.split("motion");
                 #endif
             #endif
-            m_nubot->m_platform->actionators->process(m_nubot->Actions);
+            m_nubot->m_platform->processActions();
             #ifdef THREAD_SENSEMOVE_PROFILE
                 prof.split("actionators");
                 debug << prof;

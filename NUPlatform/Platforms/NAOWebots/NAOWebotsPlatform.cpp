@@ -23,10 +23,11 @@
 #include "NAOWebotsCamera.h"
 #include "NAOWebotsSensors.h"
 #include "NAOWebotsActionators.h"
-#include "NAOWebotsSystem.h"
 #include "NAOWebotsIO.h"
+
 #include "debug.h"
 #include "debugverbositynuplatform.h"
+#include "nubotconfig.h"
 
 #include <string.h>
 #include <iostream>
@@ -35,41 +36,77 @@
 using namespace std;
 
 /*! @brief Constructor for NAO in Webots robotic platform
- 
-    Webots passes the controller a command line argument specifying the URBI port.
-    This port number is then used to determine which robot the controller is running on.
- 
-    @param argc the number of command line arguements
-    @param argv[] the command line arguements
  */
-NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[])
+NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[]) : m_argc(argc), m_argv(argv)
 {
-#if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "NAOWebotsPlatform::NAOWebotsPlatform" << endl;
-#endif
-    if (argc < 3)
-    {
-        errorlog << "NAOWebotsPlatform::NAOWebotsPlatform(). Could not find team id and player id in controllerArgs" << endl;
-        m_player_number = 0;
-        m_team_number = 0;
-    }
-    else
-    {
-        m_player_number = atoi(argv[1]) + 1;
-        m_team_number = atoi(argv[2]);
-    }
+    #if DEBUG_NUPLATFORM_VERBOSITY > 1
+        debug << "NAOWebotsPlatform::NAOWebotsPlatform()" << endl;
+    #endif
+    init();
     
-    stringstream ss;
-    ss << "nubot" << m_player_number;
-    m_name = ss.str();
-    
-    system = new NAOWebotsSystem(this);                 // the system needs to be created first because it provides times for the other modules!
-    camera = new NAOWebotsCamera(this);
-    sensors = new NAOWebotsSensors(this);
-    actionators = new NAOWebotsActionators(this);
+    #ifdef USE_VISION
+        m_camera = new NAOWebotsCamera(this);
+    #else
+        m_camera = 0;
+    #endif
+    m_sensors = new NAOWebotsSensors(this);
+    m_actionators = new NAOWebotsActionators(this);
 }
 
 NAOWebotsPlatform::~NAOWebotsPlatform()
 {
 }
+
+double NAOWebotsPlatform::getTime()
+{
+    return JRobot::getTime()*1000;
+}
+
+/*! @brief Initialises the NUPlatform's name
+    Sets m_name.
+ */
+void NAOWebotsPlatform::initName()
+{
+    // In webots the player number is a command line arguement. We use this as the robot number.
+    // We construct the name as nubot${playernumber}
+    int player_number = 0;
+    if (m_argc >= 2)
+        player_number = atoi(m_argv[1]) + 1;
+    
+    stringstream ss;
+    ss << "nubot" << player_number;
+    m_name = ss.str();
+}
+
+/*! @brief Intialise the NUPlatform's robot number 
+    Sets m_robot_number
+ */
+void NAOWebotsPlatform::initNumber()
+{
+    // In webots the player number is a command line arguement. We use this as the robot number.
+    if (m_argc >= 2)
+        m_robot_number = atoi(m_argv[1]) + 1;
+}
+
+/*! @brief Intialise the NUPlatform's team number 
+    Sets m_team_number
+ */
+void NAOWebotsPlatform::initTeam()
+{
+    // In webots the team number is a command line arguement.
+    if (m_argc >= 3)
+        m_team_number = atoi(m_argv[2]);
+}
+
+/*! @brief Intialise the NUPlatform's mac address 
+    Sets m_mac_address
+ */
+void NAOWebotsPlatform::initMAC()
+{
+    // In webots we manufacture a mac addresss that is all zero except for the last digit, which is the robot number
+    stringstream ss;
+    ss << "00-00-00-00-0" << m_robot_number;
+    m_mac_address = ss.str();
+}
+
 

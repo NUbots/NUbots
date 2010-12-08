@@ -2,7 +2,7 @@
 #define IMAGESTREAMFILEREADER_H
 
 #include <QObject>
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 #include "StreamFileReader.h"
 
@@ -20,16 +20,16 @@ public:
         imageReader.OpenFile(filename.toStdString());
     };
 private:
-    StreamFileReader<NUimage> imageReader;
+    StreamFileReader<NUImage> imageReader;
 signals:
-    void NewDataAvailable(NUimage* newData);
+    void NewDataAvailable(NUImage* newData);
 
 public slots:
     void nextFrame()
     {
         if(imageReader.IsValid())
         {
-            NUimage* result = imageReader.ReadNextFrame();
+            NUImage* result = imageReader.ReadNextFrame();
             if(result)
             {
                 emit NewDataAvailable(result);
@@ -40,7 +40,7 @@ public slots:
     {
         if(imageReader.IsValid())
         {
-            NUimage* result = imageReader.ReadPrevFrame();
+            NUImage* result = imageReader.ReadPrevFrame();
             if(result)
             {
                 emit NewDataAvailable(result);
@@ -51,7 +51,7 @@ public slots:
     {
         if(imageReader.IsValid())
         {
-            NUimage* result = imageReader.ReadFirstFrame();
+            NUImage* result = imageReader.ReadFirstFrame();
             if(result)
             {
                 emit NewDataAvailable(result);
@@ -62,7 +62,7 @@ public slots:
     {
         if(imageReader.IsValid())
         {
-            NUimage* result = imageReader.ReadLastFrame();
+            NUImage* result = imageReader.ReadLastFrame();
             if(result)
             {
                 emit NewDataAvailable(result);
@@ -73,7 +73,7 @@ public slots:
     {
         if(imageReader.IsValid())
         {
-            NUimage* result = imageReader.ReadFrameNumber(frameNumber);
+            NUImage* result = imageReader.ReadFrameNumber(frameNumber);
             if(result)
             {
                 emit NewDataAvailable(result);

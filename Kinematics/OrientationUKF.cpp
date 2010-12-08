@@ -1,6 +1,6 @@
 #include "OrientationUKF.h"
 #include "Tools/Math/General.h"
-#include "NUPlatform/NUSystem.h"
+
 #include "debug.h"
 #include "nubotdataconfig.h"
 OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)
@@ -29,9 +29,9 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
     m_covariance[rollAngle][rollAngle] = 0.5f * 0.5f;
 
     m_processNoise = Matrix(numStates,numStates,false);
-    m_processNoise[pitchAngle][pitchAngle] = 1e-2;
+    m_processNoise[pitchAngle][pitchAngle] = 1e-3;
     m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-5;
-    m_processNoise[rollAngle][rollAngle] = 1e-2;
+    m_processNoise[rollAngle][rollAngle] = 1e-3;
     m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-5;
 
     m_initialised = true;
@@ -44,7 +44,7 @@ void OrientationUKF::TimeUpdate(const std::vector<float>& gyroReadings, double t
 //    file << "-- Time Update (" << timestamp << ") [" << rollGyroReading << "," << pitchGyroReading << "] --" << std::endl;
 //    file << "Previous Mean:" << std::endl;
 //    file << m_mean;
-    //double startTime = nusystem->getThreadTime();
+    //double startTime = System->getThreadTime();
     // Find delta 't', the time that has passed since the previous time update.
     const float dt = (timestamp - m_timeOfLastUpdate) / 1000.0f;
 
@@ -91,7 +91,7 @@ void OrientationUKF::TimeUpdate(const std::vector<float>& gyroReadings, double t
 
     // Find the new covariance
     m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean) + m_processNoise;
-    //double runTime = nusystem->getThreadTime() - startTime;
+    //double runTime = System->getThreadTime() - startTime;
     //debug << "TimeUpdate took: " << runTime << " ms" << std::endl;
 
 //    file << "New Mean:" << std::endl;
@@ -112,7 +112,7 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
 //    file << "Previous Mean:" << std::endl;
 //    file << m_mean << std::endl;
 
-    //double startTime = nusystem->getThreadTime();
+    //double startTime = System->getThreadTime();
     const float gravityAccel = 981.0f; // cm/s^2
     int numMeasurements = 3;
     if(validKinematics) numMeasurements+=2;
@@ -187,7 +187,7 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
     measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
-    //double runTime = nusystem->getThreadTime() - startTime;
+    //double runTime = System->getThreadTime() - startTime;
     //debug << "Acceleration Measurement Update took: " << runTime << " ms" << std::endl;
 //    file << "Predicted Observation Mean:" << std::endl;
 //    file << predictedObservationSigmas.getCol(0);

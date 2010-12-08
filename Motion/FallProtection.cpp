@@ -21,8 +21,8 @@
 
 #include "FallProtection.h"
 #include "NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "motionconfig.h"
 #include "debug.h"
@@ -149,22 +149,27 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
     #endif
     if (m_data->isFalling())
     {
-        vector<float> velocity_larm(m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-        vector<float> velocity_rarm(m_actions->getNumberOfJoints(NUActionatorsData::RightArmJoints), 0);
-        vector<float> velocity_lleg(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-        vector<float> velocity_rleg(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
-        
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
-        m_data->getJointPositions(NUSensorsData::LeftArmJoints, sensor_larm);
-        m_data->getJointPositions(NUSensorsData::RightArmJoints, sensor_rarm);
-        m_data->getJointPositions(NUSensorsData::LeftLegJoints, sensor_lleg);
-        m_data->getJointPositions(NUSensorsData::RightLegJoints, sensor_rleg);
+        m_data->getPosition(NUSensorsData::LArm, sensor_larm);
+        m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
+        m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
+        m_data->getPosition(NUSensorsData::RLeg, sensor_rleg);
         
-        m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, 0, sensor_lleg, velocity_lleg, 0);
-        m_actions->addJointPositions(NUActionatorsData::RightLegJoints, 0, sensor_rleg, velocity_rleg, 0);
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, 0, sensor_larm, velocity_larm, 0);
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, 0, sensor_rarm, velocity_rarm, 0);
+        m_actions->add(NUActionatorsData::LLeg, 0, sensor_lleg, 0);
+        m_actions->add(NUActionatorsData::RLeg, 0, sensor_rleg, 0);
+        m_actions->add(NUActionatorsData::LArm, 0, sensor_larm, 0);
+        m_actions->add(NUActionatorsData::RArm, 0, sensor_rarm, 0);
+        
+        vector<float> head_position(2,0);
+        vector<float> head_velocity(2,0);
+        vector<float> falling;
+        m_data->getFalling(falling);
+        if (falling[3])         // forward
+            head_position[0] = -0.67;
+        else if (falling[4])    // backward
+            head_position[0] = 0.44;
+        m_actions->add(NUActionatorsData::Head, 0, head_position, 45);
     }
 }
 
