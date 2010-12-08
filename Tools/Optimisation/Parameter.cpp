@@ -26,6 +26,8 @@
 #include <sstream>
 #include "debug.h"
 
+#include "Tools/Math/StlVector.h"
+
 /*! @brief Default constructor for a parameter. Everything is initialised to 0/blank */
 Parameter::Parameter() 
 {
@@ -400,6 +402,7 @@ istream& operator>> (istream& input, vector<Parameter>& p)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
+/*
 vector<float> operator+(const float& f, const vector<float>& v)
 {
     vector<float> result;
@@ -566,4 +569,5 @@ istream& operator>>(istream& input, vector<vector<float> >& v)
     }
     return input;
 }
+*/
 
