@@ -58,6 +58,9 @@ NUPlatform::NUPlatform()
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
         debug << "NUPlatform::NUPlatform()" << endl;
     #endif
+    m_camera = NULL;
+    m_actionators = NULL;
+    m_sensors = NULL;
     Platform = this;
 }
 
@@ -66,11 +69,11 @@ NUPlatform::~NUPlatform()
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
         debug << "NUPlatform::~NUPlatform()" << endl;
     #endif
-    delete m_camera;
+    if(m_camera) delete m_camera;
     m_camera = 0;
-    delete m_sensors;
+    if(m_sensors) delete m_sensors;
     m_sensors = 0;
-    delete m_actionators;
+    if(m_actionators) delete m_actionators;
     m_actionators = 0;
 }
 

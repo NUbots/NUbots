@@ -156,6 +156,8 @@ MainWindow::~MainWindow()
     delete doBonjourTestAction;
     
     delete m_nuview_io;
+    delete m_blackboard;
+    delete m_platform;
     return;
 }
 
