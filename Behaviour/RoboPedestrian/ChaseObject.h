@@ -44,50 +44,67 @@ public:
     {
         m_id = fieldobjectid;
         m_ambiguous_id = ambiguousfieldobjectid;
-	lastBallTrack = 0;
-	timeSinceTrack = 0;
+        m_tracking_ball = false;
+        m_tracking_time = 0;
+        m_chasing_time = 0;
+        m_previous_time = 0;
     };
+    
     virtual ~ChaseObject() {};
     virtual BehaviourState* nextState() = 0;
+        
     virtual void doState()
     {
-        // track the object
-        if (m_target.isObjectVisible())
-         //   m_jobs->addMotionJob(new HeadTrackJob(m_target));
-		targetBearing = m_target.measuredBearing();
+        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        if (m_previous_time == 0 or m_data->CurrentTime - m_previous_time > 500)
+        {   // check if this is the first time this state has been run in awhile, if so: reset
+            m_previous_time = m_data->CurrentTime;
+            m_tracking_ball = false;
+            m_tracking_time = 0;
+            m_chasing_time = 0;
+        }
+        
+        vector<float> speed(3,0);
+        vector<float> result(3,0);
+        speed[0] = 1;
+        speed[1] = m_target.measuredBearing();
+        speed[2] = m_target.measuredBearing()/2;
+        result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 40, 100);
+        
+        if (not m_tracking_ball)
+        {   // if we are chasing the object
 
-        if(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() < 3000
-		&& timeSinceTrack > 5000
-		&& m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 500
-		//&& m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible()
-	        && m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance() > 75
-		&& m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance() < 400
-	)
-	{
-		if(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
-			m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL],0.25,0));
-		
-		m_jobs->addMotionJob(new WalkJob(0.2, targetBearing, (targetBearing)/2.0));
-		lastBallTrack = m_data->CurrentTime;
-	}
-	else
-	{
-		m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation,100, 300, -0.6, 0.6)); //Min Distance should be 5cm not 400
-		timeSinceTrack = m_data->CurrentTime - lastBallTrack;
-		vector<float> speed(3,0);
-		vector<float> result(3,0);
-		speed[0] = 1;
-		speed[1] = targetBearing;
-		speed[2] = targetBearing/2;
-		result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 40, 100);
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation, 75, 300, -0.6, 0.6)); //Min Distance should be 5cm not 400
             
-		m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
-	}
-	
-        // walk torward the object
-        //m_jobs->addMotionJob(new WalkJob(1, m_target.measuredBearing(), (m_target.measuredBearing())/2.0));
-	//m_jobs->addMotionJob(new WalkJob(1, targetBearing, (targetBearing)/2.0));
+            m_chasing_time += m_data->CurrentTime - m_previous_time;
+            
+            if (m_chasing_time > 5000 and ball.isObjectVisible() and ball.measuredDistance() > 75 and ball.measuredDistance() < 180)
+            {
+                m_tracking_ball = true;
+                m_tracking_time = 0;
+            }
+        }
+        else
+        {   // if we are distracted by the ball
+            if(ball.isObjectVisible())
+            {
+                float offset = mathGeneral::sign(ball.measuredBearing())*0.3;
+                m_jobs->addMotionJob(new HeadTrackJob(ball, 0.15, offset));
+            }
+            
+            result[0] *= 0.5;
+            
+            m_tracking_time += m_data->CurrentTime - m_previous_time;
+            
+            if (m_tracking_time > 3000)
+            {
+                m_tracking_ball = false;
+                m_chasing_time = 0;
+            }
+        }
+        m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
 
+        m_previous_time = m_data->CurrentTime;
     };
 protected:
     void updateTarget()
@@ -110,12 +127,14 @@ protected:
         }
     };
 protected:
-    int m_id;               //!< the id of the field object you want to chase
-    int m_ambiguous_id;     //!< the ambiguous id of the field object you want to chase
-    Object m_target;
-    float targetBearing;
-    float timeSinceTrack;
-    float lastBallTrack;
+    int m_id;                   //!< the id of the field object you want to chase
+    int m_ambiguous_id;         //!< the ambiguous id of the field object you want to chase
+    Object m_target;            //!< the object we are 'chasing'
+    bool m_tracking_ball;       //!< a flag to indicate whether we are tracking the distraction
+    float m_chasing_time;       //!< the time spent chasing the target
+    float m_tracking_time;      //!< the time spent tracking the ball
+
+    double m_previous_time;     //!< the previous time this tate was run
 };
 
 #endif
