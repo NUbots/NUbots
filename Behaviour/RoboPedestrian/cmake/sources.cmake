@@ -20,22 +20,18 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
-                BehaviourFSMProvider.cpp BehaviourFSMProvider.h
-                BehaviourState.cpp BehaviourState.h
-                BehaviourFSMState.cpp BehaviourFSMState.h
-                BehaviourPotentials.h
-                Behaviour.cpp Behaviour.h
+SET (YOUR_SRCS  RoboPedestrianProvider.cpp RoboPedestrianProvider.h
+                RoboPedestrianState.h
+		ChaseObject.h
+		SearchForObject.h
+		ChaseBlueGoal.h
+		ChaseYellowGoal.h
+		SearchForBlueGoal.h
+		SearchForYellowGoal.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Soccer
-                ChaseBall
-                MiscBehaviours
-                WalkOptimisation
-                Kicker
-                PassingChallenge
-                RoboPedestrian
+SET (YOUR_DIRS  
 )
 ####################################################################################
 
