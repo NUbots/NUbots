@@ -101,7 +101,7 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 100, -0.95, 0.95));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 700, -0.95, 0.95));
         
         if (m_team_info->getPlayerNumber() != 1)
             m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
