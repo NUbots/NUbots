@@ -11,7 +11,10 @@ win32 {
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
     INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    INCLUDEPATH += 'C:/Program Files/boost/boost_1_44'
+    INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
+    INCLUDEPATH += 'C:/Program Files/Bonjour SDK/Include/'
     LIBS += -lwsock32
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
@@ -41,7 +44,7 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Horizon.h \
     openglmanager.h \
     GLDisplay.h \
-    ../Infrastructure/NUImage/NUimage.h \
+    ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ClassifiedImage.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \

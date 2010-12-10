@@ -35,6 +35,7 @@ SET (YOUR_DIRS  Soccer
                 WalkOptimisation
                 Kicker
                 PassingChallenge
+                RoboPedestrian
 )
 ####################################################################################
 

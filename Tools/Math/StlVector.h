@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <vector>
 using namespace std;
 
 // ----------------------------------------------------------------------------------------------------------------------------- Serialisation

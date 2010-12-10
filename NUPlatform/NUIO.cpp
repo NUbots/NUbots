@@ -97,6 +97,11 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     #ifdef USE_NETWORK_JOBS
         m_jobs_port = new JobPort(jobs);
     #endif
+    #ifdef USE_NETWORK_SSLVISION
+        m_ssl_vision_port = new SSLVisionPort(Blackboard->Sensors, Blackboard->TeamInfo, SSLVISION_PORT);
+    #else
+        m_ssl_vision_port = NULL;
+    #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
         m_localisation_port = new TcpPort(LOCWM_PORT);

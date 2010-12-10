@@ -2,7 +2,7 @@
 #include <QLabel>
 #include <QString>
 #include <QGridLayout>
-#include <Infrastructure/NUImage/NUImage.h>
+#include "Infrastructure/NUImage/NUImage.h"
 
 
 frameInformationWidget::frameInformationWidget(QWidget *parent) :
