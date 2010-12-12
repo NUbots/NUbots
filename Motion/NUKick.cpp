@@ -497,7 +497,7 @@ void NUKick::doKick()
         {
             // Shift the weight of the robot to the support leg.
             //done = ShiftWeightToFoot(supportLeg,1.0f,0.01, 1500);
-            done = ShiftWeightToFootClosedLoop(supportLeg, m_intialWeightShiftPercentage, 0.7);
+            done = ShiftWeightToFootClosedLoop(supportLeg, m_intialWeightShiftPercentage, 0.4);
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -657,7 +657,7 @@ void NUKick::doKick()
                     cout << "Swing completed!" << endl;
                     debug << "Swing completed!" << endl;
                     #endif
-                    pose = REALIGN_LEGS;
+                    pose = RETRACT;
                 }
                 break;
         }
@@ -677,7 +677,7 @@ void NUKick::doKick()
             }
         case REALIGN_LEGS:
             {
-                done = LowerLeg(m_kickingLeg, 1.5f);
+                done = LowerLeg(m_kickingLeg, 1.0f);
                 BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
@@ -692,7 +692,7 @@ void NUKick::doKick()
         case UNSHIFT_LEG:
         {
                 //done = ShiftWeightToFoot(m_kickingLeg,0.5f,0.01f, 500.0f);
-                done = ShiftWeightToFootClosedLoop(supportLeg, 0.5f, 0.7);
+                done = ShiftWeightToFootClosedLoop(supportLeg, 0.5f, 0.4);
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -745,7 +745,7 @@ bool NUKick::doPreKick()
     static double endWaitTime = 0;
     if (m_kickWait)
     {
-        endWaitTime = m_data->CurrentTime + 1000;
+        endWaitTime = m_data->CurrentTime + 1500;
         m_kickWait = false;
         debug << "Pre - Kick. Updated endWaitTime: " << endWaitTime << endl;
     }
@@ -1004,7 +1004,7 @@ bool NUKick::LiftKickingLeg(legId_t p_kickingLeg, float speed)
         if(!m_stateCommandGiven)
         {
             kickLegTargets = supportLegPositions;
-            kickLegTargets[3] = 1.3f;
+            kickLegTargets[3] = 1.4f;
             kickLegTargets[1] = -kickLegTargets[3] / 2.0f;
             kickLegTargets[5] = -kickLegTargets[3] / 2.0f;
             m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(kickingLeg, kickLegPositions, kickLegTargets, speed, 75.0, 1.0);
@@ -1050,7 +1050,8 @@ bool NUKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
         if(!m_stateCommandGiven)
         {
             kickLegTargets.assign(kickLegPositions.begin(), kickLegPositions.end());
-            kickLegTargets[1] = kickLegPositions[1] + angleChange;
+            kickLegTargets[1] += angleChange;
+            kickLegTargets[3] += 0.25*angleChange;
             FlattenFoot(kickLegTargets);
             LimitJoints(poiseLeg, kickLegTargets);
 
@@ -1768,7 +1769,7 @@ double NUKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vecto
     vector<double> endTimes(1,endTime);
     vector< vector<float> > endPositions(1,targetPosition);
 
-    MotionCurves::calculate(startTime,endTimes,currentPosition,endPositions,smoothness,20,times,positions,velocities);
+    MotionCurves::calculate(startTime,endTimes,currentPosition,endPositions,smoothness,10,times,positions,velocities);
 
     m_actions->add(limbId,times,positions,gain);
     return endTime;
