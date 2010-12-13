@@ -47,6 +47,7 @@ SSLVisionPort::SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teami
     else
         m_ssl_id = m_team_info->getPlayerNumber();
     idfile.close();
+	storage.open("/var/volatile/storage.log");	
 }
 
 /*! @brief Closes the job port
@@ -94,6 +95,10 @@ void SSLVisionPort::writePacketToSensors(SSLVisionPacket* packet, NUSensorsData*
                 sensors->getPosition(NUSensorsData::HeadYaw, headyaw);
                 compassData = mathGeneral::normaliseAngle(packet->robots[i].heading - headyaw);           // as the marker is attached to the head, subtract the head yaw position
                 sensors->set(NUSensorsData::Compass, currTime, compassData);
+				
+				// Record data into file
+				storage<<"\n"<<gpsData[0]<<", "<<gpsData[1]<<", "<<compassData<<", "<<headyaw<<", "<<currTime;
+				
                 #if DEBUG_NETWORK_VERBOSITY > 0
                     debug << "SSLVisionPort. Position data received - gps: (" << gpsData[0] << "," << gpsData[1];
                     debug << ") Heading: " << compassData << std::endl;
