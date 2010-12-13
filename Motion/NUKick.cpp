@@ -113,12 +113,13 @@ void NUKick::loadKickParameters()
     float footInnerWidth = m_kinematicModel->getFootInnerWidth();
     m_footWidth = footWidth;
     m_ballRadius = 3.5f;
-    const float yReachFwd = 6.0f;
+    const float yReachFwd = 2.0f;
     const float yReachSide = 20.0f;
     const float xMin = m_kinematicModel->getFootForwardLength() - 1;
-    const float xReachFwd = xMin + 8.0f;
+    const float xReachFwd = xMin + 10.0f;
     const float xReachSide = 30.0f;
-    float yMin = footInnerWidth + 2.0f;
+    float yMin = footInnerWidth + 3.5f;
+    float yMax = yMin + footWidth - 1.5;
 
     m_intialWeightShiftPercentage = 1.0f;
 #ifdef TARGET_IS_NAOWEBOTS
@@ -126,8 +127,9 @@ void NUKick::loadKickParameters()
     yMin = footInnerWidth;
 #endif
 
-    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (yMin), (footWidth + yReachFwd));
-    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(footWidth + yReachFwd), -(yMin));
+    // These boxes are relative to the supporting foot at the ankle's attachment point
+    LeftFootForwardKickableArea = Rectangle(xMin, xReachFwd, (yMin), yMax);
+    RightFootForwardKickableArea = Rectangle(xMin, xReachFwd, -(yMax), -(yMin));
 
     LeftFootRightKickableArea = Rectangle(xMin, xReachSide, footWidth/2.0, yReachSide);
     //LeftFootLeftKickableArea = Rectangle(xMin, xReachSide, 2.0f*footWidth, 3.0f/2.0f*footWidth + yReachSide);
@@ -552,7 +554,7 @@ void NUKick::doKick()
 
         case POISE_LEG:
         {
-            done = doPoise(m_kickingLeg, 0.2, 1.5f);
+            done = doPoise(m_kickingLeg, 0.5, 1.5f);
             if(m_kickingLeg == leftLeg)
             {
                 BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
@@ -663,7 +665,7 @@ void NUKick::doKick()
         }
         case RETRACT:
             {
-                done = LiftKickingLeg(m_kickingLeg, 1.0f);
+                done = LiftKickingLeg(m_kickingLeg, 1.5f);
                 BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
@@ -677,7 +679,7 @@ void NUKick::doKick()
             }
         case REALIGN_LEGS:
             {
-                done = LowerLeg(m_kickingLeg, 1.0f);
+                done = LowerLeg(m_kickingLeg, 0.7f);
                 BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
@@ -692,7 +694,7 @@ void NUKick::doKick()
         case UNSHIFT_LEG:
         {
                 //done = ShiftWeightToFoot(m_kickingLeg,0.5f,0.01f, 500.0f);
-                done = ShiftWeightToFootClosedLoop(supportLeg, 0.5f, 0.4);
+                done = ShiftWeightToFootClosedLoop(supportLeg, 0.5f, 0.3);
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -939,8 +941,7 @@ bool NUKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeight
             debug << "targetAnkleRoll = " << targetAnkleRoll << endl;
             legPositionTargets[0] = -targetAnkleRoll;
             legPositionTargets[4] = targetAnkleRoll;
-            MoveLimbToPositionWithSpeed(targetLeg,targetLegPositions,legPositionTargets,speed,m_defaultMotorGain,1.0);
-            m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(otherLeg,otherLegPositions,legPositionTargets,speed,m_defaultMotorGain,1.0);
+            m_estimatedStateCompleteTime = MoveLegsToPositionWithSpeed(legPositionTargets,speed,m_defaultMotorGain,1.0);
 
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
@@ -1051,7 +1052,7 @@ bool NUKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
         {
             kickLegTargets.assign(kickLegPositions.begin(), kickLegPositions.end());
             kickLegTargets[1] += angleChange;
-            kickLegTargets[3] += 0.25*angleChange;
+            kickLegTargets[3] += angleChange;
             FlattenFoot(kickLegTargets);
             LimitJoints(poiseLeg, kickLegTargets);
 
@@ -1162,7 +1163,7 @@ void NUKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, fl
 {
     // Linear controller to centre CoP
     const float gainx = -0.01 * GainMultiplier();
-    const float gainy = 0.008 * GainMultiplier();
+    const float gainy = 0.01 * GainMultiplier();
     const float targetCoPx = targetX;
     const float targetCoPy = targetY;
 
@@ -1199,7 +1200,7 @@ void NUKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, fl
     // Pitch correction
     jointAngles[5] += gainx * asin(deltax / 35.0f);
     // Hip Pitch - Reverse of pitch to maintain vertical torso.
-    jointAngles[1] = jointAngles[5];
+    //jointAngles[1] = jointAngles[5];
     return;
 }
 
@@ -1457,7 +1458,7 @@ bool NUKick::SwingLegForward(legId_t p_kickingLeg, float speed)
     validData = validData && m_data->getTarget(kickingLeg,kickingLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
-    const float targetHipPitch = -1.1;
+    const float targetHipPitch = -1.2;
     const float targetKneePitch = 0.7f;
 
     static float endHipAngle = 0;
@@ -1494,7 +1495,7 @@ bool NUKick::SwingLegForward(legId_t p_kickingLeg, float speed)
             kickingTargets[3] = endKneeAngle;
             FlattenFoot(kickingTargets);
             
-            m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(kickingLeg,kickingLegJoints,kickingTargets,swingSpeed,100.0f,1.0f);
+            m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(kickingLeg,kickingLegJoints,kickingTargets,swingSpeed, 80.0f, 1.0f);
             m_stateCommandGiven = true;
 
             #if DEBUG_NUMOTION_VERBOSITY > 4
@@ -1582,8 +1583,10 @@ bool NUKick::LowerLeg(legId_t p_kickingLeg, float speed)
     if(!validData) return false;
 
     vector<float>kickLegPositions, supportLegPositions;
+    bool kickingLegContact;
     validData = validData && m_data->getTarget(kickingLeg,kickLegPositions);
     validData = validData && m_data->getTarget(supportLeg,supportLegPositions);
+    validData = validData && m_data->getContact(kickingLeg, kickingLegContact);
 
     validData = validData && (kickLegPositions.size() >= 6);
 
@@ -1603,7 +1606,7 @@ bool NUKick::LowerLeg(legId_t p_kickingLeg, float speed)
             #endif
         }
 
-        if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
+        if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0) or kickingLegContact)
         {
             m_stateCommandGiven = false;
             return true;
@@ -1619,7 +1622,7 @@ bool NUKick::kickAbortCondition()
 
 float NUKick::CalculateForwardSwingSpeed(float kickDistance)
 {
-    return 10.0f;
+    return 5.0f;
 }
 
 float NUKick::CalculateSidewardSwingSpeed(float kickDistance)
@@ -1636,7 +1639,7 @@ bool NUKick::chooseLeg()
 	double xtrans = m_ball_x*cos(theta) + m_ball_y*sin(theta);
 	double ytrans = m_ball_y*cos(theta) - m_ball_x*sin(theta);
 
-        #if DEBUG_NUMOTION_VERBOSITY > 3
+        #if DEBUG_NUMOTION_VERBOSITY > 1
         debug << "bool NUKick::chooseLeg()" << endl;
         debug << "theta - " << theta << endl;
         debug << "xtrans - " << xtrans << endl;
@@ -1657,14 +1660,14 @@ bool NUKick::chooseLeg()
         vector<float> leftPos = Kinematics::PositionFromTransform(leftFootTransform);
         vector<float> rightPos = Kinematics::PositionFromTransform(rightFootTransform);
 
-        #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "Right Pos = (" << rightPos[0] << "," << rightPos[1] << "," << rightPos[2] << ")" << endl;
-        debug << "Left Pos = (" << leftPos[0] << "," << leftPos[1] << "," << leftPos[2] << ")" << endl;
+        #if DEBUG_NUMOTION_VERBOSITY > 1
+            debug << "Right Pos = (" << rightPos[0] << "," << rightPos[1] << "," << rightPos[2] << ")" << endl;
+            debug << "Left Pos = (" << leftPos[0] << "," << leftPos[1] << "," << leftPos[2] << ")" << endl;
 
-        debug << "Ball Position - " << endl;
-        debug << "Origin Relative: (" << ballLocation.x << "," << ballLocation.y << ")" << endl;
-        debug << "Right Foot Relative: (" << rightFootRelativeBallLocation.x << "," << rightFootRelativeBallLocation.y << ")" << endl;
-        debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << endl;
+            debug << "Ball Position - " << endl;
+            debug << "Origin Relative: (" << ballLocation.x << "," << ballLocation.y << ")" << endl;
+            debug << "Right Foot Relative: (" << rightFootRelativeBallLocation.x << "," << rightFootRelativeBallLocation.y << ")" << endl;
+            debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << endl;
         #endif
 
         const float fwdAngleRange = PI/16.0f;
@@ -1675,7 +1678,7 @@ bool NUKick::chooseLeg()
 
         if(fabs(theta) < fwdAngleRange)
         {
-            #if DEBUG_NUMOTION_VERBOSITY > 3
+            #if DEBUG_NUMOTION_VERBOSITY > 1
             debug << "Right foot: " << endl << RightFootForwardKickableArea.MinX() << " < " << leftFootRelativeBallLocation.x << " < " << RightFootForwardKickableArea.MaxX() << endl;
             debug << RightFootForwardKickableArea.MinY() << " < " << leftFootRelativeBallLocation.y << " < " << RightFootForwardKickableArea.MaxY() << endl;
             debug << "Left foot: " << endl << LeftFootForwardKickableArea.MinX() << " < " << rightFootRelativeBallLocation.x << " < " << LeftFootForwardKickableArea.MaxX() << endl;
@@ -1759,7 +1762,7 @@ double NUKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vecto
 
     // compute the time required to move into the initial pose for each limb
     double moveTime = 1000*(maxDifference(currentPosition, targetPosition)/movespeed);
-    float startTime = m_data->CurrentTime + 100.0;
+    float startTime = m_data->CurrentTime;
     float endTime = startTime + moveTime;
     
     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -1772,5 +1775,36 @@ double NUKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vecto
     MotionCurves::calculate(startTime,endTimes,currentPosition,endPositions,smoothness,10,times,positions,velocities);
 
     m_actions->add(limbId,times,positions,gain);
+    return endTime;
+}
+
+double NUKick::MoveLegsToPositionWithSpeed(const vector<float>& targetPosition, float maxSpeed , float gain, float smoothness)
+{
+    vector<float> left_currentPosition, right_currentPosition;
+    m_data->getPosition(NUSensorsData::LLeg, left_currentPosition);
+    m_data->getPosition(NUSensorsData::RLeg, right_currentPosition);
+    
+    const float movespeed = maxSpeed;
+    vector< vector<float> > positions;
+    vector< vector<float> > velocities;
+    vector< vector<double> > times;
+    
+    // compute the time required to move into the initial pose for each limb
+    double left_moveTime = 1000*(maxDifference(left_currentPosition, targetPosition)/movespeed);
+    double right_moveTime = 1000*(maxDifference(right_currentPosition, targetPosition)/movespeed);
+    double moveTime = max(left_moveTime, right_moveTime);
+    
+    float startTime = m_data->CurrentTime;
+    float endTime = startTime + moveTime;
+    
+    vector<double> endTimes(1,endTime);
+    vector< vector<float> > endPositions(1, targetPosition);
+    
+    MotionCurves::calculate(startTime,endTimes,left_currentPosition,endPositions,smoothness,10,times,positions,velocities);
+    m_actions->add(NUActionatorsData::LLeg, times, positions, gain);
+    
+    MotionCurves::calculate(startTime,endTimes,right_currentPosition,endPositions,smoothness,10,times,positions,velocities);
+    m_actions->add(NUActionatorsData::RLeg, times, positions, gain);
+    
     return endTime;
 }

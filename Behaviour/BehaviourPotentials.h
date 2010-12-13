@@ -133,7 +133,7 @@ public:
     
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 13.0, float stoppingdistance = 65)
+    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
     {
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)

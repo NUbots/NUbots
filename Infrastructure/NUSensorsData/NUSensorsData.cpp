@@ -354,7 +354,7 @@ bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
     data = vector<float>(2);
     bool successful = true;
     successful &= getEndEffectorData(id, CoPXId, data[0]);
-    successful &= getEndEffectorData(id, CoPXId, data[1]);
+    successful &= getEndEffectorData(id, CoPYId, data[1]);
     return successful;
 }
 
