@@ -31,6 +31,7 @@
 #include "PassingChallenge/PassingChallengeProvider.h"
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
+#include "RoboPedestrian/RoboPedestrianProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -113,7 +114,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new ScriptedPoseProvider(this);
     else if (name.compare("pose") == 0)
         return new PoseProvider(this);
-
+    else if (name.compare("robopedestrian") == 0)
+        return new RoboPedestrianProvider(this);
     else
         return NULL;
 }
