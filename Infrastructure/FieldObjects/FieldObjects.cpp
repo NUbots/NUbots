@@ -37,6 +37,7 @@ void FieldObjects::preProcess(const float timestamp)
  */
 void FieldObjects::postProcess(const float timestamp)
 {
+    m_timestamp = timestamp;
     for (unsigned int i=0; i<stationaryFieldObjects.size(); i++)
         stationaryFieldObjects[i].postProcess(timestamp);
     for (unsigned int i=0; i<mobileFieldObjects.size(); i++)
@@ -249,6 +250,7 @@ void FieldObjects::InitMobileFieldObjects()
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 {
     int size;
+    output.write(reinterpret_cast<const char*>(&p_fob.m_timestamp), sizeof(p_fob.m_timestamp));
     output << p_fob.self;
     size = p_fob.stationaryFieldObjects.size();
     output.write(reinterpret_cast<const char*>(&size), sizeof(size));
@@ -269,6 +271,7 @@ std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 
 std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
 {
+    input.read(reinterpret_cast<char*>(&p_fob.m_timestamp), sizeof(p_fob.m_timestamp));
     input >> p_fob.self;
 
     int size;
