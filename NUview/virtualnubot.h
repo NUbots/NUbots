@@ -111,10 +111,6 @@ private:
     Horizon horizonLine;
     NUBlackboard* m_blackboard;
     NUSensorsData* sensorsData;
-    //TODO: these should change later..
-    //float jointSensors[100];
-    //float balanceSensors[100];
-    //float touchSensors[100];
     const float* jointSensors;
     const float* balanceSensors;
     const float* touchSensors;
