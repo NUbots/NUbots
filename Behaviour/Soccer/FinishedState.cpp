@@ -23,12 +23,12 @@
 #include "SoccerState.h"
 #include "SoccerProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
-#include "Behaviour/Jobs/MotionJobs/MotionKillJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 FinishedState::FinishedState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -47,10 +47,10 @@ void FinishedState::doState()
 {
     if (m_provider->stateChanged())
     {   // play a sound, and stop moving
-        m_actions->addSound(m_actions->CurrentTime, NUSounds::FINISHED);
+        m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::FINISHED);
         m_jobs->addMotionJob(new MotionKillJob());
     }
     // In finished the chest led should be off
-    m_actions->addLeds(NUActionatorsData::ChestLeds, m_actions->CurrentTime, 0, 0, 0);
+    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, vector<float>(3,0));
 }
 

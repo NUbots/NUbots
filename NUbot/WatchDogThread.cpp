@@ -22,9 +22,9 @@
 #include "WatchDogThread.h"
 #include "NUbot.h"
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "NUPlatform/NUSystem.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #ifdef USE_VISION
     #include "Vision/Vision.h"
@@ -64,13 +64,13 @@ WatchDogThread::~WatchDogThread()
 
 void WatchDogThread::periodicFunction()
 {
-    nusystem->displayBatteryState(m_nubot->SensorData, m_nubot->Actions);
+    //System->displayBatteryState(Blackboard->Sensors, Blackboard->Actions);
     #ifdef USE_VISION
         int framesdropped = m_nubot->m_vision->getNumFramesDropped();
         int framesprocessed = m_nubot->m_vision->getNumFramesProcessed();
         if (framesprocessed < 29 || framesdropped > 9)
         {
-            nusystem->displayVisionFrameDrop(m_nubot->Actions);
+            //System->displayVisionFrameDrop(Blackboard->Actions);
             debug << "WatchDogThread: Vision processed " << framesprocessed << " and 'dropped' " << framesdropped << endl;
         }
     #endif

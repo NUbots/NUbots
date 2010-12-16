@@ -21,12 +21,12 @@
 
 #include "VisionCalibrationProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/ChaseBall/ChaseBallProvider.h"
 
 #include "debug.h"
@@ -58,17 +58,17 @@ void VisionCalibrationProvider::doBehaviour()
     {
         m_selection_index = (m_selection_index + 1) % m_num_motions;
         if (m_selection_index == 4)
-            m_actions->addSound(m_current_time, "chase_ball.wav");
+            m_actions->add(NUActionatorsData::Sound, m_current_time, "chase_ball.wav");
         else
-            m_actions->addSound(m_current_time, "error1.wav");
+            m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
     }
     if (singleRightBumperClick())
     {
         m_selection_index = (m_selection_index + m_num_motions-1) % m_num_motions;
         if (m_selection_index == 4)
-            m_actions->addSound(m_current_time, "chase_ball.wav");
+            m_actions->add(NUActionatorsData::Sound, m_current_time, "chase_ball.wav");
         else
-            m_actions->addSound(m_current_time, "error1.wav");
+            m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
     }
     
     // handle the starting and stopping of saving images
@@ -83,15 +83,14 @@ void VisionCalibrationProvider::doSelectedMotion()
 {
     if (m_selection_index == 0)
     {
-        vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, 50);
+        m_actions->add(NUActionatorsData::Head, m_current_time, 0, 50);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
         //! @todo TODO: If we are not standing up, then we should stand up (probably need a stand-up job, or set the walk speed non-zero for a little bit)
     }
     else if (m_selection_index == 1)
     {
-        vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, m_current_time, zero, zero, -100);
+        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        m_actions->add(NUActionatorsData::Head, m_current_time, 0, 0);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
     }
     else if (m_selection_index == 2)

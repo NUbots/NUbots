@@ -342,7 +342,7 @@ void WalkParameters::summaryTo(ostream& output)
 {
     output << m_name << " WalkParameters: ";
     vector<float> temp = getAsVector();
-    for (int i=0; i<temp.size(); i++)
+    for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << " ";
     output << endl;
 }
@@ -352,7 +352,7 @@ void WalkParameters::summaryTo(ostream& output)
 void WalkParameters::csvTo(ostream& output)
 {
     vector<float> temp = getAsVector();
-    for (int i=0; i<temp.size(); i++)
+    for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << ", ";
 }
 

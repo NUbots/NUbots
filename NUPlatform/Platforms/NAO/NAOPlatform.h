@@ -29,14 +29,6 @@ class NAOPlatform : public NUPlatform
 public:
     NAOPlatform();
     ~NAOPlatform();
-    
-protected:
-private:
-    
-public:
-protected:
-private:
-    
 };
 
 #endif

@@ -19,20 +19,24 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUSensors.h"
-#include "NUSystem.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "NUPlatform/NUPlatform.h"
+#include "NUPlatform/NUSensors.h"
+
 #include "../Kinematics/Horizon.h"
 #include "Kinematics/Kinematics.h"
 #include "Kinematics/OrientationUKF.h"
 #include "Tools/Math/General.h"
+#include "Motion/Tools/MotionFileTools.h"
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
 #include "nubotdataconfig.h"
-#include "Motion/Tools/MotionFileTools.h"
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
+#include <limits>
 using namespace std;
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
@@ -44,8 +48,8 @@ NUSensors::NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::NUSensors" << endl;
 #endif
-    m_current_time = nusystem->getTime();
-    m_previous_time = 0;
+    m_current_time = Platform->getTime();
+    m_previous_time = -1000;
     m_data = new NUSensorsData();
 	m_kinematicModel = new Kinematics();
 	m_kinematicModel->LoadModel("None");
@@ -71,54 +75,35 @@ NUSensors::~NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::~NUSensors" << endl;
 #endif
-    if (m_data != NULL)
-        delete m_data;
 	delete m_kinematicModel;
 	m_kinematicModel = 0;
-        delete m_orientationFilter;
-        m_orientationFilter = 0;
+    delete m_orientationFilter;
+    m_orientationFilter = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
     @return a pointer to the freshly updated sensor data
  */
-NUSensorsData* NUSensors::update()
+void NUSensors::update()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
-    m_current_time = nusystem->getTime();
+    m_current_time = Platform->getTime();
+    m_data->PreviousTime = m_data->CurrentTime;
+    m_data->CurrentTime = m_current_time;
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
     
 #if DEBUG_NUSENSORS_VERBOSITY > 0
-    static bool firstrun = true;
-    if (firstrun)
-    {
-        debug << "NUSensors::update(). Available Sensors:" << endl;
-        m_data->summaryTo(debug);
-        firstrun = false;
-    }
-#endif
-#if DEBUG_NUSENSORS_VERBOSITY > 0
     m_data->summaryTo(debug);
 #endif
     m_previous_time = m_current_time;
-    return getData();
 }
 
-/*! @brief Returns a pointer to the current NUSensorsData.
- 
-    @attention I do not copy any of the NUSensorsData, and the current data could be updated at any time.
-               Consequently, if you want to save some data to be synchronised with vision you have to make
-               the copy of what you need yourself. However, the getJointPositions etc functions of NUSensorsData
-               will return copies of the selected data.
- */
-NUSensorsData* NUSensors::getData()
+/*! @brief Returns a pointer to the NUSensorsData object used to store sensor values */
+NUSensorsData* NUSensors::getNUSensorsData()
 {
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::getData()" << endl;
-#endif
     return m_data;
 }
 
@@ -135,17 +120,10 @@ void NUSensors::copyFromHardwareCommunications()
 
 void NUSensors::calculateSoftSensors()
 {
-    // if there is no velocity sensor calculate velocity
-    if (m_data->JointVelocities->IsValid == false || m_data->JointVelocities->IsCalculated == true)
-        calculateJointVelocity();
-    // if there is no acceleration sensor
-    if (m_data->JointAccelerations->IsValid == false || m_data->JointAccelerations->IsCalculated == true)
-        calculateJointAcceleration();
-    
     calculateKinematics();
     calculateOrientation();
     calculateHorizon();
-    calculateButtonTriggers();
+    calculateButtonDurations();
     calculateFootForce();
     calculateFootSupport();
     calculateFootImpact();
@@ -156,42 +134,6 @@ void NUSensors::calculateSoftSensors()
     calculateFallSense();
 }
 
-void NUSensors::calculateJointVelocity()
-{
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateJointVelocity()" << endl;
-#endif
-    static vector<float> previousjointpositions = m_data->JointPositions->Data;
-    static vector<float> jointvelocities(m_data->JointPositions->Data.size(), 0);
-    if (m_previous_time != 0)
-    {
-        for (unsigned i=0; i<m_data->JointPositions->Data.size(); i++)
-        {
-            jointvelocities[i] = 1000*(m_data->JointPositions->Data[i] - previousjointpositions[i])/(m_current_time - m_previous_time);
-        }
-    }
-    m_data->JointVelocities->setData(m_current_time, jointvelocities, true);
-    previousjointpositions = m_data->JointPositions->Data;
-}
-
-void NUSensors::calculateJointAcceleration()
-{
-#if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateJointAcceleration()" << endl;
-#endif
-    static vector<float> previousjointvelocities = m_data->JointVelocities->Data;
-    static vector<float> jointaccelerations(m_data->JointVelocities->Data.size(), 0);
-    if (m_previous_time != 0)
-    {
-        for (unsigned i=0; i<m_data->JointVelocities->Data.size(); i++)
-        {
-            jointaccelerations[i] = 1000*(m_data->JointVelocities->Data[i] - previousjointvelocities[i])/(m_current_time - m_previous_time);
-        }
-    }
-    m_data->JointAccelerations->setData(m_current_time, jointaccelerations, true);
-    previousjointvelocities = m_data->JointVelocities->Data;
-}
-
 /*! @brief Updates the orientation estimate using the current sensor data
  */
 void NUSensors::calculateOrientation()
@@ -200,16 +142,16 @@ void NUSensors::calculateOrientation()
     debug << "NUSensors::calculateOrientation()" << endl;
 #endif
     static vector<float> orientation(3, 0.0f);
+    static vector<float> orientationhardware(3, 0.0f);
     static vector<float> acceleration(3, 0.0f);
     static vector<float> gyros(3, 0.0f);
     static vector<float> gyroOffset(3, 0.0f);
-    static vector<float> orientationhardware(3, 0.0f);
     
-    if (m_data->getOrientationHardware(orientationhardware))
+    if (m_data->get(NUSensorsData::OrientationHardware, orientationhardware))
     {
-        m_data->BalanceOrientation->setData(m_current_time, orientationhardware, false);
+        m_data->set(NUSensorsData::Orientation, m_current_time, orientationhardware);
     }
-    else if (m_data->getGyroValues(gyros) && m_data->getAccelerometerValues(acceleration))
+    else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
         if(!m_orientationFilter->Initialised())
         {
@@ -222,12 +164,11 @@ void NUSensors::calculateOrientation()
         else
         {
             m_orientationFilter->TimeUpdate(gyros, m_current_time);
-            Matrix supportLegTransform;
-            bool validKinematics = m_data->getSupportLegTransform(supportLegTransform);
+            vector<float> supportLegTransformFlat;
+            bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+            Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
             if(validKinematics)
-            {
                 orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-            }
             m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
         }
 
@@ -235,12 +176,12 @@ void NUSensors::calculateOrientation()
         orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
         orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
         orientation[2] = 0.0f;
-        m_data->BalanceOrientation->setData(m_current_time, orientation, true);
+        m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
         // Set gyro offset values
         gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
         gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
         gyroOffset[2] = 0.0f;
-        m_data->BalanceGyroOffset->setData(m_current_time,gyroOffset,true);
+        m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
     }
 }
 
@@ -253,73 +194,74 @@ void NUSensors::calculateHorizon()
     debug << "NUSensors::calculateHorizon()" << endl;
 #endif
     Horizon HorizonLine;
-    float bodyPitch;
-    float bodyRoll;
-    bodyRoll = m_data->BalanceOrientation->Data[0];
-    bodyPitch = m_data->BalanceOrientation->Data[1];
-    float headYaw;
-    m_data->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-    float headPitch;
-    m_data->getJointPosition(NUSensorsData::HeadPitch,headPitch);
+    vector<float> orientation;
+    float headYaw, headPitch;
+    bool validdata = m_data->get(NUSensorsData::Orientation, orientation);
+    validdata &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
+    validdata &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
     int camera = 1;
 
-    HorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
-    vector<float> line;
-    line.reserve(3);
-    line.push_back(HorizonLine.getA());
-    line.push_back(HorizonLine.getB());
-    line.push_back(HorizonLine.getC());
-    m_data->BalanceHorizon->setData(m_current_time, line, true );
+    if (validdata)
+    {
+        HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
+        vector<float> line;
+        line.reserve(3);
+        line.push_back(HorizonLine.getA());
+        line.push_back(HorizonLine.getB());
+        line.push_back(HorizonLine.getC());
+        m_data->set(NUSensorsData::Horizon, m_current_time, line);
+    }
 }
 
 
 /*! @brief Calculates the duration of the last press on each of the buttons and bumpers
  */
-void NUSensors::calculateButtonTriggers()
+void NUSensors::calculateButtonDurations()
 {
-    static float nextChestDuration = 0;
+    static float nextMainDuration = 0;
     static float nextLeftDuration = 0;
     static float nextRightDuration = 0;
-    static vector<float> durations(3,0);
     
-    static float prevChestState = 0;
+    static float prevMainState = 0;
     static float prevLeftState = 0;
     static float prevRightState = 0;
     
-	vector<float> tempData;
-    if (m_data->getButtonValues(NUSensorsData::MainButton, tempData) && (tempData.size() >= 1))
+	float buttonvalue;
+    if (m_data->get(NUSensorsData::MainButton, buttonvalue))
     {
-        if (tempData[0] > 0.5)
-            nextChestDuration += (m_current_time - m_previous_time);
-        else if (prevChestState > 0.5)
+        if (buttonvalue > 0.5)
+            nextMainDuration += (m_current_time - m_previous_time);
+        else if (prevMainState > 0.5)
         {   // if this is a negative edge update the last press duration
-            durations[0] = nextChestDuration;
-            nextChestDuration = 0;
+            m_data->modify(NUSensorsData::MainButton, NUSensorsData::DurationId, m_current_time, nextMainDuration);
+            nextMainDuration = 0;
         }
-        prevChestState = tempData[0];
+        prevMainState = buttonvalue;
     }
     
-    if(m_data->getFootBumperValues(NUSensorsData::AllFeet, tempData) && tempData.size() >= 2)
+    if(m_data->get(NUSensorsData::LeftButton, buttonvalue))
     {
-        if (tempData[0] > 0.5)
+        if (buttonvalue > 0.5)
             nextLeftDuration += (m_current_time - m_previous_time);
         else if (prevLeftState > 0.5)
         {   // if this is a negative edge update the last press duration
-            durations[1] = nextLeftDuration;
+            m_data->modify(NUSensorsData::LeftButton, NUSensorsData::DurationId, m_current_time, nextLeftDuration);
             nextLeftDuration = 0;
         }
-        prevLeftState = tempData[0];
-        
-        if (tempData[1] > 0.5)
+        prevLeftState = buttonvalue;
+    }
+    
+    if (m_data->get(NUSensorsData::RightButton, buttonvalue))
+    {
+        if (buttonvalue > 0.5)
             nextRightDuration += (m_current_time - m_previous_time);
         else if (prevRightState > 0.5)
         {   // if this is a negative edge update the last press duration
-            durations[2] = nextRightDuration;
+            m_data->modify(NUSensorsData::RightButton, NUSensorsData::DurationId, m_current_time, nextRightDuration);
             nextRightDuration = 0;
         }
-        prevRightState = tempData[1];
+        prevRightState = buttonvalue;
     }
-    m_data->ButtonTriggers->setData(m_current_time, durations, true);
 }
 
 /*! @brief Updates the zero moment point estimate using the current sensor data
@@ -353,58 +295,64 @@ void NUSensors::calculateFallSense()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFallingSense()" << endl;
 #endif
+    
     vector<float> acceleration;
-    float acceleration_mag;
     vector<float> orientation;
-    vector<float> angularvelocity;
-    m_data->getAccelerometerValues(acceleration);
+    m_data->getAccelerometer(acceleration);
     m_data->getOrientation(orientation);
-    m_data->getGyroFilteredValues(angularvelocity);
     
-    acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-    // check if the robot has fallen over
-    vector<float> fallen(5,0);
-    if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
-        fallen_time += m_current_time - m_previous_time;
-    else
-        fallen_time = 0;
-    
-    if (fallen_time > 100)
-    {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
-        // We use only the angle to determine we have fallen, not the direction
-        fallen[0] = Fallen;
-        if (fabs(acceleration[0]) > fabs(acceleration[1]))
-        {   
-            if (acceleration[0] > 0)
-                fallen[3] = Fallen;
-            else
-                fallen[4] = Fallen;
-        }
-        else
-        {
-            if (acceleration[1] > 0)
-                fallen[1] = Fallen;
-            else
-                fallen[2] = Fallen;
-        }
-    }
-    m_data->BalanceFallen->setData(m_current_time, fallen, true);
-    
-    // check if the robot is falling over
-    vector<float> falling(5,0);
-    if (not fallen[0])
+    if (m_data->getAccelerometer(acceleration) and m_data->getOrientation(orientation))
     {
-        if (orientation[0] < -RollFallingThreshold)
-            falling[1] = Falling;
-        if (orientation[0] > RollFallingThreshold)
-            falling[2] = Falling;
-        if (orientation[1] > ForwardFallingThreshold)
-            falling[3] = Falling;
-        if (orientation[1] < -BackwardFallingThreshold)
-            falling[4] = Falling;
+        float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
+        // check if the robot has fallen over
+        vector<float> fallen(5,0);
+        if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+            fallen_time += m_current_time - m_previous_time;
+        else
+            fallen_time = 0;
+        
+        if (fallen_time > 100)
+        {   // To make this sensor robust to orientation sensors that fail when the robot rolls over after falling
+            // We use only the angle to determine we have fallen, not the direction
+            fallen[0] = Fallen;
+            if (fabs(acceleration[0]) > fabs(acceleration[1]))
+            {   
+                if (acceleration[0] > 0)
+                    fallen[3] = Fallen;
+                else
+                    fallen[4] = Fallen;
+            }
+            else
+            {
+                if (acceleration[1] > 0)
+                    fallen[1] = Fallen;
+                else
+                    fallen[2] = Fallen;
+            }
+        }
+        m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
+    
+        // check if the robot is falling over
+        vector<float> falling(5,0);
+        if (not fallen[0])
+        {
+            if (orientation[0] < -RollFallingThreshold)
+                falling[1] = Falling;
+            if (orientation[0] > RollFallingThreshold)
+                falling[2] = Falling;
+            if (orientation[1] > ForwardFallingThreshold)
+                falling[3] = Falling;
+            if (orientation[1] < -BackwardFallingThreshold)
+                falling[4] = Falling;
+        }
+        falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
+        m_data->set(NUSensorsData::Falling, m_current_time, falling);
     }
-    falling[0] = falling[1] + falling[2] + falling[3] + falling[4];
-    m_data->BalanceFalling->setData(m_current_time, falling, true);
+    else
+    {
+        m_data->setAsInvalid(NUSensorsData::Fallen);
+        m_data->setAsInvalid(NUSensorsData::Falling);
+    }
 }
 
 /*! @brief Calculates the total force in Newtons on each foot
@@ -417,58 +365,64 @@ void NUSensors::calculateFootForce()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateFootForce()" << endl;
 #endif
-    static vector<float> forces(3,0);
     const float MINIMUM_CONTACT_FORCE = 3;          // If we register a force less than 3N (approx. 300g)
-    forces[0] = 0;
-    // now I assume that the left foot values are stored first (because they are ;)) and that the left and right feet have the same number of sensors
-    for (int i=0; i<m_data->FootSoleValues->size()/2; i++)
-        forces[0] += (*m_data->FootSoleValues)[i];
-    forces[1] = 0;
-    for (int i=m_data->FootSoleValues->size()/2; i<m_data->FootSoleValues->size(); i++)
-        forces[1] += (*m_data->FootSoleValues)[i];
-    
-    // Now I attempt to compensate for uncalibrated foot sensors by using the long term averages, to scale each foot
-    // I assume that the force on the left and right foot over time should be the same.
     static float leftforcesum = 0;
     static float rightforcesum = 0;
     static int forcecount = 0;
     static float leftforceaverage = 0;
     static float rightforceaverage = 0;
     
-    if (forces[0] + forces[1] > MINIMUM_CONTACT_FORCE)
-    {   // only use forces which exceed a minimum contact force
-        leftforcesum += forces[0];
-        rightforcesum += forces[1];
-        forcecount++;
-        leftforceaverage = leftforcesum/forcecount;
-        rightforceaverage = rightforcesum/forcecount;
+    vector<float> leftcontactvalues, rightcontactvalues;
+    if (m_data->get(NUSensorsData::LFootTouch, leftcontactvalues) and m_data->get(NUSensorsData::RFootTouch, rightcontactvalues))
+    {
+        float totalleft = 0;
+        float totalright = 0;
+
+        for (int i=0; i<leftcontactvalues.size(); i++)
+            totalleft += leftcontactvalues[i];
+
+        for (int i=0; i<rightcontactvalues.size(); i++)
+            totalright += rightcontactvalues[i];
         
-        if (forcecount > 500)
-        {   // only scale using the long term averages, if we have enough data
-            forces[0] *= (leftforceaverage + rightforceaverage)/(2*leftforceaverage);
-            forces[1] *= (leftforceaverage + rightforceaverage)/(2*rightforceaverage);
+        // Now I attempt to compensate for uncalibrated foot sensors by using the long term averages, to scale each foot
+        // I assume that the force on the left and right foot over time should be the same.
+        
+        if (totalleft + totalright > MINIMUM_CONTACT_FORCE)
+        {   // only use forces which exceed a minimum contact force
+            leftforcesum += totalleft;
+            rightforcesum += totalright;
+            forcecount++;
+            leftforceaverage = leftforcesum/forcecount;
+            rightforceaverage = rightforcesum/forcecount;
+            
+            if (forcecount > 500)
+            {   // only scale using the long term averages, if we have enough data
+                totalleft *= (leftforceaverage + rightforceaverage)/(2*leftforceaverage);
+                totalright *= (leftforceaverage + rightforceaverage)/(2*rightforceaverage);
+            }
+            
+            if (forcecount > 5000)
+            {   // if the number of forcecount is getting large, then the sums are getting large, and we should avoid overflow
+                forcecount = 2000;
+                leftforcesum = leftforceaverage*forcecount;
+                rightforcesum = rightforceaverage*forcecount;
+            }
         }
         
-        if (forcecount > 5000)
-        {   // if the number of forcecount is getting large, then the sums are getting large, and we should avoid overflow
-            forcecount = 2000;
-            leftforcesum = leftforceaverage*forcecount;
-            rightforcesum = rightforceaverage*forcecount;
-        }
+        // save the foot forces in the FootForce sensor
+        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::ForceId, m_current_time, totalleft);
+        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::ForceId, m_current_time, totalright);
+        
+        // also save the foot contact in the FootContact sensor
+        float contactleft = 0;
+        float contactright = 0;
+        if (totalleft > MINIMUM_CONTACT_FORCE)
+            contactleft = 1;
+        if (totalright > MINIMUM_CONTACT_FORCE)
+            contactright = 1;
+        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::ContactId, m_current_time, contactleft);
+        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::ContactId, m_current_time, contactright);
     }
-    
-    // save the foot forces in the FootForce sensor
-    forces[2] = forces[0] + forces[1];
-    m_data->FootForce->setData(m_current_time, forces, true);
-    
-    // also save the foot contact in the FootContact sensor
-    vector<float> contact(3,0);
-    if (forces[0] > MINIMUM_CONTACT_FORCE)
-        contact[0] = 1;
-    if (forces[1] > MINIMUM_CONTACT_FORCE)
-        contact[1] = 1;
-    contact[2] = contact[0] + contact[1];
-    m_data->FootContact->setData(m_current_time, contact, true);
 }
 
 /*! @brief Calculates the centre of pressure underneath each foot.
@@ -478,28 +432,32 @@ void NUSensors::calculateCoP()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCoP()" << endl;
 #endif
-    static vector<float> cop(6, 0);
+    vector<float> lfsr, rfsr;
+    float lcopx = numeric_limits<float>::quiet_NaN();
+    float lcopy = numeric_limits<float>::quiet_NaN();
+    float rcopx = numeric_limits<float>::quiet_NaN();
+    float rcopy = numeric_limits<float>::quiet_NaN();
     
-    vector<float> fsr;
-    if (m_data->getFootSoleValues(NUSensorsData::AllFeet, fsr) and fsr.size() == 8 and m_left_foot_hull.size() >= 4 and m_right_foot_hull.size() >= 4)
+    if (m_data->get(NUSensorsData::LFootTouch, lfsr) and m_data->get(NUSensorsData::RFootTouch, rfsr) and m_left_foot_hull.size() >= 4 and m_right_foot_hull.size() >= 4)
     {   
-        float leftfsr_sum = fsr[0] + fsr[1] + fsr[2] + fsr[3];
-        int offset = 4;
-        float rightfsr_sum = fsr[offset+0] + fsr[offset+1] + fsr[offset+2] + fsr[offset+3];
+        float leftfsr_sum = lfsr[0] + lfsr[1] + lfsr[2] + lfsr[3];
+        float rightfsr_sum = rfsr[0] + rfsr[1] + rfsr[2] + rfsr[3];
         if (leftfsr_sum > 0)
         {
-            cop[0] = (m_left_foot_hull[0][0]*fsr[0] + m_left_foot_hull[1][0]*fsr[1] + m_left_foot_hull[3][0]*fsr[2] + m_left_foot_hull[2][0]*fsr[3])/leftfsr_sum;
-            cop[1] = (m_left_foot_hull[0][1]*fsr[0] + m_left_foot_hull[1][1]*fsr[1] + m_left_foot_hull[3][1]*fsr[2] + m_left_foot_hull[2][1]*fsr[3])/leftfsr_sum;
+            lcopx = (m_left_foot_hull[0][0]*lfsr[0] + m_left_foot_hull[1][0]*lfsr[1] + m_left_foot_hull[3][0]*lfsr[2] + m_left_foot_hull[2][0]*lfsr[3])/leftfsr_sum;
+            lcopy = (m_left_foot_hull[0][1]*lfsr[0] + m_left_foot_hull[1][1]*lfsr[1] + m_left_foot_hull[3][1]*lfsr[2] + m_left_foot_hull[2][1]*lfsr[3])/leftfsr_sum;
         }
         if (rightfsr_sum > 0)
         {
-            cop[2] = (m_right_foot_hull[0][0]*fsr[0+offset] + m_right_foot_hull[1][0]*fsr[1+offset] + m_right_foot_hull[3][0]*fsr[2+offset] + m_right_foot_hull[2][0]*fsr[3+offset])/rightfsr_sum;
-            cop[3] = (m_right_foot_hull[0][1]*fsr[0+offset] + m_right_foot_hull[1][1]*fsr[1+offset] + m_right_foot_hull[3][1]*fsr[2+offset] + m_right_foot_hull[2][1]*fsr[3+offset])/rightfsr_sum;
+            rcopx = (m_right_foot_hull[0][0]*rfsr[0] + m_right_foot_hull[1][0]*rfsr[1] + m_right_foot_hull[3][0]*rfsr[2] + m_right_foot_hull[2][0]*rfsr[3])/rightfsr_sum;
+            rcopy = (m_right_foot_hull[0][1]*rfsr[0] + m_right_foot_hull[1][1]*rfsr[1] + m_right_foot_hull[3][1]*rfsr[2] + m_right_foot_hull[2][1]*rfsr[3])/rightfsr_sum;
         }
-        m_data->FootCoP->setData(m_current_time, cop, true);
     }
-    else    
-        m_data->FootCoP->IsValid = false;
+    
+    m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::CoPXId, m_current_time, lcopx);
+    m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::CoPYId, m_current_time, lcopy);
+    m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::CoPXId, m_current_time, rcopx);
+    m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::CoPYId, m_current_time, rcopy);
 }
 
 /*! @brief Determines whether each foot is supporting the robot, where support is defined as taking sufficent weight and having the CoP inside the convex hull of the foot.
@@ -507,37 +465,39 @@ void NUSensors::calculateCoP()
 void NUSensors::calculateFootSupport()
 {
     const float MINIMUM_CONTACT_FORCE = 3;
-    
-    static vector<float> support(3, 0);
-    
-    // a foot is supporting if there is sufficient weight on the foot
-    float force, copx, copy;
-    if (m_data->getFootForce(NUSensorsData::LeftFoot, force) and m_data->getFootCoP(NUSensorsData::LeftFoot, copx, copy))
+	
+    vector<float> lfoot, rfoot;
+    if (m_data->get(NUSensorsData::LLegEndEffector, lfoot) and m_data->get(NUSensorsData::RLegEndEffector, rfoot))
     {
-        if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_left_foot_hull, 0.2))
-            support[0] = 1.0;
-        else
-            support[0] = 0;
+        // a foot is supporting if there is sufficient weight on the foot
+        float force = lfoot[NUSensorsData::ForceId];
+        float copx = lfoot[NUSensorsData::CoPXId];
+        float copy = lfoot[NUSensorsData::CoPYId];
+        float support = numeric_limits<float>::quiet_NaN();
+        
+        if (not isnan(force) and not isnan(copx) and not isnan(copy))
+        {
+            if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_left_foot_hull, 0.2))
+                support = 1.0;
+            else
+                support = 0;
+        }
+		m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::SupportId, m_current_time, support);
+        
+        force = rfoot[NUSensorsData::ForceId];
+        copx = rfoot[NUSensorsData::CoPXId];
+        copy = rfoot[NUSensorsData::CoPYId];
+        support = numeric_limits<float>::quiet_NaN();
+        
+        if (not isnan(force) and not isnan(copx) and not isnan(copy))
+        {
+            if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_right_foot_hull, 0.2))
+                support = 1.0;
+            else
+                support = 0;
+        }
+        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::SupportId, m_current_time, support);
     }
-    else
-    {
-        m_data->FootSupport->IsValid = false;
-        return;
-    }
-    
-    if (m_data->getFootForce(NUSensorsData::RightFoot, force) and m_data->getFootCoP(NUSensorsData::RightFoot, copx, copy))
-    {
-        if (force > MINIMUM_CONTACT_FORCE and mathGeneral::PointInsideConvexHull(copx, copy, m_right_foot_hull, 0.2))
-            support[1] = 1.0;
-        else
-            support[1] = 0;
-    }
-    else
-    {
-        m_data->FootSupport->IsValid = false;
-        return;
-    }
-    m_data->FootSupport->setData(m_current_time, support, true);
 }
 
 /*! @brief Determines the time at which each foot last impacted with the ground
@@ -552,15 +512,12 @@ void NUSensors::calculateFootImpact()
     static vector<float> impacttimes(2,0);
     static vector<float> previousimpacttimes(2,0);
     
+    float leftforce, rightforce, totalforce;
     // The idea is to keep track of what is 'small' and what is 'large' for foot forces
     // And then define an impact to be a transisition from small to large foot force
-    if (m_previous_time > 0)
+    if (m_data->getForce(NUSensorsData::LLeg, leftforce) and m_data->getForce(NUSensorsData::RLeg, rightforce) and m_previous_time > 0)
     {
-        // grab the current force readings
-        float leftforce = (*(m_data->FootForce))[0];
-        float rightforce = (*(m_data->FootForce))[1];
-        float totalforce = (*(m_data->FootForce))[2];
-        
+        totalforce = leftforce + rightforce;
         const int numpastvalues = static_cast<int> (200.0/(m_current_time - m_previous_time)) + 1;
         static boost::circular_buffer<float> previousleftforces(numpastvalues, 0);      // forces on the left foot
         static boost::circular_buffer<float> previousrightforces(numpastvalues, 0);     // forces on the right foot
@@ -640,8 +597,8 @@ void NUSensors::calculateFootImpact()
             }
         }
     }
-    
-    m_data->FootImpact->setData(m_data->CurrentTime, impacttimes, true);
+    m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::ImpactId, m_current_time, impacttimes[0]);
+    m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::ImpactId, m_current_time, impacttimes[1]);
 }
 
 void NUSensors::calculateOdometry()
@@ -662,51 +619,46 @@ void NUSensors::calculateOdometry()
 
     static vector<float> leftFootPosition(3,0.0f);
     static vector<float> rightFootPosition(3,0.0f);
-    vector<float> odometeryData = m_data->Odometry->Data;
-    if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
+    vector<float> odometeryData;
+    if (not m_data->getOdometry(odometeryData))
+        odometeryData = vector<float>(3,0);
 
     float hipYawPitch;
-    m_data->getJointPosition(NUSensorsData::LHipYawPitch,hipYawPitch);
+    bool yawPositionOk = m_data->getPosition(NUSensorsData::LHipYawPitch, hipYawPitch);
 
     const int arrayWidth = 4;
     const int translationCol = 3;
 
     // Get the left foot position relative to the origin
     bool leftPositionOk = false;
-    if(m_data->LeftLegTransform->IsValid)
-    {
-        vector<float> leftFootTransform = m_data->LeftLegTransform->Data;
-        if(leftFootTransform.size() >= 16)
-        {
-            leftFootPosition[0] = leftFootTransform[translationCol];
-            leftFootPosition[1] = leftFootTransform[translationCol+arrayWidth];
-            leftFootPosition[2] = leftFootTransform[translationCol+2*arrayWidth];
-            leftPositionOk = true;
-        }
-    }
-
-    // Get the right foot position
     bool rightPositionOk = false;
-    if(m_data->RightLegTransform->IsValid)
+    vector<float> llegvector, rlegvector;
+    Matrix leftFootTransform, rightFootTransform;
+    if (m_data->get(NUSensorsData::LLegTransform, llegvector))
     {
-        vector<float> rightFootTransform = m_data->RightLegTransform->Data;
-        if(rightFootTransform.size() >= 16)
-        {
-            rightFootPosition[0] = rightFootTransform[translationCol];
-            rightFootPosition[1] = rightFootTransform[translationCol+arrayWidth];
-            rightFootPosition[2] = rightFootTransform[translationCol+2*arrayWidth];
-            rightPositionOk = true;
-        }
+        leftFootTransform = Matrix4x4fromVector(llegvector);
+        leftFootPosition[0] = leftFootTransform[0][3];
+        leftFootPosition[1] = leftFootTransform[1][3];
+        leftFootPosition[2] = leftFootTransform[2][3];
+        leftPositionOk = true;
+    }
+    if(m_data->get(NUSensorsData::RLegTransform, rlegvector))
+    {
+        rightFootTransform = Matrix4x4fromVector(rlegvector);
+        rightFootPosition[0] = rightFootTransform[0][3];
+        rightFootPosition[1] = rightFootTransform[1][3];
+        rightFootPosition[2] = rightFootTransform[2][3];
+        rightPositionOk = true;
     }
 
-    if(!rightPositionOk || !leftPositionOk) return;
+    if(!rightPositionOk or !leftPositionOk or !yawPositionOk) return;
 
     bool leftFootSupport = false;
     bool rightFootSupport = false;
 
     float leftForce, rightForce;
-    m_data->getFootForce(NUSensorsData::LeftFoot,leftForce);
-    m_data->getFootForce(NUSensorsData::RightFoot,rightForce);
+    m_data->getForce(NUSensorsData::LLeg,leftForce);
+    m_data->getForce(NUSensorsData::RLeg,rightForce);
 
     if(leftForce > rightForce)
     {
@@ -741,7 +693,7 @@ void NUSensors::calculateOdometry()
     odometeryData[1] += deltaY;
     odometeryData[2] += deltaTheta;
 
-    m_data->Odometry->setData(m_data->CurrentTime, odometeryData, true);
+    m_data->set(NUSensorsData::Odometry, m_data->CurrentTime, odometeryData);
 
     // Save the historical data
     prevHipYaw = hipYawPitch;
@@ -755,15 +707,20 @@ void NUSensors::calculateKinematics()
 {
     //! TODO: Need to get these values from somewhere else.
     const int cameraNumber = 1;
-    const double time = m_data->CurrentTime;
+    const double time = m_data->CurrentTime;		
 
     static vector<float> leftLegJoints(6,0.0f);
-    bool leftLegJointsSuccess = m_data->getJointPositions(NUSensorsData::LeftLegJoints,leftLegJoints);
+    bool leftLegJointsSuccess = m_data->getPosition(NUSensorsData::LLeg, leftLegJoints);
     static vector<float> rightLegJoints(6,0.0f);
-    bool rightLegJointsSuccess = m_data->getJointPositions(NUSensorsData::RightLegJoints,rightLegJoints);
+    bool rightLegJointsSuccess = m_data->getPosition(NUSensorsData::RLeg, rightLegJoints);
     static vector<float> headJoints(2,0.0f);
-    bool headJointsSuccess = m_data->getJointPositions(NUSensorsData::HeadJoints,headJoints);
+    bool headJointsSuccess = m_data->getPosition(NUSensorsData::Head, headJoints);
 
+    // Note that the kinematics uses the Matrix class, however, at this stage the NUSensorsData stores vector<float> and vector<vector<float>>
+    // In this early version we continue to use the method used in 2010:
+    //		- Matrices are stored in NUSensorsData as flattened vector<float> using Matrix.asVector()
+    //		- Matrices are then loaded from NUSensorsData into a temporary vector<float> then a Matrix is constructed from it using Matrix4x4fromVector
+	// There is no doubt this is messy, however, meh
     Matrix rightLegTransform;
     Matrix leftLegTransform;
     Matrix bottomCameraTransform;
@@ -774,20 +731,20 @@ void NUSensors::calculateKinematics()
     if(rightLegJointsSuccess)
     {
         rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
-        m_data->RightLegTransform->setData(time,rightLegTransform.asVector(),true);
+        m_data->set(NUSensorsData::RLegTransform, time, rightLegTransform.asVector());
     }
     else
     {
-        m_data->RightLegTransform->IsValid = false;
+        m_data->setAsInvalid(NUSensorsData::RLegTransform);
     }
     if(leftLegJointsSuccess)
     {
         leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
-        m_data->LeftLegTransform->setData(time,leftLegTransform.asVector(),true);
+        m_data->set(NUSensorsData::LLegTransform, time, leftLegTransform.asVector());
     }
     else
     {
-        m_data->LeftLegTransform->IsValid = false;
+        m_data->setAsInvalid(NUSensorsData::LLegTransform);
     }
     if(headJointsSuccess)
     {
@@ -799,17 +756,17 @@ void NUSensors::calculateKinematics()
     if(headJointsSuccess && (cameraNumber == 1))
     {
         cameraTransform = &bottomCameraTransform;
-        m_data->CameraTransform->setData(time, cameraTransform->asVector(), true);
+        m_data->set(NUSensorsData::CameraTransform, time, cameraTransform->asVector());
     }
     else
     {
-        m_data->CameraTransform->IsValid = false;
+        m_data->setAsInvalid(NUSensorsData::CameraTransform);
     }
 
 
     bool leftFootSupport = false, rightFootSupport = false;
-    m_data->getFootSupport(NUSensorsData::LeftFoot,leftFootSupport);
-    m_data->getFootSupport(NUSensorsData::RightFoot,rightFootSupport);
+    m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
+    m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
     // Choose support leg.
     if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
@@ -831,16 +788,16 @@ void NUSensors::calculateKinematics()
 
     if(supportLegTransform)
     {
-        m_data->SupportLegTransform->setData(time,supportLegTransform->asVector(),true);
+        m_data->set(NUSensorsData::SupportLegTransform, time, supportLegTransform->asVector());
 
         // Calculate transfrom matrix to convert camera centred coordinates to ground centred coordinates.
         Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(*supportLegTransform, *cameraTransform);
-        m_data->CameraToGroundTransform->setData(time, cameraToGroundTransform.asVector(), true);
+        m_data->set(NUSensorsData::CameraToGroundTransform, time, cameraToGroundTransform.asVector());
     }
     else
     {
-        m_data->SupportLegTransform->IsValid = false;
-        m_data->CameraToGroundTransform->IsValid = false;
+        m_data->setAsInvalid(NUSensorsData::SupportLegTransform);
+        m_data->setAsInvalid(NUSensorsData::CameraToGroundTransform);
     }
     return;
 }
@@ -850,14 +807,15 @@ void NUSensors::calculateCameraHeight()
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCameraHeight()" << endl;
 #endif
-    Matrix cameraGroundTransform;
-    if(m_data->getCameraToGroundTransform(cameraGroundTransform))
+    vector<float> cgtvector;
+    if (m_data->get(NUSensorsData::CameraToGroundTransform, cgtvector))
     {
-        m_data->CameraHeight->setData(m_data->CurrentTime, vector<float>(1, cameraGroundTransform[2][3]));
+        Matrix cameraGroundTransform = Matrix4x4fromVector(cgtvector);
+        m_data->set(NUSensorsData::CameraHeight, m_data->CurrentTime, static_cast<float>(cameraGroundTransform[2][3]));
     }
     else
     {
-        m_data->CameraHeight->IsValid = false;
+        m_data->setAsInvalid(NUSensorsData::CameraHeight);
     }
 }
 

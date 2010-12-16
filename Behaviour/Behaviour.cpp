@@ -31,6 +31,7 @@
 #include "PassingChallenge/PassingChallengeProvider.h"
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
+#include "RoboPedestrian/RoboPedestrianProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -43,7 +44,7 @@ Behaviour::Behaviour()
         m_behaviour = new SoccerProvider(this);
     #else
         // For Webots, create the behaviour you want to run here 
-        m_behaviour = new WalkOptimisationProvider(this);
+        m_behaviour = new SoccerProvider(this);
     #endif
     m_next_behaviour = NULL;
 }
@@ -68,8 +69,14 @@ Behaviour::~Behaviour()
 */
 void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+        debug << "Behaviour::process()" << endl;
+    #endif
     if (m_next_behaviour != NULL)
     {
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 0
+            debug << "Behaviour::process() is swaping the behaviour provider" << endl;
+        #endif
         delete m_behaviour;
         m_behaviour = m_next_behaviour;
         m_next_behaviour = NULL;
@@ -107,7 +114,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new ScriptedPoseProvider(this);
     else if (name.compare("pose") == 0)
         return new PoseProvider(this);
-
+    else if (name.compare("robopedestrian") == 0)
+        return new RoboPedestrianProvider(this);
     else
         return NULL;
 }

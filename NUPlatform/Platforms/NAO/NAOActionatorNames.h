@@ -25,164 +25,167 @@
 #include <string>
 using namespace std;
 
+#define DN_PREFIX           string("")
+#define DN_POSTFIX          string("/Actuator/Value")
+
 // Joint Names
-#define HEAD_YAW             std::string("HeadYaw")
-#define HEAD_PITCH           std::string("HeadPitch")
-#define L_SHOULDER_ROLL      std::string("LShoulderRoll")
-#define L_SHOULDER_PITCH     std::string("LShoulderPitch")
-#define L_ELBOW_YAW          std::string("LElbowYaw") 
-#define L_ELBOW_ROLL         std::string("LElbowRoll")
-#define R_SHOULDER_ROLL      std::string("RShoulderRoll")
-#define R_SHOULDER_PITCH     std::string("RShoulderPitch")
-#define R_ELBOW_YAW          std::string("RElbowYaw") 
-#define R_ELBOW_ROLL         std::string("RElbowRoll")
-#define L_HIP_YAWPITCH       std::string("LHipYawPitch") 
-#define L_HIP_ROLL           std::string("LHipRoll") 
-#define L_HIP_PITCH          std::string("LHipPitch")
-#define L_KNEE_PITCH         std::string("LKneePitch")
-#define L_ANKLE_PITCH        std::string("LAnklePitch") 
-#define L_ANKLE_ROLL         std::string("LAnkleRoll")
-#define R_HIP_YAWPITCH       std::string("RHipYawPitch")
-#define R_HIP_ROLL           std::string("RHipRoll") 
-#define R_HIP_PITCH          std::string("RHipPitch")
-#define R_KNEE_PITCH         std::string("RKneePitch")
-#define R_ANKLE_PITCH        std::string("RAnklePitch") 
-#define R_ANKLE_ROLL         std::string("RAnkleRoll")
+#define HEAD_YAW             DN_PREFIX + string("HeadYaw") + DN_POSTFIX
+#define HEAD_PITCH           DN_PREFIX + string("HeadPitch") + DN_POSTFIX
+#define L_SHOULDER_ROLL      DN_PREFIX + string("LShoulderRoll") + DN_POSTFIX
+#define L_SHOULDER_PITCH     DN_PREFIX + string("LShoulderPitch") + DN_POSTFIX
+#define L_ELBOW_YAW          DN_PREFIX + string("LElbowYaw") + DN_POSTFIX 
+#define L_ELBOW_ROLL         DN_PREFIX + string("LElbowRoll") + DN_POSTFIX
+#define R_SHOULDER_ROLL      DN_PREFIX + string("RShoulderRoll") + DN_POSTFIX
+#define R_SHOULDER_PITCH     DN_PREFIX + string("RShoulderPitch") + DN_POSTFIX
+#define R_ELBOW_YAW          DN_PREFIX + string("RElbowYaw") + DN_POSTFIX 
+#define R_ELBOW_ROLL         DN_PREFIX + string("RElbowRoll") + DN_POSTFIX
+#define L_HIP_YAWPITCH       DN_PREFIX + string("LHipYawPitch") + DN_POSTFIX 
+#define L_HIP_ROLL           DN_PREFIX + string("LHipRoll") + DN_POSTFIX 
+#define L_HIP_PITCH          DN_PREFIX + string("LHipPitch") + DN_POSTFIX
+#define L_KNEE_PITCH         DN_PREFIX + string("LKneePitch") + DN_POSTFIX
+#define L_ANKLE_PITCH        DN_PREFIX + string("LAnklePitch") + DN_POSTFIX 
+#define L_ANKLE_ROLL         DN_PREFIX + string("LAnkleRoll") + DN_POSTFIX
+#define R_HIP_YAWPITCH       DN_PREFIX + string("RHipYawPitch") + DN_POSTFIX
+#define R_HIP_ROLL           DN_PREFIX + string("RHipRoll") + DN_POSTFIX 
+#define R_HIP_PITCH          DN_PREFIX + string("RHipPitch") + DN_POSTFIX
+#define R_KNEE_PITCH         DN_PREFIX + string("RKneePitch") + DN_POSTFIX
+#define R_ANKLE_PITCH        DN_PREFIX + string("RAnklePitch") + DN_POSTFIX 
+#define R_ANKLE_ROLL         DN_PREFIX + string("RAnkleRoll") + DN_POSTFIX
 
 // Device names for position actuators
-#define DN_HEAD_YAW_POSITION            std::string("HeadYaw/Position/Actuator/Value")
-#define DN_HEAD_PITCH_POSITION          std::string("HeadPitch/Position/Actuator/Value")
-#define DN_L_SHOULDER_ROLL_POSITION     std::string("LShoulderRoll/Position/Actuator/Value")
-#define DN_L_SHOULDER_PITCH_POSITION    std::string("LShoulderPitch/Position/Actuator/Value")
-#define DN_L_ELBOW_YAW_POSITION         std::string("LElbowYaw/Position/Actuator/Value") 
-#define DN_L_ELBOW_ROLL_POSITION        std::string("LElbowRoll/Position/Actuator/Value")
-#define DN_R_SHOULDER_ROLL_POSITION     std::string("RShoulderRoll/Position/Actuator/Value")
-#define DN_R_SHOULDER_PITCH_POSITION    std::string("RShoulderPitch/Position/Actuator/Value")
-#define DN_R_ELBOW_YAW_POSITION         std::string("RElbowYaw/Position/Actuator/Value") 
-#define DN_R_ELBOW_ROLL_POSITION        std::string("RElbowRoll/Position/Actuator/Value")
-#define DN_L_HIP_YAWPITCH_POSITION      std::string("LHipYawPitch/Position/Actuator/Value") 
-#define DN_L_HIP_ROLL_POSITION          std::string("LHipRoll/Position/Actuator/Value") 
-#define DN_L_HIP_PITCH_POSITION         std::string("LHipPitch/Position/Actuator/Value")
-#define DN_L_KNEE_PITCH_POSITION        std::string("LKneePitch/Position/Actuator/Value")
-#define DN_L_ANKLE_PITCH_POSITION       std::string("LAnklePitch/Position/Actuator/Value") 
-#define DN_L_ANKLE_ROLL_POSITION        std::string("LAnkleRoll/Position/Actuator/Value")
-#define DN_R_HIP_YAWPITCH_POSITION      std::string("RHipYawPitch/Position/Actuator/Value")
-#define DN_R_HIP_ROLL_POSITION          std::string("RHipRoll/Position/Actuator/Value") 
-#define DN_R_HIP_PITCH_POSITION         std::string("RHipPitch/Position/Actuator/Value")
-#define DN_R_KNEE_PITCH_POSITION        std::string("RKneePitch/Position/Actuator/Value")
-#define DN_R_ANKLE_PITCH_POSITION       std::string("RAnklePitch/Position/Actuator/Value") 
-#define DN_R_ANKLE_ROLL_POSITION        std::string("RAnkleRoll/Position/Actuator/Value")
+#define HEAD_YAW_POSITION            DN_PREFIX + string("HeadYaw/Position") + DN_POSTFIX
+#define HEAD_PITCH_POSITION          DN_PREFIX + string("HeadPitch/Position") + DN_POSTFIX
+#define L_SHOULDER_ROLL_POSITION     DN_PREFIX + string("LShoulderRoll/Position") + DN_POSTFIX
+#define L_SHOULDER_PITCH_POSITION    DN_PREFIX + string("LShoulderPitch/Position") + DN_POSTFIX
+#define L_ELBOW_YAW_POSITION         DN_PREFIX + string("LElbowYaw/Position") + DN_POSTFIX 
+#define L_ELBOW_ROLL_POSITION        DN_PREFIX + string("LElbowRoll/Position") + DN_POSTFIX
+#define R_SHOULDER_ROLL_POSITION     DN_PREFIX + string("RShoulderRoll/Position") + DN_POSTFIX
+#define R_SHOULDER_PITCH_POSITION    DN_PREFIX + string("RShoulderPitch/Position") + DN_POSTFIX
+#define R_ELBOW_YAW_POSITION         DN_PREFIX + string("RElbowYaw/Position") + DN_POSTFIX 
+#define R_ELBOW_ROLL_POSITION        DN_PREFIX + string("RElbowRoll/Position") + DN_POSTFIX
+#define L_HIP_YAWPITCH_POSITION      DN_PREFIX + string("LHipYawPitch/Position") + DN_POSTFIX 
+#define L_HIP_ROLL_POSITION          DN_PREFIX + string("LHipRoll/Position") + DN_POSTFIX 
+#define L_HIP_PITCH_POSITION         DN_PREFIX + string("LHipPitch/Position") + DN_POSTFIX
+#define L_KNEE_PITCH_POSITION        DN_PREFIX + string("LKneePitch/Position") + DN_POSTFIX
+#define L_ANKLE_PITCH_POSITION       DN_PREFIX + string("LAnklePitch/Position") + DN_POSTFIX 
+#define L_ANKLE_ROLL_POSITION        DN_PREFIX + string("LAnkleRoll/Position") + DN_POSTFIX
+#define R_HIP_YAWPITCH_POSITION      DN_PREFIX + string("RHipYawPitch/Position") + DN_POSTFIX
+#define R_HIP_ROLL_POSITION          DN_PREFIX + string("RHipRoll/Position") + DN_POSTFIX 
+#define R_HIP_PITCH_POSITION         DN_PREFIX + string("RHipPitch/Position") + DN_POSTFIX
+#define R_KNEE_PITCH_POSITION        DN_PREFIX + string("RKneePitch/Position") + DN_POSTFIX
+#define R_ANKLE_PITCH_POSITION       DN_PREFIX + string("RAnklePitch/Position") + DN_POSTFIX 
+#define R_ANKLE_ROLL_POSITION        DN_PREFIX + string("RAnkleRoll/Position") + DN_POSTFIX
 
 // Device names for hardness actuators
-#define DN_HEAD_YAW_HARDNESS            std::string("HeadYaw/Hardness/Actuator/Value")
-#define DN_HEAD_PITCH_HARDNESS          std::string("HeadPitch/Hardness/Actuator/Value")
-#define DN_L_SHOULDER_ROLL_HARDNESS     std::string("LShoulderRoll/Hardness/Actuator/Value")
-#define DN_L_SHOULDER_PITCH_HARDNESS    std::string("LShoulderPitch/Hardness/Actuator/Value")
-#define DN_L_ELBOW_YAW_HARDNESS         std::string("LElbowYaw/Hardness/Actuator/Value") 
-#define DN_L_ELBOW_ROLL_HARDNESS        std::string("LElbowRoll/Hardness/Actuator/Value")
-#define DN_R_SHOULDER_ROLL_HARDNESS     std::string("RShoulderRoll/Hardness/Actuator/Value")
-#define DN_R_SHOULDER_PITCH_HARDNESS    std::string("RShoulderPitch/Hardness/Actuator/Value")
-#define DN_R_ELBOW_YAW_HARDNESS         std::string("RElbowYaw/Hardness/Actuator/Value") 
-#define DN_R_ELBOW_ROLL_HARDNESS        std::string("RElbowRoll/Hardness/Actuator/Value")
-#define DN_L_HIP_YAWPITCH_HARDNESS      std::string("LHipYawPitch/Hardness/Actuator/Value") 
-#define DN_L_HIP_ROLL_HARDNESS          std::string("LHipRoll/Hardness/Actuator/Value") 
-#define DN_L_HIP_PITCH_HARDNESS         std::string("LHipPitch/Hardness/Actuator/Value")
-#define DN_L_KNEE_PITCH_HARDNESS        std::string("LKneePitch/Hardness/Actuator/Value")
-#define DN_L_ANKLE_PITCH_HARDNESS       std::string("LAnklePitch/Hardness/Actuator/Value") 
-#define DN_L_ANKLE_ROLL_HARDNESS        std::string("LAnkleRoll/Hardness/Actuator/Value")
-#define DN_R_HIP_YAWPITCH_HARDNESS      std::string("RHipYawPitch/Hardness/Actuator/Value")
-#define DN_R_HIP_ROLL_HARDNESS          std::string("RHipRoll/Hardness/Actuator/Value") 
-#define DN_R_HIP_PITCH_HARDNESS         std::string("RHipPitch/Hardness/Actuator/Value")
-#define DN_R_KNEE_PITCH_HARDNESS        std::string("RKneePitch/Hardness/Actuator/Value")
-#define DN_R_ANKLE_PITCH_HARDNESS       std::string("RAnklePitch/Hardness/Actuator/Value") 
-#define DN_R_ANKLE_ROLL_HARDNESS        std::string("RAnkleRoll/Hardness/Actuator/Value")
+#define HEAD_YAW_HARDNESS            DN_PREFIX + string("HeadYaw/Hardness") + DN_POSTFIX
+#define HEAD_PITCH_HARDNESS          DN_PREFIX + string("HeadPitch/Hardness") + DN_POSTFIX
+#define L_SHOULDER_ROLL_HARDNESS     DN_PREFIX + string("LShoulderRoll/Hardness") + DN_POSTFIX
+#define L_SHOULDER_PITCH_HARDNESS    DN_PREFIX + string("LShoulderPitch/Hardness") + DN_POSTFIX
+#define L_ELBOW_YAW_HARDNESS         DN_PREFIX + string("LElbowYaw/Hardness") + DN_POSTFIX 
+#define L_ELBOW_ROLL_HARDNESS        DN_PREFIX + string("LElbowRoll/Hardness") + DN_POSTFIX
+#define R_SHOULDER_ROLL_HARDNESS     DN_PREFIX + string("RShoulderRoll/Hardness") + DN_POSTFIX
+#define R_SHOULDER_PITCH_HARDNESS    DN_PREFIX + string("RShoulderPitch/Hardness") + DN_POSTFIX
+#define R_ELBOW_YAW_HARDNESS         DN_PREFIX + string("RElbowYaw/Hardness") + DN_POSTFIX 
+#define R_ELBOW_ROLL_HARDNESS        DN_PREFIX + string("RElbowRoll/Hardness") + DN_POSTFIX
+#define L_HIP_YAWPITCH_HARDNESS      DN_PREFIX + string("LHipYawPitch/Hardness") + DN_POSTFIX 
+#define L_HIP_ROLL_HARDNESS          DN_PREFIX + string("LHipRoll/Hardness") + DN_POSTFIX 
+#define L_HIP_PITCH_HARDNESS         DN_PREFIX + string("LHipPitch/Hardness") + DN_POSTFIX
+#define L_KNEE_PITCH_HARDNESS        DN_PREFIX + string("LKneePitch/Hardness") + DN_POSTFIX
+#define L_ANKLE_PITCH_HARDNESS       DN_PREFIX + string("LAnklePitch/Hardness") + DN_POSTFIX 
+#define L_ANKLE_ROLL_HARDNESS        DN_PREFIX + string("LAnkleRoll/Hardness") + DN_POSTFIX
+#define R_HIP_YAWPITCH_HARDNESS      DN_PREFIX + string("RHipYawPitch/Hardness") + DN_POSTFIX
+#define R_HIP_ROLL_HARDNESS          DN_PREFIX + string("RHipRoll/Hardness") + DN_POSTFIX 
+#define R_HIP_PITCH_HARDNESS         DN_PREFIX + string("RHipPitch/Hardness") + DN_POSTFIX
+#define R_KNEE_PITCH_HARDNESS        DN_PREFIX + string("RKneePitch/Hardness") + DN_POSTFIX
+#define R_ANKLE_PITCH_HARDNESS       DN_PREFIX + string("RAnklePitch/Hardness") + DN_POSTFIX 
+#define R_ANKLE_ROLL_HARDNESS        DN_PREFIX + string("RAnkleRoll/Hardness") + DN_POSTFIX
 
 // Device names for ear LEDs
-#define DN_LED_EAR_LEFT_0DEG            std::string("Ears/Led/Left/0Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_36DEG           std::string("Ears/Led/Left/36Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_72DEG           std::string("Ears/Led/Left/72Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_108DEG          std::string("Ears/Led/Left/108Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_144DEG          std::string("Ears/Led/Left/144Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_180DEG          std::string("Ears/Led/Left/180Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_216DEG          std::string("Ears/Led/Left/216Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_252DEG          std::string("Ears/Led/Left/252Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_288DEG          std::string("Ears/Led/Left/288Deg/Actuator/Value")
-#define DN_LED_EAR_LEFT_324DEG          std::string("Ears/Led/Left/324Deg/Actuator/Value")
+#define LED_EAR_LEFT_0DEG            DN_PREFIX + string("Ears/Led/Left/0Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_36DEG           DN_PREFIX + string("Ears/Led/Left/36Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_72DEG           DN_PREFIX + string("Ears/Led/Left/72Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_108DEG          DN_PREFIX + string("Ears/Led/Left/108Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_144DEG          DN_PREFIX + string("Ears/Led/Left/144Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_180DEG          DN_PREFIX + string("Ears/Led/Left/180Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_216DEG          DN_PREFIX + string("Ears/Led/Left/216Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_252DEG          DN_PREFIX + string("Ears/Led/Left/252Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_288DEG          DN_PREFIX + string("Ears/Led/Left/288Deg") + DN_POSTFIX
+#define LED_EAR_LEFT_324DEG          DN_PREFIX + string("Ears/Led/Left/324Deg") + DN_POSTFIX
 
-#define DN_LED_EAR_RIGHT_0DEG           std::string("Ears/Led/Right/0Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_36DEG          std::string("Ears/Led/Right/36Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_72DEG          std::string("Ears/Led/Right/72Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_108DEG         std::string("Ears/Led/Right/108Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_144DEG         std::string("Ears/Led/Right/144Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_180DEG         std::string("Ears/Led/Right/180Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_216DEG         std::string("Ears/Led/Right/216Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_252DEG         std::string("Ears/Led/Right/252Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_288DEG         std::string("Ears/Led/Right/288Deg/Actuator/Value")
-#define DN_LED_EAR_RIGHT_324DEG         std::string("Ears/Led/Right/324Deg/Actuator/Value")
+#define LED_EAR_RIGHT_0DEG           DN_PREFIX + string("Ears/Led/Right/0Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_36DEG          DN_PREFIX + string("Ears/Led/Right/36Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_72DEG          DN_PREFIX + string("Ears/Led/Right/72Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_108DEG         DN_PREFIX + string("Ears/Led/Right/108Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_144DEG         DN_PREFIX + string("Ears/Led/Right/144Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_180DEG         DN_PREFIX + string("Ears/Led/Right/180Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_216DEG         DN_PREFIX + string("Ears/Led/Right/216Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_252DEG         DN_PREFIX + string("Ears/Led/Right/252Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_288DEG         DN_PREFIX + string("Ears/Led/Right/288Deg") + DN_POSTFIX
+#define LED_EAR_RIGHT_324DEG         DN_PREFIX + string("Ears/Led/Right/324Deg") + DN_POSTFIX
 
 // Device names for eye LEDs
-#define DN_LED_EYE_LEFT_RED_0DEG        std::string("Face/Led/Red/Left/0Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_0DEG      std::string("Face/Led/Green/Left/0Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_0DEG       std::string("Face/Led/Blue/Left/0Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_45DEG       std::string("Face/Led/Red/Left/45Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_45DEG     std::string("Face/Led/Green/Left/45Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_45DEG      std::string("Face/Led/Blue/Left/45Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_90DEG       std::string("Face/Led/Red/Left/90Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_90DEG     std::string("Face/Led/Green/Left/90Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_90DEG      std::string("Face/Led/Blue/Left/90Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_135DEG      std::string("Face/Led/Red/Left/135Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_135DEG    std::string("Face/Led/Green/Left/135Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_135DEG     std::string("Face/Led/Blue/Left/135Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_180DEG      std::string("Face/Led/Red/Left/180Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_180DEG    std::string("Face/Led/Green/Left/180Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_180DEG     std::string("Face/Led/Blue/Left/180Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_225DEG      std::string("Face/Led/Red/Left/225Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_225DEG    std::string("Face/Led/Green/Left/225Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_225DEG     std::string("Face/Led/Blue/Left/225Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_270DEG      std::string("Face/Led/Red/Left/270Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_270DEG    std::string("Face/Led/Green/Left/270Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_270DEG     std::string("Face/Led/Blue/Left/270Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_RED_315DEG      std::string("Face/Led/Red/Left/315Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_GREEN_315DEG    std::string("Face/Led/Green/Left/315Deg/Actuator/Value")
-#define DN_LED_EYE_LEFT_BLUE_315DEG     std::string("Face/Led/Blue/Left/315Deg/Actuator/Value")
+#define LED_EYE_LEFT_RED_0DEG        DN_PREFIX + string("Face/Led/Red/Left/0Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_0DEG      DN_PREFIX + string("Face/Led/Green/Left/0Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_0DEG       DN_PREFIX + string("Face/Led/Blue/Left/0Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_45DEG       DN_PREFIX + string("Face/Led/Red/Left/45Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_45DEG     DN_PREFIX + string("Face/Led/Green/Left/45Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_45DEG      DN_PREFIX + string("Face/Led/Blue/Left/45Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_90DEG       DN_PREFIX + string("Face/Led/Red/Left/90Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_90DEG     DN_PREFIX + string("Face/Led/Green/Left/90Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_90DEG      DN_PREFIX + string("Face/Led/Blue/Left/90Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_135DEG      DN_PREFIX + string("Face/Led/Red/Left/135Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_135DEG    DN_PREFIX + string("Face/Led/Green/Left/135Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_135DEG     DN_PREFIX + string("Face/Led/Blue/Left/135Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_180DEG      DN_PREFIX + string("Face/Led/Red/Left/180Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_180DEG    DN_PREFIX + string("Face/Led/Green/Left/180Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_180DEG     DN_PREFIX + string("Face/Led/Blue/Left/180Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_225DEG      DN_PREFIX + string("Face/Led/Red/Left/225Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_225DEG    DN_PREFIX + string("Face/Led/Green/Left/225Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_225DEG     DN_PREFIX + string("Face/Led/Blue/Left/225Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_270DEG      DN_PREFIX + string("Face/Led/Red/Left/270Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_270DEG    DN_PREFIX + string("Face/Led/Green/Left/270Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_270DEG     DN_PREFIX + string("Face/Led/Blue/Left/270Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_RED_315DEG      DN_PREFIX + string("Face/Led/Red/Left/315Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_GREEN_315DEG    DN_PREFIX + string("Face/Led/Green/Left/315Deg") + DN_POSTFIX
+#define LED_EYE_LEFT_BLUE_315DEG     DN_PREFIX + string("Face/Led/Blue/Left/315Deg") + DN_POSTFIX
 
-#define DN_LED_EYE_RIGHT_RED_0DEG       std::string("Face/Led/Red/Right/0Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_0DEG     std::string("Face/Led/Green/Right/0Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_0DEG      std::string("Face/Led/Blue/Right/0Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_45DEG      std::string("Face/Led/Red/Right/45Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_45DEG    std::string("Face/Led/Green/Right/45Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_45DEG     std::string("Face/Led/Blue/Right/45Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_90DEG      std::string("Face/Led/Red/Right/90Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_90DEG    std::string("Face/Led/Green/Right/90Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_90DEG     std::string("Face/Led/Blue/Right/90Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_135DEG     std::string("Face/Led/Red/Right/135Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_135DEG   std::string("Face/Led/Green/Right/135Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_135DEG    std::string("Face/Led/Blue/Right/135Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_180DEG     std::string("Face/Led/Red/Right/180Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_180DEG   std::string("Face/Led/Green/Right/180Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_180DEG    std::string("Face/Led/Blue/Right/180Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_225DEG     std::string("Face/Led/Red/Right/225Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_225DEG   std::string("Face/Led/Green/Right/225Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_225DEG    std::string("Face/Led/Blue/Right/225Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_270DEG     std::string("Face/Led/Red/Right/270Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_270DEG   std::string("Face/Led/Green/Right/270Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_270DEG    std::string("Face/Led/Blue/Right/270Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_RED_315DEG     std::string("Face/Led/Red/Right/315Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_GREEN_315DEG   std::string("Face/Led/Green/Right/315Deg/Actuator/Value")
-#define DN_LED_EYE_RIGHT_BLUE_315DEG    std::string("Face/Led/Blue/Right/315Deg/Actuator/Value")
+#define LED_EYE_RIGHT_RED_0DEG       DN_PREFIX + string("Face/Led/Red/Right/0Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_0DEG     DN_PREFIX + string("Face/Led/Green/Right/0Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_0DEG      DN_PREFIX + string("Face/Led/Blue/Right/0Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_45DEG      DN_PREFIX + string("Face/Led/Red/Right/45Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_45DEG    DN_PREFIX + string("Face/Led/Green/Right/45Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_45DEG     DN_PREFIX + string("Face/Led/Blue/Right/45Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_90DEG      DN_PREFIX + string("Face/Led/Red/Right/90Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_90DEG    DN_PREFIX + string("Face/Led/Green/Right/90Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_90DEG     DN_PREFIX + string("Face/Led/Blue/Right/90Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_135DEG     DN_PREFIX + string("Face/Led/Red/Right/135Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_135DEG   DN_PREFIX + string("Face/Led/Green/Right/135Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_135DEG    DN_PREFIX + string("Face/Led/Blue/Right/135Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_180DEG     DN_PREFIX + string("Face/Led/Red/Right/180Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_180DEG   DN_PREFIX + string("Face/Led/Green/Right/180Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_180DEG    DN_PREFIX + string("Face/Led/Blue/Right/180Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_225DEG     DN_PREFIX + string("Face/Led/Red/Right/225Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_225DEG   DN_PREFIX + string("Face/Led/Green/Right/225Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_225DEG    DN_PREFIX + string("Face/Led/Blue/Right/225Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_270DEG     DN_PREFIX + string("Face/Led/Red/Right/270Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_270DEG   DN_PREFIX + string("Face/Led/Green/Right/270Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_270DEG    DN_PREFIX + string("Face/Led/Blue/Right/270Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_RED_315DEG     DN_PREFIX + string("Face/Led/Red/Right/315Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_GREEN_315DEG   DN_PREFIX + string("Face/Led/Green/Right/315Deg") + DN_POSTFIX
+#define LED_EYE_RIGHT_BLUE_315DEG    DN_PREFIX + string("Face/Led/Blue/Right/315Deg") + DN_POSTFIX
 
 // Device names for the chest LEDs
-#define DN_LED_CHEST_RED                std::string("ChestBoard/Led/Red/Actuator/Value")
-#define DN_LED_CHEST_GREEN              std::string("ChestBoard/Led/Green/Actuator/Value")
-#define DN_LED_CHEST_BLUE               std::string("ChestBoard/Led/Blue/Actuator/Value")
+#define LED_CHEST_RED                DN_PREFIX + string("ChestBoard/Led/Red") + DN_POSTFIX
+#define LED_CHEST_GREEN              DN_PREFIX + string("ChestBoard/Led/Green") + DN_POSTFIX
+#define LED_CHEST_BLUE               DN_PREFIX + string("ChestBoard/Led/Blue") + DN_POSTFIX
 
 // Device names for the feet LEDs
-#define DN_LED_FOOT_LEFT_RED            std::string("LFoot/Led/Red/Actuator/Value")
-#define DN_LED_FOOT_LEFT_GREEN          std::string("LFoot/Led/Green/Actuator/Value")
-#define DN_LED_FOOT_LEFT_BLUE           std::string("LFoot/Led/Blue/Actuator/Value")
+#define LED_FOOT_LEFT_RED            DN_PREFIX + string("LFoot/Led/Red") + DN_POSTFIX
+#define LED_FOOT_LEFT_GREEN          DN_PREFIX + string("LFoot/Led/Green") + DN_POSTFIX
+#define LED_FOOT_LEFT_BLUE           DN_PREFIX + string("LFoot/Led/Blue") + DN_POSTFIX
 
-#define DN_LED_FOOT_RIGHT_RED           std::string("RFoot/Led/Red/Actuator/Value")
-#define DN_LED_FOOT_RIGHT_GREEN         std::string("RFoot/Led/Green/Actuator/Value")
-#define DN_LED_FOOT_RIGHT_BLUE          std::string("RFoot/Led/Blue/Actuator/Value")
+#define LED_FOOT_RIGHT_RED           DN_PREFIX + string("RFoot/Led/Red") + DN_POSTFIX
+#define LED_FOOT_RIGHT_GREEN         DN_PREFIX + string("RFoot/Led/Green") + DN_POSTFIX
+#define LED_FOOT_RIGHT_BLUE          DN_PREFIX + string("RFoot/Led/Blue") + DN_POSTFIX
 
 #endif

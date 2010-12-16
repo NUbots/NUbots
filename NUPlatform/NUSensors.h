@@ -32,10 +32,12 @@
 #ifndef NUSENSORS_H
 #define NUSENSORS_H
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-
+class NUSensorsData;
 class Kinematics;
 class OrientationUKF;
+
+#include <vector>
+using namespace std;
 
 /*! @brief Base sensor storage class
  */
@@ -45,22 +47,19 @@ public:
     NUSensors();
     virtual ~NUSensors();
     
-    NUSensorsData* update();
-    NUSensorsData* getData();
+    void update();
+    NUSensorsData* getNUSensorsData();
     
 protected:
     virtual void copyFromHardwareCommunications();
     
     virtual void calculateSoftSensors();
     
-    void calculateJointVelocity();
-    void calculateJointAcceleration();
-    
     void calculateKinematics();
     
     void calculateOrientation();
     void calculateHorizon();
-    void calculateButtonTriggers();
+    void calculateButtonDurations();
     
     void calculateFootForce();
     void calculateCoP();
@@ -78,6 +77,10 @@ protected:
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
+    
+    vector<float> m_previous_joint_positions;
+    vector<float> m_previous_joint_velocities;
+    
     Kinematics* m_kinematicModel;
     OrientationUKF* m_orientationFilter;
     vector<vector<float> > m_left_foot_hull;

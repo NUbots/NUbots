@@ -32,7 +32,7 @@ class NUWalk;
 #include "Motion/NUMotionProvider.h"
 
 #include "Kinematics/Kinematics.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include <string>
 
 class FieldObjects;
@@ -134,7 +134,8 @@ private:
     float perSec2perFrame(float value);
     float SpeedMultiplier();
     float GainMultiplier();
-    double MoveLimbToPositionWithSpeed(NUActionatorsData::bodypart_id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+    double MoveLegsToPositionWithSpeed(const vector<float>& targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
 
     float CalculateForwardSwingSpeed(float kickDistance);
     float CalculateSidewardSwingSpeed(float kickDistance);
@@ -197,6 +198,7 @@ private:
     bool m_armCommandSent;
     bool m_kickActive;
     bool m_kickReady;
+    bool m_kickWait;
 };
 
 

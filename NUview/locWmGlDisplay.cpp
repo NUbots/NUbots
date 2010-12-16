@@ -5,7 +5,7 @@
 #include <QApplication>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocalisation(0)
 {

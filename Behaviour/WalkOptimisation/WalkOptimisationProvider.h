@@ -47,6 +47,7 @@ public:
     void setStability(float stability);
     
     float stoppingDistance();
+    float normalDistribution(float mean, float sigma);
 protected:
     BehaviourState* nextStateCommons();
     void doBehaviourCommons();

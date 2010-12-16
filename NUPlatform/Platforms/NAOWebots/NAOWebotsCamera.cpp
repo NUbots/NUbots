@@ -20,13 +20,13 @@
  */
 
 #include "NAOWebotsCamera.h"
-#include "Tools/Image/ColorModelConversions.h"
-#include "Tools/Image/Pixel.h"
+#include "Infrastructure/NUImage/ColorModelConversions.h"
+#include "Infrastructure/NUImage/Pixel.h"
+#include "NUPlatform/NUPlatform.h"
+
 #include "debug.h"
 #include "debugverbositynucamera.h"
-#include "NUPlatform/NUSystem.h"
 
-#include "webots/Robot.hpp"
 using namespace webots;
 
 /*! @brief Constructs a webots camera
@@ -50,7 +50,7 @@ NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
     debug << "NAOWebotsCamera::NAOWebotsCamera(). Width = " << m_width << " Height = " << m_height << endl;
 #endif
     
-    m_image = new NUimage(m_width, m_height, false);
+    m_image = new NUImage(m_width, m_height, false);
     m_yuyv_buffer = new Pixel[m_totalpixels*2];
 }
 
@@ -73,7 +73,7 @@ NAOWebotsCamera::~NAOWebotsCamera()
  
     The image is 160 x 120, and is in the usual YUV422 format.
  */
-NUimage* NAOWebotsCamera::grabNewImage()
+NUImage* NAOWebotsCamera::grabNewImage()
 {
     const unsigned char* rgb_image = m_camera->getImage();              // grab the image from webots
     
@@ -89,8 +89,8 @@ NUimage* NAOWebotsCamera::grabNewImage()
         m_yuyv_buffer[i].cr = v;
     }
     
-    m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have nuimage use m_yuyv_buffer
-    m_image->m_timestamp = nusystem->getTime();
+    m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have NUImage use m_yuyv_buffer
+    m_image->m_timestamp = Platform->getTime();
     return m_image;
 }
 

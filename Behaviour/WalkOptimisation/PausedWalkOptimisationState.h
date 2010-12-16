@@ -25,11 +25,13 @@
 #include "WalkOptimisationProvider.h"
 #include "WalkOptimisationState.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 
 #include "debug.h"
 
@@ -44,7 +46,7 @@ public:
         if (m_parent->stateChanged())
         {
             m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+            vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
             m_jobs->addMotionJob(new HeadJob(m_actions->CurrentTime + 500, zero));
         }
     };

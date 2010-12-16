@@ -2,14 +2,14 @@
     @brief Declaration of the top-level behaviour class
  
     @class Behaviour
-    @brief The top-level behaviour class
+    @brief The top-level class for the Behaviour module. 
  
-    The Behaviour has a single BehaviourProvider. The BehaviourProvider can
+    The Behaviour module has a single BehaviourProvider. The BehaviourProvider can
     be changed online.
 
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2009,2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
 
 class BehaviourProvider;
 
-class JobList;
 class NUSensorsData;
 class NUActionatorsData;
+class JobList;
 class FieldObjects;
 class GameInformation;
 class TeamInformation;

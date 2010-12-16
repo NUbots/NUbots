@@ -21,13 +21,13 @@
 
 
 #include "NUHead.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Tools/MotionCurves.h"
 #include "Tools/MotionFileTools.h"
 
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "NUPlatform/NUCamera.h"
 
 #include "debug.h"
@@ -72,7 +72,7 @@ void NUHead::stopHead()
     m_is_panning = false;
     m_move_end_time = 0;
     if (m_data and m_actions)
-        m_actions->addJointPositions(NUActionatorsData::HeadJoints, 0, vector<float>(2,0), vector<float>(2,0), 0);
+        m_actions->add(NUActionatorsData::Head, 0, vector<float>(2,0), 0);
 }
 
 /*! @brief Kills the head module
@@ -215,13 +215,13 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
         return;
 
     vector<float> sensorpositions;
-    m_data->getJointPositions(NUSensorsData::HeadJoints, sensorpositions);
+    m_data->getPosition(NUSensorsData::Head, sensorpositions);
     
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
     MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
-    m_actions->addJointPositions(NUActionatorsData::HeadJoints, curvetimes, curvepositions, curvevelocities, m_default_gains);
+    m_actions->add(NUActionatorsData::Head, curvetimes, curvepositions, m_default_gains);
     
     if (times.size() > 0)
         m_move_end_time = times.back();
@@ -364,12 +364,12 @@ void NUHead::getSensorValues()
         m_camera_height = 46;
     
     vector<float> orientation;
-    m_data->getOrientation(orientation);
+    m_data->get(NUSensorsData::Orientation, orientation);
     if (orientation.size() > 2)
         m_body_pitch = orientation[1];
     
-    m_data->getJointPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
-    m_data->getJointPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
+    m_data->getPosition(NUSensorsData::HeadPitch, m_sensor_pitch);
+    m_data->getPosition(NUSensorsData::HeadYaw, m_sensor_yaw);
 }
 
 /*! @brief Calculates evenly spaced pitch values to pan at based on the camera field of view

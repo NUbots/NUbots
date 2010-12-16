@@ -23,6 +23,8 @@
 #include "NAOWebotsPlatform.h"
 #include "NAOWebotsNetworkThread.h"
 
+#include "Infrastructure/NUBlackboard.h"
+
 #include "NUPlatform/NUIO/NetworkPortNumbers.h"
 #include "NUPlatform/NUIO/JobPort.h"
 #include "NUPlatform/NUIO/TcpPort.h"
@@ -45,12 +47,12 @@ NAOWebotsIO::NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform)
 #endif
     m_nubot = nubot;
     #if defined(USE_NETWORK_GAMECONTROLLER) or defined(USE_NETWORK_TEAMINFO)
-        m_network = new NAOWebotsNetworkThread(nubot->GameInfo, nubot->TeamInfo, platform, 250);
+        m_network = new NAOWebotsNetworkThread(Blackboard->GameInfo, Blackboard->TeamInfo, platform, 250);
         m_network->start();
     #endif
     
     #ifdef USE_NETWORK_JOBS
-        m_jobs_port = new JobPort(nubot->Jobs);
+        m_jobs_port = new JobPort(Blackboard->Jobs);
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);

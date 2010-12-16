@@ -11,7 +11,10 @@ win32 {
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
     INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
     INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    INCLUDEPATH += 'C:/Program Files/boost/boost_1_44'
+    INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
+    INCLUDEPATH += 'C:/Program Files/Bonjour SDK/Include/'
     LIBS += -lwsock32
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
@@ -35,31 +38,33 @@ HEADERS += ui_mainwindow.h \
     ../Vision/Vision.h \
     ../Tools/FileFormats/LUTTools.h \
     virtualnubot.h \
-    ../Tools/Image/BresenhamLine.h \
+    ../Infrastructure/NUImage/BresenhamLine.h \
     ../Tools/Math/Vector2.h \
     ../Tools/Math/Line.h \
     ../Kinematics/Horizon.h \
     openglmanager.h \
     GLDisplay.h \
-    ../Tools/Image/NUimage.h \
-    ../Tools/Image/ClassifiedImage.h \
+    ../Infrastructure/NUImage/NUImage.h \
+    ../Infrastructure/NUImage/ClassifiedImage.h \
     ../Vision/ClassifiedSection.h \
     ../Vision/ScanLine.h \
     ../Vision/TransitionSegment.h \
     ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
     WalkParameterWidget.h \
+    ../Motion/Walks/WalkParameters.h \
+    ../Tools/Optimisation/Parameter.h \
     KickWidget.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
     ../Tools/Math/Vector3.h \
-    ../Vision/FieldObjects/StationaryObject.h \
-    ../Vision/FieldObjects/Self.h \
-    ../Vision/FieldObjects/Object.h \
-    ../Vision/FieldObjects/MobileObject.h \
-    ../Vision/FieldObjects/AmbiguousObject.h \
-    ../Vision/FieldObjects/FieldObjects.h \
+    ../Infrastructure/FieldObjects/StationaryObject.h \
+    ../Infrastructure/FieldObjects/Self.h \
+    ../Infrastructure/FieldObjects/Object.h \
+    ../Infrastructure/FieldObjects/MobileObject.h \
+    ../Infrastructure/FieldObjects/AmbiguousObject.h \
+    ../Infrastructure/FieldObjects/FieldObjects.h \
     ../Vision/Threads/SaveImagesThread.h \
     ../Vision/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
@@ -81,8 +86,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/Parse.h \
     ../Localisation/KF.h \
     ../Localisation/Localisation.h \
-    ../Vision/FieldObjects/WorldModelShareObject.h \
-    ../Behaviour/GameInformation.h \
+    ../Infrastructure/FieldObjects/WorldModelShareObject.h \
+    ../Infrastructure/GameInformation/GameInformation.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
     ../Tools/Threading/PeriodicThread.h \
@@ -99,7 +104,10 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Link.h \
     ../Kinematics/EndEffector.h \
     ../NUPlatform/NUSensors.h \
-    ../NUPlatform/NUSensors/NUSensorsData.h \
+    ../Infrastructure/NUSensorsData/NUSensorsData.h \
+    ../Infrastructure/NUData.h \
+    ../Infrastructure/NUBlackboard.h \
+    ../NUPlatform/NUPlatform.h \
     ../Tools/Math/General.h \
     ../Vision/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
@@ -153,13 +161,13 @@ SOURCES += mainwindow.cpp \
     ../Vision/Vision.cpp \
     ../Tools/FileFormats/LUTTools.cpp \
     virtualnubot.cpp \
-    ../Tools/Image/BresenhamLine.cpp \
+    ../Infrastructure/NUImage/BresenhamLine.cpp \
     ../Tools/Math/Line.cpp \
     ../Kinematics/Horizon.cpp \
     openglmanager.cpp \
     GLDisplay.cpp \
-    ../Tools/Image/NUimage.cpp \
-    ../Tools/Image/ClassifiedImage.cpp \
+    ../Infrastructure/NUImage/NUImage.cpp \
+    ../Infrastructure/NUImage/ClassifiedImage.cpp \
     ../Vision/ClassifiedSection.cpp \
     ../Vision/ScanLine.cpp \
     ../Vision/TransitionSegment.cpp \
@@ -168,30 +176,34 @@ SOURCES += mainwindow.cpp \
     WalkParameterWidget.cpp \
     KickWidget.cpp \
     ../Motion/Walks/WalkParameters.cpp \
+    ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     ../NUPlatform/NUIO/*.cpp \
     NUviewIO/NUviewIO.cpp \
+    ../Infrastructure/NUData.cpp \
+    ../Infrastructure/NUBlackboard.cpp \
+    ../NUPlatform/NUPlatform.cpp \
     ../NUPlatform/NUSensors.cpp \
-    ../NUPlatform/NUSensors/*.cpp \
+    ../Infrastructure/NUSensorsData/*.cpp \
     ../NUPlatform/NUActionators.cpp \
     ../NUPlatform/NUActionators/*.cpp \
-    ../NUPlatform/NUSystem.cpp \
-    ../Behaviour/TeamInformation.cpp \
-    ../Behaviour/Jobs/*.cpp \
-    ../Behaviour/Jobs/CameraJobs/*.cpp \
-    ../Behaviour/Jobs/VisionJobs/*.cpp \
-    ../Behaviour/Jobs/MotionJobs/*.cpp \
+    ../Infrastructure/NUActionatorsData/*.cpp \
+    ../Infrastructure/TeamInformation/TeamInformation.cpp \
+    ../Infrastructure/Jobs/*.cpp \
+    ../Infrastructure/Jobs/CameraJobs/*.cpp \
+    ../Infrastructure/Jobs/VisionJobs/*.cpp \
+    ../Infrastructure/Jobs/MotionJobs/*.cpp \
     locWmGlDisplay.cpp \
     ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
-    ../Vision/FieldObjects/StationaryObject.cpp \
-    ../Vision/FieldObjects/Self.cpp \
-    ../Vision/FieldObjects/Object.cpp \
-    ../Vision/FieldObjects/MobileObject.cpp \
-    ../Vision/FieldObjects/AmbiguousObject.cpp \
-    ../Vision/FieldObjects/FieldObjects.cpp \
+    ../Infrastructure/FieldObjects/StationaryObject.cpp \
+    ../Infrastructure/FieldObjects/Self.cpp \
+    ../Infrastructure/FieldObjects/Object.cpp \
+    ../Infrastructure/FieldObjects/MobileObject.cpp \
+    ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
+    ../Infrastructure/FieldObjects/FieldObjects.cpp \
     ../Vision/Threads/SaveImagesThread.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
@@ -212,8 +224,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/KF.cpp \
     ../Localisation/Localisation.cpp \
-    ../Vision/FieldObjects/WorldModelShareObject.cpp \
-    ../Behaviour/GameInformation.cpp \
+    ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
+    ../Infrastructure/GameInformation/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
     ../Tools/Threading/ConditionalThread.cpp \
     ../Tools/Threading/PeriodicThread.cpp \

@@ -22,8 +22,8 @@
 #include "ColorModelConversions.h"
 #include "Vision/ClassificationColours.h"
 #include "openglmanager.h"
-#include "Tools/Image/NUimage.h"
-#include "Tools/Image/ClassifiedImage.h"
+#include "Infrastructure/NUImage/NUImage.h"
+#include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
@@ -90,7 +90,7 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     displayStored[displayId] = true;
 }
 
-void OpenglManager::writeNUimageToDisplay(const NUimage* newImage, GLDisplay::display displayId)
+void OpenglManager::writeNUImageToDisplay(const NUImage* newImage, GLDisplay::display displayId)
 {
     width = newImage->getWidth();
     height = newImage->getHeight();

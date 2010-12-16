@@ -61,12 +61,11 @@ protected:
     BallIsLostState* m_ball_is_lost_state;
     ImLostState* m_im_lost_state;
 private:
-    vector<int> m_chase_led_indices; 
-    vector<vector<float> > m_led_on;
-    vector<vector<float> > m_led_off;
-    vector<vector<float> > m_led_red;
-    vector<vector<float> > m_led_green;
-    vector<vector<float> > m_led_yellow;
+    vector<float> m_led_on;
+    vector<float> m_led_off;
+    vector<float> m_led_red;
+    vector<float> m_led_green;
+    vector<float> m_led_yellow;
 };
 
 

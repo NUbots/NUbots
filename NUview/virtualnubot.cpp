@@ -8,11 +8,12 @@
 #include <iostream>
 #include <fstream>
 #include <qmessagebox.h>
-#include "../NUPlatform/NUSensors/NUSensorsData.h"
+
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
-
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
@@ -43,7 +44,7 @@ virtualNUbot::~virtualNUbot()
     delete classificationTable;
 }
 
-void virtualNUbot::setRawImage(const NUimage* image)
+void virtualNUbot::setRawImage(const NUImage* image)
 {
     rawImage = image;
     vision.setImage(image);
@@ -163,13 +164,13 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     classifiedImage.height = currentPacket->frameHeight;
     classifiedImage.width = currentPacket->frameWidth;
     classifiedImage.imageBuffer = currentPacket->classImage;
-    classifiedImage.imageFormat = NUimage::CLASSIFIED;
+    classifiedImage.imageFormat = NUImage::CLASSIFIED;
     processVisionFrame(classifiedImage);
     emit classifiedImageChanged(&classifiedImage);
     */
 }
 
-void virtualNUbot::generateClassifiedImage(const NUimage* yuvImage)
+void virtualNUbot::generateClassifiedImage(const NUImage* yuvImage)
 {
     vision.classifyImage(classImage);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
@@ -181,7 +182,7 @@ void virtualNUbot::processVisionFrame()
     processVisionFrame(rawImage);
 }
 
-void virtualNUbot::processVisionFrame(const NUimage* image)
+void virtualNUbot::processVisionFrame(const NUImage* image)
 {
 
     if(!imageAvailable()) return;
@@ -477,7 +478,7 @@ void virtualNUbot::processVisionFrame(const NUimage* image)
     //emit fftChanged(vision.getFFT(), GLDisplay::FFT);
 
     float datavalue = 0.0;
-    sensorsData->getJointPosition(NUSensorsData::HeadPitch,datavalue);
+    sensorsData->get(NUSensorsData::HeadPitch,datavalue);
     qDebug() << "Sensors Data: Head Elevation: " << datavalue;
 
 
