@@ -218,8 +218,8 @@ float WalkOptimisationProvider::calculateFitness()
         speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     #ifdef TARGET_IS_NAOWEBOTS
-        //speed += normalDistribution(0, ?);
-        //cost += normalDistribution(0, ?);
+        speed *= normalDistribution(1, 0.03);
+        cost *= normalDistribution(1, 0.03);
     #endif
     
     //fitness = speed;                      // speed--based fitness
