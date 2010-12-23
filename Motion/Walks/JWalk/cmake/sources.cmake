@@ -21,6 +21,11 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  JWalk.cpp JWalk.h
+				JWalkState.h
+                JWalkStance.h JWalkStance.cpp
+                JWalkPush.h JWalkPush.cpp
+                JWalkSwing.h JWalkSwing.cpp
+                JWalkAccept.h JWalkAccept.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

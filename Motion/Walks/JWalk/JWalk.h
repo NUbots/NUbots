@@ -6,7 +6,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010, 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,8 +26,7 @@
 #define JWALK_H
 
 #include "Motion/NUWalk.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+class JWalkState;
 
 class JWalk : public NUWalk
 {
@@ -37,10 +36,31 @@ public:
 protected:
     void doWalk();
 private:
+    void calculateGaitPhase();
 public:
+    // The JWalk blackboard
+    float GaitPhase;
+    JWalkState* LeftState;
+    JWalkState* RightState;
+    
+    JWalkState* LeftStance;
+    JWalkState* LeftPush;
+    JWalkState* LeftSwing;
+    JWalkState* LeftAccept;
+    
+    JWalkState* RightStance;
+    JWalkState* RightPush;
+    JWalkState* RightSwing;
+    JWalkState* RightAccept;
+    
+    double CurrentTime;
+    double PreviousTime;
 protected:
 private:
+    float GaitFrequency;
 };
+
+extern JWalk* JWalkBlackboard;
 
 #endif
 
