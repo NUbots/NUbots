@@ -168,9 +168,10 @@ inline float maxDifference(const vector<T>& left, const vector<T>& right)
     @param x the x value of the point to test
     @param y the y value of the point to test
     @param vertices the [[x0,y0], [x1,y1], ... , [xn,yn]] specifying the convex hull. 
-           If x is up, y is left, then the vertices need to be in clockwise order.
+           If x is up, y is left (ie the NUbot convention), then the vertices need to be in clockwise order.
            If x is up, y is right, then the vertices need to be in anti-clockwise order
     @param margin the amount to 'shrink' the convex hull and then test if the point is inside it
+ 	@return true if [x,y] is inside the hull specified by vertices
  */
 inline bool PointInsideConvexHull(float x, float y, const std::vector<std::vector<float> >& vertices, float margin = 0)
 {
