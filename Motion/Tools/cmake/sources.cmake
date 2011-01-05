@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS  MotionCurves.cpp MotionCurves.h
                 MotionFileTools.cpp MotionFileTools.h
                 MotionScript.cpp MotionScript.h
+                PIDController.cpp PIDController.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
