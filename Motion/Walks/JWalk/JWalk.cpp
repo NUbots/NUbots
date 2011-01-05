@@ -39,6 +39,13 @@ JWalk* JWalkBlackboard = 0;
 JWalk::JWalk() : NUWalk(Blackboard->Sensors, Blackboard->Actions)
 {
     JWalkBlackboard = this;
+    m_walk_parameters.load("JWalkStart");
+    // a hack for hasty pid controller tuning
+    vector<Parameter>& p = m_walk_parameters.getParameters();
+    cout << p.size() << endl;
+    LAnkleRGain = p[0].get();
+    LAnklePGain = p[1].get();
+    cout << LAnkleRGain << " " << LAnklePGain << endl;
     
     GaitPhase = 0;
     GaitFrequency = 0.6;
@@ -59,7 +66,7 @@ JWalk::JWalk() : NUWalk(Blackboard->Sensors, Blackboard->Actions)
     CurrentTime = 0;
     PreviousTime = 0;
     
-    m_walk_parameters.load("JWalkStart");
+    
     // Initialise the leg values
     m_initial_lleg = vector<float>(Blackboard->Actions->getSize(NUActionatorsData::LLeg), 0);
     m_initial_rleg = vector<float>(Blackboard->Actions->getSize(NUActionatorsData::RLeg), 0);
