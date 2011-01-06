@@ -185,7 +185,7 @@ namespace WP {
      0.4f,          // zmp static perc                              ---> Walk Parameter
      10.0f,          // l zmp off                                   ---> Walk Parameter
      10.0f,          // r zmp off                                   ---> Walk Parameter 
-     0.01f,         // strafe zmp off
+     0.0f,          // strafe zmp off
      0.0f,};        // turn zmp off  
     static const float HACK_DEFAULT[LEN_HACK_CONFIG]=
     {0.1f,          // hip hack l                                   ---> Walk Parameter

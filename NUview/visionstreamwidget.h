@@ -7,8 +7,8 @@
 #include <QtNetwork/QTcpSocket>
 #include <stdio.h>
 #include <iostream>
-#include "Tools/Image/NUimage.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUImage/NUImage.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include <QTimer>
 #include <QTime>
 class QLabel;
@@ -61,7 +61,7 @@ signals:
       *    @param datagram The QByteArray pointer to a datagram packet to be processed
       */
     void PacketReady(QByteArray* datagram);
-    void rawImageChanged(const NUimage*);
+    void rawImageChanged(const NUImage*);
     void sensorsDataChanged(NUSensorsData*);
     void sensorsDataChanged(const float* joint, const float* balance, const float* touch);
 
@@ -92,7 +92,7 @@ private:
     QWidget* window;
     QTcpSocket* tcpSocket;
     QTimer time;
-    NUimage image;
+    NUImage image;
     NUSensorsData sensors;
     QTime timeToRecievePacket;
 

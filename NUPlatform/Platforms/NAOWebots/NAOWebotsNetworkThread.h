@@ -43,8 +43,8 @@ private:
     
     RoboCupGameControlData* m_game_packet;
     
-    Receiver* m_receiver;
-    Emitter* m_emitter;
+    webots::Receiver* m_receiver;
+    webots::Emitter* m_emitter;
     
     GameInformation* m_game_info;
     TeamInformation* m_team_info;

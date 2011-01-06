@@ -3,7 +3,7 @@
 
 #include "LogFileFormatReader.h"
 #include "Tools/FileFormats/NUbotImage.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 
 class nifVersion1FormatReader : public LogFileFormatReader
@@ -18,7 +18,7 @@ public:
     bool closeFile();
     bool fileGood(){return (nifFileReader.currentFile.good() && nifFileReader.currentFile.is_open());};
 
-    const NUimage* getImage(){return &rawImageBuffer;};
+    const NUImage* getImage(){return &rawImageBuffer;};
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
@@ -39,7 +39,7 @@ protected:
     NUbotImage nifFileReader;
 
     // Data Buffers
-    NUimage rawImageBuffer;
+    NUImage rawImageBuffer;
     //!TODO: sensor data must be updated
     float jointSensorsBuffer[100];
     float balanceSensorsBuffer[100];

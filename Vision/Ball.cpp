@@ -6,7 +6,7 @@
 #include "ClassifiedSection.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
-#include "../NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 //#include <QDebug>
 Ball::Ball()
 {
@@ -240,7 +240,7 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
         }
 
         float headElevation = 0.0;
-        vision->getSensorsData()->getJointPosition(NUSensorsData::HeadPitch,headElevation);
+        vision->getSensorsData()->getPosition(NUSensorsData::HeadPitch,headElevation);
 
         if(!(tempSegement->getEndPoint().y >= height-buffer || tempSegement->getEndPoint().x >= width-buffer) &&  headElevation < 0.3)
         {

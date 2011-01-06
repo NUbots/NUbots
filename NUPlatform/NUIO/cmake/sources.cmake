@@ -20,13 +20,14 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  UdpPort
-		GameControllerPort
-		JobPort
-		TeamPort
-		TeamTransmissionThread.cpp TeamTransmissionThread.h
-                TcpPort
-        
+SET (YOUR_SRCS  UdpPort.cpp UdpPort.h
+                TcpPort.cpp TcpPort.h
+                GameControllerPort.cpp GameControllerPort.h
+                JobPort.cpp JobPort.h
+                TeamPort.cpp TeamPort.h
+                TeamTransmissionThread.cpp TeamTransmissionThread.h
+                SSLVisionPort.cpp SSLVisionPort.h
+                SSLVisionPacket.cpp SSLVisionPacket.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

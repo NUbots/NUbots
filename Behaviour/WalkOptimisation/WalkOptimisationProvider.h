@@ -45,8 +45,12 @@ public:
     void setSpeed(float speed);
     void setEnergy(float energy);
     void setStability(float stability);
+    
+    float stoppingDistance();
+    float normalDistribution(float mean, float sigma);
 protected:
     BehaviourState* nextStateCommons();
+    void doBehaviourCommons();
 public:
     BehaviourState* m_generate;                 //!< the state in which the parameter generation is done, and preparations for its evaluation
     BehaviourState* m_evaluate;                 //!< the state in which the parameter evaluation is done

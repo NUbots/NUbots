@@ -32,13 +32,13 @@
 #include "Tools/Math/General.h"
 #include "Motion/Tools/MotionFileTools.h"
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/Jobs/JobList.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/BehaviourPotentials.h"
 
 #include "debug.h"
@@ -57,13 +57,18 @@ public:
         #endif
         m_getting_up = false;
         m_previously_getting_up = false;
+        m_time_not_getting_up = 0;
+        m_time_in_state = 0;
+        m_current_start_state = vector<float>(3);
     }
     
     ~GenerateWalkParametersState() {};
     BehaviourState* nextState()
-    {   // progress to the evaluation state when we are in position AND lined up
+    {   // progress to the evaluation state when we are in position AND lined up AND stopped
         vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_start_state);
-        if (difference[0] < 5 and fabs(difference[2]) < 0.2)
+        vector<float> speed;
+        m_data->get(NUSensorsData::MotionWalkSpeed, speed);
+        if (difference[0] < 10 and fabs(difference[2]) < 0.2)
             return m_parent->m_evaluate;
         else
             return this;
@@ -75,12 +80,11 @@ public:
             debug << "GenerateWalkParametersState" << endl;
         #endif
         m_previously_getting_up = m_getting_up;
-        m_data->getMotionGetupActive(m_getting_up);
+        m_data->get(NUSensorsData::MotionGetupActive, m_getting_up);
         
-        if (m_parent->stateChanged() or (m_parent->wasPreviousState(this) and m_previously_getting_up and not m_getting_up and not m_data->isFallen()) or m_time_in_state > 120000)
+        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up and m_time_not_getting_up > 3000) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
-            m_current_start_state = getStartState();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << "GenerateWalkParametersState::doState(). Start Position: " << MotionFileTools::fromVector(m_current_start_state) << endl;
             #endif
@@ -89,10 +93,15 @@ public:
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
+        if (m_getting_up)
+            m_time_not_getting_up = 0;
+        else
+            m_time_not_getting_up += m_data->CurrentTime - m_previous_time;
         
         lookAtGoals();
         
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 5, 50, 9000);
+        m_current_start_state = getStartState();
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_start_state, 0, 2*m_parent->stoppingDistance(), 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 private:
@@ -100,10 +109,7 @@ private:
     {   
         vector<vector<float> >& points = m_parent->m_speed_points;
         vector<float> front = points.front();
-        vector<float> back = front;
-        back[0] = -back[0];
-        back[1] = -back[1];
-        back[2] += 3.14;
+        vector<float> back = points.back();
         
         vector<float> difference_from_front = m_field_objects->self.CalculateDifferenceFromFieldState(front);
         vector<float> difference_from_back = m_field_objects->self.CalculateDifferenceFromFieldState(back);
@@ -166,6 +172,7 @@ private:
     
     bool m_previously_getting_up;
     bool m_getting_up;
+    float m_time_not_getting_up;
     float m_time_in_state;
     float m_previous_time;
 };

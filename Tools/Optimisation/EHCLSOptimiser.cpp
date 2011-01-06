@@ -22,6 +22,8 @@
 #include "EHCLSOptimiser.h"
 #include "Parameter.h"
 
+#include "NUPlatform/NUPlatform.h"
+
 #include <boost/random.hpp>
 
 #include "debug.h"
@@ -42,10 +44,17 @@ EHCLSOptimiser::EHCLSOptimiser(std::string name, vector<Parameter> parameters) :
     m_real_best_performance = 0;
     m_alpha = 0.0;
     m_count_since_last_improvement = 0;
-    m_reset_limit = 15;
     
     m_improvement = 1e100;
     m_previous_improvement = 1e100;
+    
+    // for NBWalk in Webots 0.125, 5, 0.98 is the best combination of parameters
+    // The algorithm appears to work best when the reset limit is low, this means we only search
+    // along the direction of the last improvement for a short time. The reset fraction is high
+    // so we don't back track to far     
+    m_neta = 0.125;               // tune this parameter
+    m_reset_limit = 5;            // tune this parameter
+    m_reset_fraction = 0.98;      // tune this parameter
     
     load();
     save();
@@ -70,7 +79,7 @@ void EHCLSOptimiser::setParametersResult(float fitness)
     {
         m_previous_improvement = m_improvement;
         m_improvement = m_current_performance - m_best_performance;
-        m_alpha = fabs(tanh(fabs(m_improvement/m_previous_improvement)));
+        m_alpha = 0.95*fabs(tanh(fabs(m_improvement/m_previous_improvement)));
         m_best_delta_parameters = m_current_parameters - m_best_parameters;
         
         m_best_parameters = m_current_parameters;
@@ -90,9 +99,9 @@ void EHCLSOptimiser::setParametersResult(float fitness)
     
     if (m_count_since_last_improvement > m_reset_limit)
     {	// check if we need to reset
-        m_alpha *= 0.9;
+        m_alpha = 0;
         m_count_since_last_improvement = 0;
-        m_best_performance *= 0.99;
+        m_best_performance *= m_reset_fraction;
     }
 }
 
@@ -109,7 +118,7 @@ void EHCLSOptimiser::mutateBestParameters(vector<Parameter>& parameters)
 void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector<float>& basedelta_parameters, vector<Parameter>& parameters)
 {
     // generate phi to mutate the BestParameters
-    float sigma = 0.1*exp(m_count_since_last_improvement/m_reset_limit - 1);			// 0.04
+    float sigma = m_neta*exp(m_count_since_last_improvement/m_reset_limit - 1);			// 0.04
     vector<float> phi(base_parameters.size(), 0);
     for (size_t i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(0, sigma);
@@ -136,7 +145,7 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
  */
 float EHCLSOptimiser::normalDistribution(float mean, float sigma)
 {
-    static unsigned int seed = clock()*clock()*clock();          // I am hoping that at least one of the three calls is different for each process
+    static unsigned int seed = 1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime();          // I am hoping that at least one of the three calls is different for each process
     static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
     static boost::normal_distribution<float> distribution(0,1);
     static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);
@@ -161,7 +170,7 @@ void EHCLSOptimiser::toStream(ostream& o) const
     o << m_previous_parameters << endl;
     o << m_real_best_parameters << endl;
     
-    o << m_iteration_count << " " << m_count_since_last_improvement << " " << m_alpha << " " << m_improvement << " " << m_previous_improvement << " " << m_reset_limit << endl;
+    o << m_iteration_count << " " << m_count_since_last_improvement << " " << m_alpha << " " << m_improvement << " " << m_previous_improvement << " " << m_neta << " " << m_reset_limit << " " << m_reset_fraction << endl;
     o << m_current_performance << " " << m_best_performance << endl;
 }
 
@@ -173,7 +182,7 @@ void EHCLSOptimiser::fromStream(istream& i)
     i >> m_previous_parameters;
     i >> m_real_best_parameters;
     
-    i >> m_iteration_count >> m_count_since_last_improvement >> m_alpha >> m_improvement >> m_previous_improvement >> m_reset_limit;
+    i >> m_iteration_count >> m_count_since_last_improvement >> m_alpha >> m_improvement >> m_previous_improvement >> m_neta >> m_reset_limit >> m_reset_fraction;
     i >> m_current_performance >> m_best_performance;
 }
 

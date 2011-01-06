@@ -35,15 +35,15 @@
     #include "Script.h"
 #endif
 
-#include "Behaviour/Jobs.h"
+#include "Infrastructure/Jobs/Jobs.h"
 #include "FallProtection.h"
 #include "Getup.h"
 #include "Tools/MotionScript.h"
 #include "Tools/Math/General.h"
 
 #include "NUPlatform/NUPlatform.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -145,7 +145,7 @@ NUMotion::~NUMotion()
  */
 void NUMotion::stop()
 {
-    m_killed = true;
+    //m_killed = true;
     m_last_kill_time = m_current_time;
     m_fall_protection->stop();
     m_getup->stop();
@@ -167,6 +167,10 @@ void NUMotion::stop()
  */
 void NUMotion::kill()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::kill()" << endl;
+    #endif
+    
     m_killed = true;
     m_last_kill_time = m_current_time;
     m_fall_protection->kill();
@@ -190,8 +194,6 @@ void NUMotion::kill()
     vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
     vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
     vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
-    vector<float> legvelocities(legpositions.size(), 1.0);
-    vector<float> armvelocities(larmpositions.size(), 1.0);
     
     // check if there is a reason it is not safe or possible to go into the crouch position
     if (m_actions == NULL)
@@ -200,42 +202,42 @@ void NUMotion::kill()
     {
         // check the orientation
         vector<float> orientation;
-        if (m_data->getOrientation(orientation))
+        if (m_data->get(NUSensorsData::Orientation, orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
             {
-                m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), larmpositions, armvelocities, 0);
-                m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), rarmpositions, armvelocities, 0);
+                m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), legpositions, 0);
+                m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), legpositions, 0);
+                m_actions->add(NUActionatorsData::LArm, Platform->getTime(), larmpositions, 0);
+                m_actions->add(NUActionatorsData::RArm, Platform->getTime(), rarmpositions, 0);
                 return;
             }
         // check the feet are on the ground
         if (not m_data->isOnGround())
         {
-            m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime(), legpositions, legvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime(), larmpositions, armvelocities, 0);
-            m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime(), rarmpositions, armvelocities, 0);
+            m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), legpositions, 0);
+            m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), legpositions, 0);
+            m_actions->add(NUActionatorsData::LArm, Platform->getTime(), larmpositions, 0);
+            m_actions->add(NUActionatorsData::RArm, Platform->getTime(), rarmpositions, 0);
             return;
         }
         
         // check the stiffness is on
         vector<float> leftstiffnesses, rightstiffnesses;
-        if (m_data->getJointStiffnesses(NUSensorsData::LeftLegJoints, leftstiffnesses) and m_data->getJointStiffnesses(NUSensorsData::RightLegJoints, rightstiffnesses))
+        if (m_data->getStiffness(NUSensorsData::LLeg, leftstiffnesses) and m_data->getStiffness(NUSensorsData::RLeg, rightstiffnesses))
             if (mathGeneral::allZeros(leftstiffnesses) and mathGeneral::allZeros(rightstiffnesses))
                 return;
     }
     
     // go into safe mode
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 1500, legpositions, legvelocities, 65);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 750, larmpositions, armvelocities, 30);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 750, rarmpositions, armvelocities, 30);
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime() + 1500, legpositions, 65);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime() + 1500, legpositions, 65);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime() + 750, larmpositions, 30);
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime() + 750, rarmpositions, 30);
     
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 2000, legpositions, legvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, nusystem->getTime() + 2000, larmpositions, armvelocities, 0);
-    m_actions->addJointPositions(NUActionatorsData::RightArmJoints, nusystem->getTime() + 2000, rarmpositions, armvelocities, 0);
+    m_actions->add(NUActionatorsData::LLeg, Platform->getTime() + 2000, legpositions, 0);
+    m_actions->add(NUActionatorsData::RLeg, Platform->getTime() + 2000, legpositions, 0);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime() + 2000, larmpositions, 0);
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime() + 2000, rarmpositions, 0);
 }
 
 /*! @brief Calls kill on each of the active motion providers */
@@ -415,7 +417,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     
     if (isCurrentProvider(m_current_leg_provider) and m_current_leg_provider != m_current_arm_provider and m_current_leg_provider != m_current_head_provider)
         m_current_leg_provider->process(data, actions);
-    
+	
     m_previous_time = m_current_time;
 }
 
@@ -426,9 +428,9 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 void NUMotion::process(JobList* jobs)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::process(): Start" << endl;
+    debug << "NUMotion::process(jobs): Start" << endl;
 #endif
-    if (jobs == NULL or m_data == NULL or m_actions == NULL)
+    if (jobs == NULL or m_data == NULL or m_actions == NULL or m_current_time < m_last_kill_time + 2000)
         return;
     
     list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
@@ -497,9 +499,13 @@ void NUMotion::process(JobList* jobs)
         #endif
             case Job::MOTION_KILL:
                 process(reinterpret_cast<MotionKillJob*> (*it));
+                jobs->clearMotionJobs();
+                return;
                 break;
             case Job::MOTION_FREEZE:
                 process(reinterpret_cast<MotionFreezeJob*> (*it));
+                jobs->clearMotionJobs();
+                return;
                 break;
             default:
                 break;
@@ -597,39 +603,37 @@ void NUMotion::process(MotionFreezeJob* job)
 /*! @brief Updates the motion sensors in NUSensorsData */
 void NUMotion::updateMotionSensors()
 {
-    m_data->setMotionFallActive(m_current_time, m_fall_protection->enabled() and m_data->isFalling());
-    m_data->setMotionGetupActive(m_current_time, m_getup->isActive());
+    m_data->set(NUSensorsData::MotionFallActive, m_current_time, m_fall_protection->enabled() and m_data->isFalling());
+    m_data->set(NUSensorsData::MotionGetupActive, m_current_time, m_getup->isActive());
     #ifdef USE_KICK
-        m_data->setMotionKickActive(m_current_time, m_kick->isActive());
+        m_data->set(NUSensorsData::MotionKickActive, m_current_time, m_kick->isActive());
     #else
-        m_data->setMotionKickActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionKickActive, m_current_time, false);
     #endif
     #ifdef USE_SAVE
-        m_data->setMotionSaveActive(m_current_time, m_save->isActive());
+        m_data->set(NUSensorsData::MotionSaveActive, m_current_time, m_save->isActive());
     #else
-        m_data->setMotionSaveActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionSaveActive, m_current_time, false);
     #endif
     #ifdef USE_SCRIPT
-        m_data->setMotionScriptActive(m_current_time, m_script->isActive());
+        m_data->set(NUSensorsData::MotionScriptActive, m_current_time, m_script->isActive());
     #else
-        m_data->setMotionScriptActive(m_current_time, false);
+        m_data->set(NUSensorsData::MotionScriptActive, m_current_time, false);
     #endif
     #ifdef USE_WALK
-        m_data->setMotionWalkActive(m_current_time, m_walk->isActive());
         vector<float> speed;
         m_walk->getCurrentSpeed(speed);
-        m_data->setMotionWalkSpeed(m_current_time, speed);
+        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, speed);
         m_walk->getMaximumSpeed(speed);
-        m_data->setMotionWalkMaxSpeed(m_current_time, speed);
+        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, speed);
     #else
-        vector<float> zero(3,0);
-        m_data->setMotionWalkSpeed(m_current_time, zero);
-        m_data->setMotionWalkMaxSpeed(m_current_time, zero);
+        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, vector<float> (3,0));
+        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, vector<float> (3, 0.1));
     #endif
     #ifdef USE_HEAD
-        m_data->setMotionHeadCompletionTime(m_current_time, m_head->getCompletionTime());
+        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, static_cast<float>(m_head->getCompletionTime()));
     #else
-        m_data->setMotionHeadCompletionTime(m_current_time, 0);
+        m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, 0.0f);
     #endif
 }
 

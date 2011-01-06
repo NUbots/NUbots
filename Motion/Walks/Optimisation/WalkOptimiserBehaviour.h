@@ -61,7 +61,7 @@ protected:
     void pushOutward();
     void pushForward();
     void pushBackward();
-    void pushJoint(NUSensorsData::joint_id_t id, float offset);
+    void pushJoint(NUSensorsData::id_t id, float offset);
 
     void teleport();
     void respawn();

@@ -26,6 +26,8 @@
 #include <sstream>
 #include "debug.h"
 
+#include "Tools/Math/StlVector.h"
+
 /*! @brief Default constructor for a parameter. Everything is initialised to 0/blank */
 Parameter::Parameter() 
 {
@@ -400,6 +402,7 @@ istream& operator>> (istream& input, vector<Parameter>& p)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
+/*
 vector<float> operator+(const float& f, const vector<float>& v)
 {
     vector<float> result;
@@ -509,6 +512,19 @@ ostream& operator<<(ostream& output, const vector<float>& v)
 	return output;
 }
 
+ostream& operator<<(ostream& output, const vector<vector<float> >& v)
+{
+    output << "[";
+    if (not v.empty())
+    {
+        for (size_t i=0; i<v.size()-1; i++)
+            output << v[i] << ",";
+        output << v.back();
+    }
+    output << "]";
+    return output;
+}
+
 istream& operator>>(istream& input, vector<float>& v)
 {
     string wholevector;
@@ -517,16 +533,41 @@ istream& operator>>(istream& input, vector<float>& v)
     getline(input, wholevector, ']');
     
     v.clear();
-    stringstream ss(wholevector);
-    float floatBuffer;
-    
-    // now split the data based on the commas
-    while (not ss.eof())
+    if (wholevector.size() > 0)
     {
-        ss >> floatBuffer;
-        ss.ignore(128, ',');
-        v.push_back(floatBuffer);
+        stringstream ss(wholevector);
+        float floatBuffer;
+        
+        // now split the data based on the commas
+        while (not ss.eof())
+        {
+            ss >> floatBuffer;
+            ss.ignore(128, ',');
+            v.push_back(floatBuffer);
+        }
     }
     
     return input;
 }
+
+istream& operator>>(istream& input, vector<vector<float> >& v)
+{
+    string buffer;
+    getline(input, buffer);
+    stringstream ss(buffer);
+    ss.ignore(128, '[');
+
+    while(getline(ss, buffer, ']'))
+    {
+        if (buffer.size() > 0)
+        {
+            vector<float> e;
+            stringstream sss(buffer);
+            sss >> e;
+            v.push_back(e);
+        }
+    }
+    return input;
+}
+*/
+

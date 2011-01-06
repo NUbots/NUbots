@@ -23,7 +23,7 @@
 #include "../ReadyState.h"
 #include "ReadyLostStates.h"
 
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"

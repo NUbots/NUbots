@@ -45,6 +45,14 @@
     #else
         #undef USE_NETWORK_DEBUGSTREAM
     #endif
+    
+    #define USE_NETWORK_SSLVISION_${NUBOT_USE_NETWORK_SSLVISION}
+    #ifdef USE_NETWORK_SSLVISION_ON
+        #define USE_NETWORK_SSLVISION
+    #else
+        #undef USE_NETWORK_SSLVISION
+    #endif
+    
 #endif
 
 #endif // !IOCONFIG_H

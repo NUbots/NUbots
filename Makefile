@@ -17,7 +17,6 @@ CUR_DIR = $(shell pwd)
 
 # Make directories
 MAKE_DIR = $(CUR_DIR)/Make
-MAKE_OPTIONS = --no-print-directory
 
 # Build directories
 NAO_BUILD_DIR = Build/NAO
@@ -80,6 +79,15 @@ ifeq ($(SYSTEM), windows32)
 else
 	CCMAKE = ccmake
 endif
+
+# to take advantage of multicore computers
+ifeq ($(SYSTEM), Linux)
+	NPROCS := $(shell grep -c ^processor /proc/cpuinfo)
+endif
+ifeq ($(SYSTEM), Darwin)
+	NPROCS := $(shell system_profiler SPHardwareDataType | awk '/Total Number Of Cores:/{print $$5}')
+endif
+MAKE_OPTIONS = --no-print-directory -j $(NPROCS)
 
 
 default_target: NAOWebots
@@ -187,11 +195,16 @@ NAOWebots:
     endif
 
 NAOWebotsConfig:
+    ifeq ($(SYSTEM),Darwin)
+		@set -e; \
+			mkdir -p $(NAOWEBOTS_BUILD_DIR)/Xcode; \
+			cd $(NAOWEBOTS_BUILD_DIR)/Xcode; \
+			cmake -G Xcode $(MAKE_DIR);
+    endif
 	@set -e; \
 		cd $(NAOWEBOTS_BUILD_DIR); \
 		cmake $(MAKE_DIR); \
-		$(CCMAKE) .; \
-		make $(MAKE_OPTIONS);
+		$(CCMAKE) .;
 
 NAOWebotsClean:
 	@echo "Cleaning NAOWebots Build";

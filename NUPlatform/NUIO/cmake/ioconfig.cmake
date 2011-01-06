@@ -35,12 +35,17 @@ SET( NUBOT_USE_NETWORK_DEBUGSTREAM
      ON
      CACHE BOOL
      "Set to ON to enable streaming of data of the network, set to OFF to keep quiet")
+SET( NUBOT_USE_NETWORK_SSLVISION
+     ON
+     CACHE BOOL
+     "Set to ON to enable use of SSL Vision data, set to OFF to keep quiet")     
      
 MARK_AS_ADVANCED(
     NUBOT_USE_NETWORK_GAMECONTROLLER
     NUBOT_USE_NETWORK_TEAMINFO
     NUBOT_USE_NETWORK_JOBS
     NUBOT_USE_NETWORK_DEBUGSTREAM
+    NUBOT_USE_NETWORK_SSLVISION
 )
 
 ############################ ioconfig.h generation

@@ -2,9 +2,10 @@
 #define SPLITSTREAMFILEFORMATREADER_H
 #include "LogFileFormatReader.h"
 #include "StreamFileReader.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Localisation/Localisation.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Localisation/LocWmFrame.h"
 #include <QDir>
 
 class SplitStreamFileFormatReader: public LogFileFormatReader
@@ -21,7 +22,7 @@ public:
     bool closeFile();
     bool fileGood(){return true;};
 
-    const NUimage* getImage();
+    const NUImage* getImage();
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
@@ -41,9 +42,10 @@ public slots:
 protected:
     std::vector<QFileInfo> FindValidFiles(const QDir& directory);
     void setKnownDataTypes();
-    StreamFileReader<NUimage> imageReader;
+    StreamFileReader<NUImage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
     StreamFileReader<Localisation> locwmReader;
+    StreamFileReader<LocWmFrame> locmframeReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;

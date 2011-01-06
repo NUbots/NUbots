@@ -25,7 +25,7 @@
 #include "EvaluateSpeedOfWalkParametersState.h"
 #include "EvaluateStabilityOfWalkParametersState.h"
 
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -54,7 +54,9 @@ EvaluateWalkParametersState::~EvaluateWalkParametersState()
 /*! @brief Returns the desired next state in the walk optimisation provider */
 BehaviourState* EvaluateWalkParametersState::nextState()
 {
-    if (m_data->isFallen() or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
+    bool getting_up;
+    m_data->get(NUSensorsData::MotionGetupActive, getting_up);
+    if (getting_up or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
         return m_parent->m_generate;
     else
         return this;

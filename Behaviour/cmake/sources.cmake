@@ -26,18 +26,16 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
                 BehaviourFSMState.cpp BehaviourFSMState.h
                 BehaviourPotentials.h
                 Behaviour.cpp Behaviour.h
-                GameInformation.cpp GameInformation.h
-                TeamInformation.cpp TeamInformation.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Jobs
-                Soccer
+SET (YOUR_DIRS  Soccer
                 ChaseBall
                 MiscBehaviours
                 WalkOptimisation
                 Kicker
                 PassingChallenge
+                RoboPedestrian
 )
 IF(${TARGET_ROBOT} STREQUAL BEAR)
     LIST(APPEND YOUR_DIRS BearMode)

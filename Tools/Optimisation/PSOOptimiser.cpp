@@ -22,6 +22,8 @@
 #include "PSOOptimiser.h"
 #include "Parameter.h"
 
+#include "NUPlatform/NUPlatform.h"
+
 #include "debug.h"
 #include "nubotdataconfig.h"
 
@@ -31,13 +33,14 @@
  */
 PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_c1 = 0.5;
-    m_c2 = 0.5;
-    m_inertia = 0.95;
+    m_c1 = 1.50;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
+    m_c2 = 1.50;             // tune this:
+    m_inertia = 0.70;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
+    m_num_particles = 40;   // tune this: 40 particles seems to be about right. More particles helps alot in the initial stages of the algorithm
+    m_seed_fraction = 0;    // tune this: having this set to anything but 0 puts too large a restriction on the particles
     m_num_dimensions = parameters.size();
-    m_num_particles = 20;
     
-    srand(static_cast<unsigned int> (clock()*clock()*clock()));
+    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
 
     initSwarm();
 }
@@ -52,15 +55,29 @@ void PSOOptimiser::initSwarm()
         m_swarm_best_fitness.push_back(0);
         
         vector<float> r = getRandVector();
+        vector<float> rv = getRandVector();
         vector<Parameter> particle = m_initial_parameters;
+        vector<float> velocity = vector<float>(m_num_dimensions, 0);
         for (int j=0; j<m_num_dimensions; j++)
         {
-            float range = 0.5*(m_initial_parameters[j].max() - m_initial_parameters[j].min());
-            particle[j].set(range*r[j] - 0.5*range + m_initial_parameters[j].get());
+            if (m_seed_fraction < 0.01)
+            {
+                float range = m_initial_parameters[j].max() - m_initial_parameters[j].min();
+                particle[j].set(range*r[j] + m_initial_parameters[j].min());
+                velocity[j] = 0.25*range*rv[j] - 0.125*range;        // initial velocity between +/- range
+            }            
+            else
+            {
+                float value = m_initial_parameters[j].get();
+                float range = 2*(1-m_seed_fraction)*min(m_initial_parameters[j].max() - value, value - m_initial_parameters[j].min());
+                particle[j].set(range*r[j] - 0.5*range + value);
+                velocity[j] = range*rv[j] - 0.5*range;        // initial velocity between +/- constricted range
+            }
         }
         debug << i << ": " << Parameter::getAsVector(particle) << endl;
+        debug << i << ": " << velocity << endl;
         m_swarm_position.push_back(particle);
-        m_swarm_velocity.push_back(vector<float>(m_num_dimensions,0));
+        m_swarm_velocity.push_back(velocity);
     }
     m_best = m_initial_parameters;
     m_best_fitness = 0;
@@ -112,7 +129,16 @@ void PSOOptimiser::updateSwarm()
     {
         vector<float> r1 = getRandVector();
         vector<float> r2 = getRandVector();
-        m_swarm_velocity[i] = m_inertia*m_swarm_velocity[i] + m_c1*r1*(m_swarm_best[i] - m_swarm_position[i]) + m_c2*r2*(m_best - m_swarm_position[i]);
+        for (int j=0; j<m_num_dimensions; j++)
+        {   
+            m_swarm_velocity[i][j] = m_inertia*m_swarm_velocity[i][j] + m_c1*r1[j]*(m_swarm_best[i][j] - m_swarm_position[i][j]) + m_c2*r2[j]*(m_best[j] - m_swarm_position[i][j]);
+            // I need to clip each velocity             
+            float max = (m_best[j].max() - m_best[j].min())/2;                    
+            if (m_swarm_velocity[i][j] < -max)
+                m_swarm_velocity[i][j] = -max;
+            else if (m_swarm_velocity[i][j] > max)
+                m_swarm_velocity[i][j] = max;
+        }        
         m_swarm_position[i] += m_swarm_velocity[i];
         
         debug << "pos " << i << ": " << Parameter::getAsVector(m_swarm_position[i]) << endl;

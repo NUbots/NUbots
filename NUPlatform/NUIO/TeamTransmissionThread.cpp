@@ -21,7 +21,7 @@
 
 #include "TeamTransmissionThread.h"
 #include "TeamPort.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include <string>
 using namespace std;

@@ -5,7 +5,7 @@
 */
 
 #include "Vision.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "Tools/Math/Line.h"
 #include "ClassificationColours.h"
 #include "Ball.h"
@@ -20,14 +20,13 @@
 
 #include "Kinematics/Kinematics.h"
 #include "NUPlatform/NUCamera.h"
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
-#include "Behaviour/Jobs/VisionJobs/SaveImagesJob.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
-#include "NUPlatform/NUSystem.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -123,14 +122,14 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
                         sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
-                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
+                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
                 {
                     imagefile.flush();
                     sensorfile.flush();
                     m_camera->setSettings(currentSettings);
-                    m_actions->addSound(m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
+                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
             }
             isSavingImages = job->saving();
@@ -145,7 +144,7 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
 }
 
 
-void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
+void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
@@ -192,10 +191,8 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
     vector <float> horizonInfo;
 
 
-    if(m_sensor_data->getHorizon(horizonInfo))
-    {
+    if(m_sensor_data->get(NUSensorsData::Horizon, horizonInfo))
         m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
-    }
     else
     {
         #if DEBUG_VISION_VERBOSITY > 5
@@ -532,6 +529,12 @@ void Vision::ProcessFrame(NUimage* image, NUSensorsData* data, NUActionatorsData
         //START: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
 
         //TESTING: Save Images which of a field object seen
+        /*
+        if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        {
+            SaveAnImage();
+        }
+        */
         //bool BlueGoalSeen = false;
         /*
         if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
@@ -579,7 +582,7 @@ void Vision::SaveAnImage()
         {
             sensorfile << (*m_sensor_data) << flush;
         }
-        NUimage buffer;
+        NUImage buffer;
         buffer.cloneExisting(*currentImage);
         imagefile << buffer;
         numSavedImages++;
@@ -666,7 +669,7 @@ void Vision::loadLUTFromFile(const std::string& fileName)
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
 }
 
-void Vision::setImage(const NUimage* newImage)
+void Vision::setImage(const NUImage* newImage)
 {
 
     currentImage = newImage;
@@ -2128,10 +2131,12 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         visualSphericalPosition[0] = distance;
         visualSphericalPosition[1] = bearing;
         visualSphericalPosition[2] = elevation;
-        Matrix cameraTransform;
-        bool isOK = getSensorsData()->getCameraTransform(cameraTransform);
+        
+        vector<float> ctvector;
+        bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
         if(isOK == true)
         {
+            Matrix cameraTransform = Matrix4x4fromVector(ctvector);
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
 
         }
@@ -2216,13 +2221,13 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": Blue Robot: get transform";
-            Matrix camera2groundTransform;
-            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
+            bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
             if(isOK == true)
             {
-
+                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
@@ -2251,12 +2256,13 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": pink Robot: get transform";
-            Matrix camera2groundTransform;
-            bool isOK = m_sensor_data->getCameraToGroundTransform(camera2groundTransform);
+            vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
+            bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
             if(isOK == true)
             {
+                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6

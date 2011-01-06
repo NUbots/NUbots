@@ -20,15 +20,14 @@
  */
 
 #include "TcpPort.h"
-#include "NUPlatform/NUSystem.h"
-#include "Tools/Image/NUimage.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUImage/NUImage.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "debug.h"
 #include "debugverbositynetwork.h"
 #include <string.h>
 #include <errno.h>
 #include "Localisation/Localisation.h"
-#include "Vision/FieldObjects/FieldObjects.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 /*! @brief Constructs a tcp port on the specified port
  
@@ -139,7 +138,6 @@ void TcpPort::run()
             #endif
 
             pthread_mutex_lock(&m_socket_mutex);
-            m_time_last_receive = nusystem->getTime();
             memcpy(m_data, localdata, 10*1024);
             m_message_size = localnumBytes; 
             m_has_data = true;
@@ -206,7 +204,7 @@ void TcpPort::sendData(network_data_t netdata)
     return;
 }
 
-void TcpPort::sendData(const NUimage& p_image, const NUSensorsData &p_sensors)
+void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 {
     network_data_t netdata;
     stringstream buffer;

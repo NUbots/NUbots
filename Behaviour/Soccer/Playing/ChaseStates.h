@@ -27,16 +27,16 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
 #include "Behaviour/BehaviourPotentials.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/KickJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/KickJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -74,7 +74,7 @@ protected:
             m_jobs->addMotionJob(new HeadPanJob(ball));
         
         bool iskicking;
-        m_data->getMotionKickActive(iskicking);
+        m_data->get(NUSensorsData::MotionKickActive, iskicking);
         if(!iskicking)
         {
             vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
@@ -83,9 +83,9 @@ protected:
             float leftobstacle = 255;
             float rightobstacle = 255;
             vector<float> temp;
-            if (m_data->getDistanceLeftValues(temp) and temp.size() > 0)
+            if (m_data->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
                 leftobstacle = temp[0];
-            if (m_data->getDistanceRightValues(temp) and temp.size() > 0)
+            if (m_data->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
                 rightobstacle = temp[0];
             
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!

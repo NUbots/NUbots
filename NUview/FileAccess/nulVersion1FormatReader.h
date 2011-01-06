@@ -3,7 +3,7 @@
 
 #include "LogFileFormatReader.h"
 #include <fstream>
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 class nulVersion1FormatReader : public LogFileFormatReader
 {
@@ -16,7 +16,7 @@ public:
     int openFile(const QString& filename);
     bool closeFile();
     bool fileGood(){return (fileStream.good() && fileStream.is_open());};
-    const NUimage* getImage(){return &rawImageBuffer;};
+    const NUImage* getImage(){return &rawImageBuffer;};
 
 
     bool isNextFrameAvailable();
@@ -33,7 +33,7 @@ protected:
     int m_frameLength;
 
     // Data Buffers
-    NUimage rawImageBuffer;
+    NUImage rawImageBuffer;
     //!TODO: sensor data must be updated
     float jointSensorsBuffer[100];
     float balanceSensorsBuffer[100];

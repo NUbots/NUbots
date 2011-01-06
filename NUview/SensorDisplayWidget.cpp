@@ -1,5 +1,5 @@
 #include "SensorDisplayWidget.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include <sstream>
 
 SensorDisplayWidget::SensorDisplayWidget(QWidget *parent) :

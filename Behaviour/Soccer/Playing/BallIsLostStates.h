@@ -26,18 +26,18 @@
 #include "BallIsLostState.h"
 #include "Behaviour/BehaviourPotentials.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "NUPlatform/NUSensors/NUSensorsData.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/TeamInformation.h"
-#include "Behaviour/GameInformation.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadNodJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Tools/Math/General.h"
 
 #include "debug.h"
@@ -93,7 +93,7 @@ protected:
         // grab the pan end time
         if (not m_pan_started and m_time_in_state > 100)
         {
-            if (m_data->getMotionHeadCompletionTime(m_pan_end_time))
+            if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;
         }
         
@@ -101,7 +101,7 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 100, -0.95, 0.95));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 700, -0.95, 0.95));
         
         if (m_team_info->getPlayerNumber() != 1)
             m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
@@ -159,7 +159,7 @@ protected:
         {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
             vector<float> walkspeed;
-            if (m_data->getMotionWalkSpeed(walkspeed) and walkspeed[2] != 0)        
+            if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
                 m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
             else
                 m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;

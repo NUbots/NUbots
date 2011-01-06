@@ -19,6 +19,12 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "NAOCamera.h"
+#include "NUPlatform/NUPlatform.h"
+#include "GTAssert.h"
+
+#include "debug.h"
+#include "debugverbositynucamera.h"
 #include "nubotdataconfig.h"        // for initial camera settings location
 
 #include <cstring>
@@ -87,16 +93,10 @@ enum  v4l2_exposure_auto_type {
  
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) */
 
-#include "NAOCamera.h"
-#include "NUPlatform/NUSystem.h"
-#include "GTAssert.h"
-#include "debug.h"
-#include "debugverbositynucamera.h"
-
 NAOCamera::NAOCamera() :
 currentBuf(0),
 timeStamp(0),
-storedTimeStamp(nusystem->getTime())
+storedTimeStamp(Platform->getTime())
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
     debug << "NAOCamera::NAOCamera()" << endl;
@@ -278,7 +278,7 @@ bool NAOCamera::capturedNew()
   ASSERT(buf->bytesused == SIZE);
   currentBuf = buf;
   timeStamp = storedTimeStamp + 33.0;
-  storedTimeStamp = nusystem->getTime();
+  storedTimeStamp = Platform->getTime();
   return true;
 }
 
@@ -294,7 +294,7 @@ double NAOCamera::getTimeStamp() const
   return timeStamp;
 }
 
-NUimage* NAOCamera::grabNewImage()
+NUImage* NAOCamera::grabNewImage()
 {
     while(!capturedNew());
     currentBufferedImage.MapYUV422BufferToImage(getImage(), WIDTH, HEIGHT);
@@ -382,7 +382,7 @@ void NAOCamera::loadCameraOffset()
     ifstream file((CONFIG_DIR + string("CameraOffsets.cfg")).c_str());
     if (file.is_open())
     {
-        string macaddress = nusystem->getWiredMacAddress();
+        string macaddress = Platform->getMacAddress();
         while (not file.eof())
         {
             string buffer;

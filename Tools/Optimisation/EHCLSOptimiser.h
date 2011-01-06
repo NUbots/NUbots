@@ -56,9 +56,11 @@ private:
     float m_best_performance;
     float m_real_best_performance;
     float m_alpha;
-    int m_reset_limit;
     int m_count_since_last_improvement;
     float m_improvement, m_previous_improvement;
+    float m_neta;                                   //!< a parameter that controls the breadth of the search
+    int m_reset_limit;	                            //!< a parameter that controls how quickly we give up searching along a line
+    float m_reset_fraction;                         //!< a parameter that controls how much we reset
 };
 
 #endif

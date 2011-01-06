@@ -25,6 +25,7 @@
 #include "NUIO/GameControllerPort.h"
 #include "NUIO/TeamPort.h"
 #include "NUIO/JobPort.h"
+#include "NUIO/SSLVisionPort.h"
 
 #include "NUIO/TcpPort.h"
 #include "NUIO/RoboCupGameControlData.h"
@@ -32,9 +33,10 @@
 
 #include "NUbot.h"
 #include "NUPlatform/NUPlatform.h"
-#include "Behaviour/Jobs.h"
-#include "Behaviour/GameInformation.h"
-#include "Tools/Image/NUimage.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/Jobs/Jobs.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 #include <sstream>
 #include <string>
@@ -56,14 +58,17 @@ NUIO::NUIO(NUbot* nubot)
     m_nubot = nubot;            // we need the nubot so that we can access the public store
     
     #ifdef USE_NETWORK_GAMECONTROLLER
-        m_gamecontroller_port = new GameControllerPort(m_nubot->GameInfo);
-        m_nubot->GameInfo->addNetworkPort(m_gamecontroller_port);
+        m_gamecontroller_port = new GameControllerPort(Blackboard->GameInfo);
+        Blackboard->GameInfo->addNetworkPort(m_gamecontroller_port);
     #endif
     #ifdef USE_NETWORK_TEAMINFO
-        m_team_port = new TeamPort(m_nubot->TeamInfo, TEAM_PORT);
+        m_team_port = new TeamPort(Blackboard->TeamInfo, TEAM_PORT);
     #endif
     #ifdef USE_NETWORK_JOBS
-        m_jobs_port = new JobPort(m_nubot->Jobs);
+        m_jobs_port = new JobPort(Blackboard->Jobs);
+    #endif
+    #ifdef USE_NETWORK_SSLVISION
+        m_ssl_vision_port = new SSLVisionPort(Blackboard->Sensors, Blackboard->TeamInfo, SSLVISION_PORT);
     #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
@@ -92,6 +97,11 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
     #ifdef USE_NETWORK_JOBS
         m_jobs_port = new JobPort(jobs);
     #endif
+    #ifdef USE_NETWORK_SSLVISION
+        m_ssl_vision_port = new SSLVisionPort(Blackboard->Sensors, Blackboard->TeamInfo, SSLVISION_PORT);
+    #else
+        m_ssl_vision_port = NULL;
+    #endif
     #ifdef USE_NETWORK_DEBUGSTREAM
         m_vision_port = new TcpPort(VISION_PORT);
         m_localisation_port = new TcpPort(LOCWM_PORT);
@@ -113,6 +123,8 @@ NUIO::~NUIO()
         delete m_jobs_port;
     if(m_localisation_port != NULL)
         delete m_localisation_port;
+    if(m_ssl_vision_port != NULL)
+        delete m_ssl_vision_port;
 }
 
 /*! @brief Stream insertion operator for a JobList
@@ -160,9 +172,9 @@ void NUIO::setJobPortToBroadcast()
         errorlog << "NUIO::setJobPortToBroadcast(). Network jobs are OFF" << endl;
 }
 
-/*! @brief Stream insertion operator for NUimage
+/*! @brief Stream insertion operator for NUImage
     @param io the nuio stream object
-    @param sensors the NUimage data to stream
+    @param sensors the NUImage data to stream
  */
 NUIO& operator<<(NUIO& io, NUbot& p_nubot)
 {
@@ -171,23 +183,23 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
         if(netdata.size > 0)
         {
 	   
-            io.m_vision_port->sendData(*(p_nubot.Image), *(p_nubot.SensorData));
+            io.m_vision_port->sendData(*(Blackboard->Image), *(Blackboard->Sensors));
         }
         if(io.m_localisation_port)
         {
             network_data_t locnetdata = io.m_localisation_port->receiveData();
             if(locnetdata.size > 0)
             {
-                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(p_nubot.Objects));
+                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(Blackboard->Objects));
             }
         }
     #endif
     return io;
 }
 
-/*! @brief Stream insertion operator for a pointer to NUimage
+/*! @brief Stream insertion operator for a pointer to NUImage
     @param io the nuio stream object
-    @param sensors the pointer to the NUimage data to put in the stream
+    @param sensors the pointer to the NUImage data to put in the stream
  */
 NUIO& operator<<(NUIO& io, NUbot* p_nubot)
 {

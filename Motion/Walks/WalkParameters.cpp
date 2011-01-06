@@ -103,17 +103,14 @@ vector<Parameter> WalkParameters::getAsParameters()
     vector<Parameter> data;
     data.reserve(size());
     
-    for (size_t i=0; i<m_max_speeds.size(); i++)
-    {
-        Parameter p("Velocity", m_max_speeds[i], 0, m_max_speeds[i]*3); 
-        data.push_back(p);
-    }
-    
-    for (size_t i=0; i<m_max_accelerations.size(); i++)
-    {
-        Parameter p("Acceleration", m_max_accelerations[i], 0, m_max_accelerations[i]*3); 
-        data.push_back(p);
-    }
+    // Need to hand-code the maximum speeds
+    data.push_back(Parameter("Velocity", m_max_speeds[0], 5, 70));
+    data.push_back(Parameter("Velocity", m_max_speeds[1], 2.5, 70));
+    data.push_back(Parameter("Velocity", m_max_speeds[2], 0.5, 2));
+
+    data.push_back(Parameter("Acceleration", m_max_accelerations[0], 5, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[1], 2.5, 140));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0.5, 4));
     
     for (size_t i=0; i<m_parameters.size(); i++)
         data.push_back(m_parameters[i]);
@@ -122,7 +119,7 @@ vector<Parameter> WalkParameters::getAsParameters()
     {
         for (size_t j=0; j<m_leg_gains[i].size(); j++)
         {
-            Parameter p("Gain", m_leg_gains[i][j], 0, 100);
+            Parameter p("Gain", m_leg_gains[i][j], 25, 100);
             data.push_back(p);
         }
     }
@@ -191,7 +188,7 @@ vector<vector<float> >& WalkParameters::getLegGains()
  */
 void WalkParameters::set(const vector<float>& data)
 {
-    if (data.size() != size())
+    if (data.size() < m_max_speeds.size() + m_max_accelerations.size() + m_parameters.size())
         return;
     else
     {
@@ -204,16 +201,21 @@ void WalkParameters::set(const vector<float>& data)
         for (size_t i=0; i<m_max_accelerations.size(); i++)
             m_max_accelerations[i] = data[i+offset];
         offset += m_max_accelerations.size();
-        
+
         for (size_t i=0; i<m_parameters.size(); i++)
             m_parameters[i].set(data[i+offset]);
         offset += m_parameters.size();
         
-        for (size_t i=0; i<m_leg_gains.size(); i++)
+        if (data.size() < size())               // check if the new parameters includes stiffnesses for the legs, 
+            return;
+        else
         {
-            for (size_t j=0; j<m_leg_gains[i].size(); j++)
-                m_leg_gains[i][j] = data[offset+j];
-            offset += m_leg_gains[i].size();
+            for (size_t i=0; i<m_leg_gains.size(); i++)
+            {
+                for (size_t j=0; j<m_leg_gains[i].size(); j++)
+                    m_leg_gains[i][j] = data[offset+j];
+                offset += m_leg_gains[i].size();
+            }
         }
     }
 }
@@ -340,7 +342,7 @@ void WalkParameters::summaryTo(ostream& output)
 {
     output << m_name << " WalkParameters: ";
     vector<float> temp = getAsVector();
-    for (int i=0; i<temp.size(); i++)
+    for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << " ";
     output << endl;
 }
@@ -350,7 +352,7 @@ void WalkParameters::summaryTo(ostream& output)
 void WalkParameters::csvTo(ostream& output)
 {
     vector<float> temp = getAsVector();
-    for (int i=0; i<temp.size(); i++)
+    for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << ", ";
 }
 

@@ -23,12 +23,12 @@
 #include "WalkOptimisationProvider.h"
 #include "EvaluateWalkParametersState.h"
 
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
-#include "Vision/FieldObjects/FieldObjects.h"
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadTrackJob.h"
-#include "Behaviour/Jobs/MotionJobs/HeadPanJob.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "Behaviour/BehaviourPotentials.h"
 
 #include "Motion/Tools/MotionFileTools.h"
@@ -81,7 +81,7 @@ void EvaluateSpeedOfWalkParametersState::doState()
     if (pointReached())
         m_current_target_state = getNextPoint();
     
-    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 0, 9000);
+    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, m_provider->stoppingDistance(), 9000);
     m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
@@ -92,6 +92,7 @@ void EvaluateSpeedOfWalkParametersState::startEvaluation()
     m_trial_start_time = m_data->CurrentTime;
     m_energy_used = 0;
     m_previous_positions.clear();
+    m_previous_time = 0;
     
     #if DEBUG_BEHAVIOUR_VERBOSITY > 3
         debug << "EvaluateSpeedOfWalkParametersState::startEvaluation() target:[" << m_current_target_state[0] << "," << m_current_target_state[1] << "," << m_current_target_state[2] << "]" << endl;
@@ -120,29 +121,32 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
 {
     // There are two ways to measure the energy used (a) using joint torques or (b) using battery currents (c) using joint currents
     vector<float> currents;
-    vector<float> battery;
+	float batteryvoltage, batterycurrent;
     vector<float> positions;
     vector<float> torques;
     
-    bool batteryavaliable = m_data->getBatteryValues(battery);
-    bool currentsavailable = m_data->getJointCurrents(NUSensorsData::BodyJoints, currents);
+    bool batteryavaliable = m_data->getBatteryVoltage(batteryvoltage);
+    batteryavaliable &= m_data->getBatteryCurrent(batterycurrent);
+    bool currentsavailable = m_data->getCurrent(NUSensorsData::Body, currents);
     
-    m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
-    bool torquesavailable = m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
+    bool positionsavailable = m_data->getPosition(NUSensorsData::Body, positions);
+    bool torquesavailable = m_data->getTorque(NUSensorsData::Body, torques);
     
-    if (batteryavaliable)
+    if (false and batteryavaliable)
     {
-        // This code has never been tested, but should be OK on NAO
-        float voltage = 3*(battery[2] + battery[3])/1000.0;        					// this has been hastily ported over from 2009!
-        float current = battery[1];
-        m_energy_used += voltage*current*(m_data->CurrentTime - m_previous_time)/1000;
+        float voltage = batteryvoltage;
+        float current = -batterycurrent;
+        if (m_previous_time != 0)
+            m_energy_used += voltage*current*(m_data->CurrentTime - m_previous_time)/1000;
     }
     else if (currentsavailable)
     {
-        /*float voltage = 3*(battery[2] + battery[3])/1000;        					// this has been hastily ported over from 2009!
-        for (unsigned int i=0; i<currents.size(); i++)
-            m_energy_used += fabs(currents[i]*voltage);
-        m_energy_used += 21.0*(m_data->CurrentTime - m_previous_time);				// we assume for now the CPU etc draws 21W*/
+        if (m_previous_time != 0)
+        {
+            for (unsigned int i=0; i<currents.size(); i++)
+                m_energy_used += 0.69*fabs(currents[i]*batteryvoltage)*(m_data->CurrentTime - m_previous_time)/1000;       // the 0.69 is a fudge factor to make the current sum match the battery current
+            m_energy_used += 17.3*(m_data->CurrentTime - m_previous_time)/1000;				// we assume for now the CPU etc draws 17.3W
+        }
     }
     else if (torquesavailable)
     {
@@ -161,7 +165,7 @@ void EvaluateSpeedOfWalkParametersState::updateEnergy()
 vector<float> EvaluateSpeedOfWalkParametersState::getStartPoint()
 {
     float distance_from_forward = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.front())[0];
-    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(reversePoint(m_points.front()))[0];
+    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(m_points.back())[0];
 
     m_current_point_index = 0;
     if (distance_from_forward <= distance_from_reverse)
@@ -179,7 +183,7 @@ vector<float> EvaluateSpeedOfWalkParametersState::getStartPoint()
 bool EvaluateSpeedOfWalkParametersState::pointReached()
 {
     vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
-    if (difference[0] < 10)
+    if (difference[0] < 10 and fabs(difference[2]) < 0.2)
         return true;
     else
         return false;
@@ -214,11 +218,14 @@ bool EvaluateSpeedOfWalkParametersState::allPointsReached()
 /*! @brief Returns the equivalent point on the reverse path */
 vector<float> EvaluateSpeedOfWalkParametersState::reversePoint(const vector<float>& point)
 {
-    vector<float> reverse;
-    reverse.reserve(3);
-    reverse.push_back(-point[0]);
-    reverse.push_back(-point[1]);
-    reverse.push_back(point[2] + 3.14);
+    vector<float> reverse = m_points[(m_points.size()-1) - m_current_point_index];
+    if (m_current_point_index == 0 or m_current_point_index == m_points.size()-1)
+        return reverse;
+    else
+    {
+        reverse[2] += 3.14;
+        return reverse;
+    }
     return reverse;
 }
     
