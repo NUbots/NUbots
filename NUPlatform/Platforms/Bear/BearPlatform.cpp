@@ -40,18 +40,17 @@ BearPlatform::BearPlatform()
     debug << "BearPlatform::BearPlatform" << endl;
 #endif
     
-    system = new BearSystem();                 // the system needs to be created first because it provides times for the other modules!
     #ifdef USE_VISION
-        camera = new BearCamera();
+        m_camera = new BearCamera();
         #error BearCamera not implemented yet! Compile with USE_VISION set to OFF
     #else
-        camera = 0;
+        m_camera = 0;
     #endif
-    motors = Motors::getInstance();
-    sensors = new BearSensors(motors);
-    actionators = new BearActionators(motors);
+    m_motors = Motors::getInstance();
+    m_sensors = new BearSensors(m_motors);
+    m_actionators = new BearActionators(m_motors);
 
-    motors->torqueOn(Motors::IndexToMotorID, MOTORS_NUM_MOTORS);
+    //motors->torqueOn(Motors::IndexToMotorID, MOTORS_NUM_MOTORS);
 }
 
 BearPlatform::~BearPlatform()

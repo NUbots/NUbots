@@ -21,8 +21,6 @@
 
 #include "BearWalk.h"
 
-#include "NUPlatform/NUSystem.h"
-
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -45,7 +43,7 @@ BearWalk::BearWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     m_left_back_angles = vector<float>(5,0);
     m_right_back_angles = vector<float>(5,0);
     
-    m_torso_angles = vector<float>(3,0);
+    m_torso_angles = vector<float>(2,0);
     
     m_walk_parameters.load("BearWalkDefault");
 }
@@ -188,7 +186,7 @@ void BearWalk::doWalk()
     else
         twist = (twist_amount/twist_duration)*(twist_phase - 1);
     
-    m_torso_angles[2] = twist;
+    m_torso_angles[1] = twist;
     
     updateActionatorsData();
     m_previous_time = m_current_time;
@@ -209,15 +207,13 @@ void BearWalk::calculateGaitPhase()
 
 void BearWalk::updateActionatorsData()
 {
-    static vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
-    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-    m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, m_current_time, m_left_back_angles, zeroleg, 100);
-    m_actions->addJointPositions(NUActionatorsData::RightLegJoints, m_current_time, m_right_back_angles, zeroleg, 100);
-    m_actions->addJointPositions(NUActionatorsData::TorsoJoints, m_current_time, m_torso_angles, zeroleg, 100);
+    m_actions->add(NUActionatorsData::LLeg, m_current_time, m_left_back_angles, 100);
+    m_actions->add(NUActionatorsData::RLeg, m_current_time, m_right_back_angles, 100);
+    m_actions->add(NUActionatorsData::Torso, m_current_time, m_torso_angles, 100);
     if (m_larm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::LeftArmJoints, m_current_time, m_left_front_angles, zeroarm, 100);
+        m_actions->add(NUActionatorsData::LArm, m_current_time, m_left_front_angles, 100);
     if (m_rarm_enabled)
-        m_actions->addJointPositions(NUActionatorsData::RightArmJoints, m_current_time, m_right_front_angles, zeroarm, 100);
+        m_actions->add(NUActionatorsData::RArm, m_current_time, m_right_front_angles, 100);
 }
 
 

@@ -282,6 +282,13 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
         else 
             return false;
     }
+    else if (group == Torso)
+    {
+        if (TorsoRoll == member or TorsoPitch == member or TorsoYaw == member)
+            return true;
+        else 
+            return false;
+    }
     else if (group == LLeg)
     {
         if (LHipRoll == member or LHipPitch == member or LHipYaw == member or LHipYawPitch == member or LKneePitch == member or LAnkleRoll == member or LAnklePitch == member)

@@ -39,10 +39,10 @@ public:
     
 private:
     void copyToHardwareCommunications();
+    void copyToServos();
     
 private:
     // Actionators
-    static vector<string> m_servo_control_names;    //!< the names of the available joint control methods (usually position and/or torque)
     static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
     
     Motors* m_motors;

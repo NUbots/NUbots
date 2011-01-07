@@ -21,7 +21,6 @@ SET (YOUR_SRCS  BearPlatform.cpp BearPlatform.h
                 BearCamera.cpp BearCamera.h
                 BearSensors.cpp BearSensors.h
                 BearActionators.cpp BearActionators.h
-                BearSystem.cpp BearSystem.h
                 BearIO.cpp BearIO.h
                 main.cpp
 )

@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010, 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public:
     BearPlatform();
     ~BearPlatform();
 private:
-    Motors* motors;
+    Motors* m_motors;
 };
 
 #endif

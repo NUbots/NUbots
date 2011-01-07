@@ -28,7 +28,7 @@
 #define BEARCAMERA_H
 
 #include "NUPlatform/NUCamera.h"
-class NUimage;
+class NUImage;
 
 class BearCamera : public NUCamera
 {
@@ -36,7 +36,7 @@ public:
     BearCamera();
     ~BearCamera();
     
-    NUimage* grabNewImage();
+    NUImage* grabNewImage();
     void setSettings(const CameraSettings& newset);
 private:
 };

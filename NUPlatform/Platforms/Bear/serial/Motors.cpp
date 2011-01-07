@@ -33,7 +33,7 @@ unsigned char Motors::MotorIDToIndex[MOTORS_MAX_ID+1] = {-1, -1, 10, 9, 4, 7, 3,
 unsigned char Motors::LowerBodyIndexToMotorID[MOTORS_NUM_LOWER_MOTORS] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
 unsigned char Motors::UpperBodyIndexToMotorID[MOTORS_NUM_UPPER_MOTORS] = {};
 
-//                                                               HP    HY    TP   LSR   LSP   LEP   RSR   RSP   REP    TR    TY   LHR   LHP    LK   LAR   LAP   RHR   RHP    RK   RAR   RAP
+//                                                               HP    HY    NP   LSR   LSP   LEP   RSR   RSP   REP    TR    TY   LHR   LHP    LK   LAR   LAP   RHR   RHP    RK   RAR   RAP
 //                                                                0    1     2     3     4     5     6     7     8    9     10    11    12    13    14    15    16    17    18    19    20  
 char Motors::MotorSigns[MOTORS_NUM_MOTORS] =                   { -1,    1,    1,   -1,    1,    1,   -1,   -1,   -1,   -1,    1,   -1,    1,    1,    1,    1,   -1,   -1,   -1,    1,   -1}; 
 unsigned short Motors::DefaultPositions[MOTORS_NUM_MOTORS] =   {499,  481,  374,  709,  526,  612,  318,  500,  412,  525,  528,  657,  372,  531,  773,  508,  563,  642,  514,  500,  519}; 
@@ -107,7 +107,7 @@ void Motors::initSelf()
    // Initialise motor torques to off
    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
    {
-      MotorTorqueOn[i] = false;
+      MotorTorqueOn[i] = true;
    }
    
    // Initialise the controls to their default values
@@ -449,6 +449,16 @@ void Motors::closeSerial()
    status = FT_Close(upperHandle);
    if (status != FT_OK)
       debug << "MOTORS: Failed to close lower body serial connection" << endl;
+}
+
+/*! @brief Gets the current motor targets in motor units (to be consistent with the rest of the interface)
+    @param targets will be updated with the current targets
+ */
+void Motors::getTargets(vector<float>& targets)
+{
+    targets.clear();
+    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
+        targets.push_back(255*MotorControls[i][2] + MotorControls[i][1]);
 }
 
 /*! Enable the torque on each motor (this will not start sending control commands, use torqueOn to do that)

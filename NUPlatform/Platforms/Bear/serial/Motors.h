@@ -51,6 +51,7 @@ class DXSerialThread;
 class ConditionalThread;
 
 #include "ftd2xx.h"
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -101,6 +102,8 @@ class Motors
       bool write();                                                                       // write motor control commands
       bool request();                                                                     // request for feedback data
       bool read();                                                                        // read feedback data and put it into global feedback arrays
+    
+      void getTargets(vector<float>& targets);
     
       void torqueEnable();                                                                // turn on all motors
       void emergencyOff();                                                                // emergency off (fast, collapse in heap)

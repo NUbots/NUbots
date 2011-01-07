@@ -28,6 +28,7 @@
 #define BEARSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "Infrastructure/NUData.h"
 class Motors;
 
 #include <vector>
@@ -41,11 +42,14 @@ public:
     ~BearSensors();
     
     void copyFromHardwareCommunications();
+    void copyFromJoints();
     
 private:
     static vector<string> m_servo_names;                //!< a vector of the names of each available servo
-    
-    Motors* m_motors;
+    Motors* m_motors;                                   //!< a pointer to the underlying Motors class which communicates with the hardware
+    vector<NUData::id_t*> m_joint_ids;                  //!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+    vector<float> m_previous_positions;
+    vector<float> m_previous_velocities;
 };
 
 #endif

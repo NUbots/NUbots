@@ -41,7 +41,7 @@ BearCamera::~BearCamera()
 
 /*! @brief Returns a pointer to a new image.
  */
-NUimage* BearCamera::grabNewImage()
+NUImage* BearCamera::grabNewImage()
 {
     // this might be bad because the SeeThinkThread will have an infinite loop frequency
     return NULL;

@@ -20,7 +20,7 @@
  */
 
 #include "BearActionators.h"
-#include "NUPlatform/NUActionators/NUActionatorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Serial/Motors.h"
 
 #include <cmath>
@@ -28,13 +28,9 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 
-// init m_actionator_names:
-static string temp_servo_control_names[] = {string("JointPositions"), string("JointTorques")};
-vector<string> BearActionators::m_servo_control_names(temp_servo_control_names, temp_servo_control_names + sizeof(temp_servo_control_names)/sizeof(*temp_servo_control_names));
-
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("TorsoPitch"), \
+                                    string("NeckPitch"), \
                                     string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), \
                                     string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), \
                                     string("TorsoRoll"), string("TorsoYaw"), \
@@ -52,8 +48,7 @@ BearActionators::BearActionators(Motors* motors)
     m_current_time = 0;
     m_motors = motors;
     
-    m_data->setAvailableJointControlMethods(m_servo_control_names);
-    m_data->setAvailableJoints(m_servo_names);
+    m_data->addActionators(m_servo_names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
     debug << "BearActionators::BearActionators(). Avaliable Actionators: " << endl;
@@ -73,27 +68,26 @@ void BearActionators::copyToHardwareCommunications()
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
 #endif
-    vector<bool> isvalid;
-    vector<double> time;
-    vector<float> position;
-    vector<float> velocity;
-    vector<float> gain;
+    copyToServos();
+}
+
+void BearActionators::copyToServos()
+{
+    static vector<float> positions;
+    static vector<float> gains;
     
-    if (m_data->getNextJointPositions(isvalid, time, position, velocity, gain))
+    m_data->getNextServos(positions, gains);
+    for (size_t i=0; i<positions.size(); i++)
     {
-        for (int i=0; i<position.size(); i++)
-        {
-            if (isvalid[i])
-            {
-                // 195.379 converts radians to motor units, and Motors::DefaultPositions are the calibrated zero positions
-                float motorposition = Motors::MotorSigns[i]*position[i]*195.379 + Motors::DefaultPositions[i];                  
-                float speed = 1000*fabs(motorposition - JointPositions[i])/(time[i] - m_current_time);     
-                
-                m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, speed, -1);
-            }
-        }
+        // 195.379 converts radians to motor units, and Motors::DefaultPositions are the calibrated zero positions
+        float motorposition = Motors::MotorSigns[i]*positions[i]*195.379 + Motors::DefaultPositions[i];                  
+        float speed = 1000*fabs(motorposition - JointPositions[i])/(m_data->CurrentTime - m_data->PreviousTime);     
+        
+        if (i == 12)
+            cout << motorposition << "," << speed << endl;
+        
+        m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, speed, -1);
     }
-    
 }
 
 

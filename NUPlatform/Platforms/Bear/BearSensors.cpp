@@ -21,9 +21,13 @@
 
 #include "BearSensors.h"
 #include "Serial/Motors.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
+
+#include <limits>
+using namespace std;
 
 // init m_servo_names:
 static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
@@ -43,7 +47,10 @@ BearSensors::BearSensors(Motors* motors)
         debug << "BearSensors::BearSensors()" << endl;
     #endif
     m_motors = motors;
-    m_data->setAvailableJoints(m_servo_names);
+    m_data->addSensors(m_servo_names);
+    m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
+    m_previous_positions = vector<float>(m_joint_ids.size(), 0);
+    m_previous_velocities = vector<float>(m_joint_ids.size(), 0);
 }
 
 /*! @brief Destructor for BearSensors
@@ -55,12 +62,39 @@ BearSensors::~BearSensors()
     #endif
 }
 
+/*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
+ */
 void BearSensors::copyFromHardwareCommunications()
 {
-    vector<float> positions (JointPositions, JointPositions + sizeof(JointPositions)/sizeof(float));
-    vector<float> torques (JointLoads, JointLoads + sizeof(JointLoads)/sizeof(float));
-    m_data->setJointPositions(m_current_time, positions);
-    m_data->setJointTorques(m_current_time, torques);
+    copyFromJoints();
 }
 
+/*! @brief Copys the joint sensor data from the Motors class to the NUSensorsData container.
+ 
+    The Motors class is very old and uses two globals; JointPositions and JointLoads to store sensor data.
+    Consequently, we need only copy from these old arrays into the new fancy NUSensorsData structure.
+ */
+void BearSensors::copyFromJoints()
+{
+    static const float NaN = numeric_limits<float>::quiet_NaN();
+    
+    vector<float> targets;
+    m_motors->getTargets(targets);
+    
+    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    float delta_t = 1000*(m_current_time - m_previous_time);
+    for (size_t i=0; i<m_joint_ids.size(); i++)
+    {
+        joint[NUSensorsData::PositionId] = Motors::MotorSigns[i]*(JointPositions[i] - Motors::DefaultPositions[i])/195.379;         // I know, its a horrible way of converting from motor units to radians
+        joint[NUSensorsData::VelocityId] = (joint[NUSensorsData::PositionId] - m_previous_positions[i])/delta_t;    
+        joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
+        joint[NUSensorsData::TargetId] = Motors::MotorSigns[i]*(targets[i] - Motors::DefaultPositions[i])/195.379;;
+        joint[NUSensorsData::StiffnessId] = NaN;
+        joint[NUSensorsData::TorqueId] = Motors::MotorSigns[i]*JointLoads[i]*1.6432e-3;             // This torque conversion factor was measured for a DX-117, I don't know how well it applies to other motors
+        m_data->set(*m_joint_ids[i], m_current_time, joint);
+        
+        m_previous_positions[i] = joint[NUSensorsData::PositionId];
+        m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
+    }
+}
 
