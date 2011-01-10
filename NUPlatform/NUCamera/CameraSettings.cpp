@@ -53,7 +53,7 @@ void CameraSettings::SetDefaults()
     autoGain = 0;
 
     // Extra
-    activeCamera = 1;
+    activeCamera = BOTTOM_CAMERA;
 
     return;
 }
@@ -112,7 +112,7 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 
     // ActiveCamera
     if(configParser.HasKey("ActiveCamera"))
-        activeCamera = configParser.GetAsInt("ActiveCamera");
+        activeCamera = Camera(configParser.GetAsInt("ActiveCamera"));
 
     return;
 }
