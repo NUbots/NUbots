@@ -37,7 +37,12 @@ public:
     NAOCamera();
     ~NAOCamera();
     NUImage* grabNewImage();
-    void setSettings(const CameraSettings& newset);
+    void applySettings(const CameraSettings& newset);
+    void setSettings(const CameraSettings& newset){
+        applySettings(newset);
+    };
+
+    void forceApplySettings(const CameraSettings& newset);
 
 private:
     void loadCameraOffset();
@@ -50,8 +55,13 @@ private:
     SIZE = WIDTH * HEIGHT * 2
   };
 
-    bool setControlSetting(unsigned int settingID, int value);
-    int getControlSetting(unsigned int id);
+    bool applySetting(unsigned int settingID, int value);
+    int readSetting(unsigned int id);
+    CameraSettings::Camera setActiveCamera(CameraSettings::Camera newCamera);
+    void initialiseCamera();
+    void readCameraSettings();
+    void openCameraDevice(std::string device_name);
+    void setStreaming(bool streaming_on);
 
     int fd; //!< The file descriptor for the video device.
     void* mem[frameBufferCount]; //!< Frame buffer addresses.
@@ -63,9 +73,8 @@ private:
     bool capturedNew();
     const unsigned char* getImage() const;
     double getTimeStamp() const;
-	CameraSettings::Camera setCamera(CameraSettings::Camera newCamera);
     NUImage currentBufferedImage;
-
+    CameraSettings m_cameraSettings[CameraSettings::NUM_CAMERAS];
 };
 
 #endif

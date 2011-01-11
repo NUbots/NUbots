@@ -53,6 +53,7 @@
 #  define V4L2_CID_AUDIO_MUTE       (V4L2_CID_BASE+9)
 #endif
 
+/*
 #ifndef V4L2_CID_POWER_LINE_FREQUENCY
 #  define V4L2_CID_POWER_LINE_FREQUENCY  (V4L2_CID_BASE+24)
 enum v4l2_power_line_frequency {
@@ -63,7 +64,7 @@ enum v4l2_power_line_frequency {
 
 #define V4L2_CID_HUE_AUTO      (V4L2_CID_BASE+25)
 #define V4L2_CID_WHITE_BALANCE_TEMPERATURE  (V4L2_CID_BASE+26)
-#define V4L2_CID_SHARPNESS      (V4L2_CID_BASE+27)
+	#define V4L2_CID_SHARPNESS      (V4L2_CID_BASE+27)
 #define V4L2_CID_BACKLIGHT_COMPENSATION   (V4L2_CID_BASE+28)
 
 #define V4L2_CID_CAMERA_CLASS_BASE     (V4L2_CTRL_CLASS_CAMERA | 0x900)
@@ -91,8 +92,7 @@ enum  v4l2_exposure_auto_type {
 #define V4L2_CID_FOCUS_RELATIVE      (V4L2_CID_CAMERA_CLASS_BASE+11)
 #define V4L2_CID_FOCUS_AUTO      (V4L2_CID_CAMERA_CLASS_BASE+12)
  
-#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) */
-
+#endif // LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)*/
 
 std::string controlName(unsigned int id)
 {
@@ -152,151 +152,37 @@ storedTimeStamp(Platform->getTime())
 #if DEBUG_NUCAMERA_VERBOSITY > 4
     debug << "NAOCamera::NAOCamera()" << endl;
 #endif
-  int returnValue;
 
-  int i2cFd = open("/dev/i2c-0", O_RDWR);
-  ASSERT(i2cFd != -1);
-  VERIFY(ioctl(i2cFd, 0x703, 8) == 0);
-  VERIFY(i2c_smbus_read_byte_data(i2cFd, 170) >= 2); // at least Nao V3
-  unsigned char cmd[2] = {2, 0};
-  VERIFY(i2c_smbus_write_block_data(i2cFd, 220, 1, cmd) != -1); // select lower camera
-  close(i2cFd);
-  settings.activeCamera = CameraSettings::BOTTOM_CAMERA;
+    // Set current camera to unknown.
+    m_settings.activeCamera = CameraSettings::UNKNOWN_CAMERA;
 
-  // open device
-  fd = open("/dev/video0", O_RDWR);
-    #if DEBUG_NUCAMERA_VERBOSITY > 4
-    if(fd != -1)
-    {
-        debug << "NAOCamera::NAOCamera(): /dev/video0 Opened Successfully." << endl;  
-    }
-    else {
-        debug << "NAOCamera::NAOCamera(): /dev/video0 Could Not Be Opened: " << strerror(errno) << endl;  
-    }   
-    #else 
-    VERIFY(fd != -1);
-    #endif
+    //Read camera settings from file.
+    CameraSettings fileSettings;
+    fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
 
+    // Open device
+    openCameraDevice("/dev/video0");
 
+    // set to top camera
+    setActiveCamera(CameraSettings::TOP_CAMERA);
+    initialiseCamera();
+    readCameraSettings();
+    m_cameraSettings[0] = m_settings;
+    //forceApplySettings(fileSettings);
+    applySettings(fileSettings);
 
-  // set default parameters
-  struct v4l2_control control;
-  memset(&control, 0, sizeof(control));
-  control.id = V4L2_CID_CAM_INIT;
-  control.value = 0;
-  VERIFY(ioctl(fd, VIDIOC_S_CTRL, &control) >= 0);
+    // Set Bottom Camera
+    setActiveCamera(CameraSettings::BOTTOM_CAMERA);
+    initialiseCamera();
+    readCameraSettings();
+    m_cameraSettings[1] = m_settings;
+    //forceApplySettings(fileSettings);
+    applySettings(fileSettings);
 
-  v4l2_std_id esid0 = (WIDTH == 320 ? 0x04000000UL : 0x08000000UL);
-    returnValue = ioctl(fd, VIDIOC_S_STD, &esid0);
-
-    #if DEBUG_NUCAMERA_VERBOSITY > 4
-    if(returnValue)
-    {
-        debug << "NAOCamera::NAOCamera(): Error Setting Video Mode: " << strerror(errno) << endl;
-    }
-    else 
-    {
-        debug << "NAOCamera::NAOCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << endl;  
-    }
-    #else 
-    VERIFY(!returnValue);
-    #endif
-
-  // set format
-  struct v4l2_format fmt;
-  memset(&fmt, 0, sizeof(struct v4l2_format));
-  fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  fmt.fmt.pix.width = WIDTH;
-  fmt.fmt.pix.height = HEIGHT;
-  fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
-  fmt.fmt.pix.field = V4L2_FIELD_NONE;
-
-    returnValue = ioctl(fd, VIDIOC_S_FMT, &fmt);
-    #if DEBUG_NUCAMERA_VERBOSITY > 4
-    if(returnValue)
-    {
-        debug << "NAOCamera::NAOCamera(): Error Setting Format: " << strerror(errno) << endl;  
-    }
-    else 
-    {
-        debug << "NAOCamera::NAOCamera(): Format set" << endl;  
-    }
-    #else 
-    VERIFY(!returnValue);
-    #endif
-
-  ASSERT(fmt.fmt.pix.sizeimage == SIZE);
-
-  // set frame rate
-  struct v4l2_streamparm fps;  
-  memset(&fps, 0, sizeof(struct v4l2_streamparm));
-  fps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  VERIFY(!ioctl(fd, VIDIOC_G_PARM, &fps));
-  fps.parm.capture.timeperframe.numerator = 1;
-  fps.parm.capture.timeperframe.denominator = 30;
-  VERIFY(ioctl(fd, VIDIOC_S_PARM, &fps) != -1);
-
-  // request buffers
-  struct v4l2_requestbuffers rb;
-  memset(&rb, 0, sizeof(struct v4l2_requestbuffers));
-  rb.count = frameBufferCount;
-  rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  rb.memory = V4L2_MEMORY_MMAP;
-  VERIFY(ioctl(fd, VIDIOC_REQBUFS, &rb) != -1);
-
-  // map the buffers
-  buf = static_cast<struct v4l2_buffer*>(calloc(1, sizeof(struct v4l2_buffer)));
-  for(int i = 0; i < frameBufferCount; ++i)
-  {
-    buf->index = i;
-    buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf->memory = V4L2_MEMORY_MMAP;
-    VERIFY(ioctl(fd, VIDIOC_QUERYBUF, buf) != -1);
-    memLength[i] = buf->length;
-    mem[i] = mmap(0, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf->m.offset);
-    ASSERT(mem[i] != MAP_FAILED);
-  }
-
-  // queue the buffers
-  for(int i = 0; i < frameBufferCount; ++i)
-  {
-    buf->index = i;
-    buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf->memory = V4L2_MEMORY_MMAP;
-    VERIFY(ioctl(fd, VIDIOC_QBUF, buf) != -1);
-  }
-
-  // request camera's default control settings
-  settings.brightness = getControlSetting(V4L2_CID_BRIGHTNESS);
-  settings.contrast = getControlSetting(V4L2_CID_CONTRAST);
-  settings.saturation = getControlSetting(V4L2_CID_SATURATION);
-  settings.hue = getControlSetting(V4L2_CID_HUE);
-  settings.redChroma = getControlSetting(V4L2_CID_RED_BALANCE); 
-  settings.blueChroma = getControlSetting(V4L2_CID_BLUE_BALANCE); 
-  settings.gain = getControlSetting(V4L2_CID_GAIN);
-  settings.exposure = getControlSetting(V4L2_CID_EXPOSURE);
-  // make sure automatic stuff is off
-
-    VERIFY(setControlSetting(V4L2_CID_AUTOEXPOSURE , 0));
-    settings.autoExposure = 0;
-    VERIFY(setControlSetting(V4L2_CID_AUTO_WHITE_BALANCE, 0));
-    settings.autoWhiteBalance = 0;
-    VERIFY(setControlSetting(V4L2_CID_AUTOGAIN, 0));
-    settings.autoGain = 0;
-    VERIFY(setControlSetting(V4L2_CID_HFLIP, 0));
-    VERIFY(setControlSetting(V4L2_CID_VFLIP, 0));
-
-  // enable streaming
-  int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  VERIFY(ioctl(fd, VIDIOC_STREAMON, &type) != -1);
-  
-  	//READ CAMERA SETTINGS FROM FILE:
-
-	CameraSettings fileSettings;
-	fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
-	setSettings(fileSettings);
     loadCameraOffset();
-	
+
+    // enable streaming
+    setStreaming(true);
 }
 
 NAOCamera::~NAOCamera()
@@ -305,8 +191,7 @@ NAOCamera::~NAOCamera()
     debug << "NAOCamera::~NAOCamera()" << endl;
 #endif
   // disable streaming
-  int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  VERIFY(ioctl(fd, VIDIOC_STREAMOFF, &type) != -1);
+  setStreaming(false);
 
   // unmap buffers
   for(int i = 0; i < frameBufferCount; ++i)
@@ -315,6 +200,120 @@ NAOCamera::~NAOCamera()
   // close the device
   close(fd);
   free(buf);
+}
+
+void NAOCamera::openCameraDevice(std::string device_name)
+{
+    // open device
+    fd = open(device_name.c_str(), O_RDWR);
+    #if DEBUG_NUCAMERA_VERBOSITY > 4
+    if(fd != -1)
+    {
+        debug << "NAOCamera::NAOCamera(): " << device_name << " Opened Successfully." << endl;
+    }
+    else {
+        debug << "NAOCamera::NAOCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
+    }
+    #endif
+}
+
+void NAOCamera::setStreaming(bool streaming_on)
+{
+    int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    int instruction = streaming_on ? VIDIOC_STREAMON: VIDIOC_STREAMOFF;
+    VERIFY(ioctl(fd, instruction, &type) != -1);
+    debug << "NAOCamera: streaming - " << streaming_on << endl;
+}
+
+void NAOCamera::initialiseCamera()
+{
+    int returnValue;
+    // set default parameters
+    struct v4l2_control control;
+    memset(&control, 0, sizeof(control));
+    control.id = V4L2_CID_CAM_INIT;
+    control.value = 0;
+    VERIFY(ioctl(fd, VIDIOC_S_CTRL, &control) >= 0);
+
+    v4l2_std_id esid0 = (WIDTH == 320 ? 0x04000000UL : 0x08000000UL);
+    returnValue = ioctl(fd, VIDIOC_S_STD, &esid0);
+
+    #if DEBUG_NUCAMERA_VERBOSITY > 4
+    if(returnValue)
+    {
+        debug << "NAOCamera::NAOCamera(): Error Setting Video Mode: " << strerror(errno) << endl;
+    }
+    else
+    {
+        debug << "NAOCamera::NAOCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << endl;
+    }
+    #else
+    VERIFY(!returnValue);
+    #endif
+
+    // set format
+    struct v4l2_format fmt;
+    memset(&fmt, 0, sizeof(struct v4l2_format));
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt.fmt.pix.width = WIDTH;
+    fmt.fmt.pix.height = HEIGHT;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+    fmt.fmt.pix.field = V4L2_FIELD_NONE;
+
+    returnValue = ioctl(fd, VIDIOC_S_FMT, &fmt);
+    #if DEBUG_NUCAMERA_VERBOSITY > 4
+    if(returnValue)
+    {
+        debug << "NAOCamera::NAOCamera(): Error Setting Format: " << strerror(errno) << endl;
+    }
+    else
+    {
+        debug << "NAOCamera::NAOCamera(): Format set" << endl;
+    }
+    #else
+    VERIFY(!returnValue);
+    #endif
+
+    ASSERT(fmt.fmt.pix.sizeimage == SIZE);
+
+    // set frame rate
+    struct v4l2_streamparm fps;
+    memset(&fps, 0, sizeof(struct v4l2_streamparm));
+    fps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    VERIFY(!ioctl(fd, VIDIOC_G_PARM, &fps));
+    fps.parm.capture.timeperframe.numerator = 1;
+    fps.parm.capture.timeperframe.denominator = 30;
+    VERIFY(ioctl(fd, VIDIOC_S_PARM, &fps) != -1);
+
+    // request buffers
+    struct v4l2_requestbuffers rb;
+    memset(&rb, 0, sizeof(struct v4l2_requestbuffers));
+    rb.count = frameBufferCount;
+    rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    rb.memory = V4L2_MEMORY_MMAP;
+    VERIFY(ioctl(fd, VIDIOC_REQBUFS, &rb) != -1);
+
+    // map the buffers
+    buf = static_cast<struct v4l2_buffer*>(calloc(1, sizeof(struct v4l2_buffer)));
+    for(int i = 0; i < frameBufferCount; ++i)
+    {
+        buf->index = i;
+        buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf->memory = V4L2_MEMORY_MMAP;
+        VERIFY(ioctl(fd, VIDIOC_QUERYBUF, buf) != -1);
+        memLength[i] = buf->length;
+        mem[i] = mmap(0, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf->m.offset);
+        ASSERT(mem[i] != MAP_FAILED);
+    }
+
+    // queue the buffers
+    for(int i = 0; i < frameBufferCount; ++i)
+    {
+        buf->index = i;
+        buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf->memory = V4L2_MEMORY_MMAP;
+        VERIFY(ioctl(fd, VIDIOC_QBUF, buf) != -1);
+    }
 }
 
 bool NAOCamera::capturedNew()
@@ -353,7 +352,76 @@ NUImage* NAOCamera::grabNewImage()
     return &currentBufferedImage;
 }
 
-int NAOCamera::getControlSetting(unsigned int id)
+void NAOCamera::readCameraSettings()
+{
+    // read in current camera settings.
+    m_settings.brightness = readSetting(V4L2_CID_BRIGHTNESS);
+    m_settings.contrast = readSetting(V4L2_CID_CONTRAST);
+    m_settings.saturation = readSetting(V4L2_CID_SATURATION);
+    m_settings.hue = readSetting(V4L2_CID_HUE);
+    m_settings.redChroma = readSetting(V4L2_CID_RED_BALANCE);
+    m_settings.blueChroma = readSetting(V4L2_CID_BLUE_BALANCE);
+    m_settings.gain = readSetting(V4L2_CID_GAIN);
+    m_settings.exposure = readSetting(V4L2_CID_EXPOSURE);
+
+    m_settings.autoExposure = readSetting(V4L2_CID_AUTOEXPOSURE);
+    m_settings.autoWhiteBalance = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
+    m_settings.autoGain = readSetting(V4L2_CID_AUTOGAIN);
+}
+
+CameraSettings::Camera NAOCamera::setActiveCamera(CameraSettings::Camera newCamera)
+{
+    // If no change required, do nothing.
+    if(m_settings.activeCamera == newCamera) return m_settings.activeCamera;
+
+    CameraSettings::Camera previous_camera = m_settings.activeCamera;
+    int i2cFd = open("/dev/i2c-0", O_RDWR);
+    ASSERT(i2cFd != -1);
+    VERIFY(ioctl(i2cFd, 0x703, 8) == 0);
+    VERIFY(i2c_smbus_read_byte_data(i2cFd, 170) >= 2); // at least Nao V3
+    unsigned char cmd[2] = {newCamera, 0};
+    VERIFY(i2c_smbus_write_block_data(i2cFd, 220, 1, cmd) != -1); // set camera
+    close(i2cFd);
+
+    // Display debug message.
+    debug << "NAOCamera: Active camera changed: " << CameraSettings::cameraName(previous_camera);
+    debug << " --> " << CameraSettings::cameraName(newCamera) << endl;
+
+    int horzontal_flip, vertical_flip;
+    int cameraSettingsIndex;
+    switch(newCamera)
+    {
+        case CameraSettings::TOP_CAMERA:
+            horzontal_flip = 1;
+            vertical_flip = 1;
+            cameraSettingsIndex = 0;
+            break;
+        case CameraSettings::BOTTOM_CAMERA:
+            horzontal_flip = 0;
+            vertical_flip = 0;
+            cameraSettingsIndex = 1;
+            break;
+        default:
+            horzontal_flip = 0;
+            vertical_flip = 0;
+            cameraSettingsIndex = -1;
+            break;
+    }
+    if(cameraSettingsIndex != -1)
+    {
+        m_cameraSettings[!cameraSettingsIndex] = m_settings;
+        m_settings = m_cameraSettings[cameraSettingsIndex];
+    }
+
+    m_settings.activeCamera = newCamera;
+
+    VERIFY(applySetting(V4L2_CID_HFLIP, horzontal_flip));
+    VERIFY(applySetting(V4L2_CID_VFLIP, vertical_flip));
+
+    return m_settings.activeCamera;
+}
+
+int NAOCamera::readSetting(unsigned int id)
 {
   struct v4l2_queryctrl queryctrl;
   queryctrl.id = id;
@@ -373,7 +441,7 @@ int NAOCamera::getControlSetting(unsigned int id)
   return control_s.value;
 }
 
-bool NAOCamera::setControlSetting(unsigned int id, int value)
+bool NAOCamera::applySetting(unsigned int id, int value)
 {
   struct v4l2_queryctrl queryctrl;
   queryctrl.id = id;
@@ -390,44 +458,60 @@ bool NAOCamera::setControlSetting(unsigned int id, int value)
   if(value > queryctrl.maximum)
     value = queryctrl.maximum;
   if(value < 0)
-    value = queryctrl.default_value;
-
-  debug << "NAOCamera::NAOCamera(): setControl: " << controlName(id) << " -> " << value << " (" << queryctrl.minimum << "," << queryctrl.maximum << "," << queryctrl.default_value << ")" << std::endl;  
+    value = queryctrl.default_value;  
 
   struct v4l2_control control_s;
   control_s.id = id;
   control_s.value = value;
   if(ioctl(fd, VIDIOC_S_CTRL, &control_s) < 0) 
     return false;
+  debug << "NAOCamera: Apply (" << CameraSettings::cameraName(m_settings.activeCamera) << "): " << controlName(id) << " -> " << value << " (" << queryctrl.minimum << "," << queryctrl.maximum << "," << queryctrl.default_value << ")" << std::endl;
   return true;
 }
 
-void NAOCamera::setSettings(const CameraSettings& newset)
+void NAOCamera::applySettings(const CameraSettings& newset)
 {
-  if(newset.brightness != settings.brightness)
-    setControlSetting(V4L2_CID_BRIGHTNESS, (settings.brightness = newset.brightness));
-  if(newset.contrast != settings.contrast)
-    setControlSetting(V4L2_CID_CONTRAST, (settings.contrast = newset.contrast));
-  if(newset.saturation != settings.saturation)
-    setControlSetting(V4L2_CID_SATURATION, (settings.saturation = newset.saturation));
-  if(newset.hue != settings.hue)
-    setControlSetting(V4L2_CID_HUE, (settings.hue = newset.hue));
-  if(newset.redChroma != settings.redChroma)
-    setControlSetting(V4L2_CID_RED_BALANCE, (settings.redChroma = newset.redChroma));
-  if(newset.blueChroma != settings.blueChroma)
-    setControlSetting(V4L2_CID_BLUE_BALANCE, (settings.blueChroma = newset.blueChroma));
-  if(newset.gain != settings.gain)
-    setControlSetting(V4L2_CID_GAIN, (settings.gain = newset.gain));
-  if(newset.exposure != settings.exposure)
-    setControlSetting(V4L2_CID_EXPOSURE, (settings.exposure = newset.exposure));
+  // Auto Controls
+  if(newset.autoExposure != m_settings.autoExposure)
+    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.autoExposure = newset.autoExposure));
+  if(newset.autoWhiteBalance != m_settings.autoWhiteBalance)
+    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.autoWhiteBalance = newset.autoWhiteBalance));
+  if(newset.autoGain != m_settings.autoGain)
+    applySetting(V4L2_CID_AUTOGAIN, (m_settings.autoGain = newset.autoGain));
 
-// Auto Controls
-  if(newset.autoExposure != settings.autoExposure)
-    setControlSetting(V4L2_CID_AUTOEXPOSURE, (settings.autoExposure = newset.autoExposure));
-  if(newset.autoWhiteBalance != settings.autoWhiteBalance)
-    setControlSetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings.autoWhiteBalance = newset.autoWhiteBalance));
-  if(newset.autoGain != settings.autoGain)
-    setControlSetting(V4L2_CID_AUTOGAIN, (settings.autoGain = newset.autoGain));
+  if(newset.brightness != m_settings.brightness)
+    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.brightness = newset.brightness));
+  if(newset.contrast != m_settings.contrast)
+    applySetting(V4L2_CID_CONTRAST, (m_settings.contrast = newset.contrast));
+  if(newset.saturation != m_settings.saturation)
+    applySetting(V4L2_CID_SATURATION, (m_settings.saturation = newset.saturation));
+  if(newset.hue != m_settings.hue)
+    applySetting(V4L2_CID_HUE, (m_settings.hue = newset.hue));
+  if(newset.redChroma != m_settings.redChroma)
+    applySetting(V4L2_CID_RED_BALANCE, (m_settings.redChroma = newset.redChroma));
+  if(newset.blueChroma != m_settings.blueChroma)
+    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.blueChroma = newset.blueChroma));
+  if(newset.gain != m_settings.gain)
+    applySetting(V4L2_CID_GAIN, (m_settings.gain = newset.gain));
+  if(newset.exposure != m_settings.exposure)
+    applySetting(V4L2_CID_EXPOSURE, (m_settings.exposure = newset.exposure));
+}
+
+void NAOCamera::forceApplySettings(const CameraSettings& newset)
+{
+    // Auto Controls
+    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.autoExposure = newset.autoExposure));
+    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.autoWhiteBalance = newset.autoWhiteBalance));
+    applySetting(V4L2_CID_AUTOGAIN, (m_settings.autoGain = newset.autoGain));
+
+    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.brightness = newset.brightness));
+    applySetting(V4L2_CID_CONTRAST, (m_settings.contrast = newset.contrast));
+    applySetting(V4L2_CID_SATURATION, (m_settings.saturation = newset.saturation));
+    applySetting(V4L2_CID_HUE, (m_settings.hue = newset.hue));
+    applySetting(V4L2_CID_RED_BALANCE, (m_settings.redChroma = newset.redChroma));
+    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.blueChroma = newset.blueChroma));
+    applySetting(V4L2_CID_GAIN, (m_settings.gain = newset.gain));
+    applySetting(V4L2_CID_EXPOSURE, (m_settings.exposure = newset.exposure));
 }
 
 void NAOCamera::loadCameraOffset()
