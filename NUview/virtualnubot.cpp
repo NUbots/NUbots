@@ -34,6 +34,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     autoSoftColour = false;
 
     sensorsData = new NUSensorsData();
+    setSensorData(sensorsData);
     //debug<<"VirtualNUBot started";
     //TEST:
 
@@ -354,7 +355,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
                 //qDebug() << "POST-ROBOT";
 
                 break;
-        case BALL:
+            case BALL:
                 validColours.clear();
                 validColours.push_back(ClassIndex::orange);
                 validColours.push_back(ClassIndex::pink_orange);
@@ -539,13 +540,25 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
 {
     if(!imageAvailable()) return;
     Pixel temp;
+    float LUTSelectedCounter[ClassIndex::num_colours+1];
+
+    //Set colour counters to 0;
+    for (int col = 0; col < ClassIndex::num_colours+1; col++)
+    {
+        LUTSelectedCounter[col] = 0;
+    }
+
     // Add selected values to temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
     {
         temp = indexs[i];
         unsigned int index = LUTTools::getLUTIndex(temp);
+        LUTSelectedCounter[ClassIndex::Colour(classificationTable[index])] = LUTSelectedCounter[ClassIndex::Colour(classificationTable[index])] +1;
         tempLut[index] = getUpdateColour(ClassIndex::Colour(classificationTable[index]),colour);
     }
+
+    //Send Stats to Classification widget to display
+    emit updateStatistics(LUTSelectedCounter);
 
     // Create Classifed Image based on lookup table.
     vision.classifyPreviewImage(previewClassImage,tempLut);
@@ -595,6 +608,7 @@ void virtualNUbot::UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> index
     if(nextUndoIndex >= maxUndoLength)
         nextUndoIndex = 0;
     processVisionFrame(rawImage);
+    emit LUTChanged(classificationTable);
     return;
 }
 
