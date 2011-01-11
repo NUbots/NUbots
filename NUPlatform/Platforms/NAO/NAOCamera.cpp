@@ -93,6 +93,57 @@ enum  v4l2_exposure_auto_type {
  
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) */
 
+
+std::string controlName(unsigned int id)
+{
+	std::string name = "None";
+	switch(id)
+	{
+	case V4L2_CID_BRIGHTNESS:
+		name = "Brightness";
+		break;
+	case V4L2_CID_CONTRAST:
+		name = "Contrast";
+		break;
+	case V4L2_CID_SATURATION:
+		name = "Saturation";
+		break;
+	case V4L2_CID_HUE:
+		name = "Hue";
+		break;
+	case V4L2_CID_RED_BALANCE:
+		name = "Red Balance";
+		break;
+	case V4L2_CID_BLUE_BALANCE:
+		name = "Blue Balance";
+		break;
+	case V4L2_CID_GAIN:
+		name = "Gain";
+		break;
+	case V4L2_CID_EXPOSURE:
+		name = "Exposure";
+		break;
+	case V4L2_CID_AUTOEXPOSURE:
+		name = "Auto Exposure";
+		break;
+	case V4L2_CID_AUTO_WHITE_BALANCE:
+		name = "Auto White Balance";
+		break;
+	case V4L2_CID_AUTOGAIN:
+		name = "Auto Gain";
+		break;
+	case V4L2_CID_HFLIP:
+		name = "Horizontal Flip";
+		break;
+	case V4L2_CID_VFLIP:
+		name = "Vertical Flip";
+		break;
+	default:
+		name = "Unknown";
+	}
+	return name;
+}
+
 NAOCamera::NAOCamera() :
 currentBuf(0),
 timeStamp(0),
@@ -110,7 +161,7 @@ storedTimeStamp(Platform->getTime())
   unsigned char cmd[2] = {2, 0};
   VERIFY(i2c_smbus_write_block_data(i2cFd, 220, 1, cmd) != -1); // select lower camera
   close(i2cFd);
-    settings.activeCamera = 1;
+  settings.activeCamera = CameraSettings::BOTTOM_CAMERA;
 
   // open device
   fd = open("/dev/video0", O_RDWR);
@@ -217,9 +268,9 @@ storedTimeStamp(Platform->getTime())
 
   // request camera's default control settings
   settings.brightness = getControlSetting(V4L2_CID_BRIGHTNESS);
-  //settings.contrast = getControlSetting(?);
-  //settings.saturation = getControlSetting(?);
-  //settings.hue = getControlSetting(?);
+  settings.contrast = getControlSetting(V4L2_CID_CONTRAST);
+  settings.saturation = getControlSetting(V4L2_CID_SATURATION);
+  settings.hue = getControlSetting(V4L2_CID_HUE);
   settings.redChroma = getControlSetting(V4L2_CID_RED_BALANCE); 
   settings.blueChroma = getControlSetting(V4L2_CID_BLUE_BALANCE); 
   settings.gain = getControlSetting(V4L2_CID_GAIN);
@@ -341,6 +392,8 @@ bool NAOCamera::setControlSetting(unsigned int id, int value)
   if(value < 0)
     value = queryctrl.default_value;
 
+  debug << "NAOCamera::NAOCamera(): setControl: " << controlName(id) << " -> " << value << " (" << queryctrl.minimum << "," << queryctrl.maximum << "," << queryctrl.default_value << ")" << std::endl;  
+
   struct v4l2_control control_s;
   control_s.id = id;
   control_s.value = value;
@@ -353,12 +406,12 @@ void NAOCamera::setSettings(const CameraSettings& newset)
 {
   if(newset.brightness != settings.brightness)
     setControlSetting(V4L2_CID_BRIGHTNESS, (settings.brightness = newset.brightness));
-//  if(newset.contrast != settings.contrast)
-//    setControlSetting(?, (settings.contrast = newset.contrast));
-//  if(newset.saturation != settings.saturation)
-//    setControlSetting(?, (settings.saturation = newset.saturation));
-//  if(newset.hue != settings.hue)
-//    setControlSetting(?, (settings.hue = newset.hue));
+  if(newset.contrast != settings.contrast)
+    setControlSetting(V4L2_CID_CONTRAST, (settings.contrast = newset.contrast));
+  if(newset.saturation != settings.saturation)
+    setControlSetting(V4L2_CID_SATURATION, (settings.saturation = newset.saturation));
+  if(newset.hue != settings.hue)
+    setControlSetting(V4L2_CID_HUE, (settings.hue = newset.hue));
   if(newset.redChroma != settings.redChroma)
     setControlSetting(V4L2_CID_RED_BALANCE, (settings.redChroma = newset.redChroma));
   if(newset.blueChroma != settings.blueChroma)

@@ -63,6 +63,7 @@ private:
     bool capturedNew();
     const unsigned char* getImage() const;
     double getTimeStamp() const;
+	CameraSettings::Camera setCamera(CameraSettings::Camera newCamera);
     NUImage currentBufferedImage;
 
 };

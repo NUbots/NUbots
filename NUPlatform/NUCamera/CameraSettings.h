@@ -16,6 +16,11 @@
 class CameraSettings
 {
     public:
+		enum Camera
+		{
+			TOP_CAMERA = 0x01,
+			BOTTOM_CAMERA = 0x02
+		};
         int brightness;         //!< Brightness setting.
         int contrast;           //!< Contrast setting.
         int saturation;         //!< Saturation setting.
@@ -29,7 +34,7 @@ class CameraSettings
         int autoWhiteBalance;   //!< Auto White Balance setting.
         int autoGain;           //!< Auto Gain setting.
 
-        int activeCamera;       //!< The Active Camera.
+        Camera activeCamera;       //!< The Active Camera.
 
         /*!
             @brief Default Constructor. Loads the default camera settings.
