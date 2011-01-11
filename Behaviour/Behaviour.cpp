@@ -32,6 +32,7 @@
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
+#include "CameraCalibration/CameraCalibrationProvider.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -116,6 +117,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new PoseProvider(this);
     else if (name.compare("robopedestrian") == 0)
         return new RoboPedestrianProvider(this);
+	else if (name.compare("cameracalibration") == 0)
+        return new CameraCalibrationProvider(this);
     else
         return NULL;
 }
