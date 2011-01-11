@@ -217,9 +217,9 @@ storedTimeStamp(Platform->getTime())
 
   // request camera's default control settings
   settings.brightness = getControlSetting(V4L2_CID_BRIGHTNESS);
-  //settings.contrast = getControlSetting(?);
-  //settings.saturation = getControlSetting(?);
-  //settings.hue = getControlSetting(?);
+  settings.contrast = getControlSetting(V4L2_CID_CONTRAST);
+  settings.saturation = getControlSetting(V4L2_CID_SATURATION);
+  settings.hue = getControlSetting(V4L2_CID_HUE);
   settings.redChroma = getControlSetting(V4L2_CID_RED_BALANCE); 
   settings.blueChroma = getControlSetting(V4L2_CID_BLUE_BALANCE); 
   settings.gain = getControlSetting(V4L2_CID_GAIN);
@@ -353,12 +353,12 @@ void NAOCamera::setSettings(const CameraSettings& newset)
 {
   if(newset.brightness != settings.brightness)
     setControlSetting(V4L2_CID_BRIGHTNESS, (settings.brightness = newset.brightness));
-//  if(newset.contrast != settings.contrast)
-//    setControlSetting(?, (settings.contrast = newset.contrast));
-//  if(newset.saturation != settings.saturation)
-//    setControlSetting(?, (settings.saturation = newset.saturation));
-//  if(newset.hue != settings.hue)
-//    setControlSetting(?, (settings.hue = newset.hue));
+  if(newset.contrast != settings.contrast)
+    setControlSetting(V4L2_CID_CONTRAST, (settings.contrast = newset.contrast));
+  if(newset.saturation != settings.saturation)
+    setControlSetting(V4L2_CID_SATURATION, (settings.saturation = newset.saturation));
+  if(newset.hue != settings.hue)
+    setControlSetting(V4L2_CID_HUE, (settings.hue = newset.hue));
   if(newset.redChroma != settings.redChroma)
     setControlSetting(V4L2_CID_RED_BALANCE, (settings.redChroma = newset.redChroma));
   if(newset.blueChroma != settings.blueChroma)
