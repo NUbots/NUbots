@@ -15,12 +15,12 @@
   */
 class CameraSettings
 {
-	enum Camera
-	{
-		TOP_CAMERA = 0x01,
-		BOTTOM_CAMERA = 0x02
-	};
     public:
+		enum Camera
+		{
+			TOP_CAMERA = 0x01,
+			BOTTOM_CAMERA = 0x02
+		};
         int brightness;         //!< Brightness setting.
         int contrast;           //!< Contrast setting.
         int saturation;         //!< Saturation setting.

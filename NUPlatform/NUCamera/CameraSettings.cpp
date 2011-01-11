@@ -80,7 +80,7 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 
     // Hue
     if(configParser.HasKey("Hue"))
-        saturation = configParser.GetAsInt("Hue");
+        hue = configParser.GetAsInt("Hue");
 
     // RedChroma
     if(configParser.HasKey("RedChroma"))
