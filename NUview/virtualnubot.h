@@ -80,6 +80,8 @@ signals:
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
     void edgeFilterChanged(QImage image, GLDisplay::display displayId);
     void fftChanged(QImage image, GLDisplay::display displayId);
+    void updateStatistics(float* selectedColourCounters);
+    void LUTChanged(unsigned char* classificationTable);
 
 private:
     class classEntry
