@@ -366,9 +366,9 @@ void cameraSettingsWidget::cameraSettingsChanged()
 
 
     if(TopCameraSelected->isChecked())
-        settings->activeCamera = 0;
+        settings->activeCamera = CameraSettings::TOP_CAMERA;
     else
-        settings->activeCamera = 1;
+        settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
 }
 
 

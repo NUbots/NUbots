@@ -160,7 +160,10 @@ std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting)
     input >> p_cameraSetting.autoWhiteBalance;
     input >> p_cameraSetting.autoGain;
 
-    input >> p_cameraSetting.activeCamera;
+    int tempCamera;
+    input >> tempCamera;
+    p_cameraSetting.activeCamera = CameraSettings::Camera(tempCamera);
+
 
     return input;
 }
