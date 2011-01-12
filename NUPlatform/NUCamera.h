@@ -34,10 +34,10 @@ public:
     virtual ~NUCamera();
     virtual NUImage* grabNewImage() = 0;
     virtual void setSettings(const CameraSettings& newset) = 0;
-    CameraSettings getSettings(){return settings;};
+    CameraSettings getSettings(){return m_settings;};
     
 protected:
-    CameraSettings settings;
+    CameraSettings m_settings;
 private:
 };
 
