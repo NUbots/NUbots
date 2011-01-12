@@ -16,11 +16,31 @@
 class CameraSettings
 {
     public:
-		enum Camera
-		{
-			TOP_CAMERA = 0x01,
-			BOTTOM_CAMERA = 0x02
-		};
+        enum Camera
+        {
+            UNKNOWN_CAMERA = 0x00,
+            TOP_CAMERA = 0x01,
+            BOTTOM_CAMERA = 0x02,
+            NUM_CAMERAS = 2
+        };
+
+        static std::string cameraName(Camera theCamera)
+        {
+            std::string camera_name;
+            switch(theCamera)
+            {
+                case TOP_CAMERA:
+                    camera_name = "Top Camera";
+                    break;
+                case BOTTOM_CAMERA:
+                    camera_name = "Bottom Camera";
+                    break;
+                default:
+                    camera_name = "Unknown Camera";
+            }
+            return camera_name;
+        }
+
         int brightness;         //!< Brightness setting.
         int contrast;           //!< Contrast setting.
         int saturation;         //!< Saturation setting.
