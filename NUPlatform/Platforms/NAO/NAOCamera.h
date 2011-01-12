@@ -39,6 +39,7 @@ public:
     NUImage* grabNewImage();
     void applySettings(const CameraSettings& newset);
     void setSettings(const CameraSettings& newset){
+        setActiveCamera(newset.activeCamera);
         applySettings(newset);
     };
 

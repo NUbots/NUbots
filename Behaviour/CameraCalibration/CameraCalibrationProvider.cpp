@@ -1,9 +1,9 @@
 /*! @file CameraCalibrationProvider.cpp
-    @brief Implementation of Pose behaviour class
+    @brief Implementation of CameraCalibrationProvider class
 
-    @author Aaron Wong
+    @author David Budden
  
- Copyright (c) 2010 Aaron Wong
+ Copyright (c) 2010 David Budden
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@ CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : Behav
     isStart = 0;
     m_saving_images = false;
     topcam = false;
-
 }
 
 
@@ -75,8 +74,18 @@ void CameraCalibrationProvider::doBehaviour()
              refImage.copyFromExisting(*(Blackboard->Image));
              m_actions->add(NUActionatorsData::Sound, m_current_time, "camera_click.wav");
              
-             Pixel tmp = refImage.m_image[1][1];
-             debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;             
+             //Pixel tmp = refImage.m_image[1][1];
+             //debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;             
+             
+             Pixel tmp;
+             for (int i = 0; i < 320; i++)             
+             {
+                 for (int j = 0; j < 240; j++)
+                 {
+                     tmp = refImage.m_image[j][i];
+                     debug << "Pixel Data: \tY1: " << (int)tmp.yCbCrPadding << "\t\tU: " << (int)tmp.cb << "\t\tY2: "<< (int)tmp.y << "\t\tV: " << (int)tmp.cr << "\t\t(" << i << "," << j << ")" << endl;       
+                 }
+             }
        }
 
 	   //settings.activeCamera = 0;
@@ -97,8 +106,15 @@ void CameraCalibrationProvider::doBehaviour()
              refImage.copyFromExisting(*(Blackboard->Image));
              m_actions->add(NUActionatorsData::Sound, m_current_time, "camera_click.wav");  
              
-             Pixel tmp = refImage.m_image[1][1];
-             debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;    
+             Pixel tmp;
+             for (int i = 0; i < 320; i++)             
+             {
+                 for (int j = 0; j < 240; j++)
+                 {
+                     tmp = refImage.m_image[j][i];
+                     debug << "Pixel Data: \tY1: " << (int)tmp.yCbCrPadding << "\t\tU: " << (int)tmp.cb << "\t\tY2: "<< (int)tmp.y << "\t\tV: " << (int)tmp.cr << "\t\t(" << i << "," << j << ")" << endl;       
+                 }
+             }
        }
 	   
 	   //settings.activeCamera = 1;
