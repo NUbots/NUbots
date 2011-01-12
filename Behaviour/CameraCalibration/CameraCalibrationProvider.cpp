@@ -29,6 +29,8 @@
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
 
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 #include <math.h>
 #include "debug.h"
@@ -42,6 +44,7 @@ CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : Behav
     m_yaw_index = 0;
     isStart = 0;
     m_saving_images = false;
+    topcam = false;
 
 }
 
@@ -52,69 +55,59 @@ CameraCalibrationProvider::~CameraCalibrationProvider()
 }
 
 void CameraCalibrationProvider::doBehaviour()
-{
-    /*	
-    if(singleChestClick())
-    {
-	m_saving_images = true;
-        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
-	
-
-    }
-    else if(m_saving_images == true)
-    {
-	m_saving_images = false;
-        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
-    }
-    */
+{   
     
     // handle the selection of motions
     //CameraSettings settings;
 	//settings = m_camera->getSettings();
     if (singleLeftBumperClick())
     {
-       m_pitch_index = 17.4*3.14/180;
-       m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
-	   
+       if (!topcam)
+       // change camera and position
+       {
+           m_pitch_index = 17.4*3.14/180;
+           m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
+           topcam = true;
+       }
+       else
+       // copy image
+       {             
+             refImage.copyFromExisting(*(Blackboard->Image));
+             m_actions->add(NUActionatorsData::Sound, m_current_time, "camera_click.wav");
+             
+             Pixel tmp = refImage.m_image[1][1];
+             debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;             
+       }
+
 	   //settings.activeCamera = 0;
     }
     
     if (singleRightBumperClick())
     {
-       m_pitch_index = -27.4*3.14/180;
-       m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
+       if (topcam)
+       // change camera and position
+       {
+           m_pitch_index = -27.4*3.14/180;
+           m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
+           topcam = false;
+       }
+       else
+       // copy image
+       {
+             refImage.copyFromExisting(*(Blackboard->Image));
+             m_actions->add(NUActionatorsData::Sound, m_current_time, "camera_click.wav");  
+             
+             Pixel tmp = refImage.m_image[1][1];
+             debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;    
+       }
 	   
 	   //settings.activeCamera = 1;
     }
 	
+	
 	//m_jobs->addCameraJob(new ChangeCameraSettingsJob(settings));
     
-	/*
-    if (singleLeftBumperClick())
-    {
-        m_pitch_index = (m_pitch_index + 1) % m_num_pitch_motions;
-	//m_actions->addSound(m_current_time, "error1.wav");
-	sayPosition(calculatePitchPosition());
-    }
-    if (singleRightBumperClick())
-    {
-        m_yaw_index = (m_yaw_index + 1) % m_num_yaw_motions;
-	//m_actions->addSound(m_current_time, "error1.wav");
-	sayPosition(calculateYawPosition());
-    }
-    if(doubleLeftBumperClick())
-    {
-	m_pitch_index = (m_pitch_index  + m_num_pitch_motions-1) % m_num_pitch_motions;
-	//m_actions->addSound(m_current_time, "error1.wav");
-	sayPosition(calculatePitchPosition());
-    }
-    if(doubleRightBumperClick())
-    {
-	m_yaw_index = (m_yaw_index  + m_num_yaw_motions-1) % m_num_yaw_motions;
-	//m_actions->addSound(m_current_time, "error1.wav");
-	sayPosition(calculateYawPosition());
-    }
-    */
+
     doSelectedMotion();
     
 }
@@ -124,78 +117,41 @@ void CameraCalibrationProvider::doSelectedMotion()
     //Initialisation: First 50 Frames, will be used to stand up
     if (isStart < 50)
     {
+    // stand up
         vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
 		isStart++;
+    }
+    else if (isStart < 51)
+    // set initial head position and camera
+    {
+         m_pitch_index = -27.4*3.14/180;
+         //m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
+         topcam = false;  
+         isStart++;        
     }
     //Start the bahaviour:
     else
     {        
         vector<float> position(3);
         //POSITION [PITCH, YAW, ROLL]
-        //position[0] = calculatePitchPosition()*3.14/180;
-        //position[1] = calculateYawPosition()*3.14/180; //degrees to radians
+        
         position[0] = m_pitch_index;
         position[1] = 0;
         position[2] = 0;
         m_jobs->addMotionJob(new HeadJob(m_current_time,position)); //
         m_jobs->addMotionJob(new WalkJob(0,0,0));                   // stop
     }
-}
-
-/*
-float CameraCalibrationProvider::calculatePitchPosition()
-{
-	float min_pitch = -40.0; //-38.5
-	float max_pitch = 30; //29.5
-	float degrees = ((m_pitch_index)*(max_pitch - min_pitch)/(m_num_pitch_motions-1)) + min_pitch;
-
-	return degrees;
-	return degrees;
-}
     
-float CameraCalibrationProvider::calculateYawPosition()
-{
-	float min_yaw = -120.0; //-119.5
-	float max_yaw = 120.0; //119.5
-	float degrees = ((m_yaw_index)*(max_yaw - min_yaw)/(m_num_yaw_motions-1)) + min_yaw;
-	return degrees;
+    //debug << "Test BB image Read: " << Blackboard->Image->getHeight() << ", "<< Blackboard->Image->getWidth() <<endl;
+    //image[y][x]
+    
+    //Pixel tmp = Blackboard->Image->m_image[1][1];
+    //Pixel tmp = refImage.m_image[1][1];
+    
+    //debug << "Test BB image Read: \tY1: " << (int)tmp.yCbCrPadding << ",\t\tU: " << (int)tmp.cb << ",\t\tY2: "<< (int)tmp.y << ",\t\tV: " << (int)tmp.cr << endl;
+    
+    
 }
 
-void CameraCalibrationProvider::sayPosition(float degrees)
-{
-	int tens = int(floor(fabs(degrees) /10.0));
-	int units = int(fabs(degrees) - tens*10);
-	
-	string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
-	string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
-	string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
-	if(tens == 1)
-	{
-		m_actions->add(NUActionatorsData::Sound, m_current_time, teen_numbers[units]  + ".wav");
-		return;
-	}
-	if(tens == 0)
-	{
-		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
-		return;
-	}
-	if(units == 0 && tens !=0)
-	{
-		m_actions->add(NUActionatorsData::Sound, m_current_time, ten_numbers[tens] + ".wav");
-		return;
-	}
-	if(units == 0 && tens == 0)
-	{
-		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
-		return;
-	}
-	vector<string> sounds (2);
-	sounds[0] = ten_numbers[tens] + ".wav";
-	sounds[1] = unit_numbers[units] + ".wav";
-	m_actions->add(NUActionatorsData::Sound, m_current_time, sounds);
-	
-	return;
-}
-*/

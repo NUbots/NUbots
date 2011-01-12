@@ -27,6 +27,7 @@
 #define CAMERACALBRATIONPROVIDER_H
 
 #include "../BehaviourProvider.h"
+#include "Infrastructure/NUImage/NUImage.h"
 
 class JobList;
 class NUSensorsData;
@@ -55,6 +56,8 @@ private:
     float m_yaw_index;
     int isStart;
     bool m_saving_images;
+    NUImage refImage;
+    bool topcam;
 
 };
 
