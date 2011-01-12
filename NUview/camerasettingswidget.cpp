@@ -5,6 +5,8 @@
 #include <QCheckBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QSlider>
 #include <QSpinBox>
@@ -154,57 +156,86 @@ void cameraSettingsWidget::createWidgets()  //!< Create all of the child widgets
     StopSavingImagesButton = new QPushButton("Stop Saving Images");
     StartSavingImagesWithSettingsCheckBox = new QCheckBox("Vary Camera Settings");
 
+    TopCameraSelected = new QCheckBox("Top Camera");
+    TopCameraSelected->setChecked(false);
+    BottomCameraSelected = new QCheckBox("Bottom Camera");
+    BottomCameraSelected->setChecked(true);
+    AutoGainSelected = new QCheckBox("Auto Gain");
+    AutoWhiteBalanceSelected = new QCheckBox("Auto White Balance");
+    AutoExposureSelected = new QCheckBox("Auto Exposure");
+
+
 }
 void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets.
 {
+    SliderLayout = new QGridLayout;
     // Shift Gain
-    shiftGainLayout = new QHBoxLayout();                      //!< Layout for shift Gain
-    shiftGainLayout->addWidget(shiftGainLabel);               //!< Label for shift Gain
-    shiftGainLayout->addWidget(shiftGainSlider);              //!< Slider for Gain selection
-    shiftGainLayout->addWidget(shiftGainSpinBox);             //!< SpinBox for Gain selection
+    //shiftGainLayout = new QHBoxLayout();                      //!< Layout for shift Gain
+    SliderLayout->addWidget(shiftGainLabel,1,1);               //!< Label for shift Gain
+    SliderLayout->addWidget(shiftGainSlider,1,2);              //!< Slider for Gain selection
+    SliderLayout->addWidget(shiftGainSpinBox,1,3);             //!< SpinBox for Gain selection
 
     // Shift Exposure
-    shiftExposureLayout = new QHBoxLayout();                        //!< Layout for shift Exposure
-    shiftExposureLayout->addWidget(shiftExposureLabel);             //!< Label for shift Exposure
-    shiftExposureLayout->addWidget(shiftExposureSlider);            //!< Slider for Exposure selection
-    shiftExposureLayout->addWidget(shiftExposureSpinBox);           //!< SpinBox for Exposure selection
+    //shiftExposureLayout = new QHBoxLayout();                        //!< Layout for shift Exposure
+    SliderLayout->addWidget(shiftExposureLabel,2,1);             //!< Label for shift Exposure
+    SliderLayout->addWidget(shiftExposureSlider,2,2);            //!< Slider for Exposure selection
+    SliderLayout->addWidget(shiftExposureSpinBox,2,3);           //!< SpinBox for Exposure selection
 
 
     // Shift BlueChroma
-    shiftBlueChromaLayout = new QHBoxLayout();                          //!< Layout for shift BlueChroma
-    shiftBlueChromaLayout->addWidget(shiftBlueChromaLabel);             //!< Label for shift BlueChroma
-    shiftBlueChromaLayout->addWidget(shiftBlueChromaSlider);            //!< Slider for Exposure BlueChroma
-    shiftBlueChromaLayout->addWidget(shiftBlueChromaSpinBox);           //!< SpinBox for Exposure BlueChroma
+    //shiftBlueChromaLayout = new QHBoxLayout();                          //!< Layout for shift BlueChroma
+    SliderLayout->addWidget(shiftBlueChromaLabel,3,1);             //!< Label for shift BlueChroma
+    SliderLayout->addWidget(shiftBlueChromaSlider,3,2);            //!< Slider for Exposure BlueChroma
+    SliderLayout->addWidget(shiftBlueChromaSpinBox,3,3);           //!< SpinBox for Exposure BlueChroma
 
     // Shift RedChroma
-    shiftRedChromaLayout = new QHBoxLayout();                          //!< Layout for shift RedChroma
-    shiftRedChromaLayout->addWidget(shiftRedChromaLabel);             //!< Label for shift RedChroma
-    shiftRedChromaLayout->addWidget(shiftRedChromaSlider);            //!< Slider for RedChroma selection
-    shiftRedChromaLayout->addWidget(shiftRedChromaSpinBox);           //!< SpinBox for RedChroma selection
+    //shiftRedChromaLayout = new QHBoxLayout();                          //!< Layout for shift RedChroma
+    SliderLayout->addWidget(shiftRedChromaLabel,4,1);             //!< Label for shift RedChroma
+    SliderLayout->addWidget(shiftRedChromaSlider,4,2);            //!< Slider for RedChroma selection
+    SliderLayout->addWidget(shiftRedChromaSpinBox,4,3);           //!< SpinBox for RedChroma selection
 
     // Shift Brightness
-    shiftBrightnessLayout = new QHBoxLayout();                          //!< Layout for shift Brightness
-    shiftBrightnessLayout->addWidget(shiftBrightnessLabel);             //!< Label for shift Brightness
-    shiftBrightnessLayout->addWidget(shiftBrightnessSlider);            //!< Slider for Brightness selection
-    shiftBrightnessLayout->addWidget(shiftBrightnessSpinBox);           //!< SpinBox for Brightness selection
+    //shiftBrightnessLayout = new QHBoxLayout();                          //!< Layout for shift Brightness
+    SliderLayout->addWidget(shiftBrightnessLabel,5,1);             //!< Label for shift Brightness
+    SliderLayout->addWidget(shiftBrightnessSlider,5,2);            //!< Slider for Brightness selection
+    SliderLayout->addWidget(shiftBrightnessSpinBox,5,3);           //!< SpinBox for Brightness selection
 
     // Shift Saturation
-    shiftSaturationLayout = new QHBoxLayout();                          //!< Layout for shift Saturation
-    shiftSaturationLayout->addWidget(shiftSaturationLabel);             //!< Label for shift Saturation
-    shiftSaturationLayout->addWidget(shiftSaturationSlider);            //!< Slider for Saturation selection
-    shiftSaturationLayout->addWidget(shiftSaturationSpinBox);           //!< SpinBox for Saturation selection
+    //shiftSaturationLayout = new QHBoxLayout();                          //!< Layout for shift Saturation
+    SliderLayout->addWidget(shiftSaturationLabel,6,1);             //!< Label for shift Saturation
+    SliderLayout->addWidget(shiftSaturationSlider,6,2);            //!< Slider for Saturation selection
+    SliderLayout->addWidget(shiftSaturationSpinBox,6,3);           //!< SpinBox for Saturation selection
 
     // Shift Contrast
-    shiftContrastLayout = new QHBoxLayout();                          //!< Layout for shift Contrast
-    shiftContrastLayout->addWidget(shiftContrastLabel);             //!< Label for shift Contrast
-    shiftContrastLayout->addWidget(shiftContrastSlider);            //!< Slider for Contrast selection
-    shiftContrastLayout->addWidget(shiftContrastSpinBox);           //!< SpinBox for Contrast selection
+    //shiftContrastLayout = new QHBoxLayout();                          //!< Layout for shift Contrast
+    SliderLayout->addWidget(shiftContrastLabel,7,1);             //!< Label for shift Contrast
+    SliderLayout->addWidget(shiftContrastSlider,7,2);            //!< Slider for Contrast selection
+    SliderLayout->addWidget(shiftContrastSpinBox,7,3);           //!< SpinBox for Contrast selection
 
     // Shift Hue
-    shiftHueLayout = new QHBoxLayout();                   //!< Layout for shift Hue
-    shiftHueLayout->addWidget(shiftHueLabel);             //!< Label for shift Hue
-    shiftHueLayout->addWidget(shiftHueSlider);            //!< Slider for Hue selection
-    shiftHueLayout->addWidget(shiftHueSpinBox);           //!< SpinBox for Hue selection
+    //shiftHueLayout = new QHBoxLayout();                   //!< Layout for shift Hue
+    SliderLayout->addWidget(shiftHueLabel,8,1);             //!< Label for shift Hue
+    SliderLayout->addWidget(shiftHueSlider,8,2);            //!< Slider for Hue selection
+    SliderLayout->addWidget(shiftHueSpinBox,8,3);           //!< SpinBox for Hue selection
+
+
+    CameraSettingsGroupBox = new QGroupBox(tr("Camera Settings Sliders"));
+    CameraSettingsGroupBox->setLayout(SliderLayout);
+
+    //Auto Settings Layout:
+    AutoTickBoxLayout = new QGridLayout;
+    AutoTickBoxLayout->addWidget(AutoGainSelected,1,1);
+    AutoTickBoxLayout->addWidget(AutoWhiteBalanceSelected,2,1);
+    AutoTickBoxLayout->addWidget(AutoExposureSelected,3,1);
+    AutoCameraSettingsGroupBox = new QGroupBox(tr("Automatic Settings"));
+    AutoCameraSettingsGroupBox->setLayout(AutoTickBoxLayout);
+
+    //Select Camera:
+    SelectCameraLayout = new QGridLayout;
+    SelectCameraLayout->addWidget(TopCameraSelected,1,1);
+    SelectCameraLayout->addWidget(BottomCameraSelected,1,2);
+    SelectCameraGroupBox = new QGroupBox(tr("Select Camera"));
+    SelectCameraGroupBox->setLayout(SelectCameraLayout);
 
     robotNameInputLayout = new QHBoxLayout();
     robotNameInputLayout->addWidget(nameLabel);
@@ -221,15 +252,20 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     saveImagesButtonLayout->addWidget(StartSavingImagesWithSettingsCheckBox);
 
     overallLayout = new QVBoxLayout();                 //!< Overall widget layout.
-    overallLayout->addLayout(shiftGainLayout);
-    overallLayout->addLayout(shiftExposureLayout);
-    overallLayout->addLayout(shiftBlueChromaLayout);
-    overallLayout->addLayout(shiftRedChromaLayout);
-    overallLayout->addLayout(shiftBrightnessLayout);
-    overallLayout->addLayout(shiftSaturationLayout);
-    overallLayout->addLayout(shiftContrastLayout);
-    overallLayout->addLayout(shiftHueLayout);
+    //overallLayout->addLayout(shiftGainLayout);
+    //overallLayout->addLayout(shiftExposureLayout);
+    //overallLayout->addLayout(shiftBlueChromaLayout);
+    //overallLayout->addLayout(shiftRedChromaLayout);
+    //overallLayout->addLayout(shiftBrightnessLayout);
+    //overallLayout->addLayout(shiftSaturationLayout);
+    //overallLayout->addLayout(shiftContrastLayout);
+    //overallLayout->addLayout(shiftHueLayout);
     overallLayout->addLayout(robotNameInputLayout);
+    overallLayout->addWidget(CameraSettingsGroupBox);
+    overallLayout->addWidget(AutoCameraSettingsGroupBox);
+    overallLayout->addWidget(SelectCameraGroupBox);
+
+
     overallLayout->addLayout(pushButtonLayout);
     overallLayout->addLayout(saveImagesButtonLayout);
 
@@ -277,6 +313,18 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(shiftHueSpinBox,SIGNAL(valueChanged(int)),shiftHueSlider,SLOT(setValue(int)));
     connect(shiftHueSlider,SIGNAL(valueChanged(int)),this,SLOT(cameraSettingsChanged()));
 
+    // Setup Auto:
+    //QCheckBox* TopCameraSelected;
+    //QCheckBox* BottomCameraSelected;
+    connect(AutoGainSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+    connect(AutoWhiteBalanceSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+    connect(AutoExposureSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+
+    connect(TopCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+    connect(BottomCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+    connect(TopCameraSelected,SIGNAL(clicked()),BottomCameraSelected,SLOT(toggle()));
+    connect(BottomCameraSelected,SIGNAL(clicked()),TopCameraSelected,SLOT(toggle()));
+
     connect(nameLineEdit, SIGNAL(textChanged(QString)),this,SLOT(updateRobotName(QString)));
     connect(getCameraSettingsButton,SIGNAL(pressed()),this,SLOT(getCameraSetting()));
     connect(streamCameraSettingsButton,SIGNAL(pressed()),this,SLOT(streamCameraSetting()));
@@ -301,6 +349,26 @@ void cameraSettingsWidget::cameraSettingsChanged()
     settings->contrast = shiftContrastSlider->value();
     settings->hue = shiftHueSlider->value();
 
+    if(AutoExposureSelected->isChecked())
+        settings->autoExposure = 1;
+    else
+        settings->autoExposure = 0;
+
+    if(AutoGainSelected->isChecked())
+        settings->autoGain = 1;
+    else
+        settings->autoGain = 0;
+
+    if(AutoWhiteBalanceSelected->isChecked())
+        settings->autoWhiteBalance = 1;
+    else
+        settings->autoWhiteBalance = 0;
+
+
+    if(TopCameraSelected->isChecked())
+        settings->activeCamera = CameraSettings::TOP_CAMERA;
+    else
+        settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
 }
 
 
@@ -454,6 +522,7 @@ void cameraSettingsWidget::readPendingData()
                     shiftSaturationSlider->setValue(tempsettings.saturation);
                     shiftContrastSlider->setValue(tempsettings.contrast);
                     shiftHueSlider->setValue(tempsettings.hue);
+
                 }
             }
         }

@@ -136,6 +136,8 @@ std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSe
     output << p_cameraSetting.autoWhiteBalance << " ";
     output << p_cameraSetting.autoGain << " ";
 
+    output << p_cameraSetting.activeCamera << " ";
+
     return output;
 }
 
@@ -157,6 +159,11 @@ std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting)
     input >> p_cameraSetting.autoExposure;
     input >> p_cameraSetting.autoWhiteBalance;
     input >> p_cameraSetting.autoGain;
+
+    int tempCamera;
+    input >> tempCamera;
+    p_cameraSetting.activeCamera = CameraSettings::Camera(tempCamera);
+
 
     return input;
 }
