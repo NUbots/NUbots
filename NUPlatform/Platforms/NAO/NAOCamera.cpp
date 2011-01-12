@@ -344,6 +344,11 @@ double NAOCamera::getTimeStamp() const
   return timeStamp;
 }
 
+CameraSettings::Camera NAOCamera::getCurrentCamera()
+{
+    return m_settings.activeCamera;
+}
+
 NUImage* NAOCamera::grabNewImage()
 {
     while(!capturedNew());

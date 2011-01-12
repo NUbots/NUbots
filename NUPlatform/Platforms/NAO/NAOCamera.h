@@ -48,12 +48,12 @@ private:
     void loadCameraOffset();
 private:
   enum 
-  {
-    frameBufferCount = 20, //!< Number of available frame buffers.
-    WIDTH = 640,
-    HEIGHT = 480,
-    SIZE = WIDTH * HEIGHT * 2
-  };
+    {
+        frameBufferCount = 20, //!< Number of available frame buffers.
+        WIDTH = 640,
+        HEIGHT = 480,
+        SIZE = WIDTH * HEIGHT * 2
+    };
 
     bool applySetting(unsigned int settingID, int value);
     int readSetting(unsigned int id);
@@ -73,6 +73,8 @@ private:
     bool capturedNew();
     const unsigned char* getImage() const;
     double getTimeStamp() const;
+    CameraSettings::Camera getCurrentCamera();
+
     NUImage currentBufferedImage;
     CameraSettings m_cameraSettings[CameraSettings::NUM_CAMERAS];
 };
