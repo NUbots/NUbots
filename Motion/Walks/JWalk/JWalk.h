@@ -55,6 +55,9 @@ public:
     
     double CurrentTime;
     double PreviousTime;
+    
+    float LAnkleRGain;
+    float LAnklePGain;
 protected:
 private:
     float GaitFrequency;

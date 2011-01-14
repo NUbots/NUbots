@@ -27,6 +27,8 @@
 
 #include "JWalkState.h"
 
+class PIDController;
+
 class JWalkStance : public JWalkState
 {
 public:
@@ -35,6 +37,12 @@ public:
     void doIt();
     JWalkStance* next();
 private:
+    PIDController* m_lroll_pid;
+    PIDController* m_lpitch_pid;
+    PIDController* m_l_hiproll_pid;
+    PIDController* m_l_hippitch_pid;
+    PIDController* m_rroll_pid;
+    PIDController* m_rpitch_pid;
 };
 
 #endif
