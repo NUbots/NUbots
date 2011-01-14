@@ -58,6 +58,7 @@ private:
     bool m_saving_images;
     NUImage refImage;
     bool topcam;
+    float angleOffset;
 
 };
 

@@ -45,6 +45,7 @@ CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : Behav
     isStart = 0;
     m_saving_images = false;
     topcam = false;
+    angleOffset = 9.0;
 }
 
 
@@ -57,16 +58,18 @@ void CameraCalibrationProvider::doBehaviour()
 {   
     
     // handle the selection of motions
-    //CameraSettings settings;
-	//settings = m_camera->getSettings();
+    CameraSettings settings;
+	
     if (singleLeftBumperClick())
     {
        if (!topcam)
        // change camera and position
        {
-           m_pitch_index = 17.4*3.14/180;
+           m_pitch_index = (17.4 - angleOffset)*3.14/180;
            m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
            topcam = true;
+           //settings.activeCamera = CameraSettings::TOP_CAMERA;
+           //m_camera->setSettings(settings);
        }
        else
        // copy image
@@ -99,6 +102,9 @@ void CameraCalibrationProvider::doBehaviour()
            m_pitch_index = -27.4*3.14/180;
            m_actions->add(NUActionatorsData::Sound, m_current_time, "error1.wav");
            topcam = false;
+           
+           //settings.activeCamera = CameraSettings::BOTTOM_CAMERA;
+           //m_camera->setSettings(settings);
        }
        else
        // copy image
