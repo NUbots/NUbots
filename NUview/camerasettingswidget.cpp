@@ -320,10 +320,11 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
     connect(AutoWhiteBalanceSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
     connect(AutoExposureSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
 
-    connect(TopCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
-    connect(BottomCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
     connect(TopCameraSelected,SIGNAL(clicked()),BottomCameraSelected,SLOT(toggle()));
     connect(BottomCameraSelected,SIGNAL(clicked()),TopCameraSelected,SLOT(toggle()));
+    connect(TopCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+    connect(BottomCameraSelected,SIGNAL(clicked()),this,SLOT(cameraSettingsChanged()));
+
 
     connect(nameLineEdit, SIGNAL(textChanged(QString)),this,SLOT(updateRobotName(QString)));
     connect(getCameraSettingsButton,SIGNAL(pressed()),this,SLOT(getCameraSetting()));
@@ -369,6 +370,11 @@ void cameraSettingsWidget::cameraSettingsChanged()
         settings->activeCamera = CameraSettings::TOP_CAMERA;
     else
         settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
+
+    if(BottomCameraSelected->isChecked())
+        settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
+    else
+        settings->activeCamera = CameraSettings::TOP_CAMERA;
 }
 
 
@@ -382,7 +388,7 @@ void cameraSettingsWidget::updateRobotName(const QString name)
         stopStreamCameraSetting();
     }
     robotName = name;
-    //nuio->;
+
 }
 void cameraSettingsWidget::getCameraSetting()
 {
@@ -402,6 +408,8 @@ void cameraSettingsWidget::connectToRobot()
 
     }
     */
+    std::string ipaddress = robotName.toStdString();
+    nuio->setJobPortTargetAddress(ipaddress);
     sendDataToRobot();
 }
 
@@ -456,7 +464,7 @@ void cameraSettingsWidget::sendSettingsToRobot()
 {
 
 
-    //qDebug() << "Settings: " << settings->gain << ","<<settings->exposure;
+    qDebug() << "Camera Settings: Send " << settings->gain << ","<<settings->exposure;
 
     ChangeCameraSettingsJob* camerajob = new ChangeCameraSettingsJob(*settings);
 
@@ -468,6 +476,8 @@ void cameraSettingsWidget::sendSettingsToRobot()
     (*nuio) << m_job_list;
 
     m_job_list->clear();
+
+    qDebug() << "Camera Settings: Sent " ;
 
 }
 
@@ -501,7 +511,7 @@ void cameraSettingsWidget::readPendingData()
         static list<Job*>::iterator it;     // the iterator over the motion jobs
         for (it = Blackboard->Jobs->camera_begin(); it !=Blackboard->Jobs->camera_end(); ++it)
         {
-           // debug  << "Vision::Process - Processing Job" << endl;
+            qDebug()  << "CameraSettings - Processing Recieved Job" << endl;
             if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
             {   // process a walk speed job
                 //CameraSettings settings;
@@ -509,7 +519,7 @@ void cameraSettingsWidget::readPendingData()
                 job = (ChangeCameraSettingsJob*) (*it);
 
                 CameraSettings tempsettings = job->getSettings();
-                if(tempsettings.exposure > 0 && tempsettings.exposure != settings->exposure)
+                if(tempsettings.exposure > -1)
                 {
                     stopStreamCameraSetting();
                     //*settings = tempsettings;
@@ -523,6 +533,34 @@ void cameraSettingsWidget::readPendingData()
                     shiftContrastSlider->setValue(tempsettings.contrast);
                     shiftHueSlider->setValue(tempsettings.hue);
 
+
+                    if(tempsettings.autoExposure == 1)
+                       AutoExposureSelected->setChecked(true);
+                    else
+                       AutoExposureSelected->setChecked(false);
+
+                    if(tempsettings.autoGain == 1)
+                        AutoGainSelected->setChecked(true);
+                    else
+                        AutoGainSelected->setChecked(false);
+
+                    if(tempsettings.autoWhiteBalance == 1)
+                        AutoWhiteBalanceSelected->setChecked(true);
+                    else
+                        AutoWhiteBalanceSelected->setChecked(false);
+
+
+                    if(tempsettings.activeCamera == CameraSettings::TOP_CAMERA)
+                    {
+                        TopCameraSelected->setChecked(true);
+                        BottomCameraSelected->setChecked(false);
+                    }
+                    else
+                    {
+                        TopCameraSelected->setChecked(false);
+                        BottomCameraSelected->setChecked(true);
+                    }
+                    qDebug()  << "CameraSettings - Processed" << endl;
                 }
             }
         }
@@ -547,7 +585,6 @@ void cameraSettingsWidget::stopStreamCameraSetting()
     timer.stop();
     dostream = false;
     readPacketTimer.stop();
-
 }
 
 

@@ -29,7 +29,7 @@
 /*! @brief Constructs a JobPort
     @param nubotjobs the public nubot job list
  */
-JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT)
+JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT, true)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
         debug << "JobPort::JobPort(" << nubotjobs << ")" << endl;
