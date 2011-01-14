@@ -32,6 +32,11 @@ class NUActionators;
 class NUActionatorsData;
 class NUCamera;
 
+class JobList;
+class NUIO;
+
+#include "NUPlatform/NUCamera/CameraSettings.h"
+
 #include <ctime>
 #include <string>
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
@@ -72,6 +77,8 @@ public:
     void updateImage();
     void updateSensors();
     void processActions();
+    void process(JobList* jobs, NUIO* m_io);
+    
     
     void kill();
 protected:

@@ -41,7 +41,7 @@
 class UdpPort : public Thread
 {
 public:
-    UdpPort(std::string name, int portnumber, bool ignoreself = false);
+    UdpPort(std::string name, int portnumber, bool ignoreself = true);
     virtual ~UdpPort();
 protected:
     void sendData(const std::stringstream& stream);

@@ -156,7 +156,10 @@ void SeeThinkThread::run()
             #endif
             
             #ifdef USE_VISION
-            m_nubot->m_vision->process(Blackboard->Jobs, m_nubot->m_platform->m_camera, m_nubot->m_io) ; //<! Networking for Vision
+
+            m_nubot->m_vision->process(Blackboard->Jobs) ; //<! Networking for Vision
+            m_nubot->m_platform->process(Blackboard->Jobs, m_nubot->m_io); //<! Networking for Platform
+
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif
