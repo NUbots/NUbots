@@ -478,6 +478,8 @@ void NUSensors::calculateKinematics()
     {
         rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
         m_data->set(NUSensorsData::RLegTransform, time, rightLegTransform.asVector());
+        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::EndPositionXId, time, Kinematics::PositionFromTransform(rightLegTransform));
+        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::EndPositionRollId, time, Kinematics::OrientationFromTransform(rightLegTransform));
     }
     else
     {
@@ -487,6 +489,8 @@ void NUSensors::calculateKinematics()
     {
         leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
         m_data->set(NUSensorsData::LLegTransform, time, leftLegTransform.asVector());
+        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::EndPositionXId, time, Kinematics::PositionFromTransform(leftLegTransform));
+        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::EndPositionRollId, time, Kinematics::OrientationFromTransform(leftLegTransform));
     }
     else
     {
