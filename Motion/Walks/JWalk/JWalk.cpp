@@ -1,5 +1,5 @@
 /*! @file JWalk.cpp
-    @brief Implementation of jwalk class
+    @brief Implementation of the JWalk
 
     @author Jason Kulk
  
@@ -40,15 +40,16 @@ JWalk::JWalk() : NUWalk(Blackboard->Sensors, Blackboard->Actions)
 {
     JWalkBlackboard = this;
     m_walk_parameters.load("JWalkStart");
-    // a hack for hasty pid controller tuning
-    vector<Parameter>& p = m_walk_parameters.getParameters();
-    cout << p.size() << endl;
-    LAnkleRGain = p[0].get();
-    LAnklePGain = p[1].get();
-    cout << LAnkleRGain << " " << LAnklePGain << endl;
     
-    GaitPhase = 0;
-    GaitFrequency = 0.6;
+    WalkForwardSpeed = 0;
+    WalkSidewardSpeed = 0;
+    WalkTurnSpeed = 0;
+    WalkFrequency = 0.6;			// a constant for now
+    
+    Parameters = &m_walk_parameters;
+    
+    LArmEnabled = false;
+    RArmEnabled = false;
     
     LeftStance = new JWalkStance(NUData::LLeg);
     LeftPush = new JWalkPush(NUData::LLeg);
@@ -60,6 +61,7 @@ JWalk::JWalk() : NUWalk(Blackboard->Sensors, Blackboard->Actions)
     RightSwing = new JWalkSwing(NUData::RLeg);
     RightAccept = new JWalkAccept(NUData::RLeg);
     
+    GaitPhase = 0;
     LeftState = LeftStance;
     RightState = RightStance;
     
@@ -95,13 +97,18 @@ JWalk::~JWalk()
 void JWalk::doWalk()
 {
     CurrentTime = Blackboard->Sensors->CurrentTime;
+
+    updateJWalkBlackboard();
     calculateGaitPhase();
     
-    LeftState = LeftState->next();
-    RightState = RightState->next();
+    JWalkState* next_l, *next_r;		// to avoid the problem of having one state change before the other
+    next_l = LeftState->next();			// has decided which state is next, we copy the result of next()
+    next_r = RightState->next();		// into a buffer, and set both at the same time
+	LeftState = next_l;
+    RightState = next_r;
     
     #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "JWalk::doWalk(). CurrentTime: " << CurrentTime << " Phase: " << GaitPhase << " Left: " << LeftState->Name << " Right: " << RightState->Name << endl;
+        debug << "JWalk::doWalk(). CurrentTime: " << CurrentTime << " Phase: " << GaitPhase << " Left: " << LeftState->getName() << " Right: " << RightState->getName() << endl;
     #endif
     
     LeftState->doIt();
@@ -110,14 +117,34 @@ void JWalk::doWalk()
     PreviousTime = CurrentTime;
 }
 
+/*! @brief Updates parts of the JWalkBlackboard that are copies of data stored elsewhere.
+           In particular, it copies things from the NUWalk and WalkParameters.
+ */
+void JWalk::updateJWalkBlackboard()
+{
+    WalkForwardSpeed = m_speed_x;
+    WalkSidewardSpeed = m_speed_y;
+    WalkTurnSpeed = m_speed_yaw;
+    
+    // m_walk_parameters (will copy all of the parameters into there local copies)
+    WalkFrequency = 0.6;			// a constant for now
+    
+    LArmEnabled = m_larm_enabled;
+    RArmEnabled = m_rarm_enabled;
+}
+
+/*! @brief Calculates the GaitPhase. The GaitPhase is not incremented while we are just standing still wanting for non-zero speed
+ 	       The GaitPhase and LeftState/RightState are automatically reset if there is a long gap,
+           ie control of the robot has been taken away from the walk.
+ */
 void JWalk::calculateGaitPhase()
 {
     double dt = (CurrentTime - PreviousTime)/1000;
     if (dt < 0.2)
     {
-        if (m_target_speed_x != 0 or m_target_speed_y != 0 or m_target_speed_yaw != 0)
-        {	// only progress the GaitPhase if we have a non-zero speed
-            GaitPhase += dt*GaitFrequency;
+        if (not (m_target_speed_x == 0 and m_target_speed_y == 0 and m_target_speed_yaw == 0 and LeftState == LeftStance and RightState == RightStance))
+        {	// only progress the GaitPhase when the speed is non-zero and we are not just standing still
+            GaitPhase += dt*WalkFrequency;
             if (GaitPhase >= 1)
                 GaitPhase--;
         }

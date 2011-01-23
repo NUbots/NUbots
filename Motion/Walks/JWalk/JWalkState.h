@@ -36,16 +36,30 @@ using namespace std;
 class JWalkState
 {
 public:
-    JWalkState(const string& name, const NUData::id_t& leg) 
-    {
-        Name = name;
-        Leg = leg;
-    };
+    JWalkState(const string& name, const NUData::id_t& leg);
     virtual ~JWalkState() {};
     virtual void doIt() = 0;
     virtual JWalkState* next() = 0;
-    string Name;
-    NUData::id_t Leg;
+    
+    string& getName();
+protected:
+    string m_name;
+    NUData::id_t m_leg;
+    NUData::id_t m_other_leg;
+    
+    // Note. I've chosen to go with pointers to pointers so I can do everything in the constructor,
+    // and i don't need to keep updating m_state and m_other_state this way.
+    JWalkState** m_state;			//!< the current state of this side
+    JWalkState** m_stance;			//!< the stance state of this side
+    JWalkState** m_push;			//!< the push state of this side
+    JWalkState** m_swing;			//!< the swing state of this side
+    JWalkState** m_accept;			//!< the accept state of this side
+    
+    JWalkState** m_other_state;		//!< the current state of the other side
+    JWalkState** m_other_stance;	//!< the stance state of the other side
+    JWalkState** m_other_push;		//!< the push state of the other side
+    JWalkState** m_other_swing;		//!< the swing state of the other side
+    JWalkState** m_other_accept;	//!< the accept state of the other side
 };
 
 #endif

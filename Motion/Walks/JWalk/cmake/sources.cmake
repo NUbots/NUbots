@@ -21,7 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  JWalk.cpp JWalk.h
-				JWalkState.h
+				JWalkState.h JWalkState.cpp
                 JWalkStance.h JWalkStance.cpp
                 JWalkPush.h JWalkPush.cpp
                 JWalkSwing.h JWalkSwing.cpp
