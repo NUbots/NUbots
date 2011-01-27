@@ -1077,10 +1077,10 @@ int NUSensorsData::size() const
  */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
 {    
-    output << p_data.m_common_ids;
-    output << p_data.m_ids_copy;
-    output << p_data.m_id_to_indices;
-    output << p_data.m_available_ids;
+    output << p_data.m_common_ids << endl;
+    output << p_data.m_ids_copy << endl;
+    output << p_data.m_id_to_indices << endl;
+    output << p_data.m_available_ids << endl;
     output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
         output << p_data.m_sensors[i];
