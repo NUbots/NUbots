@@ -28,6 +28,31 @@
 #include "debugverbositynuactionators.h"
 #include "debugverbositynusensors.h"
 
+/*! @brief Streaming operator for id_t* objects. Copies the object at the pointer location.
+    @param output The output stream on which to write.
+    @param id The object to be written to the stream.
+    @return The output stream with the object written to it.
+ */
+ostream& operator << (ostream& output, const NUData::id_t* id)
+{
+    output << id->Id << " ";
+    output << id->Name << " ";
+    return output;
+}
+
+/*! @brief Streaming operator for id_t* objects. Reads the object to a new object.
+    @param input The input stream containing the data.
+    @param id The pointer where the new object will be written.
+    @return The input stream post read.
+ */
+istream& operator >> (istream& input, NUData::id_t* id)
+{
+    id = new NUData::id_t();
+    input >> id->Id;
+    input >> id->Name;
+    return input;
+}
+
 int curr_id = 0;
 vector<NUData::id_t*> NUData::m_common_ids;
 const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);							//0
