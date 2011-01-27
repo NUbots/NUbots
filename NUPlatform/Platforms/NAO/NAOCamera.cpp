@@ -354,6 +354,7 @@ NUImage* NAOCamera::grabNewImage()
     while(!capturedNew());
     currentBufferedImage.MapYUV422BufferToImage(getImage(), WIDTH, HEIGHT);
     currentBufferedImage.m_timestamp = getTimeStamp();
+    currentBufferedImage.setCameraSettings(m_settings);
     return &currentBufferedImage;
 }
 
@@ -462,8 +463,6 @@ bool NAOCamera::applySetting(unsigned int id, int value)
     value = queryctrl.minimum;
   if(value > queryctrl.maximum)
     value = queryctrl.maximum;
-  if(value < 0)
-    value = queryctrl.default_value;  
 
   struct v4l2_control control_s;
   control_s.id = id;
