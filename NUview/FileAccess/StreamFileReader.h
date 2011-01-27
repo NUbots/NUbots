@@ -186,13 +186,14 @@ private:
             m_index.clear();
             m_timeIndex.clear();
             temp.frameSequenceNumber = 0;
+            bool eofReached = false;
             while (m_file.good() && (m_file.tellg() < m_fileEndLocation))
             {
                 int pos = m_file.tellg();
                 temp.position = m_file.tellg();
                 try{
                     m_file >> (*m_dataBuffer);
-                }   catch(...){qDebug("Bad frame found"); CloseFile(); return;}
+                }   catch(...){qDebug("Bad frame found"); eofReached = true;}
                 // File Cursor Has Not Moved
                 if(pos == m_file.tellg())
                 {
@@ -200,6 +201,7 @@ private:
                     CloseFile();
                     return;
                 }
+                if(eofReached) break;
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
                 timestamp = floor(timestamp);
                 if(HasTime(timestamp)) continue;
