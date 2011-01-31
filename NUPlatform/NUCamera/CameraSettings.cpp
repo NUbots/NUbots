@@ -53,7 +53,7 @@ void CameraSettings::SetDefaults()
     autoGain = 0;
 
     // Extra
-    activeCamera = 1;
+    activeCamera = BOTTOM_CAMERA;
 
     return;
 }
@@ -80,7 +80,7 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 
     // Hue
     if(configParser.HasKey("Hue"))
-        saturation = configParser.GetAsInt("Hue");
+        hue = configParser.GetAsInt("Hue");
 
     // RedChroma
     if(configParser.HasKey("RedChroma"))
@@ -112,7 +112,7 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 
     // ActiveCamera
     if(configParser.HasKey("ActiveCamera"))
-        activeCamera = configParser.GetAsInt("ActiveCamera");
+        activeCamera = Camera(configParser.GetAsInt("ActiveCamera"));
 
     return;
 }
@@ -136,6 +136,8 @@ std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSe
     output << p_cameraSetting.autoWhiteBalance << " ";
     output << p_cameraSetting.autoGain << " ";
 
+    output << p_cameraSetting.activeCamera << " ";
+
     return output;
 }
 
@@ -157,6 +159,11 @@ std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting)
     input >> p_cameraSetting.autoExposure;
     input >> p_cameraSetting.autoWhiteBalance;
     input >> p_cameraSetting.autoGain;
+
+    int tempCamera;
+    input >> tempCamera;
+    p_cameraSetting.activeCamera = CameraSettings::Camera(tempCamera);
+
 
     return input;
 }

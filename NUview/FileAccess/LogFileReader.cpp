@@ -25,6 +25,7 @@ int LogFileReader::openFile(QString fileName)
     QFileInfo fileInfo(fileName);
     if(fileName.isEmpty()) return 0;
     QString ext = fileInfo.suffix().toLower();
+    int availableFrames = 0;
     try{
         if(ext == "nif")
         {
@@ -56,13 +57,14 @@ int LogFileReader::openFile(QString fileName)
             connect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
             connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
+            availableFrames = currentFileReader->numFrames();
         }
         else
         {
             closeFile();
         }
     }
-    return currentFileReader->numFrames();
+    return availableFrames;
 }
 
 bool LogFileReader::closeFile()
@@ -86,7 +88,7 @@ bool LogFileReader::closeFile()
 
 int LogFileReader::nextFrame()
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         int curr = 0;
         try{
@@ -108,7 +110,7 @@ int LogFileReader::nextFrame()
 
 int LogFileReader::previousFrame()
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         int curr = 0;
         try{
@@ -127,7 +129,7 @@ int LogFileReader::previousFrame()
 
 int LogFileReader::firstFrame()
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         int curr = 0;
         try{
@@ -147,7 +149,7 @@ int LogFileReader::firstFrame()
 
 int LogFileReader::lastFrame()
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         int curr = 0;
         try{
@@ -166,7 +168,7 @@ int LogFileReader::lastFrame()
 
 int LogFileReader::setFrame(int frameNumber)
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         int curr = 0;
         try{
@@ -185,7 +187,7 @@ int LogFileReader::setFrame(int frameNumber)
 
 void LogFileReader::emitControlAvailability()
 {
-    if(currentFileReader)
+    if(currentFileReader && currentFileReader->fileGood())
     {
         emit nextFrameAvailable(currentFileReader->isNextFrameAvailable());
         emit previousFrameAvailable(currentFileReader->isPreviousFrameAvailable());

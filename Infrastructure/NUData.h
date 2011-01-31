@@ -76,8 +76,10 @@ public:
         {
             return Id > other.Id;
         }
+        friend ostream& operator <<(ostream& output, const id_t* id);
+        friend istream& operator >>(istream& input, id_t* id);
     };
-    
+        
     // Common aliases
     const static id_t All;							//!< alias for 'all', can be used in a number of ways for getting all sensors or actionators in a group
     const static id_t Head;							//!< alias for 'head', can be used to get sensors or actionators in the head

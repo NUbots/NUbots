@@ -44,12 +44,8 @@ public:
     };
     virtual ~SearchForObject() {};
     virtual BehaviourState* nextState() = 0;
-    virtual void doState()
-    {
-        m_jobs->addMotionJob(new WalkJob(0,0,0.3));
-        m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Localisation, 0.3));
-	//m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation, 40, 90000, -0.8, 0.8));
-    };
+    virtual void doState() = 0;
+    
 protected:
     bool isTargetVisible()
     {

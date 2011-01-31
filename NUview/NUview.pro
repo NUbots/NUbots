@@ -152,7 +152,9 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Rectangle.h \
     ../NUPlatform/NUCamera.h \
     ../Vision/fitellipsethroughcircle.h \
-    ../Localisation/LocWmFrame.h
+    ../Localisation/LocWmFrame.h \
+    FileAccess/IndexedFileReader.h \
+    LUTGlDisplay.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -252,6 +254,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
     ../Vision/fitellipsethroughcircle.cpp \
-    ../Localisation/LocWmFrame.cpp
+    ../Localisation/LocWmFrame.cpp \
+    FileAccess/IndexedFileReader.cpp \
+    LUTGlDisplay.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

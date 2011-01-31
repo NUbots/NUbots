@@ -17,6 +17,20 @@ public:
     int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;};
     int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;};
 
+    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();};
+    const NUImage* GetRawImage(){return currentFileReader->GetImageData();};
+    const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();};
+
+    bool nextFrameAvailable()
+    {
+        return currentFrame() < numFrames();
+    }
+
+    bool previousFrameAvailable()
+    {
+        return currentFrame() > 0;
+    }
+
 signals:
     // Signals to trigger available controls
     void nextFrameAvailable(bool);

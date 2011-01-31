@@ -25,6 +25,8 @@ class QSignalMapper;
 class QToolButton;
 class QLineEdit;
 class QTcpSocket;
+class QGridLayout;
+class QGroupBox;
 
 class CameraSettings;
 class JobList;
@@ -106,11 +108,25 @@ private:
     QSlider* shiftHueSlider;              //!< Slider for Hue selection
     QSpinBox* shiftHueSpinBox;            //!< SpinBox for Hue selection
 
+    // Auto Settings
+    QGridLayout* AutoTickBoxLayout;
+    QGroupBox* AutoCameraSettingsGroupBox;
+
+    QLabel* ActiveCamera;                   //!< Label for Camera
+    QCheckBox* TopCameraSelected;
+    QCheckBox* BottomCameraSelected;
+    QCheckBox* AutoGainSelected;
+    QCheckBox* AutoWhiteBalanceSelected;
+    QCheckBox* AutoExposureSelected;
+
     QPushButton* getCameraSettingsButton;
     QPushButton* streamCameraSettingsButton;
     QPushButton* stopStreamCameraSettingsButton;
 
-
+    QGroupBox* CameraSettingsGroupBox;
+    QGridLayout* SelectCameraLayout;
+    QGroupBox* SelectCameraGroupBox;
+    QGridLayout* SliderLayout;
     QHBoxLayout* robotNameInputLayout;
     QHBoxLayout* pushButtonLayout;
     QHBoxLayout* saveImagesButtonLayout;
