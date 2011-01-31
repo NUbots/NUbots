@@ -52,7 +52,9 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
     r1 = circ.radius;
     float reldistance = sqrt(relativeCentrePoint.x * relativeCentrePoint.x  + relativeCentrePoint.y *relativeCentrePoint.y);
     float bearing = atan2(relativeCentrePoint.y,relativeCentrePoint.x);
-    //qDebug() << "CenterCircle through Circle: Distance: " << reldistance << "Bearing:" <<bearing << "Radius: " <<r1;
+    #if DEBUG_VISION_VERBOSITY > 6
+        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << reldistance << "cm , "<<bearing " rad. Radius: " << r1 << "."<<endl;
+    #endif
     return true;
 }
 Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision* vision)
@@ -78,7 +80,7 @@ Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision
         relativePoint.z = result[2]; //ELEVATION
 
         #if DEBUG_VISION_VERBOSITY > 6
-        debug << "\t\tELLIPISE::Calculated Distance to Point: " << relativePoint.x <<endl;
+        debug << "\t\tELLIPISEthroughCircle::Calculated Distance to Point: " << relativePoint.x <<endl;
         #endif
     }
     return relativePoint;

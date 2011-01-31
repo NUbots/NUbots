@@ -19,9 +19,13 @@
 #include "../Kinematics/Kinematics.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
-//#include <QDebug>
-//#include "debug.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 #include <ctime>
+
+#if TARGET_OS_IS_WINDOWS
+    #include <QDebug>
+#endif
 
 LineDetection::LineDetection(){
 
@@ -68,7 +72,16 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //clock_t startLineForm = clock();
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-FindFieldLines" << endl;
+    #endif
+    
     FindFieldLines(image_width,image_height);
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-FindFieldLines: Found " << fieldLines.size()<< " lines." <<endl;
+    #endif
+    
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
     //{
@@ -87,10 +100,27 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //    }
     //}
 
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-FindPenaltySpot" << endl;
+    #endif
+    
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
     //qDebug() << "Finding Corner Points:";
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-FindPenaltySpot" << endl;
+    #endif
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-FindCornerPoints" << endl;
+    #endif
+    
     FindCornerPoints(image_width,image_height);
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-FindCornerPoints: Found " << cornerPoints.size() << " corners."<< endl;
+    #endif
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
     //{
@@ -108,11 +138,27 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //clock_t startCorner = clock();
     //qDebug() << "Decode Corners:";
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-DecodeCorners" << endl;
+    #endif
+    
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
-
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-DecodeCorners" << endl;
+    #endif
     //qDebug() << "Decode Penalty Spots:";
+    
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-DecodePenaltySpot" << endl;
+    #endif
+    
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-DecodePenaltySpot" << endl;
+    #endif
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
     //end = clock();
@@ -1203,6 +1249,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
         double longestLineLength = 0.0;
 
 
+        #if TARGET_OS_IS_WINDOWS
+            qDebug()  << "Start Centre Circle Detection: " << endl;
+        #endif
+
         //Sort Lines by most Left:
         qsort(fieldLines, 0, fieldLines.size()-1);
 
@@ -1224,6 +1274,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             }
         }
         //Find Points:
+
         std::vector<LinePoint*> points;
         for(unsigned int i = 0; i < fieldLines.size(); i++)
         {
@@ -1278,7 +1329,9 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 break;
             }
         }
-
+        #if TARGET_OS_IS_WINDOWS
+            qDebug()  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
+        #endif
         if(points.size() > 5)
         {
 
@@ -1287,10 +1340,14 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             double r1 =0;
             double r2 =0;
             Vector2<float> screenPositionAngle;
-            //FitEllipseThroughCircle ellipseCircleFitter;
-            //bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
+            FitEllipseThroughCircle ellipseCircleFitter;
+            bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
 
-            if(true) //isOK  == false)
+            #if TARGET_OS_IS_WINDOWS
+                qDebug() << "Ellipse Results: "<< isOK << ellipseCircleFitter.cx <<  ellipseCircleFitter.cy << ellipseCircleFitter.r1;
+            #endif
+
+            if(isOK  == false)
             {
                 EllipseFit* e = new EllipseFit;
 
@@ -1304,11 +1361,18 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 TempDist = 0.0;
                 Vector2<float> screenPositionAngle((float)vision->CalculateBearing(cx), (float)vision->CalculateElevation(cy));
                 GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
-                //qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+                #if TARGET_OS_IS_WINDOWS
+                    qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+                #endif
             }
             else
             {
-
+                #if TARGET_OS_IS_WINDOWS
+                    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                #endif
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                #endif
             }
             //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
 
