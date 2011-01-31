@@ -1340,12 +1340,13 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             double r1 =0;
             double r2 =0;
             Vector2<float> screenPositionAngle;
-            FitEllipseThroughCircle ellipseCircleFitter;
-            bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
+            //FitEllipseThroughCircle ellipseCircleFitter;
+            //bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
+            //#if TARGET_OS_IS_WINDOWS
+            //    qDebug() << "Ellipse Results: "<< isOK << ellipseCircleFitter.cx <<  ellipseCircleFitter.cy << ellipseCircleFitter.r1;
+            //#endif
+            bool isOK = false;
 
-            #if TARGET_OS_IS_WINDOWS
-                qDebug() << "Ellipse Results: "<< isOK << ellipseCircleFitter.cx <<  ellipseCircleFitter.cy << ellipseCircleFitter.r1;
-            #endif
 
             if(isOK  == false)
             {
@@ -1367,9 +1368,9 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             }
             else
             {
-                #if TARGET_OS_IS_WINDOWS
-                    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
-                #endif
+                //#if TARGET_OS_IS_WINDOWS
+                //    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                //#endif
                 #if DEBUG_VISION_VERBOSITY > 5
                     debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
                 #endif
