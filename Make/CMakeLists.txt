@@ -16,8 +16,6 @@
 # 3. Edit project option : ccmake .
 # 4. Build it : make 
 
-
-
 ######################################################## PROJECT NAME ########################################################
 PROJECT( NUBOT )
 MESSAGE( STATUS "...:::: NUBOT ::::..." )
@@ -30,7 +28,6 @@ ELSE()
 	SET(TARGET_ROBOT $ENV{TARGET_ROBOT})
 ENDIF()
 
-SET(NUBOT_IS_EXECUTABLE OFF)
 SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 
 ########## Control Debugging of the cmake files themselves
@@ -41,9 +38,11 @@ ENDIF (DEBUG)
 
 ######################################################## The location of target specific files 
 # this is used by target specific cmake files to locate appropriate sources
+#	- we have TARGET_ROBOT which was an environment variable set of the Makefile
 #	- we have TARGET_ROBOT_NAME for a case sensitive name of the platform.
 # 	- we have target specific sources in TARGET_ROBOT_DIR
 # 	- we have target specific home environment variable in HOME_ENV_VAR
+#	- we have NUBOT_CONFIG_DIR which is the location of nubot configuration files are stored
 # 	- we have target specific location for data files NUBOT_DATA_DIR. This is the location on the actual platform that data files are placed.
 IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     SET(TARGET_ROBOT_NAME NAOWebots)
@@ -211,7 +210,7 @@ ENDIF (DEBUG)
 IF (NUBOT_IS_EXECUTABLE)
     ADD_EXECUTABLE( nubot ${NUBOT_SRCS} )
 ELSE()
-    IF (NOT ${TARGET_ROBOT} STREQUAL NAO)
+    IF (NOT ${TARGET_ROBOT} STREQUAL NAO)			## aldebaran already do this in one of their scripts, so don't do it again
         ADD_LIBRARY( nubot SHARED ${NUBOT_SRCS} )
     ENDIF (NOT ${TARGET_ROBOT} STREQUAL NAO)
 ENDIF()

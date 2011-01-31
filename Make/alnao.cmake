@@ -20,6 +20,7 @@ USE(NAOQI-PLUGINS-TOOLS)
 
 ######### Set NUBOT_IS_REMOTE so that the code is compiled into an library
 SET(NUBOT_IS_EXECUTABLE OFF)
+SET(NUBOT_IS_REMOTE OFF)
 
 ############################ CMAKE PACKAGE DIRECTORY
 SET( CMAKE_MODULE_PATH ${T001CHAIN_DIR}/cmake/modules )
