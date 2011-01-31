@@ -20,7 +20,7 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     nameLineEdit->setText("IP ADDRESS");
     connectButton = new QPushButton("Connect");
     disconnectButton = new QPushButton("Disconnect");
-    getImageButton = new QPushButton("Get an Image");
+    getImageButton = new QPushButton("Get an &Image");
     startStreamButton = new QPushButton("Start Stream");
     stopStreamButton = new QPushButton("Stop Stream");
     layout = new QVBoxLayout;

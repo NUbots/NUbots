@@ -23,6 +23,7 @@ class Localisation: public TimestampedData
 {
 	public:
         Localisation(int playerNumber = 0);
+        Localisation(const Localisation& source);
         ~Localisation();
     
         void process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo);
@@ -62,8 +63,8 @@ class Localisation: public TimestampedData
         void PrintModelStatus(int modelID);
 
         bool IsValidObject(const Object& theObject);
-	    bool amILost;                       // true if we are 'lost' in this frame
-	    int lostCount;                      // the number of consecutive frames in which we are 'lost'
+        bool amILost;                       // true if we are 'lost' in this frame
+        int lostCount;                      // the number of consecutive frames in which we are 'lost'
         float timeSinceFieldObjectSeen;     // the time since a useful field object has been seen
 
         // Model Reset Functions
@@ -93,12 +94,15 @@ class Localisation: public TimestampedData
         */
         friend std::istream& operator>> (std::istream& input, Localisation& p_loc);
 
+        Localisation& operator= (const Localisation & source);
+
+
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
-        KF tempModel;
-        KF models[c_MAX_MODELS];
+        KF m_tempModel;
+        KF m_models[c_MAX_MODELS];
     
         // local pointers to the public store
         NUSensorsData* m_sensor_data;
@@ -112,14 +116,14 @@ class Localisation: public TimestampedData
 
         double m_timestamp;
         double GetTimestamp() const {return m_timestamp;};
-        int currentFrameNumber;
-        float modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
+        int m_currentFrameNumber;
+        float m_modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
 
         // Game state memory
         bool m_previously_incapacitated;
         GameInformation::RobotState m_previous_game_state;
         
-        float odomForward, odomLeft, odomTurn;
+        float m_odomForward, m_odomLeft, m_odomTurn;
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;

@@ -7,6 +7,7 @@
 #ifndef NUIMAGE_H
 #define NUIMAGE_H
 
+#include "NUPlatform/NUCamera/CameraSettings.h"
 #include "Pixel.h"
 #include <iostream>
 #include "Tools/FileFormats/TimestampedData.h"
@@ -141,6 +142,16 @@ public:
     {
         return m_timestamp;
     }
+    
+    CameraSettings getCameraSettings() const
+    {
+        return m_currentCameraSettings;
+    }
+    
+    void setCameraSettings(CameraSettings newCameraSettings)
+    {
+        m_currentCameraSettings = newCameraSettings;
+    }
 
     /*!
       @brief gets the sub image as defined by the (x,y) of the top left corner and the
@@ -171,7 +182,7 @@ private:
     int m_imageHeight;                  //!< The current image height.
     bool m_usingInternalBuffer;         //!< The current image buffering state. True when buffered internally. false when buffered externally.
     Pixel *m_localBuffer;               //!< Pointer to the local storage buffer.
-
+    CameraSettings m_currentCameraSettings;   //!< Copy Of Current Camera Settings.
     /*!
     @brief Selects the buffering mode for the image.
     @param newCondition Select the new buffering mode. True the image is buffered internally.

@@ -20,9 +20,12 @@ public:
 
     int openFile(const QString& filename);
     bool closeFile();
-    bool fileGood(){return true;};
+    bool fileGood(){return m_fileGood;};
 
-    const NUImage* getImage();
+    const NUImage* GetImageData();
+    const NUSensorsData* GetSensorData();
+    const Localisation* GetLocalisationData();
+    const FieldObjects* GetObjectData();
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
@@ -41,15 +44,18 @@ public slots:
 
 protected:
     std::vector<QFileInfo> FindValidFiles(const QDir& directory);
+    std::vector<IndexedFileReader*> m_fileReaders;
     void setKnownDataTypes();
     StreamFileReader<NUImage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
     StreamFileReader<Localisation> locwmReader;
+    StreamFileReader<FieldObjects> objectReader;
     StreamFileReader<LocWmFrame> locmframeReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;
     QString m_primaryData;
+    bool m_fileGood;
     bool m_dataIsSynced;
 };
 

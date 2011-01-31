@@ -34,6 +34,10 @@ public:
     virtual bool isLastFrameAvailable(){return false;};
     virtual bool isSetFrameAvailable(){return false;};
 
+    virtual const Localisation* GetLocalisationData(){return NULL;};
+    virtual const NUImage* GetImageData(){return NULL;};
+    virtual const NUSensorsData* GetSensorData(){return NULL;};
+
 signals:
     void LocalisationDataChanged(const Localisation*);
     void LocalisationFrameChanged(const LocWmFrame*);
