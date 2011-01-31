@@ -25,6 +25,9 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Motion/Tools/MotionFileTools.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "NUIO.h"
 
 #ifndef CLOCK_REALTIME_FAST                             // not all distros will have the CLOCK_REALTIME_FAST, fudge it if they don't
     #define CLOCK_REALTIME_FAST CLOCK_REALTIME
@@ -365,10 +368,56 @@ void NUPlatform::processActions()
     m_actionators->process(Blackboard->Actions);
 }
 
+void NUPlatform::process(JobList* jobs, NUIO* m_io)
+{
+    static list<Job*>::iterator it;     // the iterator over the jobs
+    for (it = jobs->camera_begin(); it != jobs->camera_end();)
+    {
+        //debug  << "NUPlatform::Process - Processing Job" << endl;
+        if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
+        {   // process a camera settings job
+            CameraSettings settings;
+            static ChangeCameraSettingsJob* job;
+            job = (ChangeCameraSettingsJob*) (*it);
+            settings = job->getSettings();
+            #if DEBUG_NUPLATFORM_VERBOSITY > 4
+                debug << "NUPlatform::process(): Processing a camera job." << endl;
+            #endif
+            
+            if( settings.exposure == -1 ||
+                settings.contrast == -1 ||
+                settings.gain     == -1 )
+            {
+                #if DEBUG_NUPLATFORM_VERBOSITY > 4
+                    debug << "NUPlatform::Process - Send CAMERASETTINGS Request Recieved: " << endl;
+                #endif
+                JobList toSendList;
+                ChangeCameraSettingsJob newJob(m_camera->getSettings());
+                toSendList.addCameraJob(&newJob);
+                (*m_io) << toSendList;
+                toSendList.clear();
+            }
+            else
+            {   
+                m_camera->setSettings(settings);
+            }
+            it = jobs->removeCameraJob(it);
+        }
+        else 
+        {
+            ++it;
+        }
+
+    }
+    
+}
+
 /*! @brief Kills the NUPlatform */
 void NUPlatform::kill()
 {
     if (m_actionators)
         m_actionators->process(Blackboard->Actions);
 }
+
+
 

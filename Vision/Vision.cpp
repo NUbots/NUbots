@@ -19,7 +19,8 @@
 #include "nubotdataconfig.h"
 
 #include "Kinematics/Kinematics.h"
-#include "NUPlatform/NUCamera.h"
+#include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
@@ -60,49 +61,12 @@ Vision::~Vision()
     return;
 }
 
-void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
+void Vision::process(JobList* jobs)
 {
-    //debug  << "Vision::Process - Begin" << endl;
-    m_camera = camera;
+    #if DEBUG_VISION_VERBOSITY > 4
+        debug  << "Vision::Process - Begin" << endl;
+    #endif
     static list<Job*>::iterator it;     // the iterator over the motion jobs
-    for (it = jobs->camera_begin(); it != jobs->camera_end();)
-    {
-        //debug  << "Vision::Process - Processing Job" << endl;
-        if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
-        {   // process a walk speed job
-            CameraSettings settings;
-            static ChangeCameraSettingsJob* job;
-            job = (ChangeCameraSettingsJob*) (*it);
-            settings = job->getSettings();
-            #if DEBUG_VISION_VERBOSITY > 4
-                debug << "Vision::process(): Processing a camera job." << endl;
-            #endif
-            
-            if( settings.exposure == -1 ||
-                settings.contrast == -1 ||
-                settings.gain     == -1 )
-            {
-                #if DEBUG_VISION_VERBOSITY > 4
-                    debug << "Vision::Process - Send CAMERASETTINGS Request Recieved: " << endl;
-                #endif
-                JobList toSendList;
-                ChangeCameraSettingsJob newJob(m_camera->getSettings());
-                toSendList.addCameraJob(&newJob);
-                (*m_io) << toSendList;
-                toSendList.clear();
-            }
-            else
-            {   
-                m_camera->setSettings(settings);
-            }
-            it = jobs->removeCameraJob(it);
-        }
-        else 
-        {
-            ++it;
-        }
-
-    }
     
     for (it = jobs->vision_begin(); it != jobs->vision_end();)
     {
@@ -117,7 +81,7 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
             {
                 if(job->saving() == true)
                 {
-                    currentSettings = m_camera->getSettings();
+                    currentSettings = currentImage->getCameraSettings();
                     if (!imagefile.is_open())
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
@@ -128,7 +92,9 @@ void Vision::process(JobList* jobs, NUCamera* camera, NUIO* m_io)
                 {
                     imagefile.flush();
                     sensorfile.flush();
-                    m_camera->setSettings(currentSettings);
+
+                    ChangeCameraSettingsJob* newJob  = new ChangeCameraSettingsJob(currentSettings);
+                    jobs->addCameraJob(newJob);
                     m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
             }
@@ -589,7 +555,7 @@ void Vision::SaveAnImage()
         
         if (isSavingImagesWithVaryingSettings)
         {
-            CameraSettings tempCameraSettings = m_camera->getSettings();
+            CameraSettings tempCameraSettings = currentImage->getCameraSettings();
             if (numSavedImages % 10 == 0 )
             {
                 tempCameraSettings.exposure = currentSettings.exposure - 0;
@@ -630,7 +596,11 @@ void Vision::SaveAnImage()
             {
                 tempCameraSettings.exposure = currentSettings.exposure + 300;
             }
-            m_camera->setSettings(tempCameraSettings);
+            
+            //Set the Camera Setttings using Jobs:
+            ChangeCameraSettingsJob* newJob = new ChangeCameraSettingsJob(tempCameraSettings);
+            Blackboard->Jobs->addCameraJob(newJob);
+            //m_camera->setSettings(tempCameraSettings);
         }
     }
     #if DEBUG_VISION_VERBOSITY > 1

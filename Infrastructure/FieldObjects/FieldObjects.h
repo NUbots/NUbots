@@ -5,10 +5,12 @@
 #include "Self.h"
 #include "MobileObject.h"
 #include "AmbiguousObject.h"
+#include "Tools/FileFormats/TimestampedData.h"
 #include <vector>
 
 
-class FieldObjects{
+class FieldObjects: public TimestampedData
+{
 
 
 	public:
@@ -92,7 +94,7 @@ class FieldObjects{
 
                 NUM_AMBIGUOUS_FIELD_OBJECTS = 9
             };
-
+            double m_timestamp;
             Self self;
             vector<StationaryObject> stationaryFieldObjects;
             vector<MobileObject> mobileFieldObjects;
@@ -102,6 +104,7 @@ class FieldObjects{
     
             void preProcess(const float timestamp);
             void postProcess(const float timestamp);
+            double GetTimestamp() const{return m_timestamp;};
 
             /*!
             @brief Output streaming operation.

@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QTimer>
 #include <QMainWindow>
+#include <QTextStream>
 #include "ColorModelConversions.h"
 #include "Vision/ClassificationColours.h"
 
@@ -114,12 +115,27 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     FileButtonLayout->addWidget(openFileButton, 1);
     FileButtonLayout->addWidget(saveAsFileButton, 1);
 
+    // Selected Colour statistics:
+    StatisticsLayout = new QGridLayout;
+    for (int col = 0; col < ClassIndex::num_colours; col++)
+    {
+        ColourLabel[col] = new QLabel(tr(ClassIndex::getColourNameFromIndex(col)));
+        PercentageSelectedLabel[col] = new QLabel(tr("0 %"));
+        PixelSelectedLabelOverlapped[col] = new QLabel(tr("0 Colours"));
+        StatisticsLayout->addWidget(ColourLabel[col],col,1);
+        StatisticsLayout->addWidget(PixelSelectedLabelOverlapped[col],col,2);
+        StatisticsLayout->addWidget(PercentageSelectedLabel[col],col,3);
+    }
+    StatisticsGroupBox = new QGroupBox(tr("OverLapping Colour Statistics"));
+    StatisticsGroupBox->setLayout(StatisticsLayout);
+
     groupLayout = new QVBoxLayout;
     groupLayout->addLayout(selectedColourLayout);
     groupLayout->addLayout(colourSelectLayout);
     groupLayout->addWidget(boundaryGroupBox);
     groupLayout->addLayout(colourSpaceSelectLayout);
     groupLayout->addLayout(FileButtonLayout);
+    groupLayout->addWidget(StatisticsGroupBox);
     groupLayout->addStretch();
 
     window = new QWidget;
@@ -394,4 +410,24 @@ void ClassificationWidget::convertfromYCbCr(Pixel colour, unsigned char& chan0, 
             ColorModelConversions::fromYCbCrToRGB(colour.y, colour.cb, colour.cr, chan0, chan1, chan2);
             break;
     }
+}
+
+void ClassificationWidget::updateStatistics(float* PixelsOverLapped)
+{
+    //qDebug() << "Updating Stats:" ;
+    float total = 0;
+    for (int col = 0; col < ClassIndex::num_colours; col++)
+    {
+        total = total + PixelsOverLapped[col];
+    }
+    for (int col = 0; col < ClassIndex::num_colours; col++)
+    {
+        QString result;
+        QString pixelsOverlapped;
+        QTextStream(&result) << PixelsOverLapped[col]/total*100 << " %";
+        QTextStream(&pixelsOverlapped) << PixelsOverLapped[col] << " Colours";
+        PercentageSelectedLabel[col]->setText(result);
+        PixelSelectedLabelOverlapped[col]->setText(pixelsOverlapped);
+    }
+
 }
