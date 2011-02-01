@@ -20,7 +20,7 @@
 #endif
 
 #ifndef WIN32
-    #define DATA_DIR (std::string(std::getenv("HOME")) + std::string("/nubot/"))
+    #define DATA_DIR (std::string(getenv("HOME")) + std::string("/nubot/"))
 #endif
 
 #ifdef WIN32
