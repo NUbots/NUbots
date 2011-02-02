@@ -23,10 +23,11 @@ SET (YOUR_SRCS  BearPlatform.cpp BearPlatform.h
                 BearActionators.cpp BearActionators.h
                 BearIO.cpp BearIO.h
                 main.cpp
+                MotorConstants.h MotorConstants.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Serial
+SET (YOUR_DIRS 
 )
 ####################################################################################
 

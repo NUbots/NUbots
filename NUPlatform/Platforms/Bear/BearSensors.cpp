@@ -20,7 +20,7 @@
  */
 
 #include "BearSensors.h"
-#include "Serial/Motors.h"
+#include "../Robotis/Motors.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 #include "debug.h"

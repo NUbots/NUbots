@@ -50,6 +50,13 @@
 class DXSerialThread;
 class ConditionalThread;
 
+#include "targetconfig.h"
+#ifdef TARGET_IS_BEAR
+    #include "../Bear/MotorConstants.h"
+#else
+    #include "../Cycloid/MotorConstants.h"
+#endif
+
 #include "ftd2xx.h"
 #include <vector>
 #include <iostream>
@@ -58,19 +65,6 @@ class ConditionalThread;
 using namespace std;
  
 #define MOTORS_BAUD_RATE                  1000000
-
-#define MOTORS_NUM_MOTORS                 21
-#define MOTORS_NUM_LOWER_MOTORS           21
-#define MOTORS_NUM_UPPER_MOTORS           0
-#define MOTORS_MIN_ID                     2
-#define MOTORS_MAX_ID                     22
-
-#define MOTORS_NUM_MOTORS_PER_BLOCK       6                       // the number of motors in a bulk read_data message
-#define MOTORS_NUM_LOWER_REQUEST_BLOCKS   (MOTORS_NUM_LOWER_MOTORS+(MOTORS_NUM_MOTORS_PER_BLOCK-1))/MOTORS_NUM_MOTORS_PER_BLOCK        // the number of bulk read_data messages required to poll all of the motors in the lower body
-#define MOTORS_NUM_UPPER_REQUEST_BLOCKS   (MOTORS_NUM_UPPER_MOTORS+(MOTORS_NUM_MOTORS_PER_BLOCK-1))/MOTORS_NUM_MOTORS_PER_BLOCK
-
-#define MOTORS_UPPER_BODY                 0
-#define MOTORS_LOWER_BODY                 1
 
 #define MOTORS_NUM_CONTROLS               1+4            // the number of bytes used to control the motors (this includes the write address(es))
 #define MOTORS_NUM_PUNCHES                1+2            // the number of bytes used to change the 'punch' of the motors (this includes the write address)
@@ -150,19 +144,19 @@ class Motors
       bool findHeader(unsigned char readdata[], unsigned short numbytes, unsigned short* index);
    
    public:
-      static unsigned char MotorIDToLowerBody[];
-      static unsigned char LowerBodyIndexToMotorID[];
-      static unsigned char UpperBodyIndexToMotorID[];
-      static unsigned char IndexToMotorID[];
-      static unsigned char MotorIDToIndex[];  
+      static unsigned char* MotorIDToLowerBody;
+      static unsigned char* LowerBodyIndexToMotorID;
+      static unsigned char* UpperBodyIndexToMotorID;
+      static unsigned char* IndexToMotorID;
+      static unsigned char* MotorIDToIndex;  
       
-      static char MotorSigns[];
-      static unsigned short DefaultPositions[];
-      static unsigned short DefaultSpeeds[];
+      static char* MotorSigns;
+      static unsigned short* DefaultPositions;
+      static unsigned short* DefaultSpeeds;
    
-      static unsigned char DefaultSlopes[];
-      static unsigned char DefaultMargins[];
-      static unsigned short DefaultPunches[];
+      static unsigned char* DefaultSlopes;
+      static unsigned char* DefaultMargins;
+      static unsigned short* DefaultPunches;
    
    private:
       FT_HANDLE upperHandle;              // handle of the d2xx channel for the upper body (device 1)

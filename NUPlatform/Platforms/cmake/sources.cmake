@@ -26,8 +26,15 @@ SET (YOUR_SRCS
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 )
+
 IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     LIST(APPEND YOUR_DIRS Webots)
+ENDIF()
+IF(${TARGET_ROBOT} STREQUAL BEAR)
+    LIST(APPEND YOUR_DIRS Robotis)
+ENDIF()
+IF(${TARGET_ROBOT} STREQUAL CYCLOID)
+    LIST(APPEND YOUR_DIRS Robotis)
 ENDIF()
 ####################################################################################
 

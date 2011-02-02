@@ -23,8 +23,7 @@
 #include "BearCamera.h"
 #include "BearSensors.h"
 #include "BearActionators.h"
-#include "Serial/Motors.h"
-#include "BearSystem.h"
+#include "../Robotis/Motors.h"
 
 #include "debug.h"
 #include "debugverbositynuplatform.h"

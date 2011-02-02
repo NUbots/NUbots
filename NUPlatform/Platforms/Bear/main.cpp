@@ -1,6 +1,6 @@
 #include "NUbot.h"
 
-#include "Serial/Motors.h"
+#include "../Robotis/Motors.h"
 #include "NUbot/SenseMoveThread.h"
 
 #include "debug.h"

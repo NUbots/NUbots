@@ -27,22 +27,20 @@
 #include "debug.h"
 #include "debugverbositynuplatform.h"
 
-unsigned char Motors::MotorIDToLowerBody[MOTORS_MAX_ID+1] = {MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY, MOTORS_LOWER_BODY};
-unsigned char Motors::IndexToMotorID[MOTORS_NUM_MOTORS] = {22, 21, 20, 6, 4, 8, 7, 5, 9, 3, 2, 12, 10, 14, 18, 16, 13, 11, 15, 19, 17};
-unsigned char Motors::MotorIDToIndex[MOTORS_MAX_ID+1] = {-1, -1, 10, 9, 4, 7, 3, 6, 5, 8, 12, 17, 11, 16, 13, 18, 15, 20, 14, 19, 2, 1, 0};
-unsigned char Motors::LowerBodyIndexToMotorID[MOTORS_NUM_LOWER_MOTORS] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
-unsigned char Motors::UpperBodyIndexToMotorID[MOTORS_NUM_UPPER_MOTORS] = {};
+unsigned char* Motors::MotorIDToLowerBody = MotorConstants::e_MotorIDToLowerBody;
+unsigned char* Motors::IndexToMotorID = MotorConstants::e_IndexToMotorID;
+unsigned char* Motors::MotorIDToIndex = MotorConstants::e_MotorIDToIndex;
+unsigned char* Motors::LowerBodyIndexToMotorID = MotorConstants::e_LowerBodyIndexToMotorID;
+unsigned char* Motors::UpperBodyIndexToMotorID = MotorConstants::e_UpperBodyIndexToMotorID;
 
-//                                                               HP    HY    NP   LSR   LSP   LEP   RSR   RSP   REP    TR    TY   LHR   LHP    LK   LAR   LAP   RHR   RHP    RK   RAR   RAP
-//                                                                0    1     2     3     4     5     6     7     8    9     10    11    12    13    14    15    16    17    18    19    20  
-char Motors::MotorSigns[MOTORS_NUM_MOTORS] =                   { -1,    1,    1,   -1,    1,    1,   -1,   -1,   -1,   -1,    1,   -1,    1,    1,    1,    1,   -1,   -1,   -1,    1,   -1}; 
-unsigned short Motors::DefaultPositions[MOTORS_NUM_MOTORS] =   {499,  481,  374,  709,  526,  612,  318,  500,  412,  525,  528,  657,  372,  531,  773,  508,  563,  642,  514,  500,  519}; 
-unsigned short Motors::DefaultSpeeds[MOTORS_NUM_MOTORS] =      {100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100,  100}; 
-// Compliance Settings. Remember the slope has to be a power of 2, and cannot be changed online without producing jerk
-unsigned char Motors::DefaultSlopes[MOTORS_NUM_MOTORS] =       {006,  006,  005,  005,  004,  006,  005,  004,  006,  006,  006,  005,  005,  006,  007,  006,  005,  005,  006,  007,  006}; 
-//unsigned char Motors::DefaultSlopes[MOTORS_NUM_MOTORS] =       {004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004,  004}; 
-unsigned char Motors::DefaultMargins[MOTORS_NUM_MOTORS] =      {000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000}; 
-unsigned short Motors::DefaultPunches[MOTORS_NUM_MOTORS] =     {000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000,  000}; 
+ 
+char* Motors::MotorSigns = MotorConstants::e_MotorSigns;
+unsigned short* Motors::DefaultPositions = MotorConstants::e_DefaultPositions;
+unsigned short* Motors::DefaultSpeeds = MotorConstants::e_DefaultSpeeds;
+
+unsigned char* Motors::DefaultSlopes = MotorConstants::e_DefaultSlopes;
+unsigned char* Motors::DefaultMargins = MotorConstants::e_DefaultMargins;
+unsigned short* Motors::DefaultPunches = MotorConstants::e_DefaultPunches;
 
 // externally available feedback arrays
 long double JointTime = 0.0;

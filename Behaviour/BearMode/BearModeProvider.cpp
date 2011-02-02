@@ -21,8 +21,8 @@
 
 #include "BearModeProvider.h"
 
-#include "Behaviour/Jobs/JobList.h"
-#include "Behaviour/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
