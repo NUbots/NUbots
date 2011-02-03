@@ -45,8 +45,8 @@ static string temp_distance_names[] = {string("US/TopLeft"), string("US/BottomLe
 vector<string> NAOWebotsSensors::m_distance_names(temp_distance_names, temp_distance_names + sizeof(temp_distance_names)/sizeof(*temp_distance_names));
 
 // init m_foot_names:
-static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBL"), string("LFsrBR"), \
-                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBL"), string("RFsrBR")};
+static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBR"), string("LFsrBL"), \
+                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBR"), string("RFsrBL")};
 vector<string> NAOWebotsSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
 
 // init m_button_names:

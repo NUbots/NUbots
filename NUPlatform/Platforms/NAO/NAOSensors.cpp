@@ -57,8 +57,8 @@ vector<string> NAOSensors::m_gyro_names(temp_gyro_names, temp_gyro_names + sizeo
 static string temp_orientation_names[] = {ANGLE_X, ANGLE_Y};
 vector<string> NAOSensors::m_orientation_names(temp_orientation_names, temp_orientation_names + sizeof(temp_orientation_names)/sizeof(*temp_orientation_names));
 
-static string temp_foot_left_sole_names[] = {L_FSR_FL, L_FSR_FR, L_FSR_BL, L_FSR_BR};
-static string temp_foot_right_sole_names[] = {R_FSR_FL, R_FSR_FR, R_FSR_BL, R_FSR_BR};
+static string temp_foot_left_sole_names[] = {L_FSR_FL, L_FSR_FR, L_FSR_BR, L_FSR_BL};
+static string temp_foot_right_sole_names[] = {R_FSR_FL, R_FSR_FR, R_FSR_BR, R_FSR_BL};
 vector<string> NAOSensors::m_foot_left_sole_names(temp_foot_left_sole_names, temp_foot_left_sole_names + sizeof(temp_foot_left_sole_names)/sizeof(*temp_foot_left_sole_names));
 vector<string> NAOSensors::m_foot_right_sole_names(temp_foot_right_sole_names, temp_foot_right_sole_names + sizeof(temp_foot_right_sole_names)/sizeof(*temp_foot_right_sole_names));
 

@@ -334,16 +334,6 @@ bool NUSensorsData::getSupport(const id_t& id, bool& data)
     return successful;
 }
 
-/*! @brief Gets the impact time for the end effector
-    @param id the id of the end effector
-    @param data will be updated with impact time (timestamp in ms)
-    @return true if valid, false if invalid
- */
-bool NUSensorsData::getImpact(const id_t& id, float& data)
-{
-    return getEndEffectorData(id, ImpactId, data);
-}
-
 /*! @brief Gets the centre of pressure for the end effector
     @param id the id of the end effector
     @param data will be updated with centre of presssure [x(cm), y(cm)]
@@ -790,7 +780,7 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
-            if (static_cast<unsigned>(in) < vectorBuffer.size())
+            if (static_cast<size_t>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
                 data = numeric_limits<float>::quiet_NaN();

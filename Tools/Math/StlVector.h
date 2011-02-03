@@ -105,7 +105,8 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
     while (wholematrix.good())
     {
         wholematrix >> buffer;
-        v.push_back(buffer);
+        if (buffer.size() > 0)
+            v.push_back(buffer);
     }
     return input;
 }

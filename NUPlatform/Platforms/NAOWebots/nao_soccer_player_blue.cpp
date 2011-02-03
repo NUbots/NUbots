@@ -37,7 +37,7 @@ int main(int argc, const char *argv[])
     time(&timenow);
     struct tm* timeinfo = localtime(&timenow);
     char buffer[80];
-    strftime(buffer, 80, "%H%M%S %Y%m%d", timeinfo);
+    strftime(buffer, 80, "%Y%m%d %H%M%S ", timeinfo);
     
     filename_prefix << buffer << " " << setfill('0') << setw(2) << getLogNumber(argc, argv);
     filename_postfix << ".log";
