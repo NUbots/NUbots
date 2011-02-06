@@ -1,14 +1,12 @@
-/*! @file CycloidSystem.h
-    @brief Declaration of Cycloid system class
+/*! @file CycloidIO.h
+    @brief Declaration of CycloidIO class.
+ 
+    @class CycloidIO
+    @brief CycloidIO class for input and output to streams, files and networks on the Bear platform
 
     @author Jason Kulk
  
-    @class CycloidSystem
-    @brief Cycloid system class
- 
-    @author Jason Kulk
- 
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,16 +22,22 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CycloidSYSTEM_H
-#define CycloidSYSTEM_H
+#ifndef CYCLOIDIO_H
+#define CYCLOIDIO_H
 
-#include "NUPlatform/NUSystem.h"
+#include "NUPlatform/NUIO.h"
 
-class CycloidSystem : public NUSystem
+class NUbot;
+
+class CycloidIO: public NUIO
 {
+// Functions:
 public:
-    CycloidSystem();
-    ~CycloidSystem();
+    CycloidIO(NUbot* nubot);
+    ~CycloidIO();
+    
+protected:
+private:
 };
 
 #endif

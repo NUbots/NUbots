@@ -34,6 +34,7 @@
 #include "PassingChallenge/PassingChallengeProvider.h"
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
+#include "MiscBehaviours/ForwardWalkProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
 
 #ifdef TARGET_IS_BEAR
@@ -50,6 +51,8 @@ Behaviour::Behaviour()
         m_behaviour = new WalkOptimisationProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
+    #elif defined(TARGET_IS_CYCLOID)
+        m_behaviour = new ForwardWalkProvider(this);
     #else
         m_behaviour = new SoccerProvider(this);
     #endif

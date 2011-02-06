@@ -38,7 +38,7 @@ BearPlatform::BearPlatform()
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
     debug << "BearPlatform::BearPlatform" << endl;
 #endif
-    
+    init();
     #ifdef USE_VISION
         m_camera = new BearCamera();
         #error BearCamera not implemented yet! Compile with USE_VISION set to OFF

@@ -18,7 +18,21 @@ ENDIF()
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/walkconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
-############################ walk engine options
+############################# default walk engines for specific platforms
+####### NAO
+IF (${TARGET_ROBOT} STREQUAL NAO)
+    SET( NUBOT_USE_MOTION_WALK_ALWALK
+         ON
+         CACHE BOOL
+         "Set to ON to use almotion's walk, set to OFF use something else")
+ELSE()
+    SET( NUBOT_USE_MOTION_WALK_ALWALK
+         OFF
+         CACHE BOOL
+         "Set to ON to use almotion's walk, set to OFF use something else")
+ENDIF()
+
+####### NAOWebots
 IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     SET( NUBOT_USE_MOTION_WALK_NBWALK
          ON
@@ -31,33 +45,20 @@ ELSE()
          "Set to ON to use nbwalk, set to OFF use something else")
 ENDIF()
 
-SET( NUBOT_USE_MOTION_WALK_JUPPWALK
-     OFF
-     CACHE BOOL
-     "Set to ON to use juppwalk, set to OFF use something else")
-
-SET( NUBOT_USE_MOTION_WALK_VSCWALK
-     OFF
-     CACHE BOOL
-     "Set to ON to use vscwalk, set to OFF use something else")
-
-IF (${TARGET_ROBOT} STREQUAL NAO)
-    SET( NUBOT_USE_MOTION_WALK_ALWALK
+####### Cycloid
+IF (${TARGET_ROBOT} STREQUAL CYCLOID)
+    SET( NUBOT_USE_MOTION_WALK_JUPPWALK
          ON
          CACHE BOOL
-         "Set to ON to use almotion's walk, set to OFF use something else")
+         "Set to ON to use juppwalk, set to OFF use something else")
 ELSE()
-    SET( NUBOT_USE_MOTION_WALK_ALWALK
+    SET( NUBOT_USE_MOTION_WALK_JUPPWALK
          OFF
          CACHE BOOL
-         "Set to ON to use almotion's walk, set to OFF use something else")
+         "Set to ON to use juppwalk, set to OFF use something else")
 ENDIF()
-     
-SET( NUBOT_USE_MOTION_WALK_JWALK
-     OFF 
-     CACHE BOOL
-     "Set to ON to use jwalk, set to OFF use something else")
-     
+
+####### Cycloid
 IF (${TARGET_ROBOT} STREQUAL BEAR)
     SET( NUBOT_USE_MOTION_WALK_BEARWALK
          ON
@@ -69,11 +70,21 @@ ELSE()
          CACHE BOOL
          "Set to ON to use bearwalk, set to OFF use something else")
 ENDIF()
+
+
+############################ other walk engines
+
+SET( NUBOT_USE_MOTION_WALK_VSCWALK
+     OFF
+     CACHE BOOL
+     "Set to ON to use vscwalk, set to OFF use something else")
      
-############################# default walk engines for specific platforms
+SET( NUBOT_USE_MOTION_WALK_JWALK
+     OFF 
+     CACHE BOOL
+     "Set to ON to use jwalk, set to OFF use something else")
 
 MARK_AS_ADVANCED(
-	NUBOT_USE_MOTION_WALK_WALKOPTIMISER
 	NUBOT_USE_MOTION_WALK_JWALK
 	NUBOT_USE_MOTION_WALK_JUPPWALK
 	NUBOT_USE_MOTION_WALK_ALWALK

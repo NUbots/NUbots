@@ -35,8 +35,8 @@ BEAR_EXT_DIR = projects/robocup
 .PHONY: NAO NAOConfig NAOConfigInstall NAOClean NAOVeryClean
 .PHONY: NAOExternal
 .PHONY: NAOWebots NAOWebotsConfig NAOWebotsClean NAOWebotsVeryClean
-.PHONY: Cycloid CycloidConfig CycloidClean CycloidVeryClean
-.PHONY: Bear BearConfig BearClean BearVeryClean
+.PHONY: Cycloid CycloidConfig CycloidConfigInstall CycloidClean CycloidVeryClean
+.PHONY: Bear BearConfig BearConfigInstall BearClean BearVeryClean
 .PHONY: BearExternal
 .PHONY: NUView NUViewConfig NUViewClean NUViewVeryClean
 .PHONY: clean veryclean
@@ -219,17 +219,85 @@ NAOWebotsVeryClean:
 		rm -rf Autoconfig/*;
 
 ################ Cycloid ################
-
 Cycloid:
-	@echo "Targetting Cycloid";
-	@cmake $(MAKE_DIR);
+ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
+    ifeq ($(SYSTEM),Linux)					## can only compile on linux
+		@echo "Compiling for Cycloid"
+        ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(CYCLOID_BUILD_DIR)/*)), )		## check if the project has already been configured
+			@set -e; \
+				echo "Configuring for first use"; \
+				mkdir -p $(CYCLOID_BUILD_DIR); \
+				cd $(CYCLOID_BUILD_DIR); \
+				cmake $(MAKE_DIR); \
+				ccmake .; \
+				make $(MAKE_OPTIONS);
+        else
+			@set -e; \
+				cd $(CYCLOID_BUILD_DIR); \
+				make $(MAKE_OPTIONS);
+        endif
+		@echo $(ROBOT_IP)
+        ifneq ($(ROBOT_IP),)
+			@./Make/scripts/cycloidSendLib $(ROBOT_IP);
+        endif
+    else
+		@echo "Cannot compile on this operating system"
+    endif
+else
+	@make CycloidExternal
+endif
+
+CycloidExternal:
+	@echo "Send source to external machine $(LOGNAME)@$(VM_IP)";
+#log into VM_IP and make the project dir
+	@ssh $(LOGNAME)@$(VM_IP) mkdir -p $(BEAR_EXT_DIR);
+#copy everything in this directory except the existing .*, Build, Documentation directories
+	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM_IP):$(BEAR_EXT_DIR);
+#run make inside the vm
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make Cycloid robot=$(ROBOT_IP);"
+#copy the binary back
+	@mkdir -p ./$(CYCLOID_BUILD_DIR)
+	@scp -prC $(LOGNAME)@$(VM_IP):$(BEAR_EXT_DIR)/$(CYCLOID_BUILD_DIR)/nubot ./$(CYCLOID_BUILD_DIR)/nubot
+	
+
+CycloidConfig:
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			cd $(CYCLOID_BUILD_DIR); \
+			ccmake .;
+    endif
+else
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make CycloidConfig;"
+endif
+
+CycloidConfigInstall:
+	@./Make/scripts/cycloidSendConfig $(ROBOT_IP);
 
 CycloidClean:
-	@echo "Cleaning Cycloid Build"
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			echo "Cleaning Cyclioid Build"; \
+			cd $(CYCLOID_BUILD_DIR); \
+			make $(MAKE_OPTIONS) clean;
+    endif
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make CycloidClean;"
+endif
 
 CycloidVeryClean:
-	@echo "Hosing Cycloid Build";
-	@set -e;
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			echo "Hosing Cycloid Build"; \
+			rm -rf $(CYCLOID_BUILD_DIR)/*; \
+			rm -rf Autoconfig/*;
+    endif
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make CycloidVeryClean;"
+endif
+
 	
 ################ Bear ################
 Bear:
@@ -284,6 +352,8 @@ else
 	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make BearConfig;"
 endif
 
+BearConfigInstall:
+	@./Make/scripts/bearSendConfig $(ROBOT_IP);
 
 BearClean:
 ifeq ($(VM_IP), )

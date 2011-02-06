@@ -1,14 +1,13 @@
-/*! @file CycloidActionators.h
-    @brief Declaration of Bear actionators class
+/*! @file ForwardWalkProvider.h
+    @brief Declaration of a behaviour provider for walk testing purposes
+ 
+    @class ForwardWalkProvider
+    @brief A special behaviour for developing walk engine's in
+ 
 
     @author Jason Kulk
  
-    @class CycloidActionators
-    @brief The cycloid actionators class
- 
-    @author Jason Kulk
- 
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,29 +23,22 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CYCLOIDACTIONATORS_H
-#define CYCLOIDACTIONATORS_H
+#ifndef FORWARDWALKPROVIDER_H
+#define FORWARDWALKPROVIDER_H
 
-#include "NUPlatform/NUActionators.h"
-class Motors;
+#include "../BehaviourProvider.h"
 
-
-class CycloidActionators : public NUActionators
+class ForwardWalkProvider : public BehaviourProvider
 {
 public:
-    CycloidActionators(Motors* motors);
-    ~CycloidActionators();
-    
+    ForwardWalkProvider(Behaviour* manager);
+    ~ForwardWalkProvider();
+protected:
+    void doBehaviour();
+
 private:
-    void copyToHardwareCommunications();
-    void copyToServos();
-    
-private:
-    // Actionators
-    static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
-    
-    Motors* m_motors;
 };
+
 
 #endif
 

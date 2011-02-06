@@ -32,7 +32,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     setWindowTitle(tr("Walk Parameter(s)"));
 
     m_job_list = new JobList();
-    m_walk_parameters.load("NBWalkTest");
+    m_walk_parameters.load("JuppWalkTest");
     
     createWidgets();
     createLayout();
@@ -275,7 +275,7 @@ WalkParameterWidget::~WalkParameterWidget()
 
 void WalkParameterWidget::walkParameterChanged()
 {
-    m_walk_parameters.load("NBWalkTest");
+    m_walk_parameters.load("JuppWalkTest");
     vector<Parameter>& params = m_walk_parameters.getParameters();
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
 

@@ -1,9 +1,9 @@
-/*! @file CycloidPlatform.h
-    @brief Declaration of Bear platform class.
+/*! @file CycloidIO.cpp
+    @brief Implementation of CycloidIO input/output class
 
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010, 2011 Jason Kulk
+ Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,22 +17,32 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#ifndef CYCLOIDPLATFORM_H
-#define CYCLOIDPLATFORM_H
+#include "CycloidIO.h"
+#include "NUbot.h"
 
-#include "NUPlatform/NUPlatform.h"
-class Motors;
+#include "debug.h"
+#include "debugverbositynetwork.h"
+#include "ioconfig.h"
 
-class CycloidPlatform : public NUPlatform
+using namespace std;
+
+/*! @brief Construct a CycloidIO object
+    @param nubot a pointer to the NUbot, we need this to gain access to the public store
+ */
+CycloidIO::CycloidIO(NUbot* nubot): NUIO(nubot)
 {
-// Functions:
-public:
-    CycloidPlatform();
-    ~CycloidPlatform();
-private:
-    Motors* m_motors;
-};
-
+#if DEBUG_NETWORK_VERBOSITY > 0
+    debug << "CycloidIO::CycloidIO()" << endl;
 #endif
+    m_nubot = nubot;
+}
+
+CycloidIO::~CycloidIO()
+{
+#if DEBUG_NETWORK_VERBOSITY > 0
+    debug << "CycloidIO::~CycloidIO()" << endl;
+#endif
+}
+
