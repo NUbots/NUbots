@@ -41,6 +41,7 @@ public:
     virtual vector<float> getNextParameters() = 0;
     virtual void setParametersResult(float fitness) = 0;
     
+    string& getName();
     virtual void summaryTo(ostream& stream) = 0;
     friend ostream& operator<<(ostream& o, const Optimiser& optimser);
     friend ostream& operator<<(ostream& o, const Optimiser* optimser);

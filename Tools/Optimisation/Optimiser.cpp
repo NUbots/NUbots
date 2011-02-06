@@ -40,6 +40,14 @@ Optimiser::~Optimiser()
 {
 }
 
+/*! @brief Returns the optimiser's name
+    @return the optimiser's name
+*/
+string& Optimiser::getName()
+{
+    return m_name;
+}
+
 /*! @brief Stream insertion operator for optimiser. Store the entire optimiser in the given stream
     @param o the output stream to save the optimiser to
    	@param optimiser the optimiser to save
