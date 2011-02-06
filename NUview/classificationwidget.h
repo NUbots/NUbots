@@ -123,6 +123,11 @@ public slots:
      @param The state of the auto soft colour checkbox.
      */
     void autoSoftColourStateChanged(int newState);
+    /*!
+     Update overlapping statistics from colours which overlap from LUT and currently selected
+     @param The percenteage of colour in each class overlapped.
+     */
+    void updateStatistics(float* PercentageOverLapped);
 
 signals:
     void openLookupTableFile(QString fileName);
@@ -142,6 +147,11 @@ private:
     QLabel* colourSpaceLabel;
     QLabel* channelLabels[numChannels];
     QLabel* allValuesLabel;
+
+    //Stats:
+    QLabel* ColourLabel[ClassIndex::num_colours];
+    QLabel* PercentageSelectedLabel[ClassIndex::num_colours];
+    QLabel* PixelSelectedLabelOverlapped[ClassIndex::num_colours];
 
     // selection Controls
     QComboBox* coloursComboBox;
@@ -164,6 +174,8 @@ private:
     QGridLayout* boundaryLayout;
     QHBoxLayout* colourSpaceSelectLayout;
     QHBoxLayout* FileButtonLayout;
+    QGroupBox *StatisticsGroupBox;
+    QGridLayout* StatisticsLayout;
 
     QVBoxLayout* groupLayout;
     QWidget* window;

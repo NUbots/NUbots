@@ -27,6 +27,8 @@
 
 #include "Tools/Threading/ConditionalThread.h"
 #include <vector>
+#include <fstream>
+
 
 class NUbot;
 
@@ -41,6 +43,7 @@ protected:
     void run();  
 private:
     NUbot* m_nubot;
+    std::ofstream m_locwmfile;
 };
 
 #endif

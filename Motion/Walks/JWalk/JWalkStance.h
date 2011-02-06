@@ -27,22 +27,14 @@
 
 #include "JWalkState.h"
 
-class PIDController;
-
 class JWalkStance : public JWalkState
 {
 public:
     JWalkStance(const NUData::id_t& leg);
     ~JWalkStance();
     void doIt();
-    JWalkStance* next();
+    JWalkState* next();
 private:
-    PIDController* m_lroll_pid;
-    PIDController* m_lpitch_pid;
-    PIDController* m_l_hiproll_pid;
-    PIDController* m_l_hippitch_pid;
-    PIDController* m_rroll_pid;
-    PIDController* m_rpitch_pid;
 };
 
 #endif

@@ -60,10 +60,13 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
         //! Check if the Goal is in a Robot:
         CheckCandidateIsInRobot(FO_Candidates, AllObjects);
+        //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
 
         CheckIsFilled(FO_Candidates, vision);
+        //qDebug()<< "Candidate Size[After Fill Check]: " <<FO_Candidates.size();
 
         CheckObjectIsBelowHorizon(FO_Candidates, vision);
+        //qDebug()<< "Candidate Size[After Horizon Check]: " <<FO_Candidates.size();
 
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);

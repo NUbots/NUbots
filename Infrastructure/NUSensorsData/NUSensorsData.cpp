@@ -1067,10 +1067,14 @@ int NUSensorsData::size() const
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
-{
-    /*output << p_data.size() << " ";
+{    
+    output << p_data.m_common_ids << endl;
+    output << p_data.m_ids_copy << endl;
+    output << p_data.m_id_to_indices << endl;
+    output << p_data.m_available_ids << endl;
+    output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
-        output << *p_data.m_sensors[i];*/
+        output << p_data.m_sensors[i];
     return output;
 }
 
@@ -1078,22 +1082,23 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
  */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
-    /*p_data.m_sensors.clear();
+    input >> p_data.m_common_ids;
+    input >> p_data.m_ids_copy;
+    input >> p_data.m_id_to_indices;
+    input >> p_data.m_available_ids;
+    p_data.m_sensors.clear();
     int numsensors;
-    sensor_t insensor;
-    sensor_t* sensor;
     input >> numsensors;
     double lastUpdateTime = 0;
+    Sensor tempSensor("temp");
     for (int i=0; i<numsensors; i++)
     {
         if(!input.good()) throw exception();
-        input >> insensor;
-        sensor = new sensor_t(insensor);
-        p_data.m_sensors.push_back(sensor);
-        p_data.updateNamedSensorPointer(sensor);
-        if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
+        input >> tempSensor;
+        p_data.m_sensors.push_back(Sensor(tempSensor));
+        if(tempSensor.Time > lastUpdateTime) lastUpdateTime = tempSensor.Time;
     }
-    p_data.CurrentTime = lastUpdateTime;*/
+    p_data.CurrentTime = lastUpdateTime;
     return input;
 }
 

@@ -4,10 +4,12 @@
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFileFormatReader(parent)
 {
     setKnownDataTypes();
+    m_fileGood = false;
 }
 
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(const QString& filename, QObject *parent): LogFileFormatReader(parent)
 {
+    m_fileGood = false;
     setKnownDataTypes();
     openFile(filename);
 }
@@ -16,30 +18,56 @@ SplitStreamFileFormatReader::~SplitStreamFileFormatReader()
 {
     closeFile();
 }
+const NUImage* SplitStreamFileFormatReader::GetImageData()
+{
+    return imageReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const NUSensorsData* SplitStreamFileFormatReader::GetSensorData()
+{
+    return sensorReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
+{
+    return locwmReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const FieldObjects* SplitStreamFileFormatReader::GetObjectData()
+{
+    return objectReader.ReadFrameNumber(m_currentFrameIndex);
+}
 
 void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
     m_extension = ".strm";
     m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame";
+
+    // Add the file readers.
+    m_fileReaders.push_back(&imageReader);
+    m_fileReaders.push_back(&sensorReader);
+    m_fileReaders.push_back(&locwmReader);
+    m_fileReaders.push_back(&objectReader);
+    m_fileReaders.push_back(&locmframeReader);
 }
 
 std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& directory)
 {
     std::vector<QFileInfo> fileLocations;
 
-    qDebug() << "Set Directory: " << directory.path();
+    qDebug("Searching Path: %s", qPrintable(directory.path()));
 
     QStringList extensionsFilter;
     extensionsFilter << "*"+m_extension;
     QStringList files = directory.entryList(extensionsFilter);
-    qDebug() << "Num Files = " << files.size();
+    qDebug("%d File(s) Found:", files.size());
 
     // Display files
     QStringList::const_iterator constIterator;
     for (constIterator = files.constBegin(); constIterator != files.constEnd();
            ++constIterator)
-        qDebug() << (*constIterator).toLocal8Bit().constData();
+        qDebug("%s", qPrintable(*constIterator));
 
     QRegExp rx;
     int index;
@@ -47,6 +75,7 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 
     QStringList::const_iterator constFormatIterator;
     QString displayName;
+    qDebug("Determining File Types:");
     for (constFormatIterator = m_knownDataTypes.constBegin(); constFormatIterator != m_knownDataTypes.constEnd();
            ++constFormatIterator)
     {
@@ -57,95 +86,78 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
             fileLocations.push_back(QFileInfo(directory, files[index]));
             displayName = (*constFormatIterator);
             displayName[0] = displayName[0].toUpper();
-            qDebug() << displayName.toLocal8Bit().constData() << "file present: " << fileLocations.back().filePath();
+            qDebug("%s File: %s", qPrintable(displayName), qPrintable(fileLocations.back().filePath()));
         }
     }
+    qDebug("Done");
     return fileLocations;
 }
 
 int SplitStreamFileFormatReader::openFile(const QString& filename)
 {
+    // close existing files;
+    closeFile();
+
     QFileInfo fileInfo(filename);
     QDir openDir;
     openDir.setPath(fileInfo.path());
+
     if(m_directory.exists())
     {
         if(!fileInfo.fileName().isEmpty() && m_knownDataTypes.contains(fileInfo.baseName(),Qt::CaseInsensitive))
         {
-            qDebug() << "Primary File selected: " << fileInfo.filePath();
+            qDebug("Primary File selected: %s", qPrintable(fileInfo.filePath()));
             m_primaryData = fileInfo.baseName().toLower();
-            qDebug() << "Primary data type: " << m_primaryData;
+            qDebug("Primary data type: %s", qPrintable(m_primaryData));
             m_fileInformation = fileInfo;
         }
-
-        // close existing files;
-        closeFile();
 
         std::vector<QFileInfo> fileLocations = FindValidFiles(openDir);
         std::vector<QFileInfo>::const_iterator fileIt;
         QString temp;
         bool successIndicator = false;
+        int index = 0;
+        unsigned int totalFrames = 0;
+        QString success_msg;
         for (fileIt = fileLocations.begin(); fileIt != fileLocations.end(); ++fileIt)
         {
             temp = (*fileIt).baseName();
-            if(temp.compare(QString("image"),Qt::CaseInsensitive) == 0)
+            index = m_knownDataTypes.indexOf(temp);
+            successIndicator = m_fileReaders[index]->OpenFile((*fileIt).filePath().toStdString());
+
+            if(successIndicator)
             {
-                qDebug() << "Opening " << (*fileIt).filePath();
-                successIndicator = imageReader.OpenFile((*fileIt).filePath().toStdString());
-                qDebug() << successIndicator;
-                if(successIndicator)
-                {
-                    qDebug() << imageReader.TotalFrames() << "images found.";
-                }
+                success_msg = QString("Successful! %1 Frames Found.").arg(m_fileReaders[index]->TotalFrames());
+
             }
-            if(temp.compare(QString("sensor"),Qt::CaseInsensitive) == 0)
+            else success_msg = "Failed!";
+
+            qDebug("Opening %s - %s", qPrintable((*fileIt).filePath()), qPrintable(success_msg));
+
+            if((totalFrames == 0) || (totalFrames > m_fileReaders[index]->TotalFrames()))
             {
-                qDebug() << "Opening " << (*fileIt).filePath();
-                successIndicator = sensorReader.OpenFile((*fileIt).filePath().toStdString());
-                qDebug() << successIndicator;
-                if(successIndicator)
-                {
-                    qDebug() << sensorReader.TotalFrames() << "sensor frames found.";
-                }
-            }
-            if(temp.compare(QString("locwm"),Qt::CaseInsensitive) == 0)
-            {
-                qDebug() << "Opening " << (*fileIt).filePath();
-                successIndicator = locwmReader.OpenFile((*fileIt).filePath().toStdString());
-                qDebug() << successIndicator;
-                if(successIndicator)
-                {
-                    qDebug() << locwmReader.TotalFrames() << "locwm frames found.";
-                }
-            }
-            if(temp.compare(QString("locwmframe"),Qt::CaseInsensitive) == 0)
-            {
-                qDebug() << "Opening " << (*fileIt).filePath();
-                successIndicator = locmframeReader.OpenFile((*fileIt).filePath().toStdString());
-                qDebug() << successIndicator;
-                if(successIndicator)
-                {
-                    qDebug() << locmframeReader.TotalFrames() << "locwm frames found.";
-                }
+                totalFrames = m_fileReaders[index]->TotalFrames();
             }
         }
-
+        m_totalFrames = totalFrames;
         m_directory = openDir;
     }
-    if(imageReader.IsValid())
+    if(m_totalFrames > 0)
     {
-        m_totalFrames = imageReader.TotalFrames();
+        m_fileGood = true;
+        qDebug("Loading complete %d frames available.", m_totalFrames);
     }
-    else if(locwmReader.IsValid())
+    else
     {
-        m_totalFrames = locwmReader.TotalFrames();
+        m_fileGood = false;
+        qDebug("Loading Failed.");
+        m_totalFrames = 0;
     }
     return m_totalFrames;
 }
 
 bool SplitStreamFileFormatReader::closeFile()
 {
-    imageReader.CloseFile();
     m_totalFrames = 0;
     m_currentFrameIndex = 0;
     return true;

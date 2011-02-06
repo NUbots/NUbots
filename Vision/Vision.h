@@ -29,6 +29,7 @@
 class NUSensorsData;
 class NUActionatorsData;
 class SaveImagesThread;
+class NUPlatform;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
@@ -47,7 +48,6 @@ class Vision
     unsigned char* testLUTBuffer;
     int spacings;
     
-    NUCamera* m_camera;                         //!< pointer to the camera 
     NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
     NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
     friend class SaveImagesThread;
@@ -87,7 +87,7 @@ class Vision
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
 
-    void process (JobList* jobs, NUCamera* camera, NUIO* m_io);
+    void process (JobList* jobs);
 
     void ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects);
 

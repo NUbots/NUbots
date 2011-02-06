@@ -80,6 +80,8 @@ signals:
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
     void edgeFilterChanged(QImage image, GLDisplay::display displayId);
     void fftChanged(QImage image, GLDisplay::display displayId);
+    void updateStatistics(float* selectedColourCounters);
+    void LUTChanged(unsigned char* classificationTable);
 
 private:
     class classEntry
@@ -111,10 +113,6 @@ private:
     Horizon horizonLine;
     NUBlackboard* m_blackboard;
     NUSensorsData* sensorsData;
-    //TODO: these should change later..
-    //float jointSensors[100];
-    //float balanceSensors[100];
-    //float touchSensors[100];
     const float* jointSensors;
     const float* balanceSensors;
     const float* touchSensors;

@@ -10,7 +10,6 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QMdiSubWindow>
-//#include <QStringlist>
 #include <QPixmap>
 #include <QPushButton>
 #include <QSignalMapper>

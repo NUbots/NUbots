@@ -37,7 +37,8 @@ class Sensor
 {
 public:
     Sensor(string sensorname);
-    
+    Sensor(const Sensor& source);
+
     bool get(float& data);
     bool get(vector<float>& data);
     bool get(vector<vector<float> >& data);
