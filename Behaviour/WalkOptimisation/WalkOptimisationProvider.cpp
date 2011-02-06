@@ -47,6 +47,9 @@
 #include "targetconfig.h"
 
 #include <boost/random.hpp>
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
@@ -73,7 +76,10 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
     //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
     m_optimiser = NULL;    
-    m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str(), fstream::out | fstream::app);
+    if (not m_optimiser)
+        m_log.open((DATA_DIR + "/Optimisation/" + m_parameters.getName() + ".log").c_str(), fstream::out);
+    else
+        m_log.open((DATA_DIR + "/Optimisation/" + id.str() + "Log.log").c_str(), fstream::out | fstream::app);
     
     if (m_optimiser)
         m_parameters.set(m_optimiser->getNextParameters());
@@ -105,9 +111,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     m_state = m_paused;
     
     m_iteration_count = 0;
+    m_fall_count = 0;
     m_duration = 0;
     m_energy = 0;	
     m_stability = 0;
+
+    if (m_optimiser)
+        cout << m_optimiser->getName() << " " << id.str() << endl;
 }
 
 WalkOptimisationProvider::~WalkOptimisationProvider()
@@ -121,7 +131,6 @@ WalkOptimisationProvider::~WalkOptimisationProvider()
 
 BehaviourState* WalkOptimisationProvider::nextStateCommons()
 {
-
     while (m_game_info->getCurrentState() != GameInformation::PlayingState)
         m_game_info->doManualStateChange();
     
@@ -131,8 +140,10 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
         else
             return m_state;
     #else
-        if (Platform->getTime() > 20*60*60*1e3)
-            exit(1);
+        if (not m_optimiser and Platform->getTime() > 20*60*1e3)
+            kill(getppid(), SIGKILL);
+        else if (m_iteration_count + 9*m_fall_count > 3000)
+            kill(getppid(), SIGKILL);
         
         if (m_state == m_paused and Platform->getTime() > 1000)
             return m_generate;
@@ -218,15 +229,19 @@ float WalkOptimisationProvider::calculateFitness()
         speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     #ifdef TARGET_IS_NAOWEBOTS
-        speed *= normalDistribution(1, 0.035);
-        cost *= normalDistribution(1, 0.035);
+        speed *= normalDistribution(1, 0.105);      // 0.045, 0.055, 0.065
+        cost *= normalDistribution(1, 0.105);
     #endif
     
     //fitness = speed;                      // speed--based fitness
     fitness = 180/(4+cost);                 // cost--based fitness
     //fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
     m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << m_stability << ", " << m_parameters.getAsVector() << endl << flush;
-    
+
+    // update fall count    
+    if (speed < 1.5 or cost > 40)
+        m_fall_count++;    
+
     return fitness;
 }
 

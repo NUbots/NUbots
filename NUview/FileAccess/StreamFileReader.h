@@ -187,9 +187,10 @@ private:
             m_timeIndex.clear();
             temp.frameSequenceNumber = 0;
             bool eofReached = false;
-            while (m_file.good() && (m_file.tellg() < m_fileEndLocation))
+            while (m_file.good() && ((m_fileEndLocation - m_file.tellg()) > sizeof(double)))
             {
                 int pos = m_file.tellg();
+                qDebug("Indexing Frame %d at %d", temp.frameSequenceNumber, pos);
                 temp.position = m_file.tellg();
                 try{
                     m_file >> (*m_dataBuffer);

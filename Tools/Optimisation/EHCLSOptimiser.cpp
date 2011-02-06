@@ -52,9 +52,9 @@ EHCLSOptimiser::EHCLSOptimiser(std::string name, vector<Parameter> parameters) :
     // The algorithm appears to work best when the reset limit is low, this means we only search
     // along the direction of the last improvement for a short time. The reset fraction is high
     // so we don't back track to far     
-    m_neta = 0.125;               // tune this parameter
+    m_neta = 0.10;               // tune this parameter
     m_reset_limit = 5;            // tune this parameter
-    m_reset_fraction = 0.98;      // tune this parameter
+    m_reset_fraction = 0.995;      // tune this parameter
     
     load();
     save();
