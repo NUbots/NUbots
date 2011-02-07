@@ -444,10 +444,10 @@ void NUSensors::calculateOdometry()
             if(prevGpsData.size()>0)
             {
                 float gpsX = gpsData[0] - prevGpsData[0];
-                float gpsY = gpsData[0] - prevGpsData[1];
+                float gpsY = gpsData[1] - prevGpsData[1];
                 float compass = mathGeneral::normaliseAngle(compassData - prevCompassData);
-                float correctedgpsX = gpsX * cos(compass) + gpsY * sin(compass);
-                float correctedgpsY = gpsX * sin(compass) + gpsY * cos(compass);
+                float correctedgpsX = gpsX * cos(compassData) + gpsY * sin(compassData);
+                float correctedgpsY = gpsX * sin(compassData) + gpsY * cos(compassData);
                 debug << deltaX << "," << deltaY << "," << deltaTheta << "," << correctedgpsX << "," << correctedgpsY << "," << compass << endl;
             }
             prevGpsData = gpsData;
