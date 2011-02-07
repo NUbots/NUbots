@@ -434,6 +434,23 @@ void NUSensors::calculateOdometry()
         debug << "Odometry Update: " << odometeryData << endl;
 #endif        
         m_data->set(NUSensorsData::Odometry,m_data->GetTimestamp(),odometeryData);
+
+        vector<float> gpsData;
+        float compassData;
+        static vector<float> prevGpsData;
+        static float prevCompassData;
+        if(m_data->getGps(gpsData) and m_data->getCompass(compassData))
+        {
+            if(prevGpsData.size()>0)
+            {
+                float gpsX = gpsData[0] - prevGpsData[0];
+                float gpsY = gpsData[0] - prevGpsData[1];
+                float compass = compassData - prevCompassData;
+                debug << deltaX << "," << deltaY << "," << deltaTheta << "," << gpsX << "," << gpsY << "," << compass << endl;
+            }
+            prevGpsData = gpsData;
+            prevCompassData = compassData;
+        }
     }
 
     prevLeftPosition = leftPosition;
