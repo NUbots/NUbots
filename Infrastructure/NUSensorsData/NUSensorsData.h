@@ -54,9 +54,10 @@ public:
     const static id_t Accelerometer;
     const static id_t Gyro;                             // raw gyro readings
     const static id_t GyroOffset;                       // gyro offset such that the filtered gyro values are gyro - gyro_offset
-    const static id_t Orientation;
-    const static id_t Horizon;
-    const static id_t Zmp;
+    const static id_t Orientation;                      // orientation sensor
+    const static id_t OrientationHardware;              // a hardware orientation sensor
+    const static id_t Horizon;                          // a sensor for the horizon line
+    const static id_t Zmp;                              // a zero moment point sensor
     const static id_t Falling;                          // Compactly stores Falling, Falling Left, Falling Right, Falling Forward, Falling Backward
     const static id_t Fallen;                           // Compactly stores Fallen, Fallen Left, Fallen Right, Fallen Forward, Fallen Backward
     // touch sensors
@@ -107,16 +108,15 @@ public:
         ForceId = 1,
         ContactId = 2, 
         SupportId = 3, 
-        ImpactId = 4, 
-        CoPXId = 5,
-        CoPYId = 6,
-        EndPositionXId = 7,
-        EndPositionYId = 8, 
-        EndPositionZId = 9,
-        EndPositionRollId = 10,
-        EndPositionPitchId = 11,
-        EndPositionYawId = 12,
-        NumEndEffectorIndices = 13
+        CoPXId = 4,
+        CoPYId = 5,
+        EndPositionXId = 6,
+        EndPositionYId = 7, 
+        EndPositionZId = 8,
+        EndPositionRollId = 9,
+        EndPositionPitchId = 10,
+        EndPositionYawId = 11,
+        NumEndEffectorIndices = 12
     };
     enum ButtonSensorIndices
     {	// indices into a single button vector
@@ -153,7 +153,6 @@ public:
     bool getForce(const id_t& id, float& data);
     bool getContact(const id_t& id, bool& data);
     bool getSupport(const id_t& id, bool& data);
-    bool getImpact(const id_t& id, float& data);
     bool getCoP(const id_t& id, vector<float>& data);
     bool getEndPosition(const id_t id, vector<float>& data);
     

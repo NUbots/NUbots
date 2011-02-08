@@ -49,6 +49,7 @@ const NUSensorsData::id_t NUSensorsData::Accelerometer(s_curr_id++, "Acceleromet
 const NUSensorsData::id_t NUSensorsData::Gyro(s_curr_id++, "Gyro", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::GyroOffset(s_curr_id++, "GyroOffset", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Orientation(s_curr_id++, "Orientation", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::OrientationHardware(s_curr_id++, "OrientationHardware", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Horizon(s_curr_id++, "Horizon", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Zmp(s_curr_id++, "Zmp", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Falling(s_curr_id++, "Falling", NUSensorsData::m_ids);
@@ -333,16 +334,6 @@ bool NUSensorsData::getSupport(const id_t& id, bool& data)
     return successful;
 }
 
-/*! @brief Gets the impact time for the end effector
-    @param id the id of the end effector
-    @param data will be updated with impact time (timestamp in ms)
-    @return true if valid, false if invalid
- */
-bool NUSensorsData::getImpact(const id_t& id, float& data)
-{
-    return getEndEffectorData(id, ImpactId, data);
-}
-
 /*! @brief Gets the centre of pressure for the end effector
     @param id the id of the end effector
     @param data will be updated with centre of presssure [x(cm), y(cm)]
@@ -353,7 +344,7 @@ bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
     data = vector<float>(2);
     bool successful = true;
     successful &= getEndEffectorData(id, CoPXId, data[0]);
-    successful &= getEndEffectorData(id, CoPXId, data[1]);
+    successful &= getEndEffectorData(id, CoPYId, data[1]);
     return successful;
 }
 
@@ -789,7 +780,7 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
-            if (static_cast<unsigned>(in) < vectorBuffer.size())
+            if (static_cast<size_t>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
                 data = numeric_limits<float>::quiet_NaN();

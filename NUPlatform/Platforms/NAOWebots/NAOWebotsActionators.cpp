@@ -130,6 +130,12 @@ void NAOWebotsActionators::copyToServos()
         jservo->setVelocity(jservo->getMaxVelocity());
         jservo->setPosition(positions[i]);
     }
+ 
+    // Quick fix to force the RHipYawPitch to be in the same position as the LHipYawPitch
+    JServo* rhipyaw = (JServo*) m_servos[18];
+    rhipyaw->setGain(gains[12]);
+    rhipyaw->setVelocity(rhipyaw->getMaxVelocity());
+    rhipyaw->setPosition(positions[12]);
 }
 
 /*! @brief Copies the led values to the leds

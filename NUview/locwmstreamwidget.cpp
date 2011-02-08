@@ -1,4 +1,4 @@
-#include "locwmStreamWidget.h"
+#include "locwmstreamwidget.h"
 #include <QLabel>
 #include <QLineEdit>
 #include <QHBoxLayout>
