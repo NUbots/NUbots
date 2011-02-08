@@ -154,7 +154,8 @@ HEADERS += ui_mainwindow.h \
     ../Vision/fitellipsethroughcircle.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
-    LUTGlDisplay.h
+    LUTGlDisplay.h \
+    ../NUPlatform/NUSensors/EndEffectorTouch.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -256,6 +257,7 @@ SOURCES += mainwindow.cpp \
     ../Vision/fitellipsethroughcircle.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
-    LUTGlDisplay.cpp
+    LUTGlDisplay.cpp \
+    ../NUPlatform/NUSensors/EndEffectorTouch.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
