@@ -38,6 +38,7 @@ Autoconfig/*
 /NUview/qrc_textures.cpp
 /NUview/diagona/*.*
 /NUview/NUview
+/NUview-build-desktop/
 
 # Ignore our data file formats
 *.lut

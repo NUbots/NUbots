@@ -111,6 +111,7 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 	}
 }
 
+
 double LSFittedLine::getMSD()
 {
 	return MSD;

@@ -6,6 +6,8 @@
 #include "ClassifiedSection.h"
 #include "TransitionSegment.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "ObjectCandidate.h"
+#include "SplitAndMerge/SAM.h"
 #include <iostream>
 
 class Vision;
@@ -43,6 +45,8 @@ class LineDetection{
         std::vector<CornerPoint> cornerPoints;
         std::vector<AmbiguousObject> possiblePenaltySpots;
         std::vector<TransitionSegment> robotSegments;
+        std::vector<TransitionSegment> verticalLineSegments;
+        std::vector<TransitionSegment> horizontalLineSegments;
         //int LinePointCounter;
         //int FieldLinesCounter;
         //int CornerPointCounter;
@@ -54,7 +58,8 @@ class LineDetection{
 
         void FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision);
         void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
-	
+        void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data, vector< ObjectCandidate >& candidates);
+
 	
 	private:
 

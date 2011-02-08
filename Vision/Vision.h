@@ -202,9 +202,9 @@ class Vision
     void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
 
     void DetectLines(LineDetection* LineDetector);
+    void DetectLines(LineDetection* LineDetector, vector<ObjectCandidate>& candidates);
 
-
-     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(const std::vector< TransitionSegment > &segments,
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,
                                                                       int spacing, int min_segments);
 

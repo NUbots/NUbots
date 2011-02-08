@@ -17,7 +17,7 @@ class TransitionSegment
         unsigned char getBeforeColour() const;
         unsigned char getColour() const;
         unsigned char getAfterColour() const;
-
+        bool isUsed;
 
     private:
         Vector2<int> start;
