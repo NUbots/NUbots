@@ -434,30 +434,34 @@ void NUSensors::calculateOdometry()
         debug << "Odometry Update: " << odometeryData << endl;
 #endif        
         m_data->set(NUSensorsData::Odometry,m_data->GetTimestamp(),odometeryData);
-
-        vector<float> gpsData;
-        float compassData;
-        static vector<float> prevGpsData;
-        static float prevCompassData;
-        if(m_data->getGps(gpsData) and m_data->getCompass(compassData))
-        {
-            if(prevGpsData.size()>0)
-            {
-                float gpsX = gpsData[0] - prevGpsData[0];
-                float gpsY = gpsData[1] - prevGpsData[1];
-                float compass = mathGeneral::normaliseAngle(compassData - prevCompassData);
-                float correctedgpsX = gpsX * cos(compassData) + gpsY * sin(compassData);
-                float correctedgpsY = gpsX * sin(compassData) + gpsY * cos(compassData);
-                debug << deltaX << "," << deltaY << "," << deltaTheta << "," << correctedgpsX << "," << correctedgpsY << "," << compass << endl;
-            }
-            prevGpsData = gpsData;
-            prevCompassData = compassData;
-        }
-    }
+		saveOdometryData(deltaX, deltaY, deltaTheta);
+	}
 
     prevLeftPosition = leftPosition;
     prevRightPosition = rightPosition;
     return;
+}
+
+void NUSensors::saveOdometryData(float x, float y, float theta)
+{
+	vector<float> gpsData;
+    float compassData;
+    static vector<float> prevGpsData;
+    static float prevCompassData;
+    if(m_data->getGps(gpsData) and m_data->getCompass(compassData))
+    {
+        if(prevGpsData.size()>0)
+        {
+            float gpsX = gpsData[0] - prevGpsData[0];
+            float gpsY = gpsData[1] - prevGpsData[1];
+            float compass = mathGeneral::normaliseAngle(compassData - prevCompassData);
+            float correctedgpsX = gpsX * cos(compassData) + gpsY * sin(compassData);
+            float correctedgpsY = gpsX * sin(compassData) + gpsY * cos(compassData);
+            debug << x << "," << y << "," << theta << "," << correctedgpsX << "," << correctedgpsY << "," << compass << endl;
+        }
+        prevGpsData = gpsData;
+        prevCompassData = compassData;
+    }
 }
 
 void NUSensors::calculateKinematics()

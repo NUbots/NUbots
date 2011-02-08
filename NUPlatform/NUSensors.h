@@ -66,6 +66,7 @@ protected:
     void calculateFallSense();
 
     void calculateOdometry();
+	void saveOdometryData(float x, float y, float theta);
     void calculateCameraHeight();
     
 private:
