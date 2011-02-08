@@ -279,3 +279,4 @@ std::istream& operator>> (std::istream& input, NUImage& p_image)
     }
     return input;
 }
+
