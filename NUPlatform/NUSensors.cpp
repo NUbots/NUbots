@@ -427,11 +427,11 @@ void NUSensors::calculateOdometry()
         odometeryData[0] += deltaX;
         odometeryData[1] += deltaY;
         odometeryData[2] += deltaTheta;
-        
+
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-		debug << "Foot Position: " << currentPosition << endl;
+		//debug << "Foot Position: " << currentPosition << endl;
        	debug << "Odometry This Frame: (" << deltaX << "," << deltaY << "," << deltaTheta << ")" << endl;
-        debug << "Odometry Update: " << odometeryData << endl;
+        //debug << "Odometry Update: " << odometeryData << endl;
 #endif        
         m_data->set(NUSensorsData::Odometry,m_data->GetTimestamp(),odometeryData);
 		saveOdometryData(deltaX, deltaY, deltaTheta);
@@ -455,8 +455,11 @@ void NUSensors::saveOdometryData(float x, float y, float theta)
             float gpsX = gpsData[0] - prevGpsData[0];
             float gpsY = gpsData[1] - prevGpsData[1];
             float compass = mathGeneral::normaliseAngle(compassData - prevCompassData);
+
+			// Rotate absolute movment to relative movement using compass value.
             float correctedgpsX = gpsX * cos(compassData) + gpsY * sin(compassData);
-            float correctedgpsY = gpsX * sin(compassData) + gpsY * cos(compassData);
+            float correctedgpsY = -gpsX * sin(compassData) + gpsY * cos(compassData);
+
             debug << x << "," << y << "," << theta << "," << correctedgpsX << "," << correctedgpsY << "," << compass << endl;
         }
         prevGpsData = gpsData;
