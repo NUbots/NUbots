@@ -3,12 +3,28 @@
 #include <iostream>
 #include <cstdlib>
 
+
+bool operator < (const Point& point1, const Point& point2) {
+    if(point1.x < point2.x) {
+        return true;
+    }
+    else if(point1.x == point2.x) {
+        if(point1.y < point2.y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Constructor
 Line::Line(){
   // General Line Equation: A*x + B*y = C
   m_A = 0.0;
   m_B = 0.0;
   m_C = 0.0;
+  Rho = 0;
+  Phi = 0;
   return;
 }
 
@@ -28,10 +44,24 @@ Line::~Line(){
 bool Line::setLine(double A, double B, double C)
 {
   if(isValid(A,B,C) == false) // IF the values do not give a valid line, do not use them.
-    return false;  
-  m_A = A;
-  m_B = B;
-  m_C = C;
+    return false;
+  if(B != 0.0) {
+      //B!=0 means not vertical
+      m_A = A/B;
+      m_B = 1;
+      m_C = C/B;
+      double denom = sqrt(m_A*m_A + m_B*m_B);
+      Phi = acos(m_A/denom);
+      Rho = m_C/denom;
+  }
+  else {
+      //B==0 means vertical
+      m_A = 1;
+      m_B = 0.0;
+      m_C = C/A;
+      Phi = 0.0;
+      Rho = m_C;
+  }
   return (isValid()); // Just to double check.
 }
 
@@ -148,12 +178,28 @@ double Line::getYIntercept() const
   return findYFromX(0);
 }
 
-double Line::getLinePointDistance(Point point)
+double Line::getLinePointDistance(Point point) const
 {
   double distance;
   if(isValid() == false) return 0.0;
   distance = fabs(m_A * point.x + m_B * point.y - m_C) / (sqrt(m_A*m_A + m_B*m_B));
   return distance;
+}
+
+double Line::getSignedLinePointDistance(Point point) const
+{
+  double distance;
+  if(isValid() == false) return 0.0;
+  distance = (m_A * point.x + m_B * point.y - m_C) / (sqrt(m_A*m_A + m_B*m_B));
+  return distance;
+}
+
+double Line::getRho() const {
+    return Rho;
+}
+
+double Line::getPhi() const {
+    return Phi;
 }
 
 bool operator ==(const Line& line1, const Line& line2)
@@ -164,6 +210,14 @@ bool operator ==(const Line& line1, const Line& line2)
 bool operator !=(const Line& line1, const Line& line2)
 {
   return !(line1 == line2);
+}
+
+bool operator >(const Line& line1, const Line& line2)
+{
+    if(line1.getGradient() == line2.getGradient())
+        return line1.getYIntercept() > line2.getYIntercept();
+    else
+        return line1.getGradient() > line2.getGradient();
 }
 
 // isValid(float A, float B, float C): Check if the given values create a valid line.
