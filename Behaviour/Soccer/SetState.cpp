@@ -66,9 +66,10 @@ void SetState::doState()
         m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
     
     // In set we can move the head, so track the ball if you can see it otherwise do a pan
-    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
-        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
-    else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+    
+    if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
+        m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE]));
+    else if (m_field_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].TimeSinceLastSeen() > 250)
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
     
     // In set we must not walk
