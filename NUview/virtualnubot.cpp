@@ -397,8 +397,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //qDebug() << "PRE-ROBOT";
     method = Vision::PRIMS;
-    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 2, method);
-    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,2);
+    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 4, method);
+    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4);
     qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
     qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
     unsigned int no_unused = 0;

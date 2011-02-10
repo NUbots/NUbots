@@ -3,7 +3,7 @@
 
 #include "Vision/ClassificationColours.h"
 #include <QGLWidget>
-#include "OpenglManager.h"
+#include "openglmanager.h"
 
 class LUTGlDisplay : public QGLWidget
 {

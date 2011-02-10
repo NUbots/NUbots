@@ -889,12 +889,12 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
     double SRXX = sharedBall.SRXX;
     double SRXY = sharedBall.SRXY;
     double SRYY = sharedBall.SRYY;
-
+    
+    if (timeSinceSeen < 500)    // if another robot can see the ball then it is not lost
+        m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
+    
     if (timeSinceSeen > 0)      // don't process sharedBalls unless they are seen
         return 0;
-    
-    if (timeSinceSeen < 250)    // if another robot can see the ball then it is not lost
-        m_objects->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
     
     #if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  << "[" << m_timestamp << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;

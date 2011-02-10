@@ -5,28 +5,11 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
-#include "../robocup/Tools/Math/LSFittedLine.h"
-#include "../robocup/Tools/Math/Matrix.h"
-#include "../robocup/Tools/Math/Vector3.h"
+#include "../../Tools/Math/LSFittedLine.h"
+#include "../../Tools/Math/Matrix.h"
+#include "../../Tools/Math/Vector3.h"
 
-//maximum field objects rules
-#define MAX_POINTS 500
-#define MAX_LINES 15
-//splitting rules
-#define SPLIT_DISTANCE 2
-#define MIN_POINTS_OVER 2
-//Noise splitting rules
-#define SPLIT_NOISE_ITERATIONS 2
-//merging rules
-#define MAX_GRAD_DIFF 1
-#define MAX_INTERCEPT_DIFF 10
-#define MAX_RHO_DIFF 12
-#define MAX_PHI_DIFF 0.5
-#define MAX_END_POINT_DIFF 5
-//Line keeping rules
-#define MIN_POINTS_TO_LINE 3
-#define MIN_POINTS_TO_LINE_FINAL 5
-#define MIN_LINE_R2_FIT 0.9997
+
 //Debug rules
 #define DEBUG 0
 #define DEBUG_POINTS 0
@@ -48,15 +31,37 @@ public:
 
     //GENERIC
     static void initDebug(ofstream& dout);
+    static bool initRules(vector<unsigned int>& ints, vector<double>& doubles);
+    static void initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int MPTLF, double MEPD, double MLRF);
 
     //LEAST-SQUARES FITTING
     static void splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall=true, bool cleardirty=true, bool noise=true);
     //CLUSTERS
     static void splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, bool clearsmall=true, bool cleardirty=true, bool noise=true);
     //POINTCONVERSION
-    static void convertPoints(vector<LinePoint*>& points, Vector3<double> vals);
+    static void convertPoint(LinePoint& point, Vector3<float>& vals);
 
 private:
+    //RULES
+    //maximum field objects rules
+    static unsigned int MAX_POINTS; //500
+    static unsigned int MAX_LINES; //15
+    //splitting rules
+    static double SPLIT_DISTANCE; //1.0
+    static unsigned int MIN_POINTS_OVER; //2
+    //Noise splitting rules
+    static unsigned int SPLIT_NOISE_ITERATIONS; //1
+    //merging rules
+    //#define MAX_GRAD_DIFF 1
+    //#define MAX_INTERCEPT_DIFF 10
+    //#define MAX_RHO_DIFF 12
+    //#define MAX_PHI_DIFF 0.5
+    static double MAX_END_POINT_DIFF; //5.0
+    //Line keeping rules
+    static unsigned int MIN_POINTS_TO_LINE; //3
+    static unsigned int MIN_POINTS_TO_LINE_FINAL; //5
+    static double MIN_LINE_R2_FIT; //0.90
+
     //DEBUGGING
     /*
     static ofstream* debug_out;
@@ -79,7 +84,7 @@ private:
 
 
     //GENERIC
-    static void findFurthestPoint(LSFittedLine& line, unsigned int& points_over, unsigned int& furthest_point);
+    static void findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_point);
     static void addToNoise(LinePoint* point);
     static void clearSmallLines(vector<LSFittedLine*>& lines);
     static void clearDirtyLines(vector<LSFittedLine*>& lines);

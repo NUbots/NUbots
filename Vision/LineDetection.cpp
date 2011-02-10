@@ -19,9 +19,14 @@
 #include "../Kinematics/Kinematics.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
-#include <QDebug>
-//#include "debug.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
+
 #include <ctime>
+
+#if TARGET_OS_IS_WINDOWS
+    #include <QDebug>
+#endif
 
 LineDetection::LineDetection(){
 
@@ -46,14 +51,16 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     int image_width = vision->getImageWidth();
     sensorsData = data;
 
-    //clock_t start, end;
+    //
     //LinePointCounter = 0;
     TotalValidLines = 0;
     //FieldLinesCounter = 0;
     //CornerPointCounter = 0;
     //FIND LINE POINTS:
-    //start = clock();
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        clock_t start, end;
+        start = clock();
+    #endif
     //update local pointer to sensors data:
 
 
@@ -66,16 +73,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
          qDebug() << "Point " <<j << ":" << linePoints[j].x << "," << linePoints[j].y;
     }*/
 
-    //clock_t startLineForm = clock();
+    //
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
+
 
     /*AARON'S OLD LINE DETECTION*/
     FindFieldLines(image_width,image_height);
     /*AARON'S OLD LINE DETECTION*/
-
-    /*SHANNON'S NEW LINE DETECTION*/
-
-    /*SHANNON'S NEW LINE DETECTION*/
 
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
@@ -95,10 +99,31 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //    }
     //}
 
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-FindPenaltySpot" << endl;
+    #endif
+    
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
     //qDebug() << "Finding Corner Points:";
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-FindPenaltySpot" << endl;
+    #endif
+
+
+    TransformLinesToWorldModelSpace(vision);
+
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-FindCornerPoints" << endl;
+    #endif
+    
     FindCornerPoints(image_width,image_height);
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-FindCornerPoints: Found " << cornerPoints.size() << " corners."<< endl;
+    #endif
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
     //{
@@ -113,23 +138,41 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
             //        "\t Orientation, Direction: " << cornerPoints[i].Orientation << "," << cornerPoints[i].Direction;
     //    }
     //}
-
-    //clock_t startCorner = clock();
+    #if DEBUG_VISION_VERBOSITY > 5
+    clock_t startCorner = clock();
+    #endif
     //qDebug() << "Decode Corners:";
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-DecodeCorners" << endl;
+    #endif
+    
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
-
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-DecodeCorners" << endl;
+    #endif
     //qDebug() << "Decode Penalty Spots:";
+    
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Pre-DecodePenaltySpot" << endl;
+    #endif
+    
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
+    
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug  << "\t\tLineDetection::Post-DecodePenaltySpot" << endl;
+    #endif
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
-    //end = clock();
-
-    //debug << "Line Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    //debug << "Line Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    //debug << "Line Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    //debug << "Line Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-
+    //
+    #if DEBUG_VISION_VERBOSITY > 5
+    end = clock();
+    debug << "\t\t\tLine Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "\t\t\tLine Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "\t\t\tLine Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "\t\t\tLine Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    #endif
 }
 
 void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data,  vector< ObjectCandidate >& candidates) {
@@ -148,6 +191,8 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     /*SHANNON'S NEW LINE DETECTION*/
 
+    Vector3<float> convertVals;
+
     //get clusters
     vector< vector<LinePoint*> > clusters;
     vector< LinePoint* > leftover;
@@ -164,6 +209,11 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
             temppoint = new LinePoint();
             temppoint->x = (double)tempseg[k].getMidPoint().x;
             temppoint->y = (double)tempseg[k].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
             tempcluster.push_back(temppoint);
         }
         clusters.push_back(tempcluster);
@@ -175,6 +225,11 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
             temppoint = new LinePoint();
             temppoint->x = (double)verticalLineSegments[i].getMidPoint().x;
             temppoint->y = (double)verticalLineSegments[i].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
             leftover.push_back(temppoint);
         }
     }
@@ -184,23 +239,85 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
             temppoint = new LinePoint();
             temppoint->x = (double)horizontalLineSegments[i].getMidPoint().x;
             temppoint->y = (double)horizontalLineSegments[i].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
             leftover.push_back(temppoint);
         }
     }
-    qDebug() << "Beginning SAM:\n";
-    qDebug() << "Clusters: " << clusters.size() << " leftover points: " << leftover.size();
+    //qDebug() << "Beginning SAM:\n";
+    //qDebug() << "Clusters: " << clusters.size() << " leftover points: " << leftover.size();
     for(unsigned int i=0; i<clusters.size(); i++) {
-        qDebug() << "\nC" << i+1 << " size: " << clusters[i].size();
+        //qDebug() << "\nC" << i+1 << " size: " << clusters[i].size();
     }
     vector<LSFittedLine*> lines;
+    /*OUTPUT FOR DEBUGGING*/
+    ofstream fout;
+    fout.open("points.txt");
+    for(unsigned int i=0; i<clusters.size(); i++) {
+        fout << clusters[i].size() << "\n";
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            fout << clusters[i][k]->x << " " << clusters[i][k]->y << "\n";
+        }
+    }
+    fout << leftover.size() << "\n";
+    for(unsigned int i=0; i<leftover.size(); i++) {
+        fout << leftover[i]->x << " " << leftover[i]->y << "\n";
+    }
+    fout.close();
+    /*OUTPUT FOR DEBUGGING*/
+    SAM::initRules(2.0,2,3,5,5.0,0.99);
     SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
 
-    qDebug() << "Finished \nPushing back lines:" << lines.size();
+    /*OUTPUT FOR DEBUGGING*/
+    /*
+    qDebug() << "printing to file";
+    ofstream pointsout;
+    ofstream linesout;
+    pointsout.open("convertedpoints.txt");
+    linesout.open("convertedlines.txt");
+    LSFittedLine* line;
+    vector<LinePoint*> points;
+    for(unsigned int i=0; i<lines.size(); i++) {
+        line = lines[i];
+        //output line
+        linesout << line->leftPoint.x << " " << line->findYFromX(line->leftPoint.x) << " " << line->rightPoint.x << " " << line->findYFromX(line->rightPoint.x) << " " << i << " " << line->numPoints << "\n";
+        //output line's points
+        points = line->getPoints();
+        for(unsigned int k=0; k<points.size(); k++) {
+            points[k]->inUse = true;
+            pointsout << points[k]->x << " " << points[k]->y << " " << i << "\n";
+        }
+    }
+    for(unsigned int i=0; i<clusters.size(); i++) {
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            if(!clusters[i][k]->inUse) {
+                pointsout << clusters[i][k]->x << " " << clusters[i][k]->y << " " << -1 << "\n";
+            }
+        }
+    }
+    pointsout.close();
+    linesout.close();
+    qDebug() << "done";
+    */
+    /*OUTPUT FOR DEBUGGING*/
+
+    //qDebug() << "Finished \nPushing back lines:" << lines.size();
+    unsigned int lineno = 0;
+    double sumMSD = 0;
+    double sumR2 = 0;
     while(!lines.empty()) {
         fieldLines.push_back(*lines.back());
+        lineno++;
+        //qDebug() << "line " << lineno << " MSD: " << fieldLines.back().getMSD() << " R^2: " << fieldLines.back().getr2tls();
+        sumMSD += fieldLines.back().getMSD();
+        sumR2 += fieldLines.back().getr2tls();
         lines.pop_back();
     }
-    qDebug() << "Finished \n";
+    //qDebug() << "Average: MSD: " << sumMSD/fieldLines.size() << " R^2: " << sumR2/fieldLines.size();
+    //qDebug() << "Finished \n";
     /*SHANNON'S NEW LINE DETECTION*/
 
 
@@ -1004,6 +1121,197 @@ bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,V
 }
 
 
+/*----------------------
+// Method:      TransformLinesToWorldModelSpace
+// Arguments:   void
+// Returns:     void
+// Description: Changes cordinates from image space to relative world model space
+--------------------------*/
+
+void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
+{
+
+    // Itterate though obtained field lines and calculate the eqivelent line in relative WM Space
+    for(unsigned int i = 0; i< fieldLines.size(); i++)
+    {
+        //std::vector<LSFittedLine> fieldLines
+        LinePoint leftVisualCalculated,rightVisualCalculated;
+        Vector3<float> leftWMPolarPoint, rightWMPolarPoint;
+        LinePoint leftWMPoint, rightWMPoint;
+
+        LSFittedLine currentVisualLine = fieldLines[i];
+        //Get 2 points corresponding to the end points on the line:
+        //Check if vertical: FindXfromY, if not FindYfromX
+        if(currentVisualLine.isVertical())
+        {
+            leftVisualCalculated.y = currentVisualLine.leftPoint.y;
+            leftVisualCalculated.x = currentVisualLine.findXFromY(leftVisualCalculated.y);
+            rightVisualCalculated.y = currentVisualLine.rightPoint.y;
+            rightVisualCalculated.x = currentVisualLine.findXFromY(rightVisualCalculated.y);
+        }
+        else
+        {
+            leftVisualCalculated.x = currentVisualLine.leftPoint.x;
+            leftVisualCalculated.y = currentVisualLine.findYFromX(leftVisualCalculated.x);
+            rightVisualCalculated.x = currentVisualLine.rightPoint.x;
+            rightVisualCalculated.y = currentVisualLine.findYFromX(rightVisualCalculated.x);
+        }
+        //USE Distance to point to transform the points to relative WM space:
+
+        bool isOKA = GetDistanceToPoint(leftVisualCalculated, leftWMPolarPoint, vision);
+        bool isOKB = GetDistanceToPoint(rightVisualCalculated, rightWMPolarPoint, vision);
+        if(isOKA== false || isOKB ==false)
+        {
+            debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+            break;
+        }
+
+        //Calculate X,Y Points from Polar Points:
+        leftWMPoint.x = leftWMPolarPoint.x * cos(leftWMPolarPoint.y) * cos (leftWMPolarPoint.z);
+        leftWMPoint.y = leftWMPolarPoint.x * sin(leftWMPolarPoint.y) * cos (leftWMPolarPoint.z);
+        rightWMPoint.x = rightWMPolarPoint.x * cos(rightWMPolarPoint.y) * cos (rightWMPolarPoint.z);
+        rightWMPoint.y = rightWMPolarPoint.x * sin(rightWMPolarPoint.y) * cos (rightWMPolarPoint.z);
+
+        LSFittedLine relWMLine;
+
+        relWMLine.addPoint(leftWMPoint);
+        relWMLine.addPoint(rightWMPoint);
+
+        #if TARGET_OS_IS_WINDOWS
+        qDebug()    << "VisualLeftPoint: " << leftVisualCalculated.x << "," << leftVisualCalculated.y
+                    << "VisualRightPoint: " << rightVisualCalculated.x << "," << rightVisualCalculated.y
+                    << "\t LeftPoint: " << relWMLine.leftPoint.x << "," << relWMLine.leftPoint.y
+                    << "RightPoint: " << relWMLine.rightPoint.x << "," << relWMLine.rightPoint.y
+                    << " \t "<< i << ": " << relWMLine.getA() << "x + "
+                        << relWMLine.getB() << " y + " << relWMLine.getC() << " = 0 \t Angle: "
+                        << relWMLine.getAngle()*57.2957795 << " Degrees." << currentVisualLine.numPoints;
+                //qDebug() << leftWMPoint.x << "," << leftWMPoint.y << "," << rightWMPoint.x << "," << rightWMPoint.y;
+        #endif
+        relWMLine.valid = currentVisualLine.valid;
+        transformedFieldLines.push_back(relWMLine);
+
+    }
+
+    //Find Candidates for CentreCircle Lines:
+
+    vector<unsigned int> usedLines;
+
+    for(unsigned int i = 0 ; i < transformedFieldLines.size(); i++ )
+    {
+        //if(!transformedFieldLines[i].valid)
+        //    continue;
+        float lineLength = sqrt((transformedFieldLines[i].leftPoint.x-transformedFieldLines[i].rightPoint.x) * (transformedFieldLines[i].leftPoint.x-transformedFieldLines[i].rightPoint.x) + (transformedFieldLines[i].leftPoint.y-transformedFieldLines[i].rightPoint.y)* (transformedFieldLines[i].leftPoint.y-transformedFieldLines[i].rightPoint.y));
+        if (lineLength > 100 )
+            continue;
+        for(unsigned int j = i+1; j < transformedFieldLines.size(); j++)
+        {
+            //if(!transformedFieldLines[j].valid)
+            //    continue;
+            float lineLength = sqrt((transformedFieldLines[j].leftPoint.x-transformedFieldLines[j].rightPoint.x) * (transformedFieldLines[j].leftPoint.x-transformedFieldLines[j].rightPoint.x) + (transformedFieldLines[j].leftPoint.y-transformedFieldLines[j].rightPoint.y)*( transformedFieldLines[j].leftPoint.y-transformedFieldLines[j].rightPoint.y));
+            if (lineLength > 100)
+                continue;
+            float distance;
+            float xtheta1 = transformedFieldLines[j].leftPoint.x-transformedFieldLines[i].rightPoint.x;
+            float ytheta1 = transformedFieldLines[j].leftPoint.y-transformedFieldLines[i].rightPoint.y;
+            float xtheta2 = transformedFieldLines[j].rightPoint.x-transformedFieldLines[i].rightPoint.x;
+            float ytheta2 = transformedFieldLines[j].rightPoint.y-transformedFieldLines[i].rightPoint.y;
+            float xtheta3 = transformedFieldLines[j].leftPoint.x-transformedFieldLines[i].leftPoint.x;
+            float ytheta3 = transformedFieldLines[j].leftPoint.y-transformedFieldLines[i].leftPoint.y;
+            float distance1 = sqrt(xtheta1*xtheta1 + ytheta1*ytheta1);
+            float distance2 = sqrt(xtheta2*xtheta2 + ytheta2*ytheta2);
+            float distance3 = sqrt(xtheta3*xtheta3 + ytheta3*ytheta3);
+            if(distance1 > 30 && distance2 > 30 && distance3 > 30)
+            {
+               continue;
+            }
+            else
+            {
+                distance = distance1;
+                if(distance > distance2 )
+                {
+                    distance = distance2;
+                }
+                if( distance > distance3 )
+                {
+                    distance = distance3;
+                }
+            }
+            float angle =  fabs(transformedFieldLines[i].getAngle()*57.2957795 - transformedFieldLines[j].getAngle()*57.2957795);
+            //qDebug() << i << " and " << j << ": " << angle << "degrees \t Distance: " << distance;
+            if((angle > 110 && angle < 170 )|| (angle < 70 && angle > 10) )
+            {
+                //qDebug() <<"\tADDED: "<< i << " and " << j << ": " << angle << "degrees \t Distance: " << distance;
+                //qDebug() << transformedFieldLines[i].leftPoint.x << ", " << transformedFieldLines[i].leftPoint.y << ", " << transformedFieldLines[i].rightPoint.x << ", " << transformedFieldLines[i].rightPoint.y << i;
+                //qDebug() << transformedFieldLines[j].leftPoint.x << ", " << transformedFieldLines[j].leftPoint.y << ", " << transformedFieldLines[j].rightPoint.x << ", " << transformedFieldLines[j].rightPoint.y << j;
+                bool iused = false;
+                bool jused = false;
+                for(unsigned int k = 0; k < usedLines.size(); k++)
+                {
+                    if(usedLines[k] == i)
+                    {
+                        iused =true;
+                    }
+                    if(usedLines[k] == j)
+                    {
+                        jused =true;
+                    }
+                }
+                if(!iused)
+                {
+                    usedLines.push_back(i);
+                    std::vector  <LinePoint*> linePts = fieldLines[i].getPoints();
+                    for(int k = 0; k <  fieldLines[i].numPoints ; k++)
+                    {
+                        LinePoint* tempPoint = linePts.at(k);
+                        centreCirclePoints.push_back(tempPoint);
+                    }
+
+                }
+                if(!jused)
+                {
+                    usedLines.push_back(j);
+                    std::vector  <LinePoint*> linePts = fieldLines[j].getPoints();
+                    for(int k = 0; k <  fieldLines[j].numPoints ; k++)
+                    {
+                        LinePoint* tempPoint = linePts.at(k);
+                        centreCirclePoints.push_back(tempPoint);
+                    }
+                }
+
+            }
+        }
+    }
+    // CentreCirclePoints:
+    int sum=0;
+    for(unsigned int i = 0; i < usedLines.size(); i++)
+    {
+        //qDebug() << transformedFieldLines[usedLines[i]].leftPoint.x << ", " << transformedFieldLines[usedLines[i]].leftPoint.y << ", " << transformedFieldLines[usedLines[i]].rightPoint.x << ", " << transformedFieldLines[usedLines[i]].rightPoint.y << usedLines[i] << fieldLines[usedLines[i]].numPoints;
+        sum = sum + fieldLines[usedLines[i]].numPoints;
+    }
+    //qDebug() << "Number of Points: " << sum;
+    for(unsigned int i = 0; i < usedLines.size(); i++)
+    {
+        //qDebug() << centreCirclePoints[i]->x <<"," << centreCirclePoints[i]->y;
+        std::vector  <LinePoint*> linePts = fieldLines[usedLines[i]].getPoints();
+        for(int k = 0; k <  fieldLines[usedLines[i]].numPoints ; k++)
+        {
+            LinePoint* tempPoint = linePts.at(k);
+            if(tempPoint->inUse == false)
+                continue;
+            Vector3<float> point;
+            bool isok = GetDistanceToPoint(*tempPoint, point, vision);
+            if(isok)
+            {
+                float x = point.x * cos(point.y) * cos (point.z);
+                float y = point.x * sin(point.y) * cos (point.z);
+                //qDebug() << x <<"," << y <<"," << usedLines[i];
+            }
+        }
+
+    }
+}
+
+
 /*------------------
 // Method: 	FindCornerPoints
 // Arguments: 	void
@@ -1228,7 +1536,7 @@ float LineDetection::findAngleOfLCorner(CornerPoint cornerPoint)
 
 
 
-void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vision* vision)
+void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vision* vision)
 {
 	
     double TempDist = 0.0;
@@ -1303,6 +1611,13 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
         double longestLineLength = 0.0;
 
 
+        #if TARGET_OS_IS_WINDOWS
+            qDebug()  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen << endl;
+        #endif
+        #if DEBUG_VISION_VERBOSITY > 0
+            debug  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen <<endl;
+        #endif
+
         //Sort Lines by most Left:
         qsort(fieldLines, 0, fieldLines.size()-1);
 
@@ -1324,6 +1639,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
             }
         }
         //Find Points:
+
         std::vector<LinePoint*> points;
         for(unsigned int i = 0; i < fieldLines.size(); i++)
         {
@@ -1378,24 +1694,37 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 break;
             }
         }
-
+        #if TARGET_OS_IS_WINDOWS
+            qDebug()  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
+        #endif
+        #if DEBUG_VISION_VERBOSITY > 0
+            debug  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
+        #endif
         if(points.size() > 5)
         {
+           
+            FitEllipseThroughCircle ellipseCircleFitter;
+            bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(centreCirclePoints, vision);
+            #if TARGET_OS_IS_WINDOWS
+                qDebug() << "Ellipse Results: "<< isOK << ellipseCircleFitter.relCx <<  ellipseCircleFitter.relCy << ellipseCircleFitter.r;
+            #endif
+            #if DEBUG_VISION_VERBOSITY > 0
+                debug << "Ellipse Results: "<< isOK << ellipseCircleFitter.relDistance <<  ellipseCircleFitter.relBearing << ellipseCircleFitter.r;
+            #endif
 
-            double cx =0;
-            double cy =0;
-            double r1 =0;
-            double r2 =0;
-            Vector2<float> screenPositionAngle;
-            //FitEllipseThroughCircle ellipseCircleFitter;
-            //bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(points, vision);
 
-            if(true) //isOK  == false)
+            if(isOK  == false)
             {
+                
+                
+                double cx =0;
+                double cy =0;
+                double r1 =0;
+                double r2 =0;
                 EllipseFit* e = new EllipseFit;
 
                 e->Fit_Ellipse(points);
-            //e->PrintFinal();
+                //e->PrintFinal();
                 cx = e->GetX();
                 cy = e->GetY();
                 r1 = e->GetR1();
@@ -1404,34 +1733,64 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
                 TempDist = 0.0;
                 Vector2<float> screenPositionAngle((float)vision->CalculateBearing(cx), (float)vision->CalculateElevation(cy));
                 GetDistanceToPoint(cx, cy, &TempDist, &TempBearing, &TempElev, vision);
-                //qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+                #if TARGET_OS_IS_WINDOWS
+                    qDebug() << TempDist << closeGoalDistance <<  fabs( TempDist - closeGoalDistance);
+                #endif
+
+                if (TempDist > 100.0  && TempDist != 0.0  && fabs( TempDist - closeGoalDistance) > 200) {
+
+                    Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+                    Vector3<float> measuredError(0.0,0.0,0.0);
+                    Vector2<int> screenPosition(cx, cy);
+                    Vector2<int> sizeOnScreen;
+                    if(r2 > r1)
+                    {
+                       sizeOnScreen.x = r2*2;
+                       sizeOnScreen.y = r1*2;
+                    }
+                    else
+                    {
+                        sizeOnScreen.x = r1*2;
+                        sizeOnScreen.y = r2*2;
+                    }
+
+                    AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
+                    return;
+                }
+                
             }
             else
             {
 
-            }
-            //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
-
-            if (TempDist > 100.0  && TempDist != 0.0  && fabs( TempDist - closeGoalDistance) > 200) {
-
-                Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
-                Vector3<float> measuredError(0.0,0.0,0.0);
-                Vector2<int> screenPosition(cx, cy);
+                #if TARGET_OS_IS_WINDOWS
+                    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<endl;
+                #endif
+                #if DEBUG_VISION_VERBOSITY > 5
+                    debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                #endif
+                Vector3<float> measured((float)ellipseCircleFitter.relDistance,(float)ellipseCircleFitter.relBearing, (float)ellipseCircleFitter.relElevation);
+                Vector3<float> measuredError(ellipseCircleFitter.sd,0.0,0.0);
+                Vector2<int> screenPosition(round(ellipseCircleFitter.cx), round(ellipseCircleFitter.cy));
+                Vector2<float> screenPositionAngle((float)vision->CalculateBearing(ellipseCircleFitter.cx), (float)vision->CalculateElevation(ellipseCircleFitter.cy));
                 Vector2<int> sizeOnScreen;
-                if(r2 > r1)
+                if(ellipseCircleFitter.r2 > ellipseCircleFitter.r1)
                 {
-                   sizeOnScreen.x = r2*2;
-                   sizeOnScreen.y = r1*2;
+                   sizeOnScreen.x = round(ellipseCircleFitter.r2);
+                   sizeOnScreen.y = round(ellipseCircleFitter.r1);
                 }
                 else
                 {
-                    sizeOnScreen.x = r1*2;
-                    sizeOnScreen.y = r2*2;
+                    sizeOnScreen.x = round(ellipseCircleFitter.r1);
+                    sizeOnScreen.y = round(ellipseCircleFitter.r2);
                 }
 
-                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,timestamp);
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
+                
                 return;
             }
+            //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
+
+
         }
 
     }
@@ -1979,7 +2338,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, float timestamp, Vis
 // Description: 4 scenarios of penalty spots using Goals/Posts and Centrecircle
 ------------------**/
 
-void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, float timestamp)
+void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp)
 {
     bool blueGoalSeen = false;
     bool yellowGoalSeen = false;
@@ -2119,6 +2478,26 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
         #endif
     }
     return;
+}
+
+bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relativePoint, Vision* vision)
+{
+    float bearing = vision->CalculateBearing(point.x);
+    float elevation = vision->CalculateElevation(point.y);
+
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    if(isOK == true)
+    {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+
+        relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+        //#if DEBUG_VISION_VERBOSITY > 6
+        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        //#endif
+    }
+    return isOK;
 }
 
 /*

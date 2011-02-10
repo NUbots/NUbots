@@ -320,39 +320,36 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     }
     #endif
     
-    #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "NUMotion::CurrentHeadProvider: ";
+    #if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUMotion::Providers. Head: ";
         if (m_current_head_provider)
             debug << m_current_head_provider->getName();
         else
             debug << "None";
-        debug << " nextHeadProvider: ";
-        if (m_next_head_provider)
-            debug << m_next_head_provider->getName();
-        else
-            debug << "None";
-        debug << endl;
-    #endif
-    #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "NUMotion::CurrentArmProvider: ";
+    	debug << " Arms: ";
         if (m_current_arm_provider)
             debug << m_current_arm_provider->getName();
         else
             debug << "None";
-        debug << " nextArmProvider: ";
-        if (m_next_arm_provider)
-            debug << m_next_arm_provider->getName();
-        else
-            debug << "None";
-        debug << endl;
-    #endif
-    #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "NUMotion::CurrentLegProvider: ";
+    	debug << " Legs: ";
         if (m_current_leg_provider)
             debug << m_current_leg_provider->getName();
         else
             debug << "None";
-        debug << " nextLegProvider: ";
+        debug << endl;
+    #endif
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUMotion::nextProviders. Head: ";
+        if (m_next_head_provider)
+            debug << m_next_head_provider->getName();
+        else
+            debug << "None";
+        debug << " Arms: ";
+        if (m_next_arm_provider)
+            debug << m_next_arm_provider->getName();
+        else
+            debug << "None";
+        debug << " Legs: ";
         if (m_next_leg_provider)
             debug << m_next_leg_provider->getName();
         else
@@ -531,7 +528,7 @@ void NUMotion::setNextProviders(NUMotionProvider* next_provider)
         if (next_provider->requiresLegs())
             m_next_leg_provider = next_provider;
         
-        #if DEBUG_NUMOTION_VERBOSITY > 0
+        #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NUMotion::setNextProviders: ";
             if (m_next_head_provider)
                 debug << m_next_head_provider->getName() << " ";

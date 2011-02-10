@@ -155,7 +155,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
-    ../Vision/SplitAndMerge/SAM.h
+    ../Vision/SplitAndMerge/SAM.h \
+    ../NUPlatform/NUSensors/EndEffectorTouch.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -258,6 +259,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
-    ../Vision/SplitAndMerge/SAM.cpp
+    ../Vision/SplitAndMerge/SAM.cpp \
+    ../NUPlatform/NUSensors/EndEffectorTouch.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

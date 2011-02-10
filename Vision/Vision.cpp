@@ -414,7 +414,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
 
         DetectLines(&LineDetector);
-
+    
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-Line Formation: " <<endl;
         #endif
@@ -439,7 +439,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
     AllFieldObjects->postProcess(image->m_timestamp);
 
-
+    if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
+    {
+        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+    }
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;

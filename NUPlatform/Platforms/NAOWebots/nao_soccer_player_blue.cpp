@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <iomanip>
+#include <ctime>
 
 using namespace std;
 ofstream debug;
@@ -31,14 +32,19 @@ int getLogNumber(int argc, const char *argv[])
 
 int main(int argc, const char *argv[]) 
 {
-    stringstream filename;
-    filename << setfill('0') << setw(2);
-    filename << getLogNumber(argc, argv) << "debug.log";
-    debug.open((DATA_DIR + filename.str()).c_str());    // I need to use a different name for each robot!
-    stringstream errorlogname;
-    errorlogname << setfill('0') << setw(2);
-    errorlogname << getLogNumber(argc, argv) << "error.log";
-    errorlog.open((DATA_DIR + errorlogname.str()).c_str());
+    stringstream filename_prefix, filename_postfix;
+    time_t timenow;
+    time(&timenow);
+    struct tm* timeinfo = localtime(&timenow);
+    char buffer[80];
+    strftime(buffer, 80, "%Y%m%d %H%M%S ", timeinfo);
+    
+    filename_prefix << buffer << " " << setfill('0') << setw(2) << getLogNumber(argc, argv);
+    filename_postfix << ".log";
+    
+    debug.open((DATA_DIR + filename_prefix.str() + "debug" + filename_postfix.str()).c_str());
+    errorlog.open((DATA_DIR + filename_prefix.str() + "error" + filename_postfix.str()).c_str());
+    
     NUbot* nubot = new NUbot(argc, argv);
     nubot->run();
     delete nubot;

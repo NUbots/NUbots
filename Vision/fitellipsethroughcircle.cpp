@@ -8,21 +8,31 @@ class Vision;
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Kinematics.h"
-#include "CircleFitting.h"
 #include "Vision.h"
-//#include <QDebug>
+
+#if TARGET_OS_IS_WINDOWS
+    #include <QDebug>
+#endif
 FitEllipseThroughCircle::FitEllipseThroughCircle()
 {
     cx = 0;
     cy = 0;
-    r1 = 0;
+    r = 0;
     sd = 0;
+    
+    relDistance = 0;
+    relBearing = 0;
+    relElevation = 0;
+    relCx = 0;
+    relCy = 0;
 }
 
 
 bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*> centreCirclePoints, Vision* vision)
 {
-
+    
+    //This function assumes points are points that belong on the centre circle:
+    
     CircleFitting circleFitter;
     std::vector < Vector2<int> > points;
     points.reserve(centreCirclePoints.size());
@@ -44,16 +54,56 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
             //qDebug() << "CenterCircle through Circle: Point Found: " << tempLinePoint.x << "," <<tempLinePoint.y;
         }
     }
+    
+    //Perform Circle Fit on Transformed Points:
     Circle circ = circleFitter.FitCircleLMA(points);
     LinePoint relativeCentrePoint;
     relativeCentrePoint.x = circ.centreX;
     relativeCentrePoint.y = circ.centreY;
+    relCx = circ.centreX;
+    relCy = circ.centreY;
 
-    r1 = circ.radius;
-    float reldistance = sqrt(relativeCentrePoint.x * relativeCentrePoint.x  + relativeCentrePoint.y *relativeCentrePoint.y);
-    float bearing = atan2(relativeCentrePoint.y,relativeCentrePoint.x);
-    //qDebug() << "CenterCircle through Circle: Distance: " << reldistance << "Bearing:" <<bearing << "Radius: " <<r1;
-    return true;
+    //Assign Relative Centre Circle points:
+    r = circ.radius;
+    relDistance = sqrt(relativeCentrePoint.x * relativeCentrePoint.x  + relativeCentrePoint.y *relativeCentrePoint.y);
+    relBearing =  atan2(relativeCentrePoint.y,relativeCentrePoint.x);
+    
+    #if TARGET_OS_IS_WINDOWS
+    qDebug() << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Elevation: " << relElevation <<" Radius: "<< r << "."<<endl;
+    #endif
+    #if DEBUG_VISION_VERBOSITY > 6
+        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Radius: " << r << "."<<endl;
+    #endif
+    bool result = isThisAGoodFit();
+
+    #if TARGET_OS_IS_WINDOWS
+    if(result)
+    {
+        CalculateScreenPosition(centreCirclePoints);
+    }
+    #endif
+    return result;
+}
+bool FitEllipseThroughCircle::isThisAGoodFit()
+{
+    //USE KNOWN DIMENSIONS OF THE CIRCLE ON FIELD TO DECIDE IF ITS A GOOD FIT:
+    //SPL2010 Rules: Centre Circle Diameter is 1200mm
+    //Radius: 600mm = 60cm
+    float ActualRadius = 60;
+    float PercentageError = 33;
+    if((r1 < ActualRadius*(1+PercentageError/100)) && (r1 > ActualRadius*(1-PercentageError/100)) )
+    {
+
+        sd = fabs(r-ActualRadius);
+        #if TARGET_OS_IS_WINDOWS
+        qDebug() << "\t\tELLIPISEthroughCircle::Centre Circle: SD :" << sd << "cm." <<endl;
+        #endif
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision* vision)
 {
@@ -72,37 +122,65 @@ Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision
     {
         Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
         Vector3<float> result;
+
         result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
         relativePoint.x = result[0]; //DISTANCE
         relativePoint.y = result[1]; //BEARING
         relativePoint.z = result[2]; //ELEVATION
 
+
         #if DEBUG_VISION_VERBOSITY > 6
         debug << "\t\tELLIPISE::Calculated Distance to Point: " << relativePoint.x <<endl;
         #endif
+
+        //#if TARGET_OS_IS_WINDOWS
+        //qDebug() << "\t\t Point On Screen: " << point->x << point->y <<endl;
+        //#endif
+        //CalculateScreenPosition(relativePoint.x, relativePoint.y, vision);
     }
     return relativePoint;
 }
-/*
-void FitEllipseThroughCircle::CalculateScreenPosition(float relativex, float relativey, Vision* vision)
+
+Vector3<float>  FitEllipseThroughCircle::CalculateScreenPosition(std::vector<LinePoint*> centreCirclePoints)
 {
-    Matrix camera2groundTransform;
+    // A Function to obtain the screen position of points, for showing the point on screen
+    // Easiest Way: Approximate the height, camera yaw, pitch and perform a trig opperation to obtain the screen position.
+    // Easy Way: Average of all the points and use that as the "centre".
 
-    bool isOK = vision->getSensorsData()->getCameraToGroundTransform(camera2groundTransform);
-    if(isOK == true)
+    Vector3<float> result;
+    float sumX = 0;
+    float sumY = 0;
+    int minY = 10000;
+    int maxY = 0;
+    int minX = 10000;
+    int maxX = 0;
+    for(unsigned int i = 0; i<centreCirclePoints.size(); i++)
     {
-        Matrix InverseCameraToGroundTransform = InverseMatrix(camera2groundTransform);
-        Vector3<float> result;
-        result = Kinematics::DistanceToPoint(InverseCameraToGroundTransform, bearing, elevation);
-        relativePoint.x = result[0]; //DISTANCE
-        relativePoint.y = result[1]; //BEARING
-        relativePoint.z = result[2]; //ELEVATION
-
-        #if DEBUG_VISION_VERBOSITY > 6
-        debug << "\t\tELLIPISE::Calculated Distance to Point: " << relativePoint.x <<endl;
-        #endif
+        sumX += centreCirclePoints[i]->x;
+        sumY += centreCirclePoints[i]->y;
+        if( centreCirclePoints[i]->y > maxY)
+        {
+            maxY = centreCirclePoints[i]->y;
+        }
+        if( centreCirclePoints[i]->y < minY)
+        {
+            minY = centreCirclePoints[i]->y;
+        }
+        if( centreCirclePoints[i]->x > maxX)
+        {
+            maxX = centreCirclePoints[i]->x;
+        }
+        if( centreCirclePoints[i]->x < minX)
+        {
+            minX = centreCirclePoints[i]->x;
+        }
     }
-    return;
+    cx = sumX/centreCirclePoints.size();
+    cy = sumY/centreCirclePoints.size();
+    r1 = maxX-minX;
+    r2 = maxY-minY;
+
+    return result;
 
 }
-*/
+
