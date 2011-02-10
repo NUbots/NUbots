@@ -96,26 +96,46 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 		//CHECK if new point is a start or end point
 		if (sourceLine.leftPoint.x < leftPoint.x)
 			leftPoint = sourceLine.leftPoint;
-		else if (sourceLine.rightPoint.x > rightPoint.x)
+                if (sourceLine.rightPoint.x > rightPoint.x)
 			rightPoint = sourceLine.rightPoint;
 		
 		//SPECIAL CONDITION FOR VERITCAL LINES
 		//**************************************
-		else if (rightPoint.x == leftPoint.x)
+                if (rightPoint.x == leftPoint.x)
 		{
 			if(sourceLine.leftPoint.y < leftPoint.y)
 				leftPoint = sourceLine.leftPoint;
-			else if(sourceLine.rightPoint.y > rightPoint.y)
+                        if(sourceLine.rightPoint.y > rightPoint.y)
 				rightPoint = sourceLine.rightPoint;
 		}
 	}
 }
 
-double LSFittedLine::getMSD()
+Vector2<double> LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine) const{
+    double sxx, syy, sxy, Sigma;
+    double TsumX, TsumY, TsumX2, TsumY2, TsumXY, TnumPoints;
+    TsumX = sumX + sourceLine.sumX;
+    TsumY = sumY + sourceLine.sumY;
+    TsumX2 = sumX2 + sourceLine.sumX2;
+    TsumY2 = sumY2 + sourceLine.sumY2;
+    TsumXY = sumXY + sourceLine.sumXY;
+    TnumPoints = numPoints + sourceLine.numPoints;
+    Vector2<double> results;
+
+    sxx = TsumX2 - TsumX*TsumX/TnumPoints;
+    syy = TsumY2 - TsumY*TsumY/TnumPoints;
+    sxy = TsumXY - TsumX*TsumY/TnumPoints;
+    Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
+    results.x = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
+    results.y = Sigma/TnumPoints;
+    return results;
+}
+
+double LSFittedLine::getMSD () const
 {
 	return MSD;
 }
-double LSFittedLine::getr2tls()
+double LSFittedLine::getr2tls () const
 {
 	return r2tls;
 }
@@ -148,6 +168,7 @@ void LSFittedLine::calcLine(){
 
 LinePoint::LinePoint()
 {
+        ID = 0;
 	clear();
 }
 

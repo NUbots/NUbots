@@ -9,8 +9,8 @@ macx {
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
-    INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
-    INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_44'
+    INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/boost_1_44'
     INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
@@ -155,6 +155,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
+    ../Vision/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -258,6 +259,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
+    ../Vision/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

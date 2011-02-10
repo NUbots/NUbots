@@ -21,6 +21,7 @@
 
 #include "debug.h"
 #include "debugverbosityvision.h"
+
 #include <ctime>
 
 #if TARGET_OS_IS_WINDOWS
@@ -74,17 +75,12 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     //
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
-    #if DEBUG_VISION_VERBOSITY > 5
-        clock_t startLineForm = clock();
-        debug  << "\t\tLineDetection::Pre-FindFieldLines" << endl;
-    #endif
-    
+
+
+    /*AARON'S OLD LINE DETECTION*/
     FindFieldLines(image_width,image_height);
-    
-    #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Post-FindFieldLines: Found " << fieldLines.size()<< " lines." <<endl;
-    #endif
-    
+    /*AARON'S OLD LINE DETECTION*/
+
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
     //{
@@ -178,6 +174,168 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     debug << "\t\t\tLine Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     #endif
 }
+
+void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data,  vector< ObjectCandidate >& candidates) {
+
+    //Setting up the variables:
+    int spacing = vision->getScanSpacings();
+    LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
+
+    int image_height = vision->getImageHeight();
+    int image_width = vision->getImageWidth();
+    sensorsData = data;
+
+    //clock_t startLineForm = clock();
+    //qDebug() << "Finding Lines with segments:  " << linePoints.size();
+
+
+    /*SHANNON'S NEW LINE DETECTION*/
+
+    Vector3<float> convertVals;
+
+    //get clusters
+    vector< vector<LinePoint*> > clusters;
+    vector< LinePoint* > leftover;
+    //temps
+    vector< TransitionSegment > tempseg;
+    LinePoint* temppoint;
+    vector<LinePoint*> tempcluster;
+    for(unsigned int i=0; i<candidates.size(); i++) {
+        //For each ObjectCandidate create vector of linepoints and add it to clusters
+        tempseg = candidates[i].getSegments();
+        tempcluster.clear();
+        for(unsigned int k=0; k<tempseg.size(); k++) {
+            //For each segment create a new linepoint and push it to a vector
+            temppoint = new LinePoint();
+            temppoint->x = (double)tempseg[k].getMidPoint().x;
+            temppoint->y = (double)tempseg[k].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
+            tempcluster.push_back(temppoint);
+        }
+        clusters.push_back(tempcluster);
+    }
+
+    //get leftover points
+    for(unsigned int i=0; i<verticalLineSegments.size(); i++) {
+        if(!verticalLineSegments[i].isUsed) {
+            temppoint = new LinePoint();
+            temppoint->x = (double)verticalLineSegments[i].getMidPoint().x;
+            temppoint->y = (double)verticalLineSegments[i].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
+            leftover.push_back(temppoint);
+        }
+    }
+
+    for(unsigned int i=0; i<horizontalLineSegments.size(); i++) {
+        if(!horizontalLineSegments[i].isUsed) {
+            temppoint = new LinePoint();
+            temppoint->x = (double)horizontalLineSegments[i].getMidPoint().x;
+            temppoint->y = (double)horizontalLineSegments[i].getMidPoint().y;
+            /*
+            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+                SAM::convertPoint(*temppoint, convertVals);
+            }
+            */
+            leftover.push_back(temppoint);
+        }
+    }
+    //qDebug() << "Beginning SAM:\n";
+    //qDebug() << "Clusters: " << clusters.size() << " leftover points: " << leftover.size();
+    for(unsigned int i=0; i<clusters.size(); i++) {
+        //qDebug() << "\nC" << i+1 << " size: " << clusters[i].size();
+    }
+    vector<LSFittedLine*> lines;
+    /*OUTPUT FOR DEBUGGING*/
+    ofstream fout;
+    fout.open("points.txt");
+    for(unsigned int i=0; i<clusters.size(); i++) {
+        fout << clusters[i].size() << "\n";
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            fout << clusters[i][k]->x << " " << clusters[i][k]->y << "\n";
+        }
+    }
+    fout << leftover.size() << "\n";
+    for(unsigned int i=0; i<leftover.size(); i++) {
+        fout << leftover[i]->x << " " << leftover[i]->y << "\n";
+    }
+    fout.close();
+    /*OUTPUT FOR DEBUGGING*/
+    SAM::initRules(2.0,2,3,5,5.0,0.99);
+    SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
+
+    /*OUTPUT FOR DEBUGGING*/
+    /*
+    qDebug() << "printing to file";
+    ofstream pointsout;
+    ofstream linesout;
+    pointsout.open("convertedpoints.txt");
+    linesout.open("convertedlines.txt");
+    LSFittedLine* line;
+    vector<LinePoint*> points;
+    for(unsigned int i=0; i<lines.size(); i++) {
+        line = lines[i];
+        //output line
+        linesout << line->leftPoint.x << " " << line->findYFromX(line->leftPoint.x) << " " << line->rightPoint.x << " " << line->findYFromX(line->rightPoint.x) << " " << i << " " << line->numPoints << "\n";
+        //output line's points
+        points = line->getPoints();
+        for(unsigned int k=0; k<points.size(); k++) {
+            points[k]->inUse = true;
+            pointsout << points[k]->x << " " << points[k]->y << " " << i << "\n";
+        }
+    }
+    for(unsigned int i=0; i<clusters.size(); i++) {
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            if(!clusters[i][k]->inUse) {
+                pointsout << clusters[i][k]->x << " " << clusters[i][k]->y << " " << -1 << "\n";
+            }
+        }
+    }
+    pointsout.close();
+    linesout.close();
+    qDebug() << "done";
+    */
+    /*OUTPUT FOR DEBUGGING*/
+
+    //qDebug() << "Finished \nPushing back lines:" << lines.size();
+    unsigned int lineno = 0;
+    double sumMSD = 0;
+    double sumR2 = 0;
+    while(!lines.empty()) {
+        fieldLines.push_back(*lines.back());
+        lineno++;
+        //qDebug() << "line " << lineno << " MSD: " << fieldLines.back().getMSD() << " R^2: " << fieldLines.back().getr2tls();
+        sumMSD += fieldLines.back().getMSD();
+        sumR2 += fieldLines.back().getr2tls();
+        lines.pop_back();
+    }
+    //qDebug() << "Average: MSD: " << sumMSD/fieldLines.size() << " R^2: " << sumR2/fieldLines.size();
+    //qDebug() << "Finished \n";
+    /*SHANNON'S NEW LINE DETECTION*/
+
+
+    //qDebug() << "Finding Penalty Spots:";
+    FindPenaltySpot(vision);
+    //qDebug() << "Finding Corner Points:";
+    FindCornerPoints(image_width,image_height);
+
+    //qDebug() << "Decode Corners:";
+
+    DecodeCorners(AllObjects, vision->m_timestamp, vision);
+
+    //qDebug() << "Decode Penalty Spots:";
+    DecodePenaltySpot(AllObjects, vision->m_timestamp);
+    //qDebug() << "Finnished Decoding Penalty Spots:";
+
+}
+
 
 void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision)
 {
@@ -301,6 +459,8 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                                 Vector2<int> linepointposition= tempSeg->getMidPoint();
                                 //ADD A FIELD LINEPOINT!
 
+
+
                                 LinePoint tempLinePoint;
                                 tempLinePoint.width = tempSeg->getSize();
                                 tempLinePoint.x = linepointposition.x;
@@ -324,6 +484,7 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                                     segmentisused = true;
                                     tempLinePoint.inUse = false;
                                     linePoints.push_back(tempLinePoint);
+                                    verticalLineSegments.push_back(*tempSeg);
                                     //qDebug() << "Added LinePoint to list: "<< tempLinePoint.x <<"," <<tempLinePoint.y << tempLinePoint.width;
                                 }
                             }
@@ -368,6 +529,7 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                     segmentisused = true;
                     tempLinePoint.inUse = false;
                     linePoints.push_back(tempLinePoint);
+                    horizontalLineSegments.push_back(*segment);
                 }
                  ////qDebug() << "Found LinePoint (MidPoint): "<< (start.x + end.x) / 2 << ","<< (start.y+end.y)/2 << " Length: "<< segment->getSize();
                 //LinePointCounter++;
