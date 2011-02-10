@@ -65,7 +65,7 @@ Motors::Motors()
     clock_gettime(CLOCK_REALTIME, &timenow);
     StartTime = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
     
-    m_thread = new DXSerialThread(this, 20);
+    m_thread = new DXSerialThread(this, 10);
 }
 
 /*! Destroy the serial link with the motors

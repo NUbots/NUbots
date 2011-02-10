@@ -75,9 +75,6 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     m_left_arm_gains = vector<float> (4, 0);
     m_right_arm_angles = m_initial_rarm;
     m_right_arm_gains = vector<float> (4, 0);
-    
-    m_pattern_debug.open("patternDebug.csv");
-    m_pattern_debug << "Phase (rad), Swing, Phase (rad), Swing" << endl;
 }
 
 void JuppWalk::initWalkParameters()
@@ -182,6 +179,9 @@ JuppWalk::~JuppWalk()
 
 void JuppWalk::doWalk()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::doWalk()" << endl;
+    #endif
     getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
     //m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
@@ -200,42 +200,27 @@ void JuppWalk::doWalk()
     calculateRightArm();
     
     updateActionatorsData();
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::doWalk(). Completed" << endl;
+    #endif
 }
 
 void JuppWalk::calculateGaitPhase()
 {
-    // I need to learn to interpolate, because abrupt changes destablise the robot
-    // so I want to shift to the measured phase over m_step_frequency/8 seconds
-    static float leftimpacttime;
-    static float rightimpacttime;
-    static const float interpolationtime = 1000*m_step_frequency/4.0;
-    static float gaitphaseonimpact = m_gait_phase;
-    m_current_time = m_data->CurrentTime;
-        
-    if (m_current_time - leftimpacttime < interpolationtime)
-    {
-        float measuredphaseonimpact = M_PI/m_param_short_v - M_PI + m_param_phase_offset + m_param_phase_reset_offset;
-        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
-        if (fabs(phasediff) < M_PI/8)
-            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-    }
-    if (m_current_time - rightimpacttime < interpolationtime)
-    {
-        float measuredphaseonimpact = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
-        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
-        if (fabs(phasediff) < M_PI/8)
-            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-    }
-    
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateGaitPhase()" << endl;
+    #endif
     m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
-    
-    m_previous_time = m_current_time;
 }
 
 /*! @brief Calculates the angles and gains for the left leg
  */
 void JuppWalk::calculateLeftLeg()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLeftLeg()" << endl;
+    #endif
     calculateLegAngles(m_left_leg_phase, -1, m_left_leg_angles);
     calculateLegGains(m_left_leg_phase, m_left_leg_gains);
 }
@@ -244,6 +229,9 @@ void JuppWalk::calculateLeftLeg()
  */
 void JuppWalk::calculateRightLeg()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateRightLeg()" << endl;
+    #endif
     calculateLegAngles(m_right_leg_phase, 1, m_right_leg_angles);
     calculateLegGains(m_right_leg_phase, m_right_leg_gains);
 }
@@ -254,6 +242,9 @@ void JuppWalk::calculateRightLeg()
  */
 void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& angles)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLegAngles()" << endl;
+    #endif
     /* Jason's guide to this to walk:
      Step 1. Tune shift_amp such that it looks like the weight is being shifted between the feet
      Step 2. Tune the shortening phase shift. Too late and the robot will fall, too early and the feet wont come off the ground!
@@ -326,10 +317,6 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
         swing_leg_yaw = -legsign*m_swing_amplitude_yaw - fabs(m_swing_amplitude_yaw);
     }
     
-    m_pattern_debug << swing_phase << ", " << swing_leg_yaw << ", ";
-    if (legsign > 0) 
-        m_pattern_debug << endl;
-    
     // Balance
     float balance_foot_roll = 0;//-2*legsign*m_swing_amplitude_roll*cos(legphase + 0.35);
     float balance_foot_pitch = m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
@@ -377,14 +364,19 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
-    gains = leggains[0];
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLegGains()" << endl;
+    #endif
+    gains = m_walk_parameters.getLegGains()[0];
 }
 
 /*! @brief Calculates the left arm angles and gains
  */
 void JuppWalk::calculateLeftArm()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLeftArm()" << endl;
+    #endif
     calculateArmAngles(m_left_leg_phase, -1, m_left_arm_angles);
     calculateArmGains(m_left_leg_phase, m_left_arm_gains);
 }
@@ -393,6 +385,9 @@ void JuppWalk::calculateLeftArm()
  */
 void JuppWalk::calculateRightArm()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateRightArm()" << endl;
+    #endif
     calculateArmAngles(m_right_leg_phase, 1, m_right_arm_angles);
     calculateArmGains(m_right_leg_phase, m_right_arm_gains);
 }
@@ -415,8 +410,7 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
  */
 void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
-    gains = armgains[0];
+    gains = m_walk_parameters.getArmGains()[0];
 }
 
 /*! @brief Calculates the gyro-based feedback terms m_gyro_foot_roll and m_gyro_foot_pitch
@@ -459,6 +453,10 @@ void JuppWalk::calculateGyroFeedback()
 
 void JuppWalk::updateActionatorsData()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::updateActionatorsData()" << endl;
+    #endif
+    
     m_actions->add(NUActionatorsData::LLeg, m_current_time, m_left_leg_angles, m_left_leg_gains);
     m_actions->add(NUActionatorsData::RLeg, m_current_time, m_right_leg_angles, m_right_leg_gains);
     if (m_larm_enabled)

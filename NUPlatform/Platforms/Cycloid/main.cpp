@@ -14,7 +14,7 @@ ofstream errorlog;
 
 int main(int argc, const char *argv[]) 
 {
-    debug.open((DATA_DIR + "debug.log").c_str());
+    debug.open("/var/volatile/debug.log");
     errorlog.open((DATA_DIR + "error.log").c_str());
                   
     NUbot* nubot = new NUbot(argc, argv);

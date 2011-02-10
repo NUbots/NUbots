@@ -25,6 +25,11 @@
 
 #include "debug.h"
 #include "debugverbositynuplatform.h"
+#include "nubotconfig.h"
+#include "debugverbositythreading.h"
+#ifdef THREAD_SENSEMOVE_PROFILE
+    #include "Tools/Profiling/Profiler.h"
+#endif
 
 using namespace std;
 
@@ -32,7 +37,7 @@ using namespace std;
     @param motors the name of the thread (used entirely for debug purposes)
     @param period the time in ms between each main loop execution
  */
-DXSerialThread::DXSerialThread(Motors* motors, int period) : PeriodicThread("DXSerialThread", period, 45), m_motors(motors)
+DXSerialThread::DXSerialThread(Motors* motors, int period) : PeriodicThread("DXSerialThread", period, 51), m_motors(motors)
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
         debug << "DXSerialThread::DXSerialThread(" << m_motors << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << endl;
@@ -58,12 +63,30 @@ void DXSerialThread::setSensorThread(ConditionalThread* thread)
 
 void DXSerialThread::periodicFunction()
 {
+    #ifdef THREAD_SENSEMOVE_PROFILE
+        Profiler prof = Profiler("DXSerialThread");
+        prof.start();
+    #endif
+    
     if (m_motors)
     {
         m_motors->read();
+        #ifdef THREAD_SENSEMOVE_PROFILE
+            prof.split("MotorRead");
+        #endif
         m_motors->write();
+        #ifdef THREAD_SENSEMOVE_PROFILE
+            prof.split("MotorWrite");
+        #endif
         m_motors->request();
+        #ifdef THREAD_SENSEMOVE_PROFILE
+            prof.split("MotorRequest");
+        #endif
     }
+    
+    #ifdef THREAD_SENSEMOVE_PROFILE
+        debug << prof;
+    #endif
     
     if (m_sensor_thread)
         m_sensor_thread->startLoop();
