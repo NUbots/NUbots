@@ -21,25 +21,12 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-GoalDetection.cpp
-LineDetection.cpp
-ClassifiedSection.cpp
-ObjectCandidate.cpp
-RobotCandidate.cpp
-ScanLine.cpp
-TransitionSegment.cpp
-Vision.cpp
-Ball.cpp
-CircleFitting.cpp
-EllipseFit.cpp
-fitellipsethroughcircle.cpp
+SAM.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Threads
-EllipseFitting
-SplitAndMerge
+
 )
 ####################################################################################
 

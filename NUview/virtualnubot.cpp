@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <qmessagebox.h>
+#include <sstream>
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -65,6 +66,9 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
 void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
 
+    //std::stringstream data;
+    //newsensorsData->summaryTo(data);
+    //qDebug() << data.str().c_str() << endl;
 
     sensorsData = newsensorsData;
     vector<float> horizondata;

@@ -62,6 +62,7 @@ template<typename T> istream& operator>>(istream& input, vector<T>& v)
     getline(input, wholevector, ']');
     
     v.clear();
+
     if (wholevector.size() > 0)
     {
     	stringstream ss(wholevector);
@@ -100,13 +101,12 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
         else if (c == ']')
             brackets--;
     }
-    
+
     vector<T> buffer;
-    while (wholematrix.good())
+    while (wholematrix.peek() != ']')
     {
         wholematrix >> buffer;
-        if (buffer.size() > 0)
-            v.push_back(buffer);
+        v.push_back(buffer);
     }
     return input;
 }
