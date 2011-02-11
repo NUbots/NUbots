@@ -14,8 +14,9 @@
 #include "Vision.h"
 #include "EllipseFit.h"
 #include "fitellipsethroughcircle.h"
-
+#include "Tools/Math/StlVector.h"
 //For distance to Point:
+#include "Infrastructure/NUBlackboard.h"
 #include "../Kinematics/Kinematics.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
@@ -320,6 +321,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //qDebug() << "Finished \n";
     /*SHANNON'S NEW LINE DETECTION*/
 
+    TransformLinesToWorldModelSpace(vision);
 
     //qDebug() << "Finding Penalty Spots:";
     FindPenaltySpot(vision);
@@ -1130,7 +1132,9 @@ bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,V
 
 void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
 {
-
+    #if TARGET_OS_IS_WINDOWS
+        qDebug() << "TransformLinesToWorldModelSpace" <<  fieldLines.size();
+    #endif
     // Itterate though obtained field lines and calculate the eqivelent line in relative WM Space
     for(unsigned int i = 0; i< fieldLines.size(); i++)
     {
@@ -1163,6 +1167,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
         if(isOKA== false || isOKB ==false)
         {
             debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+            #if TARGET_OS_IS_WINDOWS
+                qDebug() << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+            #endif
             break;
         }
 
@@ -1285,7 +1292,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
     int sum=0;
     for(unsigned int i = 0; i < usedLines.size(); i++)
     {
-        //qDebug() << transformedFieldLines[usedLines[i]].leftPoint.x << ", " << transformedFieldLines[usedLines[i]].leftPoint.y << ", " << transformedFieldLines[usedLines[i]].rightPoint.x << ", " << transformedFieldLines[usedLines[i]].rightPoint.y << usedLines[i] << fieldLines[usedLines[i]].numPoints;
+        #if TARGET_OS_IS_WINDOWS
+            qDebug() << transformedFieldLines[usedLines[i]].leftPoint.x << ", " << transformedFieldLines[usedLines[i]].leftPoint.y << ", " << transformedFieldLines[usedLines[i]].rightPoint.x << ", " << transformedFieldLines[usedLines[i]].rightPoint.y << usedLines[i] << fieldLines[usedLines[i]].numPoints;
+        #endif
         sum = sum + fieldLines[usedLines[i]].numPoints;
     }
     //qDebug() << "Number of Points: " << sum;
@@ -1304,7 +1313,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
             {
                 float x = point.x * cos(point.y) * cos (point.z);
                 float y = point.x * sin(point.y) * cos (point.z);
-                //qDebug() << x <<"," << y <<"," << usedLines[i];
+                #if TARGET_OS_IS_WINDOWS
+                    qDebug() << x <<"," << y <<"," << usedLines[i];
+                #endif
             }
         }
 

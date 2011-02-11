@@ -157,7 +157,8 @@ HEADERS += ui_mainwindow.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
     ../Vision/SplitAndMerge/SAM.h \
-    ../NUPlatform/NUSensors/EndEffectorTouch.h
+    ../NUPlatform/NUSensors/EndEffectorTouch.h \
+    Tools/Math/StlVector.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
