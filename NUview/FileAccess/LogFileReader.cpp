@@ -44,7 +44,6 @@ int LogFileReader::openFile(QString fileName)
     {
         qDebug() << "I/O Error:" << e.what();
     }
-
     if(currentFileReader)
     {
         if(currentFileReader->fileGood())
@@ -71,6 +70,13 @@ bool LogFileReader::closeFile()
 {
     if(currentFileReader)
     {
+        disconnect(currentFileReader,SIGNAL(rawImageChanged(const NUImage*)), this, SIGNAL(rawImageChanged(const NUImage*)));
+        disconnect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
+        disconnect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
+                this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
+        disconnect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
+        disconnect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
+        disconnect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
         try{
         currentFileReader->closeFile();
         delete currentFileReader;
