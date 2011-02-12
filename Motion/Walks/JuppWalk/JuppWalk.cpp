@@ -44,7 +44,7 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
 {
     initWalkParameters();
     
-    m_leg_length = 20;          // The NAO has legs 20cm long
+    m_leg_length = 15;          // The NAO has legs 20cm long, the cycloid has 15cm
     m_current_time = 0;
     m_previous_time = m_current_time;
     
@@ -184,9 +184,9 @@ void JuppWalk::doWalk()
     #endif
     getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
-    //m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
-    //m_swing_amplitude_pitch = asin(m_speed_x/(2*m_step_frequency*m_leg_length));
-    //m_swing_amplitude_yaw = m_speed_yaw/(2*m_step_frequency);
+    m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
+    m_swing_amplitude_pitch = asin(m_speed_x/(2*m_step_frequency*m_leg_length));
+    m_swing_amplitude_yaw = m_speed_yaw/(2*m_step_frequency);
     
     calculateGaitPhase();
     m_left_leg_phase = NORMALISE(m_gait_phase + M_PI/2);

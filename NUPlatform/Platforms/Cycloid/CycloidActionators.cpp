@@ -80,9 +80,11 @@ void CycloidActionators::copyToServos()
     {
         // 195.379 converts radians to motor units, and Motors::DefaultPositions are the calibrated zero positions
         float motorposition = Motors::MotorSigns[i]*positions[i]*195.379 + Motors::DefaultPositions[i];                  
-        //float speed = 1000*fabs(motorposition - JointPositions[i])/(m_data->CurrentTime - m_data->PreviousTime);     
+        float speed = 1000*fabs(motorposition - JointPositions[i])/(m_data->CurrentTime - m_data->PreviousTime);     
+        if (speed > 1023)
+            speed = 1023;
         
-        m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, 100, -1);
+        m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, speed, -1);
     }
 }
 
