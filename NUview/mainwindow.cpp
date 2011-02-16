@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "ConnectionManager/ConnectionManager.h"
 #include "LayerSelectionWidget.h"
 #include "WalkParameterWidget.h"
 #include "KickWidget.h"
@@ -26,15 +27,12 @@
 #include "NUviewIO/NUviewIO.h"
 
 #include "frameInformationWidget.h"
-#include "bonjour/robotSelectDialog.h"
-#include "bonjour/bonjourserviceresolver.h"
 
 using namespace std;
 ofstream debug;
 ofstream errorlog;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), bonjourResolver(0)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     qDebug() << "NUview is starting in: MainWindow.cpp";
     debug.open("debug.log");
@@ -325,14 +323,17 @@ void MainWindow::createToolBars()
     fileToolBar->setObjectName(tr("fileToolbar"));
 
     // Navigation Toolbar
-    navigationToolbar = addToolBar(tr("N&avigation"));
+    navigationToolbar = addToolBar(tr("&Navigation"));
     navigationToolbar->addAction(firstFrameAction);
     navigationToolbar->addAction(previousFrameAction);
     navigationToolbar->addAction(selectFrameAction);
     navigationToolbar->addAction(nextFrameAction);
     navigationToolbar->addAction(lastFrameAction);
     navigationToolbar->setObjectName(tr("navigationToolbar"));
-    //windowDisplayToolbar = addToolBar(tr("&Display"));
+
+    // Connection Toolbar
+    connectionToolBar = addToolBar("Connection");
+    connectionToolBar->addWidget(new ConnectionManager(this));
 }
 
 void MainWindow::createStatusBar()
@@ -512,22 +513,6 @@ void MainWindow::shrinkToNativeAspectRatio()
 
 void MainWindow::BonjourTest()
 {
-    robotSelectDialog test(this, "_nuview._tcp");
-    if(test.exec())
-    {
-        BonjourRecord bonjourHost = test.getBonjourHost();
-        if (!bonjourResolver)
-        {
-                bonjourResolver = new BonjourServiceResolver(this);
-                connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)),
-                        this, SLOT(PrintConnectionInfo(const QHostInfo &, int)));
-        }
-        bonjourResolver->resolveBonjourRecord(bonjourHost);
-    }
-    else
-    {
-        qDebug() << "Cancelled" << endl;
-    }
 }
 
 void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)

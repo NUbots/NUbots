@@ -17,8 +17,8 @@ locwmStreamWidget::locwmStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent)
     locwm = new Localisation();
     objects = new FieldObjects();
     robotName = QString("");
-    setWindowTitle(tr("LocWm Stream Manager"));
-    setObjectName(tr("LocWm Stream Manager"));
+    setWindowTitle(tr("Localisation"));
+    setObjectName(tr("Localisation"));
     nameLabel = new QLabel("Robot name: ");
     nameLineEdit = new QLineEdit();
     nameLineEdit->setText("IP ADDRESS");

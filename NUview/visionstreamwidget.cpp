@@ -13,8 +13,8 @@
 visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
     robotName = QString("");
-    setWindowTitle(tr("Vision Stream Manager"));
-    setObjectName(tr("Vision Stream Manager"));
+    setWindowTitle(tr("Vision"));
+    setObjectName(tr("Vision"));
     nameLabel = new QLabel("Robot name: ");
     nameLineEdit = new QLineEdit();
     nameLineEdit->setText("IP ADDRESS");

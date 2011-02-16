@@ -3,9 +3,12 @@ QT += network \
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -lz
+    LIBS += -framework CoreFoundation -lz
+    DESTDIR = "../Build/NUView"
+    OBJECTS_DIR = "../Build/NUView/.obj"
+    MOC_DIR = "../Build/NUView/.moc"
+    RCC_DIR = "../Build/NUView/.rcc"
+    UI_DIR = "../Build/NUView/.ui"
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
@@ -95,10 +98,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
     frameInformationWidget.h \
-    bonjour/robotSelectDialog.h \
-    bonjour/bonjourserviceresolver.h \
-    bonjour/bonjourservicebrowser.h \
-    bonjour/bonjourrecord.h \
     ../Tools/Math/UKF.h \
     ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
@@ -156,7 +155,13 @@ HEADERS += ui_mainwindow.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
     ../Vision/SplitAndMerge/SAM.h \
-    ../NUPlatform/NUSensors/EndEffectorTouch.h
+    ../NUPlatform/NUSensors/EndEffectorTouch.h \
+    ConnectionManager/ConnectionManager.h \
+    ConnectionManager/bonjourIncludeDataTypes.h \
+    ConnectionManager/bonjourrecord.h \
+    ConnectionManager/bonjourservicebrowser.h \
+    ConnectionManager/bonjourserviceresolver.h \
+    ConnectionManager/robotSelectDialog.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -236,9 +241,6 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \
-    bonjour/robotSelectDialog.cpp \
-    bonjour/bonjourserviceresolver.cpp \
-    bonjour/bonjourservicebrowser.cpp \
     ../Tools/Math/UKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
@@ -260,6 +262,10 @@ SOURCES += mainwindow.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
-    ../NUPlatform/NUSensors/EndEffectorTouch.cpp
-RESOURCES = textures.qrc
-RESOURCES += icons.qrc
+    ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
+    ConnectionManager/ConnectionManager.cpp \
+    ConnectionManager/bonjourservicebrowser.cpp \
+    ConnectionManager/bonjourserviceresolver.cpp \
+    ConnectionManager/robotSelectDialog.cpp
+    
+RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc

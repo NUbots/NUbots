@@ -28,8 +28,8 @@
 
 WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
-    setObjectName(tr("Walk Parameter(s)"));
-    setWindowTitle(tr("Walk Parameter(s)"));
+    setObjectName(tr("Walk"));
+    setWindowTitle(tr("Walk"));
 
     m_job_list = new JobList();
     m_walk_parameters.load("NBWalkTest");

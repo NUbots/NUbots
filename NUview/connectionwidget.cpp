@@ -10,8 +10,8 @@
 ConnectionWidget::ConnectionWidget(QWidget *parent): QDockWidget(parent)
 {
     robotName = QString("");
-    setWindowTitle(tr("Conection Manager"));
-    setObjectName(tr("Conection Manager"));
+    setWindowTitle(tr("Conection"));
+    setObjectName(tr("Conection"));
     nameLabel = new QLabel("Robot name: ");
     nameLineEdit = new QLineEdit();
     nameLineEdit->setText("IP ADDRESS");
