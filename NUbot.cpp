@@ -71,6 +71,9 @@
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
     #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_BEAR)
+    #include "NUPlatform/Platforms/Bear/BearPlatform.h"
+    #include "NUPlatform/Platforms/Bear/BearIO.h"
 #elif defined(TARGET_IS_NUVIEW)
     #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
@@ -172,6 +175,10 @@ void NUbot::createPlatform(int argc, const char *argv[])
         m_platform = new NAOPlatform();
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
+    #elif defined(TARGET_IS_BEAR)
+        m_platform = new BearPlatform();
+    #else
+        #error You need to create a Platform instance for this platform
     #endif
 }
 
@@ -229,6 +236,10 @@ void NUbot::createNetwork()
         m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_io = new CycloidIO(this);
+    #elif defined(TARGET_IS_BEAR)
+        m_io = new BearIO(this);
+    #else
+        #error You need to create an IO class for this platform
     #endif
 }
 

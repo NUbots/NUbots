@@ -8,7 +8,7 @@
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,16 +24,21 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CycloidCAMERA_H
-#define CycloidCAMERA_H
+#ifndef CYCLOIDCAMERA_H
+#define CYCLOIDCAMERA_H
 
 #include "NUPlatform/NUCamera.h"
+class NUImage;
 
 class CycloidCamera : public NUCamera
 {
 public:
     CycloidCamera();
     ~CycloidCamera();
+    
+    NUImage* grabNewImage();
+    void setSettings(const CameraSettings& newset);
+private:
 };
 
 #endif

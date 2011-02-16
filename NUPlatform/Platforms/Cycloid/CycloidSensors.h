@@ -1,14 +1,14 @@
 /*! @file CycloidSensors.h
-    @brief Declaration of Cycloidsensors class
+    @brief Declaration of Cycloid sensors class
 
     @author Jason Kulk
  
     @class CycloidSensors
-    @brief A Cycloid sensors
+    @brief A Bear sensors
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,16 +24,32 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CycloidSENSORS_H
-#define CycloidSENSORS_H
+#ifndef CYCLOIDSENSORS_H
+#define CYCLOIDSENSORS_H
 
 #include "NUPlatform/NUSensors.h"
+#include "Infrastructure/NUData.h"
+class Motors;
+
+#include <vector>
+#include <string>
+
 
 class CycloidSensors : public NUSensors
 {
 public:
-    CycloidSensors();
+    CycloidSensors(Motors* motors);
     ~CycloidSensors();
+    
+    void copyFromHardwareCommunications();
+    void copyFromJoints();
+    
+private:
+    static vector<string> m_servo_names;                //!< a vector of the names of each available servo
+    Motors* m_motors;                                   //!< a pointer to the underlying Motors class which communicates with the hardware
+    vector<NUData::id_t*> m_joint_ids;                  //!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+    vector<float> m_previous_positions;
+    vector<float> m_previous_velocities;
 };
 
 #endif

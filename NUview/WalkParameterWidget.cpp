@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QToolButton>
 #include <QColorDialog>
+#include <QTimer>
 
 #include <typeinfo>
 #include "GLDisplay.h"
@@ -32,7 +33,7 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
     setWindowTitle(tr("Walk Parameter(s)"));
 
     m_job_list = new JobList();
-    m_walk_parameters.load("NBWalkTest");
+    m_walk_parameters.load("JuppWalkTest");
     
     createWidgets();
     createLayout();
@@ -189,44 +190,15 @@ void WalkParameterWidget::createLayout()
 
 void WalkParameterWidget::createConnections()
 {
-    // Setup Shift Amplitude signals
-    connect(shiftAmplitudeSlider,SIGNAL(valueChanged(int)),shiftAmplitudeSpinBox,SLOT(setValue(int)));
-    connect(shiftAmplitudeSpinBox,SIGNAL(valueChanged(int)),shiftAmplitudeSlider,SLOT(setValue(int)));
-    connect(shiftAmplitudeSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup Shift Frequency signals
-    connect(shiftFrequencySlider,SIGNAL(valueChanged(int)),shiftFrequencySpinBox,SLOT(setValue(int)));
-    connect(shiftFrequencySpinBox,SIGNAL(valueChanged(int)),shiftFrequencySlider,SLOT(setValue(int)));
-    connect(shiftFrequencySlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup Phase Offset signals
-    connect(phaseOffsetSlider,SIGNAL(valueChanged(int)),phaseOffsetSpinBox,SLOT(setValue(int)));
-    connect(phaseOffsetSpinBox,SIGNAL(valueChanged(int)),phaseOffsetSlider,SLOT(setValue(int)));
-    connect(phaseOffsetSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup Phase Reset signals
-    connect(phaseResetSlider,SIGNAL(valueChanged(int)),phaseResetSpinBox,SLOT(setValue(int)));
-    connect(phaseResetSpinBox,SIGNAL(valueChanged(int)),phaseResetSlider,SLOT(setValue(int)));
-    connect(phaseResetSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup speed signals
-    connect(xSpeedSlider,SIGNAL(valueChanged(int)),xSpeedSpinBox,SLOT(setValue(int)));
-    connect(xSpeedSpinBox,SIGNAL(valueChanged(int)),xSpeedSlider,SLOT(setValue(int)));
-    connect(xSpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup speed signals
-    connect(ySpeedSlider,SIGNAL(valueChanged(int)),ySpeedSpinBox,SLOT(setValue(int)));
-    connect(ySpeedSpinBox,SIGNAL(valueChanged(int)),ySpeedSlider,SLOT(setValue(int)));
-    connect(ySpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
-    
-    // Setup speed signals
-    connect(yawSpeedSlider,SIGNAL(valueChanged(int)),yawSpeedSpinBox,SLOT(setValue(int)));
-    connect(yawSpeedSpinBox,SIGNAL(valueChanged(int)),yawSpeedSlider,SLOT(setValue(int)));
-    connect(yawSpeedSlider,SIGNAL(valueChanged(int)),this,SLOT(walkParameterChanged()));
+    // Setup the timer, and connect it to the walkParameter changed
+    m_timer = new QTimer();
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(walkParameterChanged()));
+    m_timer->start(1000);
 }
 
 WalkParameterWidget::~WalkParameterWidget()
 {
+    delete m_timer;
     // Shift Amplitude
     delete shiftAmplitudeLabel;      
     delete shiftAmplitudeSlider;     
@@ -275,19 +247,7 @@ WalkParameterWidget::~WalkParameterWidget()
 
 void WalkParameterWidget::walkParameterChanged()
 {
-    m_walk_parameters.load("NBWalkTest");
-    vector<Parameter>& params = m_walk_parameters.getParameters();
-    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
-
-    if (params.size() > 0)
-        params[0].set(shiftFrequencySlider->value()/10.0);
-    
-    if (maxspeeds.size() > 2)
-    {
-        maxspeeds[0] = xSpeedSlider->value()/10.0;
-        maxspeeds[1] = ySpeedSlider->value()/10.0;
-        maxspeeds[2] = yawSpeedSlider->value()/100.0;
-    }
+    m_walk_parameters.load("JuppWalkTest");
     
     m_job_list->addMotionJob(new WalkParametersJob(m_walk_parameters));
     m_job_list->summaryTo(debug);
