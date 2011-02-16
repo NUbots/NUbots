@@ -1,5 +1,5 @@
 #include "SAM.h"
-#include <QDebug>
+//#include <QDebug>
 
 using std::vector;
 
@@ -148,21 +148,6 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
 
     noisePoints.clear();
 //qDebug() << "finished";
-}
-
-
-
-//POINT CONVERSION
-void SAM::convertPoint(LinePoint& point, Vector3<float>& vals) {
-    //converts points from image coordinates to field coordinates
-    //vals -> 0 = bearing, 1 = distance, 2 = elevation
-    double xholder, yholder;
-    xholder = point.x;
-    yholder = point.y;
-    //x = dist * cos(bearing) * cos(elevation)
-    point.x = vals[0] * cos(vals[1]) * cos(vals[2]);
-    //y = dist * sin(bearing) * cos(elevation)
-    point.y = vals[0] * sin(vals[1]) * cos(vals[2]);
 }
 
 

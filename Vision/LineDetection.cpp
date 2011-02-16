@@ -192,8 +192,6 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
     /*SHANNON'S NEW LINE DETECTION*/
 
-    Vector3<float> convertVals;
-
     //get clusters
     vector< vector<LinePoint*> > clusters;
     vector< LinePoint* > leftover;
@@ -248,13 +246,54 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
             leftover.push_back(temppoint);
         }
     }
-    //qDebug() << "Beginning SAM:\n";
-    //qDebug() << "Clusters: " << clusters.size() << " leftover points: " << leftover.size();
+
+
+    //POINT CONVERSION TESTING
+    /*
+    ofstream prepoints, postpoints;
+    prepoints.open("prepoints.txt");
+    postpoints.open("postpoints.txt");
+    Vector3<float> convertVals;
+    double xtrans, ytrans;
+
     for(unsigned int i=0; i<clusters.size(); i++) {
-        //qDebug() << "\nC" << i+1 << " size: " << clusters[i].size();
+        //for each cluster
+        postpoints << clusters[i].size() << "\n";
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            //for each point
+            prepoints << clusters[i][k]->x << " " << clusters[i][k]->y << "\n";
+            GetDistanceToPoint(*clusters[i][k],convertVals,vision);
+            //x = dist * cos(bearing) * cos(elevation)
+            xtrans = convertVals[0] * cos(convertVals[1]) * cos(convertVals[2]);
+            //y = dist * sin(bearing) * cos(elevation)
+            ytrans = convertVals[0] * sin(convertVals[1]) * cos(convertVals[2]);
+            postpoints << xtrans << " " << ytrans << "\n";
+            //clusters[i][k]->x = xtrans;
+            //clusters[i][k]->y = ytrans;
+        }
+        prepoints << "\n";
+        postpoints << "\n";
     }
+    //leftovers
+    postpoints << leftover.size() << "\n";
+    for(unsigned int k=0; k<leftover.size(); k++) {
+        //for each point
+        prepoints << leftover[k]->x << " " << leftover[k]->y << "\n";
+        GetDistanceToPoint(*leftover[k],convertVals,vision);
+        //x = dist * cos(bearing) * cos(elevation)
+        xtrans = convertVals[0] * cos(convertVals[1]) * cos(convertVals[2]);
+        //y = dist * sin(bearing) * cos(elevation)
+        ytrans = convertVals[0] * sin(convertVals[1]) * cos(convertVals[2]);
+        postpoints << xtrans << " " << ytrans << "\n";
+        //leftover[k]->x = xtrans;
+        //leftover[k]->y = ytrans;
+    }
+    */
+
+    //qDebug() << "Beginning SAM:\n";
     vector<LSFittedLine*> lines;
     /*OUTPUT FOR DEBUGGING*/
+    /*
     ofstream fout;
     fout.open("points.txt");
     for(unsigned int i=0; i<clusters.size(); i++) {
@@ -268,8 +307,9 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
         fout << leftover[i]->x << " " << leftover[i]->y << "\n";
     }
     fout.close();
+    */
     /*OUTPUT FOR DEBUGGING*/
-    SAM::initRules(2.0,2,3,5,5.0,0.99);
+    SAM::initRules(2.0,2,3,5,7.5,0.99);
     SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
 
     /*OUTPUT FOR DEBUGGING*/

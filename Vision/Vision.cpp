@@ -281,6 +281,35 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
     //! Identify Field Objects
 
+    /**INCLUDED BY SHANNON**/
+        std::vector< ObjectCandidate > HorizontalLineCandidates;
+        std::vector< ObjectCandidate > VerticalLineCandidates;
+        std::vector< ObjectCandidate > LineCandidates;
+        validColours.clear();
+        validColours.push_back(ClassIndex::white);
+        //validColours.push_back(ClassIndex::blue);
+
+
+        method = Vision::PRIMS;
+        HorizontalLineCandidates = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.001, 10000, 4, method);
+        VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4);
+        unsigned int no_unused = 0;
+        for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
+            if(!LineDetector.horizontalLineSegments[i].isUsed)
+                no_unused++;
+        }
+        for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
+            if(!LineDetector.verticalLineSegments[i].isUsed)
+                no_unused++;
+        }
+        //candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+        //candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+        LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+        LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+
+
+    /**INCLUDED BY SHANNON**/
+
     #if DEBUG_VISION_VERBOSITY > 5
     debug << "Begin Classify Candidates: " << endl;
     #endif
@@ -413,7 +442,8 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
             debug << "\tPre-Line Formation: " <<endl;
         #endif
 
-        DetectLines(&LineDetector);
+        //DetectLines(&LineDetector);
+        DetectLines(&LineDetector, LineCandidates);
     
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-Line Formation: " <<endl;

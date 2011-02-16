@@ -38,8 +38,6 @@ public:
     static void splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall=true, bool cleardirty=true, bool noise=true);
     //CLUSTERS
     static void splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, bool clearsmall=true, bool cleardirty=true, bool noise=true);
-    //POINTCONVERSION
-    static void convertPoint(LinePoint& point, Vector3<float>& vals);
 
 private:
     //RULES
