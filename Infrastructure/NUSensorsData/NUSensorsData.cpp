@@ -91,11 +91,13 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
-    
     CurrentTime = 0;
     PreviousTime = 0;
-    
-    m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
+    // If this has already been initialised, don't do it again or bad stuff will happen.
+    if(m_ids.size() <= 0)
+        m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
     m_ids_copy = m_ids;
     m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
 

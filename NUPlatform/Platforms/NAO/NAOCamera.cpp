@@ -169,7 +169,7 @@ storedTimeStamp(Platform->getTime())
     readCameraSettings();
     m_cameraSettings[0] = m_settings;
     //forceApplySettings(fileSettings);
-    applySettings(fileSettings);
+    forceApplySettings(fileSettings);
 
     // Set Bottom Camera
     setActiveCamera(CameraSettings::BOTTOM_CAMERA);
@@ -177,7 +177,7 @@ storedTimeStamp(Platform->getTime())
     readCameraSettings();
     m_cameraSettings[1] = m_settings;
     //forceApplySettings(fileSettings);
-    applySettings(fileSettings);
+    forceApplySettings(fileSettings);
 
     loadCameraOffset();
 

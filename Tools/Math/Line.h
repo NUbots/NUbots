@@ -7,6 +7,8 @@
 #ifndef LINE_H_DEFINED
 #define LINE_H_DEFINED
 
+
+
 /*!
   @brief Class representing a 2 dimensional (x,y) position.
   */
@@ -23,6 +25,15 @@ class Point
     Point(double in_x, double in_y) {x = in_x; y = in_y; return;};
     double x; //!< The points x value.
     double y; //!< The points y value.
+    //double distance(const Point& p1) const { return sqrt((x-p1.x)*(x-p1.x) + (y-p1.y)*(y-p1.y)); }
+
+    // Overloaded functions
+    /*!
+      @brief Equality operator
+      @return True of the two points are equal. False if they are not.
+      */
+    friend bool operator ==(const Point& point1, const Point& point2) {return (point1.x==point2.x)&&(point1.y==point2.y);}
+
 };
 
 /*!
@@ -139,9 +150,28 @@ class Line
     /*!
       @brief Find the distance between the the line and the point.
       @param point The point to find the distance to.
-      @return The from the line to the point.
+      @return The distance from the line to the point.
       */
-    double getLinePointDistance(Point point);
+    double getLinePointDistance(Point point) const;
+    /*Added by Shannon*/
+    /*!
+      @brief Find the signed distance between the the line and the point.
+      @param point The point to find the distance to.
+      @return The signed distance from the line to the point.
+      */
+    double getSignedLinePointDistance(Point point) const;
+    /*!
+      @brief Retrieve the Rho value of the line equation (normal form)
+      @return Rho.
+      */
+    double getRho() const;
+    /*!
+      @brief Retrieve the Phi value of the line equation (normal form)
+      @return Phi.
+      */
+    double getPhi() const;
+    /*Added by Shannon*/
+
 // Overloaded functions
     /*!
       @brief Equality operator
@@ -153,11 +183,19 @@ class Line
       @return False of the two lines are equal. True if they are not.
       */
     friend bool operator !=(const Line& line1, const Line& line2);
+    /*!
+      @brief Greater than operator
+      @return True if line1 grad > line2 grad, if == then true if
+            line1 y-int > line2 y-int. False otherwise.
+      */
+    friend bool operator > (const Line& line1, const Line& line2);
     
   private:
     double m_A; //! The lines A value.
     double m_B; //! The lines B value.
     double m_C; //! The lines C value.
+    double Rho;
+    double Phi;
     /*!
       @brief Determine if the line represented by the given equation is valid.
       @param A The A value of the line equation.

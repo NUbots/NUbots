@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <qmessagebox.h>
+#include <sstream>
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -65,6 +66,9 @@ void virtualNUbot::setSensorData(const float* joint, const float* balance, const
 void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
 
+    //std::stringstream data;
+    //newsensorsData->summaryTo(data);
+    //qDebug() << data.str().c_str() << endl;
 
     sensorsData = newsensorsData;
     vector<float> horizondata;
@@ -182,6 +186,67 @@ void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
 }
+
+/**ADDED BY SHANNON FOR TEST DATA COLLECTION**/
+void virtualNUbot::printPoints(const vector<LinePoint>& points) const {
+    string s = "C:\\Users\\Shannon\\Documents\\Uni\\3rd Yr Summer Research\\untitled\\inputs\\nubots.txt";
+    ofstream file;
+    file.open(s.c_str());
+    if(!file) {
+        //error
+        return;
+    }
+    else {
+        for(unsigned int i=0; i<points.size(); i++) {
+            file << points[i].x;
+            file << " ";
+            file << points[i].y;
+            file << "\n";
+        }
+        file.close();
+    }
+
+}
+
+void virtualNUbot::printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const {
+
+    if(!file) {
+        //error
+        return;
+    }
+    else {
+        vector<TransitionSegment> segments;
+        for(unsigned int i=0; i<candidates.size(); i++) {
+            segments = candidates[i].getSegments();
+            Vector2<int> midPoint;
+            for(unsigned int k=0; k<segments.size(); k++) {
+                midPoint = segments[k].getMidPoint();
+                file << midPoint.x;
+                file << " ";
+                file << midPoint.y;
+                file << "\n";
+            }
+            file << -1.0 << "\n"; //sentinel value
+        }
+    }
+}
+
+void virtualNUbot::printOtherPoints(const vector<LinePoint>& points, ofstream& file) const {
+    if(!file) {
+        //error
+        return;
+    }
+    else {
+        for(unsigned int i=0; i<points.size(); i++) {
+            file << points[i].x;
+            file << " ";
+            file << points[i].y;
+            file << "\n";
+        }
+    }
+}
+
+/**ADDED BY SHANNON FOR TEST DATA COLLECTION**/
 
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
@@ -319,7 +384,6 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //qDebug() << "disaplay scanPaths: finnished";
 
     emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-
     LineDetection LineDetector;
     vision.DetectLineOrRobotPoints(&vertScanArea,&LineDetector);
     qDebug() << "Number Of Robot Segments: "<<  LineDetector.robotSegments.size() << "Number Of LinePoints: " << LineDetector.linePoints.size() ;
@@ -327,7 +391,40 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
+/**INCLUDED BY SHANNON FOR DEBUGGING**/
+    std::vector< ObjectCandidate > HorizontalLineCandidates;
+    std::vector< ObjectCandidate > VerticalLineCandidates;
+    std::vector< ObjectCandidate > LineCandidates;
+    validColours.clear();
+    validColours.push_back(ClassIndex::white);
+    //validColours.push_back(ClassIndex::blue);
 
+    //qDebug() << "PRE-ROBOT";
+    method = Vision::PRIMS;
+    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 4, method);
+    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4);
+    qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
+    qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
+    unsigned int no_unused = 0;
+    for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
+        if(!LineDetector.horizontalLineSegments[i].isUsed)
+            no_unused++;
+    }
+    for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
+        if(!LineDetector.verticalLineSegments[i].isUsed)
+            no_unused++;
+    }
+    qDebug() << "Unused Segments: " << no_unused;
+    candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+    candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+    LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+    LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+    //qDebug() << "POST-ROBOT";
+    //printCandidates(HorizontalLineCandidates, file);
+    //printCandidates(VerticalLineCandidates, file);
+    //printOtherPoints(LineDetector.linePoints, file);
+
+/**INCLUDED BY SHANNON FOR DEBUGGING**/
 
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;
@@ -413,7 +510,10 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     qDebug() << "Post Processing Goal Posts: ";
     vision.PostProcessGoals();
      qDebug() << "Finding Lines" ;
-    vision.DetectLines(&LineDetector);
+    //vision.DetectLines(&LineDetector);
+     vision.DetectLines(&LineDetector, LineCandidates);
+
+
     //! Extract Detected Line & Corners
     emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
     emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
