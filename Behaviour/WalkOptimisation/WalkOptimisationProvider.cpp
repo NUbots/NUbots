@@ -69,13 +69,13 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("NBWalkStart");
+    m_parameters.load("ALWalkAldebaran");
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
-    //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
+    m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
     //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
-    m_optimiser = NULL;    
+    //m_optimiser = NULL;    
     if (not m_optimiser)
         m_log.open((DATA_DIR + "/Optimisation/" + m_parameters.getName() + ".log").c_str(), fstream::out);
     else
