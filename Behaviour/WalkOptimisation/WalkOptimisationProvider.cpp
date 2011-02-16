@@ -69,7 +69,12 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-    m_parameters.load("ALWalkAldebaran");
+#ifdef TARGET_IS_NAOWEBOTS
+    m_parameters.load("NBWalkStart");
+#else
+    m_parameters.load("ALWalkCrab");
+#endif
+    
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);

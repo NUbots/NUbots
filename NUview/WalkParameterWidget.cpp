@@ -252,7 +252,7 @@ void WalkParameterWidget::walkParameterChanged()
     m_job_list->addMotionJob(new WalkParametersJob(m_walk_parameters));
     m_job_list->summaryTo(debug);
 
-    (*nuio) << m_job_list;
+    //(*nuio) << m_job_list;
     
     m_job_list->clear();
 }
