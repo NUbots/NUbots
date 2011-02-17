@@ -357,9 +357,9 @@ void NUSensors::calculateOdometry()
     // Enum for leg selection.
     enum{none, left, right};
 
-    const float turnMultiplier = 0.96;   // Turn Gripping factor
-    const float xMultiplier = 1.0;      // X Gripping factor
-    const float yMultiplier = 1.0;      // Y Gripping factor
+    const float turnMultiplier = 1.0f;   // Turn Gripping factor
+    const float xMultiplier = 1.0f;      // X Gripping factor
+    const float yMultiplier = 1.0f;      // Y Gripping factor
 
     static std::vector<float> prevLeftPosition(6);
     static std::vector<float> prevRightPosition(6);
@@ -404,18 +404,21 @@ void NUSensors::calculateOdometry()
 
     std::vector<float> currentPosition(6);
     std::vector<float> prevPosition(6);
+	std::string footText("None");
     // Select values to use for calculation based on the support leg.
     if(currentSupportLeg == left)
     {        
         currentPosition = leftPosition;
         prevPosition = prevLeftPosition;
+		footText = "Left";
     }
     else if (currentSupportLeg == right)
     {
         currentPosition = rightPosition;
         prevPosition = prevRightPosition;
+		footText = "Right";
     }
-
+	//debug << leftPosition[5] << "," << rightPosition[5] << "," << footText << endl;
     if(currentSupportLeg != none)
  	{
         // Calculate differences in the position of the support leg.
@@ -479,6 +482,8 @@ void NUSensors::calculateKinematics()
     bool rightLegJointsSuccess = m_data->getPosition(NUSensorsData::RLeg, rightLegJoints);
     static vector<float> headJoints(2,0.0f);
     bool headJointsSuccess = m_data->getPosition(NUSensorsData::Head, headJoints);
+
+	rightLegJoints[2] = leftLegJoints[2];
 
     // Note that the kinematics uses the Matrix class, however, at this stage the NUSensorsData stores vector<float> and vector<vector<float>>
     // In this early version we continue to use the method used in 2010:
