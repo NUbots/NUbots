@@ -187,66 +187,6 @@ void virtualNUbot::processVisionFrame()
     processVisionFrame(rawImage);
 }
 
-/**ADDED BY SHANNON FOR TEST DATA COLLECTION**/
-void virtualNUbot::printPoints(const vector<LinePoint>& points) const {
-    string s = "C:\\Users\\Shannon\\Documents\\Uni\\3rd Yr Summer Research\\untitled\\inputs\\nubots.txt";
-    ofstream file;
-    file.open(s.c_str());
-    if(!file) {
-        //error
-        return;
-    }
-    else {
-        for(unsigned int i=0; i<points.size(); i++) {
-            file << points[i].x;
-            file << " ";
-            file << points[i].y;
-            file << "\n";
-        }
-        file.close();
-    }
-
-}
-
-void virtualNUbot::printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const {
-
-    if(!file) {
-        //error
-        return;
-    }
-    else {
-        vector<TransitionSegment> segments;
-        for(unsigned int i=0; i<candidates.size(); i++) {
-            segments = candidates[i].getSegments();
-            Vector2<int> midPoint;
-            for(unsigned int k=0; k<segments.size(); k++) {
-                midPoint = segments[k].getMidPoint();
-                file << midPoint.x;
-                file << " ";
-                file << midPoint.y;
-                file << "\n";
-            }
-            file << -1.0 << "\n"; //sentinel value
-        }
-    }
-}
-
-void virtualNUbot::printOtherPoints(const vector<LinePoint>& points, ofstream& file) const {
-    if(!file) {
-        //error
-        return;
-    }
-    else {
-        for(unsigned int i=0; i<points.size(); i++) {
-            file << points[i].x;
-            file << " ";
-            file << points[i].y;
-            file << "\n";
-        }
-    }
-}
-
-/**ADDED BY SHANNON FOR TEST DATA COLLECTION**/
 
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
@@ -391,7 +331,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //! Identify Field Objects
     //qDebug() << "PREclassifyCandidates";
 
-/**INCLUDED BY SHANNON FOR DEBUGGING**/
+    //Prep object candidates for line detection
     std::vector< ObjectCandidate > HorizontalLineCandidates;
     std::vector< ObjectCandidate > VerticalLineCandidates;
     std::vector< ObjectCandidate > LineCandidates;
@@ -420,11 +360,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
     LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
     //qDebug() << "POST-ROBOT";
-    //printCandidates(HorizontalLineCandidates, file);
-    //printCandidates(VerticalLineCandidates, file);
-    //printOtherPoints(LineDetector.linePoints, file);
 
-/**INCLUDED BY SHANNON FOR DEBUGGING**/
 
     std::vector< ObjectCandidate > RobotCandidates;
     std::vector< ObjectCandidate > BallCandidates;

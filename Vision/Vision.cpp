@@ -282,6 +282,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //! Identify Field Objects
 
     /**INCLUDED BY SHANNON**/
+
         std::vector< ObjectCandidate > HorizontalLineCandidates;
         std::vector< ObjectCandidate > VerticalLineCandidates;
         std::vector< ObjectCandidate > LineCandidates;
