@@ -45,7 +45,6 @@ public:
 private:
     void initSwarm();
     void updateSwarm();
-    vector<float> getRandVector();
     
     
     void toStream(ostream& o) const;
@@ -63,7 +62,6 @@ private:
     float m_c1;
     float m_c2;
     float m_inertia;
-    float m_seed_fraction;
     int m_num_particles;
     int m_num_dimensions;
 };
