@@ -334,6 +334,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //Prep object candidates for line detection
     std::vector< ObjectCandidate > HorizontalLineCandidates;
     std::vector< ObjectCandidate > VerticalLineCandidates;
+    std::vector< TransitionSegment > LeftoverPoints;
     std::vector< ObjectCandidate > LineCandidates;
     validColours.clear();
     validColours.push_back(ClassIndex::white);
@@ -341,8 +342,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //qDebug() << "PRE-ROBOT";
     method = Vision::PRIMS;
-    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 4, method);
-    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4);
+    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 4, LeftoverPoints);
+    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4,LeftoverPoints);
     qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
     qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
     unsigned int no_unused = 0;
@@ -447,7 +448,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     vision.PostProcessGoals();
      qDebug() << "Finding Lines" ;
     //vision.DetectLines(&LineDetector);
-     vision.DetectLines(&LineDetector, LineCandidates);
+     vision.DetectLines(&LineDetector, LineCandidates, LeftoverPoints);
 
 
     //! Extract Detected Line & Corners

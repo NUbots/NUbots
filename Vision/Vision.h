@@ -165,11 +165,25 @@ class Vision
                                                     float min_aspect, float max_aspect, int min_segments,
                                                     tCLASSIFY_METHOD method);
 
+    std::vector<ObjectCandidate> classifyCandidates(std::vector< TransitionSegment > &segments,
+                                                    const std::vector<Vector2<int> >&fieldBorders,
+                                                    const std::vector<unsigned char> &validColours,
+                                                    int spacing,
+                                                    float min_aspect, float max_aspect, int min_segments,
+                                                    std::vector< TransitionSegment >& leftover);
+
     std::vector<ObjectCandidate> classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
                                                          const std::vector<Vector2<int> >&fieldBorders,
                                                          const std::vector<unsigned char> &validColours,
                                                          int spacing,
                                                          float min_aspect, float max_aspect, int min_segments);
+
+    std::vector<ObjectCandidate> classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
+                                                         const std::vector<Vector2<int> >&fieldBorders,
+                                                         const std::vector<unsigned char> &validColours,
+                                                         int spacing,
+                                                         float min_aspect, float max_aspect, int min_segments,
+                                                         std::vector< TransitionSegment >& leftover);
 
     std::vector<ObjectCandidate> classifyCandidatesDBSCAN(std::vector< TransitionSegment > &segments,
                                                           const std::vector<Vector2<int> >&fieldBorders,
@@ -202,11 +216,16 @@ class Vision
     void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
 
     void DetectLines(LineDetection* LineDetector);
-    void DetectLines(LineDetection* LineDetector, vector<ObjectCandidate>& candidates);
+    void DetectLines(LineDetection* LineDetector, vector<ObjectCandidate>& candidates, vector< TransitionSegment >& leftover);
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,
                                                                       int spacing, int min_segments);
+
+     std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > &segments,
+                                                                      const std::vector<unsigned char> &validColours,
+                                                                      int spacing, int min_segments,
+                                                                      std::vector< TransitionSegment > &leftover);
 
     Circle DetectBall(const std::vector<ObjectCandidate> &FO_Candidates);
 

@@ -176,7 +176,11 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     #endif
 }
 
-void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data,  vector< ObjectCandidate >& candidates) {
+void LineDetection::FormLines(FieldObjects* AllObjects,
+                              Vision* vision,
+                              NUSensorsData* data,
+                              vector< ObjectCandidate >& candidates,
+                              vector< TransitionSegment>& leftoverPoints) {
 
     //Setting up the variables:
     int spacing = vision->getScanSpacings();
@@ -219,32 +223,16 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     }
 
     //get leftover points
-    for(unsigned int i=0; i<verticalLineSegments.size(); i++) {
-        if(!verticalLineSegments[i].isUsed) {
-            temppoint = new LinePoint();
-            temppoint->x = (double)verticalLineSegments[i].getMidPoint().x;
-            temppoint->y = (double)verticalLineSegments[i].getMidPoint().y;
-            /*
-            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
-                SAM::convertPoint(*temppoint, convertVals);
-            }
-            */
-            leftover.push_back(temppoint);
+    for(unsigned int i=0; i<leftoverPoints.size(); i++) {
+        temppoint = new LinePoint();
+        temppoint->x = (double)leftoverPoints[i].getMidPoint().x;
+        temppoint->y = (double)leftoverPoints[i].getMidPoint().y;
+        /*
+        if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+            SAM::convertPoint(*temppoint, convertVals);
         }
-    }
-
-    for(unsigned int i=0; i<horizontalLineSegments.size(); i++) {
-        if(!horizontalLineSegments[i].isUsed) {
-            temppoint = new LinePoint();
-            temppoint->x = (double)horizontalLineSegments[i].getMidPoint().x;
-            temppoint->y = (double)horizontalLineSegments[i].getMidPoint().y;
-            /*
-            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
-                SAM::convertPoint(*temppoint, convertVals);
-            }
-            */
-            leftover.push_back(temppoint);
-        }
+        */
+        leftover.push_back(temppoint);
     }
 
 
@@ -309,7 +297,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     fout.close();
     */
     /*OUTPUT FOR DEBUGGING*/
-    SAM::initRules(2.0,2,3,5,7.5,0.99);
+    SAM::initRules(2.0,2,3,5,10,0.999);
     SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
 
     /*OUTPUT FOR DEBUGGING*/
@@ -357,6 +345,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
         sumR2 += fieldLines.back().getr2tls();
         lines.pop_back();
     }
+    TotalValidLines = lineno;
     //qDebug() << "Average: MSD: " << sumMSD/fieldLines.size() << " R^2: " << sumR2/fieldLines.size();
     //qDebug() << "Finished \n";
     /*SHANNON'S NEW LINE DETECTION*/
