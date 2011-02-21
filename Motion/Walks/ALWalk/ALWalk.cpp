@@ -31,7 +31,7 @@
 
 #include "Motion/Tools/MotionFileTools.h"
 
-#include <albroker.h>
+#include <alcommon/albroker.h>
 #include <time.h>
 
 ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, actions)

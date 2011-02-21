@@ -8,7 +8,7 @@
 #   - include Aldebaran's AL_DIR/cmakemodule/aldebaran.cmake
 #   - FIND_PACKAGE(ALCOMMON)
 #   - set NUBOT_IS_EXECUTABLE to OFF
-#   - set the OUTPUT_ROOT_DIR_LIB to AL_DIR/modules/lib 
+#   - set the OUTPUT_ROOT_DIR to AL_DIR/modules/lib 
 #	- ADD_DEFINITIONS
 #	- INCLUDE_DIRECTORIES
 #	- Append required libraries to NUBOT_LINK_LIBRARIES
@@ -19,6 +19,7 @@ INCLUDE(${TOOLCHAIN_DIR}/cmake/bootstrap.cmake)
 USE(NAOQI-PLUGINS-TOOLS)
 
 ######### Set NUBOT_IS_REMOTE so that the code is compiled into an library
+SET(NUBOT_IS_EXECUTABLE OFF)
 SET(NUBOT_IS_REMOTE OFF)
 
 ############################ CMAKE PACKAGE DIRECTORY
@@ -41,9 +42,9 @@ SET( CMAKE_CXX_FLAGS_DEBUG
   " -g3 -Wall -march=geode -mtune=geode -mmmx -m3dnow" )
 
 CONFIGURE_SRC_MODULE(nubot ${NUBOT_SRCS})
-USE_LIB(nubot ALCOMMON ALMATH LIBCORE TOOLS ALVALUE PROXIES)
+USE_LIB(nubot ALCOMMON ALMEMORY_FAST_ACCESS ALVALUE PROXIES)
 
-SET( OUTPUT_ROOT_DIR_LIB "${CMAKE_CURRENT_SOURCE_DIR}/../Build/NAO/" )
+SET( OUTPUT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Build/NAO/" )
 
 MARK_AS_ADVANCED(
 	ALCOMMON_DEPENDS

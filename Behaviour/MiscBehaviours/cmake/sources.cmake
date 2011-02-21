@@ -24,6 +24,7 @@ SET (YOUR_SRCS  SelectBehaviourProvider.cpp SelectBehaviourProvider.h
                 VisionCalibrationProvider.cpp VisionCalibrationProvider.h
 				PoseProvider.cpp PoseProvider.h 
 				ScriptedPoseProvider.cpp ScriptedPoseProvider.h
+                ForwardWalkProvider.cpp ForwardWalkProvider.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

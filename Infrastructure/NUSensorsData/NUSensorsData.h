@@ -90,6 +90,8 @@ public:
     const static id_t MotionWalkMaxSpeed;
     const static id_t MotionHeadCompletionTime;
     
+    const static unsigned int m_num_sensor_ids;                  //!< internal use only.
+    
     enum JointSensorIndices 
     {   // indices into the single joint vector
         PositionId = 0,

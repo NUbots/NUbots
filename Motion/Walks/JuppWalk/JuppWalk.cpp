@@ -21,6 +21,8 @@
 
 #include "JuppWalk.h"
 
+#include "Infrastructure/NUBlackboard.h"
+
 #include "debug.h"
 #include "debugverbositynumotion.h"
 
@@ -42,7 +44,7 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
 {
     initWalkParameters();
     
-    m_leg_length = 20;          // The NAO has legs 20cm long
+    m_leg_length = 15;          // The NAO has legs 20cm long, the cycloid has 15cm
     m_current_time = 0;
     m_previous_time = m_current_time;
     
@@ -64,8 +66,8 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     m_right_leg_gains = vector<float> (6, 0);
     
     // Initialise the arm values
-    float larm[] = {0.1, 1.57, 0.15, -1.57};
-    float rarm[] = {-0.1, 1.57, 0.15, 1.57};
+    float larm[] = {0.1, 1.57, 0.15, 0};
+    float rarm[] = {-0.1, 1.57, 0.15, 0};
     m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
     m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
     
@@ -73,9 +75,6 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     m_left_arm_gains = vector<float> (4, 0);
     m_right_arm_angles = m_initial_rarm;
     m_right_arm_gains = vector<float> (4, 0);
-    
-    m_pattern_debug.open("patternDebug.csv");
-    m_pattern_debug << "Phase (rad), Swing, Phase (rad), Swing" << endl;
 }
 
 void JuppWalk::initWalkParameters()
@@ -94,7 +93,7 @@ void JuppWalk::initWalkParameters()
     // leg swing parameters
     m_param_swing_v = 2.0;                      // controls the swing duration
     // balance parameters
-    m_param_balance_orientation = 0.03;         // controls the body orientation
+    m_param_balance_orientation = 0.00;         // controls the body orientation
     m_param_balance_sagittal_sway = 0.02;       // controls the sagittal sway amplitude
     // gyro parameters
     m_param_gyro_roll = 0.1;
@@ -113,21 +112,21 @@ void JuppWalk::initWalkParameters()
     maxaccels.push_back(1.25);
     maxaccels.push_back(0.2);
     
-    vector<WalkParameters::Parameter> parameters;
-    parameters.push_back(WalkParameters::Parameter("StepFrequency", m_step_frequency, 0.1, 3.0, "The step frequency in Hz"));
-    parameters.push_back(WalkParameters::Parameter("PhaseOffset", m_param_phase_offset, -M_PI/2.0, M_PI/2.0, "The phase offset in radians for the shortening, swing and loading phases"));
-    parameters.push_back(WalkParameters::Parameter("ShiftAmplitude", m_param_shift_c, 0.0, 0.4, "The amplitude of the left-right shifting motion"));
-    parameters.push_back(WalkParameters::Parameter("ShiftAnkle", m_param_ankle_shift, 0.0, 1.0, "The fraction of the weight shifting done at the ankle level"));
-    parameters.push_back(WalkParameters::Parameter("ShortAmplitude", m_param_short_c, 0.0, 1.0, "The amplitude of the shortening movement"));
-    parameters.push_back(WalkParameters::Parameter("ShortDuration", m_param_short_v, 1.0, 4.0, "The duration of the shortening phase"));
-    parameters.push_back(WalkParameters::Parameter("LoadAmplitude", m_param_load_c, 0.0, 1.0, "The amplitude of the loading movement"));
-    parameters.push_back(WalkParameters::Parameter("LoadDuration", m_param_load_v, 1.0, 4.0, "The duration of the loading phase"));
-    parameters.push_back(WalkParameters::Parameter("SwingDuration", m_param_swing_v, 1.0, 4.0, "The duration of the swing phase"));
-    parameters.push_back(WalkParameters::Parameter("ForwardLean", m_param_balance_orientation, -0.1, 0.1, "The forward body lean in radians"));
-    parameters.push_back(WalkParameters::Parameter("ForwardShiftAmplitude", m_param_balance_sagittal_sway, 0.0, 1.0, "The amplitude of the forward-backward shifting motion"));
-    parameters.push_back(WalkParameters::Parameter("GyroRollGain", m_param_gyro_roll, 0.0, 1.0, "The gain of the roll controller"));
-    parameters.push_back(WalkParameters::Parameter("GyroPitchGain", m_param_gyro_pitch, 0.0, 1.0, "The gain of the pitch controller"));
-    parameters.push_back(WalkParameters::Parameter("PhaseReset", m_param_phase_reset_offset, -1.0, 1.0, "The phase reset offset triggered upon impact with the ground"));
+    vector<Parameter> parameters;
+    parameters.push_back(Parameter("StepFrequency", m_step_frequency, 0.1, 3.0, "The step frequency in Hz"));
+    parameters.push_back(Parameter("PhaseOffset", m_param_phase_offset, -M_PI/2.0, M_PI/2.0, "The phase offset in radians for the shortening, swing and loading phases"));
+    parameters.push_back(Parameter("ShiftAmplitude", m_param_shift_c, 0.0, 0.4, "The amplitude of the left-right shifting motion"));
+    parameters.push_back(Parameter("ShiftAnkle", m_param_ankle_shift, 0.0, 1.0, "The fraction of the weight shifting done at the ankle level"));
+    parameters.push_back(Parameter("ShortAmplitude", m_param_short_c, 0.0, 1.0, "The amplitude of the shortening movement"));
+    parameters.push_back(Parameter("ShortDuration", m_param_short_v, 1.0, 4.0, "The duration of the shortening phase"));
+    parameters.push_back(Parameter("LoadAmplitude", m_param_load_c, 0.0, 1.0, "The amplitude of the loading movement"));
+    parameters.push_back(Parameter("LoadDuration", m_param_load_v, 1.0, 4.0, "The duration of the loading phase"));
+    parameters.push_back(Parameter("SwingDuration", m_param_swing_v, 1.0, 4.0, "The duration of the swing phase"));
+    parameters.push_back(Parameter("ForwardLean", m_param_balance_orientation, -0.1, 0.1, "The forward body lean in radians"));
+    parameters.push_back(Parameter("ForwardShiftAmplitude", m_param_balance_sagittal_sway, 0.0, 1.0, "The amplitude of the forward-backward shifting motion"));
+    parameters.push_back(Parameter("GyroRollGain", m_param_gyro_roll, 0.0, 1.0, "The gain of the roll controller"));
+    parameters.push_back(Parameter("GyroPitchGain", m_param_gyro_pitch, 0.0, 1.0, "The gain of the pitch controller"));
+    parameters.push_back(Parameter("PhaseReset", m_param_phase_reset_offset, -1.0, 1.0, "The phase reset offset triggered upon impact with the ground"));
     
     vector<vector<float> > armgains;
     armgains.push_back(vector<float>());
@@ -155,21 +154,21 @@ void JuppWalk::initWalkParameters()
  */
 void JuppWalk::getParameters()
 {
-    vector<WalkParameters::Parameter>& parameters = m_walk_parameters.getParameters();
-    m_step_frequency = parameters[0].Value; 
-    m_param_phase_offset = parameters[1].Value;
-    m_param_shift_c = parameters[2].Value;
-    m_param_ankle_shift = parameters[3].Value;
-    m_param_short_c = parameters[4].Value;
-    m_param_short_v = parameters[5].Value;
-    m_param_load_c = parameters[6].Value;
-    m_param_load_v = parameters[7].Value;
-    m_param_swing_v = parameters[8].Value;
-    m_param_balance_orientation = parameters[9].Value;
-    m_param_balance_sagittal_sway = parameters[10].Value;
-    m_param_gyro_roll = parameters[11].Value;
-    m_param_gyro_pitch = parameters[12].Value;
-    m_param_phase_reset_offset = parameters[13].Value;
+    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    m_step_frequency = parameters[0].get(); 
+    m_param_phase_offset = parameters[1].get();
+    m_param_shift_c = parameters[2].get();
+    m_param_ankle_shift = parameters[3].get();
+    m_param_short_c = parameters[4].get();
+    m_param_short_v = parameters[5].get();
+    m_param_load_c = parameters[6].get();
+    m_param_load_v = parameters[7].get();
+    m_param_swing_v = parameters[8].get();
+    m_param_balance_orientation = parameters[9].get();
+    m_param_balance_sagittal_sway = parameters[10].get();
+    m_param_gyro_roll = parameters[11].get();
+    m_param_gyro_pitch = parameters[12].get();
+    m_param_phase_reset_offset = parameters[13].get();
 }
 
 /*! @brief Destructor for motion module
@@ -180,6 +179,9 @@ JuppWalk::~JuppWalk()
 
 void JuppWalk::doWalk()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::doWalk()" << endl;
+    #endif
     getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
     m_swing_amplitude_roll = asin(-m_speed_y/(2*m_step_frequency*m_leg_length));
@@ -198,42 +200,27 @@ void JuppWalk::doWalk()
     calculateRightArm();
     
     updateActionatorsData();
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::doWalk(). Completed" << endl;
+    #endif
 }
 
 void JuppWalk::calculateGaitPhase()
 {
-    // I need to learn to interpolate, because abrupt changes destablise the robot
-    // so I want to shift to the measured phase over m_step_frequency/8 seconds
-    static float leftimpacttime;
-    static float rightimpacttime;
-    static const float interpolationtime = 1000*m_step_frequency/4.0;
-    static float gaitphaseonimpact = m_gait_phase;
-    m_current_time = m_data->CurrentTime;
-        
-    if (m_current_time - leftimpacttime < interpolationtime)
-    {
-        float measuredphaseonimpact = M_PI/m_param_short_v - M_PI + m_param_phase_offset + m_param_phase_reset_offset;
-        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
-        if (fabs(phasediff) < M_PI/8)
-            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-    }
-    if (m_current_time - rightimpacttime < interpolationtime)
-    {
-        float measuredphaseonimpact = M_PI/m_param_short_v + m_param_phase_offset + m_param_phase_reset_offset;
-        float phasediff = measuredphaseonimpact - gaitphaseonimpact;
-        if (fabs(phasediff) < M_PI/8)
-            m_gait_phase += (phasediff/interpolationtime)*(m_current_time - m_previous_time);
-    }
-    
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateGaitPhase()" << endl;
+    #endif
     m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
-    
-    m_previous_time = m_current_time;
 }
 
 /*! @brief Calculates the angles and gains for the left leg
  */
 void JuppWalk::calculateLeftLeg()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLeftLeg()" << endl;
+    #endif
     calculateLegAngles(m_left_leg_phase, -1, m_left_leg_angles);
     calculateLegGains(m_left_leg_phase, m_left_leg_gains);
 }
@@ -242,6 +229,9 @@ void JuppWalk::calculateLeftLeg()
  */
 void JuppWalk::calculateRightLeg()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateRightLeg()" << endl;
+    #endif
     calculateLegAngles(m_right_leg_phase, 1, m_right_leg_angles);
     calculateLegGains(m_right_leg_phase, m_right_leg_gains);
 }
@@ -252,6 +242,9 @@ void JuppWalk::calculateRightLeg()
  */
 void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& angles)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLegAngles()" << endl;
+    #endif
     /* Jason's guide to this to walk:
      Step 1. Tune shift_amp such that it looks like the weight is being shifted between the feet
      Step 2. Tune the shortening phase shift. Too late and the robot will fall, too early and the feet wont come off the ground!
@@ -324,10 +317,6 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
         swing_leg_yaw = -legsign*m_swing_amplitude_yaw - fabs(m_swing_amplitude_yaw);
     }
     
-    m_pattern_debug << swing_phase << ", " << swing_leg_yaw << ", ";
-    if (legsign > 0) 
-        m_pattern_debug << endl;
-    
     // Balance
     float balance_foot_roll = 0;//-2*legsign*m_swing_amplitude_roll*cos(legphase + 0.35);
     float balance_foot_pitch = m_param_balance_orientation + 0.05*m_swing_amplitude_pitch - m_param_balance_sagittal_sway*m_swing_amplitude_pitch*cos(2*(legphase - m_param_phase_offset));
@@ -375,14 +364,19 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
  */
 void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
-    gains = leggains[0];
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLegGains()" << endl;
+    #endif
+    gains = m_walk_parameters.getLegGains()[0];
 }
 
 /*! @brief Calculates the left arm angles and gains
  */
 void JuppWalk::calculateLeftArm()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateLeftArm()" << endl;
+    #endif
     calculateArmAngles(m_left_leg_phase, -1, m_left_arm_angles);
     calculateArmGains(m_left_leg_phase, m_left_arm_gains);
 }
@@ -391,6 +385,9 @@ void JuppWalk::calculateLeftArm()
  */
 void JuppWalk::calculateRightArm()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::calculateRightArm()" << endl;
+    #endif
     calculateArmAngles(m_right_leg_phase, 1, m_right_arm_angles);
     calculateArmGains(m_right_leg_phase, m_right_arm_gains);
 }
@@ -403,8 +400,8 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
 {
     angles[0] = -0.15*armsign;                          // ShoulderRoll
     angles[1] = 0.4*sin(legphase + M_PI) + M_PI/2.0;    // ShoulderPitch
-    angles[2] = 0;                                      // ElbowRoll
-    angles[3] = armsign*M_PI/2;                         // ElbowYaw
+    angles[2] = 0;                                      // ElbowPitch
+    angles[3] = 0;                                      // ElbowYaw
 }
 
 /*! @brief Calculates the arm gains based on the given phase
@@ -413,8 +410,7 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
  */
 void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 {
-    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
-    gains = armgains[0];
+    gains = m_walk_parameters.getArmGains()[0];
 }
 
 /*! @brief Calculates the gyro-based feedback terms m_gyro_foot_roll and m_gyro_foot_pitch
@@ -425,43 +421,52 @@ void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
 void JuppWalk::calculateGyroFeedback()
 {
     static vector<float> values;        // [vx, vy, vz]
-    m_data->get(NUSensorsData::Gyro, values);
+    if (m_data->get(NUSensorsData::Gyro, values))
+    {
+        static const float roll_threshold = 0.10;
+        static const float pitch_threshold = 0.10;          
+        if (values[0] > roll_threshold)
+            m_gyro_foot_roll = -m_param_gyro_roll*(values[0] - roll_threshold);
+        else if (values[0] < -roll_threshold)
+            m_gyro_foot_roll = -m_param_gyro_roll*(values[0] + roll_threshold);
+        else
+            m_gyro_foot_roll = 0;
 
-    static const float roll_threshold = 0.10;
-    static const float pitch_threshold = 0.10;          
-    if (values[0] > roll_threshold)
-        m_gyro_foot_roll = -m_param_gyro_roll*(values[0] - roll_threshold);
-    else if (values[0] < -roll_threshold)
-        m_gyro_foot_roll = -m_param_gyro_roll*(values[0] + roll_threshold);
-    else
-        m_gyro_foot_roll = 0;
-
-    
-    if (values[1] > pitch_threshold)
-    {
-        m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] - pitch_threshold);
-        m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] - pitch_threshold);
-    }
-    else if (values[1] < -pitch_threshold)
-    {
-        m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] + pitch_threshold);
-        m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] + pitch_threshold);
-    }
-    else
-    {
-        m_gyro_foot_pitch = 0;
-        m_gyro_leg_pitch = 0;
+        
+        if (values[1] > pitch_threshold)
+        {
+            m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] - pitch_threshold);
+            m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] - pitch_threshold);
+        }
+        else if (values[1] < -pitch_threshold)
+        {
+            m_gyro_foot_pitch = -m_param_gyro_pitch*(values[1] + pitch_threshold);
+            m_gyro_leg_pitch = -0.5*m_param_gyro_pitch*(values[1] + pitch_threshold);
+        }
+        else
+        {
+            m_gyro_foot_pitch = 0;
+            m_gyro_leg_pitch = 0;
+        }
     }
 }
 
 void JuppWalk::updateActionatorsData()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "JuppWalk::updateActionatorsData()" << endl;
+    #endif
+    
     m_actions->add(NUActionatorsData::LLeg, m_current_time, m_left_leg_angles, m_left_leg_gains);
     m_actions->add(NUActionatorsData::RLeg, m_current_time, m_right_leg_angles, m_right_leg_gains);
     if (m_larm_enabled)
         m_actions->add(NUActionatorsData::LArm, m_current_time, m_left_arm_angles, m_left_arm_gains);
     if (m_rarm_enabled)
         m_actions->add(NUActionatorsData::RArm, m_current_time, m_right_arm_angles, m_right_arm_gains);
+
+    vector<float> sensor_lleg, target_lleg;
+    Blackboard->Sensors->getPosition(NUSensorsData::LLeg, sensor_lleg);
+    Blackboard->Sensors->getTarget(NUSensorsData::LLeg, target_lleg);
 }
 
 

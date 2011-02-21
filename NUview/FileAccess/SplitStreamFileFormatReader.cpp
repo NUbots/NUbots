@@ -63,11 +63,11 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
     QStringList files = directory.entryList(extensionsFilter);
     qDebug("%d File(s) Found:", files.size());
 
-    // Display files
-    QStringList::const_iterator constIterator;
-    for (constIterator = files.constBegin(); constIterator != files.constEnd();
-           ++constIterator)
-        qDebug("%s", qPrintable(*constIterator));
+//    // Display files
+//    QStringList::const_iterator constIterator;
+//    for (constIterator = files.constBegin(); constIterator != files.constEnd();
+//           ++constIterator)
+//        qDebug("%s", qPrintable(*constIterator));
 
     QRegExp rx;
     int index;
@@ -75,7 +75,6 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 
     QStringList::const_iterator constFormatIterator;
     QString displayName;
-    qDebug("Determining File Types:");
     for (constFormatIterator = m_knownDataTypes.constBegin(); constFormatIterator != m_knownDataTypes.constEnd();
            ++constFormatIterator)
     {
@@ -86,10 +85,9 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
             fileLocations.push_back(QFileInfo(directory, files[index]));
             displayName = (*constFormatIterator);
             displayName[0] = displayName[0].toUpper();
-            qDebug("%s File: %s", qPrintable(displayName), qPrintable(fileLocations.back().filePath()));
+//            qDebug("%s File: %s", qPrintable(displayName), qPrintable(fileLocations.back().filePath()));
         }
     }
-    qDebug("Done");
     return fileLocations;
 }
 
@@ -97,7 +95,6 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
 {
     // close existing files;
     closeFile();
-
     QFileInfo fileInfo(filename);
     QDir openDir;
     openDir.setPath(fileInfo.path());
@@ -106,9 +103,7 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
     {
         if(!fileInfo.fileName().isEmpty() && m_knownDataTypes.contains(fileInfo.baseName(),Qt::CaseInsensitive))
         {
-            qDebug("Primary File selected: %s", qPrintable(fileInfo.filePath()));
             m_primaryData = fileInfo.baseName().toLower();
-            qDebug("Primary data type: %s", qPrintable(m_primaryData));
             m_fileInformation = fileInfo;
         }
 

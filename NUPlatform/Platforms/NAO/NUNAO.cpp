@@ -22,7 +22,9 @@
 #include "NUNAO.h"
 #include "NUbot.h"
 #include "NUbot/SenseMoveThread.h"
+
 #include <dcmproxy.h>
+#include <boost/bind.hpp>
 using namespace AL;
 
 ofstream debug;

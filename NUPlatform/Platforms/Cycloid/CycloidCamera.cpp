@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,15 +21,35 @@
 
 #include "CycloidCamera.h"
 
-#include <iostream>
-using namespace std;
+#include "debug.h"
+#include "debugverbositynucamera.h"
 
+/*! @brief Constructs a webots camera
+ */
 CycloidCamera::CycloidCamera()
 {
-    cout << "CycloidCamera::CycloidCamera()" << endl;
+#if DEBUG_NUCAMERA_VERBOSITY > 0
+    debug << "CycloidCamera::CycloidCamera(" << platform << ")" << endl;
+#endif
 }
 
+/*! @brief Destory the CycloidCamera
+ */
 CycloidCamera::~CycloidCamera()
+{
+}
+
+/*! @brief Returns a pointer to a new image.
+ */
+NUImage* CycloidCamera::grabNewImage()
+{
+    // this might be bad because the SeeThinkThread will have an infinite loop frequency
+    return NULL;
+}
+
+/*! @brief The CycloidCamera has no settings, so this function does nothing
+ */
+void CycloidCamera::setSettings(const CameraSettings& newset)
 {
 }
 

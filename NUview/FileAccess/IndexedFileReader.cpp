@@ -1,6 +1,5 @@
 #include "IndexedFileReader.h"
 #include <cmath>
-
 IndexedFileReader::IndexedFileReader(): m_fileEndLocation(0)
 {
     m_selectedFrame = m_index.end();
@@ -29,6 +28,7 @@ bool IndexedFileReader::IsValid()
   */
 bool IndexedFileReader::OpenFile(const std::string& filename)
 {
+    CloseFile();
     m_file.open(filename.c_str(),std::ios_base::in | std::ios_base::binary);
     if(m_file.good())
     {
@@ -45,6 +45,8 @@ bool IndexedFileReader::OpenFile(const std::string& filename)
 void IndexedFileReader::CloseFile()
 {
     m_file.close();
+    m_fileEndLocation = 0;
+    ClearIndex();
 }
 
 /**
@@ -191,4 +193,10 @@ IndexedFileReader::IndexIterator IndexedFileReader::GetIndexFromTime(double time
         }
     }
     return pos;
+}
+
+void IndexedFileReader::ClearIndex()
+{
+    m_index.clear();
+    m_timeIndex.clear();
 }

@@ -21,8 +21,8 @@
 #ifndef NUNAO_H
 #define NUNAO_H
 
-#include <albroker.h>
-#include <alproxy.h>
+#include <alcommon/albroker.h>
+#include <alcommon/alproxy.h>
 using namespace AL;
 
 #include <iostream>

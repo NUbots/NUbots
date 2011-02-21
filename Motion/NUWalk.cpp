@@ -44,6 +44,9 @@
 #ifdef USE_ALWALK
     #include "Walks/ALWalk/ALWalk.h"
 #endif
+#ifdef USE_BEARWALK
+    #include "Walks/BearWalk/BearWalk.h"
+#endif
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -55,25 +58,30 @@ using namespace mathGeneral;
 
 NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
 {
-#ifdef USE_JWALK
-    return new JWalk();
-#else
+    #ifdef USE_JWALK
+        return new JWalk();
+    #endif
+    
     #ifdef USE_JUPPWALK
         return new JuppWalk(data, actions);
-    #else
-        #ifdef USE_NBWALK
-            return new NBWalk(data, actions);
-        #else
-            #ifdef USE_VSCWALK
-                return new VSCWalk(data, actions);
-            #else
-                #ifdef USE_ALWALK
-                    return new ALWalk(data, actions);
-                #endif
-            #endif
-        #endif
     #endif
-#endif
+    
+    #ifdef USE_NBWALK
+        return new NBWalk(data, actions);
+    #endif
+    
+    #ifdef USE_ALWALK
+        return new ALWalk(data, actions);
+    #endif
+    
+    #ifdef USE_VSCWALK
+        return new VSCWalk(data, actions);
+    #endif
+                
+    #ifdef USE_BEARWALK
+        return new BearWalk(data, actions);
+    #endif
+    
     return NULL;
 }
 

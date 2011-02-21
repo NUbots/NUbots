@@ -74,6 +74,7 @@ protected:
     bool ValidStartingLocation(Position startingLocation);
     bool ValidEntry(IndexIterator entry);
     IndexIterator GetIndexFromTime(double time);
+    void ClearIndex();
 
     // Protected member variables
     FileIndex m_index;                  //!< Index mapping timestamp to Frame entries.
