@@ -22,6 +22,7 @@ class QPushButton;
 class QSignalMapper;
 class QToolButton;
 class GLDisplay;
+class QTimer;
 
 class JobList;
 #include "Motion/Walks/WalkParameters.h"
@@ -53,6 +54,8 @@ private slots:
 
 private:
     QVBoxLayout* overallLayout;                 //!< Overall widget layout.
+    
+    QTimer* m_timer;
     
     // Shift Amplitude
     QHBoxLayout* shiftAmplitudeLayout;          //!< Layout for shift amplitude

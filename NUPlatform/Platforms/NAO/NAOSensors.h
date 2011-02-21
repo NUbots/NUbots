@@ -30,7 +30,7 @@
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
 
-#include <almemoryfastaccess.h>
+#include <almemoryfastaccess/almemoryfastaccess.h>
 using namespace AL;
 
 #include <vector>

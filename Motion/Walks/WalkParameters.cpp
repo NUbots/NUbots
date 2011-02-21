@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "debugverbositynumotion.h"
 #include "nubotdataconfig.h"
+#include "walkconfig.h"
 
 /*! @brief Construct a walk parameter set with no parameters
  */
@@ -102,15 +103,24 @@ vector<Parameter> WalkParameters::getAsParameters()
 {
     vector<Parameter> data;
     data.reserve(size());
-    
-    // Need to hand-code the maximum speeds
+
+#ifdef USE_ALWALK       // this is a horrible hack. The ranges for the velocities and accelerations should be put in the walk parameter file...
     data.push_back(Parameter("Velocity", m_max_speeds[0], 5, 70));
     data.push_back(Parameter("Velocity", m_max_speeds[1], 2.5, 70));
     data.push_back(Parameter("Velocity", m_max_speeds[2], 0.5, 2));
-
+    
+    data.push_back(Parameter("Acceleration", m_max_accelerations[0], 5, 90));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[1], 2.5, 60));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0.5, 6));
+#else
+    data.push_back(Parameter("Velocity", m_max_speeds[0], 5, 30));
+    data.push_back(Parameter("Velocity", m_max_speeds[1], 2.5, 20));
+    data.push_back(Parameter("Velocity", m_max_speeds[2], 0.5, 2));
+    
     data.push_back(Parameter("Acceleration", m_max_accelerations[0], 5, 140));
     data.push_back(Parameter("Acceleration", m_max_accelerations[1], 2.5, 140));
-    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0.5, 4));
+    data.push_back(Parameter("Acceleration", m_max_accelerations[2], 0.5, 6));
+#endif
     
     for (size_t i=0; i<m_parameters.size(); i++)
         data.push_back(m_parameters[i]);

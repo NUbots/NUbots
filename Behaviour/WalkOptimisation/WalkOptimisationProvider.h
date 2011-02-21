@@ -65,6 +65,7 @@ private:
     float calculateFitness();					//!< calculates the fitness of the current parameters from m_duration, m_speed, m_energy, and m_stability
     float calculatePathDistance();				//!< calculates the distance of the speed evaluation path
     int m_iteration_count;						//!< the number of times the optimiser has been ticked
+    int m_fall_count;                           //!< the number of times the optimiser has fallen
     float m_duration;							//!< the evaluation time in ms
     float m_energy;								//!< the energy used during evalution of walk parameters in J
     float m_stability;							//!< the stability of the walk parameters
