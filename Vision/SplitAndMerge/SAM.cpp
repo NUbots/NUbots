@@ -1,5 +1,5 @@
 #include "SAM.h"
-#include <QDebug>
+//#include <QDebug>
 
 using std::vector;
 
