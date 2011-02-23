@@ -40,6 +40,9 @@
 #ifdef TARGET_IS_BEAR
     #include "BearMode/BearModeProvider.h"
 #endif
+#ifdef TARGET_IS_CYCLOID
+    #include "Cycloid/QuietStance/QuietStanceProvider.h"
+#endif
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -52,7 +55,7 @@ Behaviour::Behaviour()
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
-        m_behaviour = new ForwardWalkProvider(this);
+        m_behaviour = new QuietStanceProvider(this);
     #else
         m_behaviour = new SoccerProvider(this);
     #endif
