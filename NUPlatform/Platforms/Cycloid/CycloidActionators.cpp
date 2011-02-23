@@ -84,6 +84,11 @@ void CycloidActionators::copyToServos()
         if (speed > 1023)
             speed = 1023;
         
+        if (gains[i] == 0)
+            m_motors->torqueOff(Motors::IndexToMotorID[i]);
+        else if (gains[i] > 0)
+            m_motors->torqueOn(Motors::IndexToMotorID[i]);
+        
         m_motors->updateControl(Motors::IndexToMotorID[i], motorposition, speed, -1);
     }
 }

@@ -23,6 +23,7 @@
 #include "dx117.h"
 #include "Motors.h"
 #include "DXSerialThread.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 #include "debugverbositynuplatform.h"
@@ -60,12 +61,17 @@ Motors::Motors()
     initControlTables();  //<-- I don't need to change this, however, occasionally the motor does resort back to 57k baud rate
     initSlopes();
     initMargins();
-    // initPunches(); the punch is now used as a control variable
+
+    request();
+    Platform->msleep(40);
+    read();
+    updateControls(JointPositions, Motors::DefaultSpeeds, Motors::DefaultPunches);
+    
     struct timespec timenow;
     clock_gettime(CLOCK_REALTIME, &timenow);
     StartTime = timenow.tv_nsec/1e6 + timenow.tv_sec*1e3;
     
-    m_thread = new DXSerialThread(this, 10);
+    m_thread = new DXSerialThread(this, 13.33);
 }
 
 /*! Destroy the serial link with the motors
@@ -102,19 +108,15 @@ void Motors::initSelf()
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
       debug << "MOTORS: Initialising self." << endl;
    #endif
-   // Initialise motor torques to off
-   for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
-   {
-      MotorTorqueOn[i] = true;
-   }
-   
    // Initialise the controls to their default values
    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
    {
       MotorControls[i][0] = P_GOAL_POSITION_L;
       MotorPunches[i][0] = P_PUNCH_L;
    }
-   updateControls(Motors::DefaultPositions, Motors::DefaultSpeeds, Motors::DefaultPunches);
+   // Initialise motor torques to off
+   for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
+      MotorTorqueOn[i] = false;
    return;
 }
 
@@ -459,6 +461,16 @@ void Motors::getTargets(vector<float>& targets)
         targets.push_back(255*MotorControls[i][2] + MotorControls[i][1]);
 }
 
+/*! @brief Gets the current stiffness of each motor. Because of the present limitations the stiffness is either 0 or 100%.
+    @param stiffnesses will be updated with the current stiffnesses
+ */
+void Motors::getStiffnesses(vector<float>& stiffnesses)
+{
+    stiffnesses.clear();
+    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
+        stiffnesses.push_back(100*static_cast<float>(MotorTorqueOn[i]));
+}
+
 /*! Enable the torque on each motor (this will not start sending control commands, use torqueOn to do that)
  Thus, this commands will make the robot 'rigid' in its current position. A following torqueOn will get the robot to move into the current target position
  */
@@ -486,6 +498,17 @@ void Motors::emergencyOff()
    debug << "MOTORS: Finished writing to motors" << endl;
 }
 
+/*! @brief Turns torque on for a single motor
+    @param motorid the id of the motor to turn on
+*/
+void Motors::torqueOn(unsigned char motorid)
+{
+   #if DEBUG_NUPLATFORM_VERBOSITY > 2
+      debug << "MOTORS: torqueOn " << (int) motorid << endl;
+   #endif
+   MotorTorqueOn[MotorIDToIndex[motorid]] = true;
+}
+
 /*! Turn on the specified motors and start sending motor controls to those motors
  @param motorid[] the motor ids of the motors to turn on
  @param nummotors the length of motorid[]
@@ -493,7 +516,16 @@ void Motors::emergencyOff()
 void Motors::torqueOn(unsigned char motorid[], unsigned char nummotors)
 {
    for (unsigned char i=0; i<nummotors; i++)
-      MotorTorqueOn[MotorIDToIndex[motorid[i]]] = true;
+      torqueOn(motorid[i]);
+}
+
+/*! @brief Turns off a single motor
+    @param motorid the id of the motor to turn off
+ */
+void Motors::torqueOff(unsigned char motorid)
+{
+    MotorTorqueOn[MotorIDToIndex[motorid]] = false;
+    
 }
 
 /*! Turn off the spcified motors and stop sending motor controls to those motors
@@ -503,16 +535,7 @@ void Motors::torqueOn(unsigned char motorid[], unsigned char nummotors)
 void Motors::torqueOff(unsigned char motorid[], unsigned char nummotors)
 {
    for (unsigned char i=0; i<nummotors; i++)
-   {
-      MotorTorqueOn[MotorIDToIndex[motorid[i]]] = false;
-   }
-   unsigned char idata[] = {P_TORQUE_ENABLE, DX117_TORQUE_OFF};
-   unsigned char* data[nummotors];
-   for (unsigned char i=0; i<nummotors; i++)
-   {
-      data[i] = idata;
-   }
-   write(motorid, nummotors, DX117_WRITE, data, 2);
+      torqueOff(motorid[i]);
 }
 
 /*! Update the motors controls and punches, the updated values will be sent to the motor in the next cycle
@@ -528,6 +551,9 @@ void Motors::torqueOff(unsigned char motorid[], unsigned char nummotors)
  */
 void Motors::updateControl(unsigned char motorid, unsigned short position, unsigned short speed, unsigned short punch)
 {
+   if (not MotorTorqueOn[MotorIDToIndex[motorid]])
+      position = JointPositions[MotorIDToIndex[motorid]];
+    
    if (position != (unsigned short) -1)
    {
       if (position > (unsigned short) 1023)
@@ -761,6 +787,9 @@ bool Motors::write(unsigned char command, unsigned char data[MOTORS_NUM_MOTORS][
  */
 void Motors::appendControlPacketsToBuffer(unsigned char lowermessagebuffer[], unsigned char uppermessagebuffer[], unsigned short* lowerindex, unsigned short* upperindex)
 {
+   #if DEBUG_NUPLATFORM_VERBOSITY > 0
+      debug << "appendControlPacketsToBuffer()" << endl;
+   #endif
    appendPacketsToBuffer(DX117_WRITE, MotorControls, lowermessagebuffer, uppermessagebuffer, lowerindex, upperindex);
    appendPacketsToBuffer(DX117_WRITE, MotorPunches, lowermessagebuffer, uppermessagebuffer, lowerindex, upperindex);
    return;
@@ -850,26 +879,28 @@ void Motors::appendPacketToBuffer(unsigned char motorid, unsigned char command, 
  */
 void Motors::appendPacketsToBuffer(unsigned char command, unsigned char data[MOTORS_NUM_MOTORS][MOTORS_NUM_CONTROLS], unsigned char lowermessagebuffer[], unsigned char uppermessagebuffer[], unsigned short* lowerindex, unsigned short* upperindex)
 {
-   unsigned char* messagebuffer;
-   unsigned short* index;
-   for (unsigned short i=0; i<MOTORS_NUM_MOTORS; i++)
-   {
-      if (MotorTorqueOn[i])            // writing to a motor that is off will turn it back on
-      {
-         if (Motors::MotorIDToLowerBody[Motors::IndexToMotorID[i]])             // decide which buffer this command needs to be added to
-         {
-            messagebuffer = lowermessagebuffer;
-            index = lowerindex;
-         }
-         else
-         {
-            messagebuffer = uppermessagebuffer;
-            index = upperindex;
-         }
-         appendPacketToBuffer(Motors::IndexToMotorID[i], command, data[i], MOTORS_NUM_CONTROLS, messagebuffer, index);
-      }
-   }
-   return;
+    unsigned char torqueoffdata[] = {P_TORQUE_ENABLE, DX117_TORQUE_OFF};
+    unsigned char* messagebuffer;
+    unsigned short* index;
+    for (unsigned short i=0; i<MOTORS_NUM_MOTORS; i++)
+    {
+        if (Motors::MotorIDToLowerBody[Motors::IndexToMotorID[i]])             // decide which buffer this command needs to be added to
+        {
+           messagebuffer = lowermessagebuffer;
+           index = lowerindex;
+        }
+        else
+        {
+           messagebuffer = uppermessagebuffer;
+           index = upperindex;
+        }
+        
+        if (MotorTorqueOn[i])
+            appendPacketToBuffer(Motors::IndexToMotorID[i], command, data[i], MOTORS_NUM_CONTROLS, messagebuffer, index);
+        else                 
+            appendPacketToBuffer(Motors::IndexToMotorID[i], command, torqueoffdata, 2, messagebuffer, index);
+    }
+    return;
 }
 
 /* Append packets the message buffers (this is a specialised version to simplify and speed up writing controls to motors)

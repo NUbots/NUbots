@@ -77,8 +77,9 @@ void CycloidSensors::copyFromJoints()
 {
     static const float NaN = numeric_limits<float>::quiet_NaN();
     
-    vector<float> targets;
+    vector<float> targets, stiffnesses;
     m_motors->getTargets(targets);
+    m_motors->getStiffnesses(stiffnesses);
     
     vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = 1000*(m_current_time - m_previous_time);
@@ -88,7 +89,7 @@ void CycloidSensors::copyFromJoints()
         joint[NUSensorsData::VelocityId] = (joint[NUSensorsData::PositionId] - m_previous_positions[i])/delta_t;    
         joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
         joint[NUSensorsData::TargetId] = Motors::MotorSigns[i]*(targets[i] - Motors::DefaultPositions[i])/195.379;;
-        joint[NUSensorsData::StiffnessId] = NaN;
+        joint[NUSensorsData::StiffnessId] = stiffnesses[i];
         joint[NUSensorsData::TorqueId] = Motors::MotorSigns[i]*JointLoads[i]*1.6432e-3;             // This torque conversion factor was measured for a DX-117, I don't know how well it applies to other motors
         m_data->set(*m_joint_ids[i], m_current_time, joint);
         

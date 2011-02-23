@@ -222,8 +222,6 @@ private:
     bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);
     bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data);
     bool getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data);
-public:
-    double CurrentTime;                      //!< stores the most recent time sensors were updated in milliseconds
 
 private:
     static vector<id_t*> m_ids;				 //!< a vector containing all of the actionator ids

@@ -98,10 +98,13 @@ class Motors
       bool read();                                                                        // read feedback data and put it into global feedback arrays
     
       void getTargets(vector<float>& targets);
+      void getStiffnesses(vector<float>& stiffnesses);
     
       void torqueEnable();                                                                // turn on all motors
       void emergencyOff();                                                                // emergency off (fast, collapse in heap)
+      void torqueOn(unsigned char motorid);
       void torqueOn(unsigned char motorid[], unsigned char nummotors);                    // turn the motors on (and start sending motor controls)
+      void torqueOff(unsigned char motorid);
       void torqueOff(unsigned char motorid[], unsigned char nummotors);                   // turn the motors off (and stop sending motor controls)
       
    private:
