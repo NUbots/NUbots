@@ -158,7 +158,8 @@ HEADERS += ui_mainwindow.h \
     LUTGlDisplay.h \
     ../Vision/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
-    Tools/Math/StlVector.h
+    Tools/Math/StlVector.h \
+    ../Tools/Profiling/Profiler.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -262,6 +263,7 @@ SOURCES += mainwindow.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
-    ../NUPlatform/NUSensors/EndEffectorTouch.cpp
+    ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
+    ../Tools/Profiling/Profiler.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

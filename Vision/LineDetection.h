@@ -65,6 +65,7 @@ class LineDetection{
                        NUSensorsData* data,
                        vector< ObjectCandidate >& candidates,
                        vector< TransitionSegment>& leftover);
+        bool GetDistanceToPoint(Point point,  Vector3<float> &result, Vision* vision);
 
 	
 	private:

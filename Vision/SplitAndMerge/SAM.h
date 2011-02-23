@@ -5,10 +5,9 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
-#include "../../Tools/Math/LSFittedLine.h"
-#include "../../Tools/Math/Matrix.h"
-#include "../../Tools/Math/Vector3.h"
-
+#include "Tools/Math/LSFittedLine.h"
+#include "Tools/Math/Matrix.h"
+#include "Tools/Math/Vector3.h"
 
 //Debug rules
 #define DEBUG 0
@@ -19,6 +18,9 @@
 #define DEBUG_SPLIT_NOISE 0
 #define DEBUG_SHOULD_SPLIT 0
 #define DEBUG_CLEAR_SMALL 0
+
+class Vision;
+class LineDetection;
 
 using namespace std;
 
@@ -37,7 +39,7 @@ public:
     //LEAST-SQUARES FITTING
     static void splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall=true, bool cleardirty=true, bool noise=true);
     //CLUSTERS
-    static void splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, bool clearsmall=true, bool cleardirty=true, bool noise=true);
+    static void splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall=true, bool cleardirty=true, bool noise=true);
 
 private:
     //RULES
@@ -87,6 +89,7 @@ private:
     static void clearSmallLines(vector<LSFittedLine*>& lines);
     static void clearDirtyLines(vector<LSFittedLine*>& lines);
     static bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);
+    static bool convertLinesEndPoints(vector<LSFittedLine*>& lines, Vision* vision, LineDetection* linedetector);
 
 };
 

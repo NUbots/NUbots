@@ -20,6 +20,8 @@
 #include "../Kinematics/Kinematics.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
+#include "Tools/Profiling/Profiler.h"
+
 #include "debug.h"
 #include "debugverbosityvision.h"
 
@@ -77,11 +79,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
 
-
+    Profiler prof = Profiler("AARON");
+    prof.start();
     /*AARON'S OLD LINE DETECTION*/
     FindFieldLines(image_width,image_height);
     /*AARON'S OLD LINE DETECTION*/
-
+    prof.split("FindFieldLines");
+    debug << prof;
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
     //{
@@ -182,6 +186,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
                               vector< ObjectCandidate >& candidates,
                               vector< TransitionSegment>& leftoverPoints) {
 
+
     //Setting up the variables:
     int spacing = vision->getScanSpacings();
     LINE_SEARCH_GRID_SIZE = spacing/4; //Should be 4 at 320width
@@ -234,7 +239,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
         */
         leftover.push_back(temppoint);
     }
-
+    //prof.split("clusters");
 
     //POINT CONVERSION TESTING
     /*
@@ -297,9 +302,15 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     fout.close();
     */
     /*OUTPUT FOR DEBUGGING*/
-    SAM::initRules(2.0,2,3,5,10,0.999);
-    SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
+    Profiler prof("SHANNON");
+    prof.start();
 
+    SAM::initRules(2.0,2,3,5,12.0,0.999);
+    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, true);
+
+    prof.split("SAM");
+
+    debug << prof;
     /*OUTPUT FOR DEBUGGING*/
     /*
     qDebug() << "printing to file";
@@ -345,10 +356,14 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
         sumR2 += fieldLines.back().getr2tls();
         lines.pop_back();
     }
+
     TotalValidLines = lineno;
+
     //qDebug() << "Average: MSD: " << sumMSD/fieldLines.size() << " R^2: " << sumR2/fieldLines.size();
     //qDebug() << "Finished \n";
     /*SHANNON'S NEW LINE DETECTION*/
+
+
 
     TransformLinesToWorldModelSpace(vision);
 
@@ -364,6 +379,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     //qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
     //qDebug() << "Finnished Decoding Penalty Spots:";
+
 
 }
 
@@ -2521,6 +2537,26 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
 }
 
 bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relativePoint, Vision* vision)
+{
+    float bearing = vision->CalculateBearing(point.x);
+    float elevation = vision->CalculateElevation(point.y);
+
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    if(isOK == true)
+    {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+
+        relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+        //#if DEBUG_VISION_VERBOSITY > 6
+        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        //#endif
+    }
+    return isOK;
+}
+
+bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoint, Vision* vision)
 {
     float bearing = vision->CalculateBearing(point.x);
     float elevation = vision->CalculateElevation(point.y);

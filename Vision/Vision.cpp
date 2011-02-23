@@ -445,8 +445,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
             debug << "\tPre-Line Formation: " <<endl;
         #endif
 
-        //DetectLines(&LineDetector);
+        //SHANNON
         DetectLines(&LineDetector, LineCandidates, LeftoverPoints);
+        //AARON
+        //LineDetector.fieldLines.clear();
+        //DetectLines(&LineDetector);
     
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-Line Formation: " <<endl;

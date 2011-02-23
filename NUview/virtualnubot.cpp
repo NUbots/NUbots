@@ -10,6 +10,8 @@
 #include <qmessagebox.h>
 #include <sstream>
 
+#include "Tools/Profiling/Profiler.h"
+
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
@@ -342,8 +344,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //qDebug() << "PRE-ROBOT";
     method = Vision::PRIMS;
-    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.001, 10000, 4, LeftoverPoints);
-    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4,LeftoverPoints);
+    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings*3, 0.001, 10000, 4, LeftoverPoints);
+    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,4,LeftoverPoints);
     qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
     qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
     unsigned int no_unused = 0;
@@ -447,8 +449,15 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     qDebug() << "Post Processing Goal Posts: ";
     vision.PostProcessGoals();
      qDebug() << "Finding Lines" ;
+
     //vision.DetectLines(&LineDetector);
      vision.DetectLines(&LineDetector, LineCandidates, LeftoverPoints);
+     qDebug() << "Linepoint: " << LineDetector.linePoints.size() << " Lines: " << LineDetector.fieldLines.size();
+     for(unsigned int i=0; i<LineDetector.fieldLines.size(); i++) {
+         qDebug() << LineDetector.fieldLines[i].getA() << " " << LineDetector.fieldLines[i].getB() << " " << LineDetector.fieldLines[i].getC();
+     }
+     //AARON
+     //vision.DetectLines(&LineDetector);
 
 
     //! Extract Detected Line & Corners
