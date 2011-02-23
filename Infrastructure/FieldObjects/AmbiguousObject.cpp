@@ -57,7 +57,7 @@ std::istream& operator>> (std::istream& input, AmbiguousObject& p_amb)
     int id;
     input.read(reinterpret_cast<char*>(&numEntries), sizeof(numEntries));
     p_amb.PossibleObjectIDs.clear();
-    for(int i = 0; i < numEntries; i++)
+    for(unsigned int i = 0; i < numEntries; i++)
     {
         input.read(reinterpret_cast<char*>(&id), sizeof(id));
         p_amb.PossibleObjectIDs.push_back(id);
