@@ -1,0 +1,15 @@
+# if there is only a single argument then split based on commas
+# otherwise assume that each ip address is given on the command line
+if [ $# -eq 1 ]
+then
+    robot_ips=$(echo $1 | tr "," "\n")
+else
+    robot_ips=$@
+fi
+
+for robot_ip in $robot_ips
+do
+    echo Sending to $robot_ip
+    scp -pC ./Build/Cycloid/nubot root@$robot_ip:/root/nubotbin
+done
+

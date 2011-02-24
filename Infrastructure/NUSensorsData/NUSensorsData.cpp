@@ -84,6 +84,8 @@ const NUSensorsData::id_t NUSensorsData::MotionWalkSpeed(s_curr_id++, "MotionWal
 const NUSensorsData::id_t NUSensorsData::MotionWalkMaxSpeed(s_curr_id++, "MotionWalkMaxSpeed", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::MotionHeadCompletionTime(s_curr_id++, "MotionHeadCompletionTime", NUSensorsData::m_ids);
 
+const unsigned int NUSensorsData::m_num_sensor_ids = s_curr_id;
+
 /*! @brief Default constructor for NUSensorsData
  */
 NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
@@ -91,11 +93,13 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
-    
     CurrentTime = 0;
     PreviousTime = 0;
-    
-    m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
+    // If this has already been initialised, don't do it again or bad stuff will happen.
+    if(m_ids.size() < m_num_sensor_ids)
+        m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
     m_ids_copy = m_ids;
     m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
 

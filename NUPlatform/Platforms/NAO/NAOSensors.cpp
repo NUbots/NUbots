@@ -178,13 +178,13 @@ void NAOSensors::copyFromHardwareCommunications()
 void NAOSensors::copyFromJoints()
 {
     static const float NaN = numeric_limits<float>::quiet_NaN();
-    const id_t& pos_id = NUSensorsData::PositionId;
-    const id_t& vel_id = NUSensorsData::VelocityId;
-    const id_t& acc_id = NUSensorsData::AccelerationId;
-    const id_t& tar_id = NUSensorsData::TargetId;
-    const id_t& sti_id = NUSensorsData::StiffnessId;
-    const id_t& cur_id = NUSensorsData::CurrentId;
-    const id_t& tem_id = NUSensorsData::TemperatureId;
+    const NUSensorsData::JointSensorIndices pos_id = NUSensorsData::PositionId;
+    const NUSensorsData::JointSensorIndices vel_id = NUSensorsData::VelocityId;
+    const NUSensorsData::JointSensorIndices acc_id = NUSensorsData::AccelerationId;
+    const NUSensorsData::JointSensorIndices tar_id = NUSensorsData::TargetId;
+    const NUSensorsData::JointSensorIndices sti_id = NUSensorsData::StiffnessId;
+    const NUSensorsData::JointSensorIndices cur_id = NUSensorsData::CurrentId;
+    const NUSensorsData::JointSensorIndices tem_id = NUSensorsData::TemperatureId;
     
     m_al_positions_access->GetValues(m_buffer_positions);
     m_al_targets_access->GetValues(m_buffer_targets);

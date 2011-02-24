@@ -6,6 +6,7 @@ TransitionSegment::TransitionSegment()
    beforeColour = 0;
    colour = 0;
    afterColour =  0;
+   isUsed = false;
 }
 
 TransitionSegment::~TransitionSegment()
@@ -19,6 +20,7 @@ TransitionSegment::TransitionSegment(Vector2<int> newStart, Vector2<int> newEnd,
     beforeColour = newBeforeColour;
     colour = newColour;
     afterColour = newAfterColour;
+    isUsed = false;
 }
 Vector2<int> TransitionSegment::getEndPoint() const
 {

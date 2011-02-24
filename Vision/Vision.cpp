@@ -414,7 +414,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
 
         DetectLines(&LineDetector);
-
+    
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-Line Formation: " <<endl;
         #endif
@@ -439,7 +439,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
     AllFieldObjects->postProcess(image->m_timestamp);
 
-
+    if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
+    {
+        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+    }
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
@@ -1541,11 +1544,12 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
         std::queue<int> qUnprocessed;
         std::vector<TransitionSegment> candidate_segments;
+        std::vector<unsigned int> usedSegments;
         unsigned int rawSegsLeft = segments.size();
         unsigned int nextRawSeg = 0;
 
         bool isSegUsed [segments.size()];
-
+        usedSegments.clear();
         //! Removing invalid colours O(N)
         for (unsigned int i = 0; i < segments.size(); i++)
         {
@@ -1740,6 +1744,8 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
 
                 //add thisSeg to CandidateVector
                 candidate_segments.push_back(segments.at(thisSeg));
+                segments.at(thisSeg).isUsed = true;
+                usedSegments.push_back(thisSeg);
             }//while (!qUnprocessed->empty())
             //qDebug() << "Candidate ready...";
             //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
@@ -1757,8 +1763,18 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                     if (i != max_col && colourHistogram[i] > colourHistogram[max_col])
                         max_col = i;
                 }
+                for(unsigned int i=0; i<candidate_segments.size(); i++) {
+                    candidate_segments[i].isUsed = true;
+                }
                 ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
                 candidateList.push_back(temp);
+                usedSegments.clear();
+            }
+            else {
+                while(!usedSegments.empty()){
+                    segments[usedSegments.back()].isUsed = false;
+                    usedSegments.pop_back();
+                }
             }
 	    delete [] colourHistogram;
         }//while(rawSegsLeft)
@@ -1903,7 +1919,7 @@ bool Vision::checkIfBufferSame(boost::circular_buffer<unsigned char> cb)
 
 }
 
-std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   const std::vector< TransitionSegment > &horizontalsegments,
+std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std::vector< TransitionSegment > &horizontalsegments,
                                                                             const std::vector<unsigned char> &validColours,
                                                                             int spacing,
                                                                             int min_segments)
@@ -1944,6 +1960,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   cons
         Xstart = horizontalsegments[i].getStartPoint().x;
         Xend = horizontalsegments[i].getEndPoint().x;
         tempSegments.push_back(horizontalsegments[i]);
+        horizontalsegments[i].isUsed = true;
         tempUsedSegments.push_back(i);
         int nextSegCounter = i-1;
 
@@ -1968,6 +1985,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   cons
             {
                 //Update with new info
                 tempSegments.push_back(horizontalsegments[nextSegCounter]);
+                horizontalsegments[nextSegCounter].isUsed = true;
                 tempUsedSegments.push_back(nextSegCounter);
                 if (horizontalsegments[nextSegCounter].getStartPoint().x <= Xstart)
                 {
@@ -2011,6 +2029,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   cons
                     Ystart = horizontalsegments[j].getStartPoint().y;
                 }
                 tempSegments.push_back(horizontalsegments[j]);
+                horizontalsegments[j].isUsed = true;
                 tempUsedSegments.push_back(j);
             }
 
@@ -2029,6 +2048,14 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   cons
             while (!tempUsedSegments.empty())
             {
                 usedSegments[tempUsedSegments.back()] = true;
+                tempUsedSegments.pop_back();
+            }
+        }
+        else {
+            //reset segments to not used
+            while (!tempUsedSegments.empty())
+            {
+                horizontalsegments[tempUsedSegments.back()].isUsed = false;
                 tempUsedSegments.pop_back();
             }
         }
@@ -2058,7 +2085,16 @@ void Vision::DetectLines(LineDetection* LineDetector)
 
     return;
 }
+void Vision::DetectLines(LineDetection* LineDetector, vector< ObjectCandidate >& candidates)
+{
+    //qDebug() << "Forming Lines:" << endl;
 
+    LineDetector->FormLines(AllFieldObjects, this, m_sensor_data, candidates);
+
+    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
+
+    return;
+}
 Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
 {
     //debug<< "Vision::DetectBall" << endl;

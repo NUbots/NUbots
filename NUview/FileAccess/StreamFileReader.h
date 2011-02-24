@@ -38,6 +38,7 @@
 #include <QDebug>
 #include <cmath>
 #include "IndexedFileReader.h"
+
 template<class C>
 class StreamFileReader: public IndexedFileReader
 {
@@ -190,7 +191,7 @@ private:
             while (m_file.good() && ((m_fileEndLocation - m_file.tellg()) > sizeof(double)))
             {
                 int pos = m_file.tellg();
-                qDebug("Indexing Frame %d at %d", temp.frameSequenceNumber, pos);
+                //qDebug("Indexing Frame %d at %d", temp.frameSequenceNumber, pos);
                 temp.position = m_file.tellg();
                 try{
                     m_file >> (*m_dataBuffer);
@@ -198,7 +199,7 @@ private:
                 // File Cursor Has Not Moved
                 if(pos == m_file.tellg())
                 {
-                    qDebug("ERROR Reading Frame. Check File Format.");
+                    qDebug("ERROR Reading Frame (%d). Check File Format.", temp.frameSequenceNumber);
                     CloseFile();
                     return;
                 }

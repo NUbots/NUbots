@@ -25,6 +25,7 @@
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 #ifdef USE_VISION
     #include "Vision/Vision.h"
@@ -65,6 +66,10 @@ WatchDogThread::~WatchDogThread()
 void WatchDogThread::periodicFunction()
 {
     //System->displayBatteryState(Blackboard->Sensors, Blackboard->Actions);
+    float charge = 0;
+    if (Blackboard->Sensors->getBatteryCharge(charge) and charge < 0.02)
+        Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, NUSounds::LOW_BATTERY);
+
     #ifdef USE_VISION
         int framesdropped = m_nubot->m_vision->getNumFramesDropped();
         int framesprocessed = m_nubot->m_vision->getNumFramesProcessed();

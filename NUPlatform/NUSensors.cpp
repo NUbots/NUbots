@@ -188,6 +188,7 @@ void NUSensors::calculateHorizon()
     Horizon HorizonLine;
     vector<float> orientation;
     float headYaw, headPitch;
+
     bool validdata = m_data->get(NUSensorsData::Orientation, orientation);
     validdata &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
     validdata &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
@@ -290,8 +291,6 @@ void NUSensors::calculateFallSense()
     
     vector<float> acceleration;
     vector<float> orientation;
-    m_data->getAccelerometer(acceleration);
-    m_data->getOrientation(orientation);
     
     if (m_data->getAccelerometer(acceleration) and m_data->getOrientation(orientation))
     {

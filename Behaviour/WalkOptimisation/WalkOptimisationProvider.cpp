@@ -68,9 +68,8 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file << instance_id << endl;
         id_file.close();
     } 
-
+    
     m_parameters.load("NBWalkStart");
-
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
 

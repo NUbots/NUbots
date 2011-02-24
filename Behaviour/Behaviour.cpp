@@ -19,6 +19,9 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "targetconfig.h"
+
+
 #include "Behaviour.h"
 #include "BehaviourProvider.h"
 
@@ -31,20 +34,27 @@
 #include "PassingChallenge/PassingChallengeProvider.h"
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
+#include "MiscBehaviours/ForwardWalkProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
+
+#ifdef TARGET_IS_BEAR
+    #include "BearMode/BearModeProvider.h"
+#endif
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-#include "targetconfig.h"
 using namespace std;
 
 Behaviour::Behaviour()
 {
-    #ifndef TARGET_IS_NAOWEBOTS
+    #if defined(TARGET_IS_NAOWEBOTS)
         m_behaviour = new WalkOptimisationProvider(this);
+    #elif defined(TARGET_IS_BEAR)
+        m_behaviour = new BearModeProvider(this);
+    #elif defined(TARGET_IS_CYCLOID)
+        m_behaviour = new ForwardWalkProvider(this);
     #else
-        // For Webots, create the behaviour you want to run here 
-        m_behaviour = new WalkOptimisationProvider(this);
+        m_behaviour = new SoccerProvider(this);
     #endif
     m_next_behaviour = NULL;
 }
