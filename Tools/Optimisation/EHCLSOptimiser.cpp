@@ -24,8 +24,6 @@
 
 #include "NUPlatform/NUPlatform.h"
 
-#include <boost/random.hpp>
-
 #include "debug.h"
 
 /*!
@@ -139,21 +137,6 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
     parameters.resize(base_parameters.size());
     for (size_t i=0; i<base_parameters.size(); i++)
         parameters[i].set(base_parameters[i] + deltaparameters[i]);
-}
-
-/*! @brief Returns a normal random variable from the normal distribution with mean and sigma
- */
-float EHCLSOptimiser::normalDistribution(float mean, float sigma)
-{
-    static unsigned int seed = 1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime();          // I am hoping that at least one of the three calls is different for each process
-    static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
-    static boost::normal_distribution<float> distribution(0,1);
-    static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);
-    
-    float z = standardnorm();       // take a random variable from the standard normal distribution
-    float x = mean + z*sigma;       // then scale it to belong to the specified normal distribution
-    
-    return x;
 }
 
 void EHCLSOptimiser::summaryTo(ostream& stream)

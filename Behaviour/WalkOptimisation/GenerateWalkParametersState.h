@@ -66,9 +66,10 @@ public:
     BehaviourState* nextState()
     {   // progress to the evaluation state when we are in position AND lined up AND stopped
         vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_start_state);
-        vector<float> speed;
-        m_data->get(NUSensorsData::MotionWalkSpeed, speed);
-        if (difference[0] < 10 and fabs(difference[2]) < 0.2)
+        bool gettingup = false;
+        m_data->get(NUSensorsData::MotionGetupActive, gettingup);
+
+        if (difference[0] < 10 and fabs(difference[2]) < 0.2 and not gettingup)
             return m_parent->m_evaluate;
         else
             return this;
@@ -82,7 +83,7 @@ public:
         m_previously_getting_up = m_getting_up;
         m_data->get(NUSensorsData::MotionGetupActive, m_getting_up);
         
-        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up and m_time_not_getting_up > 3000) or m_time_in_state > 120000)
+        if ((m_parent->stateChanged() and not m_parent->wasPreviousState(m_parent->m_paused)) or (not m_previously_getting_up and m_getting_up and m_time_not_getting_up > 1000) or m_time_in_state > 120000)
         {
             m_parent->tickOptimiser();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
@@ -92,11 +93,12 @@ public:
         }
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
-        m_previous_time = m_data->CurrentTime;
+
         if (m_getting_up)
             m_time_not_getting_up = 0;
         else
             m_time_not_getting_up += m_data->CurrentTime - m_previous_time;
+        m_previous_time = m_data->CurrentTime;
         
         lookAtGoals();
         

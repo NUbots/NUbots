@@ -43,8 +43,6 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
     m_max_step_size = 0.05;        // Tune this	
     m_epsilon = 0.05;              // Tune this
     m_num_per_iteration = 10;      // Tune this
-    
-    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
 
     load();
     if (m_current_parameters.empty())

@@ -69,18 +69,15 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
         id_file.close();
     } 
     
-#ifdef TARGET_IS_NAOWEBOTS
     m_parameters.load("NBWalkStart");
-#else
-    m_parameters.load("ALWalkCrab");
-#endif
-    
     vector<Parameter> parameters = m_parameters.getAsParameters();
     //parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set!
+
     //m_optimiser = new EHCLSOptimiser(id.str() + "EHCLS", parameters);
-    m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
-    //m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
+    //m_optimiser = new PGRLOptimiser(id.str() + "PGRL", parameters);    
+    m_optimiser = new PSOOptimiser(id.str() + "PSO", parameters);
     //m_optimiser = NULL;    
+
     if (not m_optimiser)
         m_log.open((DATA_DIR + "/Optimisation/" + m_parameters.getName() + ".log").c_str(), fstream::out);
     else
@@ -234,8 +231,8 @@ float WalkOptimisationProvider::calculateFitness()
         speed = 1000*calculatePathDistance()/m_duration;			// cm/s
     }
     #ifdef TARGET_IS_NAOWEBOTS
-        speed *= normalDistribution(1, 0.105);      // 0.045, 0.055, 0.065
-        cost *= normalDistribution(1, 0.105);
+        //speed *= normalDistribution(1, 0.105);      // 0.045, 0.055, 0.065
+        //cost *= normalDistribution(1, 0.105);
     #endif
     
     //fitness = speed;                      // speed--based fitness
