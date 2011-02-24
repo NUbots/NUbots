@@ -23,6 +23,7 @@
 #include "Parameter.h"
 
 #include "NUPlatform/NUPlatform.h"
+#include "Tools/Math/StlVector.h"
 
 #include "debug.h"
 #include "nubotdataconfig.h"
@@ -172,9 +173,31 @@ void PSOOptimiser::summaryTo(ostream& stream)
 
 void PSOOptimiser::toStream(ostream& o) const
 {
+    o << m_c1 << " " << m_c2 << " " << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
+    
+    o << m_swarm_position << endl;
+    o << m_swarm_velocity << endl;
+    o << m_swarm_fitness << endl;
+    
+    o << m_swarm_best << endl;
+    o << m_swarm_best_fitness << endl;
+    o << m_swarm_failures << endl;
+    o << m_best << endl;
+    o << m_best_fitness << endl;
 }
 
 void PSOOptimiser::fromStream(istream& i)
 {
+    i >> m_c1 >> m_c2 >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
+    
+    i >> m_swarm_position;
+    i >> m_swarm_velocity;
+    i >> m_swarm_fitness;
+    
+    i >> m_swarm_best;
+    i >> m_swarm_best_fitness;
+    i >> m_swarm_failures;
+    i >> m_best;
+    i >> m_best_fitness;
 }
 
