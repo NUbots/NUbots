@@ -172,7 +172,7 @@ void ALWalk::initALConfig()
     m_al_config.arrayPush(m_al_param);
     m_al_param[0] = "WALK_MAX_STEP_THETA";
     m_al_config.arrayPush(m_al_param);
-    m_al_param[0] = "WALK_MAX_STEP_HEIGHT";
+    m_al_param[0] = "WALK_STEP_HEIGHT";
     m_al_config.arrayPush(m_al_param);
     m_al_param[0] = "WALK_MIN_TRAPEZOID";
     m_al_config.arrayPush(m_al_param);
