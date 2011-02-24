@@ -36,7 +36,10 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
     m_c1 = 1.50;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
     m_c2 = 0.80;             // tune this:
     m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
-    m_num_particles = 40;   // tune this: 40 particles seems to be about right. More particles helps alot in the initial stages of the algorithm
+
+    m_reset_limit = 10;
+    m_reset_fraction = 0.05;
+    m_num_particles = 30;
 
     m_num_dimensions = parameters.size();
     
@@ -53,6 +56,7 @@ void PSOOptimiser::initSwarm()
     {
     	m_swarm_best.push_back(m_initial_parameters);
         m_swarm_best_fitness.push_back(0);
+        m_swarm_failures.push_back(0);
         
         vector<Parameter> particle = m_initial_parameters;
         vector<float> velocity = vector<float>(m_num_dimensions, 0);
@@ -100,7 +104,10 @@ void PSOOptimiser::updateSwarm()
         {
             m_swarm_best_fitness[i] = m_swarm_fitness[i];
             m_swarm_best[i] = m_swarm_position[i];
+            m_swarm_failures[i] = 0;
         }
+        else
+        	m_swarm_failures[i]++;;
         
         if (m_swarm_fitness[i] > m_best_fitness)
         {
@@ -116,26 +123,40 @@ void PSOOptimiser::updateSwarm()
     // update the positions and velocities of the particles
     for (int i=0; i<m_num_particles; i++)
     {
-        for (int j=0; j<m_num_dimensions; j++)
-        {   
-        	// Gaussian swarm
-        	float cognitivefactor = fabs(normalDistribution(0,1))*(m_swarm_best[i][j] - m_swarm_position[i][j]);
-        	float socialfactor = fabs(normalDistribution(0,1))*(m_best[j] - m_swarm_position[i][j]);
-            m_swarm_velocity[i][j] = cognitivefactor + socialfactor;
+    	if (m_swarm_failures[i] < m_reset_limit)
+    	{
+			for (int j=0; j<m_num_dimensions; j++)
+			{
+				// Gaussian swarm
+				float cognitivefactor = fabs(normalDistribution(0,1))*(m_swarm_best[i][j] - m_swarm_position[i][j]);
+				float socialfactor = fabs(normalDistribution(0,1))*(m_best[j] - m_swarm_position[i][j]);
+				m_swarm_velocity[i][j] = cognitivefactor + socialfactor;
 
-            // PSO Swarm
-            /*float cognitivefactor = c1*uniformDistribution(0,1)*(m_swarm_best[i][j] - m_swarm_position[i][j]);
-            float socialfactor = c2*uniformDistribution(0,1)*(m_best[j] - m_swarm_position[i][j]);
-            m_swarm_velocity[i][j] = m_inertia*m_swarm_velocity[i][j] + cognitivefactor + socialfactor;
-			*/
-            // I need to clip each velocity             
-            float max = (m_best[j].max() - m_best[j].min())/8;                  
-            if (m_swarm_velocity[i][j] < -max)
-                m_swarm_velocity[i][j] = -max;
-            else if (m_swarm_velocity[i][j] > max)
-                m_swarm_velocity[i][j] = max;
-        }        
-        m_swarm_position[i] += m_swarm_velocity[i];
+				// PSO Swarm
+				/*float cognitivefactor = c1*uniformDistribution(0,1)*(m_swarm_best[i][j] - m_swarm_position[i][j]);
+				float socialfactor = c2*uniformDistribution(0,1)*(m_best[j] - m_swarm_position[i][j]);
+				m_swarm_velocity[i][j] = m_inertia*m_swarm_velocity[i][j] + cognitivefactor + socialfactor;
+
+				*/
+				// I need to clip each velocity
+				float max = (m_best[j].max() - m_best[j].min())/8;
+				if (m_swarm_velocity[i][j] < -max)
+					m_swarm_velocity[i][j] = -max;
+				else if (m_swarm_velocity[i][j] > max)
+					m_swarm_velocity[i][j] = max;
+			}
+			m_swarm_position[i] += m_swarm_velocity[i];
+    	}
+    	else
+    	{
+    		debug << "reset " << i << endl;
+    		m_swarm_failures[i] = 0;
+    		for (int j=0; j<m_num_dimensions; j++)
+    		{
+    			m_swarm_position[i][j] += normalDistribution(0, m_reset_fraction)*(m_swarm_position[i][j].max() - m_swarm_position[i][j].min());
+    			m_swarm_velocity[i][j] = normalDistribution(0, (m_swarm_position[i][j].max() - m_swarm_position[i][j].min())/8);
+    		}
+    	}
         
         debug << "pos " << i << ": " << Parameter::getAsVector(m_swarm_position[i]) << endl;
         debug << "vel" << i << ": " << m_swarm_velocity[i] << endl;
