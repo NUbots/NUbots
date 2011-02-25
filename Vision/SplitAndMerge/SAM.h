@@ -1,10 +1,39 @@
+/*
+ * Author: Shannon Fenn
+ * Last Modified: 25/02/11
+ * Description:
+ *      - A static class of method implementing the split and merge line extraction
+        algorithm for us on the NAO robot platform
+
+        - Parameters are static member variable set by initRules(), rather than
+        #define macros. Make sure to call this method with reasonable values
+        before calling splitAndMergeLS() or splitAndMergeLSClusters()
+
+        - the only method to call (besides initRules()) is either
+         + splitAndMergeLS() - for non-clustered input
+         + splitAndMergeLSClusters() - for clustered input
+
+        - If things need to be changed the main decisions are in:
+         + splitLSIterative() - decisions on whether to split, keep or throw away lines
+         + findFurthestPoint() - finds the number of points distant from the line, and the furthest point
+         + separateLS() - divides point set into two subsets based on the line equation and the furthest point
+                uses a transform to axis defined by the line itself, and the normal from the furthest point
+                to the line.
+         + shouldMergeLines() - decisions on whether two lines should be merged
+
+         - All other methods are trivial or only make simple decisions based on the parameters set
+            by initRules()
+ */
+
+
+
 #ifndef SAM_H_SHANNON
 #define SAM_H_SHANNON
 
 #include <vector>
 #include <math.h>
-#include <iostream>
-#include <fstream>
+//#include <iostream>
+//#include <fstream>
 #include "Tools/Math/LSFittedLine.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/Vector3.h"
@@ -32,8 +61,7 @@ public:
     static unsigned int noFieldLines;
 
     //GENERIC
-    static void initDebug(ofstream& dout);
-    static bool initRules(vector<unsigned int>& ints, vector<double>& doubles);
+    //static void initDebug(ofstream& dout);
     static void initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int MPTLF, double MEPD, double MLRF);
 
     //LEAST-SQUARES FITTING
@@ -49,16 +77,12 @@ private:
     //splitting rules
     static double SPLIT_DISTANCE; //1.0
     static unsigned int MIN_POINTS_OVER; //2
+    static unsigned int MIN_POINTS_TO_LINE; //3
     //Noise splitting rules
     static unsigned int SPLIT_NOISE_ITERATIONS; //1
     //merging rules
-    //#define MAX_GRAD_DIFF 1
-    //#define MAX_INTERCEPT_DIFF 10
-    //#define MAX_RHO_DIFF 12
-    //#define MAX_PHI_DIFF 0.5
     static double MAX_END_POINT_DIFF; //5.0
     //Line keeping rules
-    static unsigned int MIN_POINTS_TO_LINE; //3
     static unsigned int MIN_POINTS_TO_LINE_FINAL; //5
     static double MIN_LINE_R2_FIT; //0.90
 
@@ -79,8 +103,8 @@ private:
     static void splitNoiseLS(vector<LSFittedLine*>& lines);
     static void mergeLS(vector<LSFittedLine*>& lines);
     static void generateLSLine(LSFittedLine& line, vector<LinePoint*>& points);
-    static void sortLinesLS(vector<LSFittedLine*>& lines);
     static bool separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePoint* split_point, LSFittedLine& line);
+    //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC

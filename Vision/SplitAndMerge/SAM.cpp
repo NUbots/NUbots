@@ -87,17 +87,10 @@ void SAM::debugPrint(const vector<LinePoint *> &points) {
 }
 
 */
-bool SAM::initRules(vector<unsigned int>& ints, vector<double>& doubles) {
-    if(ints.size() == 3 && doubles.size() == 3) {
-        initRules(doubles[0], ints[1], ints[1], ints[2], doubles[1], doubles[2]);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
 
 void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int MPTLF, double MEPD, double MLRF) {
+    //Sets up parameters
+
     SPLIT_DISTANCE = SD;
     MIN_POINTS_OVER = MPO;
     MAX_END_POINT_DIFF = MEPD;
@@ -111,6 +104,9 @@ void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int
 
 //CLUSTERS
 void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall, bool cleardirty, bool noise) {
+    //Performs split-and-merge algorithm with input consisting of a set of point clusters
+    // and a set of unclustered points, putting the resulting lines into a reference
+    // passed vector
 
     //Profiler prof("SplitAndMerge");
     noFieldLines = 0;
@@ -162,7 +158,7 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
 
 void SAM::splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall, bool cleardirty, bool noise) {
     /*
-     *
+     * Split and Merge without clustering
      */
     noFieldLines = 0;
     noisePoints.clear();
@@ -189,6 +185,8 @@ void SAM::splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
 
 
 void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
+    // Recursive split algorithm - not used
+
     //Assumes:
     //	- constant detirmined for limit - MIN_POINTS_OVER
     //	- constant for min splitting distance - SAM_THRESHOLD
@@ -304,7 +302,8 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
 }
 
 void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
-//qDebug() << "points size: " << points.size();
+    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
+    //each line or adding it to a final list.
 
     //Boundary Conds
     if(noFieldLines >= MAX_LINES) {
@@ -446,6 +445,9 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
 }
 
 void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_point) {
+    //this method finds the furthest point from a line and returns (via parameters)
+    //the number of points over the SPLIT_DISTANCE threshold and the index of
+    //the furthest point
 
     //temp variables
     double distance = 0.0; 	//holder for calculated LinePointDistance
@@ -479,6 +481,9 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
 }
 
 void SAM::splitNoiseLS(vector<LSFittedLine*>& lines) {
+    //this method creates a copy of the noisePoints vector,
+    //clears the current noisePoints vector and runs
+    //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
         vector<LinePoint*> noiseCopy;
@@ -612,7 +617,8 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
 
 void SAM::mergeLS(vector<LSFittedLine*>& lines) {
     //O(l^2)  -  l=number of lines (max 15)
-
+    // Compares all lines and merges based on the return value of
+    // shouldMergeLines(Line, Line) - edit that method not this one
 
     vector<LSFittedLine*> finals; //this vector contains lines that did not need merging
 
@@ -650,15 +656,11 @@ void SAM::mergeLS(vector<LSFittedLine*>& lines) {
 }
 
 
-
 void SAM::generateLSLine(LSFittedLine& line, vector<LinePoint*>& points) {
+    //creates a Least Squared Fitted line
+
     line.clearPoints();
     line.addPoints(points);
-    /*
-    for(unsigned int i = 0; i < points.size(); i++) {
-        line.addPoint(*points[i]);
-    }
-    */
 }
 
 
@@ -668,23 +670,27 @@ void SAM::generateLSLine(LSFittedLine& line, vector<LinePoint*>& points) {
 
 void SAM::addToNoise(LinePoint* point) {
     //NOT EFFICIENT
-    //O(n) for every insertion
+    //O(M) for every insertion - where M is the size of noisePoints
     bool add = true;
     for(unsigned int i=0; i<noisePoints.size(); i++) {
         if(*noisePoints[i] == *point)
             add = false;
     }
-    if(add)
+    if(add) {
         noisePoints.push_back(point);
+    }
 }
 
 
 void SAM::clearSmallLines(vector<LSFittedLine*>& lines) {
+    //removes any lines from the vector whose vector of
+    //member points is too small
+
     vector<LSFittedLine*> stack;
     LSFittedLine* l1;
     while(!lines.empty()) {
         l1 = lines.back();
-        if(l1->numPoints >= MIN_POINTS_TO_LINE_FINAL) {
+        if(l1->getPoints().size() >= MIN_POINTS_TO_LINE_FINAL) {
             //keep line
             stack.push_back(l1);
         }
@@ -701,8 +707,10 @@ void SAM::clearSmallLines(vector<LSFittedLine*>& lines) {
 }
 
 
-
 void SAM::clearDirtyLines(vector<LSFittedLine*>& lines) {
+    //removes any lines from the vector whose R^2 value is
+    //less than MIN_LINE_R2_FIT
+
     vector<LSFittedLine*> stack;
     LSFittedLine* l1;
     while(!lines.empty()) {
@@ -724,6 +732,12 @@ void SAM::clearDirtyLines(vector<LSFittedLine*>& lines) {
 }
 
 bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
+    //THOSE WISHING TO CHANGE THE METHOD OF MERGING LINES NEED ONLY CHANGE THIS
+    //FUNCTION
+    //returns true if some condition is satisfied, indicating the two lines should
+    //be merged
+
+
     //END POINT METHOD
     bool endPointsGood;
 
@@ -807,6 +821,9 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
 }
 
 bool SAM::convertLinesEndPoints(vector<LSFittedLine *> &lines, Vision *vision, LineDetection *linedetector) {
+    // converts the end points of lines to allow for more accurate merging
+
+
     Vector3<float> relativePoint;
     Point *lefttrans, *righttrans;
     for(unsigned int i=0; i<lines.size(); i++) {
