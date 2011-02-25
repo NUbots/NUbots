@@ -45,8 +45,10 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
     m_num_dimensions = parameters.size();
     
     srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
-
-    initSwarm();
+    load();
+    if (m_swarm_position.empty())
+    	initSwarm();
+    save();
 }
 
 void PSOOptimiser::initSwarm()
