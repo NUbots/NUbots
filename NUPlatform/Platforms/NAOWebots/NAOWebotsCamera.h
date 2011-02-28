@@ -31,7 +31,6 @@
 #include "NAOWebotsPlatform.h"
 #include <cstring>
 
-class webots::Camera;
 class NUImage;
 
 class NAOWebotsCamera : public NUCamera

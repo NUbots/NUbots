@@ -49,6 +49,7 @@ ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thre
     err = pthread_mutex_init(&m_running_mutex, NULL);
     if (err != 0)
         errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_running_mutex." << endl;
+    pthread_mutex_lock(&m_running_mutex);
 }
 
 /*! @brief Stops the thread
@@ -65,72 +66,45 @@ ConditionalThread::~ConditionalThread()
 }
 
 /*! @brief Starts a single execution of the thread's main loop
- 
-    This is implemented such that if the loop is already running, a second signal is not sent; this will allow threads
-    to drop frames properly.
- 
-    It also locks the m_running_mutex automatically.
+ * 	@param blocking set this to true if you want to block until this thread is ready to receive the signal
  */
-void ConditionalThread::startLoop()
+void ConditionalThread::signal(bool blocking)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::startLoop() " << m_name << " at " << Platform->getTime() << endl;
+        debug << "ConditionalThread::signal() " << m_name << " at " << Platform->getTime() << endl;
     #endif
-    int err = 0;
-    err = pthread_mutex_trylock(&m_running_mutex);
-    if (err == 0)
-    {   // if the loop is not already running then, signal it to start
-        pthread_mutex_lock(&m_condition_mutex);
-        err = pthread_cond_signal(&m_condition);
-        pthread_mutex_unlock(&m_condition_mutex);
+    if (blocking)
+    	pthread_mutex_lock(&m_running_mutex);
+    else
+    {	// if its not blocking then do a trylock, if the lock fails return
+    	int err = pthread_mutex_trylock(&m_running_mutex);
+    	if (err !=0)
+    	{
+			#if DEBUG_THREADING_VERBOSITY > 2
+				debug << "ConditionalThread::signal() " << m_name << " is not ready!" << endl;
+			#endif
+			return;
+    	}
     }
-    else 
-    {
-        #if DEBUG_THREADING_VERBOSITY > 2
-            debug << "ConditionalThread::startLoop() " << m_name << " is already running!" << endl;
-        #endif
-    }
-
+	pthread_mutex_lock(&m_condition_mutex);
+	pthread_cond_signal(&m_condition);
+	pthread_mutex_unlock(&m_running_mutex);
+	pthread_mutex_unlock(&m_condition_mutex);
 }
 
-/*! @brief Blocks this thread until the condition is signalled
+/*! @brief Blocks this thread until the signal() function is called
  */
-void ConditionalThread::waitForCondition()
+void ConditionalThread::wait()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread: " << m_name << " is waiting for condition at " << Platform->getTime() << endl;
+        debug << "ConditionalThread: " << m_name << " is waiting at " << Platform->getTime() << endl;
     #endif
     pthread_mutex_lock(&m_condition_mutex);
+	pthread_mutex_unlock(&m_running_mutex);
     pthread_cond_wait(&m_condition, &m_condition_mutex);
+    pthread_mutex_lock(&m_running_mutex);
     pthread_mutex_unlock(&m_condition_mutex);
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread: " << m_name << " has finished waiting for condition at " << Platform->getTime() << endl;
-    #endif
-}
-
-/*! @brief Unlocks the m_running_mutex, consequently allowing the main loop to be started again with startLoop()
- 
-    It would be really nice to have this happen automatically, at the end of each iteration...Because you must call
-    it in your implementation of run() if you want it to ever run again ;).
- */
-void ConditionalThread::onLoopCompleted()
-{
-    #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::loopCompleted() " << m_name << " at " << Platform->getTime() << endl;
-    #endif
-    pthread_mutex_unlock(&m_running_mutex);
-}
-
-/*! @brief Blocks the calling thread until the current iteration of the thread's loop completes
- */
-void ConditionalThread::waitForLoopCompletion()
-{
-    #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " at " << Platform->getTime() << endl;
-    #endif
-    pthread_mutex_lock(&m_running_mutex);            // block if thread is STILL running
-    pthread_mutex_unlock(&m_running_mutex);
-    #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::waitForLoopCompletion() " << m_name << " wait completed at " << Platform->getTime() << endl;
+        debug << "ConditionalThread: " << m_name << " finished waiting at " << Platform->getTime() << endl;
     #endif
 }
