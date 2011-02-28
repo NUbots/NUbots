@@ -392,21 +392,15 @@ void NUbot::run()
         previoussimtime = Platform->getTime();
         webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
-            m_sensemove_thread->startLoop();
+            m_sensemove_thread->signal(true);
         #endif
         
         #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
             if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
             {
-                m_seethink_thread->startLoop();         
-                m_seethink_thread->waitForLoopCompletion();
+                m_seethink_thread->signal(true);
             }
         #endif
-        
-        #if defined(USE_MOTION)
-            m_sensemove_thread->waitForLoopCompletion();
-        #endif
-        
         count++;
     };
 #else
@@ -414,7 +408,7 @@ void NUbot::run()
         while (true)
         {
             periodicSleep(33);
-            m_seethink_thread->startLoop();
+            m_seethink_thread->signal(true);
         }
     #endif
 #endif
