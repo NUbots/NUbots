@@ -92,6 +92,16 @@ void ConditionalThread::signal(bool blocking)
 	pthread_mutex_unlock(&m_condition_mutex);
 }
 
+/* @brief A non-blocking call to signal the start of the thread.
+ 
+          Note. the strangeness of having this separate version when a default arguement would of sufficed, is because
+                This version is used in a boost::bind that expects a function that takes no parameters.
+ */
+void ConditionalThread::signal()
+{
+    signal(false);
+}
+
 /*! @brief Blocks this thread until the signal() function is called
  */
 void ConditionalThread::wait()
