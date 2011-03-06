@@ -193,7 +193,7 @@ void NAOSensors::copyFromJoints()
     m_al_temperature_access->GetValues(m_buffer_temperatures);
     
     vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
-    float delta_t = 1000*(m_current_time - m_previous_time);
+    float delta_t = (m_current_time - m_previous_time)/1000;
     for (size_t i=0; i<m_buffer_positions.size(); i++)
     {
         joint[pos_id] = m_buffer_positions[i];           
