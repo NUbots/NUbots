@@ -20,6 +20,8 @@
 #include "../Kinematics/Kinematics.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
+#include "Tools/Profiling/Profiler.h"
+
 #include "debug.h"
 #include "debugverbosityvision.h"
 
@@ -77,11 +79,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
 
-
+    Profiler prof = Profiler("AARON");
+    prof.start();
     /*AARON'S OLD LINE DETECTION*/
     FindFieldLines(image_width,image_height);
     /*AARON'S OLD LINE DETECTION*/
-
+    prof.split("FindFieldLines");
+    debug << prof;
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
     //{
@@ -176,7 +180,12 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     #endif
 }
 
-void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data,  vector< ObjectCandidate >& candidates) {
+void LineDetection::FormLines(FieldObjects* AllObjects,
+                              Vision* vision,
+                              NUSensorsData* data,
+                              vector< ObjectCandidate >& candidates,
+                              vector< TransitionSegment>& leftoverPoints) {
+
 
     //Setting up the variables:
     int spacing = vision->getScanSpacings();
@@ -191,8 +200,6 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
 
     /*SHANNON'S NEW LINE DETECTION*/
-
-    Vector3<float> convertVals;
 
     //get clusters
     vector< vector<LinePoint*> > clusters;
@@ -221,40 +228,65 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     }
 
     //get leftover points
-    for(unsigned int i=0; i<verticalLineSegments.size(); i++) {
-        if(!verticalLineSegments[i].isUsed) {
-            temppoint = new LinePoint();
-            temppoint->x = (double)verticalLineSegments[i].getMidPoint().x;
-            temppoint->y = (double)verticalLineSegments[i].getMidPoint().y;
-            /*
-            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
-                SAM::convertPoint(*temppoint, convertVals);
-            }
-            */
-            leftover.push_back(temppoint);
+    for(unsigned int i=0; i<leftoverPoints.size(); i++) {
+        temppoint = new LinePoint();
+        temppoint->x = (double)leftoverPoints[i].getMidPoint().x;
+        temppoint->y = (double)leftoverPoints[i].getMidPoint().y;
+        /*
+        if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
+            SAM::convertPoint(*temppoint, convertVals);
         }
+        */
+        leftover.push_back(temppoint);
     }
+    //prof.split("clusters");
 
-    for(unsigned int i=0; i<horizontalLineSegments.size(); i++) {
-        if(!horizontalLineSegments[i].isUsed) {
-            temppoint = new LinePoint();
-            temppoint->x = (double)horizontalLineSegments[i].getMidPoint().x;
-            temppoint->y = (double)horizontalLineSegments[i].getMidPoint().y;
-            /*
-            if(GetDistanceToPoint(*temppoint, convertVals, vision)) {
-                SAM::convertPoint(*temppoint, convertVals);
-            }
-            */
-            leftover.push_back(temppoint);
-        }
-    }
-    //qDebug() << "Beginning SAM:\n";
-    //qDebug() << "Clusters: " << clusters.size() << " leftover points: " << leftover.size();
+    //POINT CONVERSION TESTING
+    /*
+    ofstream prepoints, postpoints;
+    prepoints.open("prepoints.txt");
+    postpoints.open("postpoints.txt");
+    Vector3<float> convertVals;
+    double xtrans, ytrans;
+
     for(unsigned int i=0; i<clusters.size(); i++) {
-        //qDebug() << "\nC" << i+1 << " size: " << clusters[i].size();
+        //for each cluster
+        postpoints << clusters[i].size() << "\n";
+        for(unsigned int k=0; k<clusters[i].size(); k++) {
+            //for each point
+            prepoints << clusters[i][k]->x << " " << clusters[i][k]->y << "\n";
+            GetDistanceToPoint(*clusters[i][k],convertVals,vision);
+            //x = dist * cos(bearing) * cos(elevation)
+            xtrans = convertVals[0] * cos(convertVals[1]) * cos(convertVals[2]);
+            //y = dist * sin(bearing) * cos(elevation)
+            ytrans = convertVals[0] * sin(convertVals[1]) * cos(convertVals[2]);
+            postpoints << xtrans << " " << ytrans << "\n";
+            //clusters[i][k]->x = xtrans;
+            //clusters[i][k]->y = ytrans;
+        }
+        prepoints << "\n";
+        postpoints << "\n";
     }
+    //leftovers
+    postpoints << leftover.size() << "\n";
+    for(unsigned int k=0; k<leftover.size(); k++) {
+        //for each point
+        prepoints << leftover[k]->x << " " << leftover[k]->y << "\n";
+        GetDistanceToPoint(*leftover[k],convertVals,vision);
+        //x = dist * cos(bearing) * cos(elevation)
+        xtrans = convertVals[0] * cos(convertVals[1]) * cos(convertVals[2]);
+        //y = dist * sin(bearing) * cos(elevation)
+        ytrans = convertVals[0] * sin(convertVals[1]) * cos(convertVals[2]);
+        postpoints << xtrans << " " << ytrans << "\n";
+        //leftover[k]->x = xtrans;
+        //leftover[k]->y = ytrans;
+    }
+    */
+
+    //qDebug() << "Beginning SAM:\n";
     vector<LSFittedLine*> lines;
     /*OUTPUT FOR DEBUGGING*/
+    /*
     ofstream fout;
     fout.open("points.txt");
     for(unsigned int i=0; i<clusters.size(); i++) {
@@ -268,10 +300,17 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
         fout << leftover[i]->x << " " << leftover[i]->y << "\n";
     }
     fout.close();
+    */
     /*OUTPUT FOR DEBUGGING*/
-    SAM::initRules(2.0,2,3,5,5.0,0.99);
-    SAM::splitAndMergeLSClusters(lines, clusters, leftover, true, true, true);
+    Profiler prof("SHANNON");
+    prof.start();
 
+    SAM::initRules(2.0,2,3,5,12.0,0.999);
+    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, true);
+
+    prof.split("SAM");
+
+    debug << prof;
     /*OUTPUT FOR DEBUGGING*/
     /*
     qDebug() << "printing to file";
@@ -317,9 +356,14 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
         sumR2 += fieldLines.back().getr2tls();
         lines.pop_back();
     }
+
+    TotalValidLines = lineno;
+
     //qDebug() << "Average: MSD: " << sumMSD/fieldLines.size() << " R^2: " << sumR2/fieldLines.size();
     //qDebug() << "Finished \n";
     /*SHANNON'S NEW LINE DETECTION*/
+
+
 
     TransformLinesToWorldModelSpace(vision);
 
@@ -335,6 +379,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
     //qDebug() << "Finnished Decoding Penalty Spots:";
+
 
 }
 
@@ -2492,6 +2537,26 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
 }
 
 bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relativePoint, Vision* vision)
+{
+    float bearing = vision->CalculateBearing(point.x);
+    float elevation = vision->CalculateElevation(point.y);
+
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    if(isOK == true)
+    {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+
+        relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+        //#if DEBUG_VISION_VERBOSITY > 6
+        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        //#endif
+    }
+    return isOK;
+}
+
+bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoint, Vision* vision)
 {
     float bearing = vision->CalculateBearing(point.x);
     float elevation = vision->CalculateElevation(point.y);

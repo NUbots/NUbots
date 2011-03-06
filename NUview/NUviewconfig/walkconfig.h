@@ -29,6 +29,7 @@
     #else
         #undef USE_JUPPWALK
     #endif
+
     #define USE_WALK_NBWALK_ON 
     #ifdef USE_WALK_NBWALK_ON
         #define USE_NBWALK
@@ -41,6 +42,7 @@
     #else
         #undef USE_VSCWALK
     #endif
+
     #define USE_WALK_ALWALK_OFF 
     #ifdef USE_WALK_ALWALK_ON
         #define USE_ALWALK
