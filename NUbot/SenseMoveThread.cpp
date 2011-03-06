@@ -87,7 +87,7 @@ void SenseMoveThread::run()
     
     #ifdef THREAD_SENSEMOVE_PROFILE
         Profiler prof = Profiler("SenseMoveThread");
-        Profiler wait = Profiler("SenseMoveThreadWait");
+        Profiler waitprof = Profiler("SenseMoveThreadWait");
     #endif
     
     int err = 0;
@@ -96,12 +96,12 @@ void SenseMoveThread::run()
         try 
         {
             #ifdef THREAD_SENSEMOVE_PROFILE
-                wait.start();
+                waitprof.start();
             #endif
             wait();
             #ifdef THREAD_SENSEMOVE_PROFILE
-                wait.split("wait");
-                debug << wait;
+                waitprof.split("wait");
+                debug << waitprof;
             #endif
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
