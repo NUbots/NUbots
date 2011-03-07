@@ -44,6 +44,7 @@ using namespace std;
 
 #include "debug.h"
 #include "debugverbositynetwork.h"
+#include "nubotconfig.h"
 
 /*! @brief Create a new NUIO interface to network and log files
     @param robotnumber the unique number of the robot (this is used to select a port offset)
@@ -190,7 +191,9 @@ NUIO& operator<<(NUIO& io, NUbot& p_nubot)
             network_data_t locnetdata = io.m_localisation_port->receiveData();
             if(locnetdata.size > 0)
             {
-                io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(Blackboard->Objects));
+                #ifdef USE_LOCALISATION
+                    io.m_localisation_port->sendData(*(p_nubot.GetLocWm()),*(Blackboard->Objects));
+                #endif
             }
         }
     #endif

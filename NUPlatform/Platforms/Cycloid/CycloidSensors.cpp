@@ -93,11 +93,6 @@ void CycloidSensors::copyFromJoints()
         joint[NUSensorsData::TorqueId] = Motors::MotorSigns[i]*JointLoads[i]*1.6432e-3;             // This torque conversion factor was measured for a DX-117, I don't know how well it applies to other motors
         m_data->set(*m_joint_ids[i], m_current_time, joint);
         
-        if (*m_joint_ids[i] == NUSensorsData::LAnklePitch)
-        {
-            debug << "(" << joint[NUSensorsData::PositionId] << " - " << m_previous_positions[i] << ")/" << delta_t << endl;
-        }
-        
         m_previous_positions[i] = joint[NUSensorsData::PositionId];
         m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
     }

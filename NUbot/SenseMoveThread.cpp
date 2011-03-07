@@ -33,6 +33,11 @@
     #include "Motion/NUMotion.h"
 #endif
 
+#ifdef USE_BEHAVIOUR
+    #include "Behaviour/Behaviour.h"
+    #include "Infrastructure/Jobs/Jobs.h"
+#endif
+
 #include "debug.h"
 #include "debugverbositynubot.h"
 #include "debugverbositythreading.h"
@@ -116,6 +121,18 @@ void SenseMoveThread::run()
                 m_nubot->m_motion->process(Blackboard->Sensors, Blackboard->Actions);
                 #ifdef THREAD_SENSEMOVE_PROFILE
                     prof.split("motion");
+                #endif
+            #endif
+            #if defined(USE_BEHAVIOUR) and not defined(USE_VISION) and not defined(USE_LOCALISATION)        // This is a special clause. When there is no vision or localisation we reduce down to a single thread; ie the behaviour is no called from this thread.
+                m_nubot->m_behaviour->process(Blackboard->Jobs, Blackboard->Sensors, Blackboard->Actions, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
+                #ifdef THREAD_SENSEMOVE_PROFILE
+                    prof.split("behaviour");
+                #endif
+                #if defined(USE_MOTION)
+                    m_nubot->m_motion->process(Blackboard->Jobs);
+                    #ifdef THREAD_SENSEMOVE_PROFILE
+                    prof.split("motion_jobs");
+                    #endif
                 #endif
             #endif
             m_nubot->m_platform->processActions();
