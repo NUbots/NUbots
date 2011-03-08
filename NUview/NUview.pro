@@ -6,6 +6,7 @@ macx {
     LIBS += -framework \
         CoreFoundation \
         -lz
+    INCLUDEPATH += '/opt/local/include'
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
