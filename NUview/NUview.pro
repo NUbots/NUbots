@@ -3,9 +3,14 @@ QT += network \
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -lz
+    LIBS += -framework CoreFoundation -lz
+    DESTDIR = "../Build/NUView"
+    OBJECTS_DIR = "../Build/NUView/.obj"
+    MOC_DIR = "../Build/NUView/.moc"
+    RCC_DIR = "../Build/NUView/.rcc"
+    UI_DIR = "../Build/NUView/.ui"
+
+    #Macports include directory
     INCLUDEPATH += '/opt/local/include'
 }
 win32 { 
@@ -187,21 +192,21 @@ SOURCES += mainwindow.cpp \
     ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
-    ../NUPlatform/NUIO/*.cpp \
+    $$files(../NUPlatform/NUIO/*.cpp) \
     NUviewIO/NUviewIO.cpp \
     ../Infrastructure/NUData.cpp \
     ../Infrastructure/NUBlackboard.cpp \
     ../NUPlatform/NUPlatform.cpp \
     ../NUPlatform/NUSensors.cpp \
-    ../Infrastructure/NUSensorsData/*.cpp \
+    $$files(../Infrastructure/NUSensorsData/*.cpp) \
     ../NUPlatform/NUActionators.cpp \
-    ../NUPlatform/NUActionators/*.cpp \
-    ../Infrastructure/NUActionatorsData/*.cpp \
+    $$files(../NUPlatform/NUActionators/*.cpp) \
+    $$files(../Infrastructure/NUActionatorsData/*.cpp) \
     ../Infrastructure/TeamInformation/TeamInformation.cpp \
-    ../Infrastructure/Jobs/*.cpp \
-    ../Infrastructure/Jobs/CameraJobs/*.cpp \
-    ../Infrastructure/Jobs/VisionJobs/*.cpp \
-    ../Infrastructure/Jobs/MotionJobs/*.cpp \
+    $$files(../Infrastructure/Jobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/CameraJobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/VisionJobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/MotionJobs/*.cpp) \
     locWmGlDisplay.cpp \
     ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
