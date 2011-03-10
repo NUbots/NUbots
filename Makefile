@@ -180,7 +180,7 @@ endif
 
 NAOWebots:
 	@echo "Targetting NAOWebots";
-	@echo ${NPROCS}
+	@echo "Number of Processes: ${NPROCS}"
     ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(NAOWEBOTS_BUILD_DIR)/*)), )		## check if the project has already been configured
 		@set -e; \
 			echo "Configuring for first use"; \
