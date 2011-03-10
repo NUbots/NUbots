@@ -1356,9 +1356,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
             bool isok = GetDistanceToPoint(*tempPoint, point, vision);
             if(isok)
             {
-                float x = point.x * cos(point.y) * cos (point.z);
-                float y = point.x * sin(point.y) * cos (point.z);
                 #if TARGET_OS_IS_WINDOWS
+                    float x = point.x * cos(point.y) * cos (point.z);
+                    float y = point.x * sin(point.y) * cos (point.z);
                     qDebug() << x <<"," << y <<"," << usedLines[i];
                 #endif
             }
