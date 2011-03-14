@@ -40,6 +40,7 @@ protected:
 private:
     NUData::id_t m_joint;
     const QSBallisticController* m_parent;
+    double m_time_in_state, m_previous_time;;
 };
 
 

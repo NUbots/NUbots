@@ -20,9 +20,17 @@
  */
 
 #include "QSRelax.h"
+#include "QSCatch.h"
+#include "QSBallisticController.h"
+
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+
+#include <cmath>
 
 QSRelax::QSRelax(const NUData::id_t& joint, const QSBallisticController* parent)
 {
@@ -31,6 +39,9 @@ QSRelax::QSRelax(const NUData::id_t& joint, const QSBallisticController* parent)
     #endif
     m_joint = joint;
     m_parent = parent;
+    
+    m_time_in_state = 0;
+    m_previous_time = 0;
 }
 
 QSRelax::~QSRelax()
@@ -42,6 +53,17 @@ void QSRelax::doState()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "QSRelax::doState" << endl;
     #endif
+    float target = -0.02;          // this will come from a gravity vector estimate
+    
+    float gain = 0.1;              // with a slope of 5, I can't balance the robot without control with gain of 0.05;
+    float meas_p, output;
+    m_data->getPosition(m_joint, meas_p);
+    output = gain*target - (gain-1)*meas_p;     
+    m_actions->add(m_joint, 0, output, 100);
+    
+    if (m_previous_time != 0)
+        m_time_in_state += m_data->CurrentTime - m_previous_time;
+    m_previous_time = m_data->CurrentTime;
 }
 
 BehaviourState* QSRelax::nextState()
@@ -49,6 +71,14 @@ BehaviourState* QSRelax::nextState()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "QSRelax::nextState" << endl;
     #endif
-    return this;
+    // I am fixing the time_in_state to be 0.64*catch_duration
+    if (m_time_in_state > 180 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)
+    {
+        m_previous_time = 0;
+        m_time_in_state = 0;
+        return m_parent->getCatch();
+    }
+    else
+        return this;
 }
 

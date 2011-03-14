@@ -43,6 +43,12 @@ QuietStanceProvider::QuietStanceProvider(Behaviour* manager) : BehaviourProvider
     
     Blackboard->Actions->add(NUData::LLeg, Blackboard->Actions->CurrentTime + 3000, 0, 100);
     Blackboard->Actions->add(NUData::RLeg, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::LShoulderRoll, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::LElbowYaw, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::LElbowPitch, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::RShoulderRoll, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::RElbowYaw, Blackboard->Actions->CurrentTime + 3000, 0, 100);
+    Blackboard->Actions->add(NUData::RElbowPitch, Blackboard->Actions->CurrentTime + 3000, 0, 100);
     Blackboard->Actions->add(NUData::Torso, Blackboard->Actions->CurrentTime + 3000, vector<float>(2,0), 100);
 }
 
@@ -64,8 +70,10 @@ void QuietStanceProvider::doBehaviour()
     #endif
     m_lankle->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
     m_rankle->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
-    m_lhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
-    m_rhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
+    //m_lhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
+    //m_rhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
+    
+    debug << m_lankle->getPosition() << ", " << m_rankle->getPosition() << ", " << m_lankle->getVelocity() << ", " << m_rankle->getVelocity() << endl;
 }
  
 

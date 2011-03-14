@@ -20,20 +20,28 @@
 */
 
 #include "QSBallisticController.h"
-
 #include "QSRelax.h"
 #include "QSCatch.h"
 
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+
+#include <cmath>
 
 QSBallisticController::QSBallisticController(const NUData::id_t& joint)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 4
         debug << "QSBallisticController::QSBallisticController" << endl;
     #endif
+    m_joint = joint;
     m_relax = new QSRelax(joint, this);
     m_catch = new QSCatch(joint, this);
+    
+    m_initialised = false;
     
     m_state = m_relax;
 }
@@ -47,6 +55,53 @@ QSBallisticController::~QSBallisticController()
     delete m_catch;
 }
 
+void QSBallisticController::doStateCommons()
+{
+    if (not m_initialised)
+    {
+        Blackboard->Sensors->getPosition(m_joint, m_position);
+        m_velocity = 0;
+        m_initialised = true;
+    }
+    else 
+    {
+        float beta = 0.003;                     // this amount of filtering does introduce a significant time delay in the estimate
+        float alpha = 2*sqrt(beta/2) - beta/2;  // calculate alpha to give Kalman optimal damping (Painter, 1990)
+        
+        float meas_p;
+        m_data->getPosition(m_joint, meas_p);
+        double dt = (Blackboard->Sensors->CurrentTime - Blackboard->Sensors->PreviousTime)/1000;
+        
+        float pred_p = m_position + dt*m_velocity;
+        m_position = pred_p + alpha*(meas_p - pred_p);
+        m_velocity = m_velocity + (beta/dt)*(meas_p - pred_p);
+    }
+
+}
+
+/*! @brief Returns the relax state */
+QSRelax* QSBallisticController::getRelax() const
+{
+    return m_relax;
+}
+
+/*! @brief Returns the catch state */
+QSCatch* QSBallisticController::getCatch() const
+{
+    return m_catch;
+}
+
+/*! @brief Returns the filtered angular position */
+float QSBallisticController::getPosition() const
+{
+    return m_position;
+}
+
+/*! @brief Returns the filtered angular velocity */
+float QSBallisticController::getVelocity() const
+{
+    return m_velocity;
+}
 
 
 
