@@ -48,7 +48,7 @@ SET( NUBOT_USE_MOTION_GETUP
 	CACHE BOOL
 	"Set to ON to use getups, set to OFF to stay on the ground")
 SET( NUBOT_USE_MOTION_FALL_PROTECTION
-	OFF
+	ON
 	CACHE BOOL
 	"Set to ON to use fall protection, set to OFF to just turn off stiffness when falling")
 

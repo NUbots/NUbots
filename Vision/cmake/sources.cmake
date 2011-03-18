@@ -39,6 +39,7 @@ fitellipsethroughcircle.cpp
 SET (YOUR_DIRS
 Threads
 EllipseFitting
+SplitAndMerge
 )
 ####################################################################################
 

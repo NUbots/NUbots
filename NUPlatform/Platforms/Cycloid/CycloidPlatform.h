@@ -1,9 +1,9 @@
 /*! @file CycloidPlatform.h
-    @brief Declaration of Cycloid platform class.
+    @brief Declaration of Bear platform class.
 
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2009, 2010, 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,10 +19,11 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CycloidPLATFORM_H
-#define CycloidPLATFORM_H
+#ifndef CYCLOIDPLATFORM_H
+#define CYCLOIDPLATFORM_H
 
 #include "NUPlatform/NUPlatform.h"
+class Motors;
 
 class CycloidPlatform : public NUPlatform
 {
@@ -30,17 +31,8 @@ class CycloidPlatform : public NUPlatform
 public:
     CycloidPlatform();
     ~CycloidPlatform();
-    
-    void test();
-    
-protected:
 private:
-    
-// Members:
-public:
-protected:
-private:
-    
+    Motors* m_motors;
 };
 
 #endif

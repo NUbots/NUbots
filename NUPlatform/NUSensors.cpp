@@ -84,8 +84,8 @@ void NUSensors::update()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
-    m_current_time = Platform->getTime();
     m_data->PreviousTime = m_data->CurrentTime;
+    m_current_time = Platform->getTime();
     m_data->CurrentTime = m_current_time;
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();
@@ -190,6 +190,7 @@ void NUSensors::calculateHorizon()
     Horizon HorizonLine;
     vector<float> orientation;
     float headYaw, headPitch;
+
     bool validdata = m_data->get(NUSensorsData::Orientation, orientation);
     validdata &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
     validdata &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
@@ -292,8 +293,6 @@ void NUSensors::calculateFallSense()
     
     vector<float> acceleration;
     vector<float> orientation;
-    m_data->getAccelerometer(acceleration);
-    m_data->getOrientation(orientation);
     
     if (m_data->getAccelerometer(acceleration) and m_data->getOrientation(orientation))
     {

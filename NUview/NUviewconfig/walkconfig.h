@@ -17,12 +17,6 @@
 #endif
 
 #ifdef USE_WALK
-    #define USE_WALKOPTIMISER_OFF 
-	#ifdef USE_WALKOPTIMISER_ON
-        #define USE_WALKOPTIMISER
-    #else
-        #undef USE_WALKOPTIMISER
-    #endif
     #define USE_WALK_JWALK_OFF 
     #ifdef USE_WALK_JWALK_ON
         #define USE_JWALK
@@ -35,7 +29,7 @@
     #else
         #undef USE_JUPPWALK
     #endif
-    #define USE_WALK_NBWALK_OFF 
+    #define USE_WALK_NBWALK_ON 
     #ifdef USE_WALK_NBWALK_ON
         #define USE_NBWALK
     #else
@@ -47,11 +41,17 @@
     #else
         #undef USE_VSCWALK
     #endif
-    #define USE_WALK_ALWALK_ON 
+    #define USE_WALK_ALWALK_OFF 
     #ifdef USE_WALK_ALWALK_ON
         #define USE_ALWALK
     #else
         #undef USE_ALWALK
+    #endif
+#define USE_WALK_BEARWALK_OFF 
+    #ifdef USE_WALK_BEARWALK_ON
+        #define USE_BEARWALK
+    #else
+        #undef USE_BEARWALK
     #endif
 #else
     #undef USE_JWALK
@@ -59,6 +59,7 @@
     #undef USE_NBWALK
     #undef USE_VSCWALK
     #undef USE_ALWALK
+    #undef USE_BEARWALK
 #endif
 
 #endif // !WALKCONFIG_H

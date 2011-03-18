@@ -20,6 +20,7 @@ class Self {
 		float wmX(){return WorldModelLocation[0];}
 		float wmY(){return WorldModelLocation[1];}
 		float Heading(){return WorldModelLocation[2];}
+		std::vector<float> wmState();
         float sdX() {return WorldModelLocationError[0];}
         float sdY() {return WorldModelLocationError[1];}
         float sdHeading() {return WorldModelLocationError[2];}

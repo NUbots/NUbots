@@ -233,7 +233,7 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     //Select Camera:
     SelectCameraLayout = new QGridLayout;
     SelectCameraLayout->addWidget(TopCameraSelected,1,1);
-    SelectCameraLayout->addWidget(BottomCameraSelected,1,2);
+    SelectCameraLayout->addWidget(BottomCameraSelected,2,1);
     SelectCameraGroupBox = new QGroupBox(tr("Select Camera"));
     SelectCameraGroupBox->setLayout(SelectCameraLayout);
 
@@ -265,9 +265,14 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     overallLayout->addWidget(AutoCameraSettingsGroupBox);
     overallLayout->addWidget(SelectCameraGroupBox);
 
-
-    overallLayout->addLayout(pushButtonLayout);
-    overallLayout->addLayout(saveImagesButtonLayout);
+    overallLayout->addWidget(getCameraSettingsButton);
+    overallLayout->addWidget(streamCameraSettingsButton);
+    overallLayout->addWidget(stopStreamCameraSettingsButton);
+    overallLayout->addWidget(StartSavingImagesButton);
+    overallLayout->addWidget(StopSavingImagesButton);
+    overallLayout->addWidget(StartSavingImagesWithSettingsCheckBox);
+    //overallLayout->addLayout(pushButtonLayout);
+    //overallLayout->addLayout(saveImagesButtonLayout);
 
     setLayout(overallLayout);
 }

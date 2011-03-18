@@ -43,6 +43,15 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
 	amILost = lost;
 }
 
+std::vector<float> Self::wmState()
+{
+	vector<float> state(3,0);
+	state[0] = WorldModelLocation[0];
+	state[1] = WorldModelLocation[1];
+	state[2] = WorldModelLocation[2];
+	return state;
+}
+
 bool Self::lost()
 {
     return amILost;

@@ -41,6 +41,7 @@ public:
     virtual vector<float> getNextParameters() = 0;
     virtual void setParametersResult(float fitness) = 0;
     
+    string& getName();
     virtual void summaryTo(ostream& stream) = 0;
     friend ostream& operator<<(ostream& o, const Optimiser& optimser);
     friend ostream& operator<<(ostream& o, const Optimiser* optimser);
@@ -50,6 +51,8 @@ public:
     void saveAs(string name);
     void load();
 protected:
+    float normalDistribution(float mean, float sigma);
+    float uniformDistribution(float min, float max);
     virtual void toStream(ostream& o) const = 0;
     virtual void fromStream(istream& i) = 0;
 protected:

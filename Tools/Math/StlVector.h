@@ -56,26 +56,31 @@ template<typename T> ostream& operator<<(ostream& output, const vector<T>& v)
  */
 template<typename T> istream& operator>>(istream& input, vector<T>& v)
 {
-    string wholevector;
+    stringstream wholevector;
+    v.clear();
     // get all of the data between [ ... ]
     input.ignore(128, '[');
-    getline(input, wholevector, ']');
-    
-    v.clear();
-    if (wholevector.size() > 0)
-    {
-    	stringstream ss(wholevector);
-    	T buffer;
-    
-        // now split the data based on the commas
-        while (ss.good())
-        {
-            ss >> buffer;
-            ss.ignore(128, ',');
-            v.push_back(buffer);
-        }
-    }
-    return input;
+	char c;
+	int brackets = 1;
+	while (brackets != 0 and input.good())
+	{
+		input.get(c);
+		wholevector << c;
+		if (c == '[')
+			brackets++;
+		else if (c == ']')
+			brackets--;
+	}
+
+	T buffer;
+	// now split the data based on the commas
+	while (wholevector.peek() != ']' and wholevector.good())
+	{
+		wholevector >> buffer;
+		wholevector.ignore(128, ',');
+		v.push_back(buffer);
+	}
+	return input;
 }
 
 /*! @brief Overloaded stream extraction operator for an stl vector. The vector in the stream needs to be formated as [[1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444], [1.222, 2.333, -3.4444]].
@@ -91,7 +96,7 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
     input.ignore(128, '[');
     char c;
     int brackets = 1;
-    while (brackets != 0)
+    while (brackets != 0 and input.good())
     {
         input.get(c);
         wholematrix << c;
@@ -100,21 +105,15 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
         else if (c == ']')
             brackets--;
     }
-    
+
     vector<T> buffer;
-    while (wholematrix.good())
+    while (wholematrix.peek() != ']' and wholematrix.good())
     {
         wholematrix >> buffer;
-        if (buffer.size() > 0)
-            v.push_back(buffer);
+        v.push_back(buffer);
     }
     return input;
 }
-
-// ----------------------------------------------------------------------------------------------------------------------------- Math
-// NOTE. This stl vector math has been taken from the new Parameter.cpp included with the completed walk optimisation code.
-//       The commit id is 0b6d5ad3c68e7761f9b5
-// TODO: check that the vector math has not been updated before merging in the 2011 code
 
 inline vector<float> operator+(const float& f, const vector<float>& v)
 {

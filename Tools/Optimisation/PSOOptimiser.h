@@ -45,7 +45,6 @@ public:
 private:
     void initSwarm();
     void updateSwarm();
-    vector<float> getRandVector();
     
     
     void toStream(ostream& o) const;
@@ -57,13 +56,15 @@ private:
     
     vector<vector<Parameter> > m_swarm_best;
     vector<float> m_swarm_best_fitness;
+    vector<float> m_swarm_failures;
     vector<Parameter> m_best;
     float m_best_fitness;
     
     float m_c1;
     float m_c2;
     float m_inertia;
-    float m_seed_fraction;
+    float m_reset_limit;
+    float m_reset_fraction;
     int m_num_particles;
     int m_num_dimensions;
 };
