@@ -59,32 +59,6 @@ NUSensors::NUSensors()
     m_kinematicModel = new Kinematics();
     m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
-
-    // Values found using matlab Filter Design & Anlaysis Toolbox
-	// using Order=8, Fs = 50hz, Fpass = 1Kz, Fstop = 5Hz, Design Method = Equiripple
-//[0.1044, 0.0798, 0.0988, 0.1117, 0.1161, 0.1117, 0.0988, 0.0798, 0.1044]
-
-/*
-//[0.0223, 0.0343, 0.047, 0.0693, 0.0832, 0.1014, 0.1077, 0.1145, 0.1077, 0.1014, 0.0832, 0.0693, 0.047, 0.0343, 0.0223]
-    std::vector<float> filterCoeffs;
-    filterCoeffs.push_back(0.0223f);
-    filterCoeffs.push_back(0.0343f);
-    filterCoeffs.push_back(0.047f);
-    filterCoeffs.push_back(0.0693f);
-    filterCoeffs.push_back(0.0832f);
-    filterCoeffs.push_back(0.1014f);
-    filterCoeffs.push_back(0.1077f);
-    filterCoeffs.push_back(0.1145f);
-    filterCoeffs.push_back(0.1077f);
-    filterCoeffs.push_back(0.1014f);
-    filterCoeffs.push_back(0.0832f);
-    filterCoeffs.push_back(0.0693f);
-    filterCoeffs.push_back(0.047f);
-    filterCoeffs.push_back(0.0343f);
-    filterCoeffs.push_back(0.0223f);
-    m_leftPressureFilter = new FIRFilter(filterCoeffs);
-    m_rightPressureFilter = new FIRFilter(filterCoeffs);
-*/
 }
 
 /*! @brief Destructor for parent NUSensors class.
