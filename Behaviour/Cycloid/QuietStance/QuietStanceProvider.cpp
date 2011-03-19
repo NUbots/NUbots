@@ -73,7 +73,8 @@ void QuietStanceProvider::doBehaviour()
     //m_lhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
     //m_rhip->process(m_jobs, m_data, m_actions, m_field_objects, m_game_info, m_team_info);
     
-    debug << m_lankle->getPosition() << ", " << m_rankle->getPosition() << ", " << m_lankle->getVelocity() << ", " << m_rankle->getVelocity() << endl;
+    debug << m_lankle->relaxed() << ", " << m_lankle->getPosition() << ", " << m_lankle->getVelocity() << ", " << m_lankle->getTargetEstimate() << ", ";
+    debug << m_rankle->relaxed() << ", " << m_rankle->getPosition() << ", " << m_rankle->getVelocity() << ", " << m_rankle->getTargetEstimate() << endl;
 }
  
 

@@ -31,6 +31,7 @@
 #include "debugverbositybehaviour.h"
 
 #include <cmath>
+#include <numeric>
 
 QSRelax::QSRelax(const NUData::id_t& joint, const QSBallisticController* parent)
 {
@@ -42,6 +43,13 @@ QSRelax::QSRelax(const NUData::id_t& joint, const QSBallisticController* parent)
     
     m_time_in_state = 0;
     m_previous_time = 0;
+    
+    m_target_estimate = 0;
+    m_target_estimate_buffer = boost::circular_buffer<float>(10);
+    if (m_joint.isLeft())
+        m_target_calibration = 0.053;
+    else
+        m_target_calibration = 0.026;
 }
 
 QSRelax::~QSRelax()
@@ -53,7 +61,7 @@ void QSRelax::doState()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "QSRelax::doState" << endl;
     #endif
-    float target = -0.02;          // this will come from a gravity vector estimate
+    float target = m_target_estimate;
     
     float gain = 0.1;              // with a slope of 5, I can't balance the robot without control with gain of 0.05;
     float meas_p, output;
@@ -63,6 +71,7 @@ void QSRelax::doState()
     
     if (m_previous_time != 0)
         m_time_in_state += m_data->CurrentTime - m_previous_time;
+
     m_previous_time = m_data->CurrentTime;
 }
 
@@ -76,9 +85,27 @@ BehaviourState* QSRelax::nextState()
     {
         m_previous_time = 0;
         m_time_in_state = 0;
+        updateTargetEstimate();
         return m_parent->getCatch();
     }
     else
         return this;
+}
+
+/*! @brief Returns the current estimate of where the control variable needs to be to produce zero velocity */
+float QSRelax::getTargetEstimate()
+{
+    return m_target_estimate;
+}
+
+/*! @brief Update the target esimtate */
+void QSRelax::updateTargetEstimate()
+{
+    float offset = -0.02;           // the offset applied to the target to compensate for the slack in the joints (-0.02)
+    float velocitygain = -2.0;     // a constant to control how much the velocity is used to estimate the target
+    float currentestimate = m_parent->getPosition() + velocitygain*m_parent->getVelocity() + m_target_calibration + offset;
+    m_target_estimate_buffer.push_back(currentestimate);
+    
+    m_target_estimate = accumulate(m_target_estimate_buffer.begin(), m_target_estimate_buffer.end(), 0.0f)/10;
 }
 

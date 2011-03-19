@@ -35,6 +35,7 @@
 #include "Behaviour/BehaviourFSMState.h"
 #include "Infrastructure/NUData.h"
 
+class QSDelay;
 class QSRelax;
 class QSCatch;
 
@@ -49,12 +50,15 @@ public:
     QSRelax* getRelax() const;
     QSCatch* getCatch() const;
     
+    bool relaxed() const;
+    float getTargetEstimate() const;
     float getPosition() const;
     float getVelocity() const;
 protected:
     void doStateCommons();
 private:
     NUData::id_t m_joint;
+    QSDelay* m_delay;
     QSRelax* m_relax;
     QSCatch* m_catch;
     

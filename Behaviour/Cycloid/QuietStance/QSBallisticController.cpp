@@ -20,6 +20,7 @@
 */
 
 #include "QSBallisticController.h"
+#include "QSDelay.h"
 #include "QSRelax.h"
 #include "QSCatch.h"
 
@@ -38,12 +39,13 @@ QSBallisticController::QSBallisticController(const NUData::id_t& joint)
         debug << "QSBallisticController::QSBallisticController" << endl;
     #endif
     m_joint = joint;
+    m_delay = new QSDelay(joint, this);
     m_relax = new QSRelax(joint, this);
     m_catch = new QSCatch(joint, this);
     
     m_initialised = false;
     
-    m_state = m_relax;
+    m_state = m_delay;
 }
 
 QSBallisticController::~QSBallisticController()
@@ -51,6 +53,7 @@ QSBallisticController::~QSBallisticController()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "QSBallisticController::~QSBallisticController" << endl;
     #endif
+    delete m_delay;
     delete m_relax;
     delete m_catch;
 }
@@ -89,6 +92,18 @@ QSRelax* QSBallisticController::getRelax() const
 QSCatch* QSBallisticController::getCatch() const
 {
     return m_catch;
+}
+
+/*! @brief Returns true if the controller is on the relax state, false otherwise */
+bool QSBallisticController::relaxed() const
+{
+    return m_state == m_relax;
+}
+
+/*! @brief Returns the current estimate of where the controller needs to be to produce zero velocity */
+float QSBallisticController::getTargetEstimate() const
+{
+    return m_relax->getTargetEstimate();
 }
 
 /*! @brief Returns the filtered angular position */
