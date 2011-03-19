@@ -53,6 +53,7 @@
 #include <signal.h>
 
 #define USE_PGRL
+#define USE_MO
 #define USE_COST
 #define USE_STIFFNESS
 
@@ -138,10 +139,14 @@ void WalkOptimisationProvider::tickOptimiser()
         debug << "WalkOptimisationProvider::tickOptimiser" << endl;
     #endif 
     // update the optimiser and give the next set of parameters to the walk engine
-    float fitness = calculateFitness();
+	#ifdef USE_MO
+        vector<float> fitness = calculateFitnesses();
+	#else
+        float fitness = calculateFitness();
+	#endif
     if (m_optimiser)
     {            
-        m_optimiser->setParametersResult(fitness);
+		m_optimiser->setParametersResult(fitness);
         vector<float> nextparameters = m_optimiser->getNextParameters();
         m_parameters.set(nextparameters);
     }
@@ -157,9 +162,9 @@ void WalkOptimisationProvider::tickOptimiser()
     m_iteration_count++;
 }
 
-float WalkOptimisationProvider::calculateFitness()
+vector<float> WalkOptimisationProvider::calculateFitnesses()
 {
-    float fitness = 0;
+    vector<float> fitness(2,0);
     float speed = 0;
     float cost = 0;
     bool unstable = true;
@@ -169,10 +174,11 @@ float WalkOptimisationProvider::calculateFitness()
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 2
 			debug << "WalkOptimisationProvider::calculateFitness() Generate state was not successful" << endl;
 		#endif
-		float distance = max(1.0f, m_generate->distance());
-		float duration = max(1.0f, m_generate->duration());
+		float distance = max(10.0f, m_generate->distance());
+		float duration = max(300.0f, m_generate->duration());
+		float energy = max(20.0f, m_generate->energy());
 		speed = 1000*distance/duration;
-		cost = 100*m_generate->energy()/(9.81*4.6*distance);
+		cost = 100*energy/(9.81*4.6*distance);
 
 		// penalise for falling
 		speed *= 0.5*distance/333.0;
@@ -183,9 +189,9 @@ float WalkOptimisationProvider::calculateFitness()
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 2
 			debug << "WalkOptimisationProvider::calculateFitness() Evaluate state was not successful" << endl;
 		#endif
-		float distance = max(1.0f, m_generate->distance() + m_evaluate->distance());
-		float duration = max(1.0f, m_generate->duration() + m_evaluate->duration());
-		float energy = m_generate->energy() + m_evaluate->energy();
+		float distance = max(10.0f, m_generate->distance() + m_evaluate->distance());
+		float duration = max(300.0f, m_generate->duration() + m_evaluate->duration());
+		float energy = max(20.0f, m_generate->energy() + m_evaluate->energy());
 		speed = 1000*distance/duration;
 		cost = 100*energy/(9.81*4.6*distance);
 
@@ -212,10 +218,10 @@ float WalkOptimisationProvider::calculateFitness()
         //cost *= normalDistribution(1, 0.105);
     #endif
     
-    //fitness = speed;                      // speed--based fitness
-    fitness = 180/(4+cost);                 // cost--based fitness
+    fitness[0] = speed;                      	// speed--based fitness
+    fitness[1] = 180/(4+cost);                  // cost--based fitness
     //fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
-    m_log << m_iteration_count << ", " << fitness << ", " << speed << ", " << cost << ", " << unstable << ", " << m_parameters.getAsVector() << endl << flush;
+    m_log << m_iteration_count << ", " << fitness[1] << ", " << speed << ", " << cost << ", " << unstable << ", " << m_parameters.getAsVector() << endl << flush;
 
     // update fall count    
     if (unstable)
@@ -226,6 +232,15 @@ float WalkOptimisationProvider::calculateFitness()
     #endif
 
     return fitness;
+}
+
+float WalkOptimisationProvider::calculateFitness()
+{
+	#if defined(USE_SPEED)
+		return calculateFitnesses()[0];
+	#elif defined(USE_COST)
+		return calculateFitnesses()[1];
+	#endif
 }
 
 /*! @brief Returns the distance required to stop for the current walk parameters */
