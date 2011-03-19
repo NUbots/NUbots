@@ -172,7 +172,7 @@ void NAOWebotsSensors::copyFromJoints()
     static float NaN = numeric_limits<float>::quiet_NaN();
 
     vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
-    float delta_t = 1000*(m_current_time - m_previous_time);
+    float delta_t = (m_current_time - m_previous_time)/1000;
     for (size_t i=0; i<m_servos.size(); i++)
     {
         JServo* s = static_cast<JServo*>(m_servos[i]);

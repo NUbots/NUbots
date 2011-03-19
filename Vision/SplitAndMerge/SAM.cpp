@@ -1,4 +1,8 @@
 #include "SAM.h"
+//#include "Tools/Profiling/Profiler.h"
+#include "debug.h"
+#include "Vision/Vision.h"
+#include "Vision/LineDetection.h"
 //#include <QDebug>
 
 using std::vector;
@@ -83,17 +87,10 @@ void SAM::debugPrint(const vector<LinePoint *> &points) {
 }
 
 */
-bool SAM::initRules(vector<unsigned int>& ints, vector<double>& doubles) {
-    if(ints.size() == 3 && doubles.size() == 3) {
-        initRules(doubles[0], ints[1], ints[1], ints[2], doubles[1], doubles[2]);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
 
 void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int MPTLF, double MEPD, double MLRF) {
+    //Sets up parameters
+
     SPLIT_DISTANCE = SD;
     MIN_POINTS_OVER = MPO;
     MAX_END_POINT_DIFF = MEPD;
@@ -106,63 +103,54 @@ void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int
 }
 
 //CLUSTERS
-void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, bool clearsmall, bool cleardirty, bool noise) {
+void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall, bool cleardirty, bool noise) {
+    //Performs split-and-merge algorithm with input consisting of a set of point clusters
+    // and a set of unclustered points, putting the resulting lines into a reference
+    // passed vector
 
-//qDebug() << "Iterative split";
+    //Profiler prof("SplitAndMerge");
     noFieldLines = 0;
     noisePoints.clear();
 
     //For each cluster..
-//qDebug() << "Cluster: ";
+
+    //prof.start();
     for(unsigned int i=0; i<clusters.size(); i++) {
         //perform split - splitLS() checks for appropriate size, so that need not be done here
-        //qDebug() << i;
         splitLSIterative(lines, clusters[i]);
     }
-//qDebug() << "leftover";
+    //prof.split("Split Clusters");
+
     //Then split leftover
     splitLSIterative(lines, leftover);
-//qDebug() << "noise";
+    //prof.split("Leftover");
+
     //Then noise
     if(noise) {
-        for(unsigned int i=0; i<SPLIT_NOISE_ITERATIONS; i++) {
-            splitNoiseLS(lines);
-        }
+        splitNoiseLS(lines);
     }
-    //Do Centre Circle fitting before merge
+    //prof.split("Noise");
 
+    //Do Centre Circle fitting before merge - To do later
 
-//qDebug() << "merge";
     //Then Merge
+    convertLinesEndPoints(lines, vision, linedetector);
+
     mergeLS(lines);
-//qDebug() << "clearsmall";
+    //prof.split("Merge");
+
     //Then clear unwanted lines
     if(clearsmall) {
         clearSmallLines(lines);
     }
-//qDebug() << "cleardirty";
     if(cleardirty) {
         clearDirtyLines(lines);
     }
+    //prof.split("Clear Unwanted");
+    //debug << prof;
 
 
     noisePoints.clear();
-//qDebug() << "finished";
-}
-
-
-
-//POINT CONVERSION
-void SAM::convertPoint(LinePoint& point, Vector3<float>& vals) {
-    //converts points from image coordinates to field coordinates
-    //vals -> 0 = bearing, 1 = distance, 2 = elevation
-    double xholder, yholder;
-    xholder = point.x;
-    yholder = point.y;
-    //x = dist * cos(bearing) * cos(elevation)
-    point.x = vals[0] * cos(vals[1]) * cos(vals[2]);
-    //y = dist * sin(bearing) * cos(elevation)
-    point.y = vals[0] * sin(vals[1]) * cos(vals[2]);
 }
 
 
@@ -170,7 +158,7 @@ void SAM::convertPoint(LinePoint& point, Vector3<float>& vals) {
 
 void SAM::splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall, bool cleardirty, bool noise) {
     /*
-     *
+     * Split and Merge without clustering
      */
     noFieldLines = 0;
     noisePoints.clear();
@@ -197,6 +185,8 @@ void SAM::splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
 
 
 void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
+    // Recursive split algorithm - not used
+
     //Assumes:
     //	- constant detirmined for limit - MIN_POINTS_OVER
     //	- constant for min splitting distance - SAM_THRESHOLD
@@ -213,11 +203,8 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
     }
 
     //temp variables
-    double distance = 0.0; 	//holder for calculated LinePointDistance
     int points_over = 0; //how many points are further from the line than SAM_THRESHOLD
     int greatest_point = 0; //which point in vector is the furthest
-    double greatest_distance = 0.0; //saves recalculation of greatest point distance
-    unsigned int current_point;
 
     //LinePoint* temppoint;
 
@@ -315,7 +302,8 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
 }
 
 void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
-//qDebug() << "points size: " << points.size();
+    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
+    //each line or adding it to a final list.
 
     //Boundary Conds
     if(noFieldLines >= MAX_LINES) {
@@ -457,6 +445,9 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
 }
 
 void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_point) {
+    //this method finds the furthest point from a line and returns (via parameters)
+    //the number of points over the SPLIT_DISTANCE threshold and the index of
+    //the furthest point
 
     //temp variables
     double distance = 0.0; 	//holder for calculated LinePointDistance
@@ -465,10 +456,17 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
     points_over = 0;
     furthest_point = -1;
     vector<LinePoint*> points = line.getPoints();
+    double A, B, C;
+    A = line.getA();
+    B = line.getB();
+    C = line.getC();
+    double denom = sqrt(A*A + B*B);
+    LinePoint* temp;
 
     //check points for perp distance over threshold
     for(current_point = 0; current_point < points.size(); current_point++) {
-        distance = line.getLinePointDistance(*(points[current_point]));
+        temp = points[current_point];
+        distance = fabs(A * temp->x + B * temp->y - C) / denom;
         if(distance > SPLIT_DISTANCE) {
             //potential splitting point
             points_over++; //increment points_over counter
@@ -483,6 +481,9 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
 }
 
 void SAM::splitNoiseLS(vector<LSFittedLine*>& lines) {
+    //this method creates a copy of the noisePoints vector,
+    //clears the current noisePoints vector and runs
+    //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
         vector<LinePoint*> noiseCopy;
@@ -561,39 +562,39 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
             //a = atan(-A/B)
             //(x0,y0) from [ a, b; b, -a][x; y] = [c; bx1 - ay1]
             double alpha = atan(-A/B);
+            double cosalpha = cos(alpha);
+            double sinalpha = sin(alpha);
             double xtrans;
             // Mx = k  ->  x = M^-1k
-            Matrix* M = new Matrix(2,2);
-            Matrix Minv;
-            Matrix* k = new Matrix(2,1);
-            Matrix* X = new Matrix(2,1);
-            double *r0 = (*M)[0]; //row 0
-            double *r1 = (*M)[1]; //row 1
             //M = |A   B|
             //    |B  -A|
-            *r0 = A;
-            *(r0+1) = B;
-            *r1 = B;
-            *(r1+1) = -A;
 
             // k = |    c    |
             //     | bx1-ay1 |
-            r0 = (*k)[0];
-            *r0 = C;
-            *(r0+1) = (B*x1) - (A*y1);
+            double KB;
+            KB = (B*x1) - (A*y1);
 
             //invert M
-            Minv = Invert22(*M);
+            // InvM = |-A/div  -B  |
+            //        |  -B   A/div|
+            // div = A*-A - B*B
+            double IA, ID;
+            double div = (-A)*A - (B*B);
+            IA = (-A)/div;
+            ID = -IA;
 
-            *X = Minv*(*k);
+            //X = A*K
+            //  = |-A/div  -B  |  |    c    |
+            //    |  -B   A/div|  | bx1-ay1 |
+
+            double X0 = IA*C + (-B)*KB;
+            double X1 = (-B)*C + ID*KB;
 
             for(unsigned int pointcounter = 0; pointcounter <points.size(); pointcounter++) {
                 //check all points, calculate translated x coord
                 //and place in appropriate vector
                 if(!(points[pointcounter] == split_point)) {
-                    double tempx = points[pointcounter]->x;
-                    double tempy = points[pointcounter]->y;
-                    xtrans = (tempx - *(*X)[0])*cos(alpha) + (tempy - *(*X)[1])*sin(alpha);
+                    xtrans = (points[pointcounter]->x - X0)*cosalpha + (points[pointcounter]->y - X1)*sinalpha;
                     if(xtrans < 0) {
                         //point is to the left
                         left.push_back(points[pointcounter]);
@@ -616,7 +617,8 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
 
 void SAM::mergeLS(vector<LSFittedLine*>& lines) {
     //O(l^2)  -  l=number of lines (max 15)
-
+    // Compares all lines and merges based on the return value of
+    // shouldMergeLines(Line, Line) - edit that method not this one
 
     vector<LSFittedLine*> finals; //this vector contains lines that did not need merging
 
@@ -654,12 +656,11 @@ void SAM::mergeLS(vector<LSFittedLine*>& lines) {
 }
 
 
-
 void SAM::generateLSLine(LSFittedLine& line, vector<LinePoint*>& points) {
+    //creates a Least Squared Fitted line
+
     line.clearPoints();
-    for(unsigned int i = 0; i < points.size(); i++) {
-        line.addPoint(*points[i]);
-    }
+    line.addPoints(points);
 }
 
 
@@ -669,18 +670,22 @@ void SAM::generateLSLine(LSFittedLine& line, vector<LinePoint*>& points) {
 
 void SAM::addToNoise(LinePoint* point) {
     //NOT EFFICIENT
-    //O(n) for every insertion
+    //O(M) for every insertion - where M is the size of noisePoints
     bool add = true;
     for(unsigned int i=0; i<noisePoints.size(); i++) {
         if(*noisePoints[i] == *point)
             add = false;
     }
-    if(add)
+    if(add) {
         noisePoints.push_back(point);
+    }
 }
 
 
 void SAM::clearSmallLines(vector<LSFittedLine*>& lines) {
+    //removes any lines from the vector whose vector of
+    //member points is too small
+
     vector<LSFittedLine*> stack;
     LSFittedLine* l1;
     while(!lines.empty()) {
@@ -702,8 +707,10 @@ void SAM::clearSmallLines(vector<LSFittedLine*>& lines) {
 }
 
 
-
 void SAM::clearDirtyLines(vector<LSFittedLine*>& lines) {
+    //removes any lines from the vector whose R^2 value is
+    //less than MIN_LINE_R2_FIT
+
     vector<LSFittedLine*> stack;
     LSFittedLine* l1;
     while(!lines.empty()) {
@@ -725,19 +732,25 @@ void SAM::clearDirtyLines(vector<LSFittedLine*>& lines) {
 }
 
 bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
+    //THOSE WISHING TO CHANGE THE METHOD OF MERGING LINES NEED ONLY CHANGE THIS
+    //FUNCTION
+    //returns true if some condition is satisfied, indicating the two lines should
+    //be merged
+
+
     //END POINT METHOD
     bool endPointsGood;
 
     //find outermost end points x vals
     double farLeftX, farRightX;
-    if(line1.leftPoint.x <= line2.leftPoint.x)
-        farLeftX = line1.leftPoint.x;
+    if(line1.transLeftPoint.x <= line2.transLeftPoint.x)
+        farLeftX = line1.transLeftPoint.x;
     else
-        farLeftX = line2.leftPoint.x;
-    if(line1.rightPoint.x > line2.rightPoint.x)
-        farRightX = line1.rightPoint.x;
+        farLeftX = line2.transLeftPoint.x;
+    if(line1.transRightPoint.x > line2.transRightPoint.x)
+        farRightX = line1.transRightPoint.x;
     else
-        farRightX = line2.rightPoint.x;
+        farRightX = line2.transRightPoint.x;
     //calc y vals for outer points for both lines
     double leftY1, leftY2, rightY1, rightY2;
     //line1
@@ -752,9 +765,13 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
 
     //R2TLS
     Vector2<double> results = line1.combinedR2TLSandMSD(line2);
-    bool r2good = (results.x >= line1.getr2tls()) && (results.x >= line2.getr2tls());
+    bool r2good = (results.x >= MIN_LINE_R2_FIT);
 
     return endPointsGood && r2good;
+
+
+    //double angle = fabs(line1.getAngle() - line2.getAngle());
+    //return (angle < 5.0) || (angle > 185.0);
 
     //RHO/PHI - Not working properly
     /*
@@ -801,4 +818,29 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
     //conditions for merging not satisfied
     return false;
     */
+}
+
+bool SAM::convertLinesEndPoints(vector<LSFittedLine *> &lines, Vision *vision, LineDetection *linedetector) {
+    // converts the end points of lines to allow for more accurate merging
+
+
+    Vector3<float> relativePoint;
+    Point *lefttrans, *righttrans;
+    for(unsigned int i=0; i<lines.size(); i++) {
+        lefttrans = &(lines[i]->transLeftPoint);
+        righttrans = &(lines[i]->transRightPoint);
+        //calculate transformed left point
+        //x = dist * cos(bearing) * cos(elevation)
+        lefttrans->x = lines[i]->leftPoint.x;
+        lefttrans->y = lines[i]->findYFromX(lefttrans->x);
+        linedetector->GetDistanceToPoint(*lefttrans, relativePoint, vision);
+        lefttrans->x = relativePoint[0] * cos(relativePoint[1]) * cos(relativePoint[2]);
+
+        //calculate transformed right point
+        //y = dist * sin(bearing) * cos(elevation)
+        righttrans->x = lines[i]->rightPoint.x;
+        righttrans->y = lines[i]->findYFromX(righttrans->x);
+        linedetector->GetDistanceToPoint(*righttrans, relativePoint, vision);
+        righttrans->y = relativePoint[0] * sin(relativePoint[1]) * cos(relativePoint[2]);
+    }
 }

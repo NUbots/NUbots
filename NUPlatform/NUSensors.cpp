@@ -82,8 +82,8 @@ void NUSensors::update()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::update()" << endl;
 #endif
-    m_current_time = Platform->getTime();
     m_data->PreviousTime = m_data->CurrentTime;
+    m_current_time = Platform->getTime();
     m_data->CurrentTime = m_current_time;
     copyFromHardwareCommunications();       // the implementation of this function will be platform specific
     calculateSoftSensors();

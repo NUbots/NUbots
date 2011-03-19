@@ -89,5 +89,5 @@ void DXSerialThread::periodicFunction()
     #endif
     
     if (m_sensor_thread)
-        m_sensor_thread->startLoop();
+        m_sensor_thread->signal();
 }

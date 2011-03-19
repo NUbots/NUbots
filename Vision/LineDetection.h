@@ -60,7 +60,12 @@ class LineDetection{
 
         void FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision);
         void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
-        void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data, vector< ObjectCandidate >& candidates);
+        void FormLines(FieldObjects* AllObjects,
+                       Vision* vision,
+                       NUSensorsData* data,
+                       vector< ObjectCandidate >& candidates,
+                       vector< TransitionSegment>& leftover);
+        bool GetDistanceToPoint(Point point,  Vector3<float> &result, Vision* vision);
 
 	
 	private:

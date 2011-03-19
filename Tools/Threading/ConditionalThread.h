@@ -40,7 +40,8 @@ class ConditionalThread : public Thread
 		ConditionalThread(std::string name, unsigned char priority);
         virtual ~ConditionalThread();
     
-        void signal(bool blocking = false);
+        void signal();
+        void signal(bool blocking);
     
     protected:
         virtual void run() = 0;                // To be overridden by code to run.

@@ -82,7 +82,7 @@ void BearSensors::copyFromJoints()
     m_motors->getTargets(targets);
     
     vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
-    float delta_t = 1000*(m_current_time - m_previous_time);
+    float delta_t = (m_current_time - m_previous_time)/1000.0;
     for (size_t i=0; i<m_joint_ids.size(); i++)
     {
         joint[NUSensorsData::PositionId] = Motors::MotorSigns[i]*(JointPositions[i] - Motors::DefaultPositions[i])/195.379;         // I know, its a horrible way of converting from motor units to radians
