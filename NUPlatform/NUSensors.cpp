@@ -59,6 +59,15 @@ NUSensors::NUSensors()
     m_kinematicModel = new Kinematics();
     m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
+    std::string filename = DATA_DIR + std::string("odometryLog.csv");
+    m_odometryDataLog.open(filename.c_str());
+    m_odometryDataLog << "GPS X, GPS Y, Compass,"; 
+    m_odometryDataLog << "L Odom X, L Odom Y, L Odom Turn,";
+    m_odometryDataLog << "R Odom X, R Odom Y, R Odom Turn,";
+    m_odometryDataLog << "L Force Sum, R Force Sum, Curr Support Leg,";
+    m_odometryDataLog << "L CoP Valid, L CoP X, L CoP Y,";
+    m_odometryDataLog << "R CoP Valid, R CoP X, R CoP Y";
+    m_odometryDataLog << std::endl;
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -74,6 +83,7 @@ NUSensors::~NUSensors()
 	m_kinematicModel = 0;
     delete m_orientationFilter;
     m_orientationFilter = 0;
+    m_odometryDataLog.close();
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -374,16 +384,17 @@ void NUSensors::calculateOdometry()
     m_data->getForce(NUSensorsData::LFoot,leftForce);
     m_data->getForce(NUSensorsData::RFoot,rightForce);
 
+    float minimalForceThreshold = 0.75;
     if(currentSupportLeg == left)
     {
-    	if(leftForce < 0.5f)
+    	if(leftForce < minimalForceThreshold)
     	{
     		currentSupportLeg = right;
     	}
     }
     else if(currentSupportLeg == right)
     {
-    	if(rightForce < 0.5f)
+    	if(rightForce < minimalForceThreshold)
     	{
     		currentSupportLeg = left;
     	}
@@ -460,7 +471,7 @@ void NUSensors::calculateOdometry()
 		ROdom[0] = xMultiplier * (prevRightPosition[0] - rightPosition[0]);
 		ROdom[1] = yMultiplier * (prevRightPosition[1] - rightPosition[1]);
 		ROdom[2] = turnMultiplier * (prevRightPosition[5] - rightPosition[5]);
-        savePositionData(LOdom, ROdom,leftForce, rightForce, currentSupportLeg);
+        savePositionData(LOdom, ROdom, currentSupportLeg);
 	}
 
     prevLeftPosition = leftPosition;
@@ -470,10 +481,12 @@ void NUSensors::calculateOdometry()
 
 void NUSensors::saveOdometryData(float x, float y, float theta)
 {
-	vector<float> gpsData;
-    float compassData;
     static vector<float> prevGpsData;
     static float prevCompassData;
+    
+	vector<float> gpsData;
+    float compassData;
+    
     if(m_data->getGps(gpsData) and m_data->getCompass(compassData))
     {
         if(prevGpsData.size()>0)
@@ -493,22 +506,48 @@ void NUSensors::saveOdometryData(float x, float y, float theta)
     }
 }
 
-void NUSensors::savePositionData(const std::vector<float>& leftOdom, const std::vector<float>& rightOdom, float leftForce, float rightForce, int SupportLeg)
+void NUSensors::savePositionData(const std::vector<float>& leftOdom, const std::vector<float>& rightOdom, int SupportLeg)
 {
 	// Enum for leg selection.
 	enum{none, left, right};
-	vector<float> gpsData;
+	vector<float> gpsData, leftCopData, rightCopData;
+    float leftForce, rightForce;
     float compass;
-    if(m_data->getGps(gpsData) and m_data->getCompass(compass))
+    bool haslforce = m_data->getForce(NUSensorsData::LFoot,leftForce);
+    bool hasrforce = m_data->getForce(NUSensorsData::RFoot,rightForce);
+
+    bool hasLeftCopData = m_data->getCoP(NUSensorsData::LFoot, leftCopData);
+    bool hasRightCopData = m_data->getCoP(NUSensorsData::RFoot, rightCopData);
+    
+    std::string emptyCop(",0,0");
+    
+    if(m_data->getGps(gpsData) and m_data->getCompass(compass) and haslforce and hasrforce)
     {
         if(gpsData.size()>0)
         {
-            debug << gpsData[0] << "," << gpsData[1] << "," << compass;
-            for(int n=0; n<leftOdom.size(); n++)
-            	debug << "," << leftOdom[n];
-            for(int n=0; n<rightOdom.size(); n++)
-            	debug << "," << rightOdom[n];
-            debug << "," << leftForce << "," << rightForce << "," << SupportLeg << endl;
+            m_odometryDataLog << gpsData[0] << "," << gpsData[1] << "," << compass;
+            for(unsigned int n=0; n<leftOdom.size(); n++)
+            	m_odometryDataLog << "," << leftOdom[n];
+            for(unsigned int n=0; n<rightOdom.size(); n++)
+            	m_odometryDataLog << "," << rightOdom[n];
+            m_odometryDataLog << "," << leftForce << "," << rightForce << "," << SupportLeg;
+            m_odometryDataLog << "," << hasLeftCopData;
+            if(hasLeftCopData){
+                for(unsigned int n=0; n<leftCopData.size(); n++)
+                    m_odometryDataLog << "," << leftCopData[n];
+            }
+            else{
+                m_odometryDataLog << emptyCop;
+            }
+            m_odometryDataLog << "," << hasRightCopData;
+            if(hasRightCopData){
+                for(unsigned int n=0; n<rightCopData.size(); n++)
+                    m_odometryDataLog << "," << rightCopData[n];
+            }
+            else{
+                m_odometryDataLog << emptyCop;
+            }
+            m_odometryDataLog << std::endl;
 		}
 
     }
