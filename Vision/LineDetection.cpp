@@ -1405,7 +1405,7 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 			CommonX = 	(int)((fieldLines[LineIDStart].getYIntercept() - fieldLines[LineIDCheck].getYIntercept()) / 
 					(fieldLines[LineIDCheck].getGradient() - fieldLines[LineIDStart].getGradient()));
 			//Check if they intersect on the screen.. (or near enough..)
-			if (!CommonX > 0 && CommonX < IMAGE_WIDTH) continue;
+			if (!(CommonX > 0 && CommonX < IMAGE_WIDTH)) continue;
 			//This should be on the screen, so let's work out the Y co-ords;
 			//It doesn't matter which line we use to call the point, however for ease, use the one with the best slope...
 			if (fieldLines[LineIDStart].getGradient() < 1 || fieldLines[LineIDStart].getGradient() > -1)
