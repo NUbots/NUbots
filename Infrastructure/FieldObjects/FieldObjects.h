@@ -106,6 +106,10 @@ class FieldObjects: public TimestampedData
             void postProcess(const float timestamp);
             double GetTimestamp() const{return m_timestamp;};
 
+    std::vector<StationaryFieldObjectID> GetPossibleObservationIds(float x, float y, float theta, 
+                                                                   float headPan, float headTilt, 
+                                                                   float FoV_x, float FoV_y);
+    
             /*!
             @brief Output streaming operation.
             @param output The output stream.

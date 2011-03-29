@@ -247,6 +247,26 @@ void FieldObjects::InitMobileFieldObjects()
 	}
 }
 
+std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObservationIds(float x, float y, float theta, 
+                                                                            float headPan, float headTilt, 
+                                                                            float FoV_x, float FoV_y)
+{
+    // Calculate limits.
+    float maxAngle = 0;
+    float minAngle = 0;
+    float minDistance = 0;
+    float maxDistance = 0;
+    
+    std::vector<StationaryFieldObjectID> seenIds;
+    
+    for(int i=0; i < NUM_STAT_FIELD_OBJECTS; i++)
+	{
+        Vector2<float> position = stationaryFieldObjects[i].getFieldLocation();
+        
+    }
+    return seenIds;
+}
+
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 {
     int size;
