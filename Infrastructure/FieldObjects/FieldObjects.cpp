@@ -1,6 +1,7 @@
 #include "FieldObjects.h"
 #include <string>
 #include <debug.h>
+#include "Tools/Math/FieldCalculations.h"
 
 FieldObjects::FieldObjects()
 {
@@ -247,24 +248,50 @@ void FieldObjects::InitMobileFieldObjects()
 	}
 }
 
-std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObservationIds(float x, float y, float theta, 
-                                                                            float headPan, float headTilt, 
+/*! @brief Determines the IDs of stationary objects that should be visible for a given field position.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @param headYaw Additional yaw caused by head position relative to body.
+ @param headPitch Additional pitch caused by head position relative to body.
+ @param FoV_x Horizontal field of view of the observer.
+ @param FoV_y Vertical field of view of the observer.
+ @return A vector of IDs representing the stationary field objects expected to be visible.
+ */
+std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObservationIds(float x, float y, float heading, 
+                                                                            float headYaw, float headPitch, 
                                                                             float FoV_x, float FoV_y)
 {
     // Calculate limits.
-    float maxAngle = 0;
-    float minAngle = 0;
-    float minDistance = 0;
-    float maxDistance = 0;
+    // Note: These limits assume that the camera is flat horizontally.
+    float maxAngle = heading + headYaw + FoV_x / 2.0f; // Radians
+    float minAngle = heading + headYaw - FoV_x / 2.0f; // Radians
+    float minDistance = 0;      // cm
+    float maxDistance = 100;    // cm
     
-    std::vector<StationaryFieldObjectID> seenIds;
+    // Create temporary variables for use inside loop.
+    std::vector<StationaryFieldObjectID> visibleIds;
+    Vector2<float> basePos(x,y), targetPosition;
+    float distance, angle;
+    bool expectedVisible;
     
+    visibleIds.clear(); // Make sure list is empty.
+    
+    // Check all objects.
     for(int i=0; i < NUM_STAT_FIELD_OBJECTS; i++)
 	{
-        Vector2<float> position = stationaryFieldObjects[i].getFieldLocation();
-        
+        // Get position of current field object.
+        targetPosition = stationaryFieldObjects[i].getFieldLocation();
+        // Calculate expected measurments.
+        distance = DistanceBetweenPoints(basePos,targetPosition);
+        angle = AngleBetweenPoints(basePos,targetPosition);
+        // Check if within limits.
+        expectedVisible = (angle > minAngle) and (angle < maxAngle) and (distance > minDistance) and (distance < maxDistance);
+        // If expected to be visible put on list.
+        if(expectedVisible)
+            visibleIds.push_back(i);
     }
-    return seenIds;
+    return visibleIds;
 }
 
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
