@@ -163,9 +163,9 @@ BehaviourState* SoccerProvider::nextStateCommons()
     if (singleChestClick() or longChestClick())
         m_game_info->doManualStateChange();
     
-    while (m_game_info->getCurrentState() != GameInformation::PlayingState) {
+    /*while (m_game_info->getCurrentState() != GameInformation::PlayingState) {
         m_game_info->doManualStateChange();
-    }
+    }*/
     GameInformation::RobotState game_state = m_game_info->getCurrentState();
     switch (game_state) 
     {

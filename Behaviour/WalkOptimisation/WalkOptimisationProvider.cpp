@@ -52,7 +52,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define USE_PGRL
+///#define USE_PGRL
 #define USE_COST
 #define USE_STIFFNESS
 
@@ -63,7 +63,8 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     #endif
     loadId();
     loadWayPoints();
-    loadParameters("NBWalkStart");
+    //loadParameters("NBWalkStart");
+    loadParameters("ALWalkStart");
     initOptimiser();
 
     if (not m_optimiser)

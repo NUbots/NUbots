@@ -51,7 +51,7 @@ using namespace std;
 Behaviour::Behaviour()
 {
     #if defined(TARGET_IS_NAOWEBOTS)
-        m_behaviour = new SoccerProvider(this);
+        m_behaviour = new WalkOptimisationProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
