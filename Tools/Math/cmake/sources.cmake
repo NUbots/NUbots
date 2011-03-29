@@ -27,6 +27,7 @@ Matrix.cpp
 TransformMatrices.cpp
 UKF.cpp
 Rectangle.cpp
+FieldCalculations.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
