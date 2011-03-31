@@ -305,8 +305,8 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     Profiler prof("SHANNON");
     prof.start();
 
-    SAM::initRules(2.0,2,3,5,12.0,0.999);
-    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, true);
+    SAM::initRules(2.0,2,3,3,12.0,0.999);
+    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, false);
 
     prof.split("SAM");
 
