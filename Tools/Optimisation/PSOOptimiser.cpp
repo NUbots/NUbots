@@ -33,10 +33,10 @@
  */
 PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_c1 = 1.50;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
-    m_c2 = 1.50;             // tune this:
-    m_inertia = 0.70;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
-    m_num_particles = 40;   // tune this: 40 particles seems to be about right. More particles helps alot in the initial stages of the algorithm
+    m_c1 = 1.5;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
+    m_c2 = 1.5;             // tune this:
+    m_inertia = 0.5;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
+    m_num_particles = 50;   // tune this: 40 particles seems to be about right. More particles helps alot in the initial stages of the algorithm
     m_seed_fraction = 0;    // tune this: having this set to anything but 0 puts too large a restriction on the particles
     m_num_dimensions = parameters.size();
     

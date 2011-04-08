@@ -384,9 +384,9 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
                 debug << "NUPlatform::process(): Processing a camera job." << endl;
             #endif
             
-            if( settings.exposure == -1 ||
-                settings.contrast == -1 ||
-                settings.gain     == -1 )
+            if( settings.p_exposure.get() == -1 ||
+                settings.p_contrast.get() == -1 ||
+                settings.p_gain.get()     == -1 )
             {
                 #if DEBUG_NUPLATFORM_VERBOSITY > 4
                     debug << "NUPlatform::Process - Send CAMERASETTINGS Request Recieved: " << endl;

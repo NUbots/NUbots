@@ -121,6 +121,12 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
+
+    //glManager.writeWMBallToDisplay(100,100,30,GLDisplay::CalGrid);
+    glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    //
+    //glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    //
 }
 
 MainWindow::~MainWindow()
@@ -728,7 +734,7 @@ QMdiSubWindow* MainWindow::createGLDisplay()
     if(getNumMdiWindowType("GLDisplay") <= 1)
     {
         LogReader.setFrame(LogReader.currentFrame());
-    }
+    }    
     return window;
 }
 

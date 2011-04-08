@@ -35,9 +35,12 @@ class NUActionatorsData;
 class FieldObjects;
 class GameInformation;
 class TeamInformation;
+class Optimiser;
 
 #include <vector>
 #include <string>
+#include <fstream>
+using std::vector;
 
 class CameraCalibrationProvider : public BehaviourProvider
 {
@@ -47,6 +50,14 @@ public:
 protected:
     void doBehaviour();
     void doSelectedMotion();
+    void imageProcess();
+    vector<int> getColourAvg(const int x, const int y);
+    vector<int> YUV2RGB(vector<int> YUV);
+    int clip(int input);
+    int evaluate(vector< vector<int> > coordinates);
+    int distance(vector<int> p, vector<int> q);   
+    
+    
     //float calculatePitchPosition();
     //float calculateYawPosition();
     //void sayPosition(float degree);
@@ -59,7 +70,11 @@ private:
     NUImage refImage;
     bool topcam;
     float angleOffset;
-
+    Optimiser *m_optimiser;
+    ofstream debug_file; // Logging file
+    vector<float> m_parameters;
+    int optCount;
+    CameraSettings m_settings;
 };
 
 
