@@ -93,7 +93,7 @@ Matrix TransformMatrices::ModifiedDH(double alpha, double a, double theta, doubl
   return result;
 }
 
-Matrix TransformMatrices::ModifiedDH(const DHParameters& paramteters, double theta)
+Matrix TransformMatrices::ModifiedDH(const DHParameters& parameters, double theta)
 {
     Matrix result = Matrix(4,4, true);
 
@@ -101,29 +101,29 @@ Matrix TransformMatrices::ModifiedDH(const DHParameters& paramteters, double the
   //[ cos(alpha)*sin(theta), cos(alpha)*cos(theta), -sin(alpha), -d*sin(alpha)]
   //[ sin(alpha)*sin(theta), sin(alpha)*cos(theta),  cos(alpha),  d*cos(alpha)]
   //[                     0,                     0,           0,             1]
-    double thetaTotal = paramteters.thetaOffset + theta;
+    double thetaTotal = parameters.thetaOffset + theta;
     double st = sin(thetaTotal);
     double ct = cos(thetaTotal);
-    double sa = sin(paramteters.alpha);
-    double ca = cos(paramteters.alpha);
+    double sa = sin(parameters.alpha);
+    double ca = cos(parameters.alpha);
 
   // Row 0
     result[0][0] = ct;
     result[0][1] = -st;
     result[0][2] = 0.0;
-    result[0][3] = paramteters.a;
+    result[0][3] = parameters.a;
 
   // Row 1
     result[1][0] = ca*st;
     result[1][1] = ca*ct;
     result[1][2] = -sa;
-    result[1][3] = -paramteters.d*sa;
+    result[1][3] = -parameters.d*sa;
 
   // Row 2
     result[2][0] = sa*st;
     result[2][1] = sa*ct;
     result[2][2] = ca;
-    result[2][3] = paramteters.d*ca;
+    result[2][3] = parameters.d*ca;
 
   // Row 3
     result[3][0] = 0.0;
