@@ -33,21 +33,29 @@ using namespace std;
 class NUData
 {
 public:
+    /*! @brief A structure to represent an id for a sensor and/or actionator 
+     */
     struct id_t 
     {
+        /*! @brief Default constructor for id_t */
         id_t()
         {
             Id = -1;
             Name = "";
         }
+        /*! @brief Constructor for an id_t
+         	@param id the unique integral id for this sensor/actionator
+         	@param name a unigue name for the sensor/actionator
+         	@param list the list of id_t's to add this new id_t to
+         */
         id_t(int id, const string& name, vector<NUData::id_t*>& list) 
         {
             Id = id; 
             Name = name;
             list.push_back(this);
         }
-        int Id;
-        string Name;
+        int Id;				//!< unique id
+        string Name;		//!< unique name
         bool operator==(const id_t& other) const
         {
             return Id == other.Id;
@@ -76,8 +84,21 @@ public:
         {
             return Id > other.Id;
         }
+        /*! @brief Returns true if this id_t is for a left sensor/actionator */
+        bool isLeft() const
+        {
+            return Name[0] == 'L';
+        }
+        /*! @brief Returns true if this id_t is for a right sensor/actionator */
+        bool isRight() const
+        {
+            return Name[0] == 'R';
+        }
+        
+        friend ostream& operator <<(ostream& output, const id_t* id);
+        friend istream& operator >>(istream& input, id_t* id);
     };
-    
+        
     // Common aliases
     const static id_t All;							//!< alias for 'all', can be used in a number of ways for getting all sensors or actionators in a group
     const static id_t Head;							//!< alias for 'head', can be used to get sensors or actionators in the head

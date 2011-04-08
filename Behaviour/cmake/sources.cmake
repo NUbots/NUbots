@@ -38,6 +38,12 @@ SET (YOUR_DIRS  Soccer
                 RoboPedestrian
 				CameraCalibration
 )
+IF(${TARGET_ROBOT} STREQUAL BEAR)
+    LIST(APPEND YOUR_DIRS BearMode)
+ENDIF()
+IF(${TARGET_ROBOT} STREQUAL CYCLOID)
+    LIST(APPEND YOUR_DIRS Cycloid)
+ENDIF()
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path

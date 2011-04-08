@@ -22,7 +22,9 @@
 #include "NUNAO.h"
 #include "NUbot.h"
 #include "NUbot/SenseMoveThread.h"
+
 #include <dcmproxy.h>
+#include <boost/bind.hpp>
 using namespace AL;
 
 ofstream debug;
@@ -34,7 +36,7 @@ NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pN
     debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
     m_broker = pBroker;
     m_nubot = new NUbot(0, NULL);
-    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(boost::bind<void>(&SenseMoveThread::startLoop, m_nubot->m_sensemove_thread));
+    getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(boost::bind<void>(&SenseMoveThread::signal, m_nubot->m_sensemove_thread));
     m_nubot->run();
 }
 

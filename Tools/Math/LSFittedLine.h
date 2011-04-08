@@ -2,6 +2,9 @@
 #define LSFITTEDLINE_H_DEFINED
 #include "Line.h"
 #include <vector>
+#include "Vector2.h"
+
+using std::vector;
 
 class LinePoint: public Point{
 	public:
@@ -19,10 +22,13 @@ class LSFittedLine : public Line
     bool valid;
     
     void addPoint(LinePoint &point);
+    void addPoints(vector<LinePoint*>& pointlist);
     void joinLine(LSFittedLine &sourceLine);
-    double getMSD();
-    double getr2tls();
+    Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
+    double getMSD() const;
+    double getr2tls() const;
     Point leftPoint, rightPoint;
+    Point transLeftPoint, transRightPoint;
     void clearPoints();
     std::vector<LinePoint*> getPoints();
     int numPoints;

@@ -49,6 +49,7 @@ const NUSensorsData::id_t NUSensorsData::Accelerometer(s_curr_id++, "Acceleromet
 const NUSensorsData::id_t NUSensorsData::Gyro(s_curr_id++, "Gyro", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::GyroOffset(s_curr_id++, "GyroOffset", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Orientation(s_curr_id++, "Orientation", NUSensorsData::m_ids);
+const NUSensorsData::id_t NUSensorsData::OrientationHardware(s_curr_id++, "OrientationHardware", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Horizon(s_curr_id++, "Horizon", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Zmp(s_curr_id++, "Zmp", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::Falling(s_curr_id++, "Falling", NUSensorsData::m_ids);
@@ -83,6 +84,8 @@ const NUSensorsData::id_t NUSensorsData::MotionWalkSpeed(s_curr_id++, "MotionWal
 const NUSensorsData::id_t NUSensorsData::MotionWalkMaxSpeed(s_curr_id++, "MotionWalkMaxSpeed", NUSensorsData::m_ids);
 const NUSensorsData::id_t NUSensorsData::MotionHeadCompletionTime(s_curr_id++, "MotionHeadCompletionTime", NUSensorsData::m_ids);
 
+const unsigned int NUSensorsData::m_num_sensor_ids = s_curr_id;
+
 /*! @brief Default constructor for NUSensorsData
  */
 NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
@@ -90,11 +93,13 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensorsData::NUSensorsData" << endl;
 #endif
-    
     CurrentTime = 0;
     PreviousTime = 0;
-    
-    m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
+    // If this has already been initialised, don't do it again or bad stuff will happen.
+    if(m_ids.size() < m_num_sensor_ids)
+        m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
+
     m_ids_copy = m_ids;
     m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
 
@@ -333,16 +338,6 @@ bool NUSensorsData::getSupport(const id_t& id, bool& data)
     return successful;
 }
 
-/*! @brief Gets the impact time for the end effector
-    @param id the id of the end effector
-    @param data will be updated with impact time (timestamp in ms)
-    @return true if valid, false if invalid
- */
-bool NUSensorsData::getImpact(const id_t& id, float& data)
-{
-    return getEndEffectorData(id, ImpactId, data);
-}
-
 /*! @brief Gets the centre of pressure for the end effector
     @param id the id of the end effector
     @param data will be updated with centre of presssure [x(cm), y(cm)]
@@ -353,7 +348,7 @@ bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
     data = vector<float>(2);
     bool successful = true;
     successful &= getEndEffectorData(id, CoPXId, data[0]);
-    successful &= getEndEffectorData(id, CoPXId, data[1]);
+    successful &= getEndEffectorData(id, CoPYId, data[1]);
     return successful;
 }
 
@@ -789,7 +784,7 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
-            if (static_cast<unsigned>(in) < vectorBuffer.size())
+            if (static_cast<size_t>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
                 data = numeric_limits<float>::quiet_NaN();
@@ -1076,10 +1071,14 @@ int NUSensorsData::size() const
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */
 ostream& operator<< (ostream& output, const NUSensorsData& p_data)
-{
-    /*output << p_data.size() << " ";
+{    
+    output << p_data.m_common_ids << endl;
+    output << p_data.m_ids_copy << endl;
+    output << p_data.m_id_to_indices << endl;
+    output << p_data.m_available_ids << endl;
+    output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
-        output << *p_data.m_sensors[i];*/
+        output << p_data.m_sensors[i];
     return output;
 }
 
@@ -1087,22 +1086,23 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
  */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
-    /*p_data.m_sensors.clear();
+    input >> p_data.m_common_ids;
+    input >> p_data.m_ids_copy;
+    input >> p_data.m_id_to_indices;
+    input >> p_data.m_available_ids;
+    p_data.m_sensors.clear();
     int numsensors;
-    sensor_t insensor;
-    sensor_t* sensor;
     input >> numsensors;
     double lastUpdateTime = 0;
+    Sensor tempSensor("temp");
     for (int i=0; i<numsensors; i++)
     {
         if(!input.good()) throw exception();
-        input >> insensor;
-        sensor = new sensor_t(insensor);
-        p_data.m_sensors.push_back(sensor);
-        p_data.updateNamedSensorPointer(sensor);
-        if(sensor->Time > lastUpdateTime) lastUpdateTime = sensor->Time;
+        input >> tempSensor;
+        p_data.m_sensors.push_back(Sensor(tempSensor));
+        if(tempSensor.Time > lastUpdateTime) lastUpdateTime = tempSensor.Time;
     }
-    p_data.CurrentTime = lastUpdateTime;*/
+    p_data.CurrentTime = lastUpdateTime;
     return input;
 }
 

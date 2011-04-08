@@ -71,6 +71,9 @@
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
     #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_BEAR)
+    #include "NUPlatform/Platforms/Bear/BearPlatform.h"
+    #include "NUPlatform/Platforms/Bear/BearIO.h"
 #elif defined(TARGET_IS_NUVIEW)
     #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
@@ -172,6 +175,10 @@ void NUbot::createPlatform(int argc, const char *argv[])
         m_platform = new NAOPlatform();
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
+    #elif defined(TARGET_IS_BEAR)
+        m_platform = new BearPlatform();
+    #else
+        #error You need to create a Platform instance for this platform
     #endif
 }
 
@@ -229,6 +236,10 @@ void NUbot::createNetwork()
         m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_io = new CycloidIO(this);
+    #elif defined(TARGET_IS_BEAR)
+        m_io = new BearIO(this);
+    #else
+        #error You need to create an IO class for this platform
     #endif
 }
 
@@ -381,21 +392,15 @@ void NUbot::run()
         previoussimtime = Platform->getTime();
         webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
-            m_sensemove_thread->startLoop();
+            m_sensemove_thread->signal(true);
         #endif
         
         #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
             if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
             {
-                m_seethink_thread->startLoop();         
-                m_seethink_thread->waitForLoopCompletion();
+                m_seethink_thread->signal(true);
             }
         #endif
-        
-        #if defined(USE_MOTION)
-            m_sensemove_thread->waitForLoopCompletion();
-        #endif
-        
         count++;
     };
 #else
@@ -403,7 +408,7 @@ void NUbot::run()
         while (true)
         {
             periodicSleep(33);
-            m_seethink_thread->startLoop();
+            m_seethink_thread->signal(true);
         }
     #endif
 #endif

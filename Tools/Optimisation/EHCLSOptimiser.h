@@ -38,7 +38,6 @@ public:
     
     void summaryTo(ostream& stream);
 private:
-    float normalDistribution(float mean, float sigma);
     void mutateBestParameters(vector<Parameter>& parameters);
     void mutateParameters(vector<Parameter>& base_parameters, vector<float>& basedelta_parameters, vector<Parameter>& parameters);
     

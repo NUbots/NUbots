@@ -22,10 +22,13 @@
 #include "EvaluateWalkParametersState.h"
 
 #include "WalkOptimisationProvider.h"
-#include "EvaluateSpeedOfWalkParametersState.h"
-#include "EvaluateStabilityOfWalkParametersState.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+
+#include "Behaviour/BehaviourPotentials.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -33,59 +36,153 @@
 /*! @brief Construct a evaluate walk parameters state
     @param parent the walk optimisation provider
  */
-EvaluateWalkParametersState::EvaluateWalkParametersState(WalkOptimisationProvider* parent) : m_parent(parent)
+EvaluateWalkParametersState::EvaluateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
 {
-    m_evaluate_speed = new EvaluateSpeedOfWalkParametersState(this);
-    m_evaluate_stability = new EvaluateStabilityOfWalkParametersState(this);
-    
-    m_state = m_evaluate_speed;
-    m_speed_evaluation_completed = false;
+	#if DEBUG_BEHAVIOUR_VERBOSITY > 3
+        debug << "EvaluateWalkParametersState::EvaluateWalkParametersState" << endl;
+    #endif
 }
 
 /*! @brief Destroy the evaluate walk parameters state */
 EvaluateWalkParametersState::~EvaluateWalkParametersState()
 {
-    delete m_evaluate_speed;
-    m_evaluate_speed = 0;
-    delete m_evaluate_stability;
-    m_evaluate_stability = 0;
 };
 
 /*! @brief Returns the desired next state in the walk optimisation provider */
 BehaviourState* EvaluateWalkParametersState::nextState()
 {
-    bool getting_up;
-    m_data->get(NUSensorsData::MotionGetupActive, getting_up);
-    if (getting_up or speedEvaluationFinished())		// TODO: Put in a compile flag so I can turn the stability test on and off here
-        return m_parent->m_generate;
-    else
-        return this;
+	bool getting_up = false;
+	m_data->get(NUSensorsData::MotionGetupActive, getting_up);
+	if (allPointsReached())
+	{
+		finish();
+		return m_parent->m_generate;
+	}
+	else if (m_time_in_state > 120000 or getting_up)
+		return m_parent->m_generate;
+	else
+		return this;
 }
 
-/*! @brief Returns the desired next state in the evaluate walk parameters state machine */
-BehaviourState* EvaluateWalkParametersState::nextStateCommons()
-{   
-    if (m_parent->stateChanged())
-        return m_evaluate_speed;
-    else
-        return m_state;
-}
-
-/*! @brief Returns true if the speed evalution has completed. This is a hack to shortcut the stability measurement when I don't need it */
-bool EvaluateWalkParametersState::speedEvaluationFinished()
+/*! @brief Do the state behaviour */
+void EvaluateWalkParametersState::doState()
 {
-    if (m_speed_evaluation_completed)
-    {
-        m_speed_evaluation_completed = false;
+    #if DEBUG_BEHAVIOUR_VERBOSITY > 3
+        debug << "EvaluateWalkParametersState::doState() target: " << m_current_target_state << endl;
+    #endif
+    if (m_parent->stateChanged())
+        start();
+    else
+    	tick();
+
+    lookAtGoals();
+
+    if (pointReached())
+        m_current_target_state = getNextPoint();
+
+    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, m_parent->stoppingDistance(), 9000);
+    m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
+}
+
+/*! @brief Returns the starting point for the evaluation of the speed */
+vector<float> EvaluateWalkParametersState::getStartPoint()
+{
+    float distance_from_forward = m_field_objects->self.CalculateDifferenceFromFieldState(m_way_points.front())[0];
+    float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(m_way_points.back())[0];
+
+    m_current_point_index = 0;
+    if (distance_from_forward <= distance_from_reverse)
+        m_reverse_points = false;
+    else
+        m_reverse_points = true;
+
+    if (not m_reverse_points)
+        return m_way_points[m_current_point_index];
+    else
+        return reversePoint(m_way_points[m_current_point_index]);
+}
+
+/*! @brief Returns true if the current point has been reached */
+bool EvaluateWalkParametersState::pointReached()
+{
+    vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
+    if (difference[0] < 10 and fabs(difference[2]) < 0.2)
         return true;
-    }
     else
         return false;
 }
 
-/*! @brief Marks the speed evaluation as being complete. This is a hack to shortcut the stability measurement when I don't need it */
-void EvaluateWalkParametersState::markSpeedEvaluationCompleted()
+/*! @brief Returns the next point in the list of way points in the predefined path */
+vector<float> EvaluateWalkParametersState::getNextPoint()
 {
-    m_speed_evaluation_completed = true;
+    if (m_current_point_index < m_way_points.size()-1)
+        m_current_point_index++;
+
+    if (not m_reverse_points)
+        return m_way_points[m_current_point_index];
+    else
+        return reversePoint(m_way_points[m_current_point_index]);
 }
 
+/*! @brief Returns true if the trial path has been completed */
+bool EvaluateWalkParametersState::allPointsReached()
+{
+    if (not pointReached())
+        return false;
+    else
+    {
+        if (m_current_point_index == m_way_points.size()-1)
+            return true;
+        else
+            return false;
+    }
+}
+
+/*! @brief Returns the equivalent point on the reverse path */
+vector<float> EvaluateWalkParametersState::reversePoint(const vector<float>& point)
+{
+    vector<float> reverse = m_way_points[(m_way_points.size()-1) - m_current_point_index];
+    if (m_current_point_index == 0 or m_current_point_index == m_way_points.size()-1)
+        return reverse;
+    else
+    {
+        reverse[2] += 3.14;
+        return reverse;
+    }
+    return reverse;
+}
+
+/*! @brief Returns the total distance travelled along the circuit so far
+ * 				- This function will ignore travelling that is not on the path
+ * 	@return the distance in cm
+ */
+float EvaluateWalkParametersState::distance()
+{
+	if(m_completed)
+		return calculateCircuitLength();
+	else if (m_current_point_index == 0)
+		return 0;
+	else
+	{
+		float distance = 0;
+		for (size_t i=1; i<m_current_point_index; i++)
+			distance += sqrt(pow(m_way_points[i][0] - m_way_points[i-1][0],2) + pow(m_way_points[i][1] - m_way_points[i-1][1],2));
+
+		// because i'm lazy the distance for the leg on which we fell over is (the distance of the final leg) - (the distance from the target)
+		float currentleg = sqrt(pow(m_current_target_state[0] - m_way_points[m_current_point_index-1][0],2) + pow(m_current_target_state[1] - m_way_points[m_current_point_index-1][1],2));
+		float distancefromtarget = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state)[0];
+		distance += currentleg - distancefromtarget;
+		return distance;
+	}
+}
+
+/*! @brief Returns the distance in cm of the path specified by m_points
+ *  @return the distance of the evaluation path
+ */
+float EvaluateWalkParametersState::calculateCircuitLength()
+{
+    float distance = 0;
+    for (size_t i=1; i<m_way_points.size(); i++)
+        distance += sqrt(pow(m_way_points[i][0] - m_way_points[i-1][0],2) + pow(m_way_points[i][1] - m_way_points[i-1][1],2));
+    return distance;
+}

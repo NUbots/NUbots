@@ -6,6 +6,8 @@
 #include "ClassifiedSection.h"
 #include "TransitionSegment.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "ObjectCandidate.h"
+#include "SplitAndMerge/SAM.h"
 #include <iostream>
 
 class Vision;
@@ -38,11 +40,15 @@ class LineDetection{
 
 	public:
 	//VARIABLES:
+        vector<LinePoint*> centreCirclePoints;
         std::vector<LinePoint> linePoints;
         std::vector<LSFittedLine> fieldLines;
+        std::vector<LSFittedLine> transformedFieldLines;
         std::vector<CornerPoint> cornerPoints;
         std::vector<AmbiguousObject> possiblePenaltySpots;
         std::vector<TransitionSegment> robotSegments;
+        std::vector<TransitionSegment> verticalLineSegments;
+        std::vector<TransitionSegment> horizontalLineSegments;
         //int LinePointCounter;
         //int FieldLinesCounter;
         //int CornerPointCounter;
@@ -54,7 +60,13 @@ class LineDetection{
 
         void FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vision);
         void FormLines(FieldObjects* AllObjects, Vision* vision, NUSensorsData* data);
-	
+        void FormLines(FieldObjects* AllObjects,
+                       Vision* vision,
+                       NUSensorsData* data,
+                       vector< ObjectCandidate >& candidates,
+                       vector< TransitionSegment>& leftover);
+        bool GetDistanceToPoint(Point point,  Vector3<float> &result, Vision* vision);
+
 	
 	private:
 
@@ -69,13 +81,14 @@ class LineDetection{
         bool checkAroundForWhite(int mx, int my,double length, Vision* vision);
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
         void FindPenaltySpot(Vision* vision);
-        void DecodePenaltySpot(FieldObjects* AllObjects, float timestamp);
+        void DecodePenaltySpot(FieldObjects* AllObjects, double timestamp);
 
         void FindCornerPoints(int image_width,int image_height);
         float findAngleOfLCorner(CornerPoint cornerPoint);
-        void DecodeCorners(FieldObjects* AllObjects, float timestamp,  Vision* vision);
+        void DecodeCorners(FieldObjects* AllObjects, double timestamp,  Vision* vision);
         void GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
-
+        bool GetDistanceToPoint(LinePoint point,  Vector3<float> &result, Vision* vision);
+        void TransformLinesToWorldModelSpace(Vision* vision);
         //! Line Point Sorting
         void qsort(std::vector<LinePoint> &array, int left, int right, int type);
         void swap(std::vector<LinePoint> &array, int i, int j);

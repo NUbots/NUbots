@@ -367,7 +367,7 @@ float NUActionatorsData::interpolate(const double& time, const float& current, c
             return target;
     }
     else
-        return current;
+        return target;
 }
 
 /*! @brief Returns true if a member named name belongs to the group

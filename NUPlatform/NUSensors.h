@@ -33,6 +33,7 @@
 #define NUSENSORS_H
 
 class NUSensorsData;
+class EndEffectorTouch;
 class Kinematics;
 class OrientationUKF;
 
@@ -61,11 +62,6 @@ protected:
     void calculateHorizon();
     void calculateButtonDurations();
     
-    void calculateFootForce();
-    void calculateCoP();
-    void calculateFootSupport();
-    void calculateFootImpact();
-    
     void calculateZMP();
     void calculateFallSense();
 
@@ -81,10 +77,9 @@ protected:
     vector<float> m_previous_joint_positions;
     vector<float> m_previous_joint_velocities;
     
+    EndEffectorTouch* m_touch;
     Kinematics* m_kinematicModel;
     OrientationUKF* m_orientationFilter;
-    vector<vector<float> > m_left_foot_hull;
-    vector<vector<float> > m_right_foot_hull;
 private:
 };
 

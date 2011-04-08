@@ -43,9 +43,15 @@ SSLVisionPort::SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teami
     m_packet = new SSLVisionPacket();
     ifstream idfile((string(CONFIG_DIR) + string("SslId.cfg")).c_str());      // the ssl id is stored in a config file
     if (idfile.is_open())                                                     // Use that if it exists, otherwise use the player number
+    {
         m_ssl_id = static_cast<int>(MotionFileTools::toFloat(idfile));
+        debug << "SslId.cfg found. Using (" << m_ssl_id << ")" << endl;
+    }
     else
+    {
         m_ssl_id = m_team_info->getPlayerNumber();
+        debug << "SslId.cfg not found. Using player number instead (" << m_ssl_id << ")" << endl;
+    }
     idfile.close();
 	storage.open("/var/volatile/storage.log");	
 }

@@ -38,6 +38,7 @@
 #include <QDebug>
 #include <cmath>
 #include "IndexedFileReader.h"
+
 template<class C>
 class StreamFileReader: public IndexedFileReader
 {
@@ -186,20 +187,23 @@ private:
             m_index.clear();
             m_timeIndex.clear();
             temp.frameSequenceNumber = 0;
-            while (m_file.good() && (m_file.tellg() < m_fileEndLocation))
+            bool eofReached = false;
+            while (m_file.good() && ((m_fileEndLocation - m_file.tellg()) > sizeof(double)))
             {
                 int pos = m_file.tellg();
+                //qDebug("Indexing Frame %d at %d", temp.frameSequenceNumber, pos);
                 temp.position = m_file.tellg();
                 try{
                     m_file >> (*m_dataBuffer);
-                }   catch(...){qDebug("Bad frame found"); CloseFile(); return;}
+                }   catch(...){qDebug("Bad frame found"); eofReached = true;}
                 // File Cursor Has Not Moved
                 if(pos == m_file.tellg())
                 {
-                    qDebug("ERROR Reading Frame. Check File Format.");
+                    qDebug("ERROR Reading Frame (%d). Check File Format.", temp.frameSequenceNumber);
                     CloseFile();
                     return;
                 }
+                if(eofReached) break;
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
                 timestamp = floor(timestamp);
                 if(HasTime(timestamp)) continue;

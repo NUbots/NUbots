@@ -87,6 +87,7 @@ void SenseMoveThread::run()
     
     #ifdef THREAD_SENSEMOVE_PROFILE
         Profiler prof = Profiler("SenseMoveThread");
+        Profiler waitprof = Profiler("SenseMoveThreadWait");
     #endif
     
     int err = 0;
@@ -94,7 +95,14 @@ void SenseMoveThread::run()
     {
         try 
         {
-            waitForCondition();
+            #ifdef THREAD_SENSEMOVE_PROFILE
+                waitprof.start();
+            #endif
+            wait();
+            #ifdef THREAD_SENSEMOVE_PROFILE
+                waitprof.split("wait");
+                debug << waitprof;
+            #endif
                 
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef THREAD_SENSEMOVE_PROFILE
@@ -121,7 +129,6 @@ void SenseMoveThread::run()
         {
             m_nubot->unhandledExceptionHandler(e);
         }
-        onLoopCompleted();
     }
     errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << endl;
 }

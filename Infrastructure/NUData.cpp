@@ -28,6 +28,31 @@
 #include "debugverbositynuactionators.h"
 #include "debugverbositynusensors.h"
 
+/*! @brief Streaming operator for id_t* objects. Copies the object at the pointer location.
+    @param output The output stream on which to write.
+    @param id The object to be written to the stream.
+    @return The output stream with the object written to it.
+ */
+ostream& operator << (ostream& output, const NUData::id_t* id)
+{
+    output << id->Id << " ";
+    output << id->Name << " ";
+    return output;
+}
+
+/*! @brief Streaming operator for id_t* objects. Reads the object to a new object.
+    @param input The input stream containing the data.
+    @param id The pointer where the new object will be written.
+    @return The input stream post read.
+ */
+istream& operator >> (istream& input, NUData::id_t* id)
+{
+    id = new NUData::id_t();
+    input >> id->Id;
+    input >> id->Name;
+    return input;
+}
+
 int curr_id = 0;
 vector<NUData::id_t*> NUData::m_common_ids;
 const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);							//0
@@ -157,10 +182,10 @@ string NUData::getStandardName(const string& hardwarename)
         if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
             simplename += currentletter[0];            
     }
-    
+
     // Replace "Left"/"Right" with L/R and move to front of name
-    unsigned int Left = simplename.find("Left");
-    unsigned int Right = simplename.find("Right");
+    size_t Left = simplename.find("Left");
+    size_t Right = simplename.find("Right");
     if (Left != string::npos)
     {
         simplename.erase(Left, 4);
@@ -173,34 +198,34 @@ string NUData::getStandardName(const string& hardwarename)
     }
     
     // Replace plurals (ears, eyes)
-    unsigned int Ears = simplename.find("Ears");
-    unsigned int Eyes = simplename.find("Eyes");
+    size_t Ears = simplename.find("Ears");
+    size_t Eyes = simplename.find("Eyes");
     if (Ears != string::npos)
         simplename.replace(Ears, 4, "Ear");
     if (Eyes != string::npos)
         simplename.replace(Ears, 4, "Eye");
     
     // Replace ChestBoard with Chest
-    unsigned int ChestBoard = simplename.find("ChestBoard");
+    size_t ChestBoard = simplename.find("ChestBoard");
     if (ChestBoard != string::npos)
         simplename.replace(ChestBoard, 10, "Chest");
     
     // Replace LFace with LEye and RFace with REye
-    unsigned int LFace = simplename.find("LFace");
-    unsigned int RFace = simplename.find("RFace");
+    size_t LFace = simplename.find("LFace");
+    size_t RFace = simplename.find("RFace");
     if (LFace != string::npos)
     	simplename.replace(LFace, 5, "LEye");
     if (RFace != string::npos)
     	simplename.replace(RFace, 5, "REye");
     
     // Remove colours
-    unsigned int Red = simplename.find("Red");
+    size_t Red = simplename.find("Red");
     if (Red != string::npos)
         simplename.erase(Red, 3);
-    unsigned int Green = simplename.find("Green");
+    size_t Green = simplename.find("Green");
     if (Green != string::npos)
         simplename.erase(Green, 5);
-    unsigned int Blue = simplename.find("Blue");
+    size_t Blue = simplename.find("Blue");
     if (Blue != string::npos)
         simplename.erase(Blue, 4);
     
@@ -278,6 +303,13 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
     else if (group == RArm)
     {
         if (RShoulderRoll == member or RShoulderPitch == member or RShoulderYaw == member or RElbowRoll == member or RElbowPitch == member or RElbowYaw == member)
+            return true;
+        else 
+            return false;
+    }
+    else if (group == Torso)
+    {
+        if (TorsoRoll == member or TorsoPitch == member or TorsoYaw == member)
             return true;
         else 
             return false;

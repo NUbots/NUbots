@@ -1,14 +1,14 @@
 /*! @file CycloidActionators.h
-    @brief Declaration of Cycloid actionators class
+    @brief Declaration of Bear actionators class
 
     @author Jason Kulk
  
     @class CycloidActionators
-    @brief A Cycloid actionators
+    @brief The cycloid actionators class
  
     @author Jason Kulk
  
-  Copyright (c) 2009 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,16 +24,28 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CycloidACTIONATORS_H
-#define CycloidACTIONATORS_H
+#ifndef CYCLOIDACTIONATORS_H
+#define CYCLOIDACTIONATORS_H
 
 #include "NUPlatform/NUActionators.h"
+class Motors;
+
 
 class CycloidActionators : public NUActionators
 {
 public:
-    CycloidActionators();
+    CycloidActionators(Motors* motors);
     ~CycloidActionators();
+    
+private:
+    void copyToHardwareCommunications();
+    void copyToServos();
+    
+private:
+    // Actionators
+    static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
+    
+    Motors* m_motors;
 };
 
 #endif

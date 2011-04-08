@@ -43,6 +43,9 @@ public:
     virtual BehaviourState* nextState() {return this;};
     virtual void doState()
     {
+	#if DEBUG_BEHAVIOUR_VERBOSITY > 3
+        debug << "PausedWalkOptimisationState::doState" << endl;
+    #endif
         if (m_parent->stateChanged())
         {
             m_jobs->addMotionJob(new WalkJob(0,0,0));

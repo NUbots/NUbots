@@ -342,6 +342,9 @@ vector<float> operator*(const vector<Parameter>& p, const float& f)
     return f*p;
 }
 
+/*! @brief Returns the vector of Parameters back as a vector<float> containing only the values
+ * 	@return a vector<float> containing the current value of each parameter
+ */
 vector<float> Parameter::getAsVector(const vector<Parameter>& p)
 {
     vector<float> result;
@@ -351,32 +354,41 @@ vector<float> Parameter::getAsVector(const vector<Parameter>& p)
     return result;
 }
 
+/*! @brief Stream insertion operator for a single Parameters
+		   The description and Parameter itself are terminated by a newline character.
+ */
 ostream& operator<< (ostream& output, const Parameter& p) 
 {   
-    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description;
+    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description << endl;
     return output;
 }
 
+/*! @brief Stream insertion operator for a vector of Parameters.
+ *         Unlike other vectors, each entry is separated by a newline character, which also doubles
+ *         as the terminating character for the Parameter's description.
+ *  @relates Parameter
+ */
 ostream& operator<< (ostream& output, const vector<Parameter>& p)
 {
     output << "[";
-    if (not p.empty())
-    {
-    	for (size_t i=0; i<p.size()-1; i++)
-            output << p[i] << endl;
-        output << p.back();
-    }
+	for (size_t i=0; i<p.size(); i++)
+		output << p[i];
     output << "]";
 	return output;
 }
 
+/*! @brief Stream extraction operator for a parameter.
+ * 	       Importantly, a single parameter takes an entire line, ie. The description must be terminated with a newline character.
+ *		   This has implications when puting parameters in vectors.
+ *  @relates Parameter
+ */
 istream& operator>> (istream& input, Parameter& p)
 {
     // read in the parameter name
     getline(input, p.Name, ':');
     if (p.Name[p.Name.size() - 1] == ':')
         p.Name.resize(p.Name.size() - 1);
-    
+
     // read in the value [min, max]
     input >> p.Value;
     input.ignore(10, '[');
@@ -394,195 +406,36 @@ istream& operator>> (istream& input, Parameter& p)
     return input;
 }
 
+/*! @brief Stream extraction operator for a vector of parameters.
+ * 		   We need a specialised version for a vector of parameters because the entries are not separated by commas
+ * 		   as is the case with other vectors.
+ *  @relates Parameter
+ */
 istream& operator>> (istream& input, vector<Parameter>& p)
 {
+    stringstream wholevector;
     p.clear();
-    input.ignore(128, '[');
-    
-    Parameter t;
-    while (not input.eof())
-    {
-        input >> t;
-		size_t last = t.Description.size()-1;
-        
-        if (last >=0 and t.Description[last] == ']')
-        {
-            t.Description.erase(last);
-            p.push_back(t);
-            break;
-        }
-        p.push_back(t);
-    }
-    return input;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-/*
-vector<float> operator+(const float& f, const vector<float>& v)
-{
-    vector<float> result;
-    result.reserve(v.size());
-    for (size_t i=0; i<v.size(); i++)
-        result.push_back(f + v[i]);
-    return result;
-}
-
-vector<float> operator+(const vector<float>& v, const float& f)
-{
-    return f + v;
-}
-
-vector<float> operator+(const vector<float>& v1, const vector<float>& v2)
-{
-    vector<float> result;
-    if (v1.size() != v2.size())
-        return result;
-    else
-    {
-        result.reserve(v1.size());
-        for (size_t i=0; i<v1.size(); i++)
-            result.push_back(v1[i] + v2[i]);
-        return result;
-    }
-}
-
-vector<float> operator-(const float& f, const vector<float>& v)
-{
-    vector<float> result;
-    result.reserve(v.size());
-    for (size_t i=0; i<v.size(); i++)
-        result.push_back(f - v[i]);
-    return result;
-}
-
-vector<float> operator-(const vector<float>& v, const float& f)
-{
-    vector<float> result;
-    result.reserve(v.size());
-    for (size_t i=0; i<v.size(); i++)
-        result.push_back(v[i] - f);
-    return result;
-}
-
-vector<float> operator-(const vector<float>& v1, const vector<float>& v2)
-{
-    vector<float> result;
-    if (v1.size() != v2.size())
-        return result;
-    else
-    {
-        result.reserve(v1.size());
-        for (size_t i=0; i<v1.size(); i++)
-            result.push_back(v1[i] - v2[i]);
-        return result;
-    }
-}
-
-vector<float> operator*(const float& f, const vector<float>& v)
-{
-    vector<float> result;
-    result.reserve(v.size());
-    for (size_t i=0; i<v.size(); i++)
-        result.push_back(f*v[i]);
-    return result;
-}
-
-vector<float> operator*(const vector<float>& v, const float& f)
-{
-    return f*v;
-}
-
-vector<float> operator*(const vector<float>& v1, const vector<float>& v2)
-{
-    vector<float> result;
-    if (v1.size() != v2.size())
-        return result;
-    else
-    {
-        result.reserve(v1.size());
-        for (size_t i=0; i<v1.size(); i++)
-            result.push_back(v1[i]*v2[i]);
-        return result;
-    }
-}
-
-float norm(const vector<float>& v)
-{
-    float sum = 0;
-    for (size_t i=0; i<v.size(); i++)
-        sum += pow(v[i], 2);
-    return sqrt(sum);
-}
-
-ostream& operator<<(ostream& output, const vector<float>& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-    	for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ", ";
-        output << v.back();
-    }
-    output << "]";
-	return output;
-}
-
-ostream& operator<<(ostream& output, const vector<vector<float> >& v)
-{
-    output << "[";
-    if (not v.empty())
-    {
-        for (size_t i=0; i<v.size()-1; i++)
-            output << v[i] << ",";
-        output << v.back();
-    }
-    output << "]";
-    return output;
-}
-
-istream& operator>>(istream& input, vector<float>& v)
-{
-    string wholevector;
     // get all of the data between [ ... ]
     input.ignore(128, '[');
-    getline(input, wholevector, ']');
-    
-    v.clear();
-    if (wholevector.size() > 0)
-    {
-        stringstream ss(wholevector);
-        float floatBuffer;
-        
-        // now split the data based on the commas
-        while (not ss.eof())
-        {
-            ss >> floatBuffer;
-            ss.ignore(128, ',');
-            v.push_back(floatBuffer);
-        }
-    }
-    
-    return input;
-}
+	char c;
+	int brackets = 1;
+	while (brackets != 0 and input.good())
+	{
+		input.get(c);
+		wholevector << c;
+		if (c == '[')
+			brackets++;
+		else if (c == ']')
+			brackets--;
+	}
 
-istream& operator>>(istream& input, vector<vector<float> >& v)
-{
-    string buffer;
-    getline(input, buffer);
-    stringstream ss(buffer);
-    ss.ignore(128, '[');
-
-    while(getline(ss, buffer, ']'))
-    {
-        if (buffer.size() > 0)
-        {
-            vector<float> e;
-            stringstream sss(buffer);
-            sss >> e;
-            v.push_back(e);
-        }
-    }
-    return input;
+	Parameter buffer;
+	// now split the data based on the commas
+	while (wholevector.peek() != ']' and wholevector.good())
+	{
+		wholevector >> buffer;
+		p.push_back(buffer);
+	}
+	return input;
 }
-*/
 

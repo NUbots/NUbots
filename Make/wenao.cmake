@@ -24,13 +24,13 @@ SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
 FIND_PACKAGE(WEBOTS REQUIRED)
 
 ######### Set NUBOT_EXECUTABLE so that the code is compiled into an executable
-SET(NUBOT_IS_REMOTE ON)
+SET(NUBOT_IS_EXECUTABLE ON)
 
 ######### Set the output path so it goes nicely into the webots file structure
 IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1.exe" )
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1.exe" CACHE FILEPATH "cleared")
 ELSE()
-    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1" )
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/nao_team_1/nao_team_1" CACHE FILEPATH "cleared")
 ENDIF()
 
 ######### ADD_DEFINITIONS used by this target

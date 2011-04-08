@@ -44,6 +44,9 @@
 #ifdef USE_ALWALK
     #include "Walks/ALWalk/ALWalk.h"
 #endif
+#ifdef USE_BEARWALK
+    #include "Walks/BearWalk/BearWalk.h"
+#endif
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -55,25 +58,30 @@ using namespace mathGeneral;
 
 NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
 {
-#ifdef USE_JWALK
-    return new JWalk(data, actions);
-#else
+    #ifdef USE_JWALK
+        return new JWalk();
+    #endif
+    
     #ifdef USE_JUPPWALK
         return new JuppWalk(data, actions);
-    #else
-        #ifdef USE_NBWALK
-            return new NBWalk(data, actions);
-        #else
-            #ifdef USE_VSCWALK
-                return new VSCWalk(data, actions);
-            #else
-                #ifdef USE_ALWALK
-                    return new ALWalk(data, actions);
-                #endif
-            #endif
-        #endif
     #endif
-#endif
+    
+    #ifdef USE_NBWALK
+        return new NBWalk(data, actions);
+    #endif
+    
+    #ifdef USE_ALWALK
+        return new ALWalk(data, actions);
+    #endif
+    
+    #ifdef USE_VSCWALK
+        return new VSCWalk(data, actions);
+    #endif
+                
+    #ifdef USE_BEARWALK
+        return new BearWalk(data, actions);
+    #endif
+    
     return NULL;
 }
 
@@ -220,7 +228,7 @@ bool NUWalk::isUsingLegs()
 */
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    #if DEBUG_NUMOTION_VERBOSITY > 3
+    #if DEBUG_NUMOTION_VERBOSITY > 2
         debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << endl;
     #endif
     if (actions == NULL || data == NULL)
@@ -248,6 +256,12 @@ void NUWalk::process(WalkJob* job, bool currentprovider)
 {
     if (not currentprovider)
         return;
+    
+	#if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUWalk::process ";
+        job->summaryTo(debug);
+    #endif
+    
     float t,d,y;
     t = job->getTranslationSpeed();
     d = job->getDirection();
@@ -271,6 +285,10 @@ void NUWalk::process(WalkToPointJob* job, bool currentprovider)
  */
 void NUWalk::process(WalkParametersJob* job)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUWalk::process ";
+        job->summaryTo(debug);
+    #endif
     WalkParameters parameters;
     job->getWalkParameters(parameters);                
     setWalkParameters(parameters);
@@ -293,6 +311,9 @@ void NUWalk::process(WalkPerturbationJob* job)
  */
 void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_speed)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "NUWalk::setTargetSpeed(" << trans_speed << "," << trans_direction << "," << rot_speed << ")";
+    #endif
     vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     if (isnan(trans_speed))
@@ -336,6 +357,10 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     m_target_speed_x = x;
     m_target_speed_y = y;
     m_target_speed_yaw = rot_speed;
+    
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "->(" << x << "," << y << "," << rot_speed << ")" << endl;
+    #endif
 }
 
 /*! @brief Sets m_speed_x, m_speed_y and m_speed_yaw; they are smoothed to satisify acceleration constraints
@@ -454,6 +479,9 @@ void NUWalk::moveToInitialPosition()
     }
     else
     {
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+            debug << "NUWalk::moveToInitialPosition()" << endl;
+        #endif
         // get the current joint positions
         vector<float> sensor_larm, sensor_rarm;
         vector<float> sensor_lleg, sensor_rleg;
@@ -469,7 +497,7 @@ void NUWalk::moveToInitialPosition()
         double time_rleg = 1000*(maxDifference(sensor_rleg, m_initial_rleg)/movespeed);
         
         // set the move complettion to be the maximum of each limb
-        movecompletiontime = m_current_time + std::max(std::max(time_larm, time_rarm), std::max(time_lleg, time_rleg));
+        movecompletiontime = m_current_time + std::max(std::max(time_larm, time_rarm), std::max(time_lleg, time_rleg)) + 100;
         
         // give the command to the actionators
         m_actions->add(NUActionatorsData::LArm, m_current_time + 100, sensor_larm, 40);

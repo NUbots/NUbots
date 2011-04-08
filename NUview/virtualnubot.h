@@ -92,7 +92,11 @@ private:
         int index;
         unsigned char colour;
     };
-
+/**ADDED BY SHANNON**/
+    void printPoints(const vector<LinePoint>& points) const;
+    void printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const;
+    void printOtherPoints(const vector<LinePoint>& points, ofstream& file) const;
+/**ADDED BY SHANNON**/
 
     void processVisionFrame(const NUImage* image);
     void processVisionFrame(ClassifiedImage& image);
