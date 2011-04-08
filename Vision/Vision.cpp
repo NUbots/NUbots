@@ -477,7 +477,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
     if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
     {
-        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+        //m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
     }
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 

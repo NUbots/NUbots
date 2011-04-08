@@ -79,13 +79,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
 
-    Profiler prof = Profiler("AARON");
-    prof.start();
+    //Profiler prof = Profiler("AARON");
+    //prof.start();
     /*AARON'S OLD LINE DETECTION*/
     FindFieldLines(image_width,image_height);
     /*AARON'S OLD LINE DETECTION*/
-    prof.split("FindFieldLines");
-    debug << prof;
+    //prof.split("FindFieldLines");
+    //debug << prof;
     //qDebug() << "Lines found: " << fieldLines.size()<< "\t" << "Vaild: "<< TotalValidLines;
     //for(unsigned int i = 0; i < fieldLines.size(); i++)
     //{
@@ -208,11 +208,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     vector< TransitionSegment > tempseg;
     LinePoint* temppoint;
     vector<LinePoint*> tempcluster;
-    for(unsigned int i=0; i<candidates.size(); i++) {
+    for(unsigned int i=0; i<candidates.size(); i++)
+    {
         //For each ObjectCandidate create vector of linepoints and add it to clusters
         tempseg = candidates[i].getSegments();
         tempcluster.clear();
-        for(unsigned int k=0; k<tempseg.size(); k++) {
+        for(unsigned int k=0; k<tempseg.size(); k++)
+        {
             //For each segment create a new linepoint and push it to a vector
             temppoint = new LinePoint();
             temppoint->x = (double)tempseg[k].getMidPoint().x;
@@ -228,7 +230,8 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     }
 
     //get leftover points
-    for(unsigned int i=0; i<leftoverPoints.size(); i++) {
+    for(unsigned int i=0; i<leftoverPoints.size(); i++)
+    {
         temppoint = new LinePoint();
         temppoint->x = (double)leftoverPoints[i].getMidPoint().x;
         temppoint->y = (double)leftoverPoints[i].getMidPoint().y;
@@ -302,15 +305,15 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     fout.close();
     */
     /*OUTPUT FOR DEBUGGING*/
-    Profiler prof("SHANNON");
-    prof.start();
+    //Profiler prof("SHANNON");
+    //prof.start();
 
-    SAM::initRules(2.0,2,3,3,12.0,0.999);
+    SAM::initRules(2.0,2,3,3,8.0,0.999);
     SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, false);
 
-    prof.split("SAM");
+    //prof.split("SAM");
 
-    debug << prof;
+    //debug << prof;
     /*OUTPUT FOR DEBUGGING*/
     /*
     qDebug() << "printing to file";
@@ -892,7 +895,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
             //JOIN Copies of LINEs:
             Line1.joinLine(Line2);
             MSD2 = Line1.getMSD();
-            r2tls2 = Line2.getr2tls();
+            r2tls2 = Line1.getr2tls();
 
 
             //Now make sure the slopes are both about the same degree angle....
@@ -1211,7 +1214,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
         bool isOKB = GetDistanceToPoint(rightVisualCalculated, rightWMPolarPoint, vision);
         if(isOKA== false || isOKB ==false)
         {
-            debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+            #if DEBUG_VISION_VERBOSITY > 0
+                debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+            #endif
             #if TARGET_OS_IS_WINDOWS
                 qDebug() << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
             #endif
