@@ -334,8 +334,15 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //qDebug() << "PREclassifyCandidates";
 
     //Prep object candidates for line detection
+    std::vector< ObjectCandidate > HorizontalLineCandidates1;
+    std::vector< ObjectCandidate > HorizontalLineCandidates2;
+    std::vector< ObjectCandidate > HorizontalLineCandidates3;
     std::vector< ObjectCandidate > HorizontalLineCandidates;
     std::vector< ObjectCandidate > VerticalLineCandidates;
+    std::vector< TransitionSegment > LeftoverPoints1;
+    std::vector< TransitionSegment > LeftoverPoints2;
+    std::vector< TransitionSegment > LeftoverPoints3;
+
     std::vector< TransitionSegment > LeftoverPoints;
     std::vector< ObjectCandidate > LineCandidates;
     validColours.clear();
@@ -345,9 +352,15 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //qDebug() << "PRE-ROBOT";
     method = Vision::PRIMS;
 
-    HorizontalLineCandidates = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings*3, 0.001, 10000, 4, LeftoverPoints);
-    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,4,LeftoverPoints);
-
+    HorizontalLineCandidates1 = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.000001, 10000000, 3, LeftoverPoints1);
+    HorizontalLineCandidates2 = vision.classifyCandidates(LeftoverPoints1, interpolatedBoarderPoints,validColours, spacings*2, 0.000001, 10000000, 3, LeftoverPoints2);
+    HorizontalLineCandidates3 = vision.classifyCandidates(LeftoverPoints2, interpolatedBoarderPoints,validColours, spacings*4, 0.000001, 10000000, 3, LeftoverPoints3);
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates1.begin(),HorizontalLineCandidates1.end());
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates2.begin(),HorizontalLineCandidates2.end());
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates3.begin(),HorizontalLineCandidates3.end());
+    LeftoverPoints.insert(LeftoverPoints.end(),LeftoverPoints3.begin(),LeftoverPoints3.end());
+    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,3,LeftoverPoints);
+    LeftoverPoints.clear();
     qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
     qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
     unsigned int no_unused = 0;

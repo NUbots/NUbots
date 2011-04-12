@@ -65,6 +65,8 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
 	lostCount = 0;
     timeSinceFieldObjectSeen = 0;
 
+    initSingleModel(67.5f, 0, mathGeneral::PI);
+
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
         debugLogName << DATA_DIR;
@@ -419,6 +421,18 @@ void Localisation::ClearAllModels()
         m_models[m].toBeActivated = false;
     }
     return;
+}
+
+void Localisation::initSingleModel(float x, float y, float theta)
+{
+
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    if(m_sensor_data)
+        debug_out  << "[" << m_sensor_data->CurrentTime << "] Initialising single model." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    
+    ClearAllModels();
+    setupModel(0,1,x,y,theta);
 }
 
 void Localisation::doInitialReset()

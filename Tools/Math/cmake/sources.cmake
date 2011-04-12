@@ -28,6 +28,7 @@ TransformMatrices.cpp
 UKF.cpp
 Rectangle.cpp
 FieldCalculations.cpp
+FIRFilter.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

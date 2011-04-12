@@ -68,6 +68,7 @@ class Localisation: public TimestampedData
         float timeSinceFieldObjectSeen;     // the time since a useful field object has been seen
 
         // Model Reset Functions
+        void initSingleModel(float x, float y, float theta);
         bool CheckGameState();
         void doInitialReset();
         void doSetReset();

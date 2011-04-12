@@ -92,21 +92,21 @@ void LSFittedLine::addPoints(vector<LinePoint*>& pointlist){
             pointlist[i]->inUse = true;
 
             //CHECK if point is a start or end point
-            if (pointlist[i]->x < leftPoint.x) {
-                leftPoint = *pointlist[i];
-            }
-            else if (pointlist[i]->x > rightPoint.x) {
-                rightPoint = *pointlist[i];
-            }
-            else if(pointlist[i]->x == leftPoint.x){
+            if(pointlist[i]->x == leftPoint.x){
                 if(pointlist[i]->y < leftPoint.y){
                     leftPoint = *pointlist[i];
                 }
             }
-            else if(pointlist[i]->x == rightPoint.x) {
+            else if (pointlist[i]->x < leftPoint.x) {
+                leftPoint = *pointlist[i];
+            }
+            if(pointlist[i]->x == rightPoint.x) {
                 if(pointlist[i]->y > rightPoint.y) {
                     rightPoint = *pointlist[i];
                 }
+            }
+            else if (pointlist[i]->x > rightPoint.x) {
+                rightPoint = *pointlist[i];
             }
         }
         if (numPoints < 2)
