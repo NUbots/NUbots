@@ -165,7 +165,9 @@ HEADERS += ui_mainwindow.h \
     ../Vision/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ../Tools/Math/StlVector.h \
-    ../Tools/Profiling/Profiler.h
+    ../Tools/Profiling/Profiler.h \
+    ../Tools/Math/FieldCalculations.h \
+    ../NUPlatform/NUSensors/OdometryEstimator.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -270,6 +272,8 @@ SOURCES += mainwindow.cpp \
     LUTGlDisplay.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
-    ../Tools/Profiling/Profiler.cpp
+    ../Tools/Profiling/Profiler.cpp \
+    ../Tools/Math/FieldCalculations.cpp \
+    ../NUPlatform/NUSensors/OdometryEstimator.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
