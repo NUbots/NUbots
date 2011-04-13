@@ -58,7 +58,7 @@ class FieldObjects: public TimestampedData
 
             };
 
-            enum MobileFieldObjectsID{
+            enum MobileFieldObjectID{
 
                 // Ball and Teammates and Opponents
                 FO_BALL 			= 0,
@@ -109,7 +109,10 @@ class FieldObjects: public TimestampedData
     std::vector<FieldObjects::StationaryFieldObjectID> GetPossibleObservationIds(float x, float y, float theta, 
                                                                    float headPan, float headTilt, 
                                                                    float FoV_x, float FoV_y);
-    
+    std::vector<FieldObjects::MobileFieldObjectID> GetPossibleMobileObservationIds(float x, float y, float heading,
+                                                                                float headYaw, float headPitch,
+                                                                                float FoV_x, float FoV_y);
+
             /*!
             @brief Output streaming operation.
             @param output The output stream.

@@ -267,7 +267,7 @@ std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObse
     float maxAngle = heading + headYaw + FoV_x / 2.0f; // Radians
     float minAngle = heading + headYaw - FoV_x / 2.0f; // Radians
     float minDistance = 0;      // cm
-    float maxDistance = 100;    // cm
+    float maxDistance = 200;    // cm
     
     // Create temporary variables for use inside loop.
     std::vector<StationaryFieldObjectID> visibleIds;
@@ -277,11 +277,15 @@ std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObse
     
     visibleIds.clear(); // Make sure list is empty.
     
+    std::vector<StationaryObject>::iterator stat_obj_iterator;
+
     // Check all objects.
-    for(int i=0; i < NUM_STAT_FIELD_OBJECTS; i++)
+    for(stat_obj_iterator = stationaryFieldObjects.begin();
+        stat_obj_iterator != stationaryFieldObjects.end();
+        stat_obj_iterator++)
 	{
         // Get position of current field object.
-        targetPosition = stationaryFieldObjects[i].getFieldLocation();
+        targetPosition = stat_obj_iterator->getFieldLocation();
         // Calculate expected measurments.
         distance = DistanceBetweenPoints(basePos,targetPosition);
         angle = AngleBetweenPoints(basePos,targetPosition);
@@ -289,7 +293,57 @@ std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObse
         expectedVisible = (angle > minAngle) and (angle < maxAngle) and (distance > minDistance) and (distance < maxDistance);
         // If expected to be visible put on list.
         if(expectedVisible)
-            visibleIds.push_back(i);
+            visibleIds.push_back(StationaryFieldObjectID(stat_obj_iterator->getID()));
+    }
+    return visibleIds;
+}
+
+/*! @brief Determines the IDs of mobile objects that should be visible for a given field position.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @param headYaw Additional yaw caused by head position relative to body.
+ @param headPitch Additional pitch caused by head position relative to body.
+ @param FoV_x Horizontal field of view of the observer.
+ @param FoV_y Vertical field of view of the observer.
+ @return A vector of IDs representing the stationary field objects expected to be visible.
+ */
+std::vector<FieldObjects::MobileFieldObjectID> FieldObjects::GetPossibleMobileObservationIds(float x, float y, float heading,
+                                                                            float headYaw, float headPitch,
+                                                                            float FoV_x, float FoV_y)
+{
+    // Calculate limits.
+    // Note: These limits assume that the camera is flat horizontally.
+    float maxAngle = heading + headYaw + FoV_x / 2.0f; // Radians
+    float minAngle = heading + headYaw - FoV_x / 2.0f; // Radians
+    float minDistance = 0;      // cm
+    float maxDistance = 200;    // cm
+
+    // Create temporary variables for use inside loop.
+    std::vector<MobileFieldObjectID> visibleIds;
+    Vector2<float> basePos(x,y), targetPosition;
+    float distance, angle;
+    bool expectedVisible;
+
+    visibleIds.clear(); // Make sure list is empty.
+
+    std::vector<MobileObject>::iterator stat_obj_iterator;
+
+    // Check all objects.
+    for(stat_obj_iterator = mobileFieldObjects.begin();
+        stat_obj_iterator != mobileFieldObjects.end();
+        stat_obj_iterator++)
+        {
+        // Get position of current field object.
+        targetPosition = stat_obj_iterator->getEstimatedFieldLocation();
+        // Calculate expected measurments.
+        distance = DistanceBetweenPoints(basePos,targetPosition);
+        angle = AngleBetweenPoints(basePos,targetPosition);
+        // Check if within limits.
+        expectedVisible = (angle > minAngle) and (angle < maxAngle) and (distance > minDistance) and (distance < maxDistance);
+        // If expected to be visible put on list.
+        if(expectedVisible)
+            visibleIds.push_back(MobileFieldObjectID(stat_obj_iterator->getID()));
     }
     return visibleIds;
 }
