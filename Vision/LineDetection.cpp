@@ -310,7 +310,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
 
     prof.split("SAM");
 
-    debug << prof;
+    //debug << prof;
     /*OUTPUT FOR DEBUGGING*/
     /*
     qDebug() << "printing to file";
