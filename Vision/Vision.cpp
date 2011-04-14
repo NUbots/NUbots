@@ -148,7 +148,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Vision::starting the save images loop." << endl;
         #endif
-        m_saveimages_thread->startLoop();
+        m_saveimages_thread->signal();
     }
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Generating Horizon Line: " <<endl;

@@ -85,7 +85,7 @@ ifeq ($(SYSTEM), Linux)
 	NPROCS := $(shell grep -c ^processor /proc/cpuinfo)
 endif
 ifeq ($(SYSTEM), Darwin)
-	NPROCS := $(shell system_profiler SPHardwareDataType | awk '/Total Number Of Cores:/{print $$5}')
+	NPROCS := $(shell system_profiler SPHardwareDataType | awk '/Total Number/{print $$5*1.5}')
 endif
 MAKE_OPTIONS = --no-print-directory -j $(NPROCS)
 
@@ -180,6 +180,7 @@ endif
 
 NAOWebots:
 	@echo "Targetting NAOWebots";
+	@echo "Number of Processes: ${NPROCS}"
     ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(NAOWEBOTS_BUILD_DIR)/*)), )		## check if the project has already been configured
 		@set -e; \
 			echo "Configuring for first use"; \

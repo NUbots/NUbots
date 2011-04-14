@@ -305,8 +305,8 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     Profiler prof("SHANNON");
     prof.start();
 
-    SAM::initRules(2.0,2,3,5,12.0,0.999);
-    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, true);
+    SAM::initRules(2.0,2,3,3,12.0,0.999);
+    SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, false);
 
     prof.split("SAM");
 
@@ -1356,9 +1356,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
             bool isok = GetDistanceToPoint(*tempPoint, point, vision);
             if(isok)
             {
-                float x = point.x * cos(point.y) * cos (point.z);
-                float y = point.x * sin(point.y) * cos (point.z);
                 #if TARGET_OS_IS_WINDOWS
+                    float x = point.x * cos(point.y) * cos (point.z);
+                    float y = point.x * sin(point.y) * cos (point.z);
                     qDebug() << x <<"," << y <<"," << usedLines[i];
                 #endif
             }
@@ -1405,7 +1405,7 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 			CommonX = 	(int)((fieldLines[LineIDStart].getYIntercept() - fieldLines[LineIDCheck].getYIntercept()) / 
 					(fieldLines[LineIDCheck].getGradient() - fieldLines[LineIDStart].getGradient()));
 			//Check if they intersect on the screen.. (or near enough..)
-			if (!CommonX > 0 && CommonX < IMAGE_WIDTH) continue;
+			if (!(CommonX > 0 && CommonX < IMAGE_WIDTH)) continue;
 			//This should be on the screen, so let's work out the Y co-ords;
 			//It doesn't matter which line we use to call the point, however for ease, use the one with the best slope...
 			if (fieldLines[LineIDStart].getGradient() < 1 || fieldLines[LineIDStart].getGradient() > -1)

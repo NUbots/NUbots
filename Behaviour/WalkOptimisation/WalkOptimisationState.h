@@ -25,6 +25,8 @@
 #include "Behaviour/BehaviourState.h"
 #include "WalkOptimisationProvider.h"
 
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/Jobs/JobList.h"
@@ -32,6 +34,8 @@
 #include "nubotconfig.h"
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 
 class WalkOptimisationState : public BehaviourState
 {
