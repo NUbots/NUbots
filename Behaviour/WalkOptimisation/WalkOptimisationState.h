@@ -34,6 +34,8 @@
 #include "nubotconfig.h"
 #include "debug.h"
 #include "debugverbositybehaviour.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
+#include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 
 class WalkOptimisationState : public BehaviourState
 {

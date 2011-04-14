@@ -44,7 +44,7 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
         debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
     }
 #endif
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "TcpPort::TcpPort(" << portnumber << ")" << endl;
 #endif
     m_port_number = portnumber;
@@ -70,7 +70,7 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
     m_broadcast_address.sin_addr.s_addr = htonl(INADDR_BROADCAST);     // automatically fill with my local Broadcast IP
     memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
     
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "TcpPort::TcpPort(). Binding socket." << endl;
 #endif
     if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
@@ -107,7 +107,7 @@ TcpPort::~TcpPort()
  */
 void TcpPort::run()
 {
-#if DEBUG_NUSYSTEM_VERBOSITY > 4
+#if DEBUG_NETWORK_VERBOSITY > 4
     debug << "TcpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
@@ -127,10 +127,10 @@ void TcpPort::run()
         #endif
         if ( localnumBytes != -1 && local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
         {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
-            #if DEBUG_NUSYSTEM_VERBOSITY > 3
+            #if DEBUG_NETWORK_VERBOSITY > 3
                 debug << "TcpPort::run()." << m_port_number <<" Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
             #endif
-            #if DEBUG_NUSYSTEM_VERBOSITY > 4
+            #if DEBUG_NETWORK_VERBOSITY > 4
                 debug << "TcpPort::run(). Received ";
                 for (int i=0; i<localnumBytes; i++)
                     debug << localdata[i];
@@ -167,7 +167,7 @@ network_data_t TcpPort::receiveData()
         m_has_data = false;
     }
     pthread_mutex_unlock(&m_socket_mutex);
-    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+    #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "TCP Recieved: " << netdata.size;
     #endif
     return netdata;
@@ -180,12 +180,12 @@ void TcpPort::sendData(network_data_t netdata)
     pthread_mutex_lock(&m_socket_mutex);
     if (m_clientSockfd == -1)
     {   
-        #if DEBUG_NUSYSTEM_VERBOSITY > 4
+        #if DEBUG_NETWORK_VERBOSITY > 4
         debug << "TcpPort::sendData(). No connected client "<< endl;
         #endif
         return;
     }
-    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+    #if DEBUG_NETWORK_VERBOSITY > 4
         debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
 
         //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
@@ -196,7 +196,7 @@ void TcpPort::sendData(network_data_t netdata)
     #else
         localnumBytes = write(m_clientSockfd, netdata.data, netdata.size);
     #endif
-    #if DEBUG_NUSYSTEM_VERBOSITY > 4
+    #if DEBUG_NETWORK_VERBOSITY > 4
         if(localnumBytes < 0)
             debug << "TcpPort::sendData(). Sending Error "<< endl;
     #endif
@@ -244,7 +244,9 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 
 void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
 {
+    #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "Sending worldmodel packet" << endl;
+	#endif
     network_data_t netdata;
     network_data_t sizedata;
     stringstream buffer;
