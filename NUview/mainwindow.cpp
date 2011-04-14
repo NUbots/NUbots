@@ -535,7 +535,7 @@ void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
     const QList<QHostAddress> &addresses = hostInfo.addresses();
 
     if (hostInfo.error() != QHostInfo::NoError) {
-        qWarning(QString("Lookup failed: %1").arg(hostInfo.errorString()).toAscii());
+        qWarning("Lookup failed: %s", hostInfo.errorString().toAscii().constData());
         return;
     }
 
