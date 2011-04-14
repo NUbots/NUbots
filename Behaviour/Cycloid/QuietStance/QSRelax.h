@@ -29,15 +29,12 @@
 #include "Infrastructure/NUData.h"
 class QSBallisticController;
 
-#include <boost/circular_buffer.hpp>
-
 class QSRelax : public BehaviourState
 {
 public:
     QSRelax(const NUData::id_t& joint, const QSBallisticController* parent);
     ~QSRelax();
     
-    float getTargetEstimate();
 protected:
     void doState();
     BehaviourState* nextState();
@@ -47,8 +44,6 @@ private:
     const QSBallisticController* m_parent;
     double m_time_in_state, m_previous_time;
     
-    boost::circular_buffer<float> m_target_estimate_buffer;
-    float m_target_estimate;
     float m_target_calibration;
 };
 

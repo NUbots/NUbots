@@ -47,7 +47,7 @@ QSCatch::QSCatch(const NUData::id_t& joint, const QSBallisticController* parent)
     m_catch_issued = false;
     m_finish_time = 0;
     
-    m_strength = 0.75;
+    m_strength = 1.00;
     m_catch_duration = 280;
     m_tonic_duration = 150;
     m_catch_duration_variance = 50;
@@ -66,8 +66,9 @@ void QSCatch::doState()
     {
         float currenttarget;                        // we use the currenttarget as the start point of the motion curve for maximal smoothness
         m_data->getTarget(m_joint, currenttarget);
-        float target = m_parent->getTargetEstimate();
-        target += m_strength*(target - currenttarget);
+        float targetestimate = m_parent->getTargetEstimate();
+        float target = -0.025 + targetestimate;
+        target += m_strength*(targetestimate - currenttarget);
         
         float total_duration = normalDistribution(m_catch_duration, m_catch_duration_variance);
         float tone_duration = normalDistribution(m_tonic_duration, (m_tonic_duration/m_catch_duration)*m_catch_duration_variance);

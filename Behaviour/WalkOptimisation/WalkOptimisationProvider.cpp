@@ -64,7 +64,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     #endif
     loadId();
     loadWayPoints();
-    loadParameters("NBWalkStart");
+    loadParameters("ALWalkStart");
     initOptimiser();
 
     if (not m_optimiser)

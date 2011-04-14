@@ -32,6 +32,7 @@
 #include "debugverbositybehaviour.h"
 
 #include <cmath>
+#include <numeric>
 
 QSBallisticController::QSBallisticController(const NUData::id_t& joint)
 {
@@ -44,6 +45,9 @@ QSBallisticController::QSBallisticController(const NUData::id_t& joint)
     m_catch = new QSCatch(joint, this);
     
     m_initialised = false;
+    
+    m_target_estimate = 0;
+    m_target_estimate_buffer = boost::circular_buffer<float>(300, 0);        // assume the pitch starts at zero
     
     m_state = m_delay;
 }
@@ -61,25 +65,37 @@ QSBallisticController::~QSBallisticController()
 void QSBallisticController::doStateCommons()
 {
     if (not m_initialised)
-    {
+    {   // we need a special initialisation so the m_position is set to the proper value the first time
         Blackboard->Sensors->getPosition(m_joint, m_position);
         m_velocity = 0;
+        m_acceleration = 0;
         m_initialised = true;
     }
     else 
     {
-        float beta = 0.003;                     // this amount of filtering does introduce a significant time delay in the estimate
-        float alpha = 2*sqrt(beta/2) - beta/2;  // calculate alpha to give Kalman optimal damping (Painter, 1990)
+        // so im going to need to use an alpha-beta-gamma filter because I need the acceleration too :(
+        float beta = 0.005;
+        float alpha = 2*sqrt(beta/2) - beta/2;              // coefficents taken from (Arcasoy, 1997) (Painter, 1990)
+        float gamma = 0.3*alpha*beta/(2-alpha);              
         
-        float meas_p;
-        m_data->getPosition(m_joint, meas_p);
+        // Measure the position
+        float measuredposition;
+        m_data->getPosition(m_joint, measuredposition);
         double dt = (Blackboard->Sensors->CurrentTime - Blackboard->Sensors->PreviousTime)/1000;
         
-        float pred_p = m_position + dt*m_velocity;
-        m_position = pred_p + alpha*(meas_p - pred_p);
-        m_velocity = m_velocity + (beta/dt)*(meas_p - pred_p);
+        // Do the prediction
+        float predictedposition = m_position + m_velocity*dt + 0.5*m_acceleration*pow(dt,2);
+        float predictedvelocity = m_velocity + m_acceleration*dt;
+        float predictedacceleration = m_acceleration;
+        
+        // Update the estimates
+        float change = measuredposition - predictedposition;
+        m_position = predictedposition + alpha*change;
+        m_velocity = predictedvelocity + (beta/dt)*change;
+        m_acceleration = predictedacceleration + (gamma/(2*pow(dt,2)))*change;
+        
+        updateTargetEstimate();
     }
-
 }
 
 /*! @brief Returns the relax state */
@@ -103,7 +119,8 @@ bool QSBallisticController::relaxed() const
 /*! @brief Returns the current estimate of where the controller needs to be to produce zero velocity */
 float QSBallisticController::getTargetEstimate() const
 {
-    return m_relax->getTargetEstimate();
+    return 0;
+    return m_target_estimate;
 }
 
 /*! @brief Returns the filtered angular position */
@@ -118,5 +135,41 @@ float QSBallisticController::getVelocity() const
     return m_velocity;
 }
 
+/*! @brief Returns the filtered angular acceleration */
+float QSBallisticController::getAcceleration() const
+{
+    return m_acceleration;
+}
 
+/*! @brief Returns the current guess of the torque */
+float QSBallisticController::getTorque() const
+{
+    float torque;
+    if (m_data->getTorque(m_joint, torque))
+        return torque;
+    else 
+        return 0;
+}
+
+/*! @brief Update the target esimtate */
+void QSBallisticController::updateTargetEstimate()
+{
+    float m = 2.8;
+    float g = 9.81;
+    float h = 0.25;
+    float o = -0.02;
+    float b = 7.0;
+    float K = 1.0;
+    
+    float u, v, a, t;
+    u = getPosition();
+    v = getVelocity();
+    a = getAcceleration();
+    t = getTorque();
+    
+    float currentestimate = u - asin((m*pow(h,2)*a + b*v - K*t)/(m*g*h));
+    m_target_estimate_buffer.push_back(currentestimate);
+    
+    m_target_estimate = accumulate(m_target_estimate_buffer.begin(), m_target_estimate_buffer.end(), 0.0f)/m_target_estimate_buffer.size();
+}
 

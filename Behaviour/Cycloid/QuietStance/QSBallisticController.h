@@ -39,6 +39,8 @@ class QSDelay;
 class QSRelax;
 class QSCatch;
 
+#include <boost/circular_buffer.hpp>
+
 class QSBallisticController : public BehaviourFSMState
 {
 public:
@@ -54,6 +56,10 @@ public:
     float getTargetEstimate() const;
     float getPosition() const;
     float getVelocity() const;
+    float getAcceleration() const;
+    float getTorque() const;
+    
+    void updateTargetEstimate();
 protected:
     void doStateCommons();
 private:
@@ -65,6 +71,10 @@ private:
     bool m_initialised;         // a flag to indicate whether the position and velocity have been initialised
     float m_position;           // filtered angular position of the joint under control
     float m_velocity;           // filtered angular velocity of the joint under control
+    float m_acceleration;       // filtered angular acceleration of the joint under control
+    
+    boost::circular_buffer<float> m_target_estimate_buffer;
+    float m_target_estimate;
 };
 
 #endif
