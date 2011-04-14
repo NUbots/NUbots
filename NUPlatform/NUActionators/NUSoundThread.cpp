@@ -72,7 +72,7 @@ void NUSoundThread::run()
         waitForCondition();
         // ------------------------------------------------------------------------------------------------------------------------------------------
         debug << "NUSoundThread Processing: " << m_player_command + m_sound_dir + m_queue.front() << endl;
-        int err = system((m_player_command + m_sound_dir + m_queue.front()).c_str());
+        err = system((m_player_command + m_sound_dir + m_queue.front()).c_str());
         m_queue.pop_front();
         // ------------------------------------------------------------------------------------------------------------------------------------------
     } 
