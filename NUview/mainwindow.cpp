@@ -29,6 +29,8 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
+#include "OfflineLocalisation.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -121,6 +123,9 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
+
+    OfflineLocalisation test(Localisation(),"test1", "test2");
+    qDebug() << "Offline Localisation Test Result: " << test.Run();
 }
 
 MainWindow::~MainWindow()

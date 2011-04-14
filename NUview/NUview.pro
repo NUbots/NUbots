@@ -167,7 +167,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/StlVector.h \
     ../Tools/Profiling/Profiler.h \
     ../Tools/Math/FieldCalculations.h \
-    ../NUPlatform/NUSensors/OdometryEstimator.h
+    ../NUPlatform/NUSensors/OdometryEstimator.h \
+    OfflineLocalisation.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -274,6 +275,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../Tools/Profiling/Profiler.cpp \
     ../Tools/Math/FieldCalculations.cpp \
-    ../NUPlatform/NUSensors/OdometryEstimator.cpp
+    ../NUPlatform/NUSensors/OdometryEstimator.cpp \
+    OfflineLocalisation.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
