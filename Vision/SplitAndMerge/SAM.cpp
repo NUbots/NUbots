@@ -10,7 +10,7 @@ using std::vector;
 vector<LinePoint*> SAM::noisePoints;
 unsigned int SAM::noFieldLines;
 unsigned int SAM::MAX_LINES, SAM::MAX_POINTS, SAM::MIN_POINTS_OVER, SAM::MIN_POINTS_TO_LINE, SAM::MIN_POINTS_TO_LINE_FINAL, SAM::SPLIT_NOISE_ITERATIONS;
-double SAM::MAX_END_POINT_DIFF, SAM::MIN_LINE_R2_FIT, SAM::SPLIT_DISTANCE;
+double SAM::MAX_END_POINT_DIFF, SAM::MIN_LINE_R2_FIT, SAM::SPLIT_DISTANCE, SAM::MAX_LINE_MSD;
 //ofstream* SAM::debug_out;
 /*
 std::vector<LinePoint*> SAM::linePoints;
@@ -97,6 +97,7 @@ void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int
     MIN_POINTS_TO_LINE = MPTL;
     MIN_POINTS_TO_LINE_FINAL = MPTLF;
     MIN_LINE_R2_FIT = MLRF;
+    MAX_LINE_MSD = 20;
     MAX_POINTS = 500;
     MAX_LINES = 15;
     SPLIT_NOISE_ITERATIONS = 1;
@@ -234,7 +235,7 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
     findFurthestPoint(*line, points_over, greatest_point);
 
     //if num points over threshold > limit -> split at greatest distance point.
-    if(points_over >= MIN_POINTS_OVER) {
+    if((unsigned int)points_over >= MIN_POINTS_OVER) {
         //there are enough points distant to justify a split
         vector<LinePoint*> left;
         vector<LinePoint*> right;
@@ -319,7 +320,8 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
     //Locals
     vector<LSFittedLine*> stack;
     stack.clear();
-    int furthest_point, points_over;
+    int furthest_point;
+    int points_over;
     vector<LinePoint*> left, right;
 
     LSFittedLine* tempLine = new LSFittedLine();
@@ -346,7 +348,7 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
         findFurthestPoint(*tempLine, points_over, furthest_point);
 
         //Options
-        if(points_over >= MIN_POINTS_OVER) {
+        if((unsigned int)points_over >= MIN_POINTS_OVER) {
             //See if separation is an option
             if(separateLS(left, right, tempLine->getPoints()[furthest_point], *tempLine)) {
                 //qDebug() << "separating worked";
@@ -739,6 +741,7 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
 
 
     //END POINT METHOD
+
     bool endPointsGood;
 
     //find outermost end points x vals
@@ -763,11 +766,12 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
     endPointsGood = (fabs(leftY1-leftY2) <= MAX_END_POINT_DIFF) && (fabs(rightY1-rightY2) <= MAX_END_POINT_DIFF);
 
 
-    //R2TLS
+    //R2TLS and MSD
     Vector2<double> results = line1.combinedR2TLSandMSD(line2);
-    bool r2good = (results.x >= MIN_LINE_R2_FIT);
+    bool R2TLS_is_OK = (results.x >= MIN_LINE_R2_FIT);
+    bool MSD_is_OK = (results.y <= MAX_LINE_MSD);
 
-    return endPointsGood && r2good;
+    return endPointsGood && R2TLS_is_OK && MSD_is_OK;
 
 
     //double angle = fabs(line1.getAngle() - line2.getAngle());
@@ -843,4 +847,5 @@ bool SAM::convertLinesEndPoints(vector<LSFittedLine *> &lines, Vision *vision, L
         linedetector->GetDistanceToPoint(*righttrans, relativePoint, vision);
         righttrans->y = relativePoint[0] * sin(relativePoint[1]) * cos(relativePoint[2]);
     }
+    return true;
 }

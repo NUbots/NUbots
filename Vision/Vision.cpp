@@ -247,11 +247,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
             {
                 GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
             {
                 GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
             }
@@ -477,7 +477,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
     if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
     {
-        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+        //m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
     }
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
