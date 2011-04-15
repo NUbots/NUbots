@@ -247,11 +247,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
             {
                 GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
             {
                 GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
             }
