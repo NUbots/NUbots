@@ -160,7 +160,7 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
             m_odomTurn = odo[2];
         }
         // perform odometry update and change the variance of the model
-        doTimeUpdate((-m_odomForward), m_odomLeft, m_odomTurn);
+        doTimeUpdate(m_odomForward, m_odomLeft, m_odomTurn);
         ProcessObjects();
     #endif
 
