@@ -666,7 +666,7 @@ void NUKick::doKick()
         case RETRACT:
             {
                 done = LiftKickingLeg(m_kickingLeg, 1.5f);
-                BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
+                //BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -1607,7 +1607,7 @@ bool NUKick::LowerLeg(legId_t p_kickingLeg, float speed)
             #endif
         }
 
-        if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0) or kickingLegContact)
+        if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
         {
             m_stateCommandGiven = false;
             return true;
