@@ -53,7 +53,7 @@ ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, a
     m_al_motion->setMotionConfig(m_al_config);
     
     // load and init the walk parameters
-    m_walk_parameters.load("ALWalkCrab");
+    m_walk_parameters.load("ALWalkNew");
     initALConfig();
     m_last_enabled_time = 0;
 }
