@@ -155,6 +155,8 @@ void NUbot::createErrorHandling()
         debug << "NUbot::createErrorHandling()." << endl;
     #endif
     #ifndef TARGET_OS_IS_WINDOWS
+        signal(SIGINT, terminationHandler);
+        signal(SIGTERM, terminationHandler);
         signal(SIGILL, terminationHandler);
         signal(SIGSEGV, terminationHandler);
         signal(SIGBUS, terminationHandler); 
