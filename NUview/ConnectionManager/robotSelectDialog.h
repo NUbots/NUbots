@@ -1,9 +1,14 @@
 #ifndef ROBOTSELECTDIALOG_H
 #define ROBOTSELECTDIALOG_H
 
+class BonjourProvider;
+class NUHostInfo;
+
 #include <QDialog>
-#include "bonjourrecord.h"
 #include <QHostInfo>
+#include <string>
+#include <list>
+using namespace std;
 
 class QDialogButtonBox;
 class QPushButton;
@@ -11,29 +16,31 @@ class QLabel;
 class QTreeWidget;
 class QTreeWidgetItem;
 
-class BonjourServiceBrowser;
-class BonjourServiceResolver;
-
-class robotSelectDialog : public QDialog
+class RobotSelectDialog : public QDialog
 {
 Q_OBJECT
 public:
-    robotSelectDialog(QWidget * parent = 0, const QString& service = QString());
-    BonjourRecord getBonjourHost(){return m_selectedHost;};
+    RobotSelectDialog(QWidget* parent = 0, BonjourProvider* provider = 0);
+    ~RobotSelectDialog();
+    
+    NUHostInfo getSelectedHost();
+    vector<NUHostInfo>& getSelectedHosts();
+    
 private slots:
-    void updateRecords(const QList<BonjourRecord> &list);
-    void enableConnectButton();
+    void populateTree();
     void saveSelected();
-    void refresh();
 private:
-    QPushButton *connectButton;
-    QPushButton *cancelButton;
-    QDialogButtonBox *buttonBox;
-
-    QString m_service;
-    QTreeWidget *treeWidget;
-    BonjourServiceBrowser *bonjourBrowser;
-    BonjourRecord m_selectedHost;
+    void addService(const string& service, list<NUHostInfo>& hosts);
+    
+    void enableConnectButton();
+private:
+    BonjourProvider* m_bonjour;					//!< a pointer to the bonjour provider
+    vector<NUHostInfo> m_selected_hosts;		//!< a list of the currently selected hosts
+    
+    QPushButton* m_connect_button;
+    QPushButton* m_cancel_button;
+    QDialogButtonBox* m_button_box;
+    QTreeWidget* m_tree;
 };
 
 #endif // ROBOTSELECTDIALOG_H

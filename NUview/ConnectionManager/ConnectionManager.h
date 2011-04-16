@@ -25,9 +25,12 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
-class BonjourServiceResolver;
+class BonjourProvider;
+class NUHostInfo;
 
 #include <QtGui>
+#include <vector>
+using namespace std;
 
 class ConnectionManager : public QWidget
 {
@@ -35,17 +38,19 @@ class ConnectionManager : public QWidget
 public:
     ConnectionManager(QWidget* parent);
     ~ConnectionManager();
-    
-private:
-    void drawStatus(const QColor& colour);
 
+signals:
+    void newHost();
 private slots:
     void onListButton();
     void onInputFinished();
     void onVisionChecked();
     void onLocalisationChecked();
     void onSensorsChecked();
-    
+
+private:
+    void drawStatus(const QColor& colour);
+	void onHostUpdated();    
 private:
     QHBoxLayout* m_layout;
     QPushButton* m_list_button;
@@ -54,7 +59,9 @@ private:
     QCheckBox* m_vision_checkbox;
     QCheckBox* m_localisation_checkbox;
     QCheckBox* m_sensors_checkbox;
-    BonjourServiceResolver* bonjourResolver;
+    
+    BonjourProvider* m_bonjour;
+    vector<NUHostInfo> m_current_hosts;
 };
 
 #endif

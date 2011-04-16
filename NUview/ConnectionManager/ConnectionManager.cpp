@@ -20,9 +20,14 @@
  */
 
 #include "ConnectionManager.h"
+#include "BonjourProvider.h"
+#include "RobotSelectDialog.h"
+#include "NUHostInfo.h"
 
-#include "robotSelectDialog.h"
-#include "bonjourserviceresolver.h"
+#include <algorithm>
+
+#include "debug.h"
+#include "Tools/Math/StlVector.h"
 
 
 ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
@@ -52,8 +57,13 @@ ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_vision_checkbox);
     m_layout->addWidget(m_localisation_checkbox);
     m_layout->addWidget(m_sensors_checkbox);
-    
     setLayout(m_layout);
+    
+    vector<string> types;
+    types.push_back("_nubot._tcp");
+    types.push_back("_workstation._tcp");
+    types.push_back("_ssh._tcp");
+    m_bonjour = new BonjourProvider(types);
 }
 
 ConnectionManager::~ConnectionManager()
@@ -70,9 +80,11 @@ ConnectionManager::~ConnectionManager()
     m_localisation_checkbox = 0;
     delete m_sensors_checkbox;
     m_sensors_checkbox = 0;
-    
     delete m_layout;
     m_layout = 0;
+    
+    delete m_bonjour;
+    m_bonjour = 0;
 }
 
 /*! @brief Draws a small circle in m_status_display 
@@ -92,26 +104,67 @@ void ConnectionManager::drawStatus(const QColor& colour)
 }
 
 /*! @brief Slot for the released() signal of m_list_button
+ 
+           This starts a RobotSelectDialog to enable the user to select robots to connect to.
+           This in turn triggers an update of the user_ip_input, and an emission of a signal
  */
 void ConnectionManager::onListButton()
 {
-    robotSelectDialog test(this, "_nuview._tcp");
-    if(test.exec())
+    RobotSelectDialog test(this, m_bonjour);
+    test.exec();
+    
+    m_current_hosts = test.getSelectedHosts();		// grab the selected hosts from the dialog
+    emit newHost();									// emit the signal that we have newHost(s)
+    
+    // now update the user input to reflect the selected host
+    string text;
+    if (not m_current_hosts.empty())
     {
-        BonjourRecord bonjourHost = test.getBonjourHost();
-        if (!bonjourResolver)
+        for (size_t i=0; i<m_current_hosts.size()-1; i++)
         {
-            bonjourResolver = new BonjourServiceResolver(this);
-            //connect(bonjourResolver, SIGNAL(bonjourRecordResolved(const QHostInfo &, int)), this, SLOT(PrintConnectionInfo(const QHostInfo &, int)));
+            debug << "i " << endl;
+            text += m_current_hosts[i].getHostName() + ", ";
         }
-        bonjourResolver->resolveBonjourRecord(bonjourHost);
+        text += m_current_hosts.back().getHostName();
     }
+    m_user_ip_input->setText(text.c_str());
 }
 
 /*! @brief Slot for the returnPressed() signal of m_user_ip_input
  */
 void ConnectionManager::onInputFinished()
 {
+    stringstream userinput(m_user_ip_input->text().toStdString());
+    vector<string> hosts;
+    
+    // first split the user input using the commas
+    while (userinput.good())
+    {
+    	string temp;
+    	getline(userinput, temp, ',');
+        if (not temp.empty())				// I don't want empty hosts/ipaddresses
+        {
+            temp.erase(remove_if(temp.begin(), temp.end(), ::isspace), temp.end());
+            hosts.push_back(temp);
+        }
+    }
+    
+    m_current_hosts.clear();
+    for (size_t i=0; i<hosts.size(); i++)
+    {
+        // two options (a) the user has input an ip address (b) the user has input a hostname
+        if (isdigit(hosts[i][0]))
+            m_current_hosts.push_back(NUHostInfo("Noname", hosts[i]));
+        else
+        {	// if it is a hostname is the bonjour provider to resolve it
+            NUHostInfo info = m_bonjour->lookupHostName(hosts[i]);
+            if (not info.empty())
+                m_current_hosts.push_back(info);
+        }
+    }
+    
+    debug << "ConnectionManager::onInputFinished(): " << m_current_hosts << endl;
+    emit newHost();
 }
 
 /*! @brief Slot for the stateChanged() signal of m_vision_checkbox

@@ -1,95 +1,138 @@
+/*! @file RoboSelectDialog.h
+ 	@brief Declaration of NUView's RoboSelectDialog class to provide a little dialog to select a host.
+ 
+     @class NUHostInfo
+     @brief A class to display a little dialog to allow the selection of a host
+ 
+ 	@author Jason Kulk
+ 
+  Copyright (c) 2011 Jason Kulk
+
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "RobotSelectDialog.h"
+
+#include "BonjourProvider.h"
+#include "NUHostInfo.h"
+
 #include <QtGui>
-#include "robotSelectDialog.h"
-#include "bonjourservicebrowser.h"
-#include "bonjourserviceresolver.h"
-#include <QDebug>
 
-robotSelectDialog::robotSelectDialog(QWidget * parent, const QString& service): QDialog(parent)
+#include "debug.h"
+#include "Tools/Math/StlVector.h"
+
+RobotSelectDialog::RobotSelectDialog(QWidget * parent, BonjourProvider* provider): QDialog(parent)
 {
-    bonjourBrowser = new BonjourServiceBrowser(this);
-    treeWidget = new QTreeWidget(this);
-    QString serviceDisplay(service);
-    QStringList tempList = serviceDisplay.split('.');
-    if(!tempList.empty())
-    {
-        serviceDisplay = tempList.first();
-        serviceDisplay.remove('_');
-    }
-    treeWidget->setHeaderLabels(QStringList() << tr("Available %1 services").arg(serviceDisplay));
+    m_bonjour = provider;
+    connect(m_bonjour, SIGNAL(newBrowserInformation()), this, SLOT(populateTree()));		// connect the populate tree function to the new browser information signal 
+    																						// (ie the populate tree function will be called each time a new host is found)
+    m_tree = new QTreeWidget(this);
 
-    connect(bonjourBrowser, SIGNAL(currentBonjourRecordsChanged(const QList<BonjourRecord> &)),
-                this, SLOT(updateRecords(const QList<BonjourRecord> &)));
+    QStringList labels;
+    labels.append("Hosts");
+    labels.append("Addresses");
+    m_tree->setHeaderLabels(labels);
+    m_tree->setSelectionMode(QAbstractItemView::MultiSelection);
 
-    connectButton = new QPushButton(tr("Connect"));
-    connectButton->setDefault(true);
-    connectButton->setEnabled(false);
+    m_connect_button = new QPushButton(tr("Connect"));
+    m_connect_button->setDefault(true);
+    m_connect_button->setEnabled(false);
 
-    cancelButton = new QPushButton(tr("Cancel"));
+    m_cancel_button = new QPushButton(tr("Cancel"));
 
-    buttonBox = new QDialogButtonBox;
-    buttonBox->addButton(connectButton, QDialogButtonBox::AcceptRole);
-    buttonBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSelected()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    m_button_box = new QDialogButtonBox;
+    m_button_box->addButton(m_connect_button, QDialogButtonBox::AcceptRole);
+    m_button_box->addButton(m_cancel_button, QDialogButtonBox::RejectRole);
+    connect(m_button_box, SIGNAL(accepted()), this, SLOT(saveSelected()));
+    connect(m_button_box, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(m_button_box, SIGNAL(rejected()), this, SLOT(reject()));
 
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(treeWidget, 0, 0, 2, 2);
-//    mainLayout->addWidget(statusLabel, 2, 0, 1, 2);
-    mainLayout->addWidget(buttonBox, 3, 0, 1, 2);
+    mainLayout->addWidget(m_tree, 0, 0, 2, 2);
+    mainLayout->addWidget(m_button_box, 3, 0, 1, 2);
     setLayout(mainLayout);
 
     setWindowTitle(tr("Robot Selection"));
-    treeWidget->setFocus();
-    m_service = service;
-    refresh();
+    m_tree->setFocus();
+    
+    populateTree();
 }
 
-void robotSelectDialog::saveSelected()
+RobotSelectDialog::~RobotSelectDialog()
 {
-    QList<QTreeWidgetItem *> selectedItems = treeWidget->selectedItems();
-    if(selectedItems.length() > 0)
-    {
-        QTreeWidgetItem *item = selectedItems.at(0);
-        QVariant variant = item->data(1, Qt::UserRole);
-        m_selectedHost = variant.value<BonjourRecord>();
-    }
+    delete m_connect_button;
+    delete m_cancel_button;
+    delete m_button_box;
+    delete m_tree;				// Note that this will also delete each item in the tree
+}
+
+NUHostInfo RobotSelectDialog::getSelectedHost()
+{
+    if (not m_selected_hosts.empty())
+        return m_selected_hosts.front();
     else
-    {
-        m_selectedHost = BonjourRecord();
-    }
+        return NUHostInfo();
 }
 
-
-void robotSelectDialog::enableConnectButton()
+vector<NUHostInfo>& RobotSelectDialog::getSelectedHosts()
 {
-    connectButton->setEnabled(treeWidget->invisibleRootItem()->childCount() != 0);
+    return m_selected_hosts;
 }
 
-void robotSelectDialog::updateRecords(const QList<BonjourRecord> &list)
+void RobotSelectDialog::populateTree()
 {
-    treeWidget->clear();
-    treeWidget->setIconSize(QSize(36,36));
-    QIcon robotIcon(QString(":/icons/Robot-icon.png"));
-    foreach (BonjourRecord record, list) {
-        QVariant variant;
-        variant.setValue(record);
-        QTreeWidgetItem *processItem = new QTreeWidgetItem(treeWidget,
-                                                           QStringList() << record.serviceName);
-        processItem->setIcon(0,robotIcon);
-        processItem->setData(1, Qt::UserRole, variant);
-    }
-
-    if (treeWidget->invisibleRootItem()->childCount() > 0) {
-        treeWidget->invisibleRootItem()->child(0)->setSelected(true);
-    }
-    treeWidget->setSortingEnabled(true);
-    treeWidget->sortByColumn(0,Qt::AscendingOrder);
-    treeWidget->setSortingEnabled(false);
+    m_tree->clear();
+    
+    vector<string> services = m_bonjour->getServices();
+    vector<list<NUHostInfo> > hosts = m_bonjour->getHosts();
+    for (size_t i=0; i<services.size(); i++)
+    	addService(services[i], hosts[i]);
+    
+    m_tree->resizeColumnToContents(0);
     enableConnectButton();
 }
 
-void robotSelectDialog::refresh()
+void RobotSelectDialog::addService(const string& service, list<NUHostInfo>& hosts)
 {
-    bonjourBrowser->browseForServiceType(m_service);
+    QTreeWidgetItem* node = new QTreeWidgetItem(m_tree, QStringList() << service.c_str());
+    for (list<NUHostInfo>::iterator it = hosts.begin(); it != hosts.end(); ++it)
+    {
+        NUHostInfo info = *it;
+        QStringList text;			// a list of strings to display in the gui (name, address)
+        QVariant data;				// a data variable to associate with each item (the NUHostInfo)
+        
+        text.append(info.getHostName().c_str());
+        text.append(info.getAddress().c_str());
+    	data.setValue(info);
+        
+        QTreeWidgetItem* child = new QTreeWidgetItem(node, text);
+        child->setData(0, Qt::UserRole, data);
+    }
+    node->setExpanded(true);
+}
+
+void RobotSelectDialog::saveSelected()
+{
+    m_selected_hosts.clear();
+    
+    QList<QTreeWidgetItem*> selected_items = m_tree->selectedItems();
+    for (int i=0; i<selected_items.size(); i++)
+    	m_selected_hosts.push_back(selected_items.at(i)->data(0,Qt::UserRole).value<NUHostInfo>());
+}
+
+
+void RobotSelectDialog::enableConnectButton()
+{
+    m_connect_button->setEnabled(m_tree->invisibleRootItem()->childCount() != 0);
 }

@@ -1,132 +1,124 @@
-/*
-Copyright (c) 2007, Trenton Schulz
+/*! @file BonjourServiceResolver.cpp
+    @brief Implementation of NUView's BonjourServiceResolver class
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+    @author Jason Kulk
+ 
+ Copyright (c) 2011 Jason Kulk
+ 
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
- 1. Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
+#include "BonjourServiceResolver.h"
 
- 2. Redistributions in binary form must reproduce the above copyright notice,
-    this list of conditions and the following disclaimer in the documentation
-    and/or other materials provided with the distribution.
+#include "debug.h"
 
- 3. The name of the author may not be used to endorse or promote products
-    derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-#include <QtCore/QSocketNotifier>
-#include <QtNetwork/QHostInfo>
-#include <QTimer>
-
-#include "bonjourrecord.h"
-#include "bonjourserviceresolver.h"
-
-BonjourServiceResolver::BonjourServiceResolver(QObject *parent)
-    : QObject(parent), dnssref(0), bonjourSocket(0), bonjourPort(-1)
+/*! @brief Constructs a provider for a single service
+ 	@param iface the interface number
+ 	@param name the hostname
+ 	@param type the service type
+ 	@param domain the domain
+ */
+BonjourServiceResolver::BonjourServiceResolver(DNSServiceFlags flags, uint32_t iface, const char* name, const char* type, const char* domain)
 {
-    dnsResolveTimer = new QTimer();
+    initServiceResolve();
+    m_service_add = flags & kDNSServiceFlagsAdd;
+    startServiceResolve(iface, name, type, domain);
 }
 
+/*! @brief Destroys the resolver */
 BonjourServiceResolver::~BonjourServiceResolver()
 {
-    delete dnsResolveTimer;
-    cleanupResolve();
+    endServiceResolve();
 }
 
-void BonjourServiceResolver::cleanupResolve()
+/*! @brief Returns true if the service is new, false is the service has disappeared. */
+bool BonjourServiceResolver::isNewService()
 {
-    if (dnssref) {
-        DNSServiceRefDeallocate(dnssref);
-        dnssref = 0;
-        delete bonjourSocket;
-        bonjourPort = -1;
-    }
+    return m_service_add;
 }
 
-void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record)
+/*! @brief Returns the QHostInfo for the bonjour service we have resolved. */
+NUHostInfo& BonjourServiceResolver::getHostInfo()
 {
-    if (dnssref) {
-        qWarning("resolve in process, aborting");
-        return;
-    }
-    DNSServiceErrorType err = DNSServiceResolve(&dnssref, 0, 0,
-                                                record.serviceName.toUtf8().constData(),
-                                                record.registeredType.toUtf8().constData(),
-                                                record.replyDomain.toUtf8().constData(),
-                                                (DNSServiceResolveReply)bonjourResolveReply, this);
-    connect(dnsResolveTimer, SIGNAL(timeout()), this, SLOT(resolveTimeout()));
-    dnsResolveTimer->setSingleShot(true);
-    dnsResolveTimer->start(5000);
-    if (err != kDNSServiceErr_NoError) {
-        emit error(err);
-    } else {
-        int sockfd = DNSServiceRefSockFD(dnssref);
-        if (sockfd == -1) {
-            emit error(kDNSServiceErr_Invalid);
-        } else {
-            bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
-            connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
-        }
-    }
+    return m_info;
 }
 
-void BonjourServiceResolver::bonjourSocketReadyRead()
+/*! @brief Initialises the service resolver */
+void BonjourServiceResolver::initServiceResolve()
 {
-    DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
+    // each of these needs to be created each time a new service is found
+    m_ref = 0;
+    m_sockfd = -1;
+    m_notifier = 0;
+}
+
+/*! @brief Starts the resolving service. Effectively, onResolveResults is called sometime later when the resolve is completed.
+ 
+ 		   This is done using a QSocketNotifer to monitor activity on the socket used by the DNSServiceResolve.
+           When activity is observe DNSServiceProcessResult is called, which in turn calls the onResolveResults
+ 	
+ 	@param iface
+ 	@param name
+ 	@param type
+ 	@param domain
+ */
+void BonjourServiceResolver::startServiceResolve(uint32_t iface, const char* name, const char* type, const char* domain)
+{
+    DNSServiceErrorType err = DNSServiceResolve(&m_ref, 0, iface, name, type, domain, onResolveResults, this);
     if (err != kDNSServiceErr_NoError)
-        emit error(err);
-}
-
-
-void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags ,
-                                    quint32 , DNSServiceErrorType errorCode,
-                                    const char *, const char *hosttarget, quint16 port,
-                                    quint16 , const char *, void *context)
-{
-    BonjourServiceResolver *serviceResolver = static_cast<BonjourServiceResolver *>(context);
-    if (errorCode != kDNSServiceErr_NoError) {
-        emit serviceResolver->error(errorCode);
-        return;
-    }
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-        {
-            port =  0 | ((port & 0x00ff) << 8) | ((port & 0xff00) >> 8);
+        debug << "BonjourServiceResolver::startServiceResolve. DNSServiceResolve failed for " << name << " " << type << endl;
+    else
+    {
+        m_sockfd = DNSServiceRefSockFD(m_ref);
+        if (m_sockfd != -1)
+        {	// setup a notifier to call onResolveSocketRead every time the socket is read
+            m_notifier = new QSocketNotifier(m_sockfd, QSocketNotifier::Read, this);
+            connect(m_notifier, SIGNAL(activated(int)), this, SLOT(onSocketRead()));
         }
-#endif
-    serviceResolver->bonjourPort = port;
-    QString hostName = QString::fromUtf8(hosttarget);
-    if(hostName.endsWith('.'))
-    {
-        hostName.remove(hostName.size()-1,1);
-    }
-    QHostInfo::lookupHost(hostName,
-                          serviceResolver, SLOT(finishConnect(const QHostInfo &)));
-}
-
-void BonjourServiceResolver::finishConnect(const QHostInfo &hostInfo)
-{
-    if(dnssref && (bonjourPort != -1))
-    {
-        dnsResolveTimer->stop();
-        emit bonjourRecordResolved(hostInfo, bonjourPort);
-        QMetaObject::invokeMethod(this, "cleanupResolve", Qt::QueuedConnection);
     }
 }
 
-void BonjourServiceResolver::resolveTimeout()
+/*! @brief Ends the resolve service */
+void BonjourServiceResolver::endServiceResolve()
 {
-    qWarning("DNS Resolve timed out.");
-    cleanupResolve();
+    if (m_ref)
+    {
+        DNSServiceRefDeallocate(m_ref);
+        m_ref = 0;
+        m_sockfd = -1;
+        delete m_notifier;
+        m_notifier = 0;
+    }
 }
+
+/*! @brief A slot for the activated signal of the QSocketNotifier monitoring the DNSServiceResolve */
+void BonjourServiceResolver::onSocketRead()
+{
+    m_notifier->setEnabled(false);             
+    DNSServiceProcessResult(m_ref);
+}
+
+void BonjourServiceResolver::onLookupCompleted(const QHostInfo& info)
+{
+    if (info.error() == QHostInfo::NoError) 
+        m_info = NUHostInfo(info);
+    emit resolveCompleted(this);
+}
+void BonjourServiceResolver::onResolveResults(DNSServiceRef, DNSServiceFlags, uint32_t, DNSServiceErrorType, const char*, const char* hostname, uint16_t, uint16_t, const unsigned char*, void* context)
+{
+    QHostInfo::lookupHost(hostname, (QObject*) context, SLOT(onLookupCompleted(QHostInfo)));
+}
+
+

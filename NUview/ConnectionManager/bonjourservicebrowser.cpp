@@ -1,90 +1,151 @@
-/*
-Copyright (c) 2007, Trenton Schulz
+/*! @file BonjourServiceBrowser.cpp
+    @brief Implementation of NUView's BonjourServiceBrowser class
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+    @author Jason Kulk
+ 
+ Copyright (c) 2011 Jason Kulk
+ 
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
- 1. Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
+#include "BonjourServiceBrowser.h"
+#include "BonjourServiceResolver.h"
+#include "NUHostInfo.h"
 
- 2. Redistributions in binary form must reproduce the above copyright notice,
-    this list of conditions and the following disclaimer in the documentation
-    and/or other materials provided with the distribution.
+#include "debug.h"
 
- 3. The name of the author may not be used to endorse or promote products
-    derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-#include "bonjourservicebrowser.h"
-
-#include <QtCore/QSocketNotifier>
-
-BonjourServiceBrowser::BonjourServiceBrowser(QObject *parent)
-    : QObject(parent), dnssref(0), bonjourSocket(0)
+/*! @brief Constructs a browser for a single service type
+ 	@param servicetype the type of service (eg. '_workstation._tcp')
+ */
+BonjourServiceBrowser::BonjourServiceBrowser(const string& servicetype)
 {
+    m_service_type = servicetype;
+    initServiceBrowse();
+	startServiceBrowse();
 }
 
+/*! @brief Destroys the browser */
 BonjourServiceBrowser::~BonjourServiceBrowser()
 {
-    if (dnssref) {
-        DNSServiceRefDeallocate(dnssref);
-        dnssref = 0;
-    }
+    endServiceBrowse();
 }
 
-void BonjourServiceBrowser::browseForServiceType(const QString &serviceType)
+/*! @brief Returns the service type for this browser */
+string& BonjourServiceBrowser::getServiceType()
 {
-    DNSServiceErrorType err = DNSServiceBrowse(&dnssref, 0, 0, serviceType.toUtf8().constData(), 0,
-                                               bonjourBrowseReply, this);
-    if (err != kDNSServiceErr_NoError) {
-        emit error(err);
-    } else {
-        int sockfd = DNSServiceRefSockFD(dnssref);
-        if (sockfd == -1) {
-            emit error(kDNSServiceErr_Invalid);
-        } else {
-            bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
-            connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
-        }
-    }
+    return m_service_type;
 }
 
-void BonjourServiceBrowser::bonjourSocketReadyRead()
+/*! @brief Returns the list of hosts that provide m_service_type */
+list<NUHostInfo>& BonjourServiceBrowser::getHosts()
 {
-    DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
+    return m_hosts;
+}
+
+/*! @brief Initialises the browser */
+void BonjourServiceBrowser::initServiceBrowse()
+{
+    m_ref = 0;
+    m_sockfd = -1;
+    m_notifier = 0;
+    pthread_mutex_init(&m_hosts_mutex, 0);
+}
+
+/*! @brief Starts the browsing service. Effectively, everytime a new service is found or one is lost onResolveCompleted is called.
+ 
+           This is done using a long sequence of events. A QSocketNotifier is used to monitor activity on the socket used by the DNSServiceBrowse.
+ 		   When activity is observed, DNSServiceProcessResult is called, which in turn calls the callback onBrowseResults.
+           onBrowseResults then uses a BonjourServiceResolver to resolve the information into a QHostInfo. When the BonjourServiceResolver is
+           finished onResolveCompleted is called, and the resolver will now contain the ip address.
+ */
+void BonjourServiceBrowser::startServiceBrowse()
+{
+    DNSServiceErrorType err = DNSServiceBrowse(&m_ref, kDNSServiceFlagsBrowseDomains, 0, m_service_type.c_str(), 0, onBrowseResults, this);
     if (err != kDNSServiceErr_NoError)
-        emit error(err);
-}
-
-void BonjourServiceBrowser::bonjourBrowseReply(DNSServiceRef , DNSServiceFlags flags,
-                                               quint32 , DNSServiceErrorType errorCode,
-                                               const char *serviceName, const char *regType,
-                                               const char *replyDomain, void *context)
-{
-    BonjourServiceBrowser *serviceBrowser = static_cast<BonjourServiceBrowser *>(context);
-    if (errorCode != kDNSServiceErr_NoError) {
-        emit serviceBrowser->error(errorCode);
-    } else {
-        BonjourRecord bonjourRecord(serviceName, regType, replyDomain);
-        if (flags & kDNSServiceFlagsAdd) {
-            if (!serviceBrowser->bonjourRecords.contains(bonjourRecord))
-                serviceBrowser->bonjourRecords.append(bonjourRecord);
-        } else {
-            serviceBrowser->bonjourRecords.removeAll(bonjourRecord);
-        }
-        if (!(flags & kDNSServiceFlagsMoreComing)) {
-            emit serviceBrowser->currentBonjourRecordsChanged(serviceBrowser->bonjourRecords);
+        debug << "BonjourServiceBrowser::BonjourServiceBrowser. DNSServiceBrowse failed for " << m_service_type << ": " << err << endl;
+    else
+    {
+        m_sockfd = DNSServiceRefSockFD(m_ref);
+        if (m_sockfd != -1)
+        {	// setup a notifier to call onSocketRead every time the socket is read
+            m_notifier = new QSocketNotifier(m_sockfd, QSocketNotifier::Read, 0);
+            connect(m_notifier, SIGNAL(activated(int)), this, SLOT(onSocketRead()));
         }
     }
 }
+
+/*! @brief Ends the browse service. Deallocates the DNSServiceRef, and deletes the QSocketNotifier
+*/
+void BonjourServiceBrowser::endServiceBrowse()
+{
+    if (m_ref)
+    {
+        DNSServiceRefDeallocate(m_ref);
+        m_ref = 0;
+        m_sockfd = -1;
+        delete m_notifier;
+        m_notifier = 0;
+    }
+}
+
+/*! @brief A slot for the activated signal of the QSocketNotifier monitoring the DNSServiceBrowse socket. */
+void BonjourServiceBrowser::onSocketRead()
+{
+    m_notifier->setEnabled(false);
+    DNSServiceProcessResult(m_ref);
+    m_notifier->setEnabled(true);
+}
+
+/*! @brief The callback for the DNSServiceBrowse. This is the function where new services need to be added to the list. */
+void BonjourServiceBrowser::onBrowseResults(DNSServiceRef, DNSServiceFlags flags, uint32_t iface, DNSServiceErrorType, const char* name, const char* type, const char* domain, void* context)
+{
+    BonjourServiceBrowser* browser = static_cast<BonjourServiceBrowser*>(context);
+    BonjourServiceResolver* resolver = new BonjourServiceResolver(flags, iface, name, type, domain);
+    connect(resolver, SIGNAL(resolveCompleted(BonjourServiceResolver*)), browser, SLOT(onResolveCompleted(BonjourServiceResolver*)));
+}
+
+/*! @brief A slot for the BonjourServiceResolver created in onBrowseResults resolveCompleted signal
+ 	@param resolver a pointer to the resolver itself. Use the pointer to getHostInfo(). Also delete the resolver when finished
+ */
+void BonjourServiceBrowser::onResolveCompleted(BonjourServiceResolver* resolver)
+{
+    if (resolver->isNewService())
+        addHost(resolver->getHostInfo());
+    else
+        removeHost(resolver->getHostInfo());
+    delete resolver;
+    emit newBrowserInformation();
+}
+
+
+void BonjourServiceBrowser::addHost(NUHostInfo& info)
+{
+    pthread_mutex_lock(&m_hosts_mutex);
+    m_hosts.push_back(info);
+    m_hosts.unique();
+    pthread_mutex_unlock(&m_hosts_mutex);
+    
+    debug << "BonjourServiceBrowser::addHost to " << m_service_type << ": ";
+    for (list<NUHostInfo>::iterator it = m_hosts.begin(); it != m_hosts.end(); ++it)
+        debug << (*it);
+    debug << endl;
+}
+
+void BonjourServiceBrowser::removeHost(NUHostInfo& info)
+{
+    debug << "BonjourServiceBrowser::removeHost: " << info << endl;
+    m_hosts.remove(info);
+}
+

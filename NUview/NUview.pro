@@ -157,10 +157,10 @@ HEADERS += ui_mainwindow.h \
     ../Vision/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ConnectionManager/ConnectionManager.h \
-    ConnectionManager/bonjourIncludeDataTypes.h \
-    ConnectionManager/bonjourrecord.h \
-    ConnectionManager/bonjourservicebrowser.h \
-    ConnectionManager/bonjourserviceresolver.h \
+    ConnectionManager/BonjourProvider.h \
+    ConnectionManager/BonjourServiceBrowser.h \
+    ConnectionManager/BonjourServiceResolver.h \
+    ConnectionManager/NUHostInfo.h \
     ConnectionManager/robotSelectDialog.h
 SOURCES += mainwindow.cpp \
     main.cpp \
@@ -264,8 +264,9 @@ SOURCES += mainwindow.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ConnectionManager/ConnectionManager.cpp \
-    ConnectionManager/bonjourservicebrowser.cpp \
-    ConnectionManager/bonjourserviceresolver.cpp \
+    ConnectionManager/BonjourProvider.cpp \
+    ConnectionManager/BonjourServiceBrowser.cpp \
+    ConnectionManager/BonjourServiceResolver.cpp \
     ConnectionManager/robotSelectDialog.cpp
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
