@@ -21,16 +21,17 @@
 
 #include "OdometryEstimator.h"
 #include "nubotdataconfig.h"
+#include "debug.h"
 
 /*! @brief Constructor for OdometryEstimator class.
  */
 OdometryEstimator::OdometryEstimator()
 {
-    m_logging_enabled = false;
+    m_logging_enabled = true;
 
     // Tuning variables
-    m_minimum_support_foot_pressure = 0.75; // in Newtons.
-    m_turn_multiplier = 1.0f;   // Turn Gripping factor
+    m_minimum_support_foot_pressure = 1.0; // in Newtons. 0.75 initial (robot 214)
+    m_turn_multiplier = 1.2f;   // Turn Gripping factor
     m_x_multiplier = 1.0f;      // X Gripping factor
     m_y_multiplier = 1.0f;      // Y Gripping factor
 
@@ -57,20 +58,22 @@ OdometryEstimator::~OdometryEstimator()
  */
 void OdometryEstimator::IntialiseFile(std::string filename)
 {
-    m_odometry_log.open(filename.c_str());
-    if(m_odometry_log.is_open() and m_odometry_log.good())
+    m_odometry_log.open(filename.c_str(), std::fstream::out | std::fstream::trunc);
+    if(m_odometry_log.is_open())
     {
         m_odometry_log.clear();
         m_odometry_log << "GPS X, GPS Y, Compass,";
         m_odometry_log << "L Odom X, L Odom Y, L Odom Turn,";
         m_odometry_log << "R Odom X, R Odom Y, R Odom Turn,";
-        m_odometry_log << "L Force Sum, R Force Sum, Curr Support Leg,";
+        m_odometry_log << "L Force Sum, R Force Sum, Curr Support Leg";
         m_odometry_log << std::endl;
         m_logging_enabled = true;
+        debug << "Odometry log created sucessfully." << std::endl;
     }
     else
     {
         m_logging_enabled = false;
+        debug << "Odometry log creation failed." << std::endl;
     }
 }
 
@@ -89,7 +92,14 @@ void OdometryEstimator::WriteLogData(std::vector<float>& gps, float compass,
 {
     if(m_odometry_log.is_open() and m_odometry_log.good())
     {
-        m_odometry_log << gps[0] << "," << gps[1] << "," << compass;
+        if(gps.size() > 0)
+        {
+            m_odometry_log << gps[0] << "," << gps[1] << "," << compass;
+        }
+        else
+        {
+            m_odometry_log << "0,0,0";
+        }
         for(unsigned int n=0; n<leftOdom.size(); n++)
             m_odometry_log << "," << leftOdom[n];
         for(unsigned int n=0; n<rightOdom.size(); n++)
@@ -172,7 +182,7 @@ std::vector<float> OdometryEstimator::CalculateNextStep(const std::vector<float>
         result.resize(3,0.0f);
 
     // If external position data is available write to log.
-    if(m_logging_enabled and (gps.size() > 0))
+    if(m_logging_enabled)
     {
         WriteLogData(gps, compass, LOdom, ROdom, forceLeft, forceRight, currSupport);
     }
