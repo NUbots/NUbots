@@ -1,8 +1,5 @@
-/*! @file RoboSelectDialog.h
+/*! @file RobotSelectDialog.h
  	@brief Declaration of NUView's RoboSelectDialog class to provide a little dialog to select a host.
- 
-     @class NUHostInfo
-     @brief A class to display a little dialog to allow the selection of a host
  
  	@author Jason Kulk
  
@@ -32,6 +29,10 @@
 #include "debug.h"
 #include "Tools/Math/StlVector.h"
 
+/*! @brief Creates a RobotSelectDialog 
+ 	@param parent the parent Qt widget
+ 	@param provider the bonjour provider, this is used to get hosts from bonjour
+ */
 RobotSelectDialog::RobotSelectDialog(QWidget * parent, BonjourProvider* provider): QDialog(parent)
 {
     m_bonjour = provider;
@@ -69,6 +70,7 @@ RobotSelectDialog::RobotSelectDialog(QWidget * parent, BonjourProvider* provider
     populateTree();
 }
 
+/*! @brief Destroy the RobotSelectDialog */
 RobotSelectDialog::~RobotSelectDialog()
 {
     delete m_connect_button;
@@ -77,19 +79,13 @@ RobotSelectDialog::~RobotSelectDialog()
     delete m_tree;				// Note that this will also delete each item in the tree
 }
 
-NUHostInfo RobotSelectDialog::getSelectedHost()
-{
-    if (not m_selected_hosts.empty())
-        return m_selected_hosts.front();
-    else
-        return NUHostInfo();
-}
-
+/*! @brief Returns all of the currently selected hosts */
 vector<NUHostInfo>& RobotSelectDialog::getSelectedHosts()
 {
     return m_selected_hosts;
 }
 
+/*! @brief Populates m_tree with all of the hosts stored in each of m_bonjour's services */
 void RobotSelectDialog::populateTree()
 {
     m_tree->clear();
@@ -103,6 +99,10 @@ void RobotSelectDialog::populateTree()
     enableConnectButton();
 }
 
+/*! @brief Populates a node with all of the hosts that provide a single service 
+ 	@param service the name of the service
+ 	@param hosts the list of hosts
+ */
 void RobotSelectDialog::addService(const string& service, list<NUHostInfo>& hosts)
 {
     QTreeWidgetItem* node = new QTreeWidgetItem(m_tree, QStringList() << service.c_str());
@@ -122,6 +122,7 @@ void RobotSelectDialog::addService(const string& service, list<NUHostInfo>& host
     node->setExpanded(true);
 }
 
+/*! @brief Saves the selected hosts in the tree to m_selected_hosts. If no hosts are selected then m_selected_hosts will be empty. */
 void RobotSelectDialog::saveSelected()
 {
     m_selected_hosts.clear();
@@ -131,7 +132,7 @@ void RobotSelectDialog::saveSelected()
     	m_selected_hosts.push_back(selected_items.at(i)->data(0,Qt::UserRole).value<NUHostInfo>());
 }
 
-
+/*! @brief Enables the connect button */
 void RobotSelectDialog::enableConnectButton()
 {
     m_connect_button->setEnabled(m_tree->invisibleRootItem()->childCount() != 0);

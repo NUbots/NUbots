@@ -25,6 +25,9 @@
 
 #include "debug.h"
 
+/*! @brief Constructs a BonjourProvider over the specified services.
+ 	@param servicetypes the name of each of the services we want to monitor (eg. _workstation._tcp)
+ */
 BonjourProvider::BonjourProvider(const vector<string>& servicetypes)
 {
     m_service_names = servicetypes;
@@ -36,18 +39,24 @@ BonjourProvider::BonjourProvider(const vector<string>& servicetypes)
     }
 }
 
+/*! @brief Destructor for BonjourProvider */
 BonjourProvider::~BonjourProvider()
 {
     for (size_t i=0; i<m_services.size(); i++)
         delete m_services[i];
 }
 
-
+/* @brief Returns the names of the services we are monitoring */
 vector<string>& BonjourProvider::getServices()
 {
     return m_service_names;
 }
 
+/*! @brief Returns the lists of the hosts we have found
+ 			
+ 		   The hosts will be formatted as [serviceA, serviceB, .... , serviceN]
+           where each serviceI is a list [host0, host1, ...., hostM]
+ */
 vector<list<NUHostInfo> > BonjourProvider::getHosts()
 {
     vector<list<NUHostInfo> > hosts;
@@ -57,6 +66,12 @@ vector<list<NUHostInfo> > BonjourProvider::getHosts()
     return hosts;
 }
 
+/*! @brief Looks up a hostname, and attempts to get the ip address for that host
+ 	@param name the hostname we want the ip address
+ 
+ 	@return a NUHostInfo containing both the full hostname, and its ip address. If the hostname can
+ 	        not be resolved an empty NUHostInfo will be returned
+ */
 NUHostInfo BonjourProvider::lookupHostName(string& name)
 {
     vector<list<NUHostInfo> > hosts = getHosts();
@@ -71,7 +86,9 @@ NUHostInfo BonjourProvider::lookupHostName(string& name)
     return NUHostInfo();
 }
 
+/*! @brief A signal to indicate that a new host has been found. The idea is to connect this with an update of the gui */
 void BonjourProvider::onNewBrowserInformation()
 {
     emit newBrowserInformation();
 }
+

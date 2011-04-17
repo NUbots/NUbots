@@ -129,23 +129,18 @@ void BonjourServiceBrowser::onResolveCompleted(BonjourServiceResolver* resolver)
     emit newBrowserInformation();
 }
 
-
+/*! @brief Adds a host to m_hosts */
 void BonjourServiceBrowser::addHost(NUHostInfo& info)
 {
     pthread_mutex_lock(&m_hosts_mutex);
     m_hosts.push_back(info);
     m_hosts.unique();
     pthread_mutex_unlock(&m_hosts_mutex);
-    
-    debug << "BonjourServiceBrowser::addHost to " << m_service_type << ": ";
-    for (list<NUHostInfo>::iterator it = m_hosts.begin(); it != m_hosts.end(); ++it)
-        debug << (*it);
-    debug << endl;
 }
 
+/*! @brief Removes a host from m_hosts */
 void BonjourServiceBrowser::removeHost(NUHostInfo& info)
 {
-    debug << "BonjourServiceBrowser::removeHost: " << info << endl;
     m_hosts.remove(info);
 }
 

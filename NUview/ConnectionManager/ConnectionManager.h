@@ -26,7 +26,7 @@
 #define CONNECTIONMANAGER_H
 
 class BonjourProvider;
-class NUHostInfo;
+#include "NUHostInfo.h"
 
 #include <QtGui>
 #include <vector>
@@ -40,25 +40,14 @@ public:
     ~ConnectionManager();
 
 signals:
-    void newHost();
+    void newHosts(vector<NUHostInfo> hosts);
 private slots:
     void onListButton();
     void onInputFinished();
-    void onVisionChecked();
-    void onLocalisationChecked();
-    void onSensorsChecked();
-
-private:
-    void drawStatus(const QColor& colour);
-	void onHostUpdated();    
 private:
     QHBoxLayout* m_layout;
     QPushButton* m_list_button;
     QLineEdit* m_user_ip_input;
-    QLabel* m_status_display;
-    QCheckBox* m_vision_checkbox;
-    QCheckBox* m_localisation_checkbox;
-    QCheckBox* m_sensors_checkbox;
     
     BonjourProvider* m_bonjour;
     vector<NUHostInfo> m_current_hosts;

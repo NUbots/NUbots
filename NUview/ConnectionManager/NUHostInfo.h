@@ -32,8 +32,6 @@
 #include <string>
 #include <ostream>
 
-#include "debug.h"
-
 using namespace std;
 
 class NUHostInfo

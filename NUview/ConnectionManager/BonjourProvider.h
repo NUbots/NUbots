@@ -53,8 +53,8 @@ signals:
 private slots:
     void onNewBrowserInformation();
 private:
-    vector<string> m_service_names;
-    vector<BonjourServiceBrowser*> m_services;
+    vector<string> m_service_names;					//!< the names of the bonjour services we are interested in
+    vector<BonjourServiceBrowser*> m_services;		//!< a browser over each of the services in m_service_names
 };
 
 #endif

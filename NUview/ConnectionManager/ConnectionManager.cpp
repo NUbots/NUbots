@@ -29,7 +29,7 @@
 #include "debug.h"
 #include "Tools/Math/StlVector.h"
 
-
+/*! @brief Constructs a ConnectionManager */
 ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
 {
     setObjectName("Connection Manager");
@@ -40,23 +40,9 @@ ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
     m_user_ip_input = new QLineEdit("255.255.255.255");
     connect(m_user_ip_input, SIGNAL(returnPressed()), this, SLOT(onInputFinished()));
     
-    m_status_display = new QLabel();
-    drawStatus(Qt::green);
-    
-    m_vision_checkbox = new QCheckBox("Vision");
-    connect(m_vision_checkbox, SIGNAL(stateChanged()), this, SLOT(onVisionChecked()));
-    m_localisation_checkbox = new QCheckBox("Localisation");
-    connect(m_localisation_checkbox, SIGNAL(stateChanged()), this, SLOT(onLocalisationChecked()));
-    m_sensors_checkbox = new QCheckBox("Sensors");
-    connect(m_sensors_checkbox, SIGNAL(stateChanged()), this, SLOT(onSensorsChecked()));
-    
     m_layout = new QHBoxLayout();
     m_layout->addWidget(m_list_button);
     m_layout->addWidget(m_user_ip_input);
-    m_layout->addWidget(m_status_display);
-    m_layout->addWidget(m_vision_checkbox);
-    m_layout->addWidget(m_localisation_checkbox);
-    m_layout->addWidget(m_sensors_checkbox);
     setLayout(m_layout);
     
     vector<string> types;
@@ -66,41 +52,18 @@ ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
     m_bonjour = new BonjourProvider(types);
 }
 
+/*! @brief Destroys the ConnectionManager */
 ConnectionManager::~ConnectionManager()
 {
     delete m_list_button;
     m_list_button = 0;
     delete m_user_ip_input;
     m_user_ip_input = 0;
-    delete m_status_display;
-    m_status_display = 0;
-    delete m_vision_checkbox;
-    m_vision_checkbox = 0;
-    delete m_localisation_checkbox;
-    m_localisation_checkbox = 0;
-    delete m_sensors_checkbox;
-    m_sensors_checkbox = 0;
     delete m_layout;
     m_layout = 0;
     
     delete m_bonjour;
     m_bonjour = 0;
-}
-
-/*! @brief Draws a small circle in m_status_display 
- 	@param colour the fill colour of the circle
- */
-void ConnectionManager::drawStatus(const QColor& colour)
-{
-	QPixmap temp(21,21);
-    temp.fill(Qt::transparent);
-    QPainter p(&temp);
-    p.setRenderHint(QPainter::Antialiasing, true);
-    QBrush brush(colour);
-    p.setBrush(brush);
-    p.drawEllipse(3,3,15,15);
-
-    m_status_display->setPixmap(temp);
 }
 
 /*! @brief Slot for the released() signal of m_list_button
@@ -114,23 +77,22 @@ void ConnectionManager::onListButton()
     test.exec();
     
     m_current_hosts = test.getSelectedHosts();		// grab the selected hosts from the dialog
-    emit newHost();									// emit the signal that we have newHost(s)
+    emit newHosts(m_current_hosts);					// emit the signal that we have newHost(s)
     
     // now update the user input to reflect the selected host
     string text;
     if (not m_current_hosts.empty())
     {
         for (size_t i=0; i<m_current_hosts.size()-1; i++)
-        {
-            debug << "i " << endl;
             text += m_current_hosts[i].getHostName() + ", ";
-        }
         text += m_current_hosts.back().getHostName();
     }
     m_user_ip_input->setText(text.c_str());
 }
 
 /*! @brief Slot for the returnPressed() signal of m_user_ip_input
+ 
+ 		   That is when the user presses return on the QLineEdit we trigger an update of m_current_hosts and emit a signal
  */
 void ConnectionManager::onInputFinished()
 {
@@ -164,24 +126,6 @@ void ConnectionManager::onInputFinished()
     }
     
     debug << "ConnectionManager::onInputFinished(): " << m_current_hosts << endl;
-    emit newHost();
-}
-
-/*! @brief Slot for the stateChanged() signal of m_vision_checkbox
- */
-void ConnectionManager::onVisionChecked()
-{
-}
-
-/*! @brief Slot for the stateChanged() signal of m_localisation_checkbox
- */
-void ConnectionManager::onLocalisationChecked()
-{
-}
-
-/*! @brief Slot for the stateChanged() signal of m_sensors_checkbox
- */
-void ConnectionManager::onSensorsChecked()
-{
+    emit newHosts(m_current_hosts);
 }
 
