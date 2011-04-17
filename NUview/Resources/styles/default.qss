@@ -1,0 +1,4 @@
+QWidget {
+	font: 10pt;
+}
+
