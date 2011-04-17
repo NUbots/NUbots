@@ -1,4 +1,6 @@
 #include "Localisation.h"
+
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
@@ -54,6 +56,11 @@ const float Localisation::sdTwoObjectAngle = (float) 0.02; //Small! error in ang
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
+    m_sensor_data = Blackboard->Sensors;
+    m_objects = Blackboard->Objects;
+    m_game_info = Blackboard->GameInfo;
+    m_team_info = Blackboard->TeamInfo;
+    
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
 
