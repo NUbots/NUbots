@@ -20,6 +20,7 @@
 
 class QMdiArea;
 class QMdiSubWindow;
+class ConnectionManager;
 class LayerSelectionWidget;
 class WalkParameterWidget;
 class KickWidget;
@@ -30,8 +31,6 @@ class frameInformationWidget;
 class NUPlatform;
 class NUBlackboard;
 class NUviewIO;
-class BonjourServiceResolver;
-
 
 namespace Ui
 {
@@ -163,6 +162,7 @@ private:
     QToolBar *editToolBar;          //!< Instance of the edit toolbar
     QToolBar *navigationToolbar;    //!< Instance of the navigation toolbar
     QToolBar *windowDisplayToolbar; //!< Instance of the window display toolbar
+    QToolBar *connectionToolBar;	//!< Instance of the connection toolbar
 
 
     QAction *openAction;            //!< Instance of the open action
@@ -183,7 +183,6 @@ private:
     QAction *newLUTDisplayAction;   //!< Instance of new look up table display action.
 
     QAction *doBonjourTestAction;    //!< Instance of the do test Action
-    BonjourServiceResolver* bonjourResolver;
 
     LogFileReader LogReader;
 

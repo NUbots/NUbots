@@ -23,6 +23,7 @@ NAO_BUILD_DIR = Build/NAO
 NAOWEBOTS_BUILD_DIR = Build/NAOWebots
 CYCLOID_BUILD_DIR = Build/Cycloid
 BEAR_BUILD_DIR = Build/Bear
+NUVIEW_BUILD_DIR = Build/NUView
 
 # Aldebaran build tools
 ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
@@ -87,7 +88,7 @@ endif
 ifeq ($(SYSTEM), Darwin)
 	NPROCS := $(shell system_profiler SPHardwareDataType | awk '/Total Number/{print $$5*1.5}')
 endif
-MAKE_OPTIONS = --no-print-directory -j $(NPROCS)
+MAKE_OPTIONS = --no-print-directory -j $(NPROCS) --quiet
 
 
 default_target: NAOWebots
@@ -387,7 +388,8 @@ NUView:
 	@set -e; \
 		cd $(CUR_DIR)/NUview; \
 		qmake -spec macx-g++; \
-		make all; \
+		make all $(MAKE_OPTIONS); \
+		echo "Completed"; \
 	
 NUViewConfig:
 	@echo "Configuring NUView Build"
