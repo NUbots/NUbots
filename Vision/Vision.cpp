@@ -148,7 +148,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Vision::starting the save images loop." << endl;
         #endif
-        m_saveimages_thread->startLoop();
+        m_saveimages_thread->signal();
     }
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Generating Horizon Line: " <<endl;
@@ -247,11 +247,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         ScanLine* tempScanLine = vertScanArea.getScanLine(i);
         for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
         {
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
             {
                 GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow );//|| tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
             {
                 GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
             }
@@ -280,6 +280,38 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     DetectLineOrRobotPoints(&horiScanArea, &LineDetector);
 
     //! Identify Field Objects
+
+    /**INCLUDED BY SHANNON**/
+
+        std::vector< ObjectCandidate > HorizontalLineCandidates;
+        std::vector< ObjectCandidate > VerticalLineCandidates;
+        std::vector< ObjectCandidate > LineCandidates;
+        std::vector< TransitionSegment > LeftoverPoints;
+
+        validColours.clear();
+        validColours.push_back(ClassIndex::white);
+        //validColours.push_back(ClassIndex::blue);
+
+
+        method = Vision::PRIMS;
+        HorizontalLineCandidates = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.001, 10000, 4, LeftoverPoints);
+        VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4,LeftoverPoints);
+        unsigned int no_unused = 0;
+        for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
+            if(!LineDetector.horizontalLineSegments[i].isUsed)
+                no_unused++;
+        }
+        for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
+            if(!LineDetector.verticalLineSegments[i].isUsed)
+                no_unused++;
+        }
+        //candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+        //candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+        LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+        LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+
+
+    /**INCLUDED BY SHANNON**/
 
     #if DEBUG_VISION_VERBOSITY > 5
     debug << "Begin Classify Candidates: " << endl;
@@ -413,7 +445,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
             debug << "\tPre-Line Formation: " <<endl;
         #endif
 
-        DetectLines(&LineDetector);
+        //SHANNON
+        DetectLines(&LineDetector, LineCandidates, LeftoverPoints);
+        //AARON
+        //LineDetector.fieldLines.clear();
+        //DetectLines(&LineDetector);
     
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPost-Line Formation: " <<endl;
@@ -441,7 +477,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
     if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
     {
-        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+        //m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
     }
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
@@ -1524,6 +1560,16 @@ std::vector<ObjectCandidate> Vision::classifyCandidates(
 
 }
 
+std::vector<ObjectCandidate> Vision::classifyCandidates(
+                                        std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
+                                        int spacing,
+                                        float min_aspect, float max_aspect, int min_segments, std::vector< TransitionSegment > &leftover)
+{
+    return classifyCandidatesPrims(segments, fieldBorders, validColours, spacing, min_aspect, max_aspect, min_segments, leftover);
+}
+
 std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
                                         const std::vector<Vector2<int> >&fieldBorders,
                                         const std::vector<unsigned char> &validColours,
@@ -1777,6 +1823,267 @@ std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< Transi
                 }
             }
 	    delete [] colourHistogram;
+        }//while(rawSegsLeft)
+
+    }//if (!segments.empty())
+    return candidateList;
+}
+
+std::vector<ObjectCandidate> Vision::classifyCandidatesPrims(std::vector< TransitionSegment > &segments,
+                                        const std::vector<Vector2<int> >&fieldBorders,
+                                        const std::vector<unsigned char> &validColours,
+                                        int spacing,
+                                        float min_aspect, float max_aspect, int min_segments,
+                                        std::vector< TransitionSegment >& leftover)
+{
+    //! Overall runtime O( N^2 )
+    std::vector<ObjectCandidate> candidateList;
+
+    const int VERT_JOIN_LIMIT = 3;
+    const int HORZ_JOIN_LIMIT = 1;
+
+
+    if (!segments.empty())
+    {
+        //! Sorting O(N*logN)
+        sort(segments.begin(), segments.end(), Vision::sortTransitionSegments);
+
+        std::queue<int> qUnprocessed;
+        std::vector<TransitionSegment> candidate_segments;
+        std::vector<unsigned int> usedSegments;
+        unsigned int rawSegsLeft = segments.size();
+        unsigned int nextRawSeg = 0;
+
+        bool isSegUsed [segments.size()];
+        usedSegments.clear();
+        //! Removing invalid colours O(N)
+        for (unsigned int i = 0; i < segments.size(); i++)
+        {
+            //may have non-robot colour segments, so pre-mark them as used
+            if (isValidColour(segments.at(i).getColour(), validColours))
+            {
+                //qDebug() << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << isRobotColour(segments.at(i).getColour());
+                isSegUsed[i] = false;
+                //qDebug() <<  "(" << segments.at(i).getStartPoint().x << "," << segments.at(i).getStartPoint().y << ")-("<< segments.at(i).getEndPoint().x << "," << segments.at(i).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(i).getColour()) << "]";
+            }
+            else
+            {
+                rawSegsLeft--;
+                isSegUsed[i] = true;
+            }
+
+        }
+
+        //! For all valid segments O(M)
+        while(rawSegsLeft)
+        {
+
+            //Roll through and find first unused segment
+            nextRawSeg = 0;
+
+            //! Find next unused segment O(M)
+            while(isSegUsed[nextRawSeg] && nextRawSeg < segments.size()) nextRawSeg++;
+            //Prime unprocessed segment queue to build next candidate
+            qUnprocessed.push(nextRawSeg);
+            //take away from pool of raw segs
+            isSegUsed[nextRawSeg] = true;
+            rawSegsLeft--;
+
+            int min_x, max_x, min_y, max_y, segCount;
+            int * colourHistogram = new int[validColours.size()];
+            min_x = segments.at(nextRawSeg).getStartPoint().x;
+            max_x = segments.at(nextRawSeg).getStartPoint().x;
+            min_y = segments.at(nextRawSeg).getStartPoint().y;
+            max_y = segments.at(nextRawSeg).getEndPoint().y;
+            segCount = 0;
+            for (unsigned int i = 0; i < validColours.size(); i++)  colourHistogram[i] = 0;
+
+            //! For all unprocessed joined segment in a candidate O(M)
+            //Build candidate
+
+            candidate_segments.clear();
+
+            while (!qUnprocessed.empty())
+            {
+                unsigned int thisSeg;
+                thisSeg = qUnprocessed.front();
+                qUnprocessed.pop();
+                segCount++;
+                for (unsigned int i = 0; i < validColours.size(); i++)
+                {
+                    if ( segments.at(thisSeg).getColour() == validColours.at(i) && validColours.at(i) != ClassIndex::white)
+                    {
+                        colourHistogram[i] += 1;
+                        i = validColours.size();
+                    }
+                }
+
+                if ( min_x > segments.at(thisSeg).getStartPoint().x)
+                    min_x = segments.at(thisSeg).getStartPoint().x;
+                if ( max_x < segments.at(thisSeg).getStartPoint().x)
+                    max_x = segments.at(thisSeg).getStartPoint().x;
+                if ( min_y > segments.at(thisSeg).getStartPoint().y)
+                    min_y = segments.at(thisSeg).getStartPoint().y;
+                if ( max_y < segments.at(thisSeg).getEndPoint().y)
+                    max_y = segments.at(thisSeg).getEndPoint().y;
+
+
+
+                //if there is a seg above AND 'close enough', then qUnprocessed->push()
+                if ( thisSeg > 0 &&
+                     !isSegUsed[thisSeg-1] &&
+                     segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg-1).getStartPoint().x &&
+                     segments.at(thisSeg).getStartPoint().y - segments.at(thisSeg-1).getEndPoint().y < VERT_JOIN_LIMIT)
+                {
+                    //qDebug() << "Up   Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg-1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg-1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg-1).getStartPoint().x << "," << segments.at(thisSeg-1).getStartPoint().y << ")-("<< segments.at(thisSeg-1).getEndPoint().x << "," << segments.at(thisSeg-1).getEndPoint().y << ")";
+                    qUnprocessed.push(thisSeg-1);
+                    //take away from pool of raw segs
+                    isSegUsed[thisSeg-1] = true;
+                    rawSegsLeft--;
+                }
+
+                //if there is a seg below AND 'close enough', then qUnprocessed->push()
+                if ( thisSeg+1 < segments.size() &&
+                     !isSegUsed[thisSeg+1] &&
+                     segments.at(thisSeg).getStartPoint().x == segments.at(thisSeg+1).getStartPoint().x &&
+                     segments.at(thisSeg+1).getStartPoint().y - segments.at(thisSeg).getEndPoint().y < VERT_JOIN_LIMIT)
+                {
+                    //qDebug() << "Down Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thisSeg+1)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg+1).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thisSeg+1).getStartPoint().x << "," << segments.at(thisSeg+1).getStartPoint().y << ")-("<< segments.at(thisSeg+1).getEndPoint().x << "," << segments.at(thisSeg+1).getEndPoint().y << ")";
+                    qUnprocessed.push(thisSeg+1);
+                    //take away from pool of raw segs
+                    isSegUsed[thisSeg+1] = true;
+                    rawSegsLeft--;
+                }
+
+                //! For each segment being processed in a candidate to the RIGHT attempt to join segments within range O(M)
+                //if there is a seg overlapping on the right AND 'close enough', then qUnprocessed->push()
+                for (unsigned int thatSeg = thisSeg + 1; thatSeg < segments.size(); thatSeg++)
+                {
+                    if ( segments.at(thatSeg).getStartPoint().x - segments.at(thisSeg).getStartPoint().x <=  spacing*HORZ_JOIN_LIMIT)
+                    {
+                        if ( segments.at(thatSeg).getStartPoint().x > segments.at(thisSeg).getStartPoint().x &&
+                             !isSegUsed[thatSeg])
+                        {
+                            //NOT in same column as thisSeg and is to the right
+                            if ( segments.at(thatSeg).getStartPoint().y <= segments.at(thisSeg).getEndPoint().y &&
+                                 segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
+                            {
+                                //thisSeg overlaps with thatSeg
+                                //qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
+                                //! Find intercept O(K), K is number of field border points
+                                int intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
+                                                                                    segments.at(thisSeg).getStartPoint().x,
+                                                                                    segments.at(thatSeg).getStartPoint().x,
+                                                                                    spacing*HORZ_JOIN_LIMIT);
+                                if ( intercept >= 0 &&
+                                     segments.at(thatSeg).getEndPoint().y >= intercept &&
+                                     intercept <= segments.at(thisSeg).getEndPoint().y)
+                                {
+                                    //within HORZ_JOIN_LIMIT
+                                    //qDebug() << "Right Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                    qUnprocessed.push(thatSeg);
+                                    //take away from pool of raw segs
+                                    isSegUsed[thatSeg] = true;
+                                    rawSegsLeft--;
+
+                                }
+                                else
+                                {
+                                    //qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
+                                    //qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        thatSeg = segments.size();
+                    }
+                }
+
+                //! For each segment being processed in a candidate to the LEFT attempt to join segments within range O(M)
+                //if there is a seg overlapping on the left AND 'close enough', then qUnprocessed->push()
+                for (int thatSeg = thisSeg - 1; thatSeg >= 0; thatSeg--)
+                {
+                    if ( segments.at(thisSeg).getStartPoint().x - segments.at(thatSeg).getStartPoint().x <=  spacing*HORZ_JOIN_LIMIT)
+                    {
+
+                        if ( !isSegUsed[thatSeg] &&
+                             segments.at(thatSeg).getStartPoint().x < segments.at(thisSeg).getStartPoint().x)
+                        {
+                            //NOT in same column as thisSeg and is to the right
+                            if ( segments.at(thatSeg).getStartPoint().y <= segments.at(thisSeg).getEndPoint().y &&
+                                 segments.at(thisSeg).getStartPoint().y <= segments.at(thatSeg).getEndPoint().y)
+                            {
+                                //thisSeg overlaps with thatSeg
+                                //qDebug() <<  "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << "]::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")[" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << "]";
+                                //! Find intercept O(K), K is number of field border points
+                                int intercept = findInterceptFromPerspectiveFrustum(fieldBorders,
+                                                                                    segments.at(thisSeg).getStartPoint().x,
+                                                                                    segments.at(thatSeg).getStartPoint().x,
+                                                                                    spacing*HORZ_JOIN_LIMIT);
+
+                                if ( intercept >= 0 &&
+                                     segments.at(thatSeg).getEndPoint().y >= intercept &&
+                                     intercept <= segments.at(thisSeg).getEndPoint().y)
+                                {
+                                    //within HORZ_JOIN_LIMIT
+                                    //qDebug() << "Left Join Seg: " << thisSeg << "(" << ClassIndex::getColourNameFromIndex(segments.at(thisSeg).getColour()) << ") U " << (thatSeg)<< "(" << ClassIndex::getColourNameFromIndex(segments.at(thatSeg).getColour()) << ")" << "(" << segments.at(thisSeg).getStartPoint().x << "," << segments.at(thisSeg).getStartPoint().y << ")-("<< segments.at(thisSeg).getEndPoint().x << "," << segments.at(thisSeg).getEndPoint().y << ")::(" << segments.at(thatSeg).getStartPoint().x << "," << segments.at(thatSeg).getStartPoint().y << ")-("<< segments.at(thatSeg).getEndPoint().x << "," << segments.at(thatSeg).getEndPoint().y << ")";
+                                    qUnprocessed.push(thatSeg);
+                                    //take away from pool of raw segs
+                                    isSegUsed[thatSeg] = true;
+                                    rawSegsLeft--;
+                                }
+                                else
+                                {
+                                    //qDebug() << "|" << float(segments.at(thatSeg).getEndPoint().y) <<  "thatSeg End(y)>= intercept" << intercept << "|";
+                                    //qDebug() << "|" << int(intercept) << "intercept <= thisSeg End(y)" << segments.at(thisSeg).getEndPoint().y << "|";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        thatSeg = -1;
+                    }
+                }
+
+                //add thisSeg to CandidateVector
+                candidate_segments.push_back(segments.at(thisSeg));
+                segments.at(thisSeg).isUsed = true;
+                usedSegments.push_back(thisSeg);
+            }//while (!qUnprocessed->empty())
+            //qDebug() << "Candidate ready...";
+            //HEURISTICS FOR ADDING THIS CANDIDATE AS A ROBOT CANDIDATE
+            if ( max_x - min_x >= 0 &&                                               // width  is non-zero
+                 max_y - min_y >= 0 &&                                               // height is non-zero
+                 (float)(max_x - min_x) / (float)(max_y - min_y) <= max_aspect &&    // Less    than specified landscape aspect
+                 (float)(max_x - min_x) / (float)(max_y - min_y) >= min_aspect &&    // greater than specified portrait aspect
+                 segCount >= min_segments                                    // greater than minimum amount of segments to remove noise
+                 )
+            {
+                //qDebug() << "CANDIDATE FINISHED::" << segCount << " segments, aspect:" << ( (float)(max_x - min_x) / (float)(max_y - min_y)) << ", Coords:(" << min_x << "," << min_y << ")-(" << max_x << "," << max_y << "), width: " << (max_x - min_x) << ", height: " << (max_y - min_y);
+                int max_col = 0;
+                for (int i = 0; i < (int)validColours.size(); i++)
+                {
+                    if (i != max_col && colourHistogram[i] > colourHistogram[max_col])
+                        max_col = i;
+                }
+                for(unsigned int i=0; i<candidate_segments.size(); i++) {
+                    candidate_segments[i].isUsed = true;
+                }
+                ObjectCandidate temp(min_x, min_y, max_x, max_y, validColours.at(max_col), candidate_segments);
+                candidateList.push_back(temp);
+                usedSegments.clear();
+            }
+            else {
+                while(!usedSegments.empty()){
+                    segments[usedSegments.back()].isUsed = false;
+                    leftover.push_back( segments[usedSegments.back()] );
+                    usedSegments.pop_back();
+                }
+            }
+            delete [] colourHistogram;
         }//while(rawSegsLeft)
 
     }//if (!segments.empty())
@@ -2065,6 +2372,154 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
     return candidates;
 }
 
+std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std::vector< TransitionSegment > &horizontalsegments,
+                                                                            const std::vector<unsigned char> &validColours,
+                                                                            int spacing,
+                                                                            int min_segments,
+                                                                            std::vector< TransitionSegment > &leftover)
+{
+    std::vector< ObjectCandidate > candidates;
+    std::vector< TransitionSegment > tempSegments;
+    tempSegments.reserve(horizontalsegments.size());
+    candidates.reserve(horizontalsegments.size());
+
+    bool usedSegments[horizontalsegments.size()];
+    //qDebug() << "Classify Above the horizon" << horizontalsegments.size();
+
+
+    for (int i = 0; i < (int)horizontalsegments.size(); i++)
+    {
+        usedSegments[i] = false;
+    }
+
+    int Xstart, Xend, Ystart, Yend;
+    //Work Backwards: As post width is acurrate at bottom (no crossbar)
+    //ASSUMING EVERYTHING IS ALREADY ORDERED
+    for(int i = horizontalsegments.size()-1; i > 0; i--)
+    {
+        tempSegments.clear();
+        std::vector<int> tempUsedSegments;
+        tempUsedSegments.reserve(horizontalsegments.size());
+        if(!isValidColour(horizontalsegments[i].getColour(), validColours))
+        {
+            continue;
+        }
+        //Setting up:
+        if(usedSegments[i] != false)
+        {
+            continue;
+        }
+        Ystart = horizontalsegments[i].getStartPoint().y;
+        Yend = horizontalsegments[i].getEndPoint().y;
+        Xstart = horizontalsegments[i].getStartPoint().x;
+        Xend = horizontalsegments[i].getEndPoint().x;
+        tempSegments.push_back(horizontalsegments[i]);
+        horizontalsegments[i].isUsed = true;
+        tempUsedSegments.push_back(i);
+        int nextSegCounter = i-1;
+
+        //We want to stop searching when it leaves the line
+        //Searching for a new Xend, close to this current Xstart
+        //Then update with new xstart
+        //qDebug() << "While:";
+        while(horizontalsegments[nextSegCounter].getStartPoint().y ==  Yend && nextSegCounter >0)
+        {
+            if(usedSegments[nextSegCounter] != false)
+            {
+                nextSegCounter--;
+                continue;
+            }
+            if(!isValidColour(horizontalsegments[nextSegCounter].getColour(), validColours))
+            {
+                nextSegCounter--;
+                continue;
+            }
+            if(horizontalsegments[nextSegCounter].getEndPoint().x     <= Xstart - spacing
+               && horizontalsegments[nextSegCounter].getEndPoint().x  >= Xstart + spacing)
+            {
+                //Update with new info
+                tempSegments.push_back(horizontalsegments[nextSegCounter]);
+                horizontalsegments[nextSegCounter].isUsed = true;
+                tempUsedSegments.push_back(nextSegCounter);
+                if (horizontalsegments[nextSegCounter].getStartPoint().x <= Xstart)
+                {
+                    Xstart = horizontalsegments[nextSegCounter].getStartPoint().x;
+                }
+
+            }
+            nextSegCounter--;
+        }
+        //Once all the segments on same line has been found scan between
+        //(Xstart-spacing) and (Xend+spacing) for segments that are likely to be above the
+        //Starting from your where you left off in horzontal count
+        //qDebug() << "for:" << nextSegCounter;
+        for(int j = nextSegCounter; j > 0; j--)
+        {
+            if(usedSegments[j] != false)
+            {
+                continue;
+            }
+            if(!isValidColour(horizontalsegments[j].getColour(), validColours))
+            {
+                continue;
+            }
+            if(horizontalsegments[j].getStartPoint().y < Ystart - spacing*4)
+            {
+                break;
+            }
+            if(horizontalsegments[j].getStartPoint().x   >= Xstart - spacing/2
+               && horizontalsegments[j].getEndPoint().x  <= Xend + spacing/2)
+            {
+                if (horizontalsegments[j].getStartPoint().x < Xstart)
+                {
+                    Xstart = horizontalsegments[j].getStartPoint().x;
+                }
+                if (horizontalsegments[j].getEndPoint().x > Xend)
+                {
+                    Xend = horizontalsegments[j].getEndPoint().x;
+                }
+                if(horizontalsegments[j].getStartPoint().y < Ystart)
+                {
+                    Ystart = horizontalsegments[j].getStartPoint().y;
+                }
+                tempSegments.push_back(horizontalsegments[j]);
+                horizontalsegments[j].isUsed = true;
+                tempUsedSegments.push_back(j);
+            }
+
+        }
+        //qDebug() << "About: Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
+        //Create Object Candidate if greater then the minimum number of segments
+        if((int)tempSegments.size() >= min_segments)
+        {
+            //qDebug() << "Creating candidate: " << Xstart << ","<< Ystart<< ","<< Xend<< ","<< Yend << " Size: " << tempSegments.size();
+            //for(size_t i =0; i < tempSegments.size(); i++)
+            //{
+                //qDebug() << tempSegments[i].getStartPoint().x << "," <<tempSegments[i].getStartPoint().y << " " << tempSegments[i].getEndPoint().x << "," <<tempSegments[i].getEndPoint().y;
+            //}
+            ObjectCandidate tempCandidate(Xstart, Ystart, Xend, Yend, validColours[0], tempSegments);
+            candidates.push_back(tempCandidate);
+            while (!tempUsedSegments.empty())
+            {
+                usedSegments[tempUsedSegments.back()] = true;
+                tempUsedSegments.pop_back();
+            }
+        }
+        else {
+            //reset segments to not used
+            while (!tempUsedSegments.empty())
+            {
+                horizontalsegments[tempUsedSegments.back()].isUsed = false;
+                leftover.push_back( horizontalsegments[tempUsedSegments.back()] );
+                tempUsedSegments.pop_back();
+            }
+        }
+
+    }
+    //qDebug() << "candidate size: " << candidates.size();
+    return candidates;
+}
+
 void Vision::DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector)
 {
     //qDebug() << "Forming Lines or Robot Points:" << endl;
@@ -2085,11 +2540,11 @@ void Vision::DetectLines(LineDetection* LineDetector)
 
     return;
 }
-void Vision::DetectLines(LineDetection* LineDetector, vector< ObjectCandidate >& candidates)
+void Vision::DetectLines(LineDetection* LineDetector, vector< ObjectCandidate >& candidates, vector< TransitionSegment >& leftover)
 {
     //qDebug() << "Forming Lines:" << endl;
 
-    LineDetector->FormLines(AllFieldObjects, this, m_sensor_data, candidates);
+    LineDetector->FormLines(AllFieldObjects, this, m_sensor_data, candidates, leftover);
 
     //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
 

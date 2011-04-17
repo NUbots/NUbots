@@ -16,13 +16,11 @@
 # 3. Edit project option : ccmake .
 # 4. Build it : make 
 
-
-
 ######################################################## PROJECT NAME ########################################################
 PROJECT( NUBOT )
 MESSAGE( STATUS "...:::: NUBOT ::::..." )
 
-###################### Target Robot: NAOWebots, NAO, Cycloid, etc
+###################### Target Robot: NAOWebots, NAO, Cycloid, Bear, etc
 IF(x$ENV{TARGET_ROBOT}x STREQUAL xx)
 	MESSAGE(STATUS "TARGET_ROBOT was not found in the environment. Assuming NAOWEBOTS")
 	SET(TARGET_ROBOT NAOWEBOTS)
@@ -30,7 +28,6 @@ ELSE()
 	SET(TARGET_ROBOT $ENV{TARGET_ROBOT})
 ENDIF()
 
-SET(NUBOT_IS_EXECUTABLE OFF)
 SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 
 ########## Control Debugging of the cmake files themselves
@@ -41,9 +38,11 @@ ENDIF (DEBUG)
 
 ######################################################## The location of target specific files 
 # this is used by target specific cmake files to locate appropriate sources
+#	- we have TARGET_ROBOT which was an environment variable set of the Makefile
 #	- we have TARGET_ROBOT_NAME for a case sensitive name of the platform.
 # 	- we have target specific sources in TARGET_ROBOT_DIR
 # 	- we have target specific home environment variable in HOME_ENV_VAR
+#	- we have NUBOT_CONFIG_DIR which is the location of nubot configuration files are stored
 # 	- we have target specific location for data files NUBOT_DATA_DIR. This is the location on the actual platform that data files are placed.
 IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
     SET(TARGET_ROBOT_NAME NAOWebots)
@@ -51,6 +50,8 @@ ELSEIF(${TARGET_ROBOT} STREQUAL NAO)
     SET(TARGET_ROBOT_NAME NAO)
 ELSEIF(${TARGET_ROBOT} STREQUAL CYCLOID)
     SET(TARGET_ROBOT_NAME Cycloid)
+ELSEIF(${TARGET_ROBOT} STREQUAL BEAR)
+    SET(TARGET_ROBOT_NAME Bear)
 ELSEIF(${TARGET_ROBOT} STREQUAL NUVIEW)
     SET(TARGET_ROBOT_NAME NUview)
 ENDIF()
@@ -89,17 +90,22 @@ ELSE (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
             MESSAGE(STATUS "CMake for Cycloid")
             INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cycloid.cmake)
         ELSE (${TARGET_ROBOT} STREQUAL CYCLOID)
-            MESSAGE(STATUS "Target robot unknown: ${TARGET_ROBOT}")
+            IF (${TARGET_ROBOT} STREQUAL BEAR)
+                MESSAGE(STATUS "Cmake for Bear")
+                INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/bear.cmake)
+            ELSE()
+                MESSAGE(STATUS "Target robot unknown: ${TARGET_ROBOT}")
+            ENDIF()
         ENDIF (${TARGET_ROBOT} STREQUAL CYCLOID)
     ENDIF (${TARGET_ROBOT} STREQUAL NAO)
 ENDIF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
 
 IF (DEBUG)
-MESSAGE(STATUS "Target Robot location: ${TARGET_ROBOT_DIR}")
+    MESSAGE(STATUS "Target Robot location: ${TARGET_ROBOT_DIR}")
 ENDIF (DEBUG)
 
 IF (WIN32)
-SET(CMAKE_DEBUG_POSTFIX _d)
+    SET(CMAKE_DEBUG_POSTFIX _d)
 ENDIF (WIN32)
 
 ########### Version
@@ -201,13 +207,13 @@ IF (DEBUG)
 ENDIF (DEBUG)  
 
 ############################ CHECK LIBRARY / EXECUTABLE OPTION
-IF (NUBOT_IS_REMOTE)
+IF (NUBOT_IS_EXECUTABLE)
     ADD_EXECUTABLE( nubot ${NUBOT_SRCS} )
-ELSE (NUBOT_IS_REMOTE)
-    IF (NOT ${TARGET_ROBOT} STREQUAL NAO)
+ELSE()
+    IF (NOT ${TARGET_ROBOT} STREQUAL NAO)			## aldebaran already do this in one of their scripts, so don't do it again
         ADD_LIBRARY( nubot SHARED ${NUBOT_SRCS} )
     ENDIF (NOT ${TARGET_ROBOT} STREQUAL NAO)
-ENDIF (NUBOT_IS_REMOTE)
+ENDIF()
 
 ############################ SET LIBRARIES TO LINK WITH
 IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -233,7 +239,7 @@ IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
 ELSE()
     ADD_CUSTOM_COMMAND(TARGET nubot
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${NUBOT_LOCATION} ${OUTPUT_ROOT_DIR_LIB})
+    COMMAND ${CMAKE_COMMAND} -E copy ${NUBOT_LOCATION} ${OUTPUT_ROOT_DIR})
 ENDIF()
 
 ############################ OPTIONS

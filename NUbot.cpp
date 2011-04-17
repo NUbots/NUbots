@@ -55,7 +55,7 @@
 #endif
 
 // --------------------------------------------------------------- Thread header files
-#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+#if defined(USE_VISION) or defined(USE_LOCALISATION)
     #include "NUbot/SeeThinkThread.h"
 #endif
 #include "NUbot/SenseMoveThread.h"
@@ -71,6 +71,9 @@
 #elif defined(TARGET_IS_CYCLOID)
     #include "NUPlatform/Platforms/Cycloid/CycloidPlatform.h"
     #include "NUPlatform/Platforms/Cycloid/CycloidIO.h"
+#elif defined(TARGET_IS_BEAR)
+    #include "NUPlatform/Platforms/Bear/BearPlatform.h"
+    #include "NUPlatform/Platforms/Bear/BearIO.h"
 #elif defined(TARGET_IS_NUVIEW)
     #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
@@ -152,6 +155,8 @@ void NUbot::createErrorHandling()
         debug << "NUbot::createErrorHandling()." << endl;
     #endif
     #ifndef TARGET_OS_IS_WINDOWS
+        signal(SIGINT, terminationHandler);
+        signal(SIGTERM, terminationHandler);
         signal(SIGILL, terminationHandler);
         signal(SIGSEGV, terminationHandler);
         signal(SIGBUS, terminationHandler); 
@@ -172,6 +177,10 @@ void NUbot::createPlatform(int argc, const char *argv[])
         m_platform = new NAOPlatform();
     #elif defined(TARGET_IS_CYCLOID)
         m_platform = new CycloidPlatform();
+    #elif defined(TARGET_IS_BEAR)
+        m_platform = new BearPlatform();
+    #else
+        #error You need to create a Platform instance for this platform
     #endif
 }
 
@@ -229,6 +238,10 @@ void NUbot::createNetwork()
         m_io = new NAOIO(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_io = new CycloidIO(this);
+    #elif defined(TARGET_IS_BEAR)
+        m_io = new BearIO(this);
+    #else
+        #error You need to create an IO class for this platform
     #endif
 }
 
@@ -307,7 +320,7 @@ void NUbot::createThreads()
     debug << "NUbot::createThreads(). Constructing threads." << endl;
 #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread = new SeeThinkThread(this);
     #endif
         
@@ -319,7 +332,7 @@ void NUbot::createThreads()
         m_watchdog_thread->start();
     #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread->start();
     #endif
 
@@ -335,7 +348,7 @@ void NUbot::destroyThreads()
         debug << "NUbot::destroyThreads()." << endl;
     #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread->stop();
     #endif
     #ifndef TARGET_IS_NAOWEBOTS
@@ -351,7 +364,7 @@ void NUbot::destroyThreads()
     delete m_sensemove_thread;
     m_sensemove_thread = 0;
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         delete m_seethink_thread;
         m_seethink_thread = 0;
     #endif
@@ -381,31 +394,25 @@ void NUbot::run()
         previoussimtime = Platform->getTime();
         webots->step(timestep);           // stepping the simulator generates new data to run motion, and vision data
         #if defined(USE_MOTION)
-            m_sensemove_thread->startLoop();
+            m_sensemove_thread->signal(true);
         #endif
         
-        #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+        #if defined(USE_VISION) or defined(USE_LOCALISATION)
             if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
             {
-                m_seethink_thread->startLoop();         
-                m_seethink_thread->waitForLoopCompletion();
+                m_seethink_thread->signal(true);
             }
         #endif
-        
-        #if defined(USE_MOTION)
-            m_sensemove_thread->waitForLoopCompletion();
-        #endif
-        
         count++;
     };
 #else
-    #if !defined(USE_VISION) and (defined(USE_BEHAVIOUR) or defined(USE_LOCALISATION) or defined(USE_MOTION))
-        while (true)
-        {
-            periodicSleep(33);
-            m_seethink_thread->startLoop();
-        }
-    #endif
+    while (true)
+    {
+        periodicSleep(33);
+        #if !defined(USE_VISION) and defined(USE_LOCALISATION)
+            m_seethink_thread->signal(true);
+        #endif
+    }
 #endif
 }
 
@@ -457,6 +464,9 @@ void NUbot::terminationHandler(int signum)
         debug << endl;
         cout << endl;
     #endif
+    errorlog << flush;
+    debug << flush;
+    cout << flush;
     
     #ifndef TARGET_OS_IS_WINDOWS
         void *array[10];

@@ -45,8 +45,8 @@ ENDIF()
 IF(NUBOT_USE_MOTION_WALK_ALWALK)
 	LIST(APPEND YOUR_DIRS ALWalk)
 ENDIF()
-IF(NUBOT_USE_MOTION_WALK_WALKOPTIMISER)
-	LIST(APPEND YOUR_DIRS Optimisation)
+IF(NUBOT_USE_MOTION_WALK_BEARWALK)
+	LIST(APPEND YOUR_DIRS BearWalk)
 ENDIF()
 ####################################################################################
 

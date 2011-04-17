@@ -4,12 +4,10 @@
     @class EvaluateWalkParametersState
     @brief A walk optimisation state to evaluate the performance of a set of walk parameters.
            The speed, efficiency and stability of the walk is measured. 
-           The speed and efficiency are measured simulataneously over a given path.
-           The stability is measured separately.
 
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2010, 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,33 +26,28 @@
 #ifndef EVALUATEWALKPARAMETERSSTATE_H
 #define EVALUATEWALKPARAMETERSSTATE_H
 
-#include "Behaviour/BehaviourFSMState.h"
+#include "WalkOptimisationState.h"
 class WalkOptimisationProvider;
-class EvaluateSpeedOfWalkParametersState;
-class EvaluateStabilityOfWalkParametersState;
 
-class EvaluateWalkParametersState : public BehaviourFSMState
+class EvaluateWalkParametersState : public WalkOptimisationState
 {
 public:
     EvaluateWalkParametersState(WalkOptimisationProvider* parent);
     ~EvaluateWalkParametersState();
-private:
+
     BehaviourState* nextState();
-    BehaviourState* nextStateCommons();
-    bool speedEvaluationFinished();	
-    void markSpeedEvaluationCompleted();
-    
-    WalkOptimisationProvider* m_parent;                 //!< the walk optimisation provider
-    BehaviourState* m_evaluate_speed;                   //!< the speed evaluation state machine
-    float m_speed;                                      //!< the measured speed over a trial
-    float m_energy;                                     //!< the energy used over a trial
-    BehaviourState* m_evaluate_stability;               //!< the stability evaluation state machine
-    float m_stability;                                  //!< the stability over a trial
-    
-    bool m_speed_evaluation_completed;
-    
-    friend class EvaluateStabilityOfWalkParametersState;
-    friend class EvaluateSpeedOfWalkParametersState; 
+	void doState();
+	float distance();
+private:
+	vector<float> getStartPoint();
+	bool pointReached();
+	vector<float> getNextPoint();
+	bool allPointsReached();
+	vector<float> reversePoint(const vector<float>& point);
+	float calculateCircuitLength();
+
+	bool m_reverse_points;
+	unsigned int m_current_point_index;
 };
 
 

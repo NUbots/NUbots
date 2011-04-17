@@ -136,7 +136,7 @@ public:
     static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
     {
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
-        if (ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
+        if (false)//ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
         {   // if the ball is moving go to where the ball will be!
             float x = ball_prediction[1];
             float y = ball_prediction[2];

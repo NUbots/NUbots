@@ -412,29 +412,29 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
 	m_target_y = target[1];
 	m_target_timestamp = Platform->getTime();
 
-        #if DEBUG_NUMOTION_VERBOSITY > 4
+    #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "void NUKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
         debug << "current pose = " << toString(pose) << endl;
-        #endif
+    #endif
 
-        if(!isActive())
+    if(!isActive())
+    {
+        #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUKick::Choosing leg." << endl;
+        #endif
+        m_kickReady = chooseLeg();
+
+    }
+    else
+    {
+        if(kickAbortCondition())
         {
             #if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NUKick::Choosing leg." << endl;
+            debug << "NUKick::Aborting kick." << endl;
+            stop();
             #endif
-            m_kickReady = chooseLeg();
-
         }
-        else
-        {
-            if(kickAbortCondition())
-            {
-                #if DEBUG_NUMOTION_VERBOSITY > 4
-                debug << "NUKick::Aborting kick." << endl;
-                stop();
-                #endif
-            }
-        }
+    }
 }
 
 void NUKick::doKick()
@@ -680,7 +680,7 @@ void NUKick::doKick()
         case REALIGN_LEGS:
             {
                 done = LowerLeg(m_kickingLeg, 0.7f);
-                BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
+                //BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -747,7 +747,7 @@ bool NUKick::doPreKick()
     static double endWaitTime = 0;
     if (m_kickWait)
     {
-        endWaitTime = m_data->CurrentTime + 1500;
+        endWaitTime = m_data->CurrentTime + 1200;
         m_kickWait = false;
         debug << "Pre - Kick. Updated endWaitTime: " << endWaitTime << endl;
     }
@@ -945,8 +945,8 @@ bool NUKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeight
 
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NUKick::ShiftWeightToFootClosedLoop - Sending move command ";
-            debug << "Estimated completion time = " << m_estimatedStateCompleteTime << endl;
+                debug << "NUKick::ShiftWeightToFootClosedLoop - Sending move command ";
+                debug << "Estimated completion time = " << m_estimatedStateCompleteTime << endl;
             #endif
         }
 
@@ -1200,7 +1200,8 @@ void NUKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, fl
     // Pitch correction
     jointAngles[5] += gainx * asin(deltax / 35.0f);
     // Hip Pitch - Reverse of pitch to maintain vertical torso.
-    //jointAngles[1] = jointAngles[5];
+    jointAngles[1] = -(jointAngles[3] + jointAngles[5]);
+    
     return;
 }
 

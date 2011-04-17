@@ -31,7 +31,7 @@
 
 #include "Motion/Tools/MotionFileTools.h"
 
-#include <albroker.h>
+#include <alcommon/albroker.h>
 #include <time.h>
 
 ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, actions)
@@ -53,7 +53,7 @@ ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, a
     m_al_motion->setMotionConfig(m_al_config);
     
     // load and init the walk parameters
-    m_walk_parameters.load("ALWalkCrab");
+    m_walk_parameters.load("ALWalkNew");
     initALConfig();
     m_last_enabled_time = 0;
 }
@@ -172,7 +172,7 @@ void ALWalk::initALConfig()
     m_al_config.arrayPush(m_al_param);
     m_al_param[0] = "WALK_MAX_STEP_THETA";
     m_al_config.arrayPush(m_al_param);
-    m_al_param[0] = "WALK_MAX_STEP_HEIGHT";
+    m_al_param[0] = "WALK_STEP_HEIGHT";
     m_al_config.arrayPush(m_al_param);
     m_al_param[0] = "WALK_MIN_TRAPEZOID";
     m_al_config.arrayPush(m_al_param);

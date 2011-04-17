@@ -90,6 +90,8 @@ public:
     const static id_t MotionWalkMaxSpeed;
     const static id_t MotionHeadCompletionTime;
     
+    const static unsigned int m_num_sensor_ids;                  //!< internal use only.
+    
     enum JointSensorIndices 
     {   // indices into the single joint vector
         PositionId = 0,
@@ -220,8 +222,6 @@ private:
     bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);
     bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data);
     bool getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data);
-public:
-    double CurrentTime;                      //!< stores the most recent time sensors were updated in milliseconds
 
 private:
     static vector<id_t*> m_ids;				 //!< a vector containing all of the actionator ids

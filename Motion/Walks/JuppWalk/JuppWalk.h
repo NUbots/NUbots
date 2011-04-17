@@ -64,8 +64,6 @@ public:
 protected:
 private:
     float m_leg_length;
-    float m_current_time;
-    float m_previous_time;
     
     float m_gait_phase;
     float m_left_leg_phase;
@@ -108,9 +106,6 @@ private:
     vector<float> m_left_arm_gains;
     vector<float> m_right_arm_angles;
     vector<float> m_right_arm_gains;
-    
-    // Pattern generation debugging
-    ofstream m_pattern_debug;
 };
 
 #endif

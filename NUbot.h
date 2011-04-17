@@ -106,9 +106,9 @@ private:
     #endif
     
     NUIO* m_io;                           //!< io module
-    
+public:         //! @todo TODO: this door should be closed. It is open atm because I need the sensemove_thread to connect to the serial comms of the bear.
     friend class SeeThinkThread;
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         SeeThinkThread* m_seethink_thread;
     #endif
 

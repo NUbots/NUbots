@@ -7,6 +7,7 @@
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Rectangle.h"
 #include "debug.h"
+#include "Tools/Math/General.h"
 
 class Kinematics
 {
@@ -18,7 +19,7 @@ public:
         leftFoot,
         rightFoot,
         numEffectors
-    };
+    }; 
 
     bool LoadModel(const std::string& fileName);
     Matrix CalculateTransform(Effector effectorId, const std::vector<float>& jointValues);
@@ -80,12 +81,23 @@ public:
         return result;
     }
 
-    static std::vector<float> OrientationFromTransform(const Matrix& transfromMatrix)
+    static std::vector<float> OrientationFromTransform(const Matrix& transformMatrix)
     {
+		// Derived from matrix formed by RotZ(psi)*RotY(theta)*RotX(Phi)
         std::vector<float> result(3,0.0f);
-        result[0] = asin(-transfromMatrix[2][1]);
-        result[1] = atan2(transfromMatrix[2][0], transfromMatrix[2][2]);
-        result[2] = atan2(transfromMatrix[0][1], transfromMatrix[1][1]);
+        result[1] = -asin(transformMatrix[2][0]);
+        result[0] = atan2(transformMatrix[2][1], transformMatrix[2][2]);
+        result[2] = atan2(transformMatrix[1][0], transformMatrix[0][0]);
+		if(transformMatrix[2][2] * cos(result[1]) < 0)
+		{
+			result[0] = mathGeneral::normaliseAngle(result[0] + mathGeneral::PI);
+		}
+
+		if(transformMatrix[0][0] * cos(result[1]) < 0)
+		{
+			result[2] = mathGeneral::normaliseAngle(result[2] + mathGeneral::PI);
+		}
+
         return result;
     }
 

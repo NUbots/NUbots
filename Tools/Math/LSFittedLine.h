@@ -4,6 +4,8 @@
 #include <vector>
 #include "Vector2.h"
 
+using std::vector;
+
 class LinePoint: public Point{
 	public:
 		int ID;
@@ -20,11 +22,13 @@ class LSFittedLine : public Line
     bool valid;
     
     void addPoint(LinePoint &point);
+    void addPoints(vector<LinePoint*>& pointlist);
     void joinLine(LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;
     double getr2tls() const;
     Point leftPoint, rightPoint;
+    Point transLeftPoint, transRightPoint;
     void clearPoints();
     std::vector<LinePoint*> getPoints();
     int numPoints;

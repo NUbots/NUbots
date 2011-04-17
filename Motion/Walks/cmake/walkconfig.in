@@ -17,12 +17,6 @@
 #endif
 
 #ifdef USE_WALK
-    #define USE_WALKOPTIMISER_${NUBOT_USE_MOTION_WALK_WALKOPTIMISER} 
-	#ifdef USE_WALKOPTIMISER_ON
-        #define USE_WALKOPTIMISER
-    #else
-        #undef USE_WALKOPTIMISER
-    #endif
     #define USE_WALK_JWALK_${NUBOT_USE_MOTION_WALK_JWALK} 
     #ifdef USE_WALK_JWALK_ON
         #define USE_JWALK
@@ -53,12 +47,19 @@
     #else
         #undef USE_ALWALK
     #endif
+    #define USE_WALK_BEARWALK_${NUBOT_USE_MOTION_WALK_BEARWALK} 
+    #ifdef USE_WALK_BEARWALK_ON
+        #define USE_BEARWALK
+    #else
+        #undef USE_BEARWALK
+    #endif
 #else
     #undef USE_JWALK
     #undef USE_JUPPWALK
     #undef USE_NBWALK
     #undef USE_VSCWALK
     #undef USE_ALWALK
+    #undef USE_BEARWALK
 #endif
 
 #endif // !WALKCONFIG_H

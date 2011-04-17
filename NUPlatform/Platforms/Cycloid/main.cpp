@@ -1,31 +1,24 @@
-/*! @file main.cpp
- @brief Main file
- 
- @author Jason Kulk
- 
- Copyright (c) 2009 Jason Kulk
- 
- This file is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This file is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "NUbot.h"
 
+#include "../Robotis/Motors.h"
+#include "NUbot/SenseMoveThread.h"
+
+#include "debug.h"
+#include "nubotdataconfig.h"
+
+#include <iostream>
 using namespace std;
+
+ofstream debug;
+ofstream errorlog;
 
 int main(int argc, const char *argv[]) 
 {
+    debug.open("/var/volatile/debug.log");
+    errorlog.open((DATA_DIR + "error.log").c_str());
+                  
     NUbot* nubot = new NUbot(argc, argv);
+    Motors::getInstance()->setSensorThread(nubot->m_sensemove_thread);
     nubot->run();
     delete nubot;
 }

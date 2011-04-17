@@ -15,11 +15,15 @@ void LSFittedLine::clearPoints(){
 	sumX2 = 0;
 	sumY2 = 0;
 	sumXY = 0;
-    	numPoints = 0;
+        numPoints = 0;
 	leftPoint.x = 0;
 	leftPoint.y = 0;
 	rightPoint.x = 0;
-	rightPoint.y = 0;
+        rightPoint.y = 0;
+        transLeftPoint.x = 0;
+        transLeftPoint.y = 0;
+        transRightPoint.x = 0;
+        transRightPoint.y = 0;
 	MSD = 0;
 	r2tls = 0;
 	for (unsigned int p = 0; p < points.size(); p++)
@@ -69,6 +73,52 @@ void LSFittedLine::addPoint(LinePoint &point){
 				rightPoint = point;
 		}
 	}
+}
+
+void LSFittedLine::addPoints(vector<LinePoint*>& pointlist){
+    if(!pointlist.empty()) {
+        if(numPoints < 1) {
+            leftPoint = *pointlist[0];
+            rightPoint = *pointlist[0];
+        }
+        for(unsigned int i=0; i<pointlist.size(); i++) {
+            sumX += pointlist[i]->x;
+            sumY += pointlist[i]->y;
+            sumX2 += pointlist[i]->x * pointlist[i]->x;
+            sumY2 += pointlist[i]->y * pointlist[i]->y;
+            sumXY += pointlist[i]->x * pointlist[i]->y;
+            numPoints++;
+            points.push_back(pointlist[i]);
+            pointlist[i]->inUse = true;
+
+            //CHECK if point is a start or end point
+            if(pointlist[i]->x == leftPoint.x){
+                if(pointlist[i]->y < leftPoint.y){
+                    leftPoint = *pointlist[i];
+                }
+            }
+            else if (pointlist[i]->x < leftPoint.x) {
+                leftPoint = *pointlist[i];
+            }
+            if(pointlist[i]->x == rightPoint.x) {
+                if(pointlist[i]->y > rightPoint.y) {
+                    rightPoint = *pointlist[i];
+                }
+            }
+            else if (pointlist[i]->x > rightPoint.x) {
+                rightPoint = *pointlist[i];
+            }
+        }
+        if (numPoints < 2)
+        {
+                valid = false;
+        }
+        else
+        {
+                valid = true;
+                calcLine();
+        }
+    }
 }
 
 void LSFittedLine::joinLine(LSFittedLine &sourceLine)

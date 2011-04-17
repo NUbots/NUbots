@@ -3,7 +3,7 @@
 
     @author Jason Kulk
  
- Copyright (c) 2009 Jason Kulk
+ Copyright (c) 2010 Jason Kulk
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,25 +23,34 @@
 #include "CycloidCamera.h"
 #include "CycloidSensors.h"
 #include "CycloidActionators.h"
-#include "CycloidSystem.h"
+#include "../Robotis/Motors.h"
 
-#include <string>
-#include <iostream>
+#include "debug.h"
+#include "debugverbositynuplatform.h"
+#include "nubotconfig.h"
+
 using namespace std;
 
-/*! @brief Constructor for Cycloid robotic platform
+/*! @brief Constructor for Bear robotic platform
  */
 CycloidPlatform::CycloidPlatform()
 {
-    cout << "CycloidPlatform::CycloidPlatform" << endl;
-    
-    system = new CycloidSystem();                       // the system needs to be created first because it provides times for the other modules!
-    nusystem = system;                                  // we access the system in other modules using this pointer.
-    camera = new CycloidCamera();
-    sensors = new CycloidSensors();
-    actionators = new CycloidActionators();
+#if DEBUG_NUPLATFORM_VERBOSITY > 4
+    debug << "CycloidPlatform::CycloidPlatform" << endl;
+#endif
+    init();
+    #ifdef USE_VISION
+        m_camera = new CycloidCamera();
+        #error CycloidCamera not implemented yet! Compile with USE_VISION set to OFF
+    #else
+        m_camera = 0;
+    #endif
+    m_motors = Motors::getInstance();
+    m_sensors = new CycloidSensors(m_motors);
+    m_actionators = new CycloidActionators(m_motors);
 }
 
 CycloidPlatform::~CycloidPlatform()
 {
 }
+

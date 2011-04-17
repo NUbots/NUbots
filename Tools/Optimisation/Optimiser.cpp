@@ -21,6 +21,9 @@
 
 #include "Optimiser.h"
 #include "Parameter.h"
+#include "NUPlatform/NUPlatform.h"
+
+#include <boost/random.hpp>
 
 #include "debug.h"
 #include "nubotdataconfig.h"
@@ -33,11 +36,22 @@ Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
 {
     m_name = name;
     m_initial_parameters = parameters;
+
+    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
 }
 
 /*! @brief Destructor for the abstract optimiser */
 Optimiser::~Optimiser()
 {
+}
+
+/*! @brief A dummy implementation of a the multi-objective optimiser interface
+ * 	@param fitness a vector of fitnesses, one entry for each of the objectives. The higher the fitness the better the parameters.
+ */
+void Optimiser::setParametersResult(const vector<float>& fitness)
+{
+	if (not fitness.empty())
+		setParametersResult(fitness[0]);
 }
 
 /*! @brief Returns the optimiser's name
@@ -121,3 +135,31 @@ void Optimiser::load()
     }
 }
 
+/*! @brief Returns a normal random variable from the normal distribution with mean and sigma
+ * 	@param mean the mean of the normal distribution
+ * 	@param sigma the standard deviation of the normal distribution
+ * 	@return a float from the normal distribution
+ */
+float Optimiser::normalDistribution(float mean, float sigma)
+{
+    static unsigned int seed = 1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime();          // I am hoping that at least one of the three calls is different for each process
+    static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
+    static boost::normal_distribution<float> distribution(0,1);
+    static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);
+    
+    float z = standardnorm();       // take a random variable from the standard normal distribution
+    float x = mean + z*sigma;       // then scale it to belong to the specified normal distribution
+    
+    return x;
+}
+
+/*! @brief Returns a random number from a uniform distribution
+ *	@param min the minimum value of the uniform range
+ *	@param max the maximum value of the uniform range
+ *	@return the random number
+ */
+float Optimiser::uniformDistribution(float min, float max)
+{
+	// We can't use boost's uniform distribution because it is buggy.
+	return (max - min)*rand()/RAND_MAX + min;
+}

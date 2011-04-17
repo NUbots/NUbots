@@ -119,7 +119,7 @@ void SeeThinkThread::run()
         try
         {
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-                waitForCondition();
+                wait();
             #endif
             #ifdef USE_VISION
                 m_nubot->m_platform->updateImage();
@@ -178,9 +178,6 @@ void SeeThinkThread::run()
         {
             m_nubot->unhandledExceptionHandler(e);
         }
-        #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
-            onLoopCompleted();
-        #endif
     } 
     errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
 }

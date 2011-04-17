@@ -3,16 +3,23 @@ QT += network \
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
-    LIBS += -framework \
-        CoreFoundation \
-        -lz
+    LIBS += -framework CoreFoundation -lz
+    DESTDIR = "../Build/NUView"
+    OBJECTS_DIR = "../Build/NUView/.obj"
+    MOC_DIR = "../Build/NUView/.moc"
+    RCC_DIR = "../Build/NUView/.rcc"
+    UI_DIR = "../Build/NUView/.ui"
+
+    #Macports include directory
+    INCLUDEPATH += '/opt/local/include'
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
+    INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_42'
+    INCLUDEPATH += 'C:/Qt/2010.02.1/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_44'
     INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/boost_1_44'
-    INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/'
     INCLUDEPATH += 'C:/Program Files/Bonjour SDK/Include/'
     LIBS += -lwsock32
@@ -156,7 +163,10 @@ HEADERS += ui_mainwindow.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
     ../Vision/SplitAndMerge/SAM.h \
-    ../NUPlatform/NUSensors/EndEffectorTouch.h
+    ../NUPlatform/NUSensors/EndEffectorTouch.h \
+    ../NUPlatform/NUSensors/OdometryEstimator.h \
+    ../Tools/Math/StlVector.h \
+    ../Tools/Profiling/Profiler.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -183,21 +193,21 @@ SOURCES += mainwindow.cpp \
     ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
-    ../NUPlatform/NUIO/*.cpp \
+    $$files(../NUPlatform/NUIO/*.cpp) \
     NUviewIO/NUviewIO.cpp \
     ../Infrastructure/NUData.cpp \
     ../Infrastructure/NUBlackboard.cpp \
     ../NUPlatform/NUPlatform.cpp \
     ../NUPlatform/NUSensors.cpp \
-    ../Infrastructure/NUSensorsData/*.cpp \
+    $$files(../Infrastructure/NUSensorsData/*.cpp) \
     ../NUPlatform/NUActionators.cpp \
-    ../NUPlatform/NUActionators/*.cpp \
-    ../Infrastructure/NUActionatorsData/*.cpp \
+    $$files(../NUPlatform/NUActionators/*.cpp) \
+    $$files(../Infrastructure/NUActionatorsData/*.cpp) \
     ../Infrastructure/TeamInformation/TeamInformation.cpp \
-    ../Infrastructure/Jobs/*.cpp \
-    ../Infrastructure/Jobs/CameraJobs/*.cpp \
-    ../Infrastructure/Jobs/VisionJobs/*.cpp \
-    ../Infrastructure/Jobs/MotionJobs/*.cpp \
+    $$files(../Infrastructure/Jobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/CameraJobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/VisionJobs/*.cpp) \
+    $$files(../Infrastructure/Jobs/MotionJobs/*.cpp) \
     locWmGlDisplay.cpp \
     ../Vision/ObjectCandidate.cpp \
     ../Vision/LineDetection.cpp \
@@ -260,6 +270,8 @@ SOURCES += mainwindow.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
-    ../NUPlatform/NUSensors/EndEffectorTouch.cpp
+    ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
+    ../NUPlatform/NUSensors/OdometryEstimator.cpp \
+    ../Tools/Profiling/Profiler.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

@@ -40,18 +40,16 @@ class ConditionalThread : public Thread
 		ConditionalThread(std::string name, unsigned char priority);
         virtual ~ConditionalThread();
     
-        void startLoop();
-        void waitForLoopCompletion();
+        void signal();
+        void signal(bool blocking);
     
     protected:
         virtual void run() = 0;                // To be overridden by code to run.
-        void waitForCondition();
-        void onLoopCompleted();                  
+        void wait();
 
-    protected:
+    private:
         pthread_mutex_t m_condition_mutex;     //!< lock for new data signal
         pthread_cond_t m_condition;            //!< signal for new data
         pthread_mutex_t m_running_mutex;       //!< mutex to indicate that the main loop is currently executing
-        
 };
 #endif

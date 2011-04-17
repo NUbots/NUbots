@@ -40,6 +40,7 @@ public:
     
     virtual vector<float> getNextParameters() = 0;
     virtual void setParametersResult(float fitness) = 0;
+    virtual void setParametersResult(const vector<float>& fitness);
     
     string& getName();
     virtual void summaryTo(ostream& stream) = 0;
@@ -51,6 +52,8 @@ public:
     void saveAs(string name);
     void load();
 protected:
+    float normalDistribution(float mean, float sigma);
+    float uniformDistribution(float min, float max);
     virtual void toStream(ostream& o) const = 0;
     virtual void fromStream(istream& i) = 0;
 protected:

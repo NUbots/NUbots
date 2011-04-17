@@ -65,6 +65,8 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
 	lostCount = 0;
     timeSinceFieldObjectSeen = 0;
 
+    initSingleModel(67.5f, 0, mathGeneral::PI);
+
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
         debugLogName << DATA_DIR;
@@ -141,27 +143,26 @@ void Localisation::process(NUSensorsData* data, FieldObjects* fobs, GameInformat
     if(doProcessing == false)
         return;
     
-    vector<float> odo;
-    if (m_sensor_data->getOdometry(odo))
-    {
-        m_odomForward = odo[0];
-        m_odomLeft = odo[1];
-        m_odomTurn = odo[2];
-    }
-    
-    vector<float> gps;
-    float compass;
-    if (m_sensor_data->getGps(gps) and m_sensor_data->getCompass(compass))
-    {   
-        #ifndef USE_VISION
+    #ifndef USE_VISION
+        vector<float> gps;
+        float compass;
+        if (m_sensor_data->getGps(gps) and m_sensor_data->getCompass(compass))
+        {   
             m_objects->self.updateLocationOfSelf(gps[0], gps[1], compass, 0.1, 0.1, 0.01, false);
             return;
-        #endif
-    }
-
-    // perform odometry update and change the variance of the model
-    doTimeUpdate((-m_odomForward), m_odomLeft, m_odomTurn);
-    ProcessObjects();
+        }
+    #else
+        vector<float> odo;
+        if (m_sensor_data->getOdometry(odo))
+        {
+            m_odomForward = odo[0];
+            m_odomLeft = odo[1];
+            m_odomTurn = odo[2];
+        }
+        // perform odometry update and change the variance of the model
+        doTimeUpdate((-m_odomForward), m_odomLeft, m_odomTurn);
+        ProcessObjects();
+    #endif
 
     m_timestamp = m_sensor_data->CurrentTime;
 }
@@ -420,6 +421,18 @@ void Localisation::ClearAllModels()
         m_models[m].toBeActivated = false;
     }
     return;
+}
+
+void Localisation::initSingleModel(float x, float y, float theta)
+{
+
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    if(m_sensor_data)
+        debug_out  << "[" << m_sensor_data->CurrentTime << "] Initialising single model." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    
+    ClearAllModels();
+    setupModel(0,1,x,y,theta);
 }
 
 void Localisation::doInitialReset()
