@@ -209,20 +209,20 @@ public:
             float around_speed;
             float around_direction;
             float around_rotation;
-            if (distance < 1.5*stoppingdistance)
+            if (distance < 0.75*stoppingdistance)
             {   // if we are close enough to worry about the heading
-                const float heading_gain = 0.7;
+                const float heading_gain = 0.6;
                 const float heading_threshold = mathGeneral::PI/2;
                 if (fabs(heading) < heading_threshold)
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);
                 else
                     around_speed = heading_gain;
-                if (fabs(heading) > 2.5)
+                if (fabs(heading) > 2.85)
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                 
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*11/distance;        // 11 is rough speed in cm/s
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // 11 is rough speed in cm/s
             }
             else
             {

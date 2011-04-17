@@ -118,8 +118,8 @@ void NUKick::loadKickParameters()
     const float xMin = m_kinematicModel->getFootForwardLength() - 1;
     const float xReachFwd = xMin + 10.0f;
     const float xReachSide = 30.0f;
-    float yMin = footInnerWidth + 3.5f;
-    float yMax = yMin + footWidth - 1.5;
+    float yMin = footInnerWidth + 2.0f;
+    float yMax = yMin + footWidth - 2.0;
 
     m_intialWeightShiftPercentage = 1.0f;
 #ifdef TARGET_IS_NAOWEBOTS
@@ -1671,7 +1671,7 @@ bool NUKick::chooseLeg()
             debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << endl;
         #endif
 
-        const float fwdAngleRange = PI/16.0f;
+        const float fwdAngleRange = PI/4.0f;
         const float sideAngleRange = PI/8.0f;
         // Direction is forwardsish
 

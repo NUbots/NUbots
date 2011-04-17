@@ -84,7 +84,9 @@ protected:
             debug << "BallIsLostPan" << endl;
         #endif
         // keep track of the time in this state
-        if (m_parent->stateChanged())
+        bool kickIsActive = false;
+        m_data->get(NUSensorsData::MotionKickActive, kickIsActive);
+        if (m_parent->stateChanged() or kickIsActive)
             reset();
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
@@ -144,7 +146,7 @@ public:
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
-        if (m_time_in_state > 1000*(6.28/m_ROTATIONAL_SPEED))
+        if (m_time_in_state > 1000*(1.5*6.28/m_ROTATIONAL_SPEED))
             return m_lost_machine->m_lost_move;
         else
             return this;
