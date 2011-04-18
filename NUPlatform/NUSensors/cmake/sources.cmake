@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  EndEffectorTouch.cpp EndEffectorTouch.h
+		OdometryEstimator.cpp OdometryEstimator.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

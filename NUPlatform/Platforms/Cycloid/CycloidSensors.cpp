@@ -23,6 +23,8 @@
 #include "../Robotis/Motors.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
+#include "Tools/Math/General.h"
+
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
@@ -90,13 +92,10 @@ void CycloidSensors::copyFromJoints()
         joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
         joint[NUSensorsData::TargetId] = Motors::MotorSigns[i]*(targets[i] - Motors::DefaultPositions[i])/195.379;;
         joint[NUSensorsData::StiffnessId] = stiffnesses[i];
-        joint[NUSensorsData::TorqueId] = Motors::MotorSigns[i]*JointLoads[i]*1.6432e-3;             // This torque conversion factor was measured for a DX-117, I don't know how well it applies to other motors
+        float load = (1023/pow(Motors::DefaultSlopes[i]+1, 2))*(targets[i] - JointPositions[i]);        // im lazy; this assumes both the punch and margin are zero
+        joint[NUSensorsData::TorqueId] = Motors::MotorSigns[i]*load*1.262e-3;
+        //joint[NUSensorsData::TorqueId] = mathGeneral::sign(targets[i] - JointPositions[i])*Motors::MotorSigns[i]*JointLoads[i]*1.1.262e-3;             // This torque conversion factor was measured for a DX-117, I don't know how well it applies to other motors
         m_data->set(*m_joint_ids[i], m_current_time, joint);
-        
-        if (*m_joint_ids[i] == NUSensorsData::LAnklePitch)
-        {
-            debug << "(" << joint[NUSensorsData::PositionId] << " - " << m_previous_positions[i] << ")/" << delta_t << endl;
-        }
         
         m_previous_positions[i] = joint[NUSensorsData::PositionId];
         m_previous_velocities[i] = joint[NUSensorsData::VelocityId];

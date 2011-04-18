@@ -35,17 +35,46 @@
 #include "Behaviour/BehaviourFSMState.h"
 #include "Infrastructure/NUData.h"
 
+class QSDelay;
 class QSRelax;
 class QSCatch;
+
+#include <boost/circular_buffer.hpp>
 
 class QSBallisticController : public BehaviourFSMState
 {
 public:
+    static const float VelocityThreshold = 0.009;
+public:
     QSBallisticController(const NUData::id_t& joint);
     ~QSBallisticController();
+    
+    QSRelax* getRelax() const;
+    QSCatch* getCatch() const;
+    
+    bool relaxed() const;
+    float getTargetEstimate() const;
+    float getPosition() const;
+    float getVelocity() const;
+    float getAcceleration() const;
+    float getTorque() const;
+    
+    void updateTargetEstimate();
+protected:
+    void doStateCommons();
 private:
+    NUData::id_t m_joint;
+    QSDelay* m_delay;
     QSRelax* m_relax;
     QSCatch* m_catch;
+    
+    bool m_initialised;         // a flag to indicate whether the position and velocity have been initialised
+    float m_position;           // filtered angular position of the joint under control
+    float m_velocity;           // filtered angular velocity of the joint under control
+    float m_acceleration;       // filtered angular acceleration of the joint under control
+    
+    boost::circular_buffer<float> m_target_estimate_buffer;
+    float m_target_estimate;
 };
 
 #endif

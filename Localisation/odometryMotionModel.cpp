@@ -137,14 +137,15 @@ double OdometryMotionModel::getProbabilityOfSample(Pose2D newState,Pose2D diffOd
 	
 	dHatTrans = sqrt(pow(newState.X - oldState.X, 2) + pow(newState.Y - oldState.Y, 2));
 	dHatRot2 = newState.Theta - oldState.Theta - dHatRot1;
-	
+
+/*
 	double p1_max = d_myProb.ProbabilityOfValInVariance(0.00, (rErr1 *(dHatRot1) + d_tErr1 * dHatTrans));
 	double p2_max = d_myProb.ProbabilityOfValInVariance(0.00,
 			(d_tErr2 * dHatTrans +
 					rErr2 * (((dHatRot1) + ((dHatRot2))))));
 	double p3_max = d_myProb.ProbabilityOfValInVariance(0.00, (rErr1 * (dHatRot2) + d_tErr1 * dHatTrans));
 	
-/*	double p1 = d_myProb.ProbabilityOfValInVariance((dRot1 - dHatRot1), (rErr1 *fabs(dHatRot1) + d_tErr1 * dHatTrans))/p1_max;
+	double p1 = d_myProb.ProbabilityOfValInVariance((dRot1 - dHatRot1), (rErr1 *fabs(dHatRot1) + d_tErr1 * dHatTrans))/p1_max;
 	
 	double p2 = d_myProb.ProbabilityOfValInVariance((dTrans - dHatTrans),(d_tErr2 * dHatTrans + rErr2 * fabs(((dHatRot1) + ((dHatRot2))))))/p2_max;
 	

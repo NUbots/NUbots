@@ -25,19 +25,21 @@
 #include "NUPlatform/NUPlatform.h"
 
 #include "NUSensors/EndEffectorTouch.h"
+#include "NUSensors/OdometryEstimator.h"
 #include "Kinematics/Horizon.h"
 #include "Kinematics/Kinematics.h"
 #include "Kinematics/OrientationUKF.h"
 
 #include "Tools/Math/General.h"
+#include "Tools/Math/StlVector.h"
 #include "Motion/Tools/MotionFileTools.h"
+#include "Tools/Math/FIRFilter.h"
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
 #include "nubotdataconfig.h"
 
 #include <math.h>
-#include <boost/circular_buffer.hpp>
 #include <limits>
 using namespace std;
 
@@ -54,9 +56,10 @@ NUSensors::NUSensors()
     m_previous_time = -1000;
     m_data = new NUSensorsData();
     m_touch = new EndEffectorTouch();
-	m_kinematicModel = new Kinematics();
-	m_kinematicModel->LoadModel("None");
+    m_kinematicModel = new Kinematics();
+    m_kinematicModel->LoadModel("None");
     m_orientationFilter = new OrientationUKF();
+    m_odometry = new OdometryEstimator();
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -68,10 +71,12 @@ NUSensors::~NUSensors()
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::~NUSensors" << endl;
 #endif
-	delete m_kinematicModel;
-	m_kinematicModel = 0;
+    delete m_kinematicModel;
+    m_kinematicModel = 0;
     delete m_orientationFilter;
     m_orientationFilter = 0;
+    delete m_odometry;
+    m_odometry = 0;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -352,100 +357,46 @@ void NUSensors::calculateOdometry()
     debug << "NUSensors::calculateOdometry()" << endl;
 #endif
 
-    const float turnMultiplier = 0.7;       // sd: 0.1rad (0.032 rad/rad). Measured on 12/6/2010 with ALWalkCrab
-    const float xMultiplier = 1.0;         // 1.35 sd: 7.9cm (0.023 cm/cm). Measured on 12/6/2010 with ALWalkCrab
-    const float yMultiplier = -1.09;        // 1.48 sd: 4.2cm (0.021 cm/cm). Measured on 12/6/2010 with ALWalkCrab
-
-    static float prevHipYaw = 0.0;
-    static float prevLeftX = 0.0;
-    static float prevRightX = 0.0;
-    static float prevLeftY = 0.0;
-    static float prevRightY = 0.0;
-
-    static vector<float> leftFootPosition(3,0.0f);
-    static vector<float> rightFootPosition(3,0.0f);
+    // Retrieve the current odometry data.
     vector<float> odometeryData;
-    if (not m_data->getOdometry(odometeryData))
-        odometeryData = vector<float>(3,0);
+    m_data->getOdometry(odometeryData);
+    if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
-    float hipYawPitch;
-    bool yawPositionOk = m_data->getPosition(NUSensorsData::LHipYawPitch, hipYawPitch);
-
-    const int arrayWidth = 4;
-    const int translationCol = 3;
-
-    // Get the left foot position relative to the origin
-    bool leftPositionOk = false;
-    bool rightPositionOk = false;
-    vector<float> llegvector, rlegvector;
-    Matrix leftFootTransform, rightFootTransform;
-    if (m_data->get(NUSensorsData::LLegTransform, llegvector))
-    {
-        leftFootTransform = Matrix4x4fromVector(llegvector);
-        leftFootPosition[0] = leftFootTransform[0][3];
-        leftFootPosition[1] = leftFootTransform[1][3];
-        leftFootPosition[2] = leftFootTransform[2][3];
-        leftPositionOk = true;
-    }
-    if(m_data->get(NUSensorsData::RLegTransform, rlegvector))
-    {
-        rightFootTransform = Matrix4x4fromVector(rlegvector);
-        rightFootPosition[0] = rightFootTransform[0][3];
-        rightFootPosition[1] = rightFootTransform[1][3];
-        rightFootPosition[2] = rightFootTransform[2][3];
-        rightPositionOk = true;
-    }
-
-    if(!rightPositionOk or !leftPositionOk or !yawPositionOk) return;
-
-    bool leftFootSupport = false;
-    bool rightFootSupport = false;
-
+    // Retrieve the foot pressures.
     float leftForce, rightForce;
-    m_data->getForce(NUSensorsData::LLeg,leftForce);
-    m_data->getForce(NUSensorsData::RLeg,rightForce);
+    m_data->getForce(NUSensorsData::LFoot,leftForce);
+    m_data->getForce(NUSensorsData::RFoot,rightForce);
 
-    if(leftForce > rightForce)
-    {
-        leftFootSupport = true;
-        rightFootSupport = false;
-    }
-    else
-    {
-        leftFootSupport = false;
-        rightFootSupport = true;
-    }
-    
-    // Calculate movement
-    float deltaX;
-    float deltaY;
-    float deltaTheta;
-    
-    if(leftFootSupport && !rightFootSupport)
-    {
-        deltaX = xMultiplier * (leftFootPosition[0] - prevLeftX);
-        deltaY = yMultiplier * (leftFootPosition[1] - prevLeftY);
-        deltaTheta = turnMultiplier * (hipYawPitch - prevHipYaw);
-    }
-    else if(!leftFootSupport && rightFootSupport)
-    {
-        deltaX = xMultiplier * (rightFootPosition[0] - prevRightX);
-        deltaY = yMultiplier * (rightFootPosition[1] - prevRightY);
-        deltaTheta = turnMultiplier * (prevHipYaw - hipYawPitch);
-    }
-    
+    // Retrieve the foot positions.
+    bool validFootPosition = true;
+    std::vector<float> leftPosition;
+    std::vector<float> rightPosition;
+    validFootPosition &= m_data->getEndPosition(NUSensorsData::LFoot, leftPosition);
+    validFootPosition &= m_data->getEndPosition(NUSensorsData::RFoot, rightPosition);
+    if(!validFootPosition)
+        return; // If the leg transforms cannot be obtained, then no calculations can be done.
+
+    vector<float> gpsData;
+    float compassData;
+    m_data->getGps(gpsData);
+    m_data->getCompass(compassData);
+
+    vector<float> odom = m_odometry->CalculateNextStep(leftPosition,rightPosition,leftForce,rightForce,gpsData,compassData);
+
+    // Calculate differences in the position of the support leg.
+    float deltaX = odom[0];
+    float deltaY = odom[1];
+    float deltaTheta = odom[2];
+
     odometeryData[0] += deltaX;
     odometeryData[1] += deltaY;
     odometeryData[2] += deltaTheta;
 
-    m_data->set(NUSensorsData::Odometry, m_data->CurrentTime, odometeryData);
-
-    // Save the historical data
-    prevHipYaw = hipYawPitch;
-    prevLeftX = leftFootPosition[0];
-    prevRightX = rightFootPosition[0];
-    prevLeftY = leftFootPosition[1];
-    prevRightY = rightFootPosition[1];
+#if DEBUG_NUSENSORS_VERBOSITY > 4
+    debug << "Odometry This Frame: (" << deltaX << "," << deltaY << "," << deltaTheta << ")" << endl;
+#endif        
+    m_data->set(NUSensorsData::Odometry,m_data->GetTimestamp(),odometeryData);
+    return;
 }
 
 void NUSensors::calculateKinematics()
@@ -460,6 +411,8 @@ void NUSensors::calculateKinematics()
     bool rightLegJointsSuccess = m_data->getPosition(NUSensorsData::RLeg, rightLegJoints);
     static vector<float> headJoints(2,0.0f);
     bool headJointsSuccess = m_data->getPosition(NUSensorsData::Head, headJoints);
+
+	rightLegJoints[2] = leftLegJoints[2];
 
     // Note that the kinematics uses the Matrix class, however, at this stage the NUSensorsData stores vector<float> and vector<vector<float>>
     // In this early version we continue to use the method used in 2010:

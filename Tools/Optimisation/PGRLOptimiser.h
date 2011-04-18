@@ -39,27 +39,40 @@ public:
     ~PGRLOptimiser();
     
     vector<float> getNextParameters();
+    void setParametersResult(const vector<float>& fitness);
     void setParametersResult(float fitness);
     
     void summaryTo(ostream& stream);
 private:
+    void generatePolicies();
+    vector<float> calculateStep();
+
     void generateRandomPolices(const vector<Parameter>& seed);
     vector<float> generateRandomPolicy(const vector<Parameter>& seed);
     int getRandomDirection();
-    vector<float> calculateStep();
     
+    void generateShuffledPolices(const vector<Parameter>& seed);
+    vector<float> generateSigns();
+
+    void generateOpponentPolicies(const vector<Parameter>& seed);
+    void generateOpponents(const vector<Parameter>& seed, vector<float>& policy, vector<float>& opponent);
+
     void toStream(ostream& o) const;
     void fromStream(istream& i);
 private:
-    float m_min_step_size;					//!< the minimum step size
-    float m_max_step_size;					//!< the maxiumum step size
-    float m_epsilon;						//!< the small step size used to estimate the gradient
-    int m_num_per_iteration;				//!< the number of random samples used to estimate the gradient
+    float m_step_size;							//!< the maxiumum step size
+    float m_epsilon;							//!< the small step size used to estimate the gradient
+    int m_num_particles;						//!< the number of random samples used to estimate the gradient
+    int m_stalled_threshold;					//!< the number of iterations before the selected fitness is switched
     
     int m_random_policies_index;				//!< the index into m_random_policies of the parameters currently under evaluation
     vector<Parameter> m_current_parameters;		//!< the current set of parameters, that is the current set at which point we are estimating the gradient
-    vector<vector<float> > m_random_policies;	//!< the m_num_per_iteration of randomly generated polcies use to evaluate the gradient
+    vector<vector<float> > m_random_policies;	//!< the m_num_particles of randomly generated polcies use to evaluate the gradient
     vector<float> m_fitnesses;					//!< the corresponding fitnesses of m_random_policies
+
+    int m_selected_fitness;
+    float m_best_fitness;
+    int m_stall_count;
 };
 
 #endif

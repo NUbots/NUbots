@@ -36,6 +36,7 @@ class NUSensorsData;
 class EndEffectorTouch;
 class Kinematics;
 class OrientationUKF;
+class OdometryEstimator;
 
 #include <vector>
 using namespace std;
@@ -64,7 +65,6 @@ protected:
     
     void calculateZMP();
     void calculateFallSense();
-
     void calculateOdometry();
     void calculateCameraHeight();
     
@@ -80,6 +80,7 @@ protected:
     EndEffectorTouch* m_touch;
     Kinematics* m_kinematicModel;
     OrientationUKF* m_orientationFilter;
+    OdometryEstimator* m_odometry;
 private:
 };
 

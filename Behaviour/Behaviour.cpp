@@ -36,7 +36,10 @@
 #include "MiscBehaviours/ScriptedPoseProvider.h"
 #include "MiscBehaviours/ForwardWalkProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
+
 #include "CameraCalibration/CameraCalibrationProvider.h"
+#include "EnvironmentalEmotions/EnvironmentalEmotionsProvider.h"
+
 
 #ifdef TARGET_IS_BEAR
     #include "BearMode/BearModeProvider.h"
@@ -52,7 +55,7 @@ using namespace std;
 Behaviour::Behaviour()
 {
     #if defined(TARGET_IS_NAOWEBOTS)
-        m_behaviour = new WalkOptimisationProvider(this);
+        m_behaviour = new SoccerProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
@@ -132,6 +135,8 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new RoboPedestrianProvider(this);
 	else if (name.compare("cameracalibration") == 0)
         return new CameraCalibrationProvider(this);
+    else if (name.find("enviro") != string::npos)
+        return new EnvironmentalEmotionsProvider(this);
     else
         return NULL;
 }
