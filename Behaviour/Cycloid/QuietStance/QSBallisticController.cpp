@@ -154,12 +154,12 @@ float QSBallisticController::getTorque() const
 /*! @brief Update the target esimtate */
 void QSBallisticController::updateTargetEstimate()
 {
-    float m = 2.8;
+    float m = QSBallisticController::Mass
     float g = 9.81;
-    float h = 0.25;
+    float h = QSBallisticController::Height;
     float o = -0.02;
-    float b = 7.0;
-    float K = 1.0;
+    float b = QSBallisticController::FrictionConstant;
+    float K = 1.0;          // K is a constant to compensate for calculation errors in the torque.
     
     float u, v, a, t;
     u = getPosition();
