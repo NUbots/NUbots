@@ -54,6 +54,7 @@ protected:
     std::string m_host_name;            //!< the name of the host machine
     sockaddr_in m_local_address;        //!< the machine's local address
     sockaddr_in m_target_address;       //!< the socket target address
+    sockaddr_in m_broadcast_address;	//!< the broadcast address for this machine
     
     double m_time_last_receive;         //!< the time in milliseconds the last packet was received
 private:
