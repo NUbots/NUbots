@@ -53,5 +53,7 @@ private:
     vector<NUHostInfo> m_current_hosts;
 };
 
+extern ConnectionManager* ConnectionMan;
+
 #endif
 

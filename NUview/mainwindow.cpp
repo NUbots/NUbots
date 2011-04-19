@@ -2,9 +2,9 @@
 #include "ui_mainwindow.h"
 #include "ConnectionManager/ConnectionManager.h"
 #include "LayerSelectionWidget.h"
-#include "WalkParameterWidget.h"
-#include "KickWidget.h"
 #include "camerasettingswidget.h"
+#include "MotionWidgets/WalkParameterWidget.h"
+#include "MotionWidgets/KickWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>

@@ -57,10 +57,6 @@ HEADERS += ui_mainwindow.h \
     ../Vision/TransitionSegment.h \
     ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
-    WalkParameterWidget.h \
-    ../Motion/Walks/WalkParameters.h \
-    ../Tools/Optimisation/Parameter.h \
-    KickWidget.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
@@ -167,7 +163,12 @@ HEADERS += ui_mainwindow.h \
     ConnectionManager/BonjourServiceBrowser.h \
     ConnectionManager/BonjourServiceResolver.h \
     ConnectionManager/NUHostInfo.h \
-    ConnectionManager/RobotSelectDialog.h
+    ConnectionManager/RobotSelectDialog.h \
+    MotionWidgets/WalkParameterWidget.h \
+    MotionWidgets/KickWidget.h \
+    MotionWidgets/MotionFileEditor.h \
+    ../Motion/Walks/WalkParameters.h \
+    ../Tools/Optimisation/Parameter.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -188,10 +189,6 @@ SOURCES += mainwindow.cpp \
     ../Vision/TransitionSegment.cpp \
     ../Vision/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
-    WalkParameterWidget.cpp \
-    KickWidget.cpp \
-    ../Motion/Walks/WalkParameters.cpp \
-    ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     $$files(../NUPlatform/NUIO/*.cpp) \
@@ -275,6 +272,11 @@ SOURCES += mainwindow.cpp \
     ConnectionManager/BonjourProvider.cpp \
     ConnectionManager/BonjourServiceBrowser.cpp \
     ConnectionManager/BonjourServiceResolver.cpp \
-    ConnectionManager/RobotSelectDialog.cpp
+    ConnectionManager/RobotSelectDialog.cpp \
+    MotionWidgets/WalkParameterWidget.cpp \
+    MotionWidgets/KickWidget.cpp \
+    MotionWidgets/MotionFileEditor.cpp \
+    ../Motion/Walks/WalkParameters.cpp \
+    ../Tools/Optimisation/Parameter.cpp
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
