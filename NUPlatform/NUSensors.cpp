@@ -118,12 +118,12 @@ void NUSensors::copyFromHardwareCommunications()
 
 void NUSensors::calculateSoftSensors()
 {
+    m_touch->calculate();
     calculateKinematics();
     calculateOrientation();
     calculateHorizon();
     calculateButtonDurations();
 
-    m_touch->calculate();
     //m_zmp->calculate();
 
     calculateOdometry();
@@ -448,6 +448,7 @@ void NUSensors::calculateKinematics()
     {
         m_data->setAsInvalid(NUSensorsData::LLegTransform);
     }
+    
     if(headJointsSuccess)
     {
         bottomCameraTransform = m_kinematicModel->CalculateTransform(Kinematics::bottomCamera,headJoints);        
@@ -467,25 +468,18 @@ void NUSensors::calculateKinematics()
 
 
     bool leftFootSupport = false, rightFootSupport = false;
-    m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
-    m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
+    bool validsupportdata = m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
+    validsupportdata &= m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
     // Choose support leg.
-    if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
+    if (validsupportdata)
     {
-        supportLegTransform = &rightLegTransform;
-    }
-    else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
-    {
-        supportLegTransform = &leftLegTransform;
-    }
-    else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
-    {
-        supportLegTransform = &leftLegTransform;
-    }
-    else
-    {
-        supportLegTransform = 0;
+        if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
+            supportLegTransform = &rightLegTransform;
+        else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
+            supportLegTransform = &leftLegTransform;
+        else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+            supportLegTransform = &leftLegTransform;
     }
 
     if(supportLegTransform)
