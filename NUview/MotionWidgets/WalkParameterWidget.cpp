@@ -77,8 +77,8 @@ void WalkParameterWidget::onSelectButtonPressed()
     {
         m_editor = new MotionFileEditor(files.front().toStdString());
         connect(m_editor, SIGNAL(sendRequested(string)), this, SLOT(onSendRequested(string)));
+        m_editor->show();
     }
-    m_editor->show();
 }
 
 void WalkParameterWidget::onSendRequested(string text)
