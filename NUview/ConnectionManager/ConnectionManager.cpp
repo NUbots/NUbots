@@ -29,9 +29,12 @@
 #include "debug.h"
 #include "Tools/Math/StlVector.h"
 
+ConnectionManager* ConnectionMan = 0;
+
 /*! @brief Constructs a ConnectionManager */
 ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
 {
+    ConnectionMan = this;
     setObjectName("Connection Manager");
     
     m_list_button = new QPushButton("List NUbots");

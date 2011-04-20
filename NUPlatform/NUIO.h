@@ -52,8 +52,8 @@ public:
     // JobList streaming
     friend NUIO& operator<<(NUIO& io, JobList& jobs);
     friend NUIO& operator<<(NUIO& io, JobList* jobs);
-    void setJobPortTargetAddress(std::string ipaddress);
-    void setJobPortToBroadcast();
+    void setJobAddress(std::string ipaddress);
+    void setJobToBroadcast();
 
     // Raw Image streaming 
     friend NUIO& operator<<(NUIO& io, NUbot& p_nubot);

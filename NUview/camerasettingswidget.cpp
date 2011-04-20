@@ -414,7 +414,7 @@ void cameraSettingsWidget::connectToRobot()
     }
     */
     std::string ipaddress = robotName.toStdString();
-    nuio->setJobPortTargetAddress(ipaddress);
+    nuio->setJobAddress(ipaddress);
     sendDataToRobot();
 }
 
