@@ -138,6 +138,21 @@ void Parameter::set(float value)
         Value = value;
 }
 
+void Parameter::set(float value, float min, float max, string desc)
+{
+    if (value < min) 
+        Value = min;
+    else if (value > max) 
+        Value = max;
+    else 
+        Value = value;
+        
+    Min = min;
+    Max = max;
+    
+    Description = desc;      
+}
+
 /*! @brief Prints a human-readble version of the walk parameter */
 void Parameter::summaryTo(ostream& output) 
 {

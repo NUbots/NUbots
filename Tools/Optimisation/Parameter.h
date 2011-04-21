@@ -47,6 +47,7 @@ public:
     string& name();
     string& desc();
     void set(float value);
+    void set(float value, float min, float max, string desc);
     
     void summaryTo(ostream& output);
     void csvTo(ostream& output);

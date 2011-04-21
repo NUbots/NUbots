@@ -598,43 +598,43 @@ void Vision::SaveAnImage()
             CameraSettings tempCameraSettings = currentImage->getCameraSettings();
             if (numSavedImages % 10 == 0 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure - 0;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
             }
             else if (numSavedImages % 10 == 1 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure - 50;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 50);
             }
             else if (numSavedImages % 10 == 2 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure - 25;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 25);
             }
             else if (numSavedImages % 10 == 3 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure - 0;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
             }
             else if (numSavedImages % 10 == 4 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 25;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 25);
             }
             else if (numSavedImages % 10 == 5 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 50;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 50);
             }
             else if (numSavedImages % 10 == 6 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 100;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 100);
             }
             else if (numSavedImages % 10 == 7 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 150;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 150);
             }
             else if (numSavedImages % 10 == 8 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 200;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 200);
             }
             else if (numSavedImages % 10 == 9 )
             {
-                tempCameraSettings.exposure = currentSettings.exposure + 300;
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 300);
             }
             
             //Set the Camera Setttings using Jobs:
