@@ -280,8 +280,8 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
         colourlist.push_back(ClassIndex::blue);
         colourlist.push_back(ClassIndex::shadow_blue);
     }
-
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
+    int bufferSize = 10;
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist,bufferSize);
 
     //qDebug() << "segments found: " << tempLine.getNumberOfSegments() ;
     //! Debug Output for small scans:

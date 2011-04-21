@@ -516,7 +516,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         {
             if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
             {
-                debug << "\tMobile Object: " << i << ": " << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->mobileFieldObjects[i].measuredDistance() << "cm away."
+                debug << "\tMobile Object: " << i << ": " << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->mobileFieldObjects[i].measuredDistance() <<  "cm away."
                         << "\tBearing: "<< AllFieldObjects->mobileFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->mobileFieldObjects[i].measuredElevation()<<endl;
             }
         }
@@ -534,12 +534,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         //START: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
 
         //TESTING: Save Images which of a field object seen
-        /*
-        if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        
+        /*if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             SaveAnImage();
         }
         */
+        
         //bool BlueGoalSeen = false;
         /*
         if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
@@ -1276,7 +1277,7 @@ int Vision::CalculateSkipSpacing(int currentPosition, int linestartPosition, boo
 
 //! @brief  Pass a transition segment into this function, and will return a scanline which contains
 //!         many different at interval of "spacing" transition segments classified in the orthogonal to the "direction"
-void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction, const std::vector<unsigned char> &colourList)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
+void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempTransition,int spacings, int direction, const std::vector<unsigned char> &colourList, int bufferSize)// Vector2<int> tempStartPoint, unsigned char currentColour, int length, int spacings, int direction)
 {
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
@@ -1284,7 +1285,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     if((direction == ScanLine::DOWN || direction == ScanLine::UP))
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
-        int bufferSize = 10;
+        //int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
         for (int i = 0; i < bufferSize; i++)
         {
@@ -1348,6 +1349,8 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                 }
             }
             subAfterColour = tempColour;
+
+            //START SCANING LEFT:
             tempsubPoint = StartPoint.x;
             tempColour = tempTransition->getColour();
             //Reset Buffer: to OriginalColour
@@ -1407,7 +1410,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
     {
         Vector2<int> StartPoint = tempTransition->getStartPoint();
 
-        int bufferSize = 10;
+        //int bufferSize = 10;
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
 
@@ -1512,7 +1515,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                     break;
                 }
             }
-            subBeforeColour = tempTransition->getColour();
+            subBeforeColour = tempColour;
             //THEN ADD TO LINE
 
 
@@ -2583,7 +2586,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         viewPosition.x = (int)round(ball.centreX);
         viewPosition.y = (int)round(ball.centreY);
         double ballDistanceFactor=EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()*ORANGE_BALL_DIAMETER;
-        float BALL_OFFSET = 0;
+        float BALL_OFFSET = 0.0;
         float distance = (float)(ballDistanceFactor/(2*ball.radius)+BALL_OFFSET);
         float bearing = (float)CalculateBearing(viewPosition.x);
         float elevation = (float)CalculateElevation(viewPosition.y);
@@ -2613,9 +2616,12 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
                                                                                       currentImage->m_timestamp);
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
-        /*debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()
+
+        /*
+        debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()
                     << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing()
-                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;*/
+                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;
+        */
 
     }
 
@@ -2750,13 +2756,13 @@ double Vision::CalculateBearing(double cx){
 
 
 double Vision::CalculateElevation(double cy){
-    double FOVy = deg2rad(34.45f); //Taken from Old Globals
+    double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
     return atan( (currentImage->getHeight()/2-cy) / ( (currentImage->getHeight()/2) / (tan(FOVy/2.0)) ) );
 }
 
 double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
 {
-    double FOVx = deg2rad(45.0f); //Taken from Old Globals
+    double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
 
