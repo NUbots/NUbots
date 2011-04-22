@@ -78,7 +78,7 @@ BehaviourState* QSRelax::nextState()
         debug << "QSRelax::nextState" << endl;
     #endif
     // I am fixing the time_in_state to be 0.64*catch_duration
-    if (m_time_in_state > 180 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)
+    if (m_time_in_state > 400 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)
     {
         m_previous_time = 0;
         m_time_in_state = 0;

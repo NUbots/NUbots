@@ -29,6 +29,7 @@
 #include "NUPlatform/NUPlatform.h"
 
 #include "Motion/Tools/MotionCurves.h"
+#include "Tools/Math/General.h"
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
@@ -47,8 +48,8 @@ QSCatch::QSCatch(const NUData::id_t& joint, const QSBallisticController* parent)
     m_catch_issued = false;
     m_finish_time = 0;
     
-    m_strength = 1.00;
-    m_catch_duration = 280;
+    m_strength = 0.65;
+    m_catch_duration = 315;
     m_tonic_duration = 150;
     m_catch_duration_variance = 50;
 }
@@ -64,11 +65,20 @@ void QSCatch::doState()
     #endif
     if (not m_catch_issued)
     {
-        float currenttarget;                        // we use the currenttarget as the start point of the motion curve for maximal smoothness
+        float currenttarget, sensorposition;
         m_data->getTarget(m_joint, currenttarget);
+        m_data->getPosition(m_joint, sensorposition);
+        float currentposition = m_parent->getPosition();
+        float currentvelocity = m_parent->getVelocity();
         float targetestimate = m_parent->getTargetEstimate();
-        float target = -0.025 + targetestimate;
-        target += m_strength*(targetestimate - currenttarget);
+        float error = targetestimate - currentposition;
+        
+        float m = QSBallisticController::Mass;
+        float g = 9.81;
+        float h = QSBallisticController::Height;
+        float b = QSBallisticController::FrictionConstant;
+        
+        float target = m_strength*(0.5*mathGeneral::sign(error)*m*g*h*(1 - cos(error)) + b*error - m*pow(h,2)*currentvelocity) + 0.01*mathGeneral::sign(error) + currentposition;
         
         float total_duration = normalDistribution(m_catch_duration, m_catch_duration_variance);
         float tone_duration = normalDistribution(m_tonic_duration, (m_tonic_duration/m_catch_duration)*m_catch_duration_variance);
