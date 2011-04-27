@@ -202,7 +202,7 @@ void ALWalk::setALConfig()
     
     m_al_config[4][1] = parameters[1].get()/100.0;                            // "WALK_MAX_STEP_HEIGHT";
     m_al_config[5][1] = 180*parameters[2].get()/3.141;                        // "WALK_MIN_TRAPEZOID";
-    m_al_config[6][1] = 180*parameters[3].get()/3.141;                        // "WALK_FOOT_ORIENTATION";
+    m_al_config[6][1] = 0;//180*parameters[3].get()/3.141;                        // "WALK_FOOT_ORIENTATION";
     m_al_config[7][1] = 180*parameters[4].get()/3.141;                        // "WALK_TORSO_ORIENTATION_Y"
     m_al_config[8][1] = parameters[5].get()/100;                              // "WALK_TORSO_HEIGHT";
 }
