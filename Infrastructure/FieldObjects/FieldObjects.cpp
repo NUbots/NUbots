@@ -2,6 +2,7 @@
 #include <string>
 #include <debug.h>
 #include "Tools/Math/FieldCalculations.h"
+#include <sstream>
 
 FieldObjects::FieldObjects()
 {
@@ -183,18 +184,22 @@ void FieldObjects::InitStationaryFieldObjects()
                     x = 240.0f;
                     y = 200.0f;
                     objectName = "Projected T Yellow Left";
+                    break;
                 case FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
                     x = 240.0f;
                     y = -200.0f;
                     objectName = "Projected T Yellow Right";
+                    break;
                 case FO_CORNER_PROJECTED_T_BLUE_LEFT:
                     x = -240.0f;
                     y = -200.0f;
                     objectName = "Projected T Blue Left";
+                    break;
                 case FO_CORNER_PROJECTED_T_BLUE_RIGHT:
                     x = -240.0f;
                     y = 200.0f;
                     objectName = "Projected T Blue Right";
+                    break;
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";
@@ -346,6 +351,45 @@ std::vector<FieldObjects::MobileFieldObjectID> FieldObjects::GetPossibleMobileOb
             visibleIds.push_back(MobileFieldObjectID(stat_obj_iterator->getID()));
     }
     return visibleIds;
+}
+
+std::string FieldObjects::toString(bool visibleOnly) const
+{
+    std::stringstream result;
+    result << "Timestamp: " << m_timestamp << std::endl;
+    result << std::endl << self.toString() << std::endl;
+    int printCount;
+
+    result << "Landmarks" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < stationaryFieldObjects.size(); i++)
+    {
+        if(visibleOnly and stationaryFieldObjects[i].isObjectVisible()==false) continue;
+        result << stationaryFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    result << std::endl << "Objects" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < mobileFieldObjects.size(); i++)
+    {
+        if(visibleOnly and mobileFieldObjects[i].isObjectVisible()==false) continue;
+        result << mobileFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    result << std::endl << "Ambiguous" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < ambiguousFieldObjects.size(); i++)
+    {
+        result << ambiguousFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    return result.str();
 }
 
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)

@@ -51,10 +51,10 @@ class FieldObjects: public TimestampedData
                 FO_PENALTY_BLUE                 = 24,
 
                 // Goal Gaps
-                FO_YELLOW_GOAL_GAP 		= 25,
-                FO_BLUE_GOAL_GAP 		= 26,
+                //FO_YELLOW_GOAL_GAP 		= 25,
+                //FO_BLUE_GOAL_GAP 		= 26,
 
-                NUM_STAT_FIELD_OBJECTS 		= 27
+                NUM_STAT_FIELD_OBJECTS 		= 25
 
             };
 
@@ -105,6 +105,7 @@ class FieldObjects: public TimestampedData
             void preProcess(const float timestamp);
             void postProcess(const float timestamp);
             double GetTimestamp() const{return m_timestamp;};
+            std::string toString(bool visibleOnly=false) const;
 
     std::vector<FieldObjects::StationaryFieldObjectID> GetPossibleObservationIds(float x, float y, float theta, 
                                                                    float headPan, float headTilt, 
