@@ -9,6 +9,7 @@ class Localisation;
 class NUSensorsData;
 class NUImage;
 class LocWmFrame;
+class FieldObjects;
 
 class LogFileFormatReader : public QObject
 {
@@ -37,10 +38,12 @@ public:
     virtual const Localisation* GetLocalisationData(){return NULL;};
     virtual const NUImage* GetImageData(){return NULL;};
     virtual const NUSensorsData* GetSensorData(){return NULL;};
+    virtual const FieldObjects* GetObjectData(){return NULL;};
 
 signals:
     void LocalisationDataChanged(const Localisation*);
     void LocalisationFrameChanged(const LocWmFrame*);
+    void ObjectDataChanged(const FieldObjects*);
     void rawImageChanged(const NUImage*);
     void sensorDataChanged(const float*,const float*,const float*);
     void sensorDataChanged(NUSensorsData*);

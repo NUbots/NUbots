@@ -64,12 +64,21 @@ MainWindow::MainWindow(QWidget *parent)
     createToolBars();
     createStatusBar();
 
+    // Sensor Widget
     sensorDisplay = new SensorDisplayWidget(this);
     QDockWidget* sensorDock = new QDockWidget("Sensor Values");
     sensorDock->setObjectName("Sensor Values");
     sensorDock->setWidget(sensorDisplay);
     sensorDock->setShown(false);
     addDockWidget(Qt::RightDockWidgetArea,sensorDock);
+
+    // Object Widget
+    objectDisplay = new ObjectDisplayWidget(this);
+    QDockWidget* objectDock = new QDockWidget("Field Objects");
+    objectDock->setObjectName("Field Objects");
+    objectDock->setWidget(objectDisplay);
+    objectDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,objectDock);
 
     // Add localisation widget
     localisation = new LocalisationWidget(this);
@@ -354,6 +363,7 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
+    connect(&LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
 
     connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
     connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)), frameInfo, SLOT(setRawImage(const NUImage*)));

@@ -20,6 +20,7 @@ public:
     const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();};
     const NUImage* GetRawImage(){return currentFileReader->GetImageData();};
     const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();};
+    const FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();};
 
     bool nextFrameAvailable()
     {
@@ -42,6 +43,7 @@ signals:
     void rawImageChanged(const NUImage*);
     void sensorDataChanged(const float*, const float*, const float*);
     void sensorDataChanged(NUSensorsData*);
+    void ObjectDataChanged(const FieldObjects*);
     void frameChanged(int,int);
     void cameraChanged(int);
 

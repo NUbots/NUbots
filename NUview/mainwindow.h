@@ -16,6 +16,7 @@
 #include "visionstreamwidget.h"
 #include "locwmstreamwidget.h"
 #include "SensorDisplayWidget.h"
+#include "ObjectDisplayWidget.h"
 #include <QHostInfo>
 
 class QMdiArea;
@@ -141,6 +142,7 @@ private:
     cameraSettingsWidget* cameraSetting;
     frameInformationWidget* frameInfo;
     SensorDisplayWidget* sensorDisplay;
+    ObjectDisplayWidget* objectDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

@@ -222,6 +222,11 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
             emit LocalisationDataChanged(locwmReader.ReadFrameNumber(frameNumber));
             m_currentFrameIndex = locwmReader.CurrentFrameSequenceNumber();
         }
+        if(objectReader.IsValid())
+        {
+            emit ObjectDataChanged(objectReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = objectReader.CurrentFrameSequenceNumber();
+        }
         //qDebug() << "Set Frame " << frameNumber << "at" << m_currentFrameIndex;
         //m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();
         emit frameChanged(m_currentFrameIndex, m_totalFrames);

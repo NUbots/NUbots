@@ -168,7 +168,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Profiling/Profiler.h \
     ../Tools/Math/FieldCalculations.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
-    OfflineLocalisation.h
+    OfflineLocalisation.h \
+    ObjectDisplayWidget.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -276,6 +277,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/Profiling/Profiler.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
-    OfflineLocalisation.cpp
+    OfflineLocalisation.cpp \
+    ObjectDisplayWidget.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc
