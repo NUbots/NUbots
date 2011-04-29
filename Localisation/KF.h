@@ -107,7 +107,6 @@ class KF {
 
         static const float c_outlierLikelyhood;
 	
-	void measureLocalization(double x,double y,double theta);
 	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);
 };
 

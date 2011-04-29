@@ -727,12 +727,6 @@ bool KF::clipState(int stateIndex, double minValue, double maxValue){
     return clipped;
 }
 
-void KF::measureLocalization(double x,double y,double theta)
-{
-// 	cout<<stateEstimates
-// 	cout<<x<<", "<<stateEstimates[0][0]<<", "<<y<<", "<<stateEstimates[1][0]<<", "<<theta<<", "<<stateEstimates[2][0]<<endl;
-}
-
 Matrix KF::CalculateSigmaPoints() const
 {
     Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
