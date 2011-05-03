@@ -136,7 +136,7 @@ std::string Object::toString() const
     result << "Visible: " << (isVisible ? "True" : "False") << std::endl;
     if(isVisible)
     {
-        result << "Measured Position (Relative): (" << measuredRelativePosition.x << "," << measuredRelativePosition.y << "," << measuredRelativePosition.z << std::endl;
+        result << "Measured Position (Relative): (" << measuredRelativePosition.x << "," << measuredRelativePosition.y << "," << measuredRelativePosition.z << ")" << std::endl;
     }
     return result.str();
 }
