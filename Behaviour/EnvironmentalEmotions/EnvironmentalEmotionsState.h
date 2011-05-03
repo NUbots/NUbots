@@ -1,12 +1,9 @@
-/*! @file QSRelax.h
-    @brief Declaration of the relaxed state in the QSBallisticController
- 
-    @class QSRelax
-    @brief The relaxed state in the QSBallisticController
+/*! @file RoboPedestrianState.h
+    @brief RoboPedestrian State
 
-    @author Jason Kulk
+    @author Jason Kulk, Aaron Wong
  
-  Copyright (c) 2011 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,31 +19,25 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef QSRelax_H
-#define QSRelax_H
+#ifndef ENVIRONMENTALEMOTIONSSTATE_H
+#define ENVIRONMENTALEMOTIONSSTATE_H
 
 #include "Behaviour/BehaviourState.h"
-#include "Infrastructure/NUData.h"
-class QSBallisticController;
+class EnvironmentalProvider;
 
-class QSRelax : public BehaviourState
+#include "debug.h"
+
+class EnvironmentalEmotionsState : public BehaviourState
 {
 public:
-    QSRelax(const NUData::id_t& joint, const QSBallisticController* parent);
-    ~QSRelax();
+    EnvironmentalEmotionsState(EnvironmentalEmotionsProvider* parent) : m_parent(parent) {};
+    virtual ~EnvironmentalEmotionsState() {};
+    virtual BehaviourState* nextState() = 0;
+    virtual void doState() = 0;
     
 protected:
-    void doState();
-    BehaviourState* nextState();
-    void updateTargetEstimate();
-private:
-    NUData::id_t m_joint;
-    const QSBallisticController* m_parent;
-    double m_time_in_state, m_previous_time;
-    
-    float m_target_calibration;
+    EnvironmentalEmotionsProvider* m_parent;
 };
-
 
 #endif
 

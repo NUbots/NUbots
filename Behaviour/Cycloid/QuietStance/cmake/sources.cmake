@@ -24,6 +24,7 @@ SET (YOUR_SRCS  QuietStanceProvider.cpp QuietStanceProvider.h
                 QSBallisticController.cpp QSBallisticController.h
                 QSRelax.cpp QSRelax.h
                 QSCatch.cpp QSCatch.h
+                QSDelay.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

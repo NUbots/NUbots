@@ -63,7 +63,8 @@ private:
     string m_id;								//!< the id of the optimiser
     Optimiser* m_optimiser;                     //!< the optimiser itself
     
-    float calculateFitness();					//!< calculates the fitness of the current parameters from m_duration, m_speed, m_energy, and m_stability
+    float calculateFitness();					//!< calculates the fitness of the current parameters using the information from the two walk states
+    vector<float> calculateFitnesses();			//!< calculates all of the fitnesses of the current parameters, so we can do multi-objective optimisation
     int m_iteration_count;						//!< the number of times the optimiser has been ticked
     int m_fall_count;                           //!< the number of times the optimiser has fallen
     

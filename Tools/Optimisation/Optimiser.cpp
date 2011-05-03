@@ -45,6 +45,15 @@ Optimiser::~Optimiser()
 {
 }
 
+/*! @brief A dummy implementation of a the multi-objective optimiser interface
+ * 	@param fitness a vector of fitnesses, one entry for each of the objectives. The higher the fitness the better the parameters.
+ */
+void Optimiser::setParametersResult(const vector<float>& fitness)
+{
+	if (not fitness.empty())
+		setParametersResult(fitness[0]);
+}
+
 /*! @brief Returns the optimiser's name
     @return the optimiser's name
 */

@@ -389,9 +389,11 @@ CameraSettings::Camera NAOCamera::setActiveCamera(CameraSettings::Camera newCame
     VERIFY(i2c_smbus_write_block_data(i2cFd, 220, 1, cmd) != -1); // set camera
     close(i2cFd);
 
+#if DEBUG_NUCAMERA_VERBOSITY > 4
     // Display debug message.
     debug << "NAOCamera: Active camera changed: " << CameraSettings::cameraName(previous_camera);
     debug << " --> " << CameraSettings::cameraName(newCamera) << endl;
+#endif
 
     int horzontal_flip, vertical_flip;
     int cameraSettingsIndex;

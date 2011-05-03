@@ -37,6 +37,10 @@
 #include "MiscBehaviours/ForwardWalkProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
 
+#include "CameraCalibration/CameraCalibrationProvider.h"
+#include "EnvironmentalEmotions/EnvironmentalEmotionsProvider.h"
+
+
 #ifdef TARGET_IS_BEAR
     #include "BearMode/BearModeProvider.h"
 #endif
@@ -129,6 +133,10 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new PoseProvider(this);
     else if (name.compare("robopedestrian") == 0)
         return new RoboPedestrianProvider(this);
+	else if (name.compare("cameracalibration") == 0)
+        return new CameraCalibrationProvider(this);
+    else if (name.find("enviro") != string::npos)
+        return new EnvironmentalEmotionsProvider(this);
     else
         return NULL;
 }

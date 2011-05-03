@@ -37,9 +37,19 @@ public:
 protected:
     void doState();
     BehaviourState* nextState();
+    float normalDistribution(float mean, float sigma);
 private:
     NUData::id_t m_joint;
     const QSBallisticController* m_parent;
+    
+    bool m_catch_issued;                  //!< A flag to indicate that the catch script has been issued
+    float m_finish_time;                  //!< The time at which the catching finishes
+    
+    // Parameters of the catching phase
+    float m_strength;                     //!< A scalar which determines the strength of the torque pulse to catch a micro-fall
+    float m_catch_duration;               //!< The duration of the torque pulse for catching a microfall
+    float m_tonic_duration;               //!< The duration of the static component of the torque pulse
+    float m_catch_duration_variance;      //!< The variance in the duration of the catch
 };
 
 

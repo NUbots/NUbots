@@ -28,7 +28,7 @@
 #include <QPainter>
 #include <QDebug>
 
-OpenglManager::OpenglManager(): width(0), height(0)
+OpenglManager::OpenglManager(): width(320), height(240)
 {
     for(int id = 0; id < GLDisplay::numDisplays; id++)
     {
@@ -311,6 +311,40 @@ void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDispl
     return;
 }
 
+void OpenglManager::writeCalGridToDisplay(GLDisplay::display displayId)
+{
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+
+    drawHollowCircle(80, 60, 10, 50);
+    drawHollowCircle(160, 60, 10, 50);
+    drawHollowCircle(240, 60, 10, 50);
+
+    drawHollowCircle(80, 120, 10, 50);
+    drawHollowCircle(160, 120, 10, 50);
+    drawHollowCircle(240, 120, 10, 50);
+
+    drawHollowCircle(80, 180, 10, 50);
+    drawHollowCircle(160, 180, 10, 50);
+    drawHollowCircle(240, 180, 10, 50);
+
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+    qDebug() << "Drawing Grid";
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
 void OpenglManager::clearDisplay(GLDisplay::display displayId)
 {
     // If there is an old list stored, delete it first.
@@ -319,6 +353,7 @@ void OpenglManager::clearDisplay(GLDisplay::display displayId)
         glDeleteLists(displays[displayId],1);
     }
     displays[displayId] = glGenLists(1);
+
     emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }

@@ -55,7 +55,7 @@
 #endif
 
 // --------------------------------------------------------------- Thread header files
-#if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+#if defined(USE_VISION) or defined(USE_LOCALISATION)
     #include "NUbot/SeeThinkThread.h"
 #endif
 #include "NUbot/SenseMoveThread.h"
@@ -155,6 +155,8 @@ void NUbot::createErrorHandling()
         debug << "NUbot::createErrorHandling()." << endl;
     #endif
     #ifndef TARGET_OS_IS_WINDOWS
+        signal(SIGINT, terminationHandler);
+        signal(SIGTERM, terminationHandler);
         signal(SIGILL, terminationHandler);
         signal(SIGSEGV, terminationHandler);
         signal(SIGBUS, terminationHandler); 
@@ -318,7 +320,7 @@ void NUbot::createThreads()
     debug << "NUbot::createThreads(). Constructing threads." << endl;
 #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread = new SeeThinkThread(this);
     #endif
         
@@ -330,7 +332,7 @@ void NUbot::createThreads()
         m_watchdog_thread->start();
     #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread->start();
     #endif
 
@@ -346,7 +348,7 @@ void NUbot::destroyThreads()
         debug << "NUbot::destroyThreads()." << endl;
     #endif
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread->stop();
     #endif
     #ifndef TARGET_IS_NAOWEBOTS
@@ -362,7 +364,7 @@ void NUbot::destroyThreads()
     delete m_sensemove_thread;
     m_sensemove_thread = 0;
     
-    #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+    #if defined(USE_VISION) or defined(USE_LOCALISATION)
         delete m_seethink_thread;
         m_seethink_thread = 0;
     #endif
@@ -395,7 +397,7 @@ void NUbot::run()
             m_sensemove_thread->signal(true);
         #endif
         
-        #if defined(USE_VISION) or defined(USE_LOCALISATION) or defined(USE_BEHAVIOUR) or defined(USE_MOTION)
+        #if defined(USE_VISION) or defined(USE_LOCALISATION)
             if (count%2 == 0)           // depending on the selected frame rate vision might not need to be updated every simulation step
             {
                 m_seethink_thread->signal(true);
@@ -404,13 +406,13 @@ void NUbot::run()
         count++;
     };
 #else
-    #if !defined(USE_VISION) and (defined(USE_BEHAVIOUR) or defined(USE_LOCALISATION) or defined(USE_MOTION))
-        while (true)
-        {
-            periodicSleep(33);
+    while (true)
+    {
+        periodicSleep(33);
+        #if !defined(USE_VISION) and defined(USE_LOCALISATION)
             m_seethink_thread->signal(true);
-        }
-    #endif
+        #endif
+    }
 #endif
 }
 
@@ -462,6 +464,9 @@ void NUbot::terminationHandler(int signum)
         debug << endl;
         cout << endl;
     #endif
+    errorlog << flush;
+    debug << flush;
+    cout << flush;
     
     #ifndef TARGET_OS_IS_WINDOWS
         void *array[10];

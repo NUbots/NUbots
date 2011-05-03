@@ -274,7 +274,7 @@ void NUMotion::stopActiveProviders()
  */
 void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    #if DEBUG_NUMOTION_VERBOSITY > 2
+    #if DEBUG_NUMOTION_VERBOSITY > 0
         debug << "NUMotion::process(" << data << ", " << actions << ")" << endl;
     #endif
     if (data == NULL || actions == NULL)
@@ -424,9 +424,9 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUMotion::process(JobList* jobs)
 {
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUMotion::process(jobs): Start" << endl;
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 0
+        debug << "NUMotion::process(jobs): Start" << endl;
+    #endif
     if (jobs == NULL or m_data == NULL or m_actions == NULL or m_current_time < m_last_kill_time + 2000)
         return;
     

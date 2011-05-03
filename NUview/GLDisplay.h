@@ -106,6 +106,7 @@ public:
         wmRightLeg,
         wmLeftLeg,
         wmBall,
+        CalGrid,
         numDisplays
     };
 
@@ -169,6 +170,8 @@ public:
                 return QString("World Model: Right Leg");
             case wmBall:
                 return QString("World Model: Ball");
+            case CalGrid:
+                return QString("Calibration Grid");
             default:
                 return QString("Unknown");
         }

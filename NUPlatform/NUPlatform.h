@@ -52,6 +52,7 @@ class NUPlatform
 public:
     NUPlatform();
     virtual ~NUPlatform();
+    NUCamera* m_camera;             //!< the robot's camera(s)
  
     // Robot Identity functions
     std::string& getName();
@@ -91,7 +92,7 @@ private:
     void initIdentity();
 
 protected:
-    NUCamera* m_camera;             //!< the robot's camera(s)
+    
     NUSensors* m_sensors;           //!< the robot's sensors
     NUActionators* m_actionators;   //!< the robot's actionators
     

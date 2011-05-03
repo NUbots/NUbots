@@ -148,6 +148,19 @@ private:
                 position[1] = 90.0;
             }
         }
+        else if(m_game_info->getPlayerNumber() == 4)
+        {
+            if(m_game_info->haveKickoff())
+            {
+                position[0] = 60.0;
+                position[1] = -100.0;
+            }
+            else
+            {
+                position[0] = 140.0;
+                position[1] = -90.0;
+            }
+        }
         if(m_game_info->getTeamColour() == TEAM_BLUE)
         {
             position[0] = -position[0];

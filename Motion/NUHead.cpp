@@ -72,7 +72,7 @@ void NUHead::stopHead()
     m_is_panning = false;
     m_move_end_time = 0;
     if (m_data and m_actions)
-        m_actions->add(NUActionatorsData::Head, 0, vector<float>(2,0), 0);
+        m_actions->add(NUActionatorsData::Head, 0, 0, 0);
 }
 
 /*! @brief Kills the head module

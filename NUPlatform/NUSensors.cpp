@@ -40,7 +40,6 @@
 #include "nubotdataconfig.h"
 
 #include <math.h>
-#include <boost/circular_buffer.hpp>
 #include <limits>
 using namespace std;
 
