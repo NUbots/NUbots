@@ -31,7 +31,7 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-TeamInformation::TeamInformation(int playernum, int teamnum) : m_TIMEOUT(2000)
+TeamInformation::TeamInformation(int playernum, int teamnum) : TimestampedData(), m_TIMEOUT(2000)
 {
     m_player_number = playernum;
     m_team_number = teamnum;
@@ -40,7 +40,7 @@ TeamInformation::TeamInformation(int playernum, int teamnum) : m_TIMEOUT(2000)
     m_objects = Blackboard->Objects;
     
     initTeamPacket();
-    m_received_packets = vector<boost::circular_buffer<TeamPacket> >(13, boost::circular_buffer<TeamPacket>(3));
+    m_received_packets = PacketBufferArray(13, boost::circular_buffer<TeamPacket>(3));
 }
 
 
@@ -97,6 +97,7 @@ void TeamInformation::updateTeamPacket()
 
     m_packet.ID = m_packet.ID + 1;
     m_packet.SentTime = m_data->CurrentTime;
+    m_timestamp = m_data->CurrentTime;
     m_packet.TimeToBall = getTimeToBall();
     
     // ------------------------------ Update shared localisation information
@@ -161,6 +162,51 @@ void TeamPacket::summaryTo(ostream& output)
     output << endl;
 }
 
+TeamPacket TeamInformation::generateTeamTransmissionPacket()
+{
+    updateTeamPacket();
+    return m_packet;
+}
+
+void TeamInformation::addReceivedTeamPacket(TeamPacket& receivedPacket)
+{
+    double timenow;
+    if (m_data != NULL)
+        timenow = m_data->CurrentTime;
+    else
+        timenow = Platform->getTime();
+    receivedPacket.ReceivedTime = timenow;
+
+    if (receivedPacket.PlayerNumber > 0 and (unsigned) receivedPacket.PlayerNumber < m_received_packets.size() and receivedPacket.PlayerNumber != m_player_number and receivedPacket.TeamNumber == m_team_number)
+    {   // only accept packets from valid player numbers
+        // System->displayTeamPacketReceived(info.m_actions);
+        if (m_received_packets[receivedPacket.PlayerNumber].empty())
+        {   // if there have been no previous packets from this player always accept the packet
+            m_received_packets[receivedPacket.PlayerNumber].push_back(receivedPacket);
+        }
+        else
+        {
+            TeamPacket lastpacket = m_received_packets[receivedPacket.PlayerNumber].back();
+            if (timenow - lastpacket.ReceivedTime > 2000)
+            {   // if there have been no packets recently from this player always accept the packet
+                m_received_packets[receivedPacket.PlayerNumber].push_back(receivedPacket);
+            }
+            else if (receivedPacket.ID > lastpacket.ID)
+            {   // avoid out of order packets by only adding recent packets that have a higher ID
+                m_received_packets[receivedPacket.PlayerNumber].push_back(receivedPacket);
+            }
+        }
+    }
+    else
+    {
+        #if DEBUG_NETWORK_VERBOSITY > 0
+            debug << ">>TeamInformation. Rejected team packet:";
+            receivedPacket.summaryTo(debug);
+            debug << endl;
+        #endif
+    }
+    return;
+}
 
 ostream& operator<< (ostream& output, const TeamPacket& packet)
 {
@@ -177,6 +223,54 @@ istream& operator>> (istream& input, TeamPacket& packet)
     return input;
 }
 
+ostream& operator<< (ostream& output, const TeamInformation& info)
+{
+    output.write(reinterpret_cast<const char*>(&info.m_timestamp), sizeof(info.m_timestamp));
+    output.write(reinterpret_cast<const char*>(&info.m_player_number), sizeof(info.m_player_number));
+    output.write(reinterpret_cast<const char*>(&info.m_team_number), sizeof(info.m_team_number));
+    output << info.m_packet;
+    int num_buffers = info.m_received_packets.size();
+    output.write(reinterpret_cast<const char*>(&num_buffers), sizeof(num_buffers));
+    int numEntries;
+    TeamInformation::PacketBufferArray::const_iterator buffer_iterator = info.m_received_packets.begin();
+    while(buffer_iterator != info.m_received_packets.end())
+    {
+        numEntries = buffer_iterator->size();
+        output.write(reinterpret_cast<const char*>(&numEntries), sizeof(numEntries));
+        TeamInformation::PacketBuffer::const_iterator packet_iterator = buffer_iterator->begin();
+        while(packet_iterator != buffer_iterator->end())
+        {
+            output << (*packet_iterator);
+            ++packet_iterator;
+        }
+        ++buffer_iterator;
+    }
+    return output;
+}
+
+istream& operator>> (istream& input, TeamInformation& info)
+{
+    input.read(reinterpret_cast<char*>(&info.m_timestamp), sizeof(info.m_timestamp));
+    input.read(reinterpret_cast<char*>(&info.m_player_number), sizeof(info.m_player_number));
+    input.read(reinterpret_cast<char*>(&info.m_team_number), sizeof(info.m_team_number));
+    input >> info.m_packet;
+    int num_buffers;
+    int num_entries;
+    input.read(reinterpret_cast<char*>(&num_buffers), sizeof(num_buffers));
+    info.m_received_packets.resize(num_buffers);
+    for (int b=0; b < num_buffers; ++b)
+    {
+        input.read(reinterpret_cast<char*>(&num_entries), sizeof(num_entries));
+        info.m_received_packets[b].resize(num_entries);
+        for(int e=0; e < num_entries; ++e)
+        {
+            input >> info.m_received_packets[b][e];
+        }
+    }
+    return input;
+}
+
+/*
 ostream& operator<< (ostream& output, TeamInformation& info)
 {
     info.updateTeamPacket();
@@ -240,3 +334,4 @@ istream& operator>> (istream& input, TeamInformation* info)
         input >> (*info);
     return input;
 }
+*/
