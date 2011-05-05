@@ -128,6 +128,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     numFramesProcessed++;
         
     setImage(image);
+    //debug << "Camera Settings: " << image->getCameraSettings();
     AllFieldObjects->preProcess(image->m_timestamp);
 
     std::vector< Vector2<int> > points;
@@ -538,8 +539,8 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         /*if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             SaveAnImage();
-        }
-        */
+        }*/
+        
         
         //bool BlueGoalSeen = false;
         /*
