@@ -47,7 +47,7 @@ QSBallisticController::QSBallisticController(const NUData::id_t& joint)
     m_initialised = false;
     
     m_target_estimate = 0;
-    m_target_estimate_buffer = boost::circular_buffer<float>(300, 0);        // assume the pitch starts at zero
+    m_target_estimate_buffer = boost::circular_buffer<float>(600, 0);        // assume the pitch starts at zero
     
     m_state = m_delay;
 }

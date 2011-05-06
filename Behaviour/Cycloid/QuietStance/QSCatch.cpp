@@ -48,7 +48,7 @@ QSCatch::QSCatch(const NUData::id_t& joint, const QSBallisticController* parent)
     m_catch_issued = false;
     m_finish_time = 0;
     
-    m_strength = 0.65;
+    m_strength = 0.5;
     m_catch_duration = 315;
     m_tonic_duration = 150;
     m_catch_duration_variance = 50;
@@ -78,7 +78,8 @@ void QSCatch::doState()
         float h = QSBallisticController::Height;
         float b = QSBallisticController::FrictionConstant;
         
-        float target = m_strength*(0.5*mathGeneral::sign(error)*m*g*h*(1 - cos(error)) + b*error - m*pow(h,2)*currentvelocity) + 0.01*mathGeneral::sign(error) + currentposition;
+        //float target = m_strength*(0.5*mathGeneral::sign(error)*m*g*h*(1 - cos(error)) + b*error - m*pow(h,2)*currentvelocity) + targetestimate;
+        float target = m_strength*(b*error) + targetestimate;
         
         float total_duration = normalDistribution(m_catch_duration, m_catch_duration_variance);
         float tone_duration = normalDistribution(m_tonic_duration, (m_tonic_duration/m_catch_duration)*m_catch_duration_variance);
