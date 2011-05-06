@@ -253,11 +253,12 @@ std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting)
     input >> temp;
     p_cameraSetting.p_autoGain.set(temp); 
     
-    //CameraSettings::copyParams();  
+    
 
     int tempCamera;
     input >> tempCamera;
     p_cameraSetting.activeCamera = CameraSettings::Camera(tempCamera);
+    p_cameraSetting.copyParams();
     
     return input;
 }

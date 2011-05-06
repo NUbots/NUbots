@@ -30,6 +30,8 @@
 #define VISIONCALIBRATIONPROVIDER_H
 
 #include "../BehaviourProvider.h"
+#include "Tools/FileFormats/LUTTools.h"
+
 
 class JobList;
 class NUSensorsData;
@@ -53,8 +55,19 @@ private:
     int m_selection_index;
     int m_num_motions;
     bool m_saving_images;
-    
+    int isStart;
+    float lastSpoken;
+    void sayPercentageClassified(float percentage);
     BehaviourProvider* m_chase_ball;
+
+    //For LUT and Classification:
+    
+    const unsigned char* currentLookupTable;    //!< Storage of the current colour lookup table.
+    unsigned char* LUTBuffer;                   //!< Storage of the current colour lookup table.
+    void loadLUTFromFile(const std::string& fileName);
+    int classifyImage();
+
+
 };
 
 
