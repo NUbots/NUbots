@@ -92,28 +92,6 @@ NAOActionators::NAOActionators()
     names.insert(names.end(), m_other_names.begin(), m_other_names.end());
     m_data->addActionators(names);
     
-    // Ears
-    vector<float> lear(10, 0);
-    vector<float> rear(10, 0);
-    m_data->add(NUActionatorsData::LEarLed, 5000, lear);
-    m_data->add(NUActionatorsData::REarLed, 5000, rear);
-    
-    for (size_t i=0; i<lear.size(); i++)
-    {
-        lear[i] = 1;
-        m_data->add(NUActionatorsData::LEarLed, 5000 + i*200, lear);
-        rear[i] = 1;
-        m_data->add(NUActionatorsData::REarLed, 5000 + i*200, rear);
-    }
-    
-    vector<float> blue(3,0);
-    blue[2] = 1;
-    m_data->add(NUActionatorsData::LEyeLed, 5000, blue);
-    m_data->add(NUActionatorsData::REyeLed, 5000, blue);
-    m_data->add(NUActionatorsData::ChestLed, 5000, blue);
-    m_data->add(NUActionatorsData::LFootLed, 5000, blue);
-    m_data->add(NUActionatorsData::RFootLed, 5000, blue);
-    
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "NAOActionators::NAOActionators(). Avaliable Actionators: " << endl;
         m_data->summaryTo(debug);
