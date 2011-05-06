@@ -574,7 +574,6 @@ void cameraSettingsWidget::readPendingData()
             }
         }
         Blackboard->Jobs->clear();
-
 }
 
 void cameraSettingsWidget::streamCameraSetting()
