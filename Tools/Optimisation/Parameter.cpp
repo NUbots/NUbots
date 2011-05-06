@@ -198,7 +198,7 @@ float operator+(const float& f, const Parameter& p)
 /*! @brief Addition operator for two parameters. Returns the sum of their two values */
 float operator+(const Parameter& p1, const Parameter& p2)
 {
-    return p1.Value + p1.Value;
+    return p1.Value + p2.Value;
 }
 
 /*! @brief Sum assignement operator for a parameter and a float. Returns a new parameter whose value is p.Value + f */

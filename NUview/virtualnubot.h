@@ -101,7 +101,7 @@ private:
     void processVisionFrame(const NUImage* image);
     void processVisionFrame(ClassifiedImage& image);
 
-    void generateClassifiedImage(const NUImage* yuvImage);
+    void generateClassifiedImage();
     ClassIndex::Colour getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour);
 
     unsigned char* classificationTable;
