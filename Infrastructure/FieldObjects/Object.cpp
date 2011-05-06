@@ -21,7 +21,7 @@ Object::Object(int initID, const std::string& initName):
     imagePosition[0] = 0;
     imagePosition[1] = 0;
     timeLastSeen = 0;  
-    timeSinceLastSeen = 0;
+    timeSinceLastSeen = 1e10;
     timeSeen = 0;         
     previousFrameTimestamp = 0;
 }

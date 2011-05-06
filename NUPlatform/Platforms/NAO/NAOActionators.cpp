@@ -285,7 +285,8 @@ void NAOActionators::copyToHardwareCommunications()
     size_t num_leye = ledvalues[2].size();
     size_t num_reye = ledvalues[3].size();
     size_t num_nao_eye = m_num_eyeleds/6;
-    if (num_leye >= num_nao_eye and num_reye >= num_nao_eye)
+    
+    if (num_leye >= num_nao_eye)
     {
         for (size_t i=0; i<num_nao_eye; i++)
         {
@@ -294,16 +295,8 @@ void NAOActionators::copyToHardwareCommunications()
             m_led_command[5][j+1][0] = ledvalues[2][i][1];
             m_led_command[5][j+2][0] = ledvalues[2][i][2];
         }
-        com_offset += num_nao_eye*3;
-        for (size_t i=0; i<num_nao_eye; i++)
-        {
-            size_t j = i*3+com_offset;
-            m_led_command[5][j][0] = ledvalues[3][i][0];
-            m_led_command[5][j+1][0] = ledvalues[3][i][1];
-            m_led_command[5][j+2][0] = ledvalues[3][i][2];
-        }
     }
-    else
+    else if (num_leye > 0)
     {
         for (size_t i=0; i<num_nao_eye; i++)
         {
@@ -312,7 +305,21 @@ void NAOActionators::copyToHardwareCommunications()
             m_led_command[5][j+1][0] = ledvalues[2][0][1];
             m_led_command[5][j+2][0] = ledvalues[2][0][2];
         }
-        com_offset += num_nao_eye*3;
+    }
+    com_offset += num_nao_eye*3;
+    
+    if (num_reye >= num_nao_eye)
+    {
+        for (size_t i=0; i<num_nao_eye; i++)
+        {
+            size_t j = i*3+com_offset;
+            m_led_command[5][j][0] = ledvalues[3][i][0];
+            m_led_command[5][j+1][0] = ledvalues[3][i][1];
+            m_led_command[5][j+2][0] = ledvalues[3][i][2];
+        }
+    }
+    else if (num_reye > 0)
+    {
         for (size_t i=0; i<num_nao_eye; i++)
         {
             size_t j = i*3+com_offset;
@@ -320,8 +327,8 @@ void NAOActionators::copyToHardwareCommunications()
             m_led_command[5][j+1][0] = ledvalues[3][0][1];
             m_led_command[5][j+2][0] = ledvalues[3][0][2];
         }
-        com_offset += num_nao_eye*3;
     }
+    com_offset += num_nao_eye*3;
     
     // On the NAO the chest led is a single multicolour led
     m_led_command[5][com_offset][0] = ledvalues[4][0][0];

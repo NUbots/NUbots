@@ -419,6 +419,13 @@ void NUPlatform::displayBatteryState()
     // by default there really isn't any standard way to display the battery state
 }
 
+/*! @brief Sets one of the 8 platform dependent leds to the given value at the given time
+ */
+void NUPlatform::add(const LedIndices& led, double time, const vector<float>& value)
+{
+    // this function is really just for the NAO because it has shit-loads of little leds
+}
+
 /*! @brief Kills the NUPlatform */
 void NUPlatform::kill()
 {

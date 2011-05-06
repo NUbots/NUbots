@@ -47,6 +47,19 @@ NAOPlatform::NAOPlatform()
     
     m_battery_state_previous_time = 0;
     m_battery_voiced_time = 0;
+    
+    m_eye_indices = vector<vector<float> >(4, vector<float>(2,0));
+    m_eye_indices[0][0] = 0;
+    m_eye_indices[0][1] = 7;
+    m_eye_indices[1][0] = 1;
+    m_eye_indices[1][1] = 2;
+    m_eye_indices[2][0] = 3;
+    m_eye_indices[2][1] = 4;
+    m_eye_indices[3][0] = 5;
+    m_eye_indices[3][1] = 6;
+    
+    m_leye = vector<vector<float> >(8, vector<float>(3,0));
+    m_reye = vector<vector<float> >(8, vector<float>(3,0));
 }
 
 NAOPlatform::~NAOPlatform()
@@ -121,3 +134,21 @@ void NAOPlatform::displayBatteryState()
     m_battery_state_previous_time = currenttime;
 }
 
+/*! @brief Sets one of the eight eye quarters to the given (time,value)
+ */
+void NAOPlatform::add(const LedIndices& led, double time, const vector<float>& value)
+{
+    vector<float> indices = m_eye_indices[led%4];
+    if (led < 4)
+    {
+        m_leye[indices[0]] = value;
+        m_leye[indices[1]] = value;
+        Blackboard->Actions->add(NUActionatorsData::LEyeLed, time, m_leye);
+    }
+    else
+    {
+        m_reye[indices[0]] = value;
+        m_reye[indices[1]] = value;
+        Blackboard->Actions->add(NUActionatorsData::REyeLed, time, m_reye);
+    }
+}
