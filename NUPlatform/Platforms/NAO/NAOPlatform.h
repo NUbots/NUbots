@@ -29,6 +29,13 @@ class NAOPlatform : public NUPlatform
 public:
     NAOPlatform();
     ~NAOPlatform();
+    
+    // NAO specific functions
+    void displayBatteryState();
+    
+private:
+    float m_battery_state_previous_time;
+    float m_battery_voiced_time;
 };
 
 #endif

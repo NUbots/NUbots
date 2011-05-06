@@ -412,6 +412,13 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
     
 }
 
+/*! @brief Displays the battery's state in the standard way for this platform
+ */
+void NUPlatform::displayBatteryState()
+{
+    // by default there really isn't any standard way to display the battery state
+}
+
 /*! @brief Kills the NUPlatform */
 void NUPlatform::kill()
 {

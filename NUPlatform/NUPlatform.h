@@ -78,6 +78,8 @@ public:
     void processActions();
     void process(JobList* jobs, NUIO* m_io);
     
+    // Platform dependent functions
+    virtual void displayBatteryState();
     
     void kill();
 protected:
