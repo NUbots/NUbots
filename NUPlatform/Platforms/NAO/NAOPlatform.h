@@ -33,6 +33,7 @@ public:
     // NAO specific functions
     void displayBatteryState();
     void add(const LedIndices& led, double time, const vector<float>& value);
+    void toggle(const LedIndices& led, double time, const vector<float>& value);
     
 private:
     // members for the battery display

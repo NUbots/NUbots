@@ -152,3 +152,38 @@ void NAOPlatform::add(const LedIndices& led, double time, const vector<float>& v
         Blackboard->Actions->add(NUActionatorsData::REyeLed, time, m_reye);
     }
 }
+
+/*! @brief Toggles one of the eight eye quarters to the given (time,value)
+ */
+void NAOPlatform::toggle(const LedIndices& led, double time, const vector<float>& value)
+{
+    vector<float> indices = m_eye_indices[led%4];
+    if (led < 4)
+    {
+        if (m_leye[indices[0]] == value or m_leye[indices[1]] == value)
+        {
+            m_leye[indices[0]] = vector<float>(3,0);
+            m_leye[indices[1]] = vector<float>(3,0);
+        }
+        else 
+        {
+            m_leye[indices[0]] = value;
+            m_leye[indices[1]] = value;
+        }
+        Blackboard->Actions->add(NUActionatorsData::LEyeLed, time, m_leye);
+    }
+    else
+    {
+        if (m_reye[indices[0]] == value or m_reye[indices[1]] == value)
+        {
+            m_reye[indices[0]] = vector<float>(3,0);
+            m_reye[indices[1]] = vector<float>(3,0);
+        }
+        else 
+        {
+            m_reye[indices[0]] = value;
+            m_reye[indices[1]] = value;
+        }
+        Blackboard->Actions->add(NUActionatorsData::REyeLed, time, m_leye);
+    }
+}

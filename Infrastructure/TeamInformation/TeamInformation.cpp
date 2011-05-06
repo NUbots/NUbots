@@ -41,6 +41,11 @@ TeamInformation::TeamInformation(int playernum, int teamnum) : m_TIMEOUT(2000)
     
     initTeamPacket();
     m_received_packets = vector<boost::circular_buffer<TeamPacket> >(13, boost::circular_buffer<TeamPacket>(3));
+    
+    m_led_red = vector<float>(3,0);
+    m_led_red[0] = 1;
+    m_led_green = vector<float>(3,0);
+    m_led_green[1] = 1;
 }
 
 
@@ -181,7 +186,7 @@ ostream& operator<< (ostream& output, TeamInformation& info)
 {
     info.updateTeamPacket();
     output << info.m_packet;
-    //System->displayTeamPacketSent(info.m_actions);
+    Platform->toggle(NUPlatform::Led3, Blackboard->Actions->CurrentTime, info.m_led_green);
     return output;
 }
 
@@ -205,7 +210,7 @@ istream& operator>> (istream& input, TeamInformation& info)
     
     if (temp.PlayerNumber > 0 and (unsigned) temp.PlayerNumber < info.m_received_packets.size() and temp.PlayerNumber != info.m_player_number and temp.TeamNumber == info.m_team_number)
     {   // only accept packets from valid player numbers
-        // System->displayTeamPacketReceived(info.m_actions);
+        Platform->toggle(NUPlatform::Led1, Blackboard->Actions->CurrentTime, info.m_led_green);;
         if (info.m_received_packets[temp.PlayerNumber].empty())
         {   // if there have been no previous packets from this player always accept the packet
             info.m_received_packets[temp.PlayerNumber].push_back(temp);

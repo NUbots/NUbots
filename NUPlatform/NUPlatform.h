@@ -96,6 +96,7 @@ public:
     // Platform dependent functions
     virtual void displayBatteryState();
     virtual void add(const LedIndices& led, double time, const vector<float>& value);
+    virtual void toggle(const LedIndices& led, double time, const vector<float>& value);
     
     void kill();
 protected:

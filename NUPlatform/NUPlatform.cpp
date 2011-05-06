@@ -426,6 +426,13 @@ void NUPlatform::add(const LedIndices& led, double time, const vector<float>& va
     // this function is really just for the NAO because it has shit-loads of little leds
 }
 
+/*! @brief Toggles one of the 8 platform dependent leds to the given value at the given time
+ */
+void NUPlatform::toggle(const LedIndices& led, double time, const vector<float>& value)
+{
+    // this function is really just for the NAO because it has shit-loads of little leds
+}
+
 /*! @brief Kills the NUPlatform */
 void NUPlatform::kill()
 {
