@@ -8,7 +8,9 @@
 #define CAMERASETTINGS_H
 
 #include <string>
+#include <vector>
 #include <iostream>
+#include "Tools/Optimisation/Parameter.h"
 
 /*!
     @brief Class used to store camera settings.
@@ -41,6 +43,7 @@ class CameraSettings
             return camera_name;
         }
 
+        
         int brightness;         //!< Brightness setting.
         int contrast;           //!< Contrast setting.
         int saturation;         //!< Saturation setting.
@@ -53,8 +56,23 @@ class CameraSettings
         int autoExposure;       //!< Auto Exposure setting.
         int autoWhiteBalance;   //!< Auto White Balance setting.
         int autoGain;           //!< Auto Gain setting.
+        
+        
+        Camera activeCamera;
+        
+        Parameter p_brightness;         //!< Brightness setting.
+        Parameter p_contrast;           //!< Contrast setting.
+        Parameter p_saturation;         //!< Saturation setting.
+        Parameter p_hue;                //!< Hue setting.
+        Parameter p_redChroma;          //!< Red Chroma setting.
+        Parameter p_blueChroma;         //!< Blue Chroma setting.
+        Parameter p_gain;               //!< Gain setting.
+        Parameter p_exposure;           //!< Exposure setting
 
-        Camera activeCamera;       //!< The Active Camera.
+        Parameter p_autoExposure;       //!< Auto Exposure setting.
+        Parameter p_autoWhiteBalance;   //!< Auto White Balance setting.
+        Parameter p_autoGain;           //!< Auto Gain setting.
+        
 
         /*!
             @brief Default Constructor. Loads the default camera settings.
@@ -75,13 +93,39 @@ class CameraSettings
         /*!
             @brief Sets all of the settings to their default values.
         */
+        CameraSettings(const std::vector<float> parameters);
+        
+        /*!
+            @brief Sets all of the settings to values given by parameters vector.
+        */
+        
+        CameraSettings(const std::vector<Parameter> parameters);
+        
+        /*!
+            @brief Sets all of the settings to values given by parameters vector.
+        */
+        
         void SetDefaults();
 
         /*!
             @brief Sets the settings to those found within the specified file.
             If a setting is not found, the default value is used.
         */
+        
+        void copyParams();
+        
         void LoadFromFile(const std::string& configFileName);
+        
+        std::vector<float> getAsVector();
+        
+        /*!
+            @brief Get camera settings and return as a vector of parameter values
+        */        
+        std::vector<Parameter> getAsParameters();
+        
+        /*!
+            @brief Get camera settings and return as a vector of parameters
+        */        
 
         friend std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSetting);
         friend std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting);

@@ -85,7 +85,7 @@ private:
     //Line keeping rules
     static unsigned int MIN_POINTS_TO_LINE_FINAL; //5
     static double MIN_LINE_R2_FIT; //0.90
-
+    static double MAX_LINE_MSD; //50 set at constructor
     //DEBUGGING
     /*
     static ofstream* debug_out;

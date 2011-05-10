@@ -411,7 +411,7 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
     glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
     // Draw Aura
-    glColor4ub(0,0,255,255);
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
     glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
     glDisable(GL_LIGHTING);      // Disable Global Lighting
     glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
@@ -439,7 +439,7 @@ void locWmGlDisplay::DrawModel(const KF& model)
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-            DrawSigmaPoint(QColor(255,255,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+            DrawSigmaPoint(QColor(0,0,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
     drawBall(QColor(255,165,0,255), model.getState(KF::ballX), model.getState(KF::ballY));

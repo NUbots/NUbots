@@ -163,6 +163,14 @@ storedTimeStamp(Platform->getTime())
     // Open device
     openCameraDevice("/dev/video0");
 
+    // Set Bottom Camera
+    setActiveCamera(CameraSettings::BOTTOM_CAMERA);
+    initialiseCamera();
+    readCameraSettings();
+    m_cameraSettings[1] = m_settings;
+    //forceApplySettings(fileSettings);
+    forceApplySettings(fileSettings);
+    
     // set to top camera
     setActiveCamera(CameraSettings::TOP_CAMERA);
     initialiseCamera();
@@ -171,13 +179,7 @@ storedTimeStamp(Platform->getTime())
     //forceApplySettings(fileSettings);
     forceApplySettings(fileSettings);
 
-    // Set Bottom Camera
     setActiveCamera(CameraSettings::BOTTOM_CAMERA);
-    initialiseCamera();
-    readCameraSettings();
-    m_cameraSettings[1] = m_settings;
-    //forceApplySettings(fileSettings);
-    forceApplySettings(fileSettings);
 
     loadCameraOffset();
 
@@ -373,6 +375,23 @@ void NAOCamera::readCameraSettings()
     m_settings.autoExposure = readSetting(V4L2_CID_AUTOEXPOSURE);
     m_settings.autoWhiteBalance = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
     m_settings.autoGain = readSetting(V4L2_CID_AUTOGAIN);
+    
+    
+    m_settings.p_gain.set(m_settings.gain);
+    m_settings.p_exposure.set(m_settings.exposure);
+    m_settings.p_brightness.set(m_settings.brightness);
+    m_settings.p_contrast.set(m_settings.contrast);
+    m_settings.p_saturation.set(m_settings.saturation);
+    m_settings.p_hue.set(m_settings.hue);
+    m_settings.p_redChroma.set(m_settings.redChroma);
+    m_settings.p_blueChroma.set(m_settings.blueChroma);
+
+    // Auto values
+    m_settings.p_autoExposure.set(m_settings.autoExposure);
+    m_settings.p_autoWhiteBalance.set(m_settings.autoWhiteBalance);
+    m_settings.p_autoGain.set(m_settings.autoGain);
+
+    
 }
 
 CameraSettings::Camera NAOCamera::setActiveCamera(CameraSettings::Camera newCamera)
@@ -389,9 +408,11 @@ CameraSettings::Camera NAOCamera::setActiveCamera(CameraSettings::Camera newCame
     VERIFY(i2c_smbus_write_block_data(i2cFd, 220, 1, cmd) != -1); // set camera
     close(i2cFd);
 
+#if DEBUG_NUCAMERA_VERBOSITY > 4
     // Display debug message.
     debug << "NAOCamera: Active camera changed: " << CameraSettings::cameraName(previous_camera);
     debug << " --> " << CameraSettings::cameraName(newCamera) << endl;
+#endif
 
     int horzontal_flip, vertical_flip;
     int cameraSettingsIndex;
@@ -476,46 +497,99 @@ bool NAOCamera::applySetting(unsigned int id, int value)
 void NAOCamera::applySettings(const CameraSettings& newset)
 {
   // Auto Controls
-  if(newset.autoExposure != m_settings.autoExposure)
-    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.autoExposure = newset.autoExposure));
-  if(newset.autoWhiteBalance != m_settings.autoWhiteBalance)
-    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.autoWhiteBalance = newset.autoWhiteBalance));
-  if(newset.autoGain != m_settings.autoGain)
-    applySetting(V4L2_CID_AUTOGAIN, (m_settings.autoGain = newset.autoGain));
+  if(newset.p_autoExposure.get() != m_settings.p_autoExposure.get())
+  {
+    m_settings.p_autoExposure.set(newset.p_autoExposure.get());
+    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.p_autoExposure.get()));
+  }
+  if(newset.p_autoWhiteBalance.get() != m_settings.p_autoWhiteBalance.get())
+  {
+    m_settings.p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
+    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.p_autoExposure.get()));
+  }
+  if(newset.p_autoGain.get() != m_settings.p_autoGain.get())
+  {
+    m_settings.p_autoGain.set(newset.p_autoGain.get());
+    applySetting(V4L2_CID_AUTOGAIN, (m_settings.p_autoGain.get()));
+  }
 
-  if(newset.brightness != m_settings.brightness)
-    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.brightness = newset.brightness));
-  if(newset.contrast != m_settings.contrast)
-    applySetting(V4L2_CID_CONTRAST, (m_settings.contrast = newset.contrast));
-  if(newset.saturation != m_settings.saturation)
-    applySetting(V4L2_CID_SATURATION, (m_settings.saturation = newset.saturation));
-  if(newset.hue != m_settings.hue)
-    applySetting(V4L2_CID_HUE, (m_settings.hue = newset.hue));
-  if(newset.redChroma != m_settings.redChroma)
-    applySetting(V4L2_CID_RED_BALANCE, (m_settings.redChroma = newset.redChroma));
-  if(newset.blueChroma != m_settings.blueChroma)
-    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.blueChroma = newset.blueChroma));
-  if(newset.gain != m_settings.gain)
-    applySetting(V4L2_CID_GAIN, (m_settings.gain = newset.gain));
-  if(newset.exposure != m_settings.exposure)
-    applySetting(V4L2_CID_EXPOSURE, (m_settings.exposure = newset.exposure));
+  if(newset.p_brightness.get() != m_settings.p_brightness.get())
+  {
+    m_settings.p_brightness.set(newset.p_brightness.get());
+    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.p_brightness.get()));
+  }
+  if(newset.p_contrast.get() != m_settings.p_contrast.get())
+  {
+    m_settings.p_contrast.set(newset.p_contrast.get());
+    applySetting(V4L2_CID_CONTRAST, (m_settings.p_contrast.get()));
+  }
+  if(newset.p_saturation.get() != m_settings.p_saturation.get())
+  {
+    m_settings.p_saturation.set(newset.p_saturation.get());
+    applySetting(V4L2_CID_SATURATION, (m_settings.p_saturation.get()));
+  }
+  if(newset.p_hue.get() != m_settings.p_hue.get())
+  {
+    m_settings.p_hue.set(newset.p_hue.get());
+    applySetting(V4L2_CID_HUE, (m_settings.p_hue.get()));
+  }
+  if(newset.p_redChroma.get() != m_settings.p_redChroma.get())
+  {
+    m_settings.p_redChroma.set(newset.p_redChroma.get());
+    applySetting(V4L2_CID_RED_BALANCE, (m_settings.p_redChroma.get()));
+  }
+  if(newset.p_blueChroma.get() != m_settings.p_blueChroma.get())
+  {
+    m_settings.p_blueChroma.set(newset.p_blueChroma.get());
+    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.p_blueChroma.get()));
+  }
+  if(newset.p_gain.get() != m_settings.p_gain.get())
+  {
+    m_settings.p_gain.set(newset.p_gain.get());
+    applySetting(V4L2_CID_GAIN, (m_settings.p_gain.get()));
+  }
+  if(newset.p_exposure.get() != m_settings.p_exposure.get())
+  {
+    m_settings.p_exposure.set(newset.p_exposure.get());
+    applySetting(V4L2_CID_EXPOSURE, (m_settings.p_exposure.get()));
+  }
+  
+  //COPIES INTO OLD FORMAT:
+  m_settings.copyParams();
 }
 
 void NAOCamera::forceApplySettings(const CameraSettings& newset)
 {
+    //Copying the new Paramters into the m_settings, but saving the old active camera
+    m_settings.p_autoExposure.set(newset.p_autoExposure.get());
+    m_settings.p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
+    m_settings.p_autoGain.set(newset.p_autoGain.get());
+    
+    m_settings.p_brightness.set(newset.p_brightness.get());
+    m_settings.p_contrast.set(newset.p_contrast.get());
+    m_settings.p_saturation.set(newset.p_saturation.get());
+    m_settings.p_hue.set(newset.p_hue.get());
+    m_settings.p_redChroma.set(newset.p_redChroma.get());
+    m_settings.p_blueChroma.set(newset.p_blueChroma.get());
+    m_settings.p_gain.set(newset.p_gain.get());
+    m_settings.p_exposure.set(newset.p_exposure.get());
+    
     // Auto Controls
-    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.autoExposure = newset.autoExposure));
-    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.autoWhiteBalance = newset.autoWhiteBalance));
-    applySetting(V4L2_CID_AUTOGAIN, (m_settings.autoGain = newset.autoGain));
+    applySetting(V4L2_CID_AUTOEXPOSURE, (m_settings.p_autoExposure.get()));
+    applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.p_autoWhiteBalance.get()));
+    applySetting(V4L2_CID_AUTOGAIN, (m_settings.p_autoGain.get()));
 
-    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.brightness = newset.brightness));
-    applySetting(V4L2_CID_CONTRAST, (m_settings.contrast = newset.contrast));
-    applySetting(V4L2_CID_SATURATION, (m_settings.saturation = newset.saturation));
-    applySetting(V4L2_CID_HUE, (m_settings.hue = newset.hue));
-    applySetting(V4L2_CID_RED_BALANCE, (m_settings.redChroma = newset.redChroma));
-    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.blueChroma = newset.blueChroma));
-    applySetting(V4L2_CID_GAIN, (m_settings.gain = newset.gain));
-    applySetting(V4L2_CID_EXPOSURE, (m_settings.exposure = newset.exposure));
+    applySetting(V4L2_CID_BRIGHTNESS, (m_settings.p_brightness.get()));
+    applySetting(V4L2_CID_CONTRAST, (m_settings.p_contrast.get()));
+    applySetting(V4L2_CID_SATURATION, (m_settings.p_saturation.get()));
+    applySetting(V4L2_CID_HUE, (m_settings.p_hue.get()));
+    applySetting(V4L2_CID_RED_BALANCE, (m_settings.p_redChroma.get()));
+    applySetting(V4L2_CID_BLUE_BALANCE, (m_settings.p_blueChroma.get()));
+    applySetting(V4L2_CID_GAIN, (m_settings.p_gain.get()));
+    applySetting(V4L2_CID_EXPOSURE, (m_settings.p_exposure.get()));
+    
+    //COPIES INTO OLD FORMAT:
+    m_settings.copyParams();
 }
 
 void NAOCamera::loadCameraOffset()

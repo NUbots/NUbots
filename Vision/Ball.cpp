@@ -7,7 +7,11 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
-//#include <QDebug>
+#include "Kinematics/Kinematics.h"
+
+#if TARGET_OS_IS_WINDOWS
+    #include <QDebug>
+#endif
 Ball::Ball()
 {
     //debug<< "Vision::DetectBall : Ball Class created" << endl;
@@ -41,7 +45,9 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         //! Check if the ratio is correct: Height and Width ratio should be 1 as it is a circle,
         //! through can be skewed (camera moving), so we better put some threshold on it.
         if(!isCorrectCheckRatio(PossibleBall, height, width)) continue;
-        if(isObjectInRobot(PossibleBall, AllObjects)) continue;
+
+
+        //if(isObjectInRobot(PossibleBall, AllObjects)) continue;
         //debug << "BALL::FindBall  Possible Ball Found ";
 
         int sizeOfCandidate = (PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y); //Uses the height of the candidate, as width can be 0
@@ -57,15 +63,105 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
     //! Closely Classify the candidate: to obtain more information about the object (using closely classify function in vision)
     if(sizeOfLargestCandidate > 0)
     {
+        float pinkPercentage = 0.0;
         largestCandidate.setColour(ClassIndex::orange);
-        std::vector < Vector2<int> > ballPoints = classifyBallClosely(largestCandidate, vision,height, width);
+        std::vector < Vector2<int> > ballPoints = classifyBallClosely(largestCandidate, vision,height, width, pinkPercentage);
 
         //! Perform Circle Fit: Must pass a threshold on fit to become a circle!
         //debug << "BALL::FindBall  Circle Fit ";
 
-        result = isCorrectFit(ballPoints,largestCandidate, vision);
+        Circle circle= isCorrectFit(ballPoints,largestCandidate, vision, pinkPercentage);
+        if(circle.isDefined)
+        {
+            bool DistanceIsOK = isVisualBallDistanceCloseDistanceToPoint(circle, vision, largestCandidate, AllObjects);
+            if(DistanceIsOK)
+            {
+                result = circle;
+            }
+        }
     }
     return result;
+}
+bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision, const ObjectCandidate &PossibleBall, FieldObjects* AllObjects)
+{
+    bool result = false;
+
+    //GET RADIUS FROM CIRCLE, CHANGE into a distance:
+    double ballDistanceFactor=vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()*ORANGE_BALL_DIAMETER;
+    float BALL_OFFSET = 0;
+    float VisualDistance = (float)(ballDistanceFactor/(2*circ.radius)+BALL_OFFSET);
+    float bearing = vision->CalculateBearing(circ.centreX);
+    float elevation = vision->CalculateElevation(circ.centreY);
+    float VisualFlatDistance = 0.0;
+    Vector3< float > visualSphericalPosition;
+    Vector3< float > transformedSphericalPosition;
+    visualSphericalPosition[0] = VisualDistance;
+    visualSphericalPosition[1] = bearing;
+    visualSphericalPosition[2] = elevation;
+
+    vector<float> ctvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
+    if(isOK == true)
+    {
+        Matrix cameraTransform = Matrix4x4fromVector(ctvector);
+        transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
+        VisualFlatDistance = transformedSphericalPosition[0];
+    }
+
+    //GET CENTRE POINT on CIRCLE, use Distance to point:
+
+    vector<float> ctgvector;
+    float distanceD2P =0.0;
+    isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    if(isOK == true)
+    {
+        Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+        Vector3<float> relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+        distanceD2P = relativePoint[0];
+        //#if DEBUG_VISION_VERBOSITY > 6
+        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        //#endif
+    }
+    else
+    {
+        return (!isObjectInRobot(PossibleBall, AllObjects));
+    }
+
+    //COMPARE: VisualDistance and Distance to Point:
+
+    #if TARGET_OS_IS_WINDOWS
+        qDebug() << "Distance Check: "<< "Measured:"<<VisualFlatDistance << "D2P:"<<distanceD2P;
+    #endif
+    //qDebug() << VisualFlatDistance << distanceD2P << elevation << 3.14/2-headElevation<<VisualDistance;
+    float DistanceDifference = fabs(VisualFlatDistance - distanceD2P);
+
+    if(isObjectInRobot(PossibleBall, AllObjects))
+    {
+        if(DistanceDifference > distanceD2P/5)
+        {
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+    }
+    else
+    {
+        if((DistanceDifference > distanceD2P*0.75) && (VisualFlatDistance > 40))
+        {
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+    }
+
+
+
+    return result;
+
 }
 
 bool Ball::isObjectAPossibleBall(const ObjectCandidate &PossibleBall)
@@ -154,24 +250,28 @@ bool Ball::isObjectInRobot(const ObjectCandidate &PossibleBall, FieldObjects *Al
     return isInRobot;
 }
 
-std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height, int width)
+std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height, int width, float &pinkPercentage)
 {
-    int buffer = 20;
+
+    int buffer = 40; //Stop points close to the screen from been included to as a ball point.
+    int pinkCount = 0;
     Vector2<int> TopLeft = PossibleBall.getTopLeft();
     Vector2<int> BottomRight = PossibleBall.getBottomRight();
     int midX =  (int)((BottomRight.x-TopLeft.x)/2)+TopLeft.x;
     int midY =  (int)((BottomRight.y-TopLeft.y)/2)+TopLeft.y;
     Vector2<int> SegStart;
     SegStart.x = midX;
-    SegStart.y = TopLeft.y;
+    SegStart.y = TopLeft.y-((int)(BottomRight.y-TopLeft.y)/4);
     Vector2<int> SegEnd;
     SegEnd.x = midX;
-    SegEnd.y = BottomRight.y;
+    SegEnd.y = BottomRight.y+(int)((BottomRight.y-TopLeft.y)/4);
     TransitionSegment tempSeg(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
+    //qDebug() << "Possible Ball Colour: "<<ClassIndex::getColourNameFromIndex(PossibleBall.getColour());
     ScanLine tempLine = ScanLine();
 
     //! Maximum ball points = 4*2 = 8;
-    int spacings = (int)(BottomRight.y - TopLeft.y)/4;
+    int MAX_BALL_POINTS_PER_DIECTION = 15;
+    int spacings = (int)(BottomRight.y - TopLeft.y)/MAX_BALL_POINTS_PER_DIECTION;
     if(spacings < 2)
     {
         spacings = 2;
@@ -184,9 +284,10 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     colourlist.push_back(ClassIndex::yellow_orange);
     int direction = ScanLine::DOWN;
     //qDebug() << "Horizontal Scan : ";
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction,colourlist);
+    int bufferSize = (int)((BottomRight.y-TopLeft.y)/8);
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction,colourlist,bufferSize);
 
-    std::vector< Vector2<int> > BallPoints;
+    std::vector< Vector2<int> > BallPoints,LeftBallPoints,RightBallPoints,TopBallPoints,BottomBallPoints,GoodBallPoints;
 
     BallPoints.push_back(SegStart);
     BallPoints.push_back(SegEnd);
@@ -194,25 +295,42 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
         TransitionSegment* tempSegement = tempLine.getSegment(i);
+        if(tempSegement->getSize() <= 2) continue;
         //! Check if the segments are at the edge of screen
-        if(!(tempSegement->getStartPoint().x < buffer || tempSegement->getStartPoint().y < buffer))
+        if(!(tempSegement->getStartPoint().x < buffer  || tempSegement->getStartPoint().y < buffer))
         {
+
+            if(tempSegement->getBeforeColour() == ClassIndex::green || tempSegement->getBeforeColour() == ClassIndex::shadow_object || tempSegement->getBeforeColour() == ClassIndex::unclassified)
+            {
+                //qDebug() << "Pushing LEFT" << LeftBallPoints.size();
+                LeftBallPoints.push_back(tempSegement->getStartPoint());
+                GoodBallPoints.push_back(tempSegement->getStartPoint());
+            }
+            if(tempSegement->getBeforeColour() == ClassIndex::pink) pinkCount++;
             BallPoints.push_back(tempSegement->getStartPoint());
+
         }
-        if(!(tempSegement->getEndPoint().x >= height-buffer || tempSegement->getEndPoint().x >= width-buffer))
+        if(!(tempSegement->getEndPoint().x >= width-buffer || tempSegement->getEndPoint().y >= height-buffer))
         {
+            if(tempSegement->getAfterColour() == ClassIndex::green || tempSegement->getAfterColour() == ClassIndex::shadow_object || tempSegement->getAfterColour() == ClassIndex::unclassified)
+            {
+                //qDebug() << "Pushing RIGHT" << RightBallPoints.size();
+                RightBallPoints.push_back(tempSegement->getEndPoint());
+                GoodBallPoints.push_back(tempSegement->getStartPoint());
+            }
+            if(tempSegement->getAfterColour() == ClassIndex::pink) pinkCount++;
             BallPoints.push_back(tempSegement->getEndPoint());
         }
 
         /*qDebug() << "Horizontal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
-                <<","<< tempSegement->getEndPoint().y << ")";*/
-
+                <<","<< tempSegement->getEndPoint().y << ")" <<  ClassIndex::getColourNameFromIndex(tempSegement->getBeforeColour()) << ClassIndex::getColourNameFromIndex(tempSegement->getAfterColour());
+        */
     }
 
-    SegStart.x = TopLeft.x;
+    SegStart.x = TopLeft.x-((int)(BottomRight.x-TopLeft.x)/4);
     SegStart.y = midY;
-    SegEnd.x = BottomRight.x;
+    SegEnd.x = BottomRight.x+((int)(BottomRight.x-TopLeft.x)/4);
     SegEnd.y = midY;
     tempSeg = TransitionSegment(SegStart,SegEnd,ClassIndex::unclassified,PossibleBall.getColour(),ClassIndex::unclassified);
     tempLine = ScanLine();
@@ -221,21 +339,30 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
     BallPoints.push_back(SegEnd);
 
     //! Maximum ball points = 4*2 = 8;
-    spacings = (int)(BottomRight.y - TopLeft.y)/4;
+    spacings = (int)(BottomRight.x - TopLeft.x)/MAX_BALL_POINTS_PER_DIECTION;
     if(spacings < 2)
     {
         spacings = 2;
     }
     //qDebug() << "Vertical Scan : ";
     direction = ScanLine::LEFT;
-    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist);
+    bufferSize = (int)((BottomRight.x-TopLeft.x)/8);
+    vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist,bufferSize);
     for(int i = 0; i < tempLine.getNumberOfSegments(); i++)
     {
 
         TransitionSegment* tempSegement = tempLine.getSegment(i);
+        if(tempSegement->getSize() <= 2) continue;
         //! Check if the segments are at the edge of screen
         if(!(tempSegement->getStartPoint().x < buffer || tempSegement->getStartPoint().y < buffer))
         {
+            if(tempSegement->getBeforeColour() == ClassIndex::green || tempSegement->getBeforeColour() == ClassIndex::shadow_object || tempSegement->getBeforeColour() == ClassIndex::unclassified)
+            {
+                //qDebug() << "Pushing TOP" << TopBallPoints.size();
+                TopBallPoints.push_back(tempSegement->getStartPoint());
+                GoodBallPoints.push_back(tempSegement->getStartPoint());
+            }
+            if(tempSegement->getAfterColour() == ClassIndex::pink) pinkCount++;
             BallPoints.push_back(tempSegement->getStartPoint());
         }
 
@@ -244,17 +371,53 @@ std::vector < Vector2<int> > Ball::classifyBallClosely(const ObjectCandidate &Po
 
         if(!(tempSegement->getEndPoint().y >= height-buffer || tempSegement->getEndPoint().x >= width-buffer) &&  headElevation < 0.3)
         {
+            if(tempSegement->getAfterColour() == ClassIndex::green || tempSegement->getAfterColour() == ClassIndex::shadow_object || tempSegement->getAfterColour() == ClassIndex::unclassified)
+            {
+                //qDebug() << "Pushing BOTTOM" << BottomBallPoints.size();
+                BottomBallPoints.push_back(tempSegement->getEndPoint());
+                GoodBallPoints.push_back(tempSegement->getStartPoint());
+            }
+            if(tempSegement->getAfterColour() == ClassIndex::pink) pinkCount++;
             BallPoints.push_back(tempSegement->getEndPoint());
         }
         //vision->getSensorsData()->getJointPosition(NUSensorsData::HeadPitch,headElevation);
         //qDebug() << "Ball Head Elevation:" << headElevation;
         /*qDebug() << "Veritcal Points At " <<i<<"\t Size: "<< tempSegement->getSize()<< "\t Start(x,y),End(x,y):("<< tempSegement->getStartPoint().x
                 <<","<< tempSegement->getStartPoint().y << ")("<< tempSegement->getEndPoint().x
-                <<","<< tempSegement->getEndPoint().y << ")";*/
-
+                <<","<< tempSegement->getEndPoint().y << ")" <<  ClassIndex::getColourNameFromIndex(tempSegement->getBeforeColour()) << ClassIndex::getColourNameFromIndex(tempSegement->getAfterColour());
+        */
     }
 
-    return BallPoints;
+    //FIND THE LARGEST SIDE WITH GOOD POINTS and RETURN IT:
+    std::vector < Vector2<int> > finalPoints = TopBallPoints;
+    if( LeftBallPoints.size() > finalPoints.size() && !(LeftBallPoints.empty()))
+    {
+        //qDebug() << "Using LeftBallPoints: " << finalPoints.size() << LeftBallPoints.size() ;
+        finalPoints = LeftBallPoints;
+
+    }
+    if( RightBallPoints.size() > finalPoints.size() && !(RightBallPoints.empty()))
+    {
+        //qDebug() << "Using RightBallPoints: " << finalPoints.size() << RightBallPoints.size();
+        finalPoints = RightBallPoints;
+    }
+    if( BottomBallPoints.size() > finalPoints.size() && !(BottomBallPoints.empty()))
+    {
+        //qDebug() << "Using BottomBallPoints: " << finalPoints.size() << BottomBallPoints.size();
+        finalPoints = BottomBallPoints;
+    }
+    //Ball is BIG but surrounded by white:
+    if(finalPoints.size() < MAX_BALL_POINTS_PER_DIECTION*0.8 && (PossibleBall.width() > 30 || PossibleBall.height() > 30) )
+    {
+        //qDebug() << "Using BallPoints: " << finalPoints.size() << BallPoints.size();
+        finalPoints = GoodBallPoints;
+    }
+
+    #if TARGET_OS_IS_WINDOWS
+        qDebug() << "Pink Count: "<< pinkCount << BallPoints.size() << (pinkCount*1.0/BallPoints.size())*100 << "%";
+    #endif
+    pinkPercentage = (pinkCount*1.0/BallPoints.size())*100;
+    return finalPoints;
 
 }
 bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, int width)
@@ -288,7 +451,7 @@ bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, i
         return true;
     }
 }
-Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall, Vision* vision)
+Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall, Vision* vision, float &pinkPercentage)
 {
     Circle circ;
     circ.radius = 0.0;
@@ -296,22 +459,27 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
     CircleFitting CircleFit;
 
     //debug << "Points:";
-   /* for(int i =0; i < ballPoints.size(); i++)
+    #if TARGET_OS_IS_WINDOWS
+    for(unsigned int i =0; i < ballPoints.size(); i++)
     {
-        debug << "("<<ballPoints[i].x << ","<<ballPoints[i].y<< ")";
-    }*/
-    if(ballPoints.size() > 10)
+        qDebug() <<ballPoints[i].x << ","<<ballPoints[i].y;
+    }
+    #endif
+
+    if(ballPoints.size() >= 5)
     {
 
-            circ = CircleFit.FitCircleLMA(ballPoints);
-            if(circ.sd > 5 ||  circ.radius*2 > getMaxPixelsOfBall(vision) )
+            circ = CircleFit.FitCircleLMF(ballPoints);
+            if(circ.sd > 3.5 ||  circ.radius*2 > getMaxPixelsOfBall(vision) )
             {
                 circ.isDefined = false;
             }
-            //qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
-
+            #if TARGET_OS_IS_WINDOWS
+            qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
+            #endif
     }
-    else if ((ballPoints.size() <= 10))
+    //SMALL BALLS:
+    else if ((PossibleBall.width() < 20 || PossibleBall.height() < 20) && pinkPercentage < 40) //(ballPoints.size() < 7) &&
     {
         Vector2<int> bottomRight = PossibleBall.getBottomRight();
         Vector2<int> topLeft = PossibleBall.getTopLeft();

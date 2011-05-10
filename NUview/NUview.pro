@@ -164,6 +164,7 @@ HEADERS += ui_mainwindow.h \
     LUTGlDisplay.h \
     ../Vision/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
+    ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
     ../Tools/Profiling/Profiler.h \
     ../Tools/Math/FieldCalculations.h \

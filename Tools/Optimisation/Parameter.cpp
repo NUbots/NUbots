@@ -138,6 +138,21 @@ void Parameter::set(float value)
         Value = value;
 }
 
+void Parameter::set(float value, float min, float max, string desc)
+{
+    if (value < min) 
+        Value = min;
+    else if (value > max) 
+        Value = max;
+    else 
+        Value = value;
+        
+    Min = min;
+    Max = max;
+    
+    Description = desc;      
+}
+
 /*! @brief Prints a human-readble version of the walk parameter */
 void Parameter::summaryTo(ostream& output) 
 {
@@ -183,7 +198,7 @@ float operator+(const float& f, const Parameter& p)
 /*! @brief Addition operator for two parameters. Returns the sum of their two values */
 float operator+(const Parameter& p1, const Parameter& p2)
 {
-    return p1.Value + p1.Value;
+    return p1.Value + p2.Value;
 }
 
 /*! @brief Sum assignement operator for a parameter and a float. Returns a new parameter whose value is p.Value + f */

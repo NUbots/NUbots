@@ -34,7 +34,7 @@ SelectBehaviourProvider::SelectBehaviourProvider(Behaviour* manager) : Behaviour
 {
     m_introduction_done = false;
     m_selection_index = 0;
-    string names[] = {"play_soccer", "chase_ball", "walk_optimiser", "save_images", "kicker","pose","scripted_pose","robo_pedestrian"};
+    string names[] = {"play_soccer", "chase_ball", "walk_optimiser", "save_images", "kicker","pose","scripted_pose","robo_pedestrian","camera_calibration","environmental_emotions"};
     m_available_behaviours = vector<string>(names, names + sizeof(names)/sizeof(*names));
 }
 

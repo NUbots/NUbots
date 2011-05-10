@@ -26,7 +26,9 @@
 #include "debugverbositynetwork.h"
 #include <string.h>
 #include <errno.h>
-#include "Localisation/Localisation.h"
+#if defined(USE_LOCALISATION)
+    #include "Localisation/Localisation.h"
+#endif
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
 /*! @brief Constructs a tcp port on the specified port
@@ -241,24 +243,25 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     
 }
 
+#if defined(USE_LOCALISATION)
+    void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
+    {
+        #if DEBUG_NETWORK_VERBOSITY > 4
+            debug << "Sending worldmodel packet" << endl;
+        #endif
+        network_data_t netdata;
+        network_data_t sizedata;
+        stringstream buffer;
+        buffer << p_locwm;
+        //buffer << p_objects;
+        netdata.data = (char*) buffer.str().c_str();
+        netdata.size = buffer.str().size();
 
-void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
-{
-    #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "Sending worldmodel packet" << endl;
-	#endif
-    network_data_t netdata;
-    network_data_t sizedata;
-    stringstream buffer;
-    buffer << p_locwm;
-    //buffer << p_objects;
-    netdata.data = (char*) buffer.str().c_str();
-    netdata.size = buffer.str().size();
+        int totalsize = netdata.size;
+        sizedata.data = reinterpret_cast<char*>(&totalsize);
+        sizedata.size = sizeof(totalsize);
 
-    int totalsize = netdata.size;
-    sizedata.data = reinterpret_cast<char*>(&totalsize);
-    sizedata.size = sizeof(totalsize);
-
-    sendData(sizedata);
-    sendData(netdata);
-}
+        sendData(sizedata);
+        sendData(netdata);
+    }
+#endif

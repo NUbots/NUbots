@@ -211,7 +211,7 @@ class Vision
     ClassifiedSection horizontalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     ClassifiedSection verticalScan(const std::vector<Vector2<int> >&fieldBoarders, int scanSpacing);
     void ClassifyScanArea(ClassifiedSection* scanArea);
-    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction, const std::vector<unsigned char> &colourList);
+    void CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* tempSeg, int spacing, int direction, const std::vector<unsigned char> &colourList,int bufferSize);
 
     void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
 

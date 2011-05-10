@@ -40,7 +40,6 @@
 #include "nubotdataconfig.h"
 
 #include <math.h>
-#include <boost/circular_buffer.hpp>
 #include <limits>
 using namespace std;
 
@@ -58,7 +57,7 @@ NUSensors::NUSensors()
     m_data = new NUSensorsData();
     m_touch = new EndEffectorTouch();
     m_kinematicModel = new Kinematics();
-    m_kinematicModel->LoadModel("None");
+    m_kinematicModel->LoadModel();
     m_orientationFilter = new OrientationUKF();
     m_odometry = new OdometryEstimator();
 }

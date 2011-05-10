@@ -34,12 +34,17 @@ class QSRelax : public BehaviourState
 public:
     QSRelax(const NUData::id_t& joint, const QSBallisticController* parent);
     ~QSRelax();
+    
 protected:
     void doState();
     BehaviourState* nextState();
+    void updateTargetEstimate();
 private:
     NUData::id_t m_joint;
     const QSBallisticController* m_parent;
+    double m_time_in_state, m_previous_time;
+    
+    float m_target_calibration;
 };
 
 

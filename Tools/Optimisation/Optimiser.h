@@ -40,6 +40,7 @@ public:
     
     virtual vector<float> getNextParameters() = 0;
     virtual void setParametersResult(float fitness) = 0;
+    virtual void setParametersResult(const vector<float>& fitness);
     
     string& getName();
     virtual void summaryTo(ostream& stream) = 0;
