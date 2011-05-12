@@ -346,40 +346,43 @@ void cameraSettingsWidget::createConnections()                    //!< Connect a
 void cameraSettingsWidget::cameraSettingsChanged()
 {
 
-    settings->gain = shiftGainSlider->value();
-    settings->exposure = shiftExposureSlider->value();
-    settings->blueChroma = shiftBlueChromaSlider->value();
-    settings->redChroma = shiftRedChromaSlider->value();
-    settings->brightness = shiftBrightnessSlider->value();
-    settings->saturation = shiftSaturationSlider->value();
-    settings->contrast = shiftContrastSlider->value();
-    settings->hue = shiftHueSlider->value();
+    settings->p_gain.set(shiftGainSlider->value());
+    settings->p_exposure.set(shiftExposureSlider->value());
+    settings->p_blueChroma.set(shiftBlueChromaSlider->value());
+    settings->p_redChroma.set(shiftRedChromaSlider->value());
+    settings->p_brightness.set(shiftBrightnessSlider->value());
+    settings->p_saturation.set(shiftSaturationSlider->value());
+    settings->p_contrast.set(shiftContrastSlider->value());
+    settings->p_hue.set(shiftHueSlider->value());
 
     if(AutoExposureSelected->isChecked())
-        settings->autoExposure = 1;
+        settings->p_autoExposure.set(1);
     else
-        settings->autoExposure = 0;
+        settings->p_autoExposure.set(0);
 
     if(AutoGainSelected->isChecked())
-        settings->autoGain = 1;
+        settings->p_autoGain.set(1);
     else
-        settings->autoGain = 0;
+        settings->p_autoGain.set(0);
 
     if(AutoWhiteBalanceSelected->isChecked())
-        settings->autoWhiteBalance = 1;
+        settings->p_autoWhiteBalance.set(1);
     else
-        settings->autoWhiteBalance = 0;
+        settings->p_autoWhiteBalance.set(0);
 
 
     if(TopCameraSelected->isChecked())
-        settings->activeCamera = CameraSettings::TOP_CAMERA;
+        settings->activeCamera = (CameraSettings::TOP_CAMERA);
     else
-        settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
+        settings->activeCamera = (CameraSettings::BOTTOM_CAMERA);
 
     if(BottomCameraSelected->isChecked())
-        settings->activeCamera = CameraSettings::BOTTOM_CAMERA;
+        settings->activeCamera = (CameraSettings::BOTTOM_CAMERA);
     else
-        settings->activeCamera = CameraSettings::TOP_CAMERA;
+        settings->activeCamera = (CameraSettings::TOP_CAMERA);
+
+    settings->copyParams();
+
 }
 
 
@@ -436,10 +439,11 @@ void cameraSettingsWidget::sendDataToRobot()
 
     //USING THE JOB INTERFACE: (SENDS -1s to robot)
     CameraSettings tempSettings;
-    tempSettings.gain = -1;
-    tempSettings.exposure = -1;
-    tempSettings.contrast = -1;
-
+    tempSettings.p_gain.set(0);
+    tempSettings.p_exposure.set(0);
+    tempSettings.p_contrast.set(0);
+    tempSettings.copyParams();
+    qDebug() << tempSettings.gain << tempSettings.exposure << tempSettings.contrast;
     static ChangeCameraSettingsJob* camerajob = new ChangeCameraSettingsJob(tempSettings);
 
 
@@ -524,20 +528,20 @@ void cameraSettingsWidget::readPendingData()
                 job = (ChangeCameraSettingsJob*) (*it);
 
                 CameraSettings tempsettings = job->getSettings();
-                if(tempsettings.exposure > -1)
+                if(tempsettings.exposure > 0)
                 {
                     stopStreamCameraSetting();
                     //*settings = tempsettings;
                     debug << "Job Processed: " << endl;
-                    shiftExposureSlider->setValue(tempsettings.exposure);
-                    shiftGainSlider->setValue(tempsettings.gain);
-                    shiftBlueChromaSlider->setValue(tempsettings.blueChroma);
-                    shiftRedChromaSlider->setValue(tempsettings.redChroma);
-                    shiftBrightnessSlider->setValue(tempsettings.brightness);
-                    shiftSaturationSlider->setValue(tempsettings.saturation);
-                    shiftContrastSlider->setValue(tempsettings.contrast);
-                    shiftHueSlider->setValue(tempsettings.hue);
-
+                    shiftExposureSlider->setValue(round(tempsettings.p_exposure.get()));
+                    shiftGainSlider->setValue(round(tempsettings.p_gain.get()));
+                    shiftBlueChromaSlider->setValue(round(tempsettings.p_blueChroma.get()));
+                    shiftRedChromaSlider->setValue(round(tempsettings.p_redChroma.get()));
+                    shiftBrightnessSlider->setValue(round(tempsettings.p_brightness.get()));
+                    shiftSaturationSlider->setValue(round(tempsettings.p_saturation.get()));
+                    shiftContrastSlider->setValue(round(tempsettings.p_contrast.get()));
+                    shiftHueSlider->setValue(round(tempsettings.p_hue.get()));
+                    qDebug() << tempsettings.p_gain.get() << tempsettings.p_exposure.get() << tempsettings.p_contrast.get();
 
                     if(tempsettings.autoExposure == 1)
                        AutoExposureSelected->setChecked(true);

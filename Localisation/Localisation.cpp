@@ -86,7 +86,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     return;
 }
 
-Localisation::Localisation(const Localisation& source)
+Localisation::Localisation(const Localisation& source): TimestampedData()
 {
     *this = source;
 }

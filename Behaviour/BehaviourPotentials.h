@@ -190,7 +190,7 @@ public:
             {   // if we are too close to the ball then we need to go backwards
                 position_speed = (kickingdistance - distance)/kickingdistance;
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
-                position_rotation = bearing;
+                position_rotation = 0.5*bearing;
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
@@ -211,7 +211,7 @@ public:
             float around_rotation;
             if (distance < 0.75*stoppingdistance)
             {   // if we are close enough to worry about the heading
-                const float heading_gain = 0.6;
+                const float heading_gain = 0.5;
                 const float heading_threshold = mathGeneral::PI/2;
                 if (fabs(heading) < heading_threshold)
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);

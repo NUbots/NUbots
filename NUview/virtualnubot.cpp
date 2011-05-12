@@ -177,7 +177,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     */
 }
 
-void virtualNUbot::generateClassifiedImage(const NUImage* yuvImage)
+void virtualNUbot::generateClassifiedImage()
 {
     vision.classifyImage(classImage);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
@@ -227,7 +227,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //qDebug() << "Scan Spacing calculated";
     vision.setLUT(classificationTable);
     //qDebug() << "LUT set";
-    generateClassifiedImage(image);
+    generateClassifiedImage();
     //qDebug() << "Generate Classified Image: finnished";
 
     //! Find the green edges

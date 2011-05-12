@@ -20,9 +20,9 @@ class Ball
         bool isObjectInRobot(const ObjectCandidate &PossibleBall, FieldObjects* AllObjects);
         bool isObjectTooBig(const ObjectCandidate &PossibleBall, Vision* vision);
         float getMaxPixelsOfBall(Vision* vision);
-        std::vector < Vector2<int> > classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height,int width);
+        std::vector < Vector2<int> > classifyBallClosely(const ObjectCandidate &PossibleBall,Vision* vision,int height,int width, float &pinkPercentage);
         bool isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height,int width);
-        Circle isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall, Vision* vision);
-	
+        Circle isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const ObjectCandidate &PossibleBall, Vision* vision, float &pinkPercentage);
+        bool isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,const ObjectCandidate &PossibleBall, FieldObjects* AllObjects);
 };
 

@@ -141,6 +141,15 @@ public:
           @brief Accepts a display and clears it's previously stored lists.
           @param displayId The display to be cleared.
           */
+
+        void writeCalGridToDisplay(GLDisplay::display displayId);
+
+        /*!
+          @brief Accepts a display and clears it's previously stored lists.
+          @param displayId The display to be cleared.
+          */
+
+
         void clearDisplay(GLDisplay::display displayId);
 
         /*!

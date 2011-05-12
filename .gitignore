@@ -40,6 +40,7 @@ Autoconfig/*
 /NUview/diagona/*.*
 /NUview/NUview
 /NUview-build-desktop/*
+/Extracted/*
 
 # Ignore our data file formats
 *.lut
