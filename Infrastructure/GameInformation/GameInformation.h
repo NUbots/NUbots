@@ -104,7 +104,7 @@ public:
     @brief Produce human readable string summary of the data.
     @return Formatted string summary of the current data.
     */
-    std::string toString();
+    std::string toString() const;
 
 private:
     const RobotInfo* getRobotInfo(int teamNumber, int playerNumber) const;

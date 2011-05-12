@@ -17,6 +17,8 @@
 #include "locwmstreamwidget.h"
 #include "SensorDisplayWidget.h"
 #include "ObjectDisplayWidget.h"
+#include "GameInformationDisplayWidget.h"
+#include "TeamInformationDisplayWidget.h"
 #include <QHostInfo>
 
 class QMdiArea;
@@ -143,6 +145,8 @@ private:
     frameInformationWidget* frameInfo;
     SensorDisplayWidget* sensorDisplay;
     ObjectDisplayWidget* objectDisplay;
+    GameInformationDisplayWidget* gameInfoDisplay;
+    TeamInformationDisplayWidget* teamInfoDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

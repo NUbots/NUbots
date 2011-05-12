@@ -170,7 +170,10 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/FieldCalculations.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     OfflineLocalisation.h \
-    ObjectDisplayWidget.h
+    ObjectDisplayWidget.h \
+    TeamInformationDisplayWidget.h \
+    GameInformationDisplayWidget.h \
+    ../Infrastructure/TeamInformation/TeamInformation.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -279,6 +282,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
     OfflineLocalisation.cpp \
-    ObjectDisplayWidget.cpp
+    ObjectDisplayWidget.cpp \
+    TeamInformationDisplayWidget.cpp \
+    GameInformationDisplayWidget.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

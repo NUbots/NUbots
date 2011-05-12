@@ -378,7 +378,7 @@ std::string goalToString(int goal)
 @brief Produce human readable string summary of the data.
 @return Formatted string summary of the current data.
 */
-std::string GameInformation::toString()
+std::string GameInformation::toString() const
 {
     const int NUM_TEAMS = 2;
 

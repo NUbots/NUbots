@@ -80,6 +80,22 @@ MainWindow::MainWindow(QWidget *parent)
     objectDock->setShown(false);
     addDockWidget(Qt::RightDockWidgetArea,objectDock);
 
+    // Game Info Widget
+    gameInfoDisplay = new GameInformationDisplayWidget(this);
+    QDockWidget* gameInfoDock = new QDockWidget("Game Information");
+    gameInfoDock->setObjectName("GameInformation");
+    gameInfoDock->setWidget(gameInfoDisplay);
+    gameInfoDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,gameInfoDock);
+
+    // Team Info Widget
+    teamInfoDisplay = new TeamInformationDisplayWidget(this);
+    QDockWidget* teamInfoDock = new QDockWidget("Team Information");
+    teamInfoDock->setObjectName("Team Information");
+    teamInfoDock->setWidget(teamInfoDisplay);
+    teamInfoDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,teamInfoDock);
+
     // Add localisation widget
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);

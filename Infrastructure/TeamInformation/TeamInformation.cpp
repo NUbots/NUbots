@@ -25,6 +25,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUPlatform.h"
+#include <sstream>
 
 #include <memory.h>
 
@@ -153,7 +154,14 @@ float TeamInformation::getTimeToBall()
     return time;
 }
 
-void TeamPacket::summaryTo(ostream& output)
+std::string TeamPacket::toString() const
+{
+    std::stringstream result;
+    summaryTo(result);
+    return result.str();
+}
+
+void TeamPacket::summaryTo(ostream& output) const
 {
     output << "ID: " << ID;
     output << " Player: " << (int)PlayerNumber;
@@ -208,6 +216,41 @@ void TeamInformation::addReceivedTeamPacket(TeamPacket& receivedPacket)
     return;
 }
 
+std::string TeamInformation::toString() const
+{
+    std::stringstream result;
+
+    result << "Team Information - Timestamp: " << this->GetTimestamp() << std::endl;
+    result << "Player Number: " << m_player_number << std::endl;
+    result << "Team Number: " << m_team_number << std::endl;
+    result << "Current Packet (self): " << std::endl;
+    result << m_packet.toString() << std::endl;
+
+    PacketBufferArray::const_iterator buffer_iterator = m_received_packets.begin();
+    int bufferNumber = 0;
+    while(buffer_iterator != m_received_packets.end())
+    {
+        if(buffer_iterator->size() > 0)
+        {
+            result << "Buffer Number: " << bufferNumber << std::endl;
+            PacketBuffer::const_iterator packet_iterator = buffer_iterator->begin();
+            int packetNumber = 0;
+            while(packet_iterator != buffer_iterator->end())
+            {
+                result << "Packet Numebr:" << packetNumber << std::endl;
+                result << packet_iterator->toString();
+                ++packet_iterator;
+                ++packetNumber;
+            }
+            ++buffer_iterator;
+        }
+        ++bufferNumber;
+    }
+
+    return result.str();
+}
+
+
 ostream& operator<< (ostream& output, const TeamPacket& packet)
 {
     output.write((char*) &packet, sizeof(packet));
@@ -219,7 +262,7 @@ istream& operator>> (istream& input, TeamPacket& packet)
     TeamPacket packetBuffer;
     input.read(reinterpret_cast<char*>(&packetBuffer), sizeof(packetBuffer));
     packet = packetBuffer;
-    
+
     return input;
 }
 

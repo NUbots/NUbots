@@ -67,8 +67,9 @@ public:
     float TimeToBall;
     SharedBall Ball;
     SharedSelf Self;
-    
-    void summaryTo(ostream& output);
+
+    std::string toString() const;
+    void summaryTo(ostream& output) const;
     friend ostream& operator<< (ostream& output, const TeamPacket& packet);
     friend istream& operator>> (istream& input, TeamPacket& packet);
 };
@@ -89,6 +90,7 @@ public:
     vector<TeamPacket::SharedBall> getSharedBalls();
     
     double GetTimestamp() const{return m_timestamp;};
+    std::string toString() const;
 
     friend ostream& operator<< (ostream& output, const TeamInformation& info);
     //friend ostream& operator<< (ostream& output, TeamInformation* info);
