@@ -64,7 +64,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     #endif
     loadId();
     loadWayPoints();
-    loadParameters("ALWalkStart");
+    loadParameters("NBWalkStart");
     initOptimiser();
 
     if (not m_optimiser)
@@ -111,12 +111,12 @@ BehaviourState* WalkOptimisationProvider::nextStateCommons()
 			kill(getpid(), SIGKILL);
 		}
 
-		if (m_state == m_paused and Platform->getTime() > 1000)
+		if (m_state == m_paused and Platform->getTime() > 5000)
 			return m_generate;
 		else
 			return m_state;
 	#else
-        if (m_state == m_paused and Platform->getTime() > 5000)
+        if (m_state == m_paused and Platform->getTime() > 10000)
             return m_generate;
         else
             return m_state;

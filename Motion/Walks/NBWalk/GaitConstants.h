@@ -191,13 +191,13 @@ namespace WP {
     {0.1f,          // hip hack l                                   ---> Walk Parameter
      0.1f};         // hip hack r                                   ---> Walk Parameter
     static const float SENSOR_DEFAULT[LEN_SENSOR_CONFIG]=
-    {1.0,   // Feedback type (1.0 = spring, 0.0 = old)
+    {0.0,   // Feedback type (1.0 = spring, 0.0 = old)
      0.06,  // angle X scale (gamma)
      0.08,  // angle Y scale (gamma)
      250.0,  // X spring constant k (kg/s^2)
      100.0,  // Y spring constant k (kg/s^2)
-     0.122,   // max angle X (compensation)
-     0.122,   // max angle Y
+     0.261,   // max angle X (compensation)
+     0.261,   // max angle Y
      0.785};   // max acceleration
     static const float STIFF_DEFAULT[LEN_STIFF_CONFIG]=
     {0.85f,//hip

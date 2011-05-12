@@ -85,8 +85,8 @@ public:
     {
 		// Derived from matrix formed by RotZ(psi)*RotY(theta)*RotX(Phi)
         std::vector<float> result(3,0.0f);
-        result[1] = -asin(transformMatrix[2][0]);
-        result[0] = atan2(transformMatrix[2][1], transformMatrix[2][2]);
+        result[1] = asin(transformMatrix[2][0]);
+        result[0] = -atan2(transformMatrix[2][1], transformMatrix[2][2]);
         result[2] = atan2(transformMatrix[1][0], transformMatrix[0][0]);
 		if(transformMatrix[2][2] * cos(result[1]) < 0)
 		{

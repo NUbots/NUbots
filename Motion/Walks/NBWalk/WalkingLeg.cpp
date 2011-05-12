@@ -221,7 +221,7 @@ LegJointStiffTuple WalkingLeg::supporting(ufmatrix3 fc_Transform){//float dest_x
 
 
 const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
-    const float startStopSensorScale = getEndStepSensorScale();
+    const float startStopSensorScale = 1;//getEndStepSensorScale();
 
 
 	//Center of mass control
@@ -239,28 +239,20 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
 	ufvector3 comFootGoal = footGoal;
 	comFootGoal(2) += COM_Z_OFF*COM_SCALE;
 
-    const boost::tuple <const float, const float > sensorCompensation =
-        sensorAngles->getAngles(startStopSensorScale);
+    const boost::tuple <const float, const float > sensorCompensation = sensorAngles->getAngles(startStopSensorScale);
 
-    const float bodyAngleX = sensorAngleX =
-        sensorCompensation.get<SensorAngles::X>();
-    const float bodyAngleY = sensorAngleY = gait->stance[WP::BODY_ROT_Y] +
-        sensorCompensation.get<SensorAngles::Y>();
+    const float bodyAngleX = sensorAngleX = sensorCompensation.get<SensorAngles::X>();
+    const float bodyAngleY = sensorAngleY = gait->stance[WP::BODY_ROT_Y] - sensorCompensation.get<SensorAngles::Y>();
 
     //Hack
-    const boost::tuple <const float, const float > ankleAngleCompensation =
-      getAnkleAngles();
+    const boost::tuple <const float, const float > ankleAngleCompensation = getAnkleAngles();
 
     const float footAngleX = ankleAngleCompensation.get<0>();
     const float footAngleY = ankleAngleCompensation.get<1>();
-    const float footAngleZ = getFootRotation_c()
-        + leg_sign*gait->stance[WP::LEG_ROT_Z]*0.5;
+    const float footAngleZ = getFootRotation_c() + leg_sign*gait->stance[WP::LEG_ROT_Z]*0.5;
 
-    const ufvector3 bodyOrientation = CoordFrame3D::vector3D(bodyAngleX,
-                                                       bodyAngleY, 0.0f);
-    const ufvector3 footOrientation = CoordFrame3D::vector3D(footAngleX,
-                                                             footAngleY,
-                                                             footAngleZ);
+    const ufvector3 bodyOrientation = CoordFrame3D::vector3D(bodyAngleX, bodyAngleY, 0.0f);
+    const ufvector3 footOrientation = CoordFrame3D::vector3D(footAngleX, footAngleY, footAngleZ);
 
 
 
@@ -270,9 +262,7 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
 								COM_Z_OFF*COM_SCALE);
 
 
-    IKLegResult result =
-        Kinematics::legIK(chainID,comFootGoal,footOrientation,
-                          bodyGoal,bodyOrientation);
+    IKLegResult result = Kinematics::legIK(chainID,comFootGoal,footOrientation,bodyGoal,bodyOrientation);
 
     applyHipHacks(result.angles);
 
