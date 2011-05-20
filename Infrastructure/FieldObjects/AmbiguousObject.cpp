@@ -66,6 +66,7 @@ std::istream& operator>> (std::istream& input, AmbiguousObject& p_amb)
     std::string name;
     for(int i = 0; i < nameLength; ++i)
     {
+        if(input.eof() || input.bad()) break;
         input.read(reinterpret_cast<char*>(&tempChar), sizeof(tempChar));
         name += tempChar;
     }
@@ -77,6 +78,7 @@ std::istream& operator>> (std::istream& input, AmbiguousObject& p_amb)
     p_amb.PossibleObjectIDs.clear();
     for(unsigned int i = 0; i < numEntries; i++)
     {
+        if(input.eof() || input.bad()) break;
         input.read(reinterpret_cast<char*>(&id), sizeof(id));
         p_amb.PossibleObjectIDs.push_back(id);
     }

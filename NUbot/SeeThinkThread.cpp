@@ -77,13 +77,11 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
     m_nubot = nubot;
-
-
-    m_locwmfile.open((string(DATA_DIR) + string("locfrm.strm")).c_str());
-    debug << "Opening file: " << (string(DATA_DIR) + string("locfrm.strm")).c_str() << " ... ";
-    if(m_locwmfile.is_open()) debug << "Success.";
-    else debug << "Failed.";
-    debug << std::endl;
+    m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
+    m_logrecorder->SetLogging("sensor",true);
+    m_logrecorder->SetLogging("gameinfo",true);
+    m_logrecorder->SetLogging("teaminfo",true);
+    m_logrecorder->SetLogging("object",true);
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -92,7 +90,6 @@ SeeThinkThread::~SeeThinkThread()
         debug << "SeeThinkThread::~SeeThinkThread()" << endl;
     #endif
     stop();
-    m_locwmfile.close();
 }
 
 /*! @brief The sense->move main loop
@@ -154,12 +151,14 @@ void SeeThinkThread::run()
             #if DEBUG_VERBOSITY > 0
                 Blackboard->Jobs->summaryTo(debug);
             #endif
-            
+            double current_time = Blackboard->Sensors->GetTimestamp();
+            Blackboard->TeamInfo->UpdateTime(current_time);
+            Blackboard->GameInfo->UpdateTime(current_time);
             #ifdef USE_VISION
 
             m_nubot->m_vision->process(Blackboard->Jobs) ; //<! Networking for Vision
             m_nubot->m_platform->process(Blackboard->Jobs, m_nubot->m_io); //<! Networking for Platform
-
+            m_logrecorder->WriteData(Blackboard);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif

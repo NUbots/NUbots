@@ -6,6 +6,8 @@
 #include "Localisation/Localisation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Localisation/LocWmFrame.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 #include <QDir>
 
 class SplitStreamFileFormatReader: public LogFileFormatReader
@@ -51,6 +53,8 @@ protected:
     StreamFileReader<Localisation> locwmReader;
     StreamFileReader<FieldObjects> objectReader;
     StreamFileReader<LocWmFrame> locmframeReader;
+    StreamFileReader<GameInformation> gameinfoReader;
+    StreamFileReader<TeamInformation> teaminfoReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;

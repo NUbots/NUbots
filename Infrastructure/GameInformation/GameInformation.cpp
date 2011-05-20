@@ -389,32 +389,38 @@ std::string GameInformation::toString() const
     result << "Team Number: " << m_team_number << std::endl;
     result << "State: " << stateToString(m_state) << std::endl;
     result << std::endl;
-    result << "Game Controller Info" << std::endl;
-    result << "Version: " << m_currentControlData->version << std::endl;
-    result << "Players Per Team: " << m_currentControlData->playersPerTeam << std::endl;
-    result << "State: " << stateToString(m_currentControlData->state) << std::endl;
-    result << "First Half: " << (m_currentControlData->firstHalf ? "True" : "False") << std::endl;
-    result << "Kick-off Team: " << m_currentControlData->kickOffTeam << std::endl;
-    result << "Penalty Shootout: " << (m_currentControlData->secondaryState ? "True" : "False") << std::endl;
-    result << "Drop in Team: " << m_currentControlData->dropInTeam << std::endl;
-    result << "Drop in Time: " << m_currentControlData->dropInTime << std::endl;
-    result << "Seconds Remaining: " << m_currentControlData->secsRemaining << std::endl;
-    for (int t=0; t < NUM_TEAMS; ++t)
+    if(m_currentControlData)
     {
-        result << std::endl;
-        result << teamToString(m_currentControlData->teams[t].teamColour) << " Team (" << m_currentControlData->teams[t].teamNumber << ")" << std::endl;
-        result << "Goal Colour: " << goalToString(m_currentControlData->teams[t].goalColour) << std::endl;
-        result << "Score: " << m_currentControlData->teams[t].score << std::endl;
-        for(int p=0; p < m_currentControlData->playersPerTeam; ++p)
+        result << "Game Controller Info" << std::endl;
+        result << "Version: " << m_currentControlData->version << std::endl;
+        result << "Players Per Team: " << (int)m_currentControlData->playersPerTeam << std::endl;
+        result << "State: " << stateToString(m_currentControlData->state) << std::endl;
+        result << "First Half: " << (m_currentControlData->firstHalf ? "True" : "False") << std::endl;
+        result << "Kick-off Team: " << (int)m_currentControlData->kickOffTeam << std::endl;
+        result << "Penalty Shootout: " << (m_currentControlData->secondaryState ? "True" : "False") << std::endl;
+        result << "Drop in Team: " << (int)m_currentControlData->dropInTeam << std::endl;
+        result << "Drop in Time: " << (int)m_currentControlData->dropInTime << std::endl;
+        result << "Seconds Remaining: " << (int)m_currentControlData->secsRemaining << std::endl;
+        for (int t=0; t < NUM_TEAMS; ++t)
         {
-            result << "Player " << p+1 << " - ";
-            result << "Penalised: " << (m_currentControlData->teams[t].players[p].penalty ? "True" : "False");
-            if(m_currentControlData->teams[t].players[p].penalty)
-                result << "\t (" << m_currentControlData->teams[t].players[p].secsTillUnpenalised << ")";
-             result << std::endl;
+            result << std::endl;
+            result << teamToString(m_currentControlData->teams[t].teamColour) << " Team (" << (int)m_currentControlData->teams[t].teamNumber << ")" << std::endl;
+            result << "Goal Colour: " << goalToString(m_currentControlData->teams[t].goalColour) << std::endl;
+            result << "Score: " << (int)m_currentControlData->teams[t].score << std::endl;
+            for(int p=0; p < m_currentControlData->playersPerTeam; ++p)
+            {
+                result << "Player " << p+1 << " - ";
+                result << "Penalised: " << (m_currentControlData->teams[t].players[p].penalty ? "True" : "False");
+                if(m_currentControlData->teams[t].players[p].penalty)
+                    result << "\t (" << (int)m_currentControlData->teams[t].players[p].secsTillUnpenalised << ")";
+                 result << std::endl;
+            }
         }
     }
-
+    else
+    {
+        result << "No game information available." << std::endl;
+    }
     return result.str();
 }
 

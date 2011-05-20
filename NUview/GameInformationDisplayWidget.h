@@ -14,7 +14,7 @@ public:
 signals:
 
 public slots:
-    void setGameInfoData(const GameInformation* newGameInfoData);
+    void setGameInfo(const GameInformation* newGameInfoData);
 };
 
 #endif // GAMEINFORMATIONDISPLAYWIDGET_H

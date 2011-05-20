@@ -69,6 +69,8 @@ public:
     SharedSelf Self;
 
     std::string toString() const;
+    ostream& toFile(ostream& output) const;
+    istream& fromFile(istream& input);
     void summaryTo(ostream& output) const;
     friend ostream& operator<< (ostream& output, const TeamPacket& packet);
     friend istream& operator>> (istream& input, TeamPacket& packet);
@@ -80,7 +82,7 @@ public:
     typedef boost::circular_buffer<TeamPacket> PacketBuffer;
     typedef vector<PacketBuffer> PacketBufferArray;
 
-    TeamInformation(int playernum, int teamnum);
+    TeamInformation(int playernum=0, int teamnum=0);
     ~TeamInformation();
     
     int getPlayerNumber() {return m_player_number;};
@@ -89,6 +91,7 @@ public:
     
     vector<TeamPacket::SharedBall> getSharedBalls();
     
+    void UpdateTime(double newTime) {m_timestamp=newTime;};
     double GetTimestamp() const{return m_timestamp;};
     std::string toString() const;
 

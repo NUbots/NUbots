@@ -26,6 +26,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "NUPlatform/NUPlatform.h"
 #include <sstream>
+#include "Tools/FileFormats/FileFormatException.h"
 
 #include <memory.h>
 
@@ -154,6 +155,39 @@ float TeamInformation::getTimeToBall()
     return time;
 }
 
+ostream& TeamPacket::toFile(ostream& output) const
+{
+    output.write(reinterpret_cast<const char*>(Header), 4);
+    int temp_id = ID;
+    output.write(reinterpret_cast<const char*>(&temp_id), sizeof(temp_id));
+    output.write(reinterpret_cast<const char*>(&SentTime), sizeof(SentTime));
+    output.write(reinterpret_cast<const char*>(&ReceivedTime), sizeof(ReceivedTime));
+    output.write(reinterpret_cast<const char*>(&PlayerNumber), sizeof(PlayerNumber));
+    output.write(reinterpret_cast<const char*>(&TeamNumber), sizeof(TeamNumber));
+    output.write(reinterpret_cast<const char*>(&TimeToBall), sizeof(TimeToBall));
+    output.write(reinterpret_cast<const char*>(&Ball), sizeof(Ball));
+    output.write(reinterpret_cast<const char*>(&Self), sizeof(Self));
+    return output;
+}
+
+//#include <QDebug>
+istream& TeamPacket::fromFile(istream& input)
+{
+//    //qDebug() << "Size is " << sizeof(ID);
+    input.read(reinterpret_cast<char*>(Header), 4);
+    int temp_id = 0;
+    input.read(reinterpret_cast<char*>(&temp_id), sizeof(temp_id));
+    ID = temp_id;
+    input.read(reinterpret_cast<char*>(&SentTime), sizeof(SentTime));
+    input.read(reinterpret_cast<char*>(&ReceivedTime), sizeof(ReceivedTime));
+    input.read(reinterpret_cast<char*>(&PlayerNumber), sizeof(PlayerNumber));
+    input.read(reinterpret_cast<char*>(&TeamNumber), sizeof(TeamNumber));
+    input.read(reinterpret_cast<char*>(&TimeToBall), sizeof(TimeToBall));
+    input.read(reinterpret_cast<char*>(&Ball), sizeof(Ball));
+    input.read(reinterpret_cast<char*>(&Self), sizeof(Self));
+    return input;
+}
+
 std::string TeamPacket::toString() const
 {
     std::stringstream result;
@@ -188,6 +222,7 @@ void TeamInformation::addReceivedTeamPacket(TeamPacket& receivedPacket)
     if (receivedPacket.PlayerNumber > 0 and (unsigned) receivedPacket.PlayerNumber < m_received_packets.size() and receivedPacket.PlayerNumber != m_player_number and receivedPacket.TeamNumber == m_team_number)
     {   // only accept packets from valid player numbers
         // System->displayTeamPacketReceived(info.m_actions);
+        debug << "team packet received from " << (int)receivedPacket.PlayerNumber << "." << std::endl;
         if (m_received_packets[receivedPacket.PlayerNumber].empty())
         {   // if there have been no previous packets from this player always accept the packet
             m_received_packets[receivedPacket.PlayerNumber].push_back(receivedPacket);
@@ -219,34 +254,34 @@ void TeamInformation::addReceivedTeamPacket(TeamPacket& receivedPacket)
 std::string TeamInformation::toString() const
 {
     std::stringstream result;
-
-    result << "Team Information - Timestamp: " << this->GetTimestamp() << std::endl;
+    result << "Team Information - Timestamp: " << GetTimestamp() << std::endl;
     result << "Player Number: " << m_player_number << std::endl;
     result << "Team Number: " << m_team_number << std::endl;
     result << "Current Packet (self): " << std::endl;
     result << m_packet.toString() << std::endl;
 
+    result << "Received packets:" << std::endl;
+    int total_packets_displayed = 0;
     PacketBufferArray::const_iterator buffer_iterator = m_received_packets.begin();
     int bufferNumber = 0;
     while(buffer_iterator != m_received_packets.end())
     {
         if(buffer_iterator->size() > 0)
         {
-            result << "Buffer Number: " << bufferNumber << std::endl;
             PacketBuffer::const_iterator packet_iterator = buffer_iterator->begin();
             int packetNumber = 0;
             while(packet_iterator != buffer_iterator->end())
             {
-                result << "Packet Numebr:" << packetNumber << std::endl;
                 result << packet_iterator->toString();
+                ++total_packets_displayed;
                 ++packet_iterator;
                 ++packetNumber;
             }
-            ++buffer_iterator;
         }
+        ++buffer_iterator;
         ++bufferNumber;
     }
-
+    if(total_packets_displayed <= 0) result << "None." << std::endl;
     return result.str();
 }
 
@@ -271,43 +306,69 @@ ostream& operator<< (ostream& output, const TeamInformation& info)
     output.write(reinterpret_cast<const char*>(&info.m_timestamp), sizeof(info.m_timestamp));
     output.write(reinterpret_cast<const char*>(&info.m_player_number), sizeof(info.m_player_number));
     output.write(reinterpret_cast<const char*>(&info.m_team_number), sizeof(info.m_team_number));
-    output << info.m_packet;
+    info.m_packet.toFile(output);
+
     int num_buffers = info.m_received_packets.size();
     output.write(reinterpret_cast<const char*>(&num_buffers), sizeof(num_buffers));
+
     int numEntries;
     TeamInformation::PacketBufferArray::const_iterator buffer_iterator = info.m_received_packets.begin();
     while(buffer_iterator != info.m_received_packets.end())
     {
         numEntries = buffer_iterator->size();
         output.write(reinterpret_cast<const char*>(&numEntries), sizeof(numEntries));
+
         TeamInformation::PacketBuffer::const_iterator packet_iterator = buffer_iterator->begin();
         while(packet_iterator != buffer_iterator->end())
         {
-            output << (*packet_iterator);
+            packet_iterator->toFile(output);
             ++packet_iterator;
         }
         ++buffer_iterator;
     }
     return output;
 }
-
+#include <QDebug>
 istream& operator>> (istream& input, TeamInformation& info)
 {
     input.read(reinterpret_cast<char*>(&info.m_timestamp), sizeof(info.m_timestamp));
     input.read(reinterpret_cast<char*>(&info.m_player_number), sizeof(info.m_player_number));
     input.read(reinterpret_cast<char*>(&info.m_team_number), sizeof(info.m_team_number));
-    input >> info.m_packet;
-    int num_buffers;
-    int num_entries;
+    info.m_packet.fromFile(input);
+
+    int num_buffers = 0;
+    int num_entries = 0;
     input.read(reinterpret_cast<char*>(&num_buffers), sizeof(num_buffers));
+
+    if(input.bad() || input.eof())
+    {
+        std::stringstream error_msg;
+        error_msg << "Error reading number of buffers " << num_buffers << " - end of file reached." << std::endl;
+        throw FileFormatException(error_msg.str());
+    }
     info.m_received_packets.resize(num_buffers);
-    for (int b=0; b < num_buffers; ++b)
+    for (int b=0; b < num_buffers; b++)
     {
         input.read(reinterpret_cast<char*>(&num_entries), sizeof(num_entries));
-        info.m_received_packets[b].resize(num_entries);
-        for(int e=0; e < num_entries; ++e)
+        if(input.bad() || input.eof())
         {
-            input >> info.m_received_packets[b][e];
+            std::stringstream error_msg;
+            error_msg << "Error reading packet buffer " << b << " of " << num_buffers << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
+        qDebug() << "Num Entries found: " << num_entries;
+        info.m_received_packets[b].resize(num_entries);
+
+        for(int e=0; e < num_entries; e++)
+        {
+            if(input.bad() || input.eof())
+            {
+                std::stringstream error_msg;
+                error_msg << "Error reading received packet " << e << " of " << num_entries << " for buffer " << b << " of " << num_buffers << " - end of file reached." << std::endl;
+                throw FileFormatException(error_msg.str());
+            }
+            info.m_received_packets[b][e].fromFile(input);
+            qDebug() << info.m_received_packets[b][e].toString().c_str();
         }
     }
     return input;

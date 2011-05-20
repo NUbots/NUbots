@@ -5,6 +5,8 @@
 #include <QString>
 #include "LogFileFormatReader.h"
 class NUSensorsData;
+class TeamInformation;
+class GameInformation;
 
 class LogFileReader : public QObject
 {
@@ -44,6 +46,8 @@ signals:
     void sensorDataChanged(const float*, const float*, const float*);
     void sensorDataChanged(NUSensorsData*);
     void ObjectDataChanged(const FieldObjects*);
+    void TeamInfoChanged(const TeamInformation*);
+    void GameInfoChanged(const GameInformation*);
     void frameChanged(int,int);
     void cameraChanged(int);
 

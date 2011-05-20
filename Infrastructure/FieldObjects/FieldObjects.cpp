@@ -3,6 +3,7 @@
 #include <debug.h>
 #include "Tools/Math/FieldCalculations.h"
 #include <sstream>
+#include "Tools/FileFormats/FileFormatException.h"
 
 FieldObjects::FieldObjects()
 {
@@ -423,12 +424,24 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading stationary object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.stationaryFieldObjects[i];
     }
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading mobile object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.mobileFieldObjects[i];
     }
 
@@ -436,6 +449,12 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     p_fob.ambiguousFieldObjects.resize(size);
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading ambiguous object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.ambiguousFieldObjects[i];
     }
     return input;

@@ -42,7 +42,7 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
     m_extension = ".strm";
-    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame";
+    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
 
     // Add the file readers.
     m_fileReaders.push_back(&imageReader);
@@ -50,6 +50,8 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
     m_fileReaders.push_back(&locwmReader);
     m_fileReaders.push_back(&objectReader);
     m_fileReaders.push_back(&locmframeReader);
+    m_fileReaders.push_back(&teaminfoReader);
+    m_fileReaders.push_back(&gameinfoReader);
 }
 
 std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& directory)
@@ -226,6 +228,16 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
         {
             emit ObjectDataChanged(objectReader.ReadFrameNumber(frameNumber));
             m_currentFrameIndex = objectReader.CurrentFrameSequenceNumber();
+        }
+        if(teaminfoReader.IsValid())
+        {
+            emit TeamInfoChanged(teaminfoReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = teaminfoReader.CurrentFrameSequenceNumber();
+        }
+        if(gameinfoReader.IsValid())
+        {
+            emit GameInfoChanged(gameinfoReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = gameinfoReader.CurrentFrameSequenceNumber();
         }
         //qDebug() << "Set Frame " << frameNumber << "at" << m_currentFrameIndex;
         //m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();

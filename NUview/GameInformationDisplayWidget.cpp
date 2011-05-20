@@ -7,7 +7,7 @@ GameInformationDisplayWidget::GameInformationDisplayWidget(QWidget *parent) :
 {
 }
 
-void GameInformationDisplayWidget::setGameInfoData(const GameInformation* newGameInfoData)
+void GameInformationDisplayWidget::setGameInfo(const GameInformation* newGameInfoData)
 {
     QString displayText(newGameInfoData->toString().c_str());
     this->setText(displayText);

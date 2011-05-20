@@ -56,7 +56,7 @@ public:
         RedTeam = TEAM_RED
     };
 public:
-    GameInformation(int playerNumber, int teamNumber);
+    GameInformation(int playerNumber=0, int teamNumber=0);
     ~GameInformation();
 
     // My information
@@ -84,6 +84,7 @@ public:
     void doManualStateChange();
     void doManualTeamChange();
 
+    void UpdateTime(double newTime) {m_timestamp = newTime;};
     double GetTimestamp() const{return m_timestamp;};
 
     /*!

@@ -10,6 +10,8 @@ class NUSensorsData;
 class NUImage;
 class LocWmFrame;
 class FieldObjects;
+class GameInformation;
+class TeamInformation;
 
 class LogFileFormatReader : public QObject
 {
@@ -47,6 +49,8 @@ signals:
     void rawImageChanged(const NUImage*);
     void sensorDataChanged(const float*,const float*,const float*);
     void sensorDataChanged(NUSensorsData*);
+    void GameInfoChanged(const GameInformation*);
+    void TeamInfoChanged(const TeamInformation*);
     void frameChanged(int,int);
     void cameraChanged(int);
 

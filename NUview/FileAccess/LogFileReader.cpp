@@ -55,6 +55,8 @@ int LogFileReader::openFile(QString fileName)
             connect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
             connect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
             connect(currentFileReader,SIGNAL(ObjectDataChanged(const FieldObjects*)), this, SIGNAL(ObjectDataChanged(const FieldObjects*)));
+            connect(currentFileReader,SIGNAL(GameInfoChanged(const GameInformation*)), this, SIGNAL(GameInfoChanged(const GameInformation*)));
+            connect(currentFileReader,SIGNAL(TeamInfoChanged(const TeamInformation*)), this, SIGNAL(TeamInfoChanged(const TeamInformation*)));
             connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
             availableFrames = currentFileReader->numFrames();
