@@ -16,13 +16,15 @@ public:
     ~LogFileReader();
     int openFile(QString fileName);
     bool closeFile();
-    int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;};
-    int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;};
+    int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;}
+    int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;}
 
-    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();};
-    const NUImage* GetRawImage(){return currentFileReader->GetImageData();};
-    const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();};
-    const FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();};
+    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();}
+    const NUImage* GetRawImage(){return currentFileReader->GetImageData();}
+    const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();}
+    const FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();}
+    const GameInformation* GetGameInfo(){return currentFileReader->GetGameInfo();}
+    const TeamInformation* GetTeamInfo(){return currentFileReader->GetTeamInfo();}
 
     bool nextFrameAvailable()
     {

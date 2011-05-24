@@ -23,24 +23,26 @@ public:
     virtual bool closeFile() = 0;                       // Must be implemented by derived classes.
 
     // Fetching information
-    QString fileName() const {return m_fileInformation.fileName();};
-    QString filePath() const {return m_fileInformation.absoluteFilePath();};
-    QString fileType() const {return m_fileInformation.suffix();};
-    int fileLengthInBytes() const {return m_fileInformation.size();};
-    int numFrames() const {return m_totalFrames;};
-    int currentFrame() const {return m_currentFrameIndex;};
+    QString fileName() const {return m_fileInformation.fileName();}
+    QString filePath() const {return m_fileInformation.absoluteFilePath();}
+    QString fileType() const {return m_fileInformation.suffix();}
+    int fileLengthInBytes() const {return m_fileInformation.size();}
+    int numFrames() const {return m_totalFrames;}
+    int currentFrame() const {return m_currentFrameIndex;}
     virtual bool fileGood() = 0;
 
-    virtual bool isNextFrameAvailable(){return false;};
-    virtual bool isPreviousFrameAvailable(){return false;};
-    virtual bool isFirstFrameAvailable(){return false;};
-    virtual bool isLastFrameAvailable(){return false;};
-    virtual bool isSetFrameAvailable(){return false;};
+    virtual bool isNextFrameAvailable(){return false;}
+    virtual bool isPreviousFrameAvailable(){return false;}
+    virtual bool isFirstFrameAvailable(){return false;}
+    virtual bool isLastFrameAvailable(){return false;}
+    virtual bool isSetFrameAvailable(){return false;}
 
-    virtual const Localisation* GetLocalisationData(){return NULL;};
-    virtual const NUImage* GetImageData(){return NULL;};
-    virtual const NUSensorsData* GetSensorData(){return NULL;};
-    virtual const FieldObjects* GetObjectData(){return NULL;};
+    virtual const Localisation* GetLocalisationData(){return NULL;}
+    virtual const NUImage* GetImageData(){return NULL;}
+    virtual const NUSensorsData* GetSensorData(){return NULL;}
+    virtual const FieldObjects* GetObjectData(){return NULL;}
+    virtual const GameInformation* GetGameInfo(){return NULL;}
+    virtual const TeamInformation* GetTeamInfo(){return NULL;}
 
 signals:
     void LocalisationDataChanged(const Localisation*);

@@ -28,6 +28,8 @@ public:
     const NUSensorsData* GetSensorData();
     const Localisation* GetLocalisationData();
     const FieldObjects* GetObjectData();
+    const GameInformation* GetGameInfo();
+    const TeamInformation* GetTeamInfo();
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();

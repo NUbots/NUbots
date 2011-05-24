@@ -38,6 +38,16 @@ const FieldObjects* SplitStreamFileFormatReader::GetObjectData()
     return objectReader.ReadFrameNumber(m_currentFrameIndex);
 }
 
+const GameInformation* SplitStreamFileFormatReader::GetGameInfo()
+{
+    return gameinfoReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const TeamInformation* SplitStreamFileFormatReader::GetTeamInfo()
+{
+    return teaminfoReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
 void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
