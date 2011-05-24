@@ -65,7 +65,7 @@ bool TeamInformation::amIClosestToBall()
 
 /*! @brief Returns all of the shared balls in the TeamInformation
  */
-vector<TeamPacket::SharedBall> TeamInformation::getSharedBalls()
+vector<TeamPacket::SharedBall> TeamInformation::getSharedBalls() const
 {
     vector<TeamPacket::SharedBall> sharedballs;
     sharedballs.reserve(m_received_packets.size());

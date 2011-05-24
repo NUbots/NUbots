@@ -123,7 +123,7 @@ Localisation::~Localisation()
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
 
-void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo)
+void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo)
 {
     if (sensor_data == NULL or fobs == NULL)
         return;
@@ -349,7 +349,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 											lost);
 }
 
-bool Localisation::CheckGameState(bool currently_incapacitated, GameInformation* game_info)
+bool Localisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)
 {
     GameInformation::TeamColour team_colour = game_info->getTeamColour();
     GameInformation::RobotState current_state = game_info->getCurrentState();

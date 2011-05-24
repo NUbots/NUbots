@@ -89,7 +89,7 @@ public:
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
-    vector<TeamPacket::SharedBall> getSharedBalls();
+    vector<TeamPacket::SharedBall> getSharedBalls() const;
     
     void UpdateTime(double newTime) {m_timestamp=newTime;};
     double GetTimestamp() const{return m_timestamp;};

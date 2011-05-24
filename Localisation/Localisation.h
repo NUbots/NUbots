@@ -26,7 +26,7 @@ class Localisation: public TimestampedData
         Localisation(const Localisation& source);
         ~Localisation();
     
-        void process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo);
+        void process(NUSensorsData* data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo);
         //! TODO: Require robots state to be sent to enable smart model resetting.
         //! TODO: Need to add shared packets.
 	
@@ -69,7 +69,7 @@ class Localisation: public TimestampedData
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float theta);
-        bool CheckGameState(bool currently_incapacitated, GameInformation *game_info);
+        bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff);
         void doPenaltyReset();
