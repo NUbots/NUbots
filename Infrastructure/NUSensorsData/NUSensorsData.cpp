@@ -576,7 +576,7 @@ bool NUSensorsData::getBatteryCharge(float& data)
  */
 bool NUSensorsData::get(const id_t& id, bool& data)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     float floatBuffer;
     if (ids.size() == 1)
     {
@@ -595,7 +595,7 @@ bool NUSensorsData::get(const id_t& id, bool& data)
  */
 bool NUSensorsData::get(const id_t& id, float& data)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
         return m_sensors[ids[0]].get(data);
     else
@@ -622,7 +622,7 @@ bool NUSensorsData::get(const id_t& id, double& data)
  */
 bool NUSensorsData::get(const id_t& id, vector<float>& data)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return false;
@@ -650,7 +650,7 @@ bool NUSensorsData::get(const id_t& id, vector<float>& data)
  */
 bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return false;
@@ -678,7 +678,7 @@ bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
  */
 bool NUSensorsData::get(const id_t& id, string& data)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
         return m_sensors[ids[0]].get(data);
     else
@@ -696,7 +696,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
     
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
     {
         vector<float> vectorBuffer;
@@ -730,7 +730,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
     
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids <= 1)
         return false;
@@ -778,7 +778,7 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         return false;
     
     // proceed as usual with the proper end effector id
-    vector<int>& ids = mapIdToIndices(e_id);
+    const vector<int>& ids = mapIdToIndices(e_id);
     if (ids.size() == 1)
     {
         vector<float> vectorBuffer;
@@ -811,7 +811,7 @@ bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in,
     if (id < MainButton or id > RightButton)			// check the id is for a button sensor
         return false;
     
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
     {
         vector<float> vectorBuffer;
@@ -905,7 +905,7 @@ void NUSensorsData::set(const id_t& id, double time, const float& data)
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].set(time, data);
 }
@@ -920,7 +920,7 @@ void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -950,7 +950,7 @@ void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> 
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -980,7 +980,7 @@ void NUSensorsData::set(const id_t& id, double time, const string& data)
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::set(" << id.Name << "," << time << ",\"" << data << "\")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].set(time, data);
 }
@@ -990,7 +990,7 @@ void NUSensorsData::set(const id_t& id, double time, const string& data)
  */
 void NUSensorsData::setAsInvalid(const id_t& id)
 {
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].setAsInvalid();
 }
@@ -1006,7 +1006,7 @@ void NUSensorsData::modify(const id_t& id, int start, double time, const float& 
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].modify(time, start, data);
 }
@@ -1022,7 +1022,7 @@ void NUSensorsData::modify(const id_t& id, int start, double time, const vector<
     #if DEBUG_NUSENSORS_VERBOSITY > 4
         debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
     #endif
-    vector<int>& ids = mapIdToIndices(id);
+    const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
