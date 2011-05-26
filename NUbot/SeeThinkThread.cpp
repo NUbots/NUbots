@@ -134,6 +134,11 @@ void SeeThinkThread::run()
                 #endif
             #endif
 
+            double current_time = Blackboard->Sensors->GetTimestamp();
+            Blackboard->TeamInfo->UpdateTime(current_time);
+            Blackboard->GameInfo->UpdateTime(current_time);
+            m_logrecorder->WriteData(Blackboard);
+
             #ifdef USE_LOCALISATION
                 m_nubot->m_localisation->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
@@ -151,14 +156,11 @@ void SeeThinkThread::run()
             #if DEBUG_VERBOSITY > 0
                 Blackboard->Jobs->summaryTo(debug);
             #endif
-            double current_time = Blackboard->Sensors->GetTimestamp();
-            Blackboard->TeamInfo->UpdateTime(current_time);
-            Blackboard->GameInfo->UpdateTime(current_time);
+
             #ifdef USE_VISION
 
             m_nubot->m_vision->process(Blackboard->Jobs) ; //<! Networking for Vision
             m_nubot->m_platform->process(Blackboard->Jobs, m_nubot->m_io); //<! Networking for Platform
-            m_logrecorder->WriteData(Blackboard);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif
