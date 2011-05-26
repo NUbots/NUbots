@@ -5,19 +5,23 @@
 
 /*! @brief Default Constructor
  */
-OfflineLocalisation::OfflineLocalisation()
+OfflineLocalisation::OfflineLocalisation(QObject *parent): QThread(parent)
 {
-    m_workingLoc = new Localisation();
-    m_localisation_frame_buffer.clear();
+    m_intialLoc = new Localisation();
+    Initialise(m_intialLoc);
+    m_stop_called = false;
+    m_sim_data_available = false;
 }
 
 /*! @brief Constructor with initialisation.
  */
 OfflineLocalisation::OfflineLocalisation(const Localisation& initialState, const std::string& initialLogPath)
 {
-    m_workingLoc = new Localisation();
-    Initialise(initialState);
+    m_intialLoc = new Localisation();
+    Initialise(&initialState);
     OpenLogs(initialLogPath);
+    m_stop_called = false;
+    m_sim_data_available = false;
     return;
 }
 
@@ -43,19 +47,21 @@ void OfflineLocalisation::ClearBuffer()
         delete m_localisation_frame_buffer[i];
     }
     m_localisation_frame_buffer.clear();
+    m_sim_data_available = false;
 }
 
 /*! @brief  Clears any previous information, and intialises the system with the
             initial state.
     @param initialState The initial state of the system.
  */
-void OfflineLocalisation::Initialise(const Localisation& intialState)
+void OfflineLocalisation::Initialise(const Localisation* intialState)
 {
-    ClearBuffer();
     delete m_workingLoc;
-    m_workingLoc = new Localisation(intialState);
-    Localisation* temp = new Localisation((*m_workingLoc));
-    m_localisation_frame_buffer.push_back(temp);
+    m_workingLoc = new Localisation(*intialState);
+    ClearBuffer();
+    m_localisation_frame_buffer.push_back(new Localisation(*intialState));
+    m_stop_called = false;
+    m_sim_data_available = false;
     return;
 }
 
@@ -92,6 +98,7 @@ bool OfflineLocalisation::IsInitialised()
 bool OfflineLocalisation::Run()
 {
     // Don't do anything if not initialised properly.
+    Initialise(m_intialLoc);
     if(IsInitialised() == false) return false;
     const NUSensorsData* tempSensor;
     const FieldObjects* tempObjects;
@@ -99,8 +106,10 @@ bool OfflineLocalisation::Run()
     const GameInformation* tempGameInfo;
 
     int framesProcessed = 0;
+    int totalFrames = m_log_reader.numFrames();
     m_log_reader.firstFrame();
-    while (m_log_reader.currentFrame() < m_log_reader.numFrames())
+    emit updateProgress(framesProcessed+1,totalFrames);
+    while (m_log_reader.currentFrame() < totalFrames)
     {
         tempSensor = m_log_reader.GetSensorData();
         tempObjects = m_log_reader.GetObjectData();
@@ -110,8 +119,42 @@ bool OfflineLocalisation::Run()
         if(m_log_reader.nextFrameAvailable()) m_log_reader.nextFrame();
         else break;
         ++framesProcessed;
+        emit updateProgress(framesProcessed+1,totalFrames);
     }
     return framesProcessed > 0;
+}
+
+void OfflineLocalisation::run()
+{
+    Initialise(m_intialLoc);
+    // Don't do anything if not initialised properly.
+    if(IsInitialised() == false) return;
+    m_stop_called = false;
+    m_sim_data_available = false;
+    const NUSensorsData* tempSensor;
+    const FieldObjects* tempObjects;
+    const TeamInformation* tempTeamInfo;
+    const GameInformation* tempGameInfo;
+
+    int framesProcessed = 0;
+    int totalFrames = m_log_reader.numFrames();
+    m_log_reader.firstFrame();
+    emit updateProgress(framesProcessed+1,totalFrames);
+    while (m_log_reader.currentFrame() < totalFrames)
+    {
+        tempSensor = m_log_reader.GetSensorData();
+        tempObjects = m_log_reader.GetObjectData();
+        tempTeamInfo = m_log_reader.GetTeamInfo();
+        tempGameInfo = m_log_reader.GetGameInfo();
+        AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
+        if(m_log_reader.nextFrameAvailable()) m_log_reader.nextFrame();
+        else break;
+        ++framesProcessed;
+        emit updateProgress(framesProcessed+1,totalFrames);
+        if(m_stop_called) break;
+    }
+    if(!m_stop_called) m_sim_data_available = true;
+    return;
 }
 
 /*! @brief Run the localisation algorithm on the provided data and add a new localisation frame.
@@ -121,19 +164,19 @@ bool OfflineLocalisation::Run()
 void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, const FieldObjects* objectData, const TeamInformation* teamInfo, const GameInformation* gameInfo)
 {
     // Need to make copies, since source is const
-    NUSensorsData tempSensors;
-    std::stringstream tempBuffer;
-    tempBuffer << (*sensorData);
-    tempBuffer >> tempSensors;
+    NUSensorsData tempSensors = (*sensorData);
 
-    FieldObjects tempObj;
-    tempBuffer << (*objectData);
-    tempBuffer >> tempObj;
+    FieldObjects tempObj = (*objectData);
 
     m_workingLoc->process(&tempSensors,&tempObj,gameInfo,teamInfo);
 
     Localisation* temp = new Localisation((*m_workingLoc));
     m_localisation_frame_buffer.push_back(temp);
+}
+
+int OfflineLocalisation::NumberOfLogFrames()
+{
+    return m_log_reader.numFrames();
 }
 
 int OfflineLocalisation::NumberOfFrames()
