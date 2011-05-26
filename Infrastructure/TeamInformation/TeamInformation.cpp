@@ -328,7 +328,7 @@ ostream& operator<< (ostream& output, const TeamInformation& info)
     }
     return output;
 }
-#include <QDebug>
+
 istream& operator>> (istream& input, TeamInformation& info)
 {
     input.read(reinterpret_cast<char*>(&info.m_timestamp), sizeof(info.m_timestamp));
@@ -356,7 +356,6 @@ istream& operator>> (istream& input, TeamInformation& info)
             error_msg << "Error reading packet buffer " << b << " of " << num_buffers << " - end of file reached." << std::endl;
             throw FileFormatException(error_msg.str());
         }
-        qDebug() << "Num Entries found: " << num_entries;
         info.m_received_packets[b].resize(num_entries);
 
         for(int e=0; e < num_entries; e++)
@@ -368,7 +367,6 @@ istream& operator>> (istream& input, TeamInformation& info)
                 throw FileFormatException(error_msg.str());
             }
             info.m_received_packets[b][e].fromFile(input);
-            qDebug() << info.m_received_packets[b][e].toString().c_str();
         }
     }
     return input;
