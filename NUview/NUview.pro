@@ -175,7 +175,8 @@ HEADERS += ui_mainwindow.h \
     GameInformationDisplayWidget.h \
     ../Infrastructure/TeamInformation/TeamInformation.h \
     ../Tools/FileFormats/LogRecorder.h \
-    ../Tools/FileFormats/FileFormatException.h
+    ../Tools/FileFormats/FileFormatException.h \
+    offlinelocalisationdialog.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -287,6 +288,7 @@ SOURCES += mainwindow.cpp \
     ObjectDisplayWidget.cpp \
     TeamInformationDisplayWidget.cpp \
     GameInformationDisplayWidget.cpp \
-    ../Tools/FileFormats/LogRecorder.cpp
+    ../Tools/FileFormats/LogRecorder.cpp \
+    offlinelocalisationdialog.cpp
 RESOURCES = textures.qrc
 RESOURCES += icons.qrc

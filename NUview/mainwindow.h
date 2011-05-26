@@ -34,6 +34,7 @@ class NUPlatform;
 class NUBlackboard;
 class NUviewIO;
 class BonjourServiceResolver;
+class OfflineLocalisationDialog;
 
 
 namespace Ui
@@ -72,6 +73,8 @@ public slots:
     void fileClosed(); //!< File was closed.
 
     void BonjourTest();
+
+    void RunOfflineLocalisation();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -159,6 +162,7 @@ private:
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
     QMenu *windowMenu;              //!< Instance of the window menu
     QMenu *testMenu;                //!< Instance of the test menu
+    QMenu *toolsMenu;                //!< Instance of the tools menu
     QMenu *visionWindowMenu;        //!< Instance of the vision window menu
     QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
     QMenu *networkWindowMenu;        //!< Instance of the network window menu
@@ -187,9 +191,11 @@ private:
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
     QAction *newLUTDisplayAction;   //!< Instance of new look up table display action.
+    QAction *runOfflineLocalisatonAction; //!< Instance of the offline localisation action.
 
     QAction *doBonjourTestAction;    //!< Instance of the do test Action
     BonjourServiceResolver* bonjourResolver;
+    OfflineLocalisationDialog* offlinelocDialog;
 
     LogFileReader LogReader;
 

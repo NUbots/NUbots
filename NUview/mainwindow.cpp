@@ -29,7 +29,7 @@
 #include "bonjour/robotSelectDialog.h"
 #include "bonjour/bonjourserviceresolver.h"
 
-#include "OfflineLocalisation.h"
+#include "offlinelocalisationdialog.h"
 
 using namespace std;
 ofstream debug;
@@ -139,6 +139,9 @@ MainWindow::MainWindow(QWidget *parent)
     temp->setObjectName("Frame Information Dock");
     temp->setWindowTitle(frameInfo->windowTitle());
     addDockWidget(Qt::RightDockWidgetArea,temp);
+
+    offlinelocDialog = new OfflineLocalisationDialog(this);
+    offlinelocDialog->hide();
 
     createConnections();
     setCentralWidget(mdiArea);
@@ -298,6 +301,11 @@ void MainWindow::createActions()
     doBonjourTestAction = new QAction(tr("&Bonjour Test..."), this);
     doBonjourTestAction->setStatusTip(tr("Test something."));
     connect(doBonjourTestAction, SIGNAL(triggered()), this, SLOT(BonjourTest()));
+
+    runOfflineLocalisatonAction = new QAction(tr("&Offline Localisation..."), this);
+    runOfflineLocalisatonAction->setStatusTip(tr("Run offline localisation simulation."));
+    connect(runOfflineLocalisatonAction, SIGNAL(triggered()), this, SLOT(RunOfflineLocalisation()));
+
 }
 
 void MainWindow::createMenus()
@@ -323,8 +331,13 @@ void MainWindow::createMenus()
     navigationMenu->addAction(nextFrameAction);
     navigationMenu->addAction(lastFrameAction);
 
+    // Test Menu
     testMenu = menuBar()->addMenu(tr("&Testing"));
     testMenu->addAction(doBonjourTestAction);
+
+    // Tools Menu
+    toolsMenu = menuBar()->addMenu(tr("T&ools"));
+    toolsMenu->addAction(runOfflineLocalisatonAction);
 
     // Window Menu
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -382,6 +395,7 @@ void MainWindow::createConnections()
     connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
+    connect(&LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
     connect(&LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
     connect(&LogReader,SIGNAL(GameInfoChanged(const GameInformation*)),gameInfoDisplay, SLOT(setGameInfo(const GameInformation*)));
     connect(&LogReader,SIGNAL(TeamInfoChanged(const TeamInformation*)),teamInfoDisplay, SLOT(setTeamInfo(const TeamInformation*)));
@@ -448,6 +462,14 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
     qDebug() <<"Finnished Connecting Widgets";
+}
+
+void MainWindow::RunOfflineLocalisation()
+{
+    //if(!offlinelocDialog) offlinelocDialog = new OfflineLocalisationDialog(this);
+
+    offlinelocDialog->show();
+    return;
 }
 
 void MainWindow::openLog()
@@ -737,6 +759,7 @@ void MainWindow::selectFrame()
     if(ok)
     {
         LogReader.setFrame(selectedFrameNumber);
+        offlinelocDialog->SetFrame(selectedFrameNumber);
     }
     return;
 }
@@ -774,6 +797,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
     connect(&LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
+    connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;
