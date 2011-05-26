@@ -52,6 +52,7 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
     m_extension = ".strm";
+    m_knownDataTypes.clear();
     m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
 
     // Add the file readers.
@@ -66,20 +67,19 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
 
 std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& directory)
 {
+    const QString extension = ".strm";
+    QStringList knownDataTypes;
+    knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+
+
     std::vector<QFileInfo> fileLocations;
 
     qDebug("Searching Path: %s", qPrintable(directory.path()));
 
     QStringList extensionsFilter;
-    extensionsFilter << "*"+m_extension;
+    extensionsFilter << "*" + extension;
     QStringList files = directory.entryList(extensionsFilter);
     qDebug("%d File(s) Found:", files.size());
-
-//    // Display files
-//    QStringList::const_iterator constIterator;
-//    for (constIterator = files.constBegin(); constIterator != files.constEnd();
-//           ++constIterator)
-//        qDebug("%s", qPrintable(*constIterator));
 
     QRegExp rx;
     int index;
@@ -87,10 +87,10 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 
     QStringList::const_iterator constFormatIterator;
     QString displayName;
-    for (constFormatIterator = m_knownDataTypes.constBegin(); constFormatIterator != m_knownDataTypes.constEnd();
+    for (constFormatIterator = knownDataTypes.constBegin(); constFormatIterator != knownDataTypes.constEnd();
            ++constFormatIterator)
     {
-        rx.setPattern((*constFormatIterator) + m_extension);
+        rx.setPattern((*constFormatIterator) + extension);
         index = files.indexOf(rx);
         if(index != -1)
         {

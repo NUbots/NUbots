@@ -37,6 +37,8 @@ public:
     bool isLastFrameAvailable();
     bool isSetFrameAvailable();
 
+    static std::vector<QFileInfo> FindValidFiles(const QDir& directory);
+
 signals:
 
 public slots:
@@ -47,7 +49,6 @@ public slots:
     int setFrame(int frameNumber);
 
 protected:
-    std::vector<QFileInfo> FindValidFiles(const QDir& directory);
     std::vector<IndexedFileReader*> m_fileReaders;
     void setKnownDataTypes();
     StreamFileReader<NUImage> imageReader;
