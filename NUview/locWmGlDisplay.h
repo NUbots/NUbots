@@ -8,6 +8,7 @@ class Localisation;
 class FieldObjects;
 class Object;
 class StationaryObject;
+class NUSensorsData;
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -28,12 +29,22 @@ public slots:
     {
         currentLocalisation = newLocalisation;
         update();
-    };
+    }
+    void SetLocalLocalisation(const Localisation* newLocalisation)
+    {
+        localLocalisation = newLocalisation;
+        update();
+    }
     void setFieldObjects(const FieldObjects* newFieldObjects)
     {
         currentObjects = newFieldObjects;
         update();
-    };
+    }
+    void setSensorData(const NUSensorsData* newSensorData)
+    {
+        currentSensorData = newSensorData;
+        update();
+    }
     /*!
       @brief Copy the current image displayed to the system clipboard.
       */
@@ -56,8 +67,8 @@ protected:
         void drawRobot(QColor colour, float x, float y, float theta);
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
 
-        void DrawModel(const KF& model);
-        void DrawLocalisation(const Localisation& localisation);
+        void DrawModel(const KF& model, QColor& modelColor);
+        void DrawLocalisation(const Localisation& localisation, QColor& modelColor);
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
 
@@ -73,7 +84,9 @@ protected:
         QPoint prevDragPos;
 
         const Localisation* currentLocalisation;
+        const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
+        const NUSensorsData* currentSensorData;
 
         bool light;
         bool perspective;

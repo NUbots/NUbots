@@ -6,6 +6,7 @@
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocalisation(0)
 {
@@ -19,12 +20,14 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
     light = true;
     perspective = true;
-    drawRobotModel = true;
-    drawSigmaPoints = true;
+    drawRobotModel = false;
+    drawSigmaPoints = false;
     drawBestModelOnly = false;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
+    localLocalisation = 0;
+    currentSensorData = 0;
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -224,13 +227,33 @@ void locWmGlDisplay::paintGL()
     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);		// Set Light Position
 
     drawField();        // Draw the Standard Field Layout.
+
+    if(currentSensorData)
+    {
+        QColor sensorColor(0,0,0);
+        std::vector<float> gpsPosition;
+        float compassHeading;
+        /*
+        if(currentSensorData->getGps(gpsPosition))
+        {
+            if(!currentSensorData->getCompass(compassHeading)) compassHeading = 0;
+            this->drawRobot(sensorColor, gpsPosition[0], gpsPosition[1],compassHeading);
+        }
+        */
+    }
     if(currentLocalisation)
     {
-        DrawLocalisation(*currentLocalisation);
+        QColor currentColor(0,0,255);
+        DrawLocalisation(*currentLocalisation, currentColor);
     }
     if(currentObjects)
     {
         drawFieldObjectLabels(*currentObjects);
+    }
+    if(localLocalisation)
+    {
+        QColor localColor(255,255,0);
+        DrawLocalisation(*localLocalisation, localColor);
     }
     //drawBall(QColor(255,165,0,255), 0.0f, 0.0f);    // Draw the ball.
     //drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.75f);
@@ -351,7 +374,7 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
     glDisable(GL_LIGHTING);      // Disable Global Lighting
     // Draw Aura
-    glColor4ub(0,0,255,255);
+    glColor4ub(colour.red(),colour.green(),colour.blue(),255);
     glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
@@ -431,26 +454,28 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
     glPopMatrix();
 }
 
-void locWmGlDisplay::DrawModel(const KF& model)
+void locWmGlDisplay::DrawModel(const KF& model, QColor& modelColor)
 {
-    drawRobot(QColor(255,255,255,model.alpha*255), model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
+    modelColor.setAlpha(255*model.alpha);
+    drawRobot(modelColor, model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-            DrawSigmaPoint(QColor(0,0,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+
+            DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
     drawBall(QColor(255,165,0,255), model.getState(KF::ballX), model.getState(KF::ballY));
 }
 
-void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
+void locWmGlDisplay::DrawLocalisation(const Localisation& localisation, QColor& modelColor)
 {
     if(drawBestModelOnly)
     {
         const KF model = localisation.getBestModel();
-        DrawModel(model);
+        DrawModel(model, modelColor);
     }
     else
     {
@@ -460,7 +485,7 @@ void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
             const KF model = localisation.getModel(modelID);
             if(model.isActive)
             {
-                DrawModel(model);
+                DrawModel(model, modelColor);
                 glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
                 glColor4ub(255,255,255,255);
                 renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
