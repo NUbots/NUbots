@@ -40,7 +40,7 @@ public slots:
         currentObjects = newFieldObjects;
         update();
     }
-    void setSensorData(const NUSensorsData* newSensorData)
+    void setSensorData(NUSensorsData* newSensorData)
     {
         currentSensorData = newSensorData;
         update();
@@ -62,13 +62,25 @@ protected:
 
         bool loadTexture(QString fileName, GLuint* textureId);
 
+        void drawMarkers();
+        void drawObjects();
+        void drawOverlays();
+
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
+        void drawBallMarker(QColor markerColour, float x, float y);
         void drawRobot(QColor colour, float x, float y, float theta);
+        void drawRobotMarker(QColor colour, float x, float y, float theta);
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
 
-        void DrawModel(const KF& model, QColor& modelColor);
-        void DrawLocalisation(const Localisation& localisation, QColor& modelColor);
+        void DrawModelObjects(const KF& model, QColor& modelColor);
+        void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
+
+        void DrawModelMarkers(const KF& model, QColor& modelColor);
+        void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
+
+        void DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor);
+
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
 
@@ -86,7 +98,7 @@ protected:
         const Localisation* currentLocalisation;
         const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
-        const NUSensorsData* currentSensorData;
+        NUSensorsData* currentSensorData;
 
         bool light;
         bool perspective;

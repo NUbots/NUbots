@@ -9,45 +9,87 @@
 #include <QFileInfo>
 #include <QLabel>
 #include <QProgressDialog>
+#include <QFileDialog>
+#include <QAction>
 #include "FileAccess/SplitStreamFileFormatReader.h"
 
 OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     QDialog(parent)
 {
-    m_offline_loc = new OfflineLocalisation();
+    m_reader = new LogFileReader();
+    m_external_reader = false;
+    m_offline_loc = new OfflineLocalisation(m_reader);
+    MakeLayout();
+}
+
+OfflineLocalisationDialog::OfflineLocalisationDialog(LogFileReader* reader, QWidget *parent): QDialog(parent)
+{
+    m_reader = reader;
+    m_external_reader = true;
+    m_offline_loc = new OfflineLocalisation(m_reader);
+    MakeLayout();
+}
+
+OfflineLocalisationDialog::~OfflineLocalisationDialog()
+{
+    if(m_offline_loc) delete m_offline_loc;
+}
+
+void OfflineLocalisationDialog::MakeLayout()
+{
+    this->setWindowTitle("Offline Localisation");
 
     QVBoxLayout *buttonsLayout = new QVBoxLayout();
 
     QPushButton *openFileButton = new QPushButton("&Open Log...");
-    connect(openFileButton,SIGNAL(pressed()), this, SLOT(OpenLogFiles()));
+    connect(openFileButton,SIGNAL(clicked()), this, SLOT(OpenLogFiles()));
     buttonsLayout->addWidget(openFileButton);
 
     QPushButton *runSimulationButton = new QPushButton("&Run simulation");
-    connect(runSimulationButton,SIGNAL(pressed()), this, SLOT(BeginSimulation()));
+    connect(runSimulationButton,SIGNAL(clicked()), this, SLOT(BeginSimulation()));
     buttonsLayout->addWidget(runSimulationButton);
+
+    QPushButton *saveLogButton = new QPushButton("Save &Log...");
+    saveLogButton->setEnabled(false);
+    connect(m_offline_loc,SIGNAL(SimDataChanged(bool)), saveLogButton, SLOT(setEnabled(bool)));
+    connect(saveLogButton,SIGNAL(clicked()), this, SLOT(SaveAsLocalisationLog()));
+
+    buttonsLayout->addWidget(saveLogButton);
+
+    QPushButton *saveReportButton = new QPushButton("Save Report...");
+    saveReportButton->setEnabled(false);
+    connect(m_offline_loc,SIGNAL(SimDataChanged(bool)), saveReportButton, SLOT(setEnabled(bool)));
+    //connect(runSimulationButton,SIGNAL(pressed()), this, SLOT(BeginSimulation()));
+    buttonsLayout->addWidget(saveReportButton);
+
 
     QVBoxLayout *displayLayout = new QVBoxLayout();
 
     QLabel *fileLabel = new QLabel("Log files");
     displayLayout->addWidget(fileLabel);
 
-    fileListDisplay = new QTextBrowser(this);
-    fileListDisplay->setWordWrapMode(QTextOption::NoWrap);
+    m_fileListDisplay = new QTextBrowser(this);
+    m_fileListDisplay->setWordWrapMode(QTextOption::NoWrap);
 
-    displayLayout->addWidget(fileListDisplay);
+    displayLayout->addWidget(m_fileListDisplay);
 
 
     QHBoxLayout *overallLayout = new QHBoxLayout();
 
     overallLayout->addLayout(buttonsLayout);
     overallLayout->addLayout(displayLayout,1);
-    m_progressBar = NULL;
-    setLayout(overallLayout);
-}
 
-OfflineLocalisationDialog::~OfflineLocalisationDialog()
-{
-    if(m_offline_loc) delete m_offline_loc;
+    m_progressBar = new QProgressDialog("Runing localisation...","Cancel",0, m_offline_loc->NumberOfLogFrames(),this);
+    m_progressBar->setWindowModality(Qt::WindowModal);
+    m_progressBar->setValue(0);
+    m_progressBar->setMinimumDuration(100);
+    connect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
+    connect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
+    connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
+
+    connect(m_reader, SIGNAL(OpenLogFilesChanged(std::vector<QFileInfo>)), this, SLOT(SetOpenFileList(std::vector<QFileInfo>)));
+
+    setLayout(overallLayout);
 }
 
 void OfflineLocalisationDialog::OpenLogFiles()
@@ -59,31 +101,29 @@ void OfflineLocalisationDialog::OpenLogFiles()
     if (!filename.isEmpty()){
         m_offline_loc->OpenLogs(filename.toStdString());
     }
+}
 
-    QFileInfo fileInfo(filename);
-    QDir openDir;
-    openDir.setPath(fileInfo.path());
-    std::vector<QFileInfo> logs = SplitStreamFileFormatReader::FindValidFiles(openDir);
-    QString displayString;
-
-    std::vector<QFileInfo>::const_iterator fileIt;
-    for (fileIt = logs.begin(); fileIt != logs.end(); ++fileIt)
-    {
-        displayString += (*fileIt).filePath() + '\n';
-    }
-    fileListDisplay->setText(displayString);
+void OfflineLocalisationDialog::SaveAsLocalisationLog()
+{
+    if(!m_offline_loc->hasSimData()) return;
+    QString save_name = QFileDialog::getSaveFileName(this,"Save Log",QString(),"Stream (*.strm)");
+    m_offline_loc->WriteLog(save_name.toStdString());
+    return;
 }
 
 void OfflineLocalisationDialog::BeginSimulation()
 {
     if(m_offline_loc->isRunning()) return;
-    m_progressBar = new QProgressDialog("Runing localisation...","Cancel",0, m_offline_loc->NumberOfLogFrames(),this);
-    m_progressBar->setWindowModality(Qt::WindowModal);
+    m_progressBar->setRange(0, m_offline_loc->NumberOfLogFrames());
     m_progressBar->setValue(0);
-    m_progressBar->setMinimumDuration(100);
-    connect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
-    connect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
-    connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
+
+//    m_progressBar = new QProgressDialog("Runing localisation...","Cancel",0, m_offline_loc->NumberOfLogFrames(),this);
+//    m_progressBar->setWindowModality(Qt::WindowModal);
+//    m_progressBar->setValue(0);
+//    m_progressBar->setMinimumDuration(100);
+//    connect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
+//    connect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
+//    connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
 
     //m_offline_loc->Run();
     m_offline_loc->start();
@@ -93,16 +133,15 @@ void OfflineLocalisationDialog::BeginSimulation()
 
 void OfflineLocalisationDialog::CompleteSimulation()
 {
-    disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
-    disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
-    delete m_progressBar;
-    m_progressBar = NULL;
+//    disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
+//    disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
+    //delete m_progressBar;
+    //m_progressBar = NULL;
 }
 
 void OfflineLocalisationDialog::DiplayProgress(int frame, int total)
 {
-    //qDebug("Processing frame %d of %d", frame, total);
-    if(m_progressBar)
+    if(m_progressBar && !m_offline_loc->wasStopped())
     {
         QString labelText = QString("Running Localisation... Frame %1 of %2").arg(frame).arg(total);
         m_progressBar->setLabelText(labelText);
@@ -122,4 +161,16 @@ void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)
         const Localisation* temp = m_offline_loc->GetFrame(frameNumber);
         emit LocalisationChanged(temp);
     }
+}
+
+void OfflineLocalisationDialog::SetOpenFileList(std::vector<QFileInfo> files)
+{
+    QString displayString;
+
+    std::vector<QFileInfo>::const_iterator fileIt;
+    for (fileIt = files.begin(); fileIt != files.end(); ++fileIt)
+    {
+        displayString += (*fileIt).filePath() + '\n';
+    }
+    m_fileListDisplay->setText(displayString);
 }

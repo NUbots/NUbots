@@ -18,6 +18,17 @@ SplitStreamFileFormatReader::~SplitStreamFileFormatReader()
 {
     closeFile();
 }
+
+std::vector<QFileInfo> SplitStreamFileFormatReader::AvailableLogFiles()const
+{
+    return m_open_files;
+}
+
+QStringList SplitStreamFileFormatReader::AvailableData() const
+{
+    return m_available_data;
+}
+
 const NUImage* SplitStreamFileFormatReader::GetImageData()
 {
     return imageReader.ReadFrameNumber(m_currentFrameIndex);
@@ -135,7 +146,8 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
             if(successIndicator)
             {
                 success_msg = QString("Successful! %1 Frames Found.").arg(m_fileReaders[index]->TotalFrames());
-
+                m_available_data << m_knownDataTypes[index];
+                m_open_files.push_back(*fileIt);
             }
             else success_msg = "Failed!";
 
@@ -159,6 +171,8 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
         m_fileGood = false;
         qDebug("Loading Failed.");
         m_totalFrames = 0;
+        m_available_data.clear();
+        m_open_files.clear();
     }
     return m_totalFrames;
 }
@@ -167,6 +181,11 @@ bool SplitStreamFileFormatReader::closeFile()
 {
     m_totalFrames = 0;
     m_currentFrameIndex = 0;
+    m_available_data.clear();
+    for(int i=0; i < m_fileReaders.size(); i++)
+    {
+        m_fileReaders[i]->CloseFile();
+    }
     return true;
 }
 

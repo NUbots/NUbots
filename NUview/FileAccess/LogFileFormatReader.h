@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QString>
 #include <QFileInfo>
+#include <QStringList>
+#include <vector>
 
 class Localisation;
 class NUSensorsData;
@@ -44,6 +46,9 @@ public:
     virtual const GameInformation* GetGameInfo(){return NULL;}
     virtual const TeamInformation* GetTeamInfo(){return NULL;}
 
+    virtual std::vector<QFileInfo> AvailableLogFiles()const {return std::vector<QFileInfo>();}
+    virtual QStringList AvailableData() const {return QStringList(QString("None"));}
+
 signals:
     void LocalisationDataChanged(const Localisation*);
     void LocalisationFrameChanged(const LocWmFrame*);
@@ -55,6 +60,7 @@ signals:
     void TeamInfoChanged(const TeamInformation*);
     void frameChanged(int,int);
     void cameraChanged(int);
+
 
 public slots:
     virtual int nextFrame();

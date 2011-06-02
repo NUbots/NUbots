@@ -197,7 +197,7 @@ private:
     BonjourServiceResolver* bonjourResolver;
     OfflineLocalisationDialog* offlinelocDialog;
 
-    LogFileReader LogReader;
+    LogFileReader* LogReader;
 
 protected:
     void closeEvent(QCloseEvent *event);

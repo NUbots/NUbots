@@ -18,6 +18,22 @@ nulVersion1FormatReader::~nulVersion1FormatReader()
     closeFile();
 }
 
+
+std::vector<QFileInfo> nulVersion1FormatReader::AvailableLogFiles() const
+{
+    std::vector<QFileInfo> files;
+    files.push_back(m_fileInformation);
+    return files;
+}
+
+QStringList nulVersion1FormatReader::AvailableData() const
+{
+    QStringList available_data;
+    available_data << "Image" << "SensorBuffer";
+    return available_data;
+}
+
+
 int nulVersion1FormatReader::openFile(const QString& filename)
 {
     m_fileInformation.setFile(filename);

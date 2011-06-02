@@ -59,6 +59,8 @@ int LogFileReader::openFile(QString fileName)
             connect(currentFileReader,SIGNAL(TeamInfoChanged(const TeamInformation*)), this, SIGNAL(TeamInfoChanged(const TeamInformation*)));
             connect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
             emit fileOpened(fileName);
+            emit AvailableDataChanged(AvailableData());
+            emit OpenLogFilesChanged(AvailableLogFiles());
             availableFrames = currentFileReader->numFrames();
         }
         else
@@ -93,6 +95,8 @@ bool LogFileReader::closeFile()
         }
     }
     emit fileClosed();
+    emit AvailableDataChanged(AvailableData());
+    emit OpenLogFilesChanged(AvailableLogFiles());
     return true;
 }
 

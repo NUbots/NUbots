@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_blackboard->add(new JobList());
     m_blackboard->add(new GameInformation(0, 0));
     m_blackboard->add(new TeamInformation(0, 0));
+
+    LogReader = new LogFileReader();
     
     m_nuview_io = new NUviewIO();
 
@@ -140,7 +142,8 @@ MainWindow::MainWindow(QWidget *parent)
     temp->setWindowTitle(frameInfo->windowTitle());
     addDockWidget(Qt::RightDockWidgetArea,temp);
 
-    offlinelocDialog = new OfflineLocalisationDialog(this);
+    //offlinelocDialog = new OfflineLocalisationDialog(LogReader, this);
+    offlinelocDialog = new OfflineLocalisationDialog(LogReader,this);
     offlinelocDialog->hide();
 
     createConnections();
@@ -236,14 +239,14 @@ void MainWindow::createActions()
     firstFrameAction->setStatusTip(tr("Go to the first frame of the replay"));
     firstFrameAction->setIcon(QIcon(QString(":/icons/first.png")));
     firstFrameAction->setEnabled(false);
-    connect(firstFrameAction, SIGNAL(triggered()), &LogReader, SLOT(firstFrame()));
+    connect(firstFrameAction, SIGNAL(triggered()), LogReader, SLOT(firstFrame()));
 
     // Previous Frame
     previousFrameAction = new QAction(tr("&Previous Frame"), this);
     previousFrameAction->setShortcut(QKeySequence::MoveToPreviousChar);
     previousFrameAction->setStatusTip(tr("Select the previous frame"));
     previousFrameAction->setIcon(QIcon(QString(":/icons/previous.png")));
-    connect(previousFrameAction, SIGNAL(triggered()), &LogReader, SLOT(previousFrame()));
+    connect(previousFrameAction, SIGNAL(triggered()), LogReader, SLOT(previousFrame()));
     previousFrameAction->setEnabled(false);
 
     // Select Frame
@@ -259,7 +262,7 @@ void MainWindow::createActions()
     nextFrameAction->setShortcut(QKeySequence::MoveToNextChar);
     nextFrameAction->setStatusTip(tr("Select next frame"));
     nextFrameAction->setIcon(QIcon(QString(":/icons/next.png")));
-    connect(nextFrameAction, SIGNAL(triggered()), &LogReader, SLOT(nextFrame()));
+    connect(nextFrameAction, SIGNAL(triggered()), LogReader, SLOT(nextFrame()));
     nextFrameAction->setEnabled(false);
 
     // Last Frame
@@ -267,7 +270,7 @@ void MainWindow::createActions()
     lastFrameAction->setShortcut(QKeySequence::MoveToEndOfLine);
     lastFrameAction->setStatusTip(tr("Select last frame"));
     lastFrameAction->setIcon(QIcon(QString(":/icons/last.png")));
-    connect(lastFrameAction, SIGNAL(triggered()), &LogReader, SLOT(lastFrame()));
+    connect(lastFrameAction, SIGNAL(triggered()), LogReader, SLOT(lastFrame()));
     lastFrameAction->setEnabled(false);
 
     // Cascade windows
@@ -392,27 +395,27 @@ void MainWindow::createConnections()
 {
     qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
-    connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
-    connect(&LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
-    connect(&LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
-    connect(&LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
-    connect(&LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
-    connect(&LogReader,SIGNAL(GameInfoChanged(const GameInformation*)),gameInfoDisplay, SLOT(setGameInfo(const GameInformation*)));
-    connect(&LogReader,SIGNAL(TeamInfoChanged(const TeamInformation*)),teamInfoDisplay, SLOT(setTeamInfo(const TeamInformation*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
+    connect(LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
+    connect(LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
+    connect(LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
+    connect(LogReader,SIGNAL(GameInfoChanged(const GameInformation*)),gameInfoDisplay, SLOT(setGameInfo(const GameInformation*)));
+    connect(LogReader,SIGNAL(TeamInfoChanged(const TeamInformation*)),teamInfoDisplay, SLOT(setTeamInfo(const TeamInformation*)));
 
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)), frameInfo, SLOT(setRawImage(const NUImage*)));
+    connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
+    connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), frameInfo, SLOT(setRawImage(const NUImage*)));
 
-    connect(&LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
-    connect(&LogReader,SIGNAL(fileOpened(QString)),frameInfo, SLOT(setFrameSource(QString)));
-    connect(&LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
+    connect(LogReader,SIGNAL(fileOpened(QString)),this, SLOT(filenameChanged(QString)));
+    connect(LogReader,SIGNAL(fileOpened(QString)),frameInfo, SLOT(setFrameSource(QString)));
+    connect(LogReader,SIGNAL(fileClosed()),this, SLOT(fileClosed()));
 
-    connect(&LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)),&virtualRobot, SLOT(setRawImage(const NUImage*)));
-    connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
-    connect(&LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
+    connect(LogReader,SIGNAL(cameraChanged(int)),&virtualRobot, SLOT(setCamera(int)));
+    connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),&virtualRobot, SLOT(setRawImage(const NUImage*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),&virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
+    connect(LogReader,SIGNAL(frameChanged(int,int)),&virtualRobot, SLOT(processVisionFrame()));
 
-    connect(&LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
+    connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
 
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
@@ -421,11 +424,11 @@ void MainWindow::createConnections()
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     // Setup navigation control enabling/disabling
-    connect(&LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
-    connect(&LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
-    connect(&LogReader,SIGNAL(previousFrameAvailable(bool)),previousFrameAction, SLOT(setEnabled(bool)));
-    connect(&LogReader,SIGNAL(lastFrameAvailable(bool)),lastFrameAction, SLOT(setEnabled(bool)));
-    connect(&LogReader,SIGNAL(setFrameAvailable(bool)),selectFrameAction, SLOT(setEnabled(bool)));
+    connect(LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
+    connect(LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
+    connect(LogReader,SIGNAL(previousFrameAvailable(bool)),previousFrameAction, SLOT(setEnabled(bool)));
+    connect(LogReader,SIGNAL(lastFrameAvailable(bool)),lastFrameAction, SLOT(setEnabled(bool)));
+    connect(LogReader,SIGNAL(setFrameAvailable(bool)),selectFrameAction, SLOT(setEnabled(bool)));
 
     // Connect the virtual robot to the opengl manager.
     connect(&virtualRobot,SIGNAL(imageDisplayChanged(const NUImage*,GLDisplay::display)),&glManager, SLOT(writeNUImageToDisplay(const NUImage*,GLDisplay::display)));
@@ -456,8 +459,8 @@ void MainWindow::createConnections()
 
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
     //connect(&virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));
-    connect(&LogReader,SIGNAL(cameraChanged(int)),localisation, SLOT(setCamera(int)));
-    connect(&LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),localisation, SLOT(setSensorData(const float*, const float*, const float*)));
+    connect(LogReader,SIGNAL(cameraChanged(int)),localisation, SLOT(setCamera(int)));
+    connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),localisation, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
@@ -485,8 +488,8 @@ void MainWindow::openLog()
 void MainWindow::openLog(const QString& fileName)
 {
     if (!fileName.isEmpty()){
-        LogReader.openFile(fileName);
-        LogReader.firstFrame();
+        LogReader->openFile(fileName);
+        LogReader->firstFrame();
     }
     /*
     if (!fileName.isEmpty()){
@@ -755,10 +758,10 @@ void MainWindow::selectFrame()
 
 
     bool ok;
-    int selectedFrameNumber = QInputDialog::getInteger(this, tr("Select Frame"), tr("Enter frame to jump to:"), LogReader.currentFrame(), 1, LogReader.numFrames(), 1, &ok);
+    int selectedFrameNumber = QInputDialog::getInteger(this, tr("Select Frame"), tr("Enter frame to jump to:"), LogReader->currentFrame(), 1, LogReader->numFrames(), 1, &ok);
     if(ok)
     {
-        LogReader.setFrame(selectedFrameNumber);
+        LogReader->setFrame(selectedFrameNumber);
         offlinelocDialog->SetFrame(selectedFrameNumber);
     }
     return;
@@ -786,7 +789,7 @@ QMdiSubWindow* MainWindow::createGLDisplay()
     // Required because openGL drawing command do not seem to work when there is no associated display.
     if(getNumMdiWindowType("GLDisplay") <= 1)
     {
-        LogReader.setFrame(LogReader.currentFrame());
+        LogReader->setFrame(LogReader->currentFrame());
     }    
     return window;
 }
@@ -794,7 +797,8 @@ QMdiSubWindow* MainWindow::createGLDisplay()
 QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
-    connect(&LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
+    connect(LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),temp, SLOT(setSensorData(NUSensorsData*)));
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));

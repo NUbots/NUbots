@@ -2,10 +2,11 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include <sstream>
+#include <fstream>
 
 /*! @brief Default Constructor
  */
-OfflineLocalisation::OfflineLocalisation(QObject *parent): QThread(parent)
+OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent): QThread(parent), m_log_reader(reader)
 {
     m_intialLoc = new Localisation();
     Initialise(m_intialLoc);
@@ -59,7 +60,7 @@ void OfflineLocalisation::Initialise(const Localisation* intialState)
     delete m_workingLoc;
     m_workingLoc = new Localisation(*intialState);
     ClearBuffer();
-    m_localisation_frame_buffer.push_back(new Localisation(*intialState));
+    //m_localisation_frame_buffer.push_back(new Localisation(*intialState));
     m_stop_called = false;
     m_sim_data_available = false;
     return;
@@ -73,10 +74,10 @@ void OfflineLocalisation::Initialise(const Localisation* intialState)
 bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
 {
     // Open Files
-    m_log_reader.openFile(QString::fromStdString(initialLogPath));
+    m_log_reader->openFile(QString::fromStdString(initialLogPath));
 
     // Check if it worked ok.
-    bool success = (m_log_reader.numFrames() > 0);
+    bool success = (m_log_reader->numFrames() > 0);
     return success;
 }
 
@@ -86,44 +87,33 @@ bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
  */
 bool OfflineLocalisation::IsInitialised()
 {
-    bool filesOpenOk = (m_log_reader.numFrames() > 0);
-    bool internalDataOk = (m_workingLoc != NULL) && (m_localisation_frame_buffer.size() > 0);
+    bool filesOpenOk = (m_log_reader->numFrames() > 0);
+    bool internalDataOk = (m_workingLoc != NULL) && (m_localisation_frame_buffer.size() >= 0);
+    QStringList availableData = m_log_reader->AvailableData();
+    bool all_data_available = HasRequiredData(availableData);
 
-    return (filesOpenOk && internalDataOk);
+    return (filesOpenOk && internalDataOk && all_data_available);
+}
+
+bool OfflineLocalisation::HasRequiredData(QStringList& available_data)
+{
+    QStringList required_data;
+    required_data << "sensor" << "object" << "teaminfo" << "gameinfo";
+    bool all_data_available = true;
+    QStringList::const_iterator constIterator;
+    for (constIterator = required_data.constBegin(); constIterator != required_data.constEnd();++constIterator)
+    {
+        if(available_data.contains(*constIterator,Qt::CaseInsensitive) == false)
+        {
+            all_data_available = false;
+        }
+    }
+    return all_data_available;
 }
 
 /*! @brief Run the simulation using the available data.
     @return True if simulation sucessful. False if unsuccessful.
  */
-bool OfflineLocalisation::Run()
-{
-    // Don't do anything if not initialised properly.
-    Initialise(m_intialLoc);
-    if(IsInitialised() == false) return false;
-    const NUSensorsData* tempSensor;
-    const FieldObjects* tempObjects;
-    const TeamInformation* tempTeamInfo;
-    const GameInformation* tempGameInfo;
-
-    int framesProcessed = 0;
-    int totalFrames = m_log_reader.numFrames();
-    m_log_reader.firstFrame();
-    emit updateProgress(framesProcessed+1,totalFrames);
-    while (m_log_reader.currentFrame() < totalFrames)
-    {
-        tempSensor = m_log_reader.GetSensorData();
-        tempObjects = m_log_reader.GetObjectData();
-        tempTeamInfo = m_log_reader.GetTeamInfo();
-        tempGameInfo = m_log_reader.GetGameInfo();
-        AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
-        if(m_log_reader.nextFrameAvailable()) m_log_reader.nextFrame();
-        else break;
-        ++framesProcessed;
-        emit updateProgress(framesProcessed+1,totalFrames);
-    }
-    return framesProcessed > 0;
-}
-
 void OfflineLocalisation::run()
 {
     Initialise(m_intialLoc);
@@ -137,23 +127,38 @@ void OfflineLocalisation::run()
     const GameInformation* tempGameInfo;
 
     int framesProcessed = 0;
-    int totalFrames = m_log_reader.numFrames();
-    m_log_reader.firstFrame();
+    int totalFrames = m_log_reader->numFrames();
+    m_log_reader->firstFrame();
     emit updateProgress(framesProcessed+1,totalFrames);
-    while (m_log_reader.currentFrame() < totalFrames)
+
+    bool save_signal = m_log_reader->blockSignals(true); // Block signals
+    int save_frame = m_log_reader->currentFrame();
+
+    while (m_log_reader->currentFrame() < totalFrames)
     {
-        tempSensor = m_log_reader.GetSensorData();
-        tempObjects = m_log_reader.GetObjectData();
-        tempTeamInfo = m_log_reader.GetTeamInfo();
-        tempGameInfo = m_log_reader.GetGameInfo();
+        tempSensor = m_log_reader->GetSensorData();
+        tempObjects = m_log_reader->GetObjectData();
+        tempTeamInfo = m_log_reader->GetTeamInfo();
+        tempGameInfo = m_log_reader->GetGameInfo();
+
+        // Break if things look bad.
+        if(tempSensor == NULL or tempObjects == NULL or tempTeamInfo == NULL or tempGameInfo == NULL) break;
         AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
-        if(m_log_reader.nextFrameAvailable()) m_log_reader.nextFrame();
+        if(m_log_reader->nextFrameAvailable()) m_log_reader->nextFrame();
         else break;
         ++framesProcessed;
-        emit updateProgress(framesProcessed+1,totalFrames);
         if(m_stop_called) break;
+        emit updateProgress(framesProcessed+1,totalFrames);
     }
-    if(!m_stop_called) m_sim_data_available = true;
+    if(!m_stop_called)
+    {
+        m_sim_data_available = true;
+    }
+
+    m_log_reader->setFrame(save_frame);
+    m_log_reader->blockSignals(save_signal);
+
+    emit SimDataChanged(m_sim_data_available);
     return;
 }
 
@@ -176,7 +181,7 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, const FieldO
 
 int OfflineLocalisation::NumberOfLogFrames()
 {
-    return m_log_reader.numFrames();
+    return m_log_reader->numFrames();
 }
 
 int OfflineLocalisation::NumberOfFrames()
@@ -197,6 +202,21 @@ const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
  */
 bool OfflineLocalisation::WriteLog(const std::string& logPath)
 {
-    return false;
+    bool file_saved = false;
+    if(hasSimData())
+    {
+        std::ofstream output_file(logPath.c_str());
+        if(output_file.is_open() && output_file.good())
+        {
+            std::vector<Localisation*>::iterator it = m_localisation_frame_buffer.begin();
+            while(it != m_localisation_frame_buffer.end())
+            {
+                output_file << (*(*it));
+                ++it;
+            }
+        }
+        output_file.close();
+    }
+    return file_saved;
 }
 

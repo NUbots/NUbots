@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
+#include <vector>
+#include <QFileInfo>
 #include "LogFileFormatReader.h"
 class NUSensorsData;
 class TeamInformation;
@@ -36,6 +39,22 @@ public:
         return currentFrame() > 0;
     }
 
+    std::vector<QFileInfo> AvailableLogFiles()
+    {
+        if(currentFileReader)
+            return currentFileReader->AvailableLogFiles();
+        else
+            return std::vector<QFileInfo>();
+    }
+    QStringList AvailableData()
+    {
+        if(currentFileReader)
+            return currentFileReader->AvailableData();
+        else
+            return QStringList("None");
+    }
+
+
 signals:
     // Signals to trigger available controls
     void nextFrameAvailable(bool);
@@ -52,6 +71,9 @@ signals:
     void GameInfoChanged(const GameInformation*);
     void frameChanged(int,int);
     void cameraChanged(int);
+    void AvailableDataChanged(QStringList);
+    void OpenLogFilesChanged(std::vector<QFileInfo>);
+
 
     void fileOpened(QString);
     void fileClosed();

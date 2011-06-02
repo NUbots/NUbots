@@ -17,6 +17,20 @@ nifVersion1FormatReader::~nifVersion1FormatReader()
     closeFile();
 }
 
+std::vector<QFileInfo> nifVersion1FormatReader::AvailableLogFiles() const
+{
+    std::vector<QFileInfo> files;
+    files.push_back(m_fileInformation);
+    return files;
+}
+
+QStringList nifVersion1FormatReader::AvailableData() const
+{
+    QStringList available_data;
+    available_data << "Image" << "SensorBuffer";
+    return available_data;
+}
+
 int nifVersion1FormatReader::openFile(const QString& filename)
 {
     m_fileInformation.setFile(filename);

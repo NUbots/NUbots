@@ -39,6 +39,9 @@ public:
 
     static std::vector<QFileInfo> FindValidFiles(const QDir& directory);
 
+    std::vector<QFileInfo> AvailableLogFiles()const;
+    QStringList AvailableData() const;
+
 signals:
 
 public slots:
@@ -64,6 +67,8 @@ protected:
     QString m_primaryData;
     bool m_fileGood;
     bool m_dataIsSynced;
+    QStringList m_available_data;
+    std::vector<QFileInfo> m_open_files;
 };
 
 #endif // SPLITSTREAMFILEFORMATREADER_H
