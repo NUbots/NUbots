@@ -172,10 +172,10 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         for(int i = 0; i < c_MAX_MODELS; i++){
             if(m_models[i].isActive == false) continue;
             debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
-            debug_out  << " [alpha = " << m_models[i].alpha << "]";
-            debug_out  << " Robot X: " << m_models[i].getState(0);
-            debug_out  << " Robot Y: " << m_models[i].getState(1);
-            debug_out  << " Robot Theta: " << m_models[i].getState(2) << endl;
+            debug_out  << " [alpha = " << m_models[i].alpha() << "]";
+            debug_out  << " Robot X: " << m_models[i].state(0);
+            debug_out  << " Robot Y: " << m_models[i].state(1);
+            debug_out  << " Robot Theta: " << m_models[i].state(2) << endl;
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -297,16 +297,16 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             for (int i = 0; i < c_MAX_MODELS; i++){
                 if(m_models[i].isActive == false) continue;
                 debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
-                debug_out  << " [alpha = " << m_models[i].alpha << "]";
-                debug_out  << " Robot X: " << m_models[i].getState(0);
-                debug_out  << " Robot Y: " << m_models[i].getState(1);
-                debug_out  << " Robot Theta: " << m_models[i].getState(2) << endl;
+                debug_out  << " [alpha = " << m_models[i].alpha() << "]";
+                debug_out  << " Robot X: " << m_models[i].state(0);
+                debug_out  << " Robot Y: " << m_models[i].state(1);
+                debug_out  << " Robot Theta: " << m_models[i].state(2) << endl;
             }
             debug_out  << "[" << m_timestamp << "]: Best Model";
-            debug_out  << " [alpha = " << bestModel->alpha << "]";
-            debug_out  << " Robot X: " << bestModel->getState(0);
-            debug_out  << " Robot Y: " << bestModel->getState(1);
-            debug_out  << " Robot Theta: " << bestModel->getState(2) << endl;
+            debug_out  << " [alpha = " << bestModel->alpha() << "]";
+            debug_out  << " Robot X: " << bestModel->state(0);
+            debug_out  << " Robot Y: " << bestModel->state(1);
+            debug_out  << " Robot Theta: " << bestModel->state(2) << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
 }
@@ -333,10 +333,10 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
     // Set the balls location.
     float distance,bearing;
-    distance = model.getDistanceToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
-    bearing = model.getBearingToPosition(model.getState(KF::ballX), model.getState(KF::ballY));
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.getState(KF::ballX),model.getState(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.getState(KF::ballXVelocity),model.getState(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
+    distance = model.getDistanceToPosition(model.state(KF::ballX), model.state(KF::ballY));
+    bearing = model.getBearingToPosition(model.state(KF::ballX), model.state(KF::ballY));
+    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.state(KF::ballX),model.state(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
+    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.state(KF::ballXVelocity),model.state(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
@@ -345,7 +345,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 		lost = true;
 
     // Set my location.
-    fieldObjects->self.updateLocationOfSelf(model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
+    fieldObjects->self.updateLocationOfSelf(model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
 											lost);
 }
 
@@ -579,7 +579,7 @@ void Localisation::doReset()
 
     // setup model 0 as in yellow goals
     m_models[0].isActive = true;
-    m_models[0].alpha = 0.25;
+    m_models[0].setAlpha(0.25);
 
     m_models[0].stateEstimates[0][0] = 300.0;         // Robot x
     m_models[0].stateEstimates[1][0] = 0.0;           // Robot y
@@ -594,7 +594,7 @@ void Localisation::doReset()
 
     // setup model 1 as in blue goals
     m_models[1].isActive = true;
-    m_models[1].alpha = 0.25;
+    m_models[1].setAlpha(0.25);
 
     m_models[1].stateEstimates[0][0] = -300.0;        // Robot x
     m_models[1].stateEstimates[1][0] = 0.0;           // Robot y
@@ -609,7 +609,7 @@ void Localisation::doReset()
 
     // setup model 2 as top half way 'T'
     m_models[2].isActive = true;
-    m_models[2].alpha = 0.25;
+    m_models[2].setAlpha(0.25);
 
     m_models[2].stateEstimates[0][0] = 0.0;        // Robot x
     m_models[2].stateEstimates[1][0] = 200.0;           // Robot y
@@ -624,7 +624,7 @@ void Localisation::doReset()
 
     // setup model 3 as other half way 'T'
     m_models[3].isActive = true;
-    m_models[3].alpha = 0.25;
+    m_models[3].setAlpha(0.25);
 
     m_models[3].stateEstimates[0][0] = 0.0;        // Robot x
     m_models[3].stateEstimates[1][0] = -200.0;           // Robot y
@@ -659,7 +659,7 @@ void Localisation::doBallOutReset()
 void Localisation::setupModel(int modelNumber, int numModels, float x, float y, float heading)
 {
     m_models[modelNumber].isActive = true;
-    m_models[modelNumber].alpha = 1.0f/numModels;
+    m_models[modelNumber].setAlpha(1.0f/numModels);
     
     m_models[modelNumber].stateEstimates[0][0] = x;             // Robot x
     m_models[modelNumber].stateEstimates[1][0] = y;             // Robot y
@@ -728,70 +728,70 @@ bool Localisation::clipModelToField(int modelID)
     bool wasClipped = false;
     bool clipped;
     double prevX, prevY, prevTheta;
-    prevX = m_models[modelID].getState(0);
-    prevY = m_models[modelID].getState(1);
-    prevTheta = m_models[modelID].getState(2);
+    prevX = m_models[modelID].state(0);
+    prevY = m_models[modelID].state(1);
+    prevTheta = m_models[modelID].state(2);
 
     clipped = m_models[modelID].clipState(0, fieldXMin, fieldXMax);		// Clipping for robot's X
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
-        debug_out  << " [alpha = " << m_models[modelID].alpha << "]";
+        debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
         debug_out  << " State(0) clipped.";
-        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].getState(0);
-        debug_out  << "," << m_models[modelID].getState(1) << "," << m_models[modelID].getState(2) << ")" << endl;
+        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
 
-    prevX = m_models[modelID].getState(0);
-    prevY = m_models[modelID].getState(1);
-    prevTheta = m_models[modelID].getState(2);
+    prevX = m_models[modelID].state(0);
+    prevY = m_models[modelID].state(1);
+    prevTheta = m_models[modelID].state(2);
 
     clipped = m_models[modelID].clipState(1, fieldYMin, fieldYMax);		// Clipping for robot's Y
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
-        debug_out  << " [alpha = " << m_models[modelID].alpha << "]";
+        debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
         debug_out  << " State(1) clipped." << endl;
-        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].getState(0);
-        debug_out  << "," << m_models[modelID].getState(1) << "," << m_models[modelID].getState(2) << ")" << endl;
+        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     wasClipped = wasClipped || clipped;
-    prevX = m_models[modelID].getState(0);
-    prevY = m_models[modelID].getState(1);
-    prevTheta = m_models[modelID].getState(2);
+    prevX = m_models[modelID].state(0);
+    prevY = m_models[modelID].state(1);
+    prevTheta = m_models[modelID].state(2);
 
     clipped = m_models[modelID].clipState(3, fieldXMin, fieldXMax);		// Clipping for ball's X
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
-        debug_out  << " [alpha = " << m_models[modelID].alpha << "]";
+        debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
         debug_out  << " State(3) clipped." << endl;
-        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].getState(0);
-        debug_out  << "," << m_models[modelID].getState(1) << "," << m_models[modelID].getState(2) << ")" << endl;
+        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
     wasClipped = wasClipped || clipped;
 
-    prevX = m_models[modelID].getState(0);
-    prevY = m_models[modelID].getState(1);
-    prevTheta = m_models[modelID].getState(2);
+    prevX = m_models[modelID].state(0);
+    prevY = m_models[modelID].state(1);
+    prevTheta = m_models[modelID].state(2);
 
     clipped = m_models[modelID].clipState(4, fieldYMin, fieldYMax);		// Clipping for ball's Y
 
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
-        debug_out  << " [alpha = " << m_models[modelID].alpha << "]";
+        debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
         debug_out  << " State(4) clipped." << endl;
-        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].getState(0);
-        debug_out  << "," << m_models[modelID].getState(1) << "," << m_models[modelID].getState(2) << ")" << endl;
+        debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
@@ -840,7 +840,7 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
                                                    pow((m_models[bestIndex].stateEstimates[0][0] - m_models[modelID].stateEstimates[0][0]),2) +
                                                pow((m_models[bestIndex].stateEstimates[1][0] - m_models[modelID].stateEstimates[1][0]),2) +
                                                    pow((m_models[bestIndex].stateEstimates[2][0] - m_models[modelID].stateEstimates[2][0]),2) , 0.5 );
-                entropy += (rmsDistance * m_models[modelID].alpha);
+                entropy += (rmsDistance * m_models[modelID].alpha());
 		 
     }
 	
@@ -858,7 +858,7 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
     bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
-    if(entropy >55 && m_models[bestIndex].alpha<50 )
+    if(entropy >55 && m_models[bestIndex].alpha()<50 )
         amILost = true;
 	else if (entropy <=55 && bestModelEntropy > 6.5)
         amILost = true;
@@ -1093,7 +1093,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         m_tempModel.toBeActivated = true;
         
         // Save Original model as outlier option.
-        m_models[modelID].alpha*=0.0005;
+        m_models[modelID].setAlpha(m_models[modelID].alpha()*0.0005);
         outlierModelID = -1;
 //        modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
   
@@ -1144,8 +1144,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             }
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha << endl;
-            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha << endl;
+            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
 #endif
 
         }
@@ -1153,7 +1153,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     // Split alpha between choices and also activate models
     for (int i=0; i< c_MAX_MODELS; i++) {
         if (m_models[i].toBeActivated) {
-            m_models[i].alpha *= 1.0/((float)numOptions); // Divide each models alpha by the numbmer of splits.
+            m_models[i].setAlpha(m_models[i].alpha()*1.0/((float)numOptions)); // Divide each models alpha by the numbmer of splits.
             m_models[i].isActive=true;
         }
         m_models[i].toBeActivated=false; // Turn off activation flag
@@ -1177,18 +1177,18 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     }
 
     // Merge alphas
-    double alphaMerged = m_models[index1].alpha + m_models[index2].alpha;
-    double alpha1 = m_models[index1].alpha / alphaMerged;
-    double alpha2 = m_models[index2].alpha / alphaMerged;
+    double alphaMerged = m_models[index1].alpha() + m_models[index2].alpha();
+    double alpha1 = m_models[index1].alpha() / alphaMerged;
+    double alpha2 = m_models[index2].alpha() / alphaMerged;
 
     Matrix xMerged; // Merge State matrix
 
     // If one model is much more correct than the other, use the correct states.
     // This prevents drifting from continuouse splitting and merging even when one model is much more likely.
-    if(m_models[index1].alpha > 10*m_models[index2].alpha){
+    if(m_models[index1].alpha() > 10*m_models[index2].alpha()){
         xMerged = m_models[index1].stateEstimates;
     } 
-    else if (m_models[index2].alpha > 10*m_models[index1].alpha){
+    else if (m_models[index2].alpha() > 10*m_models[index1].alpha()){
         xMerged = m_models[index2].stateEstimates;
     } 
     else {
@@ -1209,7 +1209,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     Matrix sMerged = cholesky(alpha1 * p1 + alpha2 * p2); // P merged = alpha1 * p1 + alpha2 * p2.
 
     // Copy merged value to first model
-    m_models[index1].alpha = alphaMerged;
+    m_models[index1].setAlpha(alphaMerged);
     m_models[index1].stateEstimates = xMerged;
     m_models[index1].stateStandardDeviations = sMerged;
 
@@ -1260,7 +1260,7 @@ int Localisation::getBestModelID() const
     int bestID = 0;
     for (int currID = 0; currID < c_MAX_MODELS; currID++){
         if(m_models[currID].isActive == false) continue; // Skip inactive models.
-        if(m_models[currID].alpha > m_models[bestID].alpha) bestID = currID;
+        if(m_models[currID].alpha() > m_models[bestID].alpha()) bestID = currID;
     }
     return bestID;
 }
@@ -1448,14 +1448,14 @@ void Localisation::NormaliseAlphas()
     double sumAlpha=0.0;
     for (int i = 0; i < c_MAX_MODELS; i++) {
         if (m_models[i].isActive) {
-            sumAlpha+=m_models[i].alpha;
+            sumAlpha+=m_models[i].alpha();
         }
     }
     if(sumAlpha == 1) return;
     if (sumAlpha == 0) sumAlpha = 1e-12;
     for (int i = 0; i < c_MAX_MODELS; i++) {
         if (m_models[i].isActive) {
-            m_models[i].alpha = m_models[i].alpha/sumAlpha;
+            m_models[i].setAlpha(m_models[i].alpha()/sumAlpha);
         }
     }
 }
@@ -1512,7 +1512,7 @@ void Localisation::PrintModelStatus(int modelID)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
   debug_out  <<"[" << m_currentFrameNumber << "]: Model[" << modelID << "]";
-  debug_out  << "[alpha=" << m_models[modelID].alpha << "]";
+  debug_out  << "[alpha=" << m_models[modelID].alpha() << "]";
   debug_out  << " active = " << m_models[modelID].isActive;
   debug_out  << " activate = " << m_models[modelID].toBeActivated << endl;
 #endif
@@ -1531,8 +1531,8 @@ void Localisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             mergeM = abs( MergeMetric(i,j) );
             if (mergeM < MergeMetricThreshold) { //0.5
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-                debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << m_models[j].alpha << "]";
-                debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha << "] " << " Merge Metric = " << mergeM << endl  ;
+                debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << m_models[j].alpha() << "]";
+                debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha() << "] " << " Merge Metric = " << mergeM << endl  ;
 #endif
                 MergeTwoModels(i,j);
             }
@@ -1558,7 +1558,7 @@ double Localisation::MergeMetric(int index1, int index2)
     for (int i=0; i<p1.getm(); i++) {
         dij+=(xdif[i][0]*xdif[i][0]) / (p1[i][i]+p2[i][i]);
     }
-    return dij*( (m_models[index1].alpha*m_models[index2].alpha) / (m_models[index1].alpha+m_models[index2].alpha) );
+    return dij*( (m_models[index1].alpha()*m_models[index2].alpha()) / (m_models[index1].alpha()+m_models[index2].alpha()) );
 }
 
 

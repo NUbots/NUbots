@@ -539,10 +539,10 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
 
 void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
 {
-    int alpha = 255*model.alpha;
+    int alpha = 255*model.alpha();
     if(alpha < 25) alpha = 25;
     modelColor.setAlpha(alpha);
-    drawRobot(modelColor, model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
+    drawRobot(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
@@ -552,7 +552,7 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
             DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
-    drawBall(QColor(255,165,0,alpha), model.getState(KF::ballX), model.getState(KF::ballY));
+    drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
 }
 
 void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor)
@@ -577,10 +577,10 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, Q
 
 void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
 {
-    int alpha = 255*model.alpha;
+    int alpha = 255*model.alpha();
     if(alpha < 25) alpha = 25;
     modelColor.setAlpha(alpha);
-    drawRobotMarker(modelColor, model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
+    drawRobotMarker(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
@@ -590,7 +590,7 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
             DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
-    drawBallMarker(modelColor, model.getState(KF::ballX), model.getState(KF::ballY));
+    drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
 }
 
 void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor)
@@ -616,8 +616,8 @@ void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, Q
 
 void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor)
 {
+    QColor draw_colour = modelColor;
     if(!drawBestModelOnly)
-
     {
         QString displayString("Model %1 (%2%)");
         for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
@@ -628,7 +628,7 @@ void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, Q
                 glDisable(GL_LIGHTING);      // Enable Global Lighting
                 glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
                 glColor4ub(255,255,255,255);
-                renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
+                renderText(model.state(KF::selfX), model.state(KF::selfY),1,displayString.arg(modelID).arg(model.alpha()*100,0,'f',1));
                 glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
                 glEnable(GL_LIGHTING);      // Enable Global Lighting
             }

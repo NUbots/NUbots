@@ -38,15 +38,20 @@ class KF {
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);
         void linear2MeasurementUpdate(double Y1,double Y2, double SR11, double SR12, double SR22, int index1, int index2);
         KfUpdateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle);
-
+        static unsigned int GenerateId();
+        void setAlpha(double new_alpha);
 
         // Data retrieval
         double sd(int Xi) const;
         double variance(int Xi) const;
-        double getState(int stateID) const;
+        double state(int stateID) const;
         Matrix GetBallSR() const;
         double getDistanceToPosition(double posX, double posY) const;
         double getBearingToPosition(double posX, double posY) const;
+        double alpha() const;
+        unsigned int id() const;
+        unsigned int parentId() const;
+        unsigned int spawnFromModel(const KF& parent);
 
         // Utility
         void init();
@@ -72,9 +77,9 @@ class KF {
         // Variables
 
         // Multiple Models - Model state Description.
-        double alpha;
         bool isActive;
         bool toBeActivated;
+
 
         Matrix updateUncertainties; // Update Uncertainty. (A matrix)
         Matrix stateEstimates; // State estimates. (Xhat Matrix)
@@ -108,6 +113,11 @@ class KF {
         static const float c_outlierLikelyhood;
 	
 	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);
+private:
+        double m_alpha;
+        unsigned int m_id;
+        unsigned int m_parentId;
+        double m_creationTime;
 };
 
 #endif
