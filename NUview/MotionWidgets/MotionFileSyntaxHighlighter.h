@@ -1,8 +1,8 @@
-/*! @file MotionFileEditor.h
- 	@brief Declaration of NUView's MotionFileEditor class for manually editing motion files (walk parameters and scripts)
+/*! @file MotionFileSyntaxHighlighter.h
+ 	@brief Declaration of NUView's MotionFileSyntaxHighlighter class for highlighting syntax of motion files (walk parameters and scripts)
  
- 	@class MotionFileEditor
- 	@brief A widget for editing motion files (walk parameters and scripts)
+ 	@class MotionFileSyntaxHighlighter
+ 	@brief A widget for highlighting syntax of motion files (walk parameters and scripts)
  
  @author Jason Kulk
  
@@ -23,46 +23,25 @@
  */
 
 
-#ifndef MotionFileEditor_H
-#define MotionFileEditor_H
-
-class MotionFileSyntaxHighlighter;
+#ifndef MotionFileSyntaxHighlighter_H
+#define MotionFileSyntaxHighlighter_H
 
 #include <QtGui>
 #include <string>
+#include <vector>
 using namespace std;
 
-class MotionFileEditor : public QWidget
+class MotionFileSyntaxHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 public:
-    MotionFileEditor(const string& filepath, QWidget *parent = 0);
-    ~MotionFileEditor();
-    
-signals:
-    void sendRequested(string text);
-    
-private slots:
-    void send();
-    void save();
-    void load();
+    MotionFileSyntaxHighlighter(QTextDocument *parent = 0);
+    ~MotionFileSyntaxHighlighter();
     
 private:
+    void highlightBlock(const QString& text);
     void checkSyntax();
     bool bracketsOK(const string& line);
-    
-private:
-    string m_filepath;
-    
-    QVBoxLayout* m_layout;
-    QHBoxLayout* m_button_layout;
-    
-    QLabel* m_title;
-    QTextEdit* m_editor;
-    MotionFileSyntaxHighlighter* m_highlighter;
-    QPushButton* m_send_button;
-    QPushButton* m_save_button;
-    QPushButton* m_revert_button;
 };
 
 #endif

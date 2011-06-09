@@ -20,6 +20,7 @@
  */
 
 #include "MotionFileEditor.h"
+#include "MotionFileSyntaxHighlighter.h"
 
 #include <iostream>
 #include <sstream>
@@ -43,6 +44,7 @@ MotionFileEditor::MotionFileEditor(const string& filepath, QWidget *parent): QWi
     
     m_editor = new QTextEdit();
     m_editor->setLineWrapMode(QTextEdit::NoWrap);
+    m_highlighter = new MotionFileSyntaxHighlighter(m_editor->document());
     m_layout->addWidget(m_editor);
     
     m_button_layout = new QHBoxLayout();
@@ -103,5 +105,32 @@ void MotionFileEditor::load()
         file.close();
         m_editor->setText(buffer);		// set the contents of the editor to be the contents of the buffer
     }
+}
+
+void MotionFileEditor::checkSyntax()
+{
+    stringstream text(m_editor->toPlainText().toStdString());
+    string line;
+    while (text.good())
+    {
+    	getline(text, line);
+        if (not bracketsOK(line))
+            debug << "syntax broken" << endl;
+    }
+    // for each line check that there are an equal number of ([]) in each line
+    
+}
+
+bool MotionFileEditor::bracketsOK(const string& line)
+{
+    int brackets = 0;
+    for (size_t i=0; i<line.size(); i++)
+    {
+        if (line[i] == '[' or line[i] == '(' or line[i] == '{')
+            brackets++;
+        else if (line[i] == ']' or line[i] == ')' or line[i] == '}')
+            brackets--;
+    }
+    return brackets == 0;
 }
 

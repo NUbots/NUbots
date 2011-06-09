@@ -69,7 +69,7 @@ void WalkParameterWidget::onNewHost(vector<NUHostInfo> hosts)
 
 void WalkParameterWidget::onSelectButtonPressed()
 {
-    QFileDialog dialog(this, "Select the Walk Parameter File", DATA_DIR.c_str(), "*.cfg");
+    QFileDialog dialog(this, "Select the Walk Parameter File", DATA_DIR.c_str(), "*.cfg;*.num");
     int result = dialog.exec();
     
     QStringList files = dialog.selectedFiles();
