@@ -4,6 +4,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "NUPlatform/NUIO/GameControllerPort.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include <memory.h>
 #include "debug.h"
@@ -27,6 +28,9 @@ GameInformation::GameInformation(int playerNumber, int teamNumber)
     m_currentReturnData = new RoboCupGameControlReturnData();
     memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, sizeof(m_currentReturnData->header));
     m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
+    
+    m_led_red = vector<float>(3,0);
+    m_led_red[0] = 1;
 }
 
 GameInformation::~GameInformation()
@@ -294,7 +298,7 @@ void GameInformation::process(RoboCupGameControlData* data)
                 m_last_packet_time = m_data->CurrentTime;
             memcpy(m_currentControlData, data, sizeof(RoboCupGameControlData));
             doGameControllerUpdate();
-            //System->displayGamePacketReceived(m_actions);
+            Platform->toggle(NUPlatform::Led2, m_actions->CurrentTime, m_led_red);
         }
     }
 }

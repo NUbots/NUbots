@@ -63,8 +63,7 @@ void SpringSensor::tick_sensor(const float sensorAngle){
          << "   max Angle:"<<gait->sensor[MAX_INDEX]<<endl;
 #endif
 
-    const float clippedSensorAngle  = NBMath::clip(sensorAngle,
-                                                  gait->sensor[MAX_INDEX]);
+    const float clippedSensorAngle  = NBMath::clip(sensorAngle, gait->sensor[MAX_INDEX]);
 
     //control
     const float u = sensorAngle -x_k(0);

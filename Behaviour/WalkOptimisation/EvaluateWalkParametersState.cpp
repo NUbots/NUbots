@@ -143,10 +143,16 @@ vector<float> EvaluateWalkParametersState::reversePoint(const vector<float>& poi
 {
     vector<float> reverse = m_way_points[(m_way_points.size()-1) - m_current_point_index];
     if (m_current_point_index == 0 or m_current_point_index == m_way_points.size()-1)
+    {
+        m_previous_reverse = reverse;
         return reverse;
+    }
     else
     {
+        reverse[0] = m_previous_reverse[0] - (m_way_points[m_current_point_index][0] - m_way_points[m_current_point_index-1][0]);
+        reverse[1] = m_previous_reverse[1] - (m_way_points[m_current_point_index][1] - m_way_points[m_current_point_index-1][1]);
         reverse[2] += 3.14;
+        m_previous_reverse = reverse;
         return reverse;
     }
     return reverse;

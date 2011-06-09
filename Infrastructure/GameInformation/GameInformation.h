@@ -30,6 +30,8 @@
 #include "NUPlatform/NUIO/RoboCupGameControlData.h"
 #include <string>
 #include <cstring>
+#include <vector>
+using namespace std;
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -106,6 +108,8 @@ private:
     double m_last_packet_time;                           //!< The time the last game controller packet was received
     GameControllerPort* m_port;
     RoboCupGameControlReturnData* m_currentReturnData;   //!< The current return packet
+    
+    vector<float> m_led_red;
 };
 
 #endif

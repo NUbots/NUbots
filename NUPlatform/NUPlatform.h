@@ -39,6 +39,8 @@ class NUIO;
 
 #include <ctime>
 #include <string>
+#include <vector>
+using namespace std;
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
     #define __NU_SYSTEM_CLOCK_GETTIME 
     #define __NU_PERIODIC_CLOCK_NANOSLEEP
@@ -49,6 +51,19 @@ class NUIO;
 
 class NUPlatform
 {
+public:
+    enum LedIndices
+    {
+        Led0 = 0,
+        Led1 = 1,
+        Led2 = 2,
+        Led3 = 3,
+        Led4 = 4,
+        Led5 = 5,
+        Led6 = 6,
+        Led7 = 7,
+        NumLeds = 8
+    };
 public:
     NUPlatform();
     virtual ~NUPlatform();
@@ -78,6 +93,10 @@ public:
     void processActions();
     void process(JobList* jobs, NUIO* m_io);
     
+    // Platform dependent functions
+    virtual void displayBatteryState();
+    virtual void add(const LedIndices& led, double time, const vector<float>& value);
+    virtual void toggle(const LedIndices& led, double time, const vector<float>& value);
     
     void kill();
 protected:

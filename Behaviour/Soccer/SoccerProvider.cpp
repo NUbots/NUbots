@@ -35,6 +35,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
@@ -58,24 +59,13 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     
     m_state = m_initial;
     
-    m_lost_led_indices.push_back(0);
-    m_lost_led_indices.push_back(7);
-    m_yellow_goal_led_indices.push_back(5);
-    m_yellow_goal_led_indices.push_back(6);
-    m_blue_goal_led_indices.push_back(1);
-    m_blue_goal_led_indices.push_back(2);
-    
-    m_led_on = vector<vector<float> >(1, vector<float>(3,1.0f));
-    m_led_off = vector<vector<float> >(1, vector<float>(3,0.0f));
-    m_led_red = m_led_off;
-    m_led_red[0][0] = 1;
-    m_led_green = m_led_off;
-    m_led_green[0][1] = 1;
-    m_led_yellow = m_led_off;
-    m_led_yellow[0][0] = 1;
-    m_led_yellow[0][1] = 1;
-    m_led_blue = m_led_off;
-    m_led_blue[0][2] = 1;
+    m_led_white = vector<float>(3,1);
+    m_led_off = vector<float>(3,0);
+    m_led_red = m_led_off; m_led_red[0] = 1;
+    m_led_green = m_led_off; m_led_green[1] = 1;
+    m_led_blue = m_led_off; m_led_blue[2] = 1;
+    m_led_orange = m_led_off; m_led_orange[0] = 1; m_led_orange[1] = 0.64;
+    m_led_yellow = m_led_off; m_led_yellow[0] = 1; m_led_yellow[1] = 1;
 }
 
 /*! @brief Destroys the behaviour provider as well as all of the associated states
@@ -113,16 +103,20 @@ void SoccerProvider::doBehaviourCommons()
     // set the right eyes to indicate lost states
     bool balllost = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();
     bool selflost = m_field_objects->self.lost();
-    /* TODO: Implement this again using the new NUActionatorsData interface
-     if (balllost and selflost)
-        m_actions->add(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_yellow);
+    if (balllost and selflost)
+        Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_yellow);
     else if (balllost)
-        m_actions->add(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_red);
+        Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_red);
     else if (selflost)
-        m_actions->add(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_green);
+        Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_green);
     else
-        m_actions->add(NUActionatorsData::RightEyeLeds, m_lost_led_indices, m_actions->CurrentTime, m_led_off);
-     */
+        Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_off);
+    
+    // set the right eyes to indicate the ball visibility
+    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        Platform->add(NUPlatform::Led4, m_actions->CurrentTime, m_led_orange);
+    else
+        Platform->add(NUPlatform::Led4, m_actions->CurrentTime, m_led_off);
     
     // set the right eyes to indicate the goal visibility
     StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -143,17 +137,15 @@ void SoccerProvider::doBehaviourCommons()
             unknown_blue_posts++;
     }
     
-    /* TODO: Implement this again using the new NUActionatorsData interface
     if (unknown_yellow_posts > 0 or yellow_left.isObjectVisible() or yellow_right.isObjectVisible())
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_yellow_goal_led_indices, m_actions->CurrentTime, m_led_red);
+        Platform->add(NUPlatform::Led5, m_actions->CurrentTime, m_led_yellow);
     else
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_yellow_goal_led_indices, m_actions->CurrentTime, m_led_off);
+        Platform->add(NUPlatform::Led5, m_actions->CurrentTime, m_led_off);
     
     if (unknown_blue_posts > 0 or blue_left.isObjectVisible() or blue_right.isObjectVisible())
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_blue_goal_led_indices, m_actions->CurrentTime, m_led_red);
+        Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_blue);
     else
-        m_actions->addLeds(NUActionatorsData::RightEyeLeds, m_blue_goal_led_indices, m_actions->CurrentTime, m_led_off);
-     */
+        Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_off);
 }
 
 /*! @brief Checks for state transitions that are common to all states in this behaviour provider

@@ -58,7 +58,7 @@ void SensorAngles::basic_sensor_feedback(){
         inertial.angleX*gait->sensor[WP::GAMMA_X];
     const float desiredSensorAngleY =
         (inertial.angleY-gait->stance[WP::BODY_ROT_Y])
-        *gait->sensor[WP::GAMMA_X];
+        *gait->sensor[WP::GAMMA_Y];
 
     //Clip the velocities, and max. limits
     sensorAngleX =

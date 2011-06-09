@@ -43,7 +43,7 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
     m_num_particles = 12;      	   // Tune this
     m_stalled_threshold = 25;	   // Might need to tune this
 
-    m_selected_fitness = 0;
+    m_selected_fitness = 1;
     m_best_fitness = 0;
     m_stall_count = 0;
 
