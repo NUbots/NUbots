@@ -31,14 +31,15 @@ SET (YOUR_SRCS  NBWalk.cpp NBWalk.h
 		Gait.cpp Gait.h
 		AbstractGait.cpp AbstractGait.h
 		MetaGait.cpp MetaGait.h
-	        WalkingLeg.cpp WalkingLeg.h
-	    	WalkingArm.cpp WalkingArm.h
-		PreviewController.cpp PreviewController.h
+        WalkingLeg.cpp WalkingLeg.h
+	    WalkingArm.cpp WalkingArm.h
 		Observer.cpp Observer.h
 		SensorAngles.cpp SensorAngles.h
 		SpringSensor.cpp SpringSensor.h
 		ZmpEKF.cpp ZmpEKF.h
+        ZmpExp.cpp ZmpExp.h
 		ZmpAccEKF.cpp ZmpAccEKF.h
+		ZmpAccExp.cpp ZmpAccExp.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

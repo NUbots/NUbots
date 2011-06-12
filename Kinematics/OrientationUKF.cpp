@@ -212,19 +212,19 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
         pitch = mathGeneral::normaliseAngle(sigmaPoints[pitchAngle][i]);
         roll = mathGeneral::normaliseAngle(sigmaPoints[rollAngle][i]);
 
-        // Calculate predicted x acceleration due to gravity + external acceleration.
+        // Calculate predicted x acceleration due to gravity
         if (fabs(pitch) < mathGeneral::PI/2)
             temp[0][0] = accelVectorMag*tan(pitch)/sqrt(1+pow(tan(pitch),2));
         else
             temp[0][0] = -accelVectorMag*tan(pitch)/sqrt(1+pow(tan(pitch),2));
         
-        // Calculate predicted y acceleration due to gravity + external acceleration.
+        // Calculate predicted y acceleration due to gravity
         if (fabs(roll) < mathGeneral::PI/2)
             temp[1][0] = -accelVectorMag*tan(roll)/sqrt(1+pow(tan(roll),2));
         else
             temp[1][0] = accelVectorMag*tan(roll)/sqrt(1+pow(tan(roll),2));
         
-        // Calculate predicted z acceleration due to gravity + external acceleration.
+        // Calculate predicted z acceleration due to gravity
         float zsqrd = fabs(pow(accelVectorMag,2) - pow(temp[0][0],2) - pow(temp[1][0],2));
         if ((fabs(pitch) > mathGeneral::PI/2) xor (fabs(roll) > mathGeneral::PI/2))
             temp[2][0] = sqrt(zsqrd);

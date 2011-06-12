@@ -188,6 +188,7 @@ private:
 
     const SensorAngles * sensorAngles;
     float sensorAngleX, sensorAngleY;
+    bool m_previous_contact;
 
 #ifdef DEBUG_WALKING_LOCUS_LOGGING
     FILE * locus_log;

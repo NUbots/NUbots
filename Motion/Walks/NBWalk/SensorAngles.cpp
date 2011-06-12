@@ -59,17 +59,17 @@ void SensorAngles::basic_sensor_feedback(){
 
     //Clip the velocities, and max. limits
     sensorAngleX = desiredSensorAngleX;
-        /*NBMath::clip(
+        NBMath::clip(
             NBMath::clip(desiredSensorAngleX,
                          desiredSensorAngleX - MAX_SENSOR_VEL,
                          desiredSensorAngleX + MAX_SENSOR_VEL),
-            MAX_SENSOR_ANGLE_X);*/
+            MAX_SENSOR_ANGLE_X);
     sensorAngleY = desiredSensorAngleY;
-        /*NBMath::clip(
+        NBMath::clip(
             NBMath::clip(desiredSensorAngleY,
                          desiredSensorAngleY - MAX_SENSOR_VEL,
                          desiredSensorAngleY + MAX_SENSOR_VEL),
-            MAX_SENSOR_ANGLE_Y);*/
+            MAX_SENSOR_ANGLE_Y);
 
     lastSensorAngleX = sensorAngleX;
     lastSensorAngleY = sensorAngleY;

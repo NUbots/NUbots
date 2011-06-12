@@ -162,8 +162,8 @@ namespace WP {
 
     static const float STANCE_DEFAULT[LEN_STANCE_CONFIG]=
     {310.0f,        // com height (mm)
-     14.5f,         // forward displacement of CoM (mm)
-     100.0f,        // foot separation (mm)
+     10.0f,         // forward displacement of CoM (mm)
+     115.0f,        // foot separation (mm)
      0.05f,         // forward lean angle (rad)                     ---> Walk Parameter
      0.0f,          // yaw foot angle (rad)
      0.1f};         // transition time (s)
@@ -185,8 +185,8 @@ namespace WP {
      0.4f,          // zmp static perc                              ---> Walk Parameter
      10.0f,          // l zmp off                                   ---> Walk Parameter
      10.0f,          // r zmp off                                   ---> Walk Parameter 
-     0.0f,          // strafe zmp off
-     0.0f,};        // turn zmp off  
+     0.01f,          // strafe zmp off
+     0.12f,};        // turn zmp off  
     static const float HACK_DEFAULT[LEN_HACK_CONFIG]=
     {0.1f,          // hip hack l                                   ---> Walk Parameter
      0.1f};         // hip hack r                                   ---> Walk Parameter
@@ -196,8 +196,8 @@ namespace WP {
      0.08,  // angle Y scale (gamma)
      250.0,  // X spring constant k (kg/s^2)
      100.0,  // Y spring constant k (kg/s^2)
-     0.261,   // max angle X (compensation)
-     0.261,   // max angle Y
+     0.122,   // max angle X (compensation)
+     0.122,   // max angle Y
      0.785};   // max acceleration
     static const float STIFF_DEFAULT[LEN_STIFF_CONFIG]=
     {0.85f,//hip
@@ -211,7 +211,7 @@ namespace WP {
      1.0f,//yodoscale
      1.0f};//thetaodoscale
     static const float ARM_DEFAULT[LEN_ARM_CONFIG]=
-    {0.0f};//arm amplitude
+    {0.17f};//arm amplitude
 
 };//End namespace WP
 #endif
