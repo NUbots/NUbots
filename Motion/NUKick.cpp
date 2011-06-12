@@ -43,7 +43,7 @@ NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
 {
     m_walk = walk;
     m_kinematicModel = new Kinematics();
-    m_kinematicModel->LoadModel(std::string("None"));
+    m_kinematicModel->LoadModel();
     pose = DO_NOTHING;
     m_kickingLeg = noLeg;
 
