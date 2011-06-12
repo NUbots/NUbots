@@ -44,7 +44,7 @@ RobotSelectDialog::RobotSelectDialog(QWidget * parent, BonjourProvider* provider
     labels.append("Hosts");
     labels.append("Addresses");
     m_tree->setHeaderLabels(labels);
-    m_tree->setSelectionMode(QAbstractItemView::MultiSelection);
+    m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     m_connect_button = new QPushButton(tr("Connect"));
     m_connect_button->setDefault(true);

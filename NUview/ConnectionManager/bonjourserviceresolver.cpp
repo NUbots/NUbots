@@ -118,7 +118,11 @@ void BonjourServiceResolver::onLookupCompleted(const QHostInfo& info)
 }
 void BonjourServiceResolver::onResolveResults(DNSServiceRef, DNSServiceFlags, uint32_t, DNSServiceErrorType, const char*, const char* hostname, uint16_t, uint16_t, const unsigned char*, void* context)
 {
-    QHostInfo::lookupHost(hostname, (QObject*) context, SLOT(onLookupCompleted(QHostInfo)));
+    string temp(hostname);				// There is a backwards compatibility problem:
+    size_t length = temp.size();		// hostnames used to have a '.' at the end eg. smacbook.local.
+    if (temp[length-1] == '.')			// However, on my laptop such a hostname is invalid
+        temp.erase(length-1);			// Thus, if there is a '.' on the end remove it
+    QHostInfo::lookupHost(temp.c_str(), (QObject*) context, SLOT(onLookupCompleted(QHostInfo)));
 }
 
 

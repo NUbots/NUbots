@@ -167,6 +167,7 @@ HEADERS += ui_mainwindow.h \
     MotionWidgets/WalkParameterWidget.h \
     MotionWidgets/KickWidget.h \
     MotionWidgets/MotionFileEditor.h \
+    MotionWidgets/MotionFileSyntaxHighlighter.h \
     ../Motion/Walks/WalkParameters.h \
     ../Tools/Optimisation/Parameter.h
 SOURCES += mainwindow.cpp \
@@ -276,6 +277,7 @@ SOURCES += mainwindow.cpp \
     MotionWidgets/WalkParameterWidget.cpp \
     MotionWidgets/KickWidget.cpp \
     MotionWidgets/MotionFileEditor.cpp \
+    MotionWidgets/MotionFileSyntaxHighlighter.cpp \
     ../Motion/Walks/WalkParameters.cpp \
     ../Tools/Optimisation/Parameter.cpp
     
