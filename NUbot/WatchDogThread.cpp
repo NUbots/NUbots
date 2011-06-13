@@ -66,14 +66,9 @@ WatchDogThread::~WatchDogThread()
 void WatchDogThread::periodicFunction()
 {
     Platform->displayBatteryState();
+    Platform->verifySensors();
 
     #ifdef USE_VISION
-        int framesdropped = m_nubot->m_vision->getNumFramesDropped();
-        int framesprocessed = m_nubot->m_vision->getNumFramesProcessed();
-        if (framesprocessed < 29 || framesdropped > 9)
-        {
-            //System->displayVisionFrameDrop(Blackboard->Actions);
-            debug << "WatchDogThread: Vision processed " << framesprocessed << " and 'dropped' " << framesdropped << endl;
-        }
+        Platform->verifyVision(1000.0*m_nubot->m_vision->getNumFramesDropped()/m_period, 1000.0*m_nubot->m_vision->getNumFramesProcessed()/m_period);
     #endif
 }

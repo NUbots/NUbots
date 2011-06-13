@@ -498,6 +498,10 @@ bool NUSensorsData::getCompass(float& data)
 
 /*! @brief Gets the distance data from the selected sensor.
  
+ 
+    Note. The description below is how this SHOULD work, not how it actually is at the moment.
+    For now its just a flat list of distances, that is there is no angle information returned.
+ 
  	For an ultrasonic sensor; the data will be formatted as follows:
  		[[angle_min, angle_max], [echo0,echo1,echo2,....]] where angle_min and angle_max specify the size of the ulrasonic's detection cone
  
@@ -511,7 +515,7 @@ bool NUSensorsData::getCompass(float& data)
  	@param data will be updated the distances
  	@return true if the data is valid, false if not
  */
-bool NUSensorsData::getDistance(const id_t& id, vector<vector<float> >& data)
+bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
 {
     if (id < LDistance or id > LaserDistance)		// check the id is for a distance sensor
         return false;

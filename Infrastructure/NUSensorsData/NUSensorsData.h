@@ -174,7 +174,7 @@ public:
     // Get methods for other sensors
     bool getGps(vector<float>& data);
     bool getCompass(float& data);
-    bool getDistance(const id_t& id, vector<vector<float> >& data);
+    bool getDistance(const id_t& id, vector<float>& data);
     
     bool getButton(const id_t& id, float& data);
     bool getButtonDuration(const id_t& id, float& data);
