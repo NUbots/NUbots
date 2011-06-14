@@ -33,7 +33,7 @@ win32 {
 # Input
 # HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 INCLUDEPATH += ../
-INCLUDEPATH += NUviewconfig/
+INCLUDEPATH += NUViewConfig/
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
     connectionwidget.h \
@@ -93,7 +93,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Threading/Thread.h \
     ../Tools/Threading/ConditionalThread.h \
     ../Tools/Threading/PeriodicThread.h \
-    NUviewIO/NUviewIO.h \
+    NUViewIO/NUViewIO.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
     frameInformationWidget.h \
@@ -193,7 +193,7 @@ SOURCES += mainwindow.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     $$files(../NUPlatform/NUIO/*.cpp) \
-    NUviewIO/NUviewIO.cpp \
+    NUViewIO/NUViewIO.cpp \
     ../Infrastructure/NUData.cpp \
     ../Infrastructure/NUBlackboard.cpp \
     ../NUPlatform/NUPlatform.cpp \
