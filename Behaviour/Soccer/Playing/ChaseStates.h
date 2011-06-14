@@ -97,7 +97,7 @@ protected:
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if( (ball.estimatedDistance() < 20.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
+        if( (ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);

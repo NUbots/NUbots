@@ -58,7 +58,7 @@ void QSRelax::doState()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "QSRelax::doState" << endl;
     #endif
-    float target = -0.025 + m_parent->getTargetEstimate();
+    float target = m_parent->getTargetEstimate();
     
     float gain = 0.07;              // with a slope of 5, I can't balance the robot without control with gain of 0.05;
     float meas_p, output;
@@ -78,7 +78,7 @@ BehaviourState* QSRelax::nextState()
         debug << "QSRelax::nextState" << endl;
     #endif
     // I am fixing the time_in_state to be 0.64*catch_duration
-    if (m_time_in_state > 180 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)
+    if (m_time_in_state > 200 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)
     {
         m_previous_time = 0;
         m_time_in_state = 0;

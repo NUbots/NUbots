@@ -103,6 +103,9 @@ private:
     
     TeamPacket m_packet;                                                //!< team packet to send
     vector<boost::circular_buffer<TeamPacket> > m_received_packets;     //!< team packets received from other robots
+    
+    vector<float> m_led_green;
+    vector<float> m_led_red;
 };
 
 

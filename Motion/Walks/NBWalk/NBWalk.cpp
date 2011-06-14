@@ -178,21 +178,14 @@ void NBWalk::updateNBSensors()
     m_data->getOrientation(orientation);
     m_data->get(NUSensorsData::LFootTouch, lfootvalues);
     m_data->get(NUSensorsData::RFootTouch, rfootvalues);
-
-    float angleX = 0;
-    if (orientation.size() > 0)
-        angleX = -orientation[0];           // NUbot convention has positive roll to the left, NB has positive roll to the right
-    float angleY = 0;
-    if (orientation.size() > 1)
-        angleY = orientation[1];
     
     nb_sensors->setMotionSensors(FSR(lfootvalues[0], lfootvalues[1], lfootvalues[2], lfootvalues[3]),
                                  FSR(rfootvalues[0], rfootvalues[1], rfootvalues[2], rfootvalues[3]),
                                  0,                                                             // no button in webots
-                                 Inertial(-accelvalues[0]/100.0, -accelvalues[1]/100.0, -accelvalues[2]/100.0,
-                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY),
-                                 Inertial(-accelvalues[0]/100.0, -accelvalues[1]/100.0, -accelvalues[2]/100.0,
-                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, angleX, angleY));
+                                 Inertial(accelvalues[0]/100.0, accelvalues[1]/100.0, accelvalues[2]/100.0,
+                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, orientation[0], orientation[1]),
+                                 Inertial(accelvalues[0]/100.0, accelvalues[1]/100.0, accelvalues[2]/100.0,
+                                          gyrovalues[0]/100.0, gyrovalues[1]/100.0, orientation[0], orientation[1]));
     
     nb_sensors->setMotionBodyAngles(nb_sensors->getBodyAngles());
 }
@@ -232,7 +225,7 @@ void NBWalk::setGait()
     vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
     m_gait->step[8] = 10*maxaccelerations[0];
     m_gait->step[9] = 10*maxaccelerations[1];
-    m_gait->step[10] = maxaccelerations[2];
+    m_gait->step[10] = 2*maxaccelerations[2];
     
     walkProvider.setCommand(m_gait);
 }

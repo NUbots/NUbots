@@ -38,7 +38,7 @@ void SensorAngles::spring_sensor_feedback(){
     const Inertial inertial = sensors->getInertial();
     //std::cout << "AngleX/Y  = ("<<inertial.angleX<<","<<inertial.angleY<<")"<<std::endl;
     springX.tick_sensor(inertial.angleX);
-    springY.tick_sensor(inertial.angleY-gait->stance[WP::BODY_ROT_Y]);
+    springY.tick_sensor(inertial.angleY - gait->stance[WP::BODY_ROT_Y]);
 
     sensorAngleX = springX.getSensorAngle();
     sensorAngleY = springY.getSensorAngle();
@@ -54,20 +54,17 @@ void SensorAngles::basic_sensor_feedback(){
     //calculate the new angles, take into account gait angles already
     Inertial inertial = sensors->getInertial();
 
-    const float desiredSensorAngleX =
-        inertial.angleX*gait->sensor[WP::GAMMA_X];
-    const float desiredSensorAngleY =
-        (inertial.angleY-gait->stance[WP::BODY_ROT_Y])
-        *gait->sensor[WP::GAMMA_X];
+    const float desiredSensorAngleX = inertial.angleX*gait->sensor[WP::GAMMA_X];
+    const float desiredSensorAngleY = (inertial.angleY - gait->stance[WP::BODY_ROT_Y])*gait->sensor[WP::GAMMA_Y];
 
     //Clip the velocities, and max. limits
-    sensorAngleX =
+    sensorAngleX = desiredSensorAngleX;
         NBMath::clip(
             NBMath::clip(desiredSensorAngleX,
                          desiredSensorAngleX - MAX_SENSOR_VEL,
                          desiredSensorAngleX + MAX_SENSOR_VEL),
             MAX_SENSOR_ANGLE_X);
-    sensorAngleY =
+    sensorAngleY = desiredSensorAngleY;
         NBMath::clip(
             NBMath::clip(desiredSensorAngleY,
                          desiredSensorAngleY - MAX_SENSOR_VEL,

@@ -155,22 +155,22 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
 /*! @brief Sets the target ip address for the job port
     @param ipaddress the new target ip address.
  */
-void NUIO::setJobPortTargetAddress(string ipaddress)
+void NUIO::setJobAddress(string ipaddress)
 {
     if (m_jobs_port != NULL)
         m_jobs_port->setTargetAddress(ipaddress);
     else
-        errorlog << "NUIO::setJobPortToBroadcast(). Network jobs are OFF" << endl;
+        errorlog << "NUIO::setJobAddress(). Network jobs are OFF" << endl;
 }
 
 /*! @brief Sets the job port to broadcast to all robots
  */
-void NUIO::setJobPortToBroadcast()
+void NUIO::setJobToBroadcast()
 {
     if (m_jobs_port != NULL)
         m_jobs_port->setBroadcast();
     else
-        errorlog << "NUIO::setJobPortToBroadcast(). Network jobs are OFF" << endl;
+        errorlog << "NUIO::setJobToBroadcast(). Network jobs are OFF" << endl;
 }
 
 /*! @brief Stream insertion operator for NUImage

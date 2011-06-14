@@ -63,16 +63,15 @@ void SpringSensor::tick_sensor(const float sensorAngle){
          << "   max Angle:"<<gait->sensor[MAX_INDEX]<<endl;
 #endif
 
-    const float clippedSensorAngle  = NBMath::clip(sensorAngle,
-                                                  gait->sensor[MAX_INDEX]);
+    //const float clippedSensorAngle  = NBMath::clip(sensorAngle, gait->sensor[MAX_INDEX]);
 
     //control
-    const float u = sensorAngle -x_k(0);
+    const float u = sensorAngle - x_k(0);
     const ufvector3 x_hat = prod(A,x_k) + b*u;
     x_k = x_hat;
 
     //finally clip position: reference x_hat to avoid assignment error
-    x_k(0) = NBMath::clip(x_hat(0),gait->sensor[MAX_INDEX]);
+    //x_k(0) = NBMath::clip(x_hat(0),gait->sensor[MAX_INDEX]);
     //should potentially clip more aggressively things like:
     //when we are near position zero, clip velocity
 

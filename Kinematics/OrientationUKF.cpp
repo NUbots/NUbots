@@ -1,50 +1,102 @@
 #include "OrientationUKF.h"
 #include "Tools/Math/General.h"
+#include "Tools/Math/StlVector.h"
 
 #include "debug.h"
 #include "nubotdataconfig.h"
+
+
+//#define DEBUG_ME
+//#define LOG_ME
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+
 OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)
 {
-//    std::fstream file;
-//    file.open((std::string(DATA_DIR) + std::string("OrientationUKF.log")).c_str(),ios_base::trunc | ios_base::out);
-//    file.close();
+    #ifdef DEBUG_ME
+        std::fstream file;
+        file.open("/var/volatile/OrientationUKF.log",ios_base::trunc | ios_base::out);
+        file.close();
+    #endif
+    #ifdef LOG_ME
+        std::fstream logfile;
+        logfile.open("/var/volatile/OrientationUKF.csv",ios_base::trunc | ios_base::out);
+        logfile.close();
+    #endif
+    m_initialised_count = 0;
+    m_scale = 0;
+    m_offset = vector<float>(3,0);
 }
 
-void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations)
+void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations, bool validkinematics, const std::vector<float> kinematicorientation)
 {
-    m_timeOfLastUpdate = time;
-
-    // Assume there is little or no motion to start for best intial estimate.
-    m_mean[pitchGyroOffset][0] = gyroReadings[1];
-    m_mean[rollGyroOffset][0] = gyroReadings[0];
-
-    m_covariance[pitchGyroOffset][pitchGyroOffset] = 0.1f * 0.1f;
-    m_covariance[rollGyroOffset][rollGyroOffset] = 0.1f * 0.1f;
-
-    // Assume there is little to no acceleration apart from gravity for initial estimation.
-    m_mean[pitchAngle][0] = -atan2(-accelerations[0],-accelerations[2]);
-    m_mean[rollAngle][0] = atan2(accelerations[1],-accelerations[2]);
-
-    m_covariance[pitchAngle][pitchAngle] = 0.5f*0.5f;
-    m_covariance[rollAngle][rollAngle] = 0.5f * 0.5f;
-
-    m_processNoise = Matrix(numStates,numStates,false);
-    m_processNoise[pitchAngle][pitchAngle] = 1e-3;
-    m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-5;
-    m_processNoise[rollAngle][rollAngle] = 1e-3;
-    m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-5;
-
-    m_initialised = true;
+    float a_mag = sqrt(pow(accelerations[0],2) + pow(accelerations[1],2) + pow(accelerations[2],2));
+    float a_roll = -atan2(accelerations[1], sqrt(pow(accelerations[0],2) + pow(accelerations[2],2)));
+    float a_pitch = atan2(accelerations[0], sqrt(pow(accelerations[1],2) + pow(accelerations[2],2)));
+    
+    if (validkinematics and fabs(a_mag - 981) < 98.1 and fabs(a_pitch) < 0.2 and fabs(a_roll) < 0.2)
+    {
+        m_timeOfLastUpdate = time;
+        
+        vector<float> k_pred(3,0);
+        float k_mag = OrientationUKF::g;
+        float k_roll = kinematicorientation[0];
+        float k_pitch = kinematicorientation[1];
+        k_pred[2] = -sqrt(pow(OrientationUKF::g,2)/(1 + pow(tan(k_pitch),2) + pow(tan(k_roll),2)));   // Calculate predicted z acceleration due to gravity + external acceleration.
+        k_pred[0] = -k_pred[2] * tan(k_pitch);                                     // Calculate predicted x acceleration due to gravity + external acceleration.
+        k_pred[1] = k_pred[2] * tan(k_roll);                                       // Calculate predicted y acceleration due to gravity + external acceleration.
+    
+        m_scale += (a_mag/k_mag);
+        m_offset = m_offset + accelerations - (a_mag/k_mag)*k_pred;
+        
+        m_initialised_count++;
+        if (m_initialised_count > 50)
+        {
+            m_offset = (1.0/m_initialised_count)*m_offset;
+            m_scale /= m_initialised_count;
+            // Assume there is little or no motion to start for best intial estimate.
+            m_mean[pitchGyroOffset][0] = gyroReadings[1];
+            m_mean[rollGyroOffset][0] = gyroReadings[0];
+            
+            // Assume there is little to no acceleration apart from gravity for initial estimation.
+            m_mean[pitchAngle][0] = k_pitch;
+            m_mean[rollAngle][0] = k_roll;
+            
+            m_covariance[pitchAngle][pitchAngle] = 0.25f * 0.25f;
+            m_covariance[pitchGyroOffset][pitchGyroOffset] = 0.01f * 0.01f;
+            m_covariance[rollAngle][rollAngle] = 0.25f * 0.25f;
+            m_covariance[rollGyroOffset][rollGyroOffset] = 0.01f * 0.01f;
+            
+            m_processNoise = Matrix(numStates,numStates,false);
+            m_processNoise[pitchAngle][pitchAngle] = 1e-5;
+            m_processNoise[pitchGyroOffset][pitchGyroOffset] = 1e-12;
+            m_processNoise[rollAngle][rollAngle] = 1e-5;
+            m_processNoise[rollGyroOffset][rollGyroOffset] = 1e-12;
+            
+            m_initialised = true;
+            #ifdef DEBUG_ME
+                std::fstream file;
+                file.open("/var/volatile/OrientationUKF.log",ios_base::app | ios_base::out);
+                file << "-- Initialise --" << endl;
+                file << "Mean:" << std::endl;
+                file << m_mean;
+                file << "Offsets: " << m_offset << endl;
+                file.close();
+            #endif
+        }
+    }
 }
 
 void OrientationUKF::TimeUpdate(const std::vector<float>& gyroReadings, double timestamp)
 {
-//    std::fstream file;
-//    file.open((std::string(DATA_DIR) + std::string("OrientationUKF.log")).c_str(),ios_base::app | ios_base::out);
-//    file << "-- Time Update (" << timestamp << ") [" << rollGyroReading << "," << pitchGyroReading << "] --" << std::endl;
-//    file << "Previous Mean:" << std::endl;
-//    file << m_mean;
-    //double startTime = System->getThreadTime();
+    #ifdef DEBUG_ME
+        std::fstream file;
+        file.open("/var/volatile/OrientationUKF.log",ios_base::app | ios_base::out);
+        file << "-- Time Update (" << timestamp << ") [" << gyroReadings[0] << "," << gyroReadings[1] << "] --" << std::endl;
+        file << "Previous Mean:" << std::endl;
+        file << m_mean;
+    #endif
+
     // Find delta 't', the time that has passed since the previous time update.
     const float dt = (timestamp - m_timeOfLastUpdate) / 1000.0f;
 
@@ -91,29 +143,27 @@ void OrientationUKF::TimeUpdate(const std::vector<float>& gyroReadings, double t
 
     // Find the new covariance
     m_covariance = CalculateCovarianceFromSigmas(m_updateSigmaPoints, m_mean) + m_processNoise;
-    //double runTime = System->getThreadTime() - startTime;
-    //debug << "TimeUpdate took: " << runTime << " ms" << std::endl;
 
-//    file << "New Mean:" << std::endl;
-//    file << m_mean << std::endl;
-//    file.close();
+    #ifdef DEBUG_ME
+        file << "New Mean:" << std::endl;
+        file << m_mean << std::endl;
+        file.close();
+    #endif
 }
 
 void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, bool validKinematics, const std::vector<float>& kinematicsOrientation)
 {
-//    std::fstream file;
-//    file.open((std::string(DATA_DIR) + std::string("OrientationUKF.log")).c_str(),ios_base::app | ios_base::out);
-//    file << "-- Measurement Update [" << accelerations[0] << "," << accelerations[1] << ","<< accelerations[2] <<  "] ";
-//    if(validKinematics)
-//    {
-//        file << "[" << kinematicsOrientation[0] << "," << kinematicsOrientation[1] << "," << kinematicsOrientation[2] << "] ";
-//    }
-//    file << "--" << std::endl;
-//    file << "Previous Mean:" << std::endl;
-//    file << m_mean << std::endl;
+    #ifdef DEBUG_ME
+        std::fstream file;
+        file.open("/var/volatile/OrientationUKF.log",ios_base::app | ios_base::out);
+        file << "-- Measurement Update [" << accelerations[0] << "," << accelerations[1] << ","<< accelerations[2] <<  "] ";
+        if(validKinematics)
+            file << "[" << kinematicsOrientation[0] << "," << kinematicsOrientation[1] << "," << kinematicsOrientation[2] << "] ";
+        file << "--" << std::endl;
+        file << "Previous Mean:" << std::endl;
+        file << m_mean << std::endl;
+    #endif
 
-    //double startTime = System->getThreadTime();
-    const float gravityAccel = 981.0f; // cm/s^2
     int numMeasurements = 3;
     if(validKinematics) numMeasurements+=2;
 
@@ -126,9 +176,9 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
 
     // Put observation into matrix form so we can use if for doing math
     Matrix observation(numMeasurements,1,false);
-    observation[0][0] = accelerations[0];
-    observation[1][0] = accelerations[1];
-    observation[2][0] = accelerations[2];
+    observation[0][0] = accelerations[0] - m_offset[0];
+    observation[1][0] = accelerations[1] - m_offset[1];
+    observation[2][0] = accelerations[2] - m_offset[2];
     if(validKinematics)
     {
         observation[3][0] = kinematicsOrientation[0];
@@ -137,19 +187,17 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
 
     // Observation noise
     Matrix S_Obs(numMeasurements,numMeasurements,true);
-    //double accelNoise = 200.0*200.0;
-    double accelVectorMag = sqrt(accelerations[0]*accelerations[0] + accelerations[1]*accelerations[1] + accelerations[2]*accelerations[2]);
-    double errorFromIdealGravity = accelVectorMag - fabs(gravityAccel);
-    double accelNoise = 25.0 + fabs(errorFromIdealGravity);
-//    file << "Using accel noise: " << accelNoise << std::endl;
-    accelNoise = accelNoise*accelNoise;
+    double accelVectorMag = sqrt(observation[0][0]*observation[0][0] + observation[1][0]*observation[1][0] + observation[2][0]*observation[2][0]);
+    double errorFromIdealGravity = fabs(accelVectorMag - m_scale*g);
+    double accelNoise = pow(50.0 + 10*errorFromIdealGravity, 2);
 
     S_Obs[0][0] = accelNoise;
     S_Obs[1][1] = accelNoise;
     S_Obs[2][2] = accelNoise;
     if(validKinematics)
     {
-        double kinematicsNoise = 0.01*0.01;
+        double kinematicsNoise = 0.05*0.05;
+        accelNoise *= 2;
         S_Obs[3][3] = kinematicsNoise;
         S_Obs[4][4] = kinematicsNoise;
     }
@@ -164,15 +212,25 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
         pitch = mathGeneral::normaliseAngle(sigmaPoints[pitchAngle][i]);
         roll = mathGeneral::normaliseAngle(sigmaPoints[rollAngle][i]);
 
-        // Calculate predicted x acceleration due to gravity + external acceleration.
-        temp[0][0] = gravityAccel * sin(pitch);
-
-        // Calculate predicted y acceleration due to gravity + external acceleration.
-        temp[1][0] = -gravityAccel * sin(roll);
-
-        // Calculate predicted z acceleration due to gravity + external acceleration.
-        temp[2][0] = -gravityAccel * cos(pitch) * cos(roll);
-
+        // Calculate predicted x acceleration due to gravity
+        if (fabs(pitch) < mathGeneral::PI/2)
+            temp[0][0] = accelVectorMag*tan(pitch)/sqrt(1+pow(tan(pitch),2));
+        else
+            temp[0][0] = -accelVectorMag*tan(pitch)/sqrt(1+pow(tan(pitch),2));
+        
+        // Calculate predicted y acceleration due to gravity
+        if (fabs(roll) < mathGeneral::PI/2)
+            temp[1][0] = -accelVectorMag*tan(roll)/sqrt(1+pow(tan(roll),2));
+        else
+            temp[1][0] = accelVectorMag*tan(roll)/sqrt(1+pow(tan(roll),2));
+        
+        // Calculate predicted z acceleration due to gravity
+        float zsqrd = fabs(pow(accelVectorMag,2) - pow(temp[0][0],2) - pow(temp[1][0],2));
+        if ((fabs(pitch) > mathGeneral::PI/2) xor (fabs(roll) > mathGeneral::PI/2))
+            temp[2][0] = sqrt(zsqrd);
+        else
+            temp[2][0] = -sqrt(zsqrd);
+        
         if(validKinematics)
         {
             // Calculate predicted measurement.
@@ -187,12 +245,28 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
     measurementUpdate(observation, S_Obs, predictedObservationSigmas, sigmaPoints);
     m_mean[pitchAngle][0] = mathGeneral::normaliseAngle(m_mean[pitchAngle][0]);
     m_mean[rollAngle][0] = mathGeneral::normaliseAngle(m_mean[rollAngle][0]);
-    //double runTime = System->getThreadTime() - startTime;
-    //debug << "Acceleration Measurement Update took: " << runTime << " ms" << std::endl;
-//    file << "Predicted Observation Mean:" << std::endl;
-//    file << predictedObservationSigmas.getCol(0);
-//    file << "Observation:" << std::endl << observation;
-//    file << "New Mean:" << std::endl;
-//    file << m_mean << std::endl;
-//    file.close();
+
+    #ifdef DEBUG_ME
+        file << "Predicted Observation Mean:" << std::endl;
+        file << predictedObservationSigmas.getCol(0);
+        file << "Observation:" << std::endl << observation;
+        file << "New Mean:" << std::endl;
+        file << m_mean << std::endl;
+    #endif
+    #ifdef LOG_ME
+        std::fstream logfile;
+        logfile.open("/var/volatile/OrientationUKF.csv",ios_base::app | ios_base::out);
+        float a_roll = -atan2(observation[1][0], sqrt(pow(observation[0][0],2) + pow(observation[2][0],2)));
+        float a_pitch = atan2(observation[0][0], -mathGeneral::sign(observation[2][0])*sqrt(pow(observation[1][0],2) + pow(observation[2][0],2)));
+        logfile << m_timeOfLastUpdate << "," << m_mean[rollAngle][0] << "," << m_mean[pitchAngle][0] << "," << m_mean[rollGyroOffset][0] << "," << m_mean[pitchGyroOffset][0] << ",";
+        if (validKinematics)
+            logfile << kinematicsOrientation[0] << "," << kinematicsOrientation[1];
+        else
+            logfile << "0, 0";
+        logfile << "," << a_roll << "," << a_pitch << ",";
+        vector<float> alorientation;
+        Blackboard->Sensors->get(NUSensorsData::OrientationHardware, alorientation);
+        logfile << alorientation[0] << "," << alorientation[1] << endl;
+        logfile.close();
+    #endif
 }

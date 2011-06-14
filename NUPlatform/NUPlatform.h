@@ -39,6 +39,8 @@ class NUIO;
 
 #include <ctime>
 #include <string>
+#include <vector>
+using namespace std;
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
     #define __NU_SYSTEM_CLOCK_GETTIME 
     #define __NU_PERIODIC_CLOCK_NANOSLEEP
@@ -50,9 +52,21 @@ class NUIO;
 class NUPlatform
 {
 public:
+    enum LedIndices
+    {
+        Led0 = 0,
+        Led1 = 1,
+        Led2 = 2,
+        Led3 = 3,
+        Led4 = 4,
+        Led5 = 5,
+        Led6 = 6,
+        Led7 = 7,
+        NumLeds = 8
+    };
+public:
     NUPlatform();
     virtual ~NUPlatform();
-    NUCamera* m_camera;             //!< the robot's camera(s)
  
     // Robot Identity functions
     std::string& getName();
@@ -79,6 +93,12 @@ public:
     void processActions();
     void process(JobList* jobs, NUIO* m_io);
     
+    // Platform dependent functions
+    virtual void displayBatteryState();
+    virtual void verifySensors();
+    virtual void verifyVision(int framesdropped, int framesprocessed);
+    virtual void add(const LedIndices& led, double time, const vector<float>& value);
+    virtual void toggle(const LedIndices& led, double time, const vector<float>& value);
     
     void kill();
 protected:
@@ -92,7 +112,7 @@ private:
     void initIdentity();
 
 protected:
-    
+    NUCamera* m_camera;             //!< the robot's camera(s)
     NUSensors* m_sensors;           //!< the robot's sensors
     NUActionators* m_actionators;   //!< the robot's actionators
     
@@ -100,6 +120,9 @@ protected:
     int m_robot_number;             //!< the robot's number
     int m_team_number;              //!< the robot's team number
     std::string m_mac_address;      //!< the robot's MAC address (wired)
+    
+    int m_frames_zero_count;        //!< the number of consecutive times the frames processed has been zero
+    int m_frames_dropped_count;     //!< the number of consecutive times the number of frames dropped is high
 private:
     #ifdef __NU_SYSTEM_CLOCK_GETTIME
         struct timespec m_gettime_starttime;            //!< the program's start time according to gettime()

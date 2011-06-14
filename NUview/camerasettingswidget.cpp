@@ -33,8 +33,8 @@
 
 cameraSettingsWidget::cameraSettingsWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
 {
-    setObjectName(tr("Camera Settings"));
-    setWindowTitle(tr("Camera Settings"));
+    setObjectName(tr("Camera"));
+    setWindowTitle(tr("Camera"));
     tcpSocket = new QTcpSocket();
     robotName = "";
     timer.setInterval(200);
@@ -417,7 +417,7 @@ void cameraSettingsWidget::connectToRobot()
     }
     */
     std::string ipaddress = robotName.toStdString();
-    nuio->setJobPortTargetAddress(ipaddress);
+    nuio->setJobAddress(ipaddress);
     sendDataToRobot();
 }
 

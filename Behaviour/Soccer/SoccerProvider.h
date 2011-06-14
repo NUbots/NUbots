@@ -50,15 +50,13 @@ public:
     BehaviourState* m_substitute;
     BehaviourState* m_requires_substitution;
     
-    vector<int> m_yellow_goal_led_indices;
-    vector<int> m_blue_goal_led_indices;
-    vector<int> m_lost_led_indices;
-    vector<vector<float> > m_led_on;
-    vector<vector<float> > m_led_off;
-    vector<vector<float> > m_led_red;
-    vector<vector<float> > m_led_green;
-    vector<vector<float> > m_led_yellow;
-    vector<vector<float> > m_led_blue;
+    vector<float> m_led_white;
+    vector<float> m_led_red;
+    vector<float> m_led_green;
+    vector<float> m_led_blue;
+    vector<float> m_led_orange;
+    vector<float> m_led_yellow;
+    vector<float> m_led_off;
 };
 
 

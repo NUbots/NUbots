@@ -44,9 +44,6 @@ using namespace std;
  */
 UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
 {
-    #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "UdpPort::UdpPort(" << name << ", " << portnumber << ")" << endl;
-    #endif
     #ifdef WIN32
         WSADATA wsa_Data;
         int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
@@ -93,6 +90,14 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     m_local_address.sin_port = htons(m_port_number);
     m_local_address.sin_addr.s_addr = INADDR_BROADCAST;
     memset(m_local_address.sin_zero, '\0', sizeof m_local_address.sin_zero);
+    
+    // Construct the broadcast address (we set the address to broadcast on the local subnet by default)
+    m_broadcast_address.sin_family = AF_INET;                              // host byte order
+    m_broadcast_address.sin_port = htons(m_port_number);                   // short, network byte order
+    m_broadcast_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
+    memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
+    
+    // On Linux and Darwin, I can do better. I can actually get this machine's ip address, and the proper broadcast address
     #ifndef TARGET_OS_IS_WINDOWS
         struct ifreq ifr;
         struct sockaddr_in* sin = (struct sockaddr_in*) &ifr.ifr_addr;
@@ -106,7 +111,11 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
         sin->sin_family = AF_INET;
         sin->sin_port = htons(m_port_number);
         if (ioctl(m_sockfd, SIOCGIFADDR, &ifr) != -1)
+        {
             m_local_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+            if (ioctl(m_sockfd, SIOCGIFBRDADDR, &ifr) != -1)
+                m_broadcast_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+        }
         else
         {
             // second check for wired
@@ -119,21 +128,27 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
             sin->sin_family = AF_INET;
             sin->sin_port = htons(m_port_number);
             if (ioctl(m_sockfd, SIOCGIFADDR, &ifr) != -1)
+            {
                 m_local_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+                if (ioctl(m_sockfd, SIOCGIFBRDADDR, &ifr) != -1)
+                    m_broadcast_address.sin_addr.s_addr = sin->sin_addr.s_addr;
+            }
         }
     #endif
     
-    // Construct the target address (we set the address to broadcast on the local subnet by default)
-    m_target_address.sin_family = AF_INET;                              // host byte order
-    m_target_address.sin_port = htons(m_port_number);                   // short, network byte order
-    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;      // being careful here to broadcast only to the local subnet
-    memset(m_target_address.sin_zero, '\0', sizeof m_target_address.sin_zero);
+    // By default we start using the broadcast address for udp ports
+    m_target_address = m_broadcast_address;
     
     // Bind the socket to this address
-    if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
+    if (bind(m_sockfd, (struct sockaddr*)&m_address, sizeof m_address) == -1)
         errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << endl;
     
     pthread_mutex_init(&m_socket_mutex, NULL);
+    
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "UdpPort::UdpPort(" << name << ", " << portnumber << ") connected on " << inet_ntoa(m_local_address.sin_addr) << " to ";
+        debug << inet_ntoa(m_target_address.sin_addr) << " with broadcast " << inet_ntoa(m_broadcast_address.sin_addr) << endl;
+    #endif
     
     start();
 }

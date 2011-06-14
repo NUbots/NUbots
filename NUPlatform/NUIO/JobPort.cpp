@@ -55,13 +55,19 @@ JobPort::~JobPort()
 void JobPort::setTargetAddress(std::string ipaddress)
 {
     m_target_address.sin_addr.s_addr = inet_addr(ipaddress.c_str());
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << endl;
+    #endif
 }
 
 /*! @brief Sets the job port to broadcast, this means all robots on the network will execute the job :D
  */
 void JobPort::setBroadcast()
 {
-    m_target_address.sin_addr.s_addr = m_local_address.sin_addr.s_addr | 0xFF000000;
+    m_target_address = m_broadcast_address;
+    #if DEBUG_NETWORK_VERBOSITY > 0
+        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << endl;
+    #endif
 }
 
 /*! @brief Send the jobs over the network

@@ -9,7 +9,6 @@ macx {
     MOC_DIR = "../Build/NUView/.moc"
     RCC_DIR = "../Build/NUView/.rcc"
     UI_DIR = "../Build/NUView/.ui"
-
     #Macports include directory
     INCLUDEPATH += '/opt/local/include'
 }
@@ -58,10 +57,6 @@ HEADERS += ui_mainwindow.h \
     ../Vision/TransitionSegment.h \
     ../Vision/GoalDetection.h \
     LayerSelectionWidget.h \
-    WalkParameterWidget.h \
-    ../Motion/Walks/WalkParameters.h \
-    ../Tools/Optimisation/Parameter.h \
-    KickWidget.h \
     locWmGlDisplay.h \
     ../Vision/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
@@ -102,10 +97,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
     frameInformationWidget.h \
-    bonjour/robotSelectDialog.h \
-    bonjour/bonjourserviceresolver.h \
-    bonjour/bonjourservicebrowser.h \
-    bonjour/bonjourrecord.h \
     ../Tools/Math/UKF.h \
     ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
@@ -166,7 +157,19 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
-    ../Tools/Profiling/Profiler.h
+    ../Tools/Profiling/Profiler.h \
+    ConnectionManager/ConnectionManager.h \
+    ConnectionManager/BonjourProvider.h \
+    ConnectionManager/BonjourServiceBrowser.h \
+    ConnectionManager/BonjourServiceResolver.h \
+    ConnectionManager/NUHostInfo.h \
+    ConnectionManager/RobotSelectDialog.h \
+    MotionWidgets/WalkParameterWidget.h \
+    MotionWidgets/KickWidget.h \
+    MotionWidgets/MotionFileEditor.h \
+    MotionWidgets/MotionFileSyntaxHighlighter.h \
+    ../Motion/Walks/WalkParameters.h \
+    ../Tools/Optimisation/Parameter.h
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -187,10 +190,6 @@ SOURCES += mainwindow.cpp \
     ../Vision/TransitionSegment.cpp \
     ../Vision/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
-    WalkParameterWidget.cpp \
-    KickWidget.cpp \
-    ../Motion/Walks/WalkParameters.cpp \
-    ../Tools/Optimisation/Parameter.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
     $$files(../NUPlatform/NUIO/*.cpp) \
@@ -246,9 +245,6 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \
-    bonjour/robotSelectDialog.cpp \
-    bonjour/bonjourserviceresolver.cpp \
-    bonjour/bonjourservicebrowser.cpp \
     ../Tools/Math/UKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
@@ -272,6 +268,17 @@ SOURCES += mainwindow.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
-    ../Tools/Profiling/Profiler.cpp
-RESOURCES = textures.qrc
-RESOURCES += icons.qrc
+    ../Tools/Profiling/Profiler.cpp \
+    ConnectionManager/ConnectionManager.cpp \
+    ConnectionManager/BonjourProvider.cpp \
+    ConnectionManager/BonjourServiceBrowser.cpp \
+    ConnectionManager/BonjourServiceResolver.cpp \
+    ConnectionManager/RobotSelectDialog.cpp \
+    MotionWidgets/WalkParameterWidget.cpp \
+    MotionWidgets/KickWidget.cpp \
+    MotionWidgets/MotionFileEditor.cpp \
+    MotionWidgets/MotionFileSyntaxHighlighter.cpp \
+    ../Motion/Walks/WalkParameters.cpp \
+    ../Tools/Optimisation/Parameter.cpp
+    
+RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc

@@ -118,12 +118,12 @@ void NUSensors::copyFromHardwareCommunications()
 
 void NUSensors::calculateSoftSensors()
 {
+    m_touch->calculate();
     calculateKinematics();
     calculateOrientation();
     calculateHorizon();
     calculateButtonDurations();
 
-    m_touch->calculate();
     //m_zmp->calculate();
 
     calculateOdometry();
@@ -150,35 +150,29 @@ void NUSensors::calculateOrientation()
     }
     else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
+        vector<float> supportLegTransformFlat;
+        bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+        Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+        if(validKinematics)
+            orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+        
         if(!m_orientationFilter->Initialised())
-        {
-            float accelsum = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
-            if (fabs(accelsum - 981) < 0.2*981)
-            {
-                m_orientationFilter->initialise(m_current_time,gyros,acceleration);
-            }
-        }
+            m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
         else
         {
             m_orientationFilter->TimeUpdate(gyros, m_current_time);
-            vector<float> supportLegTransformFlat;
-            bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
-            Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
-            if(validKinematics)
-                orientation = Kinematics::OrientationFromTransform(supportLegTransform);
             m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
+            // Set orientation
+            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+            orientation[2] = 0.0f;
+            m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+            // Set gyro offset values
+            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+            gyroOffset[2] = 0.0f;
+            m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
         }
-
-        // Set orientation
-        orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
-        orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
-        orientation[2] = 0.0f;
-        m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
-        // Set gyro offset values
-        gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
-        gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
-        gyroOffset[2] = 0.0f;
-        m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
     }
 }
 
@@ -448,6 +442,7 @@ void NUSensors::calculateKinematics()
     {
         m_data->setAsInvalid(NUSensorsData::LLegTransform);
     }
+    
     if(headJointsSuccess)
     {
         bottomCameraTransform = m_kinematicModel->CalculateTransform(Kinematics::bottomCamera,headJoints);        
@@ -467,25 +462,18 @@ void NUSensors::calculateKinematics()
 
 
     bool leftFootSupport = false, rightFootSupport = false;
-    m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
-    m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
+    bool validsupportdata = m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
+    validsupportdata &= m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
     // Choose support leg.
-    if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
+    if (validsupportdata)
     {
-        supportLegTransform = &rightLegTransform;
-    }
-    else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
-    {
-        supportLegTransform = &leftLegTransform;
-    }
-    else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
-    {
-        supportLegTransform = &leftLegTransform;
-    }
-    else
-    {
-        supportLegTransform = 0;
+        if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
+            supportLegTransform = &rightLegTransform;
+        else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
+            supportLegTransform = &leftLegTransform;
+        else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
+            supportLegTransform = &leftLegTransform;
     }
 
     if(supportLegTransform)

@@ -47,7 +47,7 @@ QSBallisticController::QSBallisticController(const NUData::id_t& joint)
     m_initialised = false;
     
     m_target_estimate = 0;
-    m_target_estimate_buffer = boost::circular_buffer<float>(300, 0);        // assume the pitch starts at zero
+    m_target_estimate_buffer = boost::circular_buffer<float>(600, 0);        // assume the pitch starts at zero
     
     m_state = m_delay;
 }
@@ -74,7 +74,7 @@ void QSBallisticController::doStateCommons()
     else 
     {
         // so im going to need to use an alpha-beta-gamma filter because I need the acceleration too :(
-        float beta = 0.005;
+        float beta = 0.015;
         float alpha = 2*sqrt(beta/2) - beta/2;              // coefficents taken from (Arcasoy, 1997) (Painter, 1990)
         float gamma = 0.3*alpha*beta/(2-alpha);              
         
@@ -154,12 +154,12 @@ float QSBallisticController::getTorque() const
 /*! @brief Update the target esimtate */
 void QSBallisticController::updateTargetEstimate()
 {
-    float m = 2.8;
+    float m = QSBallisticController::Mass;
     float g = 9.81;
-    float h = 0.25;
+    float h = QSBallisticController::Height;
     float o = -0.02;
-    float b = 7.0;
-    float K = 1.0;
+    float b = QSBallisticController::FrictionConstant;
+    float K = 1.0;          // K is a constant to compensate for calculation errors in the torque.
     
     float u, v, a, t;
     u = getPosition();

@@ -29,6 +29,29 @@ class NAOPlatform : public NUPlatform
 public:
     NAOPlatform();
     ~NAOPlatform();
+    
+    // NAO specific functions
+    void displayBatteryState();
+    void verifySensors();
+    void add(const LedIndices& led, double time, const vector<float>& value);
+    void toggle(const LedIndices& led, double time, const vector<float>& value);
+    
+private:
+    // members for the battery display
+    float m_battery_state_previous_time;
+    float m_battery_voiced_time;
+    
+    // members for the sensor verification
+    int m_bad_foot_sensor_count;
+    float m_previous_lfoot_force;
+    float m_previous_rfoot_force;
+    int m_bad_ultrasonic_count;
+    int m_heat_count;
+    
+    // members for the eye leds
+    vector<vector<float> > m_eye_indices; 
+    vector<vector<float> > m_leye;
+    vector<vector<float> > m_reye;
 };
 
 #endif

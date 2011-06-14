@@ -216,7 +216,7 @@ void EndEffectorTouch::calculateSupport(const NUData::id_t& endeffector)
     {	// we can only be supporting if there is contact on the end effector
         vector<float> cop;
         if (Blackboard->Sensors->getCoP(endeffector, cop))		// if there is valid centre of pressure measurement
-            if (mathGeneral::PointInsideConvexHull(cop[0], cop[1], m_hulls[endeffector.Id - m_id_offset], 0.4))		// if the cop is inside the convex hull
+            if (mathGeneral::PointInsideConvexHull(cop[0], cop[1], m_hulls[endeffector.Id - m_id_offset], 0.2))		// if the cop is inside the convex hull
         		support = true;
     }
     Blackboard->Sensors->modify(endeffector, NUSensorsData::SupportId, Blackboard->Sensors->CurrentTime, support);

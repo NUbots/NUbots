@@ -47,6 +47,7 @@ private:
 	float calculateCircuitLength();
 
 	bool m_reverse_points;
+    vector<float> m_previous_reverse;
 	unsigned int m_current_point_index;
 };
 

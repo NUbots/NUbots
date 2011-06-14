@@ -44,7 +44,10 @@ class QSCatch;
 class QSBallisticController : public BehaviourFSMState
 {
 public:
-    static const float VelocityThreshold = 0.009;
+    static const float VelocityThreshold = 0.02;    // the velocity threshold for which a catch is triggered
+    static const float Mass = 2.8;                  // the mass of the cycloid in kg
+    static const float Height = 0.25;               // the height of the COM of the cycloid when standing
+    static const float FrictionConstant = 3.3;      // the coefficient of friction (as determined through experiment)
 public:
     QSBallisticController(const NUData::id_t& joint);
     ~QSBallisticController();
