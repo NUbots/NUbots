@@ -19,7 +19,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NUviewIO.h"
+#include "NUViewIO.h"
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -30,9 +30,9 @@
 
 using namespace std;
 
-NUviewIO* nuio;
+NUViewIO* nuio;
 
-NUviewIO::NUviewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboard->Jobs)
+NUViewIO::NUViewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboard->Jobs)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUviewIO::NUviewIO(" << static_cast<void*>(Blackboard->GameInfo) << ", " << static_cast<void*>(Blackboard->TeamInfo) << ", " << static_cast<void*>(Blackboard->Jobs) << ")" << endl;
@@ -41,7 +41,7 @@ NUviewIO::NUviewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboar
         nuio = this;
 }
 
-NUviewIO::~NUviewIO()
+NUViewIO::~NUViewIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
     debug << "NUviewIO::~NUviewIO()" << endl;

@@ -22,7 +22,7 @@
 #include <sstream>
 
 
-#include "NUviewIO/NUviewIO.h"
+#include "NUViewIO/NUViewIO.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/Jobs/Jobs.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"

@@ -29,17 +29,17 @@
 
 class NUSystem;
 
-class NUviewIO: public NUIO
+class NUViewIO: public NUIO
 {
 // Functions:
 public:
-    NUviewIO();
-    ~NUviewIO();
+    NUViewIO();
+    ~NUViewIO();
 private:
 
 };
 
-extern NUviewIO* nuio;
+extern NUViewIO* nuio;
 
 #endif
 

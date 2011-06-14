@@ -22,7 +22,7 @@
 #include "GLDisplay.h"
 
 #include "Infrastructure/Jobs/Jobs.h"
-#include "NUviewIO/NUviewIO.h"
+#include "NUViewIO/NUViewIO.h"
 #include "debug.h"
 
 KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
