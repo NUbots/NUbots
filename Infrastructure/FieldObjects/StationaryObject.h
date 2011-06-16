@@ -21,6 +21,8 @@ class StationaryObject: public Object{
                 float X() const {return fieldLocation.x;}
                 float Y() const {return fieldLocation.y;}
 
+                std::string toString() const;
+
                 /*!
                 @brief Output streaming operation.
                 @param output The output stream.

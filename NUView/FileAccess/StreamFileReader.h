@@ -38,6 +38,7 @@
 #include <QDebug>
 #include <cmath>
 #include "IndexedFileReader.h"
+#include "Tools/FileFormats/FileFormatException.h"
 
 template<class C>
 class StreamFileReader: public IndexedFileReader
@@ -196,7 +197,15 @@ private:
                 temp.position = m_file.tellg();
                 try{
                     m_file >> (*m_dataBuffer);
-                }   catch(...){qDebug("Bad frame found"); eofReached = true;}
+                }
+                catch(FileFormatException& e){
+                    qDebug("Bad frame found: %s", e.getMessage().c_str());
+                    eofReached = true;
+                }
+                catch(...){
+                    qDebug("Bad frame found");
+                    eofReached = true;
+                }
                 // File Cursor Has Not Moved
                 if(pos == m_file.tellg())
                 {
@@ -207,7 +216,11 @@ private:
                 if(eofReached) break;
                 timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
                 timestamp = floor(timestamp);
-                if(HasTime(timestamp)) continue;
+                if(HasTime(timestamp))
+                {
+                    qDebug("Found duplicate frame time: %d", timestamp);
+                    continue;
+                }
                 temp.frameSequenceNumber++;
                 m_index.insert(IndexEntry(timestamp,temp));
                 m_timeIndex.push_back(timestamp);

@@ -16,6 +16,9 @@
 #include "visionstreamwidget.h"
 #include "locwmstreamwidget.h"
 #include "SensorDisplayWidget.h"
+#include "ObjectDisplayWidget.h"
+#include "GameInformationDisplayWidget.h"
+#include "TeamInformationDisplayWidget.h"
 #include <QHostInfo>
 
 class QMdiArea;
@@ -30,7 +33,10 @@ class frameInformationWidget;
 
 class NUPlatform;
 class NUBlackboard;
+
 class NUViewIO;
+class OfflineLocalisationDialog;
+
 
 namespace Ui
 {
@@ -68,6 +74,8 @@ public slots:
     void fileClosed(); //!< File was closed.
 
     void BonjourTest();
+
+    void RunOfflineLocalisation();
 
     /*!
       @brief Used to select the colour at a given position in the image and
@@ -140,6 +148,9 @@ private:
     cameraSettingsWidget* cameraSetting;
     frameInformationWidget* frameInfo;
     SensorDisplayWidget* sensorDisplay;
+    ObjectDisplayWidget* objectDisplay;
+    GameInformationDisplayWidget* gameInfoDisplay;
+    TeamInformationDisplayWidget* teamInfoDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
@@ -152,6 +163,7 @@ private:
     QMenu *navigationMenu;          //!< Instance of the naivigation menu
     QMenu *windowMenu;              //!< Instance of the window menu
     QMenu *testMenu;                //!< Instance of the test menu
+    QMenu *toolsMenu;                //!< Instance of the tools menu
     QMenu *visionWindowMenu;        //!< Instance of the vision window menu
     QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
     QMenu *networkWindowMenu;        //!< Instance of the network window menu
@@ -181,10 +193,11 @@ private:
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
     QAction *newLUTDisplayAction;   //!< Instance of new look up table display action.
+    QAction *runOfflineLocalisatonAction; //!< Instance of the offline localisation action.
 
     QAction *doBonjourTestAction;    //!< Instance of the do test Action
-
-    LogFileReader LogReader;
+    OfflineLocalisationDialog* offlinelocDialog;
+    LogFileReader* LogReader;
 
 protected:
     void closeEvent(QCloseEvent *event);

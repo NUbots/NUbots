@@ -1,6 +1,9 @@
 #include "FieldObjects.h"
 #include <string>
 #include <debug.h>
+#include "Tools/Math/FieldCalculations.h"
+#include <sstream>
+#include "Tools/FileFormats/FileFormatException.h"
 
 FieldObjects::FieldObjects()
 {
@@ -182,18 +185,22 @@ void FieldObjects::InitStationaryFieldObjects()
                     x = 240.0f;
                     y = 200.0f;
                     objectName = "Projected T Yellow Left";
+                    break;
                 case FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
                     x = 240.0f;
                     y = -200.0f;
                     objectName = "Projected T Yellow Right";
+                    break;
                 case FO_CORNER_PROJECTED_T_BLUE_LEFT:
                     x = -240.0f;
                     y = -200.0f;
                     objectName = "Projected T Blue Left";
+                    break;
                 case FO_CORNER_PROJECTED_T_BLUE_RIGHT:
                     x = -240.0f;
                     y = 200.0f;
                     objectName = "Projected T Blue Right";
+                    break;
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";
@@ -247,6 +254,145 @@ void FieldObjects::InitMobileFieldObjects()
 	}
 }
 
+/*! @brief Determines the IDs of stationary objects that should be visible for a given field position.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @param headYaw Additional yaw caused by head position relative to body.
+ @param headPitch Additional pitch caused by head position relative to body.
+ @param FoV_x Horizontal field of view of the observer.
+ @param FoV_y Vertical field of view of the observer.
+ @return A vector of IDs representing the stationary field objects expected to be visible.
+ */
+std::vector<FieldObjects::StationaryFieldObjectID> FieldObjects::GetPossibleObservationIds(float x, float y, float heading, 
+                                                                            float headYaw, float headPitch, 
+                                                                            float FoV_x, float FoV_y)
+{
+    // Calculate limits.
+    // Note: These limits assume that the camera is flat horizontally.
+    float maxAngle = heading + headYaw + FoV_x / 2.0f; // Radians
+    float minAngle = heading + headYaw - FoV_x / 2.0f; // Radians
+    float minDistance = 0;      // cm
+    float maxDistance = 200;    // cm
+    
+    // Create temporary variables for use inside loop.
+    std::vector<StationaryFieldObjectID> visibleIds;
+    Vector2<float> basePos(x,y), targetPosition;
+    float distance, angle;
+    bool expectedVisible;
+    
+    visibleIds.clear(); // Make sure list is empty.
+    
+    std::vector<StationaryObject>::iterator stat_obj_iterator;
+
+    // Check all objects.
+    for(stat_obj_iterator = stationaryFieldObjects.begin();
+        stat_obj_iterator != stationaryFieldObjects.end();
+        stat_obj_iterator++)
+	{
+        // Get position of current field object.
+        targetPosition = stat_obj_iterator->getFieldLocation();
+        // Calculate expected measurments.
+        distance = DistanceBetweenPoints(basePos,targetPosition);
+        angle = AngleBetweenPoints(basePos,targetPosition);
+        // Check if within limits.
+        expectedVisible = (angle > minAngle) and (angle < maxAngle) and (distance > minDistance) and (distance < maxDistance);
+        // If expected to be visible put on list.
+        if(expectedVisible)
+            visibleIds.push_back(StationaryFieldObjectID(stat_obj_iterator->getID()));
+    }
+    return visibleIds;
+}
+
+/*! @brief Determines the IDs of mobile objects that should be visible for a given field position.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @param headYaw Additional yaw caused by head position relative to body.
+ @param headPitch Additional pitch caused by head position relative to body.
+ @param FoV_x Horizontal field of view of the observer.
+ @param FoV_y Vertical field of view of the observer.
+ @return A vector of IDs representing the stationary field objects expected to be visible.
+ */
+std::vector<FieldObjects::MobileFieldObjectID> FieldObjects::GetPossibleMobileObservationIds(float x, float y, float heading,
+                                                                            float headYaw, float headPitch,
+                                                                            float FoV_x, float FoV_y)
+{
+    // Calculate limits.
+    // Note: These limits assume that the camera is flat horizontally.
+    float maxAngle = heading + headYaw + FoV_x / 2.0f; // Radians
+    float minAngle = heading + headYaw - FoV_x / 2.0f; // Radians
+    float minDistance = 0;      // cm
+    float maxDistance = 200;    // cm
+
+    // Create temporary variables for use inside loop.
+    std::vector<MobileFieldObjectID> visibleIds;
+    Vector2<float> basePos(x,y), targetPosition;
+    float distance, angle;
+    bool expectedVisible;
+
+    visibleIds.clear(); // Make sure list is empty.
+
+    std::vector<MobileObject>::iterator stat_obj_iterator;
+
+    // Check all objects.
+    for(stat_obj_iterator = mobileFieldObjects.begin();
+        stat_obj_iterator != mobileFieldObjects.end();
+        stat_obj_iterator++)
+        {
+        // Get position of current field object.
+        targetPosition = stat_obj_iterator->getEstimatedFieldLocation();
+        // Calculate expected measurments.
+        distance = DistanceBetweenPoints(basePos,targetPosition);
+        angle = AngleBetweenPoints(basePos,targetPosition);
+        // Check if within limits.
+        expectedVisible = (angle > minAngle) and (angle < maxAngle) and (distance > minDistance) and (distance < maxDistance);
+        // If expected to be visible put on list.
+        if(expectedVisible)
+            visibleIds.push_back(MobileFieldObjectID(stat_obj_iterator->getID()));
+    }
+    return visibleIds;
+}
+
+std::string FieldObjects::toString(bool visibleOnly) const
+{
+    std::stringstream result;
+    result << "Timestamp: " << m_timestamp << std::endl;
+    result << std::endl << self.toString() << std::endl;
+    int printCount;
+
+    result << "Landmarks" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < stationaryFieldObjects.size(); i++)
+    {
+        if(visibleOnly and stationaryFieldObjects[i].isObjectVisible()==false) continue;
+        result << stationaryFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    result << std::endl << "Objects" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < mobileFieldObjects.size(); i++)
+    {
+        if(visibleOnly and mobileFieldObjects[i].isObjectVisible()==false) continue;
+        result << mobileFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    result << std::endl << "Ambiguous" << std::endl;
+    printCount = 0;
+    for(unsigned int i=0; i < ambiguousFieldObjects.size(); i++)
+    {
+        result << ambiguousFieldObjects[i].toString() << std::endl;
+        ++printCount;
+    }
+    if(printCount <= 0) result << "None" << std::endl;
+
+    return result.str();
+}
+
 std::ostream& operator<< (std::ostream& output, const FieldObjects& p_fob)
 {
     int size;
@@ -278,12 +424,24 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading stationary object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.stationaryFieldObjects[i];
     }
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading mobile object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.mobileFieldObjects[i];
     }
 
@@ -291,6 +449,12 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
     p_fob.ambiguousFieldObjects.resize(size);
     for(int i=0; i < size; i++)
     {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading ambiguous object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
         input >> p_fob.ambiguousFieldObjects[i];
     }
     return input;

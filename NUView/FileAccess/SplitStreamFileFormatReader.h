@@ -6,6 +6,8 @@
 #include "Localisation/Localisation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Localisation/LocWmFrame.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 #include <QDir>
 
 class SplitStreamFileFormatReader: public LogFileFormatReader
@@ -26,12 +28,19 @@ public:
     const NUSensorsData* GetSensorData();
     const Localisation* GetLocalisationData();
     const FieldObjects* GetObjectData();
+    const GameInformation* GetGameInfo();
+    const TeamInformation* GetTeamInfo();
 
     bool isNextFrameAvailable();
     bool isPreviousFrameAvailable();
     bool isFirstFrameAvailable();
     bool isLastFrameAvailable();
     bool isSetFrameAvailable();
+
+    static std::vector<QFileInfo> FindValidFiles(const QDir& directory);
+
+    std::vector<QFileInfo> AvailableLogFiles()const;
+    QStringList AvailableData() const;
 
 signals:
 
@@ -43,7 +52,6 @@ public slots:
     int setFrame(int frameNumber);
 
 protected:
-    std::vector<QFileInfo> FindValidFiles(const QDir& directory);
     std::vector<IndexedFileReader*> m_fileReaders;
     void setKnownDataTypes();
     StreamFileReader<NUImage> imageReader;
@@ -51,12 +59,16 @@ protected:
     StreamFileReader<Localisation> locwmReader;
     StreamFileReader<FieldObjects> objectReader;
     StreamFileReader<LocWmFrame> locmframeReader;
+    StreamFileReader<GameInformation> gameinfoReader;
+    StreamFileReader<TeamInformation> teaminfoReader;
     QDir m_directory;
     QStringList m_knownDataTypes;
     QString m_extension;
     QString m_primaryData;
     bool m_fileGood;
     bool m_dataIsSynced;
+    QStringList m_available_data;
+    std::vector<QFileInfo> m_open_files;
 };
 
 #endif // SPLITSTREAMFILEFORMATREADER_H

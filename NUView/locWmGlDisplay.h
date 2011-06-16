@@ -8,6 +8,7 @@ class Localisation;
 class FieldObjects;
 class Object;
 class StationaryObject;
+class NUSensorsData;
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -28,12 +29,22 @@ public slots:
     {
         currentLocalisation = newLocalisation;
         update();
-    };
+    }
+    void SetLocalLocalisation(const Localisation* newLocalisation)
+    {
+        localLocalisation = newLocalisation;
+        update();
+    }
     void setFieldObjects(const FieldObjects* newFieldObjects)
     {
         currentObjects = newFieldObjects;
         update();
-    };
+    }
+    void setSensorData(NUSensorsData* newSensorData)
+    {
+        currentSensorData = newSensorData;
+        update();
+    }
     /*!
       @brief Copy the current image displayed to the system clipboard.
       */
@@ -51,13 +62,25 @@ protected:
 
         bool loadTexture(QString fileName, GLuint* textureId);
 
+        void drawMarkers();
+        void drawObjects();
+        void drawOverlays();
+
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
+        void drawBallMarker(QColor markerColour, float x, float y);
         void drawRobot(QColor colour, float x, float y, float theta);
+        void drawRobotMarker(QColor colour, float x, float y, float theta);
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
 
-        void DrawModel(const KF& model);
-        void DrawLocalisation(const Localisation& localisation);
+        void DrawModelObjects(const KF& model, QColor& modelColor);
+        void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
+
+        void DrawModelMarkers(const KF& model, QColor& modelColor);
+        void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
+
+        void DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor);
+
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
 
@@ -73,7 +96,9 @@ protected:
         QPoint prevDragPos;
 
         const Localisation* currentLocalisation;
+        const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
+        NUSensorsData* currentSensorData;
 
         bool light;
         bool perspective;

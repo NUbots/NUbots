@@ -22,6 +22,9 @@ public:
     bool isNextFrameAvailable();
     bool isFirstFrameAvailable();
     bool isPreviousFrameAvailable();
+
+    std::vector<QFileInfo> AvailableLogFiles()const;
+    QStringList AvailableData() const;
 signals:
 
 public slots:
