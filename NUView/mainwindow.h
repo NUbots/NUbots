@@ -30,7 +30,7 @@ class frameInformationWidget;
 
 class NUPlatform;
 class NUBlackboard;
-class NUviewIO;
+class NUViewIO;
 
 namespace Ui
 {
@@ -106,7 +106,7 @@ private:
     virtualNUbot virtualRobot;
     NUPlatform* m_platform;
     NUBlackboard* m_blackboard;
-    NUviewIO* m_nuview_io;
+    NUViewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
 

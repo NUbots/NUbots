@@ -34,6 +34,9 @@
 #include <vector>
 class IndexedFileReader
 {
+
+public:
+
     // Declare types and structures used in class.
     typedef std::fstream::pos_type Position;
     struct FrameEntry
@@ -46,7 +49,7 @@ class IndexedFileReader
     typedef FileIndex::iterator IndexIterator;
     typedef FileIndex::value_type IndexEntry;
 
-public:
+
     IndexedFileReader();
     ~IndexedFileReader();
 
