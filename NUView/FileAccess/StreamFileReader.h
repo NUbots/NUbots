@@ -218,7 +218,7 @@ private:
                 timestamp = floor(timestamp);
                 if(HasTime(timestamp))
                 {
-                    qDebug("Found duplicate frame time: %d", timestamp);
+                    qDebug("File: %s - Found duplicate frame time: %d", m_filename.c_str(),timestamp);
                     continue;
                 }
                 temp.frameSequenceNumber++;
@@ -232,7 +232,6 @@ private:
 
     // Member variables
     C* m_dataBuffer;                    //!< Pointer to data buffer used to store the objects read.
-
 };
 
 #endif // STREAMFILEREADER_H
