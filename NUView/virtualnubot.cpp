@@ -82,7 +82,7 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     }
     else
     {
-        qDebug() << "Invalid Horizon Line Information" << horizondata.size() ;//<< horizondata[0]<< horizondata[1] <<horizondata[2];
+        //qDebug() << "Invalid Horizon Line Information" << horizondata.size() ;//<< horizondata[0]<< horizondata[1] <<horizondata[2];
         horizondata.push_back(0);
         horizondata.push_back(-320);
         horizondata.push_back(320);
@@ -114,9 +114,10 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 
     qDebug() <<"Body Pitch: " << bodyPitch << "\tBody Roll: " << bodyRoll << "\tHeadPitch:" << headPitch << "\tHeadYaw:" << headYaw;
     qDebug() << "Test: Horizon Information: " << testHorizonLine.getGradient() << "x + " << testHorizonLine.getYIntercept();
-    */
+
     qDebug() << "Horizon Information: " << horizonLine.getGradient() << "x + " << horizonLine.getYIntercept();
     qDebug() << horizonLine.getA() << "x + "<< horizonLine.getB() << "y + " << horizonLine.getC();
+    */
 
 }
 
