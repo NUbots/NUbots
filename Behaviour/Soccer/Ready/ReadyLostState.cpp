@@ -20,7 +20,7 @@
 */
 
 #include "ReadyLostState.h"
-#include "../ReadyState.h"
+#include "ReadyState.h"
 #include "ReadyLostStates.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -57,7 +57,7 @@ BehaviourState* ReadyLostState::nextStateCommons()
 
 BehaviourFSMState* ReadyLostState::nextState()
 {   // do state transitions in the ready machine
-    if (m_state == m_lost_spin and not m_field_objects->self.lost())
+    if (not m_field_objects->self.lost())
         return m_ready_state->m_move_state;
     return this;
 }

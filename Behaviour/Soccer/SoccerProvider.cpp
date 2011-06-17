@@ -21,14 +21,14 @@
 
 #include "SoccerProvider.h"
 
-#include "InitialState.h"
-#include "ReadyState.h"
-#include "SetState.h"
-#include "PlayingState.h"
-#include "FinishedState.h"
-#include "PenalisedState.h"
-/*#include "SubstituteState.h"
-#include "RequiresSubstituteState.h"*/
+#include "Initial/InitialState.h"
+#include "Ready/ReadyState.h"
+#include "Set/SetState.h"
+#include "Playing/PlayingState.h"
+#include "Finished/FinishedState.h"
+#include "Penalised/PenalisedState.h"
+/*#include "Substitute/SubstituteState.h"
+#include "Substitute/RequiresSubstituteState.h"*/
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -159,7 +159,7 @@ void SoccerProvider::doBehaviourCommons()
 
 /*! @brief Checks for state transitions that are common to all states in this behaviour provider
  
-        That is, the state is selcted via the game controler here.
+        That is, the state is selected via the game controler here.
  */
 BehaviourState* SoccerProvider::nextStateCommons()
 {

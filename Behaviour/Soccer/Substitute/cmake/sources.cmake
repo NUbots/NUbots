@@ -20,20 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  SoccerProvider.cpp SoccerProvider.h
-                SoccerState.h
-                SoccerFSMState.h
+SET (YOUR_SRCS  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Initial
-                Ready
-                Set
-                Playing
-                Penalised
-                Finished
-                Substitute
-)
+SET (YOUR_DIRS  )
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path

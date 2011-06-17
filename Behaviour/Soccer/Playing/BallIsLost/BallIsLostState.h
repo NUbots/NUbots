@@ -1,10 +1,8 @@
-/*! @file ReadyLostState.h
-    @brief Declaration of the ReadyLostState soccer state
+/*! @file BallIsLostState.h
+    @brief Declaration of the chase ball soccer state
  
-    @class ReadyLostState
-    @brief The ReadyLostState soccer state has two substates
-            - ReadyLostPan. In this state we stand still, and do a simple localisation pan
-            - ReadyLostSpin
+    @class BallIsLostState
+    @brief The chase ball soccer state
 
     @author Jason Kulk
  
@@ -24,30 +22,31 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef READY_LOST_STATE_H
-#define READY_LOST_STATE_H
+#ifndef BALL_IS_LOST_SOCCER_FSM_STATE_H
+#define BALL_IS_LOST_SOCCER_FSM_STATE_H
 
-#include "../SoccerFSMState.h"
+#include "../../SoccerFSMState.h"
 
-class ReadyState;
-class ReadyLostPan;
-class ReadyLostSpin;
+class BallIsLostPan;
+class BallIsLostSpin;
+class BallIsLostMove;
 
-class ReadyLostState : public SoccerFSMState
+class BallIsLostState : public SoccerFSMState
 {
 public:
-    ReadyLostState(ReadyState* parent);
-    ~ReadyLostState();
-protected:
+    BallIsLostState(SoccerFSMState* parent);
+    ~BallIsLostState();
+    BehaviourFSMState* nextState();
+private:
     void doStateCommons();
     BehaviourState* nextStateCommons();
-    BehaviourFSMState* nextState();
-    
-    ReadyState* m_ready_state;
-    friend class ReadyLostPan;
+protected:
+    friend class BallIsLostPan;
     BehaviourState* m_lost_pan;
-    friend class ReadyLostSpin;
+    friend class BallIsLostSpin;
     BehaviourState* m_lost_spin;
+    friend class BallIsLostMove;
+    BehaviourState* m_lost_move;
 };
 
 

@@ -24,6 +24,7 @@
 #ifndef BEHAVIOUR_POTENTIALS_H
 #define BEHAVIOUR_POTENTIALS_H
 
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -62,29 +63,45 @@ public:
      */
     static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
     {
+        static const float m_HYSTERESIS = 0.4;      // the fraction of hysteresis in the turning point toward the desired heading
+        static double m_previous_time = 0;          // the previous time in ms
+        static bool m_previous_turning = false;     // the previous turning state; used to implement hysteresis in the decision to turn around.
+        
+        if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
+        {
+            m_previous_turning = false;
+        }
+        
         vector<float> result(3,0);
-        if (distance < stoppeddistance and fabs(heading) < 0.1)         // if we are close --- enough stop
-            return result;
-        else
+        if (distance > stoppeddistance or fabs(heading) > 0.1)
         {
             // calculate the translational speed
             if (distance < stoppingdistance)
-                result[0] = distance/stoppingdistance;
+                result[0] = 0.95*pow(distance/stoppingdistance,2) + 0.05;
             else
                 result[0] = 1;
-            // 'calculate' the translational direction
+            
+            // calculate the translational direction
             result[1] = bearing;
+            
             // calculate the rotational speed
-            if (distance < turningdistance)
-            {
-                if (fabs(heading) > 2.5)
+            if (distance < turningdistance or (m_previous_turning and distance < (1+m_HYSTERESIS)*turningdistance))
+            {   // We use a bit of hysteresis in the turning point, once the turn has started its best to stick with it
+                if (fabs(heading) > 3)
                     heading = fabs(heading);
                 result[2] = 0.5*heading;
+                m_previous_turning = true;
             }
             else
+            {
                 result[2] = 0.5*bearing;
-            return result;
+                m_previous_turning = false;
+            }
         }
+        m_previous_time = Blackboard->Sensors->CurrentTime;
+        
+        debug << distance << "," << result[0] << "," << result[1] << "," << result[2] << endl;
+        return result;
     }
     
     /*! @brief Returns a vector to avoid a field state 
@@ -142,7 +159,6 @@ public:
             float y = ball_prediction[2];
             float distance = sqrt(x*x + y*y);
             float bearing = atan2(y,x);
-            float heading = ball.estimatedBearing();
             
             vector<float> speed = goToPoint(distance, bearing, 0, 0, 0, distance+9000);
             

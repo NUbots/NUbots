@@ -20,7 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  ReadyMoveState.cpp ReadyMoveState.h
+SET (YOUR_SRCS  ReadyState.cpp ReadyState.h
+                ReadyMoveState.cpp ReadyMoveState.h
                 ReadyMoveStates.h
                 ReadyLostState.cpp ReadyLostState.h
                 ReadyLostStates.h

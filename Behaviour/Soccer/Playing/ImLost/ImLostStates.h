@@ -1,5 +1,5 @@
-/*! @file ReadyLostStates.h
-    @brief Declaration of the robot is lost in ready states
+/*! @file ImLostStates.h
+    @brief Declaration of the robot is lost states
 
     @author Jason Kulk
  
@@ -19,11 +19,11 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef READY_LOST_STATES_H
-#define READY_LOST_STATES_H
+#ifndef IM_LOST_STATES_H
+#define IM_LOST_STATES_H
 
-#include "../SoccerState.h"
-#include "ReadyLostState.h"
+#include "../../SoccerState.h"
+#include "ImLostState.h"
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -36,30 +36,34 @@
 #include "debugverbositybehaviour.h"
 using namespace std;
 
-class ReadyLostSubState : public SoccerState
+class ImLostSubState : public SoccerState
 {
 public:
-    ReadyLostSubState(ReadyLostState* parent) : SoccerState(parent), m_parent_machine(parent) {};
-    virtual ~ReadyLostSubState() {};
+    ImLostSubState(ImLostState* parent) : SoccerState(parent), m_parent_machine(parent) {};
+    virtual ~ImLostSubState() {};
 protected:
-    ReadyLostState* m_parent_machine;
+    ImLostState* m_parent_machine;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------- ReadyLostPan
-/*! @class ReadyLostPan
+// ----------------------------------------------------------------------------------------------------------------------- ImLostPan
+/*! @class ImLostPan
     In this state we stop and do a wide localisation pan. When the pan is completed we move into a spin state.
  */
-class ReadyLostPan : public ReadyLostSubState
+class ImLostPan : public ImLostSubState
 {
 public:
-    ReadyLostPan(ReadyLostState* parent) : ReadyLostSubState(parent) 
+    ImLostPan(ImLostState* parent) : ImLostSubState(parent) 
     {
-        reset();
+        m_time_in_state = 0;
+        m_previous_time = 0;
+        m_pan_started = false;
+        m_pan_end_time = 0;
     }
-    ~ReadyLostPan() {};
+    ~ImLostPan() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the lost state machine
+        // we transition to the spin state when the pan is completed.
         if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent_machine->stateChanged())
             return m_parent_machine->m_lost_spin;
         else
@@ -68,20 +72,16 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostPan" << endl;
+            debug << "ImLostPan" << endl;
         #endif
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+        
+        // keep track of the time in this state
         if (m_parent_machine->stateChanged())
             reset();
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
-        
-        if (m_time_in_state < 500)
-            m_jobs->addMotionJob(new WalkJob(0.01, 0, 0));
-        else
-            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
-        
-        // keep track of the time in this state
         m_previous_time = m_data->CurrentTime;
         
         // grab the pan end time
@@ -94,9 +94,6 @@ protected:
 private:
     void reset()
     {
-        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostPan. Resetting" << endl;
-        #endif
         m_time_in_state = 0;
         m_pan_started = false;
         m_pan_end_time = 0;
@@ -107,19 +104,19 @@ private:
     double m_pan_end_time;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------- ReadyLostSpin
-/*! @class ReadyLostSpin
+// ----------------------------------------------------------------------------------------------------------------------- ImLostSpin
+/*! @class ImLostSpin
     In this state we spin on the spot and do the nod. After 1.25 revolutions we go back to the pan state.
  */
-class ReadyLostSpin : public ReadyLostSubState
+class ImLostSpin : public ImLostSubState
 {
 public:
-    ReadyLostSpin(ReadyLostState* parent) : ReadyLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    ImLostSpin(ImLostState* parent) : ImLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
     {
         m_time_in_state = 0;
         m_previous_time = 0;
     }
-    ~ReadyLostSpin() {};
+    ~ImLostSpin() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
@@ -131,7 +128,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostSpin" << endl;
+            debug << "ImLostSpin" << endl;
         #endif
         if (m_parent_machine->stateChanged())
             m_time_in_state = 0;
