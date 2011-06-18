@@ -157,6 +157,19 @@ void GameInformation::doGameControllerUpdate()
     }
 }
 
+/*! @brief Sends the 'alive' return packet to the game controller
+ *		   This function should be called about once a second
+ */
+void GameInformation::sendAlivePacket()
+{
+	m_currentReturnData->team = m_team_number;
+	m_currentReturnData->player = m_player_number;
+	m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_ALIVE;
+
+	if (m_port)
+		m_port->sendReturnPacket(m_currentReturnData);
+}
+
 /*! @brief Does a manual state change. The logic is simple if not in penalised then penalise, otherwise go to playing
  */
 void GameInformation::doManualStateChange()
