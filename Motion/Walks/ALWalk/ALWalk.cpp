@@ -52,6 +52,12 @@ ALWalk::ALWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, a
     m_al_config.arrayPush(m_al_param);
     m_al_motion->setMotionConfig(m_al_config);
     
+    // turn the fall protection off
+    m_al_param[0] = "ENABLE_FALL_MANAGEMENT_PROTECTION";
+    m_al_param[1] = false;
+    m_al_config.arrayPush(m_al_param);
+    m_al_motion->setMotionConfig(m_al_config);
+    
     // load and init the walk parameters
     m_walk_parameters.load("ALWalkNew");
     initALConfig();

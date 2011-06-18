@@ -188,7 +188,8 @@ private:
             m_timeIndex.clear();
             temp.frameSequenceNumber = 0;
             bool eofReached = false;
-            while (m_file.good() && ((m_fileEndLocation - m_file.tellg()) > sizeof(double)))
+            const unsigned int min_length = 12;
+            while (m_file.good() && ((m_fileEndLocation - m_file.tellg()) > min_length))
             {
                 int pos = m_file.tellg();
                 //qDebug("Indexing Frame %d at %d", temp.frameSequenceNumber, pos);

@@ -1,6 +1,5 @@
 #include "WalkingArm.h"
 
-
 using namespace Kinematics;
 using boost::shared_ptr;
 using namespace std;
@@ -16,9 +15,14 @@ WalkingArm::WalkingArm(const MetaGait * _gait,ChainID id)
 
 WalkingArm::~WalkingArm(){}
 
-
-
-
+/**
+ * Ticks the WalkingArm, which calculates the arm joint angles based on
+ * where the robot is in the step.
+ *
+ * @see getShoulderPitchAddition
+ * @param pointer to the current step
+ * @return arm joint stiffnesses and angles for current frame
+ */
 ArmJointStiffTuple WalkingArm::tick(shared_ptr<Step> supportStep){
     singleSupportFrames = supportStep->singleSupportFrames;
     doubleSupportFrames = supportStep->doubleSupportFrames;
@@ -34,7 +38,7 @@ ArmJointStiffTuple WalkingArm::tick(shared_ptr<Step> supportStep){
 	armStiffnesses[0] = gait->stiffness[WP::ARM_PITCH];
 
     frameCounter++;
-    for(unsigned int  i = 0; shouldSwitchStates() && i < 2; i++){
+    for(unsigned int i = 0; shouldSwitchStates() && i < 2; i++){
         switchToNextState();
         lastStepType = supportStep->type;
     };
@@ -42,9 +46,13 @@ ArmJointStiffTuple WalkingArm::tick(shared_ptr<Step> supportStep){
     return ArmJointStiffTuple(armJoints,armStiffnesses);
 }
 
-/*
- * Currently, the arms only move in the forward direction by modulating the
- * shoulderPitch
+/**
+ * Arms move in the forward direction by modulating the shoulder pitch. Arm position
+ * is determined by where we are (phase/percent complete) of the current step
+ *
+ * @todo investigate effects of also swinging elbow yaw
+ *
+ * @param pointer to the current step, for determining arm swing direction
  */
 const float WalkingArm::getShoulderPitchAddition(shared_ptr<Step> supportStep){
     float direction = 1.0f; //forward = negative

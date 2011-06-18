@@ -20,12 +20,18 @@
 
 #include "WalkingLeg.h"
 #include "NBInclude/COMKinematics.h"
+
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 using namespace std;
 
 using namespace Kinematics;
 using namespace NBMath;
 
 //#define DEBUG_WALKINGLEG
+//#define USE_COM_CONTROL
+
+//#define USE_COM_CONTROL
 
 WalkingLeg::WalkingLeg(boost::shared_ptr<Sensors> s,
                        const MetaGait * _gait,
@@ -42,7 +48,8 @@ WalkingLeg::WalkingLeg(boost::shared_ptr<Sensors> s,
      lastRotation(0.0f),odoUpdate(3,0.0f),
      leg_sign(id == LLEG_CHAIN ? 1 : -1),
      leg_name(id == LLEG_CHAIN ? "left" : "right"),
-     sensorAngles(_sensorAngles), sensorAngleX(0.0f), sensorAngleY(0.0f)
+     sensorAngles(_sensorAngles), sensorAngleX(0.0f), sensorAngleY(0.0f),
+     m_previous_contact(false)
 {
 #ifdef DEBUG_WALKING_LOCUS_LOGGING
     char filepath[100];
@@ -138,12 +145,10 @@ LegJointStiffTuple WalkingLeg::tick(boost::shared_ptr<Step> step,
 
     return result;
 }
-//#define SENSOR_SCALE 0.75f
-#define SENSOR_SCALE 0.0f
+
 LegJointStiffTuple WalkingLeg::swinging(ufmatrix3 fc_Transform){
     ufvector3 dest_f = CoordFrame3D::vector3D(cur_dest->x,cur_dest->y);
     ufvector3 src_f = CoordFrame3D::vector3D(swing_src->x,swing_src->y);
-
 
     ufvector3 dest_c = prod(fc_Transform,dest_f);
     ufvector3 src_c = prod(fc_Transform,src_f);
@@ -164,12 +169,11 @@ LegJointStiffTuple WalkingLeg::swinging(ufmatrix3 fc_Transform){
     //the progress towards the goal.
 
     //HORIZONTAL PROGRESS:
-    float percent_complete =
-		( static_cast<float>(frameCounter) /
-		  static_cast<float>(singleSupportFrames));
+	 const float percent_complete =
+        ( static_cast<float>(frameCounter) /
+          static_cast<float>(singleSupportFrames));
 
     float theta = percent_complete*2.0f*M_PI_FLOAT;
-    float stepHeight = gait->step[WP::STEP_HEIGHT];
     float percent_to_dest_horizontal = NBMath::cycloidx(theta)/(2.0f*M_PI_FLOAT);
 
     //Then we can express the destination as the proportionate distance to cover
@@ -189,30 +193,48 @@ LegJointStiffTuple WalkingLeg::swinging(ufmatrix3 fc_Transform){
     goal(1) = target_c_y;
     goal(2) = -gait->stance[WP::BODY_HEIGHT] + heightOffGround;
 
-
     vector<float> joint_result = finalizeJoints(goal);
 
     vector<float> stiff_result = getStiffnesses();
     return LegJointStiffTuple(joint_result,stiff_result);
 }
 
+/**
+  this method calculates the angles for this leg when it is on the
+  ground (i.e. the leg on the ground in single support, or either
+  leg in double support).  We calculate the goal based on the
+  comx,comy from the controller, and the given parameters using
+  inverse kinematics.
+*/
 LegJointStiffTuple WalkingLeg::supporting(ufmatrix3 fc_Transform){//float dest_x, float dest_y) {
-    /**
-       this method calculates the angles for this leg when it is on the ground
-       (i.e. the leg on the ground in single support, or either leg in double
-       support).
-       We calculate the goal based on the comx,comy from the controller,
-       and the given parameters using inverse kinematics.
-     */
     ufvector3 dest_f = CoordFrame3D::vector3D(cur_dest->x,cur_dest->y);
     ufvector3 dest_c = prod(fc_Transform,dest_f);
     float dest_x = dest_c(0);
     float dest_y = dest_c(1);
 
-    float physicalHipOffY = 0;
+    //HORIZONTAL PROGRESS:
+    const float percent_complete =
+        ( static_cast<float>(frameCounter) /
+          static_cast<float>(singleSupportFrames));
+
+	float com_height_adjustment = 0.0f;
+
+    // modulate our CoM height based on where we are in the step phase
+	// check bounds, so we don't do stupid things when the robot is stationary
+	// disabled for US Open 2011 until I can do more testing --Nathan @ 4/21/11
+	if (percent_complete >= 0.0f && percent_complete <= 1.0f) {
+		const float com_height_adjustment_max = -1.5f;
+		// sin maps [0, 1.0f] -> [0, 1]
+		com_height_adjustment = sin(percent_complete*M_PI_FLOAT)
+			* com_height_adjustment_max;
+
+		//cout << "percent complete: " << percent_complete << endl;
+//		cout << "height adjustment " << com_height_adjustment << endl;
+	}
+
     goal(0) = dest_x; //targetX for this leg
     goal(1) = dest_y;  //targetY
-    goal(2) = -gait->stance[WP::BODY_HEIGHT];         //targetZ
+    goal(2) = -gait->stance[WP::BODY_HEIGHT] - com_height_adjustment; //targetZ
 
     vector<float> joint_result = finalizeJoints(goal);
     vector<float> stiff_result = getStiffnesses();
@@ -223,10 +245,11 @@ LegJointStiffTuple WalkingLeg::supporting(ufmatrix3 fc_Transform){//float dest_x
 const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
     const float startStopSensorScale = getEndStepSensorScale();
 
-
-	//Center of mass control
+    //Center of mass control
+	// We don't do this here anymore, instead getCOMc is integrated into
+	// the preview controller. Don't turn this back on!
 #ifdef USE_COM_CONTROL
-	const float COM_SCALE = startStopSensorScale;
+    const float COM_SCALE = startStopSensorScale;
     const ufvector4 com_c = Kinematics::getCOMc(sensors->getMotionBodyAngles());
 #else
 	const float COM_SCALE = startStopSensorScale;
@@ -242,10 +265,8 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
     const boost::tuple <const float, const float > sensorCompensation =
         sensorAngles->getAngles(startStopSensorScale);
 
-    const float bodyAngleX = sensorAngleX =
-        sensorCompensation.get<SensorAngles::X>();
-    const float bodyAngleY = sensorAngleY = gait->stance[WP::BODY_ROT_Y] +
-        sensorCompensation.get<SensorAngles::Y>();
+    const float bodyAngleX = sensorAngleX = sensorCompensation.get<SensorAngles::X>();
+    const float bodyAngleY = sensorAngleY = gait->stance[WP::BODY_ROT_Y] + sensorCompensation.get<SensorAngles::Y>();
 
     //Hack
     const boost::tuple <const float, const float > ankleAngleCompensation =
@@ -254,22 +275,18 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
     const float footAngleX = ankleAngleCompensation.get<0>();
     const float footAngleY = ankleAngleCompensation.get<1>();
     const float footAngleZ = getFootRotation_c()
-        + leg_sign*gait->stance[WP::LEG_ROT_Z]*0.5;
+        + static_cast<float>(leg_sign) * gait->stance[WP::LEG_ROT_Z] * 0.5f;
 
     const ufvector3 bodyOrientation = CoordFrame3D::vector3D(bodyAngleX,
-                                                       bodyAngleY, 0.0f);
+															 bodyAngleY, 0.0f);
     const ufvector3 footOrientation = CoordFrame3D::vector3D(footAngleX,
                                                              footAngleY,
                                                              footAngleZ);
-
-
 
     const ufvector3 bodyGoal =
 		CoordFrame3D::vector3D( -com_c(0)*COM_SCALE,
 								-com_c(1)*COM_SCALE,
 								COM_Z_OFF*COM_SCALE);
-
-
     IKLegResult result =
         Kinematics::legIK(chainID,comFootGoal,footOrientation,
                           bodyGoal,bodyOrientation);
@@ -281,18 +298,17 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
 
 }
 
-const boost::tuple <const float, const float > 
+const boost::tuple <const float, const float >
 WalkingLeg::getAnkleAngles(){
   if(state != SWINGING){
     return boost::tuple<const float, const float>(0.0f,0.0f);
   }
-  
+
   const float angle = static_cast<float>(frameCounter)/
     static_cast<float>(singleSupportFrames)*M_PI_FLOAT;
 
   const float scale = std::sin(angle);
 
-  
   const float ANKLE_LIFT_ANGLE = swing_dest->stepConfig[WP::FOOT_LIFT_ANGLE]*scale;
 
   return boost::tuple<const float, const float>(0.0f,ANKLE_LIFT_ANGLE);
@@ -361,7 +377,7 @@ const float WalkingLeg::getFootRotation(){
 const float WalkingLeg::getFootRotation_c(){
     const float abs_rot =  std::abs(getFootRotation());
 
-    const float rot_rel_c = abs_rot*0.5*leg_sign;
+    const float rot_rel_c = abs_rot * 0.5f * static_cast<float>(leg_sign);
 
     return rot_rel_c;
 
@@ -516,7 +532,8 @@ WalkingLeg::getAnglesFromGoal(const ChainID chainID,
         const ufvector3 foot_orientation =
             CoordFrame3D::vector3D(0.0f,
                                    0.0f,
-                                   sign*stance[WP::LEG_ROT_Z]*0.5);
+                                   static_cast<float>(sign) *
+                                   stance[WP::LEG_ROT_Z]*0.5f);
         const ufvector3 body_goal =
             CoordFrame3D::vector3D(0.0f,0.0f,0.0f);
 
@@ -577,20 +594,38 @@ SupportMode WalkingLeg::nextState(){
 }
 
 //Decides if time is up for the current state
-bool WalkingLeg::shouldSwitchStates(){
-    switch(state){
+bool WalkingLeg::shouldSwitchStates()
+{
+    bool shouldswitch = false;
+    // NUbots: Im going to had a hack in here to switch states when the foot hits the ground
+    // ie go from SWINGING to DOUBLE_SUPPORT when the contact occurs on this foot
+    bool contact = false;
+    if (leg_name.compare("left") == 0)
+        Blackboard->Sensors->getContact(NUSensorsData::LFoot, contact);
+    else if (leg_name.compare("right") == 0)
+        Blackboard->Sensors->getContact(NUSensorsData::RFoot, contact);
+    
+    switch(state)
+    {
     case SUPPORTING:
-        return frameCounter >= singleSupportFrames;
+        shouldswitch = frameCounter >= singleSupportFrames;
+        break;
     case SWINGING:
-        return frameCounter >= singleSupportFrames;
+        if (contact and frameCounter - singleSupportFrames < 15)
+            shouldswitch = true;
+        else if (frameCounter >= singleSupportFrames)
+            shouldswitch = true;
+        break;
     case DOUBLE_SUPPORT:
-        return frameCounter >= doubleSupportFrames;
+        shouldswitch = frameCounter >= doubleSupportFrames;
+        break;
     case PERSISTENT_DOUBLE_SUPPORT:
-        return frameCounter >= doubleSupportFrames;
+        shouldswitch = frameCounter >= doubleSupportFrames;
+        break;
     }
 
-    throw "Non existent state";
-    return false;
+    m_previous_contact = contact;
+    return shouldswitch;
 }
 
 void WalkingLeg::switchToNextState(){
@@ -652,14 +687,14 @@ void WalkingLeg::debugProcessing(){
 #ifdef DEBUG_WALKING_LOCUS_LOGGING
     static float ttime= 0.0f;
     fprintf(locus_log,"%f\t%f\t%f\t%f\t%d\n",ttime,goal(0),goal(1),goal(2),state);
-    ttime += MotionConstants::MOTION_FRAME_LENGTH_S;
+    ttime += MOTION_FRAME_LENGTH_S;
 #endif
 #ifdef DEBUG_WALKING_DEST_LOGGING
     static float stime= 0.0f;
     fprintf(dest_log,"%f\t%f\t%f\t%f\t%f\t%d\n",stime,
             cur_dest->x,cur_dest->y,
             swing_src->x,swing_src->y,state);
-    stime += MotionConstants::MOTION_FRAME_LENGTH_S;
+    stime += MOTION_FRAME_LENGTH_S;
 #endif
 #ifdef DEBUG_WALKING_SENSOR_LOGGING
     static float sentime= 0.0f;
@@ -673,6 +708,6 @@ void WalkingLeg::debugProcessing(){
             sensorAngleX,sensorAngleY,
             inertial.angleX,inertial.angleY,
             state);
-    sentime += MotionConstants::MOTION_FRAME_LENGTH_S;
+    sentime += MOTION_FRAME_LENGTH_S;
 #endif
 }

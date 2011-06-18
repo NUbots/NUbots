@@ -26,6 +26,11 @@
 #include "NBInclude/Kinematics.h"
 #include "NBInclude/InverseKinematics.h"
 
+#include "motionconfig.h" // for cmake set debugging flags like MOTION_DEBUG
+#ifdef DEBUG_MOTION
+#  define WALK_DEBUG
+#endif
+
 #include "MotionConstants.h"
 
 
@@ -36,11 +41,11 @@ enum SupportMode{
     PERSISTENT_DOUBLE_SUPPORT
 };
 
+// Shoulder pitch, Shoulder roll, Elbow yaw, Elbow roll
 static const float LARM_WALK_ANGLES[Kinematics::ARM_JOINTS] =
-{M_PI_FLOAT/2.0f, .15f, -M_PI_FLOAT/2.0f, 0.2f};
+{M_PI_FLOAT/2.0f, 0.15f, -M_PI_FLOAT/2.0f, 0.0f};
 static const float RARM_WALK_ANGLES[Kinematics::ARM_JOINTS] =
-{M_PI_FLOAT/2.0f, -.15f, M_PI_FLOAT/2.0f, 0.2f};
-
+{M_PI_FLOAT/2.0f, -0.15f, M_PI_FLOAT/2.0f, 0.0f};
 
 //Sensitivity to new walk vectors -- currently 0, giving maximum sensitivity
 //when a new vector differs by more than these constants, the internal

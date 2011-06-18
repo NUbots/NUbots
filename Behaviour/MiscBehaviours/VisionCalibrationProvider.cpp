@@ -29,6 +29,11 @@
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/ChaseBall/ChaseBallProvider.h"
 
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUImage/NUImage.h"
+#include "Vision/ClassificationColours.h"
+#include "nubotdataconfig.h"
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
@@ -36,10 +41,16 @@ using namespace std;
 
 VisionCalibrationProvider::VisionCalibrationProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
+    LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
+    currentLookupTable = LUTBuffer;
+    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    
     m_selection_index = 0;
     m_num_motions = 5;
     m_saving_images = false;
     m_chase_ball = NULL;
+    isStart = 0;
+    lastSpoken = 0;
 }
 
 
@@ -81,17 +92,44 @@ void VisionCalibrationProvider::doBehaviour()
 
 void VisionCalibrationProvider::doSelectedMotion()
 {
+    //STIFF HEAD at ZERO
     if (m_selection_index == 0)
     {
-        m_actions->add(NUActionatorsData::Head, m_current_time, 0, 50);
-        m_jobs->addMotionJob(new WalkJob(0,0,0));
+        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50.0);
+        
+        if (isStart < 50)
+        {
+            m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
+            isStart++;
+        }
+        else
+        {
+            m_jobs->addMotionJob(new WalkJob(0,0,0));
+        }
         //! @todo TODO: If we are not standing up, then we should stand up (probably need a stand-up job, or set the walk speed non-zero for a little bit)
     }
+    //NO STIFFNESS
     else if (m_selection_index == 1)
     {
         vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
-        m_actions->add(NUActionatorsData::Head, m_current_time, 0, 0);
+        m_actions->add(NUActionatorsData::Head, m_current_time, zero, 0);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
+        if(m_current_time - lastSpoken > 10000)
+        {
+            lastSpoken = m_current_time;
+            //CLASSIFY WHOLE IMAGE:
+            
+            int unclassifiedCounter = classifyImage();
+            //CALCULATE PERCENTAGE CLASSIFIED:
+            //DONE IN VISION
+            float percentage = ((Blackboard->Image->getTotalPixels() - unclassifiedCounter) / (Blackboard->Image->getTotalPixels()*1.00) ) * 100.00;
+            //SAY PERCENTAGE:
+            sayPercentageClassified(percentage);
+            
+        }
+        
+            
     }
     else if (m_selection_index == 2)
     {
@@ -111,8 +149,72 @@ void VisionCalibrationProvider::doSelectedMotion()
     }
 }
  
-
+void VisionCalibrationProvider::sayPercentageClassified(float percentage)
+{
+	int tens = int(floor(fabs(percentage) /10.0));
+	int units = int(fabs(percentage) - tens*10);
+	
+	string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
+	string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
+	string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
+	if(tens == 1)
+	{
+		m_actions->add(NUActionatorsData::Sound, m_current_time, teen_numbers[units]  + ".wav");
+		return;
+	}
+	if(tens == 0)
+	{
+		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
+		return;
+	}
+	if(units == 0 && tens !=0)
+	{
+		m_actions->add(NUActionatorsData::Sound, m_current_time, ten_numbers[tens] + ".wav");
+		return;
+	}
+	if(units == 0 && tens == 0)
+	{
+		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
+		return;
+	}
+	vector<string> sounds (2);
+	sounds[0] = ten_numbers[tens] + ".wav";
+	sounds[1] = unit_numbers[units] + ".wav";
+	m_actions->add(NUActionatorsData::Sound, m_current_time, sounds);
+	
+	return;
+}
                              
+void VisionCalibrationProvider::loadLUTFromFile(const std::string& fileName)
+{
+    LUTTools lutLoader;
+    if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+        currentLookupTable = LUTBuffer;
+    else
+        errorlog << "Behaviour::VisionCalibration::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+}
+
+int VisionCalibrationProvider::classifyImage()
+{
+    int unclassifiedCounter = 0;
+    int width = Blackboard->Image->getWidth();
+    int height = Blackboard->Image->getHeight();
+
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            NUImage* image = Blackboard->Image;
+            Pixel temp = image->m_image[y][x];
+            unsigned char classifiedPixel = currentLookupTable[LUTTools::getLUTIndex(temp)];
+            if(classifiedPixel  == ClassIndex::unclassified || temp.y < 50)
+            {
+                unclassifiedCounter++;
+            }
+        }
+    }
+    return unclassifiedCounter;
+}
     
 
 

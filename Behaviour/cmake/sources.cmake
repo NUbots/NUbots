@@ -36,6 +36,7 @@ SET (YOUR_DIRS  Soccer
                 Kicker
                 PassingChallenge
                 RoboPedestrian
+				CameraCalibration
                 EnvironmentalEmotions
 )
 IF(${TARGET_ROBOT} STREQUAL BEAR)

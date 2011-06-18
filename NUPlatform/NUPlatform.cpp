@@ -24,6 +24,7 @@
 #include "NUCamera.h"
 
 #include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Motion/Tools/MotionFileTools.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -65,6 +66,9 @@ NUPlatform::NUPlatform()
     m_actionators = NULL;
     m_sensors = NULL;
     Platform = this;
+    
+    m_frames_zero_count = 0;
+    m_frames_dropped_count = 0;
 }
 
 NUPlatform::~NUPlatform()
@@ -384,15 +388,18 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
                 debug << "NUPlatform::process(): Processing a camera job." << endl;
             #endif
             
-            if( settings.exposure == -1 ||
-                settings.contrast == -1 ||
-                settings.gain     == -1 )
+            if( settings.p_exposure.get() == 0 &&
+                settings.p_contrast.get() == 0 &&
+                settings.p_gain.get()     == 0 )
             {
                 #if DEBUG_NUPLATFORM_VERBOSITY > 4
                     debug << "NUPlatform::Process - Send CAMERASETTINGS Request Recieved: " << endl;
                 #endif
                 JobList toSendList;
                 ChangeCameraSettingsJob newJob(m_camera->getSettings());
+                #if DEBUG_NUPLATFORM_VERBOSITY > 4
+                    debug << "About to send: " << m_camera->getSettings();
+                #endif
                 toSendList.addCameraJob(&newJob);
                 (*m_io) << toSendList;
                 toSendList.clear();
@@ -417,6 +424,42 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
 void NUPlatform::displayBatteryState()
 {
     // by default there really isn't any standard way to display the battery state
+}
+
+/*! @brief Checks the sensors for common errors. This is function is very platform dependent. */
+void NUPlatform::verifySensors()
+{
+}
+
+/*! @brief Checks that vision is running ok 
+    @brief framesdropped the number of frames dropped per second since the last call
+    @brief framesprocessed the number of frames processed per second since the last call
+ */
+void NUPlatform::verifyVision(int framesdropped, int framesprocessed)
+{
+    // check to see if all of the frames were dropped
+    if (framesdropped >= framesprocessed and framesprocessed >= 1)
+        m_frames_dropped_count++;
+    else
+        m_frames_dropped_count = 0;
+    
+    // check to see if no frames were processed
+    if (framesprocessed < 1)
+        m_frames_zero_count++;
+    else
+        m_frames_zero_count = 0;
+    
+    if (m_frames_dropped_count >= 5)
+    {
+        Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_unknown.wav");
+        m_frames_dropped_count = 0;
+    }
+    
+    if (m_frames_zero_count >= 5)
+    {
+        Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_frozen_vision.wav");
+        m_frames_zero_count = 0;
+    }
 }
 
 /*! @brief Sets one of the 8 platform dependent leds to the given value at the given time

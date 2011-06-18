@@ -24,7 +24,7 @@
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
-#include "NUviewIO/NUviewIO.h"
+#include "NUViewIO/NUViewIO.h"
 
 #include "frameInformationWidget.h"
 
@@ -34,7 +34,7 @@ ofstream errorlog;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    qDebug() << "NUview is starting in: MainWindow.cpp";
+    qDebug() << "NUView is starting in: MainWindow.cpp";
     debug.open("debug.log");
     errorlog.open("error.log");
 
@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_blackboard->add(new GameInformation(0, 0));
     m_blackboard->add(new TeamInformation(0, 0));
     
-    m_nuview_io = new NUviewIO();
+    m_nuview_io = new NUViewIO();
 
     // create mdi workspace
     mdiArea = new QMdiArea(this);
@@ -114,11 +114,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     createConnections();
     setCentralWidget(mdiArea);
     qDebug() << "Main Window Starting";
-    setWindowTitle(QString("NUview"));
+    setWindowTitle(QString("NUView"));
     glManager.clearAllDisplays();
     qDebug() << "Display Cleared";
     readSettings();
     qDebug() << "Main Window Started";
+
+    //glManager.writeWMBallToDisplay(100,100,30,GLDisplay::CalGrid);
+    glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    //
+    //glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    //
 }
 
 MainWindow::~MainWindow()
@@ -340,7 +346,7 @@ void MainWindow::createStatusBar()
 {
         statusBar = new QStatusBar;
         this->setStatusBar(statusBar);
-        this->statusBar->showMessage("Welcome to NUview!",10000);
+        this->statusBar->showMessage("Welcome to NUView!",10000);
 }
 
 void MainWindow::createConnections()
@@ -434,7 +440,7 @@ void MainWindow::openLog(const QString& fileName)
     /*
     if (!fileName.isEmpty()){
         this->fileName = fileName;
-        setWindowTitle(QString("NUview - ") + fileName);
+        setWindowTitle(QString("NUView - ") + fileName);
         glManager.clearAllDisplays();
         totalFrameNumber = virtualRobot.openFile(fileName);
         QString message = "Opening File: ";
@@ -520,7 +526,7 @@ void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
     const QList<QHostAddress> &addresses = hostInfo.addresses();
 
     if (hostInfo.error() != QHostInfo::NoError) {
-        qWarning(QString("Lookup failed: %1").arg(hostInfo.errorString()).toAscii());
+        qWarning("Lookup failed: %s", hostInfo.errorString().toAscii().constData());
         return;
     }
 
@@ -545,7 +551,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::readSettings()
 {
-    QSettings settings("NUbots", "NUview");
+    QSettings settings("NUbots", "NUView");
     qDebug() <<"Start Reading Settings";
     // Restore the main window.
     settings.beginGroup("mainWindow");
@@ -588,7 +594,7 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-    QSettings settings("NUbots", "NUview");
+    QSettings settings("NUbots", "NUView");
 
     // Save the main window setting
     settings.beginGroup("mainWindow");
@@ -655,11 +661,11 @@ void MainWindow::openLUT()
 void  MainWindow::filenameChanged(QString filename)
 {
     if(!filename.isEmpty()){
-        setWindowTitle(QString("NUview - ") + filename);
+        setWindowTitle(QString("NUView - ") + filename);
     }
     else
     {
-        setWindowTitle(QString("NUview"));
+        setWindowTitle(QString("NUView"));
     }
 }
 
@@ -713,7 +719,7 @@ QMdiSubWindow* MainWindow::createGLDisplay()
     if(getNumMdiWindowType("GLDisplay") <= 1)
     {
         LogReader.setFrame(LogReader.currentFrame());
-    }
+    }    
     return window;
 }
 

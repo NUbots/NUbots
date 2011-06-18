@@ -21,7 +21,7 @@ NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(wi
     }
 }
 
-NUImage::NUImage(const NUImage& source): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
+NUImage::NUImage(const NUImage& source): TimestampedData(), m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
 {
     m_image = 0;
     int sourceWidth = source.getWidth();

@@ -67,6 +67,9 @@
  * @author George Slavov
  * @date Jan 7 2009
  * @updated August 2009
+ *
+ * @author Nathan Merritt
+ * @updated November 2010
  */
 
 #ifndef _StepGenerator_h_DEFINED
@@ -90,13 +93,16 @@
 #include "NBInclude/Sensors.h"
 #include "NBInclude/NBMatrixMath.h"
 #include "ZmpEKF.h"
-#include "ZmpAccEKF.h"
+#include "ZmpAccExp.h"
 
 //Debugging flags:
-#ifdef WALK_DEBUG
-#  define DEBUG_CONTROLLER_COM
+//#ifdef WALK_DEBUG
+//#  define DEBUG_CONTROLLER_COM
 #  define DEBUG_SENSOR_ZMP
-#endif
+//#endif
+
+// ZMP Preview Queue Debugging
+#define DEBUG_ZMP_REF
 
 typedef boost::tuple<const std::list<float>*,
                      const std::list<float>*> zmp_xy_tuple;
@@ -117,9 +123,10 @@ public:
     WalkLegsTuple tick_legs();
     WalkArmsTuple tick_arms();
 
-    bool isDone() { return done; }
+    bool isDone() const { return done; }
 
     void setSpeed(const float _x, const float _y, const float _theta);
+	void setDestination(const float rel_x, const float rel_y, const float rel_theta);
     void takeSteps(const float _x, const float _y, const float _theta,
                    const int _numSteps);
 
@@ -136,10 +143,9 @@ public:
 
 private: // Helper methods
     zmp_xy_tuple generate_zmp_ref();
-    void generate_steps();
 
     void findSensorZMP();
-    float scaleSensors(const float sensorZMP, const float perfectZMP);
+    float scaleSensors(const float sensorZMP, const float perfectZMP) const;
 
     void swapSupportLegs();
 
@@ -147,7 +153,7 @@ private: // Helper methods
                       float _theta);
     void fillZMP(const boost::shared_ptr<Step> newStep );
     void fillZMPRegular(const boost::shared_ptr<Step> newStep );
-    void fillZMPEnd(const boost::shared_ptr<Step> newStep );
+    void fillZMPEnd(const boost::shared_ptr<Step> newStep);
 
     void resetSteps(const bool startLeft);
 
@@ -164,7 +170,7 @@ private: // Helper methods
     void resetOdometry(const float initX, const float initY);
     void updateOdometry(const std::vector<float> &deltaOdo);
     void debugLogging();
-    void updateDebugMatrix();
+    void update_FtoI_transform();
 private:
     // Walk vector:
     //  * x - forward
@@ -179,7 +185,7 @@ private:
 
     SensorAngles sensorAngles;
 
-    NBMath::ufvector3 com_i,last_com_c,com_f,est_zmp_i;
+    NBMath::ufvector3 com_i,joints_com_i,last_com_c,com_f,est_zmp_i;
     //boost::numeric::ublas::vector<float> com_f;
     // need to store future zmp_ref values (points in xy)
     std::list<float> zmp_ref_x, zmp_ref_y;
@@ -208,16 +214,16 @@ private:
     //that are being sent to the WalkingLegs
     //Translation matrix to transfer points in the non-changing 'i'
     //coord. frame into points in the 'f' coord frame
+	//We also maintain their inverses
     NBMath::ufmatrix3 if_Transform;
+	NBMath::ufmatrix3 fi_Transform;
     NBMath::ufmatrix3 fc_Transform;
+	NBMath::ufmatrix3 cf_Transform;
     NBMath::ufmatrix3 cc_Transform; //odometry
 
     boost::shared_ptr<Sensors> sensors;
     const MetaGait *gait;
     bool nextStepIsLeft;
-    // HACK: this variable holds the number of frames we have to wait before
-    //       we can start walking (NUM_PREVIEW_FRAMES).
-    int waitForController;
 
     WalkingLeg leftLeg, rightLeg;
     WalkingArm leftArm, rightArm;
@@ -227,16 +233,18 @@ private:
     WalkController *controller_x, *controller_y;
 
     ZmpEKF zmp_filter;
-    ZmpAccEKF acc_filter;
+	ZmpAccExp acc_filter;
 
     NBMath::ufvector4 accInWorldFrame;
 
 #ifdef DEBUG_CONTROLLER_COM
     FILE* com_log;
-    NBMath::ufmatrix3 fi_Transform;
 #endif
 #ifdef DEBUG_SENSOR_ZMP
     FILE* zmp_log;
+#endif
+#ifdef DEBUG_ZMP_REF
+	FILE* zmp_ref_log;
 #endif
 
 };

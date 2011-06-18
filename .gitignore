@@ -26,20 +26,21 @@ Autoconfig/*
 *parameters.wp
 
 # ignore Qt builds
-/NUview/debug/*
-/NUview/release/*
+/NUView/debug/*
+/NUView/release/*
 *.Debug
 *.Release
-/NUview/Makefile
-/NUview/NUview.pro.user
-/NUview/NU*.app
-/NUview/moc_*
-/NUview/autosave.lut
-/NUview/qrc_icons.cpp
-/NUview/qrc_textures.cpp
-/NUview/diagona/*.*
-/NUview/NUview
-/NUview-build-desktop/*
+/NUView/Makefile
+/NUView/NUView.pro.user
+/NUView/NU*.app
+/NUView/moc_*
+/NUView/autosave.lut
+/NUView/qrc_icons.cpp
+/NUView/qrc_textures.cpp
+/NUView/diagona/*.*
+/NUView/NUview
+/NUView-build-desktop/*
+/Extracted/*
 
 # Ignore our data file formats
 *.lut

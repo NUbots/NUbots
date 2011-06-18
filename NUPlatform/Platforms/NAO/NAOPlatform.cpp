@@ -48,6 +48,10 @@ NAOPlatform::NAOPlatform()
     m_battery_state_previous_time = 0;
     m_battery_voiced_time = 0;
     
+    m_bad_foot_sensor_count = 0;
+    m_bad_ultrasonic_count = 0;
+    m_heat_count = 0;
+    
     m_eye_indices = vector<vector<float> >(4, vector<float>(2,0));
     m_eye_indices[0][0] = 0;
     m_eye_indices[0][1] = 7;
@@ -132,6 +136,51 @@ void NAOPlatform::displayBatteryState()
     }
     
     m_battery_state_previous_time = currenttime;
+}
+
+/*! @brief Verifys that the sensors are operating properly. In particular, the foot sensors and ultrasonics are checked. */
+void NAOPlatform::verifySensors()
+{
+    // check foot sensors are changing
+    float lf,rf;
+    bool f_valid = Blackboard->Sensors->getForce(NUSensorsData::LFoot, lf);
+    f_valid &= Blackboard->Sensors->getForce(NUSensorsData::RFoot, rf);
+    
+    if (f_valid)
+    {
+        if (lf == m_previous_lfoot_force or rf == m_previous_rfoot_force)
+            m_bad_foot_sensor_count++;
+        else
+            m_bad_foot_sensor_count = 0;
+        
+        m_previous_lfoot_force = lf;
+        m_previous_rfoot_force = rf;
+    }
+    
+    if (m_bad_foot_sensor_count >= 5)
+    {
+        Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_foot_sensors.wav");
+        m_bad_foot_sensor_count = 0;
+    }
+    
+    // check ultrasonics for invalid readings
+    vector<float> lu,ru;
+    bool u_valid = Blackboard->Sensors->getDistance(NUSensorsData::LDistance, lu);
+    u_valid = Blackboard->Sensors->getDistance(NUSensorsData::RDistance, ru);
+    
+    if (u_valid and not lu.empty() and not ru.empty())
+    {
+        if (lu[0] <= 2 or ru[0] <= 2)
+            m_bad_ultrasonic_count++;
+        else
+            m_bad_ultrasonic_count = 0;
+    }
+    
+    if (m_bad_ultrasonic_count >= 5)
+    {
+        Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_ultrasonic_sensors.wav");
+        m_bad_ultrasonic_count = 0;
+    }
 }
 
 /*! @brief Sets one of the eight eye quarters to the given (time,value)

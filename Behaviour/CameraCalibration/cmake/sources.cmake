@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -20,30 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NBWalk.cpp NBWalk.h
-		BaseFreezeCommand.cpp BaseFreezeCommand.h
-		BodyJointCommand.cpp BodyJointCommand.h
-		NullProvider.cpp NullProvider.h
-		NullBodyProvider.h
-		WalkProvider.cpp WalkProvider.h
-		Step.cpp Step.h
-		StepGenerator.cpp StepGenerator.h
-		Gait.cpp Gait.h
-		AbstractGait.cpp AbstractGait.h
-		MetaGait.cpp MetaGait.h
-        WalkingLeg.cpp WalkingLeg.h
-	    WalkingArm.cpp WalkingArm.h
-		Observer.cpp Observer.h
-		SensorAngles.cpp SensorAngles.h
-		SpringSensor.cpp SpringSensor.h
-		ZmpEKF.cpp ZmpEKF.h
-        ZmpExp.cpp ZmpExp.h
-		ZmpAccEKF.cpp ZmpAccEKF.h
-		ZmpAccExp.cpp ZmpAccExp.h
+SET (YOUR_SRCS  CameraCalibrationProvider.cpp CameraCalibrationProvider.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS NBInclude
+SET (YOUR_DIRS  
 )
 ####################################################################################
 
