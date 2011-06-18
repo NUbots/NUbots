@@ -31,8 +31,8 @@ public:
     ~NAOPlatform();
     
     // NAO specific functions
-    void displayBatteryState();
-    void verifySensors();
+    bool displayBatteryState();
+    bool verifySensors();
     void add(const LedIndices& led, double time, const vector<float>& value);
     void toggle(const LedIndices& led, double time, const vector<float>& value);
     

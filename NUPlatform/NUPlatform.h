@@ -94,9 +94,9 @@ public:
     void process(JobList* jobs, NUIO* m_io);
     
     // Platform dependent functions
-    virtual void displayBatteryState();
-    virtual void verifySensors();
-    virtual void verifyVision(int framesdropped, int framesprocessed);
+    virtual bool displayBatteryState();
+    virtual bool verifySensors();
+    virtual bool verifyVision(int framesdropped, int framesprocessed);
     virtual void add(const LedIndices& led, double time, const vector<float>& value);
     virtual void toggle(const LedIndices& led, double time, const vector<float>& value);
     

@@ -48,7 +48,7 @@
 /*! @brief Constructs the sense->move thread
  */
 
-WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogThread"), 2000, 0)
+WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogThread"), 1000, 0)
 {
     #if DEBUG_VERBOSITY > 0
         debug << "WatchDogThread::WatchDogThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
@@ -67,10 +67,12 @@ WatchDogThread::~WatchDogThread()
 void WatchDogThread::periodicFunction()
 {
 	Blackboard->GameInfo->sendAlivePacket();
-    Platform->displayBatteryState();
-    Platform->verifySensors();
+    bool ok = Platform->displayBatteryState();
+    ok &= Platform->verifySensors();
 
     #ifdef USE_VISION
-        Platform->verifyVision(1000.0*m_nubot->m_vision->getNumFramesDropped()/m_period, 1000.0*m_nubot->m_vision->getNumFramesProcessed()/m_period);
+        ok &= Platform->verifyVision(1000.0*m_nubot->m_vision->getNumFramesDropped()/m_period, 1000.0*m_nubot->m_vision->getNumFramesProcessed()/m_period);
     #endif
+    if (not ok)
+        Blackboard->GameInfo->requestForPickup();
 }

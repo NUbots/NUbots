@@ -421,21 +421,23 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
 
 /*! @brief Displays the battery's state in the standard way for this platform
  */
-void NUPlatform::displayBatteryState()
+bool NUPlatform::displayBatteryState()
 {
     // by default there really isn't any standard way to display the battery state
+    return true;
 }
 
 /*! @brief Checks the sensors for common errors. This is function is very platform dependent. */
-void NUPlatform::verifySensors()
+bool NUPlatform::verifySensors()
 {
+    return true;
 }
 
 /*! @brief Checks that vision is running ok 
     @brief framesdropped the number of frames dropped per second since the last call
     @brief framesprocessed the number of frames processed per second since the last call
  */
-void NUPlatform::verifyVision(int framesdropped, int framesprocessed)
+bool NUPlatform::verifyVision(int framesdropped, int framesprocessed)
 {
     // check to see if all of the frames were dropped
     if (framesdropped >= framesprocessed and framesprocessed >= 1)
@@ -449,17 +451,21 @@ void NUPlatform::verifyVision(int framesdropped, int framesprocessed)
     else
         m_frames_zero_count = 0;
     
-    if (m_frames_dropped_count >= 5)
+    bool ok = true;
+    if (m_frames_dropped_count >= 10)
     {
         Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_unknown.wav");
         m_frames_dropped_count = 0;
+        ok = false;
     }
     
-    if (m_frames_zero_count >= 5)
+    if (m_frames_zero_count >= 10)
     {
         Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_frozen_vision.wav");
         m_frames_zero_count = 0;
+        ok = false;
     }
+    return ok;
 }
 
 /*! @brief Sets one of the 8 platform dependent leds to the given value at the given time

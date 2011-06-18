@@ -81,6 +81,7 @@ public:
     friend GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data);
     void process(RoboCupGameControlData* data);
     void sendAlivePacket();
+    void requestForPickup();
 
     // Manual game control
     void doManualStateChange();
