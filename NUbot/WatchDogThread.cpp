@@ -26,6 +26,7 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
 #ifdef USE_VISION
     #include "Vision/Vision.h"
@@ -65,6 +66,7 @@ WatchDogThread::~WatchDogThread()
 
 void WatchDogThread::periodicFunction()
 {
+	Blackboard->GameInfo->sendAlivePacket();
     Platform->displayBatteryState();
     Platform->verifySensors();
 

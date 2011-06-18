@@ -80,6 +80,7 @@ public:
     void addNetworkPort(GameControllerPort* port);
     friend GameInformation& operator<< (GameInformation& info, RoboCupGameControlData* data);
     void process(RoboCupGameControlData* data);
+    void sendAlivePacket();
 
     // Manual game control
     void doManualStateChange();
