@@ -66,6 +66,22 @@ GameInformation::RobotState GameInformation::getCurrentState() const
     return m_state;
 }
 
+/*! @brief Returns the reason the robot is penalised */
+int GameInformation::getPenaltyReason() const
+{
+    const RobotInfo* info = getMyRobotInfo();
+    if (info)
+        return info->penalty;
+    else
+        return PENALTY_NONE;
+}
+
+/*! @brief Returns true if this robot is currently a substitute */
+bool GameInformation::amIASubstitute() const
+{
+    return getPenaltyReason() == PENALTY_SPL_SUBSTITUTE;
+}
+
 /*! @brief Returns true if the game controller is working */
 bool GameInformation::gameControllerWorking() const
 {
@@ -129,32 +145,44 @@ int GameInformation::opponentScore() const
         return 0;
 }
 
+/*! @brief Returns the number of players on my team that are penalised */
+int GameInformation::getNumberOfPlayersPenalised() const
+{
+    return getPenaltyReasons().size();
+}
+
+/*! @brief Returns a list containing the penalty reasons for each that is penalised 
+           The list is formatted as [[playernumber, reason], [playernumber, reason], ...]
+ */
+vector<vector<int> > GameInformation::getPenaltyReasons() const
+{
+    vector<vector<int> > result;
+    const TeamInfo* team = getMyTeamInfo();
+    if(team)
+    {
+        for (int i=0; i<MAX_NUM_PLAYERS; i++)
+        {
+            if (team->players[i].penalty != PENALTY_NONE)
+            {
+                vector<int> num_reason;
+                num_reason.push_back(i+1);
+                num_reason.push_back(team->players[i].penalty);
+                result.push_back(num_reason);
+            }
+        }
+    }
+    return result;
+}
+
 /*! @brief Updates the GameInformation based on the m_currentControlData (ie. sets m_state)
  */
 void GameInformation::doGameControllerUpdate()
 {
-    if (m_state == SubstituteState)
-    {   // we don't listen to game controller if we are a subsitute player
-        return;
-    }
-    else if (m_state == RequiresSubstitutionState)
-    {   // if we are in the requires substitution state we are do penalty, finish, initial
-        const RobotInfo* info = getMyRobotInfo();
-        if (info and info->penalty != PENALTY_NONE)
-            m_state = PenalisedState;
-        else if (m_currentControlData->state == InitialState || m_currentControlData->state == FinishedState)
-        {
-            m_state = static_cast<RobotState>(m_currentControlData->state); 
-        }
-    }
+    const RobotInfo* info = getMyRobotInfo();
+    if (info and info->penalty != PENALTY_NONE)
+        m_state = PenalisedState;
     else
-    {   // in other states we always do what the game controller says
-        const RobotInfo* info = getMyRobotInfo();
-        if (info and info->penalty != PENALTY_NONE)
-            m_state = PenalisedState;
-        else
-            m_state = static_cast<RobotState>(m_currentControlData->state);
-    }
+        m_state = static_cast<RobotState>(m_currentControlData->state);
 }
 
 /*! @brief Sends the 'alive' return packet to the game controller
@@ -176,7 +204,7 @@ void GameInformation::requestForPickup()
 {
 	m_currentReturnData->team = m_team_number;
 	m_currentReturnData->player = m_player_number;
-	m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_REQUEST_PICKUP;
+	m_currentReturnData->message = GAMECONTROLLER_RETURN_MSG_REQUEST_FOR_SUBSTITUTION;
     
 	if (m_port)
 		m_port->sendReturnPacket(m_currentReturnData);
@@ -226,7 +254,7 @@ const RobotInfo* GameInformation::getRobotInfo(int teamNumber, int playerNumber)
     const TeamInfo* team = getTeamInfo(teamNumber);
     if(team)
     {
-        if((playerNumber > getNumberOfPlayers()) || (playerNumber <= 0))
+        if((playerNumber > MAX_NUM_PLAYERS) || (playerNumber <= 0))
             return 0;
         else
             return &team->players[playerNumber-1];
@@ -293,12 +321,6 @@ std::string GameInformation::stateName(RobotState theState)
             break;
         case PenalisedState:
             stateName = "Penalised";
-            break;
-        case SubstituteState:
-            stateName = "Sustitute";
-            break;
-        case RequiresSubstitutionState:
-            stateName = "Requires Substitution";
             break;
         default:
             stateName = "Unknown";

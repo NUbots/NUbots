@@ -47,9 +47,7 @@ public:
         SetState = STATE_SET,
         PlayingState = STATE_PLAYING,
         FinishedState = STATE_FINISHED,
-        PenalisedState,
-        SubstituteState,
-        RequiresSubstitutionState
+        PenalisedState
     };
     enum TeamColour
     {
@@ -65,6 +63,8 @@ public:
     int getTeamNumber() const;
     TeamColour getTeamColour() const;
     RobotState getCurrentState() const;
+    int getPenaltyReason() const;
+    bool amIASubstitute() const;
     
     // Game Information
     bool gameControllerWorking() const;
@@ -75,6 +75,8 @@ public:
     int secondsRemaining() const;
     int ourScore() const;      
     int opponentScore() const;   
+    int getNumberOfPlayersPenalised() const;
+    vector<vector<int> > getPenaltyReasons() const;
     
     // GameController packets
     void addNetworkPort(GameControllerPort* port);

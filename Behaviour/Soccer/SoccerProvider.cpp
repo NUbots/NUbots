@@ -27,8 +27,6 @@
 #include "Playing/PlayingState.h"
 #include "Finished/FinishedState.h"
 #include "Penalised/PenalisedState.h"
-/*#include "Substitute/SubstituteState.h"
-#include "Substitute/RequiresSubstituteState.h"*/
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -54,8 +52,6 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     m_playing = new PlayingState(this);
     m_finished = new FinishedState(this);
     m_penalised = new PenalisedState(this);
-    /*m_substitute = new SubstituteState(this);
-    m_requires_substitution = new RequiresSubstituteState(this);*/
     
     m_state = m_initial;
     
@@ -78,8 +74,6 @@ SoccerProvider::~SoccerProvider()
     delete m_playing;
     delete m_finished;
     delete m_penalised;
-    /*delete m_substitute;
-    delete m_requires_substitution;*/
 }
 
 /*! @brief Performs behaviour that is common to all states in the soccer behaviour provider
@@ -186,13 +180,7 @@ BehaviourState* SoccerProvider::nextStateCommons()
             break;
         case GameInformation::PenalisedState:
             return m_penalised;
-            break;/*
-        case GameInformation::SubstituteState:
-            return m_substitute;
             break;
-        case GameInformation::RequiresSubstitutionState:
-            return m_requires_substitution;
-            break;*/
         default:
             break;
     }

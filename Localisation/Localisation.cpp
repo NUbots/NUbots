@@ -382,7 +382,7 @@ bool Localisation::CheckGameState()
         return false;
     }
     
-    if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState or current_state == GameInformation::SubstituteState)
+    if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState)
     {   // if we are in initial, finished, penalised or substitute states do not do localisation
         m_previous_game_state = current_state;
         m_previously_incapacitated = currently_incapacitated;

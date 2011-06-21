@@ -32,7 +32,6 @@ SET (YOUR_DIRS  Initial
                 Playing
                 Penalised
                 Finished
-                Substitute
 )
 ####################################################################################
 

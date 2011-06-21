@@ -47,8 +47,6 @@ public:
     BehaviourState* m_playing;
     BehaviourState* m_finished;
     BehaviourState* m_penalised;
-    BehaviourState* m_substitute;
-    BehaviourState* m_requires_substitution;
     
     vector<float> m_led_white;
     vector<float> m_led_red;
