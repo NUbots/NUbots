@@ -38,9 +38,13 @@ Autoconfig/*
 /NUView/qrc_icons.cpp
 /NUView/qrc_textures.cpp
 /NUView/diagona/*.*
-/NUView/NUview
+/NUView/NUView
 /NUView-build-desktop/*
 /Extracted/*
+/NUView/debug/*
+/NUView/release/*
+/NUView/Makefile
+/NUView/NUView.pro.user
 
 # Ignore our data file formats
 *.lut
