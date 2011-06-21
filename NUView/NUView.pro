@@ -25,7 +25,11 @@ win32 {
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
 }
-!macx:LIBS += -ldns_sd
+!macx{
+    !win32{
+        LIBS += -ldns_sd
+    }
+}
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -158,18 +162,21 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
     ../Tools/Profiling/Profiler.h \
-    ConnectionManager/ConnectionManager.h \
-    ConnectionManager/BonjourProvider.h \
-    ConnectionManager/BonjourServiceBrowser.h \
-    ConnectionManager/BonjourServiceResolver.h \
-    ConnectionManager/NUHostInfo.h \
-    ConnectionManager/RobotSelectDialog.h \
     MotionWidgets/WalkParameterWidget.h \
     MotionWidgets/KickWidget.h \
     MotionWidgets/MotionFileEditor.h \
     MotionWidgets/MotionFileSyntaxHighlighter.h \
     ../Motion/Walks/WalkParameters.h \
     ../Tools/Optimisation/Parameter.h
+
+!win32 {
+    HEADERS +=     ConnectionManager/ConnectionManager.h \
+    ConnectionManager/BonjourProvider.h \
+    ConnectionManager/BonjourServiceBrowser.h \
+    ConnectionManager/BonjourServiceResolver.h \
+    ConnectionManager/NUHostInfo.h \
+    ConnectionManager/RobotSelectDialog.h
+}
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -269,16 +276,19 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
     ../Tools/Profiling/Profiler.cpp \
-    ConnectionManager/ConnectionManager.cpp \
-    ConnectionManager/BonjourProvider.cpp \
-    ConnectionManager/BonjourServiceBrowser.cpp \
-    ConnectionManager/BonjourServiceResolver.cpp \
-    ConnectionManager/RobotSelectDialog.cpp \
     MotionWidgets/WalkParameterWidget.cpp \
     MotionWidgets/KickWidget.cpp \
     MotionWidgets/MotionFileEditor.cpp \
     MotionWidgets/MotionFileSyntaxHighlighter.cpp \
     ../Motion/Walks/WalkParameters.cpp \
     ../Tools/Optimisation/Parameter.cpp
+
+!win32{
+    ConnectionManager/ConnectionManager.cpp \
+    ConnectionManager/BonjourProvider.cpp \
+    ConnectionManager/BonjourServiceBrowser.cpp \
+    ConnectionManager/BonjourServiceResolver.cpp \
+    ConnectionManager/RobotSelectDialog.cpp
+}
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc

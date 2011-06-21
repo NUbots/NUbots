@@ -19,10 +19,10 @@
 #include <QColorDialog>
 
 #include <typeinfo>
-#include "GLDisplay.h"
+#include "../GLDisplay.h"
 
 #include "Infrastructure/Jobs/Jobs.h"
-#include "NUViewIO/NUViewIO.h"
+#include "../NUViewIO/NUViewIO.h"
 #include "debug.h"
 
 KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)

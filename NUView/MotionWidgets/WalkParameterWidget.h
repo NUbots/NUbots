@@ -26,7 +26,7 @@
 #ifndef WALKPARAMETERWIDGET_H
 #define WALKPARAMETERWIDGET_H
 
-#include "ConnectionManager/NUHostInfo.h"
+#include "../ConnectionManager/NUHostInfo.h"
 class MotionFileEditor;
 
 #include <QtGui>
