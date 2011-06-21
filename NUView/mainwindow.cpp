@@ -460,6 +460,7 @@ void MainWindow::createConnections()
     connect(&virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(edgeFilterChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(fftChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
+    connect(&virtualRobot,SIGNAL(fieldObjectsChanged(FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
 
     // Connect Statistics for Classification
     connect(&virtualRobot,SIGNAL(updateStatistics(float *)),classification,SLOT(updateStatistics(float *)));
