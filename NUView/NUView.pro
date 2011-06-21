@@ -25,7 +25,11 @@ win32 {
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
 }
-!macx:LIBS += -ldns_sd
+!macx{
+    !win32{
+        LIBS += -ldns_sd
+    }
+}
 
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
@@ -158,12 +162,6 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
     ../Tools/Profiling/Profiler.h \
-    ConnectionManager/ConnectionManager.h \
-    ConnectionManager/BonjourProvider.h \
-    ConnectionManager/BonjourServiceBrowser.h \
-    ConnectionManager/BonjourServiceResolver.h \
-    ConnectionManager/NUHostInfo.h \
-    ConnectionManager/RobotSelectDialog.h \
     MotionWidgets/WalkParameterWidget.h \
     MotionWidgets/KickWidget.h \
     MotionWidgets/MotionFileEditor.h \
@@ -180,6 +178,16 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/LogRecorder.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h
+
+!win32 {
+    HEADERS +=     ConnectionManager/ConnectionManager.h \
+    ConnectionManager/BonjourProvider.h \
+    ConnectionManager/BonjourServiceBrowser.h \
+    ConnectionManager/BonjourServiceResolver.h \
+    ConnectionManager/NUHostInfo.h \
+    ConnectionManager/RobotSelectDialog.h
+}
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -280,11 +288,6 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
     ../Tools/Profiling/Profiler.cpp \
-    ConnectionManager/ConnectionManager.cpp \
-    ConnectionManager/BonjourProvider.cpp \
-    ConnectionManager/BonjourServiceBrowser.cpp \
-    ConnectionManager/BonjourServiceResolver.cpp \
-    ConnectionManager/RobotSelectDialog.cpp \
     MotionWidgets/WalkParameterWidget.cpp \
     MotionWidgets/KickWidget.cpp \
     MotionWidgets/MotionFileEditor.cpp \
@@ -297,4 +300,13 @@ SOURCES += mainwindow.cpp \
     GameInformationDisplayWidget.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp
+
+!win32{
+    SOURCES+= ConnectionManager/ConnectionManager.cpp \
+    ConnectionManager/BonjourProvider.cpp \
+    ConnectionManager/BonjourServiceBrowser.cpp \
+    ConnectionManager/BonjourServiceResolver.cpp \
+    ConnectionManager/RobotSelectDialog.cpp
+}
+    
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc

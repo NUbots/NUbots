@@ -20,10 +20,12 @@
  */
 
 #include "WalkParameterWidget.h"
-#include "ConnectionManager/ConnectionManager.h"
+#ifndef WIN32
+    #include "ConnectionManager/ConnectionManager.h"
+#endif
 #include "MotionFileEditor.h"
 
-#include "NUViewIO/NUViewIO.h"
+#include "../NUViewIO/NUViewIO.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkParametersJob.h"
 
@@ -36,9 +38,9 @@ WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *par
 {
     setObjectName(tr("Walk"));
     setWindowTitle(tr("Walk"));
-    
-    connect(ConnectionMan, SIGNAL(newHosts(vector<NUHostInfo>)), this, SLOT(onNewHost(vector<NUHostInfo>)));
-
+    #ifndef WIN32
+        connect(ConnectionMan, SIGNAL(newHosts(vector<NUHostInfo>)), this, SLOT(onNewHost(vector<NUHostInfo>)));
+    #endif
     //m_job_list = new JobList();
     
     m_select_file_button = new QPushButton("Open");

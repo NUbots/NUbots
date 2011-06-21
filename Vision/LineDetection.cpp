@@ -1653,7 +1653,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         }
     }
 
-
+/*
     if ( (cornerPoints.size() > 8 || cornerPointsOnScreen > 5) && closeGoalSeen == false )                  //********  this filters out center circle. only a count 0f 2 is checked.
     {
         //PERFORM ELIPSE FIT HERE!
@@ -1856,7 +1856,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         }
 
     }
-
+*/
 
         //qDebug() << "Before Decoding Lines: ";
         /*

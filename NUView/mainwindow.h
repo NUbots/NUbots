@@ -23,7 +23,9 @@
 
 class QMdiArea;
 class QMdiSubWindow;
-class ConnectionManager;
+#ifndef WIN32
+    class ConnectionManager;
+#endif
 class LayerSelectionWidget;
 class WalkParameterWidget;
 class KickWidget;

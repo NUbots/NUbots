@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "ConnectionManager/ConnectionManager.h"
+
+#ifndef WIN32
+    #include "ConnectionManager/ConnectionManager.h"
+#endif
+
 #include "LayerSelectionWidget.h"
 #include "camerasettingswidget.h"
 #include "MotionWidgets/WalkParameterWidget.h"
@@ -388,10 +392,12 @@ void MainWindow::createToolBars()
     navigationToolbar->addAction(lastFrameAction);
     navigationToolbar->setObjectName(tr("navigationToolbar"));
 
+    #ifndef WIN32
     // Connection Toolbar
     connectionToolBar = addToolBar("Connection");
     connectionToolBar->addWidget(new ConnectionManager(this));
     connectionToolBar->setObjectName("connectionToolbar");
+    #endif
 }
 
 void MainWindow::createStatusBar()
