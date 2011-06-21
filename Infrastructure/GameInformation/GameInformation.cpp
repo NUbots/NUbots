@@ -379,12 +379,6 @@ std::string stateToString(int state)
     case GameInformation::PenalisedState:
         result = "Penalised";
         break;
-    case GameInformation::SubstituteState:
-        result = "Substitute";
-        break;
-    case GameInformation::RequiresSubstitutionState:
-        result = "Requires Substitution";
-        break;
     default:
         result = "Unknown";
     }
