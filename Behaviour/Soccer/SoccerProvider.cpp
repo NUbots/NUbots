@@ -64,7 +64,7 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     m_led_red = m_led_off; m_led_red[0] = 1;
     m_led_green = m_led_off; m_led_green[1] = 1;
     m_led_blue = m_led_off; m_led_blue[2] = 1;
-    m_led_orange = m_led_off; m_led_orange[0] = 1; m_led_orange[1] = 0.64;
+    m_led_orange = m_led_off; m_led_orange[0] = 1; m_led_orange[1] = 0.3;
     m_led_yellow = m_led_off; m_led_yellow[0] = 1; m_led_yellow[1] = 1;
 }
 
@@ -83,6 +83,15 @@ SoccerProvider::~SoccerProvider()
 }
 
 /*! @brief Performs behaviour that is common to all states in the soccer behaviour provider
+ 
+    The rules specify the following:
+        - the left foot led mush display the team colour 
+ 
+    The right eye indicate the following:
+        - top sector whether the the robot is lost, or the ball is lost
+        - botton sector whether the ball is visible
+        - left sector whether a yellow post is visible
+        - right sector whether a blu post is visible
  */
 void SoccerProvider::doBehaviourCommons()
 {
@@ -149,6 +158,8 @@ void SoccerProvider::doBehaviourCommons()
 }
 
 /*! @brief Checks for state transitions that are common to all states in this behaviour provider
+ 
+        That is, the state is selcted via the game controler here.
  */
 BehaviourState* SoccerProvider::nextStateCommons()
 {

@@ -26,8 +26,8 @@ Autoconfig/*
 *parameters.wp
 
 # ignore Qt builds
-/NUview/debug/*
-/NUview/release/*
+/NUView/debug/*
+/NUView/release/*
 *.Debug
 *.Release
 /NUView/Makefile
