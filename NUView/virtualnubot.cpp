@@ -549,6 +549,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     vision.AllFieldObjects->postProcess(image->m_timestamp);
     qDebug() << image->m_timestamp ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
+    emit fieldObjectsChanged(vision.AllFieldObjects);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
 
     //SUMMARY:
