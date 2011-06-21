@@ -167,7 +167,17 @@ HEADERS += ui_mainwindow.h \
     MotionWidgets/MotionFileEditor.h \
     MotionWidgets/MotionFileSyntaxHighlighter.h \
     ../Motion/Walks/WalkParameters.h \
-    ../Tools/Optimisation/Parameter.h
+    ../Tools/Optimisation/Parameter.h \
+    ../Tools/Math/FieldCalculations.h \
+    ../NUPlatform/NUSensors/OdometryEstimator.h \
+    OfflineLocalisation.h \
+    ObjectDisplayWidget.h \
+    TeamInformationDisplayWidget.h \
+    GameInformationDisplayWidget.h \
+    ../Infrastructure/TeamInformation/TeamInformation.h \
+    ../Tools/FileFormats/LogRecorder.h \
+    ../Tools/FileFormats/FileFormatException.h \
+    offlinelocalisationdialog.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -177,6 +187,7 @@ HEADERS += ui_mainwindow.h \
     ConnectionManager/NUHostInfo.h \
     ConnectionManager/RobotSelectDialog.h
 }
+
 SOURCES += mainwindow.cpp \
     main.cpp \
     connectionwidget.cpp \
@@ -274,6 +285,7 @@ SOURCES += mainwindow.cpp \
     LUTGlDisplay.cpp \
     ../Vision/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
+    ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
     ../Tools/Profiling/Profiler.cpp \
     MotionWidgets/WalkParameterWidget.cpp \
@@ -281,10 +293,16 @@ SOURCES += mainwindow.cpp \
     MotionWidgets/MotionFileEditor.cpp \
     MotionWidgets/MotionFileSyntaxHighlighter.cpp \
     ../Motion/Walks/WalkParameters.cpp \
-    ../Tools/Optimisation/Parameter.cpp
+    ../Tools/Optimisation/Parameter.cpp \
+    OfflineLocalisation.cpp \
+    ObjectDisplayWidget.cpp \
+    TeamInformationDisplayWidget.cpp \
+    GameInformationDisplayWidget.cpp \
+    ../Tools/FileFormats/LogRecorder.cpp \
+    offlinelocalisationdialog.cpp
 
 !win32{
-    ConnectionManager/ConnectionManager.cpp \
+    SOURCES+= ConnectionManager/ConnectionManager.cpp \
     ConnectionManager/BonjourProvider.cpp \
     ConnectionManager/BonjourServiceBrowser.cpp \
     ConnectionManager/BonjourServiceResolver.cpp \

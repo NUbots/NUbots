@@ -172,7 +172,7 @@ protected:
     virtual bool belongsToGroup(const id_t& member, const id_t& group);
     virtual bool belongsToGroup(const string& name, const id_t& group);
     
-    vector<int>& mapIdToIndices(const id_t& id);
+    const vector<int>& mapIdToIndices(const id_t& id) const;
     
     // debug tools
     void printMap(ostream& output);

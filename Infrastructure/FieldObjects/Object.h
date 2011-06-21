@@ -73,7 +73,7 @@ class Object
         int ScreenY() const {return imagePosition.y;}
         int getObjectWidth() const {return sizeOnScreen.x;}
         int getObjectHeight() const {return sizeOnScreen.y;}
-
+        std::string toString() const;
         /*!
         @brief Output streaming operation.
         @param output The output stream.

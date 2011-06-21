@@ -335,14 +335,14 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
 /*! @brief Returns a list of indices into m_sensors/m_actionators so that the sensors/actionators under id can be accessed
     @param id the id of the sensor/actionator(s) to get the indicies for
  */
-vector<int>& NUData::mapIdToIndices(const id_t& id)
+const vector<int>& NUData::mapIdToIndices(const id_t& id) const
 {
     return m_id_to_indices[id.Id];
 }
 
 vector<NUData::id_t*> NUData::mapIdToIds(const id_t& id)
 {
-    vector<int>& indicies = mapIdToIndices(id);
+    const vector<int>& indicies = mapIdToIndices(id);
     vector<id_t*> ids;
     ids.reserve(indicies.size());
     for (size_t i=0; i<indicies.size(); i++)

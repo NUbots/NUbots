@@ -1,5 +1,5 @@
 #include "StationaryObject.h"
-
+#include <sstream>
 StationaryObject::StationaryObject(const Vector2<float>& initialFieldLocation, int id, const std::string& initName):
         Object(id, initName),
         fieldLocation(initialFieldLocation)
@@ -24,6 +24,14 @@ StationaryObject::StationaryObject(const StationaryObject& otherObject):
 StationaryObject::~StationaryObject()
 {
 
+}
+
+std::string StationaryObject::toString() const
+{
+    std::stringstream result;
+    result << Object::toString();
+    result << "Location: (" << fieldLocation.x << "," << fieldLocation.y << ")" << std::endl;
+    return result.str();
 }
 
 std::ostream& operator<< (std::ostream& output, const StationaryObject& p_stat)

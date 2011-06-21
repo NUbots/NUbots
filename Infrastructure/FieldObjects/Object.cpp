@@ -1,5 +1,6 @@
 //OBJECT.cpp
 #include "Object.h"
+#include <sstream>
 
 Object::Object(int initID, const std::string& initName):
         ID(initID),
@@ -125,6 +126,20 @@ void Object::updateEstimatedRelativeVariables(float distance, float bearing, flo
         estimatedRelativeLocation[2] = elevation;
 }
 
+
+std::string Object::toString() const
+{
+    std::stringstream result;
+
+    result << "ID: " << ID << std::endl;
+    result << "Name: " << name << std::endl;
+    result << "Visible: " << (isVisible ? "True" : "False") << std::endl;
+    if(isVisible)
+    {
+        result << "Measured Position (Relative): (" << measuredRelativePosition.x << "," << measuredRelativePosition.y << "," << measuredRelativePosition.z << ")" << std::endl;
+    }
+    return result.str();
+}
 
 std::ostream& operator<< (std::ostream& output, const Object& p_obj)
 {

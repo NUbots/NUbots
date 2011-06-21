@@ -85,6 +85,7 @@ protected:
     std::fstream m_file;                //!< The file.
     Position m_fileEndLocation;         //!< The end position of the file.
     IndexIterator m_selectedFrame;      //!< Reference to the currently selected frame in the FileIndex.
+    std::string m_filename;             //!< The name of the open file.
 };
 
 #endif // FILEREADER_H

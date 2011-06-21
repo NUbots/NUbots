@@ -11,6 +11,7 @@ class NUSensorsData;
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
+#include <sstream>
 
 // Debug output level
 // 0 - No messages
@@ -19,6 +20,8 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
+#define LOC_SUMMARY 1
+
 class Localisation: public TimestampedData
 {
 	public:
@@ -26,15 +29,15 @@ class Localisation: public TimestampedData
         Localisation(const Localisation& source);
         ~Localisation();
     
-        void process(NUSensorsData* data, FieldObjects* fobs, GameInformation* gameInfo, TeamInformation* teamInfo);
+        void process(NUSensorsData* data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo);
         //! TODO: Require robots state to be sent to enable smart model resetting.
         //! TODO: Need to add shared packets.
 	
         void feedback(double*);
         double feedbackPosition[3];
-        void ProcessObjects();
-        bool varianceCheck(int modelID);
-        int varianceCheckAll();
+        void ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::SharedBall>& sharedballs, float time_increment);
+        bool varianceCheck(int modelID, FieldObjects* fobs);
+        int varianceCheckAll(FieldObjects* fobs);
         void ResetAll();
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
@@ -69,9 +72,9 @@ class Localisation: public TimestampedData
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float theta);
-        bool CheckGameState();
-        void doInitialReset();
-        void doSetReset();
+        bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
+        void doInitialReset(GameInformation::TeamColour team_colour);
+        void doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff);
         void doPenaltyReset();
         void doBallOutReset();
         void doFallenReset();
@@ -80,6 +83,11 @@ class Localisation: public TimestampedData
         void setupModelSd(int modelNumber, float sdx, float sdy, float sdheading);
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
+
+        std::string frameLog() const
+        {
+            return m_frame_log.str();
+        }
 
         /*!
         @brief Output streaming operation.
@@ -104,12 +112,6 @@ class Localisation: public TimestampedData
         static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         KF m_tempModel;
         KF m_models[c_MAX_MODELS];
-    
-        // local pointers to the public store
-        NUSensorsData* m_sensor_data;
-        FieldObjects* m_objects;
-        GameInformation* m_game_info;
-        TeamInformation* m_team_info;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file
@@ -123,8 +125,8 @@ class Localisation: public TimestampedData
         // Game state memory
         bool m_previously_incapacitated;
         GameInformation::RobotState m_previous_game_state;
+        std::stringstream m_frame_log;
         
-        float m_odomForward, m_odomLeft, m_odomTurn;
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;
@@ -138,7 +140,6 @@ class Localisation: public TimestampedData
         static const float R_obj_range_relative;
         static const float centreCircleBearingError;
         static const float sdTwoObjectAngle;
-	void measureLocalization(double,double,double);
 };
 
 #endif

@@ -3,8 +3,13 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
+#include <vector>
+#include <QFileInfo>
 #include "LogFileFormatReader.h"
 class NUSensorsData;
+class TeamInformation;
+class GameInformation;
 
 class LogFileReader : public QObject
 {
@@ -14,12 +19,15 @@ public:
     ~LogFileReader();
     int openFile(QString fileName);
     bool closeFile();
-    int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;};
-    int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;};
+    int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;}
+    int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;}
 
-    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();};
-    const NUImage* GetRawImage(){return currentFileReader->GetImageData();};
-    const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();};
+    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();}
+    const NUImage* GetRawImage(){return currentFileReader->GetImageData();}
+    const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();}
+    FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();}
+    const GameInformation* GetGameInfo(){return currentFileReader->GetGameInfo();}
+    const TeamInformation* GetTeamInfo(){return currentFileReader->GetTeamInfo();}
 
     bool nextFrameAvailable()
     {
@@ -30,6 +38,22 @@ public:
     {
         return currentFrame() > 0;
     }
+
+    std::vector<QFileInfo> AvailableLogFiles()
+    {
+        if(currentFileReader)
+            return currentFileReader->AvailableLogFiles();
+        else
+            return std::vector<QFileInfo>();
+    }
+    QStringList AvailableData()
+    {
+        if(currentFileReader)
+            return currentFileReader->AvailableData();
+        else
+            return QStringList("None");
+    }
+
 
 signals:
     // Signals to trigger available controls
@@ -42,8 +66,14 @@ signals:
     void rawImageChanged(const NUImage*);
     void sensorDataChanged(const float*, const float*, const float*);
     void sensorDataChanged(NUSensorsData*);
+    void ObjectDataChanged(const FieldObjects*);
+    void TeamInfoChanged(const TeamInformation*);
+    void GameInfoChanged(const GameInformation*);
     void frameChanged(int,int);
     void cameraChanged(int);
+    void AvailableDataChanged(QStringList);
+    void OpenLogFilesChanged(std::vector<QFileInfo>);
+
 
     void fileOpened(QString);
     void fileClosed();

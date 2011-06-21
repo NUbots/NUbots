@@ -3,6 +3,7 @@
 #include "MobileObject.h"
 #include "Tools/Math/General.h"
 #include "debug.h"
+#include <sstream>
 using namespace mathGeneral;
 
 
@@ -367,6 +368,15 @@ std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const Mo
         
         return CalculatePositionBetweenMobileObjectAndGoal(mobileobject, goalpost, distancefrommobile);
     }
+}
+
+std::string Self::toString() const
+{
+    std::stringstream result;
+    result << "Name: Self" << std::endl;
+    result << "Location: (" << WorldModelLocation.x << "," << WorldModelLocation.y << "," << WorldModelLocation.z << ")" << std::endl;
+    result << "Location Error: (" << WorldModelLocationError.x << "," << WorldModelLocationError.y << "," << WorldModelLocationError.z << ")" << std::endl;
+    return result.str();
 }
 
 std::ostream& operator<< (std::ostream& output, const Self& p_self)

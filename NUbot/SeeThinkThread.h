@@ -26,6 +26,7 @@
 #define SEETHINK_THREAD_H
 
 #include "Tools/Threading/ConditionalThread.h"
+#include "Tools/FileFormats/LogRecorder.h"
 #include <vector>
 #include <fstream>
 
@@ -43,7 +44,7 @@ protected:
     void run();  
 private:
     NUbot* m_nubot;
-    std::ofstream m_locwmfile;
+    LogRecorder* m_logrecorder;
 };
 
 #endif

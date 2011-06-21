@@ -66,7 +66,9 @@ void NAOWebotsNetworkThread::periodicFunction()
         {   // if it is a team packet
             stringstream ss;
             ss.write((char*) data, sizeof(TeamPacket));
-            ss >> (*m_team_info);
+            TeamPacket temp;
+            ss >> temp;
+            m_team_info->addReceivedTeamPacket(temp);
         }
         else
             cout << "Received " << m_receiver->getDataSize() << " unknown bytes. Want " << sizeof(RoboCupGameControlDataWebots) << " or " << sizeof(TeamPacket) << endl;
@@ -75,7 +77,7 @@ void NAOWebotsNetworkThread::periodicFunction()
     
     // Do transmitting
     stringstream ss;
-    ss << m_team_info;
+    ss << m_team_info->generateTeamTransmissionPacket();
     m_emitter->send(ss.str().c_str(), ss.str().size());
 }
 

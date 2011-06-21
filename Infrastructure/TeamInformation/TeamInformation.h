@@ -32,6 +32,7 @@ class FieldObjects;
 #include <boost/circular_buffer.hpp>
 #include <vector>
 #include <iostream>
+#include "Tools/FileFormats/TimestampedData.h"
 using namespace std;
 
 #define TEAM_PACKET_STRUCT_HEADER "NUtm"
@@ -66,28 +67,41 @@ public:
     float TimeToBall;
     SharedBall Ball;
     SharedSelf Self;
-    
-    void summaryTo(ostream& output);
+
+    std::string toString() const;
+    ostream& toFile(ostream& output) const;
+    istream& fromFile(istream& input);
+    void summaryTo(ostream& output) const;
     friend ostream& operator<< (ostream& output, const TeamPacket& packet);
     friend istream& operator>> (istream& input, TeamPacket& packet);
 };
 
-class TeamInformation
+class TeamInformation: public TimestampedData
 {
 public:
-    TeamInformation(int playernum, int teamnum);
+    typedef boost::circular_buffer<TeamPacket> PacketBuffer;
+    typedef vector<PacketBuffer> PacketBufferArray;
+
+    TeamInformation(int playernum=0, int teamnum=0);
     ~TeamInformation();
     
     int getPlayerNumber() {return m_player_number;};
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
-    vector<TeamPacket::SharedBall> getSharedBalls();
+    vector<TeamPacket::SharedBall> getSharedBalls() const;
     
-    friend ostream& operator<< (ostream& output, TeamInformation& info);
-    friend ostream& operator<< (ostream& output, TeamInformation* info);
+    void UpdateTime(double newTime) {m_timestamp=newTime;};
+    double GetTimestamp() const{return m_timestamp;};
+    std::string toString() const;
+
+    friend ostream& operator<< (ostream& output, const TeamInformation& info);
+    //friend ostream& operator<< (ostream& output, TeamInformation* info);
     friend istream& operator>> (istream& input, TeamInformation& info);
-    friend istream& operator>> (istream& input, TeamInformation* info);
+    //friend istream& operator>> (istream& input, TeamInformation* info);
+
+    TeamPacket generateTeamTransmissionPacket();
+    void addReceivedTeamPacket(TeamPacket& receivedPacket);
 private:
     void initTeamPacket();
     void updateTeamPacket();
@@ -96,13 +110,15 @@ private:
     const float m_TIMEOUT;
     int m_player_number;
     int m_team_number;
-    
+    double m_timestamp;
+
     NUSensorsData* m_data;
     NUActionatorsData* m_actions;
     FieldObjects* m_objects;
     
     TeamPacket m_packet;                                                //!< team packet to send
-    vector<boost::circular_buffer<TeamPacket> > m_received_packets;     //!< team packets received from other robots
+
+    PacketBufferArray m_received_packets;     //!< team packets received from other robots
     
     vector<float> m_led_green;
     vector<float> m_led_red;

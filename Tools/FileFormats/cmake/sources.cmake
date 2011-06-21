@@ -24,6 +24,8 @@ SET (YOUR_SRCS
 LUTTools.cpp
 NUbotImage.cpp
 Parse.cpp
+LogRecorder.cpp
+LogRecorder.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

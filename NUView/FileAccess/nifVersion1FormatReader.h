@@ -26,6 +26,9 @@ public:
     bool isLastFrameAvailable();
     bool isSetFrameAvailable();
 
+    std::vector<QFileInfo> AvailableLogFiles()const;
+    QStringList AvailableData() const;
+
 signals:
 
 public slots:
