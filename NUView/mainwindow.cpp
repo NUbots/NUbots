@@ -96,6 +96,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     teamInfoDock->setShown(false);
     addDockWidget(Qt::RightDockWidgetArea,teamInfoDock);
 
+    // Localisation info display
+    locInfoDisplay = new QTextBrowser(this);
+    QDockWidget* locInfoDock = new QDockWidget("Localisation Information");
+    locInfoDock->setObjectName("Localisation Information");
+    locInfoDock->setWidget(locInfoDisplay);
+    locInfoDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,locInfoDock);
+
     // Add localisation widget
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);
@@ -466,6 +474,8 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
+
+    connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
     qDebug() <<"Finnished Connecting Widgets";
 }
 

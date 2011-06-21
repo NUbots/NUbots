@@ -59,13 +59,14 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
+    m_currentFrameNumber = -1;
 
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
     feedbackPosition[2] = 0;
 	
-	amILost = true;
-	lostCount = 0;
+    amILost = true;
+    lostCount = 0;
     timeSinceFieldObjectSeen = 0;
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
@@ -128,21 +129,39 @@ Localisation::~Localisation()
 
 void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo)
 {
+
+    m_frame_log.str("");
     if (sensor_data == NULL or fobs == NULL)
         return;
 
-    bool doProcessing = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
-    m_timestamp = sensor_data->CurrentTime;
-    if(doProcessing == false)
-        return;
-    
     float time_increment = sensor_data->CurrentTime - m_timestamp;
+    m_timestamp = sensor_data->CurrentTime;
+    m_currentFrameNumber++;
+
+#if LOC_SUMMARY > 0
+    m_frame_log << "Frame " << m_currentFrameNumber << " Time: " << m_timestamp << std::endl;
+#endif
+
+    bool doProcessing = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
+
+    if(doProcessing == false)
+    {
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Processing Cancelled." << std::endl;
+        #endif
+        return;
+    }
+    
+
 
     #ifndef USE_VISION
         vector<float> gps;
         float compass;
         if (sensor_data->getGps(gps) and sensor_data->getCompass(compass))
         {   
+            #if LOC_SUMMARY > 0
+            m_frame_log << "Setting position from GPS: (" << gps[0] << "," << gps[1] << "," << compass << ")" << std::endl;
+            #endif
             fobs->self.updateLocationOfSelf(gps[0], gps[1], compass, 0.1, 0.1, 0.01, false);
             return;
         }
@@ -154,8 +173,39 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             float side = odo[1];
             float turn = odo[2];
             // perform odometry update and change the variance of the model
+            #if LOC_SUMMARY > 0
+            m_frame_log << "Time Update - Odometry: (" << fwd << "," << side << "," << turn << ")";
+            m_frame_log << " Time Increment: " << time_increment << std::endl;
+            #endif
             doTimeUpdate(fwd, side, turn);
+            #if LOC_SUMMARY > 0
+            m_frame_log << "Result: " << getBestModel().summary();
+            #endif
         }
+
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Observation Update:" << std::endl;
+        int objseen = 0;
+        bool seen;
+        std::vector<StationaryObject>::iterator s_it = fobs->stationaryFieldObjects.begin();
+        while(s_it != fobs->stationaryFieldObjects.end())
+        {
+            seen = s_it->isObjectVisible();
+            if(seen)
+                ++objseen;
+            ++s_it;
+        }
+        m_frame_log << "Stationary Objects: " << objseen << std::endl;
+
+        objseen = 0;
+        for (int i=0; i < fobs->mobileFieldObjects.size(); i++)
+        {
+            if(fobs->mobileFieldObjects[i].isObjectVisible()) ++objseen;
+        }
+        m_frame_log << "Mobile Objects: " << objseen << std::endl;
+        m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
+        #endif
+
         ProcessObjects(fobs, teamInfo->getSharedBalls(), time_increment);
     #endif
 }
@@ -165,7 +215,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
     int numUpdates = 0;
     int updateResult;
     int usefulObjectCount = 0;
-    m_currentFrameNumber = 0;
+
     //if(balanceFallen) return;
 // 	debug_out  << "Dont put anything "<<endl;
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -176,9 +226,9 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             if(m_models[i].isActive == false) continue;
             debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
             debug_out  << " [alpha = " << m_models[i].alpha() << "]";
-            debug_out  << " Robot X: " << m_models[i].state(0);
-            debug_out  << " Robot Y: " << m_models[i].state(1);
-            debug_out  << " Robot Theta: " << m_models[i].state(2) << endl;
+            debug_out  << " Robot X: " << m_models[i].state(KF::selfX);
+            debug_out  << " Robot Y: " << m_models[i].state(KF::selfY);
+            debug_out  << " Robot Theta: " << m_models[i].state(KF::selfTheta) << endl;
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -360,6 +410,9 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
     {   // if the robot is incapacitated there is no point running localisation
         m_previous_game_state = current_state;
         m_previously_incapacitated = true;
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Robot is incapscitated." << std::endl;
+        #endif
         return false;
     }
     
@@ -367,6 +420,9 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
     {   // if we are in initial, finished, penalised or substitute states do not do localisation
         m_previous_game_state = current_state;
         m_previously_incapacitated = currently_incapacitated;
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Robot in non-processing state: " << GameInformation::stateName(current_state) << std::endl;
+        #endif
         return false;
     }
     
@@ -422,6 +478,9 @@ void Localisation::initSingleModel(float x, float y, float theta)
 
 void Localisation::doInitialReset(GameInformation::TeamColour team_colour)
 {
+    #if LOC_SUMMARY > 0
+    m_frame_log << "Reset leaving initial." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "Performing initial->ready reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -469,6 +528,9 @@ void Localisation::doInitialReset(GameInformation::TeamColour team_colour)
 
 void Localisation::doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff)
 {
+    #if LOC_SUMMARY > 0
+    m_frame_log << "Reset due to manual positioning." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "Performing manual position reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -542,6 +604,9 @@ void Localisation::doSetReset(GameInformation::TeamColour team_colour, int playe
 
 void Localisation::doPenaltyReset()
 {
+    #if LOC_SUMMARY > 0
+    m_frame_log << "Reset due to penalty." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "Performing penalty reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -561,6 +626,9 @@ void Localisation::doPenaltyReset()
 
 void Localisation::doFallenReset()
 {
+    #if LOC_SUMMARY > 0
+    m_frame_log << "Reset due to fall." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "Performing fallen reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0

@@ -9,6 +9,7 @@
 OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent): QThread(parent), m_log_reader(reader)
 {
     m_intialLoc = new Localisation();
+    m_workingLoc = 0;
     Initialise(m_intialLoc);
     m_stop_called = false;
     m_sim_data_available = false;
@@ -122,7 +123,7 @@ void OfflineLocalisation::run()
     m_stop_called = false;
     m_sim_data_available = false;
     const NUSensorsData* tempSensor;
-    const FieldObjects* tempObjects;
+    FieldObjects* tempObjects;
     const TeamInformation* tempTeamInfo;
     const GameInformation* tempGameInfo;
 
@@ -162,21 +163,24 @@ void OfflineLocalisation::run()
     return;
 }
 
+#include <QDebug>
 /*! @brief Run the localisation algorithm on the provided data and add a new localisation frame.
     @param sensorData The sensor data for the new frame.
     @param objectData The observed objects for the current frame.
  */
-void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, const FieldObjects* objectData, const TeamInformation* teamInfo, const GameInformation* gameInfo)
+void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects* objectData, const TeamInformation* teamInfo, const GameInformation* gameInfo)
 {
     // Need to make copies, since source is const
     NUSensorsData tempSensors = (*sensorData);
 
-    FieldObjects tempObj = (*objectData);
+    //FieldObjects tempObj = (*objectData);
 
-    m_workingLoc->process(&tempSensors,&tempObj,gameInfo,teamInfo);
+    m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
 
     Localisation* temp = new Localisation((*m_workingLoc));
     m_localisation_frame_buffer.push_back(temp);
+    QString info(m_workingLoc->frameLog().c_str());
+    m_frame_info.push_back(info);
 }
 
 int OfflineLocalisation::NumberOfLogFrames()
@@ -191,10 +195,18 @@ int OfflineLocalisation::NumberOfFrames()
 
 const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
 {
-    if( (frameNumber < 0) || frameNumber > NumberOfFrames())
+    if( (frameNumber < 1) || frameNumber > NumberOfFrames())
         return NULL;
     else
-        return m_localisation_frame_buffer[frameNumber];
+        return m_localisation_frame_buffer[frameNumber-1];
+}
+
+QString OfflineLocalisation::GetFrameInfo(int frameNumber)
+{
+    if( (frameNumber < 1) || frameNumber > NumberOfFrames())
+        return NULL;
+    else
+        return m_frame_info[frameNumber-1];
 }
 
 /*! @brief Writes a text based summary of the current experiment to file.

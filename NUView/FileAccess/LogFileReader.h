@@ -25,7 +25,7 @@ public:
     const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();}
     const NUImage* GetRawImage(){return currentFileReader->GetImageData();}
     const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();}
-    const FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();}
+    FieldObjects* GetObjectData(){return currentFileReader->GetObjectData();}
     const GameInformation* GetGameInfo(){return currentFileReader->GetGameInfo();}
     const TeamInformation* GetTeamInfo(){return currentFileReader->GetTeamInfo();}
 

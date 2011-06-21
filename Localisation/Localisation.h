@@ -11,6 +11,7 @@ class NUSensorsData;
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
+#include <sstream>
 
 // Debug output level
 // 0 - No messages
@@ -18,6 +19,8 @@ class NUSensorsData;
 // 2 - Update messages
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
+
+#define LOC_SUMMARY 1
 
 class Localisation: public TimestampedData
 {
@@ -81,6 +84,11 @@ class Localisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
+        std::string frameLog() const
+        {
+            return m_frame_log.str();
+        }
+
         /*!
         @brief Output streaming operation.
         @param output The output stream.
@@ -117,6 +125,7 @@ class Localisation: public TimestampedData
         // Game state memory
         bool m_previously_incapacitated;
         GameInformation::RobotState m_previous_game_state;
+        std::stringstream m_frame_log;
         
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;

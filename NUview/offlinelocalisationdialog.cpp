@@ -127,8 +127,6 @@ void OfflineLocalisationDialog::BeginSimulation()
 
     //m_offline_loc->Run();
     m_offline_loc->start();
-
-
 }
 
 void OfflineLocalisationDialog::CompleteSimulation()
@@ -160,6 +158,8 @@ void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)
     {
         const Localisation* temp = m_offline_loc->GetFrame(frameNumber);
         emit LocalisationChanged(temp);
+        QString message = m_offline_loc->GetFrameInfo(frameNumber);
+        emit LocalisationInfoChanged(message);
     }
 }
 

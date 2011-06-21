@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <QThread>
+#include <QString>
 
 class FieldObjects;
 class NUSensorsData;
@@ -26,6 +27,7 @@ public:
     int NumberOfLogFrames();
     int NumberOfFrames();
     const Localisation* GetFrame(int frameNumber);
+    QString GetFrameInfo(int frameNumber);
     bool IsInitialised();
     void run();
     void stop(){m_stop_called = true;}
@@ -33,17 +35,18 @@ public:
     bool hasSimData(){return m_sim_data_available;}
     bool HasRequiredData(QStringList& availableData);
 private:
-    void AddFrame(const NUSensorsData* sensorData, const FieldObjects* objectData, const TeamInformation* teamInfo=NULL, const GameInformation* gameInfo=NULL);
+    void AddFrame(const NUSensorsData* sensorData, FieldObjects* objectData, const TeamInformation* teamInfo=NULL, const GameInformation* gameInfo=NULL);
     void ClearBuffer();
     std::vector<Localisation*> m_localisation_frame_buffer;
+    std::vector<QString> m_frame_info;
     Localisation* m_workingLoc;
     LogFileReader* m_log_reader;
     Localisation* m_intialLoc;
     bool m_stop_called;
     bool m_sim_data_available;
 signals:
-    void updateProgress(int,int);
     void SimDataChanged(bool);
+    void updateProgress(int,int);
 };
 
 #endif // OFFLINELOCALISATION_H

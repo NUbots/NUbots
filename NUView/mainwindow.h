@@ -151,6 +151,7 @@ private:
     ObjectDisplayWidget* objectDisplay;
     GameInformationDisplayWidget* gameInfoDisplay;
     TeamInformationDisplayWidget* teamInfoDisplay;
+    QTextBrowser* locInfoDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

@@ -20,6 +20,7 @@ public:
 
 signals:
     void LocalisationChanged(const Localisation*);
+    void LocalisationInfoChanged(const QString&);
 
 public slots:
     void OpenLogFiles();

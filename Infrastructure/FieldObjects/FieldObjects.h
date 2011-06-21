@@ -100,6 +100,7 @@ class FieldObjects: public TimestampedData
             vector<MobileObject> mobileFieldObjects;
             vector<AmbiguousObject> ambiguousFieldObjects;
             FieldObjects();
+            FieldObjects(const FieldObjects& source);
             ~FieldObjects();
     
             void preProcess(const float timestamp);

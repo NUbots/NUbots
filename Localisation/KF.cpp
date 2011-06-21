@@ -16,6 +16,7 @@ Xhat[6][0]=ballVeocityY
 #include "debug.h"
 #include "odometryMotionModel.h"
 #include "pose2d.h"
+#include <sstream>
 
 using namespace mathGeneral;
 
@@ -273,6 +274,27 @@ void KF::timeUpdate(double deltaTime){
 	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));	
         stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
 	return;
+}
+
+
+void KF::timeUpdate(float odom_x, float odom_y, float odom_theta, double deltaTime)
+{
+    double deltaTimeSeconds = deltaTime / 1000;
+    //-----------------------Update for ball velocity
+    stateEstimates[KF::ballX][0] = stateEstimates[3][0] + stateEstimates[5][0]*deltaTimeSeconds; // Update ball x position by ball x velocity.
+    stateEstimates[KF::ballY][0] = stateEstimates[4][0] + stateEstimates[6][0]*deltaTimeSeconds; // Update ball y position by ball y velocity.
+    stateEstimates[KF::ballXVelocity][0] = c_ballDecayRate*stateEstimates[5][0]; // Reduce ball x velocity assuming deceleration
+    stateEstimates[KF::ballYVelocity][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
+
+    float mid_theta = stateEstimates[KF::selfTheta][0] + 0.5*odom_theta;
+    stateEstimates[KF::selfX][0] = stateEstimates[KF::selfX][0] + odom_x*cos(mid_theta) - odom_y*sin(mid_theta);
+    stateEstimates[KF::selfY][0] = stateEstimates[KF::selfY][0] + odom_x*sin(mid_theta) - odom_y*cos(mid_theta);
+
+
+
+// Householder transform. Unscented KF algorithm. Takes a while.
+    stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
+    stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
 }
 
 
@@ -787,6 +809,21 @@ float KF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innova
     return notOutlierLikelyhood * fracRes * expRes + outlierLikelyhood;
 }
 
+
+std::string KF::summary(bool brief) const
+{
+    std::stringstream buffer;
+    buffer << "Model Number " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
+    buffer << state(KF::selfY) << "," << state(KF::selfTheta) << ") Ball Position: (" << state(KF::ballX) << ",";
+    buffer << state(KF::ballY) << ")" << endl;
+    if(!brief)
+    {
+            buffer << "Variance - Position: (" << sd(KF::selfX) << ",";
+            buffer << sd(KF::selfY) << "," << sd(KF::selfTheta) << ") Ball Position: (" << sd(KF::ballX) << ",";
+            buffer << sd(KF::ballY) << ")" << endl;
+    }
+    return buffer.str();
+}
 
 std::ostream& operator<< (std::ostream& output, const KF& p_kf)
 {

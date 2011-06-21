@@ -15,6 +15,11 @@ FieldObjects::~FieldObjects()
 	
 }
 
+FieldObjects::FieldObjects(const FieldObjects& source): m_timestamp(source.m_timestamp), self(source.self),
+stationaryFieldObjects(source.stationaryFieldObjects), mobileFieldObjects(source.mobileFieldObjects), ambiguousFieldObjects(source.ambiguousFieldObjects)
+{
+}
+
 /*! @brief Preprocesses each field object
     @param timestamp the current timestamp in ms
  

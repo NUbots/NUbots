@@ -4,6 +4,7 @@
 #include <math.h>
 #include "Tools/Math/Matrix.h"
 #include "odometryMotionModel.h"
+#include <string>
 enum KfUpdateResult
 {
     KF_OUTLIER = 0,
@@ -33,6 +34,7 @@ class KF {
 
         // Update functions
         void timeUpdate(double deltaTime);
+        void timeUpdate(float odom_x, float odom_y, float odom_theta, double deltaTime);
         KfUpdateResult odometeryUpdate(double odom_X, double odom_Y, double odom_Theta, double R_X, double R_Y, double R_Theta);
         KfUpdateResult ballmeas(double Ballmeas, double theta_Ballmeas);
         KfUpdateResult fieldObjectmeas(double distance, double bearing,double objX,double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError);
@@ -113,6 +115,8 @@ class KF {
         static const float c_outlierLikelyhood;
 	
 	void performFiltering(double odometeryForward, double odometeryLeft, double odometeryTurn);
+        std::string summary(bool brief=true) const;
+
 private:
         double m_alpha;
         unsigned int m_id;

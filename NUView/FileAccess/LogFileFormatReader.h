@@ -42,7 +42,7 @@ public:
     virtual const Localisation* GetLocalisationData(){return NULL;}
     virtual const NUImage* GetImageData(){return NULL;}
     virtual const NUSensorsData* GetSensorData(){return NULL;}
-    virtual const FieldObjects* GetObjectData(){return NULL;}
+    virtual FieldObjects* GetObjectData(){return NULL;}
     virtual const GameInformation* GetGameInfo(){return NULL;}
     virtual const TeamInformation* GetTeamInfo(){return NULL;}
 

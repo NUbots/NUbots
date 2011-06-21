@@ -44,7 +44,7 @@ const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
     return locwmReader.ReadFrameNumber(m_currentFrameIndex);
 }
 
-const FieldObjects* SplitStreamFileFormatReader::GetObjectData()
+FieldObjects* SplitStreamFileFormatReader::GetObjectData()
 {
     return objectReader.ReadFrameNumber(m_currentFrameIndex);
 }

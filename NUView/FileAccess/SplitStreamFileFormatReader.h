@@ -27,7 +27,7 @@ public:
     const NUImage* GetImageData();
     const NUSensorsData* GetSensorData();
     const Localisation* GetLocalisationData();
-    const FieldObjects* GetObjectData();
+    FieldObjects* GetObjectData();
     const GameInformation* GetGameInfo();
     const TeamInformation* GetTeamInfo();
 

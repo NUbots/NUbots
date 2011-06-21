@@ -88,6 +88,7 @@ public:
 
     void UpdateTime(double newTime) {m_timestamp = newTime;};
     double GetTimestamp() const{return m_timestamp;};
+    static std::string stateName(RobotState theState);
 
     /*!
     @brief Output streaming operation.
@@ -115,8 +116,6 @@ private:
     const TeamInfo* getTeamInfo(int teamNumber) const;
     const TeamInfo* getMyTeamInfo() const;
     const TeamInfo* getOpponentTeamInfo() const;
-
-    static std::string stateName(RobotState theState);
 
     void doGameControllerUpdate();
 
