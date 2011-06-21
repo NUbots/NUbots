@@ -550,12 +550,45 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
         //TESTING: Save Images which of a field object seen
         
+        //BALL
         /*if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
             SaveAnImage();
         }*/
+    
+    /*
+        //YELLOW POST
+        if (AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() or AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
+            m_saveimages_thread->signal();
+    
+        //YELLOW AMBIGUOUS POST
+        for (size_t i=0; i<AllFieldObjects->ambiguousFieldObjects.size(); i++)
+        {
+            int ambig_id = AllFieldObjects->ambiguousFieldObjects[i].getID();
+            if (ambig_id == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+            {
+                m_saveimages_thread->signal();
+                break;
+            }
+
+        }
+    
+        //BLUE POST
+        if (AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() or AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
+            m_saveimages_thread->signal();
         
-        
+        //BLUE AMBIGUOUS POST
+        for (size_t i=0; i<AllFieldObjects->ambiguousFieldObjects.size(); i++)
+        {
+            int ambig_id = AllFieldObjects->ambiguousFieldObjects[i].getID();
+            if (ambig_id == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                m_saveimages_thread->signal();
+                break;
+            }
+            
+        }
+        */
         //bool BlueGoalSeen = false;
         /*
         if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
