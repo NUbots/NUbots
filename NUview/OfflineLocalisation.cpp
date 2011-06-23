@@ -135,7 +135,7 @@ void OfflineLocalisation::run()
     bool save_signal = m_log_reader->blockSignals(true); // Block signals
     int save_frame = m_log_reader->currentFrame();
 
-    while (m_log_reader->currentFrame() < totalFrames)
+    while (true)
     {
         tempSensor = m_log_reader->GetSensorData();
         tempObjects = m_log_reader->GetObjectData();
@@ -163,7 +163,6 @@ void OfflineLocalisation::run()
     return;
 }
 
-#include <QDebug>
 /*! @brief Run the localisation algorithm on the provided data and add a new localisation frame.
     @param sensorData The sensor data for the new frame.
     @param objectData The observed objects for the current frame.
@@ -195,18 +194,21 @@ int OfflineLocalisation::NumberOfFrames()
 
 const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
 {
-    if( (frameNumber < 1) || frameNumber > NumberOfFrames())
+    int index = frameNumber-1;
+    int numframs = NumberOfFrames();
+    if( (index < 0) || (index >= NumberOfFrames()))
         return NULL;
     else
-        return m_localisation_frame_buffer[frameNumber-1];
+        return m_localisation_frame_buffer[index];
 }
 
 QString OfflineLocalisation::GetFrameInfo(int frameNumber)
 {
-    if( (frameNumber < 1) || frameNumber > NumberOfFrames())
+    int index = frameNumber-1;
+    if( (index < 0) || (index >= NumberOfFrames()))
         return NULL;
     else
-        return m_frame_info[frameNumber-1];
+        return m_frame_info[index];
 }
 
 /*! @brief Writes a text based summary of the current experiment to file.
