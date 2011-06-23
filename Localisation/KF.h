@@ -91,7 +91,7 @@ class KF {
         Matrix sqrtOfTestWeightings; // Square root of W (Constant)
         Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
         Matrix sqrtOfProcessNoiseReset; // Square root of Q when resetting. (Conastant) 
-	Matrix sigmaPoints;
+        //Matrix sigmaPoints;
 	
 	
 	Matrix srukfCovX;  // Original covariance mat

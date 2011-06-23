@@ -98,7 +98,7 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   nStates = stateEstimates.getm(); // number of states.
 // Create Sigma Points matrix
  
-  sigmaPoints = Matrix (nStates,2*nStates+1,false);
+  //sigmaPoints = Matrix (nStates,2*nStates+1,false);
 
 // Create square root of W matrix
   sqrtOfTestWeightings = Matrix(1,2*nStates+1,false);
@@ -185,22 +185,8 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 	// Step 2 : Calculate new sigma points based on previous covariance
 	double sigmaAngleMax = 2.5;               // required for normalising Angle
 	
-	sigmaPoints.setCol(0, stateEstimates);    // First sigma point is the mean itself
-			
-	for(int i=1;i<nStates+1;i++)
-	{
-		// Eqn 17
-		sigmaPoints.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i-1)  );  
-
-		// Crop angle
-		sigmaPoints[2][i] = crop(sigmaPoints[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0])); 
-
-		// Eqn 18
-		sigmaPoints.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i-1) );
-
-		// Crop angle again for the negative equation
-	  	sigmaPoints[2][nStates + i] = crop(sigmaPoints[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-	}
+        Matrix sigmaPoints = CalculateSigmaPoints();
+        const unsigned int numSigmaPoints = sigmaPoints.getn();
 	//-----------------------------------------------------------------------------------------------
 	
 	
@@ -210,7 +196,7 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 	Pose2D oldPose, diffOdom;
 	double *newPose;
 
-	for (int i = 0 ; i < 2 * nStates + 1; i++)
+        for (int i = 0 ; i < numSigmaPoints; i++)
 	{
 		oldPose.X = sigmaPoints[0][i];
 		oldPose.Y = sigmaPoints[1][i];
@@ -236,7 +222,7 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 	// Step 4: Calculate new state based on propagated sigma points and the weightings of the sigmaPoints
 	Matrix newStateEstimates(stateEstimates.getm(),stateEstimates.getn(), false);
 	
-	for(int i=0; i <= 2*nStates; i++)
+        for(int i=0; i < numSigmaPoints; i++)
 	{
 		// Eqn 20
 		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
@@ -247,11 +233,10 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 	Matrix newSrukfSx(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
 	Matrix Mx(sigmaPoints.getm(),sigmaPoints.getn(), false);
   	
-  	for(int i=0; i <= 2*nStates; i++)
+        for(int i=0; i < numSigmaPoints; i++)
 	{
 		// Eqn 21 part
-		Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newStateEstimates));      // Error matrix
-		
+		Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newStateEstimates));      // Error matrix	
  	}
 	
 	// Eqn 23 originally it should be a Mx*Mz
@@ -315,29 +300,17 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
 	Matrix yBar;                                  	//reset
 	Matrix Py;
 	Matrix Pxy=Matrix(7, 2, false);                    //Pxy=[0;0;0];
-	Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
-	scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;                  
-    
-  //----------------Saturate ScriptX angle sigma points to not wrap
-	double sigmaAngleMax = 2.5;
-	for(int i=1;i<nStates+1;i++){//hack to make test points distributed
-    // Addition Portion.
-		scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-	// Crop heading
-                scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-    // Subtraction Portion.
-		scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-	// Crop heading
-                scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-	}
+        Matrix scriptX = CalculateSigmaPoints();
+        const unsigned int numSigmaPoints = scriptX.getn();
+
 	//----------------------------------------------------------------
 // 	std::cout << "Running motion model." << std::endl;
 	Pose2D oldPose, diffOdom;
-	double *newPose;
+        double *newPose;
 
-	sigmaPoints = scriptX;
+        Matrix sigmaPoints = scriptX;
 
-	for (int i = 0 ; i < 2 * nStates + 1; i++)
+        for (int i = 0 ; i < scriptX.getn(); i++)
 	{
 		oldPose.X = scriptX[0][i];
 		oldPose.Y = scriptX[1][i];
@@ -349,7 +322,7 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
    
 		newPose = odom_Model.getNextSigma(diffOdom,oldPose);
 
-		sigmaPoints[0][i] = *newPose;
+                sigmaPoints[0][i] = *newPose;
 		sigmaPoints[1][i] = *(newPose+1);
 		sigmaPoints[2][i] = *(newPose+2);
 // 		cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
@@ -365,14 +338,14 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
 	Matrix newCovariance(stateStandardDeviations.getm(),stateStandardDeviations.getn(), false);
 
 //   std::cout << "Calculating Mean." << std::endl;
-	for(int i=0; i <= 2*nStates; i++){
+        for(int i=0; i < numSigmaPoints; i++){
 		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
 	}
 	cout<<"New Mean    = ["<<newStateEstimates[0][0]<<", "<<newStateEstimates[1][0]<<", "<<newStateEstimates[1][0]<<" ]"<<endl;
 // std::cout << "Calculating Covariance." << std::endl;
 	Matrix temp;
   // Update Covariance
-	for(int i=0; i <= 2*nStates; i++){
+        for(int i=0; i < numSigmaPoints; i++){
 		temp = sigmaPoints.getCol(i) - newStateEstimates;
 		newCovariance = newCovariance + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*temp*temp.transp();
 	}
@@ -404,26 +377,20 @@ KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
   Matrix Py;
   Matrix Pxy = Matrix(7,2,false);                    //Pxy=[0;0;0];
 
-  Matrix scriptX = Matrix(stateEstimates.getm(),2 * nStates + 1,false);
-  scriptX.setCol(0,stateEstimates);                         //scriptX(:,1)=Xhat; Current state.
-  for(int i = 1; i <= nStates; i++){  // Unscented KF. Creates test points used to compare against vision data.
-    // Addition Portion.
-    scriptX.setCol(i, stateEstimates + sqrt(nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-    // Subtraction Portion.
-    scriptX.setCol(nStates + i, stateEstimates - sqrt(nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-  }
-    
-  Matrix scriptY = Matrix(2, 2 * nStates + 1, false);
+  Matrix scriptX = CalculateSigmaPoints();
+  const unsigned int numSigmaPoints = scriptX.getn();
+
+  Matrix scriptY = Matrix(2, numSigmaPoints, false);
   Matrix temp = Matrix(2,1,false);
-  for(int i = 0; i < 2 * nStates + 1; i++){
+  for(int i = 0; i < numSigmaPoints; i++){
     temp[0][0] = (scriptX[3][i] - scriptX[0][i]) * cos(scriptX[2][i]) + (scriptX[4][i] - scriptX[1][i]) * sin(scriptX[2][i]);
     temp[1][0] = -(scriptX[3][i] - scriptX[0][i]) * sin(scriptX[2][i]) + (scriptX[4][i] - scriptX[1][i]) * cos(scriptX[2][i]);
     scriptY.setCol(i,temp.getCol(0));
   }
     
-  Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
-  Matrix My = Matrix(scriptY.getm(), 2 * nStates + 1, false);  
-  for(int i = 0; i < 2 * nStates + 1; i++){
+  Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+  Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+  for(int i = 0; i < numSigmaPoints; i++){
     Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
     My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
   }                                      
@@ -480,28 +447,15 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   Matrix yBar;                                  	//reset
   Matrix Py;
   Matrix Pxy=Matrix(7, 2, false);                    //Pxy=[0;0;0];
-  Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
-  scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;                  
-    
-  //----------------Saturate ScriptX angle sigma points to not wrap
-  double sigmaAngleMax = 2.5;
-  for(int i=1;i<nStates+1;i++){//hack to make test points distributed
-    // Addition Portion.
-    scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-	// Crop heading.
-    scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-    // Subtraction Portion.
-    scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-	// Crop heading.
-    scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-  }
+  Matrix scriptX = CalculateSigmaPoints();
+  const unsigned int numSigmaPoints = scriptX.getn();
 	//----------------------------------------------------------------
-  Matrix scriptY = Matrix(2, 2 * nStates + 1, false);
+  Matrix scriptY = Matrix(2, numSigmaPoints, false);
   Matrix temp = Matrix(2, 1, false);
  
   double dX,dY,Cc,Ss;
  
-  for(int i = 0; i < 2 * nStates + 1; i++){
+  for(int i = 0; i < numSigmaPoints; i++){
  	  dX = objX-scriptX[0][i];
  	  dY = objY-scriptX[1][i];
  	  Cc = cos(scriptX[2][i]);
@@ -510,9 +464,9 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
     temp[1][0] = -dX * Ss + dY * Cc; 
     scriptY.setCol(i, temp.getCol(0));
   }
-  Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
-  Matrix My = Matrix(scriptY.getm(), 2 * nStates + 1, false);  
-  for(int i = 0; i < 2 * nStates + 1; i++){
+  Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+  Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+  for(int i = 0; i < numSigmaPoints; i++){
     Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
     My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
   }
@@ -640,32 +594,24 @@ KfUpdateResult KF::updateAngleBetween(double angle, double x1, double y1, double
     double yBar;                                  	//reset
     double Py;
     Matrix Pxy = Matrix(7, 1, false);                    //Pxy=[0;0;0];
-    Matrix scriptX = Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
-    scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
-    float weight = sqrt((double)nStates + c_Kappa);
-
-    for (int i = 1; i <= nStates; i++) //populate matrix of test points
-    {  // Unscented KF. Creates test points used to compare against vision data.
-        scriptX.setCol(i, stateEstimates + weight * stateStandardDeviations.getCol(i - 1));
-        scriptX.setCol(nStates + i, stateEstimates - weight * stateStandardDeviations.getCol(i - 1));
-    }
-
+    Matrix scriptX = CalculateSigmaPoints();
+    const unsigned int numSigmaPoints = scriptX.getn();
     //----------------------------------------------------------------
-    Matrix scriptY = Matrix(1, 2 * nStates + 1, false);
+    Matrix scriptY = Matrix(1, numSigmaPoints, false);
 
     double angleToObj1;
     double angleToObj2;
 
-    for (int i = 0; i < 2 * nStates + 1; i++)
+    for (int i = 0; i < numSigmaPoints; i++)
     {
         angleToObj1 = atan2 ( y1 - scriptX[1][i], x1 - scriptX[0][i] );
         angleToObj2 = atan2 ( y2 - scriptX[1][i], x2 - scriptX[0][i] );
         scriptY[0][i] = normaliseAngle(angleToObj1 - angleToObj2);
     }
 
-    Matrix Mx = Matrix(scriptX.getm(), 2 * nStates + 1, false);
-    Matrix My = Matrix(scriptY.getm(), 2 * nStates + 1, false);
-    for (int i = 0; i < 2 * nStates + 1; i++)
+    Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+    Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+    for (int i = 0; i < numSigmaPoints; i++)
     {
         Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
         My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
