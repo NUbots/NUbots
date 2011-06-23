@@ -52,7 +52,7 @@ void TeamTransmissionThread::periodicFunction()
     if (m_port->m_team_information->getPlayerNumber() > 0)
     {
         stringstream buffer;
-        buffer << m_port->m_team_information;
+        buffer << m_port->m_team_information->generateTeamTransmissionPacket();
         m_port->sendData(buffer);
     }
 }

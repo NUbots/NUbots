@@ -62,7 +62,7 @@ Sensor::Sensor(const Sensor& source)
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(float& data)
+bool Sensor::get(float& data) const
 {
     if (ValidFloat)
     {
@@ -77,7 +77,7 @@ bool Sensor::get(float& data)
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(vector<float>& data)
+bool Sensor::get(vector<float>& data) const
 {
     if (ValidVector)
     {
@@ -92,7 +92,7 @@ bool Sensor::get(vector<float>& data)
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(vector<vector<float> >& data)
+bool Sensor::get(vector<vector<float> >& data) const
 {
     if (ValidMatrix)
     {
@@ -107,7 +107,7 @@ bool Sensor::get(vector<vector<float> >& data)
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(string& data)
+bool Sensor::get(string& data) const
 {
     if (ValidString)
     {

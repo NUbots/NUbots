@@ -34,8 +34,10 @@ bool IndexedFileReader::OpenFile(const std::string& filename)
     {
         m_file.seekg(0,std::ios_base::end);
         m_fileEndLocation = m_file.tellg();
+        m_filename = filename;
         IndexFile();
     }
+    if(!IsValid()) m_filename.clear();
     return IsValid();
 }
 
@@ -47,6 +49,7 @@ void IndexedFileReader::CloseFile()
     m_file.close();
     m_fileEndLocation = 0;
     ClearIndex();
+    m_filename.clear();
 }
 
 /**

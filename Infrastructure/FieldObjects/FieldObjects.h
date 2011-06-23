@@ -51,14 +51,14 @@ class FieldObjects: public TimestampedData
                 FO_PENALTY_BLUE                 = 24,
 
                 // Goal Gaps
-                FO_YELLOW_GOAL_GAP 		= 25,
-                FO_BLUE_GOAL_GAP 		= 26,
+                //FO_YELLOW_GOAL_GAP 		= 25,
+                //FO_BLUE_GOAL_GAP 		= 26,
 
-                NUM_STAT_FIELD_OBJECTS 		= 27
+                NUM_STAT_FIELD_OBJECTS 		= 25
 
             };
 
-            enum MobileFieldObjectsID{
+            enum MobileFieldObjectID{
 
                 // Ball and Teammates and Opponents
                 FO_BALL 			= 0,
@@ -100,11 +100,20 @@ class FieldObjects: public TimestampedData
             vector<MobileObject> mobileFieldObjects;
             vector<AmbiguousObject> ambiguousFieldObjects;
             FieldObjects();
+            FieldObjects(const FieldObjects& source);
             ~FieldObjects();
     
             void preProcess(const float timestamp);
             void postProcess(const float timestamp);
             double GetTimestamp() const{return m_timestamp;};
+            std::string toString(bool visibleOnly=false) const;
+
+    std::vector<FieldObjects::StationaryFieldObjectID> GetPossibleObservationIds(float x, float y, float theta, 
+                                                                   float headPan, float headTilt, 
+                                                                   float FoV_x, float FoV_y);
+    std::vector<FieldObjects::MobileFieldObjectID> GetPossibleMobileObservationIds(float x, float y, float heading,
+                                                                                float headYaw, float headPitch,
+                                                                                float FoV_x, float FoV_y);
 
             /*!
             @brief Output streaming operation.

@@ -39,10 +39,10 @@ public:
     Sensor(string sensorname);
     Sensor(const Sensor& source);
 
-    bool get(float& data);
-    bool get(vector<float>& data);
-    bool get(vector<vector<float> >& data);
-    bool get(string& data);
+    bool get(float& data) const;
+    bool get(vector<float>& data) const;
+    bool get(vector<vector<float> >& data) const;
+    bool get(string& data) const;
     
     void set(double time, const float& data);
     void set(double time, const vector<float>& data);

@@ -7,9 +7,10 @@
 #include "NUPlatform/NUPlatform.h"
 
 #include <memory.h>
+#include <sstream>
 #include "debug.h"
 
-GameInformation::GameInformation(int playerNumber, int teamNumber)
+GameInformation::GameInformation(int playerNumber, int teamNumber): TimestampedData()
 {
     m_data = Blackboard->Sensors;
     m_actions = Blackboard->Actions;
@@ -307,4 +308,146 @@ void GameInformation::addNetworkPort(GameControllerPort* port)
 {
     m_port = port;
 }
+
+std::string stateToString(int state)
+{
+    std::string result;
+    switch(state)
+    {
+    case GameInformation::InitialState:
+        result = "Initial";
+        break;
+    case GameInformation::ReadyState:
+        result = "Ready";
+        break;
+    case GameInformation::SetState:
+        result = "Set";
+        break;
+    case GameInformation::PlayingState:
+        result = "Playing";
+        break;
+    case GameInformation::FinishedState:
+        result = "Finished";
+        break;
+    case GameInformation::PenalisedState:
+        result = "Penalised";
+        break;
+    case GameInformation::SubstituteState:
+        result = "Substitute";
+        break;
+    case GameInformation::RequiresSubstitutionState:
+        result = "Requires Substitution";
+        break;
+    default:
+        result = "Unknown";
+    }
+    return result;
+}
+
+std::string teamToString(int team)
+{
+    std::string result;
+    switch(team)
+    {
+    case TEAM_BLUE:
+        result = "Blue";
+        break;
+    case TEAM_RED:
+        result = "Red";
+        break;
+    default:
+        result = "Unknown";
+    }
+    return result;
+}
+
+std::string goalToString(int goal)
+{
+    std::string result;
+    switch(goal)
+    {
+    case GOAL_BLUE:
+        result = "Blue";
+        break;
+    case GOAL_YELLOW:
+        result = "Yellow";
+        break;
+    default:
+        result = "Unknown";
+    }
+    return result;
+}
+
+/*!
+@brief Produce human readable string summary of the data.
+@return Formatted string summary of the current data.
+*/
+std::string GameInformation::toString() const
+{
+    const int NUM_TEAMS = 2;
+
+    std::stringstream result;
+    result << "Game Information Time: " << GetTimestamp() << std::endl;
+    result << "Last Packet Time: " << m_last_packet_time << std::endl;
+    result << "Player Number: " << m_player_number << std::endl;
+    result << "Team Number: " << m_team_number << std::endl;
+    result << "State: " << stateToString(m_state) << std::endl;
+    result << std::endl;
+    if(m_currentControlData)
+    {
+        result << "Game Controller Info" << std::endl;
+        result << "Version: " << m_currentControlData->version << std::endl;
+        result << "Players Per Team: " << (int)m_currentControlData->playersPerTeam << std::endl;
+        result << "State: " << stateToString(m_currentControlData->state) << std::endl;
+        result << "First Half: " << (m_currentControlData->firstHalf ? "True" : "False") << std::endl;
+        result << "Kick-off Team: " << (int)m_currentControlData->kickOffTeam << std::endl;
+        result << "Penalty Shootout: " << (m_currentControlData->secondaryState ? "True" : "False") << std::endl;
+        result << "Drop in Team: " << (int)m_currentControlData->dropInTeam << std::endl;
+        result << "Drop in Time: " << (int)m_currentControlData->dropInTime << std::endl;
+        result << "Seconds Remaining: " << (int)m_currentControlData->secsRemaining << std::endl;
+        for (int t=0; t < NUM_TEAMS; ++t)
+        {
+            result << std::endl;
+            result << teamToString(m_currentControlData->teams[t].teamColour) << " Team (" << (int)m_currentControlData->teams[t].teamNumber << ")" << std::endl;
+            result << "Goal Colour: " << goalToString(m_currentControlData->teams[t].goalColour) << std::endl;
+            result << "Score: " << (int)m_currentControlData->teams[t].score << std::endl;
+            for(int p=0; p < m_currentControlData->playersPerTeam; ++p)
+            {
+                result << "Player " << p+1 << " - ";
+                result << "Penalised: " << (m_currentControlData->teams[t].players[p].penalty ? "True" : "False");
+                if(m_currentControlData->teams[t].players[p].penalty)
+                    result << "\t (" << (int)m_currentControlData->teams[t].players[p].secsTillUnpenalised << ")";
+                 result << std::endl;
+            }
+        }
+    }
+    else
+    {
+        result << "No game information available." << std::endl;
+    }
+    return result.str();
+}
+
+std::ostream& operator<< (std::ostream& output, const GameInformation& p_game)
+{
+    output.write(reinterpret_cast<const char*>(&p_game.m_timestamp), sizeof(p_game.m_timestamp));
+    output.write(reinterpret_cast<const char*>(&p_game.m_last_packet_time), sizeof(p_game.m_last_packet_time));
+    output.write(reinterpret_cast<const char*>(&p_game.m_player_number), sizeof(p_game.m_player_number));
+    output.write(reinterpret_cast<const char*>(&p_game.m_team_number), sizeof(p_game.m_team_number));
+    output.write(reinterpret_cast<const char*>(&p_game.m_state), sizeof(p_game.m_state));
+    output.write(reinterpret_cast<const char*>(p_game.m_currentControlData), sizeof(*p_game.m_currentControlData));
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, GameInformation& p_game)
+{
+    input.read(reinterpret_cast<char*>(&p_game.m_timestamp), sizeof(p_game.m_timestamp));
+    input.read(reinterpret_cast<char*>(&p_game.m_last_packet_time), sizeof(p_game.m_last_packet_time));
+    input.read(reinterpret_cast<char*>(&p_game.m_player_number), sizeof(p_game.m_player_number));
+    input.read(reinterpret_cast<char*>(&p_game.m_team_number), sizeof(p_game.m_team_number));
+    input.read(reinterpret_cast<char*>(&p_game.m_state), sizeof(p_game.m_state));
+    input.read(reinterpret_cast<char*>(p_game.m_currentControlData), sizeof(*p_game.m_currentControlData));
+    return input;
+}
+
 

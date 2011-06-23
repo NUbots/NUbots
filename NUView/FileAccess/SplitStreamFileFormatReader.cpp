@@ -18,6 +18,17 @@ SplitStreamFileFormatReader::~SplitStreamFileFormatReader()
 {
     closeFile();
 }
+
+std::vector<QFileInfo> SplitStreamFileFormatReader::AvailableLogFiles()const
+{
+    return m_open_files;
+}
+
+QStringList SplitStreamFileFormatReader::AvailableData() const
+{
+    return m_available_data;
+}
+
 const NUImage* SplitStreamFileFormatReader::GetImageData()
 {
     return imageReader.ReadFrameNumber(m_currentFrameIndex);
@@ -33,16 +44,27 @@ const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
     return locwmReader.ReadFrameNumber(m_currentFrameIndex);
 }
 
-const FieldObjects* SplitStreamFileFormatReader::GetObjectData()
+FieldObjects* SplitStreamFileFormatReader::GetObjectData()
 {
     return objectReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const GameInformation* SplitStreamFileFormatReader::GetGameInfo()
+{
+    return gameinfoReader.ReadFrameNumber(m_currentFrameIndex);
+}
+
+const TeamInformation* SplitStreamFileFormatReader::GetTeamInfo()
+{
+    return teaminfoReader.ReadFrameNumber(m_currentFrameIndex);
 }
 
 void SplitStreamFileFormatReader::setKnownDataTypes()
 {
     m_dataIsSynced = true;
     m_extension = ".strm";
-    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame";
+    m_knownDataTypes.clear();
+    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
 
     // Add the file readers.
     m_fileReaders.push_back(&imageReader);
@@ -50,24 +72,25 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
     m_fileReaders.push_back(&locwmReader);
     m_fileReaders.push_back(&objectReader);
     m_fileReaders.push_back(&locmframeReader);
+    m_fileReaders.push_back(&teaminfoReader);
+    m_fileReaders.push_back(&gameinfoReader);
 }
 
 std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& directory)
 {
+    const QString extension = ".strm";
+    QStringList knownDataTypes;
+    knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+
+
     std::vector<QFileInfo> fileLocations;
 
     qDebug("Searching Path: %s", qPrintable(directory.path()));
 
     QStringList extensionsFilter;
-    extensionsFilter << "*"+m_extension;
+    extensionsFilter << "*" + extension;
     QStringList files = directory.entryList(extensionsFilter);
     qDebug("%d File(s) Found:", files.size());
-
-//    // Display files
-//    QStringList::const_iterator constIterator;
-//    for (constIterator = files.constBegin(); constIterator != files.constEnd();
-//           ++constIterator)
-//        qDebug("%s", qPrintable(*constIterator));
 
     QRegExp rx;
     int index;
@@ -75,10 +98,10 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 
     QStringList::const_iterator constFormatIterator;
     QString displayName;
-    for (constFormatIterator = m_knownDataTypes.constBegin(); constFormatIterator != m_knownDataTypes.constEnd();
+    for (constFormatIterator = knownDataTypes.constBegin(); constFormatIterator != knownDataTypes.constEnd();
            ++constFormatIterator)
     {
-        rx.setPattern((*constFormatIterator) + m_extension);
+        rx.setPattern((*constFormatIterator) + extension);
         index = files.indexOf(rx);
         if(index != -1)
         {
@@ -123,7 +146,8 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
             if(successIndicator)
             {
                 success_msg = QString("Successful! %1 Frames Found.").arg(m_fileReaders[index]->TotalFrames());
-
+                m_available_data << m_knownDataTypes[index];
+                m_open_files.push_back(*fileIt);
             }
             else success_msg = "Failed!";
 
@@ -147,6 +171,8 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
         m_fileGood = false;
         qDebug("Loading Failed.");
         m_totalFrames = 0;
+        m_available_data.clear();
+        m_open_files.clear();
     }
     return m_totalFrames;
 }
@@ -155,6 +181,11 @@ bool SplitStreamFileFormatReader::closeFile()
 {
     m_totalFrames = 0;
     m_currentFrameIndex = 0;
+    m_available_data.clear();
+    for(int i=0; i < m_fileReaders.size(); i++)
+    {
+        m_fileReaders[i]->CloseFile();
+    }
     return true;
 }
 
@@ -221,6 +252,21 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
         {
             emit LocalisationDataChanged(locwmReader.ReadFrameNumber(frameNumber));
             m_currentFrameIndex = locwmReader.CurrentFrameSequenceNumber();
+        }
+        if(objectReader.IsValid())
+        {
+            emit ObjectDataChanged(objectReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = objectReader.CurrentFrameSequenceNumber();
+        }
+        if(teaminfoReader.IsValid())
+        {
+            emit TeamInfoChanged(teaminfoReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = teaminfoReader.CurrentFrameSequenceNumber();
+        }
+        if(gameinfoReader.IsValid())
+        {
+            emit GameInfoChanged(gameinfoReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = gameinfoReader.CurrentFrameSequenceNumber();
         }
         //qDebug() << "Set Frame " << frameNumber << "at" << m_currentFrameIndex;
         //m_currentFrameIndex = imageReader.CurrentFrameSequenceNumber();

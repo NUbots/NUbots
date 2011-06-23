@@ -43,6 +43,8 @@ class Self {
         std::vector<float> CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefrommobile);
         std::vector<float> CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth);
 
+        std::string toString() const;
+
         /*!
         @brief Output streaming operation.
         @param output The output stream.

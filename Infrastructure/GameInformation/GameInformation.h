@@ -36,8 +36,9 @@ using namespace std;
 class NUSensorsData;
 class NUActionatorsData;
 class GameControllerPort;
+#include "Tools/FileFormats/TimestampedData.h"
 
-class GameInformation
+class GameInformation: public TimestampedData
 {
 public:
     enum RobotState
@@ -57,7 +58,7 @@ public:
         RedTeam = TEAM_RED
     };
 public:
-    GameInformation(int playerNumber, int teamNumber);
+    GameInformation(int playerNumber=0, int teamNumber=0);
     ~GameInformation();
 
     // My information
@@ -85,14 +86,36 @@ public:
     void doManualStateChange();
     void doManualTeamChange();
 
+    void UpdateTime(double newTime) {m_timestamp = newTime;};
+    double GetTimestamp() const{return m_timestamp;};
+    static std::string stateName(RobotState theState);
+
+    /*!
+    @brief Output streaming operation.
+    @param output The output stream.
+    @param p_game The source game information data to be streamed.
+    */
+    friend std::ostream& operator<< (std::ostream& output, const GameInformation& p_game);
+
+    /*!
+    @brief Input streaming operation.
+    @param input The input stream.
+    @param p_game The destination game information data to be streamed to.
+    */
+    friend std::istream& operator>> (std::istream& input, GameInformation& p_game);
+
+    /*!
+    @brief Produce human readable string summary of the data.
+    @return Formatted string summary of the current data.
+    */
+    std::string toString() const;
+
 private:
     const RobotInfo* getRobotInfo(int teamNumber, int playerNumber) const;
     const RobotInfo* getMyRobotInfo() const;
     const TeamInfo* getTeamInfo(int teamNumber) const;
     const TeamInfo* getMyTeamInfo() const;
     const TeamInfo* getOpponentTeamInfo() const;
-
-    static std::string stateName(RobotState theState);
 
     void doGameControllerUpdate();
 
@@ -105,6 +128,7 @@ private:
 
     // Game Information
     RoboCupGameControlData* m_currentControlData;        //!< The current game info.
+    double m_timestamp;
     double m_last_packet_time;                           //!< The time the last game controller packet was received
     GameControllerPort* m_port;
     RoboCupGameControlReturnData* m_currentReturnData;   //!< The current return packet

@@ -78,6 +78,7 @@ signals:
     void linePointsDisplayChanged(std::vector<LinePoint> linepoints, GLDisplay::display displayId);
     void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
+    void fieldObjectsChanged(FieldObjects* AllFieldObjects);
     void edgeFilterChanged(QImage image, GLDisplay::display displayId);
     void fftChanged(QImage image, GLDisplay::display displayId);
     void updateStatistics(float* selectedColourCounters);

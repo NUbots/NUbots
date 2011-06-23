@@ -6,6 +6,7 @@
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocalisation(0)
 {
@@ -19,12 +20,14 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
     light = true;
     perspective = true;
-    drawRobotModel = true;
-    drawSigmaPoints = true;
+    drawRobotModel = false;
+    drawSigmaPoints = false;
     drawBestModelOnly = false;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
+    localLocalisation = 0;
+    currentSensorData = 0;
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -224,18 +227,83 @@ void locWmGlDisplay::paintGL()
     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);		// Set Light Position
 
     drawField();        // Draw the Standard Field Layout.
+
+    drawMarkers();
+    drawObjects();
+    drawOverlays();
+
+    glFlush ();         // Run Queued Commands
+    return;
+}
+
+void locWmGlDisplay::drawMarkers()
+{
+    if(currentSensorData)
+    {
+        QColor sensorColor(0,0,0);
+        std::vector<float> gpsPosition;
+        float compassHeading;
+        if(currentSensorData->getGps(gpsPosition))
+        {
+            if(!currentSensorData->getCompass(compassHeading)) compassHeading = 3.14;
+            drawRobotMarker(sensorColor, gpsPosition[0], gpsPosition[1],compassHeading);
+        }
+
+    }
     if(currentLocalisation)
     {
-        DrawLocalisation(*currentLocalisation);
+        QColor currentColor(0,0,255);
+        DrawLocalisationMarkers(*currentLocalisation, currentColor);
+    }
+    if(localLocalisation)
+    {
+        QColor localColor(255,255,0);
+        DrawLocalisationMarkers(*localLocalisation, localColor);
+    }
+}
+
+void locWmGlDisplay::drawObjects()
+{
+    if(currentSensorData)
+    {
+        QColor sensorColor(0,0,0);
+        std::vector<float> gpsPosition;
+        float compassHeading;
+        if(currentSensorData->getGps(gpsPosition))
+        {
+            if(!currentSensorData->getCompass(compassHeading)) compassHeading = 3.14;
+            drawRobot(sensorColor, gpsPosition[0], gpsPosition[1],compassHeading);
+        }
+
+    }
+    if(currentLocalisation)
+    {
+        QColor currentColor(0,0,255);
+        DrawLocalisationObjects(*currentLocalisation, currentColor);
+    }
+    if(localLocalisation)
+    {
+        QColor localColor(255,255,0);
+        DrawLocalisationObjects(*localLocalisation, localColor);
+    }
+}
+
+void locWmGlDisplay::drawOverlays()
+{
+    if(currentLocalisation)
+    {
+        QColor currentColor(0,0,255);
+        DrawLocalisationOverlay(*currentLocalisation, currentColor);
     }
     if(currentObjects)
     {
         drawFieldObjectLabels(*currentObjects);
     }
-    //drawBall(QColor(255,165,0,255), 0.0f, 0.0f);    // Draw the ball.
-    //drawRobot(QColor(255,255,255,255), 30.0f, 30.0f, 0.75f);
-    glFlush ();         // Run Queued Commands
-    return;
+    if(localLocalisation)
+    {
+        QColor localColor(255,255,0);
+        DrawLocalisationOverlay(*localLocalisation, localColor);
+    }
 }
 
 void locWmGlDisplay::snapshotToClipboard()
@@ -330,28 +398,50 @@ void locWmGlDisplay::drawBall(QColor colour, float x, float y)
     const float ballRadius = 6.5/2.0;
 
     glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
     glTranslatef(x,y,ballRadius);    // Move to centre of ball.
     gluSphere(quadratic,ballRadius,128,128);		// Draw A Sphere
     glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    glDisable(GL_BLEND);		// Turn Blending On
     glPopMatrix();
 }
 
-void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
+void locWmGlDisplay::drawBallMarker(QColor colour, float x, float y)
 {
-    const float robotHeight = 58.0f;
+    const float ballRadius = 6.5/2.0;
+
+    glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glDisable(GL_LIGHTING);      // Disable Global Lighting
+    glColor4ub(colour.red(), colour.green(), colour.blue(), colour.alpha());
+    glTranslatef(x,y,0);    // Move to centre of ball.
+    gluDisk(quadratic, ballRadius, ballRadius+2, 32, 32);
+    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
+    glDisable(GL_BLEND);		// Turn Blending On
+    glPopMatrix();
+    return;
+}
+
+void locWmGlDisplay::drawRobotMarker(QColor colour, float x, float y, float theta)
+{
     const float robotWidth = 30.0f;
     glPushMatrix();
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glEnable(GL_TEXTURE_2D);       // Enable Texture Mapping
     glTranslatef(x,y,0);    // Move to centre of robot.
     glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
     glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
     glDisable(GL_LIGHTING);      // Disable Global Lighting
     // Draw Aura
-    glColor4ub(0,0,255,255);
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
     glBindTexture(GL_TEXTURE_2D, robotAuraTexture);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
@@ -363,7 +453,23 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
         glTexCoord2f(0.0f, 1.0f); glVertex3f(+robotWidth/2.0f, -robotWidth/2.0f*1.2,  1.5);       // Top Left Of The Texture and Quad
     glEnd();
     glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+
+    glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glDisable(GL_BLEND);		// Turn Blending Off
+    glPopMatrix();
+}
+
+void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
+{
+    const float robotHeight = 58.0f;
     glEnable(GL_LIGHTING);      // Enable Global Lighting
+    const float robotWidth = 30.0f;
+    glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);       // Enable Texture Mapping
+    glTranslatef(x,y,0);    // Move to centre of robot.
+    glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
     glColor4ub(255,255,255,colour.alpha());
     if(drawRobotModel)
@@ -431,26 +537,68 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
     glPopMatrix();
 }
 
-void locWmGlDisplay::DrawModel(const KF& model)
+void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
 {
-    drawRobot(QColor(255,255,255,model.alpha*255), model.getState(KF::selfX), model.getState(KF::selfY), model.getState(KF::selfTheta));
+    int alpha = 255*model.alpha();
+    if(alpha < 25) alpha = 25;
+    modelColor.setAlpha(alpha);
+    drawRobot(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-            DrawSigmaPoint(QColor(0,0,255,model.alpha*255), sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+
+            DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
-    drawBall(QColor(255,165,0,255), model.getState(KF::ballX), model.getState(KF::ballY));
+    drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
 }
 
-void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
+void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor)
 {
     if(drawBestModelOnly)
     {
         const KF model = localisation.getBestModel();
-        DrawModel(model);
+        DrawModelObjects(model, modelColor);
+    }
+    else
+    {
+        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
+        {
+            const KF model = localisation.getModel(modelID);
+            if(model.isActive)
+            {
+                DrawModelObjects(model, modelColor);
+            }
+        }
+    }
+}
+
+void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
+{
+    int alpha = 255*model.alpha();
+    if(alpha < 25) alpha = 25;
+    modelColor.setAlpha(alpha);
+    drawRobotMarker(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
+    if(drawSigmaPoints)
+    {
+        Matrix sigmaPoints = model.CalculateSigmaPoints();
+        for (int i=1; i < sigmaPoints.getn(); i++)
+        {
+
+            DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+        }
+    }
+    drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
+}
+
+void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor)
+{
+    if(drawBestModelOnly)
+    {
+        const KF model = localisation.getBestModel();
+        DrawModelMarkers(model, modelColor);
     }
     else
     {
@@ -460,11 +608,29 @@ void locWmGlDisplay::DrawLocalisation(const Localisation& localisation)
             const KF model = localisation.getModel(modelID);
             if(model.isActive)
             {
-                DrawModel(model);
+                DrawModelMarkers(model, modelColor);
+            }
+        }
+    }
+}
+
+void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor)
+{
+    QColor draw_colour = modelColor;
+    if(!drawBestModelOnly)
+    {
+        QString displayString("Model %1 (%2%)");
+        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
+        {
+            const KF model = localisation.getModel(modelID);
+            if(model.isActive)
+            {
+                glDisable(GL_LIGHTING);      // Enable Global Lighting
                 glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
                 glColor4ub(255,255,255,255);
-                renderText(model.getState(KF::selfX), model.getState(KF::selfY),1,displayString.arg(modelID).arg(model.alpha*100,0,'f',1));
+                renderText(model.state(KF::selfX), model.state(KF::selfY),1,displayString.arg(modelID).arg(model.alpha()*100,0,'f',1));
                 glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+                glEnable(GL_LIGHTING);      // Enable Global Lighting
             }
         }
     }
