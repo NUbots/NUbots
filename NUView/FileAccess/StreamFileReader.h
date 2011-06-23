@@ -218,7 +218,7 @@ private:
                 timestamp = floor(timestamp);
                 if(HasTime(timestamp))
                 {
-                    qDebug("File: %s - Found duplicate frame time: %d", m_filename.c_str(),timestamp);
+                    qDebug("File: %s - Found duplicate frame time: %f", m_filename.c_str(),timestamp);
                     continue;
                 }
                 temp.frameSequenceNumber++;
