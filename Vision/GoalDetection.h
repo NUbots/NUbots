@@ -27,7 +27,7 @@ class GoalDetection
 
   private:
 
-        void ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
+        bool ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                                     const std::vector < TransitionSegment > &horizontalSegments);
 
@@ -47,7 +47,8 @@ class GoalDetection
 
         void CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_Candidates, Vision* vision);
 
-        float FindGoalDistance(const ObjectCandidate &PossibleGoal, Vision* vision);
+        Vector3<float> FindGoalSphericalPosition(const ObjectCandidate &PossibleGoal, Vision* vision);
+
         float DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision* vision);
 
         float DistanceLineToPoint(const LSFittedLine &midPointLine, const Vector2<int> &point);
@@ -74,5 +75,6 @@ class GoalDetection
 
         float MINIMUM_GOAL_WIDTH_IN_PIXELS;
         float MINIMUM_GOAL_HEIGHT_IN_PIXELS;
+        float MINIMUM_GOAL_HEIGHT_IN_PIXELS_AT_SCREEN_EDGE;
 };
 

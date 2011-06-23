@@ -7,7 +7,9 @@
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Kinematics.h"
-//#include <QDebug>
+//#ifdef WIN32
+//    #include <QDebug>
+//#end
 using namespace mathGeneral;
 
 
@@ -31,6 +33,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //! Set the Minimum goal width in pixels as a function of screen width
         MINIMUM_GOAL_WIDTH_IN_PIXELS = vision->getImageWidth()/60; //6 Pixels for 320 width = 8m range
         MINIMUM_GOAL_HEIGHT_IN_PIXELS = vision->getImageHeight()/6.2; //38pixels for 240 height = 8m range
+        MINIMUM_GOAL_HEIGHT_IN_PIXELS_AT_SCREEN_EDGE = 10;
 
         ObjectCandidate result;
         vector < ObjectCandidate > ::iterator it;
@@ -45,29 +48,55 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
                 continue;
             }
             //debug << "Crash Check: Before Extend with Horizontal Segments Detection:";
-            ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
+            bool wasExtended = ExtendGoalAboveHorizon(&(*it), FO_AboveHorizonCandidates,horizontalSegments);
+            if(!wasExtended)
+            {
+                it = FO_Candidates.erase(it);
+                continue;
+            }
             ++it;
         }
         //! ADD REMAINING GOAL CANDIDATES above horizon:
         FO_Candidates.insert(FO_Candidates.end(), FO_AboveHorizonCandidates.begin(), FO_AboveHorizonCandidates.end());
         FO_AboveHorizonCandidates.clear();
         //qDebug()<< "Candidate Size[Before CombineOverlapping]: " <<FO_Candidates.size();
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size();
+        //}
         //! Combine Any "OverLapping" Candidates:
         CombineOverlappingCandidates(FO_Candidates);
         //qDebug()<< "Candidate Size[Before Ratio Size Checks]: " <<FO_Candidates.size();
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size();
+        //}
         //! Check if the ratio of the object candidate is OK
         CheckCandidateSizeRatio(FO_Candidates, height, width);
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size();
+        //}
         //! Check if the Goal is in a Robot:
         CheckCandidateIsInRobot(FO_Candidates, AllObjects);
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
-
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size();
+        //}
         CheckIsFilled(FO_Candidates, vision);
         //qDebug()<< "Candidate Size[After Fill Check]: " <<FO_Candidates.size();
-
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size();
+        //}
         CheckObjectIsBelowHorizon(FO_Candidates, vision);
-        //qDebug()<< "Candidate Size[After Horizon Check]: " <<FO_Candidates.size();
-
+        /*qDebug()<< "Candidate Size[After Horizon Check]: " <<FO_Candidates.size();
+        for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        {
+            qDebug() << (*it).getSegments().size();
+        }*/
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
 
@@ -138,7 +167,7 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
 
 
 
-void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
+bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
                                            const std::vector < TransitionSegment > &horizontalSegments)
 {
@@ -148,15 +177,18 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     //int min = TopLeft.x;
     //int max = BottomRight.x;
     int margin = 16*1.5;
-    if((int)FO_AboveHorizonCandidates.size() ==0) return;
+    bool hasBeenExtended = false;
+    if((int)FO_AboveHorizonCandidates.size() ==0) return hasBeenExtended;
 
     vector < ObjectCandidate > ::iterator itAboveHorizon;
-    //debug << "AboveHoriCands:" << endl;
+    //qDebug() << "AboveHoriCands:" << endl;
     for (itAboveHorizon = FO_AboveHorizonCandidates.begin(); itAboveHorizon < FO_AboveHorizonCandidates.end(); )
     {
         //qDebug() << itAboveHorizon->getTopLeft().x << "," << itAboveHorizon->getTopLeft().y << "\t " << itAboveHorizon->getBottomRight().x << "," << itAboveHorizon->getBottomRight().y;
-        if( itAboveHorizon->getTopLeft().x > TopLeft.x - margin &&
-            itAboveHorizon->getBottomRight().x < BottomRight.x + margin &&
+        //qDebug() << TopLeft.x << BottomRight.x;
+        //qDebug() << Colour << itAboveHorizon->getColour();
+        if( itAboveHorizon->getTopLeft().x < TopLeft.x + margin &&
+            itAboveHorizon->getBottomRight().x > BottomRight.x - margin &&
             Colour == itAboveHorizon->getColour())
         {
             if(itAboveHorizon->getTopLeft().x <= TopLeft.x)
@@ -182,9 +214,9 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
             PossibleGoal->addSegments(itAboveHorizon->getSegments());
             itAboveHorizon = FO_AboveHorizonCandidates.erase(itAboveHorizon);
 
+            hasBeenExtended = true;
 
-
-            //debug << "OverLapping: Join Cand " << endl;
+            //qDebug() << "OverLapping: Join Cand " << endl;
             //usedAbovehorizonCandidate[i] = true;
             //debug <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
         }
@@ -248,6 +280,7 @@ void GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 
     }
     */
+    return hasBeenExtended;
 }
 
 
@@ -275,10 +308,10 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
         colourlist.push_back(ClassIndex::yellow);
         colourlist.push_back(ClassIndex::yellow_orange);
     }
-    else if(PossibleGoal->getColour() == ClassIndex::blue ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
+    else if(PossibleGoal->getColour() == ClassIndex::blue)// ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
     {
         colourlist.push_back(ClassIndex::blue);
-        colourlist.push_back(ClassIndex::shadow_blue);
+        //colourlist.push_back(ClassIndex::shadow_blue);
     }
     int bufferSize = 10;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist,bufferSize);
@@ -345,6 +378,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 }
                 it->setTopLeft(tempTopLeft);
                 it->setBottomRight(tempBottomRight);
+                it->addSegments(itInside->getSegments());
                 FO_Candidates.erase(itInside);
                 itInside = it+1;
                 //qDebug() << "Found: Overlapping TopLeft Goal " << tempTopLeft.x << "," << tempTopLeft.y << "\t" << tempBottomRight.x <<","<< tempBottomRight.y ;
@@ -379,6 +413,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 }
                 it->setTopLeft(tempTopLeft);
                 it->setBottomRight(tempBottomRight);
+                it->addSegments(itInside->getSegments());
                 FO_Candidates.erase(itInside);
                 itInside = it + 1;
                 //qDebug() << "Found: Overlapping BottomRight Goal "   << tempTopLeft.x << "," << tempTopLeft.y << "\t" << tempBottomRight.x <<","<< tempBottomRight.y ;
@@ -413,6 +448,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 }
                 it->setTopLeft(tempTopLeft);
                 it->setBottomRight(tempBottomRight);
+                it->addSegments(itInside->getSegments());
                 FO_Candidates.erase(itInside);
                 itInside = it + 1;
 
@@ -448,6 +484,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
                 }
                 it->setTopLeft(tempTopLeft);
                 it->setBottomRight(tempBottomRight);
+                it->addSegments(itInside->getSegments());
                 FO_Candidates.erase(itInside);
                 itInside = it+1;
                 //qDebug() << "Found: Overlapping BottomRight Goal OutSide "  << tempTopLeft.x << "," << tempTopLeft.y << "\t" << tempBottomRight.x <<","<< tempBottomRight.y ;
@@ -486,6 +523,16 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
                 continue;
             }
         }
+        if(it->getTopLeft().y < 0+boarder)
+        {
+            //USED TO STOP SMALL GOALS FORMING AT EDGE OF SCREEN
+            if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS_AT_SCREEN_EDGE)
+            {
+                //qDebug() << "Removed due to height been too small";
+                it = FO_Candidates.erase(it);
+                continue;
+            }
+        }
 
         if( !isCorrectCheckRatio(*it,height, width))
         {
@@ -508,23 +555,30 @@ void GoalDetection::CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates,
     for(it =  FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
 
-        int heigtOfPossibleGoal = it->width();
-        int widthOfPossibleGoal = it->height();
+        int heigtOfPossibleGoal = it->height();
+        int widthOfPossibleGoal = it->width();
 
         int horizontalScanspacing = vision->getScanSpacings();
-        float minIntersectingScanlines = heigtOfPossibleGoal / (float)horizontalScanspacing;
+        float minIntersectingScanlines = heigtOfPossibleGoal / (float)horizontalScanspacing; //Above horizon ScanSpacing, not inbetween horizon.
 
         int maxScanLengthOfMinScanlines = minIntersectingScanlines * widthOfPossibleGoal;
 
         vector<TransitionSegment> segments = it->getSegments();
         int lengthsOfSegments = 0;
+        int numberOfHorizontalScanLines = 0;
         for(unsigned int i = 0; i < segments.size(); i++)
         {
             lengthsOfSegments = lengthsOfSegments + segments[i].getSize();
+            //qDebug() << segments[i].getSize() << segments[i].getStartPoint().x <<", "<<segments[i].getStartPoint().y  << segments[i].getEndPoint().x<< ", "<< segments[i].getEndPoint().y<< (MINIMUM_GOAL_WIDTH_IN_PIXELS/2 +2);
+
+            if(segments[i].getSize() > (MINIMUM_GOAL_WIDTH_IN_PIXELS/2 +2) && segments[i].getStartPoint().y == segments[i].getEndPoint().y)
+            {
+                numberOfHorizontalScanLines++;
+            }
         }
 
-        //qDebug() << "Comparing LengthOfMinScanIntersection and actual lengths: " <<maxScanLengthOfMinScanlines << lengthsOfSegments << heigtOfPossibleGoal << widthOfPossibleGoal;
-        if(lengthsOfSegments <  maxScanLengthOfMinScanlines*0.5)
+        //qDebug() << "Comparing LengthOfMinScanIntersection and actual lengths: " <<maxScanLengthOfMinScanlines << lengthsOfSegments << heigtOfPossibleGoal << widthOfPossibleGoal << segments.size() << numberOfHorizontalScanLines;
+        if(lengthsOfSegments <  maxScanLengthOfMinScanlines*0.5 || numberOfHorizontalScanLines <= 1)
         {
             it = FO_Candidates.erase(it);
             continue;
@@ -639,7 +693,7 @@ void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_C
 }
 
 
-float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Vision* vision)
+Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &PossibleGoal, Vision* vision)
 {
     float distance = 0.0;
     std::vector < TransitionSegment > tempSegments = PossibleGoal.getSegments();
@@ -647,7 +701,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     Vector2<int> tempStart, tempEnd;
     float pixelError = 0.0;
     //! USE CANDIDATE HEIGHT:
-    if(PossibleGoal.getTopLeft().y > vision->getScanSpacings()
+    /*if(PossibleGoal.getTopLeft().y > vision->getScanSpacings()
         && PossibleGoal.getTopLeft().y < vision->getImageHeight()-vision->getScanSpacings()
         && PossibleGoal.aspect() < 0.3 )
     {
@@ -655,23 +709,23 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
         //qDebug() << "Height Distance " <<GoalHeightDistance ;
         return GoalHeightDistance;
-    }
+    }*/
 
     //! USE CADIDATE WIDTH:
 
     //! Calculate the soft colour list:
     std::vector <unsigned char> colourlist;
     colourlist.reserve(2);
-    if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
+    if(PossibleGoal.getColour() == ClassIndex::blue)// || PossibleGoal.getColour() == ClassIndex::shadow_blue)
     {
         //qDebug() << "BlueGoal Found: addding blue softColours to list" ;
         colourlist.push_back(ClassIndex::blue);
-        colourlist.push_back(ClassIndex::shadow_blue);
+        //colourlist.push_back(ClassIndex::shadow_blue);
     }
-    else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+    else if (PossibleGoal.getColour() == ClassIndex::yellow)// || PossibleGoal.getColour() == ClassIndex::yellow_orange)
     {
         colourlist.push_back(ClassIndex::yellow);
-        colourlist.push_back(ClassIndex::yellow_orange);
+        //colourlist.push_back(ClassIndex::yellow_orange);
     }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)
@@ -679,7 +733,7 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
         //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
-                            //<< tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
+        //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
         if(tempStart.x == tempEnd.x && tempStart.y != tempEnd.y) continue; //! Throw out vertical lines
 
         int j = i+1;
@@ -716,28 +770,16 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-                if(vision->isPixelOnScreen(checkStartx-1,tempStart.y))
+                while(vision->isPixelOnScreen(checkStartx,tempStart.y) && vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist) )
                 {
                     checkStartx--;
-                    while(vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist))
-                    {
-                        checkStartx--;
-                        if(!vision->isPixelOnScreen(checkStartx,tempStart.y))
-                            break;
-                    }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkStartx+1,tempStart.y))
+                while(vision->isPixelOnScreen(checkStartx,tempStart.y) && !vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist))
                 {
                     checkStartx++;
-                    while(!vision->isValidColour(vision->classifyPixel(checkStartx,tempStart.y),colourlist))
-                    {
-                        checkStartx++;
-                        if(!vision->isPixelOnScreen(checkStartx,tempStart.y))
-                            break;
-                    }
                 }
             }
             tempStart.x = checkStartx;
@@ -746,33 +788,20 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             if(vision->isValidColour(vision->classifyPixel(tempEnd.x,tempEnd.y),colourlist))
             {
                 //Find the pixel which isnt the colour
-
-                if(vision->isPixelOnScreen(checkEndx,tempEnd.y))
+                while(vision->isPixelOnScreen(checkEndx,tempEnd.y) && vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
                 {
                     checkEndx++;
-                    while( vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
-                    {
-                        checkEndx++;
-                        if(!vision->isPixelOnScreen(checkEndx,tempEnd.y))
-                            break;
-                    }
                 }
             }
             else
             {
-                if(vision->isPixelOnScreen(checkEndx-1,tempEnd.y))
+                while(vision->isPixelOnScreen(checkEndx,tempEnd.y) && !vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
                 {
                     checkEndx--;
-                    while(!vision->isValidColour(vision->classifyPixel(checkEndx,tempEnd.y),colourlist))
-                    {
-                        checkEndx--;
-                        if(!vision->isPixelOnScreen(checkEndx,tempEnd.y))
-                            break;
-                    }
                 }
             }
             tempEnd.x = checkEndx;
-            //qDebug() << "Start, End: "<< i <<":" << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x;
+            //qDebug() << "Start, End: "<< i <<":" << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y << "\t" << tempEnd.x - tempStart.x << MINIMUM_GOAL_WIDTH_IN_PIXELS/2;
             if(fabs(tempEnd.x -tempStart.x) < MINIMUM_GOAL_WIDTH_IN_PIXELS/2) continue;
 
 
@@ -789,19 +818,12 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     //Check if the top is cut off:
     //qDebug() << "Condition Check: "<<PossibleGoal.getTopLeft().y << vision->getScanSpacings()/2 << (PossibleGoal.getTopLeft().y < 0 +  vision->getScanSpacings()/2);
     int MIN_MIDPOINTS, LAST_MIDPOINT;
-    if(false)
-    {
-        //IT IS CUT OFF: (NO CROSSBAR)
-        MIN_MIDPOINTS = 2;
-        LAST_MIDPOINT = midpoints.size();
-    }
-    else
-    {
-        //IS NOT CUTOFF: (Maybe CrossBAR)
-        MIN_MIDPOINTS = 3;
-        LAST_MIDPOINT = midpoints.size()-1;
-    }
-    if(midpoints.size() < (unsigned int)MIN_MIDPOINTS)
+
+    //IT IS CUT OFF: (NO CROSSBAR) Removed by method further down
+    MIN_MIDPOINTS = 2;
+    LAST_MIDPOINT = midpoints.size();
+
+    /*if(midpoints.size() < (unsigned int)MIN_MIDPOINTS)
     {
         float FinalDistance;
         if(midpoints.empty())
@@ -845,11 +867,13 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
             //qDebug() <<"Single Midpoint GOAL Distance: " << FinalDistance <<endl;
         }
         return FinalDistance;
-    }
+    }*/
 
     //FORM EQUATION if MidPointLine
     //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << LAST_MIDPOINT<<endl;
     LSFittedLine midPointLine;
+    LSFittedLine leftPointLine;
+    LSFittedLine rightPointLine;
     for (int i = 0; i < (int) LAST_MIDPOINT; i++)
     {
 
@@ -857,16 +881,46 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         point.x = midpoints[i].x;
         point.y = midpoints[i].y;
         midPointLine.addPoint(point);
+        point.x = leftPoints[i].x;
+        point.y = leftPoints[i].y;
+        leftPointLine.addPoint(point);
+        point.x = rightPoints[i].x;
+        point.y = rightPoints[i].y;
+        rightPointLine.addPoint(point);
 
     }
-    //qDebug() << "Equation of Line is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y + " << midPointLine.getC() << " = 0" << endl;
+
+
+    //qDebug() << "Equation of MidLine is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y  = " << midPointLine.getC() << endl;
     //qDebug()<< "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << endl;
     //qDebug()<< "Interescting Screen at Bottom: \t"<< midPointLine.findXFromY(240)<< ","<< 240 << endl;
+
+    //qDebug() << "Equation of LeftLine is: " << leftPointLine.getA()<< "x + " <<  leftPointLine.getB() << "y = " << leftPointLine.getC()  << endl;
+    //qDebug()<< "Interescting Screen at TOP: \t"<< leftPointLine.findXFromY(0)<< ","<< 0 << endl;
+    //qDebug()<< "Interescting Screen at Bottom: \t"<< leftPointLine.findXFromY(240)<< ","<< 240 << endl;
+
+    //qDebug() << "Equation of RightLine is: " << rightPointLine.getA()<< "x + " <<  rightPointLine.getB() << "y = " << rightPointLine.getC() << endl;
+    //qDebug()<< "Interescting Screen at TOP: \t"<< rightPointLine.findXFromY(0)<< ","<< 0 << endl;
+    //qDebug()<< "Interescting Screen at Bottom: \t"<< rightPointLine.findXFromY(240)<< ","<< 240 << endl;
+
+    Vector2<int> leftpoint;
+    leftpoint.y = (PossibleGoal.getBottomRight().y + PossibleGoal.getTopLeft().y)/2;
+    leftpoint.x = leftPointLine.findXFromY(leftpoint.y);
+
+    float DistanceCentre = DistanceLineToPoint(rightPointLine,leftpoint);
+    //leftpoint.x = leftPointLine.findXFromY(240);
+    //leftpoint.y = 240;
+    //float DistanceBottom = DistanceLineToPoint(rightPointLine,leftpoint);
+
+    //qDebug() << "Distance at centre: " << DistanceCentre;
+
     float widthSum = 0;
     float tightwidthSum = 0;
     int tightPoints = 0;
-    float largestWidth = 0;
+    //float largestWidth = 0;
     float tightlargestWidth = 0;
+    float largestWidthRight = 0;
+    float largestWidthLeft = 0;
 
     //! Average filter: All Mid-Points
     //! Tight Average filter: Using the principle that mid-points should have symetrical left and right distances,
@@ -884,19 +938,27 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
         widthSum +=  leftPixels + rightPixels;
 
         //Check if the current width is larger then the largest width and pixels are close to the mid line
-        if(fabs(leftPixels - rightPixels) < (leftPixels + rightPixels) * 0.15)
+        if(fabs(leftPixels - rightPixels) < (leftPixels + rightPixels) * 0.5)
         {
             tightwidthSum +=  leftPixels + rightPixels;
             tightPoints++;
-            if(tightlargestWidth < leftPixels + rightPixels && fabs(leftPixels - rightPixels) < (leftPixels + rightPixels) * 0.1)
+            if(tightlargestWidth < leftPixels + rightPixels)
             {
                 tightlargestWidth = leftPixels + rightPixels;
             }
+            if(rightPixels >largestWidthRight)
+            {
+                largestWidthRight = rightPixels;
+            }
+            if(leftPixels > largestWidthLeft)
+            {
+                largestWidthLeft = leftPixels;
+            }
         }
-        if(largestWidth < leftPixels + rightPixels)
+        /*if(largestWidth < leftPixels + rightPixels)
         {
             largestWidth = leftPixels + rightPixels;
-        }
+        }*/
         //qDebug() << DistanceLineToPoint(midPointLine, leftpoint) << ", "<< DistanceLineToPoint(midPointLine, rightpoint) <<  " = "<< DistanceLineToPoint(midPointLine, leftpoint) +  DistanceLineToPoint(midPointLine, rightpoint) ;
 
     }
@@ -920,10 +982,17 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
 
     //if(tightlargestWidth  == 0 &&  widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 && tightwidthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2)
 
-    if(( widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 || midpoints.size() < 5) && largestWidth < widthSum * 1.2 && largestWidth != 0 && largestWidth > widthSum )
+    /*if(( widthSum < MINIMUM_GOAL_WIDTH_IN_PIXELS * 2 || midpoints.size() < 5) && largestWidth < widthSum * 1.2 && largestWidth != 0 && largestWidth > widthSum )
     {
         distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidth + pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-        //qDebug() << "Largest MidPoints Distance:" << distance << "cm using " << largestWidth << " pixels.";
+        qDebug() << "Largest MidPoints Distance:" << distance << "cm using " << largestWidth << " pixels.";
+    }*/
+    if(tightwidthSum != 0)
+    {
+
+        distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (DistanceCentre + pixelError);
+        //distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidthLeft + largestWidthRight + pixelError);
+        //qDebug() << "Largest thingy Distance:" << distance << "cm using " << largestWidthLeft + largestWidthRight << " pixels.";
     }
     else if (tightwidthSum > 0 )
     {
@@ -947,8 +1016,22 @@ float GoalDetection::FindGoalDistance( const ObjectCandidate &PossibleGoal, Visi
     }
     */
 
+    //To the bottom of the Goal Post.
+    Vector2<int> bottomCentrePoint;
+    bottomCentrePoint.y = PossibleGoal.getBottomRight().y;
+    bottomCentrePoint.x = midPointLine.findXFromY(bottomCentrePoint.y);
 
-    return distance;
+
+    Vector3<float> sphericalPosition;
+    float bearing = (float)vision->CalculateBearing(bottomCentrePoint.x);
+    float elevation = (float)vision->CalculateElevation(bottomCentrePoint.y);
+
+    sphericalPosition[0] = distance;//distance
+    sphericalPosition[1] = bearing;
+    sphericalPosition[2] = elevation;
+
+    //qDebug() << "Goal Info: (D,B,E): "<<  distance << "\t" << bearing << "\t" << elevation;
+    return sphericalPosition;
 }
 float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision* vision)
 {
@@ -1174,11 +1257,12 @@ Vector3<float> GoalDetection::CalculateSphericalPosition(ObjectCandidate* GoalPo
     Vector3<float> sphericalPosition;
     classifyGoalClosely(GoalPost, vision);
 
-    float bearing = (float)vision->CalculateBearing(GoalPost->getCentreX());
-    float elevation = (float)vision->CalculateElevation(GoalPost->getCentreY());
-    sphericalPosition[0] = FindGoalDistance((*GoalPost),vision);
-    sphericalPosition[1] = bearing;
-    sphericalPosition[2] = elevation;
+    //float bearing = (float)vision->CalculateBearing(GoalPost->getCentreX());
+    //float elevation = (float)vision->CalculateElevation(GoalPost->getCentreY());
+    //qDebug()<< "OLD B,E: " << bearing << "\t" <<elevation;
+    sphericalPosition = FindGoalSphericalPosition((*GoalPost),vision);
+    //sphericalPosition[1] = bearing;
+    //sphericalPosition[2] = elevation;
     return sphericalPosition;
 }
 
