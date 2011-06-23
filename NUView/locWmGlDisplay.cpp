@@ -537,6 +537,26 @@ void locWmGlDisplay::DrawSigmaPoint(QColor colour, float x, float y, float theta
     glPopMatrix();
 }
 
+void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
+{
+    const float ballRadius = 2.0;
+
+    glPushMatrix();
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glDisable(GL_LIGHTING);      // Disable Global Lighting
+    glColor4ub(colour.red(), colour.green(), colour.blue(), colour.alpha());
+    glTranslatef(x,y,0);    // Move to centre of ball.
+    gluDisk(quadratic, ballRadius, ballRadius+2, 32, 32);
+    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
+    glDisable(GL_BLEND);		// Turn Blending On
+    glPopMatrix();
+    return;
+}
+
 void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
 {
     int alpha = 255*model.alpha();
@@ -548,7 +568,6 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-
             DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
@@ -586,7 +605,7 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-
+            DrawBallSigma(modelColor, sigmaPoints[KF::ballX][i], sigmaPoints[KF::ballY][i]);
             DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
