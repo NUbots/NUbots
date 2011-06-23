@@ -59,7 +59,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
-    m_currentFrameNumber = -1;
+    m_currentFrameNumber = 0;
 
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
