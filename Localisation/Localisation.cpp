@@ -183,6 +183,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             #endif
         }
 
+        std::vector<TeamPacket::SharedBall> sharedBalls = teamInfo->getSharedBalls();
         #if LOC_SUMMARY > 0
         m_frame_log << "Observation Update:" << std::endl;
         int objseen = 0;
@@ -204,9 +205,10 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         }
         m_frame_log << "Mobile Objects: " << objseen << std::endl;
         m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
+        m_frame_log << "Shared Information: " << sharedBalls.size() << std::endl;
         #endif
 
-        ProcessObjects(fobs, teamInfo->getSharedBalls(), time_increment);
+        ProcessObjects(fobs, sharedBalls, time_increment);
     #endif
 }
 
@@ -1384,7 +1386,6 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
 }
 
 
-
 int  Localisation::CheckForOutlierResets()
 {
     bool numResets = 0;
@@ -1401,7 +1402,6 @@ int  Localisation::CheckForOutlierResets()
     }
     return numResets;
 }
-
 
 
 int Localisation::varianceCheckAll(FieldObjects* fobs)
@@ -1492,7 +1492,6 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
          changed = true;
      }
      
-     
      /* NEED TO FIX THIS I DON't KNOW HOW IT WILL WORK YET!
      else if( (objects[FO_YELLOW_GOALPOST_UNKNOWN].seen == true) && (objects[FO_YELLOW_GOALPOST_UNKNOWN].visionDistance > 100) ){
          models[modelID].stateEstimates[2][0]=(yellowDirection - objects[FO_YELLOW_GOALPOST_UNKNOWN].visionBearing);
@@ -1510,8 +1509,6 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
  	#endif
    	  return changed;
 }
-
-
 
 void Localisation::NormaliseAlphas()
 {
