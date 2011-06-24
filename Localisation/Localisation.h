@@ -40,7 +40,7 @@ class Localisation: public TimestampedData
         int varianceCheckAll(FieldObjects* fobs);
         void ResetAll();
         void writeToLog();
-        bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
+        bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
         void WriteModelToObjects(const KF &model, FieldObjects* fobs);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();

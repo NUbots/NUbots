@@ -50,19 +50,17 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 {
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/
-  //frameRate = g_fps;
-  frameRate = 30;
 
   m_alpha = 1.0; // Accuracy of model (0.0 -> 1.0)
-  isActive = false; // Model currently in use.
-  toBeActivated = false; // Model to be in use.
+  m_isActive = false; // Model currently in use.
+  m_toBeActivated = false; // Model to be in use.
 
 // Update Uncertainty
   updateUncertainties = Matrix(7, 7, true);
   updateUncertainties[5][5] = c_ballDecayRate; // Ball velocity x
   updateUncertainties[6][6] = c_ballDecayRate; // Ball velocity y
-  updateUncertainties[3][5] = 1.0f/frameRate; // [ballX][ballXvelocity]
-  updateUncertainties[4][6] = 1.0f/frameRate; // [ballY][ballYvelocity]
+  updateUncertainties[3][5] = 1.0f/30.0f; // [ballX][ballXvelocity]
+  updateUncertainties[4][6] = 1.0f/30.0f; // [ballY][ballYvelocity]
 
   init();									//Initialisation of Xhat and S
 
@@ -145,6 +143,16 @@ unsigned int KF::id() const
 unsigned int KF::parentId() const
 {
     return m_parentId;
+}
+
+bool KF::active() const
+{
+    return m_isActive;
+}
+
+void KF::setActive(bool active)
+{
+    m_isActive = active;
 }
 
 double KF::alpha() const
@@ -250,17 +258,20 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 
 
 void KF::timeUpdate(double deltaTime){
-		
-   	//-----------------------Update for ball velocity	
-	stateEstimates[3][0] = stateEstimates[3][0] + stateEstimates[5][0]/frameRate; // Update ball x position by ball x velocity.
-	stateEstimates[4][0] = stateEstimates[4][0] + stateEstimates[6][0]/frameRate; // Update ball y position by ball y velocity.
-	stateEstimates[5][0] = c_ballDecayRate*stateEstimates[5][0]; // Reduce ball x velocity assuming deceleration
-	stateEstimates[6][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
+    double deltaTimeSeconds = deltaTime / 1000;
+    //-----------------------Update for ball velocity
+    stateEstimates[3][0] = stateEstimates[3][0] + stateEstimates[5][0]*deltaTimeSeconds; // Update ball x position by ball x velocity.
+    stateEstimates[4][0] = stateEstimates[4][0] + stateEstimates[6][0]*deltaTimeSeconds; // Update ball y position by ball y velocity.
+    stateEstimates[5][0] = c_ballDecayRate*stateEstimates[5][0]; // Reduce ball x velocity assuming deceleration
+    stateEstimates[6][0] = c_ballDecayRate*stateEstimates[6][0]; // Reduce ball y velocity assuming deceleration
 
-  // Householder transform. Unscented KF algorithm. Takes a while.
-	stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));	
-        stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
-	return;
+    updateUncertainties[3][5] = deltaTimeSeconds; // [ballX][ballXvelocity]
+    updateUncertainties[4][6] = deltaTimeSeconds; // [ballY][ballYvelocity]
+
+    // Householder transform. Unscented KF algorithm. Takes a while.
+    stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
+    stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
+    return;
 }
 
 
@@ -778,8 +789,8 @@ std::string KF::summary(bool brief) const
 
 std::ostream& operator<< (std::ostream& output, const KF& p_kf)
 {
-    output.write(reinterpret_cast<const char*>(&p_kf.isActive), sizeof(p_kf.isActive));
-    if(p_kf.isActive)
+    output.write(reinterpret_cast<const char*>(&p_kf.m_isActive), sizeof(p_kf.m_isActive));
+    if(p_kf.m_isActive)
     {
         output.write(reinterpret_cast<const char*>(&p_kf.m_alpha), sizeof(p_kf.m_alpha));
         WriteMatrix(output,p_kf.stateEstimates);
@@ -790,8 +801,8 @@ std::ostream& operator<< (std::ostream& output, const KF& p_kf)
 
 std::istream& operator>> (std::istream& input, KF& p_kf)
 {
-    input.read(reinterpret_cast<char*>(&p_kf.isActive), sizeof(p_kf.isActive));
-    if(p_kf.isActive)
+    input.read(reinterpret_cast<char*>(&p_kf.m_isActive), sizeof(p_kf.m_isActive));
+    if(p_kf.m_isActive)
     {
         input.read(reinterpret_cast<char*>(&p_kf.m_alpha), sizeof(p_kf.m_alpha));
         p_kf.stateEstimates  = ReadMatrix(input);

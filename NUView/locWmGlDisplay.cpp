@@ -586,7 +586,7 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, Q
         for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
         {
             const KF model = localisation.getModel(modelID);
-            if(model.isActive)
+            if(model.active())
             {
                 DrawModelObjects(model, modelColor);
             }
@@ -625,7 +625,7 @@ void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, Q
         for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
         {
             const KF model = localisation.getModel(modelID);
-            if(model.isActive)
+            if(model.active())
             {
                 int alpha = std::max(c_min_display_alpha, (int)(255*model.alpha()));
                 modelColor.setAlpha(alpha);
@@ -644,7 +644,7 @@ void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, Q
         for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
         {
             const KF model = localisation.getModel(modelID);
-            if(model.isActive)
+            if(model.active())
             {
                 glDisable(GL_LIGHTING);      // Enable Global Lighting
                 glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
