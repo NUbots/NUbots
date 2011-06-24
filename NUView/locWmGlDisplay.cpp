@@ -596,9 +596,7 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, Q
 
 void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
 {
-    int alpha = 255*model.alpha();
-    if(alpha < 25) alpha = 25;
-    modelColor.setAlpha(alpha);
+
     drawRobotMarker(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
@@ -614,8 +612,10 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
 
 void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor)
 {
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
     if(drawBestModelOnly)
     {
+        modelColor.setAlpha(255);
         const KF model = localisation.getBestModel();
         DrawModelMarkers(model, modelColor);
     }
@@ -627,6 +627,8 @@ void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, Q
             const KF model = localisation.getModel(modelID);
             if(model.isActive)
             {
+                int alpha = std::max(c_min_display_alpha, (int)(255*model.alpha()));
+                modelColor.setAlpha(alpha);
                 DrawModelMarkers(model, modelColor);
             }
         }
