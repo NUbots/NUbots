@@ -184,7 +184,6 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 	//-----------------------------------------------------------------------------------------------
 	
 	
-	
 	// Step 3: Update the state estimate - Pass all sigma points through motion model
 	
 	Pose2D oldPose, diffOdom;
@@ -204,9 +203,7 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 
 		sigmaPoints[0][i] = *newPose;
 		sigmaPoints[1][i] = *(newPose+1);
-		sigmaPoints[2][i] = *(newPose+2);
-//  		   cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
- 
+		sigmaPoints[2][i] = *(newPose+2); 
 	}
 	//-----------------------------------------------------------------------------------------------
 	
