@@ -130,10 +130,11 @@ Localisation::~Localisation()
 void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo)
 {
 
-    m_frame_log.str("");
+    m_frame_log.str(""); // Clear buffer.
     if (sensor_data == NULL or fobs == NULL)
         return;
 
+    // Calculate time passed since previous frame.
     float time_increment = sensor_data->CurrentTime - m_timestamp;
     m_timestamp = sensor_data->CurrentTime;
     m_currentFrameNumber++;
@@ -142,6 +143,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
     m_frame_log << "Frame " << m_currentFrameNumber << " Time: " << m_timestamp << std::endl;
 #endif
 
+    // Check if processing is required.
     bool doProcessing = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
 
     if(doProcessing == false)
@@ -151,10 +153,9 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         #endif
         return;
     }
-    
-
 
     #ifndef USE_VISION
+        // If vision is disabled, gps coordinates are used in its place to trach location.
         vector<float> gps;
         float compass;
         if (sensor_data->getGps(gps) and sensor_data->getCompass(compass))
@@ -173,17 +174,21 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             float side = odo[1];
             float turn = odo[2];
             // perform odometry update and change the variance of the model
+
             #if LOC_SUMMARY > 0
             m_frame_log << "Time Update - Odometry: (" << fwd << "," << side << "," << turn << ")";
             m_frame_log << " Time Increment: " << time_increment << std::endl;
             #endif
+
             doTimeUpdate(fwd, side, turn, time_increment);
+
             #if LOC_SUMMARY > 0
             m_frame_log << "Result: " << getBestModel().summary();
             #endif
         }
 
         std::vector<TeamPacket::SharedBall> sharedBalls = teamInfo->getSharedBalls();
+
         #if LOC_SUMMARY > 0
         m_frame_log << "Observation Update:" << std::endl;
         int objseen = 0;
@@ -218,8 +223,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
     int updateResult;
     int usefulObjectCount = 0;
 
-    //if(balanceFallen) return;
-// 	debug_out  << "Dont put anything "<<endl;
 #if DEBUG_LOCALISATION_VERBOSITY > 2
     if(numUpdates == 0 )
     {
@@ -368,24 +371,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 
 void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjects)
 {
-
-    // Write stationary objects.
-    /*
-    StationaryObjectsIt currStat = fieldObjects->stationaryFieldObjects.begin();
-    StationaryObjectsConstIt endStat = fieldObjects->stationaryFieldObjects.end();
-    float x,y;
-    float distance,bearing;
-    while(currStat != endStat)
-    {
-        x = (*currStat).X();
-        y = (*currStat).Y();
-        distance = model.getDistanceToPosition(x,y);
-        bearing = model.getBearingToPosition(x,y);
-        (*currStat).updateEstimatedRelativeVariables(distance, bearing, 0.0f);
-        ++currStat;
-    }
-    */
-
     // Set the balls location.
     float distance,bearing;
     distance = model.getDistanceToPosition(model.state(KF::ballX), model.state(KF::ballY));
@@ -395,13 +380,14 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
     fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
 
-	bool lost = false;
-	if (lostCount > 20 or timeSinceFieldObjectSeen > 15000)
-		lost = true;
+    // Check if lost.
+    bool lost = false;
+    if (lostCount > 20 or timeSinceFieldObjectSeen > 15000)
+        lost = true;
 
     // Set my location.
-    fieldObjects->self.updateLocationOfSelf(model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta), model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),
-											lost);
+    fieldObjects->self.updateLocationOfSelf(model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta),
+                                            model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),lost);
 }
 
 bool Localisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)
@@ -765,7 +751,6 @@ void Localisation::resetSdMatrix(int modelNumber)
      m_models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 100 cm
      m_models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
      m_models[modelNumber].stateStandardDeviations[6][6] = 10.0;   // 10 cm/s
-
     
 //    models[modelNumber].stateStandardDeviations[0][0] = 10.0; // 100 cm
 //    models[modelNumber].stateStandardDeviations[1][1] = 10.0; // 150 cm
@@ -773,9 +758,7 @@ void Localisation::resetSdMatrix(int modelNumber)
 //    models[modelNumber].stateStandardDeviations[3][3] = 10.0; // 100 cm
 //    models[modelNumber].stateStandardDeviations[4][4] = 10.0; // 150 cm
 //    models[modelNumber].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-//    models[modelNumber].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
-    
-    
+//    models[modelNumber].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s    
     return;  
 }
 
@@ -789,8 +772,6 @@ void Localisation::swapFieldStateTeam(float& x, float& y, float& heading)
 
 bool Localisation::clipModelToField(int modelID)
 {
-//    const double fieldXLength = 440.0;
-//    const double fieldYLength = 680.0;
     const double fieldXLength = 680.0;
     const double fieldYLength = 440.0;
     const double fieldXMax = fieldXLength / 2.0;
@@ -874,7 +855,6 @@ bool Localisation::clipModelToField(int modelID)
 }
 
 
-
 bool Localisation::clipActiveModelsToField()
 {
     bool wasClipped = false;
@@ -899,52 +879,51 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         m_models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     
-	//------------------------- Trial code for entropy ---- Made to work only on webots as of now
-	int bestIndex = getBestModelID();
-	double rmsDistance = 0;
-	double entropy = 0;
-	double bestModelEntropy = 0;
+    //------------------------- Trial code for entropy ---- Made to work only on webots as of now
+    int bestIndex = getBestModelID();
+    double rmsDistance = 0;
+    double entropy = 0;
+    double bestModelEntropy = 0;
 	
-	for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
     {
         if(m_models[modelID].active() == false) continue; // Skip Inactive models.
         
-		rmsDistance = pow (
-                                                   pow((m_models[bestIndex].stateEstimates[0][0] - m_models[modelID].stateEstimates[0][0]),2) +
-                                               pow((m_models[bestIndex].stateEstimates[1][0] - m_models[modelID].stateEstimates[1][0]),2) +
-                                                   pow((m_models[bestIndex].stateEstimates[2][0] - m_models[modelID].stateEstimates[2][0]),2) , 0.5 );
-                entropy += (rmsDistance * m_models[modelID].alpha());
-		 
+        rmsDistance = pow (
+                           pow((m_models[bestIndex].stateEstimates[0][0] - m_models[modelID].stateEstimates[0][0]),2) +
+                           pow((m_models[bestIndex].stateEstimates[1][0] - m_models[modelID].stateEstimates[1][0]),2) +
+                           pow((m_models[bestIndex].stateEstimates[2][0] - m_models[modelID].stateEstimates[2][0]),2) , 0.5 );
+        entropy += (rmsDistance * m_models[modelID].alpha());
     }
 	
-	Matrix bestModelCovariance(3,3,false);
+    Matrix bestModelCovariance(3,3,false);
 	
 	
-	for(int i =0 ; i < 3 ; i++)
-	{
-		for(int j = 0 ; j < 3 ; j++ )
-		{
-                        bestModelCovariance[i][j] = m_models[bestIndex].stateStandardDeviations[i][j]  ;
-		}
-	}
+    for(int i =0 ; i < 3 ; i++)
+    {
+        for(int j = 0 ; j < 3 ; j++ )
+        {
+            bestModelCovariance[i][j] = m_models[bestIndex].stateStandardDeviations[i][j]  ;
+        }
+    }
 	
     bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
     bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
     if(entropy >55 && m_models[bestIndex].alpha()<50 )
         amILost = true;
-	else if (entropy <=55 && bestModelEntropy > 6.5)
+    else if (entropy <=55 && bestModelEntropy > 6.5)
         amILost = true;
-	else 
-		amILost = false;
+    else
+        amILost = false;
     
-    if(	amILost )
-		lostCount++;
-	else 
-		lostCount = 0;		
-	// End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
+    if(amILost)
+        lostCount++;
+    else
+        lostCount = 0;
+    // End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
 
-	return result;
+    return result;
 }
 
 int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
@@ -1020,7 +999,6 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
     int objID = landmark.getID();
     double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
-    //double flatObjectDistance = landmark.measuredDistance();
 
     double distanceOffsetError = R_obj_range_offset;
     double distanceRelativeError = R_obj_range_relative;
@@ -1157,7 +1135,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
-    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
+    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
         if(m_models[modelID].active() == false) continue; // Skip inactive models.
 
         // Copy initial model to the temporary model.
@@ -1171,12 +1150,14 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 //        modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
   
         // Now go through each of the possible options, and apply it to a copy of the model
-        for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++){
+        for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++)
+        {
             int possibleObjectID = possabilities[optionNumber];
             int newModelID = FindNextFreeModel();
     
             // If an invalid modelID has been returned, something has gone horribly wrong, so stop here.
-            if(newModelID < 0){ 
+            if(newModelID < 0)
+            {
 
                 #if DEBUG_LOCALISATION_VERBOSITY > 0
                 debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
@@ -1189,7 +1170,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             m_models[newModelID] = m_tempModel; // Get the new model from the temp
 
             // Copy outlier history from the current model.
-            for (int i=0; i<c_numOutlierTrackedObjects; i++){
+            for (int i=0; i<c_numOutlierTrackedObjects; i++)
+            {
                 m_modelObjectErrors[newModelID][i] = m_modelObjectErrors[modelID][i];
             }
 
@@ -1204,7 +1186,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 
             // If the update reult was an outlier rejection, the model need not be kept as the
             // information is already contained in the designated outlier model created earlier
-            if (kf_return == KF_OUTLIER) {
+            if (kf_return == KF_OUTLIER)
+            {
                 m_models[newModelID].m_toBeActivated=false;
 		   /*
                 if (outlierModelID < 0) {
@@ -1224,8 +1207,10 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         }
     }
     // Split alpha between choices and also activate models
-    for (int i=0; i< c_MAX_MODELS; i++) {
-        if (m_models[i].m_toBeActivated) {
+    for (int i=0; i< c_MAX_MODELS; i++)
+    {
+        if (m_models[i].m_toBeActivated)
+        {
             m_models[i].setAlpha(m_models[i].alpha()*1.0/((float)numOptions)); // Divide each models alpha by the numbmer of splits.
             m_models[i].setActive(true);
         }
@@ -1242,7 +1227,9 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     bool success = true;
     if(index1 == index2) success = false; // Don't merge the same model.
     if((m_models[index1].active() == false) || (m_models[index2].active() == false)) success = false; // Both models must be active.
-    if(success == false){
+
+    if(success == false)
+    {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
         debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -1299,7 +1286,8 @@ bool Localisation::MergeTwoModels(int index1, int index2)
 int Localisation::getNumActiveModels()
 {
     int numActive = 0;
-    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
+    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
         if(m_models[modelID].active() == true) numActive++;
     }
     return numActive;
@@ -1310,7 +1298,8 @@ int Localisation::getNumActiveModels()
 int Localisation::getNumFreeModels()
 {
     int numFree = 0;
-    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
+    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
         if((m_models[modelID].active() == false) && (m_models[modelID].m_toBeActivated == false)) numFree++;
     }
     return numFree;
@@ -1331,7 +1320,8 @@ int Localisation::getBestModelID() const
 {
     // Return model with highest alpha value.
     int bestID = 0;
-    for (int currID = 0; currID < c_MAX_MODELS; currID++){
+    for (int currID = 0; currID < c_MAX_MODELS; currID++)
+    {
         if(m_models[currID].active() == false) continue; // Skip inactive models.
         if(m_models[currID].alpha() > m_models[bestID].alpha()) bestID = currID;
     }
@@ -1355,19 +1345,20 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
     double sum = 0.0;
     int numObjects = 0;
     bool reset = false;
-    for(int objID = 0; objID < c_numOutlierTrackedObjects; objID++){
+    for(int objID = 0; objID < c_numOutlierTrackedObjects; objID++)
+    {
         switch(objID)
         {
-        case FieldObjects::FO_BLUE_LEFT_GOALPOST:
-        case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
-        case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
-        case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
-            sum += m_modelObjectErrors[modelID][objID];
-            if (m_modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
-            m_modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
-            break;
-        default:
-            break;
+            case FieldObjects::FO_BLUE_LEFT_GOALPOST:
+            case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
+            case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
+            case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
+                sum += m_modelObjectErrors[modelID][objID];
+                if (m_modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
+                m_modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
+                break;
+            default:
+                break;
         }
     }
 
@@ -1389,7 +1380,8 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
 int  Localisation::CheckForOutlierResets()
 {
     bool numResets = 0;
-    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
+    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
         if(CheckModelForOutlierReset(modelID))
         {
             m_models[modelID].setActive(false);
@@ -1408,7 +1400,8 @@ int Localisation::varianceCheckAll(FieldObjects* fobs)
 {
     int numModelsChanged = 0;
     bool changed;
-    for (int currID = 0; currID < c_MAX_MODELS; currID++){
+    for (int currID = 0; currID < c_MAX_MODELS; currID++)
+    {
         if(m_models[currID].active() == false)
 	{
 		continue; // Skip inactive models.
@@ -1536,7 +1529,8 @@ void Localisation::NormaliseAlphas()
 
 int Localisation::FindNextFreeModel()
 {
-    for (int i=0; i<c_MAX_MODELS; i++) {
+    for (int i=0; i<c_MAX_MODELS; i++)
+    {
         if ((m_models[i].active() == true) || (m_models[i].active() == true)) continue;
         else return i;
     }
@@ -1552,7 +1546,8 @@ void Localisation::ResetAll()
     debug_out  <<"[" << m_timestamp << "]: Resetting All Models." << endl;
 #endif
 
-    for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++){
+    for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++)
+    {
         m_models[modelNum].init();
         for (int i=0; i<c_numOutlierTrackedObjects; i++) m_modelObjectErrors[modelNum][i] = 0.0; // Reset outlier values.
     }
@@ -1563,14 +1558,16 @@ void Localisation::ResetAll()
 //**************************************************************************
 //  This method begins the process of merging close models together
 
-void Localisation::MergeModels(int maxAfterMerge) {
+void Localisation::MergeModels(int maxAfterMerge)
+{
     MergeModelsBelowThreshold(0.001);
     MergeModelsBelowThreshold(0.01);
   
 //  double threshold=0.04;
     double threshold=0.05;
 
-    while (getNumActiveModels()>maxAfterMerge) {
+    while (getNumActiveModels()>maxAfterMerge)
+    {
         MergeModelsBelowThreshold(threshold);
 //      threshold*=5.0;
         threshold+=0.05;

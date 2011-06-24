@@ -83,7 +83,6 @@ class KF {
         // Multiple Models - Model state Description.
         bool m_toBeActivated;
 
-
         Matrix updateUncertainties; // Update Uncertainty. (A matrix)
         Matrix stateEstimates; // State estimates. (Xhat Matrix)
         Matrix stateStandardDeviations; // Standard Deviation Matrix. (S Matrix)
@@ -92,13 +91,6 @@ class KF {
         Matrix sqrtOfTestWeightings; // Square root of W (Constant)
         Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
         Matrix sqrtOfProcessNoiseReset; // Square root of Q when resetting. (Conastant) 
-        //Matrix sigmaPoints;
-	
-	
-	Matrix srukfCovX;  // Original covariance mat
-	Matrix srukfSx;    // Square root of Covariance
-	Matrix srukfSq;    // State noise square root covariance
-	Matrix srukfSr;    // Measurement noise square root covariance
 	
 	// Motion Model
 	OdometryMotionModel odom_Model;

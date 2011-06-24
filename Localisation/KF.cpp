@@ -27,13 +27,6 @@ const float KF::c_threshold2 = 15.0f; // Threshold for outlier rejection. Magic 
 
 const float KF::c_outlierLikelyhood = 1e-3;
 
-// const float KF::sb_alpha1 = 0.05;
-// const float KF::sb_alpha2 = 0.0005;
-// const float KF::sb_alpha3 = 0.005;
-// const float KF::sb_alpha4 = 0.0005;
-// const float KF::sb_alpha5 = 0.0005;
-
-
 // Ball distance measurement error weightings (Constant)
 const float KF::c_R_ball_theta = 0.0001f;
 const float KF::c_R_ball_range_offset = 25.0f; // (5cm)^2
@@ -94,25 +87,19 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 
 
   nStates = stateEstimates.getm(); // number of states.
-// Create Sigma Points matrix
- 
-  //sigmaPoints = Matrix (nStates,2*nStates+1,false);
+
 
   const unsigned int numSigmaPoints = 2*nStates+1;
 
-// Create square root of W matrix
+  // Create square root of W matrix
   sqrtOfTestWeightings = Matrix(1,numSigmaPoints,false);
   sqrtOfTestWeightings[0][0] = sqrt(c_Kappa/(nStates+c_Kappa));
   double outerWeighting = sqrt(1.0/(2*(nStates+c_Kappa)));
-  for(int i=1; i <= 2*nStates; i++){
+  for(int i=1; i <= 2*nStates; i++)
+  {
     sqrtOfTestWeightings[0][i] = (outerWeighting);
   }
   
-  
-  Matrix srukfCovX = Matrix(7,7,false);  // Original covariance mat
-  Matrix srukfSq = Matrix(7,7,false);    // State noise square root covariance
-  Matrix srukfSr = Matrix(7,7,false);    // Measurement noise square root cov
-  Matrix srukfSx = Matrix(7,7,false);
   return;
 }
 
@@ -131,9 +118,6 @@ void KF::init(){
     stateStandardDeviations[4][4] = 100; // 150 cm
     stateStandardDeviations[5][5] = 10;  // 10 cm/s
     stateStandardDeviations[6][6] = 10;  // 10 cm/s
-    
-    srukfCovX = stateStandardDeviations*stateStandardDeviations.transp();
-    srukfSx = cholesky(srukfCovX);
 }
 
 unsigned int KF::id() const
