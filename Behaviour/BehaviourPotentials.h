@@ -77,7 +77,7 @@ public:
         {
             // calculate the translational speed
             if (distance < stoppingdistance)
-                result[0] = 0.95*pow(distance/stoppingdistance,2) + 0.05;
+                result[0] = distance/stoppingdistance;
             else
                 result[0] = 1;
             
@@ -100,7 +100,6 @@ public:
         }
         m_previous_time = Blackboard->Sensors->CurrentTime;
         
-        debug << distance << "," << result[0] << "," << result[1] << "," << result[2] << endl;
         return result;
     }
     
