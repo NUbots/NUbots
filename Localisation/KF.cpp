@@ -100,8 +100,10 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
  
   //sigmaPoints = Matrix (nStates,2*nStates+1,false);
 
+  const unsigned int numSigmaPoints = 2*nStates+1;
+
 // Create square root of W matrix
-  sqrtOfTestWeightings = Matrix(1,2*nStates+1,false);
+  sqrtOfTestWeightings = Matrix(1,numSigmaPoints,false);
   sqrtOfTestWeightings[0][0] = sqrt(c_Kappa/(nStates+c_Kappa));
   double outerWeighting = sqrt(1.0/(2*(nStates+c_Kappa)));
   for(int i=1; i <= 2*nStates; i++){
@@ -728,22 +730,25 @@ bool KF::clipState(int stateIndex, double minValue, double maxValue){
 
 Matrix KF::CalculateSigmaPoints() const
 {
-    Matrix scriptX=Matrix(stateEstimates.getm(), 2 * nStates + 1, false);
-    scriptX.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
+    const unsigned int numSigmaPoints = 2 * nStates + 1;
+    Matrix sigmaPoints = Matrix(stateEstimates.getm(), numSigmaPoints, false);
+    sigmaPoints.setCol(0, stateEstimates);                         //scriptX(:,1)=Xhat;
 
 //----------------Saturate ScriptX angle sigma points to not wrap
     double sigmaAngleMax = 2.5;
+    unsigned int neg_index;
     for(int i=1;i<nStates+1;i++){//hack to make test points distributed
-// Addition Portion.
-            scriptX.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-    // Crop heading
-            scriptX[2][i] = crop(scriptX[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
-// Subtraction Portion.
-            scriptX.setCol(nStates + i,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
-    // Crop heading
-            scriptX[2][nStates + i] = crop(scriptX[2][nStates + i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+        neg_index = nStates + i;
+        // Addition Portion.
+        sigmaPoints.setCol(i, stateEstimates + sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+        // Crop heading
+        sigmaPoints[2][i] = crop(sigmaPoints[2][i], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
+        // Subtraction Portion.
+        sigmaPoints.setCol(neg_index,stateEstimates - sqrt((double)nStates + c_Kappa) * stateStandardDeviations.getCol(i - 1));
+        // Crop heading
+        sigmaPoints[2][neg_index] = crop(sigmaPoints[2][neg_index], (-sigmaAngleMax + stateEstimates[2][0]), (sigmaAngleMax + stateEstimates[2][0]));
     }
-    return scriptX;
+    return sigmaPoints;
 }
 
 float KF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const
