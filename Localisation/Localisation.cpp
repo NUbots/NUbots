@@ -60,6 +60,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
+    m_prevSharedBalls.clear();
 
     feedbackPosition[0] = 0;
     feedbackPosition[1] = 0;
@@ -187,7 +188,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             #endif
         }
 
-        std::vector<TeamPacket::SharedBall> sharedBalls = teamInfo->getSharedBalls();
+        std::vector<TeamPacket::SharedBall> sharedBalls = FindNewSharedBalls(teamInfo->getSharedBalls());
 
         #if LOC_SUMMARY > 0
         m_frame_log << "Observation Update:" << std::endl;
@@ -215,6 +216,37 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
 
         ProcessObjects(fobs, sharedBalls, time_increment);
     #endif
+}
+
+std::vector<TeamPacket::SharedBall> Localisation::FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls)
+{
+    std::vector<TeamPacket::SharedBall> updateBalls;
+    updateBalls.reserve(allSharedBalls.size());
+
+    for(unsigned int b = 0; b < allSharedBalls.size(); b++)
+    {
+        std::vector<TeamPacket::SharedBall>::iterator b_it = m_prevSharedBalls.begin();
+        std::vector<TeamPacket::SharedBall>::const_iterator end_it = m_prevSharedBalls.end();
+        bool previouslyUsed = false;
+        while(b_it != end_it)
+        {
+            if((allSharedBalls[b].TimeSinceLastSeen == b_it->TimeSinceLastSeen)
+               and (allSharedBalls[b].X == b_it->X)
+               and (allSharedBalls[b].Y == b_it->Y)
+               and (allSharedBalls[b].SRXX == b_it->SRXX)
+               and (allSharedBalls[b].SRXY == b_it->SRXY)
+               and (allSharedBalls[b].SRYY == b_it->SRYY))
+            {
+                previouslyUsed = true;
+                break;
+            }
+            ++b_it;
+        }
+        if(!previouslyUsed)
+            updateBalls.push_back(allSharedBalls[b]);
+    }
+    m_prevSharedBalls = allSharedBalls;
+    return updateBalls;
 }
 
 void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::SharedBall>& sharedballs, float time_increment)

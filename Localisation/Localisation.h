@@ -84,6 +84,8 @@ class Localisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
+        std::vector<TeamPacket::SharedBall> FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls);
+
         std::string frameLog() const
         {
             return m_frame_log.str();
@@ -121,6 +123,8 @@ class Localisation: public TimestampedData
         double GetTimestamp() const {return m_timestamp;};
         int m_currentFrameNumber;
         float m_modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
+
+        std::vector<TeamPacket::SharedBall> m_prevSharedBalls;
 
         // Game state memory
         bool m_previously_incapacitated;
