@@ -42,17 +42,17 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 5.0f; // 3 // then 8.0 (home)
+const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.0316f*0.0316f;        // (0.01 rad)^2
-const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.15f*0.15f;   // 20% of range added
+const float Localisation::R_obj_theta = 0.04f;        // (0.01 rad)^2
+const float Localisation::R_obj_range_offset = 30.0f*30.0f;     // (10cm)^2
+const float Localisation::R_obj_range_relative = 0.35f*0.35f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float Localisation::sdTwoObjectAngle = (float) 0.02; //Small! error in angle difference is normally very small
+const float Localisation::sdTwoObjectAngle = 0.08f; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
@@ -67,7 +67,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     feedbackPosition[2] = 0;
 	
     amILost = true;
-    lostCount = 0;
+    lostCount = 100;
     timeSinceFieldObjectSeen = 0;
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
@@ -326,7 +326,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         for (size_t i=0; i<sharedballs.size(); i++)
         {
             doSharedBallUpdate(sharedballs[i]);
-            if (sharedballs[i].TimeSinceLastSeen < 500)    // if another robot can see the ball then it is not lost
+            if (sharedballs[i].TimeSinceLastSeen < 3000)    // if another robot can see the ball then it is not lost
                 fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
         }
     }
@@ -414,7 +414,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
     // Check if lost.
     bool lost = false;
-    if (lostCount > 20 or timeSinceFieldObjectSeen > 15000)
+    if (lostCount > 20)
         lost = true;
 
     // Set my location.
@@ -654,9 +654,9 @@ void Localisation::doFallenReset()
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
     {   // Increase heading uncertainty if fallen
-        m_models[modelNumber].stateStandardDeviations[0][0] += 15;        // Robot x
-        m_models[modelNumber].stateStandardDeviations[1][1] += 15;        // Robot y
-        m_models[modelNumber].stateStandardDeviations[2][2] += 0.707;     // Robot heading
+        m_models[modelNumber].stateStandardDeviations[0][0] += 45;        // Robot x
+        m_models[modelNumber].stateStandardDeviations[1][1] += 45;        // Robot y
+        m_models[modelNumber].stateStandardDeviations[2][2] += 1.571;     // Robot heading
     }
 }
 
@@ -911,7 +911,6 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         m_models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     
-    //------------------------- Trial code for entropy ---- Made to work only on webots as of now
     int bestIndex = getBestModelID();
     double rmsDistance = 0;
     double entropy = 0;
@@ -942,9 +941,9 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
     bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
-    if(entropy >55 && m_models[bestIndex].alpha()<50 )
+    if(entropy > 100 && m_models[bestIndex].alpha() < 50 )
         amILost = true;
-    else if (entropy <=55 && bestModelEntropy > 6.5)
+    else if (entropy <= 100 && bestModelEntropy > 20)
         amILost = true;
     else
         amILost = false;
@@ -953,7 +952,6 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         lostCount++;
     else
         lostCount = 0;
-    // End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
 
     return result;
 }

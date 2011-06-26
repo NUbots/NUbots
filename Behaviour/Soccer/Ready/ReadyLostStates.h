@@ -75,7 +75,7 @@ protected:
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         
-        if (m_time_in_state < 500)
+        if (m_time_in_state < 1000)
             m_jobs->addMotionJob(new WalkJob(0.01, 0, 0));
         else
             m_jobs->addMotionJob(new WalkJob(0, 0, 0));
@@ -85,7 +85,7 @@ protected:
         m_previous_time = m_data->CurrentTime;
         
         // grab the pan end time
-        if (not m_pan_started and m_time_in_state > 200)
+        if (not m_pan_started and m_time_in_state > 5000)
         {
             if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;

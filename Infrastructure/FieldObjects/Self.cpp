@@ -16,6 +16,7 @@ Self::Self()
     WorldModelLocationError[0] = 600;
     WorldModelLocationError[1] = 600;
     WorldModelLocationError[0] = 6.283;
+    amILost = true;
 }
 Self::~Self()
 {

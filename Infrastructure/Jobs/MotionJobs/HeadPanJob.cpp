@@ -73,7 +73,7 @@ HeadPanJob::HeadPanJob(const MobileObject& object) : MotionJob(Job::MOTION_PAN)
     m_use_default = false;
     float d = object.estimatedDistance()*cos(object.estimatedElevation());
     float t = object.estimatedBearing();
-    float sd = max(object.sdX(), object.sdY());
+    float sd = 2*max(object.sdX(), object.sdY());
     
     m_x_min = d - sd;
     m_x_max = d + sd;
@@ -92,7 +92,7 @@ HeadPanJob::HeadPanJob(const StationaryObject& object) : MotionJob(Job::MOTION_P
     m_use_default = false;
     float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(object);
     float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(object);
-    float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+    float sd = 2*max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
     
     m_x_min = d - sd;
     m_x_max = 9000;
@@ -117,7 +117,7 @@ HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects) : MotionJob(Job:
     {
         float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(objects[i]);
         float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(objects[i]);
-        float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+        float sd = 2*max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
         
         float x_min = d - sd;
         float yaw_min = t - atan2(sd,d);
