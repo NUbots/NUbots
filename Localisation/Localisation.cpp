@@ -13,11 +13,19 @@
 #include <sstream>
 #include "nubotdataconfig.h"
 #include "nubotconfig.h"
-
+ 
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
 #define TWO_OBJECT_UPDATE_ON 1
+
+
+#define BOX_LENGTH_X 10 
+#define BOX_LENGTH_Y 10
+#define X_BOUNDARY 300
+#define Y_BOUNDARY 200
+
+
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -1412,8 +1420,15 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
 int  Localisation::CheckForOutlierResets()
 {
     bool numResets = 0;
-    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
-    {
+   
+    // SB: 27/06/2011 
+	// Changing the outcome of obtaining an outlier during the game playing state// 
+	// During the game, if an outlier is detected, it will increase the variance of current model
+	// If there are multiple outliers, and the variance goes beyond a certain level, the models are reset
+	// However the new position of models are uniformly spread around the current location within a square boundary
+
+	for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+	{
         if(CheckModelForOutlierReset(modelID))
         {
             m_models[modelID].setActive(false);
@@ -1422,10 +1437,109 @@ int  Localisation::CheckForOutlierResets()
     }
     if(getNumActiveModels() < 1)
     {
-        this->doReset();
+		#ifdef PLAYING_STATE_RESETTING
+			if(Blackboard->GameInfo->getCurrentState() == STATE_PLAYING ) // if an outlier is detected during play
+			{
+				resetPlayingStateModels();
+			} 
+		#else
+			this->doReset();
+        #endif
     }
     return numResets;
 }
+
+
+
+void Localisation::resetPlayingStateModels()
+{
+	int bestModel = getBestModelID();
+	int lowX,highX, lowY, highY;
+	bool clearLow = false;
+	bool clearHigh = false;
+	
+	int currX = m_models[bestModel].stateEstimates[0][0];         // Robot x
+    int currY = m_models[bestModel].stateEstimates[1][0];           // Robot y
+    double currTheta = m_models[bestModel].stateEstimates[2][0];
+    /*
+    models[0].stateEstimates[2][0] = PI;           // Robot heading
+    models[0].stateEstimates[3][0] = 0.0;       // Ball x 
+    models[0].stateEstimates[4][0] = 0.0;       // Ball y
+    models[0].stateEstimates[5][0] = 0.0;       // Ball vx
+    models[0].stateEstimates[6][0] = 0.0;       // Ball vy	
+    */
+    
+    
+    // Calculate lowX,highX
+    if( (currX - BOX_LENGTH_X/2) >= -X_BOUNDARY)
+		clearLow = true;
+	if( (currX + BOX_LENGTH_X/2) <= X_BOUNDARY )
+		clearHigh = true;
+		
+	if(clearLow && clearHigh)
+	{
+		lowX = currX - BOX_LENGTH_X/2;
+		highX = currX + BOX_LENGTH_X/2;
+	}
+	else if(!clearLow && clearHigh)
+	{
+		lowX = -X_BOUNDARY;
+		highX = -X_BOUNDARY + BOX_LENGTH_X;
+	}
+	else if(clearLow && !clearHigh)
+	{
+		highX = X_BOUNDARY;
+		lowX = X_BOUNDARY - BOX_LENGTH_X;
+	}
+	
+	
+	//Calculate lowY, highY
+	clearLow = false;
+	clearHigh = false;
+	if( (currY - BOX_LENGTH_Y/2) >= -Y_BOUNDARY)
+		clearLow = true;
+	if( (currY + BOX_LENGTH_Y/2) <= Y_BOUNDARY )
+		clearHigh = true;
+		
+	if(clearLow && clearHigh)
+	{
+		lowY = currY - BOX_LENGTH_Y/2;
+		highY = currY + BOX_LENGTH_Y/2;
+	}
+	else if(!clearLow && clearHigh)
+	{
+		lowY = -Y_BOUNDARY;
+		highY = -Y_BOUNDARY + BOX_LENGTH_Y;
+	}
+	else if(clearLow && !clearHigh)
+	{
+		highY = Y_BOUNDARY;
+		lowY = Y_BOUNDARY - BOX_LENGTH_Y;
+	}
+    
+	this->doReset();
+    
+    m_models[0].stateEstimates[0][0] = lowX + BOX_LENGTH_X/4;
+    m_models[0].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
+    m_models[0].stateEstimates[2][0] = currTheta;
+    
+    m_models[1].stateEstimates[0][0] = lowX + BOX_LENGTH_X/4;
+    m_models[1].stateEstimates[1][0] = highY - BOX_LENGTH_Y/4;
+	m_models[1].stateEstimates[2][0] = currTheta;
+	
+    m_models[2].stateEstimates[0][0] = highX - BOX_LENGTH_X/4;
+    m_models[2].stateEstimates[1][0] = highY - BOX_LENGTH_Y/4;
+    m_models[2].stateEstimates[2][0] = currTheta;
+        
+    m_models[3].stateEstimates[0][0] = highX - BOX_LENGTH_X/4;
+    m_models[3].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
+    m_models[3].stateEstimates[2][0] = currTheta ;
+    
+    cout<<"\n\nResetting model during playing state!";
+    
+
+}
+
 
 
 int Localisation::varianceCheckAll(FieldObjects* fobs)

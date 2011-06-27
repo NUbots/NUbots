@@ -65,6 +65,8 @@ class Localisation: public TimestampedData
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
 
+		void resetPlayingStateModels();
+
         bool IsValidObject(const Object& theObject);
         bool amILost;                       // true if we are 'lost' in this frame
         int lostCount;                      // the number of consecutive frames in which we are 'lost'
