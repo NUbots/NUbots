@@ -97,7 +97,7 @@ void SAM::initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int
     MIN_POINTS_TO_LINE = MPTL;
     MIN_POINTS_TO_LINE_FINAL = MPTLF;
     MIN_LINE_R2_FIT = MLRF;
-    MAX_LINE_MSD = 20;
+    MAX_LINE_MSD = 40;
     MAX_POINTS = 500;
     MAX_LINES = 15;
     SPLIT_NOISE_ITERATIONS = 1;
@@ -118,7 +118,9 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
     //prof.start();
     for(unsigned int i=0; i<clusters.size(); i++) {
         //perform split - splitLS() checks for appropriate size, so that need not be done here
+        //noisePoints.clear();
         splitLSIterative(lines, clusters[i]);
+        //splitNoiseLS(lines);
     }
     //prof.split("Split Clusters");
 
@@ -335,7 +337,7 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
         //Pop the top line off and split it if warranted
         //if not, slap it on the end of lines and go again
         //until stack is empty or maximum lines reached
-//qDebug() << stack.size();
+
         //Clear left and right
         left.clear();
         right.clear();
@@ -346,10 +348,11 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
 
         //check for points over threshold
         findFurthestPoint(*tempLine, points_over, furthest_point);
-
+        //qDebug() << points_over << furthest_point;
         //Options
         if((unsigned int)points_over >= MIN_POINTS_OVER) {
             //See if separation is an option
+            //qDebug() << "going to seperate the line: ";
             if(separateLS(left, right, tempLine->getPoints()[furthest_point], *tempLine)) {
                 //qDebug() << "separating worked";
                 //clear old line
@@ -469,6 +472,7 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
     for(current_point = 0; current_point < points.size(); current_point++) {
         temp = points[current_point];
         distance = fabs(A * temp->x + B * temp->y - C) / denom;
+        //qDebug() << distance;
         if(distance > SPLIT_DISTANCE) {
             //potential splitting point
             points_over++; //increment points_over counter
@@ -741,8 +745,9 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
 
 
     //END POINT METHOD
+    bool endPointsGood = true;
+    /*
 
-    bool endPointsGood;
 
     //find outermost end points x vals
     double farLeftX, farRightX;
@@ -764,12 +769,20 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
     rightY2 = line2.findYFromX(farRightX);
     //differences check:
     endPointsGood = (fabs(leftY1-leftY2) <= MAX_END_POINT_DIFF) && (fabs(rightY1-rightY2) <= MAX_END_POINT_DIFF);
+    */
 
-
+    bool Gradient_is_ok = (fabs(line1.getGradient() - line2.getGradient()) < 0.25);
+    bool Intercept_is_ok = (fabs(line1.getYIntercept() - line2.getYIntercept()) < MAX_END_POINT_DIFF);
+    endPointsGood =  Gradient_is_ok && Intercept_is_ok;
     //R2TLS and MSD
     Vector2<double> results = line1.combinedR2TLSandMSD(line2);
     bool R2TLS_is_OK = (results.x >= MIN_LINE_R2_FIT);
     bool MSD_is_OK = (results.y <= MAX_LINE_MSD);
+
+
+    //qDebug() << "Comparing: \t y = " << line1.getGradient()   <<  "x + " << line1.getYIntercept() << "\t\t CENTER: " << line1.leftPoint.x << "," <<line1.leftPoint.y  << line1.numPoints ;
+    //qDebug() << "to: \t\t y = " << line2.getGradient()   <<  "x + " << line2.getYIntercept() << "\t\t CENTER: " << line2.leftPoint.x << "," <<line2.leftPoint.y << line2.numPoints;
+    //qDebug() << "Line Joining: " <<  "EndPointCheck: "<< endPointsGood << "Fit: "<<R2TLS_is_OK << results.x<< "\tMSD" << MSD_is_OK << results.y;
 
     return endPointsGood && R2TLS_is_OK && MSD_is_OK;
 

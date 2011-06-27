@@ -81,7 +81,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     //m_logrecorder->SetLogging("sensor",true);
     //m_logrecorder->SetLogging("gameinfo",true);
     //m_logrecorder->SetLogging("teaminfo",true);
-    //m_logrecorder->SetLogging("object",true);
+    m_logrecorder->SetLogging("object",true);
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -110,6 +110,7 @@ void SeeThinkThread::run()
     #ifdef THREAD_SEETHINK_PROFILE
         Profiler prof = Profiler("SeeThinkThread");
     #endif
+    ofstream locfile((string(DATA_DIR) + string("locwm.strm")).c_str(), ios_base::trunc);
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
@@ -171,6 +172,7 @@ void SeeThinkThread::run()
                     prof.split("motion_jobs");
                 #endif
             #endif
+            locfile << *m_nubot->m_localisation;
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
             #ifdef THREAD_SEETHINK_PROFILE

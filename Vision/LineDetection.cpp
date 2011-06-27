@@ -308,7 +308,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     //Profiler prof("SHANNON");
     //prof.start();
 
-    SAM::initRules(2.0,2,3,3,8.0,0.999);
+    SAM::initRules(2.0,2,4,5,8.0,0.999);
     SAM::splitAndMergeLSClusters(lines, clusters, leftover, vision, this, true, true, false);
 
     //prof.split("SAM");
@@ -1241,12 +1241,14 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
                     << "\t LeftPoint: " << relWMLine.leftPoint.x << "," << relWMLine.leftPoint.y
                     << "RightPoint: " << relWMLine.rightPoint.x << "," << relWMLine.rightPoint.y
                     << " \t "<< i << ": " << relWMLine.getA() << "x + "
-                        << relWMLine.getB() << " y + " << relWMLine.getC() << " = 0 \t Angle: "
+                        << relWMLine.getB() << " y = " << relWMLine.getC() << " \t Angle: "
                         << relWMLine.getAngle()*57.2957795 << " Degrees." << currentVisualLine.numPoints;
                 //qDebug() << leftWMPoint.x << "," << leftWMPoint.y << "," << rightWMPoint.x << "," << rightWMPoint.y;
         #endif
         relWMLine.valid = currentVisualLine.valid;
         transformedFieldLines.push_back(relWMLine);
+
+
 
     }
 
@@ -1341,6 +1343,9 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
     }
     // CentreCirclePoints:
     int sum=0;
+    #if TARGET_OS_IS_WINDOWS
+        qDebug() << "Centre Circle Points: Lines used " << usedLines.size();
+    #endif
     for(unsigned int i = 0; i < usedLines.size(); i++)
     {
         #if TARGET_OS_IS_WINDOWS
@@ -1653,8 +1658,8 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         }
     }
 
-/*
-    if ( (cornerPoints.size() > 8 || cornerPointsOnScreen > 5) && closeGoalSeen == false )                  //********  this filters out center circle. only a count 0f 2 is checked.
+    //********  this filters out center circle. only a count 0f 2 is checked.
+    /*if ( (cornerPoints.size() > 8 || cornerPointsOnScreen > 5) && closeGoalSeen == false )
     {
         //PERFORM ELIPSE FIT HERE!
 
@@ -1762,6 +1767,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         #if DEBUG_VISION_VERBOSITY > 0
             debug  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
         #endif
+
         if(points.size() > 5)
         {
            
@@ -1856,7 +1862,49 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         }
 
     }
-*/
+    */
+    if(centreCirclePoints.size() > 10)
+    {
+        FitEllipseThroughCircle ellipseCircleFitter;
+        bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(centreCirclePoints, vision);
+        #if TARGET_OS_IS_WINDOWS
+            qDebug() << "Ellipse Results: "<< isOK << ellipseCircleFitter.relCx <<  ellipseCircleFitter.relCy << ellipseCircleFitter.r;
+        #endif
+        #if DEBUG_VISION_VERBOSITY > 0
+            debug << "Ellipse Results: "<< isOK << ellipseCircleFitter.relDistance <<  ellipseCircleFitter.relBearing << ellipseCircleFitter.r;
+        #endif
+
+
+        if(isOK  == true)
+        {
+
+            #if TARGET_OS_IS_WINDOWS
+                qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<endl;
+            #endif
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+            #endif
+            Vector3<float> measured((float)ellipseCircleFitter.relDistance,(float)ellipseCircleFitter.relBearing, (float)ellipseCircleFitter.relElevation);
+            Vector3<float> measuredError(ellipseCircleFitter.sd,0.0,0.0);
+            Vector2<int> screenPosition(round(ellipseCircleFitter.cx), round(ellipseCircleFitter.cy));
+            Vector2<float> screenPositionAngle((float)vision->CalculateBearing(ellipseCircleFitter.cx), (float)vision->CalculateElevation(ellipseCircleFitter.cy));
+            Vector2<int> sizeOnScreen;
+            if(ellipseCircleFitter.r2 > ellipseCircleFitter.r1)
+            {
+               sizeOnScreen.x = round(ellipseCircleFitter.r2);
+               sizeOnScreen.y = round(ellipseCircleFitter.r1);
+            }
+            else
+            {
+                sizeOnScreen.x = round(ellipseCircleFitter.r1);
+                sizeOnScreen.y = round(ellipseCircleFitter.r2);
+            }
+
+            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
+
+
+        }
+    }
 
         //qDebug() << "Before Decoding Lines: ";
         /*

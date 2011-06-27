@@ -54,7 +54,13 @@ protected:
 class GoToBall : public ChaseSubState
 {
 public:
-    GoToBall(ChaseState* parent) : ChaseSubState(parent) {}
+    GoToBall(ChaseState* parent) : ChaseSubState(parent) 
+    {
+        m_time_since_pan = 0;
+        m_pan_end_time = 0;
+        m_pan_started = false;
+        m_previous_time = 0;
+    }
     ~GoToBall() {};
 protected:
     BehaviourState* nextState()
@@ -66,12 +72,65 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "GoToBall" << endl;
         #endif
+        if (m_parent->stateChanged() or m_data->CurrentTime - m_previous_time > 200)
+        {
+            m_time_since_pan = 0;
+            m_pan_end_time = 0;
+            m_pan_started = false;
+        }
+        
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
-        if (ball.isObjectVisible())
-            m_jobs->addMotionJob(new HeadTrackJob(ball));
-        else if (ball.TimeSinceLastSeen() > 250)
-            m_jobs->addMotionJob(new HeadPanJob(ball));
+        
+        if (m_time_since_pan > 15000)
+        {
+            StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+            StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+            StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+            StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+            
+            float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
+            float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
+            
+            vector<StationaryObject> posts;
+            if (fabs(bearing_to_yellow) < fabs(bearing_to_blue))
+            {
+                posts.push_back(yellow_left);
+                posts.push_back(yellow_right);
+            }
+            else
+            {
+                posts.push_back(blue_left);
+                posts.push_back(blue_right);
+            }
+            m_jobs->addMotionJob(new HeadPanJob(posts));
+            m_time_since_pan = 0;
+            m_pan_started = true;
+            debug << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
+        }
+        else
+        {
+            m_time_since_pan += m_data->CurrentTime - m_previous_time;
+            if (not m_pan_started)
+            {
+                if (ball.isObjectVisible())
+                {
+                    debug << m_data->CurrentTime << ": Tracking ball" << endl;
+                    m_jobs->addMotionJob(new HeadTrackJob(ball));
+                }
+                else if (ball.TimeSinceLastSeen() > 250)
+                {
+                    debug << m_data->CurrentTime << ": Ball Pan" << endl;
+                    m_jobs->addMotionJob(new HeadPanJob(ball));
+                }
+            }
+            else if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time) and m_pan_end_time < m_data->CurrentTime)
+            {
+                debug << m_data->CurrentTime << ": Goal Post Pan Completed" << endl;
+                m_pan_started = false;
+            }
+        }
+        
         
         bool iskicking;
         m_data->get(NUSensorsData::MotionKickActive, iskicking);
@@ -89,7 +148,7 @@ protected:
                 rightobstacle = temp[0];
             
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
-            if (ball.estimatedDistance() > 20 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
+            if (ball.estimatedDistance() > 25 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
                 result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 25.0f), 75);
             else
                 result = speed;
@@ -108,7 +167,15 @@ protected:
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
         }
+        
+        m_previous_time = m_data->CurrentTime;
     }
+    
+private:
+    float m_time_since_pan;
+    float m_pan_end_time;
+    bool m_pan_started;
+    float m_previous_time;
 };
 
 class FindTarget : public ChaseSubState
