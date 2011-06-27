@@ -78,8 +78,10 @@ protected:
         if (m_time_in_state < 1000)
             m_jobs->addMotionJob(new WalkJob(0.01, 0, 0));
         else
+        {
             m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 300, 1e10, -1.57, 1.57));
+        }
         
         // keep track of the time in this state
         m_previous_time = m_data->CurrentTime;

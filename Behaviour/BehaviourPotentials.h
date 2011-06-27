@@ -73,7 +73,7 @@ public:
         }
         
         vector<float> result(3,0);
-        if (distance > stoppeddistance or fabs(heading) > 0.1)
+        if (distance > stoppeddistance or fabs(heading) > 0.05)
         {
             // calculate the translational speed
             if (distance < stoppingdistance)

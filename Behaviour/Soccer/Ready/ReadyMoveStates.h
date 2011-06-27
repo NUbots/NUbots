@@ -102,7 +102,7 @@ protected:
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
         
         vector<float> position = getReadyFieldPositions();
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 50, 100);
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 0, 50, 100);
         
         vector<float> result;
         if (m_team_info->getPlayerNumber() != 1)

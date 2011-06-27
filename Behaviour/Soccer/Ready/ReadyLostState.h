@@ -48,6 +48,9 @@ protected:
     BehaviourState* m_lost_pan;
     friend class ReadyLostSpin;
     BehaviourState* m_lost_spin;
+    
+    float m_time_in_state;
+    float m_previous_time;
 };
 
 
