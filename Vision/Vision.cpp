@@ -117,10 +117,17 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
 
     if (image == NULL || data == NULL || actions == NULL || fieldobjects == NULL)
+    {
+        // keep object times updated.
+        if(fieldobjects && data)
+        {
+            AllFieldObjects->preProcess(data->GetTimestamp());
+            AllFieldObjects->postProcess(data->GetTimestamp());
+        }
         return;
+    }
     m_sensor_data = data;
     m_actions = actions;
-
     setFieldObjects(fieldobjects);
 
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
@@ -165,6 +172,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "No Horizon Data" << endl;
         #endif
+        AllFieldObjects->postProcess(image->m_timestamp);
         return;
     }
 
