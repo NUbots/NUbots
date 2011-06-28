@@ -512,7 +512,7 @@ void NUMotion::process(JobList* jobs)
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::process(): Finished" << endl;
+        debug << "NUMotion::process(jobs): Finished" << endl;
     #endif
 }
 

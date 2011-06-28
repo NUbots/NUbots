@@ -30,24 +30,29 @@ class NUActionatorsData;
 class ScriptJob;
 class NUWalk;
 #include "Motion/NUMotionProvider.h"
+#include "Motion/Tools/MotionScript.h"
 
-class Script
+class Script : public NUMotionProvider
 {
 public:
     Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~Script();
     
     void stop();
+    void stopHead();
+    void stopArms();
+    void stopLegs();
     void kill();
     
     bool isActive();
     bool isUsingHead();
     bool isUsingArms();
     bool isUsingLegs();
+    bool isReady();
     
-    bool requiresHead() {return false;}
-    bool requiresArms() {return false;}
-    bool requiresLegs() {return false;}
+    bool requiresHead();
+    bool requiresArms();
+    bool requiresLegs();
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(ScriptJob* job);
@@ -55,6 +60,9 @@ private:
 public:
 private:
     NUWalk* m_walk;
+    double m_script_start_time;
+    bool m_script_pending;
+    MotionScript m_script;
 };
 
 #endif

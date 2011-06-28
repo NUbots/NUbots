@@ -34,11 +34,11 @@ using namespace std;
 
 /*! @brief Constructor for NUSave module
  */
-NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUSave", data, actions), m_BLOCK_TRIGGER(1.8f), m_BLOCK_WIDTH(55.0f)
+NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUSave", data, actions), m_BLOCK_TRIGGER(1800.0f), m_BLOCK_WIDTH(55.0f)
 {
-#if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUSave::NUSave()" << endl;
-#endif
+    #if DEBUG_NUMOTION_VERBOSITY > 4
+        debug << "NUSave::NUSave()" << endl;
+    #endif
     m_walk = walk;
     m_data = data;
     m_actions = actions;
@@ -157,7 +157,7 @@ void NUSave::process(NUSensorsData* data, NUActionatorsData* actions)
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "NUSave::process()" << endl;
 #endif
-    if (not isActive())
+    if (not isActive() and m_block_time > m_data->CurrentTime)
         playSave();
 }
 
@@ -182,6 +182,10 @@ void NUSave::playSave()
  */
 void NUSave::process(BlockJob* job)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUSave::process() ";
+        job->summaryTo(debug);
+    #endif
     job->getPosition(m_block_time, m_block_position);
     if (m_data)
         m_block_timestamp = m_data->CurrentTime;
@@ -191,6 +195,10 @@ void NUSave::process(BlockJob* job)
  */
 void NUSave::process(SaveJob* job)
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 2
+        debug << "NUSave::process() ";
+        job->summaryTo(debug);
+    #endif
     job->getPosition(m_block_time, m_block_position);  
     if (m_data)
         m_block_timestamp = m_data->CurrentTime;
@@ -199,7 +207,8 @@ void NUSave::process(SaveJob* job)
 /*! @brief Returns true if the current block is doable */
 bool NUSave::isBlockAble()
 {
-    if (m_block_time > 0.3 and m_block_time < m_BLOCK_TRIGGER and fabs(m_block_position[1]) < m_BLOCK_WIDTH and m_data->CurrentTime - m_block_timestamp < 5000)
+    float timeuntilblock = m_block_time - m_block_timestamp;
+    if (timeuntilblock > 300 and timeuntilblock < m_BLOCK_TRIGGER and fabs(m_block_position[1]) < m_BLOCK_WIDTH)
         return true;
     else
         return false;

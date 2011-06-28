@@ -53,6 +53,7 @@ public:
     void play(NUSensorsData* data, NUActionatorsData* actions);
     void setPlaySpeed(float speed);
     
+    bool isValid();
     string& getName();
     
     double timeFinished();

@@ -39,6 +39,7 @@ using namespace std;
 MotionScript::MotionScript()
 {
     m_is_valid = false;
+    setUses();
 }
 
 MotionScript::MotionScript(string filename)
@@ -52,6 +53,11 @@ MotionScript::MotionScript(string filename)
 string& MotionScript::getName()
 {
     return m_name;
+}
+
+bool MotionScript::isValid()
+{
+    return m_is_valid;
 }
 
 MotionScript::~MotionScript()

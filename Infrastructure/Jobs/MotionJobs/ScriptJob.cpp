@@ -20,6 +20,7 @@
  */
 
 #include "ScriptJob.h"
+
 #include "debug.h"
 #include "debugverbosityjobs.h"
 
@@ -34,6 +35,15 @@ ScriptJob::ScriptJob(double time, const MotionScript& script) : MotionJob(Job::M
     m_name = m_script.getName();
 }
 
+/*! @brief Constructs a ScriptJob at the given time
+    @param time the time in ms to perform the save
+    @param name the name of the script to play  
+ */
+ScriptJob::ScriptJob(double time, const string& name) : MotionJob(Job::MOTION_SCRIPT)
+{
+    m_job_time = time;
+    m_name = name;
+}
 
 /*! @brief Constructs a ScriptJob from stream data
     @param time the time in ms to perform the save
@@ -59,7 +69,10 @@ ScriptJob::~ScriptJob()
 void ScriptJob::getScript(double& time, MotionScript& script)
 {
     time = m_job_time;
-    script = m_script;
+    if (not m_script.isValid())
+        script = MotionScript(m_name);
+    else
+        script = m_script;
 }
 
 /*! @brief Returns the name of the associated script

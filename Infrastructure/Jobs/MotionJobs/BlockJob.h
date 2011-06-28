@@ -32,6 +32,7 @@ using namespace std;
 class BlockJob : public MotionJob
 {
 public:
+    BlockJob(double time, float x, float y);
     BlockJob(double time, const vector<float>& position);
     BlockJob(double time, istream& input);
     ~BlockJob();
