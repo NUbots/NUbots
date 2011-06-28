@@ -19,7 +19,7 @@ public:
 
     friend ostream& operator<< (ostream& output, const NULocalisationSensors& p_sensor);
     friend istream& operator>> (istream& input, NULocalisationSensors& p_sensor);
-private:
+public:
     Sensor m_gps;                   //!< gps sensor
     Sensor m_compass;               //!< compass sensor
     Sensor m_odometry;              //!< odometry sensor

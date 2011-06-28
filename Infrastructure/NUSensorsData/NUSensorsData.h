@@ -129,7 +129,6 @@ public:
     };
 public:
     NUSensorsData();
-    NUSensorsData(const NULocalisationSensors& locsensors);
     ~NUSensorsData();
     
     void addSensors(const vector<string>& hardwarenames);
@@ -219,6 +218,7 @@ public:
     
     int size() const;
     double GetTimestamp() const {return CurrentTime;}
+    void setLocSensors(const NULocalisationSensors& locsensors);
     NULocalisationSensors getLocSensors();
 private:
     bool getJointData(const id_t& id, const JointSensorIndices& in, float& data);

@@ -107,49 +107,6 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
         m_sensors.push_back(Sensor(m_ids[i]->Name));
 }
 
-NUSensorsData::NUSensorsData(const NULocalisationSensors& locsensors)
-{
-        NUSensorsData();
-        int gps_id,compass_id,odom_id,falling_id,fallen_id,lf_id,rf_id;
-        const vector<int>& gps_ids = mapIdToIndices(Gps);
-        if (gps_ids.size() == 1)
-        {
-            m_sensors[gps_ids[0]] = locsensors.gps();
-        }
-        const vector<int>& compass_ids = mapIdToIndices(Compass);
-        if (compass_ids.size() == 1)
-        {
-            m_sensors[compass_ids[0]] = locsensors.compass();
-        }
-        const vector<int>& odom_ids = mapIdToIndices(Odometry);
-        if (odom_ids.size() == 1)
-        {
-            m_sensors[odom_ids[0]] = locsensors.odometry();
-        }
-        const vector<int>& falling_ids = mapIdToIndices(Falling);
-        if (falling_ids.size() == 1)
-        {
-            m_sensors[falling_ids[0]] = locsensors.falling();
-        }
-        const vector<int>& fallen_ids = mapIdToIndices(Fallen);
-        if (fallen_ids.size() == 1)
-        {
-            m_sensors[fallen_ids[0]] = locsensors.fallen();
-        }
-        const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
-        if (lf_ids.size() == 1)
-        {
-            m_sensors[lf_ids[0]] = locsensors.leftFoot();
-        }
-        const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
-        if (rf_ids.size() == 1)
-        {
-            m_sensors[rf_ids[0]] = locsensors.rightFoot();
-        }
-        CurrentTime = locsensors.GetTimestamp();
-        return;
-}
-
 NUSensorsData::~NUSensorsData()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
@@ -159,6 +116,7 @@ NUSensorsData::~NUSensorsData()
 
 void NUSensorsData::addSensors(const vector<string>& hardwarenames)
 {
+
     // the model we use for sensors, is that every sensor is 'available', but the data may be invalid.
     for (size_t i=NumCommonIds.Id; i<m_ids.size(); i++)
         m_id_to_indices[i].push_back(i);
@@ -925,7 +883,11 @@ bool NUSensorsData::isIncapacitated()
 {
     bool gettingup = false;
     get(MotionGetupActive, gettingup);
-    return isFalling() or isFallen() or not isOnGround() or gettingup;
+    bool falling = isFalling();
+    bool fallen = isFallen();
+    bool onGround = isOnGround();
+    return falling or fallen or !onGround or gettingup;
+    //return isFalling() or isFallen() or not isOnGround() or gettingup;
 }
 
 /******************************************************************************************************************************************
@@ -1113,6 +1075,55 @@ void NUSensorsData::csvTo(ostream& output)
 int NUSensorsData::size() const
 {
     return m_sensors.size();
+}
+
+void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
+{
+    int gps_id,compass_id,odom_id,falling_id,fallen_id,lf_id,rf_id;
+    const vector<int>& gps_ids = mapIdToIndices(Gps);
+    if (gps_ids.size() == 1)
+    {
+        gps_id = gps_ids[0];
+        m_sensors[gps_id] = locsensors.m_gps;
+    }
+    const vector<int>& compass_ids = mapIdToIndices(Compass);
+    if (compass_ids.size() == 1)
+    {
+        compass_id = compass_ids[0];
+        m_sensors[compass_id] = locsensors.compass();
+    }
+    const vector<int>& odom_ids = mapIdToIndices(Odometry);
+    if (odom_ids.size() == 1)
+    {
+        odom_id = odom_ids[0];
+        m_sensors[odom_id] = locsensors.odometry();
+    }
+    const vector<int>& falling_ids = mapIdToIndices(Falling);
+    if (falling_ids.size() == 1)
+    {
+        falling_id = falling_ids[0];
+        m_sensors[falling_id] = locsensors.falling();
+    }
+    const vector<int>& fallen_ids = mapIdToIndices(Fallen);
+    if (fallen_ids.size() == 1)
+    {
+        fallen_id = fallen_ids[0];
+        m_sensors[fallen_id] = locsensors.fallen();
+    }
+    const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
+    if (lf_ids.size() == 1)
+    {
+        lf_id = lf_ids[0];
+        m_sensors[lf_id] = locsensors.leftFoot();
+    }
+    const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
+    if (rf_ids.size() == 1)
+    {
+        rf_id = rf_ids[0];
+        m_sensors[rf_id] = locsensors.rightFoot();
+    }
+    CurrentTime = locsensors.GetTimestamp();
+    return;
 }
 
 NULocalisationSensors NUSensorsData::getLocSensors()

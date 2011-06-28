@@ -71,7 +71,7 @@ protected:
     bool m_dataIsSynced;
     QStringList m_available_data;
     std::vector<QFileInfo> m_open_files;
-    NUSensorsData* m_tempSensors;
+    NUSensorsData m_tempSensors;
 };
 
 #endif // SPLITSTREAMFILEFORMATREADER_H

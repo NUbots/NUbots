@@ -58,6 +58,21 @@ Sensor::Sensor(const Sensor& source)
     StringData = source.StringData;
 }
 
+Sensor& Sensor::operator= (const Sensor & source)
+{
+    Name = source.Name;
+    Time = source.Time;
+    ValidFloat = source.ValidFloat;
+    ValidVector = source.ValidVector;
+    ValidMatrix = source.ValidMatrix;
+    ValidString = source.ValidString;
+
+    FloatData = source.FloatData;
+    VectorData = source.VectorData;
+    MatrixData = source.MatrixData;
+    StringData = source.StringData;
+}
+
 /*! @brief Gets float sensor reading, returns true if sucessful, false otherwise 
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
