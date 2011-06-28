@@ -62,6 +62,7 @@ LogRecorder::LogRecorder(int playerNumber)
 {
     m_player_number = playerNumber;
     m_log_writers.push_back(new LogFileWriter("sensor"));
+    m_log_writers.push_back(new LogFileWriter("locsensor"));
     m_log_writers.push_back(new LogFileWriter("image"));
     m_log_writers.push_back(new LogFileWriter("object"));
     m_log_writers.push_back(new LogFileWriter("teaminfo"));
@@ -164,6 +165,8 @@ bool LogRecorder::WriteData(NUBlackboard* theBlackboard)
             std::string data_type = (*it)->GetDataType();
             if(data_type == "sensor")
                 (*it)->GetFile() << *(theBlackboard->Sensors) << std::flush;
+            else if(data_type == "locsensor")
+                (*it)->GetFile() << theBlackboard->Sensors->getLocSensors() << std::flush;
             else if(data_type == "image")
                 (*it)->GetFile() << *(theBlackboard->Image) << std::flush;
             else if(data_type == "object")

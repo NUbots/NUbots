@@ -5,6 +5,7 @@
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Localisation/Localisation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUSensorsData/NULocalisationSensors.h"
 #include "Localisation/LocWmFrame.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
@@ -56,6 +57,7 @@ protected:
     void setKnownDataTypes();
     StreamFileReader<NUImage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
+    StreamFileReader<NULocalisationSensors> locsensorReader;
     StreamFileReader<Localisation> locwmReader;
     StreamFileReader<FieldObjects> objectReader;
     StreamFileReader<LocWmFrame> locmframeReader;
@@ -69,6 +71,7 @@ protected:
     bool m_dataIsSynced;
     QStringList m_available_data;
     std::vector<QFileInfo> m_open_files;
+    NUSensorsData* m_tempSensors;
 };
 
 #endif // SPLITSTREAMFILEFORMATREADER_H
