@@ -9,6 +9,7 @@ FieldObjects::FieldObjects()
 {
         InitStationaryFieldObjects();
 	InitMobileFieldObjects();
+        m_timestamp = 0.0;
 }
 FieldObjects::~FieldObjects()
 {
