@@ -30,7 +30,8 @@
  */
 Sensor::Sensor(string sensorname)
 {
-    Name = sensorname; 
+    Name = sensorname;
+    Time = 0.0;
     ValidFloat = false;
     ValidVector = false;
     ValidMatrix = false;
