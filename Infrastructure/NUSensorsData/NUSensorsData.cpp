@@ -1079,12 +1079,12 @@ int NUSensorsData::size() const
 
 void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
 {
-    int gps_id,compass_id,odom_id,falling_id,fallen_id,lf_id,rf_id;
+    int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
     const vector<int>& gps_ids = mapIdToIndices(Gps);
     if (gps_ids.size() == 1)
     {
         gps_id = gps_ids[0];
-        m_sensors[gps_id] = locsensors.m_gps;
+        m_sensors[gps_id] = locsensors.gps();
     }
     const vector<int>& compass_ids = mapIdToIndices(Compass);
     if (compass_ids.size() == 1)
@@ -1110,6 +1110,12 @@ void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
         fallen_id = fallen_ids[0];
         m_sensors[fallen_id] = locsensors.fallen();
     }
+    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    if (fallen_ids.size() == 1)
+    {
+        getup_id = getup_ids[0];
+        m_sensors[getup_id] = locsensors.getup();
+    }
     const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
     if (lf_ids.size() == 1)
     {
@@ -1128,7 +1134,7 @@ void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
 
 NULocalisationSensors NUSensorsData::getLocSensors()
 {
-    int gps_id,compass_id,odom_id,falling_id,fallen_id,lf_id,rf_id;
+    int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
     const vector<int>& gps_ids = mapIdToIndices(Gps);
     if (gps_ids.size() == 1)
     {
@@ -1154,6 +1160,12 @@ NULocalisationSensors NUSensorsData::getLocSensors()
     {
         fallen_id = fallen_ids[0];
     }
+
+    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    if (fallen_ids.size() == 1)
+    {
+        getup_id = getup_ids[0];
+    }
     const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
     if (lf_ids.size() == 1)
     {
@@ -1166,7 +1178,7 @@ NULocalisationSensors NUSensorsData::getLocSensors()
     }
 
     return NULocalisationSensors(GetTimestamp(), m_sensors[gps_id], m_sensors[compass_id], m_sensors[odom_id], m_sensors[falling_id],
-                                 m_sensors[fallen_id], m_sensors[lf_id], m_sensors[rf_id]);
+                                 m_sensors[fallen_id], m_sensors[getup_id], m_sensors[lf_id], m_sensors[rf_id]);
 }
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
