@@ -1416,12 +1416,18 @@ int  Localisation::CheckForOutlierResets()
     {
         if(CheckModelForOutlierReset(modelID))
         {
+            #if LOC_SUMMARY > 0
+            m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
+            #endif
             m_models[modelID].setActive(false);
             numResets++;
         }
     }
     if(getNumActiveModels() < 1)
     {
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Reset - All models removed due to outliers." << std::endl;
+        #endif
         this->doReset();
     }
     return numResets;
