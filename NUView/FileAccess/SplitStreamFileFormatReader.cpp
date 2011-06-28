@@ -4,7 +4,7 @@
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFileFormatReader(parent)
 {
 
-    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "LLegEndEffector", "RLegEndEffector"};
+    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
     vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
     m_tempSensors.addSensors(sensor_names);
     setKnownDataTypes();
@@ -13,7 +13,7 @@ SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFi
 
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(const QString& filename, QObject *parent): LogFileFormatReader(parent)
 {
-    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "LLegEndEffector", "RLegEndEffector"};
+    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
     vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
     m_tempSensors.addSensors(sensor_names);
     m_fileGood = false;
@@ -49,13 +49,14 @@ const NUSensorsData* SplitStreamFileFormatReader::GetSensorData()
     }
     else if (locsensorReader.IsValid())
     {
-        m_tempSensors.setLocSensors(*locsensorReader.ReadFrameNumber(m_currentFrameIndex));
-        return &m_tempSensors;
+        NULocalisationSensors* temp = locsensorReader.ReadFrameNumber(m_currentFrameIndex);
+        if(temp)
+        {
+            m_tempSensors.setLocSensors(*temp);
+            return &m_tempSensors;
+        }
     }
-    else
-    {
-        return NULL;
-    }
+    return NULL;
 }
 
 const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
@@ -268,9 +269,13 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
         }
         else if(locsensorReader.IsValid())
         {
-            m_tempSensors.setLocSensors(*locsensorReader.ReadFrameNumber(frameNumber));
-            emit sensorDataChanged(&m_tempSensors);
-            m_currentFrameIndex = locsensorReader.CurrentFrameSequenceNumber();
+            NULocalisationSensors* temp = locsensorReader.ReadFrameNumber(frameNumber);
+            if(temp)
+            {
+                m_tempSensors.setLocSensors(*temp);
+                emit sensorDataChanged(&m_tempSensors);
+                m_currentFrameIndex = locsensorReader.CurrentFrameSequenceNumber();
+            }
         }
         if(locwmReader.IsValid())
         {
