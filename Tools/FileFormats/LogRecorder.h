@@ -68,7 +68,7 @@ public:
     {
         const std::string extension = "strm";
         const std::string seperator = ".";
-        const std::string data_dir = std::string(DATA_DIR);
+        const std::string data_dir = "/var/volatile/";//std::string(DATA_DIR);
         std::stringstream filename;
         filename << data_dir << robot_number << "_" << data_name << seperator << extension;
         return filename.str();
