@@ -43,7 +43,6 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 {
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/
-
   m_alpha = 1.0; // Accuracy of model (0.0 -> 1.0)
   m_isActive = false; // Model currently in use.
   m_toBeActivated = false; // Model to be in use.
@@ -756,7 +755,7 @@ float KF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innova
 std::string KF::summary(bool brief) const
 {
     std::stringstream buffer;
-    buffer << "Model Number " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
+    buffer << "Model Id " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
     buffer << state(KF::selfY) << "," << state(KF::selfTheta) << ") Ball Position: (" << state(KF::ballX) << ",";
     buffer << state(KF::ballY) << ")" << endl;
     if(!brief)

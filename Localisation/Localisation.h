@@ -64,6 +64,7 @@ class Localisation: public TimestampedData
         void MergeModels(int maxAfterMerge);
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
+        std::string ModelStatusSummary();
 
         bool IsValidObject(const Object& theObject);
         bool amILost;                       // true if we are 'lost' in this frame

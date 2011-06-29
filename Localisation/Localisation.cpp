@@ -348,6 +348,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         }
 
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
+
 #endif // MULTIPLE_MODELS_ON
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
@@ -1014,11 +1015,17 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
 
 int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 {
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Known landmark update: " << landmark.getName() << std::endl;
+#endif
     int kf_return;
     int numSuccessfulUpdates = 0;
 
     if(IsValidObject(landmark) == false)
     {
+    #if LOC_SUMMARY > 0
+        m_frame_log << "Skipping invalid." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
         debug_out  <<"[" << m_timestamp << "] Skipping Bad Landmark Update: ";
         debug_out  << landmark.getName();
@@ -1082,7 +1089,10 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
             debug_out << "OK!" << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
-
+    #if LOC_SUMMARY > 0
+        m_frame_log << "Model " << modelID << " updated using " << landmark.getName() << " measurment. Result = ";
+        m_frame_log << ((kf_return==KF_OUTLIER)?"Outlier":"Success") << std::endl;
+    #endif
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
@@ -1090,6 +1100,10 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
 int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
+
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Two object landmark update: " << landmark1.getName() << " & " << landmark2.getName() << std::endl;
+#endif
     float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -1109,9 +1123,21 @@ int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObjec
 int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
+    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
 
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Ambiguous landmark update: " << ambigousObject.getName() << std::endl;
+    m_frame_log << "Possible objects: " << std::endl;
+    for (int i=0; i < possabilities.size(); i++)
+    {
+        m_frame_log << possibleObjects[possabilities[i]].getName() << std::endl;
+    }
+#endif
     if(IsValidObject(ambigousObject) == false)
     {
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Skipping invalid measurment!" << std::endl;
+#endif
     #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << m_timestamp << "] Skipping Ambiguous Object: ";
         debug_out  << ambigousObject.getName();
@@ -1123,6 +1149,9 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 
     #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)){
+#if LOC_SUMMARY > 0
+    m_frame_log << "Ignoring Object."<< std::endl;
+#endif
     #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << m_timestamp << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
@@ -1130,9 +1159,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     }
     #endif // AMBIGUOUS_CORNERS_ON <= 0
 
-    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
     unsigned int numOptions = possabilities.size();
-    int outlierModelID = -1;
     int numFreeModels = getNumFreeModels();
     int numActiveModels = getNumActiveModels();
     int numRequiredModels = numActiveModels * (numOptions); // An extra base model.
@@ -1178,7 +1205,6 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         
         // Save Original model as outlier option.
         m_models[modelID].setAlpha(m_models[modelID].alpha()*0.0005);
-        outlierModelID = -1;
 //        modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
   
         // Now go through each of the possible options, and apply it to a copy of the model
@@ -1234,6 +1260,12 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 #if DEBUG_LOCALISATION_VERBOSITY > 2
             if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
             else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+#endif
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
+            m_frame_log << "Result: " << ((kf_return == KF_OK)?"Success":"Outlier");
+            if(kf_return == KF_OK) m_frame_log << " alpha = " << m_models[newModelID].alpha() << std::endl;
+            else m_frame_log << std::endl;
 #endif
 
         }
@@ -1419,7 +1451,7 @@ int  Localisation::CheckForOutlierResets()
             #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
             #endif
-            m_models[modelID].setActive(false);
+            //m_models[modelID].setActive(false);
             numResets++;
         }
     }
@@ -1569,7 +1601,7 @@ int Localisation::FindNextFreeModel()
 {
     for (int i=0; i<c_MAX_MODELS; i++)
     {
-        if ((m_models[i].active() == true) || (m_models[i].active() == true)) continue;
+        if ((m_models[i].active() == true) || (m_models[i].m_toBeActivated == true)) continue;
         else return i;
     }
     return -1; // NO FREE MODELS - This is very, very bad.
@@ -1615,6 +1647,21 @@ void Localisation::MergeModels(int maxAfterMerge)
 
 
 
+std::string Localisation::ModelStatusSummary()
+{
+    std::stringstream temp;
+    temp << "Active model summary." << std::endl;
+    for (int i=0; i < c_MAX_MODELS; i++)
+    {
+        if(m_models[i].active())
+        {   temp << "Model " << i << std::endl;
+            temp << m_models[i].summary();
+        }
+    }
+    return temp.str();
+}
+
+
 void Localisation::PrintModelStatus(int modelID)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -1637,6 +1684,9 @@ void Localisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             if (!m_models[i].active() || !m_models[j].active()) continue;
             mergeM = abs( MergeMetric(i,j) );
             if (mergeM < MergeMetricThreshold) { //0.5
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model " << j << " merged into " << i << std::endl;
+#endif
 #if DEBUG_LOCALISATION_VERBOSITY > 2
                 debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << m_models[j].alpha() << "]";
                 debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha() << "] " << " Merge Metric = " << mergeM << endl  ;
