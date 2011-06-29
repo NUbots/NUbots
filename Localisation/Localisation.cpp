@@ -1461,8 +1461,8 @@ int  Localisation::CheckForOutlierResets()
 
 	for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
 	{
-        if(CheckModelForOutlierReset(modelID))
-        {
+            if(CheckModelForOutlierReset(modelID))
+            {
             #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
             #endif
@@ -1474,7 +1474,7 @@ int  Localisation::CheckForOutlierResets()
                 {
                     resetPlayingStateModels();
                 }
-#else
+#endif
             }
             numResets++;
         }
@@ -1485,11 +1485,9 @@ int  Localisation::CheckForOutlierResets()
         m_frame_log << "Reset - All models removed due to outliers." << std::endl;
         #endif
                 this->doReset();
-        #endif
     }
     return numResets;
 }
-
 
 
 void Localisation::resetPlayingStateModels()
