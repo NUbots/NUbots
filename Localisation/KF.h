@@ -1,6 +1,8 @@
 #ifndef _KF_h_DEFINED
 #define _KF_h_DEFINED
 
+#define PLAYING_STATE_RESETTING 1
+
 #include <math.h>
 #include "Tools/Math/Matrix.h"
 #include "odometryMotionModel.h"
@@ -61,6 +63,7 @@ class KF {
         void init();
         void Reset();
         bool clipState(int stateIndex, double minValue, double maxValue);
+        bool isVarianceOutOfBounds();
 
         /*!
         @brief Output streaming operation.

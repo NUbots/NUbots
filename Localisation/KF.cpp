@@ -17,6 +17,10 @@ Xhat[6][0]=ballVeocityY
 #include "odometryMotionModel.h"
 #include "pose2d.h"
 #include <sstream>
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+
+#define VARIANCE_REST_THRESHOLD 800
 
 using namespace mathGeneral;
 
@@ -117,6 +121,7 @@ void KF::init(){
     stateStandardDeviations[4][4] = 100; // 150 cm
     stateStandardDeviations[5][5] = 10;  // 10 cm/s
     stateStandardDeviations[6][6] = 10;  // 10 cm/s
+    
 }
 
 unsigned int KF::id() const
@@ -483,7 +488,29 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   m_alpha *= 1 / (1 + innovation2measError);
   //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
 
-  if (innovation2 > c_threshold2){
+
+  // SB: 27/06/2011 
+  // Changing the outcome of obtaining an outlier during the game playing state// 
+  // During the game, if an outlier is detected, it will increase the variance of current model
+  // If there are multiple outliers, and the variance goes beyond a certain level, the models are reset
+  // However the new position of models are uniformly spread around the current location within a square boundary
+  if (innovation2 > c_threshold2)
+  {	
+	  #ifdef PLAYING_STATE_RESETTING 
+		if(Blackboard->GameInfo->getCurrentState() == STATE_PLAYING ) // if an outlier is detected during play
+		{
+			// Increase the variance of this model by 10%
+			cout<<"\nIncreasing uncertainty by 10%";
+			    stateStandardDeviations[0][0] += stateStandardDeviations[0][0]*0.1;
+				stateStandardDeviations[1][1] += stateStandardDeviations[1][1]*0.1;
+				stateStandardDeviations[2][2] += stateStandardDeviations[2][2]*0.1;
+				stateStandardDeviations[3][3] += stateStandardDeviations[3][3]*0.1;
+				stateStandardDeviations[4][4] += stateStandardDeviations[4][4]*0.1;
+				stateStandardDeviations[5][5] += stateStandardDeviations[5][5]*0.1;
+				stateStandardDeviations[6][6] += stateStandardDeviations[6][6]*0.1;
+			
+		}
+	  #endif
 		return KF_OUTLIER;
 	}
   if (innovation2 < 0){
@@ -498,6 +525,16 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   return KF_OK;   
 }
 
+
+
+bool  KF::isVarianceOutOfBounds()
+{
+
+	if (variance(0) > VARIANCE_REST_THRESHOLD && variance(1) > VARIANCE_REST_THRESHOLD)
+	   return true;
+	else
+		return false;
+}
 
 
 //
