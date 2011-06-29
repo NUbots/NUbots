@@ -219,7 +219,8 @@ private:
                 if(HasTime(timestamp))
                 {
                     qDebug("File: %s - Found duplicate frame time: %f", m_filename.c_str(),timestamp);
-                    continue;
+                    //continue;
+                    while(HasTime(timestamp)) timestamp+=1.0;
                 }
                 temp.frameSequenceNumber++;
                 m_index.insert(IndexEntry(timestamp,temp));
