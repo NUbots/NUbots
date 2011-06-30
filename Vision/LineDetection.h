@@ -80,13 +80,13 @@ class LineDetection{
         bool checkAroundForWhite(int lx, int ly,int mx,int  my,int rx, int ry, double lineLength,Vision* vision);
         bool checkAroundForWhite(int mx, int my,double length, Vision* vision);
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
-        void FindPenaltySpot(Vision* vision);
+        void FindPenaltySpot(vector< ObjectCandidate >& candidates, Vision* vision);
         void DecodePenaltySpot(FieldObjects* AllObjects, double timestamp);
 
         void FindCornerPoints(int image_width,int image_height);
         float findAngleOfLCorner(CornerPoint cornerPoint);
         void DecodeCorners(FieldObjects* AllObjects, double timestamp,  Vision* vision);
-        void GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
+        bool GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
         bool GetDistanceToPoint(LinePoint point,  Vector3<float> &result, Vision* vision);
         void TransformLinesToWorldModelSpace(Vision* vision);
         //! Line Point Sorting

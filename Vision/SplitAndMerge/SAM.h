@@ -58,6 +58,8 @@ class SAM
 public:
 
     static vector<LinePoint*> noisePoints;
+    static vector<LinePoint*> noisePoints1;
+    static vector<LinePoint*> noisePoints2;
     static unsigned int noFieldLines;
 
     //GENERIC
@@ -101,15 +103,18 @@ private:
     static void splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
     static void splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
     static void splitNoiseLS(vector<LSFittedLine*>& lines);
+    static void splitNoiseLS12(vector<LSFittedLine*>& lines);
     static void mergeLS(vector<LSFittedLine*>& lines);
     static void generateLSLine(LSFittedLine& line, vector<LinePoint*>& points);
-    static bool separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePoint* split_point, LSFittedLine& line);
+    static bool separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, vector<LinePoint*>& below, vector<LinePoint*>& above, vector<LinePoint*>& centre, LinePoint* split_point, LSFittedLine& line, bool& useTriple);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC
     static void findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_point);
     static void addToNoise(LinePoint* point);
+    static void addToNoise1(LinePoint* point);
+    static void addToNoise2(LinePoint* point);
     static void clearSmallLines(vector<LSFittedLine*>& lines);
     static void clearDirtyLines(vector<LSFittedLine*>& lines);
     static bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);

@@ -48,32 +48,29 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
         else
         {
             Vector2<int> tempLinePoint;
-            tempLinePoint.x = relativePoint.x * cos(relativePoint.y) * cos (relativePoint.z);
-            tempLinePoint.y = relativePoint.x * sin(relativePoint.y) * cos (relativePoint.z);
+            tempLinePoint.x = relativePoint.x * cos(relativePoint.y);// * cos (relativePoint.z);
+            tempLinePoint.y = relativePoint.x * sin(relativePoint.y);// * cos (relativePoint.z);
             points.push_back(tempLinePoint);
-            //qDebug() << "CenterCircle through Circle: Point Found: " << tempLinePoint.x << "," <<tempLinePoint.y;
+            //qDebug() << tempLinePoint.x << "," <<tempLinePoint.y;
+            //qDebug() << centreCirclePoints[i]->x << "," <<centreCirclePoints[i]->y;
         }
     }
     
     //Perform Circle Fit on Transformed Points:
-    Circle circ = circleFitter.FitCircleLMA(points);
+    Circle circ = circleFitter.FitCircleLMF(points);
     LinePoint relativeCentrePoint;
     relativeCentrePoint.x = circ.centreX;
     relativeCentrePoint.y = circ.centreY;
     relCx = circ.centreX;
     relCy = circ.centreY;
-
+    //qDebug() << "CenterCircle Centre: "<< relativeCentrePoint.x  << " , "<<relativeCentrePoint.y;
     //Assign Relative Centre Circle points:
     r = circ.radius;
     relDistance = sqrt(relativeCentrePoint.x * relativeCentrePoint.x  + relativeCentrePoint.y *relativeCentrePoint.y);
+
     relBearing =  atan2(relativeCentrePoint.y,relativeCentrePoint.x);
     
-    #if TARGET_OS_IS_WINDOWS
-    qDebug() << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Elevation: " << relElevation <<" Radius: "<< r << "."<<endl;
-    #endif
-    #if DEBUG_VISION_VERBOSITY > 6
-        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Radius: " << r << "."<<endl;
-    #endif
+
     bool result = isThisAGoodFit();
 
     #if TARGET_OS_IS_WINDOWS
@@ -81,6 +78,13 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
     {
         CalculateScreenPosition(centreCirclePoints);
     }
+    #endif
+
+    #if TARGET_OS_IS_WINDOWS
+    qDebug() << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Elevation: " << relElevation <<" Radius: "<< r << "."<< result << endl;
+    #endif
+    #if DEBUG_VISION_VERBOSITY > 6
+        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Radius: " << r << "."<<endl;
     #endif
     return result;
 }
@@ -90,8 +94,8 @@ bool FitEllipseThroughCircle::isThisAGoodFit()
     //SPL2010 Rules: Centre Circle Diameter is 1200mm
     //Radius: 600mm = 60cm
     float ActualRadius = 60;
-    float PercentageError = 33;
-    if((r1 < ActualRadius*(1+PercentageError/100)) && (r1 > ActualRadius*(1-PercentageError/100)) )
+    float PercentageError = 30;
+    if((r < ActualRadius*(1+PercentageError/100)) && (r > ActualRadius*(1-PercentageError/100)) )
     {
 
         sd = fabs(r-ActualRadius);

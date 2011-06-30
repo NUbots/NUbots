@@ -438,8 +438,8 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             glLineWidth(3.0);       // Line width
             glColor3ub(255,0,0);
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
+            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].leftPoint.x)));                 // Starting point
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].rightPoint.x)));               // Ending point
             glEnd();  // End Lines
 
             /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
@@ -460,8 +460,8 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             glLineWidth(2.0);       // Line width
             glColor3ub(100,0,50);
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].leftPoint.y));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].rightPoint.y));               // Ending point
+            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].leftPoint.x)));                 // Starting point
+            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].rightPoint.x)));               // Ending point
             glEnd();  // End Lines
 
         }

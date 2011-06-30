@@ -80,7 +80,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //}
         //! Check if the Goal is in a Robot:
         CheckCandidateIsInRobot(FO_Candidates, AllObjects);
-        //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
+        //qDebug()<< "Candidate Size[After IsInRobot Checks]: " <<FO_Candidates.size();
         //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         //{
         //    qDebug() << (*it).getSegments().size();
@@ -89,14 +89,14 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //qDebug()<< "Candidate Size[After Fill Check]: " <<FO_Candidates.size();
         //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         //{
-        //    qDebug() << (*it).getSegments().size();
+        //    qDebug() << (*it).getSegments().size()<< (*it).getTopLeft().x << "," << (*it).getTopLeft().y <<"  "<< (*it).getBottomRight().x << "," << (*it).getBottomRight().y ;
         //}
         CheckObjectIsBelowHorizon(FO_Candidates, vision);
-        /*qDebug()<< "Candidate Size[After Horizon Check]: " <<FO_Candidates.size();
-        for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
-        {
-            qDebug() << (*it).getSegments().size();
-        }*/
+        //qDebug()<< "Candidate Size[After Horizon Check]: " <<FO_Candidates.size();
+        //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
+        //{
+        //    qDebug() << (*it).getSegments().size() << (*it).getTopLeft().x << "," << (*it).getTopLeft().y <<"  "<< (*it).getBottomRight().x << "," << (*it).getBottomRight().y ;
+        //}
         //! Sort In order of Largest to Smallest:
         SortObjectCandidates(FO_Candidates);
 
@@ -504,7 +504,7 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
         //qDebug() << "Candidate: Ratio: TopLeft(x,y), BottomRight(x,y): "<< it->aspect()<< "\t" << it->getTopLeft().x << "," <<it->getTopLeft().y << "  "<<it->getBottomRight().x << ","<< it->getBottomRight().y;
-        int boarder = 5; //! Boarder of pixels
+        int boarder = 20; //! Boarder of pixels
         if (it->getBottomRight().x < width-boarder && it->getTopLeft().x > 0+boarder )
         {
             if(fabs(it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS)
@@ -532,6 +532,9 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
                 it = FO_Candidates.erase(it);
                 continue;
             }
+            //Should not do Ratio Check if large enough, but missing top part of goal
+            ++it;
+            continue;
         }
 
         if( !isCorrectCheckRatio(*it,height, width))
@@ -677,7 +680,8 @@ void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_C
     vector < ObjectCandidate > ::iterator it;
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
-        if((vision->m_horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y))== false)
+        int buffer = 20;
+        if((vision->m_horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y + buffer))== false)
         {
             //qDebug() << "Removing Goal Above Horizon:" << it->getBottomRight().x<< ","<< it->getBottomRight().y << vision->m_horizonLine.findYFromX(it->getBottomRight().x);
             //qDebug() << "Horizon Information: " << vision->m_horizonLine.getGradient() << "x + " << vision->m_horizonLine.getYIntercept();

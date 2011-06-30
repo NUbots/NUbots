@@ -276,10 +276,16 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }
 
     //! Find Line or Robot Points:
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Finding Line or Robot Segments: with " << horizontalsegments.size()<< "horizontalsegments"<<endl;
+    #endif
     LineDetection LineDetector;
-    DetectLineOrRobotPoints(&horiScanArea, &LineDetector);
 
+    DetectLineOrRobotPoints(&vertScanArea, &LineDetector);
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Line or Robot Segments: " << " Vertical Line Segments: "<<LineDetector.verticalLineSegments.size() << "Horizontal Line Segments: " << LineDetector.horizontalLineSegments.size()<< " Robot Segments: "<< LineDetector.robotSegments.size()<< endl;
+    #endif
     //! Identify Field Objects
 
     /**INCLUDED BY SHANNON**/
@@ -327,12 +333,14 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         //candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
         LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
         LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
-
+        #if DEBUG_VISION_VERBOSITY > 5
+            debug << "Line Candidates: " << LineCandidates.size() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size()<< " Vertical Candidates: " << VerticalLineCandidates.size()<< endl;
+        #endif
 
     /**INCLUDED BY SHANNON**/
 
     #if DEBUG_VISION_VERBOSITY > 5
-    debug << "Begin Classify Candidates: " << endl;
+        debug << "Begin Classify Candidates: " << endl;
     #endif
 
     std::vector< ObjectCandidate > RobotCandidates;
@@ -460,7 +468,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //! Form Lines
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPre-Line Formation: " <<endl;
+            debug << "\tPre-Line Formation: with " << LineCandidates.size() << " candidates"<<endl;
         #endif
 
         //SHANNON
@@ -493,10 +501,16 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
     AllFieldObjects->postProcess(image->m_timestamp);
 
-    if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
+    //PLAY A SOUND IF OBJECT SEEN:
+    /*if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
     {
-        //m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
+        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error1.wav");
     }
+    if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].isObjectVisible() ||
+        AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].isObjectVisible())
+    {
+        m_actions->add(NUActionatorsData::Sound, image->m_timestamp, "error2.wav");
+    }*/
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
 			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
@@ -2567,6 +2581,10 @@ void Vision::DetectLines(LineDetection* LineDetector, vector< ObjectCandidate >&
 
     LineDetector->FormLines(AllFieldObjects, this, m_sensor_data, candidates, leftover);
 
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tDetected: " <<  LineDetector->fieldLines.size() << " Lines, " << LineDetector->cornerPoints.size() << " Corners." <<endl;
+    #endif
+
     //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
 
     return;
@@ -2902,12 +2920,12 @@ QImage Vision::getFFT(QImage image)
 
 bool Vision::isPixelOnScreen(int x, int y)
 {
-    if(x < 0 || x > currentImage->getWidth())
+    if(x <= 0 || x >= currentImage->getWidth())
     {
         return false;
     }
 
-    if(y < 0 || x > currentImage->getWidth())
+    if(y <= 0 || y >= currentImage->getHeight())
     {
         return false;
     }
