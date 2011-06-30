@@ -98,7 +98,7 @@
 //Debugging flags:
 //#ifdef WALK_DEBUG
 //#  define DEBUG_CONTROLLER_COM
-#  define DEBUG_SENSOR_ZMP
+//#  define DEBUG_SENSOR_ZMP
 //#endif
 
 // ZMP Preview Queue Debugging

@@ -202,9 +202,14 @@ double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
     double tempY = d_myProb.normalDistribution( 0.0 , varY);
     double tempTheta = d_myProb.normalDistribution( 0.0 , varTheta); 
 
-    newPose[0] = oldSigma.X + diffOdom.X*cos(oldSigma.Theta + (diffOdom.Theta/2)) - diffOdom.Y*sin(oldSigma.Theta + (diffOdom.Theta/2)) + tempX;
-    newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2)) + tempY;
-    newPose[2] = oldSigma.Theta + diffOdom.Theta + tempTheta;
+//    newPose[0] = oldSigma.X + diffOdom.X*cos(oldSigma.Theta + (diffOdom.Theta/2)) - diffOdom.Y*sin(oldSigma.Theta + (diffOdom.Theta/2)) + tempX;
+//    newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2)) + tempY;
+//    newPose[2] = oldSigma.Theta + diffOdom.Theta + tempTheta;
+
+    // SN - Removed random element.
+    newPose[0] = oldSigma.X + diffOdom.X*cos(oldSigma.Theta + (diffOdom.Theta/2)) - diffOdom.Y*sin(oldSigma.Theta + (diffOdom.Theta/2));
+    newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2));
+    newPose[2] = oldSigma.Theta + diffOdom.Theta;
 
     return newPose;
     

@@ -1,6 +1,8 @@
 #ifndef _KF_h_DEFINED
 #define _KF_h_DEFINED
 
+#define PLAYING_STATE_RESETTING 1
+
 #include <math.h>
 #include "Tools/Math/Matrix.h"
 #include "odometryMotionModel.h"
@@ -51,6 +53,8 @@ class KF {
         double getDistanceToPosition(double posX, double posY) const;
         double getBearingToPosition(double posX, double posY) const;
         double alpha() const;
+        bool active() const;
+        void setActive(bool active=true);
         unsigned int id() const;
         unsigned int parentId() const;
         unsigned int spawnFromModel(const KF& parent);
@@ -59,6 +63,7 @@ class KF {
         void init();
         void Reset();
         bool clipState(int stateIndex, double minValue, double maxValue);
+        bool isVarianceOutOfBounds();
 
         /*!
         @brief Output streaming operation.
@@ -79,9 +84,7 @@ class KF {
         // Variables
 
         // Multiple Models - Model state Description.
-        bool isActive;
-        bool toBeActivated;
-
+        bool m_toBeActivated;
 
         Matrix updateUncertainties; // Update Uncertainty. (A matrix)
         Matrix stateEstimates; // State estimates. (Xhat Matrix)
@@ -91,15 +94,7 @@ class KF {
         Matrix sqrtOfTestWeightings; // Square root of W (Constant)
         Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
         Matrix sqrtOfProcessNoiseReset; // Square root of Q when resetting. (Conastant) 
-	Matrix sigmaPoints;
 	
-	
-	Matrix srukfCovX;  // Original covariance mat
-	Matrix srukfSx;    // Square root of Covariance
-	Matrix srukfSq;    // State noise square root covariance
-	Matrix srukfSr;    // Measurement noise square root covariance
-	
-        double frameRate; // Constant from init on.
 	// Motion Model
 	OdometryMotionModel odom_Model;
         // Tuning Values (Constants) -- Values assigned in KF.cpp
@@ -119,6 +114,7 @@ class KF {
 
 private:
         double m_alpha;
+        bool m_isActive;
         unsigned int m_id;
         unsigned int m_parentId;
         double m_creationTime;

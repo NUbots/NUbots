@@ -40,7 +40,7 @@ class Localisation: public TimestampedData
         int varianceCheckAll(FieldObjects* fobs);
         void ResetAll();
         void writeToLog();
-        bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn);
+        bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
         void WriteModelToObjects(const KF &model, FieldObjects* fobs);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
@@ -65,6 +65,8 @@ class Localisation: public TimestampedData
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
 
+		void resetPlayingStateModels();
+
         bool IsValidObject(const Object& theObject);
         bool amILost;                       // true if we are 'lost' in this frame
         int lostCount;                      // the number of consecutive frames in which we are 'lost'
@@ -83,6 +85,8 @@ class Localisation: public TimestampedData
         void setupModelSd(int modelNumber, float sdx, float sdy, float sdheading);
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
+
+        std::vector<TeamPacket::SharedBall> FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls);
 
         std::string frameLog() const
         {
@@ -121,6 +125,8 @@ class Localisation: public TimestampedData
         double GetTimestamp() const {return m_timestamp;};
         int m_currentFrameNumber;
         float m_modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
+
+        std::vector<TeamPacket::SharedBall> m_prevSharedBalls;
 
         // Game state memory
         bool m_previously_incapacitated;

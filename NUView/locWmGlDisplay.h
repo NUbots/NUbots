@@ -72,6 +72,7 @@ protected:
         void drawRobot(QColor colour, float x, float y, float theta);
         void drawRobotMarker(QColor colour, float x, float y, float theta);
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
+        void DrawBallSigma(QColor colour, float x, float y);
 
         void DrawModelObjects(const KF& model, QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
