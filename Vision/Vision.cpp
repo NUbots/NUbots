@@ -556,7 +556,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         //BALL
         /*if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
-            SaveAnImage();
+            m_saveimages_thread->signal();
         }*/
     
     /*
@@ -2801,7 +2801,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 }
 
 double Vision::CalculateBearing(double cx){
-    double FOVx = deg2rad(45.0f); //Taken from Old Globals
+    double FOVx = deg2rad(46.40f); //Taken from Old Globals
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 

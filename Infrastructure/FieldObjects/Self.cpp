@@ -211,7 +211,7 @@ bool Self::sdHeadingLessThanGoalWidth(const StationaryObject& goalpost, float nu
         return false;
 }
 
-/*! @brief Returns the [time (s), x,y] of the closest intercept point to a moving object. 
+/*! @brief Returns the [time (ms), x,y] of the closest intercept point to a moving object. 
            Deacceleration is not taken into account, so the moving object may never reach the calculated point.
            In that case the time will be (very) large.
     @param theObject the moving mobile object
@@ -239,10 +239,10 @@ std::vector<float> Self::CalculateClosestInterceptToMobileObject(const MobileObj
     {   // if the ball is moving towards us then time can be calculated
         intercept[1] = (b_x*v_y*v_y - b_y*v_x*v_y)/(v_x*v_x + v_y*v_y);                                       // intercept x
         intercept[2] = -(v_x/v_y)*intercept[1];                                                               // intercept y
-        intercept[0] = sqrt(pow(b_x - intercept[1], 2) + pow(b_y - intercept[2], 2))/velocity_mag;            // intercept time (s)
+        intercept[0] = 1000*sqrt(pow(b_x - intercept[1], 2) + pow(b_y - intercept[2], 2))/velocity_mag;       // intercept time (ms)
     }
     else
-        intercept[0] = 600;
+        intercept[0] = 60000;
     return intercept;
 }
 
