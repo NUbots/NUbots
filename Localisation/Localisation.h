@@ -20,7 +20,7 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-#define LOC_SUMMARY 1
+#define LOC_SUMMARY 0
 
 class Localisation: public TimestampedData
 {
