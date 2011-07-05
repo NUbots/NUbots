@@ -56,7 +56,7 @@ const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 // Object distance measurement error weightings (Constant)
 const float Localisation::R_obj_theta = 0.05f*0.05f;        // (0.01 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.30f*0.30f;   // 20% of range added
+const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
@@ -1120,25 +1120,15 @@ int Localisation::doMultipleKnownLandmarkObservationUpdate(std::vector<Stationar
                 kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
                                 R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
-        #if LOC_SUMMARY > 0
+                #if LOC_SUMMARY > 0
                 m_frame_log << "Individual Update: " <<  (*currStat)->getName() << " Result: " << ((kf_return==KF_OK)?"Successful":"Outlier") << std::endl;
-        #endif
-#if LOC_SUMMARY > 0
-    m_frame_log << "Following individual object updates: " << m_models[modelID].summary(false);
-#endif
-
-
+                m_frame_log << "Following individual object updates: " << m_models[modelID].summary(false);
+                #endif
                 if(kf_return == KF_OUTLIER)
                 {
                     m_modelObjectErrors[modelID][(*currStat)->getID()] += 1.0;
                 }
             }
-            kf_return = m_models[modelID].MultiFieldObs(locations, measurements, R_measurement);
-            for(unsigned int id=0; id < objIds.size(); id++)
-            {
-                m_modelObjectErrors[modelID][objIds[id]] += 1.0;
-            }
-
         }
     #if LOC_SUMMARY > 0
 
