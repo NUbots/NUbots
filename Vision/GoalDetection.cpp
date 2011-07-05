@@ -308,10 +308,10 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
         colourlist.push_back(ClassIndex::yellow);
         colourlist.push_back(ClassIndex::yellow_orange);
     }
-    else if(PossibleGoal->getColour() == ClassIndex::blue)// ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
+    else if(PossibleGoal->getColour() == ClassIndex::blue ||PossibleGoal->getColour() == ClassIndex::shadow_blue)
     {
         colourlist.push_back(ClassIndex::blue);
-        //colourlist.push_back(ClassIndex::shadow_blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
     }
     int bufferSize = 10;
     vision->CloselyClassifyScanline(&tempLine,&tempSeg,spacings, direction, colourlist,bufferSize);
@@ -516,14 +516,14 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
         }
         if(it->getBottomRight().y < height-boarder && it->getTopLeft().y > 0+boarder )
         {
-            if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS)
+            if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS*0.75)
             {
                 //qDebug() << "Removed due to height been too small";
                 it = FO_Candidates.erase(it);
                 continue;
             }
         }
-        if(it->getTopLeft().y < 0+boarder)
+        if(it->getBottomRight().y < 0+boarder)
         {
             //USED TO STOP SMALL GOALS FORMING AT EDGE OF SCREEN
             if(fabs(it->getTopLeft().y - it->getBottomRight().y) < MINIMUM_GOAL_HEIGHT_IN_PIXELS_AT_SCREEN_EDGE)
@@ -704,16 +704,7 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     std::vector < Vector2<int> > midpoints, leftPoints, rightPoints;
     Vector2<int> tempStart, tempEnd;
     float pixelError = 0.0;
-    //! USE CANDIDATE HEIGHT:
-    /*if(PossibleGoal.getTopLeft().y > vision->getScanSpacings()
-        && PossibleGoal.getTopLeft().y < vision->getImageHeight()-vision->getScanSpacings()
-        && PossibleGoal.aspect() < 0.3 )
-    {
-        float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y);
 
-        //qDebug() << "Height Distance " <<GoalHeightDistance ;
-        return GoalHeightDistance;
-    }*/
 
     //! USE CADIDATE WIDTH:
 
@@ -736,8 +727,7 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     {
         tempStart = tempSegments[i].getStartPoint();
         tempEnd = tempSegments[i].getEndPoint();
-        //qDebug() << i<<": " <<tempSegments[i].getStartPoint().x << "," << tempSegments[i].getStartPoint().y
-        //                    << tempSegments[i].getEndPoint().x  << "," << tempSegments[i].getEndPoint().y  ;
+
         if(tempStart.x == tempEnd.x && tempStart.y != tempEnd.y) continue; //! Throw out vertical lines
 
         int j = i+1;
@@ -758,18 +748,13 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
         i = j-1;
         //! Removes Small and "Top segments = cross bar"
 
-        //qDebug() << i<<": " <<tempStart.x << "," <<tempStart.y
-        //                    << tempEnd.x  << "," << tempEnd.y  ;
-
-
         if(fabs(tempEnd.x-tempStart.x) > 2 && i < (int)tempSegments.size())
         {
             Vector2<int> tempMidPoint;
             //FIND the EXACT TEMPEND and TEMPSTART points:
             int checkEndx = tempEnd.x;
             int checkStartx = tempStart.x;
-            //qDebug() << "Start, End: " << tempStart.x << ", " << tempStart.y << "\t" <<  tempEnd.x << ", " << tempEnd.y;
-            //qDebug() << "Colour At Start: "<< vision->classifyPixel(tempStart.x,tempStart.y);
+
             //Checking Start of Transition: Go Backwards if current colour is valid, otherwise go forwards
             if(vision->isValidColour(vision->classifyPixel(tempStart.x,tempStart.y),colourlist))
             {
@@ -809,8 +794,8 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
             if(fabs(tempEnd.x -tempStart.x) < MINIMUM_GOAL_WIDTH_IN_PIXELS/2) continue;
 
 
-            tempMidPoint.x = (int)((tempEnd.x -tempStart.x)/2)+tempStart.x;
-            tempMidPoint.y = (int)((tempEnd.y - tempStart.y)/2)+tempStart.y;
+            tempMidPoint.x = (int)((tempEnd.x +tempStart.x)/2);
+            tempMidPoint.y = (int)((tempEnd.y +tempStart.y)/2);
             midpoints.push_back(tempMidPoint);
             leftPoints.push_back(tempStart);
             rightPoints.push_back(tempEnd);
@@ -827,57 +812,38 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     MIN_MIDPOINTS = 2;
     LAST_MIDPOINT = midpoints.size();
 
-    /*if(midpoints.size() < (unsigned int)MIN_MIDPOINTS)
-    {
-        float FinalDistance;
-        if(midpoints.empty())
-        {
-            //TODO: Find the Largest Transition Segment
-            float GoalHeightDistance = GOAL_HEIGHT * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().y - PossibleGoal.getTopLeft().y) + pixelError); //GOAL_HEIGHT(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-            float GoalWidthDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((PossibleGoal.getBottomRight().x - PossibleGoal.getTopLeft().x) + pixelError); //GOAL_WIDTH(cm) * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
-            float D2Pdistance = 10000;  //DistanceToPoint(PossibleGoal,vision);
-
-            if(GoalHeightDistance > GoalWidthDistance && D2Pdistance > GoalWidthDistance )
-            {
-                FinalDistance = GoalWidthDistance;
-                //qDebug() <<"WIDTH GOAL Distance: " << GoalWidthDistance <<endl;
-            }
-            else if(GoalWidthDistance > GoalHeightDistance && D2Pdistance > GoalHeightDistance )
-            {
-                FinalDistance = GoalHeightDistance;
-                //qDebug() <<"Height GOAL Distance: " << GoalHeightDistance <<endl;
-            }
-            else
-            {
-                FinalDistance = D2Pdistance;
-                //qDebug() <<"Distance to PointGOAL Distance: " << GoalHeightDistance <<endl;
-            }
-
-        }
-        else //! Condition of 1 midpoint in goal
-        {
-
-            FinalDistance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ ((rightPoints[0].x -leftPoints[0].x )+pixelError);
-
-
-            float D2Pdistance = 10000;//DistanceToPoint(PossibleGoal,vision);
-
-            //qDebug() << "Distance to Bottom Of Goals: Width:"<< FinalDistance << ", D2PDistance: " << D2Pdistance;
-            float distanceBuffer = 0;
-            if(FinalDistance > D2Pdistance + distanceBuffer)
-            {
-                FinalDistance = D2Pdistance;
-            }
-            //qDebug() <<"Single Midpoint GOAL Distance: " << FinalDistance <<endl;
-        }
-        return FinalDistance;
-    }*/
-
-    //FORM EQUATION if MidPointLine
-    //qDebug() << "Number Of MidPoints: " <<(int) midpoints.size() << LAST_MIDPOINT<<endl;
     LSFittedLine midPointLine;
     LSFittedLine leftPointLine;
     LSFittedLine rightPointLine;
+
+    //FIND AVERAGE WIDTH:
+    float averageWidth = 0;
+    float sum = 0;
+    for(int i =0; i < LAST_MIDPOINT; i++)
+    {
+        sum = sum + fabs(rightPoints[i].x - leftPoints[i].x);
+    }
+    averageWidth = (float)sum/(float)rightPoints.size();
+    for(int i =0; i < LAST_MIDPOINT; i++)
+    {
+        float width = fabs(rightPoints[i].x - leftPoints[i].x);
+        if(averageWidth + 5 > width)
+        {
+            LinePoint point;
+            point.x = midpoints[i].x;
+            point.y = midpoints[i].y;
+            midPointLine.addPoint(point);
+            point.x = leftPoints[i].x;
+            point.y = leftPoints[i].y;
+            leftPointLine.addPoint(point);
+            point.x = rightPoints[i].x;
+            point.y = rightPoints[i].y;
+            rightPointLine.addPoint(point);
+        }
+    }
+
+/*
+    //Form a line with midpoints
     for (int i = 0; i < (int) LAST_MIDPOINT; i++)
     {
 
@@ -885,15 +851,28 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
         point.x = midpoints[i].x;
         point.y = midpoints[i].y;
         midPointLine.addPoint(point);
-        point.x = leftPoints[i].x;
-        point.y = leftPoints[i].y;
-        leftPointLine.addPoint(point);
-        point.x = rightPoints[i].x;
-        point.y = rightPoints[i].y;
-        rightPointLine.addPoint(point);
-
+        qDebug() << midPointLine.getMSD();
     }
 
+    //check distance between midpoint line with left and right points
+    for (int i = 0; i < (int) LAST_MIDPOINT; i++)
+    {
+        float d1 = DistanceLineToPoint(midPointLine,leftPoints[i]);
+        float d2 = DistanceLineToPoint(midPointLine,rightPoints[i]);
+        qDebug() << d1 << d2 << fabs(d1-d2) << d1+d2;
+        if(fabs(d1-d2) < 5)
+        {
+            LinePoint  point;
+            point.x = leftPoints[i].x;
+            point.y = leftPoints[i].y;
+            leftPointLine.addPoint(point);
+            point.x = rightPoints[i].x;
+            point.y = rightPoints[i].y;
+            rightPointLine.addPoint(point);
+        }
+
+    }
+*/
 
     //qDebug() << "Equation of MidLine is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y  = " << midPointLine.getC() << endl;
     //qDebug()<< "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << endl;
@@ -991,12 +970,10 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
         distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidth + pixelError); //GOAL_WIDTH * EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS
         qDebug() << "Largest MidPoints Distance:" << distance << "cm using " << largestWidth << " pixels.";
     }*/
-    if(tightwidthSum != 0)
-    {
 
+    if(tightwidthSum != 0 && DistanceCentre !=0)
+    {
         distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (DistanceCentre + pixelError);
-        //distance = GOAL_WIDTH * vision->EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()/ (largestWidthLeft + largestWidthRight + pixelError);
-        //qDebug() << "Largest thingy Distance:" << distance << "cm using " << largestWidthLeft + largestWidthRight << " pixels.";
     }
     else if (tightwidthSum > 0 )
     {
