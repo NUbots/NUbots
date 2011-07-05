@@ -676,7 +676,6 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   // However the new position of models are uniformly spread around the current location within a square boundary
   if (innovation2 > c_threshold2)
   {
-      cout << innovation2 << std::endl;
 //          #ifdef PLAYING_STATE_RESETTING
 //                        // Increase the variance of this model by 10%
 //                        //cout<<"\nIncreasing uncertainty by 10%";
