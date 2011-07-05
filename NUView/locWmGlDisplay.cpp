@@ -254,6 +254,12 @@ void locWmGlDisplay::drawMarkers()
         }
 
     }
+    if(currentObjects)
+    {
+        QColor currentColor(255,0,0);
+        drawRobotMarker(currentColor, currentObjects->self.wmX(), currentObjects->self.wmY(),currentObjects->self.Heading());
+    }
+
     if(currentLocalisation)
     {
         QColor currentColor(0,0,255);
