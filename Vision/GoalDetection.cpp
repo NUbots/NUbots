@@ -720,16 +720,16 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     //! Calculate the soft colour list:
     std::vector <unsigned char> colourlist;
     colourlist.reserve(2);
-    if(PossibleGoal.getColour() == ClassIndex::blue)// || PossibleGoal.getColour() == ClassIndex::shadow_blue)
+    if(PossibleGoal.getColour() == ClassIndex::blue || PossibleGoal.getColour() == ClassIndex::shadow_blue)
     {
         //qDebug() << "BlueGoal Found: addding blue softColours to list" ;
         colourlist.push_back(ClassIndex::blue);
-        //colourlist.push_back(ClassIndex::shadow_blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
     }
-    else if (PossibleGoal.getColour() == ClassIndex::yellow)// || PossibleGoal.getColour() == ClassIndex::yellow_orange)
+    else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
     {
         colourlist.push_back(ClassIndex::yellow);
-        //colourlist.push_back(ClassIndex::yellow_orange);
+        colourlist.push_back(ClassIndex::yellow_orange);
     }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)

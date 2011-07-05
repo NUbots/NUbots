@@ -104,7 +104,7 @@ private:
     static void splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
     static void splitNoiseLS(vector<LSFittedLine*>& lines);
     static void splitNoiseLS12(vector<LSFittedLine*>& lines);
-    static void mergeLS(vector<LSFittedLine*>& lines);
+    static void mergeLS(vector<LSFittedLine*>& lines, LineDetection* lineDetector, Vision* vision);
     static void generateLSLine(LSFittedLine& line, vector<LinePoint*>& points);
     static bool separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, vector<LinePoint*>& below, vector<LinePoint*>& above, vector<LinePoint*>& centre, LinePoint* split_point, LSFittedLine& line, bool& useTriple);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
@@ -117,7 +117,7 @@ private:
     static void addToNoise2(LinePoint* point);
     static void clearSmallLines(vector<LSFittedLine*>& lines);
     static void clearDirtyLines(vector<LSFittedLine*>& lines);
-    static bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);
+    static bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2, LineDetection* lineDetector, Vision* vision);
     static bool convertLinesEndPoints(vector<LSFittedLine*>& lines, Vision* vision, LineDetection* linedetector);
 
 };

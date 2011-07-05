@@ -66,7 +66,7 @@ class LineDetection{
                        vector< ObjectCandidate >& candidates,
                        vector< TransitionSegment>& leftover);
         bool GetDistanceToPoint(Point point,  Vector3<float> &result, Vision* vision);
-
+        bool CheckGreenBetweenTwoPoints(int x0,int y0,int x1,int y1, Vision* vision);
 	
 	private:
 
@@ -77,18 +77,27 @@ class LineDetection{
 
         void FindFieldLines(int image_width,int image_height);
 
+        //Colour Check Functions:
         bool checkAroundForWhite(int lx, int ly,int mx,int  my,int rx, int ry, double lineLength,Vision* vision);
         bool checkAroundForWhite(int mx, int my,double length, Vision* vision);
+
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
+
+
         void FindPenaltySpot(vector< ObjectCandidate >& candidates, Vision* vision);
         void DecodePenaltySpot(FieldObjects* AllObjects, double timestamp);
 
-        void FindCornerPoints(int image_width,int image_height);
+        void FindCornerPoints(int image_width,int image_height, Vision* vision);
+        void MergeCloseCorners();
+        float DistanceBetweenTwoPoints(float x0, float y0, float x1, float y1);
+
         float findAngleOfLCorner(CornerPoint cornerPoint);
         void DecodeCorners(FieldObjects* AllObjects, double timestamp,  Vision* vision);
         bool GetDistanceToPoint(double,double,double*,double*,double*, Vision* vision);
         bool GetDistanceToPoint(LinePoint point,  Vector3<float> &result, Vision* vision);
         void TransformLinesToWorldModelSpace(Vision* vision);
+
+
         //! Line Point Sorting
         void qsort(std::vector<LinePoint> &array, int left, int right, int type);
         void swap(std::vector<LinePoint> &array, int i, int j);
