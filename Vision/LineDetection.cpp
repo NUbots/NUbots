@@ -125,7 +125,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
         debug  << "\t\tLineDetection::Pre-FindCornerPoints" << endl;
     #endif
     
-    FindCornerPoints(image_width,image_height);
+    FindCornerPoints(image_width,image_height,vision);
     
     #if DEBUG_VISION_VERBOSITY > 5
         debug  << "\t\tLineDetection::Post-FindCornerPoints: Found " << cornerPoints.size() << " corners."<< endl;
@@ -395,8 +395,10 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     #endif
     FindPenaltySpot(candidates,vision);
     //qDebug() << "Finding Corner Points:";
-    FindCornerPoints(image_width,image_height);
+    FindCornerPoints(image_width,image_height,vision);
 
+    //qDebug() << "Merging Close Corners: "
+    MergeCloseCorners();
     //qDebug() << "Decode Corners:";
 
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
@@ -1554,7 +1556,7 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
 //		Stores corner points in global variable "cornerPoints".
 ------------------*/
 
-void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
+void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT, Vision* vision){
 
 	//std::cout<<"Starting to Look for Corners.."<< std::endl;
 	if (TotalValidLines <2)
@@ -1723,8 +1725,10 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
                         }
 
 
-
-                        cornerPoints.push_back(tempCornerPoint);
+                        if(DetectWhitePixels(tempCornerPoint.PosX,tempCornerPoint.PosY, 2,vision))
+                        {
+                            cornerPoints.push_back(tempCornerPoint);
+                        }
 
 		}
 	}
@@ -2863,6 +2867,135 @@ bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoin
         //#endif
     }
     return isOK;
+}
+
+
+
+/****
+  Using the Bresenham's_line_algorithm to calculate which pixels to classify
+****/
+
+bool LineDetection::CheckGreenBetweenTwoPoints(int x0,int y0,int x1,int y1, Vision* vision)
+{
+    bool foundColour = false;
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+    int temp;
+    if(steep)
+    {
+        //swap(x0, y0);
+        temp = x0;
+        x0 = y0;
+        y0 = temp;
+
+        //swap(x1, y1)
+        temp = x1;
+        x1 = y1;
+        y1 = temp;
+    }
+    if (x0 > x1)
+    {
+        //swap(x0, x1);
+        temp = x0;
+        x0 = x1;
+        x1 = temp;
+
+        //swap(y0, y1);
+        temp = y0;
+        y0 = y1;
+        y1 = temp;
+    }
+    int deltax = x1 - x0;
+
+    int deltay = abs(y1 - y0);
+
+    float error = 0;
+    float deltaerr = (float)deltay / (float)deltax;
+    int ystep;
+    int y = y0;
+    if(y0 < y1)
+    {
+        ystep = 1;
+    }
+    else
+    {
+        ystep = -1;
+    }
+
+    for (int x = x0; x < x1; x++)
+    {
+        if (steep)
+        {
+            //qDebug() << y << x;
+            //Classify(y,x);
+            if(vision->classifyPixel(y,x) == ClassIndex::green)
+            {
+                //qDebug() << y << x;
+                foundColour = true;
+                break;
+            }
+        }
+        else
+        {
+            //Classify(x,y);
+            //qDebug() << x << y;
+            if(vision->classifyPixel(x,y) == ClassIndex::green)
+            {
+
+                foundColour = true;
+                break;
+            }
+        }
+        error = error + deltaerr;
+        //qDebug() << error << deltaerr;
+        if(error >= 0.5)
+        {
+             y = y + ystep;
+             error = error - 1.0;
+
+        }
+    }
+    return foundColour;
+
+}
+
+void LineDetection::MergeCloseCorners()
+{
+    //Pixel Distance before Merging:
+    int minDistance = 10;
+    vector < CornerPoint > ::iterator cornerPointIterator1;
+    vector < CornerPoint > ::iterator cornerPointIterator2;
+    for(cornerPointIterator1 = cornerPoints.begin(); cornerPointIterator1 < cornerPoints.end(); )
+    {
+
+        for(cornerPointIterator2 = cornerPointIterator1+1; cornerPointIterator2  < cornerPoints.end(); )
+        {
+            float d1 = DistanceBetweenTwoPoints(cornerPointIterator1->PosX,cornerPointIterator1->PosY,cornerPointIterator2->PosX,cornerPointIterator2->PosY);
+            if(d1 < minDistance && cornerPointIterator1->CornerType == cornerPointIterator2->CornerType)
+            {
+
+                cornerPointIterator1->PosX = (cornerPointIterator2->PosX+cornerPointIterator1->PosX)/2;
+                cornerPointIterator1->PosY = (cornerPointIterator2->PosY+cornerPointIterator1->PosY)/2;
+
+                //Remove i and j
+                cornerPointIterator2 = cornerPoints.erase(cornerPointIterator2);
+                cornerPointIterator1 = cornerPoints.begin();
+                cornerPointIterator2 = cornerPointIterator1 + 1;
+
+            }
+            else
+            {
+                ++cornerPointIterator2;
+            }
+
+        }
+        ++cornerPointIterator1;
+    }
+
+}
+
+float LineDetection::DistanceBetweenTwoPoints(float x0, float y0, float x1, float y1)
+{
+    return (float)sqrt((x0-x1)*(x0-x1) + (y0-y1)*(y0-y1));
 }
 
 

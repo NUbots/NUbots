@@ -143,7 +143,7 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
     //Then Merge
     convertLinesEndPoints(lines, vision, linedetector);
 
-    mergeLS(lines);
+    mergeLS(lines, linedetector, vision);
     //prof.split("Merge");
 
     //Then clear unwanted lines
@@ -156,35 +156,6 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
     //prof.split("Clear Unwanted");
     //debug << prof;
 
-
-    noisePoints.clear();
-}
-
-
-//LEAST-SQUARE FITTING
-
-void SAM::splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall, bool cleardirty, bool noise) {
-    /*
-     * Split and Merge without clustering
-     */
-    noFieldLines = 0;
-    noisePoints.clear();
-
-    splitLS(lines, points);
-
-    if(noise) {
-        for(unsigned int i=0; i<SPLIT_NOISE_ITERATIONS; i++) {
-            splitNoiseLS(lines);
-        }
-    }
-
-    mergeLS(lines);
-
-    if(clearsmall)
-        clearSmallLines(lines);
-
-    if(cleardirty)
-        clearDirtyLines(lines);
 
     noisePoints.clear();
 }
@@ -771,7 +742,7 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, vector
 }
 
 
-void SAM::mergeLS(vector<LSFittedLine*>& lines) {
+void SAM::mergeLS(vector<LSFittedLine*>& lines, LineDetection* lineDetector, Vision* vision) {
     //O(l^2)  -  l=number of lines (max 15)
     // Compares all lines and merges based on the return value of
     // shouldMergeLines(Line, Line) - edit that method not this one
@@ -788,7 +759,7 @@ void SAM::mergeLS(vector<LSFittedLine*>& lines) {
         lines.pop_back();
         //go through all lines and find any that should be merged - merge them
         for(i=0; i<lines.size(); i++) {
-            if(shouldMergeLines(*current, *lines[i])) {
+            if(shouldMergeLines(*current, *lines[i], lineDetector, vision)) {
                 //join the lines
                 current->joinLine(*(lines[i]));
                 //remove the considered line and update line list
@@ -910,7 +881,7 @@ void SAM::clearDirtyLines(vector<LSFittedLine*>& lines) {
     }
 }
 
-bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
+bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2, LineDetection* lineDetector, Vision* vision){
     //THOSE WISHING TO CHANGE THE METHOD OF MERGING LINES NEED ONLY CHANGE THIS
     //FUNCTION
     //returns true if some condition is satisfied, indicating the two lines should
@@ -953,11 +924,37 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
     bool MSD_is_OK = (results.y <= MAX_LINE_MSD);
 
 
-    //qDebug() << "Comparing: \t y = " << line1.getGradient()   <<  "x + " << line1.getYIntercept() << "\t\t CENTER: " << line1.leftPoint.x << "," <<line1.leftPoint.y  << line1.numPoints ;
-    //qDebug() << "to: \t\t y = " << line2.getGradient()   <<  "x + " << line2.getYIntercept() << "\t\t CENTER: " << line2.leftPoint.x << "," <<line2.leftPoint.y << line2.numPoints;
-    //qDebug() << "Line Joining: " <<  "EndPointCheck: "<< endPointsGood << "Fit: "<<R2TLS_is_OK << results.x<< "\tMSD" << MSD_is_OK << results.y;
+    bool greenFound = false;
 
-    return endPointsGood && R2TLS_is_OK && MSD_is_OK;
+    if(endPointsGood && R2TLS_is_OK && MSD_is_OK)
+    {
+        //Check the Line for green in between 2 closest points:
+        float d1 = sqrt((line1.leftPoint.x-line2.rightPoint.x)*(line1.leftPoint.x-line2.rightPoint.x) + (line1.leftPoint.y-line2.rightPoint.y)*(line1.leftPoint.y-line2.rightPoint.y));
+        float d2 = sqrt((line1.rightPoint.x-line2.leftPoint.x)*(line1.rightPoint.x-line2.leftPoint.x) + (line1.rightPoint.y-line2.leftPoint.y)*(line1.rightPoint.y-line2.leftPoint.y));
+        //USE shortest Distance
+
+        //qDebug() << "Checking Green in between line: "<< d1 << d2;
+        if (d1 != 0 && d2 != 0)
+        {
+            if(d1 < d2)
+            {
+                //qDebug() << "Checking Green in between line: "<< line1.leftPoint.x << line1.leftPoint.y << line2.rightPoint.x << line2.rightPoint.y;
+                greenFound = lineDetector->CheckGreenBetweenTwoPoints(line1.leftPoint.x,line1.leftPoint.y,line2.rightPoint.x,line2.rightPoint.y,vision);
+            }
+            else
+            {
+                //qDebug() << "Checking Green in between line: "<< line1.rightPoint.x<<line1.rightPoint.y<< line2.leftPoint.x<<line2.leftPoint.y;
+                greenFound = lineDetector->CheckGreenBetweenTwoPoints(line1.rightPoint.x,line1.rightPoint.y,line2.leftPoint.x,line2.leftPoint.y,vision);
+            }
+        }
+    }
+    //if(endPointsGood && R2TLS_is_OK && MSD_is_OK && !greenFound)
+    //{
+        //qDebug() << "Comparing: \t y = " << line1.getGradient()   <<  "x + " << line1.getYIntercept() << "\t\t CENTER: " << line1.leftPoint.x << "," <<line1.leftPoint.y  << line1.numPoints ;
+        //qDebug() << "to: \t\t y = " << line2.getGradient()   <<  "x + " << line2.getYIntercept() << "\t\t CENTER: " << line2.leftPoint.x << "," <<line2.leftPoint.y << line2.numPoints;
+        //qDebug() << "Line Joining: " <<  "EndPointCheck: "<< endPointsGood << "Fit: "<<R2TLS_is_OK << results.x<< "\tMSD" << MSD_is_OK << results.y << greenFound;
+    //}
+    return endPointsGood && R2TLS_is_OK && MSD_is_OK && !greenFound;
 
 
     //double angle = fabs(line1.getAngle() - line2.getAngle());
@@ -1010,10 +1007,9 @@ bool SAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2)
     */
 }
 
-bool SAM::convertLinesEndPoints(vector<LSFittedLine *> &lines, Vision *vision, LineDetection *linedetector) {
+bool SAM::convertLinesEndPoints(vector<LSFittedLine *> &lines, Vision *vision, LineDetection *linedetector)
+{
     // converts the end points of lines to allow for more accurate merging
-
-
     Vector3<float> relativePoint;
     Point *lefttrans, *righttrans;
     for(unsigned int i=0; i<lines.size(); i++) {

@@ -724,12 +724,12 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     {
         //qDebug() << "BlueGoal Found: addding blue softColours to list" ;
         colourlist.push_back(ClassIndex::blue);
-        //colourlist.push_back(ClassIndex::shadow_blue);
+        colourlist.push_back(ClassIndex::shadow_blue);
     }
     else if (PossibleGoal.getColour() == ClassIndex::yellow || PossibleGoal.getColour() == ClassIndex::yellow_orange)
     {
         colourlist.push_back(ClassIndex::yellow);
-        //colourlist.push_back(ClassIndex::yellow_orange);
+        colourlist.push_back(ClassIndex::yellow_orange);
     }
     // Joins segments on same scanline and finds MIDPOINTS, leftPoints and rightPoints: Finding the last segment in the same scanline points in the same scan line
     for (int i =0; i< (int)tempSegments.size(); i++)
