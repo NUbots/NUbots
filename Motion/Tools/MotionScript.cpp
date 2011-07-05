@@ -378,7 +378,7 @@ void MotionScript::appendReturnLimbToStart(const vector<int>& ids, vector<vector
         int id = ids[i];
         if (not times[id].empty())
         {
-            double t = 1000*fabs(positions[id].back() - sensorpositions[id])/0.8;
+            double t = 1000*fabs(positions[id][positions[id].size()-2] - sensorpositions[id])/0.8;
             positions[id].back() = sensorpositions[id];
             if (t > maxtime)
                 maxtime = t;

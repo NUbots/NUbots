@@ -207,7 +207,7 @@ void NUSave::process(SaveJob* job)
 /*! @brief Returns true if the current block is doable */
 bool NUSave::isBlockAble()
 {
-    float timeuntilblock = m_block_time - m_block_timestamp;
+    float timeuntilblock = m_block_time - m_data->CurrentTime;
     if (timeuntilblock > 300 and timeuntilblock < m_BLOCK_TRIGGER and fabs(m_block_position[1]) < m_BLOCK_WIDTH)
         return true;
     else

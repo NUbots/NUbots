@@ -73,7 +73,7 @@ void GoalKeeperProvider::doBehaviour()
         {   // track the ball if it is visible
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         }
-        else if (ball.TimeSinceLastSeen() > 250 and ball.TimeSinceLastSeen() > 3000)
+        else if (ball.TimeSinceLastSeen() > 250 and ball.TimeSinceLastSeen() < 3000)
         {   // pan for the ball if it hasn't been seen for a bit
             m_jobs->addMotionJob(new HeadPanJob(ball));
         }
@@ -91,6 +91,9 @@ void GoalKeeperProvider::doBehaviour()
             //m_jobs->addMotionJob(new BlockJob(m_data->CurrentTime + time, ball_prediction[1], ball_prediction[2]));
             m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, "error1.wav");
         }
+        
+        if (singleChestClick())
+            m_jobs->addMotionJob(new ScriptJob(m_data->CurrentTime + 2000, "newscript"));
     }
 }
 
