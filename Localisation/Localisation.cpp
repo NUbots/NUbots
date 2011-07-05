@@ -50,6 +50,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float Localisation::c_LargeAngleSD = PI/2;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
+
 const float Localisation::c_RESET_SUM_THRESHOLD = 12.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
@@ -60,7 +61,7 @@ const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range 
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float Localisation::sdTwoObjectAngle = (float) 0.02; //Small! error in angle difference is normally very small
+const float Localisation::sdTwoObjectAngle = 0.05f; //Small! error in angle difference is normally very small
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
@@ -75,7 +76,7 @@ Localisation::Localisation(int playerNumber): m_timestamp(0)
     feedbackPosition[2] = 0;
 	
     amILost = true;
-    lostCount = 0;
+    lostCount = 100;
     timeSinceFieldObjectSeen = 0;
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
@@ -357,7 +358,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         for (size_t i=0; i<sharedballs.size(); i++)
         {
             doSharedBallUpdate(sharedballs[i]);
-            if (sharedballs[i].TimeSinceLastSeen < 500)    // if another robot can see the ball then it is not lost
+            if (sharedballs[i].TimeSinceLastSeen < 3000)    // if another robot can see the ball then it is not lost
                 fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
         }
     }
@@ -444,7 +445,7 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 
     // Check if lost.
     bool lost = false;
-    if (lostCount > 20 or timeSinceFieldObjectSeen > 15000)
+    if (lostCount > 20)
         lost = true;
 
     // Set my location.
@@ -467,7 +468,8 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
         return false;
     }
     */
-    if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState or current_state == GameInformation::SubstituteState)
+
+    if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState)
     {   // if we are in initial, finished, penalised or substitute states do not do localisation
         m_previous_game_state = current_state;
         m_previously_incapacitated = currently_incapacitated;
@@ -945,7 +947,6 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         m_models[modelID].performFiltering(odomForward, odomLeft, odomTurn);
     }
     
-    //------------------------- Trial code for entropy ---- Made to work only on webots as of now
     int bestIndex = getBestModelID();
     double rmsDistance = 0;
     double entropy = 0;
@@ -976,9 +977,9 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
     bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
     bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
-    if(entropy >55 && m_models[bestIndex].alpha()<50 )
+    if(entropy > 100 && m_models[bestIndex].alpha() < 50 )
         amILost = true;
-    else if (entropy <=55 && bestModelEntropy > 6.5)
+    else if (entropy <= 100 && bestModelEntropy > 20)
         amILost = true;
     else
         amILost = false;
@@ -987,7 +988,6 @@ bool Localisation::doTimeUpdate(float odomForward, float odomLeft, float odomTur
         lostCount++;
     else
         lostCount = 0;
-    // End ------------------------- Trial code for entropy ---- Made to work only on webots as of now
 
     return result;
 }

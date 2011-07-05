@@ -20,7 +20,7 @@
 */
 
 #include "ReadyLostState.h"
-#include "../ReadyState.h"
+#include "ReadyState.h"
 #include "ReadyLostStates.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -35,6 +35,8 @@ ReadyLostState::ReadyLostState(ReadyState* parent) : SoccerFSMState(parent)
     m_lost_spin = new ReadyLostSpin(this);
     
     m_state = m_lost_pan;
+    m_time_in_state = 0;
+    m_previous_time = 0;
 }
 
 ReadyLostState::~ReadyLostState()
@@ -48,6 +50,13 @@ void ReadyLostState::doStateCommons()
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
         debug << "ReadyLostState" << endl;
     #endif
+    if (m_parent->stateChanged() or m_data->CurrentTime - m_previous_time > 200)
+    {
+        m_state = m_lost_pan;
+        m_time_in_state = 0;
+    }
+    else
+        m_time_in_state += m_data->CurrentTime - m_previous_time;
 }
 
 BehaviourState* ReadyLostState::nextStateCommons()
@@ -57,7 +66,7 @@ BehaviourState* ReadyLostState::nextStateCommons()
 
 BehaviourFSMState* ReadyLostState::nextState()
 {   // do state transitions in the ready machine
-    if (m_state == m_lost_spin and not m_field_objects->self.lost())
+    if (m_state != m_lost_pan and not m_field_objects->self.lost())
         return m_ready_state->m_move_state;
     return this;
 }

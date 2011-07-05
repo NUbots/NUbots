@@ -170,6 +170,15 @@ bool Getup::isUsingLegs()
     return isActive();
 }
 
+/*! @brief Returns true if the getup requires the head */
+bool Getup::requiresHead()
+{
+    if (m_data->CurrentTime <= m_head_completion_time)
+        return true;
+    else
+        return false;
+}
+
 /*! @brief Produce actions from the data to move the robot into a standing position
  
     @param data a pointer to the most recent sensor data storage class

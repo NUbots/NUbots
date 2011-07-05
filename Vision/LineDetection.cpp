@@ -2068,11 +2068,11 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
                 sizeOnScreen.x = round(ellipseCircleFitter.r1);
                 sizeOnScreen.y = round(ellipseCircleFitter.r2);
             }
+
             if(fabs(closeGoalDistance - ellipseCircleFitter.relDistance) > 200)
             {
                 AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
             }
-
         }
     }
 

@@ -33,6 +33,7 @@
 
 #include "../MotionJob.h"
 class MobileObject;
+class StationaryObject;
 
 #include <vector>
 using namespace std;
@@ -50,6 +51,8 @@ public:
     HeadPanJob(head_pan_t pantype);
     HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax);
     HeadPanJob(const MobileObject& object);
+    HeadPanJob(const StationaryObject& object);
+    HeadPanJob(const vector<StationaryObject>& objects);
     HeadPanJob(istream& input);
     ~HeadPanJob();
     

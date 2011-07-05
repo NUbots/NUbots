@@ -25,6 +25,19 @@
 
 /*! @brief Constructs a BlockJob at the given position and time
     @param time the time in ms to perform the save
+    @param x the relative x position to block (forward-back)
+    @param y the relative y position to block (left-right)
+ */
+BlockJob::BlockJob(double time, float x, float y) : MotionJob(Job::MOTION_BLOCK)
+{
+    m_job_time = time;
+    m_block_position.reserve(2);
+    m_block_position.push_back(x);
+    m_block_position.push_back(y);
+}
+
+/*! @brief Constructs a BlockJob at the given position and time
+    @param time the time in ms to perform the save
     @param position the position at which to perform the block
  */
 BlockJob::BlockJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_BLOCK)

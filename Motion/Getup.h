@@ -52,7 +52,7 @@ public:
     bool isUsingArms();
     bool isUsingLegs();
     
-    bool requiresHead() {return true;}
+    bool requiresHead();
     bool requiresArms() {return true;}
     bool requiresLegs() {return true;}
     

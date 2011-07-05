@@ -1,3 +1,7 @@
+#ifndef STATIONARYOBJECT_H
+#define STATIONARYOBJECT_H
+
+
 #include "Object.h"
 #include "../../Tools/Math/Vector2.h"
 #include "../../Tools/Math/Vector3.h"
@@ -39,3 +43,4 @@ class StationaryObject: public Object{
 
 };
 
+#endif

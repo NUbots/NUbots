@@ -20,7 +20,10 @@
  */
 
 #include "HeadPanJob.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/FieldObjects/MobileObject.h"
+#include "Infrastructure/FieldObjects/StationaryObject.h"
 
 #include "debug.h"
 #include "debugverbosityjobs.h"
@@ -76,6 +79,59 @@ HeadPanJob::HeadPanJob(const MobileObject& object) : MotionJob(Job::MOTION_PAN)
     m_x_max = d + sd;
     m_yaw_min = t - atan2(sd,d);
     m_yaw_max = t + atan2(sd,d);
+}
+
+/*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
+ @param object the mobile field object you are looking for
+ */
+HeadPanJob::HeadPanJob(const StationaryObject& object) : MotionJob(Job::MOTION_PAN)
+{
+    m_job_time = 0;
+    m_pan_type = BallAndLocalisation;
+    
+    m_use_default = false;
+    float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(object);
+    float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(object);
+    float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+    float sd_t = Blackboard->Objects->self.sdHeading();
+    
+    m_x_min = d - sd;
+    m_x_max = 9000;
+    m_yaw_min = t - atan2(sd,d) - sd_t;
+    m_yaw_max = t + atan2(sd,d) + sd_t;
+}
+
+/*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
+    @param object the mobile field object you are looking for
+ */
+HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects) : MotionJob(Job::MOTION_PAN)
+{
+    m_job_time = 0;
+    m_pan_type = BallAndLocalisation;
+    m_use_default = false;
+    
+    m_x_min = 9000;
+    m_x_max = 9000;
+    m_yaw_min = 3.141;
+    m_yaw_max = -3.141;
+    for (size_t i=0; i<objects.size(); i++)
+    {
+        float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(objects[i]);
+        float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(objects[i]);
+        float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+        float sd_t = Blackboard->Objects->self.sdHeading();
+        
+        float x_min = d - sd;
+        float yaw_min = t - atan2(sd,d) - sd_t;
+        float yaw_max = t + atan2(sd,d) + sd_t;
+        
+        if (x_min < m_x_min)
+            m_x_min = x_min;
+        if (yaw_min < m_yaw_min)
+            m_yaw_min = yaw_min;
+        if (yaw_max > m_yaw_max)
+            m_yaw_max = yaw_max;
+    }
 }
 
 /*! @brief Constructs a HeadPanJob from stream data

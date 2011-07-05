@@ -11,7 +11,7 @@ class Self {
 	private:
 		Vector3<float> WorldModelLocation;
 		Vector3<float> WorldModelLocationError;
-	bool amILost;
+        bool amILost;
 	public:
 		Self();
 		~Self();
