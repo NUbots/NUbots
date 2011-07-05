@@ -17,11 +17,11 @@
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 0
 #define SHARED_BALL_ON 1
-#define TWO_OBJECT_UPDATE_ON 1
+#define TWO_OBJECT_UPDATE_ON 0
 
 
-#define BOX_LENGTH_X 10 
-#define BOX_LENGTH_Y 10
+#define BOX_LENGTH_X 160
+#define BOX_LENGTH_Y 160
 #define X_BOUNDARY 300
 #define Y_BOUNDARY 200
 
@@ -47,16 +47,17 @@ typedef AmbiguousObjects::iterator AmbiguousObjectsIt;
 typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 
 // Constant value initialisation
-const float Localisation::c_LargeAngleSD = 1.5f;   //For variance check
+const float Localisation::c_LargeAngleSD = PI/2;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
-const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
+
+const float Localisation::c_RESET_SUM_THRESHOLD = 12.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.05f;        // (0.01 rad)^2
-const float Localisation::R_obj_range_offset = 35.0f*35.0f;     // (10cm)^2
-const float Localisation::R_obj_range_relative = 0.40f*0.40f;   // 20% of range added
+const float Localisation::R_obj_theta = 0.05f*0.05f;        // (0.01 rad)^2
+const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
+const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
 
 const float Localisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
@@ -64,7 +65,7 @@ const float Localisation::sdTwoObjectAngle = 0.05f; //Small! error in angle diff
 
 Localisation::Localisation(int playerNumber): m_timestamp(0)
 {
-    
+    m_hasGps = false;
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
@@ -163,6 +164,10 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         return;
     }
 
+        if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
+        {
+            m_hasGps = true;
+        }
     #ifndef USE_VISION
         // If vision is disabled, gps coordinates are used in its place to trach location.
         vector<float> gps;
@@ -192,7 +197,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             doTimeUpdate(fwd, side, turn, time_increment);
 
             #if LOC_SUMMARY > 0
-            m_frame_log << "Result: " << getBestModel().summary();
+            m_frame_log << std::endl << "Result: " << getBestModel().summary(false);
             #endif
         }
 
@@ -223,6 +228,10 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         #endif
 
         ProcessObjects(fobs, sharedBalls, time_increment);
+
+#if LOC_SUMMARY > 0
+        m_frame_log << std::endl <<  "Final Result: " << getBestModel().summary(false);
+#endif
     #endif
 }
 
@@ -280,19 +289,33 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 	
 	
     // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
-    //varianceCheckAll();
+    //varianceCheckAll(fobs);
 
     // Proccess the Stationary Known Field Objects
     StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
     StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
 
+    // Regular update process.
+//    for(; currStat != endStat; ++currStat)
+//    {
+//        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+//        updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
+//        numUpdates++;
+//        usefulObjectCount++;
+//    }
+
+    // all objects at once.
+    std::vector<StationaryObject*> update_objects;
+    unsigned int objectsAdded = 0;
     for(; currStat != endStat; ++currStat)
     {
         if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
-        updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
-        numUpdates++;
-        usefulObjectCount++;
+        update_objects.push_back(&(*currStat));
+        objectsAdded++;
     }
+    updateResult = doMultipleKnownLandmarkObservationUpdate(update_objects);
+    numUpdates+=objectsAdded;
+    usefulObjectCount+=objectsAdded;
 
     // Two Object update
 #if TWO_OBJECT_UPDATE_ON
@@ -322,6 +345,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         numUpdates++;
         usefulObjectCount++;
     }
+
     NormaliseAlphas();
 
 #if SHARED_BALL_ON
@@ -354,9 +378,8 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
                 usefulObjectCount++;
         }
-
-        MergeModels(c_MAX_MODELS_AFTER_MERGE);
 #endif // MULTIPLE_MODELS_ON
+        MergeModels(c_MAX_MODELS_AFTER_MERGE);
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (int currID = 0; currID < c_MAX_MODELS; currID++){
@@ -434,6 +457,7 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
 {
     GameInformation::TeamColour team_colour = game_info->getTeamColour();
     GameInformation::RobotState current_state = game_info->getCurrentState();
+    /*
     if (currently_incapacitated)
     {   // if the robot is incapacitated there is no point running localisation
         m_previous_game_state = current_state;
@@ -443,7 +467,8 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
         #endif
         return false;
     }
-    
+    */
+
     if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState)
     {   // if we are in initial, finished, penalised or substitute states do not do localisation
         m_previous_game_state = current_state;
@@ -472,8 +497,10 @@ bool Localisation::CheckGameState(bool currently_incapacitated, const GameInform
     {   // if we are playing. If previously penalised do a reset. Also reset if fallen over
         if (m_previous_game_state == GameInformation::PenalisedState)
             doPenaltyReset();
+        /*
         else if (m_previously_incapacitated and not currently_incapacitated)
             doFallenReset();
+            */
     }
     
     m_previously_incapacitated = currently_incapacitated;
@@ -541,6 +568,7 @@ void Localisation::doInitialReset(GameInformation::TeamColour team_colour)
     }
     
     setupModel(0, num_models, front_x, right_y, right_heading);
+    setupModel(0, 1, front_x, right_y, right_heading);
     setupModelSd(0, 50, 15, 0.2);
     setupModel(1, num_models, back_x, right_y, right_heading);
     setupModelSd(1, 50, 15, 0.2);
@@ -662,9 +690,9 @@ void Localisation::doFallenReset()
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
     {   // Increase heading uncertainty if fallen
-        m_models[modelNumber].stateStandardDeviations[0][0] += 45;        // Robot x
-        m_models[modelNumber].stateStandardDeviations[1][1] += 45;        // Robot y
-        m_models[modelNumber].stateStandardDeviations[2][2] += 1.571;     // Robot heading
+        m_models[modelNumber].stateStandardDeviations[0][0] += 5;        // Robot x
+        m_models[modelNumber].stateStandardDeviations[1][1] += 5;        // Robot y
+        m_models[modelNumber].stateStandardDeviations[2][2] += 0.707;     // Robot heading
     }
 }
 
@@ -1018,13 +1046,111 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
     return numSuccessfulUpdates;
 }
 
+int Localisation::doMultipleKnownLandmarkObservationUpdate(std::vector<StationaryObject*>& landmarks)
+{
+    const unsigned int num_objects = landmarks.size();
+    if(num_objects == 0) return 0;
+    unsigned int numSuccessfulUpdates = 0;
+    std::vector<StationaryObject*>::iterator currStat(landmarks.begin());
+    std::vector<StationaryObject*>::const_iterator endStat(landmarks.end());
+    Matrix locations(2*num_objects, 1, false);
+    Matrix measurements(2*num_objects, 1, false);
+    Matrix R_measurement(2*num_objects, 2*num_objects, false);
+    int kf_return;
+    std::vector<unsigned int> objIds;
+
+
+    unsigned int measurementNumber = 0;
+    for(; currStat != endStat; ++currStat)
+    {
+        const int index = 2*measurementNumber;
+
+        // Locations
+        locations[index][0] = (*currStat)->X();
+        locations[index+1][0] = (*currStat)->Y();
+
+        double flatObjectDistance = (*currStat)->measuredDistance() * cos((*currStat)->measuredElevation());
+        measurements[index][0] = flatObjectDistance;
+        measurements[index+1][0] = (*currStat)->measuredBearing();
+
+        // R
+        R_measurement[index][index] = R_obj_range_offset + R_obj_range_relative * pow(measurements[index][0], 2);
+        R_measurement[index+1][index+1] = R_obj_theta;
+
+        objIds.push_back((*currStat)->getID());
+        measurementNumber++;
+    }
+
+#if LOC_SUMMARY > 0
+    m_frame_log << "Perfoming multiple object update." << std::endl;
+    m_frame_log << "locations:" << std::endl;
+    m_frame_log << locations << std::endl;
+    m_frame_log << "measurements:" << std::endl;
+    m_frame_log << measurements << std::endl;
+    m_frame_log << "R_measurement:" << std::endl;
+    m_frame_log << R_measurement << std::endl;
+
+#endif
+
+    for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
+        if(m_models[modelID].active() == false) continue; // Skip Inactive models.
+        kf_return = KF_OK;
+        kf_return = m_models[modelID].MultiFieldObs(locations, measurements, R_measurement);
+
+#if LOC_SUMMARY > 0
+        Matrix temp = Matrix(measurements.getm(), 1, false);
+        for(unsigned int j=0; j < measurements.getm(); j+=2)
+        {
+            const float dX = locations[j][0]-m_models[modelID].state(KF::selfX);
+            const float dY = locations[j+1][0]-m_models[modelID].state(KF::selfY);
+            temp[j][0] = sqrt(dX*dX + dY*dY);
+            temp[j+1][0] = normaliseAngle(atan2(dY,dX) - m_models[modelID].state(KF::selfTheta));
+        }
+        m_frame_log << std::endl << "Update model " << modelID << std::endl;
+        m_frame_log << "Expected Measurements: " << std::endl << temp << std::endl;
+        m_frame_log <<" Result: " << ((kf_return==KF_OK)?"Successful":"Outlier") << std::endl;
+#endif
+        if(kf_return == KF_OUTLIER)
+        {
+            currStat = landmarks.begin();
+            for(; currStat != endStat; ++currStat)
+            {
+                double flatObjectDistance = (*currStat)->measuredDistance() * cos((*currStat)->measuredElevation());
+                kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
+                                R_obj_range_offset, R_obj_range_relative, R_obj_theta);
+
+                #if LOC_SUMMARY > 0
+                m_frame_log << "Individual Update: " <<  (*currStat)->getName() << " Result: " << ((kf_return==KF_OK)?"Successful":"Outlier") << std::endl;
+                m_frame_log << "Following individual object updates: " << m_models[modelID].summary(false);
+                #endif
+                if(kf_return == KF_OUTLIER)
+                {
+                    m_modelObjectErrors[modelID][(*currStat)->getID()] += 1.0;
+                }
+            }
+        }
+    #if LOC_SUMMARY > 0
+
+    #endif
+        if(kf_return == KF_OK) numSuccessfulUpdates++;
+    }
+    return numSuccessfulUpdates;
+}
+
 int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 {
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Known landmark update: " << landmark.getName() << std::endl;
+#endif
     int kf_return;
     int numSuccessfulUpdates = 0;
 
     if(IsValidObject(landmark) == false)
     {
+    #if LOC_SUMMARY > 0
+        m_frame_log << "Skipping invalid." << std::endl;
+    #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
         debug_out  <<"[" << m_timestamp << "] Skipping Bad Landmark Update: ";
         debug_out  << landmark.getName();
@@ -1088,7 +1214,43 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
             debug_out << "OK!" << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+    #if LOC_SUMMARY > 0
+        m_frame_log << "Model " << modelID << " updated using " << landmark.getName() << " measurment." << std::endl;
+        //m_frame_log << "Measurement: Distance = " << flatObjectDistance << ", Heading = " << landmark.measuredBearing() <<std::endl;
+        m_frame_log << "Position: X = " << landmark.X() << ", Y = " << landmark.Y() <<std::endl;
+        m_frame_log << "Current State: " << m_models[modelID].state(KF::selfX) << ", " << m_models[modelID].state(KF::selfY) << ", " << m_models[modelID].state(KF::selfTheta) << std::endl;
+//        float dX = landmark.X()-m_models[modelID].state(KF::selfX);
+//        float dY = landmark.Y()-m_models[modelID].state(KF::selfY);
+//        float Cc = cos(m_models[modelID].state(KF::selfTheta));
+//        float Ss = sin(m_models[modelID].state(KF::selfTheta));
+//        float x_exp = dX * Cc + dY * Ss;
+//        float y_exp =  -dX * Ss + dY * Cc;
 
+
+//        float x_meas = flatObjectDistance * cos(landmark.measuredBearing());
+//        float y_meas =  flatObjectDistance * sin(landmark.measuredBearing());
+
+//        m_frame_log << "Expected : (" << x_exp << "," << y_exp << ")" << std::endl;
+//        m_frame_log << "Measured: (" << x_meas << "," << y_meas << ")" << std::endl;
+        if(m_hasGps)
+        {
+            float dX = landmark.X()-m_gps[0];
+            float dY = landmark.Y()-m_gps[1];
+            float Cc = cos(m_compass);
+            float Ss = sin(m_compass);
+            float x_gps = dX * Cc + dY * Ss;
+            float y_gps =  -dX * Ss + dY * Cc;
+            m_frame_log << "GPS Expected: (" << x_gps << "," << y_gps << ")" << std::endl;
+        }
+
+        float exp_dist = sqrt(pow(landmark.X() - m_models[modelID].state(KF::selfX),2) + pow(landmark.Y() - m_models[modelID].state(KF::selfY),2));
+        float positionHeading = atan2(landmark.Y() - m_models[modelID].state(KF::selfY), landmark.X() - m_models[modelID].state(KF::selfX));
+        float exp_heading = normaliseAngle(positionHeading - m_models[modelID].state(KF::selfTheta));
+        m_frame_log << "Expected: " << exp_dist << ", " << exp_heading <<std::endl;
+        m_frame_log << "Measured: " << flatObjectDistance << "," << landmark.measuredBearing() << std::endl;
+        m_frame_log << "Result = ";
+        m_frame_log << ((kf_return==KF_OUTLIER)?"Outlier":"Success") << std::endl;
+    #endif
         if(kf_return == KF_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
@@ -1096,6 +1258,10 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
 int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
+
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Two object landmark update: " << landmark1.getName() << " & " << landmark2.getName() << std::endl;
+#endif
     float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -1115,9 +1281,21 @@ int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObjec
 int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
+    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
 
-    if(IsValidObject(ambigousObject) == false)
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Ambiguous landmark update: " << ambigousObject.getName() << std::endl;
+    m_frame_log << "Possible objects: " << std::endl;
+    for (int i=0; i < possabilities.size(); i++)
     {
+        m_frame_log << possibleObjects[possabilities[i]].getName() << std::endl;
+    }
+#endif
+    if( (IsValidObject(ambigousObject) == false) || (ambigousObject.measuredDistance() > 600))
+    {
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Skipping invalid measurment!" << std::endl;
+#endif
     #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << m_timestamp << "] Skipping Ambiguous Object: ";
         debug_out  << ambigousObject.getName();
@@ -1129,6 +1307,9 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 
     #if AMBIGUOUS_CORNERS_ON <= 0
     if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)){
+#if LOC_SUMMARY > 0
+    m_frame_log << "Ignoring Object."<< std::endl;
+#endif
     #if DEBUG_LOCALISATION_VERBOSITY > 1
         debug_out  <<"[" << m_timestamp << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
@@ -1136,9 +1317,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     }
     #endif // AMBIGUOUS_CORNERS_ON <= 0
 
-    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
     unsigned int numOptions = possabilities.size();
-    int outlierModelID = -1;
     int numFreeModels = getNumFreeModels();
     int numActiveModels = getNumActiveModels();
     int numRequiredModels = numActiveModels * (numOptions); // An extra base model.
@@ -1184,8 +1363,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         
         // Save Original model as outlier option.
         m_models[modelID].setAlpha(m_models[modelID].alpha()*0.0005);
-        outlierModelID = -1;
-//        modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
+        //m_modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
   
         // Now go through each of the possible options, and apply it to a copy of the model
         for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++)
@@ -1240,6 +1418,12 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
 #if DEBUG_LOCALISATION_VERBOSITY > 2
             if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
             else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+#endif
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
+            m_frame_log << "Result: " << ((kf_return == KF_OK)?"Success":"Outlier");
+            if(kf_return == KF_OK) m_frame_log << " alpha = " << m_models[newModelID].alpha() << std::endl;
+            else m_frame_log << std::endl;
 #endif
 
         }
@@ -1403,11 +1587,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
     // Check if enough recent 'outliers' that we should reset ?
     if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
         reset = true;
-        //models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
-
-        #if DEBUG_LOCALISATION_VERBOSITY > 0
-        debug_out << "[" << m_timestamp << "]: Model[" << modelID << "] Reset due to outliers." << endl;
-        #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        //m_models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
         for (int i=0; i<c_numOutlierTrackedObjects; i++) m_modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
     }
@@ -1427,26 +1607,31 @@ int  Localisation::CheckForOutlierResets()
 
 	for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
 	{
-        if(CheckModelForOutlierReset(modelID))
-        {
+            if(CheckModelForOutlierReset(modelID))
+            {
+            #if LOC_SUMMARY > 0
+            m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
+            #endif
             m_models[modelID].setActive(false);
+//            if(modelID != this->getBestModelID()) m_models[modelID].setActive(false);
+//            else
+//            {
+//#ifdef PLAYING_STATE_RESETTING
+//                    resetPlayingStateModels();
+//#endif
+//            }
             numResets++;
         }
     }
     if(getNumActiveModels() < 1)
     {
-		#ifdef PLAYING_STATE_RESETTING
-			if(Blackboard->GameInfo->getCurrentState() == STATE_PLAYING ) // if an outlier is detected during play
-			{
-				resetPlayingStateModels();
-			} 
-		#else
-			this->doReset();
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Reset - All models removed due to outliers." << std::endl;
         #endif
+                this->doReset();
     }
     return numResets;
 }
-
 
 
 void Localisation::resetPlayingStateModels()
@@ -1456,7 +1641,7 @@ void Localisation::resetPlayingStateModels()
 	bool clearLow = false;
 	bool clearHigh = false;
 	
-	int currX = m_models[bestModel].stateEstimates[0][0];         // Robot x
+    int currX = m_models[bestModel].stateEstimates[0][0];         // Robot x
     int currY = m_models[bestModel].stateEstimates[1][0];           // Robot y
     double currTheta = m_models[bestModel].stateEstimates[2][0];
     /*
@@ -1515,7 +1700,7 @@ void Localisation::resetPlayingStateModels()
 		lowY = Y_BOUNDARY - BOX_LENGTH_Y;
 	}
     
-	this->doReset();
+    this->doReset();
     
     m_models[0].stateEstimates[0][0] = lowX + BOX_LENGTH_X/4;
     m_models[0].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
@@ -1523,7 +1708,7 @@ void Localisation::resetPlayingStateModels()
     
     m_models[1].stateEstimates[0][0] = lowX + BOX_LENGTH_X/4;
     m_models[1].stateEstimates[1][0] = highY - BOX_LENGTH_Y/4;
-	m_models[1].stateEstimates[2][0] = currTheta;
+    m_models[1].stateEstimates[2][0] = currTheta;
 	
     m_models[2].stateEstimates[0][0] = highX - BOX_LENGTH_X/4;
     m_models[2].stateEstimates[1][0] = highY - BOX_LENGTH_Y/4;
@@ -1532,6 +1717,38 @@ void Localisation::resetPlayingStateModels()
     m_models[3].stateEstimates[0][0] = highX - BOX_LENGTH_X/4;
     m_models[3].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
     m_models[3].stateEstimates[2][0] = currTheta ;
+
+//    m_models[0].stateStandardDeviations[0][0] = 30.0; // 100 cm
+//    m_models[0].stateStandardDeviations[1][1] = 30.0; // 150 cm
+//    m_models[0].stateStandardDeviations[2][2] = 0.4;   // 2 radians
+//    m_models[0].stateStandardDeviations[3][3] = 30.0; // 100 cm
+//    m_models[0].stateStandardDeviations[4][4] = 30.0; // 150 cm
+//    m_models[0].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
+//    m_models[0].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
+
+//    m_models[1].stateStandardDeviations[0][0] = 30.0; // 100 cm
+//    m_models[1].stateStandardDeviations[1][1] = 30.0; // 150 cm
+//    m_models[1].stateStandardDeviations[2][2] = 0.4;   // 2 radians
+//    m_models[1].stateStandardDeviations[3][3] = 30.0; // 100 cm
+//    m_models[1].stateStandardDeviations[4][4] = 30.0; // 150 cm
+//    m_models[1].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
+//    m_models[1].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
+
+//    m_models[2].stateStandardDeviations[0][0] = 30.0; // 100 cm
+//    m_models[2].stateStandardDeviations[1][1] = 30.0; // 150 cm
+//    m_models[2].stateStandardDeviations[2][2] = 0.4;   // 2 radians
+//    m_models[2].stateStandardDeviations[3][3] = 30.0; // 100 cm
+//    m_models[2].stateStandardDeviations[4][4] = 30.0; // 150 cm
+//    m_models[2].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
+//    m_models[2].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
+
+//    m_models[3].stateStandardDeviations[0][0] = 30.0; // 100 cm
+//    m_models[3].stateStandardDeviations[1][1] = 30.0; // 150 cm
+//    m_models[3].stateStandardDeviations[2][2] = 0.4;   // 2 radians
+//    m_models[3].stateStandardDeviations[3][3] = 30.0; // 100 cm
+//    m_models[3].stateStandardDeviations[4][4] = 30.0; // 150 cm
+//    m_models[3].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
+//    m_models[3].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
     
     cout<<"\n\nResetting model during playing state!";
     
@@ -1675,7 +1892,7 @@ int Localisation::FindNextFreeModel()
 {
     for (int i=0; i<c_MAX_MODELS; i++)
     {
-        if ((m_models[i].active() == true) || (m_models[i].active() == true)) continue;
+        if ((m_models[i].active() == true) || (m_models[i].m_toBeActivated == true)) continue;
         else return i;
     }
     return -1; // NO FREE MODELS - This is very, very bad.
@@ -1721,6 +1938,21 @@ void Localisation::MergeModels(int maxAfterMerge)
 
 
 
+std::string Localisation::ModelStatusSummary()
+{
+    std::stringstream temp;
+    temp << "Active model summary." << std::endl;
+    for (int i=0; i < c_MAX_MODELS; i++)
+    {
+        if(m_models[i].active())
+        {   temp << "Model " << i << std::endl;
+            temp << m_models[i].summary();
+        }
+    }
+    return temp.str();
+}
+
+
 void Localisation::PrintModelStatus(int modelID)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
@@ -1743,6 +1975,9 @@ void Localisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             if (!m_models[i].active() || !m_models[j].active()) continue;
             mergeM = abs( MergeMetric(i,j) );
             if (mergeM < MergeMetricThreshold) { //0.5
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model " << j << " merged into " << i << std::endl;
+#endif
 #if DEBUG_LOCALISATION_VERBOSITY > 2
                 debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << m_models[j].alpha() << "]";
                 debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha() << "] " << " Merge Metric = " << mergeM << endl  ;

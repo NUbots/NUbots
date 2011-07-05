@@ -2,8 +2,8 @@
 #include "TransitionSegment.h"
 #include "ClassificationColours.h"
 #include <math.h>
-#define MIN_POINTS_ON_LINE_FINAL 4
-#define MIN_POINTS_ON_LINE 3
+#define MIN_POINTS_ON_LINE_FINAL 5
+#define MIN_POINTS_ON_LINE 4
 #define MAX_DISTANCE_T_GOAL 40*2 //40cm away from goal with factor of 2 error
 #define MAX_DISTANCE_L_GOAL 80*2 //80cm from point to goal with factor of 2 error
 //#define LINE_SEARCH_GRID_SIZE 4
@@ -37,6 +37,7 @@ LineDetection::LineDetection(){
     linePoints.reserve(MAX_LINEPOINTS);
     fieldLines.reserve(MAX_FIELDLINES);
     cornerPoints.reserve(MAX_CORNERPOINTS);
+    transformedFieldLines.reserve(MAX_FIELDLINES);
     TotalValidLines = 0;
 }
 
@@ -109,7 +110,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     #endif
     
     //qDebug() << "Finding Penalty Spots:";
-    FindPenaltySpot(vision);
+    //FindPenaltySpot(vision);
     //qDebug() << "Finding Corner Points:";
     
     #if DEBUG_VISION_VERBOSITY > 5
@@ -171,13 +172,14 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
     //
-    #if DEBUG_VISION_VERBOSITY > 5
+    /*#if DEBUG_VISION_VERBOSITY > 5
     end = clock();
     debug << "\t\t\tLine Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     debug << "\t\t\tLine Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     debug << "\t\t\tLine Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     debug << "\t\t\tLine Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
     #endif
+    */
 }
 
 void LineDetection::FormLines(FieldObjects* AllObjects,
@@ -195,6 +197,18 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     int image_width = vision->getImageWidth();
     sensorsData = data;
 
+    vector<float> ctgvector;
+    bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    if(isOK == false)
+    {
+        #if DEBUG_VISION_VERBOSITY > 5
+            debug << "\t\tNo Camera To Ground Transform, Not running line detection.\n";
+        #endif
+        #if TARGET_OS_IS_WINDOWS
+            qDebug() << "No Camera To Ground Transform, Not running line detection.";
+        #endif
+        return;
+    }
     //clock_t startLineForm = clock();
     //qDebug() << "Finding Lines with segments:  " << linePoints.size();
 
@@ -367,11 +381,19 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     /*SHANNON'S NEW LINE DETECTION*/
 
 
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\tTransforming Lines.\n";
+    #endif
     TransformLinesToWorldModelSpace(vision);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\tTransforming Lines " << transformedFieldLines.size() <<".\n";
+    #endif
 
     //qDebug() << "Finding Penalty Spots:";
-    FindPenaltySpot(vision);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\tStart Finding Penalty Spots: \n";
+    #endif
+    FindPenaltySpot(candidates,vision);
     //qDebug() << "Finding Corner Points:";
     FindCornerPoints(image_width,image_height);
 
@@ -379,7 +401,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
 
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
 
-    //qDebug() << "Decode Penalty Spots:";
+   // qDebug() << "Decode Penalty Spots:";
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
@@ -964,74 +986,212 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                 //4. If no white found then we have penalty spot
 -------------**/
 
-void LineDetection::FindPenaltySpot(Vision* vision)
+void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Vision* vision)
 {
-        int IMAGE_WIDTH = vision->getImageWidth();
+        //int IMAGE_WIDTH = vision->getImageWidth();
 
-        int lx,ly,rx,ry, mx, my;
-        double lineLength;
-        lx = 0;
-        ly = 0;
-        rx = 0;
-        ry = 0;
-        mx = 0;
-        my = 0;
-        lineLength = 0.0;
-        //qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
-
-        //CHECK LINES:
-        for (unsigned int i = 0; i < fieldLines.size(); i++)
-        {
+    int lx,ly,rx,ry, mx, my;
+    double lineLength;
+    lx = 0;
+    ly = 0;
+    rx = 0;
+    ry = 0;
+    mx = 0;
+    my = 0;
+    lineLength = 0.0;
+    //qDebug() << "Number of Lines to check for Pentaly Spot : " <<fieldLines.size();
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\t\tStart Finding Penalty Spots: "<< fieldLines.size() <<" Lines.\n";
+    #endif
+    //CHECK LINES:
+    /*for (unsigned int i = 0; i < fieldLines.size(); i++)
+    {
         //CHECK ALL LINES (EVEN IF NOT A LINE!)
-                lx = fieldLines[i].leftPoint.x;
-                ly = fieldLines[i].leftPoint.y;
-                rx = fieldLines[i].rightPoint.x;
-                ry = fieldLines[i].rightPoint.y;
-                mx = (int)((lx+rx)/2.0);
-                my = (int)((ly+ry)/2.0);
-                lineLength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
+        lx = transformedFieldLines[i].leftPoint.x;
+        ly = transformedFieldLines[i].leftPoint.y;
+        rx = transformedFieldLines[i].rightPoint.x;
+        ry = transformedFieldLines[i].rightPoint.y;
+        mx = (int)((lx+rx)/2.0);
+        my = (int)((ly+ry)/2.0);
+        lineLength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
 
-                if (lineLength < (int)(IMAGE_WIDTH/4))
-                {
+        if (lineLength < 20)
+        {
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Line length less then 20.\n";
+            #endif
+            //CHECK FOR WHITES!
+            //Left Point is Lower X, Right Point is Higher X
+            //Perform checks on:
+            //	Left Point:	(lx-0.5length,ly), (lx, ly+3/4length), (lx, ly-3/4length),
+            //	MidPoint:	(mx, my-3/4length), (mx, my-3/4length)
+            //	Right Point:	(rx+0.5length,ry), (rx, ry+3/4length), (lx, ry-3/4length),
+            lx = fieldLines[i].leftPoint.x;
+            ly = fieldLines[i].leftPoint.y;
+            rx = fieldLines[i].rightPoint.x;
+            ry = fieldLines[i].rightPoint.y;
+            mx = (int)((lx+rx)/2.0);
+            my = (int)((ly+ry)/2.0);
+            lineLength = sqrt((lx-rx)*(lx-rx) + (ly-ry)*(ly-ry));
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<"Look for Whites around the penalty spot.\n";
+            #endif
+            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
 
-                        //CHECK FOR WHITES!
-                        //Left Point is Lower X, Right Point is Higher X
-                        //Perform checks on:
-                        //	Left Point:	(lx-0.5length,ly), (lx, ly+3/4length), (lx, ly-3/4length),
-                        //	MidPoint:	(mx, my-3/4length), (mx, my-3/4length)
-                        //	Right Point:	(rx+0.5length,ry), (rx, ry+3/4length), (lx, ry-3/4length),
+            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<"No Whites around the penalty spot.\n";
+            #endif
+            Vector2<float> screenPositionAngle(vision->CalculateBearing(mx), vision->CalculateElevation(my));
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Found Screen Angle.\n";
+            #endif
 
-                        if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Calculate Distance to point.\n";
+            #endif
+            double TempDist = 0;
+            double TempBearing = 0;
+            double TempElev = 0;
+            //Vector3<float> point;
+            //bool isOK = GetDistanceToPoint(*midPoint, point, vision);
+            bool isOK = GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
+            if(!isOK)
+            {
+                #if DEBUG_VISION_VERBOSITY > 0
+                    debug << "\t\t\tLineDetection::FindPenaltySpot: Distance to point Failed.";
+                #endif
+                return;
+            }
 
-
-
-
-
-                        //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
-                        double TempDist = 0;
-                        double TempBearing = 0;
-                        double TempElev = 0;
-                        Vector2<float> screenPositionAngle(vision->CalculateBearing(mx), vision->CalculateElevation(my));
-                        GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
-                        //qDebug() << "Distance:\t\t"<< TempDist<< endl;
-
-                        int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
-                        AmbiguousObject tempUnknownPenalty(TempID, "Unknown Penalty");
-                        tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_YELLOW);
-                        tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_BLUE);
-                        Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
-                        Vector3<float> measuredError(0.0,0.0,0.0);
-                        Vector2<int> screenPosition(mx, my);
-                        Vector2<int> sizeOnScreen(8,2);
-                        tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
-                        possiblePenaltySpots.push_back(tempUnknownPenalty);
-                }
-                else
-                {
-                        //cout << "Line["<< i<< "] too long."<< endl;
-                        continue;
-                }
+            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< endl;
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Distance to point Success.\n";
+            #endif
+            int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
+            AmbiguousObject tempUnknownPenalty(TempID, "Unknown Penalty");
+            tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_YELLOW);
+            tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_BLUE);
+            Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+            Vector3<float> measuredError(0.0,0.0,0.0);
+            Vector2<int> screenPosition(mx, my);
+            Vector2<int> sizeOnScreen(8,2);
+            tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
+            possiblePenaltySpots.push_back(tempUnknownPenalty);
         }
+        else
+        {
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Line too long.\n";
+            #endif
+            //cout << "Line["<< i<< "] too long."<< endl;
+            continue;
+        }
+    }
+    */
+    //Check Candidates:
+    for (unsigned int i = 0; i < candidates.size(); i++)
+    {
+        //Check diagonal distance of candidate:
+        lx = candidates[i].getTopLeft().x;
+        ly = candidates[i].getTopLeft().y;
+        rx = candidates[i].getBottomRight().x;
+        ry = candidates[i].getBottomRight().y;
+
+        Vector3<float> leftWMPolarPoint, rightWMPolarPoint;
+        //Get Transformed Points:
+        Point leftPoint(lx,ly);
+        bool isOKA = GetDistanceToPoint(leftPoint, leftWMPolarPoint, vision);
+        Point rightPoint(rx,ry);
+        bool isOKB = GetDistanceToPoint(rightPoint, rightWMPolarPoint, vision);
+
+        if (!isOKA || !isOKB)
+            continue;
+        //Get Difference between tranformed points:
+        //relative x,y:
+        float relLeftX = leftWMPolarPoint.x * sin(leftWMPolarPoint.y);
+        float relLeftY = leftWMPolarPoint.x * cos(leftWMPolarPoint.y);
+        float relRightX = rightWMPolarPoint.x * sin(rightWMPolarPoint.y);
+        float relRightY = rightWMPolarPoint.x * cos(rightWMPolarPoint.y);
+
+        float length = sqrt((relLeftX - relRightX)*(relLeftX - relRightX) + (relLeftY - relRightY)*(relLeftY - relRightY));
+
+
+
+        //qDebug() << "Penalty Length "<<length;
+        if (length < 30)
+        {
+
+            //CHECK FOR WHITES!
+            //Left Point is Lower X, Right Point is Higher X
+            //Perform checks on:
+            //	Left Point:	(lx-0.5length,ly), (lx, ly+3/4length), (lx, ly-3/4length),
+            //	MidPoint:	(mx, my-3/4length), (mx, my-3/4length)
+            //	Right Point:	(rx+0.5length,ry), (rx, ry+3/4length), (lx, ry-3/4length),
+
+            mx = (int)((lx+rx)/2.0);
+            my = (int)((ly+ry)/2.0);
+            lx = candidates[i].getTopLeft().x - 16;
+            ly = my;
+            rx = candidates[i].getBottomRight().x + 16;
+            ry = my;
+
+            lineLength = fabs(lx-rx);
+
+            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
+
+            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<"No Whites around the penalty spot.\n";
+            #endif
+            Vector2<float> screenPositionAngle(vision->CalculateBearing(mx), vision->CalculateElevation(my));
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Found Screen Angle.\n";
+            #endif
+
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Calculate Distance to point.\n";
+            #endif
+            double TempDist = 0;
+            double TempBearing = 0;
+            double TempElev = 0;
+            //Vector3<float> point;
+            //bool isOK = GetDistanceToPoint(*midPoint, point, vision);
+            bool isOK = GetDistanceToPoint(mx, my, &TempDist, &TempBearing, &TempElev, vision);
+            if(!isOK)
+            {
+                #if DEBUG_VISION_VERBOSITY > 0
+                    debug << "\t\t\tLineDetection::FindPenaltySpot: Distance to point Failed.";
+                #endif
+                return;
+            }
+
+            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< endl;
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Distance to point Success.\n";
+            #endif
+            int TempID = FieldObjects::FO_PENALTY_UNKNOWN;
+            AmbiguousObject tempUnknownPenalty(TempID, "Unknown Penalty");
+            tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_YELLOW);
+            tempUnknownPenalty.addPossibleObjectID(FieldObjects::FO_PENALTY_BLUE);
+            Vector3<float> measured((float)TempDist,(float)TempBearing,(float)TempElev);
+            Vector3<float> measuredError(0.0,0.0,0.0);
+            Vector2<int> screenPosition(mx, my);
+            Vector2<int> sizeOnScreen(8,2);
+            tempUnknownPenalty.UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
+            possiblePenaltySpots.push_back(tempUnknownPenalty);
+        }
+        else
+        {
+            #if DEBUG_VISION_VERBOSITY > 5
+                debug << "\t\t\tPenalty Spots: "<< i <<" Line too long.\n";
+            #endif
+            //cout << "Line["<< i<< "] too long."<< endl;
+            continue;
+        }
+    }
 
 
 }
@@ -1041,9 +1201,9 @@ bool LineDetection::checkAroundForWhite(int mx, int my,double length, Vision* vi
     bool whitePixelFound;
     int checkX, checkY;
     int searchRadius = (int)(length/16);
-    if (searchRadius < 3)
+    if (searchRadius < 2)
     {
-            searchRadius =3;
+            searchRadius = 2;
     }
     //qDebug() << "\tChecking Left " ;
     //Mid Point Left: (lx-0.5length,ly)
@@ -1152,7 +1312,7 @@ bool LineDetection::DetectWhitePixels(int checkX, int checkY, int searchRadius,V
                 for (int j =checkY - searchRadius; j< checkY + searchRadius; j++)
                 {
                     
-                    if((i > 0 && i < vision->getImageWidth()) && (j >0 && j < vision->getImageHeight()))
+                    if(vision->isPixelOnScreen(i,j))
                     {
                         if(vision->classifyPixel(i,j) == ClassIndex::white)
                         {
@@ -1261,15 +1421,21 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
         //if(!transformedFieldLines[i].valid)
         //    continue;
         float lineLength = sqrt((transformedFieldLines[i].leftPoint.x-transformedFieldLines[i].rightPoint.x) * (transformedFieldLines[i].leftPoint.x-transformedFieldLines[i].rightPoint.x) + (transformedFieldLines[i].leftPoint.y-transformedFieldLines[i].rightPoint.y)* (transformedFieldLines[i].leftPoint.y-transformedFieldLines[i].rightPoint.y));
-        if (lineLength > 100 )
+        if (lineLength > 60 )
+        {
+            //qDebug() << "Line too long" << lineLength;
             continue;
+        }
         for(unsigned int j = i+1; j < transformedFieldLines.size(); j++)
         {
             //if(!transformedFieldLines[j].valid)
             //    continue;
             float lineLength = sqrt((transformedFieldLines[j].leftPoint.x-transformedFieldLines[j].rightPoint.x) * (transformedFieldLines[j].leftPoint.x-transformedFieldLines[j].rightPoint.x) + (transformedFieldLines[j].leftPoint.y-transformedFieldLines[j].rightPoint.y)*( transformedFieldLines[j].leftPoint.y-transformedFieldLines[j].rightPoint.y));
-            if (lineLength > 100)
+            if (lineLength > 60)
+            {
+                //qDebug() << "Line too long" << lineLength;
                 continue;
+            }
             float distance;
             float xtheta1 = transformedFieldLines[j].leftPoint.x-transformedFieldLines[i].rightPoint.x;
             float ytheta1 = transformedFieldLines[j].leftPoint.y-transformedFieldLines[i].rightPoint.y;
@@ -1280,9 +1446,10 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
             float distance1 = sqrt(xtheta1*xtheta1 + ytheta1*ytheta1);
             float distance2 = sqrt(xtheta2*xtheta2 + ytheta2*ytheta2);
             float distance3 = sqrt(xtheta3*xtheta3 + ytheta3*ytheta3);
-            if(distance1 > 30 && distance2 > 30 && distance3 > 30)
+            if(distance1 > 30   && distance2 > 30 && distance3 > 30)
             {
-               continue;
+                //qDebug() << "Points Not close enough";
+                continue;
             }
             else
             {
@@ -1298,7 +1465,7 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
             }
             float angle =  fabs(transformedFieldLines[i].getAngle()*57.2957795 - transformedFieldLines[j].getAngle()*57.2957795);
             //qDebug() << i << " and " << j << ": " << angle << "degrees \t Distance: " << distance;
-            if((angle > 110 && angle < 170 )|| (angle < 70 && angle > 10) )
+            if((angle > 110 && angle < 160 ) || (angle > 20 && angle < 70) )
             {
                 //qDebug() <<"\tADDED: "<< i << " and " << j << ": " << angle << "degrees \t Distance: " << distance;
                 //qDebug() << transformedFieldLines[i].leftPoint.x << ", " << transformedFieldLines[i].leftPoint.y << ", " << transformedFieldLines[i].rightPoint.x << ", " << transformedFieldLines[i].rightPoint.y << i;
@@ -1408,8 +1575,10 @@ void LineDetection::FindCornerPoints(int IMAGE_WIDTH,int IMAGE_HEIGHT){
 		//See if this line intersects with any other ones...
                 for (unsigned int LineIDCheck = LineIDStart+1; LineIDCheck < fieldLines.size(); LineIDCheck++){
 			if (!fieldLines[LineIDCheck].valid) continue;
-			//Check this lines' slops are far enough apart...
-                        if (!(fabs(fieldLines[LineIDStart].getAngle() - fieldLines[LineIDCheck].getAngle()) >=.08)) continue;
+                        //Old Check this lines' slops are far enough apart...
+                        //if (!(fabs(fieldLines[LineIDStart].getAngle() - fieldLines[LineIDCheck].getAngle()) >=.08)) continue;
+                        //New Check: Transformed Line must be about 90 degrees
+                        if ((fabs(fabs((transformedFieldLines[LineIDStart].getAngle() - transformedFieldLines[LineIDCheck].getAngle())*57.2957795)-90) > 25)) continue;
 			//std::cout << "Comparing Line Angles: " << LineIDStart << ", " << LineIDCheck<< std::endl;
 			//this seems to be very oblique?? make more acute for circle stuff ALEX
 			//Work out their intersecting X pos..
@@ -1633,7 +1802,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
             {
                 closeGoalDistance = AllObjects->stationaryFieldObjects[i].measuredDistance();
             }
-            if(AllObjects->stationaryFieldObjects[i].measuredDistance() < 250)
+            if(AllObjects->stationaryFieldObjects[i].measuredDistance() < 300)
             {
                 closeGoalSeen = true;
 
@@ -1650,7 +1819,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
             {
                 closeGoalDistance = AllObjects->ambiguousFieldObjects[i].measuredDistance();
             }
-            if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < 250)
+            if(AllObjects->ambiguousFieldObjects[i].measuredDistance() < 300)
             {
                 closeGoalSeen = true;
 
@@ -1863,7 +2032,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
 
     }
     */
-    if(centreCirclePoints.size() > 10)
+    if(centreCirclePoints.size() > 10 && closeGoalSeen == false)
     {
         FitEllipseThroughCircle ellipseCircleFitter;
         bool isOK = ellipseCircleFitter.Fit_Ellipse_Through_Circle(centreCirclePoints, vision);
@@ -1900,9 +2069,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
                 sizeOnScreen.y = round(ellipseCircleFitter.r2);
             }
 
-            AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
-
-
+            if(fabs(closeGoalDistance - ellipseCircleFitter.relDistance) > 200)
+            {
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(measured,measuredError,screenPositionAngle,screenPosition,sizeOnScreen,vision->m_timestamp);
+            }
         }
     }
 
@@ -2452,77 +2622,87 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp
 {
     bool blueGoalSeen = false;
     bool yellowGoalSeen = false;
+    bool centreCircleSeen = false;
     double yDist = 0.0;
     double bDist = 0.0;
     double cDist = 0.0;
     double pDist = 0.0;
+    double goalBearing = 0.0;
 
     //Search for Posts or Unknown Posts:
+    //qDebug() << "Looking for Amb Objects:";
     for(unsigned int i = 0; i < AllObjects->ambiguousFieldObjects.size(); i++)
     {
         if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
                 blueGoalSeen = true;
                 bDist = AllObjects->ambiguousFieldObjects[i].measuredDistance();
+                goalBearing =  AllObjects->ambiguousFieldObjects[i].measuredBearing();
         }
         else if(AllObjects->ambiguousFieldObjects[i].getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
                 yellowGoalSeen = true;
                 yDist = AllObjects->ambiguousFieldObjects[i].measuredDistance();
+                goalBearing =  AllObjects->ambiguousFieldObjects[i].measuredBearing();
         }
     }
+    //qDebug() << "Looking for Known Objects:";
     for(int i = FieldObjects::FO_BLUE_LEFT_GOALPOST; i <= FieldObjects::FO_YELLOW_RIGHT_GOALPOST; i++)
     {
-        if(AllObjects->stationaryFieldObjects[i].TimeLastSeen() == timestamp)
+        if(AllObjects->stationaryFieldObjects[i].isObjectVisible())
         {
             if( i == FieldObjects::FO_BLUE_LEFT_GOALPOST || i == FieldObjects::FO_BLUE_RIGHT_GOALPOST)
             {
                     blueGoalSeen = true;
                     bDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+                    goalBearing =  AllObjects->stationaryFieldObjects[i].measuredBearing();
             }
-            else
+            else if ( i == FieldObjects::FO_YELLOW_LEFT_GOALPOST || i == FieldObjects::FO_YELLOW_RIGHT_GOALPOST)
             {
                     yellowGoalSeen = true;
                     yDist = AllObjects->stationaryFieldObjects[i].measuredDistance();
+                    goalBearing =  AllObjects->stationaryFieldObjects[i].measuredBearing();
             }
         }
     }
 
-
+    //qDebug() << "Decoding Penalty Spots: " << possiblePenaltySpots.size();
     for(unsigned int i = 0; i < possiblePenaltySpots.size(); i++)
     {
         if(possiblePenaltySpots[i].getID() == FieldObjects::FO_PENALTY_UNKNOWN)
-            {
-                pDist = possiblePenaltySpots[i].measuredDistance();
-            }
-            else
-            {
-                continue;
-            }
+        {
+            pDist = possiblePenaltySpots[i].measuredDistance();
+        }
+        else
+        {
+            //qDebug() << "No Distance to Penalty";
+            continue;
+        }
 
 
         if(yellowGoalSeen && blueGoalSeen)
         {
-                //cout<< "Cannot see both yellow and blue Goals at once." << endl;
+                //qDebug() << "Cannot see both yellow and blue Goals at once." << endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
         if(yellowGoalSeen==false && blueGoalSeen==false)
         {
-                //cout<< "No Goals or Posts seen." << endl;
+                //qDebug() << "No Goals or Posts seen." << endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
         if(AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].TimeLastSeen() == timestamp)
         {
                 cDist = AllObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].measuredDistance();
+                centreCircleSeen = true;
         }
-        else
-        {
+        //else
+        //{
                 //cout << "No CentreCircle Visible" << endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
-                return;
-        }
+                //return;
+        //}
 
         //Scenarios: Spot is:
         //1. in between Blue Goals & CentreCircle -> BluePenaltySpot
@@ -2531,32 +2711,79 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp
         //4. in front of CentreCircle & YellowGoals -> BluePenaltySpot
 
         //Sort by vision Distance to work out the position of PenaltySpot
-        if(bDist > pDist && cDist < pDist)
+        /*if(bDist > pDist && cDist < pDist && blueGoalSeen && centreCircleSeen)
         {
             //BluePenaltySpot
             AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
             //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
             continue;
         }
-        else if(yDist > pDist && cDist < pDist)
+
+        else if(yDist > pDist && cDist < pDist && yellowGoalSeen && centreCircleSeen)
         {
             //yellowPenaltySpot
              AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
             //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
             continue;
         }
-        else if(bDist > pDist && cDist > pDist)
+
+        else if(bDist > pDist && cDist > pDist && centreCircleSeen && blueGoalSeen)
         {
             //yellowPenaltySpot
              AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
             //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
             continue;
         }
-        else if(yDist > pDist && cDist > pDist)
+        else if(yDist > pDist && cDist > pDist && yellowGoalSeen && centreCircleSeen)
         {
             //bluePenaltySpot
              AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
             //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }*/
+
+        if(yellowGoalSeen)
+        {
+            //Calculate the transformed distance difference:
+            float xpspot = possiblePenaltySpots[i].measuredDistance() * sin(possiblePenaltySpots[i].measuredBearing());
+            float ypspot = possiblePenaltySpots[i].measuredDistance() * cos(possiblePenaltySpots[i].measuredBearing());
+            float xgoal = yDist * sin(goalBearing);
+            float ygoal = yDist * cos(goalBearing);
+
+            float measuredTransformedDistance = sqrt((xpspot - xgoal)*(xpspot - xgoal) + (ypspot - ygoal)*(ypspot - ygoal));
+            //yellowPenaltySpot
+            //qDebug() << "Distance Between the Goal and Penalty spot: "<<measuredTransformedDistance;
+            if(fabs(measuredTransformedDistance - 193.1321) < 50)
+            {
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
+            }
+            else if(fabs(measuredTransformedDistance - (600 - 193.1321)) < 50)
+            {
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
+            }
+            //fieldObjects[FO_PENALTY_UNKNOWN].seen = false;
+            continue;
+        }
+
+        else if(blueGoalSeen)
+        {
+            //Calculate the transformed distance difference:
+            float xpspot = possiblePenaltySpots[i].measuredDistance() * sin(possiblePenaltySpots[i].measuredBearing());
+            float ypspot = possiblePenaltySpots[i].measuredDistance() * cos(possiblePenaltySpots[i].measuredBearing());
+            float xgoal = bDist * sin(goalBearing);
+            float ygoal = bDist * cos(goalBearing);
+
+            float measuredTransformedDistance = sqrt((xpspot - xgoal)*(xpspot - xgoal) + (ypspot - ygoal)*(ypspot - ygoal));
+            //bluePenaltySpot
+            //qDebug() << "Distance Between the Goal and Penalty spot: "<<measuredTransformedDistance;
+            if(fabs(measuredTransformedDistance - 193.1321) < 50)
+            {
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_BLUE].CopyObject(possiblePenaltySpots[i]);
+            }
+            else if(fabs(measuredTransformedDistance - (600 - 193.1321)) < 100)
+            {
+                AllObjects->stationaryFieldObjects[FieldObjects::FO_PENALTY_YELLOW].CopyObject(possiblePenaltySpots[i]);
+            }
             continue;
         }
         else
@@ -2567,7 +2794,7 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp
     }
 }
 
-void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation, Vision* vision)
+bool LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation, Vision* vision)
 {
     *bearing = vision->CalculateBearing(cx);
     *elevation = vision->CalculateElevation(cy);
@@ -2587,25 +2814,33 @@ void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
             debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
         #endif
     }
-    return;
+    return isOK;
 }
 
 bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relativePoint, Vision* vision)
 {
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\t Calculated Bearing and Elevation: " << endl;
+    #endif
     float bearing = vision->CalculateBearing(point.x);
     float elevation = vision->CalculateElevation(point.y);
-
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\t Bearing and Elevation: " << bearing << elevation << endl;
+    #endif
     vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\t\t Get Sensor Data:  " << isOK << endl;
+    #endif
     if(isOK == true)
     {
         Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
 
         relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
-        //#if DEBUG_VISION_VERBOSITY > 6
-        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
-        //#endif
+        #if DEBUG_VISION_VERBOSITY > 5
+            debug << "\t\tCalculated Distance to Point: " << endl;
+        #endif
     }
     return isOK;
 }
@@ -2629,6 +2864,7 @@ bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoin
     }
     return isOK;
 }
+
 
 /*
 void LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, double* bearing, double* elevation) {

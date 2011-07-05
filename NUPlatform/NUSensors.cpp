@@ -188,12 +188,17 @@ void NUSensors::calculateHorizon()
     vector<float> orientation;
     float headYaw, headPitch;
 
-    bool validdata = m_data->get(NUSensorsData::Orientation, orientation);
-    validdata &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
-    validdata &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
+    vector<float> supportLegTransformFlat;
+    bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+    Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+    if(validKinematics)
+        orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+
+    validKinematics &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
+    validKinematics &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
     int camera = 1;
 
-    if (validdata)
+    if (validKinematics)
     {
         HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
         vector<float> line;

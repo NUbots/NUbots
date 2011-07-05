@@ -20,7 +20,7 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-#define LOC_SUMMARY 1
+#define LOC_SUMMARY 0
 
 class Localisation: public TimestampedData
 {
@@ -44,6 +44,8 @@ class Localisation: public TimestampedData
         void WriteModelToObjects(const KF &model, FieldObjects* fobs);
         bool clipModelToField(int modelID);
         bool clipActiveModelsToField();
+
+        int doMultipleKnownLandmarkObservationUpdate(std::vector<StationaryObject*>& landmarks);
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
         int doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
@@ -64,6 +66,7 @@ class Localisation: public TimestampedData
         void MergeModels(int maxAfterMerge);
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
+        std::string ModelStatusSummary();
 
 		void resetPlayingStateModels();
 
@@ -132,6 +135,10 @@ class Localisation: public TimestampedData
         bool m_previously_incapacitated;
         GameInformation::RobotState m_previous_game_state;
         std::stringstream m_frame_log;
+
+        std::vector<float> m_gps;
+        float m_compass;
+        bool m_hasGps;
         
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;

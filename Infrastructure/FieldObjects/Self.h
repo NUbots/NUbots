@@ -17,9 +17,9 @@ class Self {
 		~Self();
 		Self(float x, float y);
         void updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, float sdY, float sdHeading,bool lost);
-		float wmX(){return WorldModelLocation[0];}
-		float wmY(){return WorldModelLocation[1];}
-		float Heading(){return WorldModelLocation[2];}
+                float wmX() const {return WorldModelLocation.x;}
+                float wmY() const {return WorldModelLocation.y;}
+                float Heading() const {return WorldModelLocation.z;}
 		std::vector<float> wmState();
         float sdX() {return WorldModelLocationError[0];}
         float sdY() {return WorldModelLocationError[1];}

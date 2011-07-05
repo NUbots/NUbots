@@ -3,12 +3,19 @@
 
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFileFormatReader(parent)
 {
+
+    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
+    vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
+    m_tempSensors.addSensors(sensor_names);
     setKnownDataTypes();
     m_fileGood = false;
 }
 
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(const QString& filename, QObject *parent): LogFileFormatReader(parent)
 {
+    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
+    vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
+    m_tempSensors.addSensors(sensor_names);
     m_fileGood = false;
     setKnownDataTypes();
     openFile(filename);
@@ -36,7 +43,20 @@ const NUImage* SplitStreamFileFormatReader::GetImageData()
 
 const NUSensorsData* SplitStreamFileFormatReader::GetSensorData()
 {
-    return sensorReader.ReadFrameNumber(m_currentFrameIndex);
+    if(sensorReader.IsValid())
+    {
+        return sensorReader.ReadFrameNumber(m_currentFrameIndex);
+    }
+    else if (locsensorReader.IsValid())
+    {
+        NULocalisationSensors* temp = locsensorReader.ReadFrameNumber(m_currentFrameIndex);
+        if(temp)
+        {
+            m_tempSensors.setLocSensors(*temp);
+            return &m_tempSensors;
+        }
+    }
+    return NULL;
 }
 
 const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
@@ -64,11 +84,12 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
     m_dataIsSynced = true;
     m_extension = ".strm";
     m_knownDataTypes.clear();
-    m_knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+    m_knownDataTypes << "image" << "sensor" << "locsensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
 
     // Add the file readers.
     m_fileReaders.push_back(&imageReader);
     m_fileReaders.push_back(&sensorReader);
+    m_fileReaders.push_back(&locsensorReader);
     m_fileReaders.push_back(&locwmReader);
     m_fileReaders.push_back(&objectReader);
     m_fileReaders.push_back(&locmframeReader);
@@ -80,9 +101,7 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 {
     const QString extension = ".strm";
     QStringList knownDataTypes;
-    knownDataTypes << "image" << "sensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
-
-
+    knownDataTypes << "image" << "sensor" << "locsensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
     std::vector<QFileInfo> fileLocations;
 
     qDebug("Searching Path: %s", qPrintable(directory.path()));
@@ -247,6 +266,16 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
         {
             emit sensorDataChanged(sensorReader.ReadFrameNumber(frameNumber));
             m_currentFrameIndex = sensorReader.CurrentFrameSequenceNumber();
+        }
+        else if(locsensorReader.IsValid())
+        {
+            NULocalisationSensors* temp = locsensorReader.ReadFrameNumber(frameNumber);
+            if(temp)
+            {
+                m_tempSensors.setLocSensors(*temp);
+                emit sensorDataChanged(&m_tempSensors);
+                m_currentFrameIndex = locsensorReader.CurrentFrameSequenceNumber();
+            }
         }
         if(locwmReader.IsValid())
         {

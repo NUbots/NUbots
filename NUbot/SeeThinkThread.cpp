@@ -78,7 +78,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     #endif
     m_nubot = nubot;
     m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
-    //m_logrecorder->SetLogging("sensor",true);
+    //m_logrecorder->SetLogging("locsensor",true);
     //m_logrecorder->SetLogging("gameinfo",true);
     //m_logrecorder->SetLogging("teaminfo",true);
     m_logrecorder->SetLogging("object",true);

@@ -8,6 +8,8 @@
 using std::vector;
 
 vector<LinePoint*> SAM::noisePoints;
+vector<LinePoint*> SAM::noisePoints1;
+vector<LinePoint*> SAM::noisePoints2;
 unsigned int SAM::noFieldLines;
 unsigned int SAM::MAX_LINES, SAM::MAX_POINTS, SAM::MIN_POINTS_OVER, SAM::MIN_POINTS_TO_LINE, SAM::MIN_POINTS_TO_LINE_FINAL, SAM::SPLIT_NOISE_ITERATIONS;
 double SAM::MAX_END_POINT_DIFF, SAM::MIN_LINE_R2_FIT, SAM::SPLIT_DISTANCE, SAM::MAX_LINE_MSD;
@@ -119,8 +121,10 @@ void SAM::splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<L
     for(unsigned int i=0; i<clusters.size(); i++) {
         //perform split - splitLS() checks for appropriate size, so that need not be done here
         //noisePoints.clear();
+        noisePoints1.clear();
+        noisePoints2.clear();
         splitLSIterative(lines, clusters[i]);
-        //splitNoiseLS(lines);
+        splitNoiseLS12(lines);
     }
     //prof.split("Split Clusters");
 
@@ -241,7 +245,7 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
         //there are enough points distant to justify a split
         vector<LinePoint*> left;
         vector<LinePoint*> right;
-        if(separateLS(left, right, points[greatest_point], *line)) {
+        /*if(separateLS(left, right, points[greatest_point], *line)) {
             if(left.size() >= MIN_POINTS_TO_LINE) {
                 splitLS(lines, left);
             }
@@ -270,6 +274,7 @@ void SAM::splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
             newlist.pop_back();
             splitLS(lines, newlist);
         }
+        */
     }
     else if(points_over > 0) {
         //not enough points over to split so remove point as noisy, and regen line
@@ -324,7 +329,7 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
     stack.clear();
     int furthest_point;
     int points_over;
-    vector<LinePoint*> left, right;
+    vector<LinePoint*> left, right, below, above, centre;
 
     LSFittedLine* tempLine = new LSFittedLine();
     //generate first line
@@ -341,6 +346,9 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
         //Clear left and right
         left.clear();
         right.clear();
+        below.clear();
+        above.clear();
+        centre.clear();
 
         //pop top line
         tempLine = stack.back();
@@ -352,37 +360,86 @@ void SAM::splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& poi
         //Options
         if((unsigned int)points_over >= MIN_POINTS_OVER) {
             //See if separation is an option
-            //qDebug() << "going to seperate the line: ";
-            if(separateLS(left, right, tempLine->getPoints()[furthest_point], *tempLine)) {
+            //qDebug() << "going to seperate the line: " << furthest_point << (tempLine->getPoints()[furthest_point])->x << (tempLine->getPoints()[furthest_point])->y;
+            bool useTripleSplit = false;
+            if(separateLS(left, right, below, above, centre, tempLine->getPoints()[furthest_point], *tempLine,  useTripleSplit)) {
                 //qDebug() << "separating worked";
                 //clear old line
-                tempLine->getPoints().clear();
-                delete tempLine;
-                //check if left is big enough
-                if(left.size() >= MIN_POINTS_TO_LINE) {
-                    //generate line and push it to stack
-                    tempLine = new LSFittedLine();
-                    generateLSLine(*tempLine, left);
-                    stack.push_back(tempLine);
+                if(!useTripleSplit)
+                {
+                    tempLine->getPoints().clear();
+                    delete tempLine;
+                    //check if left is big enough
+                    if(left.size() >= MIN_POINTS_TO_LINE) {
+                        //generate line and push it to stack
+                        tempLine = new LSFittedLine();
+                        generateLSLine(*tempLine, left);
+                        stack.push_back(tempLine);
+                    }
+                    else {
+                        //throw left points to noise
+                        for(unsigned int i=0; i<left.size(); i++)
+                            addToNoise(left[i]);
+                        left.clear();
+                    }
+                    //check if right is big enough
+                    if(right.size() >= MIN_POINTS_TO_LINE) {
+                        //generate line and push it to stack
+                        tempLine = new LSFittedLine();
+                        generateLSLine(*tempLine, right);
+                        stack.push_back(tempLine);
+                    }
+                    else {
+                        //throw right points to noise
+                        for(unsigned int i=0; i<right.size(); i++)
+                            addToNoise(right[i]);
+                        right.clear();
+                    }
                 }
-                else {
-                    //throw left points to noise
-                    for(unsigned int i=0; i<left.size(); i++)
-                        addToNoise(left[i]);
-                    left.clear();
-                }
-                //check if right is big enough
-                if(right.size() >= MIN_POINTS_TO_LINE) {
-                    //generate line and push it to stack
-                    tempLine = new LSFittedLine();
-                    generateLSLine(*tempLine, right);
-                    stack.push_back(tempLine);
-                }
-                else {
-                    //throw right points to noise
-                    for(unsigned int i=0; i<right.size(); i++)
-                        addToNoise(right[i]);
-                    right.clear();
+                else //triple split
+                {
+                    //qDebug() << "Using the Tripple Split";
+                    tempLine->getPoints().clear();
+                    delete tempLine;
+                    //check if left is big enough
+                    if(centre.size() >= MIN_POINTS_TO_LINE) {
+                        //generate line and push it to stack
+                        tempLine = new LSFittedLine();
+                        generateLSLine(*tempLine, centre);
+                        stack.push_back(tempLine);
+                    }
+                    else {
+                        //throw left points to noise
+                        for(unsigned int i=0; i<centre.size(); i++)
+                            addToNoise(centre[i]);
+                        centre.clear();
+                    }
+                    //check if right is big enough
+                    if(above.size() >= MIN_POINTS_TO_LINE) {
+                        //generate line and push it to stack
+                        tempLine = new LSFittedLine();
+                        generateLSLine(*tempLine, above);
+                        stack.push_back(tempLine);
+                    }
+                    else {
+                        //throw right points to noise
+                        for(unsigned int i=0; i<above.size(); i++)
+                            addToNoise(above[i]);
+                        above.clear();
+                    }
+                    if(below.size() >= MIN_POINTS_TO_LINE) {
+                        //generate line and push it to stack
+                        tempLine = new LSFittedLine();
+                        generateLSLine(*tempLine, below);
+                        stack.push_back(tempLine);
+                    }
+                    else {
+                        //throw right points to noise
+                        for(unsigned int i=0; i<below.size(); i++)
+                            addToNoise(below[i]);
+                        below.clear();
+                    }
+
                 }
             } //if(separate())
             else {
@@ -472,7 +529,9 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
     for(current_point = 0; current_point < points.size(); current_point++) {
         temp = points[current_point];
         distance = fabs(A * temp->x + B * temp->y - C) / denom;
-        //qDebug() << distance;
+
+        //qDebug() <<current_point <<distance;
+
         if(distance > SPLIT_DISTANCE) {
             //potential splitting point
             points_over++; //increment points_over counter
@@ -484,6 +543,7 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
             }
         }
     }
+    //qDebug() <<furthest_point <<greatest_distance;
 }
 
 void SAM::splitNoiseLS(vector<LSFittedLine*>& lines) {
@@ -499,9 +559,28 @@ void SAM::splitNoiseLS(vector<LSFittedLine*>& lines) {
         splitLSIterative(lines, noiseCopy);
     }
 }
+void SAM::splitNoiseLS12(vector<LSFittedLine*>& lines) {
+    //this method creates a copy of the noisePoints vector,
+    //clears the current noisePoints vector and runs
+    //the split algorithm on the copy
 
+    if(noisePoints1.size() >= MIN_POINTS_TO_LINE_FINAL) {
+        vector<LinePoint*> noiseCopy;
 
-bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePoint* split_point, LSFittedLine& line) {
+        noiseCopy = noisePoints1;
+        noisePoints1.clear();
+        splitLSIterative(lines, noiseCopy);
+    }
+    if(noisePoints2.size() >= MIN_POINTS_TO_LINE_FINAL) {
+        vector<LinePoint*> noiseCopy;
+
+        noiseCopy = noisePoints2;
+        noisePoints2.clear();
+        splitLSIterative(lines, noiseCopy);
+    }
+}
+
+bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, vector<LinePoint*>& below, vector<LinePoint*>& above,vector<LinePoint*>& centre,LinePoint* split_point, LSFittedLine& line, bool& useTripleSplit) {
         /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
          *Pre: left and right should be empty vectors
          *		points contains all the points to be split
@@ -515,16 +594,18 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
         //temp holder vars
         double A = line.getA();
         double B = line.getB();
-        double C = line.getC();
+        //double C = line.getC();
         double x1 = split_point->x;
         double y1 = split_point->y;
         vector<LinePoint*> points = line.getPoints();
         //vector<LinePoint*> points = *points;
 
+        //vector<LinePoint*> above, below, centre;
+
         left.push_back(split_point);
         right.push_back(split_point);
 /*****DEBUGGING OUTPUT******/
-        //printf("\nSplitting on: (%.2f,%.2f)\n",x1,y1);
+        //qDebug("\nSplitting on: (%.2f,%.2f)\n",x1,y1);
 /*****DEBUGGING OUTPUT******/
         if(A==0.0) {
             //horizontal line - no rotation
@@ -561,7 +642,8 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
             }
         }
         else {
-         // STILL TO DO: FIX MATRIX CALCS
+            /* Shannons "Seperation does not work?"
+            // STILL TO DO: FIX MATRIX CALCS
 
             //sloped line
             //x' = (x - x0)cosa + (y - y0)sina
@@ -600,7 +682,7 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
                 //check all points, calculate translated x coord
                 //and place in appropriate vector
                 if(!(points[pointcounter] == split_point)) {
-                    xtrans = (points[pointcounter]->x - X0)*cosalpha + (points[pointcounter]->y - X1)*sinalpha;
+                   //xtrans = (points[pointcounter]->x - X0)*cosalpha + (points[pointcounter]->y - X1)*sinalpha;
                     if(xtrans < 0) {
                         //point is to the left
                         left.push_back(points[pointcounter]);
@@ -610,13 +692,81 @@ bool SAM::separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePo
                     }
                 }
             }
+            */
+
+            //AARON: Seperation based on whether the line is left or right of the split point
+            for(unsigned int pointcounter = 0; pointcounter <points.size(); pointcounter++)
+            {
+
+                Point p;
+                p.x = points[pointcounter]->x;
+                p.y = points[pointcounter]->y;
+
+                if(line.getSignedLinePointDistance(p) < -5)
+                {
+                    below.push_back(points[pointcounter]);
+                }
+                else if(line.getSignedLinePointDistance(p) > 5)
+                {
+                    above.push_back(points[pointcounter]);
+                }
+                else
+                {
+                    centre.push_back(points[pointcounter]);
+                }
+
+
+                //First check gradients: Horizontally sloping compare x values, Vertically sloping compare y values
+
+                //Go through all points to check if they are left of the split point (Left is less then split point)
+
+                if(fabs(line.getGradient()) > 1)
+                {
+                    if(points[pointcounter]->y <= split_point->y)
+                    {
+                        left.push_back(points[pointcounter]);
+                    }
+                    else
+                    {
+                        right.push_back(points[pointcounter]);
+                    }
+
+                }
+                else
+                {
+                    if(points[pointcounter]->x <= split_point->x)
+                    {
+                        left.push_back(points[pointcounter]);
+                    }
+                    else
+                    {
+                        right.push_back(points[pointcounter]);
+                    }
+                }
+            }
+
         }
         //if either left or right contains entire point set then there will be an
         //infinite loop
-        //qDebug() << "Old line size: " << line.getPoints().size() << " Left size: " << left.size() << " Right size: " << right.size();
-        if(left.size() == points.size() || right.size() == points.size())
-            return false;
-        return true;
+
+        //qDebug() << "Old line size: " << line.getPoints().size() << " Left size: " << left.size() << " Right size: " << right.size() << abs((int)left.size()-(int)right.size());
+        //qDebug() << "Old line size: " << line.getPoints().size() << " Above size: " << above.size() << " Below size: " << below.size() << "Centre Size: " << centre.size() << (abs((int)above.size()-(int)below.size()));
+
+
+        //Return the one with the least difference, in size as better "split"
+        //bool useTripleSplit= false;
+        if((abs((int)above.size() - (int)below.size()) < abs((int)left.size() - (int)right.size())) && above.size() != 0 && below.size() !=0 && centre.size() !=0)
+        {
+            if((above.size() < points.size()) && (below.size() < points.size()) && (centre.size() < points.size()/2))
+            {
+                //qDebug() << "Using Tripple Split";
+                useTripleSplit = true;
+            }
+        }
+
+        if(((left.size() < points.size()) && (right.size() < points.size())) || useTripleSplit)
+            return true;
+        return false;
 
 }
 
@@ -686,7 +836,30 @@ void SAM::addToNoise(LinePoint* point) {
         noisePoints.push_back(point);
     }
 }
-
+void SAM::addToNoise1(LinePoint* point) {
+    //NOT EFFICIENT
+    //O(M) for every insertion - where M is the size of noisePoints
+    bool add = true;
+    for(unsigned int i=0; i<noisePoints1.size(); i++) {
+        if(*noisePoints1[i] == *point)
+            add = false;
+    }
+    if(add) {
+        noisePoints1.push_back(point);
+    }
+}
+void SAM::addToNoise2(LinePoint* point) {
+    //NOT EFFICIENT
+    //O(M) for every insertion - where M is the size of noisePoints
+    bool add = true;
+    for(unsigned int i=0; i<noisePoints2.size(); i++) {
+        if(*noisePoints2[i] == *point)
+            add = false;
+    }
+    if(add) {
+        noisePoints2.push_back(point);
+    }
+}
 
 void SAM::clearSmallLines(vector<LSFittedLine*>& lines) {
     //removes any lines from the vector whose vector of

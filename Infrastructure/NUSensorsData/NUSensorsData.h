@@ -29,6 +29,7 @@
 #include "Sensor.h"
 #include "Infrastructure/NUData.h"
 #include "Tools/FileFormats/TimestampedData.h"
+#include "NULocalisationSensors.h"
 
 #include <vector>
 #include <string>
@@ -216,7 +217,9 @@ public:
     friend istream& operator>> (istream& input, NUSensorsData& p_sensor);
     
     int size() const;
-    double GetTimestamp() const {return CurrentTime;};
+    double GetTimestamp() const {return CurrentTime;}
+    void setLocSensors(const NULocalisationSensors& locsensors);
+    NULocalisationSensors getLocSensors();
 private:
     bool getJointData(const id_t& id, const JointSensorIndices& in, float& data);
     bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);

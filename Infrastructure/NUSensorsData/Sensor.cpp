@@ -30,7 +30,8 @@
  */
 Sensor::Sensor(string sensorname)
 {
-    Name = sensorname; 
+    Name = sensorname;
+    Time = 0.0;
     ValidFloat = false;
     ValidVector = false;
     ValidMatrix = false;
@@ -44,6 +45,21 @@ Sensor::Sensor(string sensorname)
     @param source The source of the copy
  */
 Sensor::Sensor(const Sensor& source)
+{
+    Name = source.Name;
+    Time = source.Time;
+    ValidFloat = source.ValidFloat;
+    ValidVector = source.ValidVector;
+    ValidMatrix = source.ValidMatrix;
+    ValidString = source.ValidString;
+
+    FloatData = source.FloatData;
+    VectorData = source.VectorData;
+    MatrixData = source.MatrixData;
+    StringData = source.StringData;
+}
+
+Sensor& Sensor::operator= (const Sensor & source)
 {
     Name = source.Name;
     Time = source.Time;
