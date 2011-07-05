@@ -1,8 +1,10 @@
 /*! @file ReadyLostState.h
-    @brief Declaration of the initial soccer state
+    @brief Declaration of the ReadyLostState soccer state
  
     @class ReadyLostState
-    @brief The initial soccer state
+    @brief The ReadyLostState soccer state has two substates
+            - ReadyLostPan. In this state we stand still, and do a simple localisation pan
+            - ReadyLostSpin
 
     @author Jason Kulk
  
@@ -46,6 +48,9 @@ protected:
     BehaviourState* m_lost_pan;
     friend class ReadyLostSpin;
     BehaviourState* m_lost_spin;
+    
+    float m_time_in_state;
+    float m_previous_time;
 };
 
 

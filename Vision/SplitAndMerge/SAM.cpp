@@ -500,7 +500,9 @@ void SAM::findFurthestPoint(LSFittedLine& line, int& points_over, int& furthest_
     for(current_point = 0; current_point < points.size(); current_point++) {
         temp = points[current_point];
         distance = fabs(A * temp->x + B * temp->y - C) / denom;
+
         //qDebug() <<current_point <<distance;
+
         if(distance > SPLIT_DISTANCE) {
             //potential splitting point
             points_over++; //increment points_over counter

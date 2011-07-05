@@ -116,6 +116,7 @@ NUSensorsData::~NUSensorsData()
 
 void NUSensorsData::addSensors(const vector<string>& hardwarenames)
 {
+
     // the model we use for sensors, is that every sensor is 'available', but the data may be invalid.
     for (size_t i=NumCommonIds.Id; i<m_ids.size(); i++)
         m_id_to_indices[i].push_back(i);
@@ -882,7 +883,11 @@ bool NUSensorsData::isIncapacitated()
 {
     bool gettingup = false;
     get(MotionGetupActive, gettingup);
-    return isFalling() or isFallen() or not isOnGround() or gettingup;
+    bool falling = isFalling();
+    bool fallen = isFallen();
+    bool onGround = isOnGround();
+    return falling or fallen or !onGround or gettingup;
+    //return isFalling() or isFallen() or not isOnGround() or gettingup;
 }
 
 /******************************************************************************************************************************************
@@ -1070,6 +1075,110 @@ void NUSensorsData::csvTo(ostream& output)
 int NUSensorsData::size() const
 {
     return m_sensors.size();
+}
+
+void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
+{
+    int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
+    const vector<int>& gps_ids = mapIdToIndices(Gps);
+    if (gps_ids.size() == 1)
+    {
+        gps_id = gps_ids[0];
+        m_sensors[gps_id] = locsensors.gps();
+    }
+    const vector<int>& compass_ids = mapIdToIndices(Compass);
+    if (compass_ids.size() == 1)
+    {
+        compass_id = compass_ids[0];
+        m_sensors[compass_id] = locsensors.compass();
+    }
+    const vector<int>& odom_ids = mapIdToIndices(Odometry);
+    if (odom_ids.size() == 1)
+    {
+        odom_id = odom_ids[0];
+        m_sensors[odom_id] = locsensors.odometry();
+    }
+    const vector<int>& falling_ids = mapIdToIndices(Falling);
+    if (falling_ids.size() == 1)
+    {
+        falling_id = falling_ids[0];
+        m_sensors[falling_id] = locsensors.falling();
+    }
+    const vector<int>& fallen_ids = mapIdToIndices(Fallen);
+    if (fallen_ids.size() == 1)
+    {
+        fallen_id = fallen_ids[0];
+        m_sensors[fallen_id] = locsensors.fallen();
+    }
+    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    if (fallen_ids.size() == 1)
+    {
+        getup_id = getup_ids[0];
+        m_sensors[getup_id] = locsensors.getup();
+    }
+    const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
+    if (lf_ids.size() == 1)
+    {
+        lf_id = lf_ids[0];
+        m_sensors[lf_id] = locsensors.leftFoot();
+    }
+    const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
+    if (rf_ids.size() == 1)
+    {
+        rf_id = rf_ids[0];
+        m_sensors[rf_id] = locsensors.rightFoot();
+    }
+    CurrentTime = locsensors.GetTimestamp();
+    return;
+}
+
+NULocalisationSensors NUSensorsData::getLocSensors()
+{
+    int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
+    const vector<int>& gps_ids = mapIdToIndices(Gps);
+    if (gps_ids.size() == 1)
+    {
+        gps_id = gps_ids[0];
+    }
+    const vector<int>& compass_ids = mapIdToIndices(Compass);
+    if (compass_ids.size() == 1)
+    {
+        compass_id = compass_ids[0];
+    }
+    const vector<int>& odom_ids = mapIdToIndices(Odometry);
+    if (odom_ids.size() == 1)
+    {
+        odom_id = odom_ids[0];
+    }
+    const vector<int>& falling_ids = mapIdToIndices(Falling);
+    if (falling_ids.size() == 1)
+    {
+        falling_id = falling_ids[0];
+    }
+    const vector<int>& fallen_ids = mapIdToIndices(Fallen);
+    if (fallen_ids.size() == 1)
+    {
+        fallen_id = fallen_ids[0];
+    }
+
+    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    if (fallen_ids.size() == 1)
+    {
+        getup_id = getup_ids[0];
+    }
+    const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
+    if (lf_ids.size() == 1)
+    {
+        lf_id = lf_ids[0];
+    }
+    const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
+    if (rf_ids.size() == 1)
+    {
+        rf_id = rf_ids[0];
+    }
+
+    return NULocalisationSensors(GetTimestamp(), m_sensors[gps_id], m_sensors[compass_id], m_sensors[odom_id], m_sensors[falling_id],
+                                 m_sensors[fallen_id], m_sensors[getup_id], m_sensors[lf_id], m_sensors[rf_id]);
 }
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream

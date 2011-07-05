@@ -102,7 +102,7 @@
 //#endif
 
 // ZMP Preview Queue Debugging
-#define DEBUG_ZMP_REF
+//#define DEBUG_ZMP_REF
 
 typedef boost::tuple<const std::list<float>*,
                      const std::list<float>*> zmp_xy_tuple;

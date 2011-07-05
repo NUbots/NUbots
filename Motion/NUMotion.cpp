@@ -307,7 +307,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     #if defined(USE_BLOCK) or defined(USE_SAVE)
     else if (m_save->isReady())
     {   // we need a fast transition into the save
-        if(m_current_leg_provider != m_save)
+        if(m_current_leg_provider != m_save and m_current_leg_provider != m_getup and m_current_leg_provider != m_fall_protection)
         {
             if (m_current_arm_provider)
                 m_current_arm_provider->kill();
@@ -512,7 +512,7 @@ void NUMotion::process(JobList* jobs)
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::process(): Finished" << endl;
+        debug << "NUMotion::process(jobs): Finished" << endl;
     #endif
 }
 

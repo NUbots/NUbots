@@ -20,18 +20,16 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  ChaseState.cpp ChaseState.h
-                ChaseStates.h
-                PositioningState.cpp PositioningState.h
-                PositioningStates.h
-                BallIsLostState.cpp BallIsLostState.h
-                BallIsLostStates.h
-                ImLostState.cpp ImLostState.h
-                ImLostStates.h
+SET (YOUR_SRCS  PlayingState.cpp PlayingState.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  
+SET (YOUR_DIRS  Striker
+                Support
+                Back
+                GoalKeeper
+                BallIsLost
+                ImLost
 )
 ####################################################################################
 

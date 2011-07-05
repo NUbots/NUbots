@@ -22,6 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  NUSensorsData.cpp NUSensorsData.h
                 Sensor.cpp Sensor.h
+		NULocalisationSensors.cpp NULocalisationSensors.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

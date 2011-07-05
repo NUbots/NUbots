@@ -34,6 +34,7 @@ SET (YOUR_DIRS  Soccer
                 MiscBehaviours
                 WalkOptimisation
                 Kicker
+                GoalKeeper
                 PassingChallenge
                 RoboPedestrian
 				CameraCalibration

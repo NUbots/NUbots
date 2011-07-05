@@ -39,7 +39,7 @@ public:
     ScriptJob(double time, istream& input);
     ~ScriptJob();
     
-    void getScript(double& time, MotionScript& position);
+    void getScript(double& time, MotionScript& script);
     string& getName();
     
     virtual void summaryTo(ostream& output);

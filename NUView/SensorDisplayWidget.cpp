@@ -1,7 +1,6 @@
 #include "SensorDisplayWidget.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include <sstream>
-
 SensorDisplayWidget::SensorDisplayWidget(QWidget *parent) :
     QTextBrowser(parent)
 {

@@ -47,7 +47,6 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 {
     /**************************Initialization**************************/
 	/*This is where values can be adjusted*/
-
   m_alpha = 1.0; // Accuracy of model (0.0 -> 1.0)
   m_isActive = false; // Model currently in use.
   m_toBeActivated = false; // Model to be in use.
@@ -63,11 +62,11 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
 
 // Process Noise - Matrix Square Root of Q
   sqrtOfProcessNoise = Matrix(7,7,true);
-  sqrtOfProcessNoise[0][0] = 0.1; // Robot X coord.
-  sqrtOfProcessNoise[1][1] = 0.1; // Robot Y coord.
-  sqrtOfProcessNoise[2][2] = 0.001; // Robot Theta. 0.00001
-  sqrtOfProcessNoise[3][3] = 4.0; // Ball X.
-  sqrtOfProcessNoise[4][4] = 4.0; // Ball Y.
+  sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
+  sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
+  sqrtOfProcessNoise[2][2] = 0.002; // Robot Theta. 0.00001
+  sqrtOfProcessNoise[3][3] = 40.0; // Ball X.
+  sqrtOfProcessNoise[4][4] = 40.0; // Ball Y.
   sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
   sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
 
@@ -274,8 +273,6 @@ void KF::timeUpdate(float odom_x, float odom_y, float odom_theta, double deltaTi
     stateEstimates[KF::selfX][0] = stateEstimates[KF::selfX][0] + odom_x*cos(mid_theta) - odom_y*sin(mid_theta);
     stateEstimates[KF::selfY][0] = stateEstimates[KF::selfY][0] + odom_x*sin(mid_theta) - odom_y*cos(mid_theta);
 
-
-
 // Householder transform. Unscented KF algorithm. Takes a while.
     stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
     stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
@@ -423,7 +420,7 @@ KfUpdateResult KF::ballmeas(double Ballmeas, double theta_Ballmeas){
 }
 
 
-
+/*
 // RHM 7/7/08: Change for resetting (return int)
 KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError){
   double objX_rel = distance * cos(bearing);
@@ -527,6 +524,176 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
 }
 
 
+
+*/
+
+KfUpdateResult KF::MultiFieldObs(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
+{
+        unsigned int numObs = measurements.getm();
+        Matrix R_obj_rel(R_Measurement); // R = S^2
+        Matrix S_obj_rel(cholesky(R_obj_rel)); // R = S^2
+
+        // Unscented KF Stuff.
+        Matrix yBar;                                  	//reset
+        Matrix Py;
+        Matrix Pxy=Matrix(7, 2*numObs, false);                    //Pxy=[0;0;0];
+        Matrix scriptX = CalculateSigmaPoints();
+        const unsigned int numSigmaPoints = scriptX.getn();
+              //----------------------------------------------------------------
+        Matrix scriptY = Matrix(numObs, numSigmaPoints, false);
+        Matrix temp = Matrix(numObs, 1, false);
+
+        double dX,dY,Cc,Ss;
+
+        for(int i = 0; i < numSigmaPoints; i++)
+        {
+            for(unsigned int j=0; j < numObs; j+=2)
+            {
+                dX = locations[j][0]-scriptX[0][i];
+                dY = locations[j+1][0]-scriptX[1][i];
+                temp[j][0] = sqrt(dX*dX + dY*dY);
+                temp[j+1][0] = normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
+            }
+            scriptY.setCol(i, temp.getCol(0));
+        }
+        Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+        Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+        for(int i = 0; i < numSigmaPoints; i++){
+          Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+          My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+        }
+
+        Matrix M1 = sqrtOfTestWeightings;
+        yBar = My * M1.transp(); // Predicted Measurement.
+        Py = (My - yBar * M1) * (My - yBar * M1).transp();
+        Pxy = (Mx - stateEstimates * M1) * (My - yBar * M1).transp();
+
+        Matrix invPyRObj = InverseMatrix(Py + R_obj_rel);
+
+        Matrix K = Pxy * invPyRObj; // K = Kalman filter gain.
+
+        Matrix y = Matrix(measurements); // Measurement. I terms of relative (x,y).
+
+        //end of standard ukf stuff
+              //RHM: 20/06/08 Outlier rejection.
+        Matrix yDiffTemp = (yBar - y);
+
+        for(unsigned int i = 0; i < yDiffTemp.getm(); i+=2)
+        {
+            Matrix inv(2,2,false);
+            inv[0][0] = invPyRObj[i][i];
+            inv[0][1] = invPyRObj[i][i+1];
+            inv[1][0] = invPyRObj[i+1][i];
+            inv[1][1] = invPyRObj[i+1][i+1];
+
+            Matrix diff(2,1,false);
+            diff[0][0] = yDiffTemp[i][0];
+            diff[1][0] = yDiffTemp[i+1][0];
+            double innovation2 = convDble(diff.transp() * inv * diff);
+            if(innovation2 > c_threshold2)
+            {
+                return KF_OUTLIER;
+            }
+        }
+
+
+        // Update Alpha
+        double innovation2measError = convDble((yBar - y).transp() * InverseMatrix(R_obj_rel) * (yBar - y));
+        m_alpha *= 1 / (1 + innovation2measError);
+        //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
+
+        stateStandardDeviations = HT( horzcat(Mx - stateEstimates*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
+        stateEstimates = stateEstimates - K*(yBar - y);
+        return KF_OK;
+    }
+
+// RHM 7/7/08: Change for resetting (return int)
+KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, double objY, double distanceErrorOffset, double distanceErrorRelative, double bearingError)
+{
+  double R_range = distanceErrorOffset + distanceErrorRelative * pow(distance, 2);
+  double R_bearing = bearingError;
+  //if(not_goal && INGORE_RANGE) R_range= 22500;	//150^2
+
+  // Calculate update uncertainties - S_obj_rel & R_obj_rel
+  Matrix S_obj_rel = Matrix(2,2,false);
+  S_obj_rel[0][0] = sqrt(R_range);
+  S_obj_rel[1][1] = sqrt(R_bearing);
+
+  Matrix R_obj_rel = S_obj_rel * S_obj_rel.transp(); // R = S^2
+
+  // Unscented KF Stuff.
+  Matrix yBar;                                  	//reset
+  Matrix Py;
+  Matrix Pxy=Matrix(7, 2, false);                    //Pxy=[0;0;0];
+  Matrix scriptX = CalculateSigmaPoints();
+  const unsigned int numSigmaPoints = scriptX.getn();
+        //----------------------------------------------------------------
+  Matrix scriptY = Matrix(2, numSigmaPoints, false);
+  Matrix temp = Matrix(2, 1, false);
+
+  double dX,dY,Cc,Ss;
+
+  for(int i = 0; i < numSigmaPoints; i++)
+  {
+          dX = objX-scriptX[0][i];
+          dY = objY-scriptX[1][i];
+        temp[0][0] = sqrt(dX*dX + dY*dY);
+        temp[1][0] = normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
+        scriptY.setCol(i, temp.getCol(0));
+  }
+  Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+  Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+  for(int i = 0; i < numSigmaPoints; i++){
+    Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+    My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+  }
+
+  Matrix M1 = sqrtOfTestWeightings;
+  yBar = My * M1.transp(); // Predicted Measurement.
+  Py = (My - yBar * M1) * (My - yBar * M1).transp();
+  Pxy = (Mx - stateEstimates * M1) * (My - yBar * M1).transp();
+
+  Matrix K = Pxy * Invert22(Py + R_obj_rel); // K = Kalman filter gain.
+
+  Matrix y = Matrix(2,1,false); // Measurement. I terms of relative (x,y).
+  y[0][0] = distance;
+  y[1][0] = bearing;
+
+  //end of standard ukf stuff
+        //RHM: 20/06/08 Outlier rejection.
+  double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
+
+  // Update Alpha
+  double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
+  m_alpha *= 1 / (1 + innovation2measError);
+  //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
+
+
+  // SB: 27/06/2011
+  // Changing the outcome of obtaining an outlier during the game playing state//
+  // During the game, if an outlier is detected, it will increase the variance of current model
+  // If there are multiple outliers, and the variance goes beyond a certain level, the models are reset
+  // However the new position of models are uniformly spread around the current location within a square boundary
+  if (innovation2 > c_threshold2)
+  {
+//          #ifdef PLAYING_STATE_RESETTING
+//                        // Increase the variance of this model by 10%
+//                        //cout<<"\nIncreasing uncertainty by 10%";
+//                    stateStandardDeviations[0][0] += stateStandardDeviations[0][0]*0.1;
+//                    stateStandardDeviations[1][1] += stateStandardDeviations[1][1]*0.1;
+//                    stateStandardDeviations[2][2] += stateStandardDeviations[2][2]*0.1;
+//                    stateStandardDeviations[3][3] += stateStandardDeviations[3][3]*0.1;
+//                    stateStandardDeviations[4][4] += stateStandardDeviations[4][4]*0.1;
+//                    stateStandardDeviations[5][5] += stateStandardDeviations[5][5]*0.1;
+//                    stateStandardDeviations[6][6] += stateStandardDeviations[6][6]*0.1;
+//          #endif
+                return KF_OUTLIER;
+        }
+
+  stateStandardDeviations = HT( horzcat(Mx - stateEstimates*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
+  stateEstimates = stateEstimates - K*(yBar - y);
+  return KF_OK;
+}
 
 bool  KF::isVarianceOutOfBounds()
 {
@@ -793,8 +960,8 @@ float KF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innova
 std::string KF::summary(bool brief) const
 {
     std::stringstream buffer;
-    buffer << "Model Number " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
-    buffer << state(KF::selfY) << "," << state(KF::selfTheta) << ") Ball Position: (" << state(KF::ballX) << ",";
+    buffer << "Model Id " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
+    buffer << state(KF::selfY) << "," << state(KF::selfTheta) << ")" << std::endl << "Ball Position: (" << state(KF::ballX) << ",";
     buffer << state(KF::ballY) << ")" << endl;
     if(!brief)
     {

@@ -299,7 +299,7 @@ SOURCES += mainwindow.cpp \
     TeamInformationDisplayWidget.cpp \
     GameInformationDisplayWidget.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
-    offlinelocalisationdialog.cpp
+    offlinelocalisationdialog.cpp \
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

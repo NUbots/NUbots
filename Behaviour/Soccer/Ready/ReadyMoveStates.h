@@ -98,13 +98,11 @@ protected:
             float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
             m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
         }
-        else if (yellow_left.TimeSinceLastSeen() > 250 and yellow_right.TimeSinceLastSeen() > 250 and blue_left.TimeSinceLastSeen() > 250 and blue_right.TimeSinceLastSeen() > 250)
+        else if (yellow_left.TimeSinceLastSeen() > 1000 and yellow_right.TimeSinceLastSeen() > 1000 and blue_left.TimeSinceLastSeen() > 1000 and blue_right.TimeSinceLastSeen() > 1000)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
         
-        
-        
         vector<float> position = getReadyFieldPositions();
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 100);
+        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 0, 50, 100);
         
         vector<float> result;
         if (m_team_info->getPlayerNumber() != 1)

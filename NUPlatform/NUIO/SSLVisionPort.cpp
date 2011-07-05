@@ -29,6 +29,7 @@
 #include "nubotdataconfig.h"
 #include "Motion/Tools/MotionFileTools.h"
 #include "Tools/Math/General.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include <string>
 
@@ -74,6 +75,10 @@ void SSLVisionPort::handleNewData(std::stringstream& buffer)
     string s_buffer = buffer.str();
     buffer >> (*m_packet);
     writePacketToSensors(m_packet, m_sensor_data);
+    vector<float> led_red(3,0);
+    led_red[0] = 1;
+    Platform->toggle(NUPlatform::Led0, m_sensor_data->CurrentTime, led_red);
+
 }
 
 /*! @brief Writes the position information in the packet into the gps and compass sensors in NUSensorsData

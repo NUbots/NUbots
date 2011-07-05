@@ -48,6 +48,7 @@ OpenglManager::~OpenglManager()
 
 void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 {
+    makeCurrent();
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
@@ -139,6 +140,7 @@ void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDispla
 
 void OpenglManager::writeLineToDisplay(Line* newLine, GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -165,6 +167,7 @@ void OpenglManager::writeLineToDisplay(Line* newLine, GLDisplay::display display
 
 void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -189,6 +192,7 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
 
 void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -223,6 +227,7 @@ void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegm
 
 void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -260,6 +265,7 @@ void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > cand
 }
 void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -289,7 +295,7 @@ void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDispl
 }
 void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDisplay::display displayId)
 {
-
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -313,6 +319,7 @@ void OpenglManager::writeWMBallToDisplay(float x, float y, float radius, GLDispl
 
 void OpenglManager::writeCalGridToDisplay(GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -347,6 +354,7 @@ void OpenglManager::writeCalGridToDisplay(GLDisplay::display displayId)
 
 void OpenglManager::clearDisplay(GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -369,6 +377,7 @@ void OpenglManager::clearAllDisplays()
 
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
 {
+    makeCurrent();
     int stepSize = 360 / num_segments;
     glBegin(GL_LINE_LOOP);
     for(int angle = 0; angle < 360; angle += stepSize)
@@ -380,6 +389,7 @@ void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segmen
 
 void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
 {
+    makeCurrent();
     int stepSize = 360 / num_segments;
     glBegin(GL_TRIANGLE_FAN);
     for(int angle = 0; angle < 360; angle += stepSize)
@@ -390,7 +400,7 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 }
 void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId)
 {
-    
+    makeCurrent();
     //glDisable(GL_TEXTURE_2D);
     glLineWidth(1.0);
     glColor3ub(255,255,0);
@@ -417,6 +427,7 @@ void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoint
 
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
 {
+    makeCurrent();
     // If there is an old list stored, delete it first.
     if(displayStored[displayId])
     {
@@ -477,6 +488,7 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
 }
 void OpenglManager::writeCornersToDisplay(std::vector< CornerPoint > corners, GLDisplay::display displayId)
 {
+    makeCurrent();
     glDisable(GL_TEXTURE_2D);
     glLineWidth(4.0);
     glColor3ub(255,0,255);
@@ -516,6 +528,7 @@ void OpenglManager::stub(QImage image, GLDisplay::display displayId)
 
 void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId)
 {
+    makeCurrent();
     //! CLEAR DRAWING LIST
     if(displayStored[displayId])
     {
@@ -715,6 +728,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
 void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradius)
 {
+    makeCurrent();
     glBegin(GL_LINE_STRIP);                              // Start Lines
         glVertex2i( cx-2, cy-2);
         glVertex2i( cx-2, cy+2);

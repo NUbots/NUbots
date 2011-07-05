@@ -98,18 +98,26 @@ bool OfflineLocalisation::IsInitialised()
 
 bool OfflineLocalisation::HasRequiredData(QStringList& available_data)
 {
-    QStringList required_data;
-    required_data << "sensor" << "object" << "teaminfo" << "gameinfo";
-    bool all_data_available = true;
+    QStringList required_data, possible_sensor_data;
+    required_data << "object" << "teaminfo" << "gameinfo";
+    possible_sensor_data << "sensor" << "locsensor";
+    bool sensor_avialable = false;
+    bool required_data_available = true;
     QStringList::const_iterator constIterator;
     for (constIterator = required_data.constBegin(); constIterator != required_data.constEnd();++constIterator)
     {
         if(available_data.contains(*constIterator,Qt::CaseInsensitive) == false)
         {
-            all_data_available = false;
+            required_data_available = false;
         }
     }
-    return all_data_available;
+
+    for (constIterator = possible_sensor_data.constBegin(); constIterator != possible_sensor_data.constEnd();++constIterator)
+    {
+        if(available_data.contains(*constIterator,Qt::CaseInsensitive) == true)
+            sensor_avialable = true;
+    }
+    return required_data_available && sensor_avialable;
 }
 
 /*! @brief Run the simulation using the available data.

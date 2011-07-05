@@ -117,10 +117,17 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
 
     if (image == NULL || data == NULL || actions == NULL || fieldobjects == NULL)
+    {
+        // keep object times updated.
+        if(fieldobjects && data)
+        {
+            AllFieldObjects->preProcess(data->GetTimestamp());
+            AllFieldObjects->postProcess(data->GetTimestamp());
+        }
         return;
+    }
     m_sensor_data = data;
     m_actions = actions;
-
     setFieldObjects(fieldobjects);
 
     if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
@@ -165,6 +172,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "No Horizon Data" << endl;
         #endif
+        AllFieldObjects->postProcess(image->m_timestamp);
         return;
     }
 
@@ -289,7 +297,6 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //! Identify Field Objects
 
     /**INCLUDED BY SHANNON**/
-
         std::vector< ObjectCandidate > HorizontalLineCandidates1;
         std::vector< ObjectCandidate > HorizontalLineCandidates2;
         std::vector< ObjectCandidate > HorizontalLineCandidates3;
@@ -320,6 +327,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         LeftoverPoints.insert(LeftoverPoints.end(),LeftoverPoints3.begin(),LeftoverPoints3.end());
         VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,3,LeftoverPoints);
         LeftoverPoints.clear();
+
         unsigned int no_unused = 0;
         for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
             if(!LineDetector.horizontalLineSegments[i].isUsed)
@@ -567,12 +575,45 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
         //TESTING: Save Images which of a field object seen
         
+        //BALL
         /*if(AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         {
-            SaveAnImage();
+            m_saveimages_thread->signal();
         }*/
+    
+    /*
+        //YELLOW POST
+        if (AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() or AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
+            m_saveimages_thread->signal();
+    
+        //YELLOW AMBIGUOUS POST
+        for (size_t i=0; i<AllFieldObjects->ambiguousFieldObjects.size(); i++)
+        {
+            int ambig_id = AllFieldObjects->ambiguousFieldObjects[i].getID();
+            if (ambig_id == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+            {
+                m_saveimages_thread->signal();
+                break;
+            }
+
+        }
+    
+        //BLUE POST
+        if (AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() or AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
+            m_saveimages_thread->signal();
         
-        
+        //BLUE AMBIGUOUS POST
+        for (size_t i=0; i<AllFieldObjects->ambiguousFieldObjects.size(); i++)
+        {
+            int ambig_id = AllFieldObjects->ambiguousFieldObjects[i].getID();
+            if (ambig_id == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+            {
+                m_saveimages_thread->signal();
+                break;
+            }
+            
+        }
+        */
         //bool BlueGoalSeen = false;
         /*
         if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible())
@@ -2786,7 +2827,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 }
 
 double Vision::CalculateBearing(double cx){
-    double FOVx = deg2rad(45.0f); //Taken from Old Globals
+    double FOVx = deg2rad(46.40f); //Taken from Old Globals
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 

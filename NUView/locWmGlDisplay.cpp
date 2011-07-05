@@ -32,6 +32,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
 
 locWmGlDisplay::~locWmGlDisplay()
 {
+    makeCurrent();
     return;
 }
 
@@ -152,6 +153,7 @@ void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
 
 bool locWmGlDisplay::loadTexture(QString fileName, GLuint* textureId)
 {
+    makeCurrent();
     glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
     QImage image(fileName);
     QImage texture(QGLWidget::convertToGLFormat( image ));
@@ -168,6 +170,7 @@ bool locWmGlDisplay::loadTexture(QString fileName, GLuint* textureId)
 
 void locWmGlDisplay::initializeGL()
 {
+    makeCurrent();
     GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };         // Ambient Light Values
     GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };		// Diffuse Light Values
     GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };        // Diffuse Light Values
@@ -205,6 +208,7 @@ void locWmGlDisplay::initializeGL()
 
 void locWmGlDisplay::paintGL()
 {
+    makeCurrent();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);         // Clear The Screen And The Depth Buffer
     glLoadIdentity();						// Reset The Current Modelview Matrix
 
@@ -250,6 +254,12 @@ void locWmGlDisplay::drawMarkers()
         }
 
     }
+    if(currentObjects)
+    {
+        QColor currentColor(255,0,0);
+        drawRobotMarker(currentColor, currentObjects->self.wmX(), currentObjects->self.wmY(),currentObjects->self.Heading());
+    }
+
     if(currentLocalisation)
     {
         QColor currentColor(0,0,255);

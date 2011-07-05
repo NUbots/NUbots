@@ -39,6 +39,7 @@ class BehaviourFSMState : public BehaviourState
 public:
     virtual ~BehaviourFSMState() {};
     virtual bool stateChanged() {return m_state_changed;};
+    virtual bool wasPreviousState(BehaviourState* state) {return state == m_previous_state;};
 protected:
     BehaviourFSMState()
     {

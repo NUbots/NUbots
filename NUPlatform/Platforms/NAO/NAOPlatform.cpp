@@ -75,7 +75,7 @@ NAOPlatform::~NAOPlatform()
 
 /*! @brief Displays the battery's charge and the (dis)charge rate on the NAO's ears
  */
-void NAOPlatform::displayBatteryState()
+bool NAOPlatform::displayBatteryState()
 {
     float currenttime = Blackboard->Sensors->CurrentTime;
     float period = currenttime - m_battery_state_previous_time;
@@ -129,17 +129,20 @@ void NAOPlatform::displayBatteryState()
     }
     
     // say low_battery.wav when the battery is really low
+    bool ok = true;
     if (charge < 0.02 and current < 0 and currenttime - m_battery_voiced_time > 5000)
     {
         Blackboard->Actions->add(NUActionatorsData::Sound, currenttime, "low_battery.wav");
         m_battery_voiced_time = currenttime;
+        ok = false;
     }
     
     m_battery_state_previous_time = currenttime;
+    return ok;
 }
 
 /*! @brief Verifys that the sensors are operating properly. In particular, the foot sensors and ultrasonics are checked. */
-void NAOPlatform::verifySensors()
+bool NAOPlatform::verifySensors()
 {
     // check foot sensors are changing
     float lf,rf;
@@ -157,10 +160,12 @@ void NAOPlatform::verifySensors()
         m_previous_rfoot_force = rf;
     }
     
+    bool ok = true;
     if (m_bad_foot_sensor_count >= 5)
     {
         Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_foot_sensors.wav");
         m_bad_foot_sensor_count = 0;
+        ok = false;
     }
     
     // check ultrasonics for invalid readings
@@ -180,7 +185,9 @@ void NAOPlatform::verifySensors()
     {
         Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Actions->CurrentTime, "error_ultrasonic_sensors.wav");
         m_bad_ultrasonic_count = 0;
+        ok = false;
     }
+    return ok;
 }
 
 /*! @brief Sets one of the eight eye quarters to the given (time,value)

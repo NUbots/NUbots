@@ -57,6 +57,7 @@ public:
     
     friend ostream& operator<< (ostream& output, const Sensor& p_sensor);
     friend istream& operator>> (istream& input, Sensor& p_sensor);
+    Sensor& operator= (const Sensor & source);
 public:
     string Name;                        //!< the sensor's name
     double Time;                        //!< the timestamp associated with the data
