@@ -60,7 +60,7 @@ void MobileObject::postProcess(const float timestamp)
     Object::postProcess(timestamp);
     if (timeSeen > 40)
         isLost = false;
-    else if (timeSinceLastSeen > 100000)
+    else if (timeSinceLastSeen > 5000)
         isLost = true;
 }
 
@@ -107,6 +107,14 @@ void MobileObject::updateSharedCovariance(const Matrix& sharedSR)
 void MobileObject::updateIsLost(bool islost)
 {
     isLost = islost;
+}
+
+/*! @brief Updates the time last seen to the given value 
+    DO NOT USE. This funcion is just for jason.
+ */
+void MobileObject::updateTimeLastSeen(float time)
+{
+    timeLastSeen = time;
 }
 
 std::ostream& operator<< (std::ostream& output, const MobileObject& p_mob)

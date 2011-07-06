@@ -33,6 +33,7 @@ class MobileObject : public Object{
         void updateObjectVelocities(float velX, float velY, float sdVelX, float sdVelY);
         void updateSharedCovariance(const Matrix& sharedSR);
         void updateIsLost(bool islost);
+        void updateTimeLastSeen(float time);
 
 		//Access:
         Vector2<float> getEstimatedFieldLocation() const {return estimatedFieldLocation;}

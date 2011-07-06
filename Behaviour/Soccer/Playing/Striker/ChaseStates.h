@@ -56,7 +56,6 @@ class GoToBall : public ChaseSubState
 public:
     GoToBall(ChaseState* parent) : ChaseSubState(parent) 
     {
-        m_time_since_pan = 0;
         m_pan_end_time = 0;
         m_pan_started = false;
         m_previous_time = 0;
@@ -74,63 +73,101 @@ protected:
         #endif
         if (m_parent->stateChanged() or m_data->CurrentTime - m_previous_time > 200)
         {
-            m_time_since_pan = 0;
             m_pan_end_time = 0;
             m_pan_started = false;
+            m_pan_finished = false;
         }
         
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         
-        if (m_time_since_pan > 15000)
-        {
-            StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-            StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
-            StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-            StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-            
-            float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
-            float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
-            
-            vector<StationaryObject> posts;
-            if (fabs(bearing_to_yellow) < fabs(bearing_to_blue))
-            {
-                posts.push_back(yellow_left);
-                posts.push_back(yellow_right);
+        // if (pan not run)
+        //      if (pan start condition)
+        //          start pan
+        //      else if (its been a long time since a pan)
+        //          set pan as not having run
+        
+        // if (not panning) then
+        //      do usual track ball
+        
+        if (not m_pan_started)
+        {   
+            if (ball.estimatedDistance() < 60 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 0.785 and ball.TimeSeen() > 1000)
+            {   
+                StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+                StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+                StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+                StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+                
+                float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
+                float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
+                
+                vector<StationaryObject> posts;
+                if (fabs(bearing_to_yellow) < fabs(bearing_to_blue))
+                {
+                    posts.push_back(yellow_left);
+                    posts.push_back(yellow_right);
+                }
+                else
+                {
+                    posts.push_back(blue_left);
+                    posts.push_back(blue_right);
+                }
+                m_jobs->addMotionJob(new HeadPanJob(posts));
+                m_pan_started = true;
+                m_pan_end_time = m_data->CurrentTime + 1000;
+                m_pan_finished = false;
+                //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
-            else
-            {
-                posts.push_back(blue_left);
-                posts.push_back(blue_right);
-            }
-            m_jobs->addMotionJob(new HeadPanJob(posts));
-            m_time_since_pan = 0;
-            m_pan_started = true;
-            debug << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
         }
-        else
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 25000)
         {
-            m_time_since_pan += m_data->CurrentTime - m_previous_time;
-            if (not m_pan_started)
-            {
-                if (ball.isObjectVisible())
-                {
-                    debug << m_data->CurrentTime << ": Tracking ball" << endl;
-                    m_jobs->addMotionJob(new HeadTrackJob(ball));
-                }
-                else if (ball.TimeSinceLastSeen() > 250)
-                {
-                    debug << m_data->CurrentTime << ": Ball Pan" << endl;
-                    m_jobs->addMotionJob(new HeadPanJob(ball));
-                }
-            }
-            else if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time) and m_pan_end_time < m_data->CurrentTime)
-            {
-                debug << m_data->CurrentTime << ": Goal Post Pan Completed" << endl;
-                m_pan_started = false;
-            }
+            m_pan_started = false;
+            m_pan_finished = false;
         }
         
+        // this is a hack to get the pan end time right given the delay in the update of the motion sensors
+        // above we set the pan time to be 1s ahead, and then only update the end time when its longer
+        // ie. after it has been updated.
+        if (m_pan_started and not m_pan_finished)
+        {
+            float endtime;
+            m_data->get(NUSensorsData::MotionHeadCompletionTime, endtime);
+            if (endtime > m_pan_end_time)
+                m_pan_end_time = endtime;
+            if (m_data->CurrentTime >= m_pan_end_time)
+                m_pan_finished = true;
+        }
+        
+        // this is a HUGE hack
+        // I am feeling really lazy at the moment; I am updating the time the ball was last seen even though it is NOT seen
+        // This is to simply prevent the ball from being lost during the look away pan (this will also trick the other robots via a team information)
+        if (m_pan_started and not m_pan_finished)       
+            ball.updateTimeLastSeen(m_data->CurrentTime - 1000);
+        
+        if (not m_pan_started or m_pan_finished)
+        {
+            if (ball.isObjectVisible())
+            {
+                //cout << m_data->CurrentTime << ": Tracking ball" << endl;
+                m_jobs->addMotionJob(new HeadTrackJob(ball));
+            }
+            else if (ball.TimeSinceLastSeen() > 3000)
+            {
+                //cout << m_data->CurrentTime << ": Ball Pan" << endl;
+                m_jobs->addMotionJob(new HeadPanJob(ball));
+            }   
+            else if (ball.TimeSinceLastSeen() > 1500)
+            {
+                //cout << m_data->CurrentTime << ": Ball Pan" << endl;
+                m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
+            }
+            else if (ball.TimeSinceLastSeen() > 750)
+            {
+                //cout << m_data->CurrentTime << ": Ball Pan" << endl;
+                m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
+            }
+        }
         
         bool iskicking;
         m_data->get(NUSensorsData::MotionKickActive, iskicking);
@@ -156,7 +193,7 @@ protected:
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if( (ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
+        if( (ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSinceLastSeen() < 250)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
@@ -168,13 +205,13 @@ protected:
             m_jobs->addMotionJob(kjob);
         }
         
+        //cout << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 
         m_previous_time = m_data->CurrentTime;
     }
     
 private:
-    float m_time_since_pan;
     float m_pan_end_time;
-    bool m_pan_started;
+    bool m_pan_started, m_pan_finished;
     float m_previous_time;
 };
 

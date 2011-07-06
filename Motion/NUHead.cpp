@@ -177,8 +177,8 @@ void NUHead::process(HeadPanJob* job, bool currentprovider)
         job->getYaw(m_yaw_min, m_yaw_max);
     }
     
-    if (m_is_panning == false || pantype != m_pan_type)
-    {
+    if (not m_is_panning or pantype != m_pan_type)
+    {   // re-calculate and issue the new pan if we are not panning or the pan type is different
         m_is_panning = true;
         m_is_nodding = false;
         m_pan_type = pantype;

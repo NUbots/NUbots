@@ -367,7 +367,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         for (size_t i=0; i<sharedballs.size(); i++)
         {
             doSharedBallUpdate(sharedballs[i]);
-            if (sharedballs[i].TimeSinceLastSeen < 3000)    // if another robot can see the ball then it is not lost
+            if (sharedballs[i].TimeSinceLastSeen < 5000)    // if another robot can see the ball then it is not lost
                 fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
         }
     }
