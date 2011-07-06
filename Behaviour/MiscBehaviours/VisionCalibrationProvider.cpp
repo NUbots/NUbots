@@ -28,6 +28,7 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Behaviour/ChaseBall/ChaseBallProvider.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUImage/NUImage.h"
@@ -62,6 +63,10 @@ VisionCalibrationProvider::~VisionCalibrationProvider()
 
 void VisionCalibrationProvider::doBehaviour()
 {
+    // hack it, and put the GameState into Playing
+    while (m_game_info->getCurrentState() != GameInformation::PlayingState)
+        m_game_info->doManualStateChange();
+    
     doSelectedMotion();
     
     // handle the selection of motions
@@ -92,26 +97,8 @@ void VisionCalibrationProvider::doBehaviour()
 
 void VisionCalibrationProvider::doSelectedMotion()
 {
-    //STIFF HEAD at ZERO
     if (m_selection_index == 0)
-    {
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
-        m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50.0);
-        
-        if (isStart < 50)
-        {
-            m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
-            isStart++;
-        }
-        else
-        {
-            m_jobs->addMotionJob(new WalkJob(0,0,0));
-        }
-        //! @todo TODO: If we are not standing up, then we should stand up (probably need a stand-up job, or set the walk speed non-zero for a little bit)
-    }
-    //NO STIFFNESS
-    else if (m_selection_index == 1)
-    {
+    {   // start with no stiffness
         vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 0);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
@@ -126,20 +113,32 @@ void VisionCalibrationProvider::doSelectedMotion()
             float percentage = ((Blackboard->Image->getTotalPixels() - unclassifiedCounter) / (Blackboard->Image->getTotalPixels()*1.00) ) * 100.00;
             //SAY PERCENTAGE:
             sayPercentageClassified(percentage);
-            
         }
         
-            
+        if (isStart < 50)
+        {
+            m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
+            isStart++;
+        }
+        else
+        {
+            m_jobs->addMotionJob(new WalkJob(0,0,0));
+        }
+    }
+    else if (m_selection_index == 1)
+    {   // generic pan
+        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        m_jobs->addMotionJob(new WalkJob(0,0,0));
     }
     else if (m_selection_index == 2)
-    {
+    {   
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         m_jobs->addMotionJob(new WalkJob(0,0,0));
     }
     else if (m_selection_index == 3)
     {
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
-        m_jobs->addMotionJob(new WalkJob(0,0,0));
+        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50.0);
     }
     else if (m_selection_index == 4)
     {

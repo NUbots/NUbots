@@ -440,10 +440,10 @@ bool NUPlatform::verifySensors()
 bool NUPlatform::verifyVision(int framesdropped, int framesprocessed)
 {
     // check to see if all of the frames were dropped
-    if (framesdropped >= framesprocessed and framesprocessed >= 1)
+    /*if (framesdropped >= framesprocessed and framesprocessed >= 1)
         m_frames_dropped_count++;
     else
-        m_frames_dropped_count = 0;
+        m_frames_dropped_count = 0;*/
     
     // check to see if no frames were processed
     if (framesprocessed < 1)
