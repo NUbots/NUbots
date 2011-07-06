@@ -25,6 +25,7 @@
 #define X_BOUNDARY 300
 #define Y_BOUNDARY 200
 
+#define CENTER_CIRCLE_ON 1 
 
 
 //#define debug_out cout
