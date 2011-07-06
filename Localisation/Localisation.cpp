@@ -315,7 +315,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 		update_objects.push_back(&(*currStat));
 		objectsAdded++;
 #else
-		if(!(*currStat == fobs->stationaryFieldObjects[FO_CORNER_CENTRE_CIRCLE]))
+		if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
 		{
 			update_objects.push_back(&(*currStat));
 			objectsAdded++;
