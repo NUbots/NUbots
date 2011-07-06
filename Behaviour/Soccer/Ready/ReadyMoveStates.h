@@ -124,7 +124,7 @@ private:
         {
             if(m_game_info->haveKickoff())
             {
-                position[0] = 15.0;
+                position[0] = 25.0;
                 position[1] = 0.0;
             }
             else
