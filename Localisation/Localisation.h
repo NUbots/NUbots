@@ -50,6 +50,7 @@ class Localisation: public TimestampedData
         int doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
         int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
+        int doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         int getNumActiveModels();
         int getNumFreeModels();
@@ -67,6 +68,8 @@ class Localisation: public TimestampedData
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(int modelID);
         std::string ModelStatusSummary();
+
+        void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
 
 		void resetPlayingStateModels();
 

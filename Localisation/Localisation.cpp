@@ -15,7 +15,7 @@
 #include "nubotconfig.h"
  
 #define MULTIPLE_MODELS_ON 1
-#define AMBIGUOUS_CORNERS_ON 0
+#define AMBIGUOUS_CORNERS_ON 1
 #define SHARED_BALL_ON 1
 #define TWO_OBJECT_UPDATE_ON 0
 
@@ -231,7 +231,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         ProcessObjects(fobs, sharedBalls, time_increment);
 
 #if LOC_SUMMARY > 0
-        m_frame_log << std::endl <<  "Final Result: " << getBestModel().summary(false);
+        m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
 #endif
     #endif
 }
@@ -295,15 +295,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
     // Proccess the Stationary Known Field Objects
     StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
     StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
-
-    // Regular update process.
-//    for(; currStat != endStat; ++currStat)
-//    {
-//        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
-//        updateResult = doKnownLandmarkMeasurementUpdate((*currStat));
-//        numUpdates++;
-//        usefulObjectCount++;
-//    }
 
     // all objects at once.
     std::vector<StationaryObject*> update_objects;
@@ -376,12 +367,16 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         NormaliseAlphas();
 
 #if MULTIPLE_MODELS_ON
+        bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
+        bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
+        removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         // Do Ambiguous objects.
         AmbiguousObjectsIt currAmb(fobs->ambiguousFieldObjects.begin());
         AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-            updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), fobs->stationaryFieldObjects);
+            //updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), fobs->stationaryFieldObjects);
+            updateResult = doAmbiguousLandmarkMeasurementUpdateDiscard((*currAmb), fobs->stationaryFieldObjects);
             NormaliseAlphas();
             numUpdates++;
             if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
@@ -394,7 +389,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         for (int currID = 0; currID < c_MAX_MODELS; currID++){
             if(m_models[currID].active())
             {
-
                 debug_out   <<"Model : "<<currID<<" Pos  : "<<m_models[currID].stateEstimates[0][0]<<", "
                             <<m_models[currID].stateEstimates[0][1]<<","<< m_models[currID].stateEstimates[0][2]<<endl;
             }
@@ -409,7 +403,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 
         // Check for model reset. -> with multiple models just remove if not last one??
         // Need to re-do reset to be model specific.
-        //int numReset = CheckForOutlierResets();
         CheckForOutlierResets();
 
         // clip models back on to field.
@@ -439,6 +432,50 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             debug_out  << " Robot Theta: " << bestModel->state(2) << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
+}
+
+void Localisation::removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen)
+{
+    // Do Ambiguous objects.
+    AmbiguousObjectsIt currAmb(ambiguousobjects.begin());
+    AmbiguousObjectsConstIt endAmb(ambiguousobjects.end());
+    AmbiguousObjectsIt blueGoal = ambiguousobjects.end();
+    AmbiguousObjectsIt yellowGoal = ambiguousobjects.end();
+    bool toomanyblue = blue_seen;
+    bool toomanyyellow = yellow_seen;
+
+    for(; currAmb != endAmb; ++currAmb)
+    {
+        if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
+        if(currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        {
+            if(yellowGoal == endAmb)
+            {
+                yellowGoal = currAmb;
+            }
+            else
+            {
+                toomanyyellow = true;
+                currAmb->setIsVisible(false);
+            }
+        }
+        if(toomanyyellow) yellowGoal->setIsVisible(false);
+
+        if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        {
+            if(blueGoal == endAmb)
+            {
+                blueGoal = currAmb;
+            }
+            else
+            {
+                toomanyblue=true;
+                currAmb->setIsVisible(false);
+            }
+        }
+        if(toomanyblue) blueGoal->setIsVisible(false);
+    }
+    return;
 }
 
 void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjects)
@@ -1283,6 +1320,204 @@ int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObjec
         {
             m_models[currID].updateAngleBetween(totalAngle,landmark1.X(),landmark1.Y(),landmark2.X(),landmark2.Y(),sdTwoObjectAngle);
         }
+    }
+    return 1;
+}
+
+int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
+{
+    int kf_return;
+    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
+
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Ambiguous landmark update: " << ambigousObject.getName() << std::endl;
+    m_frame_log << "Possible objects: " << std::endl;
+    for (int i=0; i < possabilities.size(); i++)
+    {
+        m_frame_log << possibleObjects[possabilities[i]].getName() << std::endl;
+    }
+#endif
+    if( (IsValidObject(ambigousObject) == false) || (ambigousObject.measuredDistance() > 600))
+    {
+#if LOC_SUMMARY > 0
+    m_frame_log << std::endl << "Skipping invalid measurment!" << std::endl;
+#endif
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  <<"[" << m_timestamp << "] Skipping Ambiguous Object: ";
+        debug_out  << ambigousObject.getName();
+        debug_out  << " Distance = " << ambigousObject.measuredDistance();
+        debug_out  << " Bearing = " << ambigousObject.measuredBearing();
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        return KF_OUTLIER;
+    }
+
+    #if AMBIGUOUS_CORNERS_ON <= 0
+    if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)){
+#if LOC_SUMMARY > 0
+    m_frame_log << "Ignoring Object."<< std::endl;
+#endif // LOC_SUMMARY
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+        debug_out  <<"[" << m_timestamp << "]: ingored unkown object " << ambigousObject.getName() << std::endl;
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+        return KF_OUTLIER;
+    }
+    #endif // AMBIGUOUS_CORNERS_ON <= 0
+
+    unsigned int numOptions = possabilities.size();
+    int numFreeModels = getNumFreeModels();
+    int numActiveModels = getNumActiveModels();
+    int numRequiredModels = numActiveModels * (numOptions); // An extra base model.
+
+    if(numFreeModels < numRequiredModels){
+        int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
+
+        #if DEBUG_LOCALISATION_VERBOSITY > 2
+        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 2
+
+        MergeModels(maxActiveAfterMerge);
+
+        #if DEBUG_LOCALISATION_VERBOSITY > 2
+        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << endl;
+        #endif // DEBUG_LOCALISATION_VERBOSITY > 2
+
+        if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
+
+            #if DEBUG_LOCALISATION_VERBOSITY > 0
+            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << endl;
+            #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+
+            return KF_OUTLIER;
+        }
+    }
+
+    #if DEBUG_LOCALISATION_VERBOSITY > 1
+    //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
+    debug_out << " Distance = " << ambigousObject.measuredDistance();
+    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 1
+
+    for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
+    {
+        if(m_models[modelID].active() == false) continue; // Skip inactive models.
+
+        // Copy initial model to the temporary model.
+        m_tempModel = m_models[modelID];
+        m_tempModel.setActive(false);
+        m_tempModel.m_toBeActivated = true;
+
+        // Save Original model as outlier option.
+        m_models[modelID].setAlpha(m_models[modelID].alpha()*0.0005);
+        //m_modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
+
+        std::vector<unsigned int> modelsUsed;
+        // Now go through each of the possible options, and apply it to a copy of the model
+        for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++)
+        {
+            int possibleObjectID = possabilities[optionNumber];
+            int newModelID = FindNextFreeModel();
+
+            // If an invalid modelID has been returned, something has gone horribly wrong, so stop here.
+            if(newModelID < 0)
+            {
+
+                #if DEBUG_LOCALISATION_VERBOSITY > 0
+                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
+                #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+
+                for(int m = 0; m < c_MAX_MODELS; m++) m_models[m].m_toBeActivated = false;
+                return -1;
+            }
+
+            m_models[newModelID] = m_tempModel; // Get the new model from the temp
+
+            // Copy outlier history from the current model.
+            for (int i=0; i<c_numOutlierTrackedObjects; i++)
+            {
+                m_modelObjectErrors[newModelID][i] = m_modelObjectErrors[modelID][i];
+            }
+
+            // Do the update.
+            kf_return =  m_models[newModelID].fieldObjectmeas(ambigousObject.measuredDistance(), ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
+
+            #if DEBUG_LOCALISATION_VERBOSITY > 2
+            debug_out  <<"[" << m_timestamp << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";
+            //debug_out  << " Object = " << fieldObjects[possibleObjectID].name();
+            debug_out  << "\tLocation = (" << possibleObjects[possibleObjectID].X() << "," << possibleObjects[possibleObjectID].Y() << ")...";
+            #endif // DEBUG_LOCALISATION_VERBOSITY > 2
+
+            // If the update reult was an outlier rejection, the model need not be kept as the
+            // information is already contained in the designated outlier model created earlier
+            if (kf_return == KF_OUTLIER)
+            {
+                m_models[newModelID].m_toBeActivated=false;
+                   /*
+                if (outlierModelID < 0) {
+                  outlierModelID = newModelID;
+                } else {
+                  MergeTwoModels(outlierModelID, newModelID);
+                  models[newModelID].toBeActivated=false;
+                }
+                */
+            }
+            else
+            {
+                modelsUsed.push_back(newModelID);
+            }
+
+
+
+#if DEBUG_LOCALISATION_VERBOSITY > 2
+            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+#endif
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
+            m_frame_log << "Result: " << ((kf_return == KF_OK)?"Success":"Outlier");
+            if(kf_return == KF_OK) m_frame_log << " alpha = " << m_models[newModelID].alpha() << std::endl;
+            else m_frame_log << std::endl;
+#endif
+
+        }
+        if((ambigousObject.getID() != FieldObjects::FO_BLUE_GOALPOST_UNKNOWN) && (ambigousObject.getID() != FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN))
+        {
+            float maxAlpha = m_models[modelID].alpha();
+            unsigned int bestModel = modelID;
+            for (unsigned int i = 0; i < modelsUsed.size(); i++)
+            {
+                const unsigned int id = modelsUsed[i];
+                if(m_models[id].alpha() < maxAlpha)
+                {
+                   m_models[id].setActive(false);
+                   m_models[id].m_toBeActivated=false;
+    #if LOC_SUMMARY > 0
+                   m_frame_log << "Discarding model " << id << std::endl;
+    #endif
+                }
+                else
+                {
+                    m_models[bestModel].setActive(false);
+                    m_models[bestModel].m_toBeActivated = false;
+                    bestModel = id;
+                    maxAlpha = m_models[id].alpha();
+                }
+            }
+    #if LOC_SUMMARY > 0
+            m_frame_log << "Best model from split was " << bestModel << std::endl << std::endl;
+    #endif
+        }
+
+    }
+    // Split alpha between choices and also activate models
+    for (int i=0; i< c_MAX_MODELS; i++)
+    {
+        if (m_models[i].m_toBeActivated)
+        {
+            m_models[i].setAlpha(m_models[i].alpha()*1.0/((float)numOptions)); // Divide each models alpha by the numbmer of splits.
+            m_models[i].setActive(true);
+        }
+        m_models[i].m_toBeActivated=false; // Turn off activation flag
     }
     return 1;
 }
