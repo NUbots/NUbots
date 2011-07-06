@@ -81,19 +81,19 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "BallIsLostPan" << endl;
+            debug << m_data->CurrentTime << ": BallIsLostPan" << endl;
         #endif
         // keep track of the time in this state
         bool kickIsActive = false;
         m_data->get(NUSensorsData::MotionKickActive, kickIsActive);
-        if (m_parent->stateChanged() or kickIsActive)
+        if (m_parent->stateChanged() or kickIsActive or m_data->CurrentTime - m_previous_time > 200)
             reset();
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
         
         // grab the pan end time
-        if (not m_pan_started and m_time_in_state > 100)
+        if (not m_pan_started and m_time_in_state > 200)
         {
             if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;
@@ -103,12 +103,9 @@ protected:
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 6, 700, -0.95, 0.95));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         
-        if (m_team_info->getPlayerNumber() != 1)
-            m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
-        else
-            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
     }
 private:
     void reset()
@@ -154,7 +151,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "BallIsLostSpin" << endl;
+            debug << m_data->CurrentTime << ": BallIsLostSpin" << endl;
         #endif
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (m_parent->stateChanged())
@@ -209,7 +206,7 @@ protected:
     void doState()
     {
 #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "BallIsLostMove" << endl;
+        debug << m_data->CurrentTime << ": BallIsLostMove" << endl;
 #endif
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];

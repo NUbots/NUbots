@@ -223,12 +223,12 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     CameraSettingsGroupBox->setLayout(SliderLayout);
 
     //Auto Settings Layout:
-    AutoTickBoxLayout = new QGridLayout;
-    AutoTickBoxLayout->addWidget(AutoGainSelected,1,1);
-    AutoTickBoxLayout->addWidget(AutoWhiteBalanceSelected,2,1);
-    AutoTickBoxLayout->addWidget(AutoExposureSelected,3,1);
-    AutoCameraSettingsGroupBox = new QGroupBox(tr("Automatic Settings"));
-    AutoCameraSettingsGroupBox->setLayout(AutoTickBoxLayout);
+    //AutoTickBoxLayout = new QGridLayout;
+    //AutoTickBoxLayout->addWidget(AutoGainSelected,1,1);
+    //AutoTickBoxLayout->addWidget(AutoWhiteBalanceSelected,2,1);
+    //AutoTickBoxLayout->addWidget(AutoExposureSelected,3,1);
+    //AutoCameraSettingsGroupBox = new QGroupBox(tr("Automatic Settings"));
+    //AutoCameraSettingsGroupBox->setLayout(AutoTickBoxLayout);
 
     //Select Camera:
     SelectCameraLayout = new QGridLayout;
@@ -262,7 +262,7 @@ void cameraSettingsWidget::createLayout()   //!< Layout all of the child widgets
     //overallLayout->addLayout(shiftHueLayout);
     overallLayout->addLayout(robotNameInputLayout);
     overallLayout->addWidget(CameraSettingsGroupBox);
-    overallLayout->addWidget(AutoCameraSettingsGroupBox);
+    //overallLayout->addWidget(AutoCameraSettingsGroupBox);
     overallLayout->addWidget(SelectCameraGroupBox);
 
     overallLayout->addWidget(getCameraSettingsButton);
