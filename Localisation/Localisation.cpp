@@ -310,8 +310,16 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
     for(; currStat != endStat; ++currStat)
     {
         if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
-        update_objects.push_back(&(*currStat));
-        objectsAdded++;
+#if CENTER_CIRCLE_ON
+		update_objects.push_back(&(*currStat));
+		objectsAdded++;
+#else
+		if(!(*currStat == fobs->stationaryFieldObjects[FO_CORNER_CENTRE_CIRCLE]))
+		{
+			update_objects.push_back(&(*currStat));
+			objectsAdded++;
+		}
+#endif
     }
     updateResult = doMultipleKnownLandmarkObservationUpdate(update_objects);
     numUpdates+=objectsAdded;
