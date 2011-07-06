@@ -680,7 +680,7 @@ void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_C
     vector < ObjectCandidate > ::iterator it;
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
-        int buffer = 20;
+        int buffer = 0;
         if((vision->m_horizonLine.IsBelowHorizon(it->getBottomRight().x, it->getBottomRight().y + buffer))== false)
         {
             //qDebug() << "Removing Goal Above Horizon:" << it->getBottomRight().x<< ","<< it->getBottomRight().y << vision->m_horizonLine.findYFromX(it->getBottomRight().x);
@@ -1098,7 +1098,10 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
         Matrix cameraTransform = Matrix4x4fromVector(ctvector);
         transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,sphericalPosition);
     }
-
+    if(transformedSphericalPosition[2] > 0.00)
+    {
+        return;
+    }
     sizeOnScreen.x = GoalPost->width();
     sizeOnScreen.y = GoalPost->height();
     AllObjects->stationaryFieldObjects[ID].UpdateVisualObject(      transformedSphericalPosition,
@@ -1296,29 +1299,41 @@ void GoalDetection::AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects
                                     sizeOnScreen,
                                     vision->m_timestamp);
 
-    AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
+    if(transformedSphericalPosition[2] < 0.00)
+    {
+        AllObjects->ambiguousFieldObjects.push_back(newAmbObj);
+    }
 }
 
 void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision)
 {
-
+    float maxElevation = 10.00;
     if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX() )
     {
         if((FO_Candidates[0].getColour() == ClassIndex::blue || FO_Candidates[0].getColour() == ClassIndex::shadow_blue) &&
            (FO_Candidates[1].getColour() == ClassIndex::blue || FO_Candidates[1].getColour() == ClassIndex::shadow_blue) )
         {
-            //qDebug()<< "Updating FO: Posts A";
+
             Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
             Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
-            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            //qDebug()<< "Updating FO: Posts A" << SphericalPosition0[2] << SphericalPosition1[2];
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS
+               && (SphericalPosition1[2] < maxElevation) && (SphericalPosition0[2] < maxElevation))
             {
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_LEFT_GOALPOST,SphericalPosition0 );
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_RIGHT_GOALPOST,SphericalPosition1);
             }
             else
             {
-                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
-                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                if( SphericalPosition0[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                }
+                if( SphericalPosition1[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                }
+
             }
 
         }
@@ -1328,15 +1343,23 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
             //qDebug()<< "Updating FO: Posts B";
             Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
             Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
-            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            //qDebug()<< "Updating FO: Posts B" << SphericalPosition0[2] << SphericalPosition1[2];
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS
+               && (SphericalPosition1[2] < maxElevation) && (SphericalPosition0[2] < maxElevation))
             {
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_LEFT_GOALPOST,SphericalPosition0 );
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_RIGHT_GOALPOST,SphericalPosition1 );
             }
             else
             {
-                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
-                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                if( SphericalPosition0[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                }
+                if( SphericalPosition1[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                }
             }
         }
     }
@@ -1348,15 +1371,23 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
             //qDebug()<< "Updating FO: Posts C";
             Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
             Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
-            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            //qDebug()<< "Updating FO: Posts C" << SphericalPosition0[2] << SphericalPosition1[2];
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS
+               && (SphericalPosition1[2] < maxElevation) && (SphericalPosition0[2] < maxElevation))
             {
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_BLUE_RIGHT_GOALPOST,SphericalPosition0 );
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_BLUE_LEFT_GOALPOST,SphericalPosition1 );
             }
             else
             {
-                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
-                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                if( SphericalPosition0[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                }
+                if( SphericalPosition1[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                }
             }
         }
         else if ((FO_Candidates[0].getColour() == ClassIndex::yellow || FO_Candidates[0].getColour() == ClassIndex::yellow_orange) &&
@@ -1365,15 +1396,24 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
             //qDebug()<< "Updating FO: Posts D";
             Vector3<float> SphericalPosition0 = CalculateSphericalPosition(&FO_Candidates[0],vision);
             Vector3<float> SphericalPosition1 = CalculateSphericalPosition(&FO_Candidates[1],vision);
-            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS)
+            //qDebug()<< "Updating FO: Posts D" << SphericalPosition0[2] << SphericalPosition1[2];
+            if(fabs(SphericalPosition1[0] - SphericalPosition0[0]) < 1.5 * DISTANCE_BETWEEN_POSTS
+               && (SphericalPosition1[2] < maxElevation) && (SphericalPosition0[2] < maxElevation))
             {
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[0], FieldObjects::FO_YELLOW_RIGHT_GOALPOST,SphericalPosition0 );
                 UpdateAFieldObject(AllObjects,vision,&FO_Candidates[1], FieldObjects::FO_YELLOW_LEFT_GOALPOST,SphericalPosition1 );
             }
             else
             {
-                AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
-                AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                if(SphericalPosition0[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[0], AllObjects, vision);
+                }
+                if(SphericalPosition1[2] < maxElevation)
+                {
+                    AddAmbiguousGoalPost(&FO_Candidates[1], AllObjects, vision);
+                }
+
             }
         }
     }
@@ -1381,7 +1421,7 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
     vector < ObjectCandidate > ::iterator it;
     for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
-        //! SKIP first 2 objects if greater then size is greater or equal then 2!
+        //! SKIP first 2 objects if size is greater or equal then 2!
         if(FO_Candidates.size() > 2 && it == FO_Candidates.begin())
         {
             ++it;
