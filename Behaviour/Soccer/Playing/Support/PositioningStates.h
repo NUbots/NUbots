@@ -74,7 +74,7 @@ protected:
         else
             turningdistance = 100;
         vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 50, turningdistance);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 75);
+        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
         float pan_width = 1.1;

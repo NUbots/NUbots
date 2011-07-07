@@ -106,9 +106,9 @@ protected:
         
         vector<float> result;
         if (m_team_info->getPlayerNumber() != 1)
-            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
+            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         else
-            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 35);
+            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
     }
 private:

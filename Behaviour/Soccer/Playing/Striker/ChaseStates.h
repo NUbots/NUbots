@@ -120,7 +120,7 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 25000)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 20000)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -185,15 +185,15 @@ protected:
                 rightobstacle = temp[0];
             
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
-            if (ball.estimatedDistance() > 25 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
-                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 25.0f), 75);
+            if (ball.estimatedDistance() > 40 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
+                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 30.0f), 75);
             else
                 result = speed;
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if( (ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSinceLastSeen() < 250)
+        if((ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSinceLastSeen() < 250)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
