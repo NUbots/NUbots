@@ -38,6 +38,8 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 #include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 
+#include <algorithm>
+
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 using namespace std;
@@ -92,12 +94,17 @@ protected:
         
         if (not m_pan_started)
         {   
-            if (ball.estimatedDistance() < 60 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 0.785 and ball.TimeSeen() > 1000)
+            if (ball.estimatedDistance() < 70 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 0.6 and ball.TimeSeen() > 1000)
             {   
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
                 StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
                 StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+                
+                float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
+                float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
+                float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
+                float hackfactor = (9.0/45000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
@@ -113,9 +120,9 @@ protected:
                     posts.push_back(blue_left);
                     posts.push_back(blue_right);
                 }
-                m_jobs->addMotionJob(new HeadPanJob(posts));
+                m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
                 m_pan_started = true;
-                m_pan_end_time = m_data->CurrentTime + 1000;
+                m_pan_end_time = m_data->CurrentTime + 500;
                 m_pan_finished = false;
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }

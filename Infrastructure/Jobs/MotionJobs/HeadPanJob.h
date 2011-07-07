@@ -51,8 +51,8 @@ public:
     HeadPanJob(head_pan_t pantype);
     HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax);
     HeadPanJob(const MobileObject& object, float hackfactor = 1.0);
-    HeadPanJob(const StationaryObject& object);
-    HeadPanJob(const vector<StationaryObject>& objects);
+    HeadPanJob(const StationaryObject& object, float hackfactor = 1.0);
+    HeadPanJob(const vector<StationaryObject>& objects, float hackfactor = 1.0);
     HeadPanJob(istream& input);
     ~HeadPanJob();
     
