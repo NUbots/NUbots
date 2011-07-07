@@ -52,7 +52,7 @@ const float Localisation::c_LargeAngleSD = PI/2;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
 
-const float Localisation::c_RESET_SUM_THRESHOLD = 12.0f; // 3 // then 8.0 (home)
+const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
@@ -230,6 +230,21 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
 
         ProcessObjects(fobs, sharedBalls, time_increment);
 
+        // Check for model reset. -> with multiple models just remove if not last one??
+        // Need to re-do reset to be model specific.
+        int num_models = getNumActiveModels();
+        int num_reset = CheckForOutlierResets();
+        if(num_reset == num_models) ProcessObjects(fobs, sharedBalls, time_increment);
+
+        // clip models back on to field.
+        clipActiveModelsToField();
+
+        // Store WM Data in Field Objects.
+        //int bestModelID = getBestModelID();
+        // Get the best model to use.
+        WriteModelToObjects(getBestModel(), fobs);
+
+
 #if LOC_SUMMARY > 0
         m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
 #endif
@@ -395,18 +410,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             timeSinceFieldObjectSeen = 0;
         else
             timeSinceFieldObjectSeen += time_increment;
-
-        // Check for model reset. -> with multiple models just remove if not last one??
-        // Need to re-do reset to be model specific.
-        CheckForOutlierResets();
-
-        // clip models back on to field.
-        clipActiveModelsToField();
-
-        // Store WM Data in Field Objects.
-        //int bestModelID = getBestModelID();
-        // Get the best model to use.
-        WriteModelToObjects(getBestModel(), fobs);
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
         const KF* bestModel = &(getBestModel());
