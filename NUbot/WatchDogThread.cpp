@@ -68,11 +68,15 @@ void WatchDogThread::periodicFunction()
 {
 	Blackboard->GameInfo->sendAlivePacket();
     bool ok = Platform->displayBatteryState();
-    ok &= Platform->verifySensors();
+    if (Blackboard->Sensors->CurrentTime > 20000)
+    {
+        ok &= Platform->verifySensors();
 
-    #ifdef USE_VISION
-        ok &= Platform->verifyVision(1000.0*m_nubot->m_vision->getNumFramesDropped()/m_period, 1000.0*m_nubot->m_vision->getNumFramesProcessed()/m_period);
-    #endif
+        #ifdef USE_VISION
+            ok &= Platform->verifyVision(1000.0*m_nubot->m_vision->getNumFramesDropped()/m_period, 1000.0*m_nubot->m_vision->getNumFramesProcessed()/m_period);
+        #endif
+    }
+    
     if (not ok)
         Blackboard->GameInfo->requestForPickup();
 }
