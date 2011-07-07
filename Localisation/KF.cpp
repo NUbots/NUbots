@@ -234,9 +234,30 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 		Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newStateEstimates));      // Error matrix	
  	}
 	
+//        const float muXx = 0.5;
+//        const float muXy = 0.0;     // don't know why but it looks like the covariance's should be 0
+//        const float muYy = 0.5;
+//        const float muYx = 0.0;
+//        const float muTt = 0.5;
+//        const float muXt = 0.003;
+//        const float muYt = 0.003;
+//        const float varX = muXx*fabs(diffOdom.X) + muYx*fabs(diffOdom.Y);
+//        const float varY = muYy*fabs(diffOdom.Y) + muXy*fabs(diffOdom.X);
+//        const float varTheta = muTt*fabs(diffOdom.Theta) + muXt*fabs(diffOdom.X) + muYt*fabs(diffOdom.Y);
+//        Matrix motionNoise(7,7,true);
+//        motionNoise[KF::selfX][KF::selfX] = varX*varX;
+//        motionNoise[KF::selfY][KF::selfY] = varY*varY;
+//        motionNoise[KF::selfTheta][KF::selfTheta] = varTheta*varTheta;
+
 	// Eqn 23 originally it should be a Mx*Mz
-	stateStandardDeviations = HT(Mx);
+
+        stateStandardDeviations = HT(Mx);
+        //stateStandardDeviations = HT(horzcat(Mx,motionNoise));
 	stateEstimates = newStateEstimates;  
+
+//        cout << "Odometry: " << odom_X << "," << odom_Y << "," << odom_Theta << ")" << std::endl;
+//        cout << HT(Mx) << std::endl;
+//        cout << stateStandardDeviations << std::endl;
 /*	return KF_OK;*/
 }
 
