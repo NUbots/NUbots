@@ -377,7 +377,7 @@ public:
     }
 
     /*! @brief Returns the [x,y] of the support player position */
-    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 100)
+    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 140)
     {
         // we calculate the position in field coordinates, then convert to local cartesian
         vector<float> targetposition(3,0);

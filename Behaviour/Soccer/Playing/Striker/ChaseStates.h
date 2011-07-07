@@ -82,6 +82,8 @@ protected:
         
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        bool iskicking;
+        m_data->get(NUSensorsData::MotionKickActive, iskicking);
         
         // if (pan not run)
         //      if (pan start condition)
@@ -92,9 +94,9 @@ protected:
         // if (not panning) then
         //      do usual track ball
         
-        if (not m_pan_started)
+        if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 70 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 0.6 and ball.TimeSeen() > 1000)
+            if (ball.estimatedDistance() < 70 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
@@ -104,7 +106,7 @@ protected:
                 float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
                 float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
                 float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
-                float hackfactor = (9.0/45000.0)*timesincegoalseen + 1;
+                float hackfactor = (9.0/35000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
@@ -123,11 +125,12 @@ protected:
                 m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
                 m_pan_started = true;
                 m_pan_end_time = m_data->CurrentTime + 500;
+                m_pan_time_captured = false;
                 m_pan_finished = false;
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 20000)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 25000)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -140,8 +143,11 @@ protected:
         {
             float endtime;
             m_data->get(NUSensorsData::MotionHeadCompletionTime, endtime);
-            if (endtime > m_pan_end_time)
+            if (not m_pan_time_captured and endtime > m_pan_end_time)
+            {
                 m_pan_end_time = endtime;
+                m_pan_time_captured = true;
+            }
             if (m_data->CurrentTime >= m_pan_end_time)
                 m_pan_finished = true;
         }
@@ -176,9 +182,7 @@ protected:
             }
         }
         
-        bool iskicking;
-        m_data->get(NUSensorsData::MotionKickActive, iskicking);
-        if(!iskicking)
+        if(not iskicking)
         {
             vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
             vector<float> result;
@@ -200,7 +204,7 @@ protected:
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if((ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSinceLastSeen() < 250)
+        if((ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
@@ -218,7 +222,7 @@ protected:
     
 private:
     float m_pan_end_time;
-    bool m_pan_started, m_pan_finished;
+    bool m_pan_started, m_pan_time_captured, m_pan_finished;
     float m_previous_time;
 };
 

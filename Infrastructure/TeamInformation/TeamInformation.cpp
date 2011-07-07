@@ -151,7 +151,7 @@ float TeamInformation::getTimeToBall()
         
         if (balldistance > 30)
         {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
-            time += 1.0*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.0*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.0*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+            time += 1.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.5*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.5*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
         }
         
         if (self.lost())

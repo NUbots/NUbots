@@ -15,6 +15,7 @@ MobileObject::MobileObject(int initID, const std::string& initName):
     sharedCovariance[0][1] = 0;
     sharedCovariance[1][1] = 600;
     isLost = true;
+    timeLastLostUpdate = 0;
 }
 
 MobileObject::MobileObject(const Vector2<float>& newEstimatedLocation, int initID, const std::string& initName):
@@ -60,6 +61,8 @@ void MobileObject::postProcess(const float timestamp)
     Object::postProcess(timestamp);
     if (timeSeen > 40)
         isLost = false;
+    else if (timestamp - timeLastLostUpdate < 3000)
+        isLost = false;
     else if (timeSinceLastSeen > 5000)
         isLost = true;
 }
@@ -104,9 +107,11 @@ void MobileObject::updateSharedCovariance(const Matrix& sharedSR)
 }
 
 /*! @brief Updates whether this mobile object is lost */
-void MobileObject::updateIsLost(bool islost)
+void MobileObject::updateIsLost(bool islost, double timestamp)
 {
     isLost = islost;
+    if (not isLost)
+        timeLastLostUpdate = timestamp;
 }
 
 /*! @brief Updates the time last seen to the given value 

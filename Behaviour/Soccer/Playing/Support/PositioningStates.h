@@ -60,28 +60,31 @@ protected:
         StationaryObject& owngoal = BehaviourPotentials::getOwnGoal(m_field_objects, m_game_info);
         StationaryObject& opponentgoal = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info);
         
+        
         vector<float> position;
         if (m_team_info->getPlayerNumber() == 1)
-            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 95);
+            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 120);
+        else if (m_team_info->getPlayerNumber() == 4)
+            position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 60);
         else
             position = BehaviourPotentials::CalculateSupportPlayerPosition(ball, self);
         
         float distance = sqrt(position[0]*position[0] + position[1]*position[1]);
         float bearing = atan2(position[1], position[0]);
-        float turningdistance;
-        if (m_team_info->getPlayerNumber() == 1)
-            turningdistance = 200;
-        else
-            turningdistance = 100;
-        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 50, turningdistance);
+
+        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
         vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
-        float pan_width = 1.1;
-        if (m_team_info->getPlayerNumber() == 1)
-            pan_width = 0.4;
-        m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 0.9*ball.estimatedDistance(), 9000, -pan_width, pan_width));
+        if (ball.TimeSinceLastSeen() > 15000)
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        else
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 0.9*ball.estimatedDistance(), 9000, -1.57, 1.57));
+        
+        m_previous_time = m_data->CurrentTime;
     }
+private:
+    float m_previous_time;
 };
 
 #endif
