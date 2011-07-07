@@ -287,10 +287,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
-	
-	
-    // Correct orientation to face a goal if you can see it and are unsure which way you are facing.
-    //varianceCheckAll(fobs);
 
     // Proccess the Stationary Known Field Objects
     StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
@@ -394,7 +390,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             }
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-    
     
         if (usefulObjectCount > 0)
             timeSinceFieldObjectSeen = 0;
@@ -1214,15 +1209,6 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
     double distanceRelativeError = R_obj_range_relative;
     double bearingError = R_obj_theta;
 
-    switch(objID)
-    {
-        case FieldObjects::FO_CORNER_CENTRE_CIRCLE:
-                bearingError = centreCircleBearingError;
-                break;
-        default:
-                break;
-    }
-
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++)
     {
         if(m_models[modelID].active() == false) continue; // Skip Inactive models.
@@ -1262,22 +1248,10 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     #if LOC_SUMMARY > 0
         m_frame_log << "Model " << modelID << " updated using " << landmark.getName() << " measurment." << std::endl;
-        //m_frame_log << "Measurement: Distance = " << flatObjectDistance << ", Heading = " << landmark.measuredBearing() <<std::endl;
+        m_frame_log << "Measurement: Distance = " << flatObjectDistance << ", Heading = " << landmark.measuredBearing() <<std::endl;
         m_frame_log << "Position: X = " << landmark.X() << ", Y = " << landmark.Y() <<std::endl;
         m_frame_log << "Current State: " << m_models[modelID].state(KF::selfX) << ", " << m_models[modelID].state(KF::selfY) << ", " << m_models[modelID].state(KF::selfTheta) << std::endl;
-//        float dX = landmark.X()-m_models[modelID].state(KF::selfX);
-//        float dY = landmark.Y()-m_models[modelID].state(KF::selfY);
-//        float Cc = cos(m_models[modelID].state(KF::selfTheta));
-//        float Ss = sin(m_models[modelID].state(KF::selfTheta));
-//        float x_exp = dX * Cc + dY * Ss;
-//        float y_exp =  -dX * Ss + dY * Cc;
 
-
-//        float x_meas = flatObjectDistance * cos(landmark.measuredBearing());
-//        float y_meas =  flatObjectDistance * sin(landmark.measuredBearing());
-
-//        m_frame_log << "Expected : (" << x_exp << "," << y_exp << ")" << std::endl;
-//        m_frame_log << "Measured: (" << x_meas << "," << y_meas << ")" << std::endl;
         if(m_hasGps)
         {
             float dX = landmark.X()-m_gps[0];
@@ -1888,14 +1862,6 @@ void Localisation::resetPlayingStateModels()
     int currX = m_models[bestModel].stateEstimates[0][0];         // Robot x
     int currY = m_models[bestModel].stateEstimates[1][0];           // Robot y
     double currTheta = m_models[bestModel].stateEstimates[2][0];
-    /*
-    models[0].stateEstimates[2][0] = PI;           // Robot heading
-    models[0].stateEstimates[3][0] = 0.0;       // Ball x 
-    models[0].stateEstimates[4][0] = 0.0;       // Ball y
-    models[0].stateEstimates[5][0] = 0.0;       // Ball vx
-    models[0].stateEstimates[6][0] = 0.0;       // Ball vy	
-    */
-    
     
     // Calculate lowX,highX
     if( (currX - BOX_LENGTH_X/2) >= -X_BOUNDARY)
@@ -1960,39 +1926,7 @@ void Localisation::resetPlayingStateModels()
         
     m_models[3].stateEstimates[0][0] = highX - BOX_LENGTH_X/4;
     m_models[3].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
-    m_models[3].stateEstimates[2][0] = currTheta ;
-
-//    m_models[0].stateStandardDeviations[0][0] = 30.0; // 100 cm
-//    m_models[0].stateStandardDeviations[1][1] = 30.0; // 150 cm
-//    m_models[0].stateStandardDeviations[2][2] = 0.4;   // 2 radians
-//    m_models[0].stateStandardDeviations[3][3] = 30.0; // 100 cm
-//    m_models[0].stateStandardDeviations[4][4] = 30.0; // 150 cm
-//    m_models[0].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-//    m_models[0].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
-
-//    m_models[1].stateStandardDeviations[0][0] = 30.0; // 100 cm
-//    m_models[1].stateStandardDeviations[1][1] = 30.0; // 150 cm
-//    m_models[1].stateStandardDeviations[2][2] = 0.4;   // 2 radians
-//    m_models[1].stateStandardDeviations[3][3] = 30.0; // 100 cm
-//    m_models[1].stateStandardDeviations[4][4] = 30.0; // 150 cm
-//    m_models[1].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-//    m_models[1].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
-
-//    m_models[2].stateStandardDeviations[0][0] = 30.0; // 100 cm
-//    m_models[2].stateStandardDeviations[1][1] = 30.0; // 150 cm
-//    m_models[2].stateStandardDeviations[2][2] = 0.4;   // 2 radians
-//    m_models[2].stateStandardDeviations[3][3] = 30.0; // 100 cm
-//    m_models[2].stateStandardDeviations[4][4] = 30.0; // 150 cm
-//    m_models[2].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-//    m_models[2].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
-
-//    m_models[3].stateStandardDeviations[0][0] = 30.0; // 100 cm
-//    m_models[3].stateStandardDeviations[1][1] = 30.0; // 150 cm
-//    m_models[3].stateStandardDeviations[2][2] = 0.4;   // 2 radians
-//    m_models[3].stateStandardDeviations[3][3] = 30.0; // 100 cm
-//    m_models[3].stateStandardDeviations[4][4] = 30.0; // 150 cm
-//    m_models[3].stateStandardDeviations[5][5] = 1.0;   // 10 cm/s
-//    m_models[3].stateStandardDeviations[6][6] = 1.0;   // 10 cm/s
+    m_models[3].stateEstimates[2][0] = currTheta;
     
     cout<<"\n\nResetting model during playing state!";
     
