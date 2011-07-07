@@ -857,7 +857,7 @@ void Localisation::resetSdMatrix(int modelNumber)
      // Set the uncertainties
      m_models[modelNumber].stateStandardDeviations[0][0] = 150.0; // 150 cm
      m_models[modelNumber].stateStandardDeviations[1][1] = 100.0; // 100 cm
-     m_models[modelNumber].stateStandardDeviations[2][2] = PI;   // 2 radians
+     m_models[modelNumber].stateStandardDeviations[2][2] = 2*PI;   // 2 radians
      m_models[modelNumber].stateStandardDeviations[3][3] = 150.0; // 150 cm
      m_models[modelNumber].stateStandardDeviations[4][4] = 100.0; // 100 cm
      m_models[modelNumber].stateStandardDeviations[5][5] = 10.0;   // 10 cm/s
@@ -1833,13 +1833,33 @@ int  Localisation::CheckForOutlierResets()
             m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
             #endif
             m_models[modelID].setActive(false);
-//            if(modelID != this->getBestModelID()) m_models[modelID].setActive(false);
-//            else
-//            {
-//#ifdef PLAYING_STATE_RESETTING
-//                    resetPlayingStateModels();
-//#endif
-//            }
+            if(getNumActiveModels() > 1) m_models[modelID].setActive(false);
+            else
+            {
+                const float diffX = (m_models[modelID].state(KF::ballX) - m_models[modelID].state(KF::selfX));
+                const float diffY = (m_models[modelID].state(KF::ballY) - m_models[modelID].state(KF::selfY));
+
+                const float balldistance = sqrt(pow(diffX,2) + pow(diffY,2));
+                const float ballangle = atan2(diffX, diffY);
+
+                this->doReset();
+
+                #if LOC_SUMMARY > 0
+                m_frame_log << "Reset main models." << std::endl;
+                #endif
+                for (int m = 0; m < c_MAX_MODELS; m++)
+                {
+                    if(m_models[m].active())
+                    {
+                        const float completeBearing = m_models[m].state(KF::selfTheta) + ballangle;
+                        const float ballx = m_models[m].state(KF::selfX) + balldistance * cos(completeBearing);
+                        const float bally = m_models[m].state(KF::selfY) + balldistance * sin(completeBearing);
+                        m_models[m].stateEstimates[KF::ballX][0] = ballx;
+                        m_models[m].stateEstimates[KF::ballY][0] = bally;
+                    }
+                }
+
+            }
             numResets++;
         }
     }

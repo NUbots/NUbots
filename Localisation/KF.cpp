@@ -65,8 +65,8 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
   sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
   sqrtOfProcessNoise[2][2] = 0.002; // Robot Theta. 0.00001
-  sqrtOfProcessNoise[3][3] = 40.0; // Ball X.
-  sqrtOfProcessNoise[4][4] = 40.0; // Ball Y.
+  sqrtOfProcessNoise[3][3] = 10.0; // Ball X.
+  sqrtOfProcessNoise[4][4] = 10.0; // Ball Y.
   sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
   sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
 
@@ -244,18 +244,19 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 //        const float varX = muXx*fabs(diffOdom.X) + muYx*fabs(diffOdom.Y);
 //        const float varY = muYy*fabs(diffOdom.Y) + muXy*fabs(diffOdom.X);
 //        const float varTheta = muTt*fabs(diffOdom.Theta) + muXt*fabs(diffOdom.X) + muYt*fabs(diffOdom.Y);
-//        Matrix motionNoise(7,7,true);
-//        motionNoise[KF::selfX][KF::selfX] = varX*varX;
-//        motionNoise[KF::selfY][KF::selfY] = varY*varY;
-//        motionNoise[KF::selfTheta][KF::selfTheta] = varTheta*varTheta;
+//        Matrix motionNoise(7,7,false);
+//        motionNoise[KF::selfX][KF::selfX] = sqrt(varX);
+//        motionNoise[KF::selfY][KF::selfY] = sqrt(varY);
+//        motionNoise[KF::selfTheta][KF::selfTheta] = sqrt(varTheta);
 
 	// Eqn 23 originally it should be a Mx*Mz
 
         stateStandardDeviations = HT(Mx);
-        //stateStandardDeviations = HT(horzcat(Mx,motionNoise));
-	stateEstimates = newStateEstimates;  
+//        stateStandardDeviations = HT(horzcat(Mx,motionNoise));
+        stateEstimates = newStateEstimates;
 
-//        cout << "Odometry: " << odom_X << "," << odom_Y << "," << odom_Theta << ")" << std::endl;
+//        cout << "Odometry: (" << odom_X << "," << odom_Y << "," << odom_Theta << ")" << std::endl;
+//        cout << "Odometry Variance: (" << varX << "," << varY << "," << varTheta << ")" << std::endl;
 //        cout << HT(Mx) << std::endl;
 //        cout << stateStandardDeviations << std::endl;
 /*	return KF_OK;*/
