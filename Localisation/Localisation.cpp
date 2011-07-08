@@ -359,7 +359,6 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 
     NormaliseAlphas();
 
-#if SHARED_BALL_ON
     // Check the game packets.
     // We only want to do the shared ball updates if we can't see the ball ourselves.
     // there have been probems where the team will keep sharing the previous position of their ball
@@ -370,12 +369,13 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
     { 
         for (size_t i=0; i<sharedballs.size(); i++)
         {
-            doSharedBallUpdate(sharedballs[i]);
+            #if SHARED_BALL_ON
+                doSharedBallUpdate(sharedballs[i]);
+            #endif
             if (sharedballs[i].TimeSinceLastSeen < 5000)    // if another robot can see the ball then it is not lost
                 fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false, m_timestamp);
         }
     }
-#endif // SHARED_BALL_ON
 
         NormaliseAlphas();
 
