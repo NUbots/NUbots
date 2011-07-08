@@ -80,25 +80,25 @@ protected:
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
         
-        // handle the head movements: For now we look at the yellow or blue goal if we can see them, otherwise pan
-        StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-        StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
-        StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-        StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+//        // handle the head movements: For now we look at the yellow or blue goal if we can see them, otherwise pan
+//        StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+//        StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+//        StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+//        StationaryObject& blue_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
         
-        if (yellow_left.isObjectVisible() and yellow_right.isObjectVisible())
-        {
-            float bearing = (yellow_left.ScreenXTheta() + yellow_right.ScreenXTheta())/2;
-            float elevation = (yellow_left.ScreenYTheta() + yellow_right.ScreenYTheta())/2;
-            m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
-        }
-        else if (blue_left.isObjectVisible() and blue_right.isObjectVisible())
-        {
-            float bearing = (blue_left.ScreenXTheta() + blue_right.ScreenXTheta())/2;
-            float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
-            m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
-        }
-        else if (yellow_left.TimeSinceLastSeen() > 1000 and yellow_right.TimeSinceLastSeen() > 1000 and blue_left.TimeSinceLastSeen() > 1000 and blue_right.TimeSinceLastSeen() > 1000)
+//        if (yellow_left.isObjectVisible() and yellow_right.isObjectVisible())
+//        {
+//            float bearing = (yellow_left.ScreenXTheta() + yellow_right.ScreenXTheta())/2;
+//            float elevation = (yellow_left.ScreenYTheta() + yellow_right.ScreenYTheta())/2;
+//            m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
+//        }
+//        else if (blue_left.isObjectVisible() and blue_right.isObjectVisible())
+//        {
+//            float bearing = (blue_left.ScreenXTheta() + blue_right.ScreenXTheta())/2;
+//            float elevation = (blue_left.ScreenYTheta() + blue_right.ScreenYTheta())/2;
+//            m_jobs->addMotionJob(new HeadTrackJob(elevation, bearing));
+//        }
+//        else if (yellow_left.TimeSinceLastSeen() > 1000 and yellow_right.TimeSinceLastSeen() > 1000 and blue_left.TimeSinceLastSeen() > 1000 and blue_right.TimeSinceLastSeen() > 1000)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
         
         vector<float> position = getReadyFieldPositions();
