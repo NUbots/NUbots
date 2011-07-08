@@ -283,7 +283,7 @@ public:
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 20, float dontcaredistance = 50)
+    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
     {
         // Get obstacle distances from the sensors
         vector<float> temp;
@@ -377,7 +377,7 @@ public:
     }
 
     /*! @brief Returns the [x,y] of the support player position */
-    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 100)
+    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 140)
     {
         // we calculate the position in field coordinates, then convert to local cartesian
         vector<float> targetposition(3,0);
@@ -412,20 +412,44 @@ public:
         StationaryObject* targetGoalLeftPost;
         StationaryObject* targetGoalRightPost;
         Self& self = fieldobjects->self;
+        std::string goalname;        
         if (gameinfo->getTeamColour() == GameInformation::RedTeam)
         {
+            goalname = "Blue Goal";
             targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST]);
             targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
         }
         else
         {
+            goalname = "Yellow Goal";
             targetGoalLeftPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST]);
             targetGoalRightPost = &(fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
         }
         float leftGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalLeftPost);
         float rightGoalBearing = self.CalculateBearingToStationaryObject(*targetGoalRightPost);
-        float middleBearing = leftGoalBearing + rightGoalBearing / 2.0f;
-        return ((leftGoalBearing > 0.2f) && (rightGoalBearing < -0.2f)) || (fabs(middleBearing) < mathGeneral::PI/16.0f);
+
+        Vector2<float> location;
+        location.x = (targetGoalLeftPost->X() + targetGoalRightPost->X()) / 2.0f;
+        location.y = (targetGoalLeftPost->Y() + targetGoalRightPost->Y()) / 2.0f;
+        StationaryObject middle(location);
+        float middleBearing = self.CalculateBearingToStationaryObject(middle);
+
+        bool result_posts = ((leftGoalBearing > 0.2f) && (rightGoalBearing < -0.2f));
+        bool result_centre = (fabs(middleBearing) < mathGeneral::PI/16.0f);
+        
+        /*
+        if(result_posts || result_centre)
+        {
+            debug << "%Kick lined up at time: " << Blackboard->Sensors->CurrentTime << "Goal: " << goalname << std::endl;
+            debug << "%My Heading: " << self.Heading() << std::endl;
+            debug << "%Left Post Bearing: " << leftGoalBearing << std::endl;
+            debug << "%Right Post Bearing: " << rightGoalBearing << std::endl;
+            debug << "%Middle Bearing: " << middleBearing << std::endl;
+            debug << "%Post Result: " << result_posts << std::endl;
+            debug << "%Centre Result: " << result_centre << std::endl;
+        }
+        */
+        return result_posts || result_centre;
     }
 };
 

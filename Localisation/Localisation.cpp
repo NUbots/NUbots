@@ -16,9 +16,8 @@
  
 #define MULTIPLE_MODELS_ON 1
 #define AMBIGUOUS_CORNERS_ON 1
-#define SHARED_BALL_ON 1
+#define SHARED_BALL_ON 0
 #define TWO_OBJECT_UPDATE_ON 0
-
 
 #define BOX_LENGTH_X 160
 #define BOX_LENGTH_Y 160
@@ -26,7 +25,6 @@
 #define Y_BOUNDARY 200
 
 #define CENTER_CIRCLE_ON 1 
-
 
 //#define debug_out cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -52,11 +50,11 @@ const float Localisation::c_LargeAngleSD = PI/2;   //For variance check
 const float Localisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
 const float Localisation::c_OBJECT_ERROR_DECAY = 0.94f;
 
-const float Localisation::c_RESET_SUM_THRESHOLD = 8.0f; // 3 // then 8.0 (home)
+const float Localisation::c_RESET_SUM_THRESHOLD = 3.0f; // 3 // then 8.0 (home)
 const int Localisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float Localisation::R_obj_theta = 0.05f*0.05f;        // (0.01 rad)^2
+const float Localisation::R_obj_theta = 0.1f*0.1f;        // (0.01 rad)^2
 const float Localisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
 const float Localisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
 
@@ -195,6 +193,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             m_frame_log << " Time Increment: " << time_increment << std::endl;
             #endif
 
+            if(fabs(turn) > 1.0f) turn = 0; // Hack... CSometimes we get really big odometry turn values that are not real.
             doTimeUpdate(fwd, side, turn, time_increment);
 
             #if LOC_SUMMARY > 0
@@ -246,6 +245,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
 
 
 #if LOC_SUMMARY > 0
+        m_frame_log << "num Models: " << num_models << " num reset: " << num_reset << std::endl;
         m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
 #endif
     #endif
@@ -359,21 +359,23 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 
     NormaliseAlphas();
 
-#if SHARED_BALL_ON
     // Check the game packets.
     // We only want to do the shared ball updates if we can't see the ball ourselves.
     // there have been probems where the team will keep sharing the previous position of their ball
     // and updates in vision do not supercede the shared data.
-    if(fobs->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)    // TODO: Change to a SD value
+    
+    
+    if(fobs->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 500)    // TODO: Change to a SD value
     { 
         for (size_t i=0; i<sharedballs.size(); i++)
         {
-            doSharedBallUpdate(sharedballs[i]);
+            #if SHARED_BALL_ON
+                doSharedBallUpdate(sharedballs[i]);
+            #endif
             if (sharedballs[i].TimeSinceLastSeen < 5000)    // if another robot can see the ball then it is not lost
-                fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false);
+                fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false, m_timestamp);
         }
     }
-#endif // SHARED_BALL_ON
 
         NormaliseAlphas();
 
@@ -1313,6 +1315,11 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
     {
         m_frame_log << possibleObjects[possabilities[i]].getName() << std::endl;
     }
+    m_frame_log << "Measurement:" << std::endl;
+    Matrix temp = Matrix(2, 1, false);
+    temp[0][0] = ambigousObject.measuredDistance();
+    temp[1][0] = ambigousObject.measuredBearing();
+    m_frame_log << temp;
 #endif
     if( (IsValidObject(ambigousObject) == false) || (ambigousObject.measuredDistance() > 600))
     {
@@ -1451,6 +1458,13 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
 #endif
 #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
+            Matrix temp = Matrix(2, 1, false);
+            const float dX = possibleObjects[possibleObjectID].X()-m_models[modelID].state(KF::selfX);
+            const float dY = possibleObjects[possibleObjectID].Y()-m_models[modelID].state(KF::selfY);
+            temp[0][0] = sqrt(dX*dX + dY*dY);
+            temp[1][0] = normaliseAngle(atan2(dY,dX) - m_models[modelID].state(KF::selfTheta));
+            m_frame_log << "Expected Measurements: " << std::endl << temp;
+
             m_frame_log << "Result: " << ((kf_return == KF_OK)?"Success":"Outlier");
             if(kf_return == KF_OK) m_frame_log << " alpha = " << m_models[newModelID].alpha() << std::endl;
             else m_frame_log << std::endl;
@@ -1695,7 +1709,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
         xMerged = m_models[index2].stateEstimates;
     } 
     else {
-        xMerged = (alpha1 * m_models[index1].stateEstimates + alpha1 * m_models[index2].stateEstimates);
+        xMerged = (alpha1 * m_models[index1].stateEstimates + alpha2 * m_models[index2].stateEstimates);
         // Fix angle.
         double angleDiff = m_models[index2].stateEstimates[2][0] - m_models[index1].stateEstimates[2][0];
         angleDiff = normaliseAngle(angleDiff);
@@ -1796,6 +1810,10 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
             case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
             case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
             case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
+            case FieldObjects::FO_CORNER_BLUE_PEN_LEFT:
+            case FieldObjects::FO_CORNER_BLUE_PEN_RIGHT:
+            case FieldObjects::FO_CORNER_BLUE_T_LEFT:
+            case FieldObjects::FO_CORNER_BLUE_T_RIGHT:
                 sum += m_modelObjectErrors[modelID][objID];
                 if (m_modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
                 m_modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
@@ -1818,7 +1836,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
 
 int  Localisation::CheckForOutlierResets()
 {
-    bool numResets = 0;
+    int numResets = 0;
    
     // SB: 27/06/2011 
 	// Changing the outcome of obtaining an outlier during the game playing state// 
@@ -1833,7 +1851,7 @@ int  Localisation::CheckForOutlierResets()
             #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
             #endif
-            m_models[modelID].setActive(false);
+            numResets++;
             if(getNumActiveModels() > 1) m_models[modelID].setActive(false);
             else
             {
@@ -1861,7 +1879,6 @@ int  Localisation::CheckForOutlierResets()
                 }
 
             }
-            numResets++;
         }
     }
     if(getNumActiveModels() < 1)

@@ -235,7 +235,7 @@ protected:
             }
         }
         vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_position, 0, 55, 0);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 25, 100);
+        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
         float pan_width = 1.1;

@@ -16,6 +16,7 @@ class MobileObject : public Object{
     
         Matrix sharedCovariance;
         bool isLost;
+        double timeLastLostUpdate;
             
 	public:
 		~MobileObject();
@@ -32,7 +33,7 @@ class MobileObject : public Object{
         void updateVelocityError(const Vector2<float>& newVelocityError);
         void updateObjectVelocities(float velX, float velY, float sdVelX, float sdVelY);
         void updateSharedCovariance(const Matrix& sharedSR);
-        void updateIsLost(bool islost);
+        void updateIsLost(bool islost, double timestamp);
         void updateTimeLastSeen(float time);
 
 		//Access:

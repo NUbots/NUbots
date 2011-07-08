@@ -85,7 +85,7 @@ HeadPanJob::HeadPanJob(const MobileObject& object, float hackfactor) : MotionJob
 /*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
  @param object the mobile field object you are looking for
  */
-HeadPanJob::HeadPanJob(const StationaryObject& object) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(const StationaryObject& object, float hackfactor) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = 0;
     m_pan_type = BallAndLocalisation;
@@ -93,8 +93,8 @@ HeadPanJob::HeadPanJob(const StationaryObject& object) : MotionJob(Job::MOTION_P
     m_use_default = false;
     float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(object);
     float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(object);
-    float sd = 2*max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
-    float sd_t = 2*Blackboard->Objects->self.sdHeading();
+    float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+    float sd_t = hackfactor*2.0*Blackboard->Objects->self.sdHeading();
     
     m_x_min = d - sd;
     m_x_max = 9000;
@@ -105,7 +105,7 @@ HeadPanJob::HeadPanJob(const StationaryObject& object) : MotionJob(Job::MOTION_P
 /*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
     @param object the mobile field object you are looking for
  */
-HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects, float hackfactor) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = 0;
     m_pan_type = BallAndLocalisation;
@@ -119,8 +119,8 @@ HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects) : MotionJob(Job:
     {
         float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(objects[i]);
         float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(objects[i]);
-        float sd = 2*max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
-        float sd_t = 2*Blackboard->Objects->self.sdHeading();
+        float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+        float sd_t = hackfactor*4.0*Blackboard->Objects->self.sdHeading();
         
         float x_min = d - sd;
         float yaw_min = t - atan2(sd,d) - sd_t;

@@ -140,7 +140,7 @@ float TeamInformation::getTimeToBall()
         return time;
     else if (m_player_number == 1 and balldistance > 150)            // goal keeper is a special case, don't chase balls too far away
         return time;
-    else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
+    else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 5000)
     {   // if neither the ball or self are lost or if we can see the ball then we can chase.
         vector<float> walkspeed, maxspeed;
         m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
@@ -151,7 +151,7 @@ float TeamInformation::getTimeToBall()
         
         if (balldistance > 30)
         {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
-            time += 1.0*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.0*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.0*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
+            time += 1.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.5*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.5*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
         }
         
         if (self.lost())
