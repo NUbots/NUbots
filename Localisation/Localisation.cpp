@@ -245,6 +245,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
 
 
 #if LOC_SUMMARY > 0
+        m_frame_log << "num Models: " << num_models << " num reset: " << num_reset << std::endl;
         m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
 #endif
     #endif
@@ -1708,7 +1709,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
         xMerged = m_models[index2].stateEstimates;
     } 
     else {
-        xMerged = (alpha1 * m_models[index1].stateEstimates + alpha1 * m_models[index2].stateEstimates);
+        xMerged = (alpha1 * m_models[index1].stateEstimates + alpha2 * m_models[index2].stateEstimates);
         // Fix angle.
         double angleDiff = m_models[index2].stateEstimates[2][0] - m_models[index1].stateEstimates[2][0];
         angleDiff = normaliseAngle(angleDiff);
@@ -1835,7 +1836,7 @@ bool Localisation::CheckModelForOutlierReset(int modelID)
 
 int  Localisation::CheckForOutlierResets()
 {
-    bool numResets = 0;
+    int numResets = 0;
    
     // SB: 27/06/2011 
 	// Changing the outcome of obtaining an outlier during the game playing state// 
