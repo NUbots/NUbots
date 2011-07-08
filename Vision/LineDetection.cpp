@@ -2572,6 +2572,17 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
                     tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
                     tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
 
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+                    tempUnknownCorner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
+
                 }
 
                 //qDebug("FO_CORNER_UNKNOWN_L located \n");
