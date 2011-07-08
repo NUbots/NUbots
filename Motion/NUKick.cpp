@@ -121,7 +121,7 @@ void NUKick::loadKickParameters()
     float yMin = footInnerWidth + 2.0f;
     float yMax = yMin + footWidth - 2.0;
 
-    m_intialWeightShiftPercentage = 1.0f;
+    m_intialWeightShiftPercentage = 0.9f;
 #ifdef TARGET_IS_NAOWEBOTS
     m_intialWeightShiftPercentage = 0.9;
     yMin = footInnerWidth;
@@ -499,7 +499,7 @@ void NUKick::doKick()
         {
             // Shift the weight of the robot to the support leg.
             //done = ShiftWeightToFoot(supportLeg,1.0f,0.01, 1500);
-            done = ShiftWeightToFootClosedLoop(supportLeg, m_intialWeightShiftPercentage, 0.4);
+            done = ShiftWeightToFootClosedLoop(supportLeg, m_intialWeightShiftPercentage, 0.3);
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
