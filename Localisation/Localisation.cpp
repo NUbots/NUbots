@@ -1850,7 +1850,7 @@ int  Localisation::CheckForOutlierResets()
             #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " reset due to outliers." << std::endl;
             #endif
-            m_models[modelID].setActive(false);
+            numResets++;
             if(getNumActiveModels() > 1) m_models[modelID].setActive(false);
             else
             {
@@ -1878,7 +1878,6 @@ int  Localisation::CheckForOutlierResets()
                 }
 
             }
-            numResets++;
         }
     }
     if(getNumActiveModels() < 1)
