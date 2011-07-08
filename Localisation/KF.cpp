@@ -27,7 +27,7 @@ using namespace mathGeneral;
 // Tuning Values (Constants)
 const float KF::c_Kappa = 1.0f; // weight used in w matrix. (Constant)
 const float KF::c_ballDecayRate = 0.985f; // Ball weighting 0.985 => speed halves every 1.5 seconds. (Constant)
-const float KF::c_threshold2 = 15.0f; // Threshold for outlier rejection. Magic Number. (Constant)
+const float KF::c_threshold2 = 20.0f; // Threshold for outlier rejection. Magic Number. (Constant)
 
 const float KF::c_outlierLikelyhood = 1e-3;
 

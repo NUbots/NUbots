@@ -220,7 +220,7 @@ void NUHead::moveTo(const vector<double>& times, const vector<vector<float> >& p
     vector<vector<double> > curvetimes;
     vector<vector<float> > curvepositions;
     vector<vector<float> > curvevelocities;
-    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.5, 10, curvetimes, curvepositions, curvevelocities);
+    MotionCurves::calculate(m_data->CurrentTime, times, sensorpositions, positions, 0.0, 20, curvetimes, curvepositions, curvevelocities);
     m_actions->add(NUActionatorsData::Head, curvetimes, curvepositions, m_default_gains);
     
     if (times.size() > 0)
