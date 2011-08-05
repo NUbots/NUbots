@@ -23,6 +23,7 @@ NAO_BUILD_DIR = Build/NAO
 NAOWEBOTS_BUILD_DIR = Build/NAOWebots
 CYCLOID_BUILD_DIR = Build/Cycloid
 BEAR_BUILD_DIR = Build/Bear
+DARWIN_BUILD_DIR = Build/Darwin
 NUVIEW_BUILD_DIR = Build/NUView
 
 # Aldebaran build tools
@@ -39,6 +40,8 @@ BEAR_EXT_DIR = projects/robocup
 .PHONY: Cycloid CycloidConfig CycloidConfigInstall CycloidClean CycloidVeryClean
 .PHONY: Bear BearConfig BearConfigInstall BearClean BearVeryClean
 .PHONY: BearExternal
+.PHONY: Darwin DarwinConfig DarwinConfigInstall DarwinClean DarwinVeryClean
+.PHONY: DarwinExternal
 .PHONY: NUView NUViewConfig NUViewClean NUViewVeryClean
 .PHONY: clean veryclean
 
@@ -53,6 +56,8 @@ Bear: TARGET_ROBOT=BEAR
 BearConfig: TARGET_ROBOT=BEAR
 Cycloid: TARGET_ROBOT=CYCLOID
 CycloidConfig: TARGET_ROBOT=CYCLOID
+Darwin: TARGET_ROBOT=DARWIN
+DarwinConfig: TARGET_ROBOT=DARWIN
 NUView: TARGET_ROBOT=NUVIEW
 NUViewConfig: TARGET_ROBOT=NUVIEW
 export TARGET_ROBOT
@@ -93,7 +98,7 @@ MAKE_OPTIONS = --no-print-directory -j $(NPROCS) --quiet
 
 default_target: NAOWebots
 
-all: NAO NAOWebots Cycloid Bear NUView
+all: NAO NAOWebots Cycloid Bear Darwin NUView
 
 ################ NAO ################
 NAO:
@@ -380,6 +385,81 @@ ifeq ($(VM_IP), )
 else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make BearVeryClean;"
 endif
+
+################ Darwin ################
+Darwin:
+ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
+	@echo "Compiling for Darwin"
+        ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(DARWIN_BUILD_DIR)/*)), )		## check if the project has already been configured
+		@set -e; \
+			echo "Configuring for first use"; \
+			mkdir -p $(DARWIN_BUILD_DIR); \
+			cd $(DARWIN_BUILD_DIR); \
+			cmake $(MAKE_DIR); \
+			ccmake .; \
+			make $(MAKE_OPTIONS);
+        else
+		@set -e; \
+			cd $(DARWIN_BUILD_DIR); \
+			make $(MAKE_OPTIONS);
+        endif
+		@echo $(ROBOT_IP)
+        ifneq ($(ROBOT_IP),)
+		@./Make/scripts/darwinSendLib $(ROBOT_IP);
+        endif
+else
+	@make DarwinExternal
+endif
+
+DarwinExternal:
+	@echo "Send source to external machine $(LOGNAME)@$(VM_IP)";
+#log into VM_IP and make the project dir
+	@ssh $(LOGNAME)@$(VM_IP) mkdir -p $(BEAR_EXT_DIR);
+#copy everything in this directory except the existing .*, Build, Documentation directories
+	@scp -prC $(filter-out Build Documentation Autoconfig NUview, $(wildcard *)) $(LOGNAME)@$(VM_IP):$(BEAR_EXT_DIR);
+#run make inside the vm
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make Darwin robot=$(ROBOT_IP);"
+#copy the binary back
+	@mkdir -p ./$(DARWIN_BUILD_DIR)
+	@scp -prC $(LOGNAME)@$(VM_IP):$(BEAR_EXT_DIR)/$(DARWIN_BUILD_DIR)/nubot ./$(DARWIN_BUILD_DIR)/nubot
+	
+
+DarwinConfig:
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			cd $(DARWIN_BUILD_DIR); \
+			ccmake .;
+    endif
+else
+	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinConfig;"
+endif
+
+DarwinConfigInstall:
+	@./Make/scripts/darwinSendConfig $(ROBOT_IP);
+
+DarwinClean:
+ifeq ($(VM_IP), )
+    ifeq ($(SYSTEM),Linux)
+		@set -e; \
+			echo "Cleaning Darwin Build"; \
+			cd $(DARWIN_BUILD_DIR); \
+			make $(MAKE_OPTIONS) clean;
+    endif
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinClean;"
+endif
+
+DarwinVeryClean:
+ifeq ($(VM_IP), )
+	@set -e; \
+		echo "Hosing Darwin Build"; \
+		rm -rf $(DARWIN_BUILD_DIR)/*; \
+		rm -rf Autoconfig/*;
+else
+	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinVeryClean;"
+endif
+
 	
 ################ NUView ################
 NUView:
