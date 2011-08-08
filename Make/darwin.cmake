@@ -16,5 +16,10 @@ SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
 ######### Set NUBOT_EXECUTABLE so that the code is compiled into an executable
 SET(NUBOT_IS_EXECUTABLE ON)
 
+######### Try and find where OPENCV is installed (for now Darwin uses opencv for image capture)
+FIND_PACKAGE(OPENCV REQUIRED)
+INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS})
+LIST(APPEND NUBOT_LINK_LIBRARIES ${OpenCV_LIBS})
+
 SET( OUTPUT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Build/Darwin/" )
 

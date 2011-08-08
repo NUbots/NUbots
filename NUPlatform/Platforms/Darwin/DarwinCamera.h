@@ -25,18 +25,11 @@
 #ifndef DARWINCAMERA_H
 #define DARWINCAMERA_H
 
-#include "NUPlatform/NUCamera.h"
+#include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
 class NUImage;
 
-class DarwinCamera : public NUCamera
+class DarwinCamera : public NUOpenCVCamera
 {
-public:
-    DarwinCamera();
-    ~DarwinCamera();
-    
-    NUImage* grabNewImage();
-    void setSettings(const CameraSettings& newset);
-private:
 };
 
 #endif

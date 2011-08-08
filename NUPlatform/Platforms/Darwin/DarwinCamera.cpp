@@ -26,32 +26,18 @@
 
 /*! @brief Constructs a webots camera
  */
-DarwinCamera::DarwinCamera()
+/*DarwinCamera::DarwinCamera()
 {
     #if DEBUG_NUCAMERA_VERBOSITY > 0
         debug << "DarwinCamera::DarwinCamera(" << platform << ")" << endl;
     #endif
-}
+}*/
 
 /*! @brief Destory the DarwinCamera
  */
-DarwinCamera::~DarwinCamera()
+/*DarwinCamera::~DarwinCamera()
 {
-}
-
-/*! @brief Returns a pointer to a new image.
- */
-NUImage* DarwinCamera::grabNewImage()
-{
-    // this might be bad because the SeeThinkThread will have an infinite loop frequency
-    return NULL;
-}
-
-/*! @brief The DarwinCamera has no settings, so this function does nothing
- */
-void DarwinCamera::setSettings(const CameraSettings& newset)
-{
-}
+}*/
 
 
 

@@ -206,7 +206,10 @@ NAOWebotsConfig:
 		@set -e; \
 			mkdir -p $(NAOWEBOTS_BUILD_DIR)/Xcode; \
 			cd $(NAOWEBOTS_BUILD_DIR)/Xcode; \
-			cmake -G Xcode $(MAKE_DIR);
+			cmake -G Xcode -D CMAKE_BUILD_TYPE=Debug $(MAKE_DIR); \
+			mkdir -p ../Eclipse; \
+			cd ../Eclipse; \
+			cmake -G"Eclipse CDT4 - Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug $(MAKE_DIR); 
     endif
 	@set -e; \
 		cd $(NAOWEBOTS_BUILD_DIR); \
@@ -426,11 +429,9 @@ DarwinExternal:
 
 DarwinConfig:
 ifeq ($(VM_IP), )
-    ifeq ($(SYSTEM),Linux)
-		@set -e; \
-			cd $(DARWIN_BUILD_DIR); \
-			ccmake .;
-    endif
+	@set -e; \
+		cd $(DARWIN_BUILD_DIR); \
+		ccmake .;
 else
 	@ssh -t $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinConfig;"
 endif
@@ -440,12 +441,10 @@ DarwinConfigInstall:
 
 DarwinClean:
 ifeq ($(VM_IP), )
-    ifeq ($(SYSTEM),Linux)
-		@set -e; \
-			echo "Cleaning Darwin Build"; \
-			cd $(DARWIN_BUILD_DIR); \
-			make $(MAKE_OPTIONS) clean;
-    endif
+	@set -e; \
+		echo "Cleaning Darwin Build"; \
+		cd $(DARWIN_BUILD_DIR); \
+		make $(MAKE_OPTIONS) clean;
 else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinClean;"
 endif
