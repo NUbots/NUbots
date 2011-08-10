@@ -28,8 +28,14 @@
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
 
+//From Darwin Library:
+#include <LinuxCM730.h>
+
 #include <vector>
 #include <string>
+
+
+//using namespace Robot;
 
 
 class DarwinSensors : public NUSensors
@@ -46,9 +52,13 @@ public:
     void copyFromBattery();
     
 private:
-    vector<string> m_servo_names;                       //!< a vector of the names of each available servo
+    vector<string> m_servo_names;           //!< a vector of the names of each available servo
+	vector<int> m_servo_IDs;				//!< Mapping from names to motor IDs to talk to motor
+	vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
     vector<float> m_previous_positions;
     vector<float> m_previous_velocities;
+	Robot::LinuxCM730* linux_cm730;								//!< Darwin Subcontrolller connection
+	Robot::CM730* cm730;
 };
 
 #endif
