@@ -21,9 +21,10 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-Thread.cpp 
-ConditionalThread.cpp
-PeriodicThread.cpp
+Thread.h Thread.cpp 
+ConditionalThread.h ConditionalThread.cpp
+PeriodicSignalerThread.h PeriodicSignalerThread.cpp
+PeriodicThread.h PeriodicThread.cpp
 QueueThread.h
 )
 ####################################################################################
