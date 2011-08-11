@@ -25,7 +25,7 @@ STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE}
 INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS  BlankWalk.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

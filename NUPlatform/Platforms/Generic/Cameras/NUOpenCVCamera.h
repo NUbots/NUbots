@@ -46,6 +46,8 @@ public:
     void setSettings(const CameraSettings& newset);
 private:
     cv::VideoCapture* m_camera;
+    NUImage* m_image;
+    unsigned char* m_yuyv_buffer;
 };
 
 #endif

@@ -66,12 +66,7 @@ public:
     @param Cb The Cb channel of the target pixel.
     @param Cr The Cr channel of the target pixel.
     */
-  static void fromRGBToYCbCr(unsigned char R,
-                             unsigned char G,
-                             unsigned char B,
-                             unsigned char& Y,
-                             unsigned char& Cb,
-                             unsigned char& Cr)
+  static void fromRGBToYCbCr(unsigned char R, unsigned char G, unsigned char B, unsigned char& Y, unsigned char& Cb, unsigned char& Cr)
   {
     float y = (R * .299) + (G * .587) + (B * .114);
     float cb = (R * -.169) + (G * -.332) + (B * .500) + 128;
