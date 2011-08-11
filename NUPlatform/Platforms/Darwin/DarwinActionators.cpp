@@ -53,7 +53,12 @@ DarwinActionators::DarwinActionators()
                                     string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
                                     string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
     vector<string> m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
-    
+    vector<string> sound(1, "Sound");
+	vector<string> names;
+    names.insert(names.end(), m_servo_names.begin(), m_servo_names.end());
+    names.insert(names.end(), sound.begin(), sound.end());
+    m_data->addActionators(names);
+	
     m_data->addActionators(m_servo_names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
@@ -76,6 +81,7 @@ void DarwinActionators::copyToHardwareCommunications()
     #endif
     copyToServos();
     copyToLeds();
+	copyToSound();
 }
 
 void DarwinActionators::copyToServos()

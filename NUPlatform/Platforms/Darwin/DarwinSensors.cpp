@@ -63,8 +63,8 @@ DarwinSensors::DarwinSensors()
 									JointID::ID_R_HIP_ROLL, JointID::ID_R_HIP_PITCH, JointID::ID_R_HIP_YAW, \
 									JointID::ID_R_KNEE, JointID::ID_R_ANKLE_ROLL, JointID::ID_R_ANKLE_PITCH};
 
-    vector<string> m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
-	vector<int> m_servo_IDs(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
+    m_servo_names = vector<string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+	m_servo_IDs = vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
     m_data->addSensors(m_servo_names);
 
 	m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
@@ -109,7 +109,6 @@ void DarwinSensors::copyFromJoints()
 {
 	
 	static const float NaN = numeric_limits<float>::quiet_NaN();
-
 	vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
 	int data;
@@ -117,7 +116,7 @@ void DarwinSensors::copyFromJoints()
     {
 		
 		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_POSITION_L), &(data), 0); 	//<! Read Position
-		joint[NUSensorsData::PositionId] = data;
+		joint[NUSensorsData::PositionId] = Robot::MX28::Value2Angle(data);
 		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_MOVING_SPEED_L), &(data), 0); 		//<! Read Velocity
 		joint[NUSensorsData::VelocityId] = data;
 		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_GOAL_POSITION_L), &(data), 0); 			//<! Read Goal Position (target)
@@ -130,7 +129,6 @@ void DarwinSensors::copyFromJoints()
 		joint[NUSensorsData::TorqueId] = data;
 		//<! Current is blank
 		joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
-
 		//<! Copy into m_data
 		m_data->set(*m_joint_ids[i], m_current_time, joint);
         
