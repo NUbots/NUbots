@@ -20,11 +20,9 @@
  */
 
 #include "DarwinSensors.h"
-#include "DarwinSensorNames.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
-//Darwin Motors:
-#include <MX28.h>
+
 
 #include "Tools/Math/General.h"
 
@@ -37,48 +35,22 @@ using namespace std;
 
 /*! @brief Constructs a nubot sensor class with Bear backend
  */
-DarwinSensors::DarwinSensors()
+DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
         debug << "DarwinSensors::DarwinSensors()" << endl;
     #endif
-    /* Make a list of all of the actionators in the Darwin
-        We use a standard way of quickly initialising a vector from a normal array that is initialised
-        in its declaration
-     */
-    // start with the joints
-    string temp_servo_names[] = {   string("HeadYaw"), string("HeadPitch"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"),  \
-									string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), \
-									string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
 
-	int temp_servo_IDs[] = 		{	JointID::ID_HEAD_PAN, JointID::ID_HEAD_TILT, \
-									JointID::ID_L_SHOULDER_ROLL, JointID::ID_L_SHOULDER_PITCH, JointID::ID_L_ELBOW, \
-									JointID::ID_R_SHOULDER_ROLL, JointID::ID_R_SHOULDER_PITCH, JointID::ID_R_ELBOW, \
-									JointID::ID_L_HIP_ROLL, JointID::ID_L_HIP_PITCH, JointID::ID_L_HIP_YAW, \
-									JointID::ID_L_KNEE, JointID::ID_L_ANKLE_ROLL, JointID::ID_L_ANKLE_PITCH, \
-									JointID::ID_R_HIP_ROLL, JointID::ID_R_HIP_PITCH, JointID::ID_R_HIP_YAW, \
-									JointID::ID_R_KNEE, JointID::ID_R_ANKLE_ROLL, JointID::ID_R_ANKLE_PITCH};
+	platform = darwin;
+	cm730 = subboard;
 
-    m_servo_names = vector<string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
-	m_servo_IDs = vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
-    m_data->addSensors(m_servo_names);
+    m_data->addSensors(platform->m_servo_names);
 
 	m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(m_servo_names.size(), 0);
-    m_previous_velocities = vector<float>(m_servo_names.size(), 0);
+    m_previous_positions = vector<float>(platform->m_servo_names.size(), 0);
+    m_previous_velocities = vector<float>(platform->m_servo_names.size(), 0);
 
-	//Code to Connect to Darwin SubController [Taken from Read/Write Tutorial]: 
-	linux_cm730 = new Robot::LinuxCM730("/dev/ttyUSB0");
-	cm730 = new Robot::CM730(linux_cm730);
-	if(cm730->Connect() == false)
-	{
-		printf("Fail to connect CM-730!\n");
-		return;
-	}
+	
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -89,7 +61,6 @@ DarwinSensors::~DarwinSensors()
         debug << "DarwinSensors::~DarwinSensors()" << endl;
     #endif
 	delete cm730;
-	delete linux_cm730;
 }
 
 /*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
@@ -112,20 +83,20 @@ void DarwinSensors::copyFromJoints()
 	vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
 	int data;
-	for (size_t i=0; i<m_servo_IDs.size(); i++)
+	for (size_t i=0; i<platform->m_servo_IDs.size(); i++)
     {
 		
-		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_POSITION_L), &(data), 0); 	//<! Read Position
-		joint[NUSensorsData::PositionId] = Robot::MX28::Value2Angle(data);
-		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_MOVING_SPEED_L), &(data), 0); 		//<! Read Velocity
+		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_POSITION_L), &(data), 0); 	//<! Read Position
+		joint[NUSensorsData::PositionId] = Value2Radian(data) + platform->m_servo_Offsets[i];
+		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_MOVING_SPEED_L), &(data), 0); 		//<! Read Velocity
 		joint[NUSensorsData::VelocityId] = data;
-		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_GOAL_POSITION_L), &(data), 0); 			//<! Read Goal Position (target)
+		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_GOAL_POSITION_L), &(data), 0); 			//<! Read Goal Position (target)
 		joint[NUSensorsData::TargetId] = data;
-		cm730->ReadByte(int(m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_TEMPERATURE), &(data), 0); //<! Read Temperature
+		cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_TEMPERATURE), &(data), 0); //<! Read Temperature
 		joint[NUSensorsData::TemperatureId] = data;
-		cm730->ReadByte(int(m_servo_IDs[i]),int(Robot::MX28::P_TORQUE_ENABLE), &(data), 0); 		//<! Read Stiffness
+		cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_TORQUE_ENABLE), &(data), 0); 		//<! Read Stiffness
 		joint[NUSensorsData::StiffnessId] = data;
-		cm730->ReadWord(int(m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_LOAD_L), &(data), 0); 			//<! Read Goal Position (target)
+		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_LOAD_L), &(data), 0); 			//<! Read Goal Position (target)
 		joint[NUSensorsData::TorqueId] = data;
 		//<! Current is blank
 		joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;

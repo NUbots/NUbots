@@ -26,11 +26,13 @@
 #define DARWINACTIONATORS_H
 
 #include "NUPlatform/NUActionators.h"
+#include "DarwinPlatform.h"
+
 
 class DarwinActionators : public NUActionators
 {
 public:
-    DarwinActionators();
+    DarwinActionators(DarwinPlatform*, Robot::CM730*);
     ~DarwinActionators();
     
 private:
@@ -39,7 +41,13 @@ private:
     void copyToLeds();
     
 private:
-    vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc) in the Darwin-OP robot
+	Robot::CM730* cm730;
+	DarwinPlatform* platform;
+	//Conversions:
+	static const float RATIO_VALUE2RADIAN = 0.001533980; 			//!< 2pi / 4096
+	static const float RATIO_RADIAN2VALUE = 651.8986469; 			//!< 4096 / 2pi
+	static int Radian2Value(float radian) { return (int)(radian*RATIO_RADIAN2VALUE)+Robot::MX28::CENTER_VALUE; }
+	static float Value2Radian(int value) { return (float)(value-Robot::MX28::CENTER_VALUE)*RATIO_VALUE2RADIAN; }
 };
 
 #endif

@@ -35,31 +35,23 @@
  
            This backend is also the most recent, and probably should serve as a template for future platforms.
  */ 
-DarwinActionators::DarwinActionators()
+DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboard)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "DarwinActionators::DarwinActionators()" << endl;
     #endif
     m_current_time = 0;
     
-    /* Make a list of all of the actionators in the Darwin
-        We use a standard way of quickly initialising a vector from a normal array that is initialised
-        in its declaration
-     */
-    // start with the joints
-    string temp_servo_names[] = {   string("HeadYaw"), string("HeadPitch"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-    vector<string> m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+	platform = darwin;
+	cm730 = subboard;
+
     vector<string> sound(1, "Sound");
 	vector<string> names;
-    names.insert(names.end(), m_servo_names.begin(), m_servo_names.end());
+    names.insert(names.end(), platform->m_servo_names.begin(), platform->m_servo_names.end());
     names.insert(names.end(), sound.begin(), sound.end());
     m_data->addActionators(names);
 	
-    m_data->addActionators(m_servo_names);
+    m_data->addActionators(platform->m_servo_names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
@@ -86,7 +78,36 @@ void DarwinActionators::copyToHardwareCommunications()
 
 void DarwinActionators::copyToServos()
 {
+    static vector<float> positions;
+    static vector<float> gains;
     
+    m_data->getNextServos(positions, gains);
+	
+    for (size_t i=0; i<positions.size(); i++)
+    {
+		//cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
+    	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+		if(gains[i] > 0)
+		{
+			int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
+			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
+		}
+		else
+		{
+			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+		}
+	}
+	
+
+	/*//Test Head Only:
+	for (size_t i=0; i<2; i++)
+    {
+		int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
+		platform->cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
+		platform->cm730->WriteByte(platform->m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
+    	platform->cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+	}*/
 }
 
 void DarwinActionators::copyToLeds()

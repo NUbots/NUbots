@@ -151,7 +151,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     int tempNumScanLines = 0;
     //debug << "Setting Image: " <<endl;
 
-    if(m_timestamp < 20000 or isSavingImages)
+    if(isSavingImages)
     {
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Vision::starting the save images loop." << endl;

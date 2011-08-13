@@ -24,12 +24,26 @@
 
 #include "NUPlatform/NUPlatform.h"
 
+//From Darwin Library:
+#include <LinuxCM730.h>	//Darwin Controller
+#include <MX28.h>		//Darwin Motors
+#include <JointData.h>
+
 class DarwinPlatform : public NUPlatform
 {
 public:
     DarwinPlatform();
     ~DarwinPlatform();
+
+    vector<string> 	m_servo_names;          //!< the names of the available joints (eg HeadYaw, AnklePitch etc) in the Darwin-OP robot
+	vector<int> 	m_servo_IDs;			//!< Corresponding servo ids to names
+	vector<float> 	m_servo_Offsets;
+protected:
+
+
 private:
+	Robot::LinuxCM730* linux_cm730;									//!< Darwin Subcontrolller connection
+	Robot::CM730* cm730;
 };
 
 #endif
