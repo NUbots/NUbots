@@ -21,6 +21,7 @@
 
 #include "NUOpenCVCamera.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
+#include "nubotdataconfig.h"        // for initial camera settings location
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
@@ -39,6 +40,11 @@ NUOpenCVCamera::NUOpenCVCamera()
 		errorlog << "NUOpenCVCamera::NUOpenCVCamera(). Failed to open default camera." << endl;
 		m_camera = 0;
 	}
+	CameraSettings fileSettings(CONFIG_DIR + string("Camera.cfg"));
+	setSettings(fileSettings);
+
+
+
 	m_image = new NUImage();
 	m_yuyv_buffer = 0;
 }
@@ -87,7 +93,15 @@ NUImage* NUOpenCVCamera::grabNewImage()
 
 void NUOpenCVCamera::setSettings(const CameraSettings& newset)
 {
-
+	if (newset.p_valid)
+	{
+		m_camera->set(CV_CAP_PROP_BRIGHTNESS, newset.p_brightness.get());
+		m_camera->set(CV_CAP_PROP_CONTRAST, newset.p_contrast.get());
+		m_camera->set(CV_CAP_PROP_SATURATION, newset.p_saturation.get());
+		m_camera->set(CV_CAP_PROP_HUE, newset.p_hue.get());
+		m_camera->set(CV_CAP_PROP_GAIN, newset.p_gain.get());
+		m_camera->set(CV_CAP_PROP_EXPOSURE, newset.p_exposure.get());
+	}
 }
 
 
