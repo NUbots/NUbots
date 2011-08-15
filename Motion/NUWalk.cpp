@@ -47,6 +47,7 @@
 #ifdef USE_BEARWALK
     #include "Walks/BearWalk/BearWalk.h"
 #endif
+#include "Walks/BlankWalk.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -82,7 +83,7 @@ NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
         return new BearWalk(data, actions);
     #endif
     
-    return NULL;
+    return new BlankWalk(data, actions);
 }
 
 NUWalk::NUWalk(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUWalk", data, actions)
