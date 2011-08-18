@@ -227,7 +227,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                 }
             }
             #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: [" << time - CurrentTime << "," << position << "]" << endl;
+                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: " << time - CurrentTime << ": " << positions_current[i] << " -> " << position << "]" << endl;
             #endif
         }
     }

@@ -68,7 +68,7 @@ DarwinSensors::~DarwinSensors()
 void DarwinSensors::copyFromHardwareCommunications()
 {
     copyFromJoints();
-    copyFromAccelerometerAndGyro();
+    //copyFromAccelerometerAndGyro();
     copyFromFeet();
     copyFromButtons();
     copyFromBattery();
@@ -83,38 +83,116 @@ void DarwinSensors::copyFromJoints()
 	vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
 	int data;
-	for (size_t i=0; i<platform->m_servo_IDs.size(); i++)
+
+	int start_addr = 0;//int(Robot::MX28::P_TORQUE_ENABLE);
+	int end_addr   = int(Robot::MX28::P_PRESENT_TEMPERATURE);
+	int datasize   = end_addr-start_addr+1;
+	unsigned char* datatable = new unsigned char[datasize];
+	int addr;
+	int error;
+
+	for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
-		
-		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_POSITION_L), &(data), 0); 	//<! Read Position
+
+		cm730->ReadTable(int(platform->m_servo_IDs[i]),start_addr,end_addr,datatable,&error);
+
+		/*cout << int(platform->m_servo_IDs[i]) << ": ";
+		for(int j = 0; j < datasize; j++)
+		{
+			cout << int(datatable[j]) << " ";
+		}
+		cout << endl;*/
+		/*if(error != 0)
+		{
+			cout << Platform->getTime() << "\t Motor error: \t" << platform->m_servo_names[i] << endl;
+		}*/
+
+		//cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_POSITION_L), &(data), 0); 	//<! Read Position
+		addr = int(Robot::MX28::P_PRESENT_POSITION_L);
+		data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 		joint[NUSensorsData::PositionId] = Value2Radian(data) + platform->m_servo_Offsets[i];
-		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_MOVING_SPEED_L), &(data), 0); 		//<! Read Velocity
+		//cout << addr-start_addr << " " << int(datatable[addr-start_addr]) << endl;
+		//cout << data << "\t" <<newdata << endl;
+		
+		//cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_GOAL_POSITION_L), &(data), 0); 			//<! Read Goal Position (target)
+		addr = int(Robot::MX28::P_GOAL_POSITION_L);
+		data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+		joint[NUSensorsData::TargetId] = Value2Radian(data) + platform->m_servo_Offsets[i];
+		
+		//cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_MOVING_SPEED_L), &(data), 0); 		//<! Read Velocity
+		addr = int(Robot::MX28::P_MOVING_SPEED_L);
+		data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
 		joint[NUSensorsData::VelocityId] = data;
-		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_GOAL_POSITION_L), &(data), 0); 			//<! Read Goal Position (target)
-		joint[NUSensorsData::TargetId] = data;
-		cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_TEMPERATURE), &(data), 0); //<! Read Temperature
+
+		//cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_TEMPERATURE), &(data), 0); //<! Read Temperature
+		addr = int(Robot::MX28::P_PRESENT_TEMPERATURE);
+		data = int(datatable[addr-start_addr]);
 		joint[NUSensorsData::TemperatureId] = data;
-		cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_TORQUE_ENABLE), &(data), 0); 		//<! Read Stiffness
-		joint[NUSensorsData::StiffnessId] = data;
-		cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_LOAD_L), &(data), 0); 			//<! Read Goal Position (target)
+
+		//cm730->ReadByte(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_TORQUE_ENABLE), &(data), 0); 		//<! Read Stiffness
+		addr = int(Robot::MX28::P_TORQUE_ENABLE);
+		data = int(datatable[addr-start_addr]);
+		joint[NUSensorsData::StiffnessId] = 100*data;
+		
+		//cm730->ReadWord(int(platform->m_servo_IDs[i]),int(Robot::MX28::P_PRESENT_LOAD_L), &(data), 0); 			//<! Read Goal Position (target)
+		addr = int(Robot::MX28::P_PRESENT_LOAD_L);
+		data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
 		joint[NUSensorsData::TorqueId] = data;
 		//<! Current is blank
 		joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
 		//<! Copy into m_data
+		
 		m_data->set(*m_joint_ids[i], m_current_time, joint);
         
         m_previous_positions[i] = joint[NUSensorsData::PositionId];
         m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
 	}
-
+	delete datatable;
 }
 
 void DarwinSensors::copyFromAccelerometerAndGyro()
 {
+	//<! Get the data from the control board:
+	int start_addr = int(Robot::CM730::P_GYRO_Z_L);
+	int end_addr   = int(Robot::CM730::P_ACCEL_Z_H);
+	int datasize   = end_addr-start_addr+1;
+	unsigned char* datatable = new unsigned char[datasize];
+	int error = 0;
+	cm730->ReadTable(start_addr,end_addr,datatable,&error);
+	
+	int addr;
+	int x,y,z;
+	vector<float> data(3,0);
+	//<! Assign the robot data to the NUSensor Structure:
+	addr = int(Robot::CM730::P_GYRO_X_L);
+	data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+
+	addr = int(Robot::CM730::P_GYRO_Y_L);
+	data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	
+	addr = int(Robot::CM730::P_GYRO_Z_L);
+	data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	
+	m_data->set(NUSensorsData::Gyro,m_current_time, data);
+
+	addr = int(Robot::CM730::P_ACCEL_X_L);
+	data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+
+	addr = int(Robot::CM730::P_ACCEL_Y_L);
+	data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	
+	addr = int(Robot::CM730::P_ACCEL_Z_L);
+	data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	
+	m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
+
+	delete datatable;
 }
 
 void DarwinSensors::copyFromFeet()
 {
+	//Darwin has no feet sensors atm.
+	return;
 }
 
 void DarwinSensors::copyFromButtons()

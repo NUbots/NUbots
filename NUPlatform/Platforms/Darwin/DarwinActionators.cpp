@@ -83,15 +83,20 @@ void DarwinActionators::copyToServos()
     
     m_data->getNextServos(positions, gains);
 	
-    for (size_t i=0; i<positions.size(); i++)
+    for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
 		//cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
     	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
 		if(gains[i] > 0)
 		{
 			int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
+			//int value = Radian2Value(0-platform->m_servo_Offsets[i]);
 			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
 			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
+			/*if(i == 0) //picth			
+				cout << Platform->getTime() << ": " << positions[i] << "\t"<< value << "\t \t";
+			if(i == 1)
+				cout << positions[i] << "\t"<< value << endl;*/
 		}
 		else
 		{
