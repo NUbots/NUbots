@@ -67,11 +67,24 @@ DarwinSensors::~DarwinSensors()
  */
 void DarwinSensors::copyFromHardwareCommunications()
 {
+	//Motor Data:
     copyFromJoints();
-    //copyFromAccelerometerAndGyro();
     copyFromFeet();
-    copyFromButtons();
-    copyFromBattery();
+
+	//READ CONTROL BOARD DATA:
+	int start_addr = 0;
+	int end_addr   = int(Robot::CM730::P_VOLTAGE);
+	int datasize   = end_addr-start_addr+1;
+	unsigned char* datatable = new unsigned char[datasize];
+	int error = 0;
+	cm730->ReadTable(start_addr,end_addr,datatable,&error);
+
+	//Control Board Data:
+    copyFromAccelerometerAndGyro(datatable);
+    copyFromButtons(datatable);
+    copyFromBattery(datatable);
+
+	delete datatable;
 }
 
 /*! @brief Copys the joint sensor data 
@@ -150,43 +163,52 @@ void DarwinSensors::copyFromJoints()
 	delete datatable;
 }
 
-void DarwinSensors::copyFromAccelerometerAndGyro()
+void DarwinSensors::copyFromAccelerometerAndGyro(unsigned char* datatable)
 {
 	//<! Get the data from the control board:
-	int start_addr = int(Robot::CM730::P_GYRO_Z_L);
-	int end_addr   = int(Robot::CM730::P_ACCEL_Z_H);
-	int datasize   = end_addr-start_addr+1;
-	unsigned char* datatable = new unsigned char[datasize];
-	int error = 0;
-	cm730->ReadTable(start_addr,end_addr,datatable,&error);
-	
+	int start_addr = 0;
+	int end_addr   = int(Robot::CM730::P_VOLTAGE);
+	//int datasize   = end_addr-start_addr+1;
+	//unsigned char* datatable = new unsigned char[datasize];
+	//int error = 0;
+	//cm730->ReadTable(start_addr,end_addr,datatable,&error);
+	float VALUETORPS_RATIO = 18.3348;//512/27.925
+	float VALUETOACCEL_RATIO = 0.1304; //512/4*981
 	int addr;
 	int x,y,z;
+	float centrevalue = 512;
 	vector<float> data(3,0);
+
 	//<! Assign the robot data to the NUSensor Structure:
 	addr = int(Robot::CM730::P_GYRO_X_L);
 	data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-
+	data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
+	
 	addr = int(Robot::CM730::P_GYRO_Y_L);
 	data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-	
+	data[1] = (data[1]-centrevalue)/VALUETORPS_RATIO;
+
 	addr = int(Robot::CM730::P_GYRO_Z_L);
 	data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-	
+	data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
+	//cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
 	m_data->set(NUSensorsData::Gyro,m_current_time, data);
 
 	addr = int(Robot::CM730::P_ACCEL_X_L);
 	data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	data[0] = (data[0]-centrevalue)/VALUETOACCEL_RATIO;
 
 	addr = int(Robot::CM730::P_ACCEL_Y_L);
 	data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
 	
 	addr = int(Robot::CM730::P_ACCEL_Z_L);
 	data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+	data[2] = (data[2]-centrevalue)/VALUETOACCEL_RATIO;
 	
 	m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
+	
 
-	delete datatable;
 }
 
 void DarwinSensors::copyFromFeet()
@@ -195,11 +217,62 @@ void DarwinSensors::copyFromFeet()
 	return;
 }
 
-void DarwinSensors::copyFromButtons()
+void DarwinSensors::copyFromButtons(unsigned char* datatable)
 {
+	//Bit 0 <= Mode Button
+	//Bit 1 <= Start Button
+ 
+	int addr = Robot::CM730::P_BUTTON;
+	int data  = datatable[addr];
+
+	if(data == 1)
+	{
+		//Mode Button Pressed:
+		m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 1);
+		//cout << "Mode Button Pressed" << endl;
+	}
+	else
+	{
+		m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 0);
+		//m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 0);
+	}
+	if (data == 2)
+	{
+		//Start Button Pressed:
+		m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 1);
+		//cout << "Start Button Pressed" << endl;
+	}
+	else
+	{
+		//m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 0);
+		m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 0);
+	}
+
+	if (data == 3)
+	{
+		//Mode and Start Button Pressed:
+		//m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 1);
+		//m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 1);
+		//cout << "Mode and Start Button Pressed" << endl;
+		m_data->modify(NUSensorsData::RightButton, NUSensorsData::StateId, m_current_time, 1);
+	}
+	else
+	{
+		m_data->modify(NUSensorsData::RightButton, NUSensorsData::StateId, m_current_time, 0);
+	}
+	return;
 }
 
-void DarwinSensors::copyFromBattery()
+void DarwinSensors::copyFromBattery(unsigned char* datatable)
 {
+	//External Voltage is 8-15V
+	//Values are 10x higher then actual present voltage.
+	
+	int addr = Robot::CM730::P_VOLTAGE;
+	int data  = datatable[addr];
+	float battery_percentage = data/120.00 *100.00;
+	m_data->set(NUSensorsData::BatteryVoltage, m_current_time, battery_percentage); //Convert to percent
+	
+	return;
 }
 

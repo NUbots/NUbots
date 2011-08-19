@@ -30,6 +30,8 @@ class NUImage;
 
 class DarwinCamera : public NUOpenCVCamera
 {
+	public:
+		NUImage* grabNewImage();
 };
 
 #endif

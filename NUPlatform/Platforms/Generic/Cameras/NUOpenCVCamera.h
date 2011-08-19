@@ -44,7 +44,7 @@ public:
     ~NUOpenCVCamera();
     NUImage* grabNewImage();
     void setSettings(const CameraSettings& newset);
-private:
+protected:
     cv::VideoCapture* m_camera;
     NUImage* m_image;
     unsigned char* m_yuyv_buffer;

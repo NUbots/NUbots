@@ -35,23 +35,33 @@
  
            This backend is also the most recent, and probably should serve as a template for future platforms.
  */ 
+
+static string temp_chestled_names[] = { "Chest/Led/"};
+vector<string> DarwinActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
+unsigned int DarwinActionators::m_num_chestleds = DarwinActionators::m_chestled_names.size();
+
+static string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
+vector<string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
+unsigned int DarwinActionators::m_num_footleds = DarwinActionators::m_footled_names.size();
+
 DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboard)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "DarwinActionators::DarwinActionators()" << endl;
+        debug << "DarwinActionators::DarwinActionators()" <<endl;
     #endif
     m_current_time = 0;
     
 	platform = darwin;
 	cm730 = subboard;
-
+	count = 0;
     vector<string> sound(1, "Sound");
 	vector<string> names;
     names.insert(names.end(), platform->m_servo_names.begin(), platform->m_servo_names.end());
+	names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
+	names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
     names.insert(names.end(), sound.begin(), sound.end());
     m_data->addActionators(names);
-	
-    m_data->addActionators(platform->m_servo_names);
+    //m_data->addActionators(platform->m_servo_names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
@@ -117,7 +127,34 @@ void DarwinActionators::copyToServos()
 
 void DarwinActionators::copyToLeds()
 {
-    
+	// LED DATA STRUCTURE: 
+	//		Chest: 		LedValues[0][0][0,1,2]
+	//		Feet Left:  LedValues[1][0][0,1,2]
+	//		Feet Right: LedValues[2][0][0,1,2]
+
+	// BOARD DATA STRUCTURE:
+	// 		LED:		[0 BBBB GGGG RRRR]
+	
+	if(count % 10 == 0)
+	{
+		static vector<  vector < vector < float > > > ledvalues;
+    	m_data->getNextLeds(ledvalues);
+		int value = (int(ledvalues[0][0][0]*31) << 0) + (int(ledvalues[0][0][1]*31) << 5) + (int(ledvalues[0][0][2]*31) << 10);
+		cm730->WriteWord(Robot::CM730::P_LED_HEAD_L, value, 0);
+
+		if(count % 20 == 0)
+		{
+			int value = (int(ledvalues[1][0][0]*31) << 0) + (int(ledvalues[1][0][1]*31) << 5) + (int(ledvalues[1][0][2]*31) << 10);
+			cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
+		}
+		else
+		{
+			int value = (int(ledvalues[2][0][0]*31) << 0) + (int(ledvalues[2][0][1]*31) << 5) + (int(ledvalues[2][0][2]*31) << 10);
+			cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
+		}
+	}
+
+	count++;
 }
 
 

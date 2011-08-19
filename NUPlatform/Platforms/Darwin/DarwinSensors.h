@@ -44,10 +44,10 @@ public:
     
     void copyFromHardwareCommunications();
     void copyFromJoints();
-    void copyFromAccelerometerAndGyro();
+    void copyFromAccelerometerAndGyro(unsigned char*);
     void copyFromFeet();
-    void copyFromButtons();
-    void copyFromBattery();
+    void copyFromButtons(unsigned char*);
+    void copyFromBattery(unsigned char*);
     
 private:
 	vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
@@ -55,6 +55,7 @@ private:
     vector<float> m_previous_velocities;
 	DarwinPlatform* platform;
 	Robot::CM730* cm730;
+
 
 	//Conversions:
 	static const float RATIO_VALUE2RADIAN = 0.001533980; 			//!< 2pi / 4096
