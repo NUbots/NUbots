@@ -725,6 +725,42 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
+void OpenglManager::setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId)
+{
+    GLUquadricObj *qobj;
+    makeCurrent();
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(4.0);
+    glColor3ub(255,0,0);
+
+    // Draw field and lines
+
+    // Green field border
+    glColor3ub(0,255,0);
+    glBegin(GL_LINES);                      // Start Lines
+    glVertex3i(-370, 270, 0);
+    glVertex3i( 370, 270, 0);
+    glVertex3i( 370,-270, 0);
+    glVertex3i(-370,-270, 0);
+    glEnd();  // End Lines
+
+    // Outside field lines border
+    glColor3ub(255,255,255);
+    glBegin(GL_LINES);                      // Start Lines
+    glVertex3i(-302.5, 202.5, 0);
+    glVertex3i( 302.5, 202.5, 0);
+    glVertex3i( 302.5,-202.5, 0);
+    glVertex3i(-302.5,-202.5, 0);
+    glEnd();  // End Lines
+
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+
+}
 
 void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradius)
 {
