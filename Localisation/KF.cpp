@@ -636,6 +636,9 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   double R_bearing = bearingError;
   //if(not_goal && INGORE_RANGE) R_range= 22500;	//150^2
 
+  cout << "[Orig] Meas Error: Distance = " << R_range <<std::endl;
+  cout << "[Orig] Meas Error: Heading = " << R_bearing <<std::endl;
+
   // Calculate update uncertainties - S_obj_rel & R_obj_rel
   Matrix S_obj_rel = Matrix(2,2,false);
   S_obj_rel[0][0] = sqrt(R_range);

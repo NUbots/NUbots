@@ -9,6 +9,7 @@ class OfflineLocalisation;
 class QTextBrowser;
 class QProgressDialog;
 class Localisation;
+class SelfLocalisation;
 class LogFileReader;
 class OfflineLocalisationDialog : public QDialog
 {
@@ -20,7 +21,9 @@ public:
 
 signals:
     void LocalisationChanged(const Localisation*);
+    void SelfLocalisationChanged(const SelfLocalisation*);
     void LocalisationInfoChanged(const QString&);
+    void SelfLocalisationInfoChanged(const QString&);
 
 public slots:
     void OpenLogFiles();

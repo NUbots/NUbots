@@ -1,30 +1,21 @@
-#include "OfflineLocalisation.h"
-#include "Infrastructure/NUSensorsData/NUSensorsData.h"
-#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include <sstream>
 #include <fstream>
+#include "OfflineLocalisation.h"
+#include "FileAccess/LogFileReader.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Localisation/SelfLocalisation.h"
+#include "Localisation/Localisation.h"
 
 /*! @brief Default Constructor
  */
 OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent): QThread(parent), m_log_reader(reader)
 {
-    m_intialLoc = new Localisation();
     m_workingLoc = 0;
-    Initialise(m_intialLoc);
+    m_workingSelfLoc = 0;
+    //Initialise(Localisation());
     m_stop_called = false;
     m_sim_data_available = false;
-}
-
-/*! @brief Constructor with initialisation.
- */
-OfflineLocalisation::OfflineLocalisation(const Localisation& initialState, const std::string& initialLogPath)
-{
-    m_intialLoc = new Localisation();
-    Initialise(&initialState);
-    OpenLogs(initialLogPath);
-    m_stop_called = false;
-    m_sim_data_available = false;
-    return;
 }
 
 /*! @brief Class destructor
@@ -32,11 +23,8 @@ OfflineLocalisation::OfflineLocalisation(const Localisation& initialState, const
 OfflineLocalisation::~OfflineLocalisation()
 {
     if(m_workingLoc) delete m_workingLoc;
-    for(int i = 0; i < m_localisation_frame_buffer.size(); i++)
-    {
-        delete m_localisation_frame_buffer[i];
-    }
-    m_localisation_frame_buffer.clear();
+    if(m_workingSelfLoc) delete m_workingSelfLoc;
+    ClearBuffer();
 }
 
 
@@ -44,11 +32,18 @@ OfflineLocalisation::~OfflineLocalisation()
  */
 void OfflineLocalisation::ClearBuffer()
 {
-    for(int i = 0; i < m_localisation_frame_buffer.size(); i++)
+    for(std::vector<Localisation*>::iterator loc_it = m_localisation_frame_buffer.begin(); loc_it != m_localisation_frame_buffer.end(); ++loc_it)
     {
-        delete m_localisation_frame_buffer[i];
+        delete (*loc_it);
     }
+    for(std::vector<SelfLocalisation*>::iterator loc_it = m_self_loc_frame_buffer.begin(); loc_it != m_self_loc_frame_buffer.end(); ++loc_it)
+    {
+        delete (*loc_it);
+    }
+    m_self_loc_frame_buffer.clear();
     m_localisation_frame_buffer.clear();
+    m_frame_info.clear();
+    m_self_frame_info.clear();
     m_sim_data_available = false;
 }
 
@@ -56,12 +51,13 @@ void OfflineLocalisation::ClearBuffer()
             initial state.
     @param initialState The initial state of the system.
  */
-void OfflineLocalisation::Initialise(const Localisation* intialState)
+void OfflineLocalisation::Initialise(const Localisation& intialState)
 {
     delete m_workingLoc;
-    m_workingLoc = new Localisation(*intialState);
+    delete m_workingSelfLoc;
+    m_workingLoc = new Localisation(intialState);
+    m_workingSelfLoc = new SelfLocalisation();
     ClearBuffer();
-    //m_localisation_frame_buffer.push_back(new Localisation(*intialState));
     m_stop_called = false;
     m_sim_data_available = false;
     return;
@@ -125,7 +121,7 @@ bool OfflineLocalisation::HasRequiredData(QStringList& available_data)
  */
 void OfflineLocalisation::run()
 {
-    Initialise(m_intialLoc);
+    Initialise(Localisation());
     // Don't do anything if not initialised properly.
     if(IsInitialised() == false) return;
     m_stop_called = false;
@@ -170,7 +166,7 @@ void OfflineLocalisation::run()
     emit SimDataChanged(m_sim_data_available);
     return;
 }
-
+#include <QDebug>
 /*! @brief Run the localisation algorithm on the provided data and add a new localisation frame.
     @param sensorData The sensor data for the new frame.
     @param objectData The observed objects for the current frame.
@@ -179,15 +175,20 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
 {
     // Need to make copies, since source is const
     NUSensorsData tempSensors = (*sensorData);
-
+    NUSensorsData tempSensors2 = (*sensorData);
     //FieldObjects tempObj = (*objectData);
 
     m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
-
+    m_workingSelfLoc->process(&tempSensors2,objectData,gameInfo,teamInfo);
     Localisation* temp = new Localisation((*m_workingLoc));
+    SelfLocalisation* self_temp = new SelfLocalisation(*m_workingSelfLoc);
+
     m_localisation_frame_buffer.push_back(temp);
+    m_self_loc_frame_buffer.push_back(self_temp);
     QString info(m_workingLoc->frameLog().c_str());
     m_frame_info.push_back(info);
+    QString self_info(m_workingSelfLoc->frameLog().c_str());
+    m_self_frame_info.push_back(self_info);
 }
 
 int OfflineLocalisation::NumberOfLogFrames()
@@ -203,12 +204,23 @@ int OfflineLocalisation::NumberOfFrames()
 const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
 {
     int index = frameNumber-1;
-    int numframs = NumberOfFrames();
     if( (index < 0) || (index >= NumberOfFrames()))
         return NULL;
     else
         return m_localisation_frame_buffer[index];
 }
+
+const SelfLocalisation* OfflineLocalisation::GetSelfFrame(int frameNumber)
+{
+    int index = frameNumber-1;
+    if( (index < 0) || (index >= NumberOfFrames()))
+        return NULL;
+    else
+    {
+        return m_self_loc_frame_buffer[index];
+    }
+}
+
 
 QString OfflineLocalisation::GetFrameInfo(int frameNumber)
 {
@@ -217,6 +229,15 @@ QString OfflineLocalisation::GetFrameInfo(int frameNumber)
         return NULL;
     else
         return m_frame_info[index];
+}
+
+QString OfflineLocalisation::GetSelfFrameInfo(int frameNumber)
+{
+    int index = frameNumber-1;
+    if( (index < 0) || (index >= NumberOfFrames()))
+        return NULL;
+    else
+        return m_self_frame_info[index];
 }
 
 /*! @brief Writes a text based summary of the current experiment to file.

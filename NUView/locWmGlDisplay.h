@@ -9,6 +9,8 @@ class FieldObjects;
 class Object;
 class StationaryObject;
 class NUSensorsData;
+class SelfLocalisation;
+class SelfUKF;
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -35,6 +37,12 @@ public slots:
         localLocalisation = newLocalisation;
         update();
     }
+
+    void setSelfLocalisation(const SelfLocalisation* newSelfLoc)
+    {
+        m_self_loc = newSelfLoc;
+    }
+
     void setFieldObjects(const FieldObjects* newFieldObjects)
     {
         currentObjects = newFieldObjects;
@@ -78,7 +86,9 @@ protected:
         void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
 
         void DrawModelMarkers(const KF& model, QColor& modelColor);
+        void DrawModelMarkers(const SelfUKF* model, QColor& modelColor);
         void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
+        void drawLocalisationMarkers(const SelfLocalisation& localisation, QColor& modelColor);
 
         void DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor);
 
@@ -99,6 +109,7 @@ protected:
         const Localisation* currentLocalisation;
         const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
+        const SelfLocalisation* m_self_loc;
         NUSensorsData* currentSensorData;
 
         bool light;

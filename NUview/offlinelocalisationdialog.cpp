@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QAction>
 #include "FileAccess/SplitStreamFileFormatReader.h"
+#include "FileAccess/LogFileReader.h"
 
 OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     QDialog(parent)
@@ -158,8 +159,12 @@ void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)
     {
         const Localisation* temp = m_offline_loc->GetFrame(frameNumber);
         emit LocalisationChanged(temp);
+        const SelfLocalisation* selfTemp = m_offline_loc->GetSelfFrame(frameNumber);
+        emit SelfLocalisationChanged(selfTemp);
         QString message = m_offline_loc->GetFrameInfo(frameNumber);
         emit LocalisationInfoChanged(message);
+        QString self_message = m_offline_loc->GetSelfFrameInfo(frameNumber);
+        emit SelfLocalisationInfoChanged(self_message);
     }
 }
 

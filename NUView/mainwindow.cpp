@@ -108,6 +108,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     locInfoDock->setShown(false);
     addDockWidget(Qt::RightDockWidgetArea,locInfoDock);
 
+    selflocInfoDisplay = new QTextBrowser(this);
+    QDockWidget* selflocInfoDock = new QDockWidget("Self Localisation Information");
+    selflocInfoDock->setObjectName("Self Localisation Information");
+    selflocInfoDock->setWidget(selflocInfoDisplay);
+    selflocInfoDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,selflocInfoDock);
+
     // Add localisation widget
     localisation = new LocalisationWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea,localisation);
@@ -483,6 +490,7 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
 
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
+    connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
     qDebug() <<"Finnished Connecting Widgets";
 }
 
@@ -806,6 +814,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
+    connect(offlinelocDialog, SIGNAL(SelfLocalisationChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;

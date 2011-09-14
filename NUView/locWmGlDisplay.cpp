@@ -5,6 +5,7 @@
 #include <QApplication>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
+#include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
@@ -28,6 +29,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     currentObjects = 0;
     localLocalisation = 0;
     currentSensorData = 0;
+    m_self_loc = 0;
 }
 
 locWmGlDisplay::~locWmGlDisplay()
@@ -269,6 +271,11 @@ void locWmGlDisplay::drawMarkers()
     {
         QColor localColor(255,255,0);
         DrawLocalisationMarkers(*localLocalisation, localColor);
+    }
+    if(m_self_loc)
+    {
+        QColor self_color(142, 56, 142);
+        drawLocalisationMarkers(*m_self_loc, self_color);
     }
 }
 
@@ -620,6 +627,19 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
     drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
 }
 
+void locWmGlDisplay::DrawModelMarkers(const Model* model, QColor& modelColor)
+{
+    drawRobotMarker(modelColor, model->mean(Model::states_x), model->mean(Model::states_y), model->mean(Model::states_heading));
+    if(drawSigmaPoints)
+    {
+        Matrix sigmaPoints = model->CalculateSigmaPoints();
+        for (int i=1; i < sigmaPoints.getn(); i++)
+        {
+            DrawSigmaPoint(modelColor, sigmaPoints[Model::states_x][i], sigmaPoints[Model::states_y][i], sigmaPoints[Model::states_heading][i]);
+        }
+    }
+}
+
 void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor)
 {
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
@@ -640,6 +660,31 @@ void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, Q
                 int alpha = std::max(c_min_display_alpha, (int)(255*model.alpha()));
                 modelColor.setAlpha(alpha);
                 DrawModelMarkers(model, modelColor);
+            }
+        }
+    }
+}
+
+void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisation, QColor& modelColor)
+{
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    if(drawBestModelOnly)
+    {
+        modelColor.setAlpha(255);
+        const Model* model = localisation.getBestModel();
+        DrawModelMarkers(model, modelColor);
+    }
+    else
+    {
+        QString displayString("Model %1 (%2%)");
+        ModelContainer models = localisation.allModels();
+        for(ModelContainer::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        {
+            if((*model_it)->active())
+            {
+                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
+                modelColor.setAlpha(alpha);
+                DrawModelMarkers((*model_it), modelColor);
             }
         }
     }

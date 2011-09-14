@@ -180,7 +180,8 @@ HEADERS += ui_mainwindow.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
     ../Localisation/SelfModel.h \
-    ../Localisation/SelfUKF.h
+    ../Localisation/SelfUKF.h \
+    ../Localisation/SelfLocalisation.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -305,7 +306,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/SelfModel.cpp
+    ../Localisation/SelfModel.cpp \
+    ../Localisation/SelfLocalisation.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

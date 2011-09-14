@@ -4,6 +4,7 @@
 #include "Tools/Math/Moment.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/FieldObjects/Self.h"
+#include <iostream>
 
 /*!
   * A class used to template a self localisation kalman filter.
@@ -35,6 +36,7 @@ public:
 
     // Multiple models stuff
     bool active() const {return m_active;}
+    bool inactive() const {return !m_active;}
     void setActive(bool newActive = true) {m_active = newActive;}
 
     // Alpha measure
@@ -47,7 +49,21 @@ public:
     unsigned int splitOption() const {return m_split_option;}
     double creationTime() const {return m_creation_time;}
 
-private:
+    /*!
+    @brief Output streaming operation.
+    @param output The output stream.
+    @param p_kf The source model to be streamed.
+    */
+    friend std::ostream& operator<< (std::ostream& output, const SelfModel& p_model);
+
+    /*!
+    @brief Input streaming operation.
+    @param input The input stream.
+    @param p_kf The destination model to be streamed to.
+    */
+    friend std::istream& operator>> (std::istream& input, SelfModel& p_model);
+
+protected:
     bool m_active;                  //!< Active flag.
     float m_alpha;                  //!< Alpha rating of the model.
     unsigned int m_id;              //!< Unique id of the model.
