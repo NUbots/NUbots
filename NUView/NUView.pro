@@ -181,7 +181,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Moment.h \
     ../Localisation/SelfModel.h \
     ../Localisation/SelfUKF.h \
-    ../Localisation/SelfLocalisation.h
+    ../Localisation/SelfLocalisation.h \
+    ../Localisation/SelfSRUKF.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -307,7 +308,8 @@ SOURCES += mainwindow.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
     ../Localisation/SelfModel.cpp \
-    ../Localisation/SelfLocalisation.cpp
+    ../Localisation/SelfLocalisation.cpp \
+    ../Localisation/SelfSRUKF.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -318,3 +320,5 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
+
+

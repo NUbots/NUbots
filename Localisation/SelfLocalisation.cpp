@@ -1185,7 +1185,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigou
         if((*model_it)->inactive()) continue;
         for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
         {
-            temp_mod = new SelfUKF(*(*model_it), ambigousObject, *(*obj_it), error, GetTimestamp());
+            temp_mod = new Model(*(*model_it), ambigousObject, *(*obj_it), error, GetTimestamp());
             new_models.push_back(temp_mod);
 #if LOC_SUMMARY > 0
             m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
