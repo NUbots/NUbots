@@ -11,6 +11,14 @@ public:
     float heading() const {return m_heading;}
     void setDistance(float newDistance) {m_distance = newDistance;}
     void setHeading(float newHeading) {m_heading = newHeading;}
+    Matrix errorCovariance() const
+    {
+        Matrix result(2,2,false);
+        result[0][0] = m_distance;
+        result[1][1] = m_heading;
+        return result;
+    }
+
 private:
     float m_distance;
     float m_heading;
@@ -31,6 +39,7 @@ public:
     SelfUKF(const SelfUKF& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time);
 
     void InitialiseCachedValues();
+    void CalculateSigmaWeights(float kappa);
 
     // Update functions
     updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime);
@@ -62,6 +71,8 @@ public:
 
 
 protected:
+    Matrix m_sigmaWeights;
+    Matrix m_sqrtSigmaWeights;
     Matrix sqrtOfTestWeightings; // Square root of W (Constant)
     Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
     static const float c_Kappa;
