@@ -361,7 +361,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
                 poss_obj.push_back(&(fobs->stationaryFieldObjects[(*pos_it)]));
             }
 
-            updateResult = ambiguousLandmarkUpdateExhaustive((*currAmb), poss_obj);
+            updateResult = ambiguousLandmarkUpdate((*currAmb), poss_obj);
             //updateResult = doAmbiguousLandmarkMeasurementUpdateDiscard((*currAmb), fobs->stationaryFieldObjects);
             NormaliseAlphas();
             numUpdates++;
@@ -369,7 +369,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
                 usefulObjectCount++;
         }
 #endif // MULTIPLE_MODELS_ON
-        MergeModels(c_MAX_MODELS_AFTER_MERGE);
+        PruneModels();
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -980,7 +980,7 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
     }
 
 #if LOC_SUMMARY > 0
-    m_frame_log << "Perfoming multiple object update." << std::endl;
+    m_frame_log << "Performing multiple object update." << std::endl;
     m_frame_log << "locations:" << std::endl;
     m_frame_log << locations << std::endl;
     m_frame_log << "measurements:" << std::endl;
@@ -1168,6 +1168,18 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     */
     return 1;
 }
+
+int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
+{
+    return ambiguousLandmarkUpdateExhaustive(ambigousObject, possibleObjects);
+}
+
+int SelfLocalisation::PruneModels()
+{
+    MergeModels(c_MAX_MODELS_AFTER_MERGE);
+    return 0;
+}
+
 
 int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
 {

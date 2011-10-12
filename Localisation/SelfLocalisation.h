@@ -1,6 +1,6 @@
 #ifndef SELF_LOCWM_H_DEFINED
 #define SELF_LOCWM_H_DEFINED
-#include "SelfUKF.h"
+#include "SelfSRUKF.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -23,7 +23,7 @@ class NUSensorsData;
 
 #define LOC_SUMMARY 3
 
-typedef SelfUKF Model;
+typedef SelfSRUKF Model;
 typedef std::list<Model*> ModelContainer;
 
 class SelfLocalisation: public TimestampedData
@@ -44,6 +44,7 @@ class SelfLocalisation: public TimestampedData
 
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
+        int ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
@@ -53,6 +54,7 @@ class SelfLocalisation: public TimestampedData
         const Model* getBestModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
+        int PruneModels();
         bool MergeTwoModels(Model* modelA, Model* modelB);
         double MergeMetric(const Model* modelA, const Model* modelB) const;
         void MergeModels(int maxAfterMerge);
