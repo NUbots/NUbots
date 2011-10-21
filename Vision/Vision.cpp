@@ -172,13 +172,14 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "No Horizon Data" << endl;
         #endif
-        AllFieldObjects->postProcess(image->m_timestamp);
-        return;
+        //AllFieldObjects->postProcess(image->m_timestamp);
+        //return;
+		m_horizonLine.setLine(1,0,0);
     }
 
     #if DEBUG_VISION_VERBOSITY > 7
         debug << "Generating Horizon Line: Finnished" <<endl;
-        debug << "Image(0,0) is below: " << horizonLine.IsBelowHorizon(0, 0)<< endl;
+        debug << "Image(0,0) is below: " << m_horizonLine.IsBelowHorizon(0, 0)<< endl;
     #endif
 
     std::vector<unsigned char> validColours;
@@ -342,7 +343,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
         LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "Line Candidates: " << LineCandidates.size() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size()<< " Vertical Candidates: " << VerticalLineCandidates.size()<< endl;
+            debug << "Line Candidates: " << LineCandidates.size() << "\tHorizontal Line Candidates: " << HorizontalLineCandidates.size()<< "\tVertical Candidates: " << VerticalLineCandidates.size()<< endl;
         #endif
 
     /**INCLUDED BY SHANNON**/
@@ -374,13 +375,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 //validColours.push_back(ClassIndex::blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-ROBOT" << endl;
+                    debug << "\tPRE-ROBOT: Segments:\t" <<  LineDetector.robotSegments.size() << endl;
                 #endif
 
                 RobotCandidates = classifyCandidates(LineDetector.robotSegments, points ,validColours, spacings, 0.2, 2.0, 12, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-ROBOT" << endl;
+                    debug << "\tPOST-ROBOT: Robots candidates:\t" << RobotCandidates.size()<< endl;
                 #endif
 
                 break;
@@ -391,13 +392,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 validColours.push_back(ClassIndex::yellow_orange);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-BALL" << endl;
+                    debug << "\tPRE-BALL: Segments:\t" <<  BallSegments.size() <<endl;
                 #endif
 
                 BallCandidates = classifyCandidates(BallSegments, points, validColours, spacings, 0, 3.0, 1, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-BALL" << endl;
+                    debug << "\tPOST-BALL: Ball Candidates:\t"<< BallCandidates.size() << endl;
                 #endif
 
                 break;
@@ -2648,12 +2649,18 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
     {
         return ball;
     }
-    //qDebug() << "Vision::DetectBall : Find Ball" << endl;
+	#if DEBUG_VISION_VERBOSITY > 6
+    	debug << "Vision::DetectBall : Find Ball" << endl;
+	#endif
     ball = BallFinding.FindBall(FO_Candidates, AllFieldObjects, this, height, width);
-    //qDebug() << "Vision::DetectBall : Finnised FO_Ball" << endl;
+	#if DEBUG_VISION_VERBOSITY > 6
+    debug << "Vision::DetectBall : Finnised FO_Ball" << endl;
+	#endif
     if(ball.isDefined)
     {
-        //debug<< "Vision::DetectBall : Update FO_Ball" << endl;
+		#if DEBUG_VISION_VERBOSITY > 6
+        	debug<< "Vision::DetectBall : Update FO_Ball" << endl;
+		#endif
         Vector2<float> positionAngle;
         Vector2<int> viewPosition;
         Vector2<int> sizeOnScreen;
@@ -2694,15 +2701,15 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
 
-        /*
+        #if DEBUG_VISION_VERBOSITY > 6
         debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()
                     << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing()
                     << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;
-        */
+        #endif
 
     }
 
-    //qDebug() << "Vision::DetectBall : Finnised" << endl;
+    //qDebug() << "Vision::DetectBall : Finnished" << endl;
     return ball;
 
 }

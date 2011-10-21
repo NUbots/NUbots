@@ -20,6 +20,7 @@
  */
 
 #include "DarwinCamera.h"
+#include "NUPlatform/NUPlatform.h"
 
 #include "debug.h"
 #include "debugverbositynucamera.h"
@@ -73,6 +74,7 @@ NUImage* DarwinCamera::grabNewImage()
 			}
 		}
 	}
+	m_image->m_timestamp = Platform->getTime();
 	return m_image;
 }
 

@@ -44,10 +44,10 @@ public:
     
     void copyFromHardwareCommunications();
     void copyFromJoints();
-    void copyFromAccelerometerAndGyro(unsigned char*);
+    void copyFromAccelerometerAndGyro();
     void copyFromFeet();
-    void copyFromButtons(unsigned char*);
-    void copyFromBattery(unsigned char*);
+    void copyFromButtons();
+    void copyFromBattery();
     
 private:
 	vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly

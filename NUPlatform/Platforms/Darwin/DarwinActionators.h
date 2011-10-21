@@ -36,9 +36,11 @@ public:
     ~DarwinActionators();
     
 private:
+	void InitialiseMotors();
     void copyToHardwareCommunications();
     void copyToServos();
     void copyToLeds();
+
     
 private:
 	Robot::CM730* cm730;

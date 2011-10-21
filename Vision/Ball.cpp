@@ -51,8 +51,9 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
 
 
         //if(isObjectInRobot(PossibleBall, AllObjects)) continue;
-        //debug << "BALL::FindBall  Possible Ball Found ";
-
+		#if DEBUG_VISION_VERBOSITY > 7        
+		debug << "BALL::FindBall  Possible Ball Found ";
+		#endif
         int sizeOfCandidate = (PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y); //Uses the height of the candidate, as width can be 0
 
         if(sizeOfCandidate > sizeOfLargestCandidate)

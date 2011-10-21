@@ -47,6 +47,9 @@
 #ifdef USE_BEARWALK
     #include "Walks/BearWalk/BearWalk.h"
 #endif
+#ifdef USE_DARWINWALK
+    #include "Walks/DarwinWalk/DarwinWalk.h"
+#endif
 #include "Walks/BlankWalk.h"
 
 #include "debug.h"
@@ -83,6 +86,10 @@ NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
         return new BearWalk(data, actions);
     #endif
     
+	#ifdef USE_DARWINWALK
+        return new DarwinWalk(data, actions);
+    #endif
+
     return new BlankWalk(data, actions);
 }
 

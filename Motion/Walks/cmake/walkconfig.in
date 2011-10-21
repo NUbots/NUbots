@@ -53,6 +53,12 @@
     #else
         #undef USE_BEARWALK
     #endif
+    #define USE_WALK_DARWINWALK_${NUBOT_USE_MOTION_WALK_DARWINWALK} 
+    #ifdef USE_WALK_DARWINWALK_ON
+        #define USE_DARWINWALK
+    #else
+        #undef USE_DARWINWALK
+    #endif
 #else
     #undef USE_JWALK
     #undef USE_JUPPWALK
@@ -60,6 +66,7 @@
     #undef USE_VSCWALK
     #undef USE_ALWALK
     #undef USE_BEARWALK
+	#undef USE_DARWINWALK
 #endif
 
 #endif // !WALKCONFIG_H

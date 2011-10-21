@@ -67,10 +67,20 @@ DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboa
         debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
         m_data->summaryTo(debug);
     #endif
+
+	InitialiseMotors();
 }
 
 DarwinActionators::~DarwinActionators()
 {
+
+}
+void DarwinActionators::InitialiseMotors()
+{
+	for(int i = 0; i < platform->m_servo_IDs.size(); i++)
+	{
+		cm730->WriteByte(platform->m_servo_IDs[i], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+	}
 }
 
 void DarwinActionators::copyToHardwareCommunications()
@@ -92,37 +102,65 @@ void DarwinActionators::copyToServos()
     static vector<float> gains;
     
     m_data->getNextServos(positions, gains);
+	//return;
+
+	//Data for Sync Write:
+	int param[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
+	int n = 0;
+	int joint_num = 0;
+
+	//Defaults from data sheet:
+	int P_GAIN = 8;
+	int I_GAIN = 0;
+	int D_GAIN = 0;
+	//platform->m_servo_IDs.size()
 	
     for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
+		platform->setMotorGoalPosition(i,positions[i]);
+		platform->setMotorStiffness(i,gains[i]);
+		
 		//cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
     	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-		if(gains[i] > 0)
+		/*if(gains[i] > 0)
 		{
 			int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
 			//int value = Radian2Value(0-platform->m_servo_Offsets[i]);
 			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
 			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
-			/*if(i == 0) //picth			
-				cout << Platform->getTime() << ": " << positions[i] << "\t"<< value << "\t \t";
-			if(i == 1)
-				cout << positions[i] << "\t"<< value << endl;*/
 		}
 		else
 		{
-			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+			//cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+		}
+		*/
+
+		if(gains[i] > 0)
+		{
+			
+			int value = 0;
+
+			if(i == 0 || i == 1)
+			{
+				value = Radian2Value(-positions[i]-platform->m_servo_Offsets[i]);
+			}
+			else
+			{
+				value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
+			}
+			
+			param[n++] = platform->m_servo_IDs[i];
+			param[n++] = P_GAIN;
+			param[n++] = I_GAIN;
+			param[n++] = D_GAIN;
+			param[n++] = 0;
+			param[n++] = Robot::CM730::GetLowByte(value);
+			param[n++] = Robot::CM730::GetHighByte(value);	
+			joint_num++;
 		}
 	}
 	
-
-	/*//Test Head Only:
-	for (size_t i=0; i<2; i++)
-    {
-		int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-		platform->cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
-		platform->cm730->WriteByte(platform->m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
-    	platform->cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-	}*/
+	int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
 }
 
 void DarwinActionators::copyToLeds()

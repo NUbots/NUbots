@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "debugverbositynuplatform.h"
 #include "nubotconfig.h"
+#include <math.h>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ DarwinPlatform::DarwinPlatform()
 									Robot::JointData::ID_R_HIP_ROLL, Robot::JointData::ID_R_HIP_PITCH, Robot::JointData::ID_R_HIP_YAW, \
 									Robot::JointData::ID_R_KNEE, Robot::JointData::ID_R_ANKLE_ROLL, Robot::JointData::ID_R_ANKLE_PITCH};
 
-	float temp_servo_Offsets[] = 		{	-0.72, 	0.0, \
+	float temp_servo_Offsets[] = 		{	0.0, 	0.0, \
 										//JointID::ID_L_SHOULDER_ROLL, JointID::ID_L_SHOULDER_PITCH, JointID::ID_L_ELBOW,
 										-0.7853981, 1.5707963, -1.5707963, \
 										//JointID::ID_R_SHOULDER_ROLL, JointID::ID_R_SHOULDER_PITCH, JointID::ID_R_ELBOW,
@@ -74,9 +75,14 @@ DarwinPlatform::DarwinPlatform()
 										//JointID::ID_R_KNEE, JointID::ID_R_ANKLE_ROLL, JointID::ID_R_ANKLE_PITCH};
 										0.0,	0.0,	0.0};
 
+	float zeros[sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs)] = {0};
+
     m_servo_names = vector<string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 	m_servo_IDs = vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
 	m_servo_Offsets = vector<float>(temp_servo_Offsets, temp_servo_Offsets + sizeof(temp_servo_Offsets)/sizeof(*temp_servo_Offsets));
+
+	m_servo_Goal_Positions = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
+	m_servo_Stiffness = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
 
 	//Code to Connect to Darwin SubController [Taken from Read/Write Tutorial]: 
 	linux_cm730 = new Robot::LinuxCM730("/dev/ttyUSB0");
@@ -96,7 +102,7 @@ DarwinPlatform::DarwinPlatform()
     m_actionators = new DarwinActionators(this,cm730);
 
 	
-
+	//cout << m_servo_Stiffness << endl;
 }
 
 DarwinPlatform::~DarwinPlatform()
@@ -108,4 +114,48 @@ DarwinPlatform::~DarwinPlatform()
 	delete linux_cm730;
 	
 }
+
+//Access:: Goal Positions
+float DarwinPlatform::getMotorGoalPosition(int localArrayIndex)
+{
+	return m_servo_Goal_Positions[localArrayIndex];
+}
+
+
+void DarwinPlatform::setMotorGoalPosition(int localArrayIndex, float targetRadians)
+{
+	m_servo_Goal_Positions[localArrayIndex] = targetRadians;
+}
+
+//Access:: Stiffness 
+float DarwinPlatform::getMotorStiffness(int localArrayIndex)
+{
+	return m_servo_Stiffness[localArrayIndex];
+}
+
+
+void DarwinPlatform::setMotorStiffness(int localArrayIndex, float targetStiffness)
+{
+
+		int result;
+
+		if( (targetStiffness == 0||isnan(targetStiffness)) && \
+			(m_servo_Stiffness[localArrayIndex]!= 0 && !(isnan(m_servo_Stiffness[localArrayIndex]))) )
+		{
+			//Try to turn stiffness off:			
+			//cout << "stiffness off: " << m_servo_names[localArrayIndex] <<"\t" << targetStiffness<<endl;
+			result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+		}
+
+		else if( 	(targetStiffness != 0	&&	!isnan(targetStiffness)) && \
+					(m_servo_Stiffness[localArrayIndex] == 0 || isnan(m_servo_Stiffness[localArrayIndex])))
+		{
+			//Try to turn stiffness on:
+			//cout << "stiffness on: " << m_servo_names[localArrayIndex]<<"\t" << targetStiffness<<endl;	
+			result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+		}
+		m_servo_Stiffness[localArrayIndex] = targetStiffness;
+		//cout << m_servo_Stiffness << endl;
+}
+
 
