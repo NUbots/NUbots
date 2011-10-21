@@ -46,6 +46,11 @@ void OfflineLocalisationDialog::MakeLayout()
     connect(openFileButton,SIGNAL(clicked()), this, SLOT(OpenLogFiles()));
     buttonsLayout->addWidget(openFileButton);
 
+    QPushButton *settingsButton = new QPushButton("Settings...");
+    settingsButton->setEnabled(true);
+    connect(settingsButton,SIGNAL(clicked()), this, SLOT(GetSettings()));
+    buttonsLayout->addWidget(settingsButton);
+
     QPushButton *runSimulationButton = new QPushButton("&Run simulation");
     connect(runSimulationButton,SIGNAL(clicked()), this, SLOT(BeginSimulation()));
     buttonsLayout->addWidget(runSimulationButton);
@@ -110,6 +115,11 @@ void OfflineLocalisationDialog::SaveAsLocalisationLog()
     QString save_name = QFileDialog::getSaveFileName(this,"Save Log",QString(),"Stream (*.strm)");
     m_offline_loc->WriteLog(save_name.toStdString());
     return;
+}
+
+void OfflineLocalisationDialog::GetSettings()
+{
+
 }
 
 void OfflineLocalisationDialog::BeginSimulation()

@@ -33,6 +33,7 @@ public slots:
     void SetFrame(int frameNumber, int total=0);
     void CancelProgress();
     void SaveAsLocalisationLog();
+    void GetSettings();
     void SetOpenFileList(std::vector<QFileInfo> files);
 protected:
     OfflineLocalisation* m_offline_loc;
