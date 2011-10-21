@@ -5,6 +5,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/FieldObjects/Self.h"
 #include <iostream>
+#include <boost/circular_buffer.hpp>
 
 /*!
   * A class used to template a self localisation kalman filter.
@@ -46,8 +47,20 @@ public:
     // Model and decision tracking stuff
     unsigned int id() const {return m_id;}
     unsigned int parentid() const {return m_parent_id;}
+    unsigned int history(unsigned int samples_back);
+    unsigned int history_depth(){return m_history_depth;}
     unsigned int splitOption() const {return m_split_option;}
     double creationTime() const {return m_creation_time;}
+
+    bool operator < (const SelfModel& model) const
+    {
+        return (alpha() < model.alpha());
+    }
+
+    bool operator > (const SelfModel& model) const
+    {
+        return (alpha() > model.alpha());
+    }
 
     /*!
     @brief Output streaming operation.
@@ -70,6 +83,9 @@ protected:
     unsigned int m_parent_id;       //!< Unique id of the parent model.
     unsigned int m_split_option;    //!< Option used for split from parent.
     double m_creation_time;         //!< Time at which model was created.
+
+    unsigned int m_history_depth;
+    boost::circular_buffer<unsigned int> m_history_buffer;
 
     /*! @brief Static function used to generate a unique incremental id for each individual model created.
     */

@@ -400,7 +400,21 @@ std::string SelfSRUKF::summary(bool brief) const
     if(!brief)
     {
             buffer << "Variance - Position: (" << sd(states_x)*sd(states_x) << ",";
-            buffer << sd(states_y)*sd(states_y) << "," << sd(states_heading)*sd(states_heading) << endl;
+            buffer << sd(states_y)*sd(states_y) << "," << sd(states_heading)*sd(states_heading) << ")" << endl;
+            if(m_history_buffer.size() > 0)
+            {
+                buffer << "History: ";
+
+                for(boost::circular_buffer<unsigned int>::const_iterator buff_it = m_history_buffer.begin(); buff_it != m_history_buffer.end(); ++buff_it)
+                {
+                    if(buff_it != m_history_buffer.begin())
+                    {
+                        buffer << "->";
+                    }
+                    buffer << (*buff_it);
+                }
+                buffer << std::endl;
+            }
     }
     return buffer.str();
 }

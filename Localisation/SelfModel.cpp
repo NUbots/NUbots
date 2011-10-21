@@ -11,6 +11,8 @@ SelfModel::SelfModel(float time): Moment(states_total)
     m_id = GenerateId();
     m_creation_time = time;
     m_alpha = 1.0f;
+    m_history_depth = 5;
+    m_history_buffer = boost::circular_buffer<unsigned int>(m_history_depth);
     return;
 }
 
@@ -28,6 +30,8 @@ SelfModel::SelfModel(const SelfModel& source): Moment(source)
     m_parent_id = source.m_parent_id;
     m_split_option = source.m_split_option;
     m_creation_time = source.m_creation_time;
+    m_history_depth = source.m_history_depth;
+    m_history_buffer = source.m_history_buffer;
     return;
 }
 
@@ -45,6 +49,8 @@ SelfModel::SelfModel(const SelfModel& parent, const AmbiguousObject& object, con
     // Save the information about the model
     m_id = GenerateId();
     m_parent_id = parent.id();
+    m_history_buffer = parent.m_history_buffer; // Get parents history.
+    m_history_buffer.push_back(m_parent_id);    // Add parent to the history.
     m_split_option = splitOption.getID();
 
     // copy information from the parent model.
@@ -129,6 +135,22 @@ Self SelfModel::GenerateSelfState() const
     result.updateLocationOfSelf(mean(states_x), mean(states_y), mean(states_heading), sd(states_x), sd(states_y), sd(states_heading),isLost());
     return result;
 }
+
+/*! @brief Get the historical parents of this model.
+    @param steps_back The number of steps back along the decision tree to get the value for. This valaue should be in the range 1..history_depth.
+    @return The model ID of the parent at the given step in the decision tree.
+*/
+unsigned int SelfModel::history(unsigned int steps_back)
+{
+    unsigned int result = 0;
+    unsigned int index = m_history_buffer.size() - steps_back;    // Oldest value is at [0], newest at [size - 1]
+    if((index < m_history_buffer.size()) and (index >= 0))
+    {
+        result = m_history_buffer[index];
+    }
+    return result;
+}
+
 
 std::ostream& operator<< (std::ostream& output, const SelfModel& p_model)
 {

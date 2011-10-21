@@ -25,11 +25,14 @@ class NUSensorsData;
 
 typedef SelfSRUKF Model;
 typedef std::list<Model*> ModelContainer;
+typedef std::pair<unsigned int, float> ParentSum;
+
 
 class SelfLocalisation: public TimestampedData
 {
     public:
         SelfLocalisation(int playerNumber = 0);
+        SelfLocalisation(int playerNumber, const std::string& prune_method, const std::string& branch_method);
         SelfLocalisation(const SelfLocalisation& source);
         ~SelfLocalisation();
     
@@ -46,6 +49,7 @@ class SelfLocalisation: public TimestampedData
         int landmarkUpdate(StationaryObject &landmark);
         int ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
@@ -54,7 +58,12 @@ class SelfLocalisation: public TimestampedData
         const Model* getBestModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
+
+        // Pruning functions
         int PruneModels();
+        int PruneMaxLikelyhood();
+        int PruneViterbi(unsigned int order);
+        int PruneNScan(unsigned int N);
         bool MergeTwoModels(Model* modelA, Model* modelB);
         double MergeMetric(const Model* modelA, const Model* modelB) const;
         void MergeModels(int maxAfterMerge);
@@ -88,9 +97,10 @@ class SelfLocalisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
-        Matrix mean_matrix(float x, float y, float heading);
-        Matrix covariance_matrix(float x_var, float y_var, float heading_var);
+        static Matrix mean_matrix(float x, float y, float heading);
+        static Matrix covariance_matrix(float x_var, float y_var, float heading_var);
         void InitialiseModels(const std::vector<Moment>& positions);
+        void setModels(ModelContainer& newModels);
 
         void clearModels();
 
@@ -144,6 +154,12 @@ protected:
         float m_compass;
         bool m_hasGps;
         
+        // Settings
+        const std::string m_pruning_method;
+        const std::string m_branching_method;
+
+        std::vector<AmbiguousObject> m_pastAmbiguous;
+
         // Tuning Constants -- Values assigned in LocWM.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;

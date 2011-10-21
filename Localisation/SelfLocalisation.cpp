@@ -68,7 +68,7 @@ const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle 
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
  */
-SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
+SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0), m_pruning_method("Merge"), m_branching_method("Exhaustive")
 {
     m_hasGps = false;
     m_previously_incapacitated = true;
@@ -81,6 +81,41 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 
     m_models.clear();
     //m_models.reserve(c_MAX_MODELS);
+
+    m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+
+    initSingleModel(67.5f, 0, mathGeneral::PI);
+
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+        std::stringstream debugLogName;
+        debugLogName << DATA_DIR;
+        if(playerNumber) debugLogName << playerNumber;
+        debugLogName << "Localisation.log";
+        debug_file.open(debugLogName.str().c_str());
+        debug_file.clear();
+        debug_file << "Localisation" << std::endl;
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    return;
+}
+
+/*! @brief Constructor
+    @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
+ */
+SelfLocalisation::SelfLocalisation(int playerNumber, const std::string& prune_method, const std::string& branch_method): m_timestamp(0), m_pruning_method(prune_method), m_branching_method(branch_method)
+{
+    m_hasGps = false;
+    m_previously_incapacitated = true;
+    m_previous_game_state = GameInformation::InitialState;
+    m_currentFrameNumber = 0;
+
+    m_amILost = true;
+    m_lostCount = 100;
+    m_timeSinceFieldObjectSeen = 0;
+
+    m_models.clear();
+    //m_models.reserve(c_MAX_MODELS);
+
+    m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
 
@@ -99,7 +134,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 /*! @brief Copy Constructor
     @param source The source localisation system from which to copy
  */
-SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData()
+SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_pruning_method(source.m_pruning_method), m_branching_method(source.m_branching_method)
 {
     *this = source;
 }
@@ -137,6 +172,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
  */
 SelfLocalisation::~SelfLocalisation()
 {
+    clearModels();
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -1169,19 +1205,144 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     return 1;
 }
 
-int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
+/*! @brief Perfroms an ambiguous measurement update. This is a interface function to access a variety of methods.
+    @return The number of models that were removed during this process.
+*/
+int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    return ambiguousLandmarkUpdateExhaustive(ambigousObject, possibleObjects);
-}
-
-int SelfLocalisation::PruneModels()
-{
-    MergeModels(c_MAX_MODELS_AFTER_MERGE);
+    if(m_branching_method == "Exhaustive")
+    {
+        return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
+    }
+    else if (m_branching_method == "Selective")
+    {
+        return ambiguousLandmarkUpdateSelective(ambiguousObject, possibleObjects);
+    }
     return 0;
 }
 
+/*! @brief Prunes the models using a selectable method. This is a interface function to access a variety of methods.
+    @return The number of models that were removed during this process.
+*/
+int SelfLocalisation::PruneModels()
+{
+    if(m_pruning_method == "Merge")
+    {
+        MergeModels(c_MAX_MODELS_AFTER_MERGE);
+    }
+    else if (m_pruning_method == "MaxLikelyhood")
+    {
+        PruneMaxLikelyhood();
+    }
+    else if (m_pruning_method == "Viterbi")
+    {
+        PruneViterbi(4);
+    }
+    else if (m_pruning_method == "Nscan")
+    {
+        PruneNScan(4);
+    }
+    NormaliseAlphas();
+    return 0;
+}
 
-int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
+/*! @brief Prunes the models using the maximum likelyhood method. This removes all but the mot probable model.
+    @return The number of models that were removed during this process.
+*/
+int SelfLocalisation::PruneMaxLikelyhood()
+{
+    return PruneViterbi(1);     // Max likelyhood is the equivalent of keeping the best 1 model.
+}
+
+
+struct model_ptr_cmp{
+    bool operator()( Model* lhs, Model* rhs){
+        return * lhs < * rhs;
+    }
+};
+
+/*! @brief Prunes the models using the Viterbi method. This removes lower probability models to a maximum total models.
+    @param order The number of models to be kept at the end for the process.
+    @return The number of models that were removed during this process.
+*/
+int SelfLocalisation::PruneViterbi(unsigned int order)
+{
+    if(m_models.size() <= order) return 0;                      // No pruning required if less than maximum.
+    m_models.sort(model_ptr_cmp());                                            // Sort, results in order smallest to largest.
+    unsigned int num_to_remove = m_models.size() - order;       // Number of models that need to be removed.
+
+    ModelContainer::iterator begin_remove = m_models.begin();   // Beginning of removal range
+    ModelContainer::iterator end_remove = m_models.begin();
+    std::advance(end_remove,num_to_remove);                     // End of removal range (not removed)
+
+
+    std::for_each (begin_remove, end_remove, std::bind2nd(std::mem_fun(&Model::setActive), false));
+
+    int num_removed = removeInactiveModels();    // Clear out all deactivated models.
+    assert(m_models.size() == order);   // Result should have been achieved or something is broken.
+    return num_removed;
+}
+
+bool AlphaSumPredicate( const ParentSum& a, const ParentSum& b )
+{
+        return a.second <  b.second;
+}
+
+/*! @brief Prunes the models using an N-Scan Pruning method.
+    @param N The number of braches backward to prune the decision tree
+    @return The number of models that were removed during this process.
+*/
+int SelfLocalisation::PruneNScan(unsigned int N)
+{
+    std::vector<ParentSum> results;
+    // Sum the alphas of sibling branches from a common parent at branch K-N
+    for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        unsigned int parent_id = (*model_it)->history(N);
+        float alpha = (*model_it)->alpha();
+        bool added = false;
+        if(parent_id == 0) continue;
+        // Sort all of the models
+        for(std::vector<ParentSum>::iterator resIt = results.begin(); resIt != results.end(); ++resIt)
+        {
+            // Assign to existing sum.
+            if(resIt->first == parent_id)
+            {
+                resIt->second += alpha;
+                added = true;
+                break;
+            }
+        }
+        // If not able to assign to an existing sum create a new one.
+        if(!added)
+        {
+            ParentSum temp = make_pair(parent_id, alpha);
+            results.push_back(temp);
+        }
+    }
+
+    if(results.size() > 0)
+    {
+        std::sort(results.begin(), results.end(), AlphaSumPredicate); // Sort by alpha sum, smallest to largest
+        unsigned int bestParentId = results.back().first;       // Get the parent Id of the best branch.
+
+        // Remove all siblings not created from the best branch.
+        for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+        {
+            if((*model_it)->history(N) != bestParentId)
+            {
+                (*model_it)->setActive(false);
+            }
+        }
+    }
+    removeInactiveModels();
+    return 0;
+}
+
+/*! @brief Performs an ambiguous measurement update using the exhaustive process. This creates a new model for each possible location for the measurement.
+    @return Returns RESULT_OK if measurment updates were sucessfully performed, RESULT_OUTLIER if they were not.
+*/
+int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
 
     const float outlier_factor = 0.0005;
@@ -1189,7 +1350,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigou
     Model* temp_mod;
 
     MeasurementError error;
-    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambigousObject.measuredDistance() * cos(ambigousObject.measuredElevation()),2));
+    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
     error.setHeading(R_obj_theta);
 
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -1197,7 +1358,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigou
         if((*model_it)->inactive()) continue;
         for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
         {
-            temp_mod = new Model(*(*model_it), ambigousObject, *(*obj_it), error, GetTimestamp());
+            temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
             new_models.push_back(temp_mod);
 #if LOC_SUMMARY > 0
             m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
@@ -1219,17 +1380,141 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigou
     if(new_models.size() > 0)
     {
         //cout << "replacing old models (" << m_models.size() << ") with new models (" << new_models.size() << ")" << std::endl;
-        cout << "appending new models (" << m_models.size() << " -> " << new_models.size() << ")" << std::endl;
+        //cout << "appending new models (" << m_models.size() << " -> " << new_models.size() << ")" << std::endl;
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
-    else
-    {
-        cout << "All options outliers." << std::endl;
-    }
+//    else
+//    {
+//        cout << "All options outliers." << std::endl;
+//    }
     return Model::RESULT_OUTLIER;
 }
 
+
+int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
+{
+    const float c_Max_Elapsed_Time = 1.0f;
+
+
+    // First step: Check if the same ambiguous type has beem seen recently.
+    float time_elapsed = ambiguousObject.TimeLastSeen() - m_pastAmbiguous[ambiguousObject.getID()].TimeLastSeen();
+    if(time_elapsed < c_Max_Elapsed_Time)
+    {
+        // Second step: Check if the previous measurment was consistent with the current measurment
+
+        // Calculate the distances between the two measurments
+        float flatDistancePrev = m_pastAmbiguous[ambiguousObject.getID()].measuredDistance() * cos(m_pastAmbiguous[ambiguousObject.getID()].measuredElevation());
+        float flatDistanceCurr = ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation());
+        float dist_delta = fabs(flatDistanceCurr - flatDistancePrev);
+        float heading_delta = fabs(ambiguousObject.measuredBearing() - m_pastAmbiguous[ambiguousObject.getID()].measuredBearing());
+
+        // Calculate the allowable deviation
+        MeasurementError error;
+        error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
+        error.setHeading(R_obj_theta);
+        float max_distance_deviation = error.distance();
+        float max_heading_deviation = error.heading();
+
+        if( (dist_delta < max_distance_deviation) && (heading_delta < max_heading_deviation) )
+        {
+            ModelContainer new_models;
+            Model* temp_model = NULL;
+            // Cycle through each of the models.
+            // And use the previous decisions on this split.
+            for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+            {
+                unsigned int previous_split = (*model_it)->splitOption();   // Get previous split option.
+                StationaryObject* split_object = NULL;
+                for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+                {
+                    if((*obj_it)->getID() == previous_split)
+                    {
+                        split_object = (*obj_it);
+                        break;
+                    }
+                }
+                if(split_object)
+                {
+                    temp_model = new Model(*(*model_it), ambiguousObject, (*split_object), error, GetTimestamp());
+                    if(temp_model->active())
+                    {
+                        new_models.push_back(temp_model);
+                        (*model_it)->setActive(false);
+                    }
+                    else
+                    {
+                        delete temp_model;
+                    }
+                }
+
+            }
+            removeInactiveModels(new_models);
+            removeInactiveModels(m_models);
+            m_models.insert(m_models.end(), new_models.begin(), new_models.end());
+            new_models.clear();
+        }
+        else
+        {
+            // Use the regular splitting method.
+
+            return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
+        }
+
+    }
+
+
+
+    // Third Step (A): Apply mesurment using previous decision if measurment is consistant.
+
+    // Third Step (B): Perfrom splitting if measurement was not previously seen or not consistant.
+
+
+//    const float outlier_factor = 0.0005;
+//    ModelContainer new_models;
+//    Model* temp_mod;
+
+//    MeasurementError error;
+//    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
+//    error.setHeading(R_obj_theta);
+
+//    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+//    {
+//        if((*model_it)->inactive()) continue;
+//        for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+//        {
+//            temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
+//            new_models.push_back(temp_mod);
+//#if LOC_SUMMARY > 0
+//            m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
+//            m_frame_log << "  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
+//            if(temp_mod->active())
+//            {
+//                m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
+//            }
+//            else
+//            {
+//                m_frame_log << "Outlier";
+//            }
+//            m_frame_log << std::endl;
+//#endif
+//        }
+//        removeInactiveModels(new_models);
+//        (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
+//    }
+//    if(new_models.size() > 0)
+//    {
+//        //cout << "replacing old models (" << m_models.size() << ") with new models (" << new_models.size() << ")" << std::endl;
+//        cout << "appending new models (" << m_models.size() << " -> " << new_models.size() << ")" << std::endl;
+//        m_models.insert(m_models.end(), new_models.begin(), new_models.end());
+//        new_models.clear();
+//    }
+//    else
+//    {
+//        cout << "All options outliers." << std::endl;
+//    }
+    return Model::RESULT_OUTLIER;
+}
 
 /*! @brief Merges two models into a single model.
     @param modelA First model to merge.
@@ -1655,6 +1940,13 @@ void SelfLocalisation::InitialiseModels(const std::vector<Moment>& positions)
 }
 
 
+void SelfLocalisation::setModels(ModelContainer& newModels)
+{
+    clearModels();
+    m_models = newModels;
+    return;
+}
+
 /*! @brief Create a 3x1 mean matrix with value as defiend by the parameters.
 
 Creates a 3x1 covariance matrix with the mean of each attribute set as specified.
@@ -1731,4 +2023,5 @@ unsigned int SelfLocalisation::removeInactiveModels(ModelContainer& container)
     container.erase(remove_if(container.begin(), container.end(), is_null), container.end());
     return num_before - container.size();               // Return number removed, original size - new size
 }
+
 

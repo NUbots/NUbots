@@ -3,26 +3,7 @@
 #include "SelfModel.h"
 #include "Infrastructure/FieldObjects/StationaryObject.h"
 #include "odometryMotionModel.h"
-
-class MeasurementError
-{
-public:
-    float distance() const {return m_distance;}
-    float heading() const {return m_heading;}
-    void setDistance(float newDistance) {m_distance = newDistance;}
-    void setHeading(float newHeading) {m_heading = newHeading;}
-    Matrix errorCovariance() const
-    {
-        Matrix result(2,2,false);
-        result[0][0] = m_distance;
-        result[1][1] = m_heading;
-        return result;
-    }
-
-private:
-    float m_distance;
-    float m_heading;
-};
+#include "MeasurementError.h"
 
 class SelfUKF: public SelfModel
 {

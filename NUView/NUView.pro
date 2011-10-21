@@ -182,7 +182,9 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/SelfModel.h \
     ../Localisation/SelfUKF.h \
     ../Localisation/SelfLocalisation.h \
-    ../Localisation/SelfSRUKF.h
+    ../Localisation/SelfSRUKF.h \
+    ../Localisation/MeasurementError.h \
+    ../Localisation/SelfLocalisationTests.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -309,7 +311,9 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Moment.cpp \
     ../Localisation/SelfModel.cpp \
     ../Localisation/SelfLocalisation.cpp \
-    ../Localisation/SelfSRUKF.cpp
+    ../Localisation/SelfSRUKF.cpp \
+    ../Localisation/MeasurementError.cpp \
+    ../Localisation/SelfLocalisationtests.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -320,5 +324,9 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
+
+
+
+
 
 

@@ -6,6 +6,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Localisation/SelfLocalisation.h"
 #include "Localisation/Localisation.h"
+#include "Localisation/SelfLocalisationTests.h"
 
 /*! @brief Default Constructor
  */
@@ -16,6 +17,7 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     //Initialise(Localisation());
     m_stop_called = false;
     m_sim_data_available = false;
+    RunTests();
 }
 
 /*! @brief Class destructor

@@ -426,7 +426,6 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
 
 /*! @brief  Calculation of sigma points
 Calculates the sigma points for the current model state.
-
 @return Matrix containing the sigma points for the current model.
 */
 Matrix SelfUKF::CalculateSigmaPoints() const

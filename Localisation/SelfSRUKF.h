@@ -3,18 +3,7 @@
 #include "SelfModel.h"
 #include "Infrastructure/FieldObjects/StationaryObject.h"
 #include "odometryMotionModel.h"
-
-class MeasurementError
-{
-public:
-    float distance() const {return m_distance;}
-    float heading() const {return m_heading;}
-    void setDistance(float newDistance) {m_distance = newDistance;}
-    void setHeading(float newHeading) {m_heading = newHeading;}
-private:
-    float m_distance;
-    float m_heading;
-};
+#include "MeasurementError.h"
 
 class SelfSRUKF: public SelfModel
 {

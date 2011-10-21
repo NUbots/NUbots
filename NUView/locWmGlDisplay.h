@@ -10,7 +10,8 @@ class Object;
 class StationaryObject;
 class NUSensorsData;
 class SelfLocalisation;
-class SelfUKF;
+
+#include "Localisation/SelfLocalisation.h"
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -86,7 +87,7 @@ protected:
         void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
 
         void DrawModelMarkers(const KF& model, QColor& modelColor);
-        void DrawModelMarkers(const SelfUKF* model, QColor& modelColor);
+        void DrawModelMarkers(const Model* model, QColor& modelColor);
         void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, QColor& modelColor);
 
