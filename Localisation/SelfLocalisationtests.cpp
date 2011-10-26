@@ -19,7 +19,10 @@ bool RunTests()
 
 bool MergingTest()
 {
-    SelfLocalisation loc(2,"Merge", "Exhaustive");
+    LocalisationSettings settings;
+    settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    settings.setPruneMethod(LocalisationSettings::prune_merge);
+    SelfLocalisation loc(2,settings);
     bool success = true;
     ModelContainer models;
     Model *temp;
@@ -84,7 +87,10 @@ bool MergingTest()
 bool MaxLikelyhoodTest()
 {
     // Configure localisation
-    SelfLocalisation loc(2,"MaxLikelyhood", "Exhaustive");
+    LocalisationSettings settings;
+    settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    settings.setPruneMethod(LocalisationSettings::prune_max_likelyhood);
+    SelfLocalisation loc(2,settings);
 
     ModelContainer models;
     // Create the models.
@@ -128,7 +134,10 @@ bool MaxLikelyhoodTest()
 bool ViterbiTest()
 {
     // Configure localisation
-    SelfLocalisation loc(2,"Viterbi", "Exhaustive");
+    LocalisationSettings settings;
+    settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    settings.setPruneMethod(LocalisationSettings::prune_viterbi);
+    SelfLocalisation loc(2,settings);
 
     ModelContainer models;
     // Create the models.
@@ -194,7 +203,10 @@ bool ViterbiTest()
 bool NscanTest()
 {
     // Make the localisation
-    SelfLocalisation loc(2,"Nscan", "Exhaustive");
+    LocalisationSettings settings;
+    settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    settings.setPruneMethod(LocalisationSettings::prune_nscan);
+    SelfLocalisation loc(2,settings);
 
     // Firstly we will make up the measurments that will be used.
     AmbiguousObject ambPost(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");   // Unknonw blue post

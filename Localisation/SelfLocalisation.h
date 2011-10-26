@@ -26,13 +26,13 @@ class NUSensorsData;
 typedef SelfSRUKF Model;
 typedef std::list<Model*> ModelContainer;
 typedef std::pair<unsigned int, float> ParentSum;
-
+#include "LocalisationSettings.h"
 
 class SelfLocalisation: public TimestampedData
 {
     public:
         SelfLocalisation(int playerNumber = 0);
-        SelfLocalisation(int playerNumber, const std::string& prune_method, const std::string& branch_method);
+        SelfLocalisation(int playerNumber, const LocalisationSettings& settings);
         SelfLocalisation(const SelfLocalisation& source);
         ~SelfLocalisation();
     
@@ -155,8 +155,7 @@ protected:
         bool m_hasGps;
         
         // Settings
-        const std::string m_pruning_method;
-        const std::string m_branching_method;
+        LocalisationSettings m_settings;
 
         std::vector<AmbiguousObject> m_pastAmbiguous;
 

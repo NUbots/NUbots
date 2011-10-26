@@ -184,7 +184,10 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/SelfLocalisation.h \
     ../Localisation/SelfSRUKF.h \
     ../Localisation/MeasurementError.h \
-    ../Localisation/SelfLocalisationTests.h
+    ../Localisation/SelfLocalisationTests.h \
+    OfflineLocalisationSettingsDialog.h \
+    LocalisationPerformanceMeasure.h \
+    ../Localisation/LocalisationSettings.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -313,7 +316,10 @@ SOURCES += mainwindow.cpp \
     ../Localisation/SelfLocalisation.cpp \
     ../Localisation/SelfSRUKF.cpp \
     ../Localisation/MeasurementError.cpp \
-    ../Localisation/SelfLocalisationtests.cpp
+    ../Localisation/SelfLocalisationtests.cpp \
+    OfflineLocalisationSettingsDialog.cpp \
+    LocalisationPerformanceMeasure.cpp \
+    ../Localisation/LocalisationSettings.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -324,6 +330,18 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
+
+FORMS += \
+    OfflineLocalisationSettingsDialog.ui
+
+
+
+
+
+
+
+
+
 
 
 

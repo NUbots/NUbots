@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <vector>
 #include <QStringList>
+#include "Localisation/LocalisationSettings.h"
 class OfflineLocalisation;
 class QTextBrowser;
 class QProgressDialog;

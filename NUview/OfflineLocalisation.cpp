@@ -7,6 +7,7 @@
 #include "Localisation/SelfLocalisation.h"
 #include "Localisation/Localisation.h"
 #include "Localisation/SelfLocalisationTests.h"
+#include <QElapsedTimer>
 
 /*! @brief Default Constructor
  */
@@ -17,6 +18,8 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     //Initialise(Localisation());
     m_stop_called = false;
     m_sim_data_available = false;
+    m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
     RunTests();
 }
 
@@ -46,6 +49,7 @@ void OfflineLocalisation::ClearBuffer()
     m_localisation_frame_buffer.clear();
     m_frame_info.clear();
     m_self_frame_info.clear();
+    m_performance .clear();
     m_sim_data_available = false;
 }
 
@@ -58,7 +62,7 @@ void OfflineLocalisation::Initialise(const Localisation& intialState)
     delete m_workingLoc;
     delete m_workingSelfLoc;
     m_workingLoc = new Localisation(intialState);
-    m_workingSelfLoc = new SelfLocalisation();
+    m_workingSelfLoc = new SelfLocalisation(0, m_settings);
     ClearBuffer();
     m_stop_called = false;
     m_sim_data_available = false;
@@ -141,6 +145,10 @@ void OfflineLocalisation::run()
     bool save_signal = m_log_reader->blockSignals(true); // Block signals
     int save_frame = m_log_reader->currentFrame();
 
+    QElapsedTimer experimentTimer;
+    experimentTimer.start();
+    unsigned int initial_model_id = m_workingSelfLoc->getBestModel()->id();
+
     while (true)
     {
         tempSensor = m_log_reader->GetSensorData();
@@ -161,6 +169,18 @@ void OfflineLocalisation::run()
     {
         m_sim_data_available = true;
     }
+    float exp_time = experimentTimer.elapsed() / 1000.0f;
+    float total_time = 0.0f;
+    for(std::vector<LocalisationPerformanceMeasure>::iterator it = m_performance.begin(); it != m_performance.end(); ++it)
+    {
+        total_time += it->processingTime();
+    }
+
+    Model test;
+    std::cout << "Number of models created: " << test.id() - initial_model_id << std::endl;
+    std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
+    std::cout << "Experiment time: " << exp_time * 1000 << " ms" << std::endl;
+
 
     m_log_reader->setFrame(save_frame);
     m_log_reader->blockSignals(save_signal);
@@ -179,12 +199,20 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     NUSensorsData tempSensors = (*sensorData);
     NUSensorsData tempSensors2 = (*sensorData);
     //FieldObjects tempObj = (*objectData);
+    QElapsedTimer timer;
+    long int ms_elapsed;
 
     m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
+
+    timer.start();
     m_workingSelfLoc->process(&tempSensors2,objectData,gameInfo,teamInfo);
+    ms_elapsed = timer.elapsed();
     Localisation* temp = new Localisation((*m_workingLoc));
     SelfLocalisation* self_temp = new SelfLocalisation(*m_workingSelfLoc);
 
+    LocalisationPerformanceMeasure performance_measure;
+    performance_measure.setProcessingTime(ms_elapsed / 1000.0f);
+    m_performance.push_back(performance_measure);
     m_localisation_frame_buffer.push_back(temp);
     m_self_loc_frame_buffer.push_back(self_temp);
     QString info(m_workingLoc->frameLog().c_str());

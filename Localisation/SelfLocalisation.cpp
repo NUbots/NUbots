@@ -68,13 +68,20 @@ const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle 
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
  */
-SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0), m_pruning_method("Merge"), m_branching_method("Exhaustive")
+// Prue Methods
+//"Merge"
+//"MaxLikelyhood"
+//"Viterbi"
+//"Nscan"
+
+//SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0), m_pruning_method("Merge"), m_branching_method("Exhaustive")
+SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings& settings): m_timestamp(0), m_settings(settings)
 {
     m_hasGps = false;
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
-	
+
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
@@ -98,22 +105,23 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0), m_pruning_
     return;
 }
 
-/*! @brief Constructor
-    @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
- */
-SelfLocalisation::SelfLocalisation(int playerNumber, const std::string& prune_method, const std::string& branch_method): m_timestamp(0), m_pruning_method(prune_method), m_branching_method(branch_method)
+SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 {
     m_hasGps = false;
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
-
+	
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
 
     m_models.clear();
     //m_models.reserve(c_MAX_MODELS);
+
+    // Set default settings
+    m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
 
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
@@ -134,7 +142,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const std::string& prune_me
 /*! @brief Copy Constructor
     @param source The source localisation system from which to copy
  */
-SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_pruning_method(source.m_pruning_method), m_branching_method(source.m_branching_method)
+SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_settings(source.m_settings)
 {
     *this = source;
 }
@@ -156,6 +164,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         m_gps = source.m_gps;
         m_compass = source.m_compass;
         m_hasGps = source.m_hasGps;
+        m_settings = source.m_settings;
 
         clearModels();
         m_models.clear();
@@ -1210,11 +1219,11 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
 */
 int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    if(m_branching_method == "Exhaustive")
+    if(m_settings.branchMethod() == LocalisationSettings::branch_exhaustive)
     {
         return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
     }
-    else if (m_branching_method == "Selective")
+    else if (m_settings.branchMethod() == LocalisationSettings::branch_selective)
     {
         return ambiguousLandmarkUpdateSelective(ambiguousObject, possibleObjects);
     }
@@ -1226,19 +1235,19 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
 */
 int SelfLocalisation::PruneModels()
 {
-    if(m_pruning_method == "Merge")
+    if(m_settings.pruneMethod() == LocalisationSettings::prune_merge)
     {
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
     }
-    else if (m_pruning_method == "MaxLikelyhood")
+    else if (m_settings.pruneMethod() == LocalisationSettings::prune_max_likelyhood)
     {
         PruneMaxLikelyhood();
     }
-    else if (m_pruning_method == "Viterbi")
+    else if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
     {
         PruneViterbi(4);
     }
-    else if (m_pruning_method == "Nscan")
+    else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
     {
         PruneNScan(4);
     }

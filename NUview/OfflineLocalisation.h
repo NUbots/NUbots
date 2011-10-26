@@ -5,6 +5,8 @@
 #include <vector>
 #include <QThread>
 #include <QString>
+#include "LocalisationPerformanceMeasure.h"
+#include "Localisation/LocalisationSettings.h"
 
 // Class forward declerations.
 class LogFileReader;
@@ -38,6 +40,8 @@ public:
     bool wasStopped(){return m_stop_called;}
     bool hasSimData(){return m_sim_data_available;}
     bool HasRequiredData(QStringList& availableData);
+    LocalisationSettings settings() const {return m_settings;}
+    void setSettings(const LocalisationSettings& new_settings) {m_settings = new_settings;}
 private:
     void AddFrame(const NUSensorsData* sensorData, FieldObjects* objectData, const TeamInformation* teamInfo=NULL, const GameInformation* gameInfo=NULL);
     void ClearBuffer();
@@ -45,11 +49,13 @@ private:
     std::vector<SelfLocalisation*> m_self_loc_frame_buffer;
     std::vector<QString> m_frame_info;
     std::vector<QString> m_self_frame_info;
+    std::vector<LocalisationPerformanceMeasure> m_performance;
     Localisation* m_workingLoc;
     SelfLocalisation* m_workingSelfLoc;
     LogFileReader* m_log_reader;
     bool m_stop_called;
     bool m_sim_data_available;
+    LocalisationSettings m_settings;
 signals:
     void SimDataChanged(bool);
     void updateProgress(int,int);

@@ -13,6 +13,7 @@
 #include <QAction>
 #include "FileAccess/SplitStreamFileFormatReader.h"
 #include "FileAccess/LogFileReader.h"
+#include "OfflineLocalisationSettingsDialog.h"
 
 OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     QDialog(parent)
@@ -119,7 +120,14 @@ void OfflineLocalisationDialog::SaveAsLocalisationLog()
 
 void OfflineLocalisationDialog::GetSettings()
 {
-
+    OfflineLocalisationSettingsDialog dlg(this);
+    dlg.initialiseSettings(m_offline_loc->settings());
+    bool ok_clicked =  dlg.exec();
+    if(ok_clicked)
+    {
+        m_offline_loc->setSettings(dlg.settings());
+    }
+    return;
 }
 
 void OfflineLocalisationDialog::BeginSimulation()
