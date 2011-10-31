@@ -11,6 +11,10 @@ using namespace TransformMatrices;
 //! TODO: Make this function load from a file.
 bool Kinematics::LoadModel(const std::string& fileName)
 {
+    LoadModelFromFile("/Users/steven/kinematics.cfg");
+    std::cout << "File Test!" << std::endl;
+    test();
+    m_endEffectors.clear();
     if(fileName == "Default")
     {
         // Constant distances (in cm) From documentation
@@ -182,12 +186,240 @@ bool Kinematics::LoadModel(const std::string& fileName)
 
         m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
     }
+    std::cout << "Default Test!" << std::endl;
+    test();
     return true;
+}
+
+std::string trim(std::string const& source, char const* delims = " \t\r\n")
+{
+  std::string result(source);
+  std::string::size_type index = result.find_last_not_of(delims);
+  if(index != std::string::npos)
+    result.erase(++index);
+
+  index = result.find_first_not_of(delims);
+  if(index != std::string::npos)
+    result.erase(0, index);
+  else
+    result.erase();
+  return result;
 }
 
 bool Kinematics::LoadModelFromFile(const std::string& fileName)
 {
+    // File Format should be of the form:
+    // [Effector]
+    // Transpose x, y, z
+    // Rot axis, value
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // [Effector]
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // Trans x, y, z
+    // Rot axis, value
+    // [Effector]
+    // etc..
 
+    std::cout << "Loading model from file: " << fileName << std::endl;
+    m_endEffectors.clear();
+    std::ifstream file(fileName.c_str());
+    std::string line, effector;
+    std::vector<Link> links;
+    Matrix startTrans(4,4,true), endTrans(4,4,true);
+    Matrix temp;
+    bool startTrans_done = false;
+
+
+    while(std::getline(file, line))
+    {
+        std::cout << "Line: " << line << std::endl;
+        if(!line.length()) continue;    // Blank Line
+        if(line[0] == '#') continue;    // Comment
+
+        if(line[0] == 'T' or line[0] == 't')    // Translation
+        {
+            temp = TranslationFromText(line);
+            if(!startTrans_done)
+            {
+                startTrans = startTrans * temp;
+                continue;
+            }
+            else
+            {
+                endTrans = endTrans * temp;
+                continue;
+            }
+        }
+        else if(line[0] == 'R' or line[0] == 'r')
+        {
+            temp = RotationFromText(line);
+            if(!startTrans_done)
+            {
+                startTrans = startTrans * temp;
+                continue;
+            }
+            else
+            {
+                endTrans = endTrans * temp;
+                continue;
+            }
+        }
+        else
+        {
+           startTrans_done = true;
+        }
+
+        // New effector
+        if (line[0] == '[')
+        {
+            if(effector.size())
+            {
+                // Save current effector
+                m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, effector));
+            }
+
+
+            // Add new effector
+            effector = trim(line.substr(1,line.find(']')-1));
+            startTrans_done = false;
+            startTrans = Matrix(4,4,true);
+            endTrans = startTrans;
+            links.clear();
+            continue;
+        }
+
+        Link temp_link = LinkFromText(line);
+        links.push_back(temp_link);
+    }
+    // Do the last effector, if there where any.
+    if(effector.size())
+    {
+        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, effector));
+        return true;
+    }
+    return false;
+}
+
+Matrix Kinematics::TranslationFromText(const std::string& text)
+{
+    const std::string c_prefix = "Translation";
+    std::string value, temp;
+    std::stringstream temp_stream;
+    float x=0, y=0, z=0;
+
+    // crop off prefix
+    int index = text.find(c_prefix);
+    temp = text.substr(index + c_prefix.size());
+
+    temp_stream.str(temp);
+
+    // Get x value.
+    std::getline(temp_stream,value,',');
+    x = atof(trim(value).c_str());
+
+    // Get y value.
+    std::getline(temp_stream,value,',');
+    y = atof(trim(value).c_str());
+
+    // Get Z value.
+    std::getline(temp_stream,value,',');
+    z = atof(trim(value).c_str());
+
+    std::cout << "\t" << c_prefix << std::endl;
+    std::cout << "\tx = " << x << std::endl;
+    std::cout << "\ty = " << y << std::endl;
+    std::cout << "\tz = " << z << std::endl;
+
+    return Translation(x,y,z);
+}
+
+Matrix Kinematics::RotationFromText(const std::string& text)
+{
+    const std::string c_prefix = "Rotation";
+    std::string value, temp;
+    std::stringstream temp_stream;
+    char axis;
+    float rot_value;
+    Matrix result;
+
+    // crop off prefix
+    int index = text.find(c_prefix);
+    temp = text.substr(index + c_prefix.size());
+    temp_stream.str(temp);
+
+    // Get axis value.
+    std::getline(temp_stream,value,',');
+    axis = trim(value)[0];
+
+    // Get rotation value.
+    std::getline(temp_stream,value,',');
+    rot_value = atof(trim(value).c_str());
+
+    std::cout << "\t" << c_prefix << std::endl;
+    std::cout << "\taxis = " << axis << std::endl;
+    std::cout << "\trot_value = " << rot_value << std::endl;
+
+    switch(axis)
+    {
+    case 'x':
+        result = RotX(rot_value);
+        break;
+    case 'y':
+        result = RotY(rot_value);
+        break;
+    case 'z':
+        result = RotZ(rot_value);
+        break;
+    default:
+        result = Translation(0,0,0);
+        break;
+    }
+    return result;
+}
+
+Link Kinematics::LinkFromText(const std::string& text)
+{
+    std::string jointName, value;
+    std::stringstream temp_stream;
+    DHParameters tempParam;
+    int joint_num;
+
+    temp_stream.str(text);
+
+    // Get joint number.
+    std::getline(temp_stream,value,',');
+    joint_num = atoi(trim(value).c_str());
+
+    // Get the joint name.
+    std::getline(temp_stream,value,',');
+    jointName = trim(value);
+
+    // Get alpha value.
+    std::getline(temp_stream,value,',');
+    tempParam.alpha = atof(trim(value).c_str());
+
+    // Get a value.
+    std::getline(temp_stream,value,',');
+    tempParam.a = atof(trim(value).c_str());
+
+    // Get theta offset.
+    std::getline(temp_stream,value,',');
+    tempParam.thetaOffset = atof(trim(value).c_str());
+
+    // Get d value.
+    std::getline(temp_stream,value,',');
+    tempParam.d = atof(trim(value).c_str());
+
+    std::cout << "\tLink:" <<std::endl;
+    std::cout << "\tjoint number = " << joint_num << std::endl;
+    std::cout << "\tjoint name = " << jointName << std::endl;
+    std::cout << "\talpha = " << tempParam.alpha << std::endl;
+    std::cout << "\ta = " << tempParam.a << std::endl;
+    std::cout << "\ttheta = " << tempParam.thetaOffset << std::endl;
+    std::cout << "\td = " << tempParam.d << std::endl;
+
+    return Link(tempParam, jointName);
 }
 
 Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<float>& jointValues)
@@ -442,4 +674,27 @@ std::vector<float> Kinematics::calculateInverseKinematicsLegPrimary(const Matrix
     resultingAngles[4] = footRollAngle;
     resultingAngles[5] = footPitchAngle;
     return resultingAngles;
+}
+
+bool Kinematics::test()
+{
+    std::vector<float> headJoints(2,0.0f);
+    headJoints[0] = -0.15;
+    headJoints[1] = 0.3;
+    std::vector<float> legJoints(6,0.0f);
+    Matrix top = CalculateTransform(Kinematics::topCamera, headJoints);
+    Matrix bottom = CalculateTransform(Kinematics::bottomCamera, headJoints);
+    Matrix left = CalculateTransform(Kinematics::leftFoot, legJoints);
+    Matrix right = CalculateTransform(Kinematics::rightFoot, legJoints);
+
+    std::cout << "Top Camera Transform: " << std::endl;
+    std::cout << top << std::endl;
+    std::cout << "Bottom Camera Transform: " << std::endl;
+    std::cout << bottom << std::endl;
+    std::cout << "Left foot Transform: " << std::endl;
+    std::cout << left << std::endl;
+    std::cout << "Right foot transform: " << std::endl;
+    std::cout << right << std::endl;
+
+    return true;
 }

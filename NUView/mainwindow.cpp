@@ -34,6 +34,8 @@
 
 #include "offlinelocalisationdialog.h"
 
+#include "Kinematics/Kinematics.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -170,6 +172,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     //
     //glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
     //
+    Kinematics test;
+    test.LoadModel();
 }
 
 MainWindow::~MainWindow()

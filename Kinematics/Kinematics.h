@@ -23,6 +23,10 @@ public:
 
     bool LoadModel(const std::string& fileName = "Default");
     bool LoadModelFromFile(const std::string& fileName);
+    Matrix TranslationFromText(const std::string& text);
+    Matrix RotationFromText(const std::string& text);
+    Link LinkFromText(const std::string& text);
+
     Matrix CalculateTransform(Effector effectorId, const std::vector<float>& jointValues);
 
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
@@ -117,6 +121,7 @@ public:
     float getFootForwardLength() {return m_footForwardLength;}
     float getFootBackwardLength() {return m_footBackwardLength;}
     float getHipOffsetY(){return m_hipOffsetY;}
+    bool test();
 private:
             
     // Top camera
