@@ -56,8 +56,11 @@ class Object
         //void setViewPosition(Vector2<int> newViewPosition);
 	//void setViewPositionVariables(int x, int y);
         Vector2<int> getImagePosition() const {return imagePosition;}
+        Vector2<float> getImagePositionAngle() const {return imagePositionAngle;}
+        Vector2<int> getSizeOnScreen() const {return sizeOnScreen;}
         //For COPY of whole object:
         void CopyObject(const Object& sourceObject);
+        void CopyMeasurement(const Object& sourceObject);
 
         //Access vision variables:
         bool isObjectVisible() const {return isVisible;}
