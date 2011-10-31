@@ -1405,10 +1405,11 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
 {
     const float c_Max_Elapsed_Time = 1.0f;
 
-
     // First step: Check if the same ambiguous type has beem seen recently.
     float time_elapsed = ambiguousObject.TimeLastSeen() - m_pastAmbiguous[ambiguousObject.getID()].TimeLastSeen();
-    if(time_elapsed < c_Max_Elapsed_Time)
+    bool seen_recently = (time_elapsed < c_Max_Elapsed_Time);
+    bool similar_meas_found = false;
+    if(seen_recently)
     {
         // Second step: Check if the previous measurment was consistent with the current measurment
 
@@ -1425,103 +1426,63 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         float max_distance_deviation = error.distance();
         float max_heading_deviation = error.heading();
 
-        if( (dist_delta < max_distance_deviation) && (heading_delta < max_heading_deviation) )
+        m_pastAmbiguous[ambiguousObject.getID()] = ambiguousObject;
+
+        similar_meas_found = (dist_delta < max_distance_deviation) && (heading_delta < max_heading_deviation);
+        if(similar_meas_found)
         {
+            // Third Step (A): Apply mesurment using previous decision if measurement is consistant.
             ModelContainer new_models;
             Model* temp_model = NULL;
-            // Cycle through each of the models.
-            // And use the previous decisions on this split.
+
             for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
             {
-                unsigned int previous_split = (*model_it)->splitOption();   // Get previous split option.
-                StationaryObject* split_object = NULL;
+                // Get the id of the object to use for the update.
+                unsigned int object_id = (*model_it)->previousSplitOption(ambiguousObject);
+                // Find the option that matches the previous decision
                 for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
                 {
-                    if((*obj_it)->getID() == previous_split)
+                    if((*obj_it)->getID() == object_id)
                     {
-                        split_object = (*obj_it);
-                        break;
+                        // Perform the update
+                        StationaryObject update_object(*(*obj_it));
+                        update_object.CopyMeasurement(ambiguousObject);
+                        (*model_it)->MeasurementUpdate(update_object, error);
+                        new_models.push_back(new Model(*(*model_it)));  // Copy the new model and add it to the new list.
+                        (*model_it)->setActive(false);
+                        continue;
                     }
                 }
-                if(split_object)
+                // Check if model has been updated yet
+                // If not need to do a exhaustive update for this model
+                if((*model_it)->active())
                 {
-                    temp_model = new Model(*(*model_it), ambiguousObject, (*split_object), error, GetTimestamp());
-                    if(temp_model->active())
+                    bool update_performed = false;
+                    for(vector<StationaryObject*>::const_iterator option_it = possibleObjects.begin(); option_it != possibleObjects.end(); ++option_it)
                     {
-                        new_models.push_back(temp_model);
+                        temp_model = new Model(*(*model_it), ambiguousObject, *(*option_it), error, m_timestamp);
+                        if(temp_model->active())
+                        {
+                            new_models.push_back(temp_model);
+                            update_performed = true;
+                        }
+                    }
+                    if(update_performed)
+                    {
                         (*model_it)->setActive(false);
                     }
-                    else
-                    {
-                        delete temp_model;
-                    }
                 }
-
             }
-            removeInactiveModels(new_models);
-            removeInactiveModels(m_models);
-            m_models.insert(m_models.end(), new_models.begin(), new_models.end());
-            new_models.clear();
+            removeInactiveModels();
+            m_models.insert(m_models.begin(),new_models.begin(), new_models.end());
         }
-        else
-        {
-            // Use the regular splitting method.
-
-            return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
-        }
-
     }
-
-
-
-    // Third Step (A): Apply mesurment using previous decision if measurment is consistant.
-
-    // Third Step (B): Perfrom splitting if measurement was not previously seen or not consistant.
-
-
-//    const float outlier_factor = 0.0005;
-//    ModelContainer new_models;
-//    Model* temp_mod;
-
-//    MeasurementError error;
-//    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
-//    error.setHeading(R_obj_theta);
-
-//    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
-//    {
-//        if((*model_it)->inactive()) continue;
-//        for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
-//        {
-//            temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
-//            new_models.push_back(temp_mod);
-//#if LOC_SUMMARY > 0
-//            m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
-//            m_frame_log << "  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
-//            if(temp_mod->active())
-//            {
-//                m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
-//            }
-//            else
-//            {
-//                m_frame_log << "Outlier";
-//            }
-//            m_frame_log << std::endl;
-//#endif
-//        }
-//        removeInactiveModels(new_models);
-//        (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
-//    }
-//    if(new_models.size() > 0)
-//    {
-//        //cout << "replacing old models (" << m_models.size() << ") with new models (" << new_models.size() << ")" << std::endl;
-//        cout << "appending new models (" << m_models.size() << " -> " << new_models.size() << ")" << std::endl;
-//        m_models.insert(m_models.end(), new_models.begin(), new_models.end());
-//        new_models.clear();
-//    }
-//    else
-//    {
-//        cout << "All options outliers." << std::endl;
-//    }
+    if(!similar_meas_found or !similar_meas_found)
+    {
+        // Third Step (B): Perfrom splitting if measurement was not previously seen or not consistant.
+        // Use the regular splitting method.
+        return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
+    }
     return Model::RESULT_OUTLIER;
 }
 
