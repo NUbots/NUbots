@@ -185,6 +185,10 @@ bool Kinematics::LoadModel(const std::string& fileName)
     return true;
 }
 
+bool Kinematics::LoadModelFromFile(const std::string& fileName)
+{
+
+}
 
 Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<float>& jointValues)
 {
