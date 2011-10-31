@@ -1,12 +1,12 @@
-/*! @file PenalisedState.h
-    @brief Declaration of the penalised soccer state
+/*! @file DarwinIO.h
+    @brief Declaration of DarwinIO class.
  
-    @class PenalisedState
-    @brief The initial soccer state
+    @class DarwinIO
+    @brief DarwinIO class for input and output to streams, files and networks on the Bear platform
 
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,24 +22,23 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef PENALISED_STATE_H
-#define PENALISED_STATE_H
+#ifndef DARWINIO_H
+#define DARWINIO_H
 
-class SoccerProvider;
-#include "../SoccerState.h"
+#include "NUPlatform/NUIO.h"
 
-class PenalisedState : public SoccerState
+class NUbot;
+
+class DarwinIO: public NUIO
 {
+// Functions:
 public:
-    PenalisedState(SoccerProvider* provider);
-    ~PenalisedState();
-    BehaviourState* nextState();
+    DarwinIO(NUbot* nubot);
+    ~DarwinIO();
+    
 protected:
-    void doState();
 private:
-    int m_previous_penalty_reason;
 };
-
 
 #endif
 

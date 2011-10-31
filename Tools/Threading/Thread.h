@@ -37,6 +37,8 @@ class Thread
         int join();
 		void stop();
     
+    unsigned char getPriority() {return m_priority;};
+    
     protected:
         virtual void run() = 0;                 // To be overridden by code to run.
     

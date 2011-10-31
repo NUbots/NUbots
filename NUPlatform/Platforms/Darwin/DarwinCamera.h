@@ -1,12 +1,12 @@
-/*! @file PenalisedState.h
-    @brief Declaration of the penalised soccer state
+/*! @file DarwinCamera.h
+    @brief Declaration of Darwin camera class
  
-    @class PenalisedState
-    @brief The initial soccer state
-
+    @class DarwinCamera
+    @brief A Darwin camera
+ 
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,24 +22,17 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef PENALISED_STATE_H
-#define PENALISED_STATE_H
+#ifndef DARWINCAMERA_H
+#define DARWINCAMERA_H
 
-class SoccerProvider;
-#include "../SoccerState.h"
+#include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
+class NUImage;
 
-class PenalisedState : public SoccerState
+class DarwinCamera : public NUOpenCVCamera
 {
-public:
-    PenalisedState(SoccerProvider* provider);
-    ~PenalisedState();
-    BehaviourState* nextState();
-protected:
-    void doState();
-private:
-    int m_previous_penalty_reason;
+	public:
+		NUImage* grabNewImage();
 };
-
 
 #endif
 

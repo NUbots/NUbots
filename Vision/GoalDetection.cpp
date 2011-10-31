@@ -505,6 +505,8 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
     {
         //qDebug() << "Candidate: Ratio: TopLeft(x,y), BottomRight(x,y): "<< it->aspect()<< "\t" << it->getTopLeft().x << "," <<it->getTopLeft().y << "  "<<it->getBottomRight().x << ","<< it->getBottomRight().y;
         int boarder = 20; //! Boarder of pixels
+
+        //Check Width:
         if (it->getBottomRight().x < width-boarder && it->getTopLeft().x > 0+boarder )
         {
             if(fabs(it->getBottomRight().x- it->getTopLeft().x) < MINIMUM_GOAL_WIDTH_IN_PIXELS)
@@ -523,6 +525,7 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
                 continue;
             }
         }
+
         if(it->getBottomRight().y < 0+boarder)
         {
             //USED TO STOP SMALL GOALS FORMING AT EDGE OF SCREEN
@@ -536,6 +539,13 @@ void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_C
             ++it;
             continue;
         }
+        if(it->getTopLeft().x < 0+boarder/2 || it->getBottomRight().x > width-boarder/2)
+        {
+            //qDebug() << "Removed due to close to boarder.";
+            it = FO_Candidates.erase(it);
+            continue;
+        }
+
 
         if( !isCorrectCheckRatio(*it,height, width))
         {

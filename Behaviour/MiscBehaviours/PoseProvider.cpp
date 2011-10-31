@@ -38,7 +38,7 @@ using namespace std;
 PoseProvider::PoseProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
     m_pitch_index = 0;
-    m_yaw_index = 25;
+    m_yaw_index = 0; //24 is middle
     m_num_pitch_motions = 15;
     m_num_yaw_motions = 49;
     isStart = 0;
@@ -54,20 +54,34 @@ PoseProvider::~PoseProvider()
 
 void PoseProvider::doBehaviour()
 {
-    	
-    if(singleChestClick())
-    {
-	m_saving_images = true;
-        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
-	
+/*    #ifndef TARGET_IS_DARWIN	
+		if(singleChestClick())
+		{
+			m_saving_images = true;
+		    m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
+		}
+		else if(m_saving_images == true)
+		{
+		m_saving_images = false;
+		    m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
+		}
+		if (singleRightBumperClick())
+		{
+		    m_yaw_index = (m_yaw_index + 1) % m_num_yaw_motions;
+		//m_actions->addSound(m_current_time, "error1.wav");
+		sayPosition(calculateYawPosition());
+		}
+    #endif
+*/
 
-    }
-    else if(m_saving_images == true)
-    {
-	m_saving_images = false;
-        m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, true));
-    }
-    
+	//#ifdef TARGET_IS_DARWIN
+		if (singleChestClick())
+		{
+		    m_yaw_index = (m_yaw_index + 1) % m_num_yaw_motions;
+		//m_actions->addSound(m_current_time, "error1.wav");
+		sayPosition(calculateYawPosition());
+		}
+	//#endif
     // handle the selection of motions
     if (singleLeftBumperClick())
     {
@@ -75,19 +89,17 @@ void PoseProvider::doBehaviour()
 	//m_actions->addSound(m_current_time, "error1.wav");
 	sayPosition(calculatePitchPosition());
     }
-    if (singleRightBumperClick())
-    {
-        m_yaw_index = (m_yaw_index + 1) % m_num_yaw_motions;
-	//m_actions->addSound(m_current_time, "error1.wav");
-	sayPosition(calculateYawPosition());
-    }
-    if(doubleLeftBumperClick())
+	
+
+    ///if(doubleLeftBumperClick()) //NAO
+	if(longLeftBumperClick())
     {
 	m_pitch_index = (m_pitch_index  + m_num_pitch_motions-1) % m_num_pitch_motions;
 	//m_actions->addSound(m_current_time, "error1.wav");
 	sayPosition(calculatePitchPosition());
     }
-    if(doubleRightBumperClick())
+    //if(doubleRightBumperClick()) //NAO
+	if(longChestClick())
     {
 	m_yaw_index = (m_yaw_index  + m_num_yaw_motions-1) % m_num_yaw_motions;
 	//m_actions->addSound(m_current_time, "error1.wav");
@@ -100,7 +112,7 @@ void PoseProvider::doBehaviour()
 void PoseProvider::doSelectedMotion()
 {
     //Initialisation: First 50 Frames, will be used to stand up
-    if (isStart < 50)
+    if (isStart < 5)
     {
         vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
@@ -123,9 +135,15 @@ void PoseProvider::doSelectedMotion()
  
 float PoseProvider::calculatePitchPosition()
 {
-	float min_pitch = -40.0; //-38.5
-	float max_pitch = 30; //29.5
-	float degrees = ((m_pitch_index)*(max_pitch - min_pitch)/(m_num_pitch_motions-1)) + min_pitch;
+	float min_pitch = -50.0; //-38.5
+	float max_pitch = 20; //29.5
+	float offset = 0.0;
+	float degrees = ((m_pitch_index)*(max_pitch - min_pitch)/(m_num_pitch_motions-1)) + min_pitch + offset;
+	if(degrees > max_pitch)
+	{
+		degrees = min_pitch;
+		m_pitch_index = 0;
+	}
 
 	return degrees;
 	return degrees;
@@ -136,6 +154,11 @@ float PoseProvider::calculateYawPosition()
 	float min_yaw = -120.0; //-119.5
 	float max_yaw = 120.0; //119.5
 	float degrees = ((m_yaw_index)*(max_yaw - min_yaw)/(m_num_yaw_motions-1)) + min_yaw;
+	if(degrees > max_yaw)
+	{
+		degrees = min_yaw;
+		m_yaw_index = 0;
+	}	
 	return degrees;
 }
 

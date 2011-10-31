@@ -1,12 +1,12 @@
-/*! @file PenalisedState.h
-    @brief Declaration of the penalised soccer state
+/*! @file BlankWalk.h
+    @brief Declaration a blank walk class
  
-    @class PenalisedState
-    @brief The initial soccer state
-
+    @class BlankWalk
+    @brief A module to provide a placeholder for robots which can not walk (for example a webcam)
+ 
     @author Jason Kulk
  
-  Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2011 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,24 +22,24 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef PENALISED_STATE_H
-#define PENALISED_STATE_H
+#ifndef BLANKWALK_H
+#define BLANKWALK_H
 
-class SoccerProvider;
-#include "../SoccerState.h"
+#include "Motion/NUWalk.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
-class PenalisedState : public SoccerState
+#include <fstream>
+using namespace std;
+
+class BlankWalk : public NUWalk
 {
 public:
-    PenalisedState(SoccerProvider* provider);
-    ~PenalisedState();
-    BehaviourState* nextState();
+    BlankWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(data, actions) {};
+    ~BlankWalk() {};
 protected:
-    void doState();
-private:
-    int m_previous_penalty_reason;
+    void doWalk() {};
 };
-
 
 #endif
 

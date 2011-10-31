@@ -24,6 +24,7 @@
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
@@ -31,8 +32,14 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
+#include "debug.h"
+
+#include <sstream>
+using namespace std;
+
 PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {
+    m_previous_penalty_reason = PENALTY_NONE;
 }
 
 PenalisedState::~PenalisedState()
@@ -54,12 +61,34 @@ void PenalisedState::doState()
             m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
         m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 1000, vector<float>(2,0)));
     }
-    // In penalty the chest led should be red
-    vector<float> red(3,0);
-    red[0] = 1;
-    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, red);
+    
+    // In penalty the chest led should be red, or purple in sub
+    vector<float> colour(3,0);
+    colour[0] = 1;
+    if (m_game_info->amIASubstitute())
+        colour[2] = 1;
+        
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, colour);
     
     // In penalty we should not walk
     m_jobs->addMotionJob(new WalkJob(0,0,0));
+    
+    // check if we have moved from being a substitute, to being penalised for a different reason
+    // ie. we are about to enter the game
+    if (m_game_info->getPenaltyReason() != m_previous_penalty_reason and m_previous_penalty_reason == PENALTY_SPL_SUBSTITUTE)
+    {
+        // Play a few sounds to tell people whats going on (penalised and the new player position)
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
+        int newposition = m_game_info->getSubstituteNumber();
+        if (newposition < 0 or newposition > m_game_info->getNumberOfPlayers())
+            newposition = m_game_info->getPlayerNumber();
+        
+        stringstream sound;
+        sound << newposition << ".wav";
+        m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime + 3000, sound.str());
+        m_team_info->setPlayerNumber(newposition);
+    }
+    
+    m_previous_penalty_reason = m_game_info->getPenaltyReason();
 }
 

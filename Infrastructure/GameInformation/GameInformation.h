@@ -66,6 +66,7 @@ public:
     RobotState getCurrentState() const;
     int getPenaltyReason() const;
     bool amIASubstitute() const;
+    int getSubstituteNumber() const;
     
     // Game Information
     bool gameControllerWorking() const;

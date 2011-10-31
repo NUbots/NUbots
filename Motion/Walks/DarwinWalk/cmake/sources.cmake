@@ -20,16 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS
-Thread.h Thread.cpp 
-ConditionalThread.h ConditionalThread.cpp
-PeriodicSignalerThread.h PeriodicSignalerThread.cpp
-PeriodicThread.h PeriodicThread.cpp
-QueueThread.h
+SET (YOUR_SRCS  DarwinWalk.cpp DarwinWalk.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS 
 )
 ####################################################################################
 

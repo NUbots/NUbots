@@ -115,12 +115,12 @@ private:
     vector<float> getReadyFieldPositions()
     {
         vector<float> position(3,0);
-        if(m_game_info->getPlayerNumber() == 1)
+        if(m_team_info->getPlayerNumber() == 1)
         {
             position[0] = 290.0;
             position[1] = 0.0;
         }
-        else if(m_game_info->getPlayerNumber() == 2)
+        else if(m_team_info->getPlayerNumber() == 2)
         {
             if(m_game_info->haveKickoff())
             {
@@ -133,7 +133,7 @@ private:
                 position[1] = 0.0;
             }
         }
-        else if(m_game_info->getPlayerNumber() == 3)
+        else if(m_team_info->getPlayerNumber() == 3)
         {
             if(m_game_info->haveKickoff())
             {
@@ -146,7 +146,7 @@ private:
                 position[1] = 90.0;
             }
         }
-        else if(m_game_info->getPlayerNumber() == 4)
+        else if(m_team_info->getPlayerNumber() == 4)
         {
             if(m_game_info->haveKickoff())
             {

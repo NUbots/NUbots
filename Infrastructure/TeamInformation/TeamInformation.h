@@ -86,6 +86,7 @@ public:
     ~TeamInformation();
     
     int getPlayerNumber() {return m_player_number;};
+    void setPlayerNumber(int num) {m_player_number = num;};
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
