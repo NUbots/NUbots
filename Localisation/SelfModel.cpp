@@ -13,6 +13,7 @@ SelfModel::SelfModel(float time): Moment(states_total)
     m_alpha = 1.0f;
     m_history_depth = 5;
     m_history_buffer = boost::circular_buffer<unsigned int>(m_history_depth);
+    m_previous_decisions.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS, FieldObjects::NUM_STAT_FIELD_OBJECTS);
     return;
 }
 
@@ -32,6 +33,7 @@ SelfModel::SelfModel(const SelfModel& source): Moment(source)
     m_creation_time = source.m_creation_time;
     m_history_depth = source.m_history_depth;
     m_history_buffer = source.m_history_buffer;
+    m_previous_decisions = source.m_previous_decisions;
     return;
 }
 
@@ -52,6 +54,10 @@ SelfModel::SelfModel(const SelfModel& parent, const AmbiguousObject& object, con
     m_history_buffer = parent.m_history_buffer; // Get parents history.
     m_history_buffer.push_back(m_parent_id);    // Add parent to the history.
     m_split_option = splitOption.getID();
+    assert(object.getID() < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+    m_previous_decisions = parent.m_previous_decisions;
+    m_previous_decisions[object.getID()] = splitOption.getID();
+
 
     // copy information from the parent model.
     m_alpha = parent.alpha();
@@ -148,6 +154,19 @@ unsigned int SelfModel::history(unsigned int steps_back)
     {
         result = m_history_buffer[index];
     }
+    return result;
+}
+
+/*! @brief Get the previous decision path when this ambiguous object was last encountered.
+    @param theObject The ambiguous object.
+    @return The object id of the unique object that was last chosen.
+*/
+unsigned int SelfModel::previousSplitOption(const AmbiguousObject& theObject) const
+{
+    unsigned int result;
+    unsigned int objectIndex = theObject.getID();
+    assert(objectIndex < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+    result = m_previous_decisions[objectIndex];
     return result;
 }
 

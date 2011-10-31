@@ -51,6 +51,7 @@ public:
     unsigned int history_depth(){return m_history_depth;}
     unsigned int splitOption() const {return m_split_option;}
     double creationTime() const {return m_creation_time;}
+    unsigned int previousSplitOption(const AmbiguousObject& theObject) const;
 
     bool operator < (const SelfModel& model) const
     {
@@ -81,11 +82,12 @@ protected:
     float m_alpha;                  //!< Alpha rating of the model.
     unsigned int m_id;              //!< Unique id of the model.
     unsigned int m_parent_id;       //!< Unique id of the parent model.
-    unsigned int m_split_option;    //!< Option used for split from parent.
+    unsigned int m_split_option;    //!< Most recent option used for split from parent.
     double m_creation_time;         //!< Time at which model was created.
 
     unsigned int m_history_depth;
     boost::circular_buffer<unsigned int> m_history_buffer;
+    std::vector<unsigned int> m_previous_decisions; //!< Stores the last decision for each of the ambiguous object types.
 
     /*! @brief Static function used to generate a unique incremental id for each individual model created.
     */
