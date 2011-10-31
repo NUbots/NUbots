@@ -22,6 +22,7 @@ public:
     }; 
 
     bool LoadModel(const std::string& fileName = "Default");
+    bool LoadFromFile(const std::string& fileName);
     Matrix CalculateTransform(Effector effectorId, const std::vector<float>& jointValues);
 
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);

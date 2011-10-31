@@ -185,6 +185,18 @@ bool Kinematics::LoadModel(const std::string& fileName)
     return true;
 }
 
+bool LoadFromFile(const std::string& fileName)
+{
+    // File Format should be of the form:
+    // [Effector]
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // [Effector]
+    // Joint Number, Joint Name, alpha, a, thetaOffset, d
+    // etc..
+    //getline()
+
+}
 
 Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<float>& jointValues)
 {
