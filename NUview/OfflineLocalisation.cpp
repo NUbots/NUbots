@@ -8,6 +8,7 @@
 #include "Localisation/Localisation.h"
 #include "Localisation/SelfLocalisationTests.h"
 #include <QElapsedTimer>
+#include "Tools/Math/General.h"
 
 /*! @brief Default Constructor
  */
@@ -212,6 +213,16 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
 
     LocalisationPerformanceMeasure performance_measure;
     performance_measure.setProcessingTime(ms_elapsed / 1000.0f);
+    vector<float> gps;
+    float compass;
+    if(tempSensors2.getGps(gps) and tempSensors2.getCompass(compass))
+    {
+        float err_x, err_y, err_head;
+        err_x = m_workingSelfLoc->getBestModel()->mean(Model::states_x) - gps[0];
+        err_y = m_workingSelfLoc->getBestModel()->mean(Model::states_y) - gps[1];
+        err_head = mathGeneral::normaliseAngle(m_workingSelfLoc->getBestModel()->mean(Model::states_heading) - compass);
+        performance_measure.setError(err_x, err_y, err_head);
+    }
     m_performance.push_back(performance_measure);
     m_localisation_frame_buffer.push_back(temp);
     m_self_loc_frame_buffer.push_back(self_temp);
