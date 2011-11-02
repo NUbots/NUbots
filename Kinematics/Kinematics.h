@@ -12,6 +12,7 @@
 class Kinematics
 {
 public:
+    typedef std::vector<EndEffector> RobotModel;
     enum Effector
     {
         bottomCamera,
@@ -106,7 +107,7 @@ public:
         return result;
     }
 
-    std::vector<EndEffector> m_endEffectors;
+
 
     Rectangle CalculateFootPosition(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
     double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot);
@@ -115,6 +116,7 @@ public:
     static Vector2<float> TransformPositionToFoot(const Matrix& FootTransformMatrix, Vector2<float> position);
 
     std::vector<float> calculateInverseKinematicsLegPrimary(const Matrix& desiredPose, Effector theFoot);
+    const RobotModel* getModel(){return &m_endEffectors;}
 
     float getFootInnerWidth() {return m_footInnerWidth;}
     float getFootOuterWidth() {return m_footOuterWidth;}
@@ -122,8 +124,8 @@ public:
     float getFootBackwardLength() {return m_footBackwardLength;}
     float getHipOffsetY(){return m_hipOffsetY;}
     bool test();
-private:
-            
+protected:
+    RobotModel m_endEffectors;
     // Top camera
     float m_cameraTopOffsetZ;
     float m_cameraTopOffsetX;
