@@ -128,6 +128,7 @@ class FieldObjects: public TimestampedData
             @param p_kf The destination localisation data to be streamed to.
             */
             friend std::istream& operator>> (std::istream& input, FieldObjects& p_mob);
+            std::vector<StationaryObject*> getExpectedAmbiguousDecisions(float x, float y, float heading);
 
 	private:
             void InitStationaryFieldObjects();

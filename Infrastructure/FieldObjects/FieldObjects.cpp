@@ -360,6 +360,50 @@ std::vector<FieldObjects::MobileFieldObjectID> FieldObjects::GetPossibleMobileOb
     return visibleIds;
 }
 
+/*! @brief Determines the most likely option for the current ambiguous objects, given a specific field location for the observer.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @return A vector of stationary objects representing the most likely stationary field objects.
+ */
+std::vector<StationaryObject*> FieldObjects::getExpectedAmbiguousDecisions(float x, float y, float heading)
+{
+    std::vector<StationaryObject*> expectedObjects;
+    const float c_distance_weight = 1.0f;
+    const float c_heading_weight = 100.0f;
+
+    // Loop through each of the ambiguous objects and determine the best election option based on the given field position.
+    for(std::vector<AmbiguousObject>::iterator amb_it = ambiguousFieldObjects.begin(); amb_it != ambiguousFieldObjects.end(); ++amb_it)
+    {
+        Self given_location;
+        given_location.updateLocationOfSelf(x, y, heading, 1.0f, 1.0f, 1.0f, false);
+        float measured_distance = amb_it->measuredDistance();
+        float measured_heading = amb_it->measuredBearing();
+        float minimum_error = 1000.0f;
+        StationaryObject* bestObject = NULL;
+
+        for(std::vector<int>::iterator obj_id_it = amb_it->getPossibleObjectIDs().begin(); obj_id_it != amb_it->getPossibleObjectIDs().end(); ++amb_it)
+        {
+            StationaryObject* temp_object = &stationaryFieldObjects[(*obj_id_it)];
+            float estimated_distance = given_location.CalculateDistanceToStationaryObject(*temp_object);
+            float estimated_heading = given_location.CalculateBearingToStationaryObject(*temp_object);
+
+            float distanceError = c_distance_weight * (estimated_distance - measured_distance);
+            float headingError = c_heading_weight * (estimated_heading - measured_heading);
+
+            float error_magnitude = sqrt(pow(distanceError,2) + pow(headingError,2));
+            if( (!bestObject) or (error_magnitude < minimum_error) )
+            {
+                bestObject = temp_object;
+                minimum_error = error_magnitude;
+            }
+        }
+
+        expectedObjects.push_back(bestObject);
+    }
+    return expectedObjects;
+}
+
 std::string FieldObjects::toString(bool visibleOnly) const
 {
     std::stringstream result;
