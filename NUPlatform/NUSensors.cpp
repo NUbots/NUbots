@@ -47,7 +47,7 @@ using namespace std;
  
     Creates the NUSensorsData instance (m_data) in which all of the sensor data is stored.
  */
-NUSensors::NUSensors()
+NUSensors::NUSensors(): m_initialised(false)
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
     debug << "NUSensors::NUSensors" << endl;
@@ -118,6 +118,7 @@ void NUSensors::copyFromHardwareCommunications()
 
 void NUSensors::calculateSoftSensors()
 {
+    if(!m_initialised) initialise();
     m_touch->calculate();
     calculateKinematics();
     calculateOrientation();
@@ -129,6 +130,33 @@ void NUSensors::calculateSoftSensors()
     calculateOdometry();
     calculateCameraHeight();
     calculateFallSense();
+}
+
+void NUSensors::initialise()
+{
+    m_initialised = true;   // Flag that this function has been run.
+    const Kinematics::RobotModel* model = m_kinematicModel->getModel();
+    std::vector<NUData::id_t*> effector_buffer;
+
+    m_kinematics_joint_map.clear();
+    // Cycle through all of the end effectors of the kinematic model.
+    for(Kinematics::RobotModel::const_iterator effector_it = model->begin(); effector_it != model->end(); ++effector_it)
+    {
+        effector_buffer.clear();    // Clear out old info.
+        // Now go through each of the links in the end effector.
+        for(std::vector<Link>::const_iterator link_it = effector_it->links()->begin(); link_it != effector_it->links()->end(); ++link_it)
+        {
+            // Get name of the link.
+            std::string link_name = link_it->name();
+            // Now find the id required to retrieve the data for this joint.
+            NUData::id_t* id = m_data->getId(link_name);
+            assert(id);
+            effector_buffer.push_back(id);
+        }
+        // Add the list of joint id's to the list.
+        m_kinematics_joint_map.push_back(effector_buffer);
+    }
+    return;
 }
 
 /*! @brief Updates the orientation estimate using the current sensor data

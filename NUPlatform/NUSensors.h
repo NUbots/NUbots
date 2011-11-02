@@ -32,6 +32,8 @@
 #ifndef NUSENSORS_H
 #define NUSENSORS_H
 
+#include "Infrastructure/NUData.h"
+
 class NUSensorsData;
 class EndEffectorTouch;
 class Kinematics;
@@ -67,9 +69,12 @@ protected:
     void calculateFallSense();
     void calculateOdometry();
     void calculateCameraHeight();
+
+    void initialise();
     
 private:
 protected:
+    bool m_initialised;
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
@@ -81,6 +86,9 @@ protected:
     Kinematics* m_kinematicModel;
     OrientationUKF* m_orientationFilter;
     OdometryEstimator* m_odometry;
+
+    vector< vector<NUData::id_t*> > m_kinematics_joint_map;
+
 private:
 };
 
