@@ -66,7 +66,7 @@ void OfflineLocalisationDialog::MakeLayout()
     QPushButton *saveReportButton = new QPushButton("Save Report...");
     saveReportButton->setEnabled(false);
     connect(m_offline_loc,SIGNAL(SimDataChanged(bool)), saveReportButton, SLOT(setEnabled(bool)));
-    //connect(runSimulationButton,SIGNAL(pressed()), this, SLOT(BeginSimulation()));
+    connect(saveReportButton,SIGNAL(pressed()), this, SLOT(SaveAsReport()));
     buttonsLayout->addWidget(saveReportButton);
 
 
@@ -115,6 +115,14 @@ void OfflineLocalisationDialog::SaveAsLocalisationLog()
     if(!m_offline_loc->hasSimData()) return;
     QString save_name = QFileDialog::getSaveFileName(this,"Save Log",QString(),"Stream (*.strm)");
     m_offline_loc->WriteLog(save_name.toStdString());
+    return;
+}
+
+void OfflineLocalisationDialog::SaveAsReport()
+{
+    if(!m_offline_loc->hasSimData()) return;
+    QString save_name = QFileDialog::getSaveFileName(this,"Save Report",QString(),"Comma-Seperated Values (*.csv)");
+    m_offline_loc->WriteReport(save_name.toStdString());
     return;
 }
 

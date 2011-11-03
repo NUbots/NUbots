@@ -34,6 +34,7 @@ public slots:
     void SetFrame(int frameNumber, int total=0);
     void CancelProgress();
     void SaveAsLocalisationLog();
+    void SaveAsReport();
     void GetSettings();
     void SetOpenFileList(std::vector<QFileInfo> files);
 protected:
