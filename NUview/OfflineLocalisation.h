@@ -28,6 +28,7 @@ public:
     bool OpenLogs(const std::string& intialLogPath);
     bool Run();
     bool WriteLog(const std::string& logPath);
+    bool WriteReport(const std::string& reportPath);
     int NumberOfLogFrames();
     int NumberOfFrames();
     const Localisation* GetFrame(int frameNumber);
@@ -56,6 +57,8 @@ private:
     bool m_stop_called;
     bool m_sim_data_available;
     LocalisationSettings m_settings;
+    unsigned int m_num_models_created;
+    float m_experiment_run_time;
 signals:
     void SimDataChanged(bool);
     void updateProgress(int,int);

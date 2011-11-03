@@ -19,6 +19,8 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     //Initialise(Localisation());
     m_stop_called = false;
     m_sim_data_available = false;
+    m_num_models_created = 0;
+    m_experiment_run_time = 0.0f;
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_merge);
     RunTests();
@@ -178,9 +180,11 @@ void OfflineLocalisation::run()
     }
 
     Model test;
-    std::cout << "Number of models created: " << test.id() - initial_model_id << std::endl;
+    m_num_models_created = test.id() - initial_model_id;
+    m_experiment_run_time = exp_time * 1000;
+    std::cout << "Number of models created: " << m_num_models_created << std::endl;
     std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
-    std::cout << "Experiment time: " << exp_time * 1000 << " ms" << std::endl;
+    std::cout << "Experiment time: " << m_experiment_run_time << " ms" << std::endl;
 
 
     m_log_reader->setFrame(save_frame);
@@ -304,3 +308,50 @@ bool OfflineLocalisation::WriteLog(const std::string& logPath)
     return file_saved;
 }
 
+/*! @brief Writes a text based summary of the current experiment to file.
+    @param logPath Path to which the log will be written
+ */
+bool OfflineLocalisation::WriteReport(const std::string& reportPath)
+{
+    std::string temp;
+    bool file_saved = false;
+    if(hasSimData())
+    {
+        std::ofstream output_file(reportPath.c_str());
+        if(output_file.is_open() && output_file.good())
+        {
+            unsigned int total_frames  = m_self_loc_frame_buffer.size();
+
+            // Write the settings information.
+            output_file << "Settings:" <<std::endl;
+            temp = m_log_reader->path().toStdString();
+            temp = temp.erase(temp.rfind('/')+1);   // unix/linux based path
+            //temp = temp.erase(temp.rfind('\\')+1);  // windows based path
+            output_file << "Source file path:," << temp << std::endl;
+            output_file << "Branching Method:," << m_settings.branchMethodString() <<std::endl;
+            output_file << "Prune Method:," << m_settings.pruneMethodString() <<std::endl;
+            output_file << "Results:" <<std::endl;
+            output_file << "Total frames:," << total_frames << std::endl;
+            output_file << "Number of models created:," << m_num_models_created <<std::endl;
+            output_file << "Experiment run time:," << this->m_experiment_run_time << std::endl;
+
+
+            // Make headers
+            output_file << "frame";
+            output_file << ",error x, error y, error heading";
+            output_file << std::endl;
+
+            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
+            {
+                output_file << frame_id;
+                output_file << "," << m_performance[frame_id].error_x();
+                output_file << "," << m_performance[frame_id].error_y();
+                output_file << "," << m_performance[frame_id].error_heading();
+                output_file << std::endl;
+            }
+
+        }
+        output_file.close();
+    }
+    return file_saved;
+}
