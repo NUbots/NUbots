@@ -59,6 +59,7 @@ private:
     LocalisationSettings m_settings;
     unsigned int m_num_models_created;
     float m_experiment_run_time;
+
 signals:
     void SimDataChanged(bool);
     void updateProgress(int,int);

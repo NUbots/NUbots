@@ -193,7 +193,7 @@ void OfflineLocalisation::run()
     emit SimDataChanged(m_sim_data_available);
     return;
 }
-#include <QDebug>
+
 /*! @brief Run the localisation algorithm on the provided data and add a new localisation frame.
     @param sensorData The sensor data for the new frame.
     @param objectData The observed objects for the current frame.
