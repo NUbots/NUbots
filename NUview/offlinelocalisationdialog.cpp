@@ -69,6 +69,8 @@ void OfflineLocalisationDialog::MakeLayout()
     connect(saveReportButton,SIGNAL(pressed()), this, SLOT(SaveAsReport()));
     buttonsLayout->addWidget(saveReportButton);
 
+    connect(m_offline_loc,SIGNAL(SimDataChanged(bool)), this, SLOT(ValidateData(bool)));
+
 
     QVBoxLayout *displayLayout = new QVBoxLayout();
 
@@ -136,6 +138,21 @@ void OfflineLocalisationDialog::GetSettings()
         m_offline_loc->setSettings(dlg.settings());
     }
     return;
+}
+
+void OfflineLocalisationDialog::ValidateData(bool available)
+{
+    // If data is not available sent data pointers to null,
+    // and send empty strings for the log text.
+    if(not available)
+    {
+        emit LocalisationChanged(NULL);
+        emit SelfLocalisationChanged(NULL);
+        QString message = "";
+        emit LocalisationInfoChanged(message);
+        QString self_message = "";
+        emit SelfLocalisationInfoChanged(self_message);
+    }
 }
 
 void OfflineLocalisationDialog::BeginSimulation()

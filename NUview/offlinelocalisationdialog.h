@@ -30,6 +30,7 @@ public slots:
     void OpenLogFiles();
     void BeginSimulation();
     void CompleteSimulation();
+    void ValidateData(bool available);
     void DiplayProgress(int frame, int total);
     void SetFrame(int frameNumber, int total=0);
     void CancelProgress();
