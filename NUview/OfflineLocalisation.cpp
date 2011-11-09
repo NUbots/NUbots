@@ -337,6 +337,7 @@ bool OfflineLocalisation::WriteReport(const std::string& reportPath)
 
 
             // Make headers
+            output_file << "Error data:" << std::endl;
             output_file << "frame";
             output_file << ",error x, error y, error heading";
             output_file << std::endl;
