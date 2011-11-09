@@ -54,6 +54,7 @@ void OfflineLocalisation::ClearBuffer()
     m_self_frame_info.clear();
     m_performance .clear();
     m_sim_data_available = false;
+    emit SimDataChanged(m_sim_data_available);
 }
 
 /*! @brief  Clears any previous information, and intialises the system with the
@@ -323,33 +324,47 @@ bool OfflineLocalisation::WriteReport(const std::string& reportPath)
             unsigned int total_frames  = m_self_loc_frame_buffer.size();
 
             // Write the settings information.
-            output_file << "Settings:" <<std::endl;
+            output_file << "[Settings]" <<std::endl;
             temp = m_log_reader->path().toStdString();
             temp = temp.erase(temp.rfind('/')+1);   // unix/linux based path
             //temp = temp.erase(temp.rfind('\\')+1);  // windows based path
             output_file << "Source file path:," << temp << std::endl;
             output_file << "Branching Method:," << m_settings.branchMethodString() <<std::endl;
             output_file << "Prune Method:," << m_settings.pruneMethodString() <<std::endl;
-            output_file << "Results:" <<std::endl;
+            output_file << "[Results]" <<std::endl;
             output_file << "Total frames:," << total_frames << std::endl;
             output_file << "Number of models created:," << m_num_models_created <<std::endl;
             output_file << "Experiment run time:," << this->m_experiment_run_time << std::endl;
 
 
             // Make headers
-            output_file << "Error data:" << std::endl;
-            output_file << "frame";
-            output_file << ",error x, error y, error heading";
-            output_file << std::endl;
+            output_file << "[Error data]" << std::endl;
+            //output_file << "frame";
+            std::stringstream frame_line, error_x_line, error_y_line, error_heading_line;
 
+            //output_file << ",error x, error y, error heading";
+            //output_file << std::endl;
+
+            frame_line << "frame";
+            error_x_line << "error x";
+            error_y_line << "error y";
+            error_heading_line << "error heading";
             for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
             {
-                output_file << frame_id;
-                output_file << "," << m_performance[frame_id].error_x();
-                output_file << "," << m_performance[frame_id].error_y();
-                output_file << "," << m_performance[frame_id].error_heading();
-                output_file << std::endl;
+                frame_line << "," << frame_id;
+                error_x_line << "," << m_performance[frame_id].error_x();
+                error_y_line << "," << m_performance[frame_id].error_y();
+                error_heading_line << "," << m_performance[frame_id].error_heading();
+//                output_file << frame_id;
+//                output_file << "," << m_performance[frame_id].error_x();
+//                output_file << "," << m_performance[frame_id].error_y();
+//                output_file << "," << m_performance[frame_id].error_heading();
+//                output_file << std::endl;
             }
+            output_file << frame_line.str() << std::endl;
+            output_file << error_x_line.str() << std::endl;
+            output_file << error_y_line.str() << std::endl;
+            output_file << error_heading_line.str() << std::endl;
 
         }
         output_file.close();
