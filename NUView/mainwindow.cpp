@@ -496,9 +496,8 @@ void MainWindow::createConnections()
 
 void MainWindow::RunOfflineLocalisation()
 {
-    //if(!offlinelocDialog) offlinelocDialog = new OfflineLocalisationDialog(this);
-
-    offlinelocDialog->show();
+    offlinelocDialog->show();   // Make visible.
+    offlinelocDialog->raise();  // Bring to foreground.
     return;
 }
 
