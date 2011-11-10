@@ -132,13 +132,24 @@ void NUSensors::calculateSoftSensors()
     calculateFallSense();
 }
 
+/*! @brief Intialisation function to fill in the tables required for the new generalised kinematic model.
+           After running this function the variables m_kinematics_joint_map, m_kinematics_transform_ids, and m_kinematics_effector_ids
+           will have been updated with the values obtained from the Kinematics model and the NUSensorsData available.
+           Because the complete NUSensorsData is not fully available during the constructor of this class this action must be dealayed until the first update.
+ */
 void NUSensors::initialise()
 {
+    // Need to initialise a bunch of tables to prevent doing string compares with the kinematics model.
     m_initialised = true;   // Flag that this function has been run.
-    const Kinematics::RobotModel* model = m_kinematicModel->getModel();
-    std::vector<NUData::id_t*> effector_buffer;
 
-    m_kinematics_joint_map.clear();
+    // Get the kinematic model data
+    const Kinematics::RobotModel* model = m_kinematicModel->getModel();
+    std::vector<const NUData::id_t*> effector_buffer;
+
+    // Clear all of the tables.
+    m_kinematics_map.clear();
+
+    unsigned int index = 0; // variable to keep track of the vector indec we are working with.
     // Cycle through all of the end effectors of the kinematic model.
     for(Kinematics::RobotModel::const_iterator effector_it = model->begin(); effector_it != model->end(); ++effector_it)
     {
@@ -149,13 +160,61 @@ void NUSensors::initialise()
             // Get name of the link.
             std::string link_name = link_it->name();
             // Now find the id required to retrieve the data for this joint.
-            NUData::id_t* id = m_data->getId(link_name);
-            assert(id);
-            effector_buffer.push_back(id);
+            NUData::id_t* p_id = m_data->getId(link_name);
+            assert(p_id);   // make sure we got an id.
+            effector_buffer.push_back(p_id);    // add to the list for this effector.
         }
         // Add the list of joint id's to the list.
-        m_kinematics_joint_map.push_back(effector_buffer);
+        std::string effector_name = effector_it->name();
+        const NUData::id_t* p_effector_id = NULL;
+        const NUData::id_t* p_transform_id = NULL;
+
+        // Check if the effector is one that is stored in the sensor data.
+        if(effector_name == "Bottom Camera" or effector_name == "Camera")   // On NAO we just use the bottom camera.
+        {
+            p_transform_id = &NUSensorsData::CameraTransform;
+            p_effector_id = NULL;       // No end effector for the camera.
+        }
+        else if(effector_name == "Left Foot")
+        {
+            p_transform_id = &NUSensorsData::LLegTransform;
+            p_effector_id = &NUSensorsData::LLegEndEffector;
+        }
+        else if(effector_name == "Right Foot")
+        {
+            p_transform_id = &NUSensorsData::RLegTransform;
+            p_effector_id = &NUSensorsData::RLegEndEffector;
+        }
+        else
+        {
+            ++index;
+            continue;   // don't care about updating effectors we do not use the values for.
+        }
+
+        // Add all of the values that we have discovered to the table.
+        KinematicMap temp;
+        temp.joints = effector_buffer;
+        temp.effector_id = p_effector_id;
+        temp.transform_id = p_transform_id;
+        temp.index = index;
+        m_kinematics_map.push_back(temp);
+        ++index;
     }
+    debug << "Kinematic table initialisation:" <<std::endl;
+
+    for (std::vector<KinematicMap>::iterator f_it = m_kinematics_map.begin(); f_it != m_kinematics_map.end(); ++f_it)
+    {
+        debug << "Index: " << f_it->index << " Transfrom ID: " << f_it->transform_id;
+        if(f_it->effector_id) debug << " effector_id: " << f_it->effector_id;
+        debug << std::endl;
+        debug << "Joints: ";
+        for(std::vector<const NUData::id_t*>::iterator j_it = f_it->joints.begin(); j_it != f_it->joints.end(); ++j_it)
+        {
+            debug << (*j_it) << " ";
+        }
+        debug << std::endl << std::endl;
+    }
+
     return;
 }
 
@@ -378,6 +437,11 @@ void NUSensors::calculateFallSense()
     }
 }
 
+/*! @brief Updates the odometry data for the current motion frame.
+
+    This function is a wrapper for the OdometryEstimator class, retrieveing the sensor data required,
+    then writing the results back as new sensor data.
+ */
 void NUSensors::calculateOdometry()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
@@ -426,101 +490,114 @@ void NUSensors::calculateOdometry()
     return;
 }
 
+/*! @brief Updates the kinematic data for the current motion frame.
+
+    This function uses the current kinematic model and calculates the transform for each of the effectors.
+    More advanced combined transforms are calculated for the current support foot and the current transfrom from the ground to the camera.
+ */
 void NUSensors::calculateKinematics()
 {
-    //! TODO: Need to get these values from somewhere else.
-    const int cameraNumber = 1;
-    const double time = m_data->CurrentTime;		
-
-    static vector<float> leftLegJoints(6,0.0f);
-    bool leftLegJointsSuccess = m_data->getPosition(NUSensorsData::LLeg, leftLegJoints);
-    static vector<float> rightLegJoints(6,0.0f);
-    bool rightLegJointsSuccess = m_data->getPosition(NUSensorsData::RLeg, rightLegJoints);
-    static vector<float> headJoints(2,0.0f);
-    bool headJointsSuccess = m_data->getPosition(NUSensorsData::Head, headJoints);
-
-	rightLegJoints[2] = leftLegJoints[2];
+    const double time = m_data->CurrentTime;
 
     // Note that the kinematics uses the Matrix class, however, at this stage the NUSensorsData stores vector<float> and vector<vector<float>>
     // In this early version we continue to use the method used in 2010:
     //		- Matrices are stored in NUSensorsData as flattened vector<float> using Matrix.asVector()
     //		- Matrices are then loaded from NUSensorsData into a temporary vector<float> then a Matrix is constructed from it using Matrix4x4fromVector
-	// There is no doubt this is messy, however, meh
-    Matrix rightLegTransform;
-    Matrix leftLegTransform;
-    Matrix bottomCameraTransform;
-    Matrix* supportLegTransform = 0;
-    Matrix* cameraTransform = 0;
+        // There is no doubt this is messy, however, meh
 
-    // Calculate the transforms
-    if(rightLegJointsSuccess)
+    // First get the joint data in the order required by the kinematic model. And find the resulting transform
+    for (vector<KinematicMap>::iterator eff_it = m_kinematics_map.begin(); eff_it != m_kinematics_map.end(); ++eff_it)
     {
-        rightLegTransform = m_kinematicModel->CalculateTransform(Kinematics::rightFoot,rightLegJoints);
-        m_data->set(NUSensorsData::RLegTransform, time, rightLegTransform.asVector());
-        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::EndPositionXId, time, Kinematics::PositionFromTransform(rightLegTransform));
-        m_data->modify(NUSensorsData::RLegEndEffector, NUSensorsData::EndPositionRollId, time, Kinematics::OrientationFromTransform(rightLegTransform));
-    }
-    else
-    {
-        m_data->setAsInvalid(NUSensorsData::RLegTransform);
-    }
-    if(leftLegJointsSuccess)
-    {
-        leftLegTransform = m_kinematicModel->CalculateTransform(Kinematics::leftFoot,leftLegJoints);
-        m_data->set(NUSensorsData::LLegTransform, time, leftLegTransform.asVector());
-        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::EndPositionXId, time, Kinematics::PositionFromTransform(leftLegTransform));
-        m_data->modify(NUSensorsData::LLegEndEffector, NUSensorsData::EndPositionRollId, time, Kinematics::OrientationFromTransform(leftLegTransform));
-    }
-    else
-    {
-        m_data->setAsInvalid(NUSensorsData::LLegTransform);
-    }
-    
-    if(headJointsSuccess)
-    {
-        bottomCameraTransform = m_kinematicModel->CalculateTransform(Kinematics::bottomCamera,headJoints);        
-    }
+        // For each actuator, get the joint values
+        std::vector<float> joint_positions;
+        joint_positions.clear();
+        float temp;
+        Matrix result(4,4,false);
+        for(vector<const NUData::id_t*>::iterator joint_it = eff_it->joints.begin(); joint_it != eff_it->joints.end(); ++joint_it)
+        {
+            if(m_data->getPosition(*(*joint_it),temp))
+            {
+                joint_positions.push_back(temp);
+            }
+            else
+            {
+                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
+                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
+                break;  // no use going further with this effector.
+            }
 
-    // Select the appropriate ones for further calculations.
-    // Choose camera.
-    if(headJointsSuccess && (cameraNumber == 1))
-    {
-        cameraTransform = &bottomCameraTransform;
-        m_data->set(NUSensorsData::CameraTransform, time, cameraTransform->asVector());
-    }
-    else
-    {
-        m_data->setAsInvalid(NUSensorsData::CameraTransform);
+        }
+        if(joint_positions.size() == eff_it->joints.size())
+        {
+            result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
+            debug << "Effector: " << (eff_it->transform_id) << std::endl;
+            debug << result << std::endl;
+            m_data->set(*eff_it->transform_id, time, result.asVector());
+            // If the effectors position and orientation are kept, write modify them here.
+            if(eff_it->effector_id)
+            {
+                m_data->modify(*eff_it->effector_id, NUSensorsData::EndPositionXId, time, Kinematics::PositionFromTransform(result));
+                m_data->modify(*eff_it->effector_id, NUSensorsData::EndPositionRollId, time, Kinematics::OrientationFromTransform(result));
+            }
+
+        }
+        else
+        {
+            m_data->setAsInvalid(*eff_it->transform_id);
+            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
+            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
+        }
     }
 
 
-    bool leftFootSupport = false, rightFootSupport = false;
+    // This next part calculates the more complex transform requried.
+    Matrix supportLegTransform;     // transform from torso to leg.
+    bool legTransform = false;      // flag used to indicate the required leg transfrom was available.
+    std::vector<float> temp;        // temp buffer used to store the vectorised matrices.
+
+    bool leftFootSupport = false, rightFootSupport = false;     // flags to indicate if each foot is providing support.
+
+    // Get the support data.
     bool validsupportdata = m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
     validsupportdata &= m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
-    // Choose support leg.
-    if (validsupportdata)
+    if(validsupportdata)    // if the support data was successfully retrieved.
     {
-        if((!leftFootSupport && rightFootSupport) && rightLegJointsSuccess)
-            supportLegTransform = &rightLegTransform;
-        else if((leftFootSupport && !rightFootSupport) && leftLegJointsSuccess)
-            supportLegTransform = &leftLegTransform;
-        else if((leftFootSupport && rightFootSupport) && leftLegJointsSuccess && rightLegJointsSuccess)
-            supportLegTransform = &leftLegTransform;
-    }
+        // if left foot cannot be used use right
+        if(!leftFootSupport && rightFootSupport)
+        {
+            legTransform = m_data->get(NUSensorsData::LLegTransform, temp);
+        }
+        // otherwise use left
+        else if(leftFootSupport)
+        {
+            legTransform = m_data->get(NUSensorsData::RLegTransform, temp);
+        }
 
-    if(supportLegTransform)
-    {
-        m_data->set(NUSensorsData::SupportLegTransform, time, supportLegTransform->asVector());
+        // if the leg transform was successfully retrieved.
+        if(legTransform)
+        {
+            supportLegTransform = Matrix4x4fromVector(temp);    // convert from vector to matrix
+            m_data->set(NUSensorsData::SupportLegTransform, time, temp);    // set the support leg transform to the one retrieved.
+            if(m_data->get(NUSensorsData::CameraTransform, temp))   // get camera transform
+            {
+                // if successful
+                Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(supportLegTransform, Matrix4x4fromVector(temp));  // calculate complete transform
+                m_data->set(NUSensorsData::CameraToGroundTransform, time, cameraToGroundTransform.asVector());  // set the new transform
+            }
+            else
+            {
+                m_data->setAsInvalid(NUSensorsData::CameraToGroundTransform);   // if camera not retrived mark the camera to ground transform as invalid.
 
-        // Calculate transfrom matrix to convert camera centred coordinates to ground centred coordinates.
-        Matrix cameraToGroundTransform = Kinematics::CalculateCamera2GroundTransform(*supportLegTransform, *cameraTransform);
-        m_data->set(NUSensorsData::CameraToGroundTransform, time, cameraToGroundTransform.asVector());
-    }
-    else
-    {
-        m_data->setAsInvalid(NUSensorsData::SupportLegTransform);
-        m_data->setAsInvalid(NUSensorsData::CameraToGroundTransform);
+            }
+        }
+        else
+        {
+            // if the required foot was not available, need to set the support leg and camera to ground transform to invalid.
+            m_data->setAsInvalid(NUSensorsData::SupportLegTransform);
+            m_data->setAsInvalid(NUSensorsData::CameraToGroundTransform);
+        }
+
     }
     return;
 }

@@ -74,7 +74,7 @@ protected:
     
 private:
 protected:
-    bool m_initialised;
+    bool m_initialised;     //!< Intialisation flag used to ensure initialisation is only performed once.
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;
@@ -87,7 +87,17 @@ protected:
     OrientationUKF* m_orientationFilter;
     OdometryEstimator* m_odometry;
 
-    vector< vector<NUData::id_t*> > m_kinematics_joint_map;
+    struct KinematicMap
+    {
+        std::vector<const NUData::id_t*> joints;
+        const NUData::id_t* transform_id;
+        const NUData::id_t* effector_id;
+        unsigned int index;
+    };
+    std::vector<KinematicMap> m_kinematics_map;
+//    vector< vector<const NUData::id_t*> > m_kinematics_joint_map;   //!< Vector matching the joint ordering in the Kinematics model to the joint is used by NUSensorData for each effector.
+//    vector<const NUData::id_t*> m_kinematics_transform_ids;         //!< Vector matching the transform of the above effectors to the ids used bu NUSensorsData.
+//    vector<const NUData::id_t*> m_kinematics_effector_ids;          //!< Vector matching the above effectors to the ids used bu NUSensorsData.
 
 private:
 };
