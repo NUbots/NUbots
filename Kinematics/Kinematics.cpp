@@ -3,6 +3,7 @@
 #include "Tools/Math/TransformMatrices.h"
 #include "Tools/Math/General.h"
 #include "NUPlatform/NUCamera.h"
+#include "nubotdataconfig.h"
 #include "debug.h"
 
 
@@ -11,184 +12,198 @@ using namespace TransformMatrices;
 //! TODO: Make this function load from a file.
 bool Kinematics::LoadModel(const std::string& fileName)
 {
-    LoadModelFromFile("/Users/steven/kinematics.cfg");
-    std::cout << "File Test!" << std::endl;
-    test();
-    m_endEffectors.clear();
-    if(fileName == "Default")
+//    LoadModelFromFile("/Users/steven/kinematics.cfg");
+//    std::cout << "File Test!" << std::endl;
+//    test();
+//    m_endEffectors.clear();
+//    if(fileName == "Default")
+//    {
+//        // Constant distances (in cm) From documentation
+
+//        // Top camera
+//        m_cameraTopOffsetZ = 6.79;
+//        m_cameraTopOffsetX = 5.39;
+//        m_cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
+
+//        // Bottom Camera
+//        m_cameraBottomOffsetZ = 2.381;
+//        m_cameraBottomOffsetX = 4.88;
+//        m_cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0) + NUCamera::CameraOffset;
+
+//        // Neck
+//        m_neckOffsetZ = 12.65;
+
+//        // Hips
+//        m_hipOffsetY = 5.0;
+//        m_hipOffsetZ = 8.5;
+
+//        // Legs
+//        m_thighLength = 10.0;
+//        m_tibiaLength = 10.0;
+//        m_footHeight = 4.6;
+
+//        // Feet (Measured)
+//        m_footInnerWidth = 4.5;
+//        m_footOuterWidth = 5.0;
+//        m_footForwardLength = 9.0;
+//        m_footBackwardLength = 7.0;
+
+//        DHParameters tempParam;
+//        std::vector<Link> links;
+//        Matrix startTrans;
+//        Matrix endTrans;
+
+//        // ---------------
+//        // BOTTOM CAMERA
+//        // ---------------
+//        startTrans = Translation( 0, 0, m_neckOffsetZ );
+//        endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
+//        endTrans = endTrans * Translation(m_cameraBottomOffsetX,0,m_cameraBottomOffsetZ) * RotY(m_cameraBottomOffsetAngle);
+
+//        tempParam.alpha = 0.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"Head Yaw"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = -mathGeneral::PI/2.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"Head Pitch"));
+
+//        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Bottom Camera"));
+
+//        // ---------------
+//        // TOP CAMERA
+//        // ---------------
+//        startTrans = Translation( 0, 0, m_neckOffsetZ );
+//        endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
+//        endTrans = endTrans * Translation(m_cameraTopOffsetX,0,m_cameraTopOffsetZ);
+
+//        links.clear();
+
+//        tempParam.alpha = 0.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"Head Yaw"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = -mathGeneral::PI/2.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"Head Pitch"));
+
+//        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Top Camera"));
+
+//        // ---------------
+//        // LEFT FOOT
+//        // ---------------
+//        startTrans = Translation(0.0f, m_hipOffsetY, -m_hipOffsetZ);
+//        endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
+//        links.clear();
+
+//        tempParam.alpha = -3.0*mathGeneral::PI/4.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = -mathGeneral::PI/2.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"HipYawPitch"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = mathGeneral::PI/4.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"LeftHipRoll"));
+
+//        tempParam.alpha = mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"LeftHipPitch"));
+
+//        tempParam.alpha = 0;
+//        tempParam.a = -m_thighLength;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"LeftKneePitch"));
+
+//        tempParam.alpha = 0;
+//        tempParam.a = -m_tibiaLength;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"LeftAnklePitch"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"LeftAnkleRoll"));
+
+//        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
+
+//        // ---------------
+//        // RIGHT FOOT
+//        // ---------------
+//        startTrans = Translation(0.0f, -m_hipOffsetY, -m_hipOffsetZ);
+//        endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
+//        links.clear();
+
+//        tempParam.alpha = -mathGeneral::PI/4.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = -mathGeneral::PI/2.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"HipYawPitch"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = -mathGeneral::PI/4.0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"RightHipRoll"));
+
+//        tempParam.alpha = mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"RightHipPitch"));
+
+//        tempParam.alpha = 0;
+//        tempParam.a = -m_thighLength;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"RightKneePitch"));
+
+//        tempParam.alpha = 0;
+//        tempParam.a = -m_tibiaLength;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"RightAnklePitch"));
+
+//        tempParam.alpha = -mathGeneral::PI/2.0;
+//        tempParam.a = 0;
+//        tempParam.thetaOffset = 0;
+//        tempParam.d = 0;
+//        links.push_back(Link(tempParam,"RightAnkleRoll"));
+
+//        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
+//    }
+//    std::cout << "Default Test!" << std::endl;
+//    test();
+//    return true;
+    std::string default_file = (CONFIG_DIR + string("Motion/kinematics") + ".cfg");
+    std::ifstream file(default_file.c_str());
+    bool worked = false;
+    if(file.is_open())
     {
-        // Constant distances (in cm) From documentation
-
-        // Top camera
-        m_cameraTopOffsetZ = 6.79;
-        m_cameraTopOffsetX = 5.39;
-        m_cameraTopOffsetAngle = mathGeneral::deg2rad(0.0);
-
-        // Bottom Camera
-        m_cameraBottomOffsetZ = 2.381;
-        m_cameraBottomOffsetX = 4.88;
-        m_cameraBottomOffsetAngle = mathGeneral::deg2rad(40.0) + NUCamera::CameraOffset;
-
-        // Neck
-        m_neckOffsetZ = 12.65;
-
-        // Hips
-        m_hipOffsetY = 5.0;
-        m_hipOffsetZ = 8.5;
-
-        // Legs
-        m_thighLength = 10.0;
-        m_tibiaLength = 10.0;
-        m_footHeight = 4.6;
-
-        // Feet (Measured)
-        m_footInnerWidth = 4.5;
-        m_footOuterWidth = 5.0;
-        m_footForwardLength = 9.0;
-        m_footBackwardLength = 7.0;
-
-        DHParameters tempParam;
-        std::vector<Link> links;
-        Matrix startTrans;
-        Matrix endTrans;
-
-        // ---------------
-        // BOTTOM CAMERA
-        // ---------------
-        startTrans = Translation( 0, 0, m_neckOffsetZ );
-        endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
-        endTrans = endTrans * Translation(m_cameraBottomOffsetX,0,m_cameraBottomOffsetZ) * RotY(m_cameraBottomOffsetAngle);
-
-        tempParam.alpha = 0.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"Head Yaw"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = -mathGeneral::PI/2.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"Head Pitch"));
-
-        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Bottom Camera"));
-
-        // ---------------
-        // TOP CAMERA
-        // ---------------
-        startTrans = Translation( 0, 0, m_neckOffsetZ );
-        endTrans = RotX( mathGeneral::PI/2.0 )*RotY( mathGeneral::PI/2.0 );
-        endTrans = endTrans * Translation(m_cameraTopOffsetX,0,m_cameraTopOffsetZ);
-
-        links.clear();
-
-        tempParam.alpha = 0.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"Head Yaw"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = -mathGeneral::PI/2.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"Head Pitch"));
-
-        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Top Camera"));
-
-        // ---------------
-        // LEFT FOOT
-        // ---------------
-        startTrans = Translation(0.0f, m_hipOffsetY, -m_hipOffsetZ);
-        endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
-        links.clear();
-
-        tempParam.alpha = -3.0*mathGeneral::PI/4.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = -mathGeneral::PI/2.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"HipYawPitch"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = mathGeneral::PI/4.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"LeftHipRoll"));
-
-        tempParam.alpha = mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"LeftHipPitch"));
-
-        tempParam.alpha = 0;
-        tempParam.a = -m_thighLength;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"LeftKneePitch"));
-
-        tempParam.alpha = 0;
-        tempParam.a = -m_tibiaLength;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"LeftAnklePitch"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"LeftAnkleRoll"));
-
-        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
-
-        // ---------------
-        // RIGHT FOOT
-        // ---------------
-        startTrans = Translation(0.0f, -m_hipOffsetY, -m_hipOffsetZ);
-        endTrans = RotZ(mathGeneral::PI)*RotY(-mathGeneral::PI/2.0)*Translation(0,0,-m_footHeight);    // To foot
-        links.clear();
-
-        tempParam.alpha = -mathGeneral::PI/4.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = -mathGeneral::PI/2.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"HipYawPitch"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = -mathGeneral::PI/4.0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"RightHipRoll"));
-
-        tempParam.alpha = mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"RightHipPitch"));
-
-        tempParam.alpha = 0;
-        tempParam.a = -m_thighLength;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"RightKneePitch"));
-
-        tempParam.alpha = 0;
-        tempParam.a = -m_tibiaLength;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"RightAnklePitch"));
-
-        tempParam.alpha = -mathGeneral::PI/2.0;
-        tempParam.a = 0;
-        tempParam.thetaOffset = 0;
-        tempParam.d = 0;
-        links.push_back(Link(tempParam,"RightAnkleRoll"));
-
-        m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, "Left Foot"));
+       worked = LoadModelFromFile(file);
     }
-    std::cout << "Default Test!" << std::endl;
-    test();
-    return true;
+    else
+    {
+        debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
+        errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
+    }
+    file.close();
+    return worked;
 }
 
 std::string trim(std::string const& source, char const* delims = " \t\r\n")
@@ -206,7 +221,7 @@ std::string trim(std::string const& source, char const* delims = " \t\r\n")
   return result;
 }
 
-bool Kinematics::LoadModelFromFile(const std::string& fileName)
+bool Kinematics::LoadModelFromFile(std::ifstream& file)
 {
     // File Format should be of the form:
     // [Effector]
@@ -221,19 +236,16 @@ bool Kinematics::LoadModelFromFile(const std::string& fileName)
     // [Effector]
     // etc..
 
-    std::cout << "Loading model from file: " << fileName << std::endl;
     m_endEffectors.clear();
-    std::ifstream file(fileName.c_str());
     std::string line, effector;
     std::vector<Link> links;
     Matrix startTrans(4,4,true), endTrans(4,4,true);
     Matrix temp;
     bool startTrans_done = false;
 
-
     while(std::getline(file, line))
     {
-        std::cout << "Line: " << line << std::endl;
+//        std::cout << "Line: " << line << std::endl;
         if(!line.length()) continue;    // Blank Line
         if(line[0] == '#') continue;    // Comment
 
@@ -326,10 +338,10 @@ Matrix Kinematics::TranslationFromText(const std::string& text)
     std::getline(temp_stream,value,',');
     z = atof(trim(value).c_str());
 
-    std::cout << "\t" << c_prefix << std::endl;
-    std::cout << "\tx = " << x << std::endl;
-    std::cout << "\ty = " << y << std::endl;
-    std::cout << "\tz = " << z << std::endl;
+//    std::cout << "\t" << c_prefix << std::endl;
+//    std::cout << "\tx = " << x << std::endl;
+//    std::cout << "\ty = " << y << std::endl;
+//    std::cout << "\tz = " << z << std::endl;
 
     return Translation(x,y,z);
 }
@@ -356,9 +368,9 @@ Matrix Kinematics::RotationFromText(const std::string& text)
     std::getline(temp_stream,value,',');
     rot_value = atof(trim(value).c_str());
 
-    std::cout << "\t" << c_prefix << std::endl;
-    std::cout << "\taxis = " << axis << std::endl;
-    std::cout << "\trot_value = " << rot_value << std::endl;
+//    std::cout << "\t" << c_prefix << std::endl;
+//    std::cout << "\taxis = " << axis << std::endl;
+//    std::cout << "\trot_value = " << rot_value << std::endl;
 
     switch(axis)
     {
@@ -411,13 +423,13 @@ Link Kinematics::LinkFromText(const std::string& text)
     std::getline(temp_stream,value,',');
     tempParam.d = atof(trim(value).c_str());
 
-    std::cout << "\tLink:" <<std::endl;
-    std::cout << "\tjoint number = " << joint_num << std::endl;
-    std::cout << "\tjoint name = " << jointName << std::endl;
-    std::cout << "\talpha = " << tempParam.alpha << std::endl;
-    std::cout << "\ta = " << tempParam.a << std::endl;
-    std::cout << "\ttheta = " << tempParam.thetaOffset << std::endl;
-    std::cout << "\td = " << tempParam.d << std::endl;
+//    std::cout << "\tLink:" <<std::endl;
+//    std::cout << "\tjoint number = " << joint_num << std::endl;
+//    std::cout << "\tjoint name = " << jointName << std::endl;
+//    std::cout << "\talpha = " << tempParam.alpha << std::endl;
+//    std::cout << "\ta = " << tempParam.a << std::endl;
+//    std::cout << "\ttheta = " << tempParam.thetaOffset << std::endl;
+//    std::cout << "\td = " << tempParam.d << std::endl;
 
     return Link(tempParam, jointName);
 }
@@ -440,6 +452,11 @@ Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<flo
             modifiedJointValues = jointValues;
     }
     return m_endEffectors[effectorId].CalculateTransform(modifiedJointValues);
+}
+
+Matrix Kinematics::CalculateTransform(unsigned int index, const std::vector<float>& jointValues)
+{
+    return m_endEffectors[index].CalculateTransform(jointValues);
 }
 
 Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)

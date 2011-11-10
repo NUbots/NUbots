@@ -23,12 +23,13 @@ public:
     }; 
 
     bool LoadModel(const std::string& fileName = "Default");
-    bool LoadModelFromFile(const std::string& fileName);
+    bool LoadModelFromFile(std::ifstream& file);
     Matrix TranslationFromText(const std::string& text);
     Matrix RotationFromText(const std::string& text);
     Link LinkFromText(const std::string& text);
 
     Matrix CalculateTransform(Effector effectorId, const std::vector<float>& jointValues);
+    Matrix CalculateTransform(unsigned int index, const std::vector<float>& jointValues);
 
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
