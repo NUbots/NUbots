@@ -42,6 +42,7 @@ protected:
     OfflineLocalisation* m_offline_loc;
     QTextBrowser* m_fileListDisplay;
     QProgressDialog* m_progressBar;
+    QString m_previous_log_path;
 
 private:
     void MakeLayout();

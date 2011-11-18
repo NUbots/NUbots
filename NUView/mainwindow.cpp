@@ -19,6 +19,7 @@
 #include <QTabWidget>
 #include <QImage>
 #include <typeinfo>
+#include <QFileInfo>
 
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     qDebug() << "NUView is starting in: MainWindow.cpp";
     debug.open("debug.log");
     errorlog.open("error.log");
+    m_previous_log_path = "";
 
     m_platform = new NUPlatform();                      // you could make the arguement that NUView should have its own platform, for now we just use a 'blank' one
     m_blackboard = new NUBlackboard();
@@ -503,12 +505,24 @@ void MainWindow::RunOfflineLocalisation()
 
 void MainWindow::openLog()
 {
-
+    QString intial_directory = ".";
+    if(!m_previous_log_path.isEmpty())
+    {
+        intial_directory = m_previous_log_path;
+    }
     QString fileName = QFileDialog::getOpenFileName(this,
-                            tr("Open Replay File"), ".",
+                            tr("Open Replay File"), intial_directory,
                             tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
-    openLog(fileName);
-
+    if(!fileName.isEmpty())
+    {
+        QFileInfo file_info(fileName);
+        if(file_info.exists())
+        {
+            m_previous_log_path = file_info.absolutePath();
+            openLog(fileName);
+        }
+    }
+    return;
 }
 
 void MainWindow::openLog(const QString& fileName)

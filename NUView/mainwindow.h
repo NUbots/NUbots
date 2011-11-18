@@ -119,6 +119,7 @@ private:
     NUViewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
+    QString m_previous_log_path;
 
     int getNumMdiWindowType(const QString& windowType);
 

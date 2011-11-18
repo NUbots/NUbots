@@ -21,6 +21,7 @@ OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     m_reader = new LogFileReader();
     m_external_reader = false;
     m_offline_loc = new OfflineLocalisation(m_reader);
+    m_previous_log_path = "";
     MakeLayout();
 }
 
@@ -103,28 +104,59 @@ void OfflineLocalisationDialog::MakeLayout()
 
 void OfflineLocalisationDialog::OpenLogFiles()
 {
+    QString initial_path = ".";         // Default path.
+    // If there is a previous path, use that one.
+    if(!m_previous_log_path.isEmpty())
+    {
+        initial_path = m_previous_log_path;
+    }
     QString filename = QFileDialog::getOpenFileName(this,
-                            tr("Open Replay File"), ".",
+                            tr("Open Replay File"), initial_path,
                             tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
 
     if (!filename.isEmpty()){
-        m_offline_loc->OpenLogs(filename.toStdString());
+        QFileInfo file_info(filename);  // Get info on teh selected file.
+        if(file_info.exists())      // If it exists
+        {
+            m_previous_log_path = file_info.absolutePath();     // Save the directory that the file is in.
+            m_offline_loc->OpenLogs(filename.toStdString());
+        }
     }
 }
 
 void OfflineLocalisationDialog::SaveAsLocalisationLog()
 {
     if(!m_offline_loc->hasSimData()) return;
-    QString save_name = QFileDialog::getSaveFileName(this,"Save Log",QString(),"Stream (*.strm)");
-    m_offline_loc->WriteLog(save_name.toStdString());
+    QString initial_path = ".";         // Default path.
+    if(!m_previous_log_path.isEmpty())
+    {
+        initial_path = m_previous_log_path;
+    }
+    QString save_name = QFileDialog::getSaveFileName(this,"Save Log",initial_path,"Stream (*.strm)");
+    if(!save_name.isEmpty())
+    {
+        QFileInfo file_info(save_name);
+        m_previous_log_path = file_info.absolutePath();
+        m_offline_loc->WriteLog(save_name.toStdString());
+    }
     return;
 }
 
 void OfflineLocalisationDialog::SaveAsReport()
 {
     if(!m_offline_loc->hasSimData()) return;
+    QString initial_path = ".";         // Default path.
+    if(!m_previous_log_path.isEmpty())
+    {
+        initial_path = m_previous_log_path;
+    }
     QString save_name = QFileDialog::getSaveFileName(this,"Save Report",QString(),"Comma-Seperated Values (*.csv)");
-    m_offline_loc->WriteReport(save_name.toStdString());
+    if(!save_name.isEmpty())
+    {
+        QFileInfo file_info(save_name);
+        m_previous_log_path = file_info.absolutePath();
+        m_offline_loc->WriteReport(save_name.toStdString());
+    }
     return;
 }
 
