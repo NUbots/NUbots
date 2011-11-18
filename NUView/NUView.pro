@@ -37,6 +37,7 @@ win32 {
 # Input
 # HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
 INCLUDEPATH += ../
+INCLUDEPATH += ../NUview/
 INCLUDEPATH += NUViewConfig/
 HEADERS += ui_mainwindow.h \
     mainwindow.h \
