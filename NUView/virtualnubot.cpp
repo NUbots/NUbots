@@ -185,6 +185,38 @@ void virtualNUbot::generateClassifiedImage()
     return;
 }
 
+/*ADDED BY SHANNON*/
+void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const
+{
+    string filename = "../NUView/DebugFiles/";
+    string filename2;
+    switch(filedesc)
+    {
+    case GREEN_HOR_SCAN_POINTS:
+        filename += "HorScanPoints";
+        break;
+    case GREEN_HOR_HULL_POINTS:
+        filename += "HorHullPoints";
+        break;
+    }
+    ofstream out;
+    filename2 = filename + ".txt";
+    out.open(filename2.c_str());
+    if(out.good()) {
+        //debug
+        qDebug() << "Success opening " << filename2.c_str() << "\n";
+        for(unsigned int i=0; i<points.size(); i++)
+            out << points.at(i).x << " " << points.at(i).y << "\n";
+    }
+    else {
+        //debug
+        qDebug() << "Error opening " << filename2.c_str() << "\n";
+    }
+    out.close();
+}
+
+/*ADDED BY SHANNON*/
+
 void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
@@ -196,7 +228,6 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     if(!imageAvailable()) return;
     qDebug() << "Begin Process Frame";
-    std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > verticalPoints;
     std::vector< TransitionSegment > verticalsegments;
     std::vector< TransitionSegment > horizontalsegments;
@@ -233,11 +264,19 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //! Find the green edges
     std::vector< Vector2<int> > greenPoints = vision.findGreenBorderPoints(spacings,&horizonLine);
-    emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+        /*DEBUG*/
+        printPoints(greenPoints,GREEN_HOR_SCAN_POINTS);
+        /*DEBUG*/
+    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+    emit pointsDisplayChanged(greenPoints,GLDisplay::greenHorizonScanPoints);
     //qDebug() << "Find Edges: finnished";
+
     //! Find the Field border
     std::vector< Vector2<int> > boarderPoints = vision.getConvexFieldBorders(greenPoints);
     std::vector< Vector2<int> > interpolatedBoarderPoints = vision.interpolateBorders(boarderPoints,spacings);
+        /*DEBUG*/
+        printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
+        /*DEBUG*/
     emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image

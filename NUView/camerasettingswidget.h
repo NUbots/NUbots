@@ -32,7 +32,7 @@ class CameraSettings;
 class JobList;
 
 
-class cameraSettingsWidget: public QWidget
+class cameraSettingsWidget : public QWidget
 {
     Q_OBJECT
 

@@ -138,6 +138,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     networkTabs->addTab(LocWmStreamer, LocWmStreamer->objectName());
     cameraSetting = new cameraSettingsWidget(mdiArea, this);
     networkTabs->addTab(cameraSetting, cameraSetting->objectName());
+    //addDockWidget(Qt::RightDockWidgetArea,cameraSetting);
 
     //networkTabs->addTab(kick, kick->objectName());
     networkTabDock = new QDockWidget("Network");

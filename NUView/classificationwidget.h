@@ -129,6 +129,8 @@ public slots:
      */
     void updateStatistics(float* PercentageOverLapped);
 
+    void setOverlapVisible(bool isVisible);
+
 signals:
     void openLookupTableFile(QString fileName);
     void saveLookupTableFile(QString fileName);

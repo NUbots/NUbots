@@ -34,6 +34,7 @@ struct ClassifiedPacketData{
     uint8 classImage[76800];    //!< Array of unsigned 8-bit integers containing the classified image
 };
 
+enum filedesc_t {GREEN_HOR_SCAN_POINTS, GREEN_HOR_HULL_POINTS};
 
 class virtualNUbot : public QObject
 {
@@ -94,9 +95,10 @@ private:
         unsigned char colour;
     };
 /**ADDED BY SHANNON**/
-    void printPoints(const vector<LinePoint>& points) const;
-    void printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const;
-    void printOtherPoints(const vector<LinePoint>& points, ofstream& file) const;
+    void printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const;
+    //void printPoints(const vector<LinePoint>& points) const;
+    //void printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const;
+    //void printOtherPoints(const vector<LinePoint>& points, ofstream& file) const;
 /**ADDED BY SHANNON**/
 
     void processVisionFrame(const NUImage* image);
