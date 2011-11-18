@@ -9,6 +9,9 @@
 # We don't oxygen files in the repp
 /Documentation
 /Doc
+/html
+/latex
+Doxyfile
 
 # Python Ignores:
 #we don't want to include .pyc files
