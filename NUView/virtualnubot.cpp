@@ -185,7 +185,7 @@ void virtualNUbot::generateClassifiedImage()
     return;
 }
 
-/*ADDED BY SHANNON*/
+//DEBUG
 void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const
 {
     string filename = "../NUView/DebugFiles/";
@@ -197,6 +197,9 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
         break;
     case GREEN_HOR_HULL_POINTS:
         filename += "HorHullPoints";
+        break;
+    case OBSTACLE_POINTS:
+        filename += "Obstacles";
         break;
     }
     ofstream out;
@@ -215,7 +218,70 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
     out.close();
 }
 
-/*ADDED BY SHANNON*/
+//OBSTACLE DETECTION
+vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
+{
+    vector<int> result;
+    int next_diff;
+    if(prehull.size() != hull.size()) {
+        //non matching vectors - return empty result
+        return result;
+    }
+    else {
+        for(unsigned int i=0; i<hull.size(); i++) {
+            //loop through the vectors in parallel
+            next_diff = hull.at(i).y - prehull.at(i).y;
+            result.push_back(next_diff);
+        }
+        return result;
+    }
+}
+
+vector< Vector2<int> > virtualNUbot::getObstaclePositions(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                          int height_thresh, int width_min) const
+{
+    vector< Vector2<int> > result;
+    Vector2<int> next_obst;
+    Vector2<int> start, end;
+
+    vector<int> differences = getVerticalDifferences(prehull, hull);
+
+    int consecutive_hull_breaks = 0;
+    int lowest_point;
+
+    for(unsigned int i=0; i<differences.size(); i++) {
+        if(differences.at(i) > height_thresh) {
+            //there is a break
+            if(consecutive_hull_breaks == 0) {
+                //first scan of break
+                start = prehull.at(i);
+                end = prehull.at(i);
+                lowest_point = start.y;
+            }
+            else {
+                end = prehull.at(i);
+                if(end.y < lowest_point)
+                    lowest_point = end.y; //keep track of minimum
+            }
+            consecutive_hull_breaks++;
+        }
+        else {
+            //possible end of break
+            if(consecutive_hull_breaks > width_min) {
+                //break large enough to indicate obstacle
+                //  x-position given by centre of break
+                //  y-position given by lowest point in break
+                next_obst.x = start.x + end.x / 2; //centre of break
+                next_obst.y = lowest_point;
+                result.push_back(next_obst);
+            }
+            //restart
+            consecutive_hull_breaks = 0;
+        }
+    }
+    return result;
+}
+
 
 void virtualNUbot::processVisionFrame()
 {
@@ -237,6 +303,9 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     std::vector< Vector2<int> > horizontalPoints;
     //std::vector<LSFittedLine> fieldLines;
 
+    //OBSTACLE DETECTION
+    std::vector< Vector2<int> > pre_hull_points;
+    std::vector< Vector2<int> > hull_points;
 
     int tempNumScanLines = 0;
 
@@ -264,6 +333,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //! Find the green edges
     std::vector< Vector2<int> > greenPoints = vision.findGreenBorderPoints(spacings,&horizonLine);
+
+    pre_hull_points = greenPoints;  //make a copy for obstacle detection
         /*DEBUG*/
         printPoints(greenPoints,GREEN_HOR_SCAN_POINTS);
         /*DEBUG*/
@@ -274,9 +345,19 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //! Find the Field border
     std::vector< Vector2<int> > boarderPoints = vision.getConvexFieldBorders(greenPoints);
     std::vector< Vector2<int> > interpolatedBoarderPoints = vision.interpolateBorders(boarderPoints,spacings);
+
+    hull_points = interpolatedBoarderPoints;    //make a copy for obstacle detection
         /*DEBUG*/
         printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
         /*DEBUG*/
+
+    //OBSTACLE DETECTION
+    vector< Vector2<int> > obstacle_points = getObstaclePositions(pre_hull_points, hull_points, 10, 3);
+        /*DEBUG*/
+        printPoints(obstacle_points,GREEN_HOR_HULL_POINTS);
+        /*DEBUG*/
+
+
     emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
     //qDebug() << "Find Field border: finnished";
     //! Scan Below Horizon Image
