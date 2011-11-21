@@ -127,7 +127,10 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
         StatisticsLayout->addWidget(PercentageSelectedLabel[col],col,3);
     }
     StatisticsGroupBox = new QGroupBox(tr("OverLapping Colour Statistics"));
+    StatisticsGroupBox->setCheckable(true);
     StatisticsGroupBox->setLayout(StatisticsLayout);
+    connect(StatisticsGroupBox,SIGNAL(toggled(bool)),this,SLOT(setOverlapVisible(bool)));
+    StatisticsGroupBox->setChecked(false);
 
     groupLayout = new QVBoxLayout;
     groupLayout->addLayout(selectedColourLayout);
@@ -211,6 +214,23 @@ ClassificationWidget::~ClassificationWidget()
     delete boundaryGroupBox;
     delete window;
     return;
+}
+
+void ClassificationWidget::setOverlapVisible(bool isVisible)
+{
+    QLayoutItem *item = 0;
+    QWidget *widget = 0;
+    QGridLayout *layout = StatisticsLayout;
+    for(int i = 0; i < layout->rowCount(); ++i)
+    {
+        for(int j = 0; j < layout->columnCount(); ++j)
+        {
+            item = layout->itemAtPosition(i,j);
+            widget=item?item->widget():0;
+            if(widget)
+                widget->setVisible(isVisible);
+        }
+    }
 }
 
 void ClassificationWidget::autoSoftColourStateChanged(int newState){
