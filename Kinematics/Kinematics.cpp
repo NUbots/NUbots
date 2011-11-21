@@ -9,10 +9,9 @@
 
 using namespace TransformMatrices;
 
-//! TODO: Make this function load from a file.
-bool Kinematics::LoadModel(const std::string& fileName)
+bool Kinematics::LoadModel()
 {
-    std::string default_file = (CONFIG_DIR + string("Motion/kinematics") + ".cfg");
+    const std::string default_file = (CONFIG_DIR + string("Motion/kinematics") + ".cfg");
     std::ifstream file(default_file.c_str());
     bool worked = false;
     if(file.is_open())
@@ -21,6 +20,7 @@ bool Kinematics::LoadModel(const std::string& fileName)
     }
     else
     {
+        // File was not opened correctly. Send out a warning/error message.
         debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
         errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
     }
@@ -160,11 +160,6 @@ Matrix Kinematics::TranslationFromText(const std::string& text)
     std::getline(temp_stream,value,',');
     z = atof(trim(value).c_str());
 
-//    std::cout << "\t" << c_prefix << std::endl;
-//    std::cout << "\tx = " << x << std::endl;
-//    std::cout << "\ty = " << y << std::endl;
-//    std::cout << "\tz = " << z << std::endl;
-
     return Translation(x,y,z);
 }
 
@@ -189,10 +184,6 @@ Matrix Kinematics::RotationFromText(const std::string& text)
     // Get rotation value.
     std::getline(temp_stream,value,',');
     rot_value = atof(trim(value).c_str());
-
-//    std::cout << "\t" << c_prefix << std::endl;
-//    std::cout << "\taxis = " << axis << std::endl;
-//    std::cout << "\trot_value = " << rot_value << std::endl;
 
     switch(axis)
     {
@@ -245,36 +236,9 @@ Link Kinematics::LinkFromText(const std::string& text)
     std::getline(temp_stream,value,',');
     tempParam.d = atof(trim(value).c_str());
 
-//    std::cout << "\tLink:" <<std::endl;
-//    std::cout << "\tjoint number = " << joint_num << std::endl;
-//    std::cout << "\tjoint name = " << jointName << std::endl;
-//    std::cout << "\talpha = " << tempParam.alpha << std::endl;
-//    std::cout << "\ta = " << tempParam.a << std::endl;
-//    std::cout << "\ttheta = " << tempParam.thetaOffset << std::endl;
-//    std::cout << "\td = " << tempParam.d << std::endl;
-
     return Link(tempParam, jointName);
 }
 
-Matrix Kinematics::CalculateTransform(Effector effectorId, const std::vector<float>& jointValues)
-{
-    std::vector<float> modifiedJointValues;
-
-    switch(effectorId)
-    {
-        case bottomCamera:
-        case topCamera:
-            modifiedJointValues = ReOrderKneckJoints(jointValues);
-            break;
-        case leftFoot:
-        case rightFoot:
-            modifiedJointValues = ReOrderLegJoints(jointValues);
-            break;
-        default:
-            modifiedJointValues = jointValues;
-    }
-    return m_endEffectors[effectorId].CalculateTransform(modifiedJointValues);
-}
 
 Matrix Kinematics::CalculateTransform(unsigned int index, const std::vector<float>& jointValues)
 {
@@ -396,38 +360,8 @@ std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldC
     return result;
 }
 
- Rectangle Kinematics::CalculateFootPosition(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot)
+double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix)
 {
-    if((theFoot != leftFoot) && (theFoot != rightFoot)) return Rectangle();
-    Matrix totalTransform = InverseMatrix(supportFootTransformMatrix) * theFootTransformMatrix;
-
-    // Select 2 corners to get total rect area
-    Matrix frontRightPoint(4, 1);
-    Matrix backLeftPoint(4, 1);
-    if(theFoot == leftFoot)
-    {
-        frontRightPoint[1][0] = m_footInnerWidth;
-        backLeftPoint[1][0] = -m_footOuterWidth;
-    }
-    else
-    {
-        frontRightPoint[1][0] = m_footOuterWidth;
-        backLeftPoint[1][0] = -m_footInnerWidth;
-    }
-
-    frontRightPoint[0][0] = m_footForwardLength;
-    backLeftPoint[0][0] = -m_footBackwardLength;
-    frontRightPoint[3][0] = 1.0;
-    backLeftPoint[3][0] = 1.0;
-
-    Matrix frontRightResult = totalTransform * frontRightPoint;
-    Matrix backLeftResult = totalTransform * backLeftPoint;
-    return Rectangle(backLeftResult[0][0], frontRightResult[0][0], backLeftResult[1][0], frontRightResult[1][0]);
-}
-
-double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix, Effector theFoot)
-{
-    if((theFoot != leftFoot) && (theFoot != rightFoot)) return 0.0;
     Matrix totalTransform = InverseMatrix(supportFootTransformMatrix) * theFootTransformMatrix;
 
     // Use centre of the foot
@@ -437,26 +371,6 @@ double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransfor
     Matrix result = totalTransform * footCentre;
     return result[2][0];
 }
-
-float Kinematics::CalculateRadialLegLength(const std::vector<float>& legJoints)
-{
-    float kneeAngle = legJoints[3];
-    // Using law of cosines.
-    return sqrt( pow(m_thighLength,2) + pow(m_tibiaLength,2) - 2*m_thighLength*m_tibiaLength*cos(mathGeneral::PI/2.0f - kneeAngle));
-}
-
-float Kinematics::CalculateHipPitchAngleForRelYPosition(const std::vector<float>& legJoints, float relYPos)
-{
-    float radialLegLength = CalculateRadialLegLength(legJoints);
-    return asin(relYPos / radialLegLength);
-}
-/*
-float Kinematics::CalculateRelY(const vector<float>& legJoints, float relYPos)
-{
-    float radialLegLength = CalculateRadialLegLength(legJoints);
-    return asin(relYPos / radialLegLength);
-}
-*/
 
 Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMatrix, Vector2<float> position)
 {
@@ -471,69 +385,4 @@ Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMa
     returnResult.x = result[0][0];
     returnResult.y = result[1][0];
     return returnResult;
-}
-
-std::vector<float> Kinematics::calculateInverseKinematicsLegPrimary(const Matrix& desiredPose, Effector theFoot)
-{
-    Matrix Foot2Torso = desiredPose;
-    float legOffset = 0.0f;
-    if(theFoot == leftFoot)
-    {
-        legOffset = m_hipOffsetY;
-    }
-    else if(theFoot == rightFoot)
-    {
-        legOffset = -m_hipOffsetY;
-    }
-    Matrix Foot2Hip = Translation(0.0f,legOffset,0.0f) * Foot2Torso;
-    Matrix Foot2HipOrth = RotX(mathGeneral::deg2rad(45.0f)) * Foot2Hip;
-    Matrix HipOrth2Foot = InverseMatrix(Foot2HipOrth);
-    float transx = HipOrth2Foot[0][3];
-    float transy = HipOrth2Foot[1][3];
-    float transz = HipOrth2Foot[2][3];
-    float translationVectorLength = sqrt(pow(transx,2) + pow(transy,2) + pow(transz,2));
-    float kneeInterior = acos((pow(m_thighLength,2) + pow(m_tibiaLength,2) - pow(translationVectorLength,2)) / (2 * m_thighLength * m_tibiaLength));
-    float kneeAngle = mathGeneral::PI - kneeInterior;
-
-    float footPitch1 = acos((pow(m_tibiaLength,2) + pow(translationVectorLength,2) - pow(m_thighLength,2)) / (2*m_tibiaLength*translationVectorLength));
-    float footPitch2 = atan2(transx,sqrt(pow(transy,2) + pow(transz,2)));
-    float footPitchAngle = footPitch1 + footPitch2;
-    float footRollAngle = atan2(transy, transz);
-
-    Matrix Thigh2Foot = RotX(footRollAngle) * RotY(footPitchAngle) * Translation(0.0f,0.0f,m_tibiaLength) * RotY(kneeAngle) * Translation(0.0f,0.0f,m_thighLength);
-    Matrix HipOrth2Thigh = InverseMatrix(Thigh2Foot) * HipOrth2Foot;
-    float hipRollAngle = acos(HipOrth2Thigh[2][1]) - mathGeneral::PI / 4.0f;
-    float hipYawAngle = atan2(-HipOrth2Thigh[0][1],HipOrth2Thigh[1][1]);
-    float hipPitchAngle = atan2(-HipOrth2Thigh[2][0],HipOrth2Thigh[2][2]);
-    std::vector<float> resultingAngles(6,0.0f);
-    resultingAngles[0] = hipRollAngle;
-    resultingAngles[1] = hipPitchAngle;
-    resultingAngles[2] = hipYawAngle;
-    resultingAngles[3] = kneeAngle;
-    resultingAngles[4] = footRollAngle;
-    resultingAngles[5] = footPitchAngle;
-    return resultingAngles;
-}
-
-bool Kinematics::test()
-{
-    std::vector<float> headJoints(2,0.0f);
-    headJoints[0] = -0.15;
-    headJoints[1] = 0.3;
-    std::vector<float> legJoints(6,0.0f);
-    Matrix top = CalculateTransform(Kinematics::topCamera, headJoints);
-    Matrix bottom = CalculateTransform(Kinematics::bottomCamera, headJoints);
-    Matrix left = CalculateTransform(Kinematics::leftFoot, legJoints);
-    Matrix right = CalculateTransform(Kinematics::rightFoot, legJoints);
-
-    std::cout << "Top Camera Transform: " << std::endl;
-    std::cout << top << std::endl;
-    std::cout << "Bottom Camera Transform: " << std::endl;
-    std::cout << bottom << std::endl;
-    std::cout << "Left foot Transform: " << std::endl;
-    std::cout << left << std::endl;
-    std::cout << "Right foot transform: " << std::endl;
-    std::cout << right << std::endl;
-
-    return true;
 }
