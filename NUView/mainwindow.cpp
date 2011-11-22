@@ -34,6 +34,8 @@
 
 #include "offlinelocalisationdialog.h"
 
+#include "Kinematics/Kinematics.h"
+
 using namespace std;
 ofstream debug;
 ofstream errorlog;
@@ -171,6 +173,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     //
     //glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
     //
+    Kinematics test;
+    test.LoadModel();
 }
 
 MainWindow::~MainWindow()
@@ -510,6 +514,18 @@ void MainWindow::openLog(const QString& fileName)
     if (!fileName.isEmpty()){
         LogReader->openFile(fileName);
         LogReader->firstFrame();
+
+//        std::ofstream object_out("/Users/steven/object.csv", ios::trunc);
+//        while(LogReader->nextFrameAvailable())
+//        {
+//            LogReader->nextFrame();
+//            FieldObjects* objectData = LogReader->GetObjectData();
+//            object_out << objectData->self.wmX() << "," << objectData->self.wmY() << "," << objectData->self.Heading();
+//            object_out << "," << objectData->self.sdX() << "," << objectData->self.sdY() << "," << objectData->self.sdHeading();
+//            object_out << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].X() << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].Y();
+//            object_out << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].sdX() << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].sdY() <<std::endl;
+//        }
+//        object_out.close();
     }
     /*
     if (!fileName.isEmpty()){

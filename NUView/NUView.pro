@@ -178,7 +178,10 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/TeamInformation/TeamInformation.h \
     ../Tools/FileFormats/LogRecorder.h \
     ../Tools/FileFormats/FileFormatException.h \
-    offlinelocalisationdialog.h
+    offlinelocalisationdialog.h \
+    ../Tools/Math/Moment.h \
+    ../Localisation/SelfModel.h \
+    ../Localisation/SelfUKF.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -255,6 +258,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/KF.cpp \
+    ../Localisation/SelfUKF.cpp \
     ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
@@ -301,6 +305,8 @@ SOURCES += mainwindow.cpp \
     GameInformationDisplayWidget.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
+    ../Tools/Math/Moment.cpp \
+    ../Localisation/SelfModel.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

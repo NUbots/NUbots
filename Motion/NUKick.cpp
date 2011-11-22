@@ -109,13 +109,13 @@ void NUKick::loadKickParameters()
     // Ankle Pitch
     m_rightLegLimits.push_back(jointLimit(-1.186448, 0.932056));
 
-    const float footWidth = m_kinematicModel->getFootInnerWidth() + m_kinematicModel->getFootOuterWidth();
-    float footInnerWidth = m_kinematicModel->getFootInnerWidth();
+    const float footWidth = 9.5f;
+    float footInnerWidth = 4.5f;
     m_footWidth = footWidth;
     m_ballRadius = 3.5f;
     const float yReachFwd = 2.0f;
     const float yReachSide = 20.0f;
-    const float xMin = m_kinematicModel->getFootForwardLength() - 1;
+    const float xMin = 9.0f - 1;
     const float xReachFwd = xMin + 10.0f;
     const float xReachSide = 30.0f;
     float yMin = footInnerWidth + 2.0f;
@@ -897,13 +897,13 @@ bool NUKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeight
     {
         targetLeg = NUData::RLeg;
         otherLeg = NUData::LLeg;
-        targetDisplacement = 2 * (0.5 - targetWeightPercentage) * m_kinematicModel->getHipOffsetY();
+        targetDisplacement = 2 * (0.5 - targetWeightPercentage) * 5.0f;
     }
     else if(p_targetLeg == leftLeg)
     {
         targetLeg = NUData::LLeg;
         otherLeg = NUData::RLeg;
-        targetDisplacement = 2 * (targetWeightPercentage - 0.5) * m_kinematicModel->getHipOffsetY();
+        targetDisplacement = 2 * (targetWeightPercentage - 0.5) * 5.0f;
     }
     else return true;
 
@@ -920,9 +920,10 @@ bool NUKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeight
     {
         if(!m_stateCommandGiven)
         {
-
-            float targetLegLength = m_kinematicModel->CalculateRadialLegLength(targetLegPositions);
-            float otherLegLength = m_kinematicModel->CalculateRadialLegLength(otherLegPositions);
+            const float thigh_length = 10.0f;
+            const float tibia_length = 10.0f;
+            float targetLegLength = sqrt( pow(thigh_length,2) + pow(tibia_length,2) - 2*thigh_length*tibia_length*cos(mathGeneral::PI/2.0f - targetLegPositions[3]));
+            float otherLegLength = sqrt( pow(thigh_length,2) + pow(tibia_length,2) - 2*thigh_length*tibia_length*cos(mathGeneral::PI/2.0f - otherLegPositions[3]));
             float targetLength;
             if(targetLegLength < otherLegLength)
             {
@@ -1233,7 +1234,6 @@ bool NUKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
     NUActionatorsData::id_t kickingHipPitch;
     NUActionatorsData::id_t kickingKneePitch;
     NUActionatorsData::id_t kickingAnklePitch;
-    Kinematics::Effector k_kickingLeg;
     jointLimit hipPitchJointLimits;
     jointLimit kneePitchJointLimits;
     jointLimit anklePitchJointLimits;
@@ -1248,7 +1248,6 @@ bool NUKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
         kickingHipPitch = NUActionatorsData::RHipPitch;
         kickingKneePitch = NUActionatorsData::RKneePitch;
         kickingAnklePitch = NUActionatorsData::RAnklePitch;
-        k_kickingLeg = Kinematics::rightFoot;
         validData = validData && m_data->get(NUSensorsData::RLegTransform, kltransform);
         kickingLegTransform = Matrix4x4fromVector(kltransform);
         hipPitchJointLimits = m_rightLegLimits[1];
@@ -1261,7 +1260,6 @@ bool NUKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
         kickingHipPitch = NUActionatorsData::LHipPitch;
         kickingKneePitch = NUActionatorsData::LKneePitch;
         kickingAnklePitch = NUActionatorsData::LAnklePitch;
-        k_kickingLeg = Kinematics::leftFoot;
         validData = validData && m_data->get(NUSensorsData::LLegTransform, kltransform);
         kickingLegTransform = Matrix4x4fromVector(kltransform);
         hipPitchJointLimits = m_leftLegLimits[1];
@@ -1282,7 +1280,7 @@ bool NUKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
     {
         const float targetHeight = 5.0f;
 
-        float currentHeightOffGround = m_kinematicModel->CalculateRelativeFootHeight(supportLegTransform,kickingLegTransform,k_kickingLeg);
+        float currentHeightOffGround = m_kinematicModel->CalculateRelativeFootHeight(supportLegTransform,kickingLegTransform);
         #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "X Position = " << xPos << "foot Position = (" << footPosition[0] << "," << footPosition[1] << "," << footPosition[2] << ")" << endl;
         debug << "Calculated height of foot from ground  = " << currentHeightOffGround << endl;

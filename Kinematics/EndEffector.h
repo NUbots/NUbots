@@ -17,7 +17,8 @@ public:
                 const Matrix& endTrans,
                 const std::string& effectorName = std::string("Unknown"));
     Matrix CalculateTransform(std::vector<float> jointValues);
-    std::string Name() {return m_name;};
+    std::string name() const {return m_name;}
+    const std::vector<Link>* links() const {return &m_links;}
 };
 
 #endif // ENDEFFECTOR_H

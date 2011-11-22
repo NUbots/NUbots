@@ -65,8 +65,8 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
   sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
   sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
-  sqrtOfProcessNoise[3][3] = 10.0; // Ball X.
-  sqrtOfProcessNoise[4][4] = 10.0; // Ball Y.
+  sqrtOfProcessNoise[3][3] = 5.0; // Ball X.
+  sqrtOfProcessNoise[4][4] = 5.0; // Ball Y.
   sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
   sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
 
