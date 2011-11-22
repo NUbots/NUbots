@@ -206,8 +206,6 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
     filename2 = filename + ".txt";
     out.open(filename2.c_str());
     if(out.good()) {
-        //debug
-        qDebug() << "Success opening " << filename2.c_str() << "\n";
         for(unsigned int i=0; i<points.size(); i++)
             out << points.at(i).x << " " << points.at(i).y << "\n";
     }
@@ -216,21 +214,72 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
         qDebug() << "Error opening " << filename2.c_str() << "\n";
     }
     out.close();
+
+    //cumulative
+    filename2 = filename + "_cumulative.txt";
+    out.open(filename2.c_str(), ios::out | ios::app);
+    if(out.good()) {
+        for(unsigned int i=0; i<points.size(); i++)
+            out << points.at(i).x << " " << points.at(i).y << "\n";
+        out << "\n";
+    }
+    else {
+        //debug
+        qDebug() << "Error opening " << filename2.c_str() << "\n";
+    }
+    out.close();
+}
+
+void virtualNUbot::matchHorizons(vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull, int screenHeight) const
+{
+    //Makes sure the horizon pre and post hull vectors match one-to-one in x value - will insert
+    //points into prehull to do so - these points will have y value = screenHeight
+
+    if(prehull.size() != hull.size()) {
+        //only change if mismatched
+        Vector2<int> insert, cur_hull, cur_prehull;
+        vector< Vector2<int> >::iterator prehull_it;
+        vector< Vector2<int> >::const_iterator hull_it;
+
+        //non matching vectors - need to fix prehull
+        prehull_it = prehull.begin();
+        hull_it = hull.begin();
+
+        while(hull_it != hull.end())
+        {
+            //loop through hull points
+            cur_hull = *hull_it;
+            cur_prehull = *prehull_it;
+            if(cur_hull.x != cur_prehull.x)
+            {
+                //only fix if the x values don't match
+                insert.x = cur_prehull.x;
+                insert.y = screenHeight;
+                prehull_it = prehull.insert(prehull_it,insert);
+            }
+            hull_it++;
+            prehull_it++;
+        }
+    }
 }
 
 //OBSTACLE DETECTION
 vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
 {
+    //returns a vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
     vector<int> result;
     int next_diff;
     if(prehull.size() != hull.size()) {
         //non matching vectors - return empty result
+        //debug
+        qDebug() << "Non matching vectors - no obstacle detection\n";
+
         return result;
     }
     else {
         for(unsigned int i=0; i<hull.size(); i++) {
             //loop through the vectors in parallel
-            next_diff = hull.at(i).y - prehull.at(i).y;
+            next_diff = prehull.at(i).y - hull.at(i).y;  //prehull has larger y value (counts down from top)
             result.push_back(next_diff);
         }
         return result;
@@ -250,7 +299,7 @@ vector< Vector2<int> > virtualNUbot::getObstaclePositions(const vector< Vector2<
     int lowest_point;
 
     for(unsigned int i=0; i<differences.size(); i++) {
-        if(differences.at(i) > height_thresh) {
+        if(differences.at(i) >= height_thresh) {
             //there is a break
             if(consecutive_hull_breaks == 0) {
                 //first scan of break
@@ -260,14 +309,14 @@ vector< Vector2<int> > virtualNUbot::getObstaclePositions(const vector< Vector2<
             }
             else {
                 end = prehull.at(i);
-                if(end.y < lowest_point)
+                if(end.y > lowest_point)
                     lowest_point = end.y; //keep track of minimum
             }
             consecutive_hull_breaks++;
         }
         else {
             //possible end of break
-            if(consecutive_hull_breaks > width_min) {
+            if(consecutive_hull_breaks >= width_min) {
                 //break large enough to indicate obstacle
                 //  x-position given by centre of break
                 //  y-position given by lowest point in break
@@ -282,6 +331,64 @@ vector< Vector2<int> > virtualNUbot::getObstaclePositions(const vector< Vector2<
     return result;
 }
 
+vector<ObjectCandidate> virtualNUbot::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                          int height_thresh, int width_min) const
+{
+    vector<ObjectCandidate> result;
+    ObjectCandidate next_obst;
+    Vector2<int> start, end, top_left, bottom_right;
+    int width, height;
+
+    vector<int> differences = getVerticalDifferences(prehull, hull);
+
+    int consecutive_hull_breaks = 0;
+    int lowest_point;
+
+    for(unsigned int i=0; i<differences.size(); i++) {
+        if(differences.at(i) >= height_thresh) {
+            //there is a break
+            if(consecutive_hull_breaks == 0) {
+                //first scan of break
+                start = prehull.at(i);
+                end = prehull.at(i);
+                lowest_point = start.y;
+                height = lowest_point - hull.at(i).y;
+            }
+            else {
+                end = prehull.at(i);
+                if(end.y > lowest_point) {
+                    lowest_point = end.y; //keep track of minimum
+                    height = lowest_point - hull.at(i).y;
+                }
+            }
+            consecutive_hull_breaks++;
+        }
+        else {
+            //possible end of break
+            if(consecutive_hull_breaks >= width_min) {
+                //break large enough to indicate obstacle
+                //  x-position given by centre of break
+                //  y-position given by lowest point in break
+                width = start.x - end.x;
+                //next_obst.x = width / 2; //centre of break
+                //next_obst.y = lowest_point;
+
+                top_left.x = start.x;
+                top_left.y = lowest_point - height;
+                bottom_right.x = end.x;
+                bottom_right.y = lowest_point;
+
+                next_obst.setTopLeft(top_left);
+                next_obst.setBottomRight(bottom_right);
+
+                result.push_back(next_obst);
+            }
+            //restart
+            consecutive_hull_breaks = 0;
+        }
+    }
+    return result;
+}
 
 void virtualNUbot::processVisionFrame()
 {
@@ -324,7 +431,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
     vision.AllFieldObjects->preProcess(image->m_timestamp);
     //qDebug() << "Image Pre-processed";
-    int spacings = (int)image->getWidth()/20;
+    //int spacings = (int)image->getWidth()/20;
+    int spacings = (int)image->getWidth()/40;
     //qDebug() << "Scan Spacing calculated";
     vision.setLUT(classificationTable);
     //qDebug() << "LUT set";
@@ -352,9 +460,15 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
         /*DEBUG*/
 
     //OBSTACLE DETECTION
-    vector< Vector2<int> > obstacle_points = getObstaclePositions(pre_hull_points, hull_points, 10, 3);
+    int width_min = 2;
+    int height_thresh = 20;
+
+    //matchHorizons(pre_hull_points, hull_points, vision.getImageHeight());
+    vector< Vector2<int> > obstacle_points = getObstaclePositions(pre_hull_points, hull_points, height_thresh, width_min);
+    vector<ObjectCandidate> obstacle_candidates = getObstacleCandidates(pre_hull_points, hull_points, height_thresh, width_min);
         /*DEBUG*/
-        printPoints(obstacle_points,GREEN_HOR_HULL_POINTS);
+        printPoints(obstacle_points,OBSTACLE_POINTS);
+        candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
         /*DEBUG*/
 
 

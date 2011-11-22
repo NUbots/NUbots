@@ -99,9 +99,12 @@ private:
     void printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const;
 
     //OBSTACLE DETECTION METHODS
+    void matchHorizons(vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull, int screenHeight) const;
     vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
     vector< Vector2<int> > getObstaclePositions(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
                                                 int height_thresh, int width_min) const;
+    vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                                  int height_thresh, int width_min) const;
 /**ADDED BY SHANNON**/
 
     void processVisionFrame(const NUImage* image);

@@ -819,6 +819,7 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
     std::vector< Vector2<int> > results;
     //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
 
+    bool pixel_pushed;
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
     //debug << width << " , "<< height << endl;
@@ -826,8 +827,12 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < width; x+=scanSpacing)
     {
+        pixel_pushed = false;
         yStart = (int)horizonLine->findYFromX(x);
-        if(yStart >= height) continue;
+        if(yStart >= height) {
+            results.push_back(Vector2<int>(x,height));    //ensure there is always a point at least at the bottom of the image
+            continue;
+        }
         if(yStart < 0) yStart = 0;
         consecutiveGreenPixels = 0;
         for (int y = yStart; y < height; y++)
@@ -843,9 +848,12 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
             if(consecutiveGreenPixels >= 10)
             {
                 results.push_back(Vector2<int>(x,y-consecutiveGreenPixels+1));
+                pixel_pushed = true;
                 break;
             }
         }
+        if(!pixel_pushed)
+            results.push_back(Vector2<int>(x,height));    //ensure there is always a point at least at the bottom of the image
     }
     return results;
 }
