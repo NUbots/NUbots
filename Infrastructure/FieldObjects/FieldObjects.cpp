@@ -404,6 +404,44 @@ std::vector<StationaryObject*> FieldObjects::getExpectedAmbiguousDecisions(float
     return expectedObjects;
 }
 
+std::string FieldObjects::ambiguousName(unsigned int id)
+{
+    std::string name;
+    switch(id)
+    {
+        case FO_ROBOT_UNKNOWN:
+            name = "Unknown Robot";
+            break;
+        case FO_BLUE_ROBOT_UNKNOWN:
+            name = "Unknown Blue Robot";
+            break;
+        case FO_PINK_ROBOT_UNKNOWN:
+            name = "Unknown Pink Robot";
+            break;
+        case FO_BLUE_GOALPOST_UNKNOWN:
+            name = "Unknown Blue Goal Post";
+            break;
+        case FO_YELLOW_GOALPOST_UNKNOWN:
+            name = "Unknown Yellow Goal Post";
+            break;
+        case FO_CORNER_UNKNOWN_INSIDE_L:
+            name = "Unknown Inside L";
+            break;
+        case FO_CORNER_UNKNOWN_OUTSIDE_L:
+            name = "Unknown Outside L";
+            break;
+        case FO_CORNER_UNKNOWN_T:
+            name = "Unknown T";
+            break;
+        case FO_PENALTY_UNKNOWN:
+            name = "Unknown Penalty Spot";
+            break;
+        default:
+            name = "Unknown";
+    }
+    return name;
+}
+
 std::string FieldObjects::toString(bool visibleOnly) const
 {
     std::stringstream result;
