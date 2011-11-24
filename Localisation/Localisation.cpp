@@ -163,11 +163,15 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         return;
     }
 
-        if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
-        {
-            m_hasGps = true;
-        }
-    #ifndef USE_VISION
+    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
+    {
+        m_hasGps = true;
+    }
+
+    vector<float> odo;
+    bool odom_available = sensor_data->getOdometry(odo);
+
+    #if !defined(USE_VISION) || 1
         // If vision is disabled, gps coordinates are used in its place to trach location.
         vector<float> gps;
         float compass;
@@ -180,8 +184,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             return;
         }
     #else
-        vector<float> odo;
-        if (sensor_data->getOdometry(odo))
+        if (odom_available)
         {
             float fwd = odo[0];
             float side = odo[1];

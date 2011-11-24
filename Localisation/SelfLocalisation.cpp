@@ -13,7 +13,7 @@
 #include <sstream>
 #include "nubotdataconfig.h"
 #include "nubotconfig.h"
- 
+
 #include <assert.h>
 
 
@@ -217,9 +217,22 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     // Check if processing is required.
     bool processing_required = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
 
+    // retrieve gps data
     if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
     {
         m_hasGps = true;
+    }
+
+    // Retrieve odometry data
+    vector<float> odo;
+    bool odom_ok = sensor_data->getOdometry(odo);
+
+    if(processing_required == false)
+    {
+        #if LOC_SUMMARY > 0
+        m_frame_log << "Processing Cancelled." << std::endl;
+        #endif
+        return;
     }
 
 #ifndef USE_VISION
@@ -235,18 +248,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
         return;
     }
 #else
-
-    // Retrieve odometry data
-    vector<float> odo;
-    bool odom_ok = sensor_data->getOdometry(odo);
-
-    if(processing_required == false)
-    {
-        #if LOC_SUMMARY > 0
-        m_frame_log << "Processing Cancelled." << std::endl;
-        #endif
-        return;
-    }
 
     if (odom_ok)
     {
@@ -1589,6 +1590,7 @@ bool model_alpha_lesser(Model* modelA, Model* modelB)
 */
 const Model* SelfLocalisation::getBestModel() const
 {
+    assert(m_models.size() > 0);
     Model* result;
     ModelContainer::const_iterator best_mod_it;
 
