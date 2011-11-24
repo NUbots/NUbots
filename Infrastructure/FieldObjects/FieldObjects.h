@@ -82,17 +82,20 @@ class FieldObjects: public TimestampedData
 
                 // New unknown goal posts
                 FO_BLUE_GOALPOST_UNKNOWN 	= 3,
-                FO_YELLOW_GOALPOST_UNKNOWN = 4,
+                FO_YELLOW_GOALPOST_UNKNOWN      = 4,
 
                 //New Unknown corners
                 FO_CORNER_UNKNOWN_INSIDE_L 	= 5,
                 FO_CORNER_UNKNOWN_OUTSIDE_L 	= 6,
-                FO_CORNER_UNKNOWN_T 	= 7,
+                FO_CORNER_UNKNOWN_T             = 7,
 
                 //New Unknown Penalty Spots
-                FO_PENALTY_UNKNOWN = 8,
+                FO_PENALTY_UNKNOWN              = 8,
 
-                NUM_AMBIGUOUS_FIELD_OBJECTS = 9
+                //New Unknown Obstacles
+                FO_OBSTACLE                     = 9,
+
+                NUM_AMBIGUOUS_FIELD_OBJECTS     = 10
             };
             double m_timestamp;
             Self self;

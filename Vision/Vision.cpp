@@ -297,56 +297,54 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
     //! Identify Field Objects
 
-    /**INCLUDED BY SHANNON**/
-        std::vector< ObjectCandidate > HorizontalLineCandidates1;
-        std::vector< ObjectCandidate > HorizontalLineCandidates2;
-        std::vector< ObjectCandidate > HorizontalLineCandidates3;
-        std::vector< ObjectCandidate > HorizontalLineCandidates;
-        std::vector< ObjectCandidate > VerticalLineCandidates;
-        std::vector< TransitionSegment > LeftoverPoints1;
-        std::vector< TransitionSegment > LeftoverPoints2;
-        std::vector< TransitionSegment > LeftoverPoints3;
 
-        std::vector< TransitionSegment > LeftoverPoints;
-        std::vector< ObjectCandidate > LineCandidates;
+    std::vector< ObjectCandidate > HorizontalLineCandidates1;
+    std::vector< ObjectCandidate > HorizontalLineCandidates2;
+    std::vector< ObjectCandidate > HorizontalLineCandidates3;
+    std::vector< ObjectCandidate > HorizontalLineCandidates;
+    std::vector< ObjectCandidate > VerticalLineCandidates;
+    std::vector< TransitionSegment > LeftoverPoints1;
+    std::vector< TransitionSegment > LeftoverPoints2;
+    std::vector< TransitionSegment > LeftoverPoints3;
 
-        validColours.clear();
-        validColours.push_back(ClassIndex::white);
-        //validColours.push_back(ClassIndex::blue);
+    std::vector< TransitionSegment > LeftoverPoints;
+    std::vector< ObjectCandidate > LineCandidates;
+
+    validColours.clear();
+    validColours.push_back(ClassIndex::white);
+    //validColours.push_back(ClassIndex::blue);
 
 
-        method = Vision::PRIMS;
-        //HorizontalLineCandidates = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.001, 10000, 4, LeftoverPoints);
-        //VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4,LeftoverPoints);
+    method = Vision::PRIMS;
+    //HorizontalLineCandidates = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.001, 10000, 4, LeftoverPoints);
+    //VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings,4,LeftoverPoints);
 
-        HorizontalLineCandidates1 = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.000001, 10000000, 3, LeftoverPoints1);
-        HorizontalLineCandidates2 = classifyCandidates(LeftoverPoints1, points,validColours, spacings*2, 0.000001, 10000000, 3, LeftoverPoints2);
-        HorizontalLineCandidates3 = classifyCandidates(LeftoverPoints2, points,validColours, spacings*4, 0.000001, 10000000, 3, LeftoverPoints3);
-        HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates1.begin(),HorizontalLineCandidates1.end());
-        HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates2.begin(),HorizontalLineCandidates2.end());
-        HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates3.begin(),HorizontalLineCandidates3.end());
-        LeftoverPoints.insert(LeftoverPoints.end(),LeftoverPoints3.begin(),LeftoverPoints3.end());
-        VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,3,LeftoverPoints);
-        LeftoverPoints.clear();
+    HorizontalLineCandidates1 = classifyCandidates(LineDetector.horizontalLineSegments, points,validColours, spacings, 0.000001, 10000000, 3, LeftoverPoints1);
+    HorizontalLineCandidates2 = classifyCandidates(LeftoverPoints1, points,validColours, spacings*2, 0.000001, 10000000, 3, LeftoverPoints2);
+    HorizontalLineCandidates3 = classifyCandidates(LeftoverPoints2, points,validColours, spacings*4, 0.000001, 10000000, 3, LeftoverPoints3);
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates1.begin(),HorizontalLineCandidates1.end());
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates2.begin(),HorizontalLineCandidates2.end());
+    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates3.begin(),HorizontalLineCandidates3.end());
+    LeftoverPoints.insert(LeftoverPoints.end(),LeftoverPoints3.begin(),LeftoverPoints3.end());
+    VerticalLineCandidates = ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,3,LeftoverPoints);
+    LeftoverPoints.clear();
 
-        unsigned int no_unused = 0;
-        for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
-            if(!LineDetector.horizontalLineSegments[i].isUsed)
-                no_unused++;
-        }
-        for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
-            if(!LineDetector.verticalLineSegments[i].isUsed)
-                no_unused++;
-        }
-        //candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
-        //candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
-        LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
-        LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
-        #if DEBUG_VISION_VERBOSITY > 5
-            debug << "Line Candidates: " << LineCandidates.size() << "\tHorizontal Line Candidates: " << HorizontalLineCandidates.size()<< "\tVertical Candidates: " << VerticalLineCandidates.size()<< endl;
-        #endif
-
-    /**INCLUDED BY SHANNON**/
+    unsigned int no_unused = 0;
+    for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
+        if(!LineDetector.horizontalLineSegments[i].isUsed)
+            no_unused++;
+    }
+    for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
+        if(!LineDetector.verticalLineSegments[i].isUsed)
+            no_unused++;
+    }
+    //candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+    //candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+    LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
+    LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "Line Candidates: " << LineCandidates.size() << "\tHorizontal Line Candidates: " << HorizontalLineCandidates.size()<< "\tVertical Candidates: " << VerticalLineCandidates.size()<< endl;
+    #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Begin Classify Candidates: " << endl;
@@ -361,7 +359,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
     mode = ROBOTS;
     method = Vision::PRIMS;
-   for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
 
         switch (i)
@@ -2841,13 +2839,13 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 
 }
 
-double Vision::CalculateBearing(double cx){
+double Vision::CalculateBearing(double cx) const{
     double FOVx = deg2rad(46.40f); //Taken from Old Globals
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 
 
-double Vision::CalculateElevation(double cy){
+double Vision::CalculateElevation(double cy) const{
     double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
     return atan( (currentImage->getHeight()/2-cy) / ( (currentImage->getHeight()/2) / (tan(FOVy/2.0)) ) );
 }
@@ -2987,4 +2985,47 @@ bool Vision::isPixelOnScreen(int x, int y)
     }
     else
         return true;
+}
+
+vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate> candidates)
+{
+    vector<AmbiguousObject> objectList;
+
+    for(unsigned int i=0; i<candidates.size(); i++)
+    {
+        AmbiguousObject tempObject(FieldObjects::FO_OBSTACLE, "UNKNOWN OBSTACLE");
+
+        Vector2<int> screen_centre(candidates.at(i).getCentreX(), candidates.at(i).getCentreY());
+        Vector2<int> screen_dim(candidates.at(i).width(), candidates.at(i).height());
+        Vector2<int> bottomRight = candidates.at(i).getBottomRight();
+
+        //calculate position based on bottom centre of candidate
+        float cx = screen_centre.x;
+        float cy = bottomRight.y;
+
+        float bearing = CalculateBearing(cx);
+        float elevation = CalculateElevation(cy);
+        float distance = 0;
+        //qDebug() << i << ": Object: get transform";
+        vector<float> ctgvector;
+        Vector3<float> measured(distance,bearing,elevation);
+        Vector2<float> screenPositionAngle(bearing,elevation);
+        bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+        if(isOK == true)
+        {
+            Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+            measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+            #if DEBUG_VISION_VERBOSITY > 6
+                debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+            #endif
+        }
+        //qDebug() << i << ": Obstacle: get things in order";
+        Vector3<float> measuredError(0,0,0);
+        //qDebug() << i << ": Obstacle: update object with vision data";
+        tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, screen_centre, screen_dim, m_timestamp);
+        objectList.push_back(tempObject);
+    }
+
+    return objectList;
 }

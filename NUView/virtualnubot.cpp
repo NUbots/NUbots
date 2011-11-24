@@ -201,6 +201,10 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
     case OBSTACLE_POINTS:
         filename += "Obstacles";
         break;
+    default:
+        //invalid descriptor
+        qDebug() << "Invalid file descriptor for printPoints: " << filedesc;
+        return;
     }
     ofstream out;
     filename2 = filename + ".txt";
@@ -222,6 +226,37 @@ void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t 
         for(unsigned int i=0; i<points.size(); i++)
             out << points.at(i).x << " " << points.at(i).y << "\n";
         out << "\n";
+    }
+    else {
+        //debug
+        qDebug() << "Error opening " << filename2.c_str() << "\n";
+    }
+    out.close();
+}
+
+void virtualNUbot::printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const
+{
+    string filename = "../NUView/DebugFiles/";
+    string filename2;
+    switch(filedesc)
+    {
+    case OBSTACLE_OBJECTS:
+        filename += "ObstObj";
+        break;
+    case AMBIGUOUS_OBJECTS:
+        filename += "AmbObj";
+        break;
+    default:
+        //invalid descriptor
+        qDebug() << "Invalid file descriptor for printObjects: " << filedesc;
+        return;
+    }
+    ofstream out;
+    filename2 = filename + ".txt";
+    out.open(filename2.c_str());
+    if(out.good()) {
+        for(unsigned int i=0; i<objects.size(); i++)
+            out << objects.at(i).toString() << "\n";
     }
     else {
         //debug
@@ -390,6 +425,8 @@ vector<ObjectCandidate> virtualNUbot::getObstacleCandidates(const vector< Vector
     return result;
 }
 
+
+
 void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
@@ -443,10 +480,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     std::vector< Vector2<int> > greenPoints = vision.findGreenBorderPoints(spacings,&horizonLine);
 
     pre_hull_points = greenPoints;  //make a copy for obstacle detection
-        /*DEBUG*/
-        printPoints(greenPoints,GREEN_HOR_SCAN_POINTS);
-        /*DEBUG*/
-    //emit pointsDisplayChanged(points,GLDisplay::greenHorizonScanPoints);
+    //printPoints(greenPoints,GREEN_HOR_SCAN_POINTS);
     emit pointsDisplayChanged(greenPoints,GLDisplay::greenHorizonScanPoints);
     //qDebug() << "Find Edges: finnished";
 
@@ -455,10 +489,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     std::vector< Vector2<int> > interpolatedBoarderPoints = vision.interpolateBorders(boarderPoints,spacings);
 
     hull_points = interpolatedBoarderPoints;    //make a copy for obstacle detection
-        /*DEBUG*/
-        printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
-        /*DEBUG*/
-
+    //printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
     //OBSTACLE DETECTION
     int width_min = 2;
     int height_thresh = 20;
@@ -466,10 +497,17 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     //matchHorizons(pre_hull_points, hull_points, vision.getImageHeight());
     vector< Vector2<int> > obstacle_points = getObstaclePositions(pre_hull_points, hull_points, height_thresh, width_min);
     vector<ObjectCandidate> obstacle_candidates = getObstacleCandidates(pre_hull_points, hull_points, height_thresh, width_min);
-        /*DEBUG*/
-        printPoints(obstacle_points,OBSTACLE_POINTS);
-        candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
-        /*DEBUG*/
+    //printPoints(obstacle_points,OBSTACLE_POINTS);
+    candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
+
+    vector<AmbiguousObject> obstacle_objects = vision.getObjectsFromCandidates(obstacle_candidates);
+    //qDebug() << "Size of obstacle_objects: " << obstacle_objects.size() << "\n";
+    //printObjects(obstacle_objects,OBSTACLE_OBJECTS);
+
+    vision.AllFieldObjects->ambiguousFieldObjects.insert(vision.AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
+    //printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
+
+    //END OBSTACLE DETECTION
 
 
     emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
